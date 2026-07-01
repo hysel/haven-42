@@ -8,7 +8,7 @@ No application security vulnerabilities are present because this repository cont
 
 - Assets: repository content, prompt guidance, internal engineering standards.
 - Actors: maintainers, contributors, users copying the pack.
-- Trust Boundaries: local workstation, remote Ollama endpoint, future MCP servers.
+- Trust Boundaries: local workstation, optional remote Ollama endpoint, future MCP servers.
 - Sensitive Data: potential user-provided code, logs, review findings, SonarQube reports.
 - External Dependencies: Continue CLI, Ollama, future MCP services.
 
@@ -17,10 +17,10 @@ No application security vulnerabilities are present because this repository cont
 ### Finding 1
 
 - Severity: Medium
-- Evidence: Config uses a concrete LAN Ollama endpoint.
-- Impact: Users on another network must change the endpoint; accidental exposure is possible if copied into inappropriate environments.
-- Remediation: Document endpoint customization and avoid adding secrets.
-- Verification: Confirm README explains the endpoint assumption.
+- Evidence: Remote Ollama endpoints are environment-specific and may be used during local validation.
+- Impact: Committing private network addresses can make the pack less portable and may reveal local infrastructure details.
+- Remediation: Keep remote endpoints as local overrides and avoid committing private addresses.
+- Verification: Confirm the committed config does not include a concrete `apiBase`.
 
 ## Recommendations
 

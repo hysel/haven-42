@@ -6,7 +6,6 @@ models:
   - name: Ollama Qwen Coder
     provider: ollama
     model: qwen2.5-coder:7b
-    apiBase: http://192.168.1.72:11434
     roles:
       - chat
       - edit
@@ -21,7 +20,6 @@ models:
   - name: Ollama Nomic Embed
     provider: ollama
     model: nomic-embed-text
-    apiBase: http://192.168.1.72:11434
     roles:
       - embed
 

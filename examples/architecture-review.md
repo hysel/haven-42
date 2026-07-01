@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The pack has a clean content architecture: configuration composes prompts and rules, prompts define workflows, rules define reusable standards, agents define role behavior, and templates define output shape. The main architectural risk is portability of runtime assumptions such as the configured Ollama endpoint.
+The pack has a clean content architecture: configuration composes prompts and rules, prompts define workflows, rules define reusable standards, agents define role behavior, and templates define output shape. The main architectural risk is keeping runtime assumptions portable across developer machines.
 
 ## Architecture Diagram
 
@@ -31,7 +31,7 @@ top-level docs govern project intent and delivery state
 
 ## Weaknesses
 
-- Runtime configuration includes a network-specific Ollama endpoint.
+- Remote Ollama endpoints must remain local overrides rather than committed defaults.
 - No automated validation script exists.
 - MCP integration is still conceptual.
 - SonarQube has manual workflow guidance, but no direct integration yet.
@@ -40,7 +40,7 @@ top-level docs govern project intent and delivery state
 
 1. Add example outputs for major workflows.
 2. Add validation checklists.
-3. Decide whether remote Ollama endpoint should remain default or become an override.
+3. Keep remote Ollama endpoint guidance documented as an override.
 4. Add troubleshooting guidance.
 
 ## Prioritized Improvement Plan

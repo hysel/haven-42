@@ -49,7 +49,7 @@ Continue loads `.continue/config.yaml`, which references local rules and prompts
 
 ## Risks
 
-- Remote Ollama endpoint may not match every user's network.
+- Remote Ollama endpoints are environment-specific and should remain local overrides.
 - Prompt behavior may vary by local model.
 - Agents are documented role assets and may require additional Continue wiring depending on the target surface.
 

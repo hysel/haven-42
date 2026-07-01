@@ -6,7 +6,7 @@ No blocking findings in the reviewed documentation-only change.
 
 ## Open Questions
 
-- Should the remote Ollama endpoint be committed as the default, or should it become a documented local override?
+- Should remote Ollama endpoints remain documented as local overrides rather than committed defaults?
 
 ## Test Gaps
 

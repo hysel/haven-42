@@ -99,18 +99,18 @@ Use the MIT License.
 Consequences:
 The pack is permissively licensed with low adoption friction. The license does not include the explicit patent grant provided by Apache-2.0.
 
-## 2026-07-01: Use Remote Ollama Endpoint For Local Validation
+## 2026-07-01: Keep Ollama Endpoint Portable
 
 Status: Accepted
 
 Context:
-The local workstation did not have Ollama installed or listening on `127.0.0.1:11434`, but an Ollama server was available on the local network at `http://192.168.1.72:11434`.
+The pack should be reusable across machines and networks. A local-network Ollama server was used for validation, but committing a concrete private IP address would make the default configuration environment-specific.
 
 Decision:
-Configure the Ollama models in `.continue/config.yaml` with `apiBase: http://192.168.1.72:11434`.
+Do not commit a concrete `apiBase` value for Ollama. Use remote Ollama endpoints only as local test-time overrides.
 
 Consequences:
-The pack can be validated against the available local-network Ollama server. Users on other networks may need to change `apiBase` to their own Ollama endpoint.
+The committed config remains portable and defaults to Continue's standard Ollama behavior. Users who run Ollama on another host must add their own local `apiBase` override.
 
 ## 2026-07-01: Start SonarQube Support With Manual Triage
 

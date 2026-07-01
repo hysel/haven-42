@@ -82,7 +82,7 @@ The repository contains an initial usable pack structure:
 - Core rules, prompts, agents, and templates are implemented.
 - Configured local rule and prompt file references have been statically checked.
 - Continue CLI can load the pack configuration.
-- Model-backed execution has been validated through the configured Ollama endpoint.
+- Model-backed execution has been validated with a test-time Ollama endpoint override.
 - MCP and SonarQube support are documented as integration targets, not fully wired integrations.
 
 The next milestone is integration hardening: research MCP options, evaluate SonarQube integration paths, and add troubleshooting notes.
@@ -101,7 +101,7 @@ Default local model assumptions:
 
 - Chat/edit/apply: `qwen2.5-coder:7b`
 - Embeddings: `nomic-embed-text`
-- Ollama endpoint: `http://192.168.1.72:11434`
+- Ollama endpoint: default local Ollama endpoint
 
 Expected Ollama setup:
 
@@ -120,7 +120,7 @@ Runtime status:
 
 - Continue CLI config loading was validated with `npx @continuedev/cli`.
 - Continue initialized the config, model, MCP, system-message, and file-index services.
-- Model-backed execution was validated against `http://192.168.1.72:11434`.
+- Model-backed execution was validated using a local-network Ollama endpoint as a test-time override.
 - A prompt-file smoke test completed successfully.
 - Representative workflow examples are available in `examples/`.
 
