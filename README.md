@@ -71,7 +71,7 @@ Representative outputs for major workflows. These examples show expected structu
 
 ### `docs`
 
-Workflow documentation for enterprise review practices, including the manual SonarQube review workflow.
+Workflow documentation for enterprise review practices, including the manual SonarQube review workflow and validation checklists.
 
 ## Current Status
 
@@ -85,7 +85,7 @@ The repository contains an initial usable pack structure:
 - Model-backed execution has been validated through the configured Ollama endpoint.
 - MCP and SonarQube support are documented as integration targets, not fully wired integrations.
 
-The next milestone is enterprise review hardening: add SonarQube guidance, validation checklists, and troubleshooting notes.
+The next milestone is integration hardening: research MCP options, evaluate SonarQube integration paths, and add troubleshooting notes.
 
 ## Usage
 
@@ -138,6 +138,7 @@ Runtime status:
 ## Workflow Docs
 
 - `docs/sonarqube-review.md`
+- `docs/validation-checklists.md`
 
 ## Design Principles
 

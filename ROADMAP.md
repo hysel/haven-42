@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. The core documentation, configuration, agents, prompts, rules, templates, examples, and manual SonarQube workflow exist. The next goal is to harden enterprise review workflows with validation checklists and troubleshooting notes.
+The repository is in early implementation stage. Milestone 1 and Milestone 2 are complete. The next goal is Milestone 3: integration research, MCP setup guidance, SonarQube integration options, and troubleshooting documentation.
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -62,14 +62,15 @@ Scope:
 - Complete reviewer, performance, documentation, and product-manager agents. Done.
 - Expand SonarQube guidance. Done.
 - Add example review outputs. Done.
-- Add validation checklists for prompt and rule changes.
-- Add decision records for major design choices.
+- Add validation checklists for prompt and rule changes. Done.
+- Add decision records for major design choices. Done.
 
 Exit criteria:
 
 - Review outputs are consistent across architecture, security, code, and performance workflows.
 - SonarQube findings can be incorporated manually in a documented way.
 - The pack has examples that demonstrate expected usage.
+- Prompt and rule changes have documented validation checklists.
 
 ## Milestone 3: Tooling And Integration
 

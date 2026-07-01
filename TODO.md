@@ -82,6 +82,8 @@
 - [x] Implement product manager agent.
 - [x] Add example outputs for major workflows.
 - [x] Expand SonarQube guidance.
+- [x] Add validation checklists for prompt and rule changes.
+- [x] Add decision records for major design choices.
 
 ## Milestone 3: Integrations
 

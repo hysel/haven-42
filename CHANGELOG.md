@@ -11,7 +11,9 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
-No unreleased changes yet.
+### Added
+
+- Added validation checklists for prompts, rules, agents, templates, config, examples, documentation, and releases.
 
 ## 0.1.2
 

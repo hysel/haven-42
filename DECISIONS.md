@@ -124,3 +124,16 @@ Provide a manual workflow first. Users paste relevant SonarQube findings into Co
 
 Consequences:
 Teams can use SonarQube findings immediately without integration setup. Automated SonarQube ingestion remains a future Milestone 3 concern.
+
+## 2026-07-01: Use Documentation Checklists For Pack Validation
+
+Status: Accepted
+
+Context:
+The pack is primarily composed of markdown and YAML assets. Traditional unit tests do not cover most quality risks in prompts, rules, agents, templates, and examples.
+
+Decision:
+Maintain validation checklists in `docs/validation-checklists.md` for prompt, rule, agent, template, config, example, documentation, and release changes.
+
+Consequences:
+Contributors have a repeatable review path before automated validation exists. Future scripts can be added later for checks that are easy to automate.
