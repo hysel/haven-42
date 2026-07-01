@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. The core documentation, configuration, agents, prompts, rules, and templates exist. The next goal is to validate the pack in Continue and refine setup instructions based on tested behavior.
+The repository is in early implementation stage. The core documentation, configuration, agents, prompts, rules, templates, examples, and manual SonarQube workflow exist. The next goal is to harden enterprise review workflows with validation checklists and troubleshooting notes.
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -40,7 +40,9 @@ Scope:
   - `AI.md`
 - Update `README.md` with setup and usage instructions. Done.
 - Statically validate local config file references. Done.
-- Validate the pack in Continue. Pending.
+- Validate the pack in Continue CLI. Done.
+- Validate model-backed prompt execution with Ollama. Done.
+- Add example outputs for major workflows. Done.
 
 Exit criteria:
 
@@ -58,8 +60,8 @@ Scope:
 
 - Add architecture review and performance review prompts. Done.
 - Complete reviewer, performance, documentation, and product-manager agents. Done.
-- Expand SonarQube guidance.
-- Add example review outputs.
+- Expand SonarQube guidance. Done.
+- Add example review outputs. Done.
 - Add validation checklists for prompt and rule changes.
 - Add decision records for major design choices.
 

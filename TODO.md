@@ -13,7 +13,7 @@
 - [x] Define decision log structure in `DECISIONS.md`.
 - [x] Define changelog structure in `CHANGELOG.md`.
 - [x] Add temporary license status.
-- [ ] Choose final license terms.
+- [x] Choose final license terms.
 
 ### Continue Configuration
 
@@ -21,7 +21,8 @@
 - [x] Define local Ollama model assumptions.
 - [x] Implement `.continue/config.yaml`.
 - [x] Statically verify configured local file references exist.
-- [ ] Verify Continue can load the pack.
+- [x] Verify Continue can load the pack.
+- [x] Verify model-backed prompt execution with Ollama.
 - [x] Document setup and usage in `README.md`.
 
 ### Core Rules
@@ -79,12 +80,13 @@
 - [x] Implement performance agent.
 - [x] Implement documentation agent.
 - [x] Implement product manager agent.
-- [ ] Add example outputs for major workflows.
+- [x] Add example outputs for major workflows.
+- [x] Expand SonarQube guidance.
 
 ## Milestone 3: Integrations
 
 - [ ] Research MCP options for repository and GitHub context.
 - [ ] Research SonarQube integration options.
-- [ ] Document manual SonarQube review workflow.
+- [x] Document manual SonarQube review workflow.
 - [ ] Add MCP setup documentation when implementation path is selected.
 - [ ] Add troubleshooting guidance.

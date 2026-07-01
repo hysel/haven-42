@@ -85,3 +85,42 @@ Normalize those prompt files with standard frontmatter, use lower-case kebab-cas
 
 Consequences:
 The pack now exposes broader review and planning workflows. Runtime validation must confirm each prompt is invokable in Continue.
+
+## 2026-07-01: Use MIT License
+
+Status: Accepted
+
+Context:
+The repository is a reusable Continue engineering pack made of configuration, prompts, rules, agents, templates, and documentation. Adoption should be simple for teams that want to copy, adapt, or redistribute the pack.
+
+Decision:
+Use the MIT License.
+
+Consequences:
+The pack is permissively licensed with low adoption friction. The license does not include the explicit patent grant provided by Apache-2.0.
+
+## 2026-07-01: Use Remote Ollama Endpoint For Local Validation
+
+Status: Accepted
+
+Context:
+The local workstation did not have Ollama installed or listening on `127.0.0.1:11434`, but an Ollama server was available on the local network at `http://192.168.1.72:11434`.
+
+Decision:
+Configure the Ollama models in `.continue/config.yaml` with `apiBase: http://192.168.1.72:11434`.
+
+Consequences:
+The pack can be validated against the available local-network Ollama server. Users on other networks may need to change `apiBase` to their own Ollama endpoint.
+
+## 2026-07-01: Start SonarQube Support With Manual Triage
+
+Status: Accepted
+
+Context:
+SonarQube support is part of the enterprise review scope, but direct API, CLI, or MCP integration requires additional design and environment assumptions.
+
+Decision:
+Provide a manual workflow first. Users paste relevant SonarQube findings into Continue, and the pack guides classification, prioritization, remediation, and validation.
+
+Consequences:
+Teams can use SonarQube findings immediately without integration setup. Automated SonarQube ingestion remains a future Milestone 3 concern.

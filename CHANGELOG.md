@@ -13,6 +13,16 @@ This project follows a simple changelog format:
 
 No unreleased changes yet.
 
+## 0.1.2
+
+### Changed
+
+- Selected the MIT License for repository reuse and redistribution.
+- Verified that Continue CLI can load the pack configuration.
+- Configured and validated model-backed execution against remote Ollama at `http://192.168.1.72:11434`.
+- Added representative examples for major workflows.
+- Added manual SonarQube review workflow documentation and example output.
+
 ## 0.1.1
 
 ### Added

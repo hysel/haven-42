@@ -32,6 +32,8 @@ It is designed for teams that want AI support to follow consistent engineering s
   rules/
   templates/
 
+docs/
+examples/
 AI.md
 ARCHITECTURE.md
 CHANGELOG.md
@@ -63,6 +65,14 @@ Reusable engineering standards for general development, Git, .NET, ASP.NET Core,
 
 Output templates for durable engineering artifacts such as architecture notes, AI guidance, security reviews, and performance reviews.
 
+### `examples`
+
+Representative outputs for major workflows. These examples show expected structure, tone, and level of detail for repository discovery, implementation planning, code review, architecture review, security review, performance review, and release readiness.
+
+### `docs`
+
+Workflow documentation for enterprise review practices, including the manual SonarQube review workflow.
+
 ## Current Status
 
 The repository contains an initial usable pack structure:
@@ -71,9 +81,11 @@ The repository contains an initial usable pack structure:
 - Local-first Ollama model defaults are defined.
 - Core rules, prompts, agents, and templates are implemented.
 - Configured local rule and prompt file references have been statically checked.
+- Continue CLI can load the pack configuration.
+- Model-backed execution has been validated through the configured Ollama endpoint.
 - MCP and SonarQube support are documented as integration targets, not fully wired integrations.
 
-The next milestone is runtime validation: load the pack in Continue, confirm prompts are invokable, confirm rules influence assistant behavior, and adjust setup instructions based on tested behavior.
+The next milestone is enterprise review hardening: add SonarQube guidance, validation checklists, and troubleshooting notes.
 
 ## Usage
 
@@ -89,6 +101,7 @@ Default local model assumptions:
 
 - Chat/edit/apply: `qwen2.5-coder:7b`
 - Embeddings: `nomic-embed-text`
+- Ollama endpoint: `http://192.168.1.72:11434`
 
 Expected Ollama setup:
 
@@ -103,7 +116,28 @@ Expected Continue CLI usage:
 cn --config .continue/config.yaml
 ```
 
-Runtime validation has not yet been completed in this repository because the local environment used for this pass did not have Continue or Ollama available on `PATH`.
+Runtime status:
+
+- Continue CLI config loading was validated with `npx @continuedev/cli`.
+- Continue initialized the config, model, MCP, system-message, and file-index services.
+- Model-backed execution was validated against `http://192.168.1.72:11434`.
+- A prompt-file smoke test completed successfully.
+- Representative workflow examples are available in `examples/`.
+
+## Examples
+
+- `examples/repository-discovery.md`
+- `examples/implementation-plan.md`
+- `examples/code-review.md`
+- `examples/architecture-review.md`
+- `examples/security-review.md`
+- `examples/performance-review.md`
+- `examples/release-readiness.md`
+- `examples/sonarqube-review.md`
+
+## Workflow Docs
+
+- `docs/sonarqube-review.md`
 
 ## Design Principles
 
@@ -119,4 +153,4 @@ See `ROADMAP.md`.
 
 ## License
 
-License terms have not been selected yet. See `LICENSE`.
+MIT License. See `LICENSE`.
