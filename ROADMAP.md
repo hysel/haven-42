@@ -4,6 +4,14 @@
 
 The repository is in early implementation stage. Milestone 1 and Milestone 2 are complete. The next goal is Milestone 3: integration research, MCP setup guidance, SonarQube integration options, and troubleshooting documentation.
 
+## Stage Status
+
+| Stage | Status | Summary |
+| --- | --- | --- |
+| Milestone 1: Minimum Usable Pack | Complete | Core configuration, rules, prompts, agents, templates, setup docs, and Continue/Ollama validation are complete. |
+| Milestone 2: Enterprise Review Depth | Complete | Architecture, performance, documentation, reviewer, product, SonarQube, examples, validation checklists, and decision records are complete. |
+| Milestone 3: Tooling And Integration | Not Started | MCP research, SonarQube integration research, MCP setup docs, troubleshooting, and compatibility notes remain. |
+
 ## Milestone 1: Minimum Usable Pack
 
 Goal: Make the pack loadable, understandable, and useful for common enterprise engineering workflows.
