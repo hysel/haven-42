@@ -2,7 +2,7 @@
 
 Enterprise-focused Continue configuration pack for software engineering teams that want local-first AI assistance, repeatable review workflows, and opinionated guidance for .NET and Clean Architecture repositories.
 
-This repository is currently in scaffold stage. The intended folder layout is present, but the pack content still needs to be implemented before it can be treated as production-ready.
+This repository is in early implementation stage. The documentation foundation, Continue configuration, agents, prompts, rules, and templates are present, but the pack should still be validated in Continue before it is treated as production-ready.
 
 ## Purpose
 
@@ -45,7 +45,7 @@ TODO.md
 
 ### `.continue/config.yaml`
 
-The Continue entry point. This should eventually define models, context providers, prompts, rules, and integration settings.
+The Continue entry point. It defines local Ollama models, repository context providers, local rule files, local prompt files, and an empty MCP server list for future integrations.
 
 ### `.continue/agents`
 
@@ -65,27 +65,45 @@ Output templates for durable engineering artifacts such as architecture notes, A
 
 ## Current Status
 
-The repository currently contains the target file and directory structure, but most files are placeholders. Milestone 1 should focus on turning the scaffold into a minimally usable Continue pack.
+The repository contains an initial usable pack structure:
 
-Recommended first implementation target:
+- `.continue/config.yaml` targets Continue `schema: v1`.
+- Local-first Ollama model defaults are defined.
+- Core rules, prompts, agents, and templates are implemented.
+- Configured local rule and prompt file references have been statically checked.
+- MCP and SonarQube support are documented as integration targets, not fully wired integrations.
 
-1. Define a valid `.continue/config.yaml`.
-2. Implement core engineering rules.
-3. Add repository discovery, implementation planning, code review, and security review prompts.
-4. Define the senior engineer, architect, and security engineer agents.
-5. Add practical output templates.
-6. Document setup and usage once the pack can be loaded by Continue.
+The next milestone is runtime validation: load the pack in Continue, confirm prompts are invokable, confirm rules influence assistant behavior, and adjust setup instructions based on tested behavior.
 
 ## Usage
-
-Usage instructions will be added after the Continue configuration and prompt files are implemented.
 
 The intended workflow is:
 
 1. Install or copy this pack into a repository that uses Continue.
-2. Configure local models through Ollama.
-3. Use the included agents, prompts, rules, and templates during engineering work.
-4. Keep project-specific decisions in the top-level documentation files.
+2. Ensure Ollama is running with the configured models available.
+3. Point Continue at `.continue/config.yaml`.
+4. Use the included prompts for discovery, planning, review, security, architecture, performance, and documentation workflows.
+5. Keep project-specific decisions in the top-level documentation files.
+
+Default local model assumptions:
+
+- Chat/edit/apply: `qwen2.5-coder:7b`
+- Embeddings: `nomic-embed-text`
+
+Expected Ollama setup:
+
+```powershell
+ollama pull qwen2.5-coder:7b
+ollama pull nomic-embed-text
+```
+
+Expected Continue CLI usage:
+
+```powershell
+cn --config .continue/config.yaml
+```
+
+Runtime validation has not yet been completed in this repository because the local environment used for this pass did not have Continue or Ollama available on `PATH`.
 
 ## Design Principles
 
@@ -97,8 +115,8 @@ The intended workflow is:
 
 ## Roadmap
 
-See `ROADMAP.md` once milestone planning is written.
+See `ROADMAP.md`.
 
 ## License
 
-License information has not been added yet.
+License terms have not been selected yet. See `LICENSE`.

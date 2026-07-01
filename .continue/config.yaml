@@ -1,0 +1,59 @@
+name: Continue Enterprise Engineering Pack
+version: 0.1.1
+schema: v1
+
+models:
+  - name: Ollama Qwen Coder
+    provider: ollama
+    model: qwen2.5-coder:7b
+    roles:
+      - chat
+      - edit
+      - apply
+    capabilities:
+      - tool_use
+    defaultCompletionOptions:
+      temperature: 0.2
+      contextLength: 32768
+      maxTokens: 4096
+      keepAlive: 1800
+  - name: Ollama Nomic Embed
+    provider: ollama
+    model: nomic-embed-text
+    roles:
+      - embed
+
+context:
+  - provider: file
+  - provider: code
+  - provider: diff
+  - provider: terminal
+
+rules:
+  - uses: file://./rules/general.md
+  - uses: file://./rules/git.md
+  - uses: file://./rules/dotnet.md
+  - uses: file://./rules/aspnetcore.md
+  - uses: file://./rules/clean-architecture.md
+  - uses: file://./rules/api.md
+  - uses: file://./rules/testing.md
+  - uses: file://./rules/logging.md
+  - uses: file://./rules/security.md
+  - uses: file://./rules/performance.md
+  - uses: file://./rules/sonarqube.md
+
+prompts:
+  - uses: file://./prompts/repository-discovery.md
+  - uses: file://./prompts/implementation-plan.md
+  - uses: file://./prompts/code-review.md
+  - uses: file://./prompts/bug-investigation.md
+  - uses: file://./prompts/architecture-review.md
+  - uses: file://./prompts/security-review.md
+  - uses: file://./prompts/performance-review.md
+  - uses: file://./prompts/documentation.md
+  - uses: file://./prompts/ai-framework-self-review.md
+  - uses: file://./prompts/refactoring-planner.md
+  - uses: file://./prompts/product-manager.md
+  - uses: file://./prompts/release-readiness.md
+
+mcpServers: []
