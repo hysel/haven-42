@@ -81,7 +81,7 @@ Run repository discovery for this project. Do not modify files.
 
 ### 6. If something fails
 
-Use `docs/troubleshooting.md`.
+Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 
 Most first-time problems are one of these:
 
@@ -166,6 +166,8 @@ Representative outputs for major workflows. These examples show expected structu
 
 Workflow documentation for enterprise review practices, including MCP research and setup guidance, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
 
+Use this folder for deeper instructions after the quick start. Important guides include local model selection, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, and troubleshooting.
+
 ### `scripts`
 
 Repository validation automation for release checks and portable configuration invariants.
@@ -182,7 +184,7 @@ The repository contains an initial usable pack structure:
 - Model-backed execution has been validated with a test-time Ollama endpoint override.
 - MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-Version `0.1.6` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, and a human-reviewed legacy .NET dependency migration workflow. Current work is focused on tool-enabled workflows and hardware-aware local model selection.
+Version `0.1.7` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, tool-enabled workflow guidance, and hardware-aware local model selection support.
 
 ## Standard Usage
 
@@ -201,6 +203,16 @@ Default local model assumptions:
 - Ollama endpoint: default local Ollama endpoint
 
 For smaller machines or higher-risk workflows, use `docs/local-model-selection.md` before changing models.
+
+To collect a sanitized hardware profile for local model selection on Windows:
+
+```powershell
+.\scripts\get-local-model-profile.windows.ps1
+```
+
+For Linux or macOS, use the shell scripts documented in `docs/local-model-selection.md`.
+
+For detailed setup, script usage, model selection, troubleshooting, validation, and tool-use safety instructions, start in the `docs/` folder.
 
 Expected Ollama setup:
 

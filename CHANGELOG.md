@@ -11,6 +11,10 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+No unreleased changes.
+
+## 0.1.7 - 2026-07-02
+
 ### Added
 
 - Added Milestone 6 roadmap and TODO items for tool-enabled project changes and hardware-aware local model selection.
@@ -19,6 +23,10 @@ This project follows a simple changelog format:
 - Added approved tool-backed change guidance for safely moving from review to implementation.
 - Added scoped edit guidance for converting approved plans into small, reviewable changes.
 - Added hardware-aware local model selection guidance for Ollama-backed Continue workflows.
+- Added a cross-platform PowerShell hardware profile helper for sanitized local model selection inputs.
+- Improved the hardware profile helper with AMD-friendly GPU detection through `rocm-smi` and Windows display adapter registry data.
+- Split hardware profiling into Windows PowerShell, Linux shell, and macOS shell helpers with Intel GPU detection guidance.
+- Expanded README and local model selection documentation with detailed hardware profile script usage, prerequisites, output interpretation, and docs-folder guidance.
 - Documented Windows local `file://C:/...` path behavior, duplicate-rule causes, raw JSON tool-call failures, and runtime-context fallback guidance from VSCodium/Ollama validation.
 - Changed the default chat/edit/apply model to `qwen3-coder:30b` after validation showed it supports Continue Agent tool execution more reliably than `qwen2.5-coder:7b`.
 

@@ -37,6 +37,157 @@ Before choosing a model, check:
 
 Larger models usually need more memory and respond more slowly, but they may follow tool and planning instructions better.
 
+## Hardware Profile Helper
+
+Use the helper script for your operating system to collect a sanitized local profile.
+
+Run these commands from the root of this repository. The root is the folder that contains `README.md`, `docs/`, and `scripts/`.
+
+Prerequisites:
+
+- Windows: PowerShell.
+- Linux: Bash.
+- macOS: Bash or zsh running the shell script.
+- Optional for all platforms: Ollama installed and available on `PATH`.
+- Optional for NVIDIA GPUs: `nvidia-smi`.
+- Optional for AMD GPUs on Linux: `rocm-smi`.
+- Optional for Linux GPU fallback: `lspci`.
+
+Windows:
+
+```powershell
+.\scripts\get-local-model-profile.windows.ps1
+```
+
+Linux:
+
+```bash
+./scripts/get-local-model-profile.linux.sh
+```
+
+macOS:
+
+```bash
+./scripts/get-local-model-profile.macos.sh
+```
+
+If Linux or macOS reports a permission error, run:
+
+```bash
+chmod +x scripts/get-local-model-profile.linux.sh
+chmod +x scripts/get-local-model-profile.macos.sh
+```
+
+Then run the script again.
+
+The helpers report:
+
+- Platform and operating system summary
+- PowerShell version
+- System RAM
+- CPU summary
+- GPU names and VRAM when available
+- GPU vendor and memory type when available
+- Ollama reachability
+- Installed Ollama model names
+- A low, medium, or high resource candidate tier
+
+It does not collect hostnames, IP addresses, usernames, local filesystem paths, secrets, or custom Ollama endpoint values.
+
+For automation or sanitized notes, use JSON output.
+
+Windows:
+
+```powershell
+.\scripts\get-local-model-profile.windows.ps1 -AsJson
+```
+
+Linux:
+
+```bash
+./scripts/get-local-model-profile.linux.sh --json
+```
+
+macOS:
+
+```bash
+./scripts/get-local-model-profile.macos.sh --json
+```
+
+GPU detection is best-effort:
+
+- NVIDIA GPUs use `nvidia-smi` when available.
+- AMD GPUs on Linux use `rocm-smi` when available.
+- AMD and other GPUs on Windows use display adapter registry data when available.
+- Intel GPUs are detected through platform display APIs or `lspci`; integrated/shared memory is reported as shared or unknown instead of dedicated VRAM.
+- Windows falls back to `Win32_VideoController`.
+- Linux falls back to `lspci` when available.
+- macOS falls back to `system_profiler`.
+
+If GPU VRAM is unknown, use the profile as a starting point and avoid high-risk tool-backed workflows until the model is validated.
+
+## Reading The Output
+
+Use the output as a guide, not as an automatic decision.
+
+Important fields:
+
+- `RAM`: Helps decide whether the machine can handle larger models.
+- `GPU`: Shows detected GPU names and best-effort memory information.
+- `Vendor`: Helps identify NVIDIA, AMD, Intel, Apple, or unknown GPU paths.
+- `MemoryType`: Shows whether memory appears dedicated, shared/integrated, unified, or unknown.
+- `Ollama`: Shows whether the helper can run `ollama list`.
+- `Installed Ollama models`: Shows local model names only.
+- `Recommendation tier`: A starting point for low, medium, or high resource guidance.
+
+Common results:
+
+- `Unknown VRAM`: The OS did not expose reliable GPU memory. Do not assume the GPU can run large models.
+- `shared or integrated`: Common for Intel integrated GPUs. Treat this as system-memory-backed, not dedicated model VRAM.
+- `unified`: Common on Apple Silicon. Use total system memory and real-world model testing.
+- `ollama command not found`: Ollama is not installed, not on `PATH`, or not visible to the current shell.
+- `installed but not reachable or no models listed`: Ollama may not be running, or no models have been pulled.
+
+After running the profile:
+
+1. Compare the output to the hardware tiers below.
+2. Start with read-only prompts.
+3. Test tool execution before approved write mode.
+4. Use smaller models for review-only work when hardware is limited.
+5. Use the strongest validated local model for tool-backed edits and high-risk workflows.
+
+Manual fallback commands:
+
+```powershell
+ollama list
+```
+
+Windows:
+
+```powershell
+Get-CimInstance Win32_ComputerSystem | Select-Object TotalPhysicalMemory
+Get-CimInstance Win32_Processor | Select-Object Name,NumberOfLogicalProcessors
+Get-CimInstance Win32_VideoController | Select-Object Name,AdapterRAM
+```
+
+Linux:
+
+```bash
+head -n 5 /proc/meminfo
+lscpu
+nvidia-smi
+rocm-smi --showproductname --showmeminfo vram
+lspci
+```
+
+macOS:
+
+```bash
+sysctl -n hw.memsize
+sysctl -n machdep.cpu.brand_string
+system_profiler SPDisplaysDataType
+```
+
 ## Workflow Risk Levels
 
 ### Low Risk
