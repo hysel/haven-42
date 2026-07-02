@@ -19,6 +19,12 @@ The repository now includes sanitized fixtures for local prompt validation:
 - `examples/fixtures/security-review-input.md`
 - `examples/fixtures/performance-review-input.md`
 - `examples/fixtures/release-readiness-input.md`
+- `examples/fixtures/implementation-planning-quality-input.md`
+- `examples/fixtures/documentation-review-quality-input.md`
+- `examples/fixtures/legacy-dependency-migration-input.md`
+- `examples/fixtures/release-readiness-quality-input.md`
+
+Additional real-repository validation remains useful, but it is not required to close the current milestone because no second suitable repository is available. The milestone is closed using sanitized fixture-based validation coverage plus the existing private sample repository notes.
 
 ## Validation Targets
 
@@ -50,6 +56,7 @@ Do not record private repository names, customer names, internal hostnames, priv
 | 2026-07-02 | Private .NET sample repository | Ollama via local-network endpoint override | Legacy dependency migration prompt | Failed guardrail: output provided edit-ready PackageReference XML instead of a phased migration plan | Add forbidden response patterns and minimum acceptable plan requirements. |
 | 2026-07-02 | Private .NET sample repository | Ollama via local-network endpoint override | Legacy dependency migration prompt rerun with no-XML instruction | Failed guardrail: output still produced PackageReference XML and unsafe replacement instructions | Replace negative prompt constraints with a positive fixed checklist/template workflow. |
 | 2026-07-02 | Private .NET sample repository | Ollama via local-network endpoint override | Template-driven legacy dependency migration prompt | Failed guardrail: output dumped project-file XML instead of filling the template | Use the fixed template as the human-reviewed path for this local model. |
+| 2026-07-02 | Sanitized fixture suite | Static review and local-model validation guidance | Implementation planning, documentation review, legacy dependency migration, release readiness, security, performance, SonarQube, and repository context fixtures | Pass for milestone closure: fixtures now cover high-risk prompt-quality failure modes and are enforced by validation where applicable | Keep real-repository validation in backlog until another suitable repository is available. |
 
 ## Workflow Checklist
 
@@ -101,8 +108,12 @@ Suggested smoke tests:
 3. Run security review with `examples/fixtures/security-review-input.md`.
 4. Run performance review with `examples/fixtures/performance-review-input.md`.
 5. Run release readiness review with `examples/fixtures/release-readiness-input.md`.
+6. Run implementation planning quality review with `examples/fixtures/implementation-planning-quality-input.md`.
+7. Run documentation review quality review with `examples/fixtures/documentation-review-quality-input.md`.
+8. Run legacy dependency migration quality review with `examples/fixtures/legacy-dependency-migration-input.md`.
+9. Run release readiness quality review with `examples/fixtures/release-readiness-quality-input.md`.
 
-Fixture validation does not replace real repository validation, but it helps catch prompt drift and output-shape regressions.
+Fixture validation does not replace future multi-repository validation, but it is sufficient for the current milestone when no additional suitable repository is available. It catches prompt drift, banned output patterns, and output-shape regressions without exposing private code.
 
 ## Automated Runtime Runner
 
@@ -137,11 +148,10 @@ $Pack = "C:\path\to\continue-enterprise-engineering-pack"
 
 The generated context includes repository structure, project files, config file names, test-related files, top-level documentation excerpts, and selected project-file contents. Review the file before sharing or committing it.
 
-## Open Runtime Validation Work
+## Deferred Runtime Validation Work
 
-- Rerun validation against the selected repository with stronger supplied context.
-- Record sanitized findings in this document.
-- Convert repeated issues into prompt, rule, example, or documentation improvements.
+- Validate against additional real repositories when suitable repositories are available.
+- Add project-specific MCP examples after validated real-world usage.
 - Revalidate legacy dependency migration with a stronger model or a context file that summarizes project-file risks instead of including raw XML.
 
 ## 2026-07-02 Validation Notes

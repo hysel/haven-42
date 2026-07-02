@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+## 0.1.6 - 2026-07-02
+
 ### Added
 
 - Added Milestone 5 tracking for prompt quality hardening.
@@ -22,6 +24,7 @@ This project follows a simple changelog format:
 - Added local-model reliability guidance for Ollama-backed prompt validation and escalation.
 - Added banned-output-pattern guidance for high-risk prompt workflows.
 - Added static validation for prompt frontmatter, required metadata, filename style, and config coverage.
+- Closed Milestone 4 using sanitized fixture-based validation coverage and moved broader real-repository validation to backlog.
 
 ## 0.1.5 - 2026-07-02
 

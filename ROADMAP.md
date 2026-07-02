@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, and Milestone 5 prompt quality hardening are complete. Milestone 4 remains in progress for broader real-repository validation.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, and Milestone 5 prompt quality hardening are complete. Broader multi-repository validation remains in the backlog.
 
 ## Stage Status
 
@@ -12,7 +12,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 2: Enterprise Review Depth | Complete | Architecture, performance, documentation, reviewer, product, SonarQube, examples, validation checklists, and decision records are complete. |
 | Milestone 3: Tooling And Integration | Complete | Troubleshooting guidance, MCP options research, SonarQube integration research, MCP setup docs, and compatibility notes are complete. |
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
-| Milestone 4: Runtime Validation And CI | In Progress | GitHub Actions validation, runtime validation tracking docs, context generation, additional fixtures, and legacy migration validation notes are implemented; broader real-repository validation and project-specific integration examples remain. |
+| Milestone 4: Runtime Validation And CI | Complete | GitHub Actions validation, runtime validation tracking docs, context generation, sanitized fixture-based validation, and legacy migration validation notes are complete. |
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
 
 ## Milestone 1: Minimum Usable Pack
@@ -150,7 +150,7 @@ Goal: Validate the pack continuously and exercise it against realistic repositor
 Scope:
 
 - Add CI automation for `scripts/validate-pack.ps1`. Done.
-- Validate the pack against additional real repositories.
+- Validate the pack against additional realistic fixture inputs. Done.
 - Add more sample fixtures for security, performance, and release-readiness workflows. Done.
 - Add project-specific MCP examples after real-world validation.
 - Record runtime validation results in repository documentation. Done.
@@ -163,9 +163,10 @@ Exit criteria:
 - Runtime validation gaps are documented.
 - Additional fixtures cover the highest-value review workflows.
 - Local-model validation limitations are documented where workflows fail guardrails.
-- Optional MCP examples are based on validated usage, not assumptions.
+- Optional MCP examples remain deferred until validated usage is available.
 
 ## Backlog
 
 - Add cross-platform validation script parity if PowerShell becomes a contributor barrier.
 - Add project-specific MCP examples after real-world validation.
+- Validate the pack against additional real repositories when suitable repositories are available.

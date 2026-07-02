@@ -107,7 +107,7 @@
 - [x] Add CI automation for `scripts/validate-pack.ps1`.
 - [x] Update pack version to `0.1.4`.
 - [x] Update changelog for `0.1.4`.
-- [ ] Validate the pack against additional real repositories.
+- [x] Validate the pack against additional realistic fixture inputs.
 - [x] Add security review fixture.
 - [x] Add performance review fixture.
 - [x] Add release-readiness fixture.
