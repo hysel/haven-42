@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1 and Milestone 2 are complete. The next goal is Milestone 3: integration research, MCP setup guidance, SonarQube integration options, and troubleshooting documentation.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, and release hardening for version 0.1.3 are complete. The next goal is broader runtime validation against real repositories.
 
 ## Stage Status
 
@@ -10,7 +10,8 @@ The repository is in early implementation stage. Milestone 1 and Milestone 2 are
 | --- | --- | --- |
 | Milestone 1: Minimum Usable Pack | Complete | Core configuration, rules, prompts, agents, templates, setup docs, and Continue/Ollama validation are complete. |
 | Milestone 2: Enterprise Review Depth | Complete | Architecture, performance, documentation, reviewer, product, SonarQube, examples, validation checklists, and decision records are complete. |
-| Milestone 3: Tooling And Integration | Not Started | MCP research, SonarQube integration research, MCP setup docs, troubleshooting, and compatibility notes remain. |
+| Milestone 3: Tooling And Integration | Complete | Troubleshooting guidance, MCP options research, SonarQube integration research, MCP setup docs, and compatibility notes are complete. |
+| Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -86,11 +87,11 @@ Goal: Connect the pack to richer repository and quality-system context.
 
 Scope:
 
-- Evaluate MCP servers for repository, filesystem, GitHub, issue tracking, and quality data.
-- Define a supported MCP integration path.
-- Explore SonarQube integration options.
-- Add troubleshooting documentation.
-- Add compatibility notes for Continue versions and local model choices.
+- Evaluate MCP servers for repository, filesystem, GitHub, issue tracking, and quality data. Done.
+- Define a supported MCP integration path. Done.
+- Explore SonarQube integration options. Done.
+- Add troubleshooting documentation. Done.
+- Add compatibility notes for Continue versions and local model choices. Done.
 
 Exit criteria:
 
@@ -98,10 +99,30 @@ Exit criteria:
 - MCP support has clear setup instructions.
 - SonarQube usage is no longer only conceptual.
 
+## Release Hardening: 0.1.3
+
+Goal: Prepare the repository for repeatable release validation and external contribution.
+
+Scope:
+
+- Add `CONTRIBUTING.md`. Done.
+- Add release tagging guidance. Done.
+- Add sample review fixtures. Done.
+- Add validation automation. Done.
+- Update pack version to `0.1.3`. Done.
+- Remove completed license work from the backlog. Done.
+
+Exit criteria:
+
+- Release process is documented.
+- A validation script can check core repository invariants.
+- Sample fixtures are sanitized and reusable.
+- Changelog records version `0.1.3`.
+- The pack configuration version is `0.1.3`.
+
 ## Backlog
 
-- Add a `CONTRIBUTING.md` file if outside contributors are expected.
-- Add release tagging guidance.
-- Add sample repositories or sample review fixtures.
-- Add a validation script if Continue configuration checks can be automated.
-- Choose and document a license.
+- Validate the pack against additional real repositories.
+- Add CI automation for `scripts/validate-pack.ps1`.
+- Add more sample fixtures for security, performance, and release-readiness workflows.
+- Add project-specific MCP examples after real-world validation.

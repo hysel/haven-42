@@ -13,6 +13,12 @@ The examples are intentionally small. They demonstrate expected structure, tone,
 - `security-review.md`
 - `performance-review.md`
 - `release-readiness.md`
+- `sonarqube-review.md`
+
+## Available Fixtures
+
+- `fixtures/repository-context.md`
+- `fixtures/sonarqube-findings.md`
 
 ## Usage
 

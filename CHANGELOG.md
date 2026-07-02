@@ -11,9 +11,18 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+No unreleased changes.
+
+## 0.1.3 - 2026-07-02
+
 ### Added
 
 - Added validation checklists for prompts, rules, agents, templates, config, examples, documentation, and releases.
+- Added troubleshooting guidance for config loading, local file references, Ollama connectivity, model availability, prompt visibility, rules, local endpoint overrides, and line-ending warnings.
+- Added MCP options research with a local-first recommendation that keeps MCP optional and compatible with Ollama-backed systems.
+- Added SonarQube integration options research with a manual-first, Web API automation recommendation and optional MCP guidance.
+- Added optional GitHub MCP setup guidance and compatibility notes for Continue, Ollama, MCP, and SonarQube workflows.
+- Added contributor guidance, release tagging guidance, validation automation, and sanitized review fixtures.
 
 ## 0.1.2
 

@@ -34,9 +34,11 @@ It is designed for teams that want AI support to follow consistent engineering s
 
 docs/
 examples/
+scripts/
 AI.md
 ARCHITECTURE.md
 CHANGELOG.md
+CONTRIBUTING.md
 DECISIONS.md
 PROJECT.md
 README.md
@@ -71,7 +73,11 @@ Representative outputs for major workflows. These examples show expected structu
 
 ### `docs`
 
-Workflow documentation for enterprise review practices, including the manual SonarQube review workflow and validation checklists.
+Workflow documentation for enterprise review practices, including MCP research and setup guidance, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
+
+### `scripts`
+
+Repository validation automation for release checks and portable configuration invariants.
 
 ## Current Status
 
@@ -83,9 +89,9 @@ The repository contains an initial usable pack structure:
 - Configured local rule and prompt file references have been statically checked.
 - Continue CLI can load the pack configuration.
 - Model-backed execution has been validated with a test-time Ollama endpoint override.
-- MCP and SonarQube support are documented as integration targets, not fully wired integrations.
+- MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-The next milestone is integration hardening: research MCP options, evaluate SonarQube integration paths, and add troubleshooting notes.
+Version `0.1.3` includes integration hardening, release guidance, contributor guidance, validation automation, and sanitized fixtures. Remaining work should focus on broader runtime validation and project-specific integration examples.
 
 ## Usage
 
@@ -134,11 +140,29 @@ Runtime status:
 - `examples/performance-review.md`
 - `examples/release-readiness.md`
 - `examples/sonarqube-review.md`
+- `examples/fixtures/repository-context.md`
+- `examples/fixtures/sonarqube-findings.md`
 
 ## Workflow Docs
 
 - `docs/sonarqube-review.md`
+- `docs/sonarqube-integration-options.md`
+- `docs/mcp-options.md`
+- `docs/mcp-setup.md`
+- `docs/compatibility.md`
 - `docs/validation-checklists.md`
+- `docs/troubleshooting.md`
+- `docs/release.md`
+
+## Validation
+
+Run the local validation script before release-oriented changes:
+
+```powershell
+.\scripts\validate-pack.ps1
+```
+
+The script checks the configured version, required files, local `.continue` file references, default MCP posture, and obvious committed private endpoints or secrets.
 
 ## Design Principles
 

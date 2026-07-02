@@ -123,7 +123,7 @@ Decision:
 Provide a manual workflow first. Users paste relevant SonarQube findings into Continue, and the pack guides classification, prioritization, remediation, and validation.
 
 Consequences:
-Teams can use SonarQube findings immediately without integration setup. Automated SonarQube ingestion remains a future Milestone 3 concern.
+Teams can use SonarQube findings immediately without integration setup. Automated SonarQube ingestion requires separate integration guidance before it should become a default workflow.
 
 ## 2026-07-01: Use Documentation Checklists For Pack Validation
 
@@ -137,3 +137,55 @@ Maintain validation checklists in `docs/validation-checklists.md` for prompt, ru
 
 Consequences:
 Contributors have a repeatable review path before automated validation exists. Future scripts can be added later for checks that are easy to automate.
+
+## 2026-07-02: Keep MCP Optional And Local-First
+
+Status: Accepted
+
+Context:
+MCP can connect Continue to external tools such as GitHub, filesystems, databases, and quality systems. These integrations are useful, but they expand trust boundaries, may require secrets, and can create network dependencies. The pack must continue to work with local Ollama systems and without cloud services.
+
+Decision:
+Keep `mcpServers: []` in the default config. Document MCP as optional. Prefer read-only, local-first MCP integrations first, with GitHub MCP as the first candidate for repository, issue, and pull request context.
+
+Consequences:
+The default pack remains portable and local-model compatible. Users can adopt MCP intentionally through documented setup. SonarQube and other external integrations require separate security and setup guidance before they are recommended.
+
+## 2026-07-02: Use SonarQube Web API As First Automation Path
+
+Status: Accepted
+
+Context:
+SonarQube findings are valuable review inputs, but direct integration can require tokens, internal endpoints, project identifiers, organization keys, and network access. The pack must remain usable with local Ollama and without granting agent tools live access to quality systems.
+
+Decision:
+Keep manual SonarQube triage as the default workflow. Use the SonarQube Web API as the first documented automation path for sanitized, read-only review input. Treat the SonarQube MCP server as optional until it is validated with Continue, local Ollama, and enterprise credential-handling expectations.
+
+Consequences:
+Teams can automate retrieval of quality gate status, measures, and findings without changing the default Continue config. MCP remains a future opt-in setup rather than a default dependency.
+
+## 2026-07-02: Document GitHub MCP As Optional First MCP Setup
+
+Status: Accepted
+
+Context:
+MCP can provide useful external context, but enabling MCP by default would add credentials, network dependencies, tool execution, and possible data exposure. The pack needs a concrete setup path while keeping local Ollama workflows unaffected.
+
+Decision:
+Document GitHub MCP as the first optional MCP setup path. Keep the default config unchanged with `mcpServers: []`. Prefer a separate local `.continue/mcpServers/` file for users who opt in.
+
+Consequences:
+Teams have a reproducible MCP starting point without changing the portable default configuration. GitHub MCP can be validated independently from local model behavior, and SonarQube MCP can remain separate until API-based workflows are proven.
+
+## 2026-07-02: Add Scripted Release Validation
+
+Status: Accepted
+
+Context:
+The pack is mostly markdown and YAML, so traditional unit tests do not cover the main failure modes. Release risk is concentrated around broken local file references, accidental endpoint or secret commits, stale version values, and accidental changes to the local-first default posture.
+
+Decision:
+Add a PowerShell validation script that checks the pack version, required files, local `.continue` references, default MCP posture, and obvious private endpoints or secrets.
+
+Consequences:
+Release checks are repeatable on the current Windows-first maintenance environment. Future CI can run the same script or add cross-platform equivalents.

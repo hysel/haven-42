@@ -87,8 +87,17 @@
 
 ## Milestone 3: Integrations
 
-- [ ] Research MCP options for repository and GitHub context.
-- [ ] Research SonarQube integration options.
+- [x] Research MCP options for repository and GitHub context.
+- [x] Research SonarQube integration options.
 - [x] Document manual SonarQube review workflow.
-- [ ] Add MCP setup documentation when implementation path is selected.
-- [ ] Add troubleshooting guidance.
+- [x] Add MCP setup documentation when implementation path is selected.
+- [x] Add troubleshooting guidance.
+
+## Release Hardening: 0.1.3
+
+- [x] Add `CONTRIBUTING.md`.
+- [x] Add release tagging guidance.
+- [x] Add sample review fixtures.
+- [x] Add validation automation.
+- [x] Update pack version to `0.1.3`.
+- [x] Update changelog for `0.1.3`.
