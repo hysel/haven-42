@@ -11,7 +11,17 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
-No unreleased changes.
+### Added
+
+- Added Milestone 5 tracking for prompt quality hardening.
+- Added prompt-quality documentation with legacy dependency migration, documentation review, release readiness, and implementation planning pass/fail expectations.
+- Added an implementation-planning quality fixture for plan-only, layered-change validation.
+- Added a documentation-review quality fixture for onboarding, operations, release, and support gap validation.
+- Added a legacy dependency migration quality fixture.
+- Added a release-readiness quality fixture for no-go evidence validation.
+- Added local-model reliability guidance for Ollama-backed prompt validation and escalation.
+- Added banned-output-pattern guidance for high-risk prompt workflows.
+- Added static validation for prompt frontmatter, required metadata, filename style, and config coverage.
 
 ## 0.1.5 - 2026-07-02
 

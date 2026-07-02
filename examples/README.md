@@ -18,9 +18,13 @@ The examples are intentionally small. They demonstrate expected structure, tone,
 ## Available Fixtures
 
 - `fixtures/repository-context.md`
+- `fixtures/implementation-planning-quality-input.md`
+- `fixtures/documentation-review-quality-input.md`
+- `fixtures/legacy-dependency-migration-input.md`
 - `fixtures/security-review-input.md`
 - `fixtures/performance-review-input.md`
 - `fixtures/release-readiness-input.md`
+- `fixtures/release-readiness-quality-input.md`
 - `fixtures/sonarqube-findings.md`
 
 ## Usage

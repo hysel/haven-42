@@ -58,6 +58,62 @@ foreach ($ref in $fileRefs) {
     }
 }
 
+$promptDir = Join-Path $repoRoot ".continue/prompts"
+$promptFiles = Get-ChildItem -LiteralPath $promptDir -Filter "*.md" -File
+$configuredPromptRefs = $fileRefs | Where-Object { $_ -match "^prompts\/.+\.md$" }
+$configuredPromptPaths = @{}
+
+foreach ($ref in $configuredPromptRefs) {
+    $configuredPromptPaths[$ref] = $true
+}
+
+foreach ($promptFile in $promptFiles) {
+    $relativePromptPath = "prompts/$($promptFile.Name)"
+    $promptName = [System.IO.Path]::GetFileNameWithoutExtension($promptFile.Name)
+    $promptContent = Get-Content -LiteralPath $promptFile.FullName -Raw
+
+    if ($promptFile.Name -match "^[a-z0-9]+(-[a-z0-9]+)*\.md$") {
+        Add-Pass "prompt filename is kebab-case: .continue/$relativePromptPath"
+    } else {
+        Add-Failure "prompt filename is kebab-case: .continue/$relativePromptPath"
+    }
+
+    if ($configuredPromptPaths.ContainsKey($relativePromptPath)) {
+        Add-Pass "prompt is referenced in config: .continue/$relativePromptPath"
+    } else {
+        Add-Failure "prompt is referenced in config: .continue/$relativePromptPath"
+    }
+
+    $frontmatterMatch = [regex]::Match($promptContent, "\A---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)")
+
+    if ($frontmatterMatch.Success) {
+        Add-Pass "prompt frontmatter starts on first line: .continue/$relativePromptPath"
+        $frontmatter = $frontmatterMatch.Groups[1].Value
+
+        $nameMatch = [regex]::Match($frontmatter, "(?m)^name:\s+(.+?)\s*$")
+        if ($nameMatch.Success -and $nameMatch.Groups[1].Value.Trim("'""") -eq $promptName) {
+            Add-Pass "prompt name matches filename: .continue/$relativePromptPath"
+        } else {
+            Add-Failure "prompt name matches filename: .continue/$relativePromptPath"
+        }
+
+        $descriptionMatch = [regex]::Match($frontmatter, "(?m)^description:\s+(.+?)\s*$")
+        if ($descriptionMatch.Success -and $descriptionMatch.Groups[1].Value.Trim().Length -gt 0) {
+            Add-Pass "prompt description is present: .continue/$relativePromptPath"
+        } else {
+            Add-Failure "prompt description is present: .continue/$relativePromptPath"
+        }
+
+        if ($frontmatter -match "(?m)^invokable:\s+true\s*$") {
+            Add-Pass "prompt is invokable: .continue/$relativePromptPath"
+        } else {
+            Add-Failure "prompt is invokable: .continue/$relativePromptPath"
+        }
+    } else {
+        Add-Failure "prompt frontmatter starts on first line: .continue/$relativePromptPath"
+    }
+}
+
 $requiredFiles = @(
     "README.md",
     "PROJECT.md",
@@ -73,8 +129,11 @@ $requiredFiles = @(
     "docs/release.md",
     "docs/compatibility.md",
     "docs/runtime-validation.md",
+    "docs/prompt-quality.md",
     "docs/validation-checklists.md",
     "docs/troubleshooting.md",
+    "docs/local-model-reliability.md",
+    "docs/banned-output-patterns.md",
     "docs/mcp-options.md",
     "docs/mcp-setup.md",
     "docs/sonarqube-review.md",
@@ -83,11 +142,15 @@ $requiredFiles = @(
     "scripts/run-runtime-validation.ps1",
     ".continue/prompts/legacy-dotnet-dependency-migration.md",
     ".continue/templates/LegacyDotNetDependencyMigration.md",
+    "examples/fixtures/implementation-planning-quality-input.md",
+    "examples/fixtures/documentation-review-quality-input.md",
+    "examples/fixtures/legacy-dependency-migration-input.md",
     "examples/fixtures/sonarqube-findings.md",
     "examples/fixtures/repository-context.md",
     "examples/fixtures/security-review-input.md",
     "examples/fixtures/performance-review-input.md",
     "examples/fixtures/release-readiness-input.md",
+    "examples/fixtures/release-readiness-quality-input.md",
     ".github/workflows/validate-pack.yml"
 )
 

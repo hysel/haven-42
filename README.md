@@ -168,8 +168,11 @@ Runtime status:
 - `docs/compatibility.md`
 - `docs/validation-checklists.md`
 - `docs/troubleshooting.md`
+- `docs/local-model-reliability.md`
+- `docs/banned-output-patterns.md`
 - `docs/release.md`
 - `docs/runtime-validation.md`
+- `docs/prompt-quality.md`
 
 ## Validation
 

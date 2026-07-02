@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, and runtime validation tooling for version 0.1.5 are complete. Milestone 4 remains in progress for broader real-repository validation.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, and Milestone 5 prompt quality hardening are complete. Milestone 4 remains in progress for broader real-repository validation.
 
 ## Stage Status
 
@@ -13,6 +13,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 3: Tooling And Integration | Complete | Troubleshooting guidance, MCP options research, SonarQube integration research, MCP setup docs, and compatibility notes are complete. |
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
 | Milestone 4: Runtime Validation And CI | In Progress | GitHub Actions validation, runtime validation tracking docs, context generation, additional fixtures, and legacy migration validation notes are implemented; broader real-repository validation and project-specific integration examples remain. |
+| Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -122,6 +123,25 @@ Exit criteria:
 - The pack configuration version is `0.1.3`.
 
 ## Backlog
+
+## Milestone 5: Prompt Quality Hardening
+
+Goal: Improve prompt reliability by converting runtime validation failures into focused fixtures, pass/fail checks, and stronger prompt-specific guardrails.
+
+Scope:
+
+- Add prompt-specific quality fixtures for implementation planning, legacy dependency migration, documentation review, and release readiness. Done.
+- Define pass/fail expectations for sensitive workflows. Done.
+- Add validation guidance for local-model reliability issues. Done.
+- Extend static validation for prompt frontmatter and required prompt metadata. Done.
+- Add checks or review guidance for banned output patterns in high-risk workflows. Done.
+
+Exit criteria:
+
+- Sensitive prompts have explicit pass/fail expectations.
+- Legacy dependency migration has a human-reviewed fallback path and a model reliability warning.
+- Documentation and release-readiness prompts discourage shallow summaries and unsupported go recommendations.
+- Validation catches missing prompt metadata and obvious workflow drift.
 
 ## Milestone 4: Runtime Validation And CI
 

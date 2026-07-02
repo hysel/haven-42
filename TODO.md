@@ -117,3 +117,14 @@
 - [x] Add legacy .NET dependency migration template.
 - [x] Update pack version to `0.1.5`.
 - [x] Update changelog for `0.1.5`.
+
+## Milestone 5: Prompt Quality Hardening
+
+- [x] Add implementation-planning quality fixture.
+- [x] Add legacy dependency migration quality fixture.
+- [x] Add documentation-review quality fixture.
+- [x] Add release-readiness quality fixture.
+- [x] Define pass/fail expectations for sensitive prompts.
+- [x] Add local-model reliability guidance.
+- [x] Extend static validation for prompt frontmatter and required metadata.
+- [x] Add banned-output-pattern guidance for high-risk workflows.
