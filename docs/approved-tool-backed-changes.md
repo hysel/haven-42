@@ -6,6 +6,8 @@ This guide explains how to let the assistant make changes in a project while kee
 
 Use this after reading `docs/tool-use-modes.md`.
 
+Use `docs/scoped-edits.md` when you are ready to convert an approved plan into small, reviewable file changes.
+
 ## Simple Rule
 
 The assistant should not change files until the user clearly asks it to implement an approved change.
@@ -88,6 +90,8 @@ For high-risk changes, be more specific:
 ```text
 Implement steps 1 and 2 only. Do not change dependencies, config, authentication, or deployment files.
 ```
+
+For a more controlled workflow, approve one plan slice at a time. See `docs/scoped-edits.md`.
 
 ## Step 4: Review What Changed
 

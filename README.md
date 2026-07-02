@@ -98,6 +98,7 @@ Most first-time problems are one of these:
 - Treat AI output as a draft. Review it before changing code.
 - Use `git status` before and after AI-assisted work so you know what changed.
 - Use `docs/tool-use-modes.md` before asking the assistant to modify a reviewed project.
+- Use `docs/scoped-edits.md` to turn an approved plan into one small, reviewable change at a time.
 
 ## Intended Capabilities
 
@@ -259,6 +260,7 @@ Runtime status:
 - `docs/troubleshooting.md`
 - `docs/tool-use-modes.md`
 - `docs/approved-tool-backed-changes.md`
+- `docs/scoped-edits.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`
 - `docs/release.md`
