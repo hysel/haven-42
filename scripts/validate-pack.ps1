@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.6"
+    [string]$ExpectedVersion = "0.1.7"
 )
 
 $ErrorActionPreference = "Stop"
@@ -144,6 +144,9 @@ $requiredFiles = @(
     "docs/sonarqube-integration-options.md",
     "scripts/generate-runtime-context.ps1",
     "scripts/run-runtime-validation.ps1",
+    "scripts/get-local-model-profile.windows.ps1",
+    "scripts/get-local-model-profile.linux.sh",
+    "scripts/get-local-model-profile.macos.sh",
     ".continue/prompts/legacy-dotnet-dependency-migration.md",
     ".continue/templates/LegacyDotNetDependencyMigration.md",
     "examples/fixtures/implementation-planning-quality-input.md",
@@ -172,7 +175,7 @@ $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
         $_.FullName -notmatch "\\.git\\" -and
         $_.FullName -notmatch "\\.continue\\config\.local.*\.yaml$" -and
         $_.FullName -notmatch "\\runtime-validation-output\\" -and
-        $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".txt")
+        $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".sh", ".txt")
     }
 
 $privateIpPattern = "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b"
