@@ -25,6 +25,21 @@ Local models may still:
 - Treat local smoke testing as enough evidence for release.
 - Recommend unsafe migrations for legacy project systems.
 
+## Tool-Capable Model Guidance
+
+Agent mode tool execution needs a model that produces tool calls in the format Continue can execute.
+
+Validated behavior:
+
+- `qwen3-coder:30b` successfully enabled tool execution in the tested VSCodium, Continue, and Ollama setup.
+- `qwen2.5-coder:7b` produced raw JSON tool-call text instead of executable tool calls in the same setup.
+
+Recommended use:
+
+- Use `qwen3-coder:30b` or another validated tool-capable model for Agent mode and approved tool-backed changes.
+- Use smaller models only for review, planning, summarization, or context-file workflows unless tool execution is proven.
+- Keep model experiments in local config until they are validated.
+
 ## Reliability Tiers
 
 Use these tiers when deciding how much trust to place in a local-model response.

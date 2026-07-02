@@ -180,6 +180,8 @@ Example raw JSON:
 
 This is not a patch. It means the model or Continue surface did not execute the tool call.
 
+In validation, switching from `qwen2.5-coder:7b` to `qwen3-coder:30b` fixed this behavior for the tested local Ollama setup.
+
 Use one of these safer fallbacks:
 
 - Attach files with `@Files`.

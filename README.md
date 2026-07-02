@@ -25,7 +25,7 @@ Install:
 Then open PowerShell and download the default local models:
 
 ```powershell
-ollama pull qwen2.5-coder:7b
+ollama pull qwen3-coder:30b
 ollama pull nomic-embed-text
 ```
 
@@ -181,7 +181,7 @@ The repository contains an initial usable pack structure:
 - Model-backed execution has been validated with a test-time Ollama endpoint override.
 - MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-Version `0.1.5` includes runtime validation tooling, additional fixtures, CLI setup guidance, and a human-reviewed legacy .NET dependency migration workflow. Remaining work should focus on broader runtime validation and project-specific integration examples.
+Version `0.1.6` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, and a human-reviewed legacy .NET dependency migration workflow. Current work is focused on tool-enabled workflows and hardware-aware local model selection.
 
 ## Standard Usage
 
@@ -195,14 +195,14 @@ The standard workflow is:
 
 Default local model assumptions:
 
-- Chat/edit/apply: `qwen2.5-coder:7b`
+- Chat/edit/apply/tool workflows: `qwen3-coder:30b`
 - Embeddings: `nomic-embed-text`
 - Ollama endpoint: default local Ollama endpoint
 
 Expected Ollama setup:
 
 ```powershell
-ollama pull qwen2.5-coder:7b
+ollama pull qwen3-coder:30b
 ollama pull nomic-embed-text
 ```
 

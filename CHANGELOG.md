@@ -18,6 +18,7 @@ This project follows a simple changelog format:
 - Added tool-use mode guidance for read-only discovery, plan-only work, and approved write mode.
 - Added approved tool-backed change guidance for safely moving from review to implementation.
 - Documented Windows local `file://C:/...` path behavior, duplicate-rule causes, raw JSON tool-call failures, and runtime-context fallback guidance from VSCodium/Ollama validation.
+- Changed the default chat/edit/apply model to `qwen3-coder:30b` after validation showed it supports Continue Agent tool execution more reliably than `qwen2.5-coder:7b`.
 
 ## 0.1.6 - 2026-07-02
 
