@@ -101,3 +101,14 @@
 - [x] Add validation automation.
 - [x] Update pack version to `0.1.3`.
 - [x] Update changelog for `0.1.3`.
+
+## Milestone 4: Runtime Validation And CI
+
+- [x] Add CI automation for `scripts/validate-pack.ps1`.
+- [x] Update pack version to `0.1.4`.
+- [x] Update changelog for `0.1.4`.
+- [ ] Validate the pack against additional real repositories.
+- [ ] Add security review fixture.
+- [ ] Add performance review fixture.
+- [ ] Add release-readiness fixture.
+- [ ] Add runtime validation documentation.

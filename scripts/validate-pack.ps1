@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.3"
+    [string]$ExpectedVersion = "0.1.4"
 )
 
 $ErrorActionPreference = "Stop"
@@ -79,7 +79,8 @@ $requiredFiles = @(
     "docs/sonarqube-review.md",
     "docs/sonarqube-integration-options.md",
     "examples/fixtures/sonarqube-findings.md",
-    "examples/fixtures/repository-context.md"
+    "examples/fixtures/repository-context.md",
+    ".github/workflows/validate-pack.yml"
 )
 
 foreach ($relativePath in $requiredFiles) {
