@@ -128,3 +128,13 @@
 - [x] Add local-model reliability guidance.
 - [x] Extend static validation for prompt frontmatter and required metadata.
 - [x] Add banned-output-pattern guidance for high-risk workflows.
+
+## Milestone 6: Applied Tooling And Adaptive Models
+
+- [x] Define safe tool-use modes for reviewed repositories.
+- [x] Document how to enable approved tool-backed project changes.
+- [ ] Add guidance for converting approved plans into scoped edits.
+- [ ] Define hardware-aware local model selection strategy.
+- [ ] Add hardware-profile helper or documented collection commands.
+- [ ] Define recommended Ollama model tiers by RAM, VRAM, context size, and workflow risk.
+- [ ] Document how to keep machine-specific model and endpoint details out of committed config.

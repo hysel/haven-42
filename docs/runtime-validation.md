@@ -57,6 +57,7 @@ Do not record private repository names, customer names, internal hostnames, priv
 | 2026-07-02 | Private .NET sample repository | Ollama via local-network endpoint override | Legacy dependency migration prompt rerun with no-XML instruction | Failed guardrail: output still produced PackageReference XML and unsafe replacement instructions | Replace negative prompt constraints with a positive fixed checklist/template workflow. |
 | 2026-07-02 | Private .NET sample repository | Ollama via local-network endpoint override | Template-driven legacy dependency migration prompt | Failed guardrail: output dumped project-file XML instead of filling the template | Use the fixed template as the human-reviewed path for this local model. |
 | 2026-07-02 | Sanitized fixture suite | Static review and local-model validation guidance | Implementation planning, documentation review, legacy dependency migration, release readiness, security, performance, SonarQube, and repository context fixtures | Pass for milestone closure: fixtures now cover high-risk prompt-quality failure modes and are enforced by validation where applicable | Keep real-repository validation in backlog until another suitable repository is available. |
+| 2026-07-02 | Private .NET sample repository | VSCodium Continue Agent mode with Ollama local-network endpoint override | Tool-enabled repository discovery setup | Partial pass: default config reached the model, but Agent mode printed raw JSON tool calls instead of executing tools; generated runtime context fallback produced a file-aware response | Document raw JSON tool-call failure, duplicate-rule causes, Windows `file://C:/...` path behavior, and context-file fallback. |
 
 ## Workflow Checklist
 
@@ -147,6 +148,15 @@ $Pack = "C:\path\to\continue-enterprise-engineering-pack"
 ```
 
 The generated context includes repository structure, project files, config file names, test-related files, top-level documentation excerpts, and selected project-file contents. Review the file before sharing or committing it.
+
+Use this fallback when Agent mode prints raw JSON tool calls instead of executing tools. Attach the generated file with `@Files` and instruct the model:
+
+```text
+Using the attached runtime-context.md, run repository discovery.
+Do not use tools.
+Do not output JSON.
+Do not modify files.
+```
 
 ## Deferred Runtime Validation Work
 

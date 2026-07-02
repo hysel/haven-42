@@ -110,6 +110,93 @@ Fixes:
 - Use lower-case kebab-case filenames for prompts.
 - Keep `file://./...` references aligned with paths relative to `.continue/config.yaml`.
 
+## Windows Absolute `file://` Paths Fail
+
+Symptoms:
+
+- Continue reports paths such as `C:\C:\path\to\project`.
+- Continue reports duplicated path segments such as `prompts\prompts`.
+- Continue reports `ENOENT` for files that exist.
+
+Meaning:
+
+Some Windows and VSCodium setups may resolve `file:///C:/...` incorrectly.
+
+Fixes:
+
+- Use this local-only Windows path style:
+
+```yaml
+uses: file://C:/Users/your-user/source/your-project/.continue/prompts/repository-discovery.md
+```
+
+- Avoid this style if it produces `C:\C:\...` paths:
+
+```yaml
+uses: file:///C:/Users/your-user/source/your-project/.continue/prompts/repository-discovery.md
+```
+
+- Keep these absolute paths out of committed shared config.
+
+## Duplicate Rules
+
+Symptoms:
+
+- Continue reports duplicate rules with names such as `API Design`, `.NET Engineering`, `Security`, or `Testing`.
+
+Common causes:
+
+- The same rules are loaded from both the default user config and the workspace `.continue` folder.
+- Backup or disabled config files still end in `.yaml`.
+- The workspace has more than one active config file.
+
+Fixes:
+
+- Keep only one active config source for rules.
+- If the default user config references workspace rules, remove or rename workspace config files so they do not end in `.yaml`.
+- If Continue auto-loads `.continue/rules`, remove the explicit `rules:` block from the default user config.
+- Rename local backup files to extensions such as `.bak` instead of `.yaml`.
+
+Useful checks:
+
+```powershell
+Get-ChildItem "$env:USERPROFILE\.continue" -Force -File -Filter "*.yaml"
+Get-ChildItem ".continue" -Force -File -Filter "*.yaml"
+Select-String -Path "$env:USERPROFILE\.continue\config.yaml" -Pattern "^rules:|file://.*rules"
+```
+
+## Agent Mode Prints JSON Tool Calls
+
+Symptoms:
+
+- Agent mode prints output like:
+
+```json
+{"name":"ls","arguments":{"dirPath":".","recursive":true}}
+```
+
+- Clicking Apply returns `could not resolve filepath to apply changes`.
+
+Meaning:
+
+The model produced a tool-call-shaped JSON message, but Continue did not execute it as a tool call. The JSON is not a patch and should not be applied.
+
+Fixes:
+
+- Do not click Apply on raw JSON tool-call text.
+- Confirm the Continue surface is Agent mode.
+- Try a stronger or more tool-compatible model.
+- Use `@Files`, selected text, active-file context, or a generated runtime context file as a fallback.
+
+Fallback:
+
+```powershell
+$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+& "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
+```
+
+Then attach `runtime-context.md` with `@Files` and ask the model not to use tools or output JSON.
+
 ## Ollama Is Not Reachable
 
 Symptoms:
