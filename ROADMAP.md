@@ -14,7 +14,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
 | Milestone 4: Runtime Validation And CI | Complete | GitHub Actions validation, runtime validation tracking docs, context generation, sanitized fixture-based validation, and legacy migration validation notes are complete. |
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
-| Milestone 6: Applied Tooling And Adaptive Models | In progress | Tool-use modes, approved write guidance, and scoped edit guidance are complete; hardware-aware local model selection remains planned. |
+| Milestone 6: Applied Tooling And Adaptive Models | In progress | Tool-use modes, approved write guidance, scoped edit guidance, and model selection strategy are complete; hardware profiling and model tiers remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -175,7 +175,7 @@ Scope:
 - Define safe tool-use modes for reviewed repositories, including read-only discovery, plan-only review, and approved write mode. Done.
 - Document how Continue users can enable tool-backed project changes without weakening approval, validation, rollback, or git safety rules. Done.
 - Add prompts or guidance for converting an approved plan into scoped edits in the target project. Done.
-- Define a model-selection strategy based on local hardware signals such as available RAM, GPU VRAM, model size, context needs, and workflow risk.
+- Define a model-selection strategy based on local hardware signals such as available RAM, GPU VRAM, model size, context needs, and workflow risk. Done.
 - Add a hardware-profile helper or documented command sequence for collecting local model-selection inputs.
 - Define recommended Ollama model tiers for low, medium, and high resource machines.
 - Keep machine-specific endpoints, model experiments, and hardware details out of committed shared config.

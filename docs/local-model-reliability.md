@@ -6,6 +6,8 @@ This guide explains how to use the pack safely with local models such as Ollama-
 
 Local-first operation is useful for private repositories, but smaller local models can be less consistent than hosted frontier models. Treat model output as a draft that must be checked against the pack's prompts, rules, fixtures, and templates.
 
+Use `docs/local-model-selection.md` to choose a model based on hardware capacity, context needs, workflow risk, and tool-use requirements.
+
 ## Expected Behavior
 
 Local models should be able to:

@@ -200,6 +200,8 @@ Default local model assumptions:
 - Embeddings: `nomic-embed-text`
 - Ollama endpoint: default local Ollama endpoint
 
+For smaller machines or higher-risk workflows, use `docs/local-model-selection.md` before changing models.
+
 Expected Ollama setup:
 
 ```powershell
@@ -261,6 +263,7 @@ Runtime status:
 - `docs/tool-use-modes.md`
 - `docs/approved-tool-backed-changes.md`
 - `docs/scoped-edits.md`
+- `docs/local-model-selection.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`
 - `docs/release.md`
