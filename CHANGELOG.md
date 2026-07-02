@@ -13,6 +13,26 @@ This project follows a simple changelog format:
 
 No unreleased changes.
 
+## 0.1.5 - 2026-07-02
+
+### Added
+
+- Added runtime validation tracking documentation and security, performance, and release-readiness fixtures.
+- Added README and troubleshooting guidance for using `npx @continuedev/cli` when `cn` is not installed.
+- Added a runtime validation runner that captures prompt outputs to ignored local files.
+- Added runtime context generation for local-model validation without CLI tool execution.
+- Added a dedicated legacy .NET dependency migration prompt for safe `packages.config` to `PackageReference` planning.
+- Added a fixed legacy .NET dependency migration template to reduce unsafe local-model migration recipes.
+
+### Changed
+
+- Tightened implementation planning guidance for legacy .NET project and dependency-management migrations.
+- Strengthened legacy project migration guardrails after runtime validation showed unsafe project-file rewrite recommendations.
+- Added explicit safeguards against mechanical `packages.config` migration recipes for custom MSBuild and add-in projects.
+- Added forbidden response patterns and minimum acceptable plan requirements to the legacy .NET dependency migration workflow.
+- Recorded local-model validation failure for legacy dependency migration despite explicit no-XML instructions.
+- Recorded template-driven legacy dependency migration failure and documented the human-reviewed template fallback.
+
 ## 0.1.4 - 2026-07-02
 
 ### Added

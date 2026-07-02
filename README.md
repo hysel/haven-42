@@ -17,6 +17,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 - Clean Architecture review and implementation support
 - Repository discovery and system understanding workflows
 - Code review, bug investigation, and implementation planning prompts
+- Legacy .NET dependency migration planning for high-risk package-management changes
 - Security, performance, and SonarQube-oriented review guidance
 - Documentation and product-management assistant roles
 - Reusable templates for architecture, AI, security, and performance artifacts
@@ -57,7 +58,7 @@ Role-specific assistant definitions, including senior engineer, architect, secur
 
 ### `.continue/prompts`
 
-Task-oriented workflows for repository discovery, implementation planning, code review, bug investigation, architecture review, security review, performance review, and documentation.
+Task-oriented workflows for repository discovery, implementation planning, legacy .NET dependency migration, code review, bug investigation, architecture review, security review, performance review, and documentation.
 
 ### `.continue/rules`
 
@@ -65,7 +66,7 @@ Reusable engineering standards for general development, Git, .NET, ASP.NET Core,
 
 ### `.continue/templates`
 
-Output templates for durable engineering artifacts such as architecture notes, AI guidance, security reviews, and performance reviews.
+Output templates for durable engineering artifacts such as architecture notes, AI guidance, security reviews, performance reviews, and legacy .NET dependency migration plans.
 
 ### `examples`
 
@@ -91,7 +92,7 @@ The repository contains an initial usable pack structure:
 - Model-backed execution has been validated with a test-time Ollama endpoint override.
 - MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-Version `0.1.3` includes integration hardening, release guidance, contributor guidance, validation automation, and sanitized fixtures. Remaining work should focus on broader runtime validation and project-specific integration examples.
+Version `0.1.5` includes runtime validation tooling, additional fixtures, CLI setup guidance, and a human-reviewed legacy .NET dependency migration workflow. Remaining work should focus on broader runtime validation and project-specific integration examples.
 
 ## Usage
 
@@ -116,10 +117,22 @@ ollama pull qwen2.5-coder:7b
 ollama pull nomic-embed-text
 ```
 
-Expected Continue CLI usage:
+Expected Continue CLI usage with `npx`:
+
+```powershell
+npx @continuedev/cli --config .continue/config.yaml
+```
+
+If the Continue CLI is installed globally, `cn` may also be available:
 
 ```powershell
 cn --config .continue/config.yaml
+```
+
+If PowerShell reports that `cn` is not recognized, use the `npx` command above or install the CLI globally:
+
+```powershell
+npm install -g @continuedev/cli
 ```
 
 Runtime status:
@@ -141,6 +154,9 @@ Runtime status:
 - `examples/release-readiness.md`
 - `examples/sonarqube-review.md`
 - `examples/fixtures/repository-context.md`
+- `examples/fixtures/security-review-input.md`
+- `examples/fixtures/performance-review-input.md`
+- `examples/fixtures/release-readiness-input.md`
 - `examples/fixtures/sonarqube-findings.md`
 
 ## Workflow Docs
@@ -153,6 +169,7 @@ Runtime status:
 - `docs/validation-checklists.md`
 - `docs/troubleshooting.md`
 - `docs/release.md`
+- `docs/runtime-validation.md`
 
 ## Validation
 
@@ -163,6 +180,22 @@ Run the local validation script before release-oriented changes:
 ```
 
 The script checks the configured version, required files, local `.continue` file references, default MCP posture, and obvious committed private endpoints or secrets.
+
+For runtime validation against a target repository, run:
+
+```powershell
+$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+& "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path
+```
+
+Raw runtime outputs are written to an ignored local folder and should be reviewed before any sanitized summary is committed.
+
+To generate a context file without relying on Continue tool execution:
+
+```powershell
+$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+& "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
+```
 
 ## Design Principles
 

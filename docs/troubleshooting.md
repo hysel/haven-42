@@ -45,6 +45,39 @@ Fixes:
 - Check YAML indentation.
 - Confirm `name`, `version`, and `schema` are present.
 
+## `cn` Is Not Recognized
+
+Symptoms:
+
+- PowerShell reports `cn: The term 'cn' is not recognized`.
+
+Meaning:
+
+The Continue CLI global command is not installed on `PATH`.
+
+Checks:
+
+```powershell
+Get-Command cn -ErrorAction SilentlyContinue
+npx @continuedev/cli --version
+```
+
+Fixes:
+
+- Use the CLI through `npx`:
+
+```powershell
+npx @continuedev/cli --config .continue/config.yaml
+```
+
+- Or install the CLI globally:
+
+```powershell
+npm install -g @continuedev/cli
+```
+
+After global installation, close and reopen PowerShell before retrying `cn`.
+
 ## Local File References Do Not Resolve
 
 Symptoms:

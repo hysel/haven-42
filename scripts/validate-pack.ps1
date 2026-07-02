@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.4"
+    [string]$ExpectedVersion = "0.1.5"
 )
 
 $ErrorActionPreference = "Stop"
@@ -72,14 +72,22 @@ $requiredFiles = @(
     "CONTRIBUTING.md",
     "docs/release.md",
     "docs/compatibility.md",
+    "docs/runtime-validation.md",
     "docs/validation-checklists.md",
     "docs/troubleshooting.md",
     "docs/mcp-options.md",
     "docs/mcp-setup.md",
     "docs/sonarqube-review.md",
     "docs/sonarqube-integration-options.md",
+    "scripts/generate-runtime-context.ps1",
+    "scripts/run-runtime-validation.ps1",
+    ".continue/prompts/legacy-dotnet-dependency-migration.md",
+    ".continue/templates/LegacyDotNetDependencyMigration.md",
     "examples/fixtures/sonarqube-findings.md",
     "examples/fixtures/repository-context.md",
+    "examples/fixtures/security-review-input.md",
+    "examples/fixtures/performance-review-input.md",
+    "examples/fixtures/release-readiness-input.md",
     ".github/workflows/validate-pack.yml"
 )
 
@@ -95,6 +103,8 @@ foreach ($relativePath in $requiredFiles) {
 $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
     Where-Object {
         $_.FullName -notmatch "\\.git\\" -and
+        $_.FullName -notmatch "\\.continue\\config\.local.*\.yaml$" -and
+        $_.FullName -notmatch "\\runtime-validation-output\\" -and
         $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".txt")
     }
 

@@ -1,0 +1,203 @@
+param(
+    [string]$TargetRepo = (Get-Location).Path,
+    [string]$ConfigPath,
+    [string]$ContextPath,
+    [switch]$AppendSummary
+)
+
+$ErrorActionPreference = "Stop"
+
+$packRoot = Split-Path -Parent $PSScriptRoot
+
+if (-not $ConfigPath) {
+    $localConfig = Join-Path $packRoot ".continue/config.local.yaml"
+    $defaultConfig = Join-Path $packRoot ".continue/config.yaml"
+
+    if (Test-Path -LiteralPath $localConfig) {
+        $ConfigPath = $localConfig
+    } else {
+        $ConfigPath = $defaultConfig
+    }
+}
+
+if (-not (Test-Path -LiteralPath $TargetRepo)) {
+    throw "Target repository path does not exist: $TargetRepo"
+}
+
+if (-not (Test-Path -LiteralPath $ConfigPath)) {
+    throw "Continue config path does not exist: $ConfigPath"
+}
+
+$promptRoot = Join-Path $packRoot ".continue/prompts"
+$runtimeDoc = Join-Path $packRoot "docs/runtime-validation.md"
+$outputRoot = Join-Path $packRoot "runtime-validation-output"
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$runRoot = Join-Path $outputRoot $timestamp
+
+New-Item -ItemType Directory -Force -Path $runRoot | Out-Null
+
+if (-not $ContextPath) {
+    $ContextPath = Join-Path $runRoot "runtime-context.md"
+    & (Join-Path $packRoot "scripts/generate-runtime-context.ps1") -TargetRepo $TargetRepo -OutputPath $ContextPath
+}
+
+if (-not (Test-Path -LiteralPath $ContextPath)) {
+    throw "Runtime context path does not exist: $ContextPath"
+}
+
+$workflows = @(
+    @{
+        Name = "repository-discovery"
+        Prompt = "repository-discovery.md"
+        Task = "Review this repository. Inspect the file tree, project files, source layout, tests, configuration, and top-level documentation. Produce the full repository-discovery output."
+    },
+    @{
+        Name = "architecture-review"
+        Prompt = "architecture-review.md"
+        Task = "Review this repository architecture. Evaluate Clean Architecture, SOLID, DDD, separation of concerns, layering, coupling, cohesion, dependency direction, scalability, maintainability, and extensibility."
+    },
+    @{
+        Name = "code-review"
+        Prompt = "code-review.md"
+        Task = "Review the current repository and any current git changes. Focus on correctness, maintainability, security, tests, and regression risk."
+    },
+    @{
+        Name = "implementation-plan"
+        Prompt = "implementation-plan.md"
+        Task = "Create an implementation plan for adding audit logging to important write operations. Do not modify files. Identify affected components, risks, tests, and rollout steps."
+    },
+    @{
+        Name = "bug-investigation"
+        Prompt = "bug-investigation.md"
+        Task = "Investigate this hypothetical issue: API requests sometimes return 500 errors during order creation. Inspect likely code paths and produce an investigation plan. Do not modify files."
+    },
+    @{
+        Name = "security-review"
+        Prompt = "security-review.md"
+        Task = "Review this repository for authentication, authorization, input validation, secrets, logging, dependency, and data exposure risks."
+    },
+    @{
+        Name = "performance-review"
+        Prompt = "performance-review.md"
+        Task = "Review this repository for performance risks, including database access, async usage, memory, API latency, caching, batching, and scalability."
+    },
+    @{
+        Name = "documentation"
+        Prompt = "documentation.md"
+        Task = "Review this repository documentation. Identify missing setup instructions, architecture notes, operational guidance, and developer onboarding gaps."
+    },
+    @{
+        Name = "ai-framework-self-review"
+        Prompt = "ai-framework-self-review.md"
+        Task = "Review whether this repository is ready for AI-assisted engineering workflows. Identify missing guidance, risky ambiguity, and documentation gaps."
+    },
+    @{
+        Name = "refactoring-planner"
+        Prompt = "refactoring-planner.md"
+        Task = "Identify one high-value refactoring opportunity in this repository and create a safe refactoring plan. Do not modify files."
+    },
+    @{
+        Name = "product-manager"
+        Prompt = "product-manager.md"
+        Task = "Review this repository from a product and delivery perspective. Identify unclear user value, missing acceptance criteria, release risks, and prioritization questions."
+    },
+    @{
+        Name = "release-readiness"
+        Prompt = "release-readiness.md"
+        Task = "Assess whether this repository appears ready for release. Review testing, documentation, security, operations, rollback, known risks, and go/no-go criteria."
+    }
+)
+
+$summaryRows = New-Object System.Collections.Generic.List[string]
+$summaryRows.Add("| Workflow | Status | Output File |")
+$summaryRows.Add("| --- | --- | --- |")
+
+function Test-ToolCallOnlyOutput {
+    param([string]$Text)
+
+    $trimmed = $Text.Trim()
+    return $trimmed -match '^\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:'
+}
+
+Push-Location -LiteralPath $TargetRepo
+try {
+    foreach ($workflow in $workflows) {
+        $promptPath = Join-Path $promptRoot $workflow.Prompt
+        $outputPath = Join-Path $runRoot "$($workflow.Name).md"
+
+        if (-not (Test-Path -LiteralPath $promptPath)) {
+            throw "Prompt file does not exist: $promptPath"
+        }
+
+        Write-Host "Running $($workflow.Name)..." -ForegroundColor Cyan
+
+        $output = & npx @continuedev/cli `
+            --config $ConfigPath `
+            --prompt $promptPath `
+            --prompt $ContextPath `
+            --readonly `
+            -p "Use the supplied runtime repository context. Do not call tools. Do not request List, Read, Bash, or git status. Produce final review text only. $($workflow.Task)" 2>&1
+
+        $exitCode = $LASTEXITCODE
+        $output | Set-Content -LiteralPath $outputPath
+
+        $outputText = ($output -join "`n")
+
+        if ($exitCode -eq 0 -and (Test-ToolCallOnlyOutput -Text $outputText)) {
+            $summaryRows.Add("| $($workflow.Name) | Tool call only output | $outputPath |")
+        } elseif ($exitCode -eq 0) {
+            $summaryRows.Add("| $($workflow.Name) | Completed | $outputPath |")
+        } else {
+            $summaryRows.Add("| $($workflow.Name) | Failed with exit code $exitCode | $outputPath |")
+        }
+    }
+}
+finally {
+    Pop-Location
+}
+
+$draftPath = Join-Path $runRoot "runtime-validation-summary-draft.md"
+$date = Get-Date -Format "yyyy-MM-dd HH:mm"
+
+$draft = @"
+## Runtime Validation Run - $date
+
+Repository type: TODO sanitize repository type
+Model setup: TODO record model setup
+Continue surface: Continue CLI through npx @continuedev/cli
+Config used: TODO confirm sanitized config path
+
+Raw outputs were written to an ignored local folder:
+
+$runRoot
+
+Runtime context used:
+
+$ContextPath
+
+Do not commit raw outputs until they have been reviewed and sanitized.
+
+$($summaryRows -join "`n")
+
+### What Worked
+
+- TODO summarize after reviewing raw outputs.
+
+### Gaps
+
+- TODO summarize after reviewing raw outputs.
+
+### Follow-up
+
+- TODO list prompt, rule, fixture, or documentation improvements.
+"@
+
+$draft | Set-Content -LiteralPath $draftPath
+
+if ($AppendSummary) {
+    Add-Content -LiteralPath $runtimeDoc -Value "`n$draft"
+    Write-Host "Appended sanitized summary template to $runtimeDoc" -ForegroundColor Green
+}
+
+Write-Host "Runtime validation outputs written to $runRoot" -ForegroundColor Green
+Write-Host "Review and sanitize $draftPath before committing runtime validation notes." -ForegroundColor Yellow
