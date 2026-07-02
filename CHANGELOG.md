@@ -11,7 +11,9 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
-No unreleased changes.
+### Fixed
+
+- Fixed Linux and macOS hardware profile output so numeric GPU memory prints as `GB VRAM`.
 
 ## 0.1.7 - 2026-07-02
 

@@ -22,6 +22,13 @@ gb_from_mb() {
   awk -v mb="$1" 'BEGIN { printf "%.1f", mb / 1024 }'
 }
 
+format_vram_label() {
+  case "$1" in
+    Unknown|Shared|"") printf '%s VRAM' "${1:-Unknown}" ;;
+    *) printf '%s GB VRAM' "$1" ;;
+  esac
+}
+
 detect_vendor() {
   case "$1" in
     *NVIDIA*|*Nvidia*|*nvidia*) printf 'NVIDIA' ;;
@@ -160,7 +167,8 @@ if [ "${#GPU_NAMES[@]}" -eq 0 ]; then
   printf -- '- Not detected\n'
 else
   for i in "${!GPU_NAMES[@]}"; do
-    printf -- '- %s (%s VRAM, %s, %s, %s)\n' "${GPU_NAMES[$i]}" "${GPU_VRAMS[$i]}" "${GPU_SOURCES[$i]}" "${GPU_VENDORS[$i]}" "${GPU_MEMORY_TYPES[$i]}"
+    vram_label="$(format_vram_label "${GPU_VRAMS[$i]}")"
+    printf -- '- %s (%s, %s, %s, %s)\n' "${GPU_NAMES[$i]}" "$vram_label" "${GPU_SOURCES[$i]}" "${GPU_VENDORS[$i]}" "${GPU_MEMORY_TYPES[$i]}"
   done
 fi
 printf '\nOllama: %s\n' "$OLLAMA_STATUS"
