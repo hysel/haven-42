@@ -137,6 +137,8 @@ The project domain is enterprise engineering workflow guidance.
 - Clean Architecture guidance should be practical and testable, not ceremonial.
 - Security and performance review guidance should be built into early milestones.
 - MCP and SonarQube support should be documented as integration targets until implemented.
+- Tool-enabled project changes should be treated as an approved execution mode, not the default review posture.
+- Local model selection should remain hardware-aware but portable, keeping machine-specific endpoints and hardware details out of committed shared config.
 
 ## Open Questions
 
@@ -146,3 +148,5 @@ The project domain is enterprise engineering workflow guidance.
 - How should SonarQube findings be provided to the assistant: pasted reports, MCP, CLI output, or another integration?
 - Which MCP servers are in scope for the first integration milestone?
 - Should prompt examples be added as committed fixtures or generated on demand during release validation?
+- What tool execution surface should be considered the supported path for approved project changes?
+- Which hardware signals are reliable enough to drive dynamic local model selection across Windows, Linux, and macOS?

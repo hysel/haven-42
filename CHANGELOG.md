@@ -11,6 +11,14 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+### Added
+
+- Added Milestone 6 roadmap and TODO items for tool-enabled project changes and hardware-aware local model selection.
+- Added a beginner-friendly README quick start and safety section.
+- Added tool-use mode guidance for read-only discovery, plan-only work, and approved write mode.
+- Added approved tool-backed change guidance for safely moving from review to implementation.
+- Documented Windows local `file://C:/...` path behavior, duplicate-rule causes, raw JSON tool-call failures, and runtime-context fallback guidance from VSCodium/Ollama validation.
+
 ## 0.1.6 - 2026-07-02
 
 ### Added

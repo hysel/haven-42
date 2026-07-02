@@ -2,13 +2,102 @@
 
 Enterprise-focused Continue configuration pack for software engineering teams that want local-first AI assistance, repeatable review workflows, and opinionated guidance for .NET and Clean Architecture repositories.
 
-This repository is in early implementation stage. The documentation foundation, Continue configuration, agents, prompts, rules, and templates are present, but the pack should still be validated in Continue before it is treated as production-ready.
+In plain terms: this repository gives Continue a ready-made set of prompts, rules, and templates so it can help review and plan software work in a more consistent way.
 
 ## Purpose
 
 The goal of this pack is to provide a reusable engineering assistant setup for Continue, with workflows for repository discovery, implementation planning, code review, security review, architecture review, performance review, documentation, and product management.
 
 It is designed for teams that want AI support to follow consistent engineering standards instead of relying on ad hoc prompts.
+
+## Quick Start
+
+Use this path if you are new to Continue, Ollama, or command-line tools.
+
+### 1. Install the basics
+
+Install:
+
+- Ollama
+- Node.js
+- Continue for your editor
+
+Then open PowerShell and download the default local models:
+
+```powershell
+ollama pull qwen2.5-coder:7b
+ollama pull nomic-embed-text
+```
+
+### 2. Copy this pack into your project
+
+Copy the `.continue` folder from this repository into the project you want to review.
+
+Your project should then look like this:
+
+```text
+your-project/
+  .continue/
+    config.yaml
+    prompts/
+    rules/
+    agents/
+    templates/
+```
+
+### 3. Start Ollama
+
+Make sure Ollama is running. To check it, run:
+
+```powershell
+ollama list
+```
+
+If the command shows your models, you are ready.
+
+### 4. Open your project in Continue
+
+Open the project in your editor and point Continue at:
+
+```text
+.continue/config.yaml
+```
+
+### 5. Run a prompt
+
+Start with one of these:
+
+- `repository-discovery`
+- `implementation-plan`
+- `code-review`
+- `documentation`
+- `release-readiness`
+
+Good first request:
+
+```text
+Run repository discovery for this project. Do not modify files.
+```
+
+### 6. If something fails
+
+Use `docs/troubleshooting.md`.
+
+Most first-time problems are one of these:
+
+- Ollama is not running.
+- The model was not downloaded.
+- Continue cannot find `.continue/config.yaml`.
+- The `cn` command is not installed, so you should use `npx @continuedev/cli` instead.
+
+## Beginner Safety Rules
+
+- Start with review and planning prompts before asking for changes.
+- Do not commit private IP addresses, tokens, local paths, or raw company code into this pack.
+- Keep machine-specific settings in local files, not in `.continue/config.yaml`.
+- Treat AI output as a draft. Review it before changing code.
+- Use `git status` before and after AI-assisted work so you know what changed.
+- Use `docs/tool-use-modes.md` before asking the assistant to modify a reviewed project.
 
 ## Intended Capabilities
 
@@ -94,9 +183,9 @@ The repository contains an initial usable pack structure:
 
 Version `0.1.5` includes runtime validation tooling, additional fixtures, CLI setup guidance, and a human-reviewed legacy .NET dependency migration workflow. Remaining work should focus on broader runtime validation and project-specific integration examples.
 
-## Usage
+## Standard Usage
 
-The intended workflow is:
+The standard workflow is:
 
 1. Install or copy this pack into a repository that uses Continue.
 2. Ensure Ollama is running with the configured models available.
@@ -117,7 +206,7 @@ ollama pull qwen2.5-coder:7b
 ollama pull nomic-embed-text
 ```
 
-Expected Continue CLI usage with `npx`:
+Optional Continue CLI usage with `npx`:
 
 ```powershell
 npx @continuedev/cli --config .continue/config.yaml
@@ -168,6 +257,8 @@ Runtime status:
 - `docs/compatibility.md`
 - `docs/validation-checklists.md`
 - `docs/troubleshooting.md`
+- `docs/tool-use-modes.md`
+- `docs/approved-tool-backed-changes.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`
 - `docs/release.md`

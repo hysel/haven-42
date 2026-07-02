@@ -14,6 +14,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
 | Milestone 4: Runtime Validation And CI | Complete | GitHub Actions validation, runtime validation tracking docs, context generation, sanitized fixture-based validation, and legacy migration validation notes are complete. |
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
+| Milestone 6: Applied Tooling And Adaptive Models | Planned | Tool-enabled project changes and hardware-aware local model selection are planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -164,6 +165,28 @@ Exit criteria:
 - Additional fixtures cover the highest-value review workflows.
 - Local-model validation limitations are documented where workflows fail guardrails.
 - Optional MCP examples remain deferred until validated usage is available.
+
+## Milestone 6: Applied Tooling And Adaptive Models
+
+Goal: Make the pack more useful in real repositories by supporting controlled tool-enabled changes and local hardware-aware model selection.
+
+Scope:
+
+- Define safe tool-use modes for reviewed repositories, including read-only discovery, plan-only review, and approved write mode.
+- Document how Continue users can enable tool-backed project changes without weakening approval, validation, rollback, or git safety rules.
+- Add prompts or guidance for converting an approved plan into scoped edits in the target project.
+- Define a model-selection strategy based on local hardware signals such as available RAM, GPU VRAM, model size, context needs, and workflow risk.
+- Add a hardware-profile helper or documented command sequence for collecting local model-selection inputs.
+- Define recommended Ollama model tiers for low, medium, and high resource machines.
+- Keep machine-specific endpoints, model experiments, and hardware details out of committed shared config.
+
+Exit criteria:
+
+- Users understand when the pack may read, plan, or modify a reviewed repository.
+- Tool-enabled changes require explicit approval and include validation and rollback expectations.
+- Local model recommendations are tied to hardware capacity and workflow risk.
+- The default committed config remains portable and safe for local Ollama users.
+- Documentation includes examples for selecting models without committing private machine details.
 
 ## Backlog
 
