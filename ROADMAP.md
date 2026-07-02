@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, and CI validation for version 0.1.4 are complete. Milestone 4 is in progress with runtime validation remaining.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, and runtime validation tooling for version 0.1.5 are complete. Milestone 4 remains in progress for broader real-repository validation.
 
 ## Stage Status
 
@@ -12,7 +12,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 2: Enterprise Review Depth | Complete | Architecture, performance, documentation, reviewer, product, SonarQube, examples, validation checklists, and decision records are complete. |
 | Milestone 3: Tooling And Integration | Complete | Troubleshooting guidance, MCP options research, SonarQube integration research, MCP setup docs, and compatibility notes are complete. |
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
-| Milestone 4: Runtime Validation And CI | In Progress | GitHub Actions validation is implemented and released in 0.1.4; runtime validation, additional fixtures, and project-specific integration examples remain. |
+| Milestone 4: Runtime Validation And CI | In Progress | GitHub Actions validation, runtime validation tracking docs, context generation, additional fixtures, and legacy migration validation notes are implemented; broader real-repository validation and project-specific integration examples remain. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -131,15 +131,18 @@ Scope:
 
 - Add CI automation for `scripts/validate-pack.ps1`. Done.
 - Validate the pack against additional real repositories.
-- Add more sample fixtures for security, performance, and release-readiness workflows.
+- Add more sample fixtures for security, performance, and release-readiness workflows. Done.
 - Add project-specific MCP examples after real-world validation.
-- Record runtime validation results in repository documentation.
+- Record runtime validation results in repository documentation. Done.
+- Add runtime context generation for local-model validation. Done.
+- Add legacy .NET dependency migration prompt and template. Done.
 
 Exit criteria:
 
 - CI runs validation on pushes and pull requests.
 - Runtime validation gaps are documented.
 - Additional fixtures cover the highest-value review workflows.
+- Local-model validation limitations are documented where workflows fail guardrails.
 - Optional MCP examples are based on validated usage, not assumptions.
 
 ## Backlog

@@ -108,7 +108,12 @@
 - [x] Update pack version to `0.1.4`.
 - [x] Update changelog for `0.1.4`.
 - [ ] Validate the pack against additional real repositories.
-- [ ] Add security review fixture.
-- [ ] Add performance review fixture.
-- [ ] Add release-readiness fixture.
-- [ ] Add runtime validation documentation.
+- [x] Add security review fixture.
+- [x] Add performance review fixture.
+- [x] Add release-readiness fixture.
+- [x] Add runtime validation documentation.
+- [x] Add runtime context generation.
+- [x] Add legacy .NET dependency migration prompt.
+- [x] Add legacy .NET dependency migration template.
+- [x] Update pack version to `0.1.5`.
+- [x] Update changelog for `0.1.5`.

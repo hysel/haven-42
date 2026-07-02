@@ -1,5 +1,5 @@
 name: Continue Enterprise Engineering Pack
-version: 0.1.4
+version: 0.1.5
 schema: v1
 
 models:
@@ -45,6 +45,7 @@ rules:
 prompts:
   - uses: file://./prompts/repository-discovery.md
   - uses: file://./prompts/implementation-plan.md
+  - uses: file://./prompts/legacy-dotnet-dependency-migration.md
   - uses: file://./prompts/code-review.md
   - uses: file://./prompts/bug-investigation.md
   - uses: file://./prompts/architecture-review.md
@@ -55,5 +56,8 @@ prompts:
   - uses: file://./prompts/refactoring-planner.md
   - uses: file://./prompts/product-manager.md
   - uses: file://./prompts/release-readiness.md
+
+docs:
+  - uses: file://./templates/LegacyDotNetDependencyMigration.md
 
 mcpServers: []
