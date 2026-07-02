@@ -134,7 +134,7 @@
 - [x] Define safe tool-use modes for reviewed repositories.
 - [x] Document how to enable approved tool-backed project changes.
 - [x] Add guidance for converting approved plans into scoped edits.
-- [ ] Define hardware-aware local model selection strategy.
+- [x] Define hardware-aware local model selection strategy.
 - [ ] Add hardware-profile helper or documented collection commands.
 - [ ] Define recommended Ollama model tiers by RAM, VRAM, context size, and workflow risk.
 - [ ] Document how to keep machine-specific model and endpoint details out of committed config.

@@ -38,6 +38,7 @@ Tool-use guidance:
 - `qwen3-coder:30b` is the current validated default for Agent mode tool execution in the tested VSCodium, Continue, and Ollama setup.
 - `qwen2.5-coder:7b` may still be useful as a lightweight chat or planning model, but it produced raw JSON tool-call text instead of executable tool calls in validation.
 - When a model prints tool-call JSON instead of executing tools, use the runtime-context fallback workflow in `docs/troubleshooting.md`.
+- Use `docs/local-model-selection.md` before changing the committed default model or recommending a different local model tier.
 
 Endpoint guidance:
 
