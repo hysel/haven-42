@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, and release hardening for version 0.1.3 are complete. The next goal is broader runtime validation against real repositories.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, and CI validation for version 0.1.4 are complete. Milestone 4 is in progress with runtime validation remaining.
 
 ## Stage Status
 
@@ -12,6 +12,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 2: Enterprise Review Depth | Complete | Architecture, performance, documentation, reviewer, product, SonarQube, examples, validation checklists, and decision records are complete. |
 | Milestone 3: Tooling And Integration | Complete | Troubleshooting guidance, MCP options research, SonarQube integration research, MCP setup docs, and compatibility notes are complete. |
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
+| Milestone 4: Runtime Validation And CI | In Progress | GitHub Actions validation is implemented and released in 0.1.4; runtime validation, additional fixtures, and project-specific integration examples remain. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -122,7 +123,26 @@ Exit criteria:
 
 ## Backlog
 
+## Milestone 4: Runtime Validation And CI
+
+Goal: Validate the pack continuously and exercise it against realistic repositories and review inputs.
+
+Scope:
+
+- Add CI automation for `scripts/validate-pack.ps1`. Done.
 - Validate the pack against additional real repositories.
-- Add CI automation for `scripts/validate-pack.ps1`.
 - Add more sample fixtures for security, performance, and release-readiness workflows.
+- Add project-specific MCP examples after real-world validation.
+- Record runtime validation results in repository documentation.
+
+Exit criteria:
+
+- CI runs validation on pushes and pull requests.
+- Runtime validation gaps are documented.
+- Additional fixtures cover the highest-value review workflows.
+- Optional MCP examples are based on validated usage, not assumptions.
+
+## Backlog
+
+- Add cross-platform validation script parity if PowerShell becomes a contributor barrier.
 - Add project-specific MCP examples after real-world validation.

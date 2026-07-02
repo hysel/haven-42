@@ -13,6 +13,12 @@ This project follows a simple changelog format:
 
 No unreleased changes.
 
+## 0.1.4 - 2026-07-02
+
+### Added
+
+- Added GitHub Actions validation workflow for the pack validation script.
+
 ## 0.1.3 - 2026-07-02
 
 ### Added
