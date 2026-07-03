@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+## 0.1.8 - 2026-07-02
+
 ### Fixed
 
 - Fixed Linux and macOS hardware profile output so numeric GPU memory prints as `GB VRAM`.
@@ -19,6 +21,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added automated pack tests for validation behavior, local config safety, model recommendation catalog structure, and Continue file reference integrity.
 - Added model recommendations to hardware profile scripts based on detected resource tier and installed Ollama models.
 - Added a version-controlled model recommendation catalog that scripts can use for future model updates without changing script logic.
 - Added local configuration safety guidance for keeping private endpoints, local paths, hardware output, and model experiments out of committed config.

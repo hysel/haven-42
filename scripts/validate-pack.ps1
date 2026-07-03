@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.7"
+    [string]$ExpectedVersion = "0.1.8"
 )
 
 $ErrorActionPreference = "Stop"
@@ -146,6 +146,7 @@ $requiredFiles = @(
     "docs/sonarqube-integration-options.md",
     "scripts/generate-runtime-context.ps1",
     "scripts/run-runtime-validation.ps1",
+    "scripts/test-pack.ps1",
     "scripts/get-local-model-profile.windows.ps1",
     "scripts/get-local-model-profile.linux.sh",
     "scripts/get-local-model-profile.macos.sh",

@@ -21,3 +21,7 @@ jobs:
       - name: Run pack validation
         shell: pwsh
         run: ./scripts/validate-pack.ps1
+
+      - name: Run pack tests
+        shell: pwsh
+        run: ./scripts/test-pack.ps1
