@@ -1,5 +1,7 @@
 param(
+    [Alias("target-repo")]
     [string]$TargetRepo = (Get-Location).Path,
+    [Alias("output-path")]
     [string]$OutputPath
 )
 

@@ -133,6 +133,10 @@ detect_vendor() {
   esac
 }
 
+add_platform_note() {
+  PLATFORM_NOTES+=("$1")
+}
+
 OS_SUMMARY="Linux"
 if [ -r /etc/os-release ]; then
   OS_SUMMARY="$(grep '^PRETTY_NAME=' /etc/os-release | head -n 1 | cut -d= -f2- | tr -d '"')"
@@ -161,6 +165,7 @@ GPU_VRAMS=()
 GPU_SOURCES=()
 GPU_VENDORS=()
 GPU_MEMORY_TYPES=()
+PLATFORM_NOTES=()
 
 add_gpu() {
   GPU_NAMES+=("$1")
@@ -169,6 +174,30 @@ add_gpu() {
   GPU_VENDORS+=("$4")
   GPU_MEMORY_TYPES+=("$5")
 }
+
+case "$CPU_ARCHITECTURE" in
+  arm64|armv7|armv6|arm*)
+    add_platform_note "ARM Linux detected; treat local model recommendations conservatively until acceleration and tool execution are validated."
+    ;;
+esac
+
+JETSON_DETECTED=false
+if [ -r /etc/nv_tegra_release ]; then
+  JETSON_DETECTED=true
+fi
+
+for model_file in /proc/device-tree/model /sys/firmware/devicetree/base/model; do
+  if [ -r "$model_file" ]; then
+    model_text="$(tr -d '\000' < "$model_file" 2>/dev/null || true)"
+    if printf '%s' "$model_text" | grep -Eiq 'jetson|tegra|nvidia'; then
+      JETSON_DETECTED=true
+    fi
+  fi
+done
+
+if [ "$JETSON_DETECTED" = true ]; then
+  add_platform_note "NVIDIA Jetson or Tegra indicators detected; verify JetPack, CUDA, container/device access, and Ollama acceleration before trusting model sizing."
+fi
 
 if command_exists nvidia-smi; then
   while IFS=, read -r name memory; do
@@ -274,6 +303,12 @@ if [ "$AS_JSON" = true ]; then
       "$(json_escape "${GPU_NAMES[$i]}")" "$(json_number_or_null "${GPU_VRAMS[$i]}")" "$(json_escape "${GPU_SOURCES[$i]}")" "$(json_escape "${GPU_VENDORS[$i]}")" "$(json_escape "${GPU_MEMORY_TYPES[$i]}")"
   done
   printf '\n  ],\n'
+  printf '  "PlatformNotes": ['
+  for i in "${!PLATFORM_NOTES[@]}"; do
+    [ "$i" -gt 0 ] && printf ', '
+    printf '"%s"' "$(json_escape "${PLATFORM_NOTES[$i]}")"
+  done
+  printf '],\n'
   printf '  "OllamaStatus": "%s",\n' "$(json_escape "$OLLAMA_STATUS")"
   printf '  "OllamaModels": ['
   for i in "${!OLLAMA_MODELS[@]}"; do
@@ -301,6 +336,14 @@ else
   for i in "${!GPU_NAMES[@]}"; do
     vram_label="$(format_vram_label "${GPU_VRAMS[$i]}")"
     printf -- '- %s (%s, %s, %s, %s)\n' "${GPU_NAMES[$i]}" "$vram_label" "${GPU_SOURCES[$i]}" "${GPU_VENDORS[$i]}" "${GPU_MEMORY_TYPES[$i]}"
+  done
+fi
+printf '\nPlatform notes:\n'
+if [ "${#PLATFORM_NOTES[@]}" -eq 0 ]; then
+  printf -- '- None\n'
+else
+  for note in "${PLATFORM_NOTES[@]}"; do
+    printf -- '- %s\n' "$note"
   done
 fi
 printf '\nOllama: %s\n' "$OLLAMA_STATUS"

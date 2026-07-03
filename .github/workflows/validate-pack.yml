@@ -33,3 +33,83 @@ jobs:
       - name: Run Linux test wrapper
         shell: bash
         run: ./scripts/test-pack.linux.sh
+
+      - name: Run Linux hardware profile smoke test
+        shell: bash
+        run: |
+          ./scripts/get-local-model-profile.linux.sh
+          ./scripts/get-local-model-profile.linux.sh --json
+
+      - name: Run Linux installer wrapper smoke test
+        shell: bash
+        run: |
+          target_repo="$(mktemp -d)"
+          ./scripts/install-continue-pack.linux.sh --target-repo "$target_repo" --dry-run
+
+      - name: Run Linux runtime context smoke test
+        shell: bash
+        run: |
+          target_repo="$(mktemp -d)"
+          mkdir -p "$target_repo/src"
+          printf '# Sample\n' > "$target_repo/README.md"
+          printf 'public class App { }\n' > "$target_repo/src/App.cs"
+          ./scripts/generate-runtime-context.linux.sh --target-repo "$target_repo" --output-path "$target_repo/runtime-context.md"
+          test -f "$target_repo/runtime-context.md"
+
+      - name: Run Linux runtime validation wrapper smoke test
+        shell: bash
+        run: |
+          missing_repo="$(mktemp -d)"
+          rm -rf "$missing_repo"
+          if ./scripts/run-runtime-validation.linux.sh --target-repo "$missing_repo"; then
+            echo "Runtime validation should fail for a missing target repository." >&2
+            exit 1
+          fi
+
+  macos-smoke:
+    name: macOS script smoke tests
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run macOS validation wrapper
+        shell: bash
+        run: ./scripts/validate-pack.macos.sh
+
+      - name: Run macOS test wrapper
+        shell: bash
+        run: ./scripts/test-pack.macos.sh
+
+      - name: Run macOS hardware profile smoke test
+        shell: bash
+        run: |
+          ./scripts/get-local-model-profile.macos.sh
+          ./scripts/get-local-model-profile.macos.sh --json
+
+      - name: Run macOS installer wrapper smoke test
+        shell: bash
+        run: |
+          target_repo="$(mktemp -d)"
+          ./scripts/install-continue-pack.macos.sh --target-repo "$target_repo" --dry-run
+
+      - name: Run macOS runtime context smoke test
+        shell: bash
+        run: |
+          target_repo="$(mktemp -d)"
+          mkdir -p "$target_repo/src"
+          printf '# Sample\n' > "$target_repo/README.md"
+          printf 'public class App { }\n' > "$target_repo/src/App.cs"
+          ./scripts/generate-runtime-context.macos.sh --target-repo "$target_repo" --output-path "$target_repo/runtime-context.md"
+          test -f "$target_repo/runtime-context.md"
+
+      - name: Run macOS runtime validation wrapper smoke test
+        shell: bash
+        run: |
+          missing_repo="$(mktemp -d)"
+          rm -rf "$missing_repo"
+          if ./scripts/run-runtime-validation.macos.sh --target-repo "$missing_repo"; then
+            echo "Runtime validation should fail for a missing target repository." >&2
+            exit 1
+          fi

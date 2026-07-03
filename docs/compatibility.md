@@ -135,6 +135,47 @@ The Linux hardware profile script is best effort and depends more heavily on loc
 
 Minimal distributions, containers, embedded devices, and locked-down servers may not include every optional detection command. In those cases, the script should still provide partial output and users should treat model recommendations as conservative starting points.
 
+### Enterprise And Cloud Linux
+
+Enterprise and cloud Linux images should be treated as supported targets when they provide `bash`, standard shell utilities, and PowerShell 7.
+
+Expected compatible families include:
+
+- Ubuntu LTS and Debian-based images
+- RHEL-family images such as Red Hat Enterprise Linux, Rocky Linux, AlmaLinux, Oracle Linux, and Fedora
+- SUSE and openSUSE images
+- Amazon Linux 2023
+- Azure Linux or CBL-Mariner style images when PowerShell 7 is available
+- Google Cloud images based on Debian, Ubuntu, or RHEL-family distributions
+
+Cloud and enterprise caveats:
+
+- Minimal images may omit optional utilities such as `lspci`.
+- GPU instances need vendor drivers before `nvidia-smi` or `rocm-smi` can report useful data.
+- Hardened images may restrict package installation, shell execution, or PowerShell execution.
+- Containers may hide host CPU, GPU, RAM, and driver details unless hardware is passed through.
+- ARM cloud instances should be treated conservatively until model and tool execution are validated.
+
+The support goal is portable setup, validation, and installation. Hardware profiling remains best effort because cloud images vary by provider, instance type, driver state, and hardening policy.
+
+### Containers And LXC
+
+Containers, LXC, and LXD environments need extra care because the visible hardware may not match the host machine.
+
+Considerations:
+
+- CPU, RAM, GPU, driver, and PCI information may reflect the container view rather than the physical host.
+- GPU access usually requires explicit passthrough.
+- NVIDIA container workloads commonly require NVIDIA Container Toolkit or equivalent runtime configuration.
+- AMD ROCm container workloads require ROCm device access, permissions, and compatible host drivers.
+- LXC and LXD may require explicit device passthrough for GPU devices such as `/dev/dri`, NVIDIA devices, or ROCm devices.
+- Unprivileged containers may hide hardware details or block device access.
+- `nvidia-smi`, `rocm-smi`, `lspci`, and `/proc/meminfo` may be unavailable or incomplete inside containers.
+- Ollama may run on the host while Continue or validation scripts run inside a container; keep any host endpoint override local-only and out of committed config.
+- File paths can differ when Continue runs on the host but tools or scripts run inside a container.
+
+Treat hardware profile output from containers as container-visible capacity, not guaranteed host capacity. Use conservative model recommendations until GPU passthrough, memory limits, Ollama reachability, and tool execution are validated in the exact container setup.
+
 ## Line Endings
 
 Git may report LF-to-CRLF normalization warnings on Windows.

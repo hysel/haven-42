@@ -22,6 +22,15 @@ This project follows a simple changelog format:
 - Added a local-model tool-use validation checklist and roadmap tracking for model tool-use evidence.
 - Added roadmap tracking for ARM architecture detection in hardware profile scripts.
 - Added Linux distribution compatibility assumptions and optional GPU detection dependency guidance.
+- Added enterprise and cloud Linux compatibility guidance for setup, install, validation, and hardware profiling.
+- Added container, LXC, and LXD compatibility guidance for hardware visibility, GPU passthrough, and conservative model recommendations.
+- Added ARM, Apple Silicon, Windows ARM, Linux ARM, MLX, unified-memory, and shared-memory model selection guidance.
+- Added macOS hardware profile detection for MLX tooling as a separate signal from Ollama model recommendations.
+- Added Linux hardware profile platform notes for ARM and NVIDIA Jetson/Tegra indicators.
+- Added Linux and macOS CI smoke tests for native shell wrappers, hardware profile scripts, and installer wrappers.
+- Added pack tests for validation/test wrapper coverage and runtime-validation missing-target handling.
+- Added Linux and macOS CI smoke tests for runtime context generation.
+- Added Linux and macOS shell wrappers for runtime context generation and runtime validation so users do not have to invoke PowerShell scripts directly.
 
 ### Changed
 

@@ -27,6 +27,10 @@ command_exists() {
   command -v "$1" >/dev/null 2>&1
 }
 
+python_module_exists() {
+  command_exists python3 && python3 -c "import $1" >/dev/null 2>&1
+}
+
 json_escape() {
   printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'
 }
@@ -211,6 +215,40 @@ if command_exists ollama; then
   fi
 fi
 
+MLX_TOOLS=()
+for tool in mlx-lm mlx_lm.generate mlx_lm.chat mlx_lm.server; do
+  if command_exists "$tool"; then
+    MLX_TOOLS+=("$tool")
+  fi
+done
+
+if python_module_exists "mlx_lm"; then
+  already_detected=false
+  for tool in "${MLX_TOOLS[@]}"; do
+    if [ "$tool" = "python3 module: mlx_lm" ]; then
+      already_detected=true
+      break
+    fi
+  done
+  [ "$already_detected" = false ] && MLX_TOOLS+=("python3 module: mlx_lm")
+fi
+
+if python_module_exists "mlx"; then
+  already_detected=false
+  for tool in "${MLX_TOOLS[@]}"; do
+    if [ "$tool" = "python3 module: mlx" ]; then
+      already_detected=true
+      break
+    fi
+  done
+  [ "$already_detected" = false ] && MLX_TOOLS+=("python3 module: mlx")
+fi
+
+MLX_STATUS="not detected"
+if [ "${#MLX_TOOLS[@]}" -gt 0 ]; then
+  MLX_STATUS="detected"
+fi
+
 TIER="Low resource candidate"
 RAM_INT=0
 if [ "$RAM_GB" != "Unknown" ]; then
@@ -258,6 +296,13 @@ if [ "$AS_JSON" = true ]; then
     printf '"%s"' "$(json_escape "${OLLAMA_MODELS[$i]}")"
   done
   printf '],\n'
+  printf '  "MlxStatus": "%s",\n' "$(json_escape "$MLX_STATUS")"
+  printf '  "MlxTools": ['
+  for i in "${!MLX_TOOLS[@]}"; do
+    [ "$i" -gt 0 ] && printf ', '
+    printf '"%s"' "$(json_escape "${MLX_TOOLS[$i]}")"
+  done
+  printf '],\n'
   printf '  "RecommendationTier": "%s",\n' "$(json_escape "$TIER")"
   printf '  "ModelRecommendation": {"PrimaryModel":"%s","Use":"%s","Validation":"%s"}\n' "$(json_escape "$RECOMMENDED_MODEL")" "$(json_escape "$RECOMMENDED_USE")" "$(json_escape "$VALIDATION_NOTE")"
   printf '}\n'
@@ -288,6 +333,13 @@ if [ "${#OLLAMA_MODELS[@]}" -gt 0 ]; then
   done
 else
   printf 'Installed Ollama models: None detected\n'
+fi
+printf '\nMLX tooling: %s\n' "$MLX_STATUS"
+if [ "${#MLX_TOOLS[@]}" -gt 0 ]; then
+  printf 'Detected MLX tools:\n'
+  for tool in "${MLX_TOOLS[@]}"; do
+    printf -- '- %s\n' "$tool"
+  done
 fi
 printf '\nRecommendation tier: %s\n\n' "$TIER"
 printf 'Recommended model: %s\n' "$RECOMMENDED_MODEL"

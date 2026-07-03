@@ -212,6 +212,28 @@ Invoke-PackTest "hardware profile scripts report CPU architecture" {
     }
 }
 
+Invoke-PackTest "macOS hardware profile reports MLX separately from Ollama" {
+    $scriptPath = Join-Path $repoRoot "scripts/get-local-model-profile.macos.sh"
+    $content = Get-Content -LiteralPath $scriptPath -Raw
+
+    Assert-True -Condition ($content -match "MlxStatus") -Message "macOS profile JSON output should include MlxStatus."
+    Assert-True -Condition ($content -match "MlxTools") -Message "macOS profile JSON output should include MlxTools."
+    Assert-True -Condition ($content -match "MLX tooling:") -Message "macOS profile text output should include MLX tooling status."
+    Assert-True -Condition ($content -match "mlx_lm\.server") -Message "macOS profile should look for MLX server tooling."
+    Assert-True -Condition ($content -match "OllamaModels") -Message "macOS profile should keep Ollama models as a separate output."
+}
+
+Invoke-PackTest "Linux hardware profile reports ARM platform notes" {
+    $scriptPath = Join-Path $repoRoot "scripts/get-local-model-profile.linux.sh"
+    $content = Get-Content -LiteralPath $scriptPath -Raw
+
+    Assert-True -Condition ($content -match "PlatformNotes") -Message "Linux profile JSON output should include PlatformNotes."
+    Assert-True -Condition ($content -match "Platform notes:") -Message "Linux profile text output should include Platform notes."
+    Assert-True -Condition ($content -match "nv_tegra_release") -Message "Linux profile should look for NVIDIA Tegra release indicators."
+    Assert-True -Condition ($content -match "jetson\|tegra\|nvidia") -Message "Linux profile should look for Jetson or Tegra device-tree indicators."
+    Assert-True -Condition ($content -match "ARM Linux detected") -Message "Linux profile should add conservative notes for ARM Linux."
+}
+
 Invoke-PackTest "Continue file references are relative and resolvable" {
     $configPath = Join-Path $repoRoot ".continue/config.yaml"
     $config = Get-Content -LiteralPath $configPath -Raw
@@ -269,6 +291,27 @@ Invoke-PackTest "runtime context generation fails for missing target repository"
 
     Assert-True -Condition ($result.ExitCode -ne 0) -Message "Runtime context generation should fail for a missing target path."
     Assert-True -Condition ($result.Output -match "Target repository path does not exist") -Message "Missing target error should be reported."
+}
+
+Invoke-PackTest "runtime context generation accepts shell-friendly argument aliases" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-runtime-context-alias-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path (Join-Path $tempRepo "src") | Out-Null
+        "# Sample" | Set-Content -LiteralPath (Join-Path $tempRepo "README.md")
+        "public class App { }" | Set-Content -LiteralPath (Join-Path $tempRepo "src/App.cs")
+
+        $outputPath = Join-Path $tempRepo "runtime-context.alias.md"
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/generate-runtime-context.ps1") `
+            -Arguments @("--target-repo", $tempRepo, "--output-path", $outputPath)
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Runtime context generation should accept shell-friendly aliases."
+        Assert-True -Condition (Test-Path -LiteralPath $outputPath) -Message "Runtime context file should be created when aliases are used."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 Invoke-PackTest "install script dry run does not modify target repository" {
@@ -368,6 +411,76 @@ Invoke-PackTest "install wrapper scripts exist and call PowerShell installer" {
         Assert-True -Condition ($content -match "install-continue-pack\.ps1") -Message "$wrapperName should call the PowerShell installer."
         Assert-True -Condition ($content -match "pwsh") -Message "$wrapperName should require pwsh."
     }
+}
+
+Invoke-PackTest "runtime context and validation wrapper scripts call canonical PowerShell scripts" {
+    $wrappers = @(
+        @{
+            Name = "generate-runtime-context.linux.sh"
+            Target = "generate-runtime-context.ps1"
+        },
+        @{
+            Name = "generate-runtime-context.macos.sh"
+            Target = "generate-runtime-context.ps1"
+        },
+        @{
+            Name = "run-runtime-validation.linux.sh"
+            Target = "run-runtime-validation.ps1"
+        },
+        @{
+            Name = "run-runtime-validation.macos.sh"
+            Target = "run-runtime-validation.ps1"
+        }
+    )
+
+    foreach ($wrapper in $wrappers) {
+        $wrapperPath = Join-Path $repoRoot "scripts/$($wrapper.Name)"
+        Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$($wrapper.Name) should exist."
+
+        $content = Get-Content -LiteralPath $wrapperPath -Raw
+        Assert-True -Condition ($content -match [regex]::Escape($wrapper.Target)) -Message "$($wrapper.Name) should call $($wrapper.Target)."
+        Assert-True -Condition ($content -match "pwsh") -Message "$($wrapper.Name) should require pwsh."
+    }
+}
+
+Invoke-PackTest "validation and test wrapper scripts call canonical PowerShell scripts" {
+    $wrappers = @(
+        @{
+            Name = "validate-pack.linux.sh"
+            Target = "validate-pack.ps1"
+        },
+        @{
+            Name = "validate-pack.macos.sh"
+            Target = "validate-pack.ps1"
+        },
+        @{
+            Name = "test-pack.linux.sh"
+            Target = "test-pack.ps1"
+        },
+        @{
+            Name = "test-pack.macos.sh"
+            Target = "test-pack.ps1"
+        }
+    )
+
+    foreach ($wrapper in $wrappers) {
+        $wrapperPath = Join-Path $repoRoot "scripts/$($wrapper.Name)"
+        Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$($wrapper.Name) should exist."
+
+        $content = Get-Content -LiteralPath $wrapperPath -Raw
+        Assert-True -Condition ($content -match [regex]::Escape($wrapper.Target)) -Message "$($wrapper.Name) should call $($wrapper.Target)."
+        Assert-True -Condition ($content -match "pwsh") -Message "$($wrapper.Name) should require pwsh."
+    }
+}
+
+Invoke-PackTest "runtime validation fails before CLI execution for missing target repository" {
+    $missingPath = Join-Path ([System.IO.Path]::GetTempPath()) "continue-runtime-validation-missing-$([guid]::NewGuid())"
+    $result = Invoke-CommandCapture `
+        -FilePath (Join-Path $repoRoot "scripts/run-runtime-validation.ps1") `
+        -Arguments @("-TargetRepo", $missingPath)
+
+    Assert-True -Condition ($result.ExitCode -ne 0) -Message "Runtime validation should fail for a missing target path."
+    Assert-True -Condition ($result.Output -match "Target repository path does not exist") -Message "Missing target error should be reported."
 }
 
 Invoke-PackTest "review prompts include configuration-pack guardrails" {

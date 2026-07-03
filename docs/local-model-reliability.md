@@ -127,7 +127,7 @@ Expected review:
 
 When testing a prompt with a local model:
 
-1. Generate repository context with `scripts/generate-runtime-context.ps1` when tool execution is unreliable.
+1. Generate repository context when tool execution is unreliable. Use `scripts/generate-runtime-context.ps1` on Windows, `scripts/generate-runtime-context.linux.sh` on Linux, or `scripts/generate-runtime-context.macos.sh` on macOS.
 2. Run the prompt against the target repository or a sanitized fixture.
 3. Compare the response to `docs/prompt-quality.md`.
 4. Check whether the response violates any forbidden output pattern in the fixture.

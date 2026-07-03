@@ -190,9 +190,25 @@ Fixes:
 
 Fallback:
 
+Windows:
+
 ```powershell
 $Pack = "C:\path\to\continue-enterprise-engineering-pack"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
+```
+
+Linux:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
+```
+
+macOS:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 Then attach `runtime-context.md` with `@Files` and ask the model not to use tools or output JSON.

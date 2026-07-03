@@ -121,16 +121,34 @@ Fixture validation does not replace future multi-repository validation, but it i
 
 ## Automated Runtime Runner
 
-Use `scripts/run-runtime-validation.ps1` from the target repository to run all configured validation workflows and save raw outputs locally.
+Use the runtime validation script from the target repository to run all configured validation workflows and save raw outputs locally.
 
 Example from the root of a target repository:
+
+Windows:
 
 ```powershell
 $Pack = "C:\path\to\continue-enterprise-engineering-pack"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path
 ```
 
+Linux:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD"
+```
+
+macOS:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD"
+```
+
 When using a local-only config file, pass an explicit config path. The runner resolves the path before changing into the target repository:
+
+Windows:
 
 ```powershell
 $Pack = "C:\path\to\continue-enterprise-engineering-pack"
@@ -138,24 +156,72 @@ $Config = "$Pack\.continue\config.local.yaml"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path -ConfigPath $Config
 ```
 
+Linux:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+CONFIG="$PACK/.continue/config.local.yaml"
+"$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD" --config-path "$CONFIG"
+```
+
+macOS:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+CONFIG="$PACK/.continue/config.local.yaml"
+"$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD" --config-path "$CONFIG"
+```
+
 To append a sanitized summary template to this document:
+
+Windows:
 
 ```powershell
 $Pack = "C:\path\to\continue-enterprise-engineering-pack"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path -AppendSummary
 ```
 
+Linux:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD" --append-summary
+```
+
+macOS:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD" --append-summary
+```
+
 The script writes raw outputs to `runtime-validation-output/`, which is ignored by git. Review and sanitize those outputs before copying any details into committed documentation.
 
 ## Runtime Context Generation
 
-Use `scripts/generate-runtime-context.ps1` when local model validation cannot rely on CLI tool execution.
+Use the runtime context generator when local model validation cannot rely on CLI tool execution.
 
 Example from the root of a target repository:
+
+Windows:
 
 ```powershell
 $Pack = "C:\path\to\continue-enterprise-engineering-pack"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
+```
+
+Linux:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
+```
+
+macOS:
+
+```bash
+PACK="/path/to/continue-enterprise-engineering-pack"
+"$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 The generated context includes repository structure, project files, config file names, test-related files, top-level documentation excerpts, and selected project-file contents. Review the file before sharing or committing it.
@@ -342,7 +408,7 @@ Continue surface: Continue CLI with supplied runtime context file
 
 ### Follow-up
 
-- Use `scripts/generate-runtime-context.ps1` to build richer supplied context.
+- Use the runtime context generator for your operating system to build richer supplied context.
 - Rerun repository discovery and architecture review with the generated context.
 - Add a short sanitized source summary to the runtime context when source code cannot be committed into validation notes.
 - Update the runtime runner or guidance so local Ollama validation does not rely on CLI tool execution.

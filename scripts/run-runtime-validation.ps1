@@ -1,7 +1,11 @@
 param(
+    [Alias("target-repo")]
     [string]$TargetRepo = (Get-Location).Path,
+    [Alias("config-path")]
     [string]$ConfigPath,
+    [Alias("context-path")]
     [string]$ContextPath,
+    [Alias("append-summary")]
     [switch]$AppendSummary
 )
 

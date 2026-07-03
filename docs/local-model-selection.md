@@ -87,10 +87,12 @@ The helpers report:
 - System RAM
 - CPU summary
 - CPU architecture
+- Linux platform notes for ARM, Jetson, or Tegra indicators when available
 - GPU names and VRAM when available
 - GPU vendor and memory type when available
 - Ollama reachability
 - Installed Ollama model names
+- MLX tooling status on macOS
 - A low, medium, or high resource candidate tier
 - A recommended model from the installed Ollama models, or a model to pull and validate
 
@@ -156,11 +158,13 @@ Important fields:
 
 - `RAM`: Helps decide whether the machine can handle larger models.
 - `Architecture`: Shows the normalized CPU architecture, such as `x64`, `arm64`, or `armv7`.
+- `Platform notes`: On Linux, shows conservative notes for ARM, Jetson, or Tegra-style systems when indicators are visible.
 - `GPU`: Shows detected GPU names and best-effort memory information.
 - `Vendor`: Helps identify NVIDIA, AMD, Intel, Apple, or unknown GPU paths.
 - `MemoryType`: Shows whether memory appears dedicated, shared/integrated, unified, or unknown.
 - `Ollama`: Shows whether the helper can run `ollama list`.
 - `Installed Ollama models`: Shows local model names only.
+- `MLX tooling`: On macOS, shows whether common MLX commands or Python modules are visible to the current shell.
 - `Recommendation tier`: A starting point for low, medium, or high resource guidance.
 - `Recommended model`: The first installed model that matches the machine tier and workflow guidance, or a model to pull and test.
 - `Recommended use`: How to use the recommended model safely.
@@ -355,6 +359,86 @@ Still required:
 - Validation
 - Rollback plan
 - Git diff review before commit
+
+## ARM And Apple Silicon Guidance
+
+ARM machines need a slightly different mental model than traditional x64 workstations with dedicated GPU VRAM.
+
+Apple Silicon:
+
+- Apple Silicon Macs use unified memory, so system RAM and model memory share the same pool.
+- A 16 GB Mac should be treated conservatively for coding-agent workflows, even if smaller models run well.
+- A 32 GB or larger Mac is a better starting point for medium and larger coding models.
+- Ollama with GGUF models remains the default beginner path because it is easy to install and works with this pack's default Continue setup.
+- MLX models can perform well on Apple Silicon, but they are a separate serving path and should be treated as advanced setup.
+
+Windows ARM:
+
+- Windows ARM local LLM acceleration varies by device, driver, runtime, and model provider.
+- Treat Windows ARM as conservative until the exact model, Continue setup, and tool execution path are validated.
+- CPU-only operation may work for review and planning, but tool-backed edits should wait for a successful read-only tool test.
+
+Linux ARM:
+
+- Linux ARM ranges from small boards to cloud ARM instances to Jetson-style devices.
+- Generic Linux ARM systems should be treated as conservative unless GPU acceleration is known to work.
+- NVIDIA Jetson and other ARM GPU paths may need platform-specific drivers and detection logic before recommendations can be trusted.
+- The Linux helper reports platform notes when it sees ARM architecture, `/etc/nv_tegra_release`, or Jetson/Tegra/NVIDIA device-tree indicators.
+- Jetson/Tegra detection is a caution signal only; it does not prove CUDA, JetPack, Ollama acceleration, or container device access is working.
+
+Architecture should not automatically increase trust in a model recommendation. Use the profile output to understand the machine, then validate the actual model and workflow.
+
+## Ollama, GGUF, And MLX
+
+Ollama usually runs GGUF-style local models and exposes an Ollama-compatible local API. This is the default path for the pack.
+
+MLX is a separate Apple Silicon-focused model runtime. MLX models are not discovered by `ollama list`, and the hardware profile scripts should not treat MLX-hosted models as Ollama-installed models.
+
+The macOS helper reports MLX tooling separately when it can detect common commands or Python modules such as:
+
+- `mlx-lm`
+- `mlx_lm.generate`
+- `mlx_lm.chat`
+- `mlx_lm.server`
+- Python modules named `mlx_lm` or `mlx`
+
+Detection means the tooling is visible to the current shell. It does not prove that an MLX model is installed, loaded, served through an API, or compatible with Continue.
+
+If you want to use MLX with Continue:
+
+- Run an MLX-compatible local server that exposes an OpenAI-compatible API.
+- Configure Continue locally to use that endpoint.
+- Keep the endpoint, model names, and machine-specific settings out of committed config.
+- Run the same read-only tool validation before using Agent mode or approved write mode.
+
+Do not add MLX-only model names to `config/model-recommendations.tsv` unless the catalog is updated to distinguish providers. The current catalog is for Ollama-discovered local models.
+
+## Unified, Shared, And Dedicated Memory
+
+Memory type changes how model recommendations should be read.
+
+Dedicated VRAM:
+
+- Common on NVIDIA and many AMD desktop/server GPUs.
+- The model can use GPU memory without taking the same pool as system RAM.
+- Still leave headroom for the OS, editor, Ollama, build tools, and tests.
+
+Unified memory:
+
+- Common on Apple Silicon.
+- CPU, GPU, OS, editor, and model all share one memory pool.
+- Treat total RAM as shared capacity, not as dedicated model memory.
+
+Shared or integrated memory:
+
+- Common on Intel integrated GPUs and some low-power systems.
+- GPU memory may be borrowed from system RAM.
+- Treat this as a conservative signal for local model size.
+
+Unknown memory:
+
+- The script could not determine reliable memory details.
+- Start with smaller models and validate before using tools or write mode.
 
 ## Model Capability Checklist
 

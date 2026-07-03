@@ -186,7 +186,7 @@ Use one of these safer fallbacks:
 
 - Attach files with `@Files`.
 - Include selected text or the current file as context.
-- Generate `runtime-context.md` with `scripts/generate-runtime-context.ps1`.
+- Generate `runtime-context.md` with the runtime context generator for your operating system.
 - Ask the model: `Do not use tools. Do not output JSON. Use only the attached context.`
 
 Do not use approved write mode until read-only tool execution works reliably.
