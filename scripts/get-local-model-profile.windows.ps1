@@ -1,5 +1,6 @@
 param(
-    [switch]$AsJson
+    [switch]$AsJson,
+    [string]$ModelCatalogPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -471,9 +472,88 @@ function Get-RecommendationTier {
     return "Low resource candidate"
 }
 
+function Find-InstalledModel {
+    param(
+        [string[]]$Models,
+        [string[]]$Patterns
+    )
+
+    foreach ($pattern in $Patterns) {
+        $match = $Models | Where-Object { $_ -match $pattern } | Select-Object -First 1
+        if ($match) {
+            return $match
+        }
+    }
+
+    return $null
+}
+
+function Get-ModelRecommendation {
+    param(
+        [string]$Tier,
+        [string[]]$Models,
+        [string]$CatalogPath
+    )
+
+    $tierName = if ($Tier -match "^High") { "High" } elseif ($Tier -match "^Medium") { "Medium" } else { "Low" }
+    $fallback = $null
+
+    if (Test-Path -LiteralPath $CatalogPath) {
+        $rows = Get-Content -LiteralPath $CatalogPath
+        foreach ($row in $rows) {
+            if (-not $row -or $row.StartsWith("#")) {
+                continue
+            }
+
+            $parts = $row -split "\|", 5
+            if ($parts.Count -lt 5 -or $parts[0] -ne $tierName) {
+                continue
+            }
+
+            $pattern = $parts[1]
+            $fallbackModel = $parts[2]
+            $use = $parts[3]
+            $validation = $parts[4]
+
+            if ($pattern) {
+                $model = Find-InstalledModel -Models $Models -Patterns @("(?i)$pattern")
+                if ($model) {
+                    return [pscustomobject]@{
+                        PrimaryModel = $model
+                        Use = $use
+                        Validation = $validation
+                    }
+                }
+            } elseif (-not $fallback) {
+                $fallback = [pscustomobject]@{
+                    PrimaryModel = $fallbackModel
+                    Use = $use
+                    Validation = $validation
+                }
+            }
+        }
+    }
+
+    if ($fallback) {
+        return $fallback
+    }
+
+    return [pscustomobject]@{
+        PrimaryModel = "qwen3-coder:30b"
+        Use = "Validate the model against the target workflow before relying on it."
+        Validation = "Run read-only discovery and tool-call validation before approved write mode."
+    }
+}
+
+if (-not $ModelCatalogPath) {
+    $ModelCatalogPath = Join-Path (Split-Path -Parent $PSScriptRoot) "config/model-recommendations.tsv"
+}
+
 $gpuProfiles = @(Get-GpuProfiles)
 $ramGb = Get-SystemRamGb
 $ollamaModels = @(Get-OllamaModels)
+$recommendationTier = Get-RecommendationTier -RamGb $ramGb -GpuProfiles $gpuProfiles
+$modelRecommendation = Get-ModelRecommendation -Tier $recommendationTier -Models $ollamaModels -CatalogPath $ModelCatalogPath
 
 $profile = [pscustomobject]@{
     GeneratedAt = Get-Date -Format "yyyy-MM-dd HH:mm"
@@ -485,7 +565,8 @@ $profile = [pscustomobject]@{
     Gpus = $gpuProfiles
     OllamaStatus = Get-OllamaStatus
     OllamaModels = $ollamaModels
-    RecommendationTier = Get-RecommendationTier -RamGb $ramGb -GpuProfiles $gpuProfiles
+    RecommendationTier = $recommendationTier
+    ModelRecommendation = $modelRecommendation
 }
 
 if ($AsJson) {
@@ -525,5 +606,8 @@ if ($profile.OllamaModels.Count -gt 0) {
 
 Write-Host ""
 Write-Host "Recommendation tier: $($profile.RecommendationTier)"
+Write-Host "Recommended model: $($profile.ModelRecommendation.PrimaryModel)"
+Write-Host "Recommended use: $($profile.ModelRecommendation.Use)"
+Write-Host "Validation note: $($profile.ModelRecommendation.Validation)"
 Write-Host ""
 Write-Host "Use docs/local-model-selection.md to choose the final model. This helper does not collect hostnames, IP addresses, usernames, or local paths."

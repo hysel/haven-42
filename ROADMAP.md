@@ -14,7 +14,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Release Hardening: 0.1.3 | Complete | Contributor guidance, release tagging guidance, validation automation, sanitized fixtures, and version updates are complete. |
 | Milestone 4: Runtime Validation And CI | Complete | GitHub Actions validation, runtime validation tracking docs, context generation, sanitized fixture-based validation, and legacy migration validation notes are complete. |
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
-| Milestone 6: Applied Tooling And Adaptive Models | In progress | Tool-use modes, approved write guidance, scoped edit guidance, model selection strategy, and hardware profiling are complete; model tiers remain planned. |
+| Milestone 6: Applied Tooling And Adaptive Models | In progress | Tool-use modes, approved write guidance, scoped edit guidance, model selection strategy, hardware profiling, and model tiers are complete; local override safety remains planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -177,7 +177,7 @@ Scope:
 - Add prompts or guidance for converting an approved plan into scoped edits in the target project. Done.
 - Define a model-selection strategy based on local hardware signals such as available RAM, GPU VRAM, model size, context needs, and workflow risk. Done.
 - Add a hardware-profile helper or documented command sequence for collecting local model-selection inputs. Done.
-- Define recommended Ollama model tiers for low, medium, and high resource machines.
+- Define recommended Ollama model tiers for low, medium, and high resource machines. Done.
 - Keep machine-specific endpoints, model experiments, and hardware details out of committed shared config.
 
 Exit criteria:

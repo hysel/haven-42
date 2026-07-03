@@ -2,9 +2,26 @@
 set -u
 
 AS_JSON=false
-if [ "${1:-}" = "--json" ]; then
-  AS_JSON=true
-fi
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+MODEL_CATALOG_PATH="$REPO_ROOT/config/model-recommendations.tsv"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --json)
+      AS_JSON=true
+      shift
+      ;;
+    --model-catalog)
+      MODEL_CATALOG_PATH="$2"
+      shift 2
+      ;;
+    *)
+      printf 'Unknown argument: %s\n' "$1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 command_exists() {
   command -v "$1" >/dev/null 2>&1
@@ -27,6 +44,57 @@ format_vram_label() {
     Unknown|Shared|"") printf '%s VRAM' "${1:-Unknown}" ;;
     *) printf '%s GB VRAM' "$1" ;;
   esac
+}
+
+find_model() {
+  for pattern in "$@"; do
+    for model in "${OLLAMA_MODELS[@]}"; do
+      if printf '%s' "$model" | grep -Eiq "$pattern"; then
+        printf '%s' "$model"
+        return 0
+      fi
+    done
+  done
+
+  return 1
+}
+
+recommend_from_catalog() {
+  tier_name="$1"
+  fallback_model=""
+  fallback_use=""
+  fallback_validation=""
+
+  if [ -r "$MODEL_CATALOG_PATH" ]; then
+    while IFS='|' read -r tier pattern model_name use validation; do
+      case "$tier" in ""|\#*) continue ;; esac
+      [ "$tier" != "$tier_name" ] && continue
+
+      if [ -n "$pattern" ]; then
+        installed_model="$(find_model "$pattern" || true)"
+        if [ -n "$installed_model" ]; then
+          RECOMMENDED_MODEL="$installed_model"
+          RECOMMENDED_USE="$use"
+          VALIDATION_NOTE="$validation"
+          return 0
+        fi
+      elif [ -z "$fallback_model" ]; then
+        fallback_model="$model_name"
+        fallback_use="$use"
+        fallback_validation="$validation"
+      fi
+    done < "$MODEL_CATALOG_PATH"
+  fi
+
+  if [ -n "$fallback_model" ]; then
+    RECOMMENDED_MODEL="$fallback_model"
+    RECOMMENDED_USE="$fallback_use"
+    VALIDATION_NOTE="$fallback_validation"
+  else
+    RECOMMENDED_MODEL="qwen3-coder:30b"
+    RECOMMENDED_USE="Validate the model against the target workflow before relying on it."
+    VALIDATION_NOTE="Run read-only discovery and tool-call validation before approved write mode."
+  fi
 }
 
 detect_vendor() {
@@ -128,6 +196,18 @@ elif [ "$RAM_INT" -ge 16 ]; then
   TIER="Medium resource candidate"
 fi
 
+RECOMMENDED_MODEL=""
+RECOMMENDED_USE=""
+VALIDATION_NOTE=""
+
+if [ "$TIER" = "High resource candidate" ]; then
+  recommend_from_catalog "High"
+elif [ "$TIER" = "Medium resource candidate" ]; then
+  recommend_from_catalog "Medium"
+else
+  recommend_from_catalog "Low"
+fi
+
 GENERATED="$(date '+%Y-%m-%d %H:%M')"
 
 if [ "$AS_JSON" = true ]; then
@@ -151,7 +231,8 @@ if [ "$AS_JSON" = true ]; then
     printf '"%s"' "$(json_escape "${OLLAMA_MODELS[$i]}")"
   done
   printf '],\n'
-  printf '  "RecommendationTier": "%s"\n' "$(json_escape "$TIER")"
+  printf '  "RecommendationTier": "%s",\n' "$(json_escape "$TIER")"
+  printf '  "ModelRecommendation": {"PrimaryModel":"%s","Use":"%s","Validation":"%s"}\n' "$(json_escape "$RECOMMENDED_MODEL")" "$(json_escape "$RECOMMENDED_USE")" "$(json_escape "$VALIDATION_NOTE")"
   printf '}\n'
   exit 0
 fi
@@ -181,4 +262,7 @@ else
   printf 'Installed Ollama models: None detected\n'
 fi
 printf '\nRecommendation tier: %s\n\n' "$TIER"
+printf 'Recommended model: %s\n' "$RECOMMENDED_MODEL"
+printf 'Recommended use: %s\n' "$RECOMMENDED_USE"
+printf 'Validation note: %s\n\n' "$VALIDATION_NOTE"
 printf 'Use docs/local-model-selection.md to choose the final model. This helper does not collect hostnames, IP addresses, usernames, or local paths.\n'

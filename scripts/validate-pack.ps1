@@ -126,6 +126,7 @@ $requiredFiles = @(
     "CHANGELOG.md",
     "LICENSE",
     "CONTRIBUTING.md",
+    "config/model-recommendations.tsv",
     "docs/release.md",
     "docs/compatibility.md",
     "docs/runtime-validation.md",
@@ -175,7 +176,7 @@ $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
         $_.FullName -notmatch "\\.git\\" -and
         $_.FullName -notmatch "\\.continue\\config\.local.*\.yaml$" -and
         $_.FullName -notmatch "\\runtime-validation-output\\" -and
-        $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".sh", ".txt")
+        $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".sh", ".tsv", ".txt")
     }
 
 $privateIpPattern = "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b"

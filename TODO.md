@@ -136,5 +136,5 @@
 - [x] Add guidance for converting approved plans into scoped edits.
 - [x] Define hardware-aware local model selection strategy.
 - [x] Add hardware-profile helper or documented collection commands.
-- [ ] Define recommended Ollama model tiers by RAM, VRAM, context size, and workflow risk.
+- [x] Define recommended Ollama model tiers by RAM, VRAM, context size, and workflow risk.
 - [ ] Document how to keep machine-specific model and endpoint details out of committed config.

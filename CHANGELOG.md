@@ -15,6 +15,11 @@ This project follows a simple changelog format:
 
 - Fixed Linux and macOS hardware profile output so numeric GPU memory prints as `GB VRAM`.
 
+### Added
+
+- Added model recommendations to hardware profile scripts based on detected resource tier and installed Ollama models.
+- Added a version-controlled model recommendation catalog that scripts can use for future model updates without changing script logic.
+
 ## 0.1.7 - 2026-07-02
 
 ### Added

@@ -91,6 +91,7 @@ The helpers report:
 - Ollama reachability
 - Installed Ollama model names
 - A low, medium, or high resource candidate tier
+- A recommended model from the installed Ollama models, or a model to pull and validate
 
 It does not collect hostnames, IP addresses, usernames, local filesystem paths, secrets, or custom Ollama endpoint values.
 
@@ -139,6 +140,31 @@ Important fields:
 - `Ollama`: Shows whether the helper can run `ollama list`.
 - `Installed Ollama models`: Shows local model names only.
 - `Recommendation tier`: A starting point for low, medium, or high resource guidance.
+- `Recommended model`: The first installed model that matches the machine tier and workflow guidance, or a model to pull and test.
+- `Recommended use`: How to use the recommended model safely.
+- `Validation note`: What to verify before trusting the model for tool-backed or high-risk work.
+
+The recommendation rules live in `config/model-recommendations.tsv`. Update that catalog when better local models are validated. The scripts can also use a local catalog file for private model names:
+
+Windows:
+
+```powershell
+.\scripts\get-local-model-profile.windows.ps1 -ModelCatalogPath .\model-recommendations.local.tsv
+```
+
+Linux:
+
+```bash
+./scripts/get-local-model-profile.linux.sh --model-catalog ./model-recommendations.local.tsv
+```
+
+macOS:
+
+```bash
+./scripts/get-local-model-profile.macos.sh --model-catalog ./model-recommendations.local.tsv
+```
+
+Do not commit private internal model names unless they are safe for the public repository.
 
 Common results:
 
@@ -151,10 +177,11 @@ Common results:
 After running the profile:
 
 1. Compare the output to the hardware tiers below.
-2. Start with read-only prompts.
-3. Test tool execution before approved write mode.
-4. Use smaller models for review-only work when hardware is limited.
-5. Use the strongest validated local model for tool-backed edits and high-risk workflows.
+2. Review the recommended model.
+3. Start with read-only prompts.
+4. Test tool execution before approved write mode.
+5. Use smaller models for review-only work when hardware is limited.
+6. Use the strongest validated local model for tool-backed edits and high-risk workflows.
 
 Manual fallback commands:
 
@@ -341,6 +368,18 @@ Use this matrix as a default:
 | Architecture/security/performance review | Prefer stronger model; require evidence and assumptions |
 | Tool-backed edits | Use validated tool-capable model only |
 | Dependency migration or release readiness | Use strongest available model plus human review and fixed templates |
+
+## Recommended Model Tiers
+
+The helper scripts use `config/model-recommendations.tsv` when selecting an installed model.
+
+| Resource tier | Preferred installed models | Best use |
+| --- | --- | --- |
+| High | `qwen3-coder:30b`, Qwen coder 30B/32B variants, `deepseek-coder-v2`, `devstral` 24B, Qwen 32B variants | Coding, planning, review, and tool-backed workflows after tool-call validation |
+| Medium | `qwen3-coder:30b` if it runs well, Qwen coder 14B variants, `qwen3:14b`, `phi4:14b`, Qwen 9B variants | Planning, review, documentation, and small scoped edits after validation |
+| Low | `qwen2.5-coder:7b`, Qwen 9B variants, `llama3.1:8b`, `mistral:7b`, `llama3` | Read-only discovery, summarization, documentation drafting, and focused context-file workflows |
+
+These recommendations are intentionally conservative. A model is not approved for tool-backed edits until it successfully runs a read-only tool test in Continue.
 
 ## Context Length Guidance
 
