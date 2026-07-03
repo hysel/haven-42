@@ -296,7 +296,8 @@ Invoke-PackTest "install script backs up existing .continue and excludes local c
             Assert-True -Condition (Test-Path -LiteralPath (Join-Path $targetContinue "prompts/repository-discovery.md")) -Message "Installed prompts should exist."
             Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $targetContinue "config.local.test.yaml"))) -Message "Local config overrides should not be installed."
 
-            $backupDirs = Get-ChildItem -LiteralPath $tempRepo -Directory -Filter ".continue.backup-*"
+            $backupDirs = Get-ChildItem -LiteralPath $tempRepo -Force -Directory |
+                Where-Object { $_.Name -like ".continue.backup-*" }
             Assert-Equal -Actual $backupDirs.Count -Expected 1 -Message "Install should create one backup folder."
             Assert-True -Condition (Test-Path -LiteralPath (Join-Path $backupDirs[0].FullName "config.yaml")) -Message "Backup should contain previous config."
         }
