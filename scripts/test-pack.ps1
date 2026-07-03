@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.8"
+    [string]$ExpectedVersion = "0.1.10"
 )
 
 $ErrorActionPreference = "Stop"
@@ -253,6 +253,33 @@ Invoke-PackTest "runtime context generation fails for missing target repository"
 
     Assert-True -Condition ($result.ExitCode -ne 0) -Message "Runtime context generation should fail for a missing target path."
     Assert-True -Condition ($result.Output -match "Target repository path does not exist") -Message "Missing target error should be reported."
+}
+
+Invoke-PackTest "review prompts include configuration-pack guardrails" {
+    $promptNames = @(
+        "architecture-review.md",
+        "security-review.md",
+        "code-review.md",
+        "release-readiness.md",
+        "refactoring-planner.md"
+    )
+
+    foreach ($promptName in $promptNames) {
+        $promptPath = Join-Path $repoRoot ".continue/prompts/$promptName"
+        $content = Get-Content -LiteralPath $promptPath -Raw
+
+        Assert-True -Condition ($content -match "configuration packs") -Message "$promptName should mention configuration-pack repositories."
+        Assert-True -Condition ($content -match "repository type") -Message "$promptName should require repository type classification."
+    }
+}
+
+Invoke-PackTest "configuration-pack fixture documents bad recommendations" {
+    $fixturePath = Join-Path $repoRoot "examples/fixtures/config-pack-review-input.md"
+    $content = Get-Content -LiteralPath $fixturePath -Raw
+
+    Assert-True -Condition ($content -match "not an application codebase") -Message "Fixture should define the non-application scenario."
+    Assert-True -Condition ($content -match "Known Bad Recommendations") -Message "Fixture should document known bad recommendations."
+    Assert-True -Condition ($content -match "npx @continuedev/cli") -Message "Fixture should protect the documented npx fallback."
 }
 
 if ($failed) {

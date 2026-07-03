@@ -31,3 +31,11 @@ Review the repository for release readiness without modifying files.
 - Blocking Issues
 - Recommended Version Number
 - Follow-up Recommendations
+
+## Quality Checks
+
+- Classify the repository type before deciding what "release" means.
+- For configuration packs, documentation packs, prompt libraries, examples, templates, and validation-script repositories, evaluate version metadata, changelog, README/setup guidance, validation scripts, CI status, release notes, tags, fixtures, examples, local-config safety, and rollback guidance.
+- Do not require application runtime controls such as structured logging, production operations, database rollback, API security, or deployment runbooks unless the repository includes an application runtime.
+- Treat missing evidence as a risk or open question; do not invent release blockers.
+- Give a no-go only for concrete blockers or clearly missing release evidence.

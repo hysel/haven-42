@@ -32,3 +32,10 @@ Analyze a repository and create a refactoring roadmap without modifying files.
 - Dependencies
 - Risks
 - Implementation Roadmap
+
+## Quality Checks
+
+- Classify the repository type before proposing refactors.
+- For configuration packs, documentation packs, prompt libraries, examples, templates, and validation-script repositories, focus on duplicated guidance, prompt/rule/template drift, validation coverage, fixture gaps, script portability, release metadata, and contributor ergonomics.
+- Do not propose centralizing duplicate configuration unless you identify the specific duplicated files or settings.
+- Do not recommend application-layer refactors unless there is application source code evidence.

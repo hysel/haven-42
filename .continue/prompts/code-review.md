@@ -46,3 +46,7 @@ Each finding should include:
 - Lead with findings.
 - Avoid style-only comments unless they materially affect maintainability.
 - Say clearly when no issues are found.
+- Review the repository type before making recommendations.
+- For configuration packs, documentation packs, and prompt-pack repositories, treat docs, prompts, rules, examples, fixtures, validation scripts, CI, and release metadata as the review surface.
+- Do not flag intentionally documented fallback commands, such as `npx @continuedev/cli`, as defects unless they contradict repository guidance.
+- Only recommend code-level application changes when changed files provide evidence of application code.
