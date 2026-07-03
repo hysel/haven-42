@@ -175,9 +175,11 @@ foreach ($relativePath in $requiredFiles) {
 
 $textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
     Where-Object {
-        $_.FullName -notmatch "\\.git\\" -and
-        $_.FullName -notmatch "\\.continue\\config\.local.*\.yaml$" -and
-        $_.FullName -notmatch "\\runtime-validation-output\\" -and
+        $normalizedPath = $_.FullName.Replace('\', '/')
+
+        $normalizedPath -notmatch "/\.git/" -and
+        $normalizedPath -notmatch "/\.continue/config\.local.*\.yaml$" -and
+        $normalizedPath -notmatch "/runtime-validation-output/" -and
         $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".sh", ".tsv", ".txt")
     }
 
