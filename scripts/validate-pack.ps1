@@ -157,6 +157,7 @@ $requiredFiles = @(
     ".continue/prompts/legacy-dotnet-dependency-migration.md",
     ".continue/templates/LegacyDotNetDependencyMigration.md",
     "examples/fixtures/implementation-planning-quality-input.md",
+    "examples/fixtures/config-pack-review-input.md",
     "examples/fixtures/documentation-review-quality-input.md",
     "examples/fixtures/legacy-dependency-migration-input.md",
     "examples/fixtures/sonarqube-findings.md",

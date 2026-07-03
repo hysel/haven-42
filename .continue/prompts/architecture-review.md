@@ -36,6 +36,9 @@ Act as a Principal Software Architect. Review repository architecture and produc
 
 ## Quality Checks
 
+- Classify the repository type before applying architecture patterns.
 - Do not force application architecture terms onto non-application repositories.
+- For configuration packs, documentation packs, prompt libraries, examples, templates, and validation-script repositories, focus on configuration boundaries, file-reference integrity, prompt/rule/template separation, validation automation, release hygiene, fixture quality, and contributor workflow.
+- Do not claim missing domain, API, database, authentication, logging, or runtime layers are architectural weaknesses unless the repository is supposed to contain an application runtime.
 - Separate declared architecture from implemented architecture.
 - Prefer practical boundary improvements over pattern ceremony.
