@@ -165,9 +165,9 @@ Representative outputs for major workflows. These examples show expected structu
 
 ### `docs`
 
-Workflow documentation for enterprise review practices, including MCP research and setup guidance, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
+Workflow documentation for enterprise review practices, including MCP research, setup guidance, workflow examples, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
 
-Use this folder for deeper instructions after the quick start. Important guides include local model selection, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, and troubleshooting.
+Use this folder for deeper instructions after the quick start. Important guides include local model selection, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
 
 ### `scripts`
 
@@ -272,6 +272,7 @@ Runtime status:
 - `docs/sonarqube-integration-options.md`
 - `docs/mcp-options.md`
 - `docs/mcp-setup.md`
+- `docs/mcp-examples.md`
 - `docs/compatibility.md`
 - `docs/validation-checklists.md`
 - `docs/troubleshooting.md`

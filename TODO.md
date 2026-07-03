@@ -155,4 +155,4 @@
 - [x] Add prompt guidance for configuration-pack repositories.
 - [x] Add a prompt-quality fixture for non-application repositories.
 - [x] Validate against an application repository when a suitable target is available.
-- [ ] Add project-specific MCP examples after validated real-world usage.
+- [x] Add project-specific MCP examples after validated real-world usage.

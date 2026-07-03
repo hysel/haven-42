@@ -16,7 +16,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
 | Milestone 6: Applied Tooling And Adaptive Models | Complete | Tool-use modes, approved write guidance, scoped edit guidance, model selection strategy, hardware profiling, model tiers, and local override safety guidance are complete. |
 | Milestone 7: Cross-Platform Contributor Experience | Complete | Linux and macOS validation/test wrappers are available, and Linux wrapper execution is covered in CI. |
-| Milestone 8: Real Repository Validation | In progress | The pack repository and one private application-style repository have been validated with the runtime runner; MCP examples remain deferred. |
+| Milestone 8: Real Repository Validation | Complete | The pack repository and one private application-style repository have been validated with the runtime runner; practical MCP workflow examples are documented. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -227,7 +227,7 @@ Scope:
 - Add prompt guidance for configuration-pack and documentation-heavy repositories. Done.
 - Add a prompt-quality fixture for non-application repositories. Done.
 - Validate against an application repository when a suitable target is available. Done.
-- Add project-specific MCP examples only after validated real-world usage.
+- Add project-specific MCP examples only after validated real-world usage. Done.
 
 Exit criteria:
 
