@@ -15,6 +15,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 4: Runtime Validation And CI | Complete | GitHub Actions validation, runtime validation tracking docs, context generation, sanitized fixture-based validation, and legacy migration validation notes are complete. |
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
 | Milestone 6: Applied Tooling And Adaptive Models | Complete | Tool-use modes, approved write guidance, scoped edit guidance, model selection strategy, hardware profiling, model tiers, and local override safety guidance are complete. |
+| Milestone 7: Cross-Platform Contributor Experience | Complete | Linux and macOS validation/test wrappers are available, and Linux wrapper execution is covered in CI. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -190,6 +191,25 @@ Exit criteria:
 
 ## Backlog
 
-- Add cross-platform validation script parity if PowerShell becomes a contributor barrier.
 - Add project-specific MCP examples after real-world validation.
 - Validate the pack against additional real repositories when suitable repositories are available.
+
+## Milestone 7: Cross-Platform Contributor Experience
+
+Goal: Make validation and test commands easier for contributors on Linux and macOS while keeping PowerShell as the canonical implementation.
+
+Scope:
+
+- Add Linux shell wrappers for validation and tests. Done.
+- Add macOS shell wrappers for validation and tests. Done.
+- Keep PowerShell validation and tests as the canonical implementation. Done.
+- Add CI coverage for Linux wrapper execution. Done.
+- Document cross-platform validation commands in the README. Done.
+
+Exit criteria:
+
+- Windows contributors can run PowerShell validation and tests directly.
+- Linux contributors can run shell wrapper commands that call the canonical PowerShell scripts.
+- macOS contributors can run shell wrapper commands that call the canonical PowerShell scripts.
+- Missing `pwsh` produces a clear setup message instead of a confusing command-not-found failure.
+- CI verifies wrapper behavior on Ubuntu.

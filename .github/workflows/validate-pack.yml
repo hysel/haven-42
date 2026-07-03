@@ -25,3 +25,11 @@ jobs:
       - name: Run pack tests
         shell: pwsh
         run: ./scripts/test-pack.ps1
+
+      - name: Run Linux validation wrapper
+        shell: bash
+        run: ./scripts/validate-pack.linux.sh
+
+      - name: Run Linux test wrapper
+        shell: bash
+        run: ./scripts/test-pack.linux.sh

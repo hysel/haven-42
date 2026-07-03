@@ -138,3 +138,12 @@
 - [x] Add hardware-profile helper or documented collection commands.
 - [x] Define recommended Ollama model tiers by RAM, VRAM, context size, and workflow risk.
 - [x] Document how to keep machine-specific model and endpoint details out of committed config.
+
+## Milestone 7: Cross-Platform Contributor Experience
+
+- [x] Add Linux validation wrapper.
+- [x] Add Linux test wrapper.
+- [x] Add macOS validation wrapper.
+- [x] Add macOS test wrapper.
+- [x] Add CI coverage for Linux wrappers.
+- [x] Document cross-platform validation commands.

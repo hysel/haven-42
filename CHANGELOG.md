@@ -11,6 +11,11 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+### Added
+
+- Added Linux and macOS validation/test wrapper scripts for contributors who prefer shell commands.
+- Added CI coverage for Linux validation and test wrappers.
+
 ## 0.1.9 - 2026-07-02
 
 ### Fixed

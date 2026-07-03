@@ -294,6 +294,28 @@ Run the local validation script before release-oriented changes:
 .\scripts\validate-pack.ps1
 ```
 
+Run the automated pack tests:
+
+```powershell
+.\scripts\test-pack.ps1
+```
+
+On Linux:
+
+```bash
+./scripts/validate-pack.linux.sh
+./scripts/test-pack.linux.sh
+```
+
+On macOS:
+
+```bash
+./scripts/validate-pack.macos.sh
+./scripts/test-pack.macos.sh
+```
+
+The Linux and macOS scripts are friendly wrappers around the canonical PowerShell scripts. They require PowerShell 7+ through the `pwsh` command.
+
 The script checks the configured version, required files, local `.continue` file references, default MCP posture, and obvious committed private endpoints or secrets.
 
 For runtime validation against a target repository, run:
