@@ -185,7 +185,7 @@ The repository contains an initial usable pack structure:
 - Model-backed execution has been validated with a test-time Ollama endpoint override.
 - MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-Version `0.1.8` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, tool-enabled workflow guidance, hardware-aware local model selection support, catalog-based model recommendations, and local configuration safety guidance.
+Version `0.1.9` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, tool-enabled workflow guidance, hardware-aware local model selection support, catalog-based model recommendations, local configuration safety guidance, and Linux-compatible CI validation fixes.
 
 ## Standard Usage
 

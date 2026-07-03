@@ -11,6 +11,13 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+## 0.1.9 - 2026-07-02
+
+### Fixed
+
+- Fixed validation path filtering so ignored local config files are handled correctly on Linux, macOS, and Windows.
+- Fixed runtime context path filtering so build output directories are excluded correctly on Linux, macOS, and Windows.
+
 ## 0.1.8 - 2026-07-02
 
 ### Fixed
