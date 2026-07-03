@@ -15,6 +15,7 @@ This project follows a simple changelog format:
 
 - Fixed Linux and macOS hardware profile output so numeric GPU memory prints as `GB VRAM`.
 - Fixed Linux and macOS hardware profile JSON so RAM and VRAM values are emitted as numbers, with unknown or shared memory emitted as `null`.
+- Fixed Windows AMD GPU profiling by using `dxdiag` as a dedicated VRAM fallback before unreliable WMI adapter memory values.
 
 ### Added
 

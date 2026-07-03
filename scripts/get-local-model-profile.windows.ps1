@@ -317,6 +317,84 @@ function Get-WindowsRegistryGpuProfiles {
     return $profiles
 }
 
+function Get-DxDiagGpuProfiles {
+    $profiles = New-Object System.Collections.Generic.List[object]
+
+    if (-not $IsWindows -or -not (Get-Command "dxdiag.exe" -ErrorAction SilentlyContinue)) {
+        return $profiles
+    }
+
+    $outputPath = Join-Path $env:TEMP "continue-model-profile-dxdiag-$([guid]::NewGuid()).txt"
+    $lockPath = Join-Path $env:TEMP "continue-model-profile-dxdiag.lock"
+    $lockStream = $null
+    $seen = @{}
+
+    try {
+        $deadline = (Get-Date).AddSeconds(60)
+        while (-not $lockStream -and (Get-Date) -lt $deadline) {
+            try {
+                $lockStream = [System.IO.File]::Open(
+                    $lockPath,
+                    [System.IO.FileMode]::OpenOrCreate,
+                    [System.IO.FileAccess]::ReadWrite,
+                    [System.IO.FileShare]::None
+                )
+            }
+            catch {
+                Start-Sleep -Milliseconds 500
+            }
+        }
+
+        if (-not $lockStream) {
+            return $profiles
+        }
+
+        Start-Process -FilePath "dxdiag.exe" -ArgumentList @("/whql:off", "/t", $outputPath) -Wait -WindowStyle Hidden
+
+        if (-not (Test-Path -LiteralPath $outputPath)) {
+            return $profiles
+        }
+
+        $currentName = $null
+        foreach ($line in (Get-Content -LiteralPath $outputPath -ErrorAction Stop)) {
+            if ($line -match "^\s*Card name:\s*(.+)$") {
+                $currentName = $Matches[1].Trim()
+                continue
+            }
+
+            if ($currentName -and $line -match "^\s*Dedicated Memory:\s*([0-9]+)\s*MB") {
+                $vramGb = Convert-MbToGb -Mb ([double]$Matches[1])
+                $dedupeKey = "$currentName|$vramGb"
+
+                if (-not $seen.ContainsKey($dedupeKey)) {
+                    $vendor = Get-GpuVendor -Name $currentName
+                    $profiles.Add([pscustomobject]@{
+                        Name = $currentName
+                        VramGb = $vramGb
+                        Source = "dxdiag"
+                        Vendor = $vendor
+                        MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vramGb
+                    })
+                    $seen[$dedupeKey] = $true
+                }
+
+                $currentName = $null
+            }
+        }
+    }
+    catch {
+        return $profiles
+    }
+    finally {
+        Remove-Item -LiteralPath $outputPath -ErrorAction SilentlyContinue
+        if ($lockStream) {
+            $lockStream.Dispose()
+        }
+    }
+
+    return $profiles
+}
+
 function Get-PlatformGpuProfiles {
     $profiles = New-Object System.Collections.Generic.List[object]
 
@@ -324,6 +402,11 @@ function Get-PlatformGpuProfiles {
         $registryProfiles = Get-WindowsRegistryGpuProfiles
         if ($registryProfiles.Count -gt 0) {
             return $registryProfiles
+        }
+
+        $dxDiagProfiles = Get-DxDiagGpuProfiles
+        if ($dxDiagProfiles.Count -gt 0) {
+            return $dxDiagProfiles
         }
 
         try {

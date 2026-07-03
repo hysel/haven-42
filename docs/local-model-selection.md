@@ -119,7 +119,7 @@ GPU detection is best-effort:
 
 - NVIDIA GPUs use `nvidia-smi` when available.
 - AMD GPUs on Linux use `rocm-smi` when available.
-- AMD and other GPUs on Windows use display adapter registry data when available.
+- AMD and other GPUs on Windows use display adapter registry data when available, then `dxdiag` for dedicated display memory.
 - Intel GPUs are detected through platform display APIs or `lspci`; integrated/shared memory is reported as shared or unknown instead of dedicated VRAM.
 - Windows falls back to `Win32_VideoController`.
 - Linux falls back to `lspci` when available.
