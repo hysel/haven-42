@@ -54,6 +54,13 @@ function Get-RelativePath {
     return $relative.Replace('\', '/')
 }
 
+function Test-IsIgnoredPath {
+    param([string]$Path)
+
+    $relative = Get-RelativePath -Path $Path
+    return $relative -match "(^|/)(bin|obj|\.git|\.vs|node_modules|packages)(/|$)"
+}
+
 function Get-FilesByPattern {
     param([string[]]$Patterns)
 
@@ -61,7 +68,7 @@ function Get-FilesByPattern {
 
     foreach ($pattern in $Patterns) {
         Get-ChildItem -LiteralPath $target -Recurse -File -Include $pattern -ErrorAction SilentlyContinue |
-            Where-Object { $_.FullName -notmatch "\\(bin|obj|\.git|\.vs|node_modules|packages)($|\\)" } |
+            Where-Object { -not (Test-IsIgnoredPath -Path $_.FullName) } |
             ForEach-Object { $files.Add((Get-RelativePath -Path $_.FullName)) }
     }
 
@@ -114,7 +121,7 @@ $trackedFiles = Invoke-InTarget {
 
 if (-not $trackedFiles) {
     $trackedFiles = Get-ChildItem -LiteralPath $target -Recurse -File |
-        Where-Object { $_.FullName -notmatch "\\(bin|obj|\.git|\.vs|node_modules|packages)($|\\)" } |
+        Where-Object { -not (Test-IsIgnoredPath -Path $_.FullName) } |
         ForEach-Object { Get-RelativePath -Path $_.FullName }
 }
 
