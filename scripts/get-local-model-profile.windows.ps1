@@ -178,6 +178,23 @@ function Get-CpuSummary {
     return "Unknown"
 }
 
+function Get-CpuArchitecture {
+    try {
+        $architecture = [System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()
+
+        switch ($architecture) {
+            "X64" { return "x64" }
+            "X86" { return "x86" }
+            "Arm64" { return "arm64" }
+            "Arm" { return "arm" }
+            default { return $architecture.ToLowerInvariant() }
+        }
+    }
+    catch {
+        return "Unknown"
+    }
+}
+
 function Get-NvidiaGpuProfiles {
     $rows = Get-CommandOutput -Command "nvidia-smi" -Arguments @("--query-gpu=name,memory.total", "--format=csv,noheader,nounits")
     $profiles = New-Object System.Collections.Generic.List[object]
@@ -645,6 +662,7 @@ $profile = [pscustomobject]@{
     PowerShellVersion = $PSVersionTable.PSVersion.ToString()
     SystemRamGb = $ramGb
     Cpu = Get-CpuSummary
+    CpuArchitecture = Get-CpuArchitecture
     Gpus = $gpuProfiles
     OllamaStatus = Get-OllamaStatus
     OllamaModels = $ollamaModels
@@ -665,6 +683,7 @@ Write-Host "OS: $($profile.OperatingSystem)"
 Write-Host "PowerShell: $($profile.PowerShellVersion)"
 Write-Host "RAM: $(if ($profile.SystemRamGb) { "$($profile.SystemRamGb) GB" } else { "Unknown" })"
 Write-Host "CPU: $($profile.Cpu)"
+Write-Host "Architecture: $($profile.CpuArchitecture)"
 Write-Host ""
 Write-Host "GPU:"
 if ($profile.Gpus.Count -gt 0) {

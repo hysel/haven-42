@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added CPU architecture reporting to Windows, Linux, and macOS hardware profile scripts.
 - Added a PowerShell install/update script with dry-run, backup, local-config exclusion, and install validation.
 - Added tests for installer dry-run behavior, backup behavior, local-config exclusion, and self-target protection.
 - Added Linux and macOS installer wrappers that call the canonical PowerShell installer.

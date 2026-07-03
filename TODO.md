@@ -168,8 +168,8 @@
 
 ## Milestone 10: ARM And Apple Silicon Model Support
 
-- [ ] Detect and report CPU architecture in hardware profile outputs when available.
-- [ ] Add architecture fields to Windows, Linux, and macOS hardware profile text and JSON output.
+- [x] Detect and report CPU architecture in hardware profile outputs when available.
+- [x] Add architecture fields to Windows, Linux, and macOS hardware profile text and JSON output.
 - [ ] Document Apple Silicon, Windows ARM, and Linux ARM local-model differences.
 - [ ] Document Linux distro assumptions and optional GPU detection dependencies.
 - [ ] Document Ollama/GGUF versus MLX model differences for Apple Silicon.

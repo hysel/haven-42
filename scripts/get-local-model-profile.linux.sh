@@ -46,6 +46,18 @@ json_number_or_null() {
   esac
 }
 
+normalize_architecture() {
+  case "$1" in
+    x86_64|amd64) printf 'x64' ;;
+    i386|i686|x86) printf 'x86' ;;
+    aarch64|arm64) printf 'arm64' ;;
+    armv7l|armv7*) printf 'armv7' ;;
+    armv6l|armv6*) printf 'armv6' ;;
+    "") printf 'Unknown' ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
 gb_from_kb() {
   awk -v kb="$1" 'BEGIN { printf "%.1f", kb / 1024 / 1024 }'
 }
@@ -135,6 +147,7 @@ if [ -r /proc/meminfo ]; then
 fi
 
 CPU="Unknown"
+CPU_ARCHITECTURE="$(normalize_architecture "$(uname -m 2>/dev/null || true)")"
 if command_exists lscpu; then
   CPU_MODEL="$(lscpu | awk -F: '/^Model name:/ { sub(/^[ \t]+/, "", $2); print $2; exit }')"
   CPU_COUNT="$(lscpu | awk -F: '/^CPU\(s\):/ { sub(/^[ \t]+/, "", $2); print $2; exit }')"
@@ -253,6 +266,7 @@ if [ "$AS_JSON" = true ]; then
   printf '  "OperatingSystem": "%s",\n' "$(json_escape "$OS_SUMMARY")"
   printf '  "SystemRamGb": %s,\n' "$(json_number_or_null "$RAM_GB")"
   printf '  "Cpu": "%s",\n' "$(json_escape "$CPU")"
+  printf '  "CpuArchitecture": "%s",\n' "$(json_escape "$CPU_ARCHITECTURE")"
   printf '  "Gpus": [\n'
   for i in "${!GPU_NAMES[@]}"; do
     [ "$i" -gt 0 ] && printf ',\n'
@@ -278,7 +292,8 @@ printf 'Generated: %s\n' "$GENERATED"
 printf 'Platform: Linux\n'
 printf 'OS: %s\n' "$OS_SUMMARY"
 printf 'RAM: %s GB\n' "$RAM_GB"
-printf 'CPU: %s\n\n' "$CPU"
+printf 'CPU: %s\n' "$CPU"
+printf 'Architecture: %s\n\n' "$CPU_ARCHITECTURE"
 printf 'GPU:\n'
 if [ "${#GPU_NAMES[@]}" -eq 0 ]; then
   printf -- '- Not detected\n'

@@ -86,6 +86,7 @@ The helpers report:
 - PowerShell version
 - System RAM
 - CPU summary
+- CPU architecture
 - GPU names and VRAM when available
 - GPU vendor and memory type when available
 - Ollama reachability
@@ -154,6 +155,7 @@ Use the output as a guide, not as an automatic decision.
 Important fields:
 
 - `RAM`: Helps decide whether the machine can handle larger models.
+- `Architecture`: Shows the normalized CPU architecture, such as `x64`, `arm64`, or `armv7`.
 - `GPU`: Shows detected GPU names and best-effort memory information.
 - `Vendor`: Helps identify NVIDIA, AMD, Intel, Apple, or unknown GPU paths.
 - `MemoryType`: Shows whether memory appears dedicated, shared/integrated, unified, or unknown.

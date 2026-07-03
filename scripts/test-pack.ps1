@@ -196,6 +196,22 @@ Invoke-PackTest "model recommendation catalog has valid schema" {
     }
 }
 
+Invoke-PackTest "hardware profile scripts report CPU architecture" {
+    $scriptNames = @(
+        "get-local-model-profile.windows.ps1",
+        "get-local-model-profile.linux.sh",
+        "get-local-model-profile.macos.sh"
+    )
+
+    foreach ($scriptName in $scriptNames) {
+        $scriptPath = Join-Path $repoRoot "scripts/$scriptName"
+        $content = Get-Content -LiteralPath $scriptPath -Raw
+
+        Assert-True -Condition ($content -match "CpuArchitecture") -Message "$scriptName should include CpuArchitecture in JSON output."
+        Assert-True -Condition ($content -match "Architecture:") -Message "$scriptName should include Architecture in text output."
+    }
+}
+
 Invoke-PackTest "Continue file references are relative and resolvable" {
     $configPath = Join-Path $repoRoot ".continue/config.yaml"
     $config = Get-Content -LiteralPath $configPath -Raw

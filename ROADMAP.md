@@ -266,8 +266,8 @@ Goal: Improve guidance for ARM-based machines whose local model behavior differs
 
 Scope:
 
-- Detect and report CPU architecture in hardware profile outputs when available.
-- Add architecture fields to Windows, Linux, and macOS hardware profile text and JSON output.
+- Detect and report CPU architecture in hardware profile outputs when available. Done.
+- Add architecture fields to Windows, Linux, and macOS hardware profile text and JSON output. Done.
 - Document Apple Silicon, Windows ARM, and Linux ARM as separate local-model scenarios.
 - Document Linux distro assumptions and optional GPU detection dependencies.
 - Document the difference between Ollama/GGUF models and MLX models on Apple Silicon.
