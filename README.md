@@ -135,13 +135,26 @@ If the command shows your models, you are ready.
 
 ### 5. Open your project in Continue
 
-Open the project folder in your editor. Continue should use:
+Open the project you want to review, not this pack repository.
+
+Continue should use the config file that now lives inside that project:
 
 ```text
 .continue/config.yaml
 ```
 
-If Continue does not show a model, copy or select this config as your active Continue config.
+Use the project-local copy of `.continue/config.yaml`. Do not point Continue at the original pack folder after you copy the pack into your project.
+
+Quick checks:
+
+- The editor file explorer shows your project files.
+- Your project has `.continue/config.yaml`.
+- Continue shows the local Ollama model from that config.
+- Continue can see the prompts such as `repository-discovery` and `implementation-plan`.
+
+If Continue does not show a model or prompts, make the copied `.continue/config.yaml` your active Continue config. Some editor setups use a global/default Continue config; in that case, copy this project's config into the default Continue config location or select it through your editor's Continue settings.
+
+If you see duplicate rule warnings, you probably loaded the same rules from both the global Continue config and the project-local `.continue` folder. Keep only one active source of rules.
 
 ### 6. Run a read-only prompt first
 
