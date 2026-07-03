@@ -16,6 +16,7 @@ This project follows a simple changelog format:
 - Added documentation explaining how hardware profile scripts choose model recommendations from the local Ollama model list and catalog order.
 - Added configuration-pack review guardrails and a prompt-quality fixture for non-application repositories.
 - Added sanitized runtime validation notes from a private .NET Framework Excel-DNA add-in repository.
+- Added practical MCP workflow examples for read-only repository review, approved write mode, and release-readiness context gathering.
 
 ### Fixed
 

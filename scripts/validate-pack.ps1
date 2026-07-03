@@ -142,6 +142,7 @@ $requiredFiles = @(
     "docs/banned-output-patterns.md",
     "docs/mcp-options.md",
     "docs/mcp-setup.md",
+    "docs/mcp-examples.md",
     "docs/sonarqube-review.md",
     "docs/sonarqube-integration-options.md",
     "scripts/generate-runtime-context.ps1",
