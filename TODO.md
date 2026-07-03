@@ -147,3 +147,12 @@
 - [x] Add macOS test wrapper.
 - [x] Add CI coverage for Linux wrappers.
 - [x] Document cross-platform validation commands.
+
+## Milestone 8: Real Repository Validation
+
+- [x] Run runtime validation against the pack repository itself.
+- [x] Record sanitized self-validation results.
+- [ ] Add prompt guidance for configuration-pack repositories.
+- [ ] Add a prompt-quality fixture for non-application repositories.
+- [ ] Validate against an application repository when a suitable target is available.
+- [ ] Add project-specific MCP examples after validated real-world usage.

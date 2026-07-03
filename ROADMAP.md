@@ -16,6 +16,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 5: Prompt Quality Hardening | Complete | Prompt-specific fixtures, pass/fail checks, local-model reliability guardrails, banned-output guidance, and stronger static validation are complete. |
 | Milestone 6: Applied Tooling And Adaptive Models | Complete | Tool-use modes, approved write guidance, scoped edit guidance, model selection strategy, hardware profiling, model tiers, and local override safety guidance are complete. |
 | Milestone 7: Cross-Platform Contributor Experience | Complete | Linux and macOS validation/test wrappers are available, and Linux wrapper execution is covered in CI. |
+| Milestone 8: Real Repository Validation | In progress | The pack repository has been validated with the runtime runner; prompt-quality follow-ups and application-repository validation remain. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -213,3 +214,24 @@ Exit criteria:
 - macOS contributors can run shell wrapper commands that call the canonical PowerShell scripts.
 - Missing `pwsh` produces a clear setup message instead of a confusing command-not-found failure.
 - CI verifies wrapper behavior on Ubuntu.
+
+## Milestone 8: Real Repository Validation
+
+Goal: Validate the pack against real repository contexts and convert runtime findings into prompt, fixture, documentation, and integration improvements.
+
+Scope:
+
+- Run runtime validation against the pack repository itself. Done.
+- Record sanitized runtime validation results. Done.
+- Identify prompt-quality gaps that only appear during runtime use. Done.
+- Add prompt guidance for configuration-pack and documentation-heavy repositories.
+- Add a prompt-quality fixture for non-application repositories.
+- Validate against an application repository when a suitable target is available.
+- Add project-specific MCP examples only after validated real-world usage.
+
+Exit criteria:
+
+- At least one public repository validation result is recorded.
+- Runtime outputs are reviewed and sanitized before documentation updates.
+- Follow-up work is tracked for generic or unsupported prompt findings.
+- MCP examples are based on validated usage rather than speculation.

@@ -24,7 +24,7 @@ The repository now includes sanitized fixtures for local prompt validation:
 - `examples/fixtures/legacy-dependency-migration-input.md`
 - `examples/fixtures/release-readiness-quality-input.md`
 
-Additional real-repository validation remains useful, but it is not required to close the current milestone because no second suitable repository is available. The milestone is closed using sanitized fixture-based validation coverage plus the existing private sample repository notes.
+Additional real-repository validation remains useful. The pack repository itself has now been used as a real validation target for the runtime runner, and the next useful validation target is an application repository with source code, tests, configuration, and meaningful runtime behavior.
 
 ## Validation Targets
 
@@ -59,6 +59,7 @@ Do not record private repository names, customer names, internal hostnames, priv
 | 2026-07-02 | Sanitized fixture suite | Static review and local-model validation guidance | Implementation planning, documentation review, legacy dependency migration, release readiness, security, performance, SonarQube, and repository context fixtures | Pass for milestone closure: fixtures now cover high-risk prompt-quality failure modes and are enforced by validation where applicable | Keep real-repository validation in backlog until another suitable repository is available. |
 | 2026-07-02 | Private .NET sample repository | VSCodium Continue Agent mode with Ollama local-network endpoint override | Tool-enabled repository discovery setup | Partial pass: default config reached the model, but Agent mode printed raw JSON tool calls instead of executing tools; generated runtime context fallback produced a file-aware response | Document raw JSON tool-call failure, duplicate-rule causes, Windows `file://C:/...` path behavior, and context-file fallback. |
 | 2026-07-02 | Private .NET sample repository | VSCodium Continue Agent mode with Ollama local-network endpoint override and `qwen3-coder:30b` | Tool-enabled repository discovery setup | Pass: switching to `qwen3-coder:30b` enabled tool execution where `qwen2.5-coder:7b` produced raw JSON tool-call text | Update default model guidance for tool-enabled workflows and keep smaller models as context-file fallback candidates. |
+| 2026-07-02 | Pack repository self-validation | Continue CLI through `npx @continuedev/cli` with generated runtime context | All runtime validation workflows | Partial pass: runner completed every workflow and produced final text instead of tool-call JSON, but several outputs were generic or mismatched to a configuration/documentation repository | Add prompt guidance for configuration-pack repositories, evidence discipline, and avoiding app-code recommendations when no application surface exists. |
 
 ## Workflow Checklist
 
@@ -161,9 +162,62 @@ Do not modify files.
 
 ## Deferred Runtime Validation Work
 
-- Validate against additional real repositories when suitable repositories are available.
+- Validate against additional application repositories when suitable repositories are available.
 - Add project-specific MCP examples after validated real-world usage.
 - Revalidate legacy dependency migration with a stronger model or a context file that summarizes project-file risks instead of including raw XML.
+
+## 2026-07-02 Pack Repository Self-Validation
+
+Repository type: Public configuration, documentation, and validation-script repository
+Model setup: Default pack config through Continue CLI
+Continue surface: Continue CLI through `npx @continuedev/cli` with generated runtime context
+
+### Workflows Run
+
+- Repository discovery
+- Architecture review
+- Code review
+- Implementation planning
+- Bug investigation
+- Security review
+- Performance review
+- Documentation review
+- AI framework self-review
+- Refactoring planning
+- Product review
+- Release readiness
+
+### Result
+
+Partial pass.
+
+The runtime runner completed every configured workflow and generated final text outputs. None of the workflow outputs were tool-call-only JSON. This validates the runner path, generated runtime context path, and basic prompt invocation path against this repository.
+
+The output quality was mixed. Several workflows produced the requested section structure, but multiple reviews treated this repository like an application codebase instead of a configuration/documentation pack. Some outputs recommended authentication, authorization, input validation, structured logging, or dependency controls without first establishing an application runtime surface. The code review also flagged the documented `npx @continuedev/cli` fallback as a problem even though it is intentionally documented for users who do not have `cn` installed.
+
+### What Worked
+
+- The runtime runner completed all workflows.
+- Generated runtime context was accepted by the prompts.
+- Outputs were final review text rather than raw tool-call requests.
+- Repository discovery, architecture review, AI self-review, documentation review, and product review produced usable high-level structure.
+- The run exposed prompt-quality gaps that were not visible from static validation alone.
+
+### Gaps
+
+- Some prompts did not adapt well to a repository whose primary assets are prompts, rules, documentation, config, and validation scripts.
+- Several findings were generic and not tied to evidence from the generated context.
+- Security and architecture reviews sometimes recommended application-layer controls that do not apply directly to this repository.
+- Refactoring guidance suggested centralizing duplicate configuration without identifying specific duplicated config.
+- Release-readiness output was conservative, but some blocking issues were generic and did not acknowledge the existing release docs, CI, changelog, and rollback guidance.
+
+### Follow-up
+
+- Add or update prompt guidance for configuration-pack repositories.
+- Strengthen evidence requirements so reviews label unsupported claims as assumptions.
+- Add a prompt-quality fixture for non-application repositories.
+- Consider adding validation checks for known bad recommendations, such as replacing the documented `npx @continuedev/cli` fallback with `cn` only.
+- Validate next against an application repository before creating project-specific MCP examples.
 
 ## 2026-07-02 Validation Notes
 
