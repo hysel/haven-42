@@ -12,24 +12,53 @@ It is designed for teams that want AI support to follow consistent engineering s
 
 ## Quick Start
 
-Use this path if you are new to Continue, Ollama, or command-line tools.
+Use this path if you are new to Continue, Ollama, or command-line tools. The steps work on Windows, Linux, and macOS.
 
 ### 1. Install the basics
 
 Install:
 
-- Ollama
-- Node.js
-- Continue for your editor
+- Ollama: runs the local AI models.
+- Node.js: lets you run the Continue CLI with `npx`.
+- Continue for your editor: the extension you will use inside VS Code, VSCodium, or another supported editor.
 
-Then open PowerShell and download the default local models:
+Then open a terminal and check the tools:
+
+Windows PowerShell:
+
+```powershell
+ollama --version
+node --version
+npx --version
+```
+
+Linux or macOS:
+
+```bash
+ollama --version
+node --version
+npx --version
+```
+
+### 2. Download the local models
+
+The default model is large. If your machine cannot run it, use `docs/local-model-selection.md` to choose a smaller model.
+
+Windows PowerShell:
 
 ```powershell
 ollama pull qwen3-coder:30b
 ollama pull nomic-embed-text
 ```
 
-### 2. Copy this pack into your project
+Linux or macOS:
+
+```bash
+ollama pull qwen3-coder:30b
+ollama pull nomic-embed-text
+```
+
+### 3. Copy this pack into your project
 
 Copy the `.continue` folder from this repository into the project you want to review.
 
@@ -45,25 +74,37 @@ your-project/
     templates/
 ```
 
-### 3. Start Ollama
+If your project already has a `.continue` folder, back it up first or compare the files before replacing anything.
+
+### 4. Start Ollama
 
 Make sure Ollama is running. To check it, run:
+
+Windows PowerShell:
 
 ```powershell
 ollama list
 ```
 
+Linux or macOS:
+
+```bash
+ollama list
+```
+
 If the command shows your models, you are ready.
 
-### 4. Open your project in Continue
+### 5. Open your project in Continue
 
-Open the project in your editor and point Continue at:
+Open the project folder in your editor. Continue should use:
 
 ```text
 .continue/config.yaml
 ```
 
-### 5. Run a prompt
+If Continue does not show a model, copy or select this config as your active Continue config.
+
+### 6. Run a read-only prompt first
 
 Start with one of these:
 
@@ -79,7 +120,34 @@ Good first request:
 Run repository discovery for this project. Do not modify files.
 ```
 
-### 6. If something fails
+### 7. Validate the pack files
+
+Run the validation script from this repository after copying or editing the pack.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\validate-pack.ps1
+.\scripts\test-pack.ps1
+```
+
+Linux:
+
+```bash
+./scripts/validate-pack.linux.sh
+./scripts/test-pack.linux.sh
+```
+
+macOS:
+
+```bash
+./scripts/validate-pack.macos.sh
+./scripts/test-pack.macos.sh
+```
+
+The Linux and macOS validation scripts require PowerShell 7+ through the `pwsh` command.
+
+### 8. If something fails
 
 Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 
@@ -89,6 +157,7 @@ Most first-time problems are one of these:
 - The model was not downloaded.
 - Continue cannot find `.continue/config.yaml`.
 - The `cn` command is not installed, so you should use `npx @continuedev/cli` instead.
+- Linux or macOS is missing PowerShell 7+ for the validation wrappers.
 
 ## Beginner Safety Rules
 
@@ -207,38 +276,83 @@ For smaller machines or higher-risk workflows, use `docs/local-model-selection.m
 
 For private endpoints, local model experiments, or machine-specific settings, use `docs/local-config-safety.md` before editing committed config files.
 
-To collect a sanitized hardware profile for local model selection on Windows:
+To collect a sanitized hardware profile for local model selection:
+
+Windows PowerShell:
 
 ```powershell
 .\scripts\get-local-model-profile.windows.ps1
 ```
 
-For Linux or macOS, use the shell scripts documented in `docs/local-model-selection.md`.
+Linux:
+
+```bash
+./scripts/get-local-model-profile.linux.sh
+```
+
+macOS:
+
+```bash
+./scripts/get-local-model-profile.macos.sh
+```
 
 For detailed setup, script usage, model selection, troubleshooting, validation, and tool-use safety instructions, start in the `docs/` folder.
 
 Expected Ollama setup:
+
+Windows PowerShell:
 
 ```powershell
 ollama pull qwen3-coder:30b
 ollama pull nomic-embed-text
 ```
 
+Linux or macOS:
+
+```bash
+ollama pull qwen3-coder:30b
+ollama pull nomic-embed-text
+```
+
 Optional Continue CLI usage with `npx`:
+
+Windows PowerShell:
 
 ```powershell
 npx @continuedev/cli --config .continue/config.yaml
 ```
 
+Linux or macOS:
+
+```bash
+npx @continuedev/cli --config .continue/config.yaml
+```
+
 If the Continue CLI is installed globally, `cn` may also be available:
+
+Windows PowerShell:
 
 ```powershell
 cn --config .continue/config.yaml
 ```
 
+Linux or macOS:
+
+```bash
+cn --config .continue/config.yaml
+```
+
 If PowerShell reports that `cn` is not recognized, use the `npx` command above or install the CLI globally:
 
+Windows PowerShell:
+
 ```powershell
+npm install -g @continuedev/cli
+```
+
+Linux or macOS:
+
+```bash
 npm install -g @continuedev/cli
 ```
 

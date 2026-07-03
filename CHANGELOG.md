@@ -18,6 +18,10 @@ This project follows a simple changelog format:
 - Added sanitized runtime validation notes from a private .NET Framework Excel-DNA add-in repository.
 - Added practical MCP workflow examples for read-only repository review, approved write mode, and release-readiness context gathering.
 
+### Changed
+
+- Reworked the README quick start to cover Windows, Linux, and macOS setup and validation paths.
+
 ### Fixed
 
 - Fixed runtime validation config/context path handling so relative paths are resolved before the runner changes into the target repository.

@@ -81,7 +81,7 @@ Compatibility expectations:
 
 The pack is documentation and configuration heavy, so it should remain broadly portable.
 
-Validated and documented command examples currently prefer PowerShell because this repository is maintained from a Windows workstation.
+Validated and documented command examples should include Windows PowerShell plus Linux and macOS shell variants where the commands differ.
 
 When adding commands:
 
