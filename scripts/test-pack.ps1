@@ -413,6 +413,20 @@ Invoke-PackTest "install wrapper scripts exist and call PowerShell installer" {
     }
 }
 
+Invoke-PackTest "shell wrapper scripts are executable in git" {
+    $modeRows = & git -C $repoRoot ls-files -s "scripts/*.sh"
+    Assert-True -Condition ($LASTEXITCODE -eq 0) -Message "git ls-files should succeed for shell scripts."
+    Assert-True -Condition ($modeRows.Count -gt 0) -Message "Repository should include shell scripts."
+
+    foreach ($row in $modeRows) {
+        $parts = $row -split "\s+"
+        $mode = $parts[0]
+        $path = $parts[-1]
+
+        Assert-Equal -Actual $mode -Expected "100755" -Message "Shell script should be executable in git: $path"
+    }
+}
+
 Invoke-PackTest "runtime context and validation wrapper scripts call canonical PowerShell scripts" {
     $wrappers = @(
         @{

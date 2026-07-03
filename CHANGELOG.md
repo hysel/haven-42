@@ -37,6 +37,10 @@ This project follows a simple changelog format:
 - Documented the current PowerShell install/update workflow in the README.
 - Documented Windows, Linux, and macOS install/update commands in the README.
 
+### Fixed
+
+- Fixed Linux and macOS installer wrapper executable permissions so direct shell execution works in CI and user terminals.
+
 ## 0.1.11 - 2026-07-03
 
 ### Added
