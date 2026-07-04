@@ -56,7 +56,7 @@ mkdir -p "$RUN_ROOT"
 
 if [ -z "$CONTEXT_PATH" ]; then
   CONTEXT_PATH="$RUN_ROOT/runtime-context.md"
-  "$PACK_ROOT/scripts/generate-runtime-context.unix.sh" --target-repo "$TARGET_REPO" --output-path "$CONTEXT_PATH"
+  "$PACK_ROOT/scripts/generate-runtime-context.shared.sh" --target-repo "$TARGET_REPO" --output-path "$CONTEXT_PATH"
 fi
 
 if [ ! -f "$CONTEXT_PATH" ]; then

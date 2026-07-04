@@ -123,7 +123,7 @@ The Linux shell wrappers are intended to work on mainstream Linux distributions 
 - standard POSIX-style shell utilities such as `cd`, `dirname`, `cat`, and `command`
 - Bash-compatible shell execution
 
-The Linux and macOS validation, test, install, runtime-context, and runtime-validation scripts are native Bash scripts. They do not require PowerShell on Unix-like systems.
+The Linux and macOS validation, test, install, runtime-context, and runtime-validation scripts are native Bash scripts. They do not require PowerShell on Linux and macOS systems.
 
 The Linux hardware profile script is best effort and depends more heavily on local packages, drivers, and hardware:
 

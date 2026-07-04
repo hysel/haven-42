@@ -424,7 +424,7 @@ Invoke-PackTest "install script accepts shell-friendly argument aliases" {
     }
 }
 
-Invoke-PackTest "install wrapper scripts exist and call native Unix installer" {
+Invoke-PackTest "install wrapper scripts exist and call shared Bash installer" {
     $wrapperNames = @(
         "install-continue-pack.linux.sh",
         "install-continue-pack.macos.sh"
@@ -435,7 +435,7 @@ Invoke-PackTest "install wrapper scripts exist and call native Unix installer" {
         Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$wrapperName should exist."
 
         $content = Get-Content -LiteralPath $wrapperPath -Raw
-        Assert-True -Condition ($content -match "install-continue-pack\.unix\.sh") -Message "$wrapperName should call the native Unix installer."
+        Assert-True -Condition ($content -match "install-continue-pack\.shared\.sh") -Message "$wrapperName should call the shared Bash installer."
         Assert-True -Condition ($content -notmatch "pwsh") -Message "$wrapperName should not require pwsh."
     }
 }
@@ -454,23 +454,23 @@ Invoke-PackTest "shell wrapper scripts are executable in git" {
     }
 }
 
-Invoke-PackTest "runtime context and validation wrapper scripts call native Unix scripts" {
+Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash scripts" {
     $wrappers = @(
         @{
             Name = "generate-runtime-context.linux.sh"
-            Target = "generate-runtime-context.unix.sh"
+            Target = "generate-runtime-context.shared.sh"
         },
         @{
             Name = "generate-runtime-context.macos.sh"
-            Target = "generate-runtime-context.unix.sh"
+            Target = "generate-runtime-context.shared.sh"
         },
         @{
             Name = "run-runtime-validation.linux.sh"
-            Target = "run-runtime-validation.unix.sh"
+            Target = "run-runtime-validation.shared.sh"
         },
         @{
             Name = "run-runtime-validation.macos.sh"
-            Target = "run-runtime-validation.unix.sh"
+            Target = "run-runtime-validation.shared.sh"
         }
     )
 
@@ -484,23 +484,23 @@ Invoke-PackTest "runtime context and validation wrapper scripts call native Unix
     }
 }
 
-Invoke-PackTest "validation and test wrapper scripts call native Unix scripts" {
+Invoke-PackTest "validation and test wrapper scripts call shared Bash scripts" {
     $wrappers = @(
         @{
             Name = "validate-pack.linux.sh"
-            Target = "validate-pack.unix.sh"
+            Target = "validate-pack.shared.sh"
         },
         @{
             Name = "validate-pack.macos.sh"
-            Target = "validate-pack.unix.sh"
+            Target = "validate-pack.shared.sh"
         },
         @{
             Name = "test-pack.linux.sh"
-            Target = "test-pack.unix.sh"
+            Target = "test-pack.shared.sh"
         },
         @{
             Name = "test-pack.macos.sh"
-            Target = "test-pack.unix.sh"
+            Target = "test-pack.shared.sh"
         }
     )
 
