@@ -191,9 +191,10 @@
 
 - [x] Document VS Code and VSCodium Continue extension differences.
 - [x] Add sanitized terminal preflight evidence for locally installed VS Code-compatible and VSCodium Continue extensions.
-- [ ] Validate project-local `.continue/config.yaml` loading in VS Code when available.
+- [x] Validate project-local `.continue/config.yaml` loading in VS Code-compatible builds when available.
 - [ ] Validate project-local `.continue/config.yaml` loading in VSCodium when available.
-- [ ] Validate Agent mode and tool execution behavior separately by editor.
+- [x] Validate Agent mode and tool execution behavior in VS Code-compatible builds.
+- [ ] Validate Agent mode and tool execution behavior in VSCodium.
 - [x] Document duplicate-rule troubleshooting for global plus project-local config conflicts.
 - [x] Keep Continue CLI `npx` fallback instructions available for editor-specific issues.
 

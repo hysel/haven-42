@@ -144,7 +144,9 @@ test_editor_compatibility_doc() {
     grep -q "Editor Surface Validation Evidence" "$REPO_ROOT/examples/editor-surface-validation.md" &&
     grep -q "VS Code-compatible build" "$REPO_ROOT/examples/editor-surface-validation.md" &&
     grep -q "VSCodium" "$REPO_ROOT/examples/editor-surface-validation.md" &&
-    grep -q "GUI config loading not proven" "$REPO_ROOT/examples/editor-surface-validation.md" &&
+    grep -q "Read-only tool validated" "$REPO_ROOT/examples/editor-surface-validation.md" &&
+    grep -q "qwen3-coder:30b" "$REPO_ROOT/examples/editor-surface-validation.md" &&
+    grep -q "Do not mark approved-write ready" "$REPO_ROOT/examples/editor-surface-validation.md" &&
     grep -q "model connection error" "$REPO_ROOT/examples/editor-surface-validation.md"
 }
 
