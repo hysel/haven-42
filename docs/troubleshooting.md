@@ -318,6 +318,117 @@ git diff -- README.md
 Do not commit or continue with follow-up code changes until the diff proves the
 requested change was actually applied.
 
+## Agent Creates A File In The Wrong Folder
+
+Symptoms:
+
+- The user asks to edit an existing file such as `README.md`.
+- The assistant creates a new file such as `src/README.md` or `docs/README.md`.
+- The root file is unchanged, or `git diff -- README.md` is empty.
+
+Expected behavior:
+
+- Unqualified file names should resolve from the opened repository root or
+  current folder first.
+- The assistant should inspect the current folder before creating a new file.
+- If the correct target cannot be proven, the assistant should say
+  `PATH_AMBIGUOUS` and stop before editing.
+
+What to check:
+
+```powershell
+git status --short --untracked-files=all
+git diff -- README.md
+Get-ChildItem -Force
+```
+
+If a wrong-path file was created during a test and it is safe to remove, delete
+only that test artifact:
+
+```powershell
+Remove-Item .\src\README.md
+```
+
+If the `src` folder is now empty and was created only by the failed test, remove
+it too:
+
+```powershell
+if (-not (Get-ChildItem .\src -Force -ErrorAction SilentlyContinue)) {
+  Remove-Item .\src -Recurse
+}
+```
+
+Rerun the test with a prompt that requires current-folder path resolution and
+diff verification before claiming success.
+
+## Agent Says No File Is Open And Asks For A Path
+
+Symptoms:
+
+- The assistant says the current working directory is not explicitly set.
+- The assistant says no files are open.
+- The assistant asks the user to specify the path to `README.md` before trying
+  repository tools.
+
+Expected behavior:
+
+- The assistant should use list/read tools against `.` to discover the opened
+  workspace before asking for a path.
+- If discovery fails because Continue cannot see the workspace, the assistant
+  should say `WORKSPACE_UNAVAILABLE`.
+- If discovery succeeds but more than one target is plausible, the assistant
+  should say `PATH_AMBIGUOUS`.
+
+What to check:
+
+1. Confirm the editor opened the repository folder, not only an individual file.
+2. Confirm Agent mode is active.
+3. Ask for a read-only workspace discovery test:
+
+```text
+Use tools to list the files in the opened repository folder.
+Do not modify files.
+If you cannot discover the workspace with tools, say WORKSPACE_UNAVAILABLE.
+Return only the top-level names you inspected.
+```
+
+If that test fails, fix the editor workspace or Continue config before approved
+write mode.
+
+## Apply Target Does Not Match The Requested File
+
+Symptoms:
+
+- The assistant reads one file, such as `README.md`.
+- The Continue Apply panel targets a different file, such as `src/main.py`.
+- The assistant claims the requested file changed even though the apply target
+  is unrelated.
+
+Expected behavior:
+
+- Do not click Apply.
+- The assistant should say `APPLY_TARGET_MISMATCH` and stop.
+- The assistant should not claim success unless the diff changes the requested
+  file.
+
+What to check:
+
+```powershell
+git status --short --untracked-files=all
+git diff -- README.md
+git diff -- src/main.py
+```
+
+If an unrelated test file was created and it is safe to remove, delete only that
+artifact:
+
+```powershell
+Remove-Item .\src\main.py -ErrorAction SilentlyContinue
+```
+
+Do not use approved write mode for real project changes until the model can keep
+the read target, apply target, and reported changed file aligned.
+
 ## Ollama Is Not Reachable
 
 Symptoms:

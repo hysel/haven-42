@@ -94,8 +94,14 @@ Implement the approved plan. Keep changes limited to the files needed for this f
 Expected behavior:
 
 - The assistant inspects the relevant files.
+- The assistant treats the opened repository root or current folder as the default working directory.
+- If no file is open or the current folder is unclear, the assistant uses list/read tools against `.` to discover the workspace before asking the user for a path.
+- For unqualified file names such as `README.md`, the assistant checks the current folder first and does not create a duplicate in `src/`, `docs/`, or another subfolder unless requested or proven by repository evidence.
+- If workspace discovery fails, the assistant says `WORKSPACE_UNAVAILABLE` and stops.
+- If the correct target path cannot be proven, the assistant says `PATH_AMBIGUOUS` and stops before editing.
 - The assistant successfully reads the exact files it plans to change before editing.
 - The assistant uses Continue edit/apply tools to change the approved files.
+- The assistant confirms the apply target matches the requested, discovered, and read target file before applying. If the apply target differs, the assistant says `APPLY_TARGET_MISMATCH` and stops.
 - The assistant verifies the edit with changed file content, `git diff`, or another available diff/status tool before claiming success.
 - If no changed content or diff is observed after an edit attempt, the assistant says `WRITE_NOT_APPLIED` and stops.
 - The assistant does not only describe the change.
@@ -186,6 +192,8 @@ Expected result:
 
 - Continue creates or edits the file through a write/apply tool.
 - `git status --short` shows only `continue-agent-write-test.md`.
+- The file is created in the opened repository root or current folder, not in `src/`, `docs/`, or another inferred subfolder.
+- The apply target shown by Continue is `continue-agent-write-test.md`, not an unrelated file.
 - `git diff` or a file reread confirms the requested content exists.
 - The assistant reports the file change instead of asking the user to create it manually.
 

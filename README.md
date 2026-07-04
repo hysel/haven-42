@@ -401,6 +401,9 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 | The starter model is too slow or will not load | Run the hardware profile script and follow `docs/local-model-selection.md`. |
 | `cn` is not recognized | Use `npx @continuedev/cli --config .continue/config.yaml` or install the Continue CLI globally. |
 | The assistant prints raw JSON tool calls | Use a stronger tool-capable model or the runtime-context fallback in `docs/troubleshooting.md`. |
+| The assistant creates a file in the wrong folder | Stop, check `git status --short --untracked-files=all`, remove only the wrong test artifact, and use the `PATH_AMBIGUOUS` guidance in `docs/troubleshooting.md`. |
+| The Apply panel targets the wrong file | Do not click Apply; treat it as `APPLY_TARGET_MISMATCH` and use `docs/troubleshooting.md`. |
+| The assistant says no file is open and asks for a path | Keep the repository folder open in the editor and use the `WORKSPACE_UNAVAILABLE` guidance in `docs/troubleshooting.md`. |
 | Linux or macOS validation script is not executable | Run `chmod +x scripts/*.sh`, then rerun the wrapper script. |
 | Duplicate rules appear in Continue | Regenerate the global config without `-GlobalConfigIncludeRules`; the default global config omits rules to avoid duplicates with project-local `.continue/rules`. |
 
@@ -414,6 +417,9 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 - Use `git status` before and after AI-assisted work so you know what changed.
 - Use `docs/tool-use-modes.md` before asking the assistant to modify a reviewed project.
 - Use `docs/scoped-edits.md` to turn an approved plan into one small, reviewable change at a time.
+- When you name a file without a folder, the assistant should assume the currently opened repository folder first. If it creates a duplicate such as `src/README.md` instead of editing the existing `README.md`, treat that as a failed write test.
+- If no file is open, the assistant should still try to discover the opened workspace with tools before asking you for a path.
+- Before clicking Apply, confirm the Apply target is the same file the assistant read and said it would change.
 
 ## Do Not Commit These
 

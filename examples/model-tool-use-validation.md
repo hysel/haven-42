@@ -31,6 +31,9 @@ Use this template to record sanitized model validation results. Keep private end
 | Read-only repository discovery | Pass | Response referenced real files without modifying the repository. |
 | Read-only tool execution | Pass | Tool execution produced a normal text summary. |
 | Read-content tool execution | Not run | Confirm the model can read a harmless file such as `README.md` before approving code changes. |
+| Path resolution and current-folder behavior | Not run | Confirm unqualified file names resolve from the opened repository root or current folder and do not create wrong-folder files. |
+| Workspace discovery with no active file | Not run | Confirm the model uses tools against `.` before asking the user for a path. |
+| Apply target alignment | Not run | Confirm the Apply target matches the requested and read target file. |
 | Plan-only behavior | Pass | Plan included affected files, risks, validation, rollback, and definition of done. |
 | Platform-aware command use | Not run | Confirm Windows uses PowerShell commands and Linux/macOS use shell commands. |
 | Approved-write smoke test | Not run | Leave as not run unless tested in a safe disposable branch or repository. Require changed content or a non-empty diff before marking pass. |

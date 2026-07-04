@@ -80,6 +80,7 @@ Expected behavior:
 - The assistant uses an edit/apply tool.
 - The assistant does not ask you to create the file manually.
 - `git status --short` shows only the smoke-test file.
+- The smoke-test file is created in the opened repository root or current folder.
 - The assistant verifies the file content or a non-empty diff before claiming the change succeeded.
 
 On Windows, clean up with:
@@ -140,6 +141,11 @@ Implement steps 1 and 2 only. Do not change dependencies, config, authentication
 ```
 
 For a more controlled workflow, approve one plan slice at a time. See `docs/scoped-edits.md`.
+
+If you name a file without a folder, the assistant should resolve it from the
+opened repository root or current folder first. It should not create a duplicate
+file in `src/`, `docs/`, or another inferred subfolder. If the correct target is
+unclear, the assistant should say `PATH_AMBIGUOUS` and stop before editing.
 
 ## Step 4: Review What Changed
 
