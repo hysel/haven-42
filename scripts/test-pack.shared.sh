@@ -46,8 +46,15 @@ test_catalog_schema() {
     NF != 5 { exit 1 }
     $1 !~ /^(High|Medium|Low)$/ { exit 1 }
     $4 == "" || $5 == "" { exit 1 }
+    $2 == "" && $3 ~ / or / { exit 1 }
     END { exit 0 }
-  ' "$REPO_ROOT/config/model-recommendations.tsv"
+  ' "$REPO_ROOT/config/model-recommendations.tsv" &&
+    grep -q "High|qwen3:14b" "$REPO_ROOT/config/model-recommendations.tsv"
+}
+
+test_committed_config_uses_starter_model() {
+  grep -q "model: qwen3:14b" "$REPO_ROOT/.continue/config.yaml" &&
+    ! grep -q "model: qwen3-coder:30b" "$REPO_ROOT/.continue/config.yaml"
 }
 
 test_mlx_catalog_schema() {
@@ -102,6 +109,13 @@ test_install_dry_run() {
   [ ! -e "$temp_repo/.continue" ]
 }
 
+test_install_auto_model_dry_run() {
+  temp_repo="$(mktemp -d)"
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --dry-run --auto-model-config >/tmp/continue-install-auto.out 2>&1 || return 1
+  grep -q "Would generate .continue/config.local.yaml" /tmp/continue-install-auto.out || return 1
+  [ ! -e "$temp_repo/.continue" ]
+}
+
 test_runtime_validation_missing_target() {
   missing_repo="$(mktemp -d)"
   rmdir "$missing_repo"
@@ -118,16 +132,28 @@ test_profile_script_markers() {
     grep -q "Recommended container smoke test" "$REPO_ROOT/docs/compatibility.md"
 }
 
+test_editor_compatibility_doc() {
+  grep -q "VS Code" "$REPO_ROOT/docs/editor-compatibility.md" &&
+    grep -q "VSCodium" "$REPO_ROOT/docs/editor-compatibility.md" &&
+    grep -q "project-local" "$REPO_ROOT/docs/editor-compatibility.md" &&
+    grep -q "Duplicate rule" "$REPO_ROOT/docs/editor-compatibility.md" &&
+    grep -q "Agent mode" "$REPO_ROOT/docs/editor-compatibility.md" &&
+    grep -q "npx -y @continuedev/cli --config .continue/config.yaml" "$REPO_ROOT/docs/editor-compatibility.md"
+}
+
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "model recommendation catalog has valid schema" test_catalog_schema
+run_test "committed config uses starter sample model" test_committed_config_uses_starter_model
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
 run_test "shell wrapper scripts are executable in git" test_shell_scripts_executable
 run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_macos_scripts_do_not_require_pwsh
 run_test "runtime context generation captures useful files and excludes build output" test_runtime_context_generation
 run_test "install script dry run does not modify target repository" test_install_dry_run
+run_test "install script auto model config dry run is explicit" test_install_auto_model_dry_run
 run_test "runtime validation fails before CLI execution for missing target repository" test_runtime_validation_missing_target
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
+run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

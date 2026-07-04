@@ -19,8 +19,8 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 8: Real Repository Validation | Complete | The pack repository and one private application-style repository have been validated with the runtime runner; practical MCP workflow examples are documented. |
 | Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, install validation, and Windows/Linux/macOS commands. |
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
-| Milestone 11: Editor Surface Compatibility | Planned | Validate and document VS Code and VSCodium differences for Continue config loading, Agent mode, tool execution, and duplicate-rule behavior. |
-| Milestone 12: Model Tool-Use Validation Evidence | Planned | Define repeatable evidence for marking models as tool-validated across providers, editors, and operating systems. |
+| Milestone 11: Editor Surface Compatibility | In Progress | VS Code and VSCodium setup guidance is documented; editor-specific config loading and Agent mode validation remain. |
+| Milestone 12: Model Tool-Use Validation Evidence | In Progress | Starter model defaults and automatic local model config generation are in place; repeatable validation evidence remains. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -303,12 +303,12 @@ Goal: Make setup and troubleshooting clearer for users running Continue in VS Co
 
 Scope:
 
-- Document known VS Code and VSCodium differences for Continue extension availability, versioning, and command behavior.
+- Document known VS Code and VSCodium differences for Continue extension availability, versioning, and command behavior. Done.
 - Validate project-local `.continue/config.yaml` loading in both editor surfaces when available.
 - Validate Agent mode and tool execution separately in VS Code and VSCodium.
-- Document how global Continue config can conflict with project-local rules.
-- Keep `npx @continuedev/cli --config .continue/config.yaml` as a fallback validation path.
-- Add troubleshooting notes for duplicate rules, missing models, missing prompts, and raw JSON tool-call output.
+- Document how global Continue config can conflict with project-local rules. Done.
+- Keep `npx @continuedev/cli --config .continue/config.yaml` as a fallback validation path. Done.
+- Add troubleshooting notes for duplicate rules, missing models, missing prompts, and raw JSON tool-call output. Done.
 
 Exit criteria:
 
@@ -323,9 +323,12 @@ Goal: Make model tool-use recommendations evidence-based instead of relying only
 
 Scope:
 
+- Keep committed model examples lightweight and treat larger models as validated candidates instead of setup requirements. Done.
+- Add install-script support for local-only model config generation from hardware profile recommendations. Done.
 - Define a repeatable read-only tool-use validation checklist.
 - Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.
 - Distinguish candidate model recommendations from tool-validated model status.
+- Evaluate optional online model discovery for newer Ollama candidates while keeping the default workflow offline, local-first, and non-installing.
 - Add a sanitized evidence template for model tool-use validation results.
 - Decide whether validated model evidence should live in docs, examples, or a separate catalog.
 - Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.
@@ -333,6 +336,7 @@ Scope:
 Exit criteria:
 
 - Users know that hardware/profile scripts recommend candidates, not proven tool-safe models.
+- Online model discovery, if added, suggests candidates only and does not replace local validation or auto-install models.
 - A model is considered tool-validated only after a read-only tool test passes.
 - Approved write mode remains blocked until tool execution is proven in the intended editor/provider setup.
 - Sanitized validation evidence can be recorded without exposing private machine or repository details.

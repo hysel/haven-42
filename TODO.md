@@ -189,18 +189,21 @@
 
 ## Milestone 11: Editor Surface Compatibility
 
-- [ ] Document VS Code and VSCodium Continue extension differences.
+- [x] Document VS Code and VSCodium Continue extension differences.
 - [ ] Validate project-local `.continue/config.yaml` loading in VS Code when available.
 - [ ] Validate project-local `.continue/config.yaml` loading in VSCodium when available.
 - [ ] Validate Agent mode and tool execution behavior separately by editor.
-- [ ] Document duplicate-rule troubleshooting for global plus project-local config conflicts.
-- [ ] Keep Continue CLI `npx` fallback instructions available for editor-specific issues.
+- [x] Document duplicate-rule troubleshooting for global plus project-local config conflicts.
+- [x] Keep Continue CLI `npx` fallback instructions available for editor-specific issues.
 
 ## Milestone 12: Model Tool-Use Validation Evidence
 
+- [x] Keep committed model examples lightweight and treat larger models as validated candidates instead of setup requirements.
+- [x] Add install-script support for local-only model config generation from hardware profile recommendations.
 - [ ] Define repeatable read-only tool-use validation steps.
 - [ ] Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.
 - [ ] Distinguish candidate model recommendations from tool-validated model status.
+- [ ] Evaluate optional online Ollama model discovery for newer candidates without changing the offline default flow.
 - [ ] Add a sanitized evidence template for model tool-use validation results.
 - [ ] Decide where validated model evidence should live.
 - [ ] Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.

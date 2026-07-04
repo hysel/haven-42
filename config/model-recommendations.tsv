@@ -8,17 +8,19 @@ High|qwen.*coder.*32b||Use for coding, planning, review, and tool-backed workflo
 High|deepseek-coder-v2||Use for coding, planning, review, and tool-backed workflows after tool-call validation.|Run a read-only tool test before approved write mode.
 High|devstral.*24b||Use for coding, planning, review, and tool-backed workflows after tool-call validation.|Run a read-only tool test before approved write mode.
 High|qwen.*32b||Use for coding, planning, review, and tool-backed workflows after tool-call validation.|Run a read-only tool test before approved write mode.
-High||qwen3-coder:30b|Pull and validate as the default high-resource coding and tool-capable model.|Run ollama pull qwen3-coder:30b, then test read-only tool execution.
+High|qwen.*coder.*14b||Use as an installed starter coding model while validating whether larger models are worth pulling.|Run a read-only tool test before approved write mode.
+High|qwen3:14b||Use as an installed starter model while validating whether larger models are worth pulling.|Run a read-only tool test before approved write mode.
+High||qwen3-coder:30b|Optional high-resource candidate to pull and validate when the installed starter model is not enough.|Run ollama pull qwen3-coder:30b, then test read-only tool execution.
 Medium|^qwen3-coder:30b$||Use for planning, review, and small scoped edits after validation.|Use runtime-context fallback if tool execution is unreliable.
 Medium|qwen.*coder.*14b||Use for planning, review, and small scoped edits after validation.|Use runtime-context fallback if tool execution is unreliable.
 Medium|qwen3:14b||Use for planning, review, and small scoped edits after validation.|Use runtime-context fallback if tool execution is unreliable.
 Medium|phi4:14b||Use for planning, review, and small scoped edits after validation.|Use runtime-context fallback if tool execution is unreliable.
 Medium|devstral.*24b||Use for planning, review, and small scoped edits after validation.|Use runtime-context fallback if tool execution is unreliable.
 Medium|qwen.*9b||Use for planning, review, and small scoped edits after validation.|Use runtime-context fallback if tool execution is unreliable.
-Medium||qwen2.5-coder:14b or qwen3:14b|Pull and validate a medium coding model before approved edits.|Prefer review and plan-only workflows until tool calls are proven.
+Medium||qwen3:14b|Pull and validate a medium coding model before approved edits.|Prefer review and plan-only workflows until tool calls are proven.
 Low|qwen2\.5-coder:7b||Use for read-only discovery, summarization, and documentation drafting.|Avoid approved write mode unless tool execution is explicitly validated.
 Low|qwen.*9b||Use for read-only discovery, summarization, and documentation drafting.|Avoid approved write mode unless tool execution is explicitly validated.
 Low|llama3\.1:8b||Use for read-only discovery, summarization, and documentation drafting.|Avoid approved write mode unless tool execution is explicitly validated.
 Low|mistral:7b||Use for read-only discovery, summarization, and documentation drafting.|Avoid approved write mode unless tool execution is explicitly validated.
 Low|llama3:latest||Use for read-only discovery, summarization, and documentation drafting.|Avoid approved write mode unless tool execution is explicitly validated.
-Low||qwen2.5-coder:7b or another small coding model|Use for review-only workflows on constrained machines.|Use focused context files and avoid high-risk edits.
+Low||qwen2.5-coder:7b|Use for review-only workflows on constrained machines.|Use focused context files and avoid high-risk edits.

@@ -19,6 +19,9 @@ This project follows a simple changelog format:
 - Replaced Linux and macOS PowerShell-dependent wrappers with native Bash implementations for validation, tests, installation, runtime context generation, and runtime validation.
 - Renamed shared Linux and macOS Bash implementation files to the `*.shared.sh` suffix to avoid implying support beyond Linux and macOS.
 - Added Linux profile warnings and smoke-test guidance for enterprise/cloud images and container or LXC-style environments.
+- Added editor compatibility guidance for VS Code, VSCodium, project-local configs, duplicate rules, Agent mode, and CLI fallback testing.
+- Changed the committed Ollama model to a smaller starter sample and added install-script support for generating a local-only config from hardware profile recommendations.
+- Added roadmap tracking for optional online Ollama model discovery as candidate-only, local-validation-required future work.
 
 ## 0.1.12 - 2026-07-03
 

@@ -45,6 +45,8 @@ Fixes:
 - Check YAML indentation.
 - Confirm `name`, `version`, and `schema` are present.
 
+For editor-specific checks in VS Code or VSCodium, use `docs/editor-compatibility.md`.
+
 ## `cn` Is Not Recognized
 
 Symptoms:
@@ -249,17 +251,17 @@ Checks:
 ollama list
 ```
 
-Expected models:
+Example models:
 
 ```powershell
-ollama pull qwen2.5-coder:7b
+ollama pull qwen3:14b
 ollama pull nomic-embed-text
 ```
 
 Fixes:
 
 - Pull the missing model.
-- Update `.continue/config.yaml` only when changing the pack default.
+- Use `docs/local-model-selection.md` or `--auto-model-config` to choose a local model for your machine.
 - Keep machine-specific model experiments out of committed config unless they are intended defaults.
 
 ## Prompts Do Not Appear

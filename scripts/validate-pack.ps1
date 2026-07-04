@@ -131,6 +131,7 @@ $requiredFiles = @(
     "docs/release.md",
     "docs/compatibility.md",
     "docs/runtime-validation.md",
+    "docs/editor-compatibility.md",
     "docs/prompt-quality.md",
     "docs/validation-checklists.md",
     "docs/troubleshooting.md",

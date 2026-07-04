@@ -3,9 +3,9 @@ version: 0.1.12
 schema: v1
 
 models:
-  - name: Ollama Qwen3 Coder Tools
+  - name: Ollama Starter Coding Model
     provider: ollama
-    model: qwen3-coder:30b
+    model: qwen3:14b
     roles:
       - chat
       - edit

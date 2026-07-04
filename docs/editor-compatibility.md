@@ -1,0 +1,156 @@
+# Editor Compatibility
+
+## Purpose
+
+Use this guide to test whether Continue is using this pack correctly in VS Code, VSCodium, or the Continue CLI.
+
+The pack should stay editor-neutral. The committed `.continue/config.yaml` should work as a project-local config, while editor-specific paths, private endpoints, and local model experiments stay in local-only config files.
+
+## Supported Surfaces
+
+| Surface | What to expect | What to verify |
+| --- | --- | --- |
+| VS Code | Usually installs extensions from Microsoft's Marketplace. | Continue can load the project-local `.continue/config.yaml`, show the configured model, and run prompts. |
+| VSCodium | Usually installs extensions from Open VSX. Extension versions and command names may differ from VS Code. | Continue can load the project-local `.continue/config.yaml`, show the configured model, and run prompts without duplicate global rules. |
+| Continue CLI | Useful fallback when editor behavior is unclear. | `npx @continuedev/cli --config .continue/config.yaml` can load the same config. |
+
+## Project-Local Config Rule
+
+After installing this pack into a target repository, use the target repository's config:
+
+```text
+target-repository/
+  .continue/
+    config.yaml
+```
+
+Do not keep pointing Continue at the original pack repository after copying the pack into the project you want to review.
+
+Keep local machine settings in ignored files such as:
+
+```text
+.continue/config.local.yaml
+```
+
+Do not commit:
+
+- private Ollama endpoints
+- local filesystem paths
+- private model names
+- tokens or API keys
+- editor-specific absolute config paths
+
+## Setup Checks
+
+Run these checks before testing prompts:
+
+1. Open the target repository in the editor.
+2. Confirm the editor file explorer shows the target repository files.
+3. Confirm the target repository has `.continue/config.yaml`.
+4. Confirm Continue shows the expected local model.
+5. Confirm prompts such as `repository-discovery`, `implementation-plan`, and `code-review` are visible.
+6. Confirm duplicate-rule warnings are not present.
+
+If the model or prompts are missing, Continue may be using a global/default config instead of the project-local config.
+
+## Duplicate Rule Warnings
+
+Duplicate rule warnings usually mean the same rule files are loaded from two places:
+
+- global Continue config
+- project-local `.continue/config.yaml`
+
+Common warning examples:
+
+```text
+Duplicate rules named "API Design" detected.
+Duplicate rules named "Clean Architecture" detected.
+Duplicate rules named "Security" detected.
+```
+
+Fix:
+
+1. Choose one active source of rules.
+2. Prefer the project-local `.continue/config.yaml` for repositories using this pack.
+3. Remove or disable duplicate rule entries from the global Continue config.
+4. Reload the editor window.
+5. Reopen Continue and confirm the warnings are gone.
+
+## Read-Only Editor Test
+
+Use this first test in VS Code or VSCodium:
+
+```text
+Run repository discovery for this project.
+Do not modify files.
+
+Identify:
+1. The project type
+2. The major files and folders
+3. The current architecture
+4. The main risks
+5. The suggested next steps
+```
+
+Expected result:
+
+- The response references real files from the opened repository.
+- The response does not say it lacks filesystem access.
+- The response does not print raw JSON tool calls as the final answer.
+- No files are modified.
+
+## Agent Tool Test
+
+Only run this after the read-only editor test works.
+
+Use Agent mode and ask:
+
+```text
+List the top-level files in this repository.
+Do not modify files.
+Summarize what each important file is for.
+```
+
+Expected result:
+
+- Continue executes a read/list tool or otherwise inspects the opened repository.
+- The final answer summarizes actual files.
+- The final answer does not only print tool-call JSON such as `{"name":"ls","arguments":...}`.
+
+If Agent mode prints raw JSON instead of executing tools, treat that model/editor setup as not tool-validated. Use runtime context fallback from `docs/runtime-validation.md` or switch to a model already validated for tool use.
+
+## CLI Fallback
+
+Use the CLI fallback when the editor does not clearly show which config is active.
+
+Windows PowerShell:
+
+```powershell
+npx -y @continuedev/cli --config .continue/config.yaml --readonly -p "Reply OK"
+```
+
+Linux or macOS:
+
+```bash
+npx -y @continuedev/cli --config .continue/config.yaml --readonly -p "Reply OK"
+```
+
+If the CLI loads the config but the editor does not, the issue is likely editor config selection, extension version, or global config precedence.
+
+## Test Record
+
+When testing an editor surface, record:
+
+- editor name: VS Code or VSCodium
+- editor version
+- Continue extension version
+- operating system
+- model name
+- provider: Ollama, OpenAI-compatible local endpoint, or other
+- whether `.continue/config.yaml` loaded
+- whether duplicate-rule warnings appeared
+- whether read-only repository discovery worked
+- whether Agent mode executed tools
+- whether any fallback was needed
+
+Keep private endpoints, usernames, local paths, private repository names, and raw transcripts out of committed notes.

@@ -187,6 +187,7 @@ Invoke-PackTest "model recommendation catalog has valid schema" {
             }
         } else {
             Assert-True -Condition ($parts[2].Trim().Length -gt 0) -Message "Fallback row must include fallback model: $row"
+            Assert-True -Condition ($parts[2] -notmatch "\s+or\s+") -Message "Fallback model must be one concrete model value: $row"
             $fallbacks[$parts[0]] = $true
         }
     }
@@ -194,6 +195,17 @@ Invoke-PackTest "model recommendation catalog has valid schema" {
     foreach ($tier in $allowedTiers) {
         Assert-True -Condition $fallbacks.ContainsKey($tier) -Message "Catalog must include a fallback row for $tier."
     }
+
+    $catalogText = Get-Content -LiteralPath $catalogPath -Raw
+    Assert-True -Condition ($catalogText -match "High\|qwen3:14b") -Message "High-resource catalog should still prefer an installed starter model before fallback pulls."
+}
+
+Invoke-PackTest "committed config uses a starter sample model" {
+    $configPath = Join-Path $repoRoot ".continue/config.yaml"
+    $config = Get-Content -LiteralPath $configPath -Raw
+
+    Assert-True -Condition ($config -match "model: qwen3:14b") -Message "Committed config should use the starter sample model."
+    Assert-True -Condition ($config -notmatch "model: qwen3-coder:30b") -Message "Committed config should not require the high-resource sample model."
 }
 
 Invoke-PackTest "MLX model recommendation catalog has valid schema" {
@@ -270,6 +282,18 @@ Invoke-PackTest "compatibility docs include cloud and container smoke tests" {
     Assert-True -Condition ($content -match "Recommended enterprise/cloud smoke test") -Message "Compatibility docs should include enterprise/cloud smoke-test guidance."
     Assert-True -Condition ($content -match "Recommended container smoke test") -Message "Compatibility docs should include container smoke-test guidance."
     Assert-True -Condition ($content -match "get-local-model-profile\.linux\.sh") -Message "Compatibility smoke tests should reference the Linux hardware profile helper."
+}
+
+Invoke-PackTest "editor compatibility docs cover config and tool validation" {
+    $docPath = Join-Path $repoRoot "docs/editor-compatibility.md"
+    $content = Get-Content -LiteralPath $docPath -Raw
+
+    Assert-True -Condition ($content -match "VS Code") -Message "Editor compatibility docs should cover VS Code."
+    Assert-True -Condition ($content -match "VSCodium") -Message "Editor compatibility docs should cover VSCodium."
+    Assert-True -Condition ($content -match "project-local") -Message "Editor compatibility docs should explain project-local config."
+    Assert-True -Condition ($content -match "Duplicate rule") -Message "Editor compatibility docs should cover duplicate rules."
+    Assert-True -Condition ($content -match "Agent mode") -Message "Editor compatibility docs should cover Agent mode."
+    Assert-True -Condition ($content -like "*npx -y @continuedev/cli --config .continue/config.yaml*") -Message "Editor compatibility docs should include CLI fallback command."
 }
 
 Invoke-PackTest "Continue file references are relative and resolvable" {
@@ -371,6 +395,25 @@ Invoke-PackTest "install script dry run does not modify target repository" {
     }
 }
 
+Invoke-PackTest "install script auto model config dry run is explicit" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-auto-model-dry-run-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRepo | Out-Null
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-DryRun", "-AutoModelConfig")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install dry run with auto model config should succeed."
+        Assert-True -Condition ($result.Output -match "Would generate \.continue/config\.local\.yaml") -Message "Dry run should explain local model config generation."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Dry run should not create .continue."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "install script backs up existing .continue and excludes local config" {
     $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-test-$([guid]::NewGuid())"
 
@@ -424,10 +467,11 @@ Invoke-PackTest "install script accepts shell-friendly argument aliases" {
 
         $result = Invoke-CommandCapture `
             -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
-            -Arguments @("--target-repo", $tempRepo, "--dry-run")
+            -Arguments @("--target-repo", $tempRepo, "--dry-run", "--auto-model-config")
 
         Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install dry run with shell-friendly aliases should succeed."
         Assert-True -Condition ($result.Output -match "Dry run only") -Message "Dry-run output should be present."
+        Assert-True -Condition ($result.Output -match "Would generate \.continue/config\.local\.yaml") -Message "Auto model config alias should be accepted."
         Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Alias dry run should not create .continue."
     }
     finally {

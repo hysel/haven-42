@@ -6,15 +6,15 @@ This guide helps users choose a local Ollama model for Continue based on machine
 
 The goal is not to chase the largest model. The goal is to choose the smallest reliable model that can complete the task safely.
 
-## Default Recommendation
+## Starter Recommendation
 
-Use the committed default first when your machine can run it:
+The committed config uses a smaller starter example:
 
 ```text
-qwen3-coder:30b
+qwen3:14b
 ```
 
-This is the current validated default for chat, edit, apply, and Agent tool workflows in this pack.
+This model name is an example, not a permanent requirement. It is a more realistic starting point for a home PC than a 30B-class model.
 
 Also install the embedding model:
 
@@ -36,6 +36,8 @@ Before choosing a model, check:
 - Risk level of the task
 
 Larger models usually need more memory and respond more slowly, but they may follow tool and planning instructions better.
+
+Use a larger coding model, such as `qwen3-coder:30b`, only when your hardware profile and read-only tool validation show that your setup can handle it.
 
 ## Hardware Profile Helper
 
@@ -98,6 +100,30 @@ The helpers report:
 - A recommended model from the installed Ollama models, or a model to pull and validate
 
 It does not collect hostnames, IP addresses, usernames, local filesystem paths, secrets, or custom Ollama endpoint values.
+
+## Automatic Local Config Selection
+
+The install scripts can create a local-only Continue config that uses the model recommended by the hardware profile helper.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig
+```
+
+Linux:
+
+```bash
+./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --auto-model-config
+```
+
+macOS:
+
+```bash
+./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --auto-model-config
+```
+
+This writes `.continue/config.local.yaml` in the target repository after installation. That file is local-only and should not be committed. It uses the profile script's recommended installed model when available, while the shared `.continue/config.yaml` remains a portable starter sample.
 
 ## How Model Recommendations Work
 
@@ -356,7 +382,7 @@ Typical machine:
 
 Recommended usage:
 
-- `qwen3-coder:30b` as the default coding and tool-capable model
+- Larger coding models such as `qwen3-coder:30b`, when validated on the exact machine and editor setup
 - Agent mode after read-only tool validation
 - Scoped approved edits
 - Larger context windows when needed
@@ -493,8 +519,8 @@ The helper scripts use `config/model-recommendations.tsv` when selecting an inst
 
 | Resource tier | Preferred installed models | Best use |
 | --- | --- | --- |
-| High | `qwen3-coder:30b`, Qwen coder 30B/32B variants, `deepseek-coder-v2`, `devstral` 24B, Qwen 32B variants | Coding, planning, review, and tool-backed workflows after tool-call validation |
-| Medium | `qwen3-coder:30b` if it runs well, Qwen coder 14B variants, `qwen3:14b`, `phi4:14b`, Qwen 9B variants | Planning, review, documentation, and small scoped edits after validation |
+| High | `qwen3-coder:30b`, Qwen coder 30B/32B variants, `deepseek-coder-v2`, `devstral` 24B, Qwen 32B variants, or an installed starter model while validating upgrades | Coding, planning, review, and tool-backed workflows after tool-call validation |
+| Medium | Qwen coder 14B variants, `qwen3:14b`, `phi4:14b`, Qwen 9B variants | Planning, review, documentation, and small scoped edits after validation |
 | Low | `qwen2.5-coder:7b`, Qwen 9B variants, `llama3.1:8b`, `mistral:7b`, `llama3` | Read-only discovery, summarization, documentation drafting, and focused context-file workflows |
 
 These recommendations are intentionally conservative. A model is not approved for tool-backed edits until it successfully runs a read-only tool test in Continue.
@@ -547,7 +573,7 @@ If you test a new model, record only sanitized results in committed docs:
 
 ## Recommended Starting Flow
 
-1. Start with the committed default model.
+1. Start with the committed starter model or the model selected by `--auto-model-config`.
 2. Run a read-only repository discovery prompt.
 3. Test tool execution with a safe list-files request.
 4. If tools work, try plan-only workflows.
@@ -559,7 +585,7 @@ If you test a new model, record only sanitized results in committed docs:
 
 Use a smaller model when:
 
-- The machine cannot run the default model comfortably.
+- The machine cannot run the starter model comfortably.
 - The workflow is read-only.
 - The task is summarization or documentation drafting.
 - The user can provide a focused context file.

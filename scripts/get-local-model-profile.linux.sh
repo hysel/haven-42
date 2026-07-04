@@ -118,7 +118,7 @@ recommend_from_catalog() {
     RECOMMENDED_USE="$fallback_use"
     VALIDATION_NOTE="$fallback_validation"
   else
-    RECOMMENDED_MODEL="qwen3-coder:30b"
+    RECOMMENDED_MODEL="qwen3:14b"
     RECOMMENDED_USE="Validate the model against the target workflow before relying on it."
     VALIDATION_NOTE="Run read-only discovery and tool-call validation before approved write mode."
   fi

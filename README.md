@@ -16,6 +16,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 | --- | --- |
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
+| Test VS Code or VSCodium setup | `docs/editor-compatibility.md` |
 | Let Continue edit files | `docs/tool-use-modes.md` and `docs/scoped-edits.md` |
 | Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
 | Validate this pack | `Quick Validation` |
@@ -51,31 +52,37 @@ node --version
 npx --version
 ```
 
-### 2. Download the local models
+### 2. Download example local models
 
-The default model is large. If your machine cannot run it, use `docs/local-model-selection.md` to choose a smaller model.
+The model names below are examples, not permanent requirements. Local model availability changes over time, and the best model depends on your RAM, VRAM, installed Ollama models, and whether you need Agent tools.
 
-The model helper scripts use `config/model-recommendations.tsv` as the curated model priority list. You usually do not need to edit it during setup. Update it only after validating a better local model for your hardware and workflow.
+The committed config starts with a smaller sample model. If your machine can run a larger model, the hardware profile and install scripts can create a local-only config that selects a stronger installed model automatically.
 
 Windows PowerShell:
 
 ```powershell
-ollama pull qwen3-coder:30b
+ollama pull qwen3:14b
 ollama pull nomic-embed-text
 ```
 
 Linux or macOS:
 
 ```bash
-ollama pull qwen3-coder:30b
+ollama pull qwen3:14b
 ollama pull nomic-embed-text
 ```
 
-## Minimum Recommended Hardware
+Optional stronger model for high-resource machines after validation:
 
-The default coding model is `qwen3-coder:30b`. It is intended for higher-resource machines.
+```bash
+ollama pull qwen3-coder:30b
+```
 
-If you are unsure whether your machine can run it well, run the hardware profile script before changing the config:
+The model helper scripts use `config/model-recommendations.tsv` as the curated model priority list. You usually do not need to edit it during setup. Update it only after validating a better local model for your hardware and workflow.
+
+## Model Selection
+
+If you are unsure which model fits your machine, run the hardware profile script:
 
 Windows PowerShell:
 
@@ -96,6 +103,8 @@ macOS:
 ```
 
 Then use `docs/local-model-selection.md` to choose the final model. Treat the script recommendation as a starting point, not proof that the model is safe for approved edits.
+
+To install this pack and create a local-only config using the recommended installed model, use `--auto-model-config` with the install script.
 
 ### 3. Copy this pack into your project
 
@@ -155,6 +164,8 @@ Quick checks:
 If Continue does not show a model or prompts, make the copied `.continue/config.yaml` your active Continue config. Some editor setups use a global/default Continue config; in that case, copy this project's config into the default Continue config location or select it through your editor's Continue settings.
 
 If you see duplicate rule warnings, you probably loaded the same rules from both the global Continue config and the project-local `.continue` folder. Keep only one active source of rules.
+
+For VS Code, VSCodium, Agent mode, duplicate-rule, and CLI fallback checks, use `docs/editor-compatibility.md`.
 
 ### 6. Run a read-only prompt first
 
@@ -276,10 +287,22 @@ Windows PowerShell:
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project"
 ```
 
+Create a local-only config with automatic model selection:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig
+```
+
 Linux:
 
 ```bash
 ./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project
+```
+
+Create a local-only config with automatic model selection:
+
+```bash
+./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --auto-model-config
 ```
 
 macOS:
@@ -288,12 +311,19 @@ macOS:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project
 ```
 
+Create a local-only config with automatic model selection:
+
+```bash
+./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --auto-model-config
+```
+
 The installer:
 
 - Copies the pack's `.continue` files into the target repository.
 - Excludes local config overrides such as `.continue/config.local.yaml`.
 - Backs up an existing target `.continue` folder before replacing it.
 - Validates that copied config file references resolve.
+- Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
 - Refuses to install into this pack repository itself.
 
 Linux and macOS installer wrappers are native Bash scripts and do not require PowerShell.
@@ -306,7 +336,7 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 | --- | --- |
 | Continue does not show a model | Confirm Continue is using `.continue/config.yaml`, then run `ollama list`. |
 | Ollama connection error | Start Ollama and confirm `ollama list` works in a terminal. |
-| The default model is too slow or will not load | Run the hardware profile script and follow `docs/local-model-selection.md`. |
+| The starter model is too slow or will not load | Run the hardware profile script and follow `docs/local-model-selection.md`. |
 | `cn` is not recognized | Use `npx @continuedev/cli --config .continue/config.yaml` or install the Continue CLI globally. |
 | The assistant prints raw JSON tool calls | Use a stronger tool-capable model or the runtime-context fallback in `docs/troubleshooting.md`. |
 | Linux or macOS validation script is not executable | Run `chmod +x scripts/*.sh`, then rerun the wrapper script. |
@@ -433,13 +463,13 @@ The standard workflow is:
 4. Use the included prompts for discovery, planning, review, security, architecture, performance, and documentation workflows.
 5. Keep project-specific decisions in the top-level documentation files.
 
-Default local model assumptions:
+Starter local model assumptions:
 
-- Chat/edit/apply/tool workflows: `qwen3-coder:30b`
+- Chat/edit/apply/tool workflows: `qwen3:14b` as a sample starter model
 - Embeddings: `nomic-embed-text`
 - Ollama endpoint: default local Ollama endpoint
 
-For smaller machines or higher-risk workflows, use `docs/local-model-selection.md` before changing models.
+For larger machines, higher-risk workflows, or Agent tool use, run the hardware profile helper and use `docs/local-model-selection.md` before changing models.
 
 For private endpoints, local model experiments, or machine-specific settings, use `docs/local-config-safety.md` before editing committed config files.
 
@@ -465,19 +495,19 @@ macOS:
 
 For detailed setup, script usage, model selection, troubleshooting, validation, and tool-use safety instructions, start in the `docs/` folder.
 
-Expected Ollama setup:
+Example Ollama setup:
 
 Windows PowerShell:
 
 ```powershell
-ollama pull qwen3-coder:30b
+ollama pull qwen3:14b
 ollama pull nomic-embed-text
 ```
 
 Linux or macOS:
 
 ```bash
-ollama pull qwen3-coder:30b
+ollama pull qwen3:14b
 ollama pull nomic-embed-text
 ```
 
