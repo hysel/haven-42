@@ -90,31 +90,31 @@ for prompt_path in "$REPO_ROOT"/.continue/prompts/*.md; do
     fail "prompt filename is kebab-case: .continue/$relative_prompt_path"
   fi
 
-  if printf '%s\n' "$FILE_REFS" | grep -Fxq "$relative_prompt_path"; then
+  if grep -Fxq "$relative_prompt_path" <<< "$FILE_REFS"; then
     pass "prompt is referenced in config: .continue/$relative_prompt_path"
   else
     fail "prompt is referenced in config: .continue/$relative_prompt_path"
   fi
 
-  if printf '%s' "$prompt_content" | grep -Eq '^---'; then
+  if grep -Eq '^---' <<< "$prompt_content"; then
     pass "prompt frontmatter starts on first line: .continue/$relative_prompt_path"
   else
     fail "prompt frontmatter starts on first line: .continue/$relative_prompt_path"
   fi
 
-  if printf '%s\n' "$prompt_content" | grep -Eq "^name:[[:space:]]+['\"]?$prompt_name['\"]?[[:space:]]*$"; then
+  if grep -Eq "^name:[[:space:]]+['\"]?$prompt_name['\"]?[[:space:]]*$" <<< "$prompt_content"; then
     pass "prompt name matches filename: .continue/$relative_prompt_path"
   else
     fail "prompt name matches filename: .continue/$relative_prompt_path"
   fi
 
-  if printf '%s\n' "$prompt_content" | grep -Eq '^description:[[:space:]]+.+$'; then
+  if grep -Eq '^description:[[:space:]]+.+$' <<< "$prompt_content"; then
     pass "prompt description is present: .continue/$relative_prompt_path"
   else
     fail "prompt description is present: .continue/$relative_prompt_path"
   fi
 
-  if printf '%s\n' "$prompt_content" | grep -Eq '^invokable:[[:space:]]+true[[:space:]]*$'; then
+  if grep -Eq '^invokable:[[:space:]]+true[[:space:]]*$' <<< "$prompt_content"; then
     pass "prompt is invokable: .continue/$relative_prompt_path"
   else
     fail "prompt is invokable: .continue/$relative_prompt_path"
