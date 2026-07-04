@@ -46,6 +46,19 @@ Expected behavior:
 
 Do not continue to approved write mode if the assistant prints raw JSON tool calls instead of running tools.
 
+Also confirm file-content reading works. Listing files alone is not enough for implementation.
+
+Safe read-content prompt:
+
+```text
+Use tools to read README.md.
+Do not modify files.
+Return the first heading only.
+If you cannot read the file, say READ_TOOLS_UNAVAILABLE.
+```
+
+Do not continue to approved write mode if the assistant cannot read real file contents.
+
 Then confirm write tools work in a disposable branch or test repository.
 
 Safe write smoke-test prompt:

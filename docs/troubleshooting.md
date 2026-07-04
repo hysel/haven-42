@@ -252,6 +252,40 @@ What to check:
 
 Do not treat pasted code as an implemented change. The assistant must either edit the files through Continue or clearly report that write tools are unavailable.
 
+## Agent Lists Files But Cannot Read Or Edit Them
+
+Symptoms:
+
+- The assistant can list directories or top-level files.
+- It fails or stalls when reading source/config files.
+- It then says it will make an "informed" or "typical" change based on the project type.
+- It proposes code or configuration without citing observed file content.
+
+Expected behavior:
+
+- The assistant must read the exact files it plans to change before editing.
+- If it cannot read those files, it should say `READ_TOOLS_UNAVAILABLE` and stop.
+- Listing files alone is not enough for approved write mode.
+
+What to check:
+
+1. Confirm the opened editor workspace is the target repository root.
+2. Confirm the active Continue config is the regenerated global config or the intended project-local config.
+3. Confirm the model has `chat`, `edit`, and `apply` roles.
+4. Run a read-content test on a harmless file:
+
+```text
+Use tools to read README.md.
+Do not modify files.
+Return the first heading only.
+If you cannot read the file, say READ_TOOLS_UNAVAILABLE.
+```
+
+5. If the read-content test fails, do not run approved write mode yet.
+
+Do not accept implementation based on "typical .NET project" or similar
+language. The model must base code/config edits on file evidence.
+
 ## Ollama Is Not Reachable
 
 Symptoms:

@@ -94,8 +94,11 @@ Implement the approved plan. Keep changes limited to the files needed for this f
 Expected behavior:
 
 - The assistant inspects the relevant files.
+- The assistant successfully reads the exact files it plans to change before editing.
 - The assistant uses Continue edit/apply tools to change the approved files.
 - The assistant does not only describe the change.
+- The assistant does not infer implementation details from repository type or typical framework patterns when it could not read the target files.
+- If read tools are unavailable, the assistant says `READ_TOOLS_UNAVAILABLE` clearly and stops before proposing edits.
 - If write tools are unavailable, the assistant says `WRITE_TOOLS_UNAVAILABLE` clearly and stops before pretending the change was made.
 - The assistant should not say "I can't directly edit files" and then provide copy/paste code unless write tools are actually unavailable.
 
@@ -260,5 +263,9 @@ Use one of these safer fallbacks:
 - Ask the model: `Do not use tools. Do not output JSON. Use only the attached context.`
 
 Do not use approved write mode until read-only tool execution works reliably.
+
+Do not use approved write mode if the assistant can list files but cannot read
+the source or config files it plans to change. Listing files alone is not enough
+evidence for implementation.
 
 For the model-level validation checklist, use `docs/model-tool-use-validation.md`. For reliability fallback guidance, use `docs/local-model-reliability.md`.

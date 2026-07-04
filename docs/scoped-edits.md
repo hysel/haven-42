@@ -41,6 +41,10 @@ Confirm the approved plan includes:
 
 If any of these are missing, ask for a better plan before allowing edits.
 
+Before editing, the assistant must successfully read the exact files it will
+change. If it can only list files but cannot read file contents, stop and fix
+tool access before approving implementation.
+
 ## Step 1: Pick One Slice
 
 A good slice is small enough to review in one diff.
@@ -214,6 +218,7 @@ Stop and review manually if:
 - The assistant wants to change many unrelated files.
 - The assistant prints raw JSON tool calls instead of running tools.
 - The assistant cannot read the target files.
+- The assistant proposes changes from typical framework patterns without citing file evidence.
 - Continue reports filepath resolution errors.
 - Validation fails in a way the assistant cannot explain.
 - The change touches secrets, auth, deployment, or production data.

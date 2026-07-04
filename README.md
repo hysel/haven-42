@@ -227,6 +227,10 @@ After editing, explain the diff and tell me what validation you ran.
 
 In approved write mode, Continue should use edit/apply tools. If the assistant says it cannot directly edit files, only explains what it would do, or asks you to create files manually, write tools are not validated yet. Use the smoke test in `docs/tool-use-modes.md`.
 
+For real code changes, also confirm the assistant can read file contents, not
+just list files. If it cannot read the files it wants to change, stop and fix
+tool access before approving implementation.
+
 Before approving write mode, read:
 
 - `docs/tool-use-modes.md`

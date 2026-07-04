@@ -131,6 +131,7 @@ Summarize what each important file is for.
 Passing criteria:
 
 - Continue executes a read/list tool or otherwise inspects the opened repository.
+- Continue can read the contents of at least one real source or configuration file.
 - The final answer references real files.
 - No files are modified.
 - The final answer is normal prose, not only raw JSON.
@@ -147,6 +148,10 @@ Failing examples:
 ```
 
 If raw JSON appears instead of tool execution, the setup is not read-only tool validated.
+
+If the model can list files but cannot read file contents, do not mark it
+read-only tool validated for implementation workflows. The expected clear
+failure signal is `READ_TOOLS_UNAVAILABLE`.
 
 ## Step 4: Plan-Only Test
 
@@ -187,6 +192,8 @@ Passing criteria:
 
 - The assistant uses an edit/apply tool instead of telling the user to create the file manually.
 - The assistant does not answer with "I can't directly edit files" or copy/paste implementation instructions when write tools are available.
+- Before editing, the assistant can read the target file or confirms that it is creating a new file.
+- The assistant does not make changes based on "typical" project patterns without file evidence.
 - Only `continue-agent-write-test.md` changes.
 - The diff is small and reviewable.
 - The model reports what changed.
@@ -194,6 +201,10 @@ Passing criteria:
 - `git diff --check` passes.
 
 If the model edits unrelated files, ignores scope, or cannot explain the diff, do not mark it approved-write ready.
+
+If the model says it cannot read the relevant files, or it proposes a change
+based on assumptions rather than observed file content, mark the write test as
+failed for real code changes even if a simple file-creation smoke test passed.
 
 Clean up the smoke-test file after recording the result.
 

@@ -205,6 +205,7 @@
 - [x] Keep committed model examples lightweight and treat larger models as validated candidates instead of setup requirements.
 - [x] Add install-script support for local-only model config generation from hardware profile recommendations.
 - [x] Define repeatable read-only tool-use validation steps.
+- [x] Require file-content read validation before treating a setup as ready for real code changes.
 - [x] Define a repeatable approved-write smoke test for validating edit/apply tools.
 - [x] Add platform-aware command guidance for Windows PowerShell, Linux, and macOS shells.
 - [x] Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.

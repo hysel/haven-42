@@ -16,12 +16,15 @@ Apply these standards to all engineering, review, documentation, and planning wo
 - On Linux and macOS, prefer shell commands and the repository's native `.sh` scripts. Do not ask Linux or macOS users to run PowerShell scripts unless they explicitly choose that path.
 - Prefer explicit behavior over hidden conventions.
 - Identify assumptions, uncertainty, and tradeoffs.
+- Do not infer implementation details from repository type, framework conventions, or file names when file-read tools fail. If the relevant files cannot be read, stop and report `READ_TOOLS_UNAVAILABLE`.
+- Before making code or configuration changes, successfully read the exact files that will be changed and cite the observed evidence from those files.
 - Explain material risks before recommending risky changes.
 - Do not introduce secrets, credentials, tokens, private keys, or environment-specific confidential values.
 - Treat generated code and analysis as requiring human review.
 - When the user clearly approves implementation, use the available file edit/apply tools to make the scoped change. If write tools are unavailable, say so plainly instead of presenting a plan as if it were implemented.
 - Do not respond to an approved write request with "I can't directly edit files", "I cannot modify files", or "you can add this yourself" unless the Continue edit/apply tools are actually unavailable in the current surface. First attempt the edit/apply tool that Continue provides.
 - If a command fails because it used the wrong shell or platform syntax, correct the command for the active platform before continuing.
+- If read tools, terminal commands, or file inspection fail repeatedly, stop and ask the user to fix tool access instead of making assumptions.
 
 ## Avoid
 
@@ -30,6 +33,7 @@ Apply these standards to all engineering, review, documentation, and planning wo
 - Mixing unrelated concerns in one change.
 - Claiming validation was performed when it was not.
 - Hiding known limitations.
+- Making code or configuration recommendations from "typical" framework patterns when the relevant source/config files were not actually read.
 - Printing tool-call JSON or markup as a substitute for running tools.
 - Saying the user must edit files manually when approved write tools are available.
 - Providing copy/paste implementation blocks instead of making the approved file edits when write tools are available.

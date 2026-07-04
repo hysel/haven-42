@@ -31,12 +31,14 @@ This project follows a simple changelog format:
 - Added platform-aware command guidance so Windows Agent workflows use PowerShell-native commands instead of Linux shell commands.
 - Added an approved-write smoke test for validating Continue edit/apply tool behavior before trusting Agent mode to modify projects.
 - Changed global Continue config generation to omit `rules:` by default so project-local `.continue/rules` do not produce duplicate rule warnings.
+- Added read-content tool validation guidance so Agent mode cannot treat file-listing success as enough evidence for real code changes.
 
 ### Changed
 
 - Tuned the committed local model defaults to `contextLength: 16384` and `maxTokens: 2048` after VS Code and VSCodium Agent testing showed better responsiveness with smaller local output budgets.
 - Clarified approved write mode so models must use edit/apply tools after explicit approval or report that write tools are unavailable.
 - Added `-GlobalConfigIncludeRules` and `--global-config-include-rules` for explicit global-only rule loading when needed.
+- Added `READ_TOOLS_UNAVAILABLE` guidance for cases where the model can list files but cannot read the source or config files it wants to change.
 
 ## 0.1.12 - 2026-07-03
 
