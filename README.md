@@ -363,6 +363,7 @@ The installer:
 - Validates that copied config file references resolve.
 - Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
 - Can update the global Continue config, with a backup, when an editor does not load project-local config files.
+- Writes Windows global config file references as `file://C:/path/...` for VSCodium compatibility.
 - Refuses to install into this pack repository itself.
 
 Linux and macOS installer wrappers are native Bash scripts and do not require PowerShell.

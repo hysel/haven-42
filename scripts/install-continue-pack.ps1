@@ -191,7 +191,7 @@ function Convert-ToFileUri {
     $resolvedPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($Path).Replace('\', '/')
 
     if ($resolvedPath -match "^[A-Za-z]:/") {
-        return "file:///$resolvedPath"
+        return "file://$resolvedPath"
     }
 
     return "file://$resolvedPath"
