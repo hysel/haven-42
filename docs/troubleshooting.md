@@ -221,6 +221,32 @@ PACK="/path/to/continue-enterprise-engineering-pack"
 
 Then attach `runtime-context.md` with `@Files` and ask the model not to use tools or output JSON.
 
+## Agent Says It Cannot Edit Files
+
+Symptoms:
+
+- The user approves implementation.
+- The assistant responds with wording like:
+
+```text
+Since I can't directly edit files in this environment, here is the code you can add...
+```
+
+Expected behavior:
+
+- In approved write mode, Continue should use edit/apply tools to modify the scoped files.
+- If write tools are not available in the selected editor surface, the assistant should say `WRITE_TOOLS_UNAVAILABLE` and stop.
+
+What to check:
+
+1. Confirm you are in Agent mode, not plain chat.
+2. Confirm the active model has `chat`, `edit`, and `apply` roles in the active Continue config.
+3. Confirm the active config is the global config or the project config you intended, not an older stale config.
+4. Run the approved-write smoke test from `docs/tool-use-modes.md`.
+5. If the smoke test fails, keep the model at read-only or plan-only status for that editor surface.
+
+Do not treat pasted code as an implemented change. The assistant must either edit the files through Continue or clearly report that write tools are unavailable.
+
 ## Ollama Is Not Reachable
 
 Symptoms:

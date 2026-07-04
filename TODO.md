@@ -204,9 +204,11 @@
 - [x] Keep committed model examples lightweight and treat larger models as validated candidates instead of setup requirements.
 - [x] Add install-script support for local-only model config generation from hardware profile recommendations.
 - [x] Define repeatable read-only tool-use validation steps.
+- [x] Define a repeatable approved-write smoke test for validating edit/apply tools.
+- [x] Add platform-aware command guidance for Windows PowerShell, Linux, and macOS shells.
 - [x] Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.
 - [x] Distinguish candidate model recommendations from tool-validated model status.
 - [ ] Evaluate optional online Ollama model discovery for newer candidates without changing the offline default flow.
 - [x] Add a sanitized evidence template for model tool-use validation results.
 - [x] Decide where validated model evidence should live for current scope.
-- [ ] Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.
+- [x] Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.

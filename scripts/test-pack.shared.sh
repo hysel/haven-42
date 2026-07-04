@@ -184,13 +184,32 @@ test_model_tool_use_validation_doc() {
     grep -q "Read-only tool validated" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "Approved-write ready" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "raw JSON" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "active shell and operating system" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "continue-agent-write-test.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "I can't directly edit files" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "examples/model-tool-use-validation.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "Do not record" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "Model Tool-Use Validation Evidence" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Provider: Ollama" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Editor surface" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "MCP state" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Platform-aware command use" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Sanitization Checklist" "$REPO_ROOT/examples/model-tool-use-validation.md"
+}
+
+test_tool_use_docs_define_platform_aware_write_behavior() {
+  grep -q "Match commands to the user's active operating system and shell" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "Select-String" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "write tools are unavailable" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "I can't directly edit files" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "Platform-Aware Commands" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "WRITE_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "continue-agent-write-test.md" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "Safe write smoke-test prompt" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
+    grep -q "Remove-Item" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
+    grep -q "write tools are not validated yet" "$REPO_ROOT/README.md" &&
+    grep -q "Agent Says It Cannot Edit Files" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "WRITE_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md"
 }
 
 run_test "validate-pack succeeds for repository" test_validate_succeeds
@@ -209,6 +228,7 @@ run_test "runtime validation fails before CLI execution for missing target repos
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
+run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

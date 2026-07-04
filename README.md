@@ -225,6 +225,8 @@ Edit only the files needed for the approved plan.
 After editing, explain the diff and tell me what validation you ran.
 ```
 
+In approved write mode, Continue should use edit/apply tools. If the assistant says it cannot directly edit files, only explains what it would do, or asks you to create files manually, write tools are not validated yet. Use the smoke test in `docs/tool-use-modes.md`.
+
 Before approving write mode, read:
 
 - `docs/tool-use-modes.md`

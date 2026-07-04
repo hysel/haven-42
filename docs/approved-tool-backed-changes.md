@@ -46,6 +46,40 @@ Expected behavior:
 
 Do not continue to approved write mode if the assistant prints raw JSON tool calls instead of running tools.
 
+Then confirm write tools work in a disposable branch or test repository.
+
+Safe write smoke-test prompt:
+
+```text
+Use approved write mode for this smoke test only.
+
+Create a file named continue-agent-write-test.md with exactly this content:
+
+Continue Agent write test passed.
+
+Do not modify any other files.
+After editing, report the changed file and stop.
+Do not commit.
+```
+
+Expected behavior:
+
+- The assistant uses an edit/apply tool.
+- The assistant does not ask you to create the file manually.
+- `git status --short` shows only the smoke-test file.
+
+On Windows, clean up with:
+
+```powershell
+Remove-Item .\continue-agent-write-test.md
+```
+
+On Linux or macOS, clean up with:
+
+```bash
+rm ./continue-agent-write-test.md
+```
+
 ## Step 1: Start With Read-Only Review
 
 Ask for discovery first:

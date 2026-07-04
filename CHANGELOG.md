@@ -28,10 +28,13 @@ This project follows a simple changelog format:
 - Recorded sanitized VSCodium Agent tool validation results, including an initial tool-call markup failure and a controlled read-only Agent retest that successfully listed repository files.
 - Recorded clean duplicate-rule status for the current VS Code-compatible and VSCodium validation setup and closed Milestone 11 for the current scope.
 - Added installer support for explicitly updating the global Continue config with absolute references to a target repository's installed rules, prompts, and docs.
+- Added platform-aware command guidance so Windows Agent workflows use PowerShell-native commands instead of Linux shell commands.
+- Added an approved-write smoke test for validating Continue edit/apply tool behavior before trusting Agent mode to modify projects.
 
 ### Changed
 
 - Tuned the committed local model defaults to `contextLength: 16384` and `maxTokens: 2048` after VS Code and VSCodium Agent testing showed better responsiveness with smaller local output budgets.
+- Clarified approved write mode so models must use edit/apply tools after explicit approval or report that write tools are unavailable.
 
 ## 0.1.12 - 2026-07-03
 

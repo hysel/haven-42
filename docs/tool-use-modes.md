@@ -91,6 +91,14 @@ Good user request:
 Implement the approved plan. Keep changes limited to the files needed for this feature.
 ```
 
+Expected behavior:
+
+- The assistant inspects the relevant files.
+- The assistant uses Continue edit/apply tools to change the approved files.
+- The assistant does not only describe the change.
+- If write tools are unavailable, the assistant says `WRITE_TOOLS_UNAVAILABLE` clearly and stops before pretending the change was made.
+- The assistant should not say "I can't directly edit files" and then provide copy/paste code unless write tools are actually unavailable.
+
 ## Approval Rules
 
 The assistant should ask for or wait for approval before writing when:
@@ -126,6 +134,66 @@ git diff --check
 Commit only when the user explicitly asks.
 
 Push only when the user explicitly asks.
+
+## Platform-Aware Commands
+
+The assistant should use commands for the shell it is actually running in.
+
+Windows PowerShell examples:
+
+```powershell
+Get-ChildItem
+Select-String -Path .\BrickLinkBrickset.cs -Pattern "config"
+Get-Content .\README.md
+git status --short
+```
+
+Linux and macOS examples:
+
+```bash
+ls
+grep -n "config" ./BrickLinkBrickset.cs
+cat ./README.md
+git status --short
+```
+
+If the assistant tries a Linux command on Windows, correct it and continue with PowerShell. If the assistant tries a PowerShell command on Linux or macOS, correct it and continue with shell commands.
+
+## Approved Write Smoke Test
+
+Use this only in a disposable branch or a test repository.
+
+Ask:
+
+```text
+Use approved write mode for this smoke test only.
+
+Create a file named continue-agent-write-test.md with exactly this content:
+
+Continue Agent write test passed.
+
+Do not modify any other files.
+After editing, report the changed file and stop.
+Do not commit.
+```
+
+Expected result:
+
+- Continue creates or edits the file through a write/apply tool.
+- `git status --short` shows only `continue-agent-write-test.md`.
+- The assistant reports the file change instead of asking the user to create it manually.
+
+Clean up after the test:
+
+```powershell
+Remove-Item .\continue-agent-write-test.md
+```
+
+Linux or macOS cleanup:
+
+```bash
+rm ./continue-agent-write-test.md
+```
 
 ## Validation Expectations
 

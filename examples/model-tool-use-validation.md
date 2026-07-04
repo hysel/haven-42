@@ -31,7 +31,8 @@ Use this template to record sanitized model validation results. Keep private end
 | Read-only repository discovery | Pass | Response referenced real files without modifying the repository. |
 | Read-only tool execution | Pass | Tool execution produced a normal text summary. |
 | Plan-only behavior | Pass | Plan included affected files, risks, validation, rollback, and definition of done. |
-| Approved-write smoke test | Not run | Leave as not run unless tested in a safe disposable scope. |
+| Platform-aware command use | Not run | Confirm Windows uses PowerShell commands and Linux/macOS use shell commands. |
+| Approved-write smoke test | Not run | Leave as not run unless tested in a safe disposable branch or repository. |
 
 ## Failure Mode
 

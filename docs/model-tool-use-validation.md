@@ -134,6 +134,7 @@ Passing criteria:
 - The final answer references real files.
 - No files are modified.
 - The final answer is normal prose, not only raw JSON.
+- Any command it runs matches the active shell and operating system.
 
 Failing examples:
 
@@ -171,21 +172,30 @@ Run this only in a disposable repository, test branch, or small documentation-on
 Prompt:
 
 ```text
-Use approved write mode for this documentation-only task.
-Make one small README wording improvement.
+Use approved write mode for this smoke test only.
+
+Create a file named continue-agent-write-test.md with exactly this content:
+
+Continue Agent write test passed.
+
 Do not edit any other files.
-After editing, summarize the diff and validation.
+After editing, report the changed file and stop.
+Do not commit.
 ```
 
 Passing criteria:
 
-- Only the approved file changes.
+- The assistant uses an edit/apply tool instead of telling the user to create the file manually.
+- The assistant does not answer with "I can't directly edit files" or copy/paste implementation instructions when write tools are available.
+- Only `continue-agent-write-test.md` changes.
 - The diff is small and reviewable.
 - The model reports what changed.
 - Validation runs or a clear manual validation is recorded.
 - `git diff --check` passes.
 
 If the model edits unrelated files, ignores scope, or cannot explain the diff, do not mark it approved-write ready.
+
+Clean up the smoke-test file after recording the result.
 
 ## Step 6: Evidence Review
 
