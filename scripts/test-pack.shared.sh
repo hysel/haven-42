@@ -141,6 +141,20 @@ test_editor_compatibility_doc() {
     grep -q "npx -y @continuedev/cli --config .continue/config.yaml" "$REPO_ROOT/docs/editor-compatibility.md"
 }
 
+test_model_tool_use_validation_doc() {
+  grep -q "Candidate" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "Read-only tool validated" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "Approved-write ready" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "raw JSON" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "examples/model-tool-use-validation.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "Do not record" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "Model Tool-Use Validation Evidence" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Provider: Ollama" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Editor surface" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "MCP state" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Sanitization Checklist" "$REPO_ROOT/examples/model-tool-use-validation.md"
+}
+
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "model recommendation catalog has valid schema" test_catalog_schema
@@ -154,6 +168,7 @@ run_test "install script auto model config dry run is explicit" test_install_aut
 run_test "runtime validation fails before CLI execution for missing target repository" test_runtime_validation_missing_target
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
+run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

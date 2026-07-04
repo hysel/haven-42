@@ -119,6 +119,8 @@ Expected result:
 
 If Agent mode prints raw JSON instead of executing tools, treat that model/editor setup as not tool-validated. Use runtime context fallback from `docs/runtime-validation.md` or switch to a model already validated for tool use.
 
+Use `docs/model-tool-use-validation.md` for the full validation checklist and `examples/model-tool-use-validation.md` for sanitized evidence.
+
 ## CLI Fallback
 
 Use the CLI fallback when the editor does not clearly show which config is active.

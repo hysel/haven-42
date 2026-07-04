@@ -67,6 +67,8 @@ Create an implementation plan for this change. Do not write code yet.
 
 Use this mode only after the user approves a specific change.
 
+Before using this mode with a local model, validate tool execution with `docs/model-tool-use-validation.md`.
+
 Allowed:
 
 - Edit files related to the approved task.
@@ -191,4 +193,4 @@ Use one of these safer fallbacks:
 
 Do not use approved write mode until read-only tool execution works reliably.
 
-For the model-level validation checklist, use `docs/local-model-reliability.md`.
+For the model-level validation checklist, use `docs/model-tool-use-validation.md`. For reliability fallback guidance, use `docs/local-model-reliability.md`.

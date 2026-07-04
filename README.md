@@ -16,6 +16,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 | --- | --- |
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
+| Validate whether a model can use tools | `docs/model-tool-use-validation.md` |
 | Test VS Code or VSCodium setup | `docs/editor-compatibility.md` |
 | Let Continue edit files | `docs/tool-use-modes.md` and `docs/scoped-edits.md` |
 | Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
@@ -102,7 +103,7 @@ macOS:
 ./scripts/get-local-model-profile.macos.sh
 ```
 
-Then use `docs/local-model-selection.md` to choose the final model. Treat the script recommendation as a starting point, not proof that the model is safe for approved edits.
+Then use `docs/local-model-selection.md` to choose the final model. Treat the script recommendation as a starting point, not proof that the model is safe for approved edits. Use `docs/model-tool-use-validation.md` before trusting a model for Agent tools or approved write mode.
 
 To install this pack and create a local-only config using the recommended installed model, use `--auto-model-config` with the install script.
 
@@ -227,6 +228,7 @@ Before approving write mode, read:
 - `docs/tool-use-modes.md`
 - `docs/scoped-edits.md`
 - `docs/approved-tool-backed-changes.md`
+- `docs/model-tool-use-validation.md`
 
 ## Quick Validation
 
@@ -433,7 +435,7 @@ Representative outputs for major workflows. These examples show expected structu
 
 Workflow documentation for enterprise review practices, including MCP research, setup guidance, workflow examples, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
 
-Use this folder for deeper instructions after the quick start. Important guides include local model selection, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
+Use this folder for deeper instructions after the quick start. Important guides include local model selection, model tool-use validation, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
 
 ### `scripts`
 
@@ -470,6 +472,8 @@ Starter local model assumptions:
 - Ollama endpoint: default local Ollama endpoint
 
 For larger machines, higher-risk workflows, or Agent tool use, run the hardware profile helper and use `docs/local-model-selection.md` before changing models.
+
+For Agent tools or approved write mode, also run the read-only checklist in `docs/model-tool-use-validation.md`. A hardware recommendation is only a candidate until tool execution is validated in the editor or CLI surface you plan to use.
 
 For private endpoints, local model experiments, or machine-specific settings, use `docs/local-config-safety.md` before editing committed config files.
 
@@ -592,6 +596,7 @@ Runtime status:
 - `docs/scoped-edits.md`
 - `docs/local-config-safety.md`
 - `docs/local-model-selection.md`
+- `docs/model-tool-use-validation.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`
 - `docs/release.md`

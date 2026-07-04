@@ -22,6 +22,7 @@ This project follows a simple changelog format:
 - Added editor compatibility guidance for VS Code, VSCodium, project-local configs, duplicate rules, Agent mode, and CLI fallback testing.
 - Changed the committed Ollama model to a smaller starter sample and added install-script support for generating a local-only config from hardware profile recommendations.
 - Added roadmap tracking for optional online Ollama model discovery as candidate-only, local-validation-required future work.
+- Added model tool-use validation guidance and a sanitized evidence template for recording candidate, read-only validated, plan-validated, and approved-write-ready model status.
 
 ## 0.1.12 - 2026-07-03
 

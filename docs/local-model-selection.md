@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide helps users choose a local Ollama model for Continue based on machine capacity and workflow risk.
+This guide helps users choose a candidate local Ollama model for Continue based on machine capacity and workflow risk.
 
 The goal is not to chase the largest model. The goal is to choose the smallest reliable model that can complete the task safely.
 
@@ -38,6 +38,8 @@ Before choosing a model, check:
 Larger models usually need more memory and respond more slowly, but they may follow tool and planning instructions better.
 
 Use a larger coding model, such as `qwen3-coder:30b`, only when your hardware profile and read-only tool validation show that your setup can handle it.
+
+For the validation checklist, use `docs/model-tool-use-validation.md`.
 
 ## Hardware Profile Helper
 
@@ -141,7 +143,7 @@ The process is:
 
 In other words, the recommendation depends on both the local machine and the models available on the local Ollama server.
 
-The catalog is an opinionated starting point. The "right" model still needs validation for the workflow you want to run. Before approved write mode, run a read-only prompt and confirm that the model can follow instructions, use tools when needed, avoid raw tool-call JSON, and produce evidence-based output.
+The catalog is an opinionated starting point. The "right" model still needs validation for the workflow you want to run. Before approved write mode, run the checklist in `docs/model-tool-use-validation.md` and confirm that the model can follow instructions, use tools when needed, avoid raw tool-call JSON, and produce evidence-based output.
 
 When updating `config/model-recommendations.tsv`, remember that order matters. Put the preferred model patterns first within each tier, keep one fallback row per tier, and avoid machine-specific endpoints, local paths, or private model names.
 
@@ -239,7 +241,7 @@ After running the profile:
 1. Compare the output to the hardware tiers below.
 2. Review the recommended model.
 3. Start with read-only prompts.
-4. Test tool execution before approved write mode.
+4. Test tool execution with `docs/model-tool-use-validation.md` before approved write mode.
 5. Use smaller models for review-only work when hardware is limited.
 6. Use the strongest validated local model for tool-backed edits and high-risk workflows.
 
@@ -523,7 +525,7 @@ The helper scripts use `config/model-recommendations.tsv` when selecting an inst
 | Medium | Qwen coder 14B variants, `qwen3:14b`, `phi4:14b`, Qwen 9B variants | Planning, review, documentation, and small scoped edits after validation |
 | Low | `qwen2.5-coder:7b`, Qwen 9B variants, `llama3.1:8b`, `mistral:7b`, `llama3` | Read-only discovery, summarization, documentation drafting, and focused context-file workflows |
 
-These recommendations are intentionally conservative. A model is not approved for tool-backed edits until it successfully runs a read-only tool test in Continue.
+These recommendations are intentionally conservative. A model is not approved for tool-backed edits until it successfully runs a read-only tool test in Continue and the result is recorded using the validation evidence template.
 
 ## Context Length Guidance
 
@@ -563,7 +565,7 @@ Use ignored local config files for machine-specific changes:
 .continue/config.local.yaml
 ```
 
-If you test a new model, record only sanitized results in committed docs:
+If you test a new model, record only sanitized results using `examples/model-tool-use-validation.md`:
 
 - Model family and size
 - Workflow tested
@@ -575,7 +577,7 @@ If you test a new model, record only sanitized results in committed docs:
 
 1. Start with the committed starter model or the model selected by `--auto-model-config`.
 2. Run a read-only repository discovery prompt.
-3. Test tool execution with a safe list-files request.
+3. Test tool execution with `docs/model-tool-use-validation.md`.
 4. If tools work, try plan-only workflows.
 5. If planning is reliable, approve one scoped edit.
 6. Validate the edit.
@@ -606,6 +608,7 @@ Use a stronger model when:
 ## Related Docs
 
 - `docs/local-model-reliability.md`
+- `docs/model-tool-use-validation.md`
 - `docs/tool-use-modes.md`
 - `docs/approved-tool-backed-changes.md`
 - `docs/scoped-edits.md`

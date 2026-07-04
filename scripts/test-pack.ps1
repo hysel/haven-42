@@ -296,6 +296,30 @@ Invoke-PackTest "editor compatibility docs cover config and tool validation" {
     Assert-True -Condition ($content -like "*npx -y @continuedev/cli --config .continue/config.yaml*") -Message "Editor compatibility docs should include CLI fallback command."
 }
 
+Invoke-PackTest "model tool-use validation docs define evidence workflow" {
+    $docPath = Join-Path $repoRoot "docs/model-tool-use-validation.md"
+    $templatePath = Join-Path $repoRoot "examples/model-tool-use-validation.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Model tool-use validation doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $templatePath) -Message "Model tool-use evidence template should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $template = Get-Content -LiteralPath $templatePath -Raw
+
+    Assert-True -Condition ($doc -match "Candidate") -Message "Validation doc should define candidate status."
+    Assert-True -Condition ($doc -match "Read-only tool validated") -Message "Validation doc should define read-only tool validated status."
+    Assert-True -Condition ($doc -match "Approved-write ready") -Message "Validation doc should define approved-write ready status."
+    Assert-True -Condition ($doc -match "raw JSON") -Message "Validation doc should explain raw JSON tool-call failure."
+    Assert-True -Condition ($doc -match "examples/model-tool-use-validation.md") -Message "Validation doc should reference the evidence template."
+    Assert-True -Condition ($doc -match "Do not record") -Message "Validation doc should include sanitization rules."
+
+    Assert-True -Condition ($template -match "Model Tool-Use Validation Evidence") -Message "Evidence template should have the expected title."
+    Assert-True -Condition ($template -match "Provider: Ollama") -Message "Evidence template should record provider."
+    Assert-True -Condition ($template -match "Editor surface") -Message "Evidence template should record editor surface."
+    Assert-True -Condition ($template -match "MCP state") -Message "Evidence template should record MCP state."
+    Assert-True -Condition ($template -match "Sanitization Checklist") -Message "Evidence template should include sanitization checklist."
+}
+
 Invoke-PackTest "Continue file references are relative and resolvable" {
     $configPath = Join-Path $repoRoot ".continue/config.yaml"
     $config = Get-Content -LiteralPath $configPath -Raw

@@ -20,7 +20,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, install validation, and Windows/Linux/macOS commands. |
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
 | Milestone 11: Editor Surface Compatibility | In Progress | VS Code and VSCodium setup guidance is documented; editor-specific config loading and Agent mode validation remain. |
-| Milestone 12: Model Tool-Use Validation Evidence | In Progress | Starter model defaults and automatic local model config generation are in place; repeatable validation evidence remains. |
+| Milestone 12: Model Tool-Use Validation Evidence | In Progress | Starter model defaults, automatic local model config generation, read-only tool validation guidance, and sanitized evidence templates are in place; online discovery and broader evidence catalog decisions remain. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -325,12 +325,12 @@ Scope:
 
 - Keep committed model examples lightweight and treat larger models as validated candidates instead of setup requirements. Done.
 - Add install-script support for local-only model config generation from hardware profile recommendations. Done.
-- Define a repeatable read-only tool-use validation checklist.
-- Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.
-- Distinguish candidate model recommendations from tool-validated model status.
+- Define a repeatable read-only tool-use validation checklist. Done.
+- Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs. Done via sanitized evidence template.
+- Distinguish candidate model recommendations from tool-validated model status. Done.
 - Evaluate optional online model discovery for newer Ollama candidates while keeping the default workflow offline, local-first, and non-installing.
-- Add a sanitized evidence template for model tool-use validation results.
-- Decide whether validated model evidence should live in docs, examples, or a separate catalog.
+- Add a sanitized evidence template for model tool-use validation results. Done.
+- Decide whether validated model evidence should live in docs, examples, or a separate catalog. Done for current scope: keep the reusable template in examples and defer larger evidence catalogs until records accumulate.
 - Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.
 
 Exit criteria:
