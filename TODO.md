@@ -197,6 +197,7 @@
 - [x] Validate Agent mode and tool execution behavior in VS Code-compatible builds.
 - [x] Validate Agent mode and tool execution behavior in VSCodium.
 - [x] Document duplicate-rule troubleshooting for global plus project-local config conflicts.
+- [x] Make global config generation omit rules by default to prevent duplicate rule warnings.
 - [x] Keep Continue CLI `npx` fallback instructions available for editor-specific issues.
 
 ## Milestone 12: Model Tool-Use Validation Evidence

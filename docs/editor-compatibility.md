@@ -58,7 +58,7 @@ If the model or prompts are missing, Continue may be using a global/default conf
 Some editor setups load the global Continue config instead of the repository's
 project-local `.continue/config.yaml`. If that happens, use the installer's
 explicit global-config mode. It writes the global Continue config with absolute
-references to the target repository's installed rules, prompts, and docs.
+references to the target repository's installed prompts and docs.
 
 Windows PowerShell:
 
@@ -80,6 +80,10 @@ macOS:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --global-config
 ```
 
+Generated global config omits `rules:` by default. This is intentional. It keeps
+the global config from loading the same rules that the opened repository may
+also load from `.continue/rules`.
+
 The installer backs up the existing global config before replacing it. For
 machine-specific endpoints, pass an API base only during global config
 generation rather than committing it to the target repository:
@@ -93,6 +97,16 @@ generation rather than committing it to the target repository:
 
 Use the local endpoint value that applies to your machine. Do not commit private
 IP addresses, internal hostnames, or tokens into shared config files.
+
+Use `-GlobalConfigIncludeRules` only for a global-only setup where the editor
+will not also load project-local `.continue/rules`.
+
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -GlobalConfig `
+  -GlobalConfigIncludeRules
+```
 
 On Windows, the PowerShell installer writes absolute Continue file references in
 the `file://C:/path/...` form because some VSCodium setups do not resolve
@@ -148,9 +162,10 @@ Fix:
 
 1. Choose one active source of rules.
 2. Prefer the project-local `.continue/config.yaml` for repositories using this pack.
-3. Remove or disable duplicate rule entries from the global Continue config.
-4. Reload the editor window.
-5. Reopen Continue and confirm the warnings are gone.
+3. Regenerate the global Continue config without `-GlobalConfigIncludeRules`.
+4. Remove any stale `rules:` block from the global Continue config if it was created by an older installer.
+5. Reload the editor window.
+6. Reopen Continue and confirm the warnings are gone.
 
 ## Read-Only Editor Test
 

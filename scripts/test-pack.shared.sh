@@ -122,6 +122,7 @@ test_install_global_config_dry_run() {
   rm -f "$global_config"
   "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --dry-run --global-config --global-config-path "$global_config" --global-config-api-base http://127.0.0.1:11434 >/tmp/continue-install-global.out 2>&1 || return 1
   grep -q "Would write global Continue config" /tmp/continue-install-global.out || return 1
+  grep -q "Would omit rules from generated global config" /tmp/continue-install-global.out || return 1
   [ ! -e "$global_config" ] && [ ! -e "$temp_repo/.continue" ]
 }
 
@@ -133,9 +134,19 @@ test_install_global_config_writes_refs() {
   grep -q "Global Continue config generated" "$global_config" &&
     grep -q "apiBase: http://127.0.0.1:11434" "$global_config" &&
     grep -q "file:///" "$global_config" &&
-    grep -q "rules/general.md" "$global_config" &&
+    ! grep -q "rules/general.md" "$global_config" &&
+    ! grep -q "^rules:" "$global_config" &&
     grep -q "prompts/repository-discovery.md" "$global_config" &&
     ! grep -q "file://./" "$global_config"
+}
+
+test_install_global_config_rules_opt_in() {
+  temp_repo="$(mktemp -d)"
+  global_config="$(mktemp)"
+  rm -f "$global_config"
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --global-config --global-config-path "$global_config" --global-config-include-rules >/tmp/continue-install-global-rules.out 2>&1 || return 1
+  grep -q "^rules:" "$global_config" &&
+    grep -q "rules/general.md" "$global_config"
 }
 
 test_runtime_validation_missing_target() {
@@ -224,6 +235,7 @@ run_test "install script dry run does not modify target repository" test_install
 run_test "install script auto model config dry run is explicit" test_install_auto_model_dry_run
 run_test "install script global config dry run is explicit" test_install_global_config_dry_run
 run_test "install script writes global config with target references" test_install_global_config_writes_refs
+run_test "install script can include rules in global config by explicit opt-in" test_install_global_config_rules_opt_in
 run_test "runtime validation fails before CLI execution for missing target repository" test_runtime_validation_missing_target
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc

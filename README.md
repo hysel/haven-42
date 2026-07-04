@@ -304,12 +304,15 @@ Create a local-only config with automatic model selection:
 
 If your editor uses the global Continue config instead of the project-local
 `.continue/config.yaml`, install the pack and update the global config with
-absolute references to the target repository's installed rules, prompts, and
-docs:
+absolute references to the target repository's installed prompts and docs:
 
 ```powershell
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -GlobalConfig
 ```
+
+Generated global config omits `rules:` by default. This avoids duplicate rule
+warnings when the opened project also has `.continue/rules`. Use the default
+unless you are intentionally running from global config only.
 
 For a local-network Ollama server, keep the endpoint out of committed project
 files and pass it only when generating the global config:
@@ -319,6 +322,13 @@ files and pass it only when generating the global config:
   -TargetRepo "C:\path\to\your-project" `
   -GlobalConfig `
   -GlobalConfigApiBase "http://127.0.0.1:11434"
+```
+
+Only include rules in the global config when the editor will not also load the
+project-local `.continue` folder:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -GlobalConfig -GlobalConfigIncludeRules
 ```
 
 Linux:
@@ -367,6 +377,7 @@ The installer:
 - Validates that copied config file references resolve.
 - Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
 - Can update the global Continue config, with a backup, when an editor does not load project-local config files.
+- Omits rules from generated global config by default to avoid duplicate rule warnings.
 - Writes Windows global config file references as `file://C:/path/...` for VSCodium compatibility.
 - Refuses to install into this pack repository itself.
 
@@ -384,7 +395,7 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 | `cn` is not recognized | Use `npx @continuedev/cli --config .continue/config.yaml` or install the Continue CLI globally. |
 | The assistant prints raw JSON tool calls | Use a stronger tool-capable model or the runtime-context fallback in `docs/troubleshooting.md`. |
 | Linux or macOS validation script is not executable | Run `chmod +x scripts/*.sh`, then rerun the wrapper script. |
-| Duplicate rules appear in Continue | Make sure the rules are not installed in both the global Continue config and the project-local `.continue` folder. |
+| Duplicate rules appear in Continue | Regenerate the global config without `-GlobalConfigIncludeRules`; the default global config omits rules to avoid duplicates with project-local `.continue/rules`. |
 
 ## Beginner Safety Rules
 

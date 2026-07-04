@@ -125,6 +125,9 @@ config, combine local model selection with global config generation:
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig -GlobalConfig
 ```
 
+The generated global config omits `rules:` by default to prevent duplicate rule
+warnings when the project-local `.continue` folder is also present.
+
 Linux:
 
 ```bash

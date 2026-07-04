@@ -155,8 +155,9 @@ Common causes:
 Fixes:
 
 - Keep only one active config source for rules.
+- Regenerate the global config with the current installer. By default, global config generation omits `rules:` so project-local `.continue/rules` does not load twice.
 - If the default user config references workspace rules, remove or rename workspace config files so they do not end in `.yaml`.
-- If Continue auto-loads `.continue/rules`, remove the explicit `rules:` block from the default user config.
+- If Continue auto-loads `.continue/rules`, remove any stale explicit `rules:` block from the default user config.
 - Rename local backup files to extensions such as `.bak` instead of `.yaml`.
 
 Useful checks:
@@ -166,6 +167,10 @@ Get-ChildItem "$env:USERPROFILE\.continue" -Force -File -Filter "*.yaml"
 Get-ChildItem ".continue" -Force -File -Filter "*.yaml"
 Select-String -Path "$env:USERPROFILE\.continue\config.yaml" -Pattern "^rules:|file://.*rules"
 ```
+
+Expected default result after using `-GlobalConfig`: no `rules:` matches in the
+global config. Use `-GlobalConfigIncludeRules` only for a global-only setup where
+the editor will not also load project-local rules.
 
 ## Agent Mode Prints JSON Tool Calls
 
