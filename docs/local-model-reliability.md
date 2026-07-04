@@ -41,6 +41,7 @@ Recommended use:
 - Use `qwen3-coder:30b` or another validated tool-capable model for Agent mode and approved tool-backed changes.
 - Use smaller models only for review, planning, summarization, or context-file workflows unless tool execution is proven.
 - Keep model experiments in local config until they are validated.
+- Keep local defaults responsive first. The committed starter config uses `contextLength: 16384` and `maxTokens: 2048`; raise those values only when the workflow needs deeper context and latency remains acceptable.
 
 ## Tool-Use Validation Checklist
 

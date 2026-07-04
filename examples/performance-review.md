@@ -8,17 +8,18 @@ The pack itself has minimal runtime performance concerns because it is primarily
 
 - Users run prompts against source repositories.
 - Model endpoint is remote on the local network.
-- Default chat model is `qwen2.5-coder:7b`.
-- Default context length is `32768`.
+- Default chat model is `qwen3:14b`.
+- Default context length is `16384`.
+- Default max output token budget is `2048`.
 
 ## Findings
 
 ### Finding 1
 
 - Severity: Low
-- Evidence: `contextLength` is configured to `32768`.
+- Evidence: `contextLength` is configured to `16384` and `maxTokens` is configured to `2048`.
 - Impact: Large context windows can increase latency and memory pressure on the Ollama host.
-- Recommendation: Keep the current value for capable hosts; document lowering it for constrained systems.
+- Recommendation: Keep these responsive starter defaults for most home-PC setups; increase them only for workflows that need deeper context after validating latency.
 - Verification: Run a prompt on a representative repository and observe response latency.
 
 ## Bottleneck Hypotheses

@@ -14,8 +14,8 @@ models:
       - tool_use
     defaultCompletionOptions:
       temperature: 0.2
-      contextLength: 32768
-      maxTokens: 4096
+      contextLength: 16384
+      maxTokens: 2048
       keepAlive: 1800
   - name: Ollama Nomic Embed
     provider: ollama

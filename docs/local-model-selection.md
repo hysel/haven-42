@@ -22,6 +22,8 @@ Also install the embedding model:
 nomic-embed-text
 ```
 
+The committed starter config uses `contextLength: 16384` and `maxTokens: 2048` to keep local Agent responses more responsive on common home-PC setups. Treat larger values as an explicit tuning choice for larger repositories, not as the default starting point.
+
 ## Selection Inputs
 
 Before choosing a model, check:

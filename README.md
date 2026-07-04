@@ -59,6 +59,8 @@ The model names below are examples, not permanent requirements. Local model avai
 
 The committed config starts with a smaller sample model. If your machine can run a larger model, the hardware profile and install scripts can create a local-only config that selects a stronger installed model automatically.
 
+The starter config also uses responsive defaults for local machines: `contextLength: 16384` and `maxTokens: 2048`. Increase those values only after the model feels reliable and you need deeper context for larger repositories.
+
 Windows PowerShell:
 
 ```powershell
