@@ -57,7 +57,7 @@ Good shared values:
 
 ```yaml
 provider: ollama
-model: qwen3:14b
+model: qwen3.5:9b
 ```
 
 Avoid shared values like:

@@ -22,13 +22,16 @@ Apply these standards to all engineering, review, documentation, and planning wo
 - Identify assumptions, uncertainty, and tradeoffs.
 - Do not infer implementation details from repository type, framework conventions, or file names when file-read tools fail. If the relevant files cannot be read, stop and report `READ_TOOLS_UNAVAILABLE`.
 - Before making code or configuration changes, successfully read the exact files that will be changed and cite the observed evidence from those files.
+- Keep validation labels consistent with evidence. Do not call a setup `read-only tool validated`, `plan validated`, or `approved-write ready` when a failure signal such as `READ_TOOLS_UNAVAILABLE`, `WRITE_TOOLS_UNAVAILABLE`, `WRITE_NOT_APPLIED`, `PATH_AMBIGUOUS`, `WORKSPACE_UNAVAILABLE`, or `APPLY_TARGET_MISMATCH` is present.
 - Explain material risks before recommending risky changes.
 - Do not introduce secrets, credentials, tokens, private keys, or environment-specific confidential values.
 - Treat generated code and analysis as requiring human review.
 - When the user clearly approves implementation, use the available file edit/apply tools to make the scoped change. If write tools are unavailable, say so plainly instead of presenting a plan as if it were implemented.
 - Do not respond to an approved write request with "I can't directly edit files", "I cannot modify files", or "you can add this yourself" unless the Continue edit/apply tools are actually unavailable in the current surface. First attempt the edit/apply tool that Continue provides.
 - Before applying an edit, confirm the apply target matches the file that was requested, discovered, and read. If the tool proposes a different file, such as reading `README.md` but applying `src/main.py`, do not apply it; report `APPLY_TARGET_MISMATCH`.
-- After any approved file edit, verify the change before claiming success by checking the changed file content, `git diff`, or another available diff/status tool. If no diff or changed content is observed, report `WRITE_NOT_APPLIED` instead of saying the file was changed.
+- For existing-file write validation, prefer disabling or excluding `create_new_file` and pre-creating the smoke-test file so the assistant must use an edit tool. This avoids duplicate approvals where a model first creates a file and then edits or appends to it.
+- After any approved file edit, verify the change before claiming success by checking the changed file content, `git diff`, or another available diff/status tool. For write-readiness smoke tests, require an external shell or git check outside the assistant's own claimed readback before marking the model approved-write ready. If no diff or changed content is observed, report `WRITE_NOT_APPLIED` instead of saying the file was changed.
+- If a tool-shaped edit request such as `edit_file` is printed but no file content changes and no diff appears, treat it as `WRITE_NOT_APPLIED`.
 - If a command fails because it used the wrong shell or platform syntax, correct the command for the active platform before continuing.
 - If read tools, terminal commands, or file inspection fail repeatedly, stop and ask the user to fix tool access instead of making assumptions.
 
@@ -41,12 +44,16 @@ Apply these standards to all engineering, review, documentation, and planning wo
 - Hiding known limitations.
 - Making code or configuration recommendations from "typical" framework patterns when the relevant source/config files were not actually read.
 - Printing tool-call JSON or markup as a substitute for running tools.
+- Printing `edit_file` or other edit-call text as a substitute for an applied file change.
 - Saying the user must edit files manually when approved write tools are available.
 - Providing copy/paste implementation blocks instead of making the approved file edits when write tools are available.
 - Claiming a file was changed without verifying changed content or a non-empty diff.
+- Marking a model approved-write ready from assistant-only readback when the user's shell or git status cannot see the file.
+- Combining a successful validation status with a failure signal.
 - Creating a new file in a subfolder when the user named an existing root-level file.
 - Asking the user for a file path before attempting workspace discovery with available tools.
 - Applying a patch to a different file than the one requested, read, or reported.
+- Approving both `create_new_file` and `edit_existing_file` prompts for the same smoke-test target when testing existing-file edits; this can duplicate content.
 
 ## Review Checklist
 

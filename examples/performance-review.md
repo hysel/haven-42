@@ -8,7 +8,7 @@ The pack itself has minimal runtime performance concerns because it is primarily
 
 - Users run prompts against source repositories.
 - Model endpoint is remote on the local network.
-- Default chat model is `qwen3:14b`.
+- Default chat model is `qwen3.5:9b`.
 - Default context length is `16384`.
 - Default max output token budget is `2048`.
 

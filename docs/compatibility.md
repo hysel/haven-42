@@ -49,13 +49,13 @@ Known risk:
 
 Starter model assumptions:
 
-- Chat/edit/apply/tool workflows: `qwen3:14b`
+- Chat/edit/apply/tool workflows: `qwen3.5:9b`
 - Embeddings: `nomic-embed-text`
 
 Example local setup:
 
 ```powershell
-ollama pull qwen3:14b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 

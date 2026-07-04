@@ -6,6 +6,11 @@ Use this guide to prove whether a local model can safely use Continue tools befo
 
 Hardware profile scripts recommend candidate models. They do not prove tool safety.
 
+For faster model screening, run the automated Ollama API preflight in
+`docs/local-agent-model-testing.md` before spending time on manual Continue
+Apply testing. The preflight can find obvious tool-call, reasoning-tag, and
+exact-output failures, but it does not replace editor validation.
+
 ## Validation Status Levels
 
 Use these labels consistently:
@@ -15,9 +20,18 @@ Use these labels consistently:
 | Candidate | Recommended by hardware tier, installed-model detection, or manual choice. | Read-only prompts only. |
 | Read-only tool validated | The model successfully used tools to inspect a repository without modifying files. | Discovery, planning, review, and tool-backed read-only work. |
 | Plan validated | The model produced an evidence-based implementation plan without writing files. | Plan-only workflows and scoped change proposals. |
-| Approved-write ready | The model passed read-only tools, plan-only behavior, and one small approved edit with validation. | One scoped edit at a time after explicit user approval. |
+| Approved-write ready | The model passed read-only tools, plan-only behavior, and one small approved edit that was confirmed by an external shell or git check. | One scoped edit at a time after explicit user approval. |
 
 Do not treat a model as approved-write ready just because it is large, popular, installed, or recommended by `config/model-recommendations.tsv`.
+
+Validation labels must match the evidence. If any failure signal is present,
+the status must not be `Read-only tool validated`, `Plan validated`, or
+`Approved-write ready`.
+
+When using model lanes, keep `edit` and `apply` roles limited to the lane that
+has passed approved-write validation. Review and planning models may be strong
+read-only tools, but they should remain `chat` only until they pass the same
+external write verification.
 
 ## What To Record
 
@@ -34,6 +48,7 @@ Record only sanitized evidence:
 - read-only tool test result
 - plan-only test result
 - approved-write smoke test result, if performed
+- external shell or git verification result for write tests
 - failure mode, if any
 
 Do not record:
@@ -155,6 +170,10 @@ If the model can list files but cannot read file contents, do not mark it
 read-only tool validated for implementation workflows. The expected clear
 failure signal is `READ_TOOLS_UNAVAILABLE`.
 
+If `README read` or another content-read check is `no`, the status should be
+`read-only listing only` or failed read-content validation, not `read-only tool
+validated`.
+
 ## Step 4: Plan-Only Test
 
 Prompt:
@@ -176,18 +195,62 @@ Passing criteria:
 
 Run this only in a disposable repository, test branch, or small documentation-only task.
 
+For existing-file validation, temporarily set `create_new_file` to Excluded in
+Continue built-in tools. Keep `edit_existing_file` and `single_find_and_replace`
+as Ask First. Pre-create the target file so the model must edit an existing file
+instead of taking both create and edit paths.
+
+Pre-create the test file:
+
+Windows:
+
+```powershell
+Set-Content .\continue-agent-write-test.md "before"
+```
+
+Linux or macOS:
+
+```bash
+printf '%s\n' 'before' > ./continue-agent-write-test.md
+```
+
 Prompt:
 
 ```text
 Use approved write mode for this smoke test only.
 
-Create a file named continue-agent-write-test.md with exactly this content:
+Edit the existing file continue-agent-write-test.md in the opened repository root.
+Replace the entire file content with exactly this content:
 
 Continue Agent write test passed.
 
 Do not edit any other files.
-After editing, report the changed file and stop.
+Do not create a new file.
+Do not append.
+Do not create the file under src, docs, Properties, or any other subfolder.
+Use one edit tool call.
+Stop after the first Apply diff.
 Do not commit.
+```
+
+After the assistant reports success, verify from a normal terminal in the same
+repository. The assistant's own claim that it read the file back is not enough.
+
+Windows:
+
+```powershell
+git status --short
+Test-Path .\continue-agent-write-test.md
+Get-Content .\continue-agent-write-test.md
+git diff --check
+```
+
+Linux or macOS:
+
+```bash
+git status --short
+test -f ./continue-agent-write-test.md && cat ./continue-agent-write-test.md
+git diff --check
 ```
 
 Passing criteria:
@@ -202,13 +265,20 @@ Passing criteria:
 - The assistant does not make changes based on "typical" project patterns without file evidence.
 - The apply target matches the requested and read target file. If it does not match, record `APPLY_TARGET_MISMATCH`.
 - Only `continue-agent-write-test.md` changes.
+- `git status --short` shows `continue-agent-write-test.md` in the opened repository root.
+- A shell `Test-Path`/`test -f` check confirms the file exists on disk.
+- A shell `Get-Content`/`cat` check confirms the exact requested content.
+- Only one approval or Apply path is used.
 - The diff is small and reviewable.
-- The assistant verifies changed content or a non-empty diff before claiming success.
 - The model reports what changed.
 - Validation runs or a clear manual validation is recorded.
 - `git diff --check` passes.
 
 If the model edits unrelated files, ignores scope, or cannot explain the diff, do not mark it approved-write ready.
+
+If both `create_new_file` and `edit_existing_file` prompts appear for the same
+target, stop and record the failure signal as `DUPLICATE_APPROVALS`. If the
+final file contains the requested line twice, record `DUPLICATE_CONTENT`.
 
 If the model creates the requested file in the wrong folder, such as
 `src/README.md` when an existing root `README.md` was the intended target, do
@@ -219,8 +289,18 @@ such as reading `README.md` but proposing `src/main.py`, do not apply the patch
 and do not mark it approved-write ready. Record the failure as
 `APPLY_TARGET_MISMATCH`.
 
-If the model claims it changed a file but `git diff` is empty and a file reread
-does not show the requested content, record the result as `WRITE_NOT_APPLIED`.
+If the model claims it changed a file but `git status`, `git diff`, or an
+external shell file check cannot see the requested file/content, record the
+result as `WRITE_NOT_APPLIED`.
+
+If the model claims it created and read back a file, but a normal terminal
+cannot find that file in the repository root, record the result as
+`WRITE_NOT_APPLIED`. Treat the assistant's readback as insufficient evidence
+until the filesystem check passes.
+
+If the model prints an `edit_file` call or other edit-shaped text but the
+repository file does not change, also record the result as `WRITE_NOT_APPLIED`.
+Tool-call text is not a successful edit.
 
 If the model says it cannot read the relevant files, or it proposes a change
 based on assumptions rather than observed file content, mark the write test as
@@ -241,10 +321,12 @@ Before committing sanitized evidence:
 Use status labels precisely:
 
 - Candidate
+- Read-only listing only
 - Read-only tool validated
 - Plan validated
 - Approved-write ready
 - Failed read-only tool validation
+- Failed read-content validation
 - Failed plan-only validation
 - Failed approved-write smoke test
 

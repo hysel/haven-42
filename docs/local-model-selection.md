@@ -11,7 +11,7 @@ The goal is not to chase the largest model. The goal is to choose the smallest r
 The committed config uses a smaller starter example:
 
 ```text
-qwen3:14b
+qwen3.5:9b
 ```
 
 This model name is an example, not a permanent requirement. It is a more realistic starting point for a home PC than a 30B-class model.
@@ -141,6 +141,78 @@ macOS:
 ```
 
 This writes `.continue/config.local.yaml` in the target repository after installation. That file is local-only and should not be committed. It uses the profile script's recommended installed model when available, while the shared `.continue/config.yaml` remains a portable starter sample.
+
+## Model Lanes
+
+For real work, it is safer to use different models for different risk levels
+instead of giving every model permission to edit files.
+
+Use model lanes when you want a local-only config with clear model routing:
+
+| Lane | Purpose | Roles |
+| --- | --- | --- |
+| `1 - WRITE SAFE` | Small, validated edits after approval | `chat`, `edit`, `apply` |
+| `2 - PLAN ONLY` | Implementation plans and scoped change proposals | `chat` |
+| `3 - DEEP REVIEW` | Architecture, security, and maintainability reviews | `chat` |
+
+The generated config also keeps `nomic-embed-text` as the embedding model. It
+is not an Agent profile and does not receive `chat`, `edit`, or `apply` roles.
+
+## Why These Profiles
+
+These profiles are based on observed Continue Agent behavior, not only model
+size or benchmark reputation.
+
+| Profile | Model | Why it is used |
+| --- | --- | --- |
+| `1 - WRITE SAFE` | `qwen3.5:9b` | It produced the most reliable approved-write behavior in local testing. Use it for small, scoped edits after the editor Apply smoke test passes. |
+| `2 - PLAN ONLY` | `devstral-small-2:24b` | It is useful for planning and reasoning, but it should stay chat-only until approved-write behavior is validated in the target editor. |
+| `3 - DEEP REVIEW` | `qwen3-coder:30b` | It is useful for larger code review and architecture analysis, but write access is intentionally withheld because stronger analysis does not automatically mean safer patch application. |
+
+Other tested models were removed from the generated profiles when they failed
+tool support, produced raw tool-call text, leaked reasoning tags, behaved too
+slowly for the workflow, or required unreliable multi-approval Apply behavior.
+
+Treat these models as validated defaults for this pack, not permanent
+requirements. If a newer local model performs better, add it only after
+recording sanitized read, plan, and approved-write evidence.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -ModelLanes
+```
+
+Linux:
+
+```bash
+./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --model-lanes
+```
+
+macOS:
+
+```bash
+./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --model-lanes
+```
+
+If your editor uses the global Continue config, combine model lanes with global
+config generation and pass the endpoint only at install time:
+
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -ModelLanes `
+  -GlobalConfig `
+  -GlobalConfigApiBase "http://127.0.0.1:11434"
+```
+
+The generated lane model names are examples based on local validation. Keep
+private endpoints and machine-specific changes in local or global config files,
+not in committed shared config.
+
+Only the WRITE SAFE lane should have `edit` and `apply` roles. If another model
+later passes approved-write validation, update your local config intentionally
+and record sanitized evidence with `examples/model-tool-use-validation.md`.
 
 ## How Model Recommendations Work
 
@@ -536,9 +608,9 @@ The helper scripts use `config/model-recommendations.tsv` when selecting an inst
 
 | Resource tier | Preferred installed models | Best use |
 | --- | --- | --- |
-| High | `qwen3-coder:30b`, Qwen coder 30B/32B variants, `deepseek-coder-v2`, `devstral` 24B, Qwen 32B variants, or an installed starter model while validating upgrades | Coding, planning, review, and tool-backed workflows after tool-call validation |
-| Medium | Qwen coder 14B variants, `qwen3:14b`, `phi4:14b`, Qwen 9B variants | Planning, review, documentation, and small scoped edits after validation |
-| Low | `qwen2.5-coder:7b`, Qwen 9B variants, `llama3.1:8b`, `mistral:7b`, `llama3` | Read-only discovery, summarization, documentation drafting, and focused context-file workflows |
+| High | `qwen3.5:9b`, `devstral-small-2:24b`, `qwen3-coder:30b` | WRITE SAFE edits after validation, PLAN ONLY workflows, and DEEP REVIEW workflows |
+| Medium | `qwen3.5:9b`, `devstral-small-2:24b`, `qwen3-coder:30b` only when local hardware can run it acceptably | Keep write access limited to the validated WRITE SAFE profile |
+| Low | `qwen3.5:9b` after latency and write validation are acceptable; otherwise use read-only or plan-only workflows | Focused context, one scoped edit at a time, and no approved writes until validation passes |
 
 These recommendations are intentionally conservative. A model is not approved for tool-backed edits until it successfully runs a read-only tool test in Continue and the result is recorded using the validation evidence template.
 

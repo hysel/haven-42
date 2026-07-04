@@ -34,7 +34,7 @@ Agent mode tool execution needs a model that produces tool calls in the format C
 Validated behavior:
 
 - `qwen3-coder:30b` successfully enabled tool execution in the tested VSCodium, Continue, and Ollama setup.
-- `qwen2.5-coder:7b` produced raw JSON tool-call text instead of executable tool calls in the same setup.
+- A previously tested small coder model produced raw JSON tool-call text instead of executable tool calls in the same setup.
 
 Recommended use:
 

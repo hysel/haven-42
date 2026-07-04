@@ -5,7 +5,7 @@ Use this template to record sanitized model validation results. Keep private end
 ## Summary
 
 - Date:
-- Validation status: Candidate | Read-only tool validated | Plan validated | Approved-write ready | Failed
+- Validation status: Candidate | Read-only listing only | Read-only tool validated | Plan validated | Approved-write ready | Failed
 - Model:
 - Provider: Ollama | OpenAI-compatible local endpoint | Other
 - Editor surface: VS Code | VSCodium | Continue CLI | Other
@@ -34,15 +34,18 @@ Use this template to record sanitized model validation results. Keep private end
 | Path resolution and current-folder behavior | Not run | Confirm unqualified file names resolve from the opened repository root or current folder and do not create wrong-folder files. |
 | Workspace discovery with no active file | Not run | Confirm the model uses tools against `.` before asking the user for a path. |
 | Apply target alignment | Not run | Confirm the Apply target matches the requested and read target file. |
+| Duplicate approval guard | Not run | For existing-file validation, set `create_new_file` to Excluded and confirm the test does not produce `DUPLICATE_APPROVALS` or `DUPLICATE_CONTENT`. |
 | Plan-only behavior | Pass | Plan included affected files, risks, validation, rollback, and definition of done. |
 | Platform-aware command use | Not run | Confirm Windows uses PowerShell commands and Linux/macOS use shell commands. |
-| Approved-write smoke test | Not run | Leave as not run unless tested in a safe disposable branch or repository. Require changed content or a non-empty diff before marking pass. |
+| Approved-write smoke test | Not run | Leave as not run unless tested in a safe disposable branch or repository. Require external git status plus file existence/content checks before marking pass. |
+| External write verification | Not run | Confirm the requested file exists on disk and contains the exact content from PowerShell, Bash, or another normal terminal. |
 
 ## Failure Mode
 
 Use this section only when something failed.
 
 - Failed step:
+- Failure signal:
 - Observed behavior:
 - Expected behavior:
 - Safe fallback used:
@@ -53,6 +56,7 @@ Use this section only when something failed.
 Choose one:
 
 - Keep as candidate only.
+- Mark as read-only listing only.
 - Mark as read-only tool validated.
 - Mark as plan validated.
 - Mark as approved-write ready for one scoped edit at a time.

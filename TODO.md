@@ -208,6 +208,9 @@
 - [x] Require file-content read validation before treating a setup as ready for real code changes.
 - [x] Define a repeatable approved-write smoke test for validating edit/apply tools.
 - [x] Require post-edit content or diff verification before accepting claimed file changes.
+- [x] Require external shell or git verification before marking approved-write smoke tests as passed.
+- [x] Document duplicate approval mitigation by excluding `create_new_file` during existing-file write validation.
+- [x] Add installer-supported model lanes so only validated write models receive edit/apply roles.
 - [x] Require current-folder path resolution before approved edits.
 - [x] Require workspace discovery before asking users for file paths.
 - [x] Require Apply target alignment before approved edits.
@@ -215,6 +218,8 @@
 - [x] Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.
 - [x] Distinguish candidate model recommendations from tool-validated model status.
 - [ ] Evaluate optional online Ollama model discovery for newer candidates without changing the offline default flow.
+- [ ] Add a post-validation model installer that can download the selected validated model automatically and update local-only Continue config without committing private endpoints.
 - [x] Add a sanitized evidence template for model tool-use validation results.
+- [x] Add local Ollama API preflight tooling for Agent model pull, load/unload, tool-call, and exact-output checks.
 - [x] Decide where validated model evidence should live for current scope.
 - [x] Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.

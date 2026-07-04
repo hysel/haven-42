@@ -36,6 +36,12 @@ This project follows a simple changelog format:
 - Added current-folder path resolution guidance so Agent mode does not create wrong-folder files for unqualified targets.
 - Added workspace discovery guidance so Agent mode tries tools against the opened folder before asking users for explicit file paths.
 - Added Apply target alignment guidance so users do not apply patches that target a different file than the one requested or read.
+- Clarified that printed `edit_file` text without a real diff is `WRITE_NOT_APPLIED`.
+- Clarified that validation status labels must not claim success when a failure signal is present.
+- Added external shell and git verification requirements for approved-write validation so assistant-only readback cannot create false positive write passes.
+- Added local Agent model pull and preflight scripts for Ollama API-level tool-call, load/unload, and exact-content validation before manual Continue Apply testing.
+- Added duplicate approval and duplicate content guidance for existing-file Continue Agent write validation.
+- Added installer-supported model profiles for separating WRITE SAFE, PLAN ONLY, and DEEP REVIEW Agent roles while keeping embeddings separate.
 
 ### Changed
 
@@ -44,6 +50,8 @@ This project follows a simple changelog format:
 - Added `-GlobalConfigIncludeRules` and `--global-config-include-rules` for explicit global-only rule loading when needed.
 - Added `READ_TOOLS_UNAVAILABLE` guidance for cases where the model can list files but cannot read the source or config files it wants to change.
 - Added `WRITE_NOT_APPLIED` guidance for cases where the model claims an edit but the file content or git diff does not show it.
+- Clarified that claimed file readback is not enough for approved-write readiness unless `git status` and shell file checks can see the change.
+- Documented that automated local model preflight is candidate screening only and does not replace editor Apply validation.
 - Added `PATH_AMBIGUOUS` guidance for cases where the correct edit target cannot be proven from the opened repository folder.
 - Added `WORKSPACE_UNAVAILABLE` guidance for cases where Continue cannot discover the opened workspace.
 - Added `APPLY_TARGET_MISMATCH` guidance for cases where the Continue Apply panel targets an unrelated file.
@@ -146,7 +154,7 @@ This project follows a simple changelog format:
 - Split hardware profiling into Windows PowerShell, Linux shell, and macOS shell helpers with Intel GPU detection guidance.
 - Expanded README and local model selection documentation with detailed hardware profile script usage, prerequisites, output interpretation, and docs-folder guidance.
 - Documented Windows local `file://C:/...` path behavior, duplicate-rule causes, raw JSON tool-call failures, and runtime-context fallback guidance from VSCodium/Ollama validation.
-- Changed the default chat/edit/apply model to `qwen3-coder:30b` after validation showed it supports Continue Agent tool execution more reliably than `qwen2.5-coder:7b`.
+- Changed the default chat/edit/apply model after validation showed the previous small coder model emitted raw tool-call text in the tested Continue setup.
 
 ## 0.1.6 - 2026-07-02
 

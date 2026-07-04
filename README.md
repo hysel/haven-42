@@ -17,6 +17,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
 | Validate whether a model can use tools | `docs/model-tool-use-validation.md` |
+| Automate local model preflight tests | `docs/local-agent-model-testing.md` |
 | Test VS Code or VSCodium setup | `docs/editor-compatibility.md` |
 | Let Continue edit files | `docs/tool-use-modes.md` and `docs/scoped-edits.md` |
 | Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
@@ -64,14 +65,14 @@ The starter config also uses responsive defaults for local machines: `contextLen
 Windows PowerShell:
 
 ```powershell
-ollama pull qwen3:14b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 
 Linux or macOS:
 
 ```bash
-ollama pull qwen3:14b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 
@@ -82,6 +83,9 @@ ollama pull qwen3-coder:30b
 ```
 
 The model helper scripts use `config/model-recommendations.tsv` as the curated model priority list. You usually do not need to edit it during setup. Update it only after validating a better local model for your hardware and workflow.
+
+To pull and preflight Agent model candidates through the Ollama API before
+manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
 ## Model Selection
 
@@ -309,6 +313,12 @@ Create a local-only config with automatic model selection:
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig
 ```
 
+Create a local-only config with safer model lanes:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -ModelLanes
+```
+
 If your editor uses the global Continue config instead of the project-local
 `.continue/config.yaml`, install the pack and update the global config with
 absolute references to the target repository's installed prompts and docs:
@@ -327,6 +337,16 @@ files and pass it only when generating the global config:
 ```powershell
 .\scripts\install-continue-pack.ps1 `
   -TargetRepo "C:\path\to\your-project" `
+  -GlobalConfig `
+  -GlobalConfigApiBase "http://127.0.0.1:11434"
+```
+
+For a global config that uses model lanes and a local-network Ollama server:
+
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -ModelLanes `
   -GlobalConfig `
   -GlobalConfigApiBase "http://127.0.0.1:11434"
 ```
@@ -350,6 +370,12 @@ Create a local-only config with automatic model selection:
 ./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --auto-model-config
 ```
 
+Create a local-only config with safer model lanes:
+
+```bash
+./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --model-lanes
+```
+
 Update the global Continue config when the editor does not load the project-local
 config:
 
@@ -369,6 +395,12 @@ Create a local-only config with automatic model selection:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --auto-model-config
 ```
 
+Create a local-only config with safer model lanes:
+
+```bash
+./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --model-lanes
+```
+
 Update the global Continue config when the editor does not load the project-local
 config:
 
@@ -383,6 +415,7 @@ The installer:
 - Backs up an existing target `.continue` folder before replacing it.
 - Validates that copied config file references resolve.
 - Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
+- Can create `.continue/config.local.yaml` with three Agent model profiles: WRITE SAFE, PLAN ONLY, and DEEP REVIEW, plus the embedding model.
 - Can update the global Continue config, with a backup, when an editor does not load project-local config files.
 - Omits rules from generated global config by default to avoid duplicate rule warnings.
 - Writes Windows global config file references as `file://C:/path/...` for VSCodium compatibility.
@@ -403,6 +436,9 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 | The assistant prints raw JSON tool calls | Use a stronger tool-capable model or the runtime-context fallback in `docs/troubleshooting.md`. |
 | The assistant creates a file in the wrong folder | Stop, check `git status --short --untracked-files=all`, remove only the wrong test artifact, and use the `PATH_AMBIGUOUS` guidance in `docs/troubleshooting.md`. |
 | The Apply panel targets the wrong file | Do not click Apply; treat it as `APPLY_TARGET_MISMATCH` and use `docs/troubleshooting.md`. |
+| The assistant prints `edit_file` but nothing changes | Treat it as `WRITE_NOT_APPLIED`; tool-call text is not proof that the file changed. |
+| The assistant says it created and read back a file, but PowerShell or shell cannot find it | Treat it as `WRITE_NOT_APPLIED`; approved-write readiness requires external `git status` plus file existence/content checks. |
+| Two approval prompts duplicate the same line | For existing-file validation, temporarily set `create_new_file` to Excluded, pre-create `continue-agent-write-test.md`, and approve only one edit diff. |
 | The assistant says no file is open and asks for a path | Keep the repository folder open in the editor and use the `WORKSPACE_UNAVAILABLE` guidance in `docs/troubleshooting.md`. |
 | Linux or macOS validation script is not executable | Run `chmod +x scripts/*.sh`, then rerun the wrapper script. |
 | Duplicate rules appear in Continue | Regenerate the global config without `-GlobalConfigIncludeRules`; the default global config omits rules to avoid duplicates with project-local `.continue/rules`. |
@@ -420,6 +456,8 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 - When you name a file without a folder, the assistant should assume the currently opened repository folder first. If it creates a duplicate such as `src/README.md` instead of editing the existing `README.md`, treat that as a failed write test.
 - If no file is open, the assistant should still try to discover the opened workspace with tools before asking you for a path.
 - Before clicking Apply, confirm the Apply target is the same file the assistant read and said it would change.
+- For existing-file write tests, exclude `create_new_file` and pre-create the target file so the assistant must use one edit path. Two approvals for the same target can duplicate content.
+- Treat any validation answer that combines a failure signal with a successful status label as failed or limited; for example, `READ_TOOLS_UNAVAILABLE` cannot be `read-only tool validated`.
 
 ## Do Not Commit These
 
@@ -501,7 +539,7 @@ Representative outputs for major workflows. These examples show expected structu
 
 Workflow documentation for enterprise review practices, including MCP research, setup guidance, workflow examples, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
 
-Use this folder for deeper instructions after the quick start. Important guides include local model selection, model tool-use validation, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
+Use this folder for deeper instructions after the quick start. Important guides include local model selection, local Agent model testing, model tool-use validation, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
 
 ### `scripts`
 
@@ -533,13 +571,22 @@ The standard workflow is:
 
 Starter local model assumptions:
 
-- Chat/edit/apply/tool workflows: `qwen3:14b` as a sample starter model
+- Chat/edit/apply/tool workflows: `qwen3.5:9b` as the current WRITE SAFE starter candidate
 - Embeddings: `nomic-embed-text`
 - Ollama endpoint: default local Ollama endpoint
 
 For larger machines, higher-risk workflows, or Agent tool use, run the hardware profile helper and use `docs/local-model-selection.md` before changing models.
 
-For Agent tools or approved write mode, also run the read-only checklist in `docs/model-tool-use-validation.md`. A hardware recommendation is only a candidate until tool execution is validated in the editor or CLI surface you plan to use.
+For Agent tools or approved write mode, also run the local model preflight in
+`docs/local-agent-model-testing.md` and the read-only checklist in
+`docs/model-tool-use-validation.md`. A hardware recommendation is only a
+candidate until tool execution is validated in the editor or CLI surface you
+plan to use.
+
+For mixed-model workflows, use model profiles instead of giving every model
+`edit` and `apply` roles. Only the `1 - WRITE SAFE` lane should have
+`chat`, `edit`, and `apply`; planning and review lanes should stay
+`chat` only until they pass approved-write validation.
 
 For private endpoints, local model experiments, or machine-specific settings, use `docs/local-config-safety.md` before editing committed config files.
 
@@ -570,14 +617,14 @@ Example Ollama setup:
 Windows PowerShell:
 
 ```powershell
-ollama pull qwen3:14b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 
 Linux or macOS:
 
 ```bash
-ollama pull qwen3:14b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 

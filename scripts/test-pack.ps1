@@ -197,14 +197,15 @@ Invoke-PackTest "model recommendation catalog has valid schema" {
     }
 
     $catalogText = Get-Content -LiteralPath $catalogPath -Raw
-    Assert-True -Condition ($catalogText -match "High\|qwen3:14b") -Message "High-resource catalog should still prefer an installed starter model before fallback pulls."
+    Assert-True -Condition ($catalogText -match "WRITE SAFE lane") -Message "Catalog should include the validated WRITE SAFE profile model."
+    Assert-True -Condition ($catalogText -notmatch "rejected starter model") -Message "Catalog should avoid rejected starter-model guidance."
 }
 
 Invoke-PackTest "committed config uses a starter sample model" {
     $configPath = Join-Path $repoRoot ".continue/config.yaml"
     $config = Get-Content -LiteralPath $configPath -Raw
 
-    Assert-True -Condition ($config -match "model: qwen3:14b") -Message "Committed config should use the starter sample model."
+    Assert-True -Condition ($config -match "model: qwen3\.5:9b") -Message "Committed config should use the validated WRITE SAFE starter candidate."
     Assert-True -Condition ($config -notmatch "model: qwen3-coder:30b") -Message "Committed config should not require the high-resource sample model."
 }
 
@@ -316,16 +317,20 @@ Invoke-PackTest "editor compatibility docs cover config and tool validation" {
 
 Invoke-PackTest "model tool-use validation docs define evidence workflow" {
     $docPath = Join-Path $repoRoot "docs/model-tool-use-validation.md"
+    $localAgentTestingPath = Join-Path $repoRoot "docs/local-agent-model-testing.md"
     $templatePath = Join-Path $repoRoot "examples/model-tool-use-validation.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Model tool-use validation doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $localAgentTestingPath) -Message "Local Agent model testing doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $templatePath) -Message "Model tool-use evidence template should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $localAgentTesting = Get-Content -LiteralPath $localAgentTestingPath -Raw
     $template = Get-Content -LiteralPath $templatePath -Raw
 
     Assert-True -Condition ($doc -match "Candidate") -Message "Validation doc should define candidate status."
     Assert-True -Condition ($doc -match "Read-only tool validated") -Message "Validation doc should define read-only tool validated status."
+    Assert-True -Condition ($doc -match "read-only listing only") -Message "Validation doc should define read-only listing only status."
     Assert-True -Condition ($doc -match "Approved-write ready") -Message "Validation doc should define approved-write ready status."
     Assert-True -Condition ($doc -match "raw JSON") -Message "Validation doc should explain raw JSON tool-call failure."
     Assert-True -Condition ($doc -match "read file contents") -Message "Validation doc should require file-content reading for implementation workflows."
@@ -334,15 +339,36 @@ Invoke-PackTest "model tool-use validation docs define evidence workflow" {
     Assert-True -Condition ($doc -match "PATH_AMBIGUOUS") -Message "Validation doc should document ambiguous target path handling."
     Assert-True -Condition ($doc -match "WORKSPACE_UNAVAILABLE") -Message "Validation doc should document workspace discovery failure handling."
     Assert-True -Condition ($doc -match "APPLY_TARGET_MISMATCH") -Message "Validation doc should document apply target mismatch handling."
+    Assert-True -Condition ($doc -match "create_new_file") -Message "Validation doc should cover disabling create_new_file during existing-file write validation."
+    Assert-True -Condition ($doc -match "DUPLICATE_APPROVALS") -Message "Validation doc should document duplicate approval handling."
+    Assert-True -Condition ($doc -match "DUPLICATE_CONTENT") -Message "Validation doc should document duplicate content handling."
+    Assert-True -Condition ($doc -match "edit_file") -Message "Validation doc should explain printed edit-call text without a diff."
+    Assert-True -Condition ($doc -match "Validation labels must match the evidence") -Message "Validation doc should require status/failure consistency."
     Assert-True -Condition ($doc -match "opened repository root or current folder") -Message "Validation doc should require current-folder path resolution."
-    Assert-True -Condition ($doc -match "non-empty diff") -Message "Validation doc should require changed-content or diff verification."
+    Assert-True -Condition ($doc -match "external shell or git check") -Message "Validation doc should require external write verification."
+    Assert-True -Condition ($doc -match "Test-Path") -Message "Validation doc should include Windows external file verification."
+    Assert-True -Condition ($doc -match "test -f") -Message "Validation doc should include Linux/macOS external file verification."
     Assert-True -Condition ($doc -match "active shell and operating system") -Message "Validation doc should require platform-aware command use."
     Assert-True -Condition ($doc -match "continue-agent-write-test\.md") -Message "Validation doc should include the approved-write smoke test file."
     Assert-True -Condition ($doc -match "I can't directly edit files") -Message "Validation doc should cover refusal-to-edit failure mode."
     Assert-True -Condition ($doc -match "examples/model-tool-use-validation.md") -Message "Validation doc should reference the evidence template."
     Assert-True -Condition ($doc -match "Do not record") -Message "Validation doc should include sanitization rules."
+    Assert-True -Condition ($doc -match "docs/local-agent-model-testing.md") -Message "Validation doc should reference automated local model preflight."
+
+    Assert-True -Condition ($localAgentTesting -match "pull candidate Ollama models") -Message "Local Agent testing doc should describe model pulling."
+    Assert-True -Condition ($localAgentTesting -match "load a model") -Message "Local Agent testing doc should describe model loading."
+    Assert-True -Condition ($localAgentTesting -match "unload a model") -Message "Local Agent testing doc should describe model unloading."
+    Assert-True -Condition ($localAgentTesting -match "tool-call behavior") -Message "Local Agent testing doc should describe tool-call checks."
+    Assert-True -Condition ($localAgentTesting -match "exact-content output") -Message "Local Agent testing doc should describe exact output checks."
+    Assert-True -Condition ($localAgentTesting -match "does not replace Continue UI Apply validation") -Message "Local Agent testing doc should keep manual Apply validation boundary."
+    Assert-True -Condition ($localAgentTesting -match "MODEL_DOES_NOT_SUPPORT_TOOLS") -Message "Local Agent testing doc should list model tool support failure."
+    Assert-True -Condition ($localAgentTesting -match "THINK_TAG_LEAK") -Message "Local Agent testing doc should list reasoning tag leak failure."
+    Assert-True -Condition ($localAgentTesting -match "runtime-validation-output") -Message "Local Agent testing doc should document report output."
+    Assert-True -Condition ($doc -match "model lanes") -Message "Validation doc should explain model lanes role boundaries."
 
     Assert-True -Condition ($template -match "Model Tool-Use Validation Evidence") -Message "Evidence template should have the expected title."
+    Assert-True -Condition ($template -match "Read-only listing only") -Message "Evidence template should include read-only listing only status."
+    Assert-True -Condition ($template -match "Failure signal") -Message "Evidence template should record failure signals."
     Assert-True -Condition ($template -match "Provider: Ollama") -Message "Evidence template should record provider."
     Assert-True -Condition ($template -match "Editor surface") -Message "Evidence template should record editor surface."
     Assert-True -Condition ($template -match "MCP state") -Message "Evidence template should record MCP state."
@@ -350,7 +376,9 @@ Invoke-PackTest "model tool-use validation docs define evidence workflow" {
     Assert-True -Condition ($template -match "Path resolution and current-folder behavior") -Message "Evidence template should record current-folder path validation."
     Assert-True -Condition ($template -match "Workspace discovery with no active file") -Message "Evidence template should record no-active-file workspace discovery validation."
     Assert-True -Condition ($template -match "Apply target alignment") -Message "Evidence template should record apply target alignment validation."
-    Assert-True -Condition ($template -match "non-empty diff") -Message "Evidence template should require diff verification for write tests."
+    Assert-True -Condition ($template -match "Duplicate approval guard") -Message "Evidence template should include duplicate approval guard testing."
+    Assert-True -Condition ($template -match "DUPLICATE_APPROVALS") -Message "Evidence template should record duplicate approval failure signals."
+    Assert-True -Condition ($template -match "External write verification") -Message "Evidence template should require external write verification for write tests."
     Assert-True -Condition ($template -match "Platform-aware command use") -Message "Evidence template should record platform-aware command validation."
     Assert-True -Condition ($template -match "Sanitization Checklist") -Message "Evidence template should include sanitization checklist."
 }
@@ -372,11 +400,15 @@ Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     Assert-True -Condition ($generalRule -match "PATH_AMBIGUOUS") -Message "General rules should require ambiguous path failure reporting."
     Assert-True -Condition ($generalRule -match "WORKSPACE_UNAVAILABLE") -Message "General rules should require workspace discovery failure reporting."
     Assert-True -Condition ($generalRule -match "APPLY_TARGET_MISMATCH") -Message "General rules should require apply target mismatch reporting."
+    Assert-True -Condition ($generalRule -match "create_new_file") -Message "General rules should cover duplicate approval mitigation for create_new_file."
+    Assert-True -Condition ($generalRule -match "edit_file") -Message "General rules should reject printed edit-call text without applied changes."
+    Assert-True -Condition ($generalRule -match "Keep validation labels consistent with evidence") -Message "General rules should require status/failure consistency."
     Assert-True -Condition ($generalRule -match "no file is open") -Message "General rules should handle no-active-file workspace discovery."
     Assert-True -Condition ($generalRule -match "src/main\.py") -Message "General rules should guard against unrelated apply targets."
     Assert-True -Condition ($generalRule -match "current workspace root") -Message "General rules should define current workspace root path resolution."
     Assert-True -Condition ($generalRule -match "src/README\.md") -Message "General rules should guard against wrong-folder README creation."
     Assert-True -Condition ($generalRule -match "git diff") -Message "General rules should require diff verification after edits."
+    Assert-True -Condition ($generalRule -match "external shell or git check") -Message "General rules should require external write verification for readiness."
     Assert-True -Condition ($generalRule -match "typical") -Message "General rules should forbid typical-pattern implementation guesses."
     Assert-True -Condition ($generalRule -match "Select-String") -Message "General rules should include PowerShell-native search guidance."
     Assert-True -Condition ($generalRule -match "write tools are unavailable") -Message "General rules should require clear write-tool failure reporting."
@@ -388,11 +420,20 @@ Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     Assert-True -Condition ($toolModes -match "PATH_AMBIGUOUS") -Message "Tool-use docs should define the ambiguous target path signal."
     Assert-True -Condition ($toolModes -match "WORKSPACE_UNAVAILABLE") -Message "Tool-use docs should define workspace discovery failure."
     Assert-True -Condition ($toolModes -match "APPLY_TARGET_MISMATCH") -Message "Tool-use docs should define apply target mismatch."
+    Assert-True -Condition ($toolModes -match "create_new_file") -Message "Tool-use docs should include create_new_file guidance for existing-file validation."
+    Assert-True -Condition ($toolModes -match "DUPLICATE_APPROVALS") -Message "Tool-use docs should define duplicate approval handling."
+    Assert-True -Condition ($toolModes -match "DUPLICATE_CONTENT") -Message "Tool-use docs should define duplicate content handling."
     Assert-True -Condition ($toolModes -match "opened repository root or current folder") -Message "Tool-use docs should require current-folder path resolution."
     Assert-True -Condition ($toolModes -match "continue-agent-write-test\.md") -Message "Tool-use docs should include approved-write smoke test."
+    Assert-True -Condition ($toolModes -match "Assistant-only readback is not enough") -Message "Tool-use docs should require external verification beyond assistant readback."
+    Assert-True -Condition ($toolModes -match "Test-Path") -Message "Tool-use docs should include Windows write verification."
+    Assert-True -Condition ($toolModes -match "test -f") -Message "Tool-use docs should include Linux/macOS write verification."
     Assert-True -Condition ($approvedChanges -match "Safe write smoke-test prompt") -Message "Approved changes docs should include write smoke-test prompt."
     Assert-True -Condition ($approvedChanges -match "PATH_AMBIGUOUS") -Message "Approved changes docs should cover ambiguous target paths."
     Assert-True -Condition ($approvedChanges -match "git diff") -Message "Approved changes docs should require diff inspection."
+    Assert-True -Condition ($approvedChanges -match "Assistant-only readback is not enough") -Message "Approved changes docs should require external write verification."
+    Assert-True -Condition ($approvedChanges -match "Test-Path") -Message "Approved changes docs should include Windows write verification."
+    Assert-True -Condition ($approvedChanges -match "test -f") -Message "Approved changes docs should include Linux/macOS write verification."
     Assert-True -Condition ($approvedChanges -match "Remove-Item") -Message "Approved changes docs should include Windows cleanup."
     Assert-True -Condition ($readme -match "write tools are not validated yet") -Message "README should explain unvalidated write-tool behavior."
     Assert-True -Condition ($readme -match "read file contents") -Message "README should require content-read validation before real code changes."
@@ -400,6 +441,13 @@ Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     Assert-True -Condition ($readme -match "currently opened repository folder") -Message "README should explain current-folder path resolution."
     Assert-True -Condition ($readme -match "WORKSPACE_UNAVAILABLE") -Message "README should reference workspace discovery failure guidance."
     Assert-True -Condition ($readme -match "APPLY_TARGET_MISMATCH") -Message "README should reference apply target mismatch guidance."
+    Assert-True -Condition ($readme -match "create_new_file") -Message "README should mention create_new_file exclusion for existing-file write tests."
+    Assert-True -Condition ($readme -match "Two approval prompts") -Message "README should cover duplicate approval prompts."
+    Assert-True -Condition ($readme -match "edit_file") -Message "README should mention printed edit-call text without real changes."
+    Assert-True -Condition ($readme -match "created and read back a file") -Message "README should cover false positive write readback."
+    Assert-True -Condition ($readme -match "READ_TOOLS_UNAVAILABLE.*read-only tool validated") -Message "README should explain failure signals cannot be successful status labels."
+    Assert-True -Condition ($readme -match "ModelLanes") -Message "README should document model lanes installer option."
+    Assert-True -Condition ($readme -match "1 - WRITE SAFE") -Message "README should describe WRITE SAFE lane guidance."
 
     $troubleshootingPath = Join-Path $repoRoot "docs/troubleshooting.md"
     $troubleshooting = Get-Content -LiteralPath $troubleshootingPath -Raw
@@ -409,12 +457,28 @@ Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     Assert-True -Condition ($troubleshooting -match "READ_TOOLS_UNAVAILABLE") -Message "Troubleshooting should document the read-tools unavailable signal."
     Assert-True -Condition ($troubleshooting -match "Agent Claims A Change But Git Diff Is Empty") -Message "Troubleshooting should cover claimed-but-missing writes."
     Assert-True -Condition ($troubleshooting -match "WRITE_NOT_APPLIED") -Message "Troubleshooting should document the write-not-applied signal."
+    Assert-True -Condition ($troubleshooting -match "Test-Path") -Message "Troubleshooting should include external file existence verification."
+    Assert-True -Condition ($troubleshooting -match "Assistant-only readback is not enough") -Message "Troubleshooting should warn against assistant-only readback."
     Assert-True -Condition ($troubleshooting -match "Agent Creates A File In The Wrong Folder") -Message "Troubleshooting should cover wrong-folder file creation."
     Assert-True -Condition ($troubleshooting -match "PATH_AMBIGUOUS") -Message "Troubleshooting should document ambiguous target path handling."
     Assert-True -Condition ($troubleshooting -match "Agent Says No File Is Open And Asks For A Path") -Message "Troubleshooting should cover no-active-file path requests."
     Assert-True -Condition ($troubleshooting -match "WORKSPACE_UNAVAILABLE") -Message "Troubleshooting should document workspace discovery failure handling."
     Assert-True -Condition ($troubleshooting -match "Apply Target Does Not Match The Requested File") -Message "Troubleshooting should cover apply target mismatches."
     Assert-True -Condition ($troubleshooting -match "APPLY_TARGET_MISMATCH") -Message "Troubleshooting should document apply target mismatch handling."
+    Assert-True -Condition ($troubleshooting -match "Duplicate Approval Prompts Or Duplicate Content") -Message "Troubleshooting should cover duplicate approval prompts."
+    Assert-True -Condition ($troubleshooting -match "DUPLICATE_APPROVALS") -Message "Troubleshooting should document duplicate approval handling."
+    Assert-True -Condition ($troubleshooting -match "DUPLICATE_CONTENT") -Message "Troubleshooting should document duplicate content handling."
+    Assert-True -Condition ($troubleshooting -match "edit_file") -Message "Troubleshooting should cover printed edit-call text without a diff."
+    Assert-True -Condition ($troubleshooting -match "read-only listing only") -Message "Troubleshooting should classify list-only access separately from validated reads."
+
+    $localModelSelectionPath = Join-Path $repoRoot "docs/local-model-selection.md"
+    $localModelSelection = Get-Content -LiteralPath $localModelSelectionPath -Raw
+    Assert-True -Condition ($localModelSelection -match "Model Lanes") -Message "Local model selection docs should include model lanes guidance."
+    Assert-True -Condition ($localModelSelection -match "Why These Profiles") -Message "Local model selection docs should explain why the default profiles were chosen."
+    Assert-True -Condition ($localModelSelection -match "WRITE SAFE") -Message "Local model selection docs should describe WRITE SAFE lane."
+    Assert-True -Condition ($localModelSelection -match "PLAN ONLY") -Message "Local model selection docs should describe PLAN ONLY lane."
+    Assert-True -Condition ($localModelSelection -match "DEEP REVIEW") -Message "Local model selection docs should describe DEEP REVIEW lane."
+    Assert-True -Condition ($localModelSelection -match "edit.*apply") -Message "Local model selection docs should explain edit/apply lane restrictions."
 }
 
 Invoke-PackTest "Continue file references are relative and resolvable" {
@@ -531,6 +595,42 @@ Invoke-PackTest "install script auto model config dry run is explicit" {
         Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Dry run should not create .continue."
     }
     finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "install script model lanes generate scoped roles" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-model-lanes-test-$([guid]::NewGuid())"
+    $globalConfigPath = Join-Path $tempRepo "global-config.yaml"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRepo | Out-Null
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-ModelLanes", "-GlobalConfig", "-GlobalConfigPath", $globalConfigPath, "-GlobalConfigApiBase", "http://127.0.0.1:11434")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install with model lanes should succeed."
+
+        $localConfigPath = Join-Path $tempRepo ".continue/config.local.yaml"
+        Assert-True -Condition (Test-Path -LiteralPath $localConfigPath) -Message "Model lanes should generate local config."
+        Assert-True -Condition (Test-Path -LiteralPath $globalConfigPath) -Message "Model lanes global config should be written."
+
+        $localConfig = Get-Content -LiteralPath $localConfigPath -Raw
+        $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
+
+        Assert-True -Condition ($localConfig -match "1 - WRITE SAFE - qwen3\.5:9b") -Message "Model lanes should include WRITE SAFE lane."
+        Assert-True -Condition ($localConfig -match "2 - PLAN ONLY - devstral-small-2:24b") -Message "Model lanes should include PLAN ONLY lane."
+        Assert-True -Condition ($localConfig -match "3 - DEEP REVIEW - qwen3-coder:30b") -Message "Model lanes should include DEEP REVIEW lane."
+        Assert-True -Condition ($localConfig -match "Ollama Nomic Embed") -Message "Model lanes should keep a separate embedding model."
+        Assert-True -Condition ($localConfig -notmatch "4 - ") -Message "Model lanes should include only three Agent lanes."
+        Assert-True -Condition ($localConfig -notmatch "5 - ") -Message "Embedding should not be labeled as an Agent lane."
+        Assert-True -Condition ($localConfig -match '(?s)1 - WRITE SAFE - qwen3\.5:9b.*roles:\s*\r?\n\s*- chat\s*\r?\n\s*- edit\s*\r?\n\s*- apply') -Message "WRITE SAFE lane should include chat/edit/apply roles."
+        Assert-True -Condition ($localConfig -match '(?s)2 - PLAN ONLY - devstral-small-2:24b.*roles:\s*\r?\n\s*- chat') -Message "PLAN ONLY lane should include chat role."
+        Assert-True -Condition ($localConfig -notmatch '(?s)2 - PLAN ONLY - devstral-small-2:24b.*roles:.*- edit') -Message "PLAN ONLY lane should not include edit role."
+        Assert-True -Condition ($localConfig -notmatch '(?s)3 - DEEP REVIEW - qwen3-coder:30b.*roles:.*- apply') -Message "DEEP REVIEW lane should not include apply role."
+        Assert-True -Condition ($globalConfig -match "apiBase: http://127\.0\.0\.1:11434") -Message "Global model lanes config should include requested apiBase."
+    } finally {
         Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
@@ -730,6 +830,22 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
         @{
             Name = "run-runtime-validation.macos.sh"
             Target = "run-runtime-validation.shared.sh"
+        },
+        @{
+            Name = "pull-local-agent-models.linux.sh"
+            Target = "pull-local-agent-models.shared.sh"
+        },
+        @{
+            Name = "pull-local-agent-models.macos.sh"
+            Target = "pull-local-agent-models.shared.sh"
+        },
+        @{
+            Name = "test-local-agent-models.linux.sh"
+            Target = "test-local-agent-models.shared.sh"
+        },
+        @{
+            Name = "test-local-agent-models.macos.sh"
+            Target = "test-local-agent-models.shared.sh"
         }
     )
 

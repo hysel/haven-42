@@ -639,7 +639,7 @@ function Get-ModelRecommendation {
     }
 
     return [pscustomobject]@{
-        PrimaryModel = "qwen3:14b"
+        PrimaryModel = "qwen3.5:9b"
         Use = "Validate the model against the target workflow before relying on it."
         Validation = "Run read-only discovery and tool-call validation before approved write mode."
     }

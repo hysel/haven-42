@@ -66,11 +66,12 @@ Safe write smoke-test prompt:
 ```text
 Use approved write mode for this smoke test only.
 
-Create a file named continue-agent-write-test.md with exactly this content:
+Create a file named continue-agent-write-test.md in the opened repository root with exactly this content:
 
 Continue Agent write test passed.
 
 Do not modify any other files.
+Do not create the file under src, docs, Properties, or any other subfolder.
 After editing, report the changed file and stop.
 Do not commit.
 ```
@@ -81,7 +82,27 @@ Expected behavior:
 - The assistant does not ask you to create the file manually.
 - `git status --short` shows only the smoke-test file.
 - The smoke-test file is created in the opened repository root or current folder.
-- The assistant verifies the file content or a non-empty diff before claiming the change succeeded.
+- A normal terminal confirms the file exists and contains the requested content.
+- Assistant-only readback is not enough to mark approved write mode as validated.
+
+Verify from the same repository:
+
+Windows:
+
+```powershell
+git status --short
+Test-Path .\continue-agent-write-test.md
+Get-Content .\continue-agent-write-test.md
+git diff --check
+```
+
+Linux or macOS:
+
+```bash
+git status --short
+test -f ./continue-agent-write-test.md && cat ./continue-agent-write-test.md
+git diff --check
+```
 
 On Windows, clean up with:
 

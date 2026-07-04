@@ -286,20 +286,32 @@ If you cannot read the file, say READ_TOOLS_UNAVAILABLE.
 Do not accept implementation based on "typical .NET project" or similar
 language. The model must base code/config edits on file evidence.
 
+If the assistant reports both `README read: no` and
+`Failure signal: READ_TOOLS_UNAVAILABLE`, the status is not read-only tool
+validated. Record it as read-only listing only or failed read-content
+validation.
+
 ## Agent Claims A Change But Git Diff Is Empty
 
 Symptoms:
 
 - The assistant says it changed a file.
+- The assistant says it created and read back a file.
+- The assistant prints `edit_file` or another edit-shaped tool call.
 - `git status --short` does not show that file as modified or untracked.
 - `git diff -- <file>` is empty.
 - Reading the file does not show the requested content.
+- `Test-Path` or `Get-ChildItem -Recurse` cannot find the file the assistant
+  claims it created.
 
 Expected behavior:
 
 - After approved write mode, the assistant should verify changed content or a
   non-empty diff before claiming success.
+- Approved-write readiness must be confirmed by an external shell or git check
+  after the assistant reports success. Assistant-only readback is not enough.
 - If no changed content or diff exists, it should say `WRITE_NOT_APPLIED`.
+- Printed edit-call text is not proof that a file changed.
 
 What to check:
 
@@ -308,15 +320,55 @@ What to check:
 
 ```powershell
 git status --short
+Test-Path .\continue-agent-write-test.md
+Get-ChildItem -Path . -Recurse -Filter continue-agent-write-test.md -Force | Select-Object FullName
 git diff --check
 git diff -- README.md
 ```
 
-3. If the target file has no diff, treat the implementation attempt as failed.
+3. If the target file has no diff, or a requested new file cannot be found from
+   the shell, treat the implementation attempt as failed.
 4. Rerun with a narrower prompt that explicitly requires diff verification.
 
 Do not commit or continue with follow-up code changes until the diff proves the
 requested change was actually applied.
+
+## Duplicate Approval Prompts Or Duplicate Content
+
+Symptoms:
+
+- Continue shows both a create-file prompt and an edit-file prompt for the same
+  smoke-test target.
+- Clicking both approvals appends or duplicates the requested line.
+- The final file contains `Continue Agent write test passed.` more than once.
+
+Expected behavior:
+
+- Existing-file write validation should use one edit path.
+- `create_new_file` should be Excluded during existing-file validation.
+- `edit_existing_file` or `single_find_and_replace` can remain Ask First.
+- The target file should be pre-created with harmless content before the test.
+
+What to check:
+
+1. In Continue built-in tools, temporarily set `create_new_file` to Excluded.
+2. Pre-create the smoke-test file:
+
+```powershell
+Set-Content .\continue-agent-write-test.md "before"
+```
+
+3. Ask the assistant to replace the existing file content, not create a file.
+4. Approve only one Apply diff for `continue-agent-write-test.md`.
+5. Verify the content from a normal terminal:
+
+```powershell
+Get-Content .\continue-agent-write-test.md
+```
+
+If two approval paths appear, stop and record `DUPLICATE_APPROVALS`. If the
+content is duplicated, record `DUPLICATE_CONTENT`. Do not mark the model
+approved-write ready until a single-approval existing-file edit passes.
 
 ## Agent Creates A File In The Wrong Folder
 
@@ -468,7 +520,7 @@ ollama list
 Example models:
 
 ```powershell
-ollama pull qwen3:14b
+ollama pull qwen3.5:9b
 ollama pull nomic-embed-text
 ```
 

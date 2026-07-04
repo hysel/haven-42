@@ -49,12 +49,12 @@ test_catalog_schema() {
     $2 == "" && $3 ~ / or / { exit 1 }
     END { exit 0 }
   ' "$REPO_ROOT/config/model-recommendations.tsv" &&
-    grep -q "High|qwen3:14b" "$REPO_ROOT/config/model-recommendations.tsv"
+    grep -q "WRITE SAFE lane" "$REPO_ROOT/config/model-recommendations.tsv"
 }
 
 test_committed_config_uses_starter_model() {
-  grep -q "model: qwen3:14b" "$REPO_ROOT/.continue/config.yaml" &&
-    ! grep -q "model: qwen3-coder:30b" "$REPO_ROOT/.continue/config.yaml"
+  grep -q "model: qwen3.5:9b" "$REPO_ROOT/.continue/config.yaml" &&
+  ! grep -q "model: qwen3-coder:30b" "$REPO_ROOT/.continue/config.yaml"
 }
 
 test_mlx_catalog_schema() {
@@ -114,6 +114,36 @@ test_install_auto_model_dry_run() {
   "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --dry-run --auto-model-config >/tmp/continue-install-auto.out 2>&1 || return 1
   grep -q "Would generate .continue/config.local.yaml" /tmp/continue-install-auto.out || return 1
   [ ! -e "$temp_repo/.continue" ]
+}
+
+test_install_model_lanes() {
+  temp_repo="$(mktemp -d)"
+  global_config="$temp_repo/global-config.yaml"
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --model-lanes --global-config --global-config-path "$global_config" --global-config-api-base "http://127.0.0.1:11434" >/tmp/continue-install-model-lanes.out 2>&1 || return 1
+  local_config="$temp_repo/.continue/config.local.yaml"
+  [ -f "$local_config" ] || return 1
+  [ -f "$global_config" ] || return 1
+    grep -q "1 - WRITE SAFE - qwen3.5:9b" "$local_config" &&
+    grep -q "2 - PLAN ONLY - devstral-small-2:24b" "$local_config" &&
+    grep -q "3 - DEEP REVIEW - qwen3-coder:30b" "$local_config" &&
+    grep -q "Ollama Nomic Embed" "$local_config" &&
+    ! grep -q "4 - " "$local_config" &&
+    ! grep -q "5 - " "$local_config" &&
+    grep -q "apiBase: http://127.0.0.1:11434" "$global_config" &&
+    awk '
+      /^  - name: / {
+        current = substr($0, 11)
+      }
+      current == "1 - WRITE SAFE - qwen3.5:9b" && /- edit/ { write_edit = 1 }
+      current == "1 - WRITE SAFE - qwen3.5:9b" && /- apply/ { write_apply = 1 }
+      current == "2 - PLAN ONLY - devstral-small-2:24b" && /- edit|- apply/ { plan_bad = 1 }
+      current == "3 - DEEP REVIEW - qwen3-coder:30b" && /- edit|- apply/ { deep_bad = 1 }
+      END {
+        if (!write_edit || !write_apply || plan_bad || deep_bad) {
+          exit 1
+        }
+      }
+    ' "$local_config"
 }
 
 test_install_global_config_dry_run() {
@@ -193,6 +223,7 @@ test_editor_compatibility_doc() {
 test_model_tool_use_validation_doc() {
   grep -q "Candidate" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "Read-only tool validated" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "read-only listing only" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "Approved-write ready" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "raw JSON" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "read file contents" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
@@ -201,14 +232,34 @@ test_model_tool_use_validation_doc() {
     grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "create_new_file" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "DUPLICATE_APPROVALS" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "DUPLICATE_CONTENT" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "edit_file" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "Validation labels must match the evidence" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "opened repository root or current folder" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
-    grep -q "non-empty diff" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "external shell or git check" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "Test-Path" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "test -f" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "active shell and operating system" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "continue-agent-write-test.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "I can't directly edit files" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "examples/model-tool-use-validation.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "Do not record" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "docs/local-agent-model-testing.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "pull candidate Ollama models" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "load a model" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "unload a model" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "tool-call behavior" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "exact-content output" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "does not replace Continue UI Apply validation" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "model lanes" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "MODEL_DOES_NOT_SUPPORT_TOOLS" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "THINK_TAG_LEAK" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
+    grep -q "runtime-validation-output" "$REPO_ROOT/docs/local-agent-model-testing.md" &&
     grep -q "Model Tool-Use Validation Evidence" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Read-only listing only" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Failure signal" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Provider: Ollama" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Editor surface" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "MCP state" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
@@ -216,7 +267,9 @@ test_model_tool_use_validation_doc() {
     grep -q "Path resolution and current-folder behavior" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Workspace discovery with no active file" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Apply target alignment" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
-    grep -q "non-empty diff" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Duplicate approval guard" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "DUPLICATE_APPROVALS" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "External write verification" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Platform-aware command use" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Sanitization Checklist" "$REPO_ROOT/examples/model-tool-use-validation.md"
 }
@@ -228,11 +281,15 @@ test_tool_use_docs_define_platform_aware_write_behavior() {
     grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "create_new_file" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "edit_file" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "Keep validation labels consistent with evidence" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "no file is open" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "src/main.py" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "current workspace root" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "src/README.md" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "git diff" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "external shell or git check" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "typical" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "Select-String" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "write tools are unavailable" "$REPO_ROOT/.continue/rules/general.md" &&
@@ -244,29 +301,57 @@ test_tool_use_docs_define_platform_aware_write_behavior() {
     grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "create_new_file" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "DUPLICATE_APPROVALS" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "DUPLICATE_CONTENT" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "opened repository root or current folder" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "continue-agent-write-test.md" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "Assistant-only readback is not enough" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "Test-Path" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "test -f" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "Safe write smoke-test prompt" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "git diff" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
+    grep -q "Assistant-only readback is not enough" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
+    grep -q "Test-Path" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
+    grep -q "test -f" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "Remove-Item" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "write tools are not validated yet" "$REPO_ROOT/README.md" &&
     grep -q "read file contents" "$REPO_ROOT/README.md" &&
     grep -q "git diff -- <file>" "$REPO_ROOT/README.md" &&
     grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/README.md" &&
     grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/README.md" &&
+    grep -q "create_new_file" "$REPO_ROOT/README.md" &&
+    grep -q "Two approval prompts" "$REPO_ROOT/README.md" &&
+    grep -q "edit_file" "$REPO_ROOT/README.md" &&
+    grep -q "created and read back a file" "$REPO_ROOT/README.md" &&
+    grep -q "READ_TOOLS_UNAVAILABLE.*read-only tool validated" "$REPO_ROOT/README.md" &&
+    grep -q "ModelLanes" "$REPO_ROOT/README.md" &&
+    grep -q "1 - WRITE SAFE" "$REPO_ROOT/README.md" &&
     grep -q "Agent Says It Cannot Edit Files" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "WRITE_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Lists Files But Cannot Read Or Edit Them" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Claims A Change But Git Diff Is Empty" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "WRITE_NOT_APPLIED" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Test-Path" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Assistant-only readback is not enough" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Creates A File In The Wrong Folder" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Says No File Is Open And Asks For A Path" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Apply Target Does Not Match The Requested File" "$REPO_ROOT/docs/troubleshooting.md" &&
-    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/troubleshooting.md"
+    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Duplicate Approval Prompts Or Duplicate Content" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "DUPLICATE_APPROVALS" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "DUPLICATE_CONTENT" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "edit_file" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "read-only listing only" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Model Lanes" "$REPO_ROOT/docs/local-model-selection.md" &&
+    grep -q "Why These Profiles" "$REPO_ROOT/docs/local-model-selection.md" &&
+    grep -q "WRITE SAFE" "$REPO_ROOT/docs/local-model-selection.md" &&
+    grep -q "PLAN ONLY" "$REPO_ROOT/docs/local-model-selection.md" &&
+    grep -q "DEEP REVIEW" "$REPO_ROOT/docs/local-model-selection.md"
 }
 
 run_test "validate-pack succeeds for repository" test_validate_succeeds
@@ -279,6 +364,7 @@ run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_
 run_test "runtime context generation captures useful files and excludes build output" test_runtime_context_generation
 run_test "install script dry run does not modify target repository" test_install_dry_run
 run_test "install script auto model config dry run is explicit" test_install_auto_model_dry_run
+run_test "install script model lanes generate scoped roles" test_install_model_lanes
 run_test "install script global config dry run is explicit" test_install_global_config_dry_run
 run_test "install script writes global config with target references" test_install_global_config_writes_refs
 run_test "install script can include rules in global config by explicit opt-in" test_install_global_config_rules_opt_in

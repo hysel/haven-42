@@ -103,6 +103,7 @@ Expected behavior:
 - The assistant uses Continue edit/apply tools to change the approved files.
 - The assistant confirms the apply target matches the requested, discovered, and read target file before applying. If the apply target differs, the assistant says `APPLY_TARGET_MISMATCH` and stops.
 - The assistant verifies the edit with changed file content, `git diff`, or another available diff/status tool before claiming success.
+- Approved-write readiness requires an external shell or git check after the assistant reports success. Assistant-only readback is not enough evidence that the file exists on disk.
 - If no changed content or diff is observed after an edit attempt, the assistant says `WRITE_NOT_APPLIED` and stops.
 - The assistant does not only describe the change.
 - The assistant does not infer implementation details from repository type or typical framework patterns when it could not read the target files.
@@ -174,28 +175,85 @@ If the assistant tries a Linux command on Windows, correct it and continue with 
 
 Use this only in a disposable branch or a test repository.
 
+For existing-file write validation, pre-create the test file and make the
+assistant edit it. This better matches real project work and avoids double
+approval paths.
+
+Recommended temporary Continue built-in tool settings:
+
+| Tool | Setting |
+| --- | --- |
+| `read_file` | Automatic |
+| `ls` | Automatic |
+| `view_diff` | Automatic |
+| `create_new_file` | Excluded |
+| `edit_existing_file` | Ask First |
+| `single_find_and_replace` | Ask First |
+| `run_terminal_command` | Ask First |
+
+Pre-create the test file:
+
+Windows:
+
+```powershell
+Set-Content .\continue-agent-write-test.md "before"
+```
+
+Linux or macOS:
+
+```bash
+printf '%s\n' 'before' > ./continue-agent-write-test.md
+```
+
 Ask:
 
 ```text
 Use approved write mode for this smoke test only.
 
-Create a file named continue-agent-write-test.md with exactly this content:
+Edit the existing file continue-agent-write-test.md in the opened repository root.
+Replace the entire file content with exactly this content:
 
 Continue Agent write test passed.
 
 Do not modify any other files.
-After editing, report the changed file and stop.
+Do not create a new file.
+Do not append.
+Do not create the file under src, docs, Properties, or any other subfolder.
+Use one edit tool call.
+Stop after the first Apply diff.
 Do not commit.
 ```
 
 Expected result:
 
-- Continue creates or edits the file through a write/apply tool.
+- Continue edits the existing file through one write/apply tool path.
 - `git status --short` shows only `continue-agent-write-test.md`.
 - The file is created in the opened repository root or current folder, not in `src/`, `docs/`, or another inferred subfolder.
 - The apply target shown by Continue is `continue-agent-write-test.md`, not an unrelated file.
-- `git diff` or a file reread confirms the requested content exists.
+- An external shell check confirms the file exists and contains the requested content.
 - The assistant reports the file change instead of asking the user to create it manually.
+- Only one approval or Apply path is used. If both `create_new_file` and
+  `edit_existing_file` prompts appear for the same target, stop and record
+  `DUPLICATE_APPROVALS`.
+- If the final file contains the requested line twice, record
+  `DUPLICATE_CONTENT`.
+
+Windows verification:
+
+```powershell
+git status --short
+Test-Path .\continue-agent-write-test.md
+Get-Content .\continue-agent-write-test.md
+git diff --check
+```
+
+Linux or macOS verification:
+
+```bash
+git status --short
+test -f ./continue-agent-write-test.md && cat ./continue-agent-write-test.md
+git diff --check
+```
 
 Clean up after the test:
 
@@ -264,7 +322,8 @@ Example raw JSON:
 
 This is not a patch. It means the model or Continue surface did not execute the tool call.
 
-In validation, switching from `qwen2.5-coder:7b` to `qwen3-coder:30b` fixed this behavior for the tested local Ollama setup.
+In validation, switching from a previous small coder model to `qwen3-coder:30b`
+fixed this behavior for the tested local Ollama setup.
 
 Use one of these safer fallbacks:
 
