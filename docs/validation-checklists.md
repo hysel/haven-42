@@ -82,6 +82,8 @@ Use these checklists before merging changes to this pack. They keep prompts, rul
 
 - [ ] `git status --short --branch` is reviewed before commit.
 - [ ] `git diff --check` passes.
+- [ ] Windows validation scripts pass.
+- [ ] Linux and macOS Bash wrapper scripts pass when those environments are available.
 - [ ] Config local references are checked.
 - [ ] Version is updated in `.continue/config.yaml`.
 - [ ] CHANGELOG has an entry for the release.

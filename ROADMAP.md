@@ -201,23 +201,24 @@ Exit criteria:
 
 ## Milestone 7: Cross-Platform Contributor Experience
 
-Goal: Make validation and test commands easier for contributors on Linux and macOS while keeping PowerShell as the canonical implementation.
+Goal: Make validation and test commands easy for contributors on Windows, Linux, and macOS without requiring Linux or macOS users to run PowerShell.
 
 Scope:
 
 - Add Linux shell wrappers for validation and tests. Done.
 - Add macOS shell wrappers for validation and tests. Done.
-- Keep PowerShell validation and tests as the canonical implementation. Done.
+- Add shared Bash implementations for Linux and macOS validation, tests, installation, runtime context generation, and runtime validation. Done.
+- Keep PowerShell validation and tests for Windows contributors. Done.
 - Add CI coverage for Linux wrapper execution. Done.
 - Document cross-platform validation commands in the README. Done.
 
 Exit criteria:
 
 - Windows contributors can run PowerShell validation and tests directly.
-- Linux contributors can run shell wrapper commands that call the canonical PowerShell scripts.
-- macOS contributors can run shell wrapper commands that call the canonical PowerShell scripts.
-- Missing `pwsh` produces a clear setup message instead of a confusing command-not-found failure.
-- CI verifies wrapper behavior on Ubuntu.
+- Linux contributors can run Bash wrapper commands that call shared Bash implementations.
+- macOS contributors can run Bash wrapper commands that call shared Bash implementations.
+- Linux and macOS user-facing scripts do not require `pwsh`.
+- CI verifies wrapper behavior on Ubuntu and macOS.
 
 ## Milestone 8: Real Repository Validation
 

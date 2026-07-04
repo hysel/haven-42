@@ -17,6 +17,7 @@ This project follows a simple changelog format:
 - Documented that CPU architecture is currently context for model selection, not a direct recommendation-tier input.
 - Added a separate MLX model recommendation catalog and macOS MLX recommendation output for advanced Apple Silicon setups.
 - Replaced Linux and macOS PowerShell-dependent wrappers with native Bash implementations for validation, tests, installation, runtime context generation, and runtime validation.
+- Renamed shared Linux and macOS Bash implementation files to the `*.shared.sh` suffix to avoid implying support beyond Linux and macOS.
 
 ## 0.1.12 - 2026-07-03
 
@@ -25,7 +26,7 @@ This project follows a simple changelog format:
 - Added CPU architecture reporting to Windows, Linux, and macOS hardware profile scripts.
 - Added a PowerShell install/update script with dry-run, backup, local-config exclusion, and install validation.
 - Added tests for installer dry-run behavior, backup behavior, local-config exclusion, and self-target protection.
-- Added Linux and macOS installer wrappers that call the canonical PowerShell installer.
+- Added Linux and macOS installer wrappers.
 - Added roadmap and TODO tracking for ARM, Apple Silicon, and MLX model support.
 - Added VS Code and VSCodium compatibility guidance and roadmap tracking.
 - Added a local-model tool-use validation checklist and roadmap tracking for model tool-use evidence.
