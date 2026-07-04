@@ -2,4 +2,4 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-"$SCRIPT_DIR/generate-runtime-context.unix.sh" "$@"
+"$SCRIPT_DIR/generate-runtime-context.shared.sh" "$@"

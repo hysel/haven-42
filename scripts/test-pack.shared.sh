@@ -31,12 +31,12 @@ assert_file() {
 }
 
 test_validate_succeeds() {
-  "$REPO_ROOT/scripts/validate-pack.unix.sh" >/tmp/continue-pack-validate.out 2>&1 &&
+  "$REPO_ROOT/scripts/validate-pack.shared.sh" >/tmp/continue-pack-validate.out 2>&1 &&
     grep -q "Validation passed" /tmp/continue-pack-validate.out
 }
 
 test_validate_fails_for_wrong_version() {
-  ! "$REPO_ROOT/scripts/validate-pack.unix.sh" --expected-version 0.0.0 >/tmp/continue-pack-validate-wrong.out 2>&1 &&
+  ! "$REPO_ROOT/scripts/validate-pack.shared.sh" --expected-version 0.0.0 >/tmp/continue-pack-validate-wrong.out 2>&1 &&
     grep -q "FAIL config version is 0.0.0" /tmp/continue-pack-validate-wrong.out
 }
 
@@ -67,7 +67,7 @@ test_shell_scripts_executable() {
   done < <(git -C "$REPO_ROOT" ls-files -s 'scripts/*.sh')
 }
 
-test_unix_scripts_do_not_require_pwsh() {
+test_linux_macos_scripts_do_not_require_pwsh() {
   ! grep -Eq 'pwsh|PowerShell 7' \
     "$REPO_ROOT/scripts/validate-pack.linux.sh" \
     "$REPO_ROOT/scripts/validate-pack.macos.sh" \
@@ -89,7 +89,7 @@ test_runtime_context_generation() {
   printf 'public class BuildOutput { }\n' > "$temp_repo/bin/Ignored.cs"
   printf '<Project Sdk="Microsoft.NET.Sdk" />\n' > "$temp_repo/Sample.csproj"
 
-  "$REPO_ROOT/scripts/generate-runtime-context.unix.sh" --target-repo "$temp_repo" --output-path "$temp_repo/runtime-context.md" >/tmp/continue-context.out 2>&1 || return 1
+  "$REPO_ROOT/scripts/generate-runtime-context.shared.sh" --target-repo "$temp_repo" --output-path "$temp_repo/runtime-context.md" >/tmp/continue-context.out 2>&1 || return 1
   grep -q '# Runtime Repository Context' "$temp_repo/runtime-context.md" || return 1
   grep -q 'src/App.cs' "$temp_repo/runtime-context.md" || return 1
   ! grep -q 'bin/Ignored.cs' "$temp_repo/runtime-context.md"
@@ -97,7 +97,7 @@ test_runtime_context_generation() {
 
 test_install_dry_run() {
   temp_repo="$(mktemp -d)"
-  "$REPO_ROOT/scripts/install-continue-pack.unix.sh" --target-repo "$temp_repo" --dry-run >/tmp/continue-install.out 2>&1 || return 1
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --dry-run >/tmp/continue-install.out 2>&1 || return 1
   grep -q "Dry run only" /tmp/continue-install.out || return 1
   [ ! -e "$temp_repo/.continue" ]
 }
@@ -105,7 +105,7 @@ test_install_dry_run() {
 test_runtime_validation_missing_target() {
   missing_repo="$(mktemp -d)"
   rmdir "$missing_repo"
-  ! "$REPO_ROOT/scripts/run-runtime-validation.unix.sh" --target-repo "$missing_repo" >/tmp/continue-runtime.out 2>&1 &&
+  ! "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" --target-repo "$missing_repo" >/tmp/continue-runtime.out 2>&1 &&
     grep -q "Target repository path does not exist" /tmp/continue-runtime.out
 }
 
@@ -119,7 +119,7 @@ run_test "validate-pack fails for wrong expected version" test_validate_fails_fo
 run_test "model recommendation catalog has valid schema" test_catalog_schema
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
 run_test "shell wrapper scripts are executable in git" test_shell_scripts_executable
-run_test "Unix user-facing scripts do not require PowerShell" test_unix_scripts_do_not_require_pwsh
+run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_macos_scripts_do_not_require_pwsh
 run_test "runtime context generation captures useful files and excludes build output" test_runtime_context_generation
 run_test "install script dry run does not modify target repository" test_install_dry_run
 run_test "runtime validation fails before CLI execution for missing target repository" test_runtime_validation_missing_target
