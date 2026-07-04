@@ -116,6 +116,28 @@ test_install_auto_model_dry_run() {
   [ ! -e "$temp_repo/.continue" ]
 }
 
+test_install_global_config_dry_run() {
+  temp_repo="$(mktemp -d)"
+  global_config="$(mktemp)"
+  rm -f "$global_config"
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --dry-run --global-config --global-config-path "$global_config" --global-config-api-base http://127.0.0.1:11434 >/tmp/continue-install-global.out 2>&1 || return 1
+  grep -q "Would write global Continue config" /tmp/continue-install-global.out || return 1
+  [ ! -e "$global_config" ] && [ ! -e "$temp_repo/.continue" ]
+}
+
+test_install_global_config_writes_refs() {
+  temp_repo="$(mktemp -d)"
+  global_config="$(mktemp)"
+  rm -f "$global_config"
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --global-config --global-config-path "$global_config" --global-config-api-base http://127.0.0.1:11434 >/tmp/continue-install-global-write.out 2>&1 || return 1
+  grep -q "Global Continue config generated" "$global_config" &&
+    grep -q "apiBase: http://127.0.0.1:11434" "$global_config" &&
+    grep -q "file:///" "$global_config" &&
+    grep -q "rules/general.md" "$global_config" &&
+    grep -q "prompts/repository-discovery.md" "$global_config" &&
+    ! grep -q "file://./" "$global_config"
+}
+
 test_runtime_validation_missing_target() {
   missing_repo="$(mktemp -d)"
   rmdir "$missing_repo"
@@ -181,6 +203,8 @@ run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_
 run_test "runtime context generation captures useful files and excludes build output" test_runtime_context_generation
 run_test "install script dry run does not modify target repository" test_install_dry_run
 run_test "install script auto model config dry run is explicit" test_install_auto_model_dry_run
+run_test "install script global config dry run is explicit" test_install_global_config_dry_run
+run_test "install script writes global config with target references" test_install_global_config_writes_refs
 run_test "runtime validation fails before CLI execution for missing target repository" test_runtime_validation_missing_target
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc

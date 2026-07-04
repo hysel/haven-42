@@ -298,6 +298,25 @@ Create a local-only config with automatic model selection:
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig
 ```
 
+If your editor uses the global Continue config instead of the project-local
+`.continue/config.yaml`, install the pack and update the global config with
+absolute references to the target repository's installed rules, prompts, and
+docs:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -GlobalConfig
+```
+
+For a local-network Ollama server, keep the endpoint out of committed project
+files and pass it only when generating the global config:
+
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -GlobalConfig `
+  -GlobalConfigApiBase "http://127.0.0.1:11434"
+```
+
 Linux:
 
 ```bash
@@ -308,6 +327,13 @@ Create a local-only config with automatic model selection:
 
 ```bash
 ./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --auto-model-config
+```
+
+Update the global Continue config when the editor does not load the project-local
+config:
+
+```bash
+./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --global-config
 ```
 
 macOS:
@@ -322,6 +348,13 @@ Create a local-only config with automatic model selection:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --auto-model-config
 ```
 
+Update the global Continue config when the editor does not load the project-local
+config:
+
+```bash
+./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --global-config
+```
+
 The installer:
 
 - Copies the pack's `.continue` files into the target repository.
@@ -329,6 +362,7 @@ The installer:
 - Backs up an existing target `.continue` folder before replacing it.
 - Validates that copied config file references resolve.
 - Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
+- Can update the global Continue config, with a backup, when an editor does not load project-local config files.
 - Refuses to install into this pack repository itself.
 
 Linux and macOS installer wrappers are native Bash scripts and do not require PowerShell.

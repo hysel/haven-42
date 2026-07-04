@@ -456,6 +456,28 @@ Invoke-PackTest "install script auto model config dry run is explicit" {
     }
 }
 
+Invoke-PackTest "install script global config dry run is explicit" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-global-dry-run-test-$([guid]::NewGuid())"
+    $globalConfigPath = Join-Path ([System.IO.Path]::GetTempPath()) "continue-global-config-dry-run-$([guid]::NewGuid()).yaml"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRepo | Out-Null
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-DryRun", "-GlobalConfig", "-GlobalConfigPath", $globalConfigPath, "-GlobalConfigApiBase", "http://127.0.0.1:11434")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install dry run with global config should succeed."
+        Assert-True -Condition ($result.Output -match "Would write global Continue config") -Message "Dry run should explain global config generation."
+        Assert-True -Condition (-not (Test-Path -LiteralPath $globalConfigPath)) -Message "Dry run should not create global config."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Dry run should not create .continue."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $globalConfigPath -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "install script backs up existing .continue and excludes local config" {
     $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-test-$([guid]::NewGuid())"
 
@@ -492,6 +514,36 @@ Invoke-PackTest "install script backs up existing .continue and excludes local c
     }
 }
 
+Invoke-PackTest "install script writes global config with target references" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-global-test-$([guid]::NewGuid())"
+    $globalConfigPath = Join-Path ([System.IO.Path]::GetTempPath()) "continue-global-config-test-$([guid]::NewGuid()).yaml"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRepo | Out-Null
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-GlobalConfig", "-GlobalConfigPath", $globalConfigPath, "-GlobalConfigApiBase", "http://127.0.0.1:11434")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install with global config should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath $globalConfigPath) -Message "Global config should be created."
+
+        $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
+        Assert-True -Condition ($globalConfig -match "Global Continue config generated") -Message "Global config should include generated header."
+        Assert-True -Condition ($globalConfig -match "apiBase: http://127\.0\.0\.1:11434") -Message "Global config should include requested Ollama apiBase."
+        Assert-True -Condition ($globalConfig -match "file:///") -Message "Global config should use absolute file URIs."
+        Assert-True -Condition ($globalConfig -match "rules/general\.md") -Message "Global config should reference installed rules."
+        Assert-True -Condition ($globalConfig -match "prompts/repository-discovery\.md") -Message "Global config should reference installed prompts."
+        Assert-True -Condition ($globalConfig -notmatch "file://\./") -Message "Global config should not keep project-relative file references."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $globalConfigPath -Force -ErrorAction SilentlyContinue
+        Get-ChildItem -LiteralPath ([System.IO.Path]::GetTempPath()) -Filter "$(Split-Path -Leaf $globalConfigPath).backup-*" -ErrorAction SilentlyContinue |
+            Remove-Item -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "install script refuses to target pack repository" {
     $result = Invoke-CommandCapture `
         -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
@@ -509,11 +561,12 @@ Invoke-PackTest "install script accepts shell-friendly argument aliases" {
 
         $result = Invoke-CommandCapture `
             -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
-            -Arguments @("--target-repo", $tempRepo, "--dry-run", "--auto-model-config")
+            -Arguments @("--target-repo", $tempRepo, "--dry-run", "--auto-model-config", "--global-config", "--global-config-path", (Join-Path $tempRepo "global-config.yaml"))
 
         Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install dry run with shell-friendly aliases should succeed."
         Assert-True -Condition ($result.Output -match "Dry run only") -Message "Dry-run output should be present."
         Assert-True -Condition ($result.Output -match "Would generate \.continue/config\.local\.yaml") -Message "Auto model config alias should be accepted."
+        Assert-True -Condition ($result.Output -match "Would write global Continue config") -Message "Global config alias should be accepted."
         Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Alias dry run should not create .continue."
     }
     finally {

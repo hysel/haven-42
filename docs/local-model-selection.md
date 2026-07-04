@@ -116,6 +116,13 @@ Windows PowerShell:
 Use `-TargetRepo` in Windows PowerShell. `-TargetRepository` is not a valid
 installer parameter.
 
+If your editor loads the global Continue config instead of the project-local
+config, combine local model selection with global config generation:
+
+```powershell
+.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig -GlobalConfig
+```
+
 Linux:
 
 ```bash

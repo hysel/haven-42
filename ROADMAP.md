@@ -17,7 +17,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 6: Applied Tooling And Adaptive Models | Complete | Tool-use modes, approved write guidance, scoped edit guidance, model selection strategy, hardware profiling, model tiers, and local override safety guidance are complete. |
 | Milestone 7: Cross-Platform Contributor Experience | Complete | Linux and macOS validation/test wrappers are available, and Linux wrapper execution is covered in CI. |
 | Milestone 8: Real Repository Validation | Complete | The pack repository and one private application-style repository have been validated with the runtime runner; practical MCP workflow examples are documented. |
-| Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, install validation, and Windows/Linux/macOS commands. |
+| Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, optional global config generation, install validation, and Windows/Linux/macOS commands. |
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | In Progress | Starter model defaults, automatic local model config generation, read-only tool validation guidance, and sanitized evidence templates are in place; online discovery and broader evidence catalog decisions remain. |
@@ -252,6 +252,7 @@ Scope:
 - Add a dry-run mode that shows what would change before copying files. Done.
 - Add install validation that confirms copied config, prompts, rules, agents, and templates resolve correctly. Done.
 - Document Windows, Linux, and macOS install/update commands. Done.
+- Add an explicit global Continue config update mode for editor setups that ignore project-local config files. Done.
 - Keep local overrides, private endpoints, tokens, and machine-specific config out of install outputs. Done for local config override exclusion.
 
 Exit criteria:

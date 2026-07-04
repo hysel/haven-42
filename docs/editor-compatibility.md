@@ -53,6 +53,47 @@ Run these checks before testing prompts:
 
 If the model or prompts are missing, Continue may be using a global/default config instead of the project-local config.
 
+## Global Config Install
+
+Some editor setups load the global Continue config instead of the repository's
+project-local `.continue/config.yaml`. If that happens, use the installer's
+explicit global-config mode. It writes the global Continue config with absolute
+references to the target repository's installed rules, prompts, and docs.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -GlobalConfig
+```
+
+Linux:
+
+```bash
+./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --global-config
+```
+
+macOS:
+
+```bash
+./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --global-config
+```
+
+The installer backs up the existing global config before replacing it. For
+machine-specific endpoints, pass an API base only during global config
+generation rather than committing it to the target repository:
+
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -GlobalConfig `
+  -GlobalConfigApiBase "http://127.0.0.1:11434"
+```
+
+Use the local endpoint value that applies to your machine. Do not commit private
+IP addresses, internal hostnames, or tokens into shared config files.
+
 ## Terminal Preflight Checks
 
 These commands do not prove that the editor UI loaded the project-local config. They only confirm that the editor command and Continue extension are visible from the current shell.

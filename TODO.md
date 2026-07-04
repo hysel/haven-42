@@ -164,6 +164,7 @@
 - [x] Add dry-run output before copying files.
 - [x] Add install validation for copied config, prompts, rules, agents, and templates.
 - [x] Document Windows, Linux, and macOS install/update commands.
+- [x] Add explicit global Continue config generation for editor setups that ignore project-local config files.
 - [x] Ensure install outputs exclude local overrides, private endpoints, tokens, and machine-specific config.
 
 ## Milestone 10: ARM And Apple Silicon Model Support
