@@ -261,6 +261,9 @@ The Linux and macOS validation scripts are native Bash scripts and do not requir
 
 Use the installer to copy this pack into the repository you want to review.
 
+Windows PowerShell uses the parameter name `-TargetRepo`. Do not use
+`-TargetRepository`; that is not a valid installer parameter.
+
 Preview what would be copied:
 
 Windows PowerShell:

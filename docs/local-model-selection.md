@@ -113,6 +113,9 @@ Windows PowerShell:
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig
 ```
 
+Use `-TargetRepo` in Windows PowerShell. `-TargetRepository` is not a valid
+installer parameter.
+
 Linux:
 
 ```bash
