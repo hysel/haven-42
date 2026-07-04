@@ -198,6 +198,10 @@ test_model_tool_use_validation_doc() {
     grep -q "read file contents" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "WRITE_NOT_APPLIED" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
+    grep -q "opened repository root or current folder" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "non-empty diff" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "active shell and operating system" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
     grep -q "continue-agent-write-test.md" "$REPO_ROOT/docs/model-tool-use-validation.md" &&
@@ -209,6 +213,9 @@ test_model_tool_use_validation_doc() {
     grep -q "Editor surface" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "MCP state" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Read-content tool execution" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Path resolution and current-folder behavior" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Workspace discovery with no active file" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
+    grep -q "Apply target alignment" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "non-empty diff" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Platform-aware command use" "$REPO_ROOT/examples/model-tool-use-validation.md" &&
     grep -q "Sanitization Checklist" "$REPO_ROOT/examples/model-tool-use-validation.md"
@@ -218,6 +225,13 @@ test_tool_use_docs_define_platform_aware_write_behavior() {
   grep -q "Match commands to the user's active operating system and shell" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "WRITE_NOT_APPLIED" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "no file is open" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "src/main.py" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "current workspace root" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "src/README.md" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "git diff" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "typical" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "Select-String" "$REPO_ROOT/.continue/rules/general.md" &&
@@ -227,19 +241,32 @@ test_tool_use_docs_define_platform_aware_write_behavior() {
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "WRITE_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "WRITE_NOT_APPLIED" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/tool-use-modes.md" &&
+    grep -q "opened repository root or current folder" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "continue-agent-write-test.md" "$REPO_ROOT/docs/tool-use-modes.md" &&
     grep -q "Safe write smoke-test prompt" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
+    grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "git diff" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "Remove-Item" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "write tools are not validated yet" "$REPO_ROOT/README.md" &&
     grep -q "read file contents" "$REPO_ROOT/README.md" &&
     grep -q "git diff -- <file>" "$REPO_ROOT/README.md" &&
+    grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/README.md" &&
+    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/README.md" &&
     grep -q "Agent Says It Cannot Edit Files" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "WRITE_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Lists Files But Cannot Read Or Edit Them" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Claims A Change But Git Diff Is Empty" "$REPO_ROOT/docs/troubleshooting.md" &&
-    grep -q "WRITE_NOT_APPLIED" "$REPO_ROOT/docs/troubleshooting.md"
+    grep -q "WRITE_NOT_APPLIED" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Agent Creates A File In The Wrong Folder" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "PATH_AMBIGUOUS" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Agent Says No File Is Open And Asks For A Path" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "Apply Target Does Not Match The Requested File" "$REPO_ROOT/docs/troubleshooting.md" &&
+    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/docs/troubleshooting.md"
 }
 
 run_test "validate-pack succeeds for repository" test_validate_succeeds

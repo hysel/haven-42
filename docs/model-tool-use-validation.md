@@ -132,6 +132,8 @@ Passing criteria:
 
 - Continue executes a read/list tool or otherwise inspects the opened repository.
 - Continue can read the contents of at least one real source or configuration file.
+- Continue resolves unqualified file names from the opened repository root or current folder first.
+- If no file is open, Continue attempts workspace discovery with tools against `.` instead of immediately asking the user for a path.
 - The final answer references real files.
 - No files are modified.
 - The final answer is normal prose, not only raw JSON.
@@ -193,7 +195,12 @@ Passing criteria:
 - The assistant uses an edit/apply tool instead of telling the user to create the file manually.
 - The assistant does not answer with "I can't directly edit files" or copy/paste implementation instructions when write tools are available.
 - Before editing, the assistant can read the target file or confirms that it is creating a new file.
+- For unqualified file names, the assistant edits or creates the file in the opened repository root or current folder, unless the user requested another folder or repository evidence proves another target.
+- If no file is open or the current folder is unclear, the assistant first discovers the workspace with available tools.
+- If workspace discovery fails, the assistant says `WORKSPACE_UNAVAILABLE` and stops.
+- If the target path is ambiguous, the assistant says `PATH_AMBIGUOUS` instead of inventing a subfolder path.
 - The assistant does not make changes based on "typical" project patterns without file evidence.
+- The apply target matches the requested and read target file. If it does not match, record `APPLY_TARGET_MISMATCH`.
 - Only `continue-agent-write-test.md` changes.
 - The diff is small and reviewable.
 - The assistant verifies changed content or a non-empty diff before claiming success.
@@ -202,6 +209,15 @@ Passing criteria:
 - `git diff --check` passes.
 
 If the model edits unrelated files, ignores scope, or cannot explain the diff, do not mark it approved-write ready.
+
+If the model creates the requested file in the wrong folder, such as
+`src/README.md` when an existing root `README.md` was the intended target, do
+not mark it approved-write ready.
+
+If the model reads one file but the Continue Apply panel targets another file,
+such as reading `README.md` but proposing `src/main.py`, do not apply the patch
+and do not mark it approved-write ready. Record the failure as
+`APPLY_TARGET_MISMATCH`.
 
 If the model claims it changed a file but `git diff` is empty and a file reread
 does not show the requested content, record the result as `WRITE_NOT_APPLIED`.

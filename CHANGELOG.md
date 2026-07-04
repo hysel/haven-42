@@ -33,6 +33,9 @@ This project follows a simple changelog format:
 - Changed global Continue config generation to omit `rules:` by default so project-local `.continue/rules` do not produce duplicate rule warnings.
 - Added read-content tool validation guidance so Agent mode cannot treat file-listing success as enough evidence for real code changes.
 - Added post-edit diff verification guidance so Agent mode cannot claim a file changed when no changed content or diff exists.
+- Added current-folder path resolution guidance so Agent mode does not create wrong-folder files for unqualified targets.
+- Added workspace discovery guidance so Agent mode tries tools against the opened folder before asking users for explicit file paths.
+- Added Apply target alignment guidance so users do not apply patches that target a different file than the one requested or read.
 
 ### Changed
 
@@ -41,6 +44,9 @@ This project follows a simple changelog format:
 - Added `-GlobalConfigIncludeRules` and `--global-config-include-rules` for explicit global-only rule loading when needed.
 - Added `READ_TOOLS_UNAVAILABLE` guidance for cases where the model can list files but cannot read the source or config files it wants to change.
 - Added `WRITE_NOT_APPLIED` guidance for cases where the model claims an edit but the file content or git diff does not show it.
+- Added `PATH_AMBIGUOUS` guidance for cases where the correct edit target cannot be proven from the opened repository folder.
+- Added `WORKSPACE_UNAVAILABLE` guidance for cases where Continue cannot discover the opened workspace.
+- Added `APPLY_TARGET_MISMATCH` guidance for cases where the Continue Apply panel targets an unrelated file.
 
 ## 0.1.12 - 2026-07-03
 

@@ -335,6 +335,9 @@ Scope:
 - Require read-content validation before using approved write mode for real code or configuration changes. Done.
 - Define a repeatable approved-write smoke test for edit/apply tool validation. Done.
 - Require post-edit content or diff verification before accepting claimed file changes. Done.
+- Require current-folder path resolution before approved edits so models do not create wrong-folder files. Done.
+- Require workspace discovery before asking users for file paths when no file is open. Done.
+- Require Apply target alignment so read, apply, and reported changed files match. Done.
 - Add platform-aware command guidance so Windows uses PowerShell and Linux/macOS use shell commands. Done.
 - Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs. Done via sanitized evidence template.
 - Distinguish candidate model recommendations from tool-validated model status. Done.

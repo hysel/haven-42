@@ -45,6 +45,12 @@ Before editing, the assistant must successfully read the exact files it will
 change. If it can only list files but cannot read file contents, stop and fix
 tool access before approving implementation.
 
+Unqualified file names are resolved from the opened repository root or current
+folder first. If the user says `README.md`, the assistant should inspect the
+current folder for `README.md` before creating or editing any nested
+`src/README.md`, `docs/README.md`, or similar path. If the correct file cannot
+be proven, the assistant should stop with `PATH_AMBIGUOUS`.
+
 ## Step 1: Pick One Slice
 
 A good slice is small enough to review in one diff.
@@ -141,6 +147,7 @@ git diff
 Look for:
 
 - Files changed outside the approved scope
+- New files created in the wrong folder
 - Claimed changes that do not appear in `git diff`
 - Unrelated formatting churn
 - Private machine details
