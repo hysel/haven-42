@@ -531,7 +531,8 @@ Invoke-PackTest "install script writes global config with target references" {
         $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
         Assert-True -Condition ($globalConfig -match "Global Continue config generated") -Message "Global config should include generated header."
         Assert-True -Condition ($globalConfig -match "apiBase: http://127\.0\.0\.1:11434") -Message "Global config should include requested Ollama apiBase."
-        Assert-True -Condition ($globalConfig -match "file:///") -Message "Global config should use absolute file URIs."
+        Assert-True -Condition ($globalConfig -match "file://[A-Za-z]:/") -Message "Global config should use Continue-friendly Windows absolute file references."
+        Assert-True -Condition ($globalConfig -notmatch "file:///[A-Za-z]:/") -Message "Global config should not use triple-slash Windows file references."
         Assert-True -Condition ($globalConfig -match "rules/general\.md") -Message "Global config should reference installed rules."
         Assert-True -Condition ($globalConfig -match "prompts/repository-discovery\.md") -Message "Global config should reference installed prompts."
         Assert-True -Condition ($globalConfig -notmatch "file://\./") -Message "Global config should not keep project-relative file references."

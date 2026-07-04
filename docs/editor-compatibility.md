@@ -94,6 +94,10 @@ generation rather than committing it to the target repository:
 Use the local endpoint value that applies to your machine. Do not commit private
 IP addresses, internal hostnames, or tokens into shared config files.
 
+On Windows, the PowerShell installer writes absolute Continue file references in
+the `file://C:/path/...` form because some VSCodium setups do not resolve
+`file:///C:/path/...` correctly.
+
 ## Terminal Preflight Checks
 
 These commands do not prove that the editor UI loaded the project-local config. They only confirm that the editor command and Continue extension are visible from the current shell.
