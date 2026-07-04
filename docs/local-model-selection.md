@@ -93,6 +93,7 @@ The helpers report:
 - Ollama reachability
 - Installed Ollama model names
 - MLX tooling status on macOS
+- MLX candidate recommendation on macOS when MLX tooling is detected
 - A low, medium, or high resource candidate tier
 - A recommended model from the installed Ollama models, or a model to pull and validate
 
@@ -148,6 +149,8 @@ GPU detection is best-effort:
 - Linux falls back to `lspci` when available.
 - macOS falls back to `system_profiler`.
 
+On Linux, `Platform notes` will warn when `nvidia-smi`, `rocm-smi`, and `lspci` are all missing, or when detection tools are present but no GPU is found. This is common on minimal distributions, containers, hardened servers, and cloud images before GPU drivers or device passthrough are configured.
+
 If GPU VRAM is unknown, use the profile as a starting point and avoid high-risk tool-backed workflows until the model is validated.
 
 ## Reading The Output
@@ -191,6 +194,8 @@ macOS:
 ```
 
 Do not commit private internal model names unless they are safe for the public repository.
+
+The shared `config/model-recommendations.tsv` catalog is for Ollama-discovered models. The macOS helper also reads `config/model-recommendations.mlx.tsv` for advanced Apple Silicon MLX candidates. MLX recommendations are reported separately from Ollama recommendations because MLX models are not discovered through `ollama list`.
 
 Common results:
 
@@ -388,6 +393,8 @@ Linux ARM:
 
 Architecture should not automatically increase trust in a model recommendation. Use the profile output to understand the machine, then validate the actual model and workflow.
 
+Architecture does not currently change recommendation tiering. This is intentional. `arm64` can describe very different machines, including Apple Silicon Macs, Windows ARM laptops, Linux cloud instances, and Jetson-style devices. The pack treats architecture as context and warning evidence, while memory capacity, detected GPU details, installed Ollama models, and workflow validation remain the safer recommendation inputs.
+
 ## Ollama, GGUF, And MLX
 
 Ollama usually runs GGUF-style local models and exposes an Ollama-compatible local API. This is the default path for the pack.
@@ -404,6 +411,8 @@ The macOS helper reports MLX tooling separately when it can detect common comman
 
 Detection means the tooling is visible to the current shell. It does not prove that an MLX model is installed, loaded, served through an API, or compatible with Continue.
 
+When MLX tooling is detected, the macOS helper also reports a separate MLX recommendation from `config/model-recommendations.mlx.tsv`. This recommendation is a candidate, not a verified installed model. It does not replace the Ollama recommendation and it does not change the default beginner setup path.
+
 If you want to use MLX with Continue:
 
 - Run an MLX-compatible local server that exposes an OpenAI-compatible API.
@@ -411,7 +420,7 @@ If you want to use MLX with Continue:
 - Keep the endpoint, model names, and machine-specific settings out of committed config.
 - Run the same read-only tool validation before using Agent mode or approved write mode.
 
-Do not add MLX-only model names to `config/model-recommendations.tsv` unless the catalog is updated to distinguish providers. The current catalog is for Ollama-discovered local models.
+Do not add MLX-only model names to `config/model-recommendations.tsv`. Use `config/model-recommendations.mlx.tsv` for MLX candidate guidance. If future providers are added, prefer provider-specific catalogs or a richer provider-aware schema instead of mixing discovery mechanisms in one file.
 
 ## Unified, Shared, And Dedicated Memory
 

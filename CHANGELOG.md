@@ -9,6 +9,15 @@ This project follows a simple changelog format:
 - `Fixed` for corrections
 - `Removed` for deprecated or deleted behavior
 
+## Unreleased
+
+### Added
+
+- Added Linux hardware profile platform notes for missing optional GPU detection tools and no-GPU detection fallbacks.
+- Documented that CPU architecture is currently context for model selection, not a direct recommendation-tier input.
+- Added a separate MLX model recommendation catalog and macOS MLX recommendation output for advanced Apple Silicon setups.
+- Replaced Linux and macOS PowerShell-dependent wrappers with native Bash implementations for validation, tests, installation, runtime context generation, and runtime validation.
+
 ## 0.1.12 - 2026-07-03
 
 ### Added

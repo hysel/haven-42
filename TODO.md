@@ -178,12 +178,12 @@
 - [x] Add advanced Mac guidance for MLX models served through an OpenAI-compatible local endpoint.
 - [x] Evaluate `mlx-lm` detection in the macOS hardware profile script.
 - [x] Evaluate Linux ARM detection for NVIDIA Jetson or other ARM GPU acceleration paths.
-- [ ] Evaluate fallback behavior on minimal Linux distributions where optional GPU tools are unavailable.
+- [x] Evaluate fallback behavior on minimal Linux distributions where optional GPU tools are unavailable.
 - [ ] Evaluate whether enterprise/cloud Linux images need additional validation fixtures or smoke-test guidance.
 - [ ] Evaluate whether containerized model servers need separate profile output warnings or detection.
 - [x] Add conservative Windows ARM local-model guidance.
-- [ ] Review whether ARM architecture should affect recommendation tiering before changing `config/model-recommendations.tsv`.
-- [ ] Decide whether MLX or ARM recommendations belong in the shared TSV catalog or provider-specific catalogs.
+- [x] Review whether ARM architecture should affect recommendation tiering before changing `config/model-recommendations.tsv`.
+- [x] Decide whether MLX or ARM recommendations belong in the shared TSV catalog or provider-specific catalogs.
 - [x] Document unified-memory and shared-memory guidance for model sizing.
 - [ ] Keep ARM/MLX endpoints, private model names, and machine-specific paths out of committed config.
 

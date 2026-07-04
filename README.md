@@ -242,7 +242,7 @@ macOS:
 ./scripts/test-pack.macos.sh
 ```
 
-The Linux and macOS validation scripts require PowerShell 7+ through the `pwsh` command.
+The Linux and macOS validation scripts are native Bash scripts and do not require PowerShell.
 
 ## Install Or Update A Target Repository
 
@@ -296,7 +296,7 @@ The installer:
 - Validates that copied config file references resolve.
 - Refuses to install into this pack repository itself.
 
-Linux and macOS installer wrappers require PowerShell 7+ through the `pwsh` command.
+Linux and macOS installer wrappers are native Bash scripts and do not require PowerShell.
 
 ## Common Problems
 
@@ -309,7 +309,7 @@ Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
 | The default model is too slow or will not load | Run the hardware profile script and follow `docs/local-model-selection.md`. |
 | `cn` is not recognized | Use `npx @continuedev/cli --config .continue/config.yaml` or install the Continue CLI globally. |
 | The assistant prints raw JSON tool calls | Use a stronger tool-capable model or the runtime-context fallback in `docs/troubleshooting.md`. |
-| Linux or macOS validation fails with `pwsh` missing | Install PowerShell 7+, then rerun the wrapper script. |
+| Linux or macOS validation script is not executable | Run `chmod +x scripts/*.sh`, then rerun the wrapper script. |
 | Duplicate rules appear in Continue | Make sure the rules are not installed in both the global Continue config and the project-local `.continue` folder. |
 
 ## Beginner Safety Rules
@@ -596,7 +596,7 @@ On macOS:
 ./scripts/test-pack.macos.sh
 ```
 
-The Linux and macOS scripts are friendly wrappers around the canonical PowerShell scripts. They require PowerShell 7+ through the `pwsh` command.
+The Linux and macOS scripts are native Bash scripts. They do not require PowerShell.
 
 The script checks the configured version, required files, local `.continue` file references, default MCP posture, and obvious committed private endpoints or secrets.
 

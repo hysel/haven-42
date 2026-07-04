@@ -5,6 +5,7 @@ AS_JSON=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MODEL_CATALOG_PATH="$REPO_ROOT/config/model-recommendations.tsv"
+MLX_MODEL_CATALOG_PATH="$REPO_ROOT/config/model-recommendations.mlx.tsv"
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -14,6 +15,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --model-catalog)
       MODEL_CATALOG_PATH="$2"
+      shift 2
+      ;;
+    --mlx-model-catalog)
+      MLX_MODEL_CATALOG_PATH="$2"
       shift 2
       ;;
     *)
@@ -124,6 +129,34 @@ recommend_from_catalog() {
     RECOMMENDED_USE="Validate the model against the target workflow before relying on it."
     VALIDATION_NOTE="Run read-only discovery and tool-call validation before approved write mode."
   fi
+}
+
+recommend_mlx_from_catalog() {
+  tier_name="$1"
+
+  MLX_RECOMMENDED_MODEL="Not available"
+  MLX_RECOMMENDED_USE="MLX tooling was not detected in the current shell."
+  MLX_VALIDATION_NOTE="Install and validate MLX tooling before using MLX-hosted models with Continue."
+
+  if [ "$MLX_STATUS" != "detected" ]; then
+    return 0
+  fi
+
+  if [ -r "$MLX_MODEL_CATALOG_PATH" ]; then
+    while IFS='|' read -r tier model_name use validation; do
+      case "$tier" in ""|\#*) continue ;; esac
+      [ "$tier" != "$tier_name" ] && continue
+
+      MLX_RECOMMENDED_MODEL="$model_name"
+      MLX_RECOMMENDED_USE="$use"
+      MLX_VALIDATION_NOTE="$validation"
+      return 0
+    done < "$MLX_MODEL_CATALOG_PATH"
+  fi
+
+  MLX_RECOMMENDED_MODEL="MLX-compatible coding model"
+  MLX_RECOMMENDED_USE="Use as an advanced Apple Silicon candidate only after serving validation."
+  MLX_VALIDATION_NOTE="Serve through an OpenAI-compatible local endpoint and validate read-only tool behavior before approved write mode."
 }
 
 detect_vendor() {
@@ -263,13 +296,19 @@ fi
 RECOMMENDED_MODEL=""
 RECOMMENDED_USE=""
 VALIDATION_NOTE=""
+MLX_RECOMMENDED_MODEL=""
+MLX_RECOMMENDED_USE=""
+MLX_VALIDATION_NOTE=""
 
 if [ "$TIER" = "High resource candidate" ]; then
   recommend_from_catalog "High"
+  recommend_mlx_from_catalog "High"
 elif [ "$TIER" = "Medium resource candidate" ]; then
   recommend_from_catalog "Medium"
+  recommend_mlx_from_catalog "Medium"
 else
   recommend_from_catalog "Low"
+  recommend_mlx_from_catalog "Low"
 fi
 
 GENERATED="$(date '+%Y-%m-%d %H:%M')"
@@ -304,7 +343,8 @@ if [ "$AS_JSON" = true ]; then
   done
   printf '],\n'
   printf '  "RecommendationTier": "%s",\n' "$(json_escape "$TIER")"
-  printf '  "ModelRecommendation": {"PrimaryModel":"%s","Use":"%s","Validation":"%s"}\n' "$(json_escape "$RECOMMENDED_MODEL")" "$(json_escape "$RECOMMENDED_USE")" "$(json_escape "$VALIDATION_NOTE")"
+  printf '  "ModelRecommendation": {"PrimaryModel":"%s","Use":"%s","Validation":"%s"},\n' "$(json_escape "$RECOMMENDED_MODEL")" "$(json_escape "$RECOMMENDED_USE")" "$(json_escape "$VALIDATION_NOTE")"
+  printf '  "MlxRecommendation": {"PrimaryModel":"%s","Use":"%s","Validation":"%s"}\n' "$(json_escape "$MLX_RECOMMENDED_MODEL")" "$(json_escape "$MLX_RECOMMENDED_USE")" "$(json_escape "$MLX_VALIDATION_NOTE")"
   printf '}\n'
   exit 0
 fi
@@ -341,6 +381,9 @@ if [ "${#MLX_TOOLS[@]}" -gt 0 ]; then
     printf -- '- %s\n' "$tool"
   done
 fi
+printf 'MLX recommendation: %s\n' "$MLX_RECOMMENDED_MODEL"
+printf 'MLX use: %s\n' "$MLX_RECOMMENDED_USE"
+printf 'MLX validation note: %s\n' "$MLX_VALIDATION_NOTE"
 printf '\nRecommendation tier: %s\n\n' "$TIER"
 printf 'Recommended model: %s\n' "$RECOMMENDED_MODEL"
 printf 'Recommended use: %s\n' "$RECOMMENDED_USE"

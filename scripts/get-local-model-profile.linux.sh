@@ -199,6 +199,11 @@ if [ "$JETSON_DETECTED" = true ]; then
   add_platform_note "NVIDIA Jetson or Tegra indicators detected; verify JetPack, CUDA, container/device access, and Ollama acceleration before trusting model sizing."
 fi
 
+GPU_DETECTION_TOOLS=()
+command_exists nvidia-smi && GPU_DETECTION_TOOLS+=("nvidia-smi")
+command_exists rocm-smi && GPU_DETECTION_TOOLS+=("rocm-smi")
+command_exists lspci && GPU_DETECTION_TOOLS+=("lspci")
+
 if command_exists nvidia-smi; then
   while IFS=, read -r name memory; do
     name="$(printf '%s' "$name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
@@ -240,6 +245,12 @@ if [ "${#GPU_NAMES[@]}" -eq 0 ] && command_exists lspci; then
     fi
     add_gpu "$name" "Unknown" "lspci" "$vendor" "$memory_type"
   done < <(lspci 2>/dev/null | grep -Ei 'vga compatible controller|3d controller|display controller')
+fi
+
+if [ "${#GPU_DETECTION_TOOLS[@]}" -eq 0 ]; then
+  add_platform_note "Linux GPU detection is limited because nvidia-smi, rocm-smi, and lspci are not available; treat GPU and VRAM results as incomplete."
+elif [ "${#GPU_NAMES[@]}" -eq 0 ]; then
+  add_platform_note "Linux GPU detection tools were available but no GPU was detected; verify drivers, containers, permissions, or cloud instance GPU attachment before choosing larger models."
 fi
 
 OLLAMA_STATUS="ollama command not found"

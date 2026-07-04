@@ -10,9 +10,9 @@ permissions:
   contents: read
 
 jobs:
-  validate:
-    name: Validate Continue pack
-    runs-on: ubuntu-latest
+  windows:
+    name: Windows PowerShell validation
+    runs-on: windows-latest
 
     steps:
       - name: Checkout repository
@@ -25,6 +25,14 @@ jobs:
       - name: Run pack tests
         shell: pwsh
         run: ./scripts/test-pack.ps1
+
+  validate:
+    name: Linux script smoke tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Run Linux validation wrapper
         shell: bash

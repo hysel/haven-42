@@ -196,6 +196,27 @@ Invoke-PackTest "model recommendation catalog has valid schema" {
     }
 }
 
+Invoke-PackTest "MLX model recommendation catalog has valid schema" {
+    $catalogPath = Join-Path $repoRoot "config/model-recommendations.mlx.tsv"
+    $rows = Get-Content -LiteralPath $catalogPath | Where-Object { $_ -and -not $_.StartsWith("#") }
+    $allowedTiers = @("High", "Medium", "Low")
+    $seenTiers = @{}
+
+    foreach ($row in $rows) {
+        $parts = $row -split "\|", 4
+        Assert-Equal -Actual $parts.Count -Expected 4 -Message "MLX catalog row should have four pipe-delimited columns: $row"
+        Assert-True -Condition ($parts[0] -in $allowedTiers) -Message "MLX catalog row has an unsupported tier: $row"
+        Assert-True -Condition ($parts[1].Trim().Length -gt 0) -Message "MLX catalog row must include a recommended model: $row"
+        Assert-True -Condition ($parts[2].Trim().Length -gt 0) -Message "MLX catalog row must include recommended use: $row"
+        Assert-True -Condition ($parts[3].Trim().Length -gt 0) -Message "MLX catalog row must include validation note: $row"
+        $seenTiers[$parts[0]] = $true
+    }
+
+    foreach ($tier in $allowedTiers) {
+        Assert-True -Condition $seenTiers.ContainsKey($tier) -Message "MLX catalog must include a row for $tier."
+    }
+}
+
 Invoke-PackTest "hardware profile scripts report CPU architecture" {
     $scriptNames = @(
         "get-local-model-profile.windows.ps1",
@@ -219,7 +240,10 @@ Invoke-PackTest "macOS hardware profile reports MLX separately from Ollama" {
     Assert-True -Condition ($content -match "MlxStatus") -Message "macOS profile JSON output should include MlxStatus."
     Assert-True -Condition ($content -match "MlxTools") -Message "macOS profile JSON output should include MlxTools."
     Assert-True -Condition ($content -match "MLX tooling:") -Message "macOS profile text output should include MLX tooling status."
+    Assert-True -Condition ($content -match "MlxRecommendation") -Message "macOS profile JSON output should include MlxRecommendation."
+    Assert-True -Condition ($content -match "MLX recommendation:") -Message "macOS profile text output should include MLX recommendation."
     Assert-True -Condition ($content -match "mlx_lm\.server") -Message "macOS profile should look for MLX server tooling."
+    Assert-True -Condition ($content -match "model-recommendations\.mlx\.tsv") -Message "macOS profile should use the separate MLX catalog."
     Assert-True -Condition ($content -match "OllamaModels") -Message "macOS profile should keep Ollama models as a separate output."
 }
 
@@ -232,6 +256,9 @@ Invoke-PackTest "Linux hardware profile reports ARM platform notes" {
     Assert-True -Condition ($content -match "nv_tegra_release") -Message "Linux profile should look for NVIDIA Tegra release indicators."
     Assert-True -Condition ($content -match "jetson\|tegra\|nvidia") -Message "Linux profile should look for Jetson or Tegra device-tree indicators."
     Assert-True -Condition ($content -match "ARM Linux detected") -Message "Linux profile should add conservative notes for ARM Linux."
+    Assert-True -Condition ($content -match "GPU_DETECTION_TOOLS") -Message "Linux profile should track optional GPU detection tools."
+    Assert-True -Condition ($content -match "Linux GPU detection is limited") -Message "Linux profile should warn when optional GPU detection tools are missing."
+    Assert-True -Condition ($content -match "no GPU was detected") -Message "Linux profile should warn when tools are present but no GPU is detected."
 }
 
 Invoke-PackTest "Continue file references are relative and resolvable" {
@@ -397,7 +424,7 @@ Invoke-PackTest "install script accepts shell-friendly argument aliases" {
     }
 }
 
-Invoke-PackTest "install wrapper scripts exist and call PowerShell installer" {
+Invoke-PackTest "install wrapper scripts exist and call native Unix installer" {
     $wrapperNames = @(
         "install-continue-pack.linux.sh",
         "install-continue-pack.macos.sh"
@@ -408,8 +435,8 @@ Invoke-PackTest "install wrapper scripts exist and call PowerShell installer" {
         Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$wrapperName should exist."
 
         $content = Get-Content -LiteralPath $wrapperPath -Raw
-        Assert-True -Condition ($content -match "install-continue-pack\.ps1") -Message "$wrapperName should call the PowerShell installer."
-        Assert-True -Condition ($content -match "pwsh") -Message "$wrapperName should require pwsh."
+        Assert-True -Condition ($content -match "install-continue-pack\.unix\.sh") -Message "$wrapperName should call the native Unix installer."
+        Assert-True -Condition ($content -notmatch "pwsh") -Message "$wrapperName should not require pwsh."
     }
 }
 
@@ -427,23 +454,23 @@ Invoke-PackTest "shell wrapper scripts are executable in git" {
     }
 }
 
-Invoke-PackTest "runtime context and validation wrapper scripts call canonical PowerShell scripts" {
+Invoke-PackTest "runtime context and validation wrapper scripts call native Unix scripts" {
     $wrappers = @(
         @{
             Name = "generate-runtime-context.linux.sh"
-            Target = "generate-runtime-context.ps1"
+            Target = "generate-runtime-context.unix.sh"
         },
         @{
             Name = "generate-runtime-context.macos.sh"
-            Target = "generate-runtime-context.ps1"
+            Target = "generate-runtime-context.unix.sh"
         },
         @{
             Name = "run-runtime-validation.linux.sh"
-            Target = "run-runtime-validation.ps1"
+            Target = "run-runtime-validation.unix.sh"
         },
         @{
             Name = "run-runtime-validation.macos.sh"
-            Target = "run-runtime-validation.ps1"
+            Target = "run-runtime-validation.unix.sh"
         }
     )
 
@@ -453,27 +480,27 @@ Invoke-PackTest "runtime context and validation wrapper scripts call canonical P
 
         $content = Get-Content -LiteralPath $wrapperPath -Raw
         Assert-True -Condition ($content -match [regex]::Escape($wrapper.Target)) -Message "$($wrapper.Name) should call $($wrapper.Target)."
-        Assert-True -Condition ($content -match "pwsh") -Message "$($wrapper.Name) should require pwsh."
+        Assert-True -Condition ($content -notmatch "pwsh") -Message "$($wrapper.Name) should not require pwsh."
     }
 }
 
-Invoke-PackTest "validation and test wrapper scripts call canonical PowerShell scripts" {
+Invoke-PackTest "validation and test wrapper scripts call native Unix scripts" {
     $wrappers = @(
         @{
             Name = "validate-pack.linux.sh"
-            Target = "validate-pack.ps1"
+            Target = "validate-pack.unix.sh"
         },
         @{
             Name = "validate-pack.macos.sh"
-            Target = "validate-pack.ps1"
+            Target = "validate-pack.unix.sh"
         },
         @{
             Name = "test-pack.linux.sh"
-            Target = "test-pack.ps1"
+            Target = "test-pack.unix.sh"
         },
         @{
             Name = "test-pack.macos.sh"
-            Target = "test-pack.ps1"
+            Target = "test-pack.unix.sh"
         }
     )
 
@@ -483,7 +510,7 @@ Invoke-PackTest "validation and test wrapper scripts call canonical PowerShell s
 
         $content = Get-Content -LiteralPath $wrapperPath -Raw
         Assert-True -Condition ($content -match [regex]::Escape($wrapper.Target)) -Message "$($wrapper.Name) should call $($wrapper.Target)."
-        Assert-True -Condition ($content -match "pwsh") -Message "$($wrapper.Name) should require pwsh."
+        Assert-True -Condition ($content -notmatch "pwsh") -Message "$($wrapper.Name) should not require pwsh."
     }
 }
 

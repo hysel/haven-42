@@ -121,9 +121,9 @@ The Linux shell wrappers are intended to work on mainstream Linux distributions 
 
 - `bash`
 - standard POSIX-style shell utilities such as `cd`, `dirname`, `cat`, and `command`
-- PowerShell 7+ through the `pwsh` command
+- Bash-compatible shell execution
 
-The validation, test, and install wrappers are thin wrappers around PowerShell scripts. Their distro compatibility mostly depends on whether PowerShell 7 is available for the distribution.
+The Linux and macOS validation, test, install, runtime-context, and runtime-validation scripts are native Bash scripts. They do not require PowerShell on Unix-like systems.
 
 The Linux hardware profile script is best effort and depends more heavily on local packages, drivers, and hardware:
 
@@ -135,9 +135,11 @@ The Linux hardware profile script is best effort and depends more heavily on loc
 
 Minimal distributions, containers, embedded devices, and locked-down servers may not include every optional detection command. In those cases, the script should still provide partial output and users should treat model recommendations as conservative starting points.
 
+The Linux hardware profile reports platform notes when optional GPU detection tools are missing or when available tools do not find a GPU. Those notes are caution signals for driver, container, permission, or cloud image setup; they do not automatically mean the machine has no usable acceleration.
+
 ### Enterprise And Cloud Linux
 
-Enterprise and cloud Linux images should be treated as supported targets when they provide `bash`, standard shell utilities, and PowerShell 7.
+Enterprise and cloud Linux images should be treated as supported targets when they provide `bash` and standard shell utilities.
 
 Expected compatible families include:
 
@@ -145,7 +147,7 @@ Expected compatible families include:
 - RHEL-family images such as Red Hat Enterprise Linux, Rocky Linux, AlmaLinux, Oracle Linux, and Fedora
 - SUSE and openSUSE images
 - Amazon Linux 2023
-- Azure Linux or CBL-Mariner style images when PowerShell 7 is available
+- Azure Linux or CBL-Mariner style images when Bash and standard shell utilities are available
 - Google Cloud images based on Debian, Ubuntu, or RHEL-family distributions
 
 Cloud and enterprise caveats:

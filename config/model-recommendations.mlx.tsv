@@ -1,0 +1,6 @@
+# Tier|RecommendedModel|RecommendedUse|ValidationNote
+# Ordered by hardware tier. This catalog is for MLX-capable Apple Silicon workflows, not Ollama.
+# Recommendations are candidates only; the macOS profile script does not inspect installed MLX model files.
+High|qwen3-coder-30b MLX-compatible variant|Use as an advanced Apple Silicon coding candidate when served through an OpenAI-compatible local endpoint.|Install and serve the model with MLX tooling, configure Continue locally, then run read-only and tool-call validation before approved write mode.
+Medium|qwen2.5-coder-14b or qwen3 14b MLX-compatible variant|Use for planning, review, and documentation workflows after local serving validation.|Validate latency, memory pressure, endpoint compatibility, and tool behavior before using Agent mode.
+Low|qwen2.5-coder-7b or another small MLX-compatible coding model|Use for read-only discovery, focused summaries, and documentation drafting on constrained Apple Silicon machines.|Use focused context files and avoid approved write mode unless the exact model and endpoint pass tool validation.
