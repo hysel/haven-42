@@ -177,15 +177,21 @@ Symptoms:
 {"name":"ls","arguments":{"dirPath":".","recursive":true}}
 ```
 
+- Or Agent mode prints tool-call markup like:
+
+```text
+<function=ls> <parameter=dirPath> . </tool_call>
+```
+
 - Clicking Apply returns `could not resolve filepath to apply changes`.
 
 Meaning:
 
-The model produced a tool-call-shaped JSON message, but Continue did not execute it as a tool call. The JSON is not a patch and should not be applied.
+The model produced a tool-call-shaped message, but Continue did not execute it as a tool call. The JSON or markup is not a patch and should not be applied.
 
 Fixes:
 
-- Do not click Apply on raw JSON tool-call text.
+- Do not click Apply on raw JSON or markup tool-call text.
 - Confirm the Continue surface is Agent mode.
 - Try a stronger or more tool-compatible model.
 - Use `@Files`, selected text, active-file context, or a generated runtime context file as a fallback.

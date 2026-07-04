@@ -147,8 +147,9 @@ Expected result:
 - Continue executes a read/list tool or otherwise inspects the opened repository.
 - The final answer summarizes actual files.
 - The final answer does not only print tool-call JSON such as `{"name":"ls","arguments":...}`.
+- The final answer does not only print tool-call markup such as `<function=ls> <parameter=dirPath> . </tool_call>`.
 
-If Agent mode prints raw JSON instead of executing tools, treat that model/editor setup as not tool-validated. Use runtime context fallback from `docs/runtime-validation.md` or switch to a model already validated for tool use.
+If Agent mode prints raw JSON or tool-call markup instead of executing tools, treat that model/editor setup as not tool-validated. Use runtime context fallback from `docs/runtime-validation.md` or switch to a model already validated for tool use.
 
 Use `docs/model-tool-use-validation.md` for the full validation checklist and `examples/model-tool-use-validation.md` for sanitized evidence.
 

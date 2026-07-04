@@ -147,6 +147,8 @@ test_editor_compatibility_doc() {
     grep -q "Read-only tool validated" "$REPO_ROOT/examples/editor-surface-validation.md" &&
     grep -q "qwen3-coder:30b" "$REPO_ROOT/examples/editor-surface-validation.md" &&
     grep -q "Do not mark approved-write ready" "$REPO_ROOT/examples/editor-surface-validation.md" &&
+    grep -q "VSCodium Agent Tool Test" "$REPO_ROOT/examples/editor-surface-validation.md" &&
+    grep -q "<function=ls>" "$REPO_ROOT/examples/editor-surface-validation.md" &&
     grep -q "model connection error" "$REPO_ROOT/examples/editor-surface-validation.md"
 }
 

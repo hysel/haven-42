@@ -19,7 +19,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 8: Real Repository Validation | Complete | The pack repository and one private application-style repository have been validated with the runtime runner; practical MCP workflow examples are documented. |
 | Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, install validation, and Windows/Linux/macOS commands. |
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
-| Milestone 11: Editor Surface Compatibility | In Progress | VS Code-compatible read-only Agent validation is recorded; VSCodium config loading and Agent mode validation remain. |
+| Milestone 11: Editor Surface Compatibility | In Progress | VS Code-compatible read-only Agent validation is recorded; VSCodium Agent validation is recorded as failed for the tested setup; duplicate-rule status still needs confirmation. |
 | Milestone 12: Model Tool-Use Validation Evidence | In Progress | Starter model defaults, automatic local model config generation, read-only tool validation guidance, and sanitized evidence templates are in place; online discovery and broader evidence catalog decisions remain. |
 
 ## Milestone 1: Minimum Usable Pack
@@ -306,9 +306,9 @@ Scope:
 - Document known VS Code and VSCodium differences for Continue extension availability, versioning, and command behavior. Done.
 - Add sanitized terminal preflight evidence for locally installed VS Code-compatible and VSCodium Continue extensions. Done.
 - Validate project-local `.continue/config.yaml` loading in VS Code-compatible builds when available. Done.
-- Validate project-local `.continue/config.yaml` loading in VSCodium when available.
+- Validate project-local `.continue/config.yaml` loading in VSCodium when available. Partial: Agent ran in VSCodium, but exact config source and duplicate-rule status were not confirmed.
 - Validate Agent mode and tool execution in VS Code-compatible builds. Done for read-only tool use.
-- Validate Agent mode and tool execution in VSCodium.
+- Validate Agent mode and tool execution in VSCodium. Done for the tested setup: failed due to printed tool-call markup instead of executed tool call.
 - Document how global Continue config can conflict with project-local rules. Done.
 - Keep `npx @continuedev/cli --config .continue/config.yaml` as a fallback validation path. Done.
 - Add troubleshooting notes for duplicate rules, missing models, missing prompts, and raw JSON tool-call output. Done.
