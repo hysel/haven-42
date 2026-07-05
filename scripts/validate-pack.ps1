@@ -141,6 +141,7 @@ $requiredFiles = @(
     "docs/local-config-safety.md",
     "docs/local-model-selection.md",
     "docs/online-model-discovery.md",
+    "docs/multi-repository-validation.md",
     "docs/local-agent-model-testing.md",
     "docs/model-tool-use-validation.md",
     "docs/local-model-reliability.md",
@@ -198,6 +199,7 @@ $requiredFiles = @(
     "examples/fixtures/release-readiness-quality-input.md",
     "examples/editor-surface-validation.md",
     "examples/model-tool-use-validation.md",
+    "examples/multi-repository-validation.md",
     ".github/workflows/validate-pack.yml"
 )
 

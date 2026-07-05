@@ -223,3 +223,14 @@
 - [x] Add local Ollama API preflight tooling for Agent model pull, load/unload, tool-call, and exact-output checks.
 - [x] Decide where validated model evidence should live for current scope.
 - [x] Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.
+
+## Milestone 13: Broader Multi-Repository Validation
+
+- [x] Define repository categories for broader validation coverage.
+- [x] Add a sanitized multi-repository validation evidence template.
+- [x] Document the minimum validation flow for each repository category.
+- [x] Require clean-tree, config-source, model, editor, MCP, and tool-use status in evidence.
+- [x] Add validation and test coverage for the guide and template.
+- [ ] Validate the pack against additional real repositories when suitable targets are available.
+- [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
+- [x] Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.

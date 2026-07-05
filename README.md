@@ -22,6 +22,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 | Test VS Code or VSCodium setup | `docs/editor-compatibility.md` |
 | Let Continue edit files | `docs/tool-use-modes.md` and `docs/scoped-edits.md` |
 | Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
+| Validate this pack across repository types | `docs/multi-repository-validation.md` |
 | Validate this pack | `Quick Validation` |
 | Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
 
@@ -728,6 +729,7 @@ Runtime status:
 - `examples/sonarqube-review.md`
 - `examples/editor-surface-validation.md`
 - `examples/model-tool-use-validation.md`
+- `examples/multi-repository-validation.md`
 - `examples/fixtures/repository-context.md`
 - `examples/fixtures/security-review-input.md`
 - `examples/fixtures/performance-review-input.md`
@@ -750,6 +752,7 @@ Runtime status:
 - `docs/local-config-safety.md`
 - `docs/local-model-selection.md`
 - `docs/online-model-discovery.md`
+- `docs/multi-repository-validation.md`
 - `docs/model-tool-use-validation.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`
