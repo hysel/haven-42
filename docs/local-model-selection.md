@@ -234,6 +234,11 @@ and record sanitized evidence with `examples/model-tool-use-validation.md`.
 
 The helper scripts use a rule-based recommendation. They do not benchmark models, download models, query online model rankings, or prove that a model is safe for edits.
 
+Optional online discovery is a separate future-friendly workflow for finding
+candidate model names only. It must not replace the offline local profile flow,
+update config automatically, or mark a model as validated. See
+`docs/online-model-discovery.md`.
+
 The process is:
 
 1. Detect the local hardware profile.
@@ -711,6 +716,7 @@ Use a stronger model when:
 ## Related Docs
 
 - `docs/local-model-reliability.md`
+- `docs/online-model-discovery.md`
 - `docs/model-tool-use-validation.md`
 - `docs/tool-use-modes.md`
 - `docs/approved-tool-backed-changes.md`

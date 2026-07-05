@@ -304,6 +304,20 @@ test_model_tool_use_validation_doc() {
     grep -q "Sanitization Checklist" "$REPO_ROOT/examples/model-tool-use-validation.md"
 }
 
+test_online_model_discovery_doc() {
+  [ -f "$REPO_ROOT/docs/online-model-discovery.md" ] &&
+    grep -q "candidate model names only" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "default workflow stays offline" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "must not" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "Pull models automatically" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "Mark a model as tool-safe" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "private repository content" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "Approved-write ready" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "docs/online-model-discovery.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/online-model-discovery.md" "$REPO_ROOT/docs/local-model-selection.md" &&
+    grep -q "do not discover newer" "$REPO_ROOT/docs/local-agent-model-testing.md"
+}
+
 test_tool_use_docs_define_platform_aware_write_behavior() {
   grep -q "Match commands to the user's active operating system and shell" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/.continue/rules/general.md" &&
@@ -404,6 +418,7 @@ run_test "runtime validation fails before CLI execution for missing target repos
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
+run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 
 if [ "$FAILED" -eq 1 ]; then

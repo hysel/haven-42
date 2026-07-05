@@ -383,6 +383,32 @@ Invoke-PackTest "model tool-use validation docs define evidence workflow" {
     Assert-True -Condition ($template -match "Sanitization Checklist") -Message "Evidence template should include sanitization checklist."
 }
 
+Invoke-PackTest "online model discovery docs preserve offline local-first defaults" {
+    $docPath = Join-Path $repoRoot "docs/online-model-discovery.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $selectionPath = Join-Path $repoRoot "docs/local-model-selection.md"
+    $agentTestingPath = Join-Path $repoRoot "docs/local-agent-model-testing.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Online model discovery doc should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $selection = Get-Content -LiteralPath $selectionPath -Raw
+    $agentTesting = Get-Content -LiteralPath $agentTestingPath -Raw
+
+    Assert-True -Condition ($doc -match "optional") -Message "Online discovery doc should mark discovery optional."
+    Assert-True -Condition ($doc -match "candidate model names only") -Message "Online discovery doc should limit output to candidate model names."
+    Assert-True -Condition ($doc -match "default workflow stays offline") -Message "Online discovery doc should preserve offline default workflow."
+    Assert-True -Condition ($doc -match "must not") -Message "Online discovery doc should define hard limits."
+    Assert-True -Condition ($doc -match "Pull models automatically") -Message "Online discovery doc should prevent implicit model pulls."
+    Assert-True -Condition ($doc -match "Mark a model as tool-safe") -Message "Online discovery doc should prevent false validation."
+    Assert-True -Condition ($doc -match "private repository content") -Message "Online discovery doc should prohibit sending private context online."
+    Assert-True -Condition ($doc -match "Approved-write ready") -Message "Online discovery doc should define validated status progression."
+    Assert-True -Condition ($readme -match "docs/online-model-discovery.md") -Message "README should link online discovery doc."
+    Assert-True -Condition ($selection -match "docs/online-model-discovery.md") -Message "Local model selection should reference online discovery doc."
+    Assert-True -Condition ($agentTesting -match "do not discover newer") -Message "Local Agent testing should distinguish testing from discovery."
+}
+
 Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     $generalRulePath = Join-Path $repoRoot ".continue/rules/general.md"
     $toolModesPath = Join-Path $repoRoot "docs/tool-use-modes.md"

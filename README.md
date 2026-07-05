@@ -16,6 +16,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 | --- | --- |
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
+| Evaluate newer model candidates | `docs/online-model-discovery.md` |
 | Validate whether a model can use tools | `docs/model-tool-use-validation.md` |
 | Automate local model preflight tests | `docs/local-agent-model-testing.md` |
 | Test VS Code or VSCodium setup | `docs/editor-compatibility.md` |
@@ -84,6 +85,10 @@ ollama pull qwen3-coder:30b
 ```
 
 The model helper scripts use `config/model-recommendations.tsv` as the curated model priority list. You usually do not need to edit it during setup. Update it only after validating a better local model for your hardware and workflow.
+
+Optional online model discovery is candidate research only. It should not
+change the offline default setup, pull models automatically, or mark a model as
+tool-safe without local validation. See `docs/online-model-discovery.md`.
 
 To pull and preflight Agent model candidates through the Ollama API before
 manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
@@ -744,6 +749,7 @@ Runtime status:
 - `docs/scoped-edits.md`
 - `docs/local-config-safety.md`
 - `docs/local-model-selection.md`
+- `docs/online-model-discovery.md`
 - `docs/model-tool-use-validation.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`

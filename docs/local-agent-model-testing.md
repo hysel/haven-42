@@ -5,6 +5,11 @@
 Use these scripts to automate the repetitive part of local model validation before
 testing Continue Agent mode in the editor.
 
+These scripts test selected local model names. They do not discover newer
+models online. If an online discovery helper is added later, it should only
+suggest candidates; the model still has to pass this local preflight and the
+editor Apply validation described below.
+
 The scripts can:
 
 - pull candidate Ollama models

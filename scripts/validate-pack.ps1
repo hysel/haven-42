@@ -140,6 +140,7 @@ $requiredFiles = @(
     "docs/scoped-edits.md",
     "docs/local-config-safety.md",
     "docs/local-model-selection.md",
+    "docs/online-model-discovery.md",
     "docs/local-agent-model-testing.md",
     "docs/model-tool-use-validation.md",
     "docs/local-model-reliability.md",
