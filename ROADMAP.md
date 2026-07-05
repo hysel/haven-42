@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, and Milestone 11 editor surface compatibility are complete. Broader multi-repository validation remains in the backlog.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Broader multi-repository validation remains in the backlog.
 
 ## Stage Status
 
@@ -20,7 +20,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, duplicate-rule-safe global config generation, install validation, and Windows/Linux/macOS commands. |
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
-| Milestone 12: Model Tool-Use Validation Evidence | In Progress | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, and sanitized evidence templates are in place; online discovery and broader evidence catalog decisions remain. |
+| Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -343,7 +343,7 @@ Scope:
 - Add platform-aware command guidance so Windows uses PowerShell and Linux/macOS use shell commands. Done.
 - Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs. Done via sanitized evidence template.
 - Distinguish candidate model recommendations from tool-validated model status. Done.
-- Evaluate optional online model discovery for newer Ollama candidates while keeping the default workflow offline, local-first, and non-installing.
+- Evaluate optional online model discovery for newer Ollama candidates while keeping the default workflow offline, local-first, and non-installing. Done.
 - Add a post-validation model installer that can download the selected validated model automatically and update local-only Continue config without committing private endpoints. Done.
 - Add a sanitized evidence template for model tool-use validation results. Done.
 - Decide whether validated model evidence should live in docs, examples, or a separate catalog. Done for current scope: keep the reusable template in examples and defer larger evidence catalogs until records accumulate.
@@ -352,7 +352,7 @@ Scope:
 Exit criteria:
 
 - Users know that hardware/profile scripts recommend candidates, not proven tool-safe models.
-- Online model discovery, if added, suggests candidates only and does not replace local validation or auto-install models.
+- Online model discovery, if added, suggests candidates only and does not replace local validation or auto-install models. Done.
 - Automatic model download, if added, runs only after a model is selected or validated and writes machine-specific settings only to local override config.
 - A model is considered tool-validated only after a read-only tool test passes.
 - Approved write mode for real code changes remains blocked until file listing, file-content reading, a scoped write smoke test, and post-edit diff verification pass in the intended editor/provider setup.

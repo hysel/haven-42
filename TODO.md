@@ -217,7 +217,7 @@
 - [x] Add platform-aware command guidance for Windows PowerShell, Linux, and macOS shells.
 - [x] Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs.
 - [x] Distinguish candidate model recommendations from tool-validated model status.
-- [ ] Evaluate optional online Ollama model discovery for newer candidates without changing the offline default flow.
+- [x] Evaluate optional online Ollama model discovery for newer candidates without changing the offline default flow.
 - [x] Add a post-validation model installer that can download the selected validated model automatically and update local-only Continue config without committing private endpoints.
 - [x] Add a sanitized evidence template for model tool-use validation results.
 - [x] Add local Ollama API preflight tooling for Agent model pull, load/unload, tool-call, and exact-output checks.
