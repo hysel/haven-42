@@ -258,3 +258,33 @@
 - [ ] Validate repository discovery, implementation planning, and code review against Python and JavaScript/TypeScript samples.
 - [ ] Record sanitized multi-language validation evidence.
 - [ ] Prevent .NET-specific recommendations from being applied to non-.NET repositories.
+## Milestone 16: Sample Repository Factory
+
+- [x] Add `docs/sample-repository-factory.md`.
+- [x] Add Windows sample repository factory script.
+- [x] Add Linux and macOS sample repository factory wrappers.
+- [x] Generate deterministic samples for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL.
+- [x] Add validation and test coverage for sample factory scripts.
+- [ ] Use generated samples for sanitized multi-language validation evidence.
+
+## Milestone 17: Agent Surface Compatibility Validation
+
+- [ ] Validate Cline against a generated sample repository in read-only mode.
+- [ ] Validate Aider against a generated sample repository in plan or patch mode.
+- [ ] Record sanitized evidence for each non-Continue agent surface.
+- [ ] Keep approved-write status blocked until external changed-file verification passes.
+
+## Milestone 18: Language Rule Packs
+
+- [ ] Add optional Python rule pack.
+- [ ] Add optional TypeScript rule pack.
+- [ ] Add optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
+- [ ] Add evidence-gated rule selection guidance.
+- [ ] Validate rule packs against generated sample repositories.
+
+## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
+
+- [ ] Add installer profile options for read-only review and approved-write workflows.
+- [ ] Add future surface-specific profile generation after non-Continue validation.
+- [ ] Add a sanitized evidence catalog for model, surface, OS, language, and write-readiness results.
+- [ ] Add release archive, checksum, and install-command guidance.

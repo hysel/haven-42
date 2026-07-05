@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, and release packaging.
 
 ## Stage Status
 
@@ -24,6 +24,10 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, validation workflow guidance, and first legacy .NET category evidence are defined; additional real repository categories remain pending. |
 | Milestone 14: Agent Surface Portability And Broader Audience | Planned | Reposition the project as a local-first engineering agent pack, keep Continue as the first supported surface, and evaluate other open-source agent surfaces for non-enterprise and enterprise use. |
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
+| Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories. |
+| Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
+| Milestone 18: Language Rule Packs | Planned | Add optional language-specific rule packs without applying them globally by default. |
+| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Planned | Generate surface/profile-specific installs, collect sanitized compatibility evidence, and package releases for easier adoption. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -431,3 +435,70 @@ Exit criteria:
 - At least Python and JavaScript/TypeScript sample repositories have sanitized validation evidence.
 - README explains that .NET is currently the most mature path, not the only intended path.
 - Language-specific guidance is not treated as approved until validation evidence exists.
+## Milestone 16: Sample Repository Factory
+
+Goal: Generate disposable local repositories that unblock validation when real repositories are unavailable.
+
+Scope:
+
+- Add Windows, Linux, and macOS sample repository factory scripts.
+- Generate deterministic samples for Python API, TypeScript frontend, Node service, Java/Spring API, Go service, Rust CLI, Infrastructure as Code, and SQL migrations.
+- Keep samples dependency-free and offline by default.
+- Include metadata in each generated sample explaining that it is a validation fixture, not a production starter template.
+- Document how to use generated samples for repository discovery, planning, code review, runtime output verification, and agent-surface testing.
+- Keep generated sample output under `runtime-validation-output` by default so it is not committed accidentally.
+
+Exit criteria:
+
+- A contributor can generate all sample repositories with one documented command.
+- Tests verify the factory creates expected language/project markers.
+- Generated samples are suitable for read-only and approved-write validation in disposable workspaces.
+
+## Milestone 17: Agent Surface Compatibility Validation
+
+Goal: Convert candidate agent surfaces from documentation into evidence-backed compatibility results.
+
+Scope:
+
+- Validate at least one generated sample repository with Cline in read-only mode.
+- Validate at least one generated sample repository with Aider in plan or patch mode.
+- Record surface, model, OS, tool permissions, failure signals, and changed-file verification.
+- Keep Continue as the supported first path until another surface has equivalent validation evidence.
+
+Exit criteria:
+
+- At least one non-Continue surface has sanitized read-only validation evidence.
+- Approved-write recommendations remain blocked until scoped-write and external verification pass.
+
+## Milestone 18: Language Rule Packs
+
+Goal: Add optional language-specific rules without making the default pack noisy or wrong for other ecosystems.
+
+Scope:
+
+- Add optional rule files for Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code.
+- Define when each rule pack should apply based on repository evidence.
+- Add prompt guidance that keeps recommendations language-neutral when evidence is incomplete.
+- Validate each rule pack against generated samples before promoting it.
+
+Exit criteria:
+
+- Language-specific advice is evidence-gated.
+- .NET guidance no longer leaks into non-.NET repositories during validation.
+
+## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
+
+Goal: Make adoption easier as the pack grows across surfaces, languages, and validation levels.
+
+Scope:
+
+- Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces.
+- Add language-focused install/profile options after language packs are validated.
+- Create a sanitized evidence catalog for model, OS, editor, agent surface, language, and write-readiness results.
+- Improve release packaging with GitHub release notes, downloadable archives, checksums, and install command examples.
+
+Exit criteria:
+
+- Users can choose the right profile without manually assembling config files.
+- Validation evidence is structured enough to compare models, surfaces, and languages over time.
+- Release artifacts are easy to install and verify.

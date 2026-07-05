@@ -93,7 +93,9 @@ test_linux_macos_scripts_do_not_require_pwsh() {
     "$REPO_ROOT/scripts/pull-local-agent-models.linux.sh" \
     "$REPO_ROOT/scripts/pull-local-agent-models.macos.sh" \
     "$REPO_ROOT/scripts/test-local-agent-models.linux.sh" \
-    "$REPO_ROOT/scripts/test-local-agent-models.macos.sh"
+    "$REPO_ROOT/scripts/test-local-agent-models.macos.sh" \
+    "$REPO_ROOT/scripts/generate-sample-repositories.linux.sh" \
+    "$REPO_ROOT/scripts/generate-sample-repositories.macos.sh"
 }
 
 test_runtime_context_generation() {
@@ -386,6 +388,19 @@ test_multi_repository_validation_doc() {
     grep -q "current-source verification" "$REPO_ROOT/docs/runtime-output-verification.md"
 }
 
+
+test_sample_repository_factory_doc() {
+  [ -f "$REPO_ROOT/docs/sample-repository-factory.md" ] &&
+    grep -q "python-api" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "typescript-frontend" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "generate-sample-repositories.ps1" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "generate-sample-repositories.linux.sh" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "generate-sample-repositories.macos.sh" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "production starter projects" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "docs/sample-repository-factory.md" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 16: Sample Repository Factory" "$REPO_ROOT/ROADMAP.md"
+}
+
 test_agent_surface_options_doc() {
   [ -f "$REPO_ROOT/docs/agent-surface-options.md" ] &&
     grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
@@ -409,6 +424,29 @@ test_language_support_doc() {
     grep -q "docs/language-support.md" "$REPO_ROOT/README.md" &&
     grep -q "Milestone 15: Multi-Language Engineering Support" "$REPO_ROOT/ROADMAP.md"
 }
+
+test_sample_repository_factory() {
+  temp_root="$(mktemp -d)"
+  "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" >/tmp/sample-factory.out 2>&1 || return 1
+  grep -q "Generated sample repositories" /tmp/sample-factory.out || return 1
+  [ -f "$temp_root/python-api/SAMPLE-METADATA.md" ] || return 1
+  [ -f "$temp_root/python-api/app/main.py" ] || return 1
+  [ -f "$temp_root/python-api/tests/test_main.py" ] || return 1
+  [ -f "$temp_root/typescript-frontend/package.json" ] || return 1
+  [ -f "$temp_root/node-service/Dockerfile" ] || return 1
+  [ -f "$temp_root/java-spring-api/pom.xml" ] || return 1
+  [ -f "$temp_root/go-service/go.mod" ] || return 1
+  [ -f "$temp_root/rust-cli/Cargo.toml" ] || return 1
+  [ -f "$temp_root/iac-terraform-kubernetes/terraform/main.tf" ] || return 1
+  [ -f "$temp_root/sql-migrations/schema/001_create_items.sql" ] || return 1
+
+  ! "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" >/tmp/sample-factory-rerun.out 2>&1 || return 1
+  grep -q "Use --force" /tmp/sample-factory-rerun.out || return 1
+  "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" --force >/tmp/sample-factory-force.out 2>&1 || return 1
+  "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --list >/tmp/sample-factory-list.out 2>&1 || return 1
+  grep -q "python-api" /tmp/sample-factory-list.out && grep -q "sql-migrations" /tmp/sample-factory-list.out
+}
+
 test_prompt_quality_guardrails_require_filename_fidelity() {
   grep -q "exact filenames" "$REPO_ROOT/.continue/prompts/legacy-dotnet-dependency-migration.md" &&
     grep -q "Do not invent or normalize filenames" "$REPO_ROOT/.continue/prompts/legacy-dotnet-dependency-migration.md" &&
@@ -533,8 +571,10 @@ run_test "editor compatibility docs cover config and tool validation" test_edito
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
 run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
+run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc
 run_test "agent surface docs define portability boundary" test_agent_surface_options_doc
 run_test "language support docs define staged multi-language boundary" test_language_support_doc
+run_test "sample repository factory creates expected fixtures" test_sample_repository_factory
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 

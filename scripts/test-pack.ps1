@@ -451,6 +451,23 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($runtimeOutputVerification -match "current-source verification") -Message "Runtime output verification doc should describe source verification qualifiers."
 }
 
+
+Invoke-PackTest "sample repository factory docs define generated fixtures" {
+    $docPath = Join-Path $repoRoot "docs/sample-repository-factory.md"
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath (Join-Path $repoRoot "README.md") -Raw
+    $roadmap = Get-Content -LiteralPath (Join-Path $repoRoot "ROADMAP.md") -Raw
+
+    Assert-True -Condition ($doc -match "python-api") -Message "Sample factory doc should list python-api."
+    Assert-True -Condition ($doc -match "typescript-frontend") -Message "Sample factory doc should list typescript-frontend."
+    Assert-True -Condition ($doc -match "generate-sample-repositories\.ps1") -Message "Sample factory doc should include the Windows script."
+    Assert-True -Condition ($doc -match "generate-sample-repositories\.linux\.sh") -Message "Sample factory doc should include the Linux script."
+    Assert-True -Condition ($doc -match "generate-sample-repositories\.macos\.sh") -Message "Sample factory doc should include the macOS script."
+    Assert-True -Condition ($doc -match "production starter projects") -Message "Sample factory doc should include guardrails."
+    Assert-True -Condition ($readme -match "docs/sample-repository-factory\.md") -Message "README should link to sample factory docs."
+    Assert-True -Condition ($roadmap -match "Milestone 16: Sample Repository Factory") -Message "Roadmap should include Milestone 16."
+}
+
 Invoke-PackTest "agent surface docs define portability boundary" {
     $docPath = Join-Path $repoRoot "docs/agent-surface-options.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -492,6 +509,51 @@ Invoke-PackTest "language support docs define staged multi-language boundary" {
     Assert-True -Condition ($readme -match "docs/language-support.md") -Message "README should link language support doc."
     Assert-True -Condition ($roadmap -match "Milestone 15: Multi-Language Engineering Support") -Message "Roadmap should include Milestone 15."
 }
+
+Invoke-PackTest "sample repository factory creates expected fixtures" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "sample-factory-test-$([guid]::NewGuid())"
+
+    try {
+        $scriptPath = Join-Path $repoRoot "scripts/generate-sample-repositories.ps1"
+        $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputRoot", $tempRoot)
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Sample repository factory should succeed."
+        Assert-True -Condition ($result.Output -match "Generated sample repositories") -Message "Sample factory should report generated output."
+
+        $expectedFiles = @(
+            "python-api/SAMPLE-METADATA.md",
+            "python-api/app/main.py",
+            "python-api/tests/test_main.py",
+            "typescript-frontend/package.json",
+            "node-service/Dockerfile",
+            "java-spring-api/pom.xml",
+            "go-service/go.mod",
+            "rust-cli/Cargo.toml",
+            "iac-terraform-kubernetes/terraform/main.tf",
+            "iac-terraform-kubernetes/k8s/deployment.yaml",
+            "sql-migrations/schema/001_create_items.sql"
+        )
+
+        foreach ($relativePath in $expectedFiles) {
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $tempRoot $relativePath)) -Message "Expected generated file is missing: $relativePath"
+        }
+
+        $listResult = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-List")
+        Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Sample repository factory list mode should succeed."
+        Assert-True -Condition ($listResult.Output -match "python-api") -Message "List output should include python-api."
+        Assert-True -Condition ($listResult.Output -match "sql-migrations") -Message "List output should include sql-migrations."
+
+        $rerunResult = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputRoot", $tempRoot)
+        Assert-True -Condition ($rerunResult.ExitCode -ne 0) -Message "Sample repository factory should refuse to overwrite without -Force."
+        Assert-True -Condition ($rerunResult.Output -match "overwrite generated samples") -Message "Overwrite refusal should explain how to overwrite generated samples."
+
+        $forceResult = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputRoot", $tempRoot, "-Force")
+        Assert-Equal -Actual $forceResult.ExitCode -Expected 0 -Message "Sample repository factory should overwrite with -Force."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "prompt quality guardrails require filename fidelity and sourced lifecycle claims" {
     $legacyPromptPath = Join-Path $repoRoot ".continue/prompts/legacy-dotnet-dependency-migration.md"
     $repositoryPromptPath = Join-Path $repoRoot ".continue/prompts/repository-discovery.md"
@@ -1056,6 +1118,14 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
         @{
             Name = "test-local-agent-models.macos.sh"
             Target = "test-local-agent-models.shared.sh"
+        },
+        @{
+            Name = "generate-sample-repositories.linux.sh"
+            Target = "generate-sample-repositories.shared.sh"
+        },
+        @{
+            Name = "generate-sample-repositories.macos.sh"
+            Target = "generate-sample-repositories.shared.sh"
         }
     )
 

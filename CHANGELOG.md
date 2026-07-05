@@ -11,7 +11,10 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
-- No unreleased changes yet.
+### Added
+
+- Added sample repository factory documentation and scripts for disposable local validation repositories.
+- Added roadmap and TODO tracking for sample repository factory, agent-surface compatibility validation, language rule packs, installer profiles, evidence catalogs, and release packaging.
 
 ## 0.2.0 - 2026-07-05
 

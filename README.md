@@ -28,6 +28,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Verify runtime model output | `docs/runtime-output-verification.md` |
 | Compare other open-source agent surfaces | `docs/agent-surface-options.md` |
 | Track multi-language support | `docs/language-support.md` |
+| Generate local sample repositories | `docs/sample-repository-factory.md` |
 | Validate this pack | `Quick Validation` |
 | Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
 
