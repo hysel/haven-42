@@ -66,7 +66,7 @@ Recommended validation flow:
 5. Confirm the agent reports actual files from the sample.
 6. Run implementation planning or code review.
 7. Verify output with `docs/runtime-output-verification.md` where applicable.
-8. Record sanitized evidence using `examples/multi-repository-validation.md`.
+8. Record sanitized evidence using `examples/multi-repository-validation.md` or `examples/sample-repository-factory-validation.md`.
 
 ## Guardrails
 
@@ -74,3 +74,6 @@ Recommended validation flow:
 - Do not publish generated output as evidence of real-world language support by itself.
 - Do not add secrets, private endpoints, customer names, or local machine paths to generated samples.
 - Do not mark a language or agent surface validated until model output is reviewed and recorded.
+## Evidence
+
+Initial script-level validation evidence is recorded in `examples/sample-repository-factory-validation.md`. This evidence covers generation, installation, and runtime context creation for generated samples. It does not replace editor/model Agent validation.

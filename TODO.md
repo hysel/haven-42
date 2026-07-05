@@ -265,7 +265,8 @@
 - [x] Add Linux and macOS sample repository factory wrappers.
 - [x] Generate deterministic samples for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL.
 - [x] Add validation and test coverage for sample factory scripts.
-- [ ] Use generated samples for sanitized multi-language validation evidence.
+- [x] Record initial script-level validation evidence for generated Python and TypeScript samples.
+- [ ] Use generated samples for editor/model-based multi-language validation evidence.
 
 ## Milestone 17: Agent Surface Compatibility Validation
 

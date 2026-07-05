@@ -452,6 +452,28 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
 }
 
 
+
+Invoke-PackTest "sample repository factory validation evidence is sanitized" {
+    $evidencePath = Join-Path $repoRoot "examples/sample-repository-factory-validation.md"
+    $docPath = Join-Path $repoRoot "docs/sample-repository-factory.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Sample factory validation evidence should exist."
+
+    $evidence = Get-Content -LiteralPath $evidencePath -Raw
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+
+    Assert-True -Condition ($evidence -match "Sample Repository Factory Validation Evidence") -Message "Evidence should have expected title."
+    Assert-True -Condition ($evidence -match "python-api") -Message "Evidence should include python-api sample."
+    Assert-True -Condition ($evidence -match "typescript-frontend") -Message "Evidence should include typescript-frontend sample."
+    Assert-True -Condition ($evidence -match "Runtime context generation") -Message "Evidence should mention runtime context generation."
+    Assert-True -Condition ($evidence -match "does not prove model or editor Agent behavior") -Message "Evidence should avoid overstating Agent validation."
+    Assert-True -Condition ($evidence -match "No private local paths") -Message "Evidence should include sanitization checklist."
+    Assert-True -Condition ($doc -match "examples/sample-repository-factory-validation\.md") -Message "Sample factory doc should link evidence."
+    Assert-True -Condition ($readme -match "examples/sample-repository-factory-validation\.md") -Message "README should link evidence."
+}
+
 Invoke-PackTest "sample repository factory docs define generated fixtures" {
     $docPath = Join-Path $repoRoot "docs/sample-repository-factory.md"
     $doc = Get-Content -LiteralPath $docPath -Raw

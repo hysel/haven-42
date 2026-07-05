@@ -389,6 +389,19 @@ test_multi_repository_validation_doc() {
 }
 
 
+
+test_sample_repository_factory_validation_evidence() {
+  [ -f "$REPO_ROOT/examples/sample-repository-factory-validation.md" ] &&
+    grep -q "Sample Repository Factory Validation Evidence" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "python-api" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "typescript-frontend" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "Runtime context generation" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "does not prove model or editor Agent behavior" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "No private local paths" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "examples/sample-repository-factory-validation.md" "$REPO_ROOT/docs/sample-repository-factory.md" &&
+    grep -q "examples/sample-repository-factory-validation.md" "$REPO_ROOT/README.md"
+}
+
 test_sample_repository_factory_doc() {
   [ -f "$REPO_ROOT/docs/sample-repository-factory.md" ] &&
     grep -q "python-api" "$REPO_ROOT/docs/sample-repository-factory.md" &&
@@ -571,6 +584,7 @@ run_test "editor compatibility docs cover config and tool validation" test_edito
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
 run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
+run_test "sample repository factory validation evidence is sanitized" test_sample_repository_factory_validation_evidence
 run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc
 run_test "agent surface docs define portability boundary" test_agent_surface_options_doc
 run_test "language support docs define staged multi-language boundary" test_language_support_doc

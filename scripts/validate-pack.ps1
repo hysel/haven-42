@@ -212,6 +212,7 @@ $requiredFiles = @(
     "examples/editor-surface-validation.md",
     "examples/model-tool-use-validation.md",
     "examples/multi-repository-validation.md",
+    "examples/sample-repository-factory-validation.md",
     ".github/workflows/validate-pack.yml"
 )
 

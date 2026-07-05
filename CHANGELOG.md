@@ -14,6 +14,7 @@ This project follows a simple changelog format:
 ### Added
 
 - Added sample repository factory documentation and scripts for disposable local validation repositories.
+- Added sanitized sample repository factory validation evidence for generated Python and TypeScript samples.
 - Added roadmap and TODO tracking for sample repository factory, agent-surface compatibility validation, language rule packs, installer profiles, evidence catalogs, and release packaging.
 
 ## 0.2.0 - 2026-07-05
