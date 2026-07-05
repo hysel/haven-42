@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
-EXPECTED_VERSION="0.1.12"
+EXPECTED_VERSION="0.2.0"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 FAILED=0
@@ -150,6 +150,8 @@ REQUIRED_FILES=(
   "docs/online-model-discovery.md"
   "docs/multi-repository-validation.md"
   "docs/runtime-output-verification.md"
+  "docs/agent-surface-options.md"
+  "docs/language-support.md"
   "docs/local-agent-model-testing.md"
   "docs/model-tool-use-validation.md"
   "docs/local-model-reliability.md"

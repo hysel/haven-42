@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use this guide when the Continue Enterprise Engineering Pack does not load, prompts do not appear, or local model execution fails.
+Use this guide when the Local Engineering Agent Pack does not load, prompts do not appear, or local model execution fails.
 
 ## Quick Checks
 
@@ -206,21 +206,21 @@ Fallback:
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 

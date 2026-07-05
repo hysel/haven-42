@@ -452,7 +452,7 @@ function Write-GlobalContinueConfig {
     }
 }
 
-Write-Plan "Install Continue Enterprise Engineering Pack"
+Write-Plan "Install Local Engineering Agent Pack"
 Write-Plan "Source: $sourceContinue"
 Write-Plan "Target: $targetContinue"
 

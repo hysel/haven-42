@@ -2,13 +2,15 @@
 
 ## Name
 
-Continue Enterprise Engineering Pack
+Local Engineering Agent Pack
 
 ## Purpose
 
-This repository defines an enterprise-focused Continue configuration pack for software engineering teams that want local-first AI assistance, repeatable engineering workflows, and consistent guidance for .NET, ASP.NET Core, APIs, Clean Architecture, security, performance, testing, and documentation.
+This repository defines a local-first engineering agent pack for developers, small teams, consultants, and enterprise engineering groups that want repeatable AI-assisted workflows and consistent guidance for .NET, ASP.NET Core, APIs, Clean Architecture, security, performance, testing, and documentation.
 
 The pack is intended to turn common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories.
+
+Continue is the first supported runtime surface, but the project identity is broader than Continue. The reusable assets should remain portable enough to evaluate with other open-source coding agents as they become useful.
 
 ## Current Stage
 
@@ -18,17 +20,19 @@ The expected file layout exists and initial Continue configuration, agents, prom
 
 ## Target Users
 
+- Individual developers improving personal or client repositories
+- Small teams that want consistent review and planning without heavyweight process
 - Senior engineers working in enterprise .NET repositories
 - Architects reviewing service boundaries and dependency direction
 - Security engineers reviewing API and application risks
 - Performance engineers investigating reliability and throughput concerns
 - Product and delivery leads who need structured implementation plans
-- Teams using Continue with local or self-hosted model infrastructure
+- Teams using Continue or another validated local-first agent surface with local or self-hosted model infrastructure
 
 ## Goals
 
-- Provide a usable Continue pack for enterprise engineering workflows.
-- Favor local-first operation through Continue and Ollama.
+- Provide a usable local-first agent pack for practical engineering workflows.
+- Favor local-first operation through Continue, Ollama, and future validated local agent surfaces.
 - Make AI-assisted reviews repeatable and auditable.
 - Encode practical .NET, ASP.NET Core, Clean Architecture, API, security, testing, logging, performance, and Git guidance.
 - Keep role-specific behavior explicit through agents.
@@ -47,7 +51,7 @@ The expected file layout exists and initial Continue configuration, agents, prom
 ## Product Principles
 
 - Local-first by default.
-- Enterprise-safe language and workflows.
+- Beginner-friendly defaults with enterprise-safe language and workflows where needed.
 - Clear separation between agents, prompts, rules, and templates.
 - Practical guidance over abstract theory.
 - Explicit limitations instead of inflated capability claims.

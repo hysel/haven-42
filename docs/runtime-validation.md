@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document tracks runtime validation of the Continue Enterprise Engineering Pack against real repositories and realistic review inputs.
+This document tracks runtime validation of the Local Engineering Agent Pack against real repositories and realistic review inputs.
 
 Runtime validation is different from static validation. Static validation checks repository invariants. Runtime validation checks whether the pack is useful, accurate, and ergonomic when used in Continue with real code.
 
@@ -132,21 +132,21 @@ Example from the root of a target repository:
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD"
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD"
 ```
 
@@ -155,7 +155,7 @@ When using a local-only config file, pass an explicit config path. The runner re
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 $Config = "$Pack\.continue\config.local.yaml"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path -ConfigPath $Config
 ```
@@ -163,7 +163,7 @@ $Config = "$Pack\.continue\config.local.yaml"
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 CONFIG="$PACK/.continue/config.local.yaml"
 "$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD" --config-path "$CONFIG"
 ```
@@ -171,7 +171,7 @@ CONFIG="$PACK/.continue/config.local.yaml"
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 CONFIG="$PACK/.continue/config.local.yaml"
 "$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD" --config-path "$CONFIG"
 ```
@@ -181,21 +181,21 @@ To append a sanitized summary template to this document:
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path -AppendSummary
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD" --append-summary
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD" --append-summary
 ```
 
@@ -210,21 +210,21 @@ Example from the root of a target repository:
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 

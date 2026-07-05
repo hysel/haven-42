@@ -239,3 +239,22 @@
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
 - [x] Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.
+
+## Milestone 14: Agent Surface Portability And Broader Audience
+
+- [x] Reposition the project name and top-level purpose beyond Continue-only and enterprise-only language.
+- [ ] Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options.
+- [ ] Define validation levels for each agent surface: read-only, plan validated, approved-write ready.
+- [ ] Evaluate at least one non-Continue open-source agent surface with sanitized evidence.
+- [ ] Decide whether install scripts should generate surface-specific config bundles instead of only `.continue` assets.
+- [ ] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance.
+
+## Milestone 15: Multi-Language Engineering Support
+
+- [ ] Document current language-support maturity and staged expansion in `docs/language-support.md`.
+- [ ] Add project-detection guidance for Python, JavaScript/TypeScript, Java/Spring, Go, Rust, SQL, and Infrastructure as Code repositories.
+- [ ] Add generated local sample repositories for at least Python and JavaScript/TypeScript validation.
+- [ ] Add language-specific rules or guidance without applying them globally by default.
+- [ ] Validate repository discovery, implementation planning, and code review against Python and JavaScript/TypeScript samples.
+- [ ] Record sanitized multi-language validation evidence.
+- [ ] Prevent .NET-specific recommendations from being applied to non-.NET repositories.

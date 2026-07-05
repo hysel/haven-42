@@ -1,12 +1,12 @@
 ---
 name: ai-framework-self-review
-description: Review this Continue engineering pack as an enterprise software product.
+description: Review this local-first engineering agent pack as a reusable software product.
 invokable: true
 ---
 
 ## Purpose
 
-Review the Continue Enterprise Engineering Pack itself as an enterprise software product.
+Review the Local Engineering Agent Pack itself as a reusable engineering-assistant product.
 
 ## Required Context
 

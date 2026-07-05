@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document explains how to add optional Model Context Protocol integrations to the Continue Enterprise Engineering Pack.
+This document explains how to add optional Model Context Protocol integrations to the Local Engineering Agent Pack.
 
 MCP is not required for the pack. The default configuration intentionally keeps `mcpServers: []` so the pack remains portable, local-first, and compatible with Ollama-backed systems.
 

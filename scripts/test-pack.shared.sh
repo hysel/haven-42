@@ -386,6 +386,29 @@ test_multi_repository_validation_doc() {
     grep -q "current-source verification" "$REPO_ROOT/docs/runtime-output-verification.md"
 }
 
+test_agent_surface_options_doc() {
+  [ -f "$REPO_ROOT/docs/agent-surface-options.md" ] &&
+    grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Candidate means" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Approved-write ready" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Cline" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Aider" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 14: Agent Surface Portability And Broader Audience" "$REPO_ROOT/ROADMAP.md"
+}
+
+
+test_language_support_doc() {
+  [ -f "$REPO_ROOT/docs/language-support.md" ] &&
+    grep -q ".NET.*most mature" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "Python" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "JavaScript / TypeScript" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "Infrastructure as Code" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "Do not apply .NET-specific advice" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "docs/language-support.md" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 15: Multi-Language Engineering Support" "$REPO_ROOT/ROADMAP.md"
+}
 test_prompt_quality_guardrails_require_filename_fidelity() {
   grep -q "exact filenames" "$REPO_ROOT/.continue/prompts/legacy-dotnet-dependency-migration.md" &&
     grep -q "Do not invent or normalize filenames" "$REPO_ROOT/.continue/prompts/legacy-dotnet-dependency-migration.md" &&
@@ -510,6 +533,8 @@ run_test "editor compatibility docs cover config and tool validation" test_edito
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
 run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
+run_test "agent surface docs define portability boundary" test_agent_surface_options_doc
+run_test "language support docs define staged multi-language boundary" test_language_support_doc
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 

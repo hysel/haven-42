@@ -2,9 +2,9 @@
 
 ## Overview
 
-The Continue Enterprise Engineering Pack is organized as a documentation and configuration repository. Its primary deliverable is the `.continue` directory, supported by top-level project documentation.
+The Local Engineering Agent Pack is organized as a documentation, configuration, and workflow repository. Its first supported deliverable is the `.continue` directory, supported by top-level project documentation.
 
-The intended runtime architecture is:
+The currently validated runtime architecture is:
 
 ```text
 Continue
@@ -15,6 +15,8 @@ Continue
   produces structured outputs through templates
 ```
 
+The long-term architecture should keep prompts, rules, templates, validation scripts, and evidence formats portable enough to evaluate with other local-first coding-agent surfaces.
+
 ## Repository Layers
 
 ### Project Documentation
@@ -23,9 +25,9 @@ Top-level markdown files define the product contract, architecture, roadmap, sty
 
 These files explain why the pack exists and how contributors should evolve it.
 
-### Continue Configuration
+### Agent Surface Configuration
 
-`.continue/config.yaml` is the intended entry point for Continue.
+`.continue/config.yaml` is the intended entry point for the current Continue integration.
 
 It should eventually define:
 
@@ -119,9 +121,10 @@ This keeps reusable policy below workflow orchestration and prevents circular in
 
 ## Domain Language
 
-The project domain is enterprise engineering workflow guidance.
+The project domain is local-first engineering workflow guidance.
 
-- Pack: the complete Continue configuration bundle in this repository.
+- Pack: the complete reusable engineering-agent bundle in this repository.
+- Agent surface: the editor, CLI, or runtime environment that loads the pack assets and executes model/tool workflows.
 - Agent: a role-specific assistant definition.
 - Prompt: a task-specific workflow that can be invoked by a user.
 - Rule: reusable engineering guidance applied across workflows.
@@ -133,7 +136,8 @@ The project domain is enterprise engineering workflow guidance.
 ## Initial Architecture Decisions
 
 - The pack is local-first and should work with Ollama before cloud model assumptions are introduced.
-- The first ecosystem focus is enterprise .NET and ASP.NET Core.
+- Continue remains the first supported agent surface, but the project should avoid coupling reusable guidance to Continue-only behavior when a portable abstraction is practical.
+- The first ecosystem focus is .NET and ASP.NET Core, with enterprise-grade guidance kept useful for smaller projects too.
 - Clean Architecture guidance should be practical and testable, not ceremonial.
 - Security and performance review guidance should be built into early milestones.
 - MCP and SonarQube support should be documented as integration targets until implemented.
@@ -144,6 +148,7 @@ The project domain is enterprise engineering workflow guidance.
 
 - Should the current local file references in `.continue/config.yaml` be adjusted after validation in Continue?
 - Which Ollama models should be recommended for larger enterprise repositories?
+- Which additional agent surfaces should be validated first after Continue?
 - Should agents be further integrated as native Continue agent files if the target Continue version supports richer agent packaging?
 - How should SonarQube findings be provided to the assistant: pasted reports, MCP, CLI output, or another integration?
 - Which MCP servers are in scope for the first integration milestone?
