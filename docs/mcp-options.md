@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document evaluates Model Context Protocol options for the Continue Enterprise Engineering Pack.
+This document evaluates Model Context Protocol options for the Local Engineering Agent Pack.
 
 The goal is to identify useful MCP integrations without compromising the pack's local-first posture, portability, or compatibility with Ollama-backed systems.
 
@@ -20,7 +20,7 @@ Instead:
 
 ## Why Optional MCP
 
-MCP can give Continue access to external tools, systems, and repositories, but each server expands the trust boundary. For an enterprise pack, the safest default is to keep the base configuration local-first and add integrations only when the user explicitly chooses them.
+MCP can give Continue access to external tools, systems, and repositories, but each server expands the trust boundary. For this local-first pack, the safest default is to keep the base configuration local-first and add integrations only when the user explicitly chooses them.
 
 Continue supports MCP through `mcpServers`, and MCP works in agent mode. MCP servers can use local `stdio` transport or remote HTTP-style transports. Remote transports are useful, but they introduce additional network and authentication concerns.
 

@@ -4,7 +4,7 @@
 
 This file defines how AI assistants and human contributors should work in this repository.
 
-The repository is a Continue engineering pack. Most value lives in structured guidance, not executable code, so clarity, separation of concerns, and reviewability matter more than cleverness.
+The repository is a local-first engineering agent pack. Continue is the first supported runtime surface, but most value lives in structured guidance, validation, and reusable workflow assets rather than executable code.
 
 ## Required Workflow
 
@@ -41,7 +41,7 @@ AI-assisted work in this repository should:
 
 - Explain assumptions.
 - Identify uncertainty.
-- Prefer practical enterprise engineering guidance.
+- Prefer practical engineering guidance that works for individuals, small teams, and enterprise teams.
 - Keep local-first and privacy-sensitive workflows in mind.
 - Avoid introducing secrets, tokens, private URLs, or organization-specific confidential details.
 - Suggest validation steps when behavior changes.

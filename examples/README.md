@@ -1,6 +1,6 @@
 # Examples
 
-This directory contains representative outputs for the major Continue Enterprise Engineering Pack workflows.
+This directory contains representative outputs for the major Local Engineering Agent Pack workflows.
 
 The examples are intentionally small. They demonstrate expected structure, tone, and level of detail rather than exhaustive analysis.
 

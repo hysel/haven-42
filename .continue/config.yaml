@@ -1,5 +1,5 @@
-name: Continue Enterprise Engineering Pack
-version: 0.1.12
+name: Local Engineering Agent Pack
+version: 0.2.0
 schema: v1
 
 models:

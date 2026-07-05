@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.12"
+    [string]$ExpectedVersion = "0.2.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -451,6 +451,47 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($runtimeOutputVerification -match "current-source verification") -Message "Runtime output verification doc should describe source verification qualifiers."
 }
 
+Invoke-PackTest "agent surface docs define portability boundary" {
+    $docPath = Join-Path $repoRoot "docs/agent-surface-options.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Agent surface options doc should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+
+    Assert-True -Condition ($doc -match "Continue is the first supported surface") -Message "Agent surface doc should keep Continue as the current supported surface."
+    Assert-True -Condition ($doc -match "Candidate means") -Message "Agent surface doc should define candidate status."
+    Assert-True -Condition ($doc -match "Approved-write ready") -Message "Agent surface doc should define approved-write readiness."
+    Assert-True -Condition ($doc -match "Cline") -Message "Agent surface doc should include Cline as a candidate."
+    Assert-True -Condition ($doc -match "Aider") -Message "Agent surface doc should include Aider as a candidate."
+    Assert-True -Condition ($doc -match "Non-Enterprise Use") -Message "Agent surface doc should address non-enterprise users."
+    Assert-True -Condition ($readme -match "docs/agent-surface-options.md") -Message "README should link agent surface options."
+    Assert-True -Condition ($roadmap -match "Milestone 14: Agent Surface Portability And Broader Audience") -Message "Roadmap should include Milestone 14."
+}
+
+
+Invoke-PackTest "language support docs define staged multi-language boundary" {
+    $docPath = Join-Path $repoRoot "docs/language-support.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Language support doc should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+
+    Assert-True -Condition ($doc -match "\.NET.*most mature") -Message "Language support doc should identify .NET as the current mature path."
+    Assert-True -Condition ($doc -match "Python") -Message "Language support doc should include Python."
+    Assert-True -Condition ($doc -match "JavaScript / TypeScript") -Message "Language support doc should include JavaScript/TypeScript."
+    Assert-True -Condition ($doc -match "Infrastructure as Code") -Message "Language support doc should include Infrastructure as Code."
+    Assert-True -Condition ($doc -match "Do not apply \.NET-specific advice") -Message "Language support doc should guard against .NET advice in non-.NET repos."
+    Assert-True -Condition ($readme -match "docs/language-support.md") -Message "README should link language support doc."
+    Assert-True -Condition ($roadmap -match "Milestone 15: Multi-Language Engineering Support") -Message "Roadmap should include Milestone 15."
+}
 Invoke-PackTest "prompt quality guardrails require filename fidelity and sourced lifecycle claims" {
     $legacyPromptPath = Join-Path $repoRoot ".continue/prompts/legacy-dotnet-dependency-migration.md"
     $repositoryPromptPath = Join-Path $repoRoot ".continue/prompts/repository-discovery.md"

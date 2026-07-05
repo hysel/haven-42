@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time.
 
 ## Stage Status
 
@@ -22,10 +22,12 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
 | Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, validation workflow guidance, and first legacy .NET category evidence are defined; additional real repository categories remain pending. |
+| Milestone 14: Agent Surface Portability And Broader Audience | Planned | Reposition the project as a local-first engineering agent pack, keep Continue as the first supported surface, and evaluate other open-source agent surfaces for non-enterprise and enterprise use. |
+| Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
 
 ## Milestone 1: Minimum Usable Pack
 
-Goal: Make the pack loadable, understandable, and useful for common enterprise engineering workflows.
+Goal: Make the pack loadable, understandable, and useful for common engineering workflows, from individual repositories to enterprise codebases.
 
 Scope:
 
@@ -383,3 +385,49 @@ Exit criteria:
 - Repeated failures are tracked and converted into pack improvements.
 - Additional repository-category coverage can use generated local samples when real repositories are not available.
 - README, docs, roadmap, TODO, changelog, and wiki remain aligned with the validation workflow.
+
+## Milestone 14: Agent Surface Portability And Broader Audience
+
+Goal: Make the project useful beyond one editor extension or one enterprise-only audience while preserving the tested Continue path.
+
+Scope:
+
+- Reposition the project name and product language around a local-first engineering agent pack rather than a Continue-only enterprise pack.
+- Keep Continue as the first supported and tested agent surface until another surface has equivalent validation evidence.
+- Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options.
+- Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready.
+- Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams.
+- Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical.
+- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets.
+- Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change.
+
+Exit criteria:
+
+- New users can understand that the project starts with Continue but is not limited to Continue forever.
+- Non-enterprise users can follow the quick start without feeling the pack assumes a corporate environment.
+- Enterprise users still see security, governance, validation, and auditability guidance.
+- At least one non-Continue open-source agent surface is evaluated with a documented read-only validation result.
+- Surface-specific limitations are documented before any surface is recommended for approved writes.
+
+## Milestone 15: Multi-Language Engineering Support
+
+Goal: Expand the pack beyond .NET while preserving the current .NET maturity and avoiding language-specific advice when the repository evidence does not support it.
+
+Scope:
+
+- Keep .NET and ASP.NET Core as the first mature and most validated ecosystem.
+- Add language-specific rule packs or guidance for Python, JavaScript/TypeScript, Java/Spring, Go, Rust, SQL/database projects, and Infrastructure as Code.
+- Add repository detection guidance so prompts identify project type before applying language-specific recommendations.
+- Keep shared engineering standards reusable across languages: Git, testing, security, logging, performance, architecture, documentation, and rollback planning.
+- Prevent .NET-specific recommendations from being applied to non-.NET repositories.
+- Add generated local sample repositories for planned language ecosystems when real repositories are not available.
+- Validate repository discovery, implementation planning, code review, and runtime output verification against at least Python and TypeScript samples before promoting language support.
+- Keep README, docs, roadmap, TODO, changelog, and wiki clear that language support is staged and evidence-based.
+
+Exit criteria:
+
+- Repository discovery can identify common project types without inventing unsupported framework details.
+- Prompts select language-appropriate guidance or explicitly stay language-neutral when evidence is incomplete.
+- At least Python and JavaScript/TypeScript sample repositories have sanitized validation evidence.
+- README explains that .NET is currently the most mature path, not the only intended path.
+- Language-specific guidance is not treated as approved until validation evidence exists.

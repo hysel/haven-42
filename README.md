@@ -1,14 +1,16 @@
-# Continue Enterprise Engineering Pack
+# Local Engineering Agent Pack
 
-Enterprise-focused Continue configuration pack for software engineering teams that want local-first AI assistance, repeatable review workflows, and opinionated guidance for .NET and Clean Architecture repositories.
+Local-first engineering assistant pack for developers, small teams, and enterprise groups that want repeatable AI-assisted review workflows and opinionated guidance for .NET and Clean Architecture repositories.
 
-In plain terms: this repository gives Continue a ready-made set of prompts, rules, and templates so it can help review and plan software work in a more consistent way.
+In plain terms: this repository gives an AI coding agent a ready-made set of prompts, rules, and templates so it can help review, plan, and safely improve software projects in a more consistent way.
+
+Continue is the first supported agent surface because it is the current tested path for local Ollama workflows. The project is intentionally moving toward reusable agent assets that can also be validated with other open-source coding assistants over time.
 
 ## Purpose
 
-The goal of this pack is to provide a reusable engineering assistant setup for Continue, with workflows for repository discovery, implementation planning, code review, security review, architecture review, performance review, documentation, and product management.
+The goal of this pack is to provide a reusable engineering assistant setup, starting with Continue, with workflows for repository discovery, implementation planning, code review, security review, architecture review, performance review, documentation, and product management.
 
-It is designed for teams that want AI support to follow consistent engineering standards instead of relying on ad hoc prompts.
+It is designed for people who want AI support to follow consistent engineering standards instead of relying on ad hoc prompts, whether they are hobby developers, consultants, small teams, or enterprise engineering groups.
 
 ## Which Path Should I Use?
 
@@ -24,6 +26,8 @@ It is designed for teams that want AI support to follow consistent engineering s
 | Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
 | Validate this pack across repository types | `docs/multi-repository-validation.md` |
 | Verify runtime model output | `docs/runtime-output-verification.md` |
+| Compare other open-source agent surfaces | `docs/agent-surface-options.md` |
+| Track multi-language support | `docs/language-support.md` |
 | Validate this pack | `Quick Validation` |
 | Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
 
@@ -799,21 +803,21 @@ For runtime validation against a target repository, run the command for your ope
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD"
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD"
 ```
 
@@ -824,21 +828,21 @@ To generate a context file without relying on Continue tool execution, run the c
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\continue-enterprise-engineering-pack"
+$Pack = "C:\path\to\local-engineering-agent-pack"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/continue-enterprise-engineering-pack"
+PACK="/path/to/local-engineering-agent-pack"
 "$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 

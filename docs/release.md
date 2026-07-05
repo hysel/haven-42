@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the release process for the Continue Enterprise Engineering Pack.
+This document defines the release process for the Local Engineering Agent Pack.
 
 The release process is intentionally lightweight because this repository is configuration and documentation heavy, but each release should still be validated, versioned, tagged, and documented.
 

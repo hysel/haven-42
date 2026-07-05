@@ -11,8 +11,15 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- No unreleased changes yet.
+
+## 0.2.0 - 2026-07-05
+
 ### Added
 
+- Added Milestone 15 roadmap and TODO tracking for staged multi-language engineering support beyond the current .NET-centered guidance.
+- Added `docs/language-support.md` to define current ecosystem maturity, planned language expansion, and guardrails against applying .NET-specific advice to non-.NET repositories.
+- Added Milestone 14 roadmap and TODO tracking for agent-surface portability and broader non-enterprise adoption.
 - Added deterministic runtime output verification for filename fidelity, unsafe migration patterns, and source-grounded compatibility/lifecycle/support claims.
 - Added prompt-quality guardrails and tests for exact filename fidelity, mixed-filename synthesis prevention, and source-grounded lifecycle/support claims after the first legacy repository validation run.
 - Added Linux hardware profile platform notes for missing optional GPU detection tools and no-GPU detection fallbacks.
@@ -50,6 +57,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+- Repositioned the project docs around the broader `Local Engineering Agent Pack` name while keeping Continue as the first supported and validated agent surface.
 - Changed generated model profiles to use `qwen3.5:9b` for WRITE SAFE, PLAN ONLY, and DEEP REVIEW by default so simple-hardware setups do not require 24B or 30B models.
 - Tuned the committed local model defaults to `contextLength: 16384` and `maxTokens: 2048` after VS Code and VSCodium Agent testing showed better responsiveness with smaller local output budgets.
 - Clarified approved write mode so models must use edit/apply tools after explicit approval or report that write tools are unavailable.
@@ -244,4 +252,4 @@ This project follows a simple changelog format:
 
 ### Added
 
-- Initial repository structure for a Continue Enterprise Engineering Pack.
+- Initial repository structure for a Continue-based enterprise engineering pack.

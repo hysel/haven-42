@@ -1,5 +1,5 @@
 param(
-    [string]$ExpectedVersion = "0.1.12"
+    [string]$ExpectedVersion = "0.2.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -143,6 +143,8 @@ $requiredFiles = @(
     "docs/online-model-discovery.md",
     "docs/multi-repository-validation.md",
     "docs/runtime-output-verification.md",
+    "docs/agent-surface-options.md",
+    "docs/language-support.md",
     "docs/local-agent-model-testing.md",
     "docs/model-tool-use-validation.md",
     "docs/local-model-reliability.md",
