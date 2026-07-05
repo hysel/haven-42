@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Broader multi-repository validation remains in the backlog.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress.
 
 ## Stage Status
 
@@ -21,6 +21,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
+| Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, and validation workflow guidance are defined; additional real repository runs remain pending. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -196,7 +197,6 @@ Exit criteria:
 
 ## Backlog
 
-- Add project-specific MCP examples after real-world validation.
 - Validate the pack against additional real repositories when suitable repositories are available.
 
 ## Milestone 7: Cross-Platform Contributor Experience
@@ -357,3 +357,25 @@ Exit criteria:
 - A model is considered tool-validated only after a read-only tool test passes.
 - Approved write mode for real code changes remains blocked until file listing, file-content reading, a scoped write smoke test, and post-edit diff verification pass in the intended editor/provider setup.
 - Sanitized validation evidence can be recorded without exposing private machine or repository details.
+
+## Milestone 13: Broader Multi-Repository Validation
+
+Goal: Validate the pack across multiple repository categories and convert findings into reusable prompt, documentation, test, and setup improvements.
+
+Scope:
+
+- Define repository categories for validation coverage. Done.
+- Add a sanitized multi-repository validation evidence template. Done.
+- Document the minimum validation flow for each repository category. Done.
+- Require clean-tree, config-source, model, editor, MCP, and tool-use status in evidence. Done.
+- Add validation and test coverage so the guide and template stay linked. Done.
+- Validate the pack against additional real repositories when suitable targets are available.
+- Convert repeated validation failures into prompt, rule, documentation, or script updates.
+- Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.
+
+Exit criteria:
+
+- At least three distinct repository categories have sanitized validation evidence.
+- Evidence records show setup, prompts tested, tool-use status, failure signals, and pack follow-up decisions.
+- Repeated failures are tracked and converted into pack improvements.
+- README, docs, roadmap, TODO, changelog, and wiki remain aligned with the validation workflow.

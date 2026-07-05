@@ -44,6 +44,7 @@ This project follows a simple changelog format:
 - Added duplicate approval and duplicate content guidance for existing-file Continue Agent write validation.
 - Added installer-supported model profiles for separating WRITE SAFE, PLAN ONLY, and DEEP REVIEW Agent roles while keeping embeddings separate.
 - Added optional online Ollama model discovery guardrails that keep discovery candidate-only, explicit, non-installing, and separate from local validation.
+- Added broader multi-repository validation guidance and a sanitized evidence template for future real-repository validation runs.
 
 ### Changed
 

@@ -409,6 +409,38 @@ Invoke-PackTest "online model discovery docs preserve offline local-first defaul
     Assert-True -Condition ($agentTesting -match "do not discover newer") -Message "Local Agent testing should distinguish testing from discovery."
 }
 
+Invoke-PackTest "multi-repository validation docs define sanitized evidence workflow" {
+    $docPath = Join-Path $repoRoot "docs/multi-repository-validation.md"
+    $templatePath = Join-Path $repoRoot "examples/multi-repository-validation.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Multi-repository validation doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $templatePath) -Message "Multi-repository validation evidence template should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $template = Get-Content -LiteralPath $templatePath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+
+    Assert-True -Condition ($doc -match "Repository Categories") -Message "Multi-repository validation doc should define repository categories."
+    Assert-True -Condition ($doc -match "Legacy \.NET") -Message "Multi-repository validation doc should cover legacy .NET repositories."
+    Assert-True -Condition ($doc -match "Modern \.NET") -Message "Multi-repository validation doc should cover modern .NET repositories."
+    Assert-True -Condition ($doc -match "Documentation or configuration pack") -Message "Multi-repository validation doc should cover documentation/config repositories."
+    Assert-True -Condition ($doc -match "Frontend application") -Message "Multi-repository validation doc should cover frontend repositories."
+    Assert-True -Condition ($doc -match "Script or tooling repository") -Message "Multi-repository validation doc should cover script/tooling repositories."
+    Assert-True -Condition ($doc -match "clean git working tree") -Message "Multi-repository validation doc should require clean-tree validation."
+    Assert-True -Condition ($doc -match "examples/multi-repository-validation.md") -Message "Multi-repository validation doc should reference the evidence template."
+    Assert-True -Condition ($doc -match "Do not record") -Message "Multi-repository validation doc should define sanitization limits."
+    Assert-True -Condition ($doc -match "private repository names") -Message "Multi-repository validation doc should prohibit private repository names."
+    Assert-True -Condition ($template -match "Multi-Repository Validation Evidence") -Message "Evidence template should have expected title."
+    Assert-True -Condition ($template -match "Repository category") -Message "Evidence template should record repository category."
+    Assert-True -Condition ($template -match "Clean git tree before validation") -Message "Evidence template should record clean-tree status."
+    Assert-True -Condition ($template -match "Failure signals") -Message "Evidence template should record failure signals."
+    Assert-True -Condition ($template -match "Sanitization Checklist") -Message "Evidence template should include sanitization checklist."
+    Assert-True -Condition ($template -match "No private repository names") -Message "Evidence template should prohibit private repository names."
+    Assert-True -Condition ($readme -match "docs/multi-repository-validation.md") -Message "README should link multi-repository validation doc."
+    Assert-True -Condition ($readme -match "examples/multi-repository-validation.md") -Message "README should link multi-repository validation template."
+}
+
 Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     $generalRulePath = Join-Path $repoRoot ".continue/rules/general.md"
     $toolModesPath = Join-Path $repoRoot "docs/tool-use-modes.md"

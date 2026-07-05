@@ -318,6 +318,29 @@ test_online_model_discovery_doc() {
     grep -q "do not discover newer" "$REPO_ROOT/docs/local-agent-model-testing.md"
 }
 
+test_multi_repository_validation_doc() {
+  [ -f "$REPO_ROOT/docs/multi-repository-validation.md" ] &&
+    [ -f "$REPO_ROOT/examples/multi-repository-validation.md" ] &&
+    grep -q "Repository Categories" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Legacy .NET" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Modern .NET" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Documentation or configuration pack" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Frontend application" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Script or tooling repository" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "clean git working tree" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Do not record" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "private repository names" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Multi-Repository Validation Evidence" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "Repository category" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "Clean git tree before validation" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "Failure signals" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "Sanitization Checklist" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "No private repository names" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "docs/multi-repository-validation.md" "$REPO_ROOT/README.md" &&
+    grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/README.md"
+}
+
 test_tool_use_docs_define_platform_aware_write_behavior() {
   grep -q "Match commands to the user's active operating system and shell" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "READ_TOOLS_UNAVAILABLE" "$REPO_ROOT/.continue/rules/general.md" &&
@@ -419,6 +442,7 @@ run_test "hardware profile scripts expose platform-specific markers" test_profil
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
+run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 
 if [ "$FAILED" -eq 1 ]; then
