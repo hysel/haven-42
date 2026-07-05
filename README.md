@@ -23,6 +23,7 @@ It is designed for teams that want AI support to follow consistent engineering s
 | Let Continue edit files | `docs/tool-use-modes.md` and `docs/scoped-edits.md` |
 | Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
 | Validate this pack across repository types | `docs/multi-repository-validation.md` |
+| Verify runtime model output | `docs/runtime-output-verification.md` |
 | Validate this pack | `Quick Validation` |
 | Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
 
@@ -753,6 +754,7 @@ Runtime status:
 - `docs/local-model-selection.md`
 - `docs/online-model-discovery.md`
 - `docs/multi-repository-validation.md`
+- `docs/runtime-output-verification.md`
 - `docs/model-tool-use-validation.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`

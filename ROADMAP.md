@@ -372,7 +372,8 @@ Scope:
 - Record first sanitized Milestone 13 validation evidence for a legacy .NET repository category. Done.
 - Validate the pack against additional real repositories when suitable targets are available.
 - Convert repeated validation failures into prompt, rule, documentation, or script updates. First legacy validation findings for filename fidelity and lifecycle/support claims have been converted into prompt and test guardrails.
-- Add deterministic output verification or a stricter template fallback when local models continue to ignore filename-fidelity and lifecycle/support guardrails.
+- Add deterministic output verification or a stricter template fallback when local models continue to ignore filename-fidelity and lifecycle/support guardrails. Deterministic runtime output verification has been added; stricter template fallback remains available if verification shows repeated failures.
+- Add generated local sample repositories for additional validation categories when real repositories are not available.
 - Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.
 
 Exit criteria:
@@ -380,4 +381,5 @@ Exit criteria:
 - At least three distinct repository categories have sanitized validation evidence.
 - Evidence records show setup, prompts tested, tool-use status, failure signals, and pack follow-up decisions.
 - Repeated failures are tracked and converted into pack improvements.
+- Additional repository-category coverage can use generated local samples when real repositories are not available.
 - README, docs, roadmap, TODO, changelog, and wiki remain aligned with the validation workflow.

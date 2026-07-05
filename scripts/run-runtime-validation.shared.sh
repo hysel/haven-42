@@ -99,6 +99,7 @@ PROMPTS=(
 for workflow in "${PROMPTS[@]}"; do
   prompt_path="$PACK_ROOT/.continue/prompts/$workflow.md"
   output_path="$RUN_ROOT/$workflow.md"
+  verification_path="$RUN_ROOT/$workflow.verification.txt"
   [ -f "$prompt_path" ] || continue
   (
     cd "$TARGET_REPO"
@@ -109,6 +110,11 @@ for workflow in "${PROMPTS[@]}"; do
       --readonly \
       -p "Use the supplied runtime repository context. Do not call tools. Produce final review text only."
   ) > "$output_path" 2>&1 || true
+
+  "$PACK_ROOT/scripts/verify-runtime-output.shared.sh" \
+    --output-path "$output_path" \
+    --context-path "$CONTEXT_PATH" \
+    --workflow-name "$workflow" > "$verification_path" 2>&1 || true
 done
 
 if [ "$APPEND_SUMMARY" = true ]; then

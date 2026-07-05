@@ -127,6 +127,21 @@ function Test-ToolCallOnlyOutput {
     return $trimmed -match '^\{\s*"name"\s*:\s*"[^"]+"\s*,\s*"arguments"\s*:'
 }
 
+function Invoke-OutputVerification {
+    param(
+        [string]$OutputPath,
+        [string]$WorkflowName
+    )
+
+    $verifierPath = Join-Path $packRoot "scripts/verify-runtime-output.ps1"
+    $verificationOutput = & $verifierPath -OutputPath $OutputPath -ContextPath $ContextPath -WorkflowName $WorkflowName 2>&1
+
+    return [pscustomobject]@{
+        ExitCode = $LASTEXITCODE
+        Output = ($verificationOutput -join "`n")
+    }
+}
+
 Push-Location -LiteralPath $TargetRepo
 try {
     foreach ($workflow in $workflows) {
@@ -154,7 +169,15 @@ try {
         if ($exitCode -eq 0 -and (Test-ToolCallOnlyOutput -Text $outputText)) {
             $summaryRows.Add("| $($workflow.Name) | Tool call only output | $outputPath |")
         } elseif ($exitCode -eq 0) {
-            $summaryRows.Add("| $($workflow.Name) | Completed | $outputPath |")
+            $verification = Invoke-OutputVerification -OutputPath $outputPath -WorkflowName $workflow.Name
+            $verificationPath = Join-Path $runRoot "$($workflow.Name).verification.txt"
+            $verification.Output | Set-Content -LiteralPath $verificationPath
+
+            if ($verification.ExitCode -eq 0) {
+                $summaryRows.Add("| $($workflow.Name) | Completed; verification passed | $outputPath |")
+            } else {
+                $summaryRows.Add("| $($workflow.Name) | Failed guardrail verification | $outputPath |")
+            }
         } else {
             $summaryRows.Add("| $($workflow.Name) | Failed with exit code $exitCode | $outputPath |")
         }

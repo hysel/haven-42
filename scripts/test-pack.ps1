@@ -411,13 +411,16 @@ Invoke-PackTest "online model discovery docs preserve offline local-first defaul
 
 Invoke-PackTest "multi-repository validation docs define sanitized evidence workflow" {
     $docPath = Join-Path $repoRoot "docs/multi-repository-validation.md"
+    $runtimeOutputVerificationPath = Join-Path $repoRoot "docs/runtime-output-verification.md"
     $templatePath = Join-Path $repoRoot "examples/multi-repository-validation.md"
     $readmePath = Join-Path $repoRoot "README.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Multi-repository validation doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $runtimeOutputVerificationPath) -Message "Runtime output verification doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $templatePath) -Message "Multi-repository validation evidence template should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $runtimeOutputVerification = Get-Content -LiteralPath $runtimeOutputVerificationPath -Raw
     $template = Get-Content -LiteralPath $templatePath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
 
@@ -428,7 +431,10 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($doc -match "Frontend application") -Message "Multi-repository validation doc should cover frontend repositories."
     Assert-True -Condition ($doc -match "Script or tooling repository") -Message "Multi-repository validation doc should cover script/tooling repositories."
     Assert-True -Condition ($doc -match "clean git working tree") -Message "Multi-repository validation doc should require clean-tree validation."
+    Assert-True -Condition ($doc -match "deterministic output verification") -Message "Multi-repository validation doc should require output verification."
+    Assert-True -Condition ($doc -match "local sample repositories") -Message "Multi-repository validation doc should allow generated local samples."
     Assert-True -Condition ($doc -match "examples/multi-repository-validation.md") -Message "Multi-repository validation doc should reference the evidence template."
+    Assert-True -Condition ($doc -match "docs/runtime-output-verification.md") -Message "Multi-repository validation doc should reference runtime output verification."
     Assert-True -Condition ($doc -match "Do not record") -Message "Multi-repository validation doc should define sanitization limits."
     Assert-True -Condition ($doc -match "private repository names") -Message "Multi-repository validation doc should prohibit private repository names."
     Assert-True -Condition ($template -match "Multi-Repository Validation Evidence") -Message "Evidence template should have expected title."
@@ -438,7 +444,11 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($template -match "Sanitization Checklist") -Message "Evidence template should include sanitization checklist."
     Assert-True -Condition ($template -match "No private repository names") -Message "Evidence template should prohibit private repository names."
     Assert-True -Condition ($readme -match "docs/multi-repository-validation.md") -Message "README should link multi-repository validation doc."
+    Assert-True -Condition ($readme -match "docs/runtime-output-verification.md") -Message "README should link runtime output verification doc."
     Assert-True -Condition ($readme -match "examples/multi-repository-validation.md") -Message "README should link multi-repository validation template."
+    Assert-True -Condition ($runtimeOutputVerification -match "filename") -Message "Runtime output verification doc should describe filename checks."
+    Assert-True -Condition ($runtimeOutputVerification -match "unsafe mechanical migration patterns") -Message "Runtime output verification doc should describe unsafe migration checks."
+    Assert-True -Condition ($runtimeOutputVerification -match "current-source verification") -Message "Runtime output verification doc should describe source verification qualifiers."
 }
 
 Invoke-PackTest "prompt quality guardrails require filename fidelity and sourced lifecycle claims" {
@@ -983,6 +993,14 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
             Target = "run-runtime-validation.shared.sh"
         },
         @{
+            Name = "verify-runtime-output.linux.sh"
+            Target = "verify-runtime-output.shared.sh"
+        },
+        @{
+            Name = "verify-runtime-output.macos.sh"
+            Target = "verify-runtime-output.shared.sh"
+        },
+        @{
             Name = "pull-local-agent-models.linux.sh"
             Target = "pull-local-agent-models.shared.sh"
         },
@@ -1048,6 +1066,63 @@ Invoke-PackTest "runtime validation fails before CLI execution for missing targe
 
     Assert-True -Condition ($result.ExitCode -ne 0) -Message "Runtime validation should fail for a missing target path."
     Assert-True -Condition ($result.Output -match "Target repository path does not exist") -Message "Missing target error should be reported."
+}
+
+Invoke-PackTest "runtime output verifier catches invented filenames and unsupported claims" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "continue-runtime-output-verifier-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+        $contextPath = Join-Path $tempRoot "runtime-context.md"
+        $goodOutputPath = Join-Path $tempRoot "good.md"
+        $badOutputPath = Join-Path $tempRoot "bad.md"
+
+        @"
+## Project Files
+
+- BrickLinkBrickSet.csproj
+- packages.config
+- Properties/ExcelDna.Build.props
+"@ | Set-Content -LiteralPath $contextPath
+
+        "Use BrickLinkBrickSet.csproj and packages.config. Compatibility requires current-source verification." |
+            Set-Content -LiteralPath $goodOutputPath
+
+        "BrickLinkBrickSet-AddIn.csproj is compatible with .NET Framework 4.8." |
+            Set-Content -LiteralPath $badOutputPath
+
+        $good = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/verify-runtime-output.ps1") `
+            -Arguments @("-OutputPath", $goodOutputPath, "-ContextPath", $contextPath, "-WorkflowName", "legacy-dotnet-dependency-migration")
+
+        Assert-Equal -Actual $good.ExitCode -Expected 0 -Message "Verifier should pass output that uses context filenames and verification qualifiers."
+        Assert-True -Condition ($good.Output -match "PASS runtime output verification") -Message "Verifier pass message should be present."
+
+        $bad = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/verify-runtime-output.ps1") `
+            -Arguments @("-OutputPath", $badOutputPath, "-ContextPath", $contextPath, "-WorkflowName", "legacy-dotnet-dependency-migration")
+
+        Assert-True -Condition ($bad.ExitCode -ne 0) -Message "Verifier should fail invented filename output."
+        Assert-True -Condition ($bad.Output -match "FILENAME_NOT_IN_CONTEXT") -Message "Verifier should report invented filenames."
+        Assert-True -Condition ($bad.Output -match "UNSOURCED_COMPATIBILITY_CLAIM") -Message "Verifier should report unsupported compatibility claims."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "runtime validation runner writes verification outputs" {
+    $runnerPath = Join-Path $repoRoot "scripts/run-runtime-validation.ps1"
+    $sharedRunnerPath = Join-Path $repoRoot "scripts/run-runtime-validation.shared.sh"
+
+    $runner = Get-Content -LiteralPath $runnerPath -Raw
+    $sharedRunner = Get-Content -LiteralPath $sharedRunnerPath -Raw
+
+    Assert-True -Condition ($runner -match "verify-runtime-output\.ps1") -Message "PowerShell runtime runner should call verifier."
+    Assert-True -Condition ($runner -match "Failed guardrail verification") -Message "PowerShell runtime runner should summarize verifier failures."
+    Assert-True -Condition ($sharedRunner -match "verify-runtime-output\.shared\.sh") -Message "Bash runtime runner should call verifier."
+    Assert-True -Condition ($sharedRunner -match "\.verification\.txt") -Message "Bash runtime runner should write verification output files."
 }
 
 Invoke-PackTest "review prompts include configuration-pack guardrails" {

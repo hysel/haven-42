@@ -233,7 +233,9 @@
 - [x] Add validation and test coverage for the guide and template.
 - [x] Record first sanitized Milestone 13 validation evidence for a legacy .NET repository category.
 - [x] Convert first legacy validation findings into filename-fidelity and lifecycle-claim prompt guardrails.
-- [ ] Add deterministic output verification or a stricter template fallback for filename fidelity and lifecycle/support claims.
+- [x] Add deterministic output verification for filename fidelity, unsafe migration patterns, and lifecycle/support claims.
+- [ ] Add stricter template fallback for workflows that repeatedly fail deterministic output verification.
+- [ ] Add generated local sample repositories for additional validation categories when real repositories are not available.
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
 - [x] Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.

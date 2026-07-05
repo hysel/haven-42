@@ -88,6 +88,8 @@ test_linux_macos_scripts_do_not_require_pwsh() {
     "$REPO_ROOT/scripts/generate-runtime-context.macos.sh" \
     "$REPO_ROOT/scripts/run-runtime-validation.linux.sh" \
     "$REPO_ROOT/scripts/run-runtime-validation.macos.sh" \
+    "$REPO_ROOT/scripts/verify-runtime-output.linux.sh" \
+    "$REPO_ROOT/scripts/verify-runtime-output.macos.sh" \
     "$REPO_ROOT/scripts/pull-local-agent-models.linux.sh" \
     "$REPO_ROOT/scripts/pull-local-agent-models.macos.sh" \
     "$REPO_ROOT/scripts/test-local-agent-models.linux.sh" \
@@ -216,6 +218,41 @@ test_runtime_validation_missing_target() {
     grep -q "Target repository path does not exist" /tmp/continue-runtime.out
 }
 
+test_runtime_output_verifier_catches_bad_output() {
+  temp_dir="$(mktemp -d)"
+  trap 'rm -rf "$temp_dir"' RETURN
+
+  cat > "$temp_dir/runtime-context.md" <<'EOF_CONTEXT'
+## Project Files
+
+- BrickLinkBrickSet.csproj
+- packages.config
+- Properties/ExcelDna.Build.props
+EOF_CONTEXT
+
+  printf '%s\n' 'Use BrickLinkBrickSet.csproj and packages.config. Compatibility requires current-source verification.' > "$temp_dir/good.md"
+  printf '%s\n' 'BrickLinkBrickSet-AddIn.csproj is compatible with .NET Framework 4.8.' > "$temp_dir/bad.md"
+
+  "$REPO_ROOT/scripts/verify-runtime-output.shared.sh" \
+    --output-path "$temp_dir/good.md" \
+    --context-path "$temp_dir/runtime-context.md" \
+    --workflow-name legacy-dotnet-dependency-migration >/tmp/continue-verify-good.out 2>&1 || return 1
+
+  ! "$REPO_ROOT/scripts/verify-runtime-output.shared.sh" \
+    --output-path "$temp_dir/bad.md" \
+    --context-path "$temp_dir/runtime-context.md" \
+    --workflow-name legacy-dotnet-dependency-migration >/tmp/continue-verify-bad.out 2>&1 &&
+    grep -q "FILENAME_NOT_IN_CONTEXT" /tmp/continue-verify-bad.out &&
+    grep -q "UNSOURCED_COMPATIBILITY_CLAIM" /tmp/continue-verify-bad.out
+}
+
+test_runtime_validation_runner_writes_verification_outputs() {
+  grep -q "verify-runtime-output.ps1" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "Failed guardrail verification" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "verify-runtime-output.shared.sh" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
+    grep -q ".verification.txt" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh"
+}
+
 test_profile_script_markers() {
   grep -q "MlxRecommendation" "$REPO_ROOT/scripts/get-local-model-profile.macos.sh" &&
     grep -q "PlatformNotes" "$REPO_ROOT/scripts/get-local-model-profile.linux.sh" &&
@@ -320,6 +357,7 @@ test_online_model_discovery_doc() {
 
 test_multi_repository_validation_doc() {
   [ -f "$REPO_ROOT/docs/multi-repository-validation.md" ] &&
+    [ -f "$REPO_ROOT/docs/runtime-output-verification.md" ] &&
     [ -f "$REPO_ROOT/examples/multi-repository-validation.md" ] &&
     grep -q "Repository Categories" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "Legacy .NET" "$REPO_ROOT/docs/multi-repository-validation.md" &&
@@ -328,7 +366,10 @@ test_multi_repository_validation_doc() {
     grep -q "Frontend application" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "Script or tooling repository" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "clean git working tree" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "deterministic output verification" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "local sample repositories" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "docs/runtime-output-verification.md" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "Do not record" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "private repository names" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "Multi-Repository Validation Evidence" "$REPO_ROOT/examples/multi-repository-validation.md" &&
@@ -338,7 +379,11 @@ test_multi_repository_validation_doc() {
     grep -q "Sanitization Checklist" "$REPO_ROOT/examples/multi-repository-validation.md" &&
     grep -q "No private repository names" "$REPO_ROOT/examples/multi-repository-validation.md" &&
     grep -q "docs/multi-repository-validation.md" "$REPO_ROOT/README.md" &&
-    grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/README.md"
+    grep -q "docs/runtime-output-verification.md" "$REPO_ROOT/README.md" &&
+    grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/README.md" &&
+    grep -q "filename" "$REPO_ROOT/docs/runtime-output-verification.md" &&
+    grep -q "unsafe mechanical migration patterns" "$REPO_ROOT/docs/runtime-output-verification.md" &&
+    grep -q "current-source verification" "$REPO_ROOT/docs/runtime-output-verification.md"
 }
 
 test_prompt_quality_guardrails_require_filename_fidelity() {
@@ -458,6 +503,8 @@ run_test "install script global config dry run is explicit" test_install_global_
 run_test "install script writes global config with target references" test_install_global_config_writes_refs
 run_test "install script can include rules in global config by explicit opt-in" test_install_global_config_rules_opt_in
 run_test "runtime validation fails before CLI execution for missing target repository" test_runtime_validation_missing_target
+run_test "runtime output verifier catches invented filenames and unsupported claims" test_runtime_output_verifier_catches_bad_output
+run_test "runtime validation runner writes verification outputs" test_runtime_validation_runner_writes_verification_outputs
 run_test "hardware profile scripts expose platform-specific markers" test_profile_script_markers
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc

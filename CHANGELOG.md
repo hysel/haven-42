@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added deterministic runtime output verification for filename fidelity, unsafe migration patterns, and source-grounded compatibility/lifecycle/support claims.
 - Added prompt-quality guardrails and tests for exact filename fidelity, mixed-filename synthesis prevention, and source-grounded lifecycle/support claims after the first legacy repository validation run.
 - Added Linux hardware profile platform notes for missing optional GPU detection tools and no-GPU detection fallbacks.
 - Documented that CPU architecture is currently context for model selection, not a direct recommendation-tier input.

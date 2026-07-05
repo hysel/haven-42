@@ -38,7 +38,10 @@ For each repository category:
 7. If tools are required, run read-content validation before approved writes.
 8. If approved writes are required, run the approved-write smoke test first.
 9. Verify any claimed changes with external shell or git commands.
-10. Record sanitized evidence with `examples/multi-repository-validation.md`.
+10. Run deterministic output verification for generated workflow outputs.
+11. Record sanitized evidence with `examples/multi-repository-validation.md`.
+
+When additional real repositories are not available, create local sample repositories for representative categories. Generated samples should contain realistic file names, minimal source/configuration files, and no private code or endpoints.
 
 Do not skip the clean-tree check. It is the easiest way to avoid mixing pack
 validation with unrelated user changes.
@@ -112,6 +115,7 @@ Use this decision path after each validation run:
 ## Related Docs
 
 - `docs/runtime-validation.md`
+- `docs/runtime-output-verification.md`
 - `docs/model-tool-use-validation.md`
 - `docs/tool-use-modes.md`
 - `docs/scoped-edits.md`

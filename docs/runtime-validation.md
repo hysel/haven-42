@@ -6,6 +6,8 @@ This document tracks runtime validation of the Continue Enterprise Engineering P
 
 Runtime validation is different from static validation. Static validation checks repository invariants. Runtime validation checks whether the pack is useful, accurate, and ergonomic when used in Continue with real code.
 
+Runtime validation also supports deterministic output verification. See `docs/runtime-output-verification.md` for filename-fidelity, unsafe migration-pattern, and lifecycle/support-claim checks.
+
 ## Current Status
 
 A private .NET sample repository has been used for initial runtime validation.
