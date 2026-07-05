@@ -40,6 +40,7 @@ This project follows a simple changelog format:
 - Clarified that validation status labels must not claim success when a failure signal is present.
 - Added external shell and git verification requirements for approved-write validation so assistant-only readback cannot create false positive write passes.
 - Added local Agent model pull and preflight scripts for Ollama API-level tool-call, load/unload, and exact-content validation before manual Continue Apply testing.
+- Added a post-validation model installer for applying a selected validated model to local-only Continue profile config.
 - Added duplicate approval and duplicate content guidance for existing-file Continue Agent write validation.
 - Added installer-supported model profiles for separating WRITE SAFE, PLAN ONLY, and DEEP REVIEW Agent roles while keeping embeddings separate.
 

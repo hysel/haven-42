@@ -86,6 +86,44 @@ test optional profile upgrades such as `devstral-small-2:24b` for PLAN ONLY or
 `qwen3-coder:30b` for DEEP REVIEW. Do not add those upgrades to shared config
 until they pass local validation.
 
+## Install A Validated Model Into Local Config
+
+After a model passes validation, install it into one local-only profile. This
+pulls the selected model unless `-NoPull` or `--no-pull` is used, and writes
+only `.continue/config.local.yaml` in the target repository.
+
+Windows:
+
+```powershell
+.\scripts\install-validated-model.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -Model "devstral-small-2:24b" `
+  -Profile plan-only
+```
+
+Linux:
+
+```bash
+./scripts/install-validated-model.linux.sh \
+  --target-repo "/path/to/your-project" \
+  --model "devstral-small-2:24b" \
+  --profile plan-only
+```
+
+macOS:
+
+```bash
+./scripts/install-validated-model.macos.sh \
+  --target-repo "/path/to/your-project" \
+  --model "devstral-small-2:24b" \
+  --profile plan-only
+```
+
+Supported profiles are `write-safe`, `plan-only`, and `deep-review`. Use
+`write-safe` only after approved-write validation passes in the intended editor.
+Use `plan-only` or `deep-review` for heavier local models that should stay
+chat-only.
+
 ## What The Test Means
 
 The model is marked as an API-level candidate only when:

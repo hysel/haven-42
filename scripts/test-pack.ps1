@@ -635,6 +635,55 @@ Invoke-PackTest "install script model lanes generate scoped roles" {
     }
 }
 
+Invoke-PackTest "validated model installer updates local-only config" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-validated-model-test-$([guid]::NewGuid())"
+
+    try {
+        $targetContinue = Join-Path $tempRepo ".continue"
+        New-Item -ItemType Directory -Force -Path $targetContinue | Out-Null
+        Copy-Item -LiteralPath (Join-Path $repoRoot ".continue/config.yaml") -Destination (Join-Path $targetContinue "config.yaml")
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-validated-model.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-Model", "devstral-small-2:24b", "-Profile", "plan-only", "-NoPull")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Validated model installer should succeed without pulling when NoPull is set."
+
+        $baseConfig = Get-Content -LiteralPath (Join-Path $targetContinue "config.yaml") -Raw
+        $localConfigPath = Join-Path $targetContinue "config.local.yaml"
+        $localConfig = Get-Content -LiteralPath $localConfigPath -Raw
+
+        Assert-True -Condition ($baseConfig -notmatch "devstral-small-2:24b") -Message "Validated model installer should not modify shared config."
+        Assert-True -Condition ($localConfig -match "2 - PLAN ONLY - devstral-small-2:24b") -Message "Validated model installer should update selected profile."
+        Assert-True -Condition ($localConfig -match "1 - WRITE SAFE - qwen3\.5:9b") -Message "Validated model installer should preserve simple WRITE SAFE default."
+        Assert-True -Condition ($localConfig -match "3 - DEEP REVIEW - qwen3\.5:9b") -Message "Validated model installer should preserve simple DEEP REVIEW default."
+        Assert-True -Condition ($localConfig -match "Ollama Nomic Embed") -Message "Validated model installer should preserve embedding model."
+    } finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "validated model installer dry run is local only" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-validated-model-dry-run-test-$([guid]::NewGuid())"
+
+    try {
+        $targetContinue = Join-Path $tempRepo ".continue"
+        New-Item -ItemType Directory -Force -Path $targetContinue | Out-Null
+        Copy-Item -LiteralPath (Join-Path $repoRoot ".continue/config.yaml") -Destination (Join-Path $targetContinue "config.yaml")
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-validated-model.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-Model", "qwen3-coder:30b", "-Profile", "deep-review", "-DryRun", "-NoPull")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Validated model installer dry run should succeed."
+        Assert-True -Condition ($result.Output -match "Would install validated model") -Message "Dry run should describe selected model installation."
+        Assert-True -Condition ($result.Output -match "Would write local-only config") -Message "Dry run should explain local-only config update."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $targetContinue "config.local.yaml"))) -Message "Dry run should not write local config."
+    } finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "install script global config dry run is explicit" {
     $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-install-global-dry-run-test-$([guid]::NewGuid())"
     $globalConfigPath = Join-Path ([System.IO.Path]::GetTempPath()) "continue-global-config-dry-run-$([guid]::NewGuid()).yaml"
@@ -784,18 +833,32 @@ Invoke-PackTest "install script accepts shell-friendly argument aliases" {
 }
 
 Invoke-PackTest "install wrapper scripts exist and call shared Bash installer" {
-    $wrapperNames = @(
-        "install-continue-pack.linux.sh",
-        "install-continue-pack.macos.sh"
+    $wrappers = @(
+        @{
+            Name = "install-continue-pack.linux.sh"
+            Target = "install-continue-pack.shared.sh"
+        },
+        @{
+            Name = "install-continue-pack.macos.sh"
+            Target = "install-continue-pack.shared.sh"
+        },
+        @{
+            Name = "install-validated-model.linux.sh"
+            Target = "install-validated-model.shared.sh"
+        },
+        @{
+            Name = "install-validated-model.macos.sh"
+            Target = "install-validated-model.shared.sh"
+        }
     )
 
-    foreach ($wrapperName in $wrapperNames) {
-        $wrapperPath = Join-Path $repoRoot "scripts/$wrapperName"
-        Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$wrapperName should exist."
+    foreach ($wrapper in $wrappers) {
+        $wrapperPath = Join-Path $repoRoot "scripts/$($wrapper.Name)"
+        Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$($wrapper.Name) should exist."
 
         $content = Get-Content -LiteralPath $wrapperPath -Raw
-        Assert-True -Condition ($content -match "install-continue-pack\.shared\.sh") -Message "$wrapperName should call the shared Bash installer."
-        Assert-True -Condition ($content -notmatch "pwsh") -Message "$wrapperName should not require pwsh."
+        Assert-True -Condition ($content -match [regex]::Escape($wrapper.Target)) -Message "$($wrapper.Name) should call the shared Bash installer."
+        Assert-True -Condition ($content -notmatch "pwsh") -Message "$($wrapper.Name) should not require pwsh."
     }
 }
 

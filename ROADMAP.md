@@ -344,7 +344,7 @@ Scope:
 - Record model, provider, editor surface, Continue version, operating system, and MCP state for validation runs. Done via sanitized evidence template.
 - Distinguish candidate model recommendations from tool-validated model status. Done.
 - Evaluate optional online model discovery for newer Ollama candidates while keeping the default workflow offline, local-first, and non-installing.
-- Add a post-validation model installer that can download the selected validated model automatically and update local-only Continue config without committing private endpoints.
+- Add a post-validation model installer that can download the selected validated model automatically and update local-only Continue config without committing private endpoints. Done.
 - Add a sanitized evidence template for model tool-use validation results. Done.
 - Decide whether validated model evidence should live in docs, examples, or a separate catalog. Done for current scope: keep the reusable template in examples and defer larger evidence catalogs until records accumulate.
 - Keep private endpoints, local paths, private repository names, and raw transcripts out of committed evidence.

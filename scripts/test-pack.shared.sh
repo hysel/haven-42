@@ -82,10 +82,16 @@ test_linux_macos_scripts_do_not_require_pwsh() {
     "$REPO_ROOT/scripts/test-pack.macos.sh" \
     "$REPO_ROOT/scripts/install-continue-pack.linux.sh" \
     "$REPO_ROOT/scripts/install-continue-pack.macos.sh" \
+    "$REPO_ROOT/scripts/install-validated-model.linux.sh" \
+    "$REPO_ROOT/scripts/install-validated-model.macos.sh" \
     "$REPO_ROOT/scripts/generate-runtime-context.linux.sh" \
     "$REPO_ROOT/scripts/generate-runtime-context.macos.sh" \
     "$REPO_ROOT/scripts/run-runtime-validation.linux.sh" \
-    "$REPO_ROOT/scripts/run-runtime-validation.macos.sh"
+    "$REPO_ROOT/scripts/run-runtime-validation.macos.sh" \
+    "$REPO_ROOT/scripts/pull-local-agent-models.linux.sh" \
+    "$REPO_ROOT/scripts/pull-local-agent-models.macos.sh" \
+    "$REPO_ROOT/scripts/test-local-agent-models.linux.sh" \
+    "$REPO_ROOT/scripts/test-local-agent-models.macos.sh"
 }
 
 test_runtime_context_generation() {
@@ -144,6 +150,30 @@ test_install_model_lanes() {
         }
       }
     ' "$local_config"
+}
+
+test_install_validated_model() {
+  temp_repo="$(mktemp -d)"
+  mkdir -p "$temp_repo/.continue"
+  cp "$REPO_ROOT/.continue/config.yaml" "$temp_repo/.continue/config.yaml"
+  "$REPO_ROOT/scripts/install-validated-model.shared.sh" --target-repo "$temp_repo" --model "devstral-small-2:24b" --profile plan-only --no-pull >/tmp/continue-install-validated-model.out 2>&1 || return 1
+  local_config="$temp_repo/.continue/config.local.yaml"
+  [ -f "$local_config" ] || return 1
+  ! grep -q "devstral-small-2:24b" "$temp_repo/.continue/config.yaml" &&
+    grep -q "2 - PLAN ONLY - devstral-small-2:24b" "$local_config" &&
+    grep -q "1 - WRITE SAFE - qwen3.5:9b" "$local_config" &&
+    grep -q "3 - DEEP REVIEW - qwen3.5:9b" "$local_config" &&
+    grep -q "Ollama Nomic Embed" "$local_config"
+}
+
+test_install_validated_model_dry_run() {
+  temp_repo="$(mktemp -d)"
+  mkdir -p "$temp_repo/.continue"
+  cp "$REPO_ROOT/.continue/config.yaml" "$temp_repo/.continue/config.yaml"
+  "$REPO_ROOT/scripts/install-validated-model.shared.sh" --target-repo "$temp_repo" --model "qwen3-coder:30b" --profile deep-review --dry-run --no-pull >/tmp/continue-install-validated-model-dry-run.out 2>&1 || return 1
+  grep -q "Would install validated model" /tmp/continue-install-validated-model-dry-run.out &&
+    grep -q "Would write local-only config" /tmp/continue-install-validated-model-dry-run.out &&
+    [ ! -e "$temp_repo/.continue/config.local.yaml" ]
 }
 
 test_install_global_config_dry_run() {
@@ -365,6 +395,8 @@ run_test "runtime context generation captures useful files and excludes build ou
 run_test "install script dry run does not modify target repository" test_install_dry_run
 run_test "install script auto model config dry run is explicit" test_install_auto_model_dry_run
 run_test "install script model lanes generate scoped roles" test_install_model_lanes
+run_test "validated model installer updates local-only config" test_install_validated_model
+run_test "validated model installer dry run is local only" test_install_validated_model_dry_run
 run_test "install script global config dry run is explicit" test_install_global_config_dry_run
 run_test "install script writes global config with target references" test_install_global_config_writes_refs
 run_test "install script can include rules in global config by explicit opt-in" test_install_global_config_rules_opt_in

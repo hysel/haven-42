@@ -185,6 +185,10 @@ Suggested high-resource upgrades after validation:
 | `2 - PLAN ONLY` | `devstral-small-2:24b` | The machine can run it with acceptable latency and the model stays chat-only. |
 | `3 - DEEP REVIEW` | `qwen3-coder:30b` | The machine can run it with acceptable latency and read-only tool validation passes. |
 
+After a model passes validation, use `scripts/install-validated-model.ps1` on
+Windows or the Linux/macOS `install-validated-model.*.sh` wrappers to pull the
+model and update only `.continue/config.local.yaml` for the selected profile.
+
 Treat these models as validated defaults for this pack, not permanent
 requirements. If a newer local model performs better, add it only after
 recording sanitized read, plan, and approved-write evidence.

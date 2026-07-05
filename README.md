@@ -320,6 +320,16 @@ Create a local-only config with safer model lanes:
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -ModelLanes
 ```
 
+After a model passes local validation, install it into one local-only profile
+without changing committed shared config:
+
+```powershell
+.\scripts\install-validated-model.ps1 `
+  -TargetRepo "C:\path\to\your-project" `
+  -Model "devstral-small-2:24b" `
+  -Profile plan-only
+```
+
 If your editor uses the global Continue config instead of the project-local
 `.continue/config.yaml`, install the pack and update the global config with
 absolute references to the target repository's installed prompts and docs:
@@ -377,6 +387,16 @@ Create a local-only config with safer model lanes:
 ./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --model-lanes
 ```
 
+After a model passes local validation, install it into one local-only profile
+without changing committed shared config:
+
+```bash
+./scripts/install-validated-model.linux.sh \
+  --target-repo /path/to/your-project \
+  --model devstral-small-2:24b \
+  --profile plan-only
+```
+
 Update the global Continue config when the editor does not load the project-local
 config:
 
@@ -402,6 +422,16 @@ Create a local-only config with safer model lanes:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --model-lanes
 ```
 
+After a model passes local validation, install it into one local-only profile
+without changing committed shared config:
+
+```bash
+./scripts/install-validated-model.macos.sh \
+  --target-repo /path/to/your-project \
+  --model devstral-small-2:24b \
+  --profile plan-only
+```
+
 Update the global Continue config when the editor does not load the project-local
 config:
 
@@ -417,6 +447,7 @@ The installer:
 - Validates that copied config file references resolve.
 - Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
 - Can create `.continue/config.local.yaml` with three Agent model profiles: WRITE SAFE, PLAN ONLY, and DEEP REVIEW. By default, all three use the simple-hardware starter model, plus the separate embedding model.
+- Can install a selected validated model into one local-only profile without changing committed shared config.
 - Can update the global Continue config, with a backup, when an editor does not load project-local config files.
 - Omits rules from generated global config by default to avoid duplicate rule warnings.
 - Writes Windows global config file references as `file://C:/path/...` for VSCodium compatibility.
