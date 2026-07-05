@@ -61,6 +61,7 @@ Do not record private repository names, customer names, internal hostnames, priv
 | 2026-07-02 | Private .NET sample repository | VSCodium Continue Agent mode with Ollama local-network endpoint override and `qwen3-coder:30b` | Tool-enabled repository discovery setup | Pass: switching to `qwen3-coder:30b` enabled tool execution where a previous small coder model produced raw JSON tool-call text | Update default model guidance for tool-enabled workflows and keep smaller models as context-file fallback candidates. |
 | 2026-07-02 | Pack repository self-validation | Continue CLI through `npx @continuedev/cli` with generated runtime context | All runtime validation workflows | Partial pass: runner completed every workflow and produced final text instead of tool-call JSON, but several outputs were generic or mismatched to a configuration/documentation repository | Add prompt guidance for configuration-pack repositories, evidence discipline, and avoiding app-code recommendations when no application surface exists. |
 | 2026-07-03 | Private .NET Framework Excel-DNA add-in repository | Continue CLI with local-network Ollama endpoint override and `qwen3-coder:30b` | All runtime validation workflows | Partial pass: all workflows completed with final text and no tool-call-only JSON, but several outputs remained generic or made claims that require source-level confirmation | Record sanitized findings, improve evidence discipline, and validate future prompt changes against this application-style repository. |
+| 2026-07-05 | Private legacy .NET Framework Excel-DNA add-in repository category | Continue CLI with ignored local Ollama config and generated runtime context | Repository discovery, implementation planning, legacy dependency migration readiness | Partial pass: install and context generation worked, read-only outputs were final text, but discovery misstated a project filename and migration readiness included unsupported lifecycle and modernization claims | Keep as Milestone 13 category evidence; strengthen dependency-migration evidence rules before treating migration guidance as safe. |
 
 ## Workflow Checklist
 
@@ -240,6 +241,62 @@ Do not modify files.
 - Validate against additional application repositories when suitable repositories are available.
 - Add project-specific MCP examples after validated real-world usage.
 - Revalidate legacy dependency migration with a stronger model or a context file that summarizes project-file risks instead of including raw XML.
+
+## 2026-07-05 Multi-Repository Validation: Legacy .NET Category
+
+Repository category: Private legacy .NET Framework Excel-DNA add-in repository
+Model setup: Ignored local Ollama config with generated runtime context
+Continue surface: Continue CLI through `npx @continuedev/cli`
+Pack commit: `453e01c`
+
+### Setup
+
+- The target repository was checked for a clean git tree before installation.
+- Previous untracked local validation artifacts were stashed before the run.
+- The latest pack was installed into the target repository with model lanes enabled.
+- The installer generated a local-only `.continue/config.local.yaml` with WRITE SAFE, PLAN ONLY, and DEEP REVIEW profiles.
+- Runtime context was generated into the pack repository's ignored `runtime-validation-output/` folder.
+- Raw prompt outputs remained in ignored local runtime output files and were not committed.
+
+### Workflows Run
+
+- Repository discovery, read-only CLI run with supplied context.
+- Implementation planning, plan-only CLI run with supplied context.
+- Legacy .NET dependency migration readiness, read-only CLI run with supplied context.
+
+### Result
+
+Partial pass.
+
+Install, context generation, and CLI prompt execution worked. The model produced final text instead of raw tool-call output for all three focused workflows.
+
+The run is not a clean pass because output quality still had evidence problems:
+
+- Repository discovery correctly identified the repository category as a .NET Framework Excel-DNA add-in, but misstated at least one project filename.
+- Implementation planning produced a useful high-level configuration-management plan, but some claims need source-level confirmation before being treated as findings.
+- Legacy dependency migration readiness stayed in final text and avoided direct XML output in the previewed section, but included broad modernization guidance and an unsupported .NET Framework lifecycle claim.
+
+### What Worked
+
+- Fresh install into a target repository succeeded after stashing prior local artifacts.
+- Model lanes config generation worked in the target repository.
+- Generated runtime context identified solution, project, package, configuration, documentation, and source-file signals.
+- The workflows produced final text with no raw JSON tool-call output.
+- The run produced useful category-level evidence for Milestone 13.
+
+### Gaps
+
+- The generated context included the newly installed `.continue` folder as untracked status, which is expected after install but should be clearly interpreted during validation.
+- Repository discovery needs stronger filename fidelity checks before its output is considered validated.
+- Legacy migration guidance still needs stronger evidence discipline around framework support, Excel-DNA compatibility, and migration sequencing.
+- Plan-only validation should continue to require rollback, baseline build, package output, and Excel load validation before any dependency migration is attempted.
+
+### Follow-up
+
+- Add stricter prompt guidance or validation fixtures for legacy dependency migration lifecycle claims.
+- Consider adding a filename-fidelity check to future evidence review for repository discovery.
+- Run the same Milestone 13 flow against at least two additional repository categories before closing the milestone.
+- Keep all raw outputs local and ignored unless a sanitized excerpt is intentionally added.
 
 ## 2026-07-03 Private Excel-DNA Add-In Runtime Validation
 

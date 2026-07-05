@@ -231,6 +231,7 @@
 - [x] Document the minimum validation flow for each repository category.
 - [x] Require clean-tree, config-source, model, editor, MCP, and tool-use status in evidence.
 - [x] Add validation and test coverage for the guide and template.
+- [x] Record first sanitized Milestone 13 validation evidence for a legacy .NET repository category.
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
 - [x] Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.

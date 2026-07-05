@@ -21,7 +21,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
-| Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, and validation workflow guidance are defined; additional real repository runs remain pending. |
+| Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, validation workflow guidance, and first legacy .NET category evidence are defined; additional real repository categories remain pending. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -369,6 +369,7 @@ Scope:
 - Document the minimum validation flow for each repository category. Done.
 - Require clean-tree, config-source, model, editor, MCP, and tool-use status in evidence. Done.
 - Add validation and test coverage so the guide and template stay linked. Done.
+- Record first sanitized Milestone 13 validation evidence for a legacy .NET repository category. Done.
 - Validate the pack against additional real repositories when suitable targets are available.
 - Convert repeated validation failures into prompt, rule, documentation, or script updates.
 - Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.
