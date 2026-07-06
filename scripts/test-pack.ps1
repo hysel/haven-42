@@ -538,6 +538,7 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     $typescriptRulePath = Join-Path $repoRoot ".continue/rule-packs/typescript.md"
     $languageRuleDocPath = Join-Path $repoRoot "docs/language-rule-packs.md"
     $languageSupportPath = Join-Path $repoRoot "docs/language-support.md"
+    $languageEvidencePath = Join-Path $repoRoot "examples/language-rule-pack-validation.md"
     $projectDetectionPath = Join-Path $repoRoot "docs/project-detection.md"
     $configPath = Join-Path $repoRoot ".continue/config.yaml"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -547,11 +548,13 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition (Test-Path -LiteralPath $pythonRulePath) -Message "Python optional rule pack should exist."
     Assert-True -Condition (Test-Path -LiteralPath $typescriptRulePath) -Message "TypeScript optional rule pack should exist."
     Assert-True -Condition (Test-Path -LiteralPath $languageRuleDocPath) -Message "Language rule-pack doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $languageEvidencePath) -Message "Language rule-pack validation evidence should exist."
 
     $pythonRule = Get-Content -LiteralPath $pythonRulePath -Raw
     $typescriptRule = Get-Content -LiteralPath $typescriptRulePath -Raw
     $languageRuleDoc = Get-Content -LiteralPath $languageRuleDocPath -Raw
     $languageSupport = Get-Content -LiteralPath $languageSupportPath -Raw
+    $languageEvidence = Get-Content -LiteralPath $languageEvidencePath -Raw
     $projectDetection = Get-Content -LiteralPath $projectDetectionPath -Raw
     $config = Get-Content -LiteralPath $configPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
@@ -566,12 +569,21 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition ($typescriptRule -match "unconfirmed") -Message "TypeScript rule pack should prefer unconfirmed over guesses."
     Assert-True -Condition ($languageRuleDoc -match "not referenced from") -Message "Language rule-pack doc should state packs are not globally loaded."
     Assert-True -Condition ($languageRuleDoc -match "docs/project-detection.md") -Message "Language rule-pack doc should require project detection."
+    Assert-True -Condition ($languageRuleDoc -match "examples/language-rule-pack-validation\.md") -Message "Language rule-pack doc should link validation evidence."
     Assert-True -Condition ($languageSupport -match "docs/language-rule-packs.md") -Message "Language support doc should link optional rule-pack doc."
+    Assert-True -Condition ($languageSupport -match "examples/language-rule-pack-validation\.md") -Message "Language support doc should link language rule-pack evidence."
     Assert-True -Condition ($projectDetection -match "Optional Language Rule Packs") -Message "Project detection doc should mention optional language rule packs."
     Assert-True -Condition ($readme -match "docs/language-rule-packs.md") -Message "README should link optional language rule-pack doc."
+    Assert-True -Condition ($readme -match "examples/language-rule-pack-validation\.md") -Message "README should link language rule-pack evidence."
     Assert-True -Condition ($todo -match "Add optional Python rule pack") -Message "TODO should track Python rule-pack completion."
     Assert-True -Condition ($roadmap -match "Milestone 18: Language Rule Packs") -Message "Roadmap should include language rule packs milestone."
     Assert-True -Condition ($roadmap -match "Optional Python and TypeScript rule packs") -Message "Roadmap should describe current optional packs."
+    Assert-True -Condition ($languageEvidence -match "Language Rule Pack Validation Evidence") -Message "Evidence should have expected title."
+    Assert-True -Condition ($languageEvidence -match "python-api") -Message "Evidence should include Python generated sample."
+    Assert-True -Condition ($languageEvidence -match "typescript-frontend") -Message "Evidence should include TypeScript generated sample."
+    Assert-True -Condition ($languageEvidence -match "pyproject\.toml") -Message "Evidence should include Python project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "package\.json") -Message "Evidence should include TypeScript project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "does not prove editor/model behavior") -Message "Evidence should avoid overstating editor/model validation."
     Assert-True -Condition ($config -notmatch "rule-packs") -Message "Default Continue config should not load optional language rule packs."
 }
 Invoke-PackTest "project detection docs and guidance are evidence-gated" {
@@ -643,6 +655,7 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
 
         $expectedFiles = @(
             "python-api/SAMPLE-METADATA.md",
+            "python-api/pyproject.toml",
             "python-api/app/main.py",
             "python-api/tests/test_main.py",
             "typescript-frontend/package.json",
@@ -661,9 +674,12 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
 
 
         $pythonReadme = Get-Content -LiteralPath (Join-Path $tempRoot "python-api/README.md") -Raw
+        $pythonProject = Get-Content -LiteralPath (Join-Path $tempRoot "python-api/pyproject.toml") -Raw
         $pythonMain = Get-Content -LiteralPath (Join-Path $tempRoot "python-api/app/main.py") -Raw
         Assert-True -Condition ($pythonReadme -match "# Python API Sample") -Message "Python sample README should have the expected heading."
         Assert-True -Condition ($pythonReadme -match "python -m pytest") -Message "Python sample README should include pytest command guidance."
+        Assert-True -Condition ($pythonProject -match "\[project\]") -Message "Python sample should include pyproject metadata."
+        Assert-True -Condition ($pythonProject -match "\[tool\.pytest\.ini_options\]") -Message "Python sample should include pytest metadata."
         Assert-True -Condition ($pythonReadme -notmatch "Write-SampleFile") -Message "Python sample README should not leak factory script text."
         Assert-True -Condition ($pythonReadme -notmatch "@['`"]|['`"]@") -Message "Python sample README should not leak here-string markers."
         Assert-True -Condition ($pythonMain -notmatch "Write-SampleFile") -Message "Python sample source should not leak factory script text."

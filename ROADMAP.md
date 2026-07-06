@@ -26,7 +26,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
 | Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories. |
 | Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
-| Milestone 18: Language Rule Packs | In Progress | Optional Python and TypeScript rule packs are added as evidence-gated supplemental guidance; additional ecosystems and validation remain pending. |
+| Milestone 18: Language Rule Packs | In Progress | Optional Python and TypeScript rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; editor/model workflow validation and additional ecosystems remain pending. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Planned | Generate surface/profile-specific installs, collect sanitized compatibility evidence, and package releases for easier adoption. |
 
 ## Milestone 1: Minimum Usable Pack
@@ -479,7 +479,7 @@ Scope:
 - Add optional rule files for Python and TypeScript first, then Java, Go, Rust, SQL, and Infrastructure as Code. Python and TypeScript rule packs are added for current scope.
 - Define when each rule pack should apply based on repository evidence. Done for Python and TypeScript current scope.
 - Add prompt guidance that keeps recommendations language-neutral when evidence is incomplete.
-- Validate each rule pack against generated samples before promoting it.
+- Validate each rule pack against generated samples before promoting it. Static generated-sample validation is recorded for Python and TypeScript in `examples/language-rule-pack-validation.md`; editor/model workflow validation remains pending.
 
 Exit criteria:
 

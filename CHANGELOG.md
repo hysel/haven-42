@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized static generated-sample validation evidence for optional Python and TypeScript rule packs in `examples/language-rule-pack-validation.md`.
 - Added optional Python and TypeScript rule packs under `.continue/rule-packs/` with evidence gates so they are not globally loaded by default.
 - Added `docs/language-rule-packs.md` for optional language rule-pack selection, default config behavior, and validation expectations.
 - Added `docs/project-detection.md` for evidence-based ecosystem, framework, build, package, and test-system classification before language-specific advice.
@@ -23,6 +24,8 @@ This project follows a simple changelog format:
 
 ### Changed
 
+- Updated language support and rule-pack documentation to distinguish static generated-sample validation from editor/model workflow validation.
+- Updated Python sample repository factory metadata to include `pyproject.toml` for stronger generated-sample validation.
 - Updated core prompts, shared rules, and agents to evidence-gate language-specific recommendations and use `unconfirmed` when project metadata is missing.
 - Improved runtime context generation so nested target folders do not inherit parent repository git status and common multi-language project metadata is included in context excerpts.
 

@@ -97,6 +97,17 @@ Small Python API-style sample used for local agent validation.
 - `python -m app.main`
 '@
 
+Write-SampleFile $root "pyproject.toml" @'
+[project]
+name = "sample-python-api"
+version = "0.1.0"
+description = "Generated Python API validation fixture"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+'@
+
 Write-SampleFile $root "app/main.py" @'
 from app.settings import Settings
 
