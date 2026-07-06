@@ -444,6 +444,24 @@ test_language_support_doc() {
 }
 
 
+test_optional_language_rule_packs() {
+  [ -f "$REPO_ROOT/.continue/rule-packs/python.md" ] &&
+    [ -f "$REPO_ROOT/.continue/rule-packs/typescript.md" ] &&
+    [ -f "$REPO_ROOT/docs/language-rule-packs.md" ] &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/python.md" &&
+    grep -q "pyproject.toml" "$REPO_ROOT/.continue/rule-packs/python.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/python.md" &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
+    grep -q "package.json" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
+    grep -q "not referenced from" "$REPO_ROOT/docs/language-rule-packs.md" &&
+    grep -q "docs/project-detection.md" "$REPO_ROOT/docs/language-rule-packs.md" &&
+    grep -q "docs/language-rule-packs.md" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "Optional Language Rule Packs" "$REPO_ROOT/docs/project-detection.md" &&
+    grep -q "docs/language-rule-packs.md" "$REPO_ROOT/README.md" &&
+    grep -q "Optional Python and TypeScript rule packs" "$REPO_ROOT/ROADMAP.md" &&
+    ! grep -q "rule-packs" "$REPO_ROOT/.continue/config.yaml"
+}
 test_project_detection_doc() {
   [ -f "$REPO_ROOT/docs/project-detection.md" ] &&
     grep -q "Evidence Strength" "$REPO_ROOT/docs/project-detection.md" &&
@@ -618,6 +636,7 @@ run_test "sample repository factory validation evidence is sanitized" test_sampl
 run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc
 run_test "agent surface docs define portability boundary" test_agent_surface_options_doc
 run_test "language support docs define staged multi-language boundary" test_language_support_doc
+run_test "optional language rule packs are evidence-gated and not globally loaded" test_optional_language_rule_packs
 run_test "project detection docs and guidance are evidence-gated" test_project_detection_doc
 run_test "sample repository factory creates expected fixtures" test_sample_repository_factory
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity

@@ -533,6 +533,47 @@ Invoke-PackTest "language support docs define staged multi-language boundary" {
 }
 
 
+Invoke-PackTest "optional language rule packs are evidence-gated and not globally loaded" {
+    $pythonRulePath = Join-Path $repoRoot ".continue/rule-packs/python.md"
+    $typescriptRulePath = Join-Path $repoRoot ".continue/rule-packs/typescript.md"
+    $languageRuleDocPath = Join-Path $repoRoot "docs/language-rule-packs.md"
+    $languageSupportPath = Join-Path $repoRoot "docs/language-support.md"
+    $projectDetectionPath = Join-Path $repoRoot "docs/project-detection.md"
+    $configPath = Join-Path $repoRoot ".continue/config.yaml"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $pythonRulePath) -Message "Python optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $typescriptRulePath) -Message "TypeScript optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $languageRuleDocPath) -Message "Language rule-pack doc should exist."
+
+    $pythonRule = Get-Content -LiteralPath $pythonRulePath -Raw
+    $typescriptRule = Get-Content -LiteralPath $typescriptRulePath -Raw
+    $languageRuleDoc = Get-Content -LiteralPath $languageRuleDocPath -Raw
+    $languageSupport = Get-Content -LiteralPath $languageSupportPath -Raw
+    $projectDetection = Get-Content -LiteralPath $projectDetectionPath -Raw
+    $config = Get-Content -LiteralPath $configPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+
+    Assert-True -Condition ($pythonRule -match "optional: true") -Message "Python rule pack should be marked optional."
+    Assert-True -Condition ($pythonRule -match "pyproject\.toml") -Message "Python rule pack should require Python evidence."
+    Assert-True -Condition ($pythonRule -match "unconfirmed") -Message "Python rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($typescriptRule -match "optional: true") -Message "TypeScript rule pack should be marked optional."
+    Assert-True -Condition ($typescriptRule -match "package\.json") -Message "TypeScript rule pack should require package metadata evidence."
+    Assert-True -Condition ($typescriptRule -match "unconfirmed") -Message "TypeScript rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($languageRuleDoc -match "not referenced from") -Message "Language rule-pack doc should state packs are not globally loaded."
+    Assert-True -Condition ($languageRuleDoc -match "docs/project-detection.md") -Message "Language rule-pack doc should require project detection."
+    Assert-True -Condition ($languageSupport -match "docs/language-rule-packs.md") -Message "Language support doc should link optional rule-pack doc."
+    Assert-True -Condition ($projectDetection -match "Optional Language Rule Packs") -Message "Project detection doc should mention optional language rule packs."
+    Assert-True -Condition ($readme -match "docs/language-rule-packs.md") -Message "README should link optional language rule-pack doc."
+    Assert-True -Condition ($todo -match "Add optional Python rule pack") -Message "TODO should track Python rule-pack completion."
+    Assert-True -Condition ($roadmap -match "Milestone 18: Language Rule Packs") -Message "Roadmap should include language rule packs milestone."
+    Assert-True -Condition ($roadmap -match "Optional Python and TypeScript rule packs") -Message "Roadmap should describe current optional packs."
+    Assert-True -Condition ($config -notmatch "rule-packs") -Message "Default Continue config should not load optional language rule packs."
+}
 Invoke-PackTest "project detection docs and guidance are evidence-gated" {
     $docPath = Join-Path $repoRoot "docs/project-detection.md"
     $languagePath = Join-Path $repoRoot "docs/language-support.md"

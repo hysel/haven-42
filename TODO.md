@@ -255,7 +255,7 @@
 - [x] Add project-detection guidance for Python, JavaScript/TypeScript, Java/Spring, Go, Rust, SQL, and Infrastructure as Code repositories.
 - [x] Add generated local sample repositories for at least Python and JavaScript/TypeScript validation.
 - [x] Update rules, prompts, and agents to evidence-gate language-specific advice.
-- [ ] Add language-specific rules or guidance without applying them globally by default.
+- [x] Add language-specific rules or guidance without applying them globally by default for Python and TypeScript.
 - [ ] Validate repository discovery, implementation planning, and code review against Python and JavaScript/TypeScript samples.
 - [x] Record focused Continue CLI repository-discovery validation for generated Python and TypeScript samples.
 - [ ] Record sanitized multi-language validation evidence for implementation planning and code review.
@@ -283,10 +283,10 @@
 
 ## Milestone 18: Language Rule Packs
 
-- [ ] Add optional Python rule pack.
-- [ ] Add optional TypeScript rule pack.
+- [x] Add optional Python rule pack.
+- [x] Add optional TypeScript rule pack.
 - [ ] Add optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
-- [ ] Add evidence-gated rule selection guidance.
+- [x] Add evidence-gated rule selection guidance for optional Python and TypeScript packs.
 - [ ] Validate rule packs against generated sample repositories.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging

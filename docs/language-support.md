@@ -11,8 +11,8 @@ This document tracks how the Local Engineering Agent Pack should grow beyond its
 | Ecosystem | Current status | Notes |
 | --- | --- | --- |
 | .NET / ASP.NET Core | Most mature | Existing rules, prompts, examples, and validation are strongest here. |
-| Python | Planned | Needs language-specific rules, project detection, and sample validation. |
-| JavaScript / TypeScript | Planned | Needs frontend, Node.js, package-manager, and test-runner guidance. |
+| Python | Optional rule pack added | Needs implementation-planning, code-review, and editor/model validation before promotion. |
+| JavaScript / TypeScript | Optional rule pack added | Needs implementation-planning, code-review, and editor/model validation before promotion. |
 | Java / Spring | Planned | Needs build-tool and framework-specific review guidance. |
 | Go | Planned | Needs module, concurrency, API, and deployment guidance. |
 | Rust | Planned | Needs cargo, ownership, error-handling, and performance guidance. |
@@ -38,7 +38,7 @@ These standards should remain cross-language:
 
 ## Language-Specific Guidance
 
-Language-specific rules should be added only when they are useful and validated.
+Language-specific rules should be added only when they are useful and validated. Optional Python and TypeScript rule packs now live in `.continue/rule-packs/` and are documented in `docs/language-rule-packs.md`. They are not loaded by default from `.continue/config.yaml`.
 
 Each language pack should define:
 

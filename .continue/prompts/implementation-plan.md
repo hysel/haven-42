@@ -46,6 +46,8 @@ Act as a Principal Engineer and Technical Lead. Create an implementation plan on
 
 Use `docs/project-detection.md` for evidence strength, ecosystem signals, confidence labels, and language-specific guardrails.
 
+Use docs/language-rule-packs.md only after project classification confirms Python or JavaScript/TypeScript evidence. Optional rule packs are supplemental and are not globally active by default.
+
 ## Quality Checks
 
 - Do not apply language-specific recommendations unless inspected files or supplied context provide matching evidence.

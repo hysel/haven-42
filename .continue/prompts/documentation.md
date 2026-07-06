@@ -40,6 +40,8 @@ Create, review, or improve engineering documentation while keeping recommendatio
 
 Use `docs/project-detection.md` for evidence strength, ecosystem signals, confidence labels, and language-specific guardrails.
 
+Use docs/language-rule-packs.md only after project classification confirms Python or JavaScript/TypeScript evidence. Optional rule packs are supplemental and are not globally active by default.
+
 ## Quality Checks
 
 - Do not apply language-specific recommendations unless inspected files or supplied context provide matching evidence.

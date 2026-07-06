@@ -53,6 +53,17 @@ Every project-aware workflow should be able to state:
 - If package metadata is absent, label build and test systems as `unconfirmed` unless test files or documentation clearly identify them.
 - If tools cannot read relevant project files, report `READ_TOOLS_UNAVAILABLE` instead of filling gaps with typical framework assumptions.
 
+
+## Optional Language Rule Packs
+
+Use `docs/language-rule-packs.md` to decide when optional language guidance can be applied.
+
+Current optional packs:
+
+- `.continue/rule-packs/python.md`
+- `.continue/rule-packs/typescript.md`
+
+These packs are supplemental. They are not part of the default `.continue/config.yaml` rule list, and they should not be treated as globally active rules. Use them only after classification finds matching Python or JavaScript/TypeScript evidence.
 ## Prompt Integration
 
 Prompts that review, plan, or recommend changes should start with a short project classification pass before making stack-specific recommendations.

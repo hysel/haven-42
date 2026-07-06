@@ -13,6 +13,8 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added optional Python and TypeScript rule packs under `.continue/rule-packs/` with evidence gates so they are not globally loaded by default.
+- Added `docs/language-rule-packs.md` for optional language rule-pack selection, default config behavior, and validation expectations.
 - Added `docs/project-detection.md` for evidence-based ecosystem, framework, build, package, and test-system classification before language-specific advice.
 - Added focused Continue CLI repository-discovery validation evidence for generated Python and TypeScript samples after improving runtime context fidelity.
 - Added sample repository factory documentation and scripts for disposable local validation repositories.
