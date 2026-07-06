@@ -91,6 +91,19 @@ test optional profile upgrades such as `devstral-small-2:24b` for PLAN ONLY or
 `qwen3-coder:30b` for DEEP REVIEW. Do not add those upgrades to shared config
 until they pass local validation.
 
+
+## Current Candidate Evidence
+
+The current simple-hardware default remains `qwen3.5:9b` for WRITE SAFE, PLAN ONLY, and DEEP REVIEW profiles.
+
+Recent automated API-level screening and Continue CLI prompt validation found two additional candidates worth manual editor testing:
+
+| Model | Automated Result | Next Step |
+| --- | --- | --- |
+| `Qwen3-Coder-Next:latest` | Passed API-level tool/exact-content screening and completed all generated Python sample CLI workflows; 10 of 12 workflow outputs passed verification. | Try manual Continue editor Apply validation before granting write-safe status. |
+| `devstral-small-2:latest` | Passed API-level tool/exact-content screening and completed all generated Python sample CLI workflows; 10 of 12 workflow outputs passed verification. | Try manual Continue editor Apply validation before granting write-safe status. |
+
+Both candidates failed verification only on filename-drift guardrails in non-code workflows. That is a prompt-quality follow-up, not proof that either model is write-safe.
 ## Install A Validated Model Into Local Config
 
 After a model passes validation, install it into one local-only profile. This

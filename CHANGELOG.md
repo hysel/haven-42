@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized candidate-model Continue CLI validation evidence for Qwen3-Coder-Next:latest and devstral-small-2:latest.
 - Added sanitized model-backed workflow validation evidence for generated Python and TypeScript samples in `examples/multi-language-workflow-validation.md`.
 - Added sanitized static generated-sample validation evidence for optional Python and TypeScript rule packs in `examples/language-rule-pack-validation.md`.
 - Added optional Python and TypeScript rule packs under `.continue/rule-packs/` with evidence gates so they are not globally loaded by default.

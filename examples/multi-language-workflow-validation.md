@@ -73,6 +73,36 @@ Do not include private repository names, private paths, private endpoints, usern
 - Add fixture coverage for filename drift in documentation and release-style outputs.
 - Continue validating additional generated ecosystems before promoting broader language support.
 
+
+## 2026-07-06 Candidate Model Continue CLI Validation
+
+### Summary
+
+- Validation type: Candidate model prompt workflow validation
+- Repository category: Generated Python API sample
+- Surface: Continue CLI through `npx @continuedev/cli`
+- Provider: Ollama-compatible local endpoint, endpoint omitted
+- Candidate models: `Qwen3-Coder-Next:latest`, `devstral-small-2:latest`
+- Raw output location: ignored runtime output only
+
+### Results
+
+| Candidate Model | Workflows Completed | Verification Passed | Guardrail Failures | Notes |
+| --- | --- | --- | --- | --- |
+| `Qwen3-Coder-Next:latest` | 12 of 12 | 10 of 12 | `ai-framework-self-review`, `release-readiness` | Failed checks were filename-drift issues, not tool-call-only output. |
+| `devstral-small-2:latest` | 12 of 12 | 10 of 12 | `ai-framework-self-review`, `release-readiness` | Failed checks were filename-drift issues, not tool-call-only output. |
+
+### Interpretation
+
+- Both candidate models are viable for further Continue CLI prompt validation.
+- Both candidates still require manual Continue editor Apply validation before being treated as write-safe.
+- Both candidates showed the same remaining prompt-quality risk: non-code workflows can reference files that were not present in supplied runtime context.
+
+### Follow-Up
+
+- Keep `qwen3.5:9b` as the write-safe starter default until a candidate passes manual editor Apply validation.
+- Consider `Qwen3-Coder-Next:latest` and `devstral-small-2:latest` for plan/review candidate testing.
+- Strengthen `ai-framework-self-review` and `release-readiness` prompts against filename drift.
 ### Sanitization Checklist
 
 - [x] No private repository names.
