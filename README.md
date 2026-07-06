@@ -30,6 +30,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Track multi-language support | `docs/language-support.md` |
 | Use optional language rule packs | `docs/language-rule-packs.md` |
 | Review language rule-pack evidence | `examples/language-rule-pack-validation.md` |
+| Review multi-language workflow evidence | `examples/multi-language-workflow-validation.md` |
 | Detect project type before giving advice | `docs/project-detection.md` |
 | Generate local sample repositories | `docs/sample-repository-factory.md` |
 | Validate this pack | `Quick Validation` |

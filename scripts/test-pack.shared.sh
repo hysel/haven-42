@@ -255,8 +255,12 @@ EOF_CONTEXT
 
 test_runtime_validation_runner_writes_verification_outputs() {
   grep -q "verify-runtime-output.ps1" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "Local Ollama API preflight failed" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "/api/tags" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
     grep -q "Failed guardrail verification" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
     grep -q "verify-runtime-output.shared.sh" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
+    grep -q "Local Ollama API preflight failed" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
+    grep -q "/api/tags" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
     grep -q ".verification.txt" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh"
 }
 
@@ -449,6 +453,7 @@ test_optional_language_rule_packs() {
     [ -f "$REPO_ROOT/.continue/rule-packs/typescript.md" ] &&
     [ -f "$REPO_ROOT/docs/language-rule-packs.md" ] &&
     [ -f "$REPO_ROOT/examples/language-rule-pack-validation.md" ] &&
+    [ -f "$REPO_ROOT/examples/multi-language-workflow-validation.md" ] &&
     grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/python.md" &&
     grep -q "pyproject.toml" "$REPO_ROOT/.continue/rule-packs/python.md" &&
     grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/python.md" &&
@@ -470,6 +475,10 @@ test_optional_language_rule_packs() {
     grep -q "pyproject.toml" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "package.json" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "does not prove editor/model behavior" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "Multi-Language Workflow Validation Evidence" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
+    grep -q "LOCAL_OLLAMA_UNREACHABLE" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
+    grep -q "CONTINUE_CLI_REQUEST_TIMEOUT" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
+    grep -q "Blocked until local model server responds" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
     ! grep -q "rule-packs" "$REPO_ROOT/.continue/config.yaml"
 }
 test_project_detection_doc() {

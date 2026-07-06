@@ -34,6 +34,25 @@ if (-not (Test-Path -LiteralPath $ConfigPath)) {
 
 $ConfigPath = (Resolve-Path -LiteralPath $ConfigPath).Path
 
+function Test-LocalOllamaConfig {
+    param([string]$Path)
+
+    $configText = Get-Content -LiteralPath $Path -Raw
+    if ($configText -notmatch 'provider:\s*ollama' -or $configText -notmatch 'apiBase:\s*(\S+)') {
+        return
+    }
+
+    $apiBase = $Matches[1].Trim().TrimEnd('/')
+    try {
+        Invoke-RestMethod -Uri "$apiBase/api/tags" -TimeoutSec 15 | Out-Null
+    }
+    catch {
+        throw "Local Ollama API preflight failed. Confirm the local model server is reachable before running runtime validation."
+    }
+}
+
+Test-LocalOllamaConfig -Path $ConfigPath
+
 $promptRoot = Join-Path $packRoot ".continue/prompts"
 $runtimeDoc = Join-Path $packRoot "docs/runtime-validation.md"
 $outputRoot = Join-Path $packRoot "runtime-validation-output"

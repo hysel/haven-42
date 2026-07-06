@@ -65,7 +65,15 @@ Do not record private repository names, customer names, internal hostnames, priv
 | 2026-07-03 | Private .NET Framework Excel-DNA add-in repository | Continue CLI with local-network Ollama endpoint override and `qwen3-coder:30b` | All runtime validation workflows | Partial pass: all workflows completed with final text and no tool-call-only JSON, but several outputs remained generic or made claims that require source-level confirmation | Record sanitized findings, improve evidence discipline, and validate future prompt changes against this application-style repository. |
 | 2026-07-05 | Private legacy .NET Framework Excel-DNA add-in repository category | Continue CLI with ignored local Ollama config and generated runtime context | Repository discovery, implementation planning, legacy dependency migration readiness | Partial pass: install and context generation worked, read-only outputs were final text, but discovery misstated a project filename and migration readiness included unsupported lifecycle and modernization claims | Keep as Milestone 13 category evidence; strengthen dependency-migration evidence rules before treating migration guidance as safe. |
 | 2026-07-05 | Private legacy .NET Framework Excel-DNA add-in repository category | Continue CLI with ignored local Ollama config and generated runtime context | Repository discovery and legacy dependency migration rerun after prompt guardrails | Failed guardrail: the model still synthesized an incorrect project filename and made package/framework compatibility claims without supplied source evidence | Add deterministic output verification or a stricter template fallback for filename fidelity and lifecycle/support claims. |
+| 2026-07-06 | Generated Python and TypeScript sample repositories | Continue CLI with ignored local Ollama config | Repository discovery, implementation planning, code review | Blocked: generated samples and Python runtime context succeeded, but local Ollama API did not respond and Continue CLI returned request timeout before usable output | Added sanitized local Ollama API preflight to runtime validation runners; rerun after local model server responds. |
 
+## Local Model Server Preflight
+
+When runtime validation uses a local Ollama config, the runner checks the configured Ollama API before starting Continue CLI workflows.
+
+If the local model server does not respond, runtime validation fails fast with a sanitized `Local Ollama API preflight failed` message. Do not commit private endpoints or raw timeout traces. Start or repair the local model server, then rerun repository discovery, implementation planning, and code review.
+
+A blocked generated multi-language validation attempt is recorded in `examples/multi-language-workflow-validation.md`.
 ## Workflow Checklist
 
 Run these workflows during validation:

@@ -258,6 +258,7 @@
 - [x] Add language-specific rules or guidance without applying them globally by default for Python and TypeScript.
 - [ ] Validate repository discovery, implementation planning, and code review against Python and JavaScript/TypeScript samples.
 - [x] Record focused Continue CLI repository-discovery validation for generated Python and TypeScript samples.
+- [x] Record blocked generated multi-language workflow validation attempt when local Ollama API was unreachable.
 - [ ] Record sanitized multi-language validation evidence for implementation planning and code review.
 - [ ] Prevent .NET-specific recommendations from being applied to non-.NET repositories.
 
