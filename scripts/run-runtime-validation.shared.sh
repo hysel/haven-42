@@ -51,6 +51,24 @@ if [ ! -f "$CONFIG_PATH" ]; then
   exit 1
 fi
 
+preflight_local_ollama_config() {
+  config_path="$1"
+  grep -q "provider:[[:space:]]*ollama" "$config_path" || return 0
+  api_base="$(awk '/apiBase:[[:space:]]*/ { print $2; exit }' "$config_path")"
+  [ -n "$api_base" ] || return 0
+  api_base="${api_base%/}"
+  if ! command -v curl >/dev/null 2>&1; then
+    printf 'Local Ollama API preflight failed. curl is required to check local model server reachability.\n' >&2
+    exit 1
+  fi
+  if ! curl --fail --silent --show-error --max-time 15 "$api_base/api/tags" >/dev/null 2>&1; then
+    printf 'Local Ollama API preflight failed. Confirm the local model server is reachable before running runtime validation.\n' >&2
+    exit 1
+  fi
+}
+
+preflight_local_ollama_config "$CONFIG_PATH"
+
 RUN_ROOT="$PACK_ROOT/runtime-validation-output/$(date '+%Y%m%d-%H%M%S')"
 mkdir -p "$RUN_ROOT"
 

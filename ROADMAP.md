@@ -425,7 +425,7 @@ Scope:
 - Keep shared engineering standards reusable across languages: Git, testing, security, logging, performance, architecture, documentation, and rollback planning.
 - Prevent .NET-specific recommendations from being applied to non-.NET repositories.
 - Add generated local sample repositories for planned language ecosystems when real repositories are not available.
-- Validate repository discovery, implementation planning, code review, and runtime output verification against at least Python and TypeScript samples before promoting language support.
+- Validate repository discovery, implementation planning, code review, and runtime output verification against at least Python and TypeScript samples before promoting language support. A generated-sample workflow validation attempt is recorded as blocked until the local Ollama API responds.
 - Keep README, docs, roadmap, TODO, changelog, and wiki clear that language support is staged and evidence-based.
 
 Exit criteria:

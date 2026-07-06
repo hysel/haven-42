@@ -218,6 +218,7 @@ $requiredFiles = @(
     "examples/multi-repository-validation.md",
     "examples/sample-repository-factory-validation.md",
     "examples/language-rule-pack-validation.md",
+    "examples/multi-language-workflow-validation.md",
     ".github/workflows/validate-pack.yml"
 )
 

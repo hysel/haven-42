@@ -539,6 +539,7 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     $languageRuleDocPath = Join-Path $repoRoot "docs/language-rule-packs.md"
     $languageSupportPath = Join-Path $repoRoot "docs/language-support.md"
     $languageEvidencePath = Join-Path $repoRoot "examples/language-rule-pack-validation.md"
+    $workflowEvidencePath = Join-Path $repoRoot "examples/multi-language-workflow-validation.md"
     $projectDetectionPath = Join-Path $repoRoot "docs/project-detection.md"
     $configPath = Join-Path $repoRoot ".continue/config.yaml"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -549,12 +550,14 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition (Test-Path -LiteralPath $typescriptRulePath) -Message "TypeScript optional rule pack should exist."
     Assert-True -Condition (Test-Path -LiteralPath $languageRuleDocPath) -Message "Language rule-pack doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $languageEvidencePath) -Message "Language rule-pack validation evidence should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $workflowEvidencePath) -Message "Multi-language workflow validation evidence should exist."
 
     $pythonRule = Get-Content -LiteralPath $pythonRulePath -Raw
     $typescriptRule = Get-Content -LiteralPath $typescriptRulePath -Raw
     $languageRuleDoc = Get-Content -LiteralPath $languageRuleDocPath -Raw
     $languageSupport = Get-Content -LiteralPath $languageSupportPath -Raw
     $languageEvidence = Get-Content -LiteralPath $languageEvidencePath -Raw
+    $workflowEvidence = Get-Content -LiteralPath $workflowEvidencePath -Raw
     $projectDetection = Get-Content -LiteralPath $projectDetectionPath -Raw
     $config = Get-Content -LiteralPath $configPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
@@ -584,6 +587,10 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition ($languageEvidence -match "pyproject\.toml") -Message "Evidence should include Python project metadata signal."
     Assert-True -Condition ($languageEvidence -match "package\.json") -Message "Evidence should include TypeScript project metadata signal."
     Assert-True -Condition ($languageEvidence -match "does not prove editor/model behavior") -Message "Evidence should avoid overstating editor/model validation."
+    Assert-True -Condition ($workflowEvidence -match "Multi-Language Workflow Validation Evidence") -Message "Workflow evidence should have expected title."
+    Assert-True -Condition ($workflowEvidence -match "LOCAL_OLLAMA_UNREACHABLE") -Message "Workflow evidence should record local Ollama reachability failure."
+    Assert-True -Condition ($workflowEvidence -match "CONTINUE_CLI_REQUEST_TIMEOUT") -Message "Workflow evidence should record Continue CLI timeout failure."
+    Assert-True -Condition ($workflowEvidence -match "Blocked until local model server responds") -Message "Workflow evidence should avoid claiming workflow validation passed."
     Assert-True -Condition ($config -notmatch "rule-packs") -Message "Default Continue config should not load optional language rule packs."
 }
 Invoke-PackTest "project detection docs and guidance are evidence-gated" {
@@ -1382,8 +1389,12 @@ Invoke-PackTest "runtime validation runner writes verification outputs" {
     $sharedRunner = Get-Content -LiteralPath $sharedRunnerPath -Raw
 
     Assert-True -Condition ($runner -match "verify-runtime-output\.ps1") -Message "PowerShell runtime runner should call verifier."
+    Assert-True -Condition ($runner -match "Local Ollama API preflight failed") -Message "PowerShell runtime runner should fail fast when local Ollama is unreachable."
+    Assert-True -Condition ($runner -match "/api/tags") -Message "PowerShell runtime runner should preflight Ollama tags endpoint."
     Assert-True -Condition ($runner -match "Failed guardrail verification") -Message "PowerShell runtime runner should summarize verifier failures."
     Assert-True -Condition ($sharedRunner -match "verify-runtime-output\.shared\.sh") -Message "Bash runtime runner should call verifier."
+    Assert-True -Condition ($sharedRunner -match "Local Ollama API preflight failed") -Message "Bash runtime runner should fail fast when local Ollama is unreachable."
+    Assert-True -Condition ($sharedRunner -match "/api/tags") -Message "Bash runtime runner should preflight Ollama tags endpoint."
     Assert-True -Condition ($sharedRunner -match "\.verification\.txt") -Message "Bash runtime runner should write verification output files."
 }
 
