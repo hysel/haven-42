@@ -448,6 +448,7 @@ test_optional_language_rule_packs() {
   [ -f "$REPO_ROOT/.continue/rule-packs/python.md" ] &&
     [ -f "$REPO_ROOT/.continue/rule-packs/typescript.md" ] &&
     [ -f "$REPO_ROOT/docs/language-rule-packs.md" ] &&
+    [ -f "$REPO_ROOT/examples/language-rule-pack-validation.md" ] &&
     grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/python.md" &&
     grep -q "pyproject.toml" "$REPO_ROOT/.continue/rule-packs/python.md" &&
     grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/python.md" &&
@@ -456,10 +457,19 @@ test_optional_language_rule_packs() {
     grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
     grep -q "not referenced from" "$REPO_ROOT/docs/language-rule-packs.md" &&
     grep -q "docs/project-detection.md" "$REPO_ROOT/docs/language-rule-packs.md" &&
+    grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/docs/language-rule-packs.md" &&
     grep -q "docs/language-rule-packs.md" "$REPO_ROOT/docs/language-support.md" &&
+    grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/docs/language-support.md" &&
     grep -q "Optional Language Rule Packs" "$REPO_ROOT/docs/project-detection.md" &&
     grep -q "docs/language-rule-packs.md" "$REPO_ROOT/README.md" &&
+    grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/README.md" &&
     grep -q "Optional Python and TypeScript rule packs" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Language Rule Pack Validation Evidence" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "python-api" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "typescript-frontend" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "pyproject.toml" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "package.json" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "does not prove editor/model behavior" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     ! grep -q "rule-packs" "$REPO_ROOT/.continue/config.yaml"
 }
 test_project_detection_doc() {
@@ -485,6 +495,7 @@ test_sample_repository_factory() {
   "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" >/tmp/sample-factory.out 2>&1 || return 1
   grep -q "Generated sample repositories" /tmp/sample-factory.out || return 1
   [ -f "$temp_root/python-api/SAMPLE-METADATA.md" ] || return 1
+  [ -f "$temp_root/python-api/pyproject.toml" ] || return 1
   [ -f "$temp_root/python-api/app/main.py" ] || return 1
   [ -f "$temp_root/python-api/tests/test_main.py" ] || return 1
   [ -f "$temp_root/typescript-frontend/package.json" ] || return 1
@@ -497,6 +508,8 @@ test_sample_repository_factory() {
 
   grep -q "# Python API Sample" "$temp_root/python-api/README.md" || return 1
   grep -q "python -m pytest" "$temp_root/python-api/README.md" || return 1
+  grep -q "\[project\]" "$temp_root/python-api/pyproject.toml" || return 1
+  grep -q "\[tool.pytest.ini_options\]" "$temp_root/python-api/pyproject.toml" || return 1
   ! grep -q "Write-SampleFile" "$temp_root/python-api/README.md" || return 1
   ! grep -Eq "@['\"]|['\"]@" "$temp_root/python-api/README.md" || return 1
   ! grep -q "Write-SampleFile" "$temp_root/python-api/app/main.py" || return 1

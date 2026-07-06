@@ -11,8 +11,8 @@ This document tracks how the Local Engineering Agent Pack should grow beyond its
 | Ecosystem | Current status | Notes |
 | --- | --- | --- |
 | .NET / ASP.NET Core | Most mature | Existing rules, prompts, examples, and validation are strongest here. |
-| Python | Optional rule pack added | Needs implementation-planning, code-review, and editor/model validation before promotion. |
-| JavaScript / TypeScript | Optional rule pack added | Needs implementation-planning, code-review, and editor/model validation before promotion. |
+| Python | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
+| JavaScript / TypeScript | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
 | Java / Spring | Planned | Needs build-tool and framework-specific review guidance. |
 | Go | Planned | Needs module, concurrency, API, and deployment guidance. |
 | Rust | Planned | Needs cargo, ownership, error-handling, and performance guidance. |
@@ -38,7 +38,7 @@ These standards should remain cross-language:
 
 ## Language-Specific Guidance
 
-Language-specific rules should be added only when they are useful and validated. Optional Python and TypeScript rule packs now live in `.continue/rule-packs/` and are documented in `docs/language-rule-packs.md`. They are not loaded by default from `.continue/config.yaml`.
+Language-specific rules should be added only when they are useful and validated. Optional Python and TypeScript rule packs now live in `.continue/rule-packs/` and are documented in `docs/language-rule-packs.md`. Static generated-sample validation evidence is recorded in `examples/language-rule-pack-validation.md`. They are not loaded by default from `.continue/config.yaml`.
 
 Each language pack should define:
 

@@ -10,7 +10,7 @@ The generated repositories are intentionally small. They are not production temp
 
 | Sample | Purpose |
 | --- | --- |
-| `python-api` | Python API-style repository with source, tests, and app configuration. |
+| `python-api` | Python API-style repository with `pyproject.toml`, source, tests, and app configuration. |
 | `typescript-frontend` | TypeScript frontend-style repository with package metadata, source, tests, and Vite config. |
 | `node-service` | Node service-style repository with package metadata, service code, tests, and Dockerfile. |
 | `java-spring-api` | Java/Spring-style repository with Maven metadata, application source, tests, and properties. |

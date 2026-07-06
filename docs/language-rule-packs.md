@@ -10,8 +10,8 @@ The default `.continue/config.yaml` loads only shared engineering rules. Optiona
 
 | Rule pack | Status | Evidence required before use |
 | --- | --- | --- |
-| `.continue/rule-packs/python.md` | Added, pending full validation | Python project metadata such as `pyproject.toml`, `requirements*.txt`, `setup.py`, `poetry.lock`, `Pipfile`, `pytest.ini`, `tox.ini`, or inspected Python package/source files. |
-| `.continue/rule-packs/typescript.md` | Added, pending full validation | JavaScript/TypeScript metadata such as `package.json`, lock files, `tsconfig.json`, frontend/build configs, or inspected `*.ts` / `*.tsx` source and test files. |
+| `.continue/rule-packs/python.md` | Static generated-sample validation recorded | Python project metadata such as `pyproject.toml`, `requirements*.txt`, `setup.py`, `poetry.lock`, `Pipfile`, `pytest.ini`, `tox.ini`, or inspected Python package/source files. |
+| `.continue/rule-packs/typescript.md` | Static generated-sample validation recorded | JavaScript/TypeScript metadata such as `package.json`, lock files, `tsconfig.json`, frontend/build configs, or inspected `*.ts` / `*.tsx` source and test files. |
 
 ## How Agents Should Use Them
 
@@ -30,6 +30,13 @@ This prevents every installed pack from globally applying Python or TypeScript a
 ## Validation Expectations
 
 Before a language rule pack is promoted from optional to validated, test it against generated sample repositories and record sanitized evidence.
+
+Current evidence:
+
+- `examples/language-rule-pack-validation.md` records static generated-sample validation for the optional Python and TypeScript rule packs.
+- `examples/sample-repository-factory-validation.md` records generated sample factory and focused repository-discovery validation evidence.
+
+The static generated-sample validation confirms that the optional rule packs match generated sample repository evidence and stay out of the default config. It does not prove editor/model behavior, implementation-planning quality, code-review quality, or approved-write readiness.
 
 Minimum validation:
 

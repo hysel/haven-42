@@ -117,6 +117,17 @@ Small Python API-style sample used for local agent validation.
 - `python -m app.main`
 EOF_FILE
 
+write_file "$root" "pyproject.toml" <<'EOF_FILE'
+[project]
+name = "sample-python-api"
+version = "0.1.0"
+description = "Generated Python API validation fixture"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+EOF_FILE
+
 write_file "$root" "app/main.py" <<'EOF_FILE'
 from app.settings import Settings
 
