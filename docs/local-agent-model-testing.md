@@ -18,6 +18,7 @@ The scripts can:
 - check Ollama API tool-call behavior
 - check exact-content output behavior
 - write a sanitized JSON report
+- optionally remove failed models when explicitly requested
 
 The scripts cannot click Continue's Apply button or prove that the editor
 extension applied a patch. Automated preflight does not replace Continue UI Apply validation; that still requires a manual check in the editor and an external shell verification.
@@ -115,6 +116,188 @@ Additional missing-model screening found:
 | `qwen3-coder-localpilot:latest` | Not installed and not pullable by that exact name. | Remove from active candidate lists unless a valid local tag is created. |
 | `architect:latest` | Not installed and not pullable by that exact name. | Remove from active candidate lists unless a valid local tag is created. |
 | `coder:latest` | Not installed and not pullable by that exact name. | Remove from active candidate lists unless a valid local tag is created. |
+
+
+## Progress Output And Pull Timeouts
+
+The model test runner prints numbered progress messages so users can tell what is happening during long runs:
+
+- `[1/8]` prepares the local test run.
+- `[2/8]` validates the target repository path.
+- `[3/8]` connects to Ollama and reads installed models.
+- `[4/8]` reads VRAM from a local or remote model profile when one is supplied.
+- `[5/8]` prints the candidate list, VRAM estimate, and API timeout.
+- `[6/8]` tests each model, including optional pulls, model loading, tool-call checks, and exact-content checks.
+- `[7/8]` unloads or removes models when requested.
+- `[8/8]` writes the sanitized JSON report and final summary.
+
+Large model downloads can take longer than the default API timeout. If a pull fails with `MODEL_NOT_INSTALLED` and the report shows a timeout, either increase the timeout or pull the model directly on the Ollama server first.
+
+Windows example for a large model pull:
+
+```powershell
+.\scripts\test-local-agent-models.ps1 `
+  -OllamaBaseUrl "http://127.0.0.1:11434" `
+  -TargetRepo "C:\path\to\sample-repo" `
+  -Models "qwen3.5:35b" `
+  -PullMissing `
+  -UnloadAfterEach `
+  -TimeoutSeconds 1800
+```
+
+Linux or macOS example:
+
+```bash
+./scripts/test-local-agent-models.linux.sh \
+  --ollama-base-url "http://127.0.0.1:11434" \
+  --target-repo "/path/to/sample-repo" \
+  --models "qwen3.5:35b" \
+  --pull-missing \
+  --unload-after-each \
+  --timeout-seconds 1800
+```
+
+Manual pull fallback on the Ollama server:
+
+```bash
+ollama pull qwen3.5:35b
+```
+
+After a manual pull succeeds, rerun the test. A model that previously reported `MODEL_NOT_INSTALLED` because of a timeout may become a valid API-level candidate.
+## Gate Pulls By Available VRAM
+
+Use the local model profile scripts first, then pass the generated JSON into the
+model test runner. This ties candidate pulls to the GPU/CPU detection already
+used by the setup flow and avoids manually copying VRAM values.
+
+The runner uses `TotalDedicated` VRAM by default, which sums visible dedicated or
+unknown GPU memory in `Gpus[].VramGb`. Use `MaxDedicated` when you want the more
+conservative single-GPU limit. Passing `AvailableVramGb` still wins over the
+profile value and is useful for controlled tests.
+
+Windows:
+
+```powershell
+.\scripts\get-local-model-profile.windows.ps1 -AsJson |
+  Set-Content .\runtime-validation-output\local-model-profile.json
+
+.\scripts\test-local-agent-models.ps1 `
+  -OllamaBaseUrl "http://127.0.0.1:11434" `
+  -TargetRepo "C:\path\to\sample-repo" `
+  -Models "qwen3.5:9b","devstral:24b","qwen3.5:35b","qwen3.5:122b" `
+  -ModelProfilePath .\runtime-validation-output\local-model-profile.json `
+  -VramSelectionMode TotalDedicated `
+  -PullMissing `
+  -UnloadAfterEach `
+  -RemoveFailedModels
+```
+
+Linux:
+
+```bash
+mkdir -p runtime-validation-output
+./scripts/get-local-model-profile.linux.sh --json \
+  > runtime-validation-output/local-model-profile.json
+
+./scripts/test-local-agent-models.linux.sh \
+  --ollama-base-url "http://127.0.0.1:11434" \
+  --target-repo "/path/to/sample-repo" \
+  --models "qwen3.5:9b,devstral:24b,qwen3.5:35b,qwen3.5:122b" \
+  --model-profile-path runtime-validation-output/local-model-profile.json \
+  --vram-selection-mode TotalDedicated \
+  --pull-missing \
+  --unload-after-each \
+  --remove-failed-models
+```
+
+macOS:
+
+```bash
+mkdir -p runtime-validation-output
+./scripts/get-local-model-profile.macos.sh --json \
+  > runtime-validation-output/local-model-profile.json
+
+./scripts/test-local-agent-models.macos.sh \
+  --ollama-base-url "http://127.0.0.1:11434" \
+  --target-repo "/path/to/sample-repo" \
+  --models "qwen3.5:9b,devstral:24b,qwen3.5:35b,qwen3.5:122b" \
+  --model-profile-path runtime-validation-output/local-model-profile.json \
+  --vram-selection-mode TotalDedicated \
+  --pull-missing \
+  --unload-after-each \
+  --remove-failed-models
+```
+
+Models estimated to fit the detected VRAM can be pulled and tested. Oversized
+models are skipped before pull with `MODEL_SKIPPED_FOR_VRAM`. The JSON report
+records `ModelProfilePath`, `VramSelectionMode`, `AvailableVramGb`,
+`AvailableVramSource`, `IncludeOversizedModels`, and per-model
+`VramRecommendation` details.
+
+Use `-AvailableVramGb` or `--available-vram-gb` only when you intentionally want
+to override the detected profile value. Use `-IncludeOversizedModels` or
+`--include-oversized-models` only when you intentionally want to test a model
+above the estimated VRAM limit.
+
+## Platform-Specific Pull Safety
+
+The model test scripts also skip tags that do not make sense for the detected
+model host before any pull is attempted. Cloud catalog tags are not local Ollama
+pull targets and are skipped with `MODEL_SKIPPED_FOR_PLATFORM`. MLX tags are
+skipped with the same signal unless the model host platform is macOS.
+
+When `ModelProfilePath` points at a local or remote hardware profile, the
+scripts use that profile's `Platform` value as the model host platform. Without
+a profile, they use the platform running the script. This matters when, for
+example, Windows is controlling a Linux Ollama server or a Mac is controlling a
+Linux Ollama server.
+## Remove Failed Models
+
+Use cleanup mode only when you intentionally want failed candidates removed from
+the Ollama server after the API preflight. This is useful for experimental model
+screening, but it is destructive because it deletes local model downloads.
+
+Windows:
+
+```powershell
+.\scripts\test-local-agent-models.ps1 `
+  -OllamaBaseUrl "http://127.0.0.1:11434" `
+  -TargetRepo "C:\path\to\sample-repo" `
+  -Models "candidate-model:tag" `
+  -PullMissing `
+  -UnloadAfterEach `
+  -RemoveFailedModels
+```
+
+Linux or macOS:
+
+```bash
+./scripts/test-local-agent-models.linux.sh \
+  --ollama-base-url "http://127.0.0.1:11434" \
+  --target-repo "/path/to/sample-repo" \
+  --models "candidate-model:tag" \
+  --pull-missing \
+  --unload-after-each \
+  --remove-failed-models
+```
+
+Cleanup mode runs only after a tested model fails one of the API checks. Passing
+models are kept. Missing models that were never pulled are not removed. The JSON
+report includes a `RemoveFailedModels` flag and per-model `Removal` result so
+users can see whether deletion was attempted and whether it succeeded.
+
+## Recommendation Output
+
+After all candidates are tested, the runner prints `Recommended model:` and
+writes a `Recommendation` object into the JSON report. The recommendation is
+chosen only from models that passed the API-level structured tool-call and
+exact-content checks. It prefers the smallest passing model first, with a small
+preference for coding-oriented local-agent model families.
+
+Treat this as the model to validate next in the editor, not as automatic
+approval for write-safe use. Continue read-only validation and approved-write
+smoke testing are still required before installing the model into a write-safe
+profile.
 ## Install A Validated Model Into Local Config
 
 After a model passes validation, install it into one local-only profile. This

@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, and release packaging.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, and a future easy UI.
 
 ## Stage Status
 
@@ -28,6 +28,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python and TypeScript rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; editor/model workflow validation and additional ecosystems remain pending. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Planned | Generate surface/profile-specific installs, collect sanitized compatibility evidence, and package releases for easier adoption. |
+| Milestone 20: Hardware-Aware Model And Config Automation | Planned | Convert hardware profile data into model recommendations, generated local agent configs, and a future easy UI for running setup and validation workflows. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -502,3 +503,24 @@ Exit criteria:
 - Users can choose the right profile without manually assembling config files.
 - Validation evidence is structured enough to compare models, surfaces, and languages over time.
 - Release artifacts are easy to install and verify.
+## Milestone 20: Hardware-Aware Model And Config Automation
+
+Goal: Turn hardware/profile evidence into practical model and configuration recommendations that a local user can apply without hand-tuning every setting.
+
+Scope:
+
+- Add logic that evaluates detected GPU, VRAM, RAM, CPU, architecture, operating system, and model-host platform to decide which local models are reasonable candidates for the user's machine.
+- Rank candidate models by workflow fit, resource fit, tool-use validation status, and conservative defaults so the user receives a clear recommended model plus alternatives.
+- Generate best-fit local configuration for Continue first, including model lanes, roles, context length, max tokens, keep-alive settings, and local-only endpoint handling.
+- Keep the configuration engine surface-neutral enough to support future plugins or agent surfaces after they have compatibility evidence.
+- Ensure cloud tags, provider-specific tags, MLX tags, oversized models, and unsupported local pulls are filtered or explained before any model download is attempted.
+- Keep all generated machine-specific settings in local-only config files and out of committed shared configuration.
+- Add validation coverage that proves hardware-aware selection does not expose private paths, hostnames, usernames, endpoints, or raw hardware reports.
+- Add a potential easy UI as a final-stage workflow for users who prefer to run discovery, profiling, model testing, config generation, and validation from a guided interface.
+
+Exit criteria:
+
+- A user can run one documented flow that profiles hardware, discovers or reads candidate models, tests eligible models, and receives a recommended model/config result.
+- Continue local config generation uses the recommendation result without requiring manual YAML editing for common setups.
+- Future agent/plugin support can reuse the same model/config recommendation data without being hard-coded to Continue-only assumptions.
+- The final-stage UI is treated as an optional wrapper over tested scripts, not a replacement for script-level validation.
