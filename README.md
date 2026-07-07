@@ -18,6 +18,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | --- | --- |
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
+| Profile a remote LLM machine | `docs/remote-hardware-profile.md` |
 | Evaluate newer model candidates | `docs/online-model-discovery.md` |
 | Validate whether a model can use tools | `docs/model-tool-use-validation.md` |
 | Automate local model preflight tests | `docs/local-agent-model-testing.md` |
@@ -106,7 +107,7 @@ manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
 ## Model Selection
 
-If you are unsure which model fits your machine, run the hardware profile script:
+If you are unsure which model fits your machine, run the hardware profile script. If your LLM runs on another machine, use `docs/remote-hardware-profile.md` to collect that machine's profile over SSH:
 
 Windows PowerShell:
 
@@ -762,6 +763,7 @@ Runtime status:
 - `docs/scoped-edits.md`
 - `docs/local-config-safety.md`
 - `docs/local-model-selection.md`
+- `docs/remote-hardware-profile.md`
 - `docs/online-model-discovery.md`
 - `docs/multi-repository-validation.md`
 - `docs/runtime-output-verification.md`

@@ -46,12 +46,95 @@ An online discovery helper must not:
   tokens, or hardware reports to a public service.
 - Depend on private or unstable scraped content for release validation.
 
+## Dry-Run Discovery Script
+
+Use the discovery script when you want to look for newer public model tags
+without changing local configuration or pulling models.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\discover-online-model-candidates.ps1
+```
+
+Linux:
+
+```bash
+./scripts/discover-online-model-candidates.linux.sh
+```
+
+macOS:
+
+```bash
+./scripts/discover-online-model-candidates.macos.sh
+```
+
+The script writes a sanitized report to `runtime-validation-output/` by
+default. The report records only candidate names, source category, status, and
+next-step guidance. It does not send repository content, hardware profiles,
+local endpoints, usernames, hostnames, or local paths to the public model
+catalog.
+
+To limit discovery to a small set of families:
+
+Windows PowerShell:
+
+```powershell
+.\scripts\discover-online-model-candidates.ps1 -Families qwen3.5,devstral,gpt-oss
+```
+
+Linux or macOS:
+
+```bash
+./scripts/discover-online-model-candidates.linux.sh --families qwen3.5,devstral,gpt-oss
+```
+
+For offline parser validation, use a local HTML fixture instead of the network:
+
+Windows PowerShell:
+
+```powershell
+.\scripts\discover-online-model-candidates.ps1 `
+  -SourceHtmlPath .\runtime-validation-output\sample-model-page.html
+```
+
+Linux or macOS:
+
+```bash
+./scripts/discover-online-model-candidates.linux.sh \
+  --source-html-path ./runtime-validation-output/sample-model-page.html
+```
+
+## VRAM-Aware Candidate Annotation
+
+Online discovery can read a local or remote model profile from disk and annotate candidates with estimated VRAM fit. The profile is used only on the machine running the script; it is not uploaded to the online model source, and the report keeps `HardwareProfileSent` set to `false`.
+
+Windows example using a remote hardware profile:
+
+```powershell
+.\scripts\discover-online-model-candidates.ps1 `
+  -Families qwen3.5,devstral `
+  -ModelProfilePath .\runtime-validation-output\remote-model-profile.json `
+  -VramSelectionMode TotalDedicated
+```
+
+Linux or macOS:
+
+```bash
+./scripts/discover-online-model-candidates.linux.sh \
+  --families qwen3.5,devstral \
+  --model-profile-path runtime-validation-output/remote-model-profile.json \
+  --vram-selection-mode TotalDedicated
+```
+
+The terminal output shows each family being checked, how many tags were found, each discovered model name, whether that model fits the local VRAM estimate, and any source error for a family that could not be read. The report adds `VramRecommendation` to each candidate. If a model is estimated to exceed available VRAM, its status becomes `online candidate above vram estimate`, and the next step tells the user not to pull it by default. Cloud tags and platform-incompatible tags are written to `SkippedCandidates` instead of pullable `Candidates`; cloud tags are never local pull targets, and MLX tags are only pullable when the detected model host platform is macOS. Use `-IncludeOversizedModels` or `--include-oversized-models` only when intentionally testing beyond the estimate.
+
 ## Safe Workflow
 
 Use this sequence if online discovery is added later:
 
 1. Run local hardware profiling.
-2. Run optional online discovery with an explicit command.
+2. Run optional online discovery with an explicit command such as `discover-online-model-candidates`.
 3. Review the candidate list.
 4. Pull one chosen model locally.
 5. Run API-level model preflight.

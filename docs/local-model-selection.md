@@ -79,6 +79,8 @@ macOS:
 ./scripts/get-local-model-profile.macos.sh
 ```
 
+If your Ollama server runs on a different machine than your editor, use `docs/remote-hardware-profile.md` to collect the GPU/CPU profile from the remote model host over SSH, then feed that JSON into `docs/local-agent-model-testing.md`.
+
 If Linux or macOS reports a permission error, run:
 
 ```bash

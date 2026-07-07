@@ -1425,6 +1425,253 @@ Invoke-PackTest "configuration-pack fixture documents bad recommendations" {
     Assert-True -Condition ($content -match "npx @continuedev/cli") -Message "Fixture should protect the documented npx fallback."
 }
 
+Invoke-PackTest "online model discovery scripts are candidate-only and cross-platform" {
+    $scriptNames = @(
+        "discover-online-model-candidates.ps1",
+        "discover-online-model-candidates.shared.sh"
+    )
+
+    foreach ($scriptName in $scriptNames) {
+        $scriptPath = Join-Path $repoRoot "scripts/$scriptName"
+        $content = Get-Content -LiteralPath $scriptPath -Raw
+
+        Assert-True -Condition ($content -match "PullsModels") -Message "$scriptName should report that it does not pull models."
+        Assert-True -Condition ($content -match "RewritesContinueConfig") -Message "$scriptName should report that it does not rewrite Continue config."
+        Assert-True -Condition ($content -notmatch "/api/pull") -Message "$scriptName should not call Ollama pull APIs."
+        Assert-True -Condition ($content -notmatch "config\.local\.yaml") -Message "$scriptName should not write local Continue config."
+    }
+
+    $wrappers = @(
+        @{
+            Name = "discover-online-model-candidates.linux.sh"
+            Target = "discover-online-model-candidates.shared.sh"
+        },
+        @{
+            Name = "discover-online-model-candidates.macos.sh"
+            Target = "discover-online-model-candidates.shared.sh"
+        }
+    )
+
+    foreach ($wrapper in $wrappers) {
+        $wrapperPath = Join-Path $repoRoot "scripts/$($wrapper.Name)"
+        Assert-True -Condition (Test-Path -LiteralPath $wrapperPath) -Message "$($wrapper.Name) should exist."
+
+        $content = Get-Content -LiteralPath $wrapperPath -Raw
+        Assert-True -Condition ($content -match [regex]::Escape($wrapper.Target)) -Message "$($wrapper.Name) should call the shared discovery script."
+        Assert-True -Condition ($content -notmatch "pwsh") -Message "$($wrapper.Name) should not require pwsh."
+    }
+}
+
+Invoke-PackTest "online model discovery parses a local fixture without network" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "online-model-discovery-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $fixturePath = Join-Path $tempRoot "model-page.html"
+        $outputPath = Join-Path $tempRoot "online-model-candidates.json"
+
+        @"
+<html>
+  <a href="/library/qwen3.5:9b">qwen3.5:9b</a>
+  <a href="/library/devstral-small-2:24b">devstral-small-2:24b</a>
+</html>
+"@ | Set-Content -LiteralPath $fixturePath
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/discover-online-model-candidates.ps1") `
+            -Arguments @("-SourceHtmlPath", $fixturePath, "-Families", "qwen3.5,devstral-small-2", "-OutputPath", $outputPath)
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Discovery script should parse a local fixture."
+        Assert-True -Condition (Test-Path -LiteralPath $outputPath) -Message "Discovery script should write a report."
+
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        $models = @($report.Candidates | ForEach-Object { $_.Model })
+
+        Assert-True -Condition ($report.RepositoryContentSent -eq $false) -Message "Discovery report should state repository content was not sent."
+        Assert-True -Condition ($report.HardwareProfileSent -eq $false) -Message "Discovery report should state hardware profile was not sent."
+        Assert-True -Condition ($report.PullsModels -eq $false) -Message "Discovery report should state models were not pulled."
+        Assert-True -Condition ($report.RewritesContinueConfig -eq $false) -Message "Discovery report should state Continue config was not rewritten."
+        Assert-True -Condition ($models -contains "qwen3.5:9b") -Message "Discovery report should include qwen3.5 fixture candidate."
+        Assert-True -Condition ($models -contains "devstral-small-2:24b") -Message "Discovery report should include devstral fixture candidate."
+        $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/online-model-discovery.md") -Raw
+        Assert-True -Condition ($doc -match "VRAM-Aware Candidate Annotation") -Message "Online discovery docs should explain local VRAM annotation."
+        Assert-True -Condition ($doc -match "terminal output shows each family") -Message "Online discovery docs should explain terminal discovery output."
+        Assert-True -Condition ($doc -match "HardwareProfileSent") -Message "Online discovery docs should state hardware profiles are not sent online."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "online model discovery supports local VRAM annotation without leaking profiles" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "online-model-discovery-vram-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $fixturePath = Join-Path $tempRoot "model-page.html"
+        $profilePath = Join-Path $tempRoot "model-profile.json"
+        $outputPath = Join-Path $tempRoot "online-model-candidates.json"
+
+        @"
+<html>
+  <a href="/library/qwen3.5:9b">qwen3.5:9b</a>
+  <a href="/library/qwen3.5:35b">qwen3.5:35b</a>
+  <a href="/library/qwen3.5:9b-mlx">qwen3.5:9b-mlx</a>
+  <a href="/library/qwen3.5:cloud">qwen3.5:cloud</a>
+</html>
+"@ | Set-Content -LiteralPath $fixturePath
+
+        @"
+{
+  "Platform": "Windows",
+  "Gpus": [
+    {"Name":"fixture-gpu","VramGb":16,"MemoryType":"dedicated"}
+  ]
+}
+"@ | Set-Content -LiteralPath $profilePath
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/discover-online-model-candidates.ps1") `
+            -Arguments @("-SourceHtmlPath", $fixturePath, "-Families", "qwen3.5", "-ModelProfilePath", $profilePath, "-VramSelectionMode", "TotalDedicated", "-OutputPath", $outputPath)
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Discovery script should parse a fixture with local VRAM annotation."
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        $small = @($report.Candidates | Where-Object { $_.Model -eq "qwen3.5:9b" }) | Select-Object -First 1
+        $large = @($report.Candidates | Where-Object { $_.Model -eq "qwen3.5:35b" }) | Select-Object -First 1
+        $cloud = @($report.SkippedCandidates | Where-Object { $_.Model -eq "qwen3.5:cloud" }) | Select-Object -First 1
+        $mlx = @($report.SkippedCandidates | Where-Object { $_.Model -eq "qwen3.5:9b-mlx" }) | Select-Object -First 1
+        $candidateModels = @($report.Candidates | ForEach-Object { $_.Model })
+
+        Assert-True -Condition ($report.HardwareProfileSent -eq $false) -Message "Discovery report should state hardware profile was not sent."
+        Assert-True -Condition ($report.ModelProfilePath -eq "redacted") -Message "Discovery report should redact model profile path."
+        Assert-True -Condition ($report.AvailableVramGb -eq 16) -Message "Discovery report should record local VRAM estimate."
+        Assert-True -Condition ($report.ModelHostPlatform -eq "Windows") -Message "Discovery report should record the model host platform."
+        Assert-True -Condition ($small.VramRecommendation.FitsAvailableVram -eq $true) -Message "Small fixture model should fit the local VRAM estimate."
+        Assert-True -Condition ($large.VramRecommendation.FitsAvailableVram -eq $false) -Message "Large fixture model should exceed the local VRAM estimate."
+        Assert-True -Condition ($large.Status -eq "online candidate above vram estimate") -Message "Oversized fixture model should be marked above VRAM estimate."
+        Assert-True -Condition ($null -ne $cloud) -Message "Cloud fixture model should be skipped, not treated as pullable."
+        Assert-True -Condition ($null -ne $mlx) -Message "MLX fixture model should be skipped on non-macOS model hosts."
+        Assert-True -Condition ($candidateModels -notcontains "qwen3.5:cloud") -Message "Cloud fixture model should not be included in pullable candidates."
+        Assert-True -Condition ($candidateModels -notcontains "qwen3.5:9b-mlx") -Message "MLX fixture model should not be included in pullable candidates for Windows model host."
+        Assert-True -Condition ($cloud.FailureSignal -eq "MODEL_SKIPPED_FOR_PLATFORM") -Message "Cloud fixture model should record a platform skip signal."
+        Assert-True -Condition ($mlx.FailureSignal -eq "MODEL_SKIPPED_FOR_PLATFORM") -Message "MLX fixture model should record a platform skip signal."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Invoke-PackTest "remote hardware profile scripts are documented and SSH-based" {
+    $psScriptPath = Join-Path $repoRoot "scripts/get-remote-model-profile.ps1"
+    $sharedScriptPath = Join-Path $repoRoot "scripts/get-remote-model-profile.shared.sh"
+    $docPath = Join-Path $repoRoot "docs/remote-hardware-profile.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $selectionPath = Join-Path $repoRoot "docs/local-model-selection.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "Windows remote profile script should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $sharedScriptPath) -Message "Shared remote profile script should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Remote hardware profile docs should exist."
+
+    $psScript = Get-Content -LiteralPath $psScriptPath -Raw
+    $sharedScript = Get-Content -LiteralPath $sharedScriptPath -Raw
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $selection = Get-Content -LiteralPath $selectionPath -Raw
+
+    Assert-True -Condition ($psScript -match "RemoteHost") -Message "Windows remote profile script should require a remote host."
+    Assert-True -Condition ($psScript -match "get-local-model-profile\.linux\.sh") -Message "Windows remote profile script should reuse the Linux profile helper."
+    Assert-True -Condition ($psScript -match "get-local-model-profile\.macos\.sh") -Message "Windows remote profile script should support macOS remote hosts."
+    Assert-True -Condition ($psScript -match "ssh") -Message "Windows remote profile script should use SSH."
+    Assert-True -Condition ($psScript -match "BatchMode=yes") -Message "Windows remote profile script should default to non-interactive SSH."
+    Assert-True -Condition ($psScript -match "TimeoutSeconds") -Message "Windows remote profile script should expose a timeout."
+    Assert-True -Condition ($psScript -match "SSH closed before the profile script could be sent") -Message "Windows remote profile script should report early SSH exits clearly."
+    Assert-True -Condition ($psScript -match "scp") -Message "Windows remote profile script should use scp for interactive SSH mode."
+    Assert-True -Condition ($psScript -match "local-engineering-agent-profile") -Message "Windows remote profile script should use a temporary remote profiler path."
+    Assert-True -Condition ($psScript -match "\[1/6\] Checking local SSH tools") -Message "PowerShell remote profile script should show the first progress step."
+    Assert-True -Condition ($psScript -match "\[6/6\] Validating remote profile JSON") -Message "PowerShell remote profile script should show the JSON validation progress step."
+    Assert-True -Condition ($sharedScript -match "--remote-host") -Message "Shared remote profile script should expose remote-host."
+    Assert-True -Condition ($sharedScript -match "BatchMode=yes") -Message "Shared remote profile script should default to non-interactive SSH."
+    Assert-True -Condition ($sharedScript -match "--timeout-seconds") -Message "Shared remote profile script should expose a timeout."
+    Assert-True -Condition ($sharedScript -match "scp") -Message "Shared remote profile script should use scp for interactive SSH mode."
+    Assert-True -Condition ($sharedScript -match "local-engineering-agent-profile") -Message "Shared remote profile script should use a temporary remote profiler path."
+    Assert-True -Condition ($sharedScript -match "\[1/6\] Checking local SSH tools") -Message "Shared remote profile script should show the first progress step."
+    Assert-True -Condition ($sharedScript -match "\[6/6\] Validating remote profile JSON") -Message "Shared remote profile script should show the JSON validation progress step."
+    Assert-True -Condition ($sharedScript -match "bash -s -- --json") -Message "Shared remote profile script should run the local profile script remotely as JSON."
+    Assert-True -Condition ($sharedScript -match "get-local-model-profile\.linux\.sh") -Message "Shared remote profile script should reuse the Linux profile helper."
+    Assert-True -Condition ($sharedScript -match "get-local-model-profile\.macos\.sh") -Message "Shared remote profile script should support macOS remote hosts."
+    Assert-True -Condition ($doc -match "Windows laptop to Linux Ollama server") -Message "Remote hardware profile docs should cover Windows-to-Linux."
+    Assert-True -Condition ($doc -match "ModelProfilePath") -Message "Remote hardware profile docs should show model test integration."
+    Assert-True -Condition ($doc -match "does not install files on the remote machine") -Message "Remote hardware profile docs should describe the no-install remote behavior."
+    Assert-True -Condition ($doc -match "SSH Preflight") -Message "Remote hardware profile docs should include SSH preflight guidance."
+    Assert-True -Condition ($doc -match "TimeoutSeconds") -Message "Remote hardware profile docs should document timeout behavior."
+    Assert-True -Condition ($doc -match "SSH pipe was closed") -Message "Remote hardware profile docs should cover early SSH pipe closure."
+    Assert-True -Condition ($doc -match "copy-and-run") -Message "Remote hardware profile docs should explain interactive copy-and-run mode."
+    Assert-True -Condition ($doc -match "scp") -Message "Remote hardware profile docs should mention scp for interactive mode."
+    Assert-True -Condition ($doc -match "Progress Output") -Message "Remote hardware profile docs should explain numbered progress output."
+    Assert-True -Condition ($doc -match "\[5/6\]") -Message "Remote hardware profile docs should explain the remote detection progress step."
+    Assert-True -Condition ($readme -match "docs/remote-hardware-profile.md") -Message "README should link to remote hardware profile docs."
+    Assert-True -Condition ($selection -match "remote-hardware-profile.md") -Message "Local model selection docs should link to remote hardware profile docs."
+}
+Invoke-PackTest "local agent model tests support explicit failed-model cleanup" {
+    $psScriptPath = Join-Path $repoRoot "scripts/test-local-agent-models.ps1"
+    $bashScriptPath = Join-Path $repoRoot "scripts/test-local-agent-models.shared.sh"
+    $docPath = Join-Path $repoRoot "docs/local-agent-model-testing.md"
+
+    $psScript = Get-Content -LiteralPath $psScriptPath -Raw
+    $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
+    $doc = Get-Content -LiteralPath $docPath -Raw
+
+    Assert-True -Condition ($psScript -match "RemoveFailedModels") -Message "PowerShell model test script should expose RemoveFailedModels."
+    Assert-True -Condition ($psScript -match "\[1/8\] Preparing local Agent model test run") -Message "PowerShell model test script should print numbered progress output."
+    Assert-True -Condition ($psScript -match "\[8/8\] Writing sanitized report") -Message "PowerShell model test script should print report-writing progress output."
+    Assert-True -Condition ($psScript -match "Large model pulls may need 1800 seconds") -Message "PowerShell model test script should explain large model pull timeouts."
+    Assert-True -Condition ($psScript -match "/api/delete") -Message "PowerShell model test script should use Ollama delete API for cleanup."
+    Assert-True -Condition ($psScript -match "Removal") -Message "PowerShell model test script should report per-model removal details."
+    Assert-True -Condition ($bashScript -match "--remove-failed-models") -Message "Bash model test script should expose remove-failed-models."
+    Assert-True -Condition ($bashScript -match "\[1/8\] Preparing local Agent model test run") -Message "Bash model test script should print numbered progress output."
+    Assert-True -Condition ($bashScript -match "--timeout-seconds") -Message "Bash model test script should expose timeout-seconds."
+    Assert-True -Condition ($bashScript -match "Large model pulls may need") -Message "Bash model test script should explain large model pull timeouts."
+    Assert-True -Condition ($bashScript -match 'method="DELETE"') -Message "Bash model test script should use Ollama delete API for cleanup."
+    Assert-True -Condition ($bashScript -match "Removal") -Message "Bash model test script should report per-model removal details."
+    Assert-True -Condition ($doc -match "Remove Failed Models") -Message "Docs should explain failed-model cleanup."
+    Assert-True -Condition ($doc -match "Progress Output And Pull Timeouts") -Message "Docs should explain model-test progress output."
+    Assert-True -Condition ($doc -match "TimeoutSeconds 1800") -Message "Docs should show a longer timeout for large model pulls."
+    Assert-True -Condition ($doc -match "--timeout-seconds 1800") -Message "Docs should show the Bash timeout flag for large model pulls."
+    Assert-True -Condition ($doc -match "destructive") -Message "Docs should warn that failed-model cleanup is destructive."
+    Assert-True -Condition ($doc -match "RemoveFailedModels") -Message "Docs should include the PowerShell cleanup flag."
+    Assert-True -Condition ($doc -match "--remove-failed-models") -Message "Docs should include the Bash cleanup flag."
+    Assert-True -Condition ($psScript -match "AvailableVramGb") -Message "PowerShell model test script should expose AvailableVramGb."
+    Assert-True -Condition ($psScript -match "MODEL_SKIPPED_FOR_VRAM") -Message "PowerShell model test script should skip oversized models before pull."
+    Assert-True -Condition ($psScript -match "IncludeOversizedModels") -Message "PowerShell model test script should allow explicit oversized testing override."
+    Assert-True -Condition ($bashScript -match "--available-vram-gb") -Message "Bash model test script should expose available-vram-gb."
+    Assert-True -Condition ($bashScript -match "MODEL_SKIPPED_FOR_VRAM") -Message "Bash model test script should skip oversized models before pull."
+    Assert-True -Condition ($bashScript -match "--include-oversized-models") -Message "Bash model test script should allow explicit oversized testing override."
+    Assert-True -Condition ($psScript -match "MODEL_SKIPPED_FOR_PLATFORM") -Message "PowerShell model test script should skip platform-incompatible models before pull."
+    Assert-True -Condition ($bashScript -match "MODEL_SKIPPED_FOR_PLATFORM") -Message "Bash model test script should skip platform-incompatible models before pull."
+    Assert-True -Condition ($psScript -match "Get-TestRecommendation") -Message "PowerShell model test script should produce a recommendation object."
+    Assert-True -Condition ($bashScript -match "test_recommendation") -Message "Bash model test script should produce a recommendation object."
+    Assert-True -Condition ($psScript -match "Recommended model:") -Message "PowerShell model test script should print a recommended model."
+    Assert-True -Condition ($bashScript -match "Recommended model:") -Message "Bash model test script should print a recommended model."
+    Assert-True -Condition ($doc -match "Recommendation Output") -Message "Docs should explain recommendation output."
+    Assert-True -Condition ($doc -match "Recommended model:") -Message "Docs should mention the recommended model terminal output."
+    Assert-True -Condition ($doc -match "Recommendation") -Message "Docs should mention the JSON recommendation object."
+    Assert-True -Condition ($doc -match "Platform-Specific Pull Safety") -Message "Docs should explain platform-specific pull safety."
+    Assert-True -Condition ($doc -match "MODEL_SKIPPED_FOR_PLATFORM") -Message "Docs should include the platform skip signal."
+    Assert-True -Condition ($doc -match "MLX") -Message "Docs should mention MLX platform handling."
+    Assert-True -Condition ($doc -match "cloud") -Message "Docs should mention cloud tag handling."
+    Assert-True -Condition ($doc -match "Gate Pulls By Available VRAM") -Message "Docs should explain VRAM-gated pulls."
+    Assert-True -Condition ($doc -match "AvailableVramGb") -Message "Docs should include the PowerShell VRAM flag."
+    Assert-True -Condition ($doc -match "--available-vram-gb") -Message "Docs should include the Bash VRAM flag."
+    Assert-True -Condition ($psScript -match "ModelProfilePath") -Message "PowerShell model test script should accept a model profile path."
+    Assert-True -Condition ($psScript -match "VramSelectionMode") -Message "PowerShell model test script should expose VRAM selection mode."
+    Assert-True -Condition ($psScript -match "Get-AvailableVramFromProfile") -Message "PowerShell model test script should derive VRAM from profile JSON."
+    Assert-True -Condition ($bashScript -match "--model-profile-path") -Message "Bash model test script should accept a model profile path."
+    Assert-True -Condition ($bashScript -match "--vram-selection-mode") -Message "Bash model test script should expose VRAM selection mode."
+    Assert-True -Condition ($bashScript -match "available_vram_from_profile") -Message "Bash model test script should derive VRAM from profile JSON."
+    Assert-True -Condition ($doc -match "get-local-model-profile") -Message "Docs should connect VRAM gating to the local model profile scripts."
+    Assert-True -Condition ($doc -match "ModelProfilePath") -Message "Docs should include the PowerShell profile path flag."
+    Assert-True -Condition ($doc -match "--model-profile-path") -Message "Docs should include the Bash profile path flag."
+    Assert-True -Condition ($doc -match "VramSelectionMode") -Message "Docs should explain the VRAM selection mode."
+}
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
     exit 1
