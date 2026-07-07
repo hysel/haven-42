@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+set -eu
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+printf '%s\n' "Running pre-push pack validation..."
+
+if command -v pwsh >/dev/null 2>&1; then
+  pwsh -NoProfile -ExecutionPolicy Bypass -File "$repo_root/scripts/test-pack.ps1"
+else
+  case "$(uname -s 2>/dev/null || printf unknown)" in
+    Darwin*)
+      "$repo_root/scripts/test-pack.macos.sh"
+      ;;
+    *)
+      "$repo_root/scripts/test-pack.linux.sh"
+      ;;
+  esac
+fi

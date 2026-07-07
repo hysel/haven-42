@@ -166,6 +166,7 @@ $requiredFiles = @(
     "scripts/generate-runtime-context.macos.sh",
     "scripts/generate-runtime-context.shared.sh",
     "scripts/install-continue-pack.ps1",
+    "scripts/install-git-hooks.ps1",
     "scripts/install-continue-pack.linux.sh",
     "scripts/install-continue-pack.macos.sh",
     "scripts/install-continue-pack.shared.sh",
@@ -223,7 +224,8 @@ $requiredFiles = @(
     "examples/sample-repository-factory-validation.md",
     "examples/language-rule-pack-validation.md",
     "examples/multi-language-workflow-validation.md",
-    ".github/workflows/validate-pack.yml"
+    ".github/workflows/validate-pack.yml",
+    ".githooks/pre-push"
 )
 
 foreach ($relativePath in $requiredFiles) {

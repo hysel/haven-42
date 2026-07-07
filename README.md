@@ -267,6 +267,16 @@ Before approving write mode, read:
 
 Run the validation script from this repository after copying or editing the pack.
 
+To catch pack validation problems before they reach GitHub Actions, enable the
+tracked pre-push hook once per clone:
+
+```powershell
+.\scripts\install-git-hooks.ps1
+```
+
+The hook runs the pack tests before `git push`, including the executable-bit
+check for Linux and macOS shell scripts.
+
 Windows PowerShell:
 
 ```powershell

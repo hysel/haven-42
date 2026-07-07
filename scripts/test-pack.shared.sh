@@ -71,7 +71,7 @@ test_shell_scripts_executable() {
   while IFS= read -r row; do
     mode="$(printf '%s' "$row" | awk '{ print $1 }')"
     [ "$mode" = "100755" ] || return 1
-  done < <(git -C "$REPO_ROOT" ls-files -s 'scripts/*.sh')
+  done < <(git -C "$REPO_ROOT" ls-files -s 'scripts/*.sh' '.githooks/pre-push')
 }
 
 test_linux_macos_scripts_do_not_require_pwsh() {
@@ -635,7 +635,7 @@ run_test "validate-pack fails for wrong expected version" test_validate_fails_fo
 run_test "model recommendation catalog has valid schema" test_catalog_schema
 run_test "committed config uses starter sample model" test_committed_config_uses_starter_model
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
-run_test "shell wrapper scripts are executable in git" test_shell_scripts_executable
+run_test "shell wrapper scripts and hooks are executable in git" test_shell_scripts_executable
 run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_macos_scripts_do_not_require_pwsh
 run_test "runtime context generation captures useful files and excludes build output" test_runtime_context_generation
 run_test "install script dry run does not modify target repository" test_install_dry_run

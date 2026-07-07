@@ -32,6 +32,7 @@ Update `DECISIONS.md` when the release includes a durable policy, architecture, 
 
 Before tagging a release:
 
+- [ ] Enable local Git hooks once per clone: `.\scripts\install-git-hooks.ps1`.
 - [ ] Run Windows validation: `.\scripts\validate-pack.ps1` and `.\scripts\test-pack.ps1`.
 - [ ] Run Linux validation when Bash is available: `./scripts/validate-pack.linux.sh` and `./scripts/test-pack.linux.sh`.
 - [ ] Run macOS validation when available: `./scripts/validate-pack.macos.sh` and `./scripts/test-pack.macos.sh`.
@@ -41,6 +42,7 @@ Before tagging a release:
 - [ ] Confirm `mcpServers: []` remains the default unless a decision record changes that posture.
 - [ ] Confirm no private IPs, private hostnames, tokens, or project identifiers are committed.
 - [ ] Confirm new examples and fixtures are sanitized.
+- [ ] Confirm shell scripts and hooks are executable in Git before pushing.
 - [ ] Confirm `CHANGELOG.md` has a release entry.
 
 ## Commit And Tag
