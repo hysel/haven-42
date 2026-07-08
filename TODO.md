@@ -262,7 +262,8 @@
 - [x] Record focused Continue CLI repository-discovery validation for generated Python and TypeScript samples.
 - [x] Record generated multi-language workflow validation once local Ollama API is reachable.
 - [x] Record sanitized multi-language validation evidence for implementation planning and code review.
-- [ ] Strengthen filename-drift guardrails for documentation, AI framework self-review, and release-readiness workflows.
+- [x] Strengthen filename-drift guardrails for runtime prompts and runtime validation runners.
+- [ ] Add stricter template or remediation fallback for workflows that repeatedly fail deterministic filename-fidelity verification.
 
 ## Milestone 16: Sample Repository Factory
 

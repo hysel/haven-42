@@ -99,6 +99,7 @@ if ! command -v npx >/dev/null 2>&1; then
   exit 0
 fi
 
+FIDELITY_GUARDRAILS="Use only filenames that appear in the supplied runtime repository context. Do not invent or assume conventional files such as CHANGELOG.md, CONTRIBUTING.md, ARCHITECTURE.md, CI workflows, migration scripts, manifests, or .continue/config.yaml. If a useful file is absent, label it as recommended new file: <path> or missing file recommendation: <path>. If uncertain, write unconfirmed filename instead of naming it as existing."
 PROMPTS=(
   "repository-discovery"
   "architecture-review"
@@ -126,7 +127,7 @@ for workflow in "${PROMPTS[@]}"; do
       --prompt "$prompt_path" \
       --prompt "$CONTEXT_PATH" \
       --readonly \
-      -p "Use the supplied runtime repository context. Do not call tools. Produce final review text only."
+      -p "$FIDELITY_GUARDRAILS Use the supplied runtime repository context. Do not call tools. Produce final review text only."
   ) > "$output_path" 2>&1 || true
 
   if [ ! -s "$output_path" ]; then

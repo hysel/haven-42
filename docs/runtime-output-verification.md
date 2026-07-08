@@ -67,3 +67,7 @@ Raw workflow outputs and verification files remain local in `runtime-validation-
 The verifier is intentionally conservative. A failed verification does not always mean the model output is useless, but it means the output should not be treated as safe guidance without human review.
 
 The verifier does not replace testing, source review, security review, or release validation.
+
+## Recommended New Files
+
+Runtime verification allows filenames that are absent from supplied context only when the output line clearly labels them as `recommended new file`, `missing file recommendation`, or an equivalent new-file recommendation. Unlabeled absent filenames still fail with `FILENAME_NOT_IN_CONTEXT`.

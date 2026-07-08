@@ -865,6 +865,32 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
     }
 }
 
+Invoke-PackTest "review prompts require filename fidelity gates" {
+    $promptNames = @(
+        "architecture-review.md",
+        "bug-investigation.md",
+        "code-review.md",
+        "documentation.md",
+        "implementation-plan.md",
+        "performance-review.md",
+        "product-manager.md",
+        "refactoring-planner.md",
+        "release-readiness.md",
+        "repository-discovery.md",
+        "security-review.md",
+        "ai-framework-self-review.md"
+    )
+
+    foreach ($promptName in $promptNames) {
+        $promptPath = Join-Path $repoRoot ".continue/prompts/$promptName"
+        $prompt = Get-Content -LiteralPath $promptPath -Raw
+        Assert-True -Condition ($prompt -match "Filename Fidelity Gate") -Message "$promptName should include the filename fidelity gate."
+        Assert-True -Condition ($prompt -match "only source of truth") -Message "$promptName should treat inspected context as the source of truth."
+        Assert-True -Condition ($prompt -match "engineering pack's own files") -Message "$promptName should not assume pack-local files exist in the reviewed repository."
+        Assert-True -Condition ($prompt -match "recommended new file") -Message "$promptName should label missing files as recommended new files."
+        Assert-True -Condition ($prompt -match "unconfirmed filename") -Message "$promptName should label uncertain filenames."
+    }
+}
 Invoke-PackTest "prompt quality guardrails require filename fidelity and sourced lifecycle claims" {
     $legacyPromptPath = Join-Path $repoRoot ".continue/prompts/legacy-dotnet-dependency-migration.md"
     $repositoryPromptPath = Join-Path $repoRoot ".continue/prompts/repository-discovery.md"
@@ -1558,6 +1584,7 @@ Invoke-PackTest "runtime output verifier catches invented filenames and unsuppor
         $contextPath = Join-Path $tempRoot "runtime-context.md"
         $goodOutputPath = Join-Path $tempRoot "good.md"
         $badOutputPath = Join-Path $tempRoot "bad.md"
+        $recommendedOutputPath = Join-Path $tempRoot "recommended.md"
 
         @"
 ## Project Files
@@ -1573,12 +1600,21 @@ Invoke-PackTest "runtime output verifier catches invented filenames and unsuppor
         "BrickLinkBrickSet-AddIn.csproj is compatible with .NET Framework 4.8." |
             Set-Content -LiteralPath $badOutputPath
 
+        "recommended new file: CHANGELOG.md should document release history." |
+            Set-Content -LiteralPath $recommendedOutputPath
+
         $good = Invoke-CommandCapture `
             -FilePath (Join-Path $repoRoot "scripts/verify-runtime-output.ps1") `
             -Arguments @("-OutputPath", $goodOutputPath, "-ContextPath", $contextPath, "-WorkflowName", "legacy-dotnet-dependency-migration")
 
         Assert-Equal -Actual $good.ExitCode -Expected 0 -Message "Verifier should pass output that uses context filenames and verification qualifiers."
         Assert-True -Condition ($good.Output -match "PASS runtime output verification") -Message "Verifier pass message should be present."
+
+        $recommended = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/verify-runtime-output.ps1") `
+            -Arguments @("-OutputPath", $recommendedOutputPath, "-ContextPath", $contextPath, "-WorkflowName", "documentation")
+
+        Assert-Equal -Actual $recommended.ExitCode -Expected 0 -Message "Verifier should allow recommended-new-file references when clearly labeled."
 
         $bad = Invoke-CommandCapture `
             -FilePath (Join-Path $repoRoot "scripts/verify-runtime-output.ps1") `
@@ -1605,10 +1641,14 @@ Invoke-PackTest "runtime validation runner writes verification outputs" {
     Assert-True -Condition ($runner -match "/api/tags") -Message "PowerShell runtime runner should preflight Ollama tags endpoint."
     Assert-True -Condition ($runner -match "Failed guardrail verification") -Message "PowerShell runtime runner should summarize verifier failures."
     Assert-True -Condition ($runner -match "EMPTY_MODEL_OUTPUT") -Message "PowerShell runtime runner should record empty model output instead of crashing."
+    Assert-True -Condition ($runner -match "Use only filenames that appear in the supplied runtime repository context") -Message "PowerShell runtime runner should inject filename fidelity guardrails."
+    Assert-True -Condition ($runner -match "recommended new file") -Message "PowerShell runtime runner should instruct models how to label absent recommended files."
     Assert-True -Condition ($sharedRunner -match "verify-runtime-output\.shared\.sh") -Message "Bash runtime runner should call verifier."
     Assert-True -Condition ($sharedRunner -match "Local Ollama API preflight failed") -Message "Bash runtime runner should fail fast when local Ollama is unreachable."
     Assert-True -Condition ($sharedRunner -match "/api/tags") -Message "Bash runtime runner should preflight Ollama tags endpoint."
     Assert-True -Condition ($sharedRunner -match "EMPTY_MODEL_OUTPUT") -Message "Bash runtime runner should record empty model output instead of crashing."
+    Assert-True -Condition ($sharedRunner -match "Use only filenames that appear in the supplied runtime repository context") -Message "Bash runtime runner should inject filename fidelity guardrails."
+    Assert-True -Condition ($sharedRunner -match "recommended new file") -Message "Bash runtime runner should instruct models how to label absent recommended files."
     Assert-True -Condition ($sharedRunner -match "\.verification\.txt") -Message "Bash runtime runner should write verification output files."
 }
 

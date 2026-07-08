@@ -36,17 +36,24 @@ foreach ($match in [regex]::Matches($contextText, $filePattern)) {
     }
 }
 
-$outputFiles = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-foreach ($match in [regex]::Matches($outputText, $filePattern)) {
-    $value = $match.Value.Trim("`'""()[]{}:,;")
-    if ($value) {
-        [void]$outputFiles.Add($value)
+$outputFileMentions = New-Object System.Collections.Generic.List[object]
+foreach ($line in ($outputText -split "`r?`n")) {
+    foreach ($match in [regex]::Matches($line, $filePattern)) {
+        $value = $match.Value.Trim("`'""()[]{}:,;")
+        if ($value) {
+            $outputFileMentions.Add([pscustomobject]@{ File = $value; Line = $line })
+        }
     }
 }
 
-foreach ($file in $outputFiles | Sort-Object) {
+$recommendedNewFilePattern = '(?i)recommended new file|missing file recommendation|new file recommendation|file to add|new documentation file|new config file'
+foreach ($mention in $outputFileMentions | Sort-Object File -Unique) {
+    $file = $mention.File
     $leaf = Split-Path -Leaf $file
     if (-not $contextFiles.Contains($file) -and -not $contextFiles.Contains($leaf)) {
+        if ($mention.Line -match $recommendedNewFilePattern) {
+            continue
+        }
         $failures.Add("FILENAME_NOT_IN_CONTEXT: $file")
     }
 }

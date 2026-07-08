@@ -12,6 +12,7 @@ Reject output that:
 
 - Invents repository facts, file paths, test results, package versions, endpoints, or deployment status.
 - Invents, normalizes, or alters project, solution, package, add-in, installer, or configuration filenames instead of using inspected filenames exactly.
+- Mentions absent conventional files such as `CHANGELOG.md`, `CONTRIBUTING.md`, `ARCHITECTURE.md`, CI workflows, migrations, or manifests unless they are clearly labeled as `recommended new file` or `missing file recommendation`.
 - Combines a basename from one inspected file with an extension from another inspected file.
 - Presents assumptions as confirmed evidence.
 - Makes dated framework, vendor, package, or support-lifecycle claims without source evidence or a current verification step.

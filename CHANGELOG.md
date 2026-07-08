@@ -13,6 +13,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added sanitized Generated Java, Go, Rust, SQL, and Infrastructure workflow validation evidence, including empty-output and filename-drift guardrail signals.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
@@ -47,6 +50,7 @@ This project follows a simple changelog format:
 
 ### Fixed
 
+- Fixed runtime output verification so absent filenames are allowed only when clearly labeled as recommended new files or missing-file recommendations.
 - Fixed runtime validation handling for empty model output so one empty response records EMPTY_MODEL_OUTPUT instead of aborting the run.
 
 - Fixed hardware-aware config application so generated global Continue config uses absolute target repository file references and omits rules by default, preventing editor-install-folder prompt lookup failures.
@@ -57,6 +61,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -119,6 +126,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -150,12 +160,16 @@ This project follows a simple changelog format:
 
 ### Fixed
 
+- Fixed runtime output verification so absent filenames are allowed only when clearly labeled as recommended new files or missing-file recommendations.
 - Fixed Linux and macOS installer wrapper executable permissions so direct shell execution works in CI and user terminals.
 
 ## 0.1.11 - 2026-07-03
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -176,12 +190,16 @@ This project follows a simple changelog format:
 
 ### Fixed
 
+- Fixed runtime output verification so absent filenames are allowed only when clearly labeled as recommended new files or missing-file recommendations.
 - Fixed runtime validation config/context path handling so relative paths are resolved before the runner changes into the target repository.
 
 ## 0.1.10 - 2026-07-02
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -195,6 +213,7 @@ This project follows a simple changelog format:
 
 ### Fixed
 
+- Fixed runtime output verification so absent filenames are allowed only when clearly labeled as recommended new files or missing-file recommendations.
 - Fixed validation path filtering so ignored local config files are handled correctly on Linux, macOS, and Windows.
 - Fixed runtime context path filtering so build output directories are excluded correctly on Linux, macOS, and Windows.
 
@@ -202,12 +221,16 @@ This project follows a simple changelog format:
 
 ### Fixed
 
+- Fixed runtime output verification so absent filenames are allowed only when clearly labeled as recommended new files or missing-file recommendations.
 - Fixed Linux and macOS hardware profile output so numeric GPU memory prints as `GB VRAM`.
 - Fixed Linux and macOS hardware profile JSON so RAM and VRAM values are emitted as numbers, with unknown or shared memory emitted as `null`.
 - Fixed Windows AMD GPU profiling by using `dxdiag` as a dedicated VRAM fallback before unreliable WMI adapter memory values.
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -222,6 +245,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -244,6 +270,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -264,6 +293,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -289,6 +321,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -300,6 +335,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -326,6 +364,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
@@ -347,6 +388,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
+- Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
+- Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
 
 - Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.

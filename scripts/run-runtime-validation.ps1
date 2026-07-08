@@ -161,6 +161,7 @@ function Invoke-OutputVerification {
     }
 }
 
+$runtimeGuardrails = "Use only filenames that appear in the supplied runtime repository context. Do not invent or assume conventional files such as CHANGELOG.md, CONTRIBUTING.md, ARCHITECTURE.md, CI workflows, migration scripts, manifests, or .continue/config.yaml. If a useful file is absent, label it as recommended new file: <path> or missing file recommendation: <path>. If uncertain, write unconfirmed filename instead of naming it as existing."
 Push-Location -LiteralPath $TargetRepo
 try {
     foreach ($workflow in $workflows) {
@@ -178,7 +179,7 @@ try {
             --prompt $promptPath `
             --prompt $ContextPath `
             --readonly `
-            -p "Use the supplied runtime repository context. Do not call tools. Do not request List, Read, Bash, or git status. Produce final review text only. $($workflow.Task)" 2>&1
+            -p "$runtimeGuardrails Use the supplied runtime repository context. Do not call tools. Do not request List, Read, Bash, or git status. Produce final review text only. $($workflow.Task)" 2>&1
 
         $exitCode = $LASTEXITCODE
         $outputText = if ($null -eq $output) { "" } else { ($output -join "`n") }
