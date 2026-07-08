@@ -709,6 +709,55 @@ test_tool_use_docs_define_platform_aware_write_behavior() {
     grep -q "DEEP REVIEW" "$REPO_ROOT/docs/local-model-selection.md"
 }
 
+
+test_hardware_aware_recommendation_scripts() {
+  temp_root="$(mktemp -d)"
+  trap 'rm -rf "$temp_root"' RETURN
+  profile_path="$temp_root/model-profile.json"
+  output_path="$temp_root/recommendation.json"
+
+  cat > "$profile_path" <<'JSON'
+{
+  "Platform": "Linux",
+  "CpuArchitecture": "x64",
+  "SystemRamGb": 32,
+  "Gpus": [
+    {"Name":"fixture gpu","VramGb":16,"MemoryType":"dedicated"}
+  ],
+  "OllamaModels": ["qwen3.5:9b", "qwen3-coder:30b"]
+}
+JSON
+
+  "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" \
+    --model-profile-path "$profile_path" \
+    --output-path "$output_path" \
+    --vram-selection-mode MaxDedicated >/tmp/hardware-aware-recommendation.out 2>&1 || return 1
+
+  [ -f "$output_path" ] || return 1
+  python3 - "$output_path" <<'PY'
+import json
+import re
+import sys
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    report = json.load(handle)
+text = json.dumps(report, sort_keys=True)
+assert report["Recommendation"]["Status"] == "recommended"
+assert report["Recommendation"]["WriteSafeModel"] == "qwen3.5:9b"
+assert "edit" in report["ContinueProfiles"]["WriteSafe"]["Roles"]
+assert "edit" not in report["ContinueProfiles"]["PlanOnly"]["Roles"]
+assert report["ModelProfilePath"] == "redacted"
+assert report["Privacy"]["RepositoryContentSent"] is False
+assert report["Privacy"]["HardwareProfileSentOnline"] is False
+assert not re.search(r"Users|OneDrive|192\.168\.|localhost", text)
+PY
+  grep -q "VramSelectionMode" "$REPO_ROOT/scripts/recommend-local-agent-config.ps1" &&
+    grep -q "config/evidence-catalog.tsv" "$REPO_ROOT/scripts/recommend-local-agent-config.ps1" &&
+    grep -q "python3 is required" "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" &&
+    grep -q "HardwareProfileSentOnline" "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" &&
+    grep -q "WRITE SAFE" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
+    grep -q "does not read repository source code" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
+    grep -q "hardware-aware model/config recommendation" "$REPO_ROOT/README.md"
+}
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
@@ -746,6 +795,7 @@ run_test "project detection docs and guidance are evidence-gated" test_project_d
 run_test "sample repository factory creates expected fixtures" test_sample_repository_factory
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
+run_test "hardware-aware recommendation scripts emit sanitized model lanes" test_hardware_aware_recommendation_scripts
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

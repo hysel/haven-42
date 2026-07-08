@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added cross-platform release packaging scripts with archive, manifest, checksum, and install verification guidance.
 - Added a sanitized evidence catalog for model, editor surface, language, sample repository, installer profile, and workflow validation status.
 - Added installer profiles for default, read-only, and approved-write Continue workflows.
@@ -46,6 +47,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added Milestone 15 roadmap and TODO tracking for staged multi-language engineering support beyond the current .NET-centered guidance.
 - Added `docs/language-support.md` to define current ecosystem maturity, planned language expansion, and guardrails against applying .NET-specific advice to non-.NET repositories.
 - Added Milestone 14 roadmap and TODO tracking for agent-surface portability and broader non-enterprise adoption.
@@ -103,6 +105,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added CPU architecture reporting to Windows, Linux, and macOS hardware profile scripts.
 - Added a PowerShell install/update script with dry-run, backup, local-config exclusion, and install validation.
 - Added tests for installer dry-run behavior, backup behavior, local-config exclusion, and self-target protection.
@@ -135,6 +138,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added documentation explaining how hardware profile scripts choose model recommendations from the local Ollama model list and catalog order.
 - Added configuration-pack review guardrails and a prompt-quality fixture for non-application repositories.
 - Added sanitized runtime validation notes from a private .NET Framework Excel-DNA add-in repository.
@@ -156,6 +160,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added Linux and macOS validation/test wrapper scripts for contributors who prefer shell commands.
 - Added CI coverage for Linux validation and test wrappers.
 - Added sanitized runtime validation notes from pack repository self-validation.
@@ -177,6 +182,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added automated pack tests for validation behavior, local config safety, model recommendation catalog structure, and Continue file reference integrity.
 - Added model recommendations to hardware profile scripts based on detected resource tier and installed Ollama models.
 - Added a version-controlled model recommendation catalog that scripts can use for future model updates without changing script logic.
@@ -186,6 +192,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added Milestone 6 roadmap and TODO items for tool-enabled project changes and hardware-aware local model selection.
 - Added a beginner-friendly README quick start and safety section.
 - Added tool-use mode guidance for read-only discovery, plan-only work, and approved write mode.
@@ -203,6 +210,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added Milestone 5 tracking for prompt quality hardening.
 - Added prompt-quality documentation with legacy dependency migration, documentation review, release readiness, and implementation planning pass/fail expectations.
 - Added an implementation-planning quality fixture for plan-only, layered-change validation.
@@ -218,6 +226,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added runtime validation tracking documentation and security, performance, and release-readiness fixtures.
 - Added README and troubleshooting guidance for using `npx @continuedev/cli` when `cn` is not installed.
 - Added a runtime validation runner that captures prompt outputs to ignored local files.
@@ -238,12 +247,14 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added GitHub Actions validation workflow for the pack validation script.
 
 ## 0.1.3 - 2026-07-02
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added validation checklists for prompts, rules, agents, templates, config, examples, documentation, and releases.
 - Added troubleshooting guidance for config loading, local file references, Ollama connectivity, model availability, prompt visibility, rules, local endpoint overrides, and line-ending warnings.
 - Added MCP options research with a local-first recommendation that keeps MCP optional and compatible with Ollama-backed systems.
@@ -265,6 +276,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Project documentation foundation.
 - Continue pack governance guidance.
 - Architecture, roadmap, style, and task tracking documentation.
@@ -281,4 +293,5 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Initial repository structure for a Continue-based enterprise engineering pack.

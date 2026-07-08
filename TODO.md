@@ -282,6 +282,16 @@
 - [ ] Record sanitized evidence for each non-Continue agent surface.
 - [ ] Keep approved-write status blocked until external changed-file verification passes.
 
+## Milestone 20: Hardware-Aware Model And Config Automation
+
+- [x] Add offline hardware-aware recommendation scripts for Windows, Linux, and macOS.
+- [x] Read sanitized model profile JSON plus curated model and evidence catalogs.
+- [x] Emit WRITE SAFE, PLAN ONLY, and DEEP REVIEW recommendation lanes without contacting external services.
+- [x] Add validation coverage for recommendation scripts, docs, and sanitized output behavior.
+- [ ] Generate local-only Continue config directly from the recommendation output.
+- [ ] Reuse the recommendation data model for future non-Continue agent surfaces.
+- [ ] Add a guided UI wrapper after script-level workflows are stable.
+
 ## Milestone 18: Language Rule Packs
 
 - [x] Add optional Python rule pack.

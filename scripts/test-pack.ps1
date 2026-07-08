@@ -1824,6 +1824,59 @@ Invoke-PackTest "local agent model tests support explicit failed-model cleanup" 
     Assert-True -Condition ($doc -match "--model-profile-path") -Message "Docs should include the Bash profile path flag."
     Assert-True -Condition ($doc -match "VramSelectionMode") -Message "Docs should explain the VRAM selection mode."
 }
+Invoke-PackTest "hardware-aware recommendation scripts emit sanitized model lanes" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "hardware-recommendation-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $profilePath = Join-Path $tempRoot "model-profile.json"
+        $outputPath = Join-Path $tempRoot "recommendation.json"
+
+        @"
+{
+  "Platform": "Windows",
+  "CpuArchitecture": "x64",
+  "SystemRamGb": 32,
+  "Gpus": [
+    {"Name":"fixture gpu","VramGb":16,"MemoryType":"dedicated"}
+  ],
+  "OllamaModels": ["qwen3.5:9b", "qwen3-coder:30b"]
+}
+"@ | Set-Content -LiteralPath $profilePath
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/recommend-local-agent-config.ps1") `
+            -Arguments @("-ModelProfilePath", $profilePath, "-OutputPath", $outputPath, "-VramSelectionMode", "MaxDedicated")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Recommendation script should run against a sanitized fixture."
+        Assert-True -Condition (Test-Path -LiteralPath $outputPath) -Message "Recommendation script should write a report."
+
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        $script = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/recommend-local-agent-config.ps1") -Raw
+        $sharedScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/recommend-local-agent-config.shared.sh") -Raw
+        $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/hardware-aware-recommendations.md") -Raw
+        $readme = Get-Content -LiteralPath (Join-Path $repoRoot "README.md") -Raw
+
+        Assert-True -Condition ($report.Recommendation.Status -eq "recommended") -Message "Recommendation should select an approved-write model from evidence."
+        Assert-True -Condition ($report.Recommendation.WriteSafeModel -eq "qwen3.5:9b") -Message "WRITE SAFE should choose the approved-write ready model."
+        Assert-True -Condition ($report.ContinueProfiles.WriteSafe.Roles -contains "edit") -Message "WRITE SAFE should include edit role guidance."
+        Assert-True -Condition ($report.ContinueProfiles.PlanOnly.Roles -notcontains "edit") -Message "PLAN ONLY should not include edit role guidance."
+        Assert-True -Condition ($report.ModelProfilePath -eq "redacted") -Message "Recommendation output should redact model profile path."
+        Assert-True -Condition ($report.Privacy.RepositoryContentSent -eq $false) -Message "Recommendation output should state repository content was not sent."
+        Assert-True -Condition ($report.Privacy.HardwareProfileSentOnline -eq $false) -Message "Recommendation output should state hardware profile was not sent online."
+        Assert-True -Condition (($report | ConvertTo-Json -Depth 20) -notmatch "Users|OneDrive|192\.168\.|localhost") -Message "Recommendation output should not leak local paths or endpoints."
+        Assert-True -Condition ($script -match "VramSelectionMode") -Message "PowerShell recommendation script should support VRAM selection mode."
+        Assert-True -Condition ($script -match "config/evidence-catalog.tsv") -Message "PowerShell recommendation script should use evidence catalog by default."
+        Assert-True -Condition ($sharedScript -match "python3 is required") -Message "Bash recommendation script should clearly state its python3 requirement."
+        Assert-True -Condition ($sharedScript -match "HardwareProfileSentOnline") -Message "Bash recommendation script should emit sanitized privacy fields."
+        Assert-True -Condition ($doc -match "WRITE SAFE") -Message "Recommendation docs should explain WRITE SAFE lane."
+        Assert-True -Condition ($doc -match "does not read repository source code") -Message "Recommendation docs should explain privacy boundaries."
+        Assert-True -Condition ($readme -match "hardware-aware model/config recommendation") -Message "README should link the hardware-aware recommendation path."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
     exit 1
