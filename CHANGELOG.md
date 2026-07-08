@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added sanitized Cline generated-sample failure evidence showing candidate-only status after tool execution did not complete.
 - Added a Cline read-only validation guide and sanitized evidence template for the first non-Continue surface validation track.
@@ -67,6 +68,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -133,6 +135,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -175,6 +178,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -206,6 +210,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -238,6 +243,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -256,6 +262,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -282,6 +289,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -306,6 +314,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -335,6 +344,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -350,6 +360,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -380,6 +391,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
@@ -405,6 +417,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.

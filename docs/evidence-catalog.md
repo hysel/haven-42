@@ -27,6 +27,7 @@ The machine-readable catalog lives at `config/evidence-catalog.tsv`.
 | `plan-review-candidate` | Useful for generated-sample planning or review workflows, but not write-ready. |
 | `read-only-tool-validated` | Read-only tool use worked in the stated surface and environment. |
 | `read-only-cli-validated` | CLI/context validation worked, but editor Agent behavior is not proven. |
+| `write-smoke-validated` | A minimal disposable-repository write smoke test passed with external Git and file-content verification, but broad approved-write readiness is not claimed. |
 | `approved-write-ready` | A scoped write test passed and was verified outside the agent surface. |
 | `static-validated` | Static file/script validation passed without model execution. |
 | `validated-by-tests` | Repository tests enforce the behavior. |

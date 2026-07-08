@@ -217,6 +217,7 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
         "plan-review-candidate",
         "read-only-tool-validated",
         "read-only-cli-validated",
+        "write-smoke-validated",
         "approved-write-ready",
         "static-validated",
         "validated-by-tests",
@@ -634,17 +635,17 @@ Invoke-PackTest "Cline read-only validation docs define read-only workflow" {
     $todo = Get-Content -LiteralPath $todoPath -Raw
     $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
 
-    Assert-True -Condition ($doc -match "read-only validation path only") -Message "Cline doc should keep validation read-only."
+    Assert-True -Condition ($doc -match "read-only validation path") -Message "Cline doc should keep validation scoped."
     Assert-True -Condition ($doc -match "Write mode") -Message "Cline doc should mention write mode status."
-    Assert-True -Condition ($doc -match "Blocked") -Message "Cline doc should block write mode."
+    Assert-True -Condition (($doc -match "write smoke-test") -and ($doc -match "real-project approved-write blocked")) -Message "Cline doc should distinguish write smoke test from real-project approved write."
     Assert-True -Condition ($doc -match "TOOLS_UNAVAILABLE") -Message "Cline doc should define tool-unavailable failure signals."
     Assert-True -Condition ($doc -match "HALLUCINATED_STRUCTURE") -Message "Cline doc should define hallucinated-structure failure signal."
     Assert-True -Condition ($doc -match "git status --short") -Message "Cline doc should require external git verification."
     Assert-True -Condition ($doc -match "examples/cline-readonly-validation.md") -Message "Cline doc should point at evidence template."
-    Assert-True -Condition ($evidence -match "Read-only tool validated") -Message "Cline evidence should record read-only validation scope."
+    Assert-True -Condition (($evidence -match "Read-only tool validated") -and ($evidence -match "Write smoke-test validated")) -Message "Cline evidence should record read and write-smoke validation scope."
     Assert-True -Condition ($evidence -match "Validation Record Template") -Message "Cline evidence should include a reusable template."
     Assert-True -Condition ($readme -match "docs/cline-readonly-validation.md") -Message "README should link the Cline validation doc."
-    Assert-True -Condition (($catalog -match "Cline read-only validation workflow") -and ($catalog -match "read-only-tool-validated")) -Message "Evidence catalog should include Cline read-only validation workflow."
+    Assert-True -Condition (($catalog -match "Cline read-only validation workflow") -and ($catalog -match "read-only-tool-validated") -and ($catalog -match "Cline approved-write smoke test") -and ($catalog -match "write-smoke-validated")) -Message "Evidence catalog should include Cline read and write-smoke validation workflows."
     Assert-True -Condition ($todo -match "Cline read-only validation guide") -Message "TODO should track Cline validation guide completion."
     Assert-True -Condition ($roadmap -match "Cline read-only validation guide") -Message "Roadmap should track Cline validation guide completion."
 }

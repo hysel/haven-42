@@ -8,8 +8,8 @@ This file records sanitized Cline validation results. It starts as a template. D
 | --- | --- |
 | Surface | Cline |
 | Current status | Read-only tool validated for generated Python sample with `qwen3-coder:30b` at 16k context |
-| Approved-write status | Blocked |
-| Evidence state | Passing and failed generated-sample runs recorded |
+| Approved-write status | Write smoke-test validated for disposable generated Python sample; blocked for real projects |
+| Evidence state | Passing and failed read-only runs plus passing disposable write smoke test recorded |
 
 ## Validation Record Template
 
@@ -218,3 +218,63 @@ If tools are unavailable, say TOOLS_UNAVAILABLE.
 - Failure signal: None for the passing `qwen3-coder:30b` run.
 - Caution signals for `qwen3.5:9b`: `UNSUPPORTED_CLAIM`, `SURFACE_ARTIFACT`.
 - Promotion decision: Promote Cline from candidate-only to read-only validated for the recorded generated-sample scenario only. Keep approved-write blocked until a scoped write smoke test passes and is externally verified.
+## 2026-07-08 Cline Approved-Write Smoke Test
+
+### Summary
+
+- Date: 2026-07-08
+- Surface: Cline
+- Surface version: Not recorded
+- Editor host: VS Code-compatible editor, exact host not recorded
+- Operating system: Windows
+- CPU architecture: Not recorded
+- Model: `qwen3-coder:30b`
+- Provider: Ollama
+- Context setting: 16k
+- Config source: Cline local model configuration, exact config source not recorded
+- Sample repository: generated `python-api` sample with isolated Git repository
+- Tool permission mode: Approved write for one scoped edit
+- MCP state: Not recorded
+- Private details removed: Yes
+
+### Prompt Used
+
+```text
+Use approved write mode for this smoke test only.
+
+Modify the existing README.md in the opened repository root.
+
+Add this exact sentence as the final line of the file:
+
+Cline approved-write smoke test passed.
+
+Do not create any new files.
+Do not modify any other files.
+Do not run package installation.
+Do not reformat the file.
+
+After editing, report only:
+1. The changed file.
+2. Whether exactly one file was changed.
+3. Any failure signal.
+
+Do not commit.
+```
+
+### External Verification
+
+| Check | Result |
+| --- | --- |
+| Git root | Isolated generated `python-api` sample repository |
+| `git status --short --untracked-files=all` | Only `README.md` modified |
+| `git diff HEAD -- README.md` | One final line added: `Cline approved-write smoke test passed.` |
+| `git diff --check` | Clean |
+| Direct file-content verification | README ended with the exact expected line |
+| Unexpected files created | No |
+| Private details removed | Yes |
+
+### Decision
+
+- Status: Write smoke-test validated for disposable generated Python sample.
+- Failure signal: None.
+- Promotion decision: Do not mark Cline broadly approved-write ready for real projects yet. Next write validation must use a realistic scoped code or configuration edit in a disposable sample and pass external Git and file-content verification.
