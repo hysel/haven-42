@@ -457,6 +457,12 @@ config:
 ./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --global-config
 ```
 
+Use shared assets for multiple repositories:
+
+```bash
+./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --global-config-api-base http://127.0.0.1:11434
+```
+
 macOS:
 
 ```bash
@@ -502,6 +508,12 @@ config:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --global-config
 ```
 
+Use shared assets for multiple repositories:
+
+```bash
+./scripts/install-continue-pack.macos.sh   --target-repo /path/to/your-project   --shared-assets   --global-config-api-base http://127.0.0.1:11434
+```
+
 The installer:
 
 - Copies the pack's `.continue` files into the target repository.
@@ -514,6 +526,7 @@ The installer:
 - Can create `.continue/config.local.yaml` with three Agent model profiles: WRITE SAFE, PLAN ONLY, and DEEP REVIEW. By default, all three use the simple-hardware starter model, plus the separate embedding model.
 - Can install a selected validated model into one local-only profile without changing committed shared config.
 - Can update the global Continue config, with a backup, when an editor does not load project-local config files.
+- Can install reusable shared assets into one local folder and point the global Continue config at that folder for multi-repository workflows.
 - Omits rules from generated global config by default to avoid duplicate rule warnings.
 - Writes Windows global config file references as `file://C:/path/...` for VSCodium compatibility.
 - Refuses to install into this pack repository itself.

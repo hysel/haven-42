@@ -25,7 +25,13 @@ param(
     [string]$GlobalConfigApiBaseAlias,
     [switch]$GlobalConfigIncludeRules,
     [Alias("global-config-include-rules")]
-    [switch]$GlobalConfigIncludeRulesAlias
+    [switch]$GlobalConfigIncludeRulesAlias,
+    [switch]$SharedAssets,
+    [Alias("shared-assets")]
+    [switch]$SharedAssetsAlias,
+    [string]$SharedAssetsPath,
+    [Alias("shared-assets-path")]
+    [string]$SharedAssetsPathAlias
 )
 
 $ErrorActionPreference = "Stop"
@@ -65,6 +71,14 @@ if ($GlobalConfigIncludeRulesAlias) {
     $GlobalConfigIncludeRules = $true
 }
 
+if ($SharedAssetsAlias) {
+    $SharedAssets = $true
+}
+
+if (-not $SharedAssetsPath -and $SharedAssetsPathAlias) {
+    $SharedAssetsPath = $SharedAssetsPathAlias
+}
+
 if (-not $TargetRepo) {
     throw "TargetRepo is required. Use -TargetRepo <path> or --target-repo <path>."
 }
@@ -83,8 +97,20 @@ if ($AutoModelConfig -and $ModelLanes) {
     throw "Use either -AutoModelConfig or -ModelLanes, not both."
 }
 
+if ($SharedAssets -and ($AutoModelConfig -or $ModelLanes -or $ReadOnlyProfile)) {
+    throw "Shared-assets mode currently supports reusable assets and global config generation only. Do not combine it with -AutoModelConfig, -ModelLanes, or read-only/approved-write install profiles."
+}
+
 if (-not $GlobalConfigPath) {
     $GlobalConfigPath = Join-Path $HOME ".continue/config.yaml"
+}
+
+if ($SharedAssets -and -not $SharedAssetsPath) {
+    $SharedAssetsPath = Join-Path $HOME ".local-engineering-agent-pack/assets"
+}
+
+if ($SharedAssets) {
+    $GlobalConfig = $true
 }
 
 if (-not (Test-Path -LiteralPath $sourceContinue)) {
@@ -107,6 +133,13 @@ $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $backupContinue = Join-Path $targetResolved ".continue.backup-$timestamp"
 $globalConfigResolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($GlobalConfigPath)
 $backupGlobalConfig = "$globalConfigResolved.backup-$timestamp"
+$sharedAssetsResolved = $null
+$backupSharedAssets = $null
+
+if ($SharedAssets) {
+    $sharedAssetsResolved = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($SharedAssetsPath)
+    $backupSharedAssets = "$sharedAssetsResolved.backup-$timestamp"
+}
 
 function Write-Plan {
     param([string]$Message)
@@ -135,8 +168,26 @@ function Copy-PackFiles {
     }
 }
 
+function Copy-PackFilesToRoot {
+    param([string]$DestinationRoot)
+
+    foreach ($file in Get-PackFiles) {
+        $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $file.FullName)
+        $destination = Join-Path $DestinationRoot $relative
+        $destinationDirectory = Split-Path -Parent $destination
+
+        if (-not (Test-Path -LiteralPath $destinationDirectory)) {
+            New-Item -ItemType Directory -Force -Path $destinationDirectory | Out-Null
+        }
+
+        Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
+    }
+}
+
 function Test-InstalledPack {
-    $configPath = Join-Path $targetContinue "config.yaml"
+    param([string]$AssetRoot = $targetContinue)
+
+    $configPath = Join-Path $AssetRoot "config.yaml"
 
     if (-not (Test-Path -LiteralPath $configPath)) {
         throw "Installed config is missing: $configPath"
@@ -152,13 +203,13 @@ function Test-InstalledPack {
             throw "Installed config has unsafe file reference: $ref"
         }
 
-        $refPath = Join-Path $targetContinue $ref
+        $refPath = Join-Path $AssetRoot $ref
         if (-not (Test-Path -LiteralPath $refPath)) {
-            throw "Installed config references a missing file: .continue/$ref"
+            throw "Installed config references a missing file: $ref"
         }
     }
 
-    $localConfigFiles = Get-ChildItem -LiteralPath $targetContinue -Force -File -Filter "config.local*.yaml" -ErrorAction SilentlyContinue
+    $localConfigFiles = Get-ChildItem -LiteralPath $AssetRoot -Force -File -Filter "config.local*.yaml" -ErrorAction SilentlyContinue
     if ($localConfigFiles.Count -gt 0) {
         throw "Installed pack should not include local config overrides."
     }
@@ -455,8 +506,14 @@ function Remove-TopLevelConfigSection {
 }
 
 function Write-GlobalContinueConfig {
-    $installedConfigPath = Join-Path $targetContinue "config.yaml"
-    $localConfigPath = Join-Path $targetContinue "config.local.yaml"
+    if ($SharedAssets) {
+        $assetRoot = $sharedAssetsResolved
+    } else {
+        $assetRoot = $targetContinue
+    }
+
+    $installedConfigPath = Join-Path $assetRoot "config.yaml"
+    $localConfigPath = Join-Path $assetRoot "config.local.yaml"
 
     if (Test-Path -LiteralPath $localConfigPath) {
         $sourceConfigPath = $localConfigPath
@@ -477,7 +534,7 @@ function Write-GlobalContinueConfig {
         Copy-Item -LiteralPath $globalConfigResolved -Destination $backupGlobalConfig -Force
     }
 
-    $fileUriBase = Convert-ToFileUri -Path $targetContinue
+    $fileUriBase = Convert-ToFileUri -Path $assetRoot
     $lines = Get-Content -LiteralPath $sourceConfigPath
     $rewritten = foreach ($line in $lines) {
         $line -replace "file://\./", "$fileUriBase/"
@@ -491,9 +548,9 @@ function Write-GlobalContinueConfig {
 
     $header = @(
         "# Global Continue config generated by install-continue-pack.ps1.",
-        "# This file points Continue at pack assets installed in a target repository.",
+        "# This file points Continue at reusable pack assets.",
         "# The rules section is omitted by default to avoid duplicate rules when the opened repository also has .continue/rules.",
-        "# Regenerate it when you move or reinstall the target repository."
+        "# Regenerate it when you move or reinstall the referenced asset folder."
     )
 
     @($header + $rewritten) | Set-Content -LiteralPath $globalConfigResolved
@@ -508,7 +565,9 @@ Write-Plan "Install Local Engineering Agent Pack"
 Write-Plan "Source: $sourceContinue"
 Write-Plan "Target: $targetContinue"
 
-if (Test-Path -LiteralPath $targetContinue) {
+if ($SharedAssets) {
+    Write-Plan "Target repository .continue will not be changed in shared-assets mode."
+} elseif (Test-Path -LiteralPath $targetContinue) {
     Write-Plan "Existing target .continue will be backed up to: $backupContinue"
 } else {
     Write-Plan "Target .continue does not exist and will be created."
@@ -516,6 +575,14 @@ if (Test-Path -LiteralPath $targetContinue) {
 
 Write-Plan "Local config overrides matching config.local*.yaml will be excluded."
 Write-Plan "Install profile: $InstallProfile"
+if ($SharedAssets) {
+    Write-Plan "Shared-assets mode is enabled."
+    Write-Plan "Shared assets target: $sharedAssetsResolved"
+    Write-Plan "Global Continue config update is enabled because shared-assets mode was requested."
+    if (Test-Path -LiteralPath $sharedAssetsResolved) {
+        Write-Plan "Existing shared assets will be backed up to: $backupSharedAssets"
+    }
+}
 if ($AutoModelConfig) {
     Write-Plan "Auto model config is enabled. A target .continue/config.local.yaml file will be generated after install."
 }
@@ -544,9 +611,16 @@ if ($GlobalConfig) {
 if ($DryRun) {
     Write-Plan "Dry run only. No files will be changed."
     Write-Plan "Files that would be copied:"
-    Get-PackFiles | ForEach-Object {
-        $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
-        Write-Host "- .continue/$relative"
+    if ($SharedAssets) {
+        Get-PackFiles | ForEach-Object {
+            $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
+            Write-Host "- $sharedAssetsResolved/$relative"
+        }
+    } else {
+        Get-PackFiles | ForEach-Object {
+            $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
+            Write-Host "- .continue/$relative"
+        }
     }
     if ($AutoModelConfig) {
         Write-Plan "Would generate .continue/config.local.yaml using the hardware profile recommended model."
@@ -571,13 +645,23 @@ if ($DryRun) {
     exit 0
 }
 
-if (Test-Path -LiteralPath $targetContinue) {
-    Move-Item -LiteralPath $targetContinue -Destination $backupContinue
-}
+if ($SharedAssets) {
+    if (Test-Path -LiteralPath $sharedAssetsResolved) {
+        Move-Item -LiteralPath $sharedAssetsResolved -Destination $backupSharedAssets
+    }
 
-New-Item -ItemType Directory -Force -Path $targetContinue | Out-Null
-Copy-PackFiles
-Test-InstalledPack
+    New-Item -ItemType Directory -Force -Path $sharedAssetsResolved | Out-Null
+    Copy-PackFilesToRoot -DestinationRoot $sharedAssetsResolved
+    Test-InstalledPack -AssetRoot $sharedAssetsResolved
+} else {
+    if (Test-Path -LiteralPath $targetContinue) {
+        Move-Item -LiteralPath $targetContinue -Destination $backupContinue
+    }
+
+    New-Item -ItemType Directory -Force -Path $targetContinue | Out-Null
+    Copy-PackFiles
+    Test-InstalledPack
+}
 
 if ($AutoModelConfig) {
     $recommendedModel = Get-RecommendedModel
@@ -597,8 +681,16 @@ if ($GlobalConfig) {
 }
 
 Write-Host "Install complete." -ForegroundColor Green
-Write-Host "Installed .continue to $targetContinue" -ForegroundColor Green
+if ($SharedAssets) {
+    Write-Host "Installed shared assets to $sharedAssetsResolved" -ForegroundColor Green
+} else {
+    Write-Host "Installed .continue to $targetContinue" -ForegroundColor Green
+}
 
 if (Test-Path -LiteralPath $backupContinue) {
     Write-Host "Backup created at $backupContinue" -ForegroundColor Yellow
+}
+
+if ($backupSharedAssets -and (Test-Path -LiteralPath $backupSharedAssets)) {
+    Write-Host "Shared assets backup created at $backupSharedAssets" -ForegroundColor Yellow
 }
