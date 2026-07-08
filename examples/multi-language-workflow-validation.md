@@ -202,3 +202,55 @@ Do not include private repository names, private paths, private endpoints, usern
 - [x] No raw private source code.
 - [x] No raw transcripts.
 - [x] No customer, employer, or internal project identifiers.
+
+## 2026-07-08 Filename-Fidelity Hardening Rerun
+
+### Summary
+
+- Validation type: Generated sample repository workflow validation after prompt and runtime-runner filename-fidelity hardening
+- Repository categories: Java Spring API, Go service, Rust CLI, SQL migrations, Terraform/Kubernetes infrastructure sample
+- Operating system: Windows
+- Editor surface: Continue CLI through `npx @continuedev/cli`
+- Model: `qwen3.5:9b`
+- Provider: Ollama-compatible local endpoint, endpoint omitted
+- MCP state: Not used
+
+### Changes Validated
+
+- Added a filename-fidelity gate to every runtime review prompt, including repository discovery.
+- Updated the runtime validation runners to inject filename-fidelity instructions next to the supplied runtime context for every workflow.
+- Updated deterministic runtime output verification so absent filenames are allowed only when clearly labeled as recommended new files or missing-file recommendations.
+- Added pack tests that require prompt-level and runner-level filename-fidelity guardrails.
+
+### Latest Runtime Results
+
+| Generated Sample | Workflows Run | Verification Passed | Empty Output | Filename-Fidelity Failures | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Java Spring API | 12 | 5 | 2 | 5 | Runtime runner completed all workflows; model still referenced absent conventional docs/config files. |
+| Go service | 12 | 4 | 1 | 7 | Runtime runner completed all workflows; release, security, performance, and discovery outputs still showed filename drift. |
+| Rust CLI | 12 | 6 | 1 | 5 | Runtime runner completed all workflows; several workflows still referenced absent conventional docs. |
+| SQL migrations | 12 | 5 | 1 | 6 | Runtime runner completed all workflows; migration/documentation/release outputs still referenced absent files. |
+| Terraform/Kubernetes infrastructure | 12 | 5 | 0 | 7 | Runtime runner completed all workflows; IaC outputs still referenced absent conventional docs and manifests. |
+
+### Interpretation
+
+- The pack now prevents filename drift from being silently accepted by runtime evidence.
+- Prompt-level and runtime-runner guardrails are necessary but not sufficient for the tested local model.
+- Deterministic verification remains the correct acceptance gate for language-pack promotion.
+- Optional language rule packs should remain evidence-gated until generated workflow validation passes consistently.
+
+### Follow-Up
+
+- Add a stricter template or post-processing fallback for workflows that repeatedly fail deterministic filename-fidelity verification.
+- Consider workflow-specific output templates for documentation, release-readiness, product, and AI framework self-review because they most often invent conventional files.
+- Keep recording filename-drift failures as pack improvements instead of treating partial model output as clean validation evidence.
+
+### Sanitization Checklist
+
+- [x] No private repository names.
+- [x] No private local paths.
+- [x] No private endpoints, IP addresses, or hostnames.
+- [x] No usernames.
+- [x] No tokens or secrets.
+- [x] No raw private source code.
+- [x] No raw transcripts.

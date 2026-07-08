@@ -15,6 +15,7 @@ Prompt output should:
 - Prefer plans and recommendations that preserve existing project constraints.
 - Avoid generic advice when repository context indicates a specialized workflow.
 - Use exact filenames from inspected evidence and label unconfirmed filenames as unknown.
+- When recommending a file that is not present in context, label it as `recommended new file: <path>` or `missing file recommendation: <path>` instead of describing it as existing.
 - Do not combine a basename from one inspected file with an extension from another inspected file.
 - Do not make dated framework, vendor, model, package, or lifecycle/support claims without current evidence or an explicit verification step.
 - Include validation and rollback for risky changes.
@@ -57,6 +58,7 @@ The response fails when it:
 - Includes XML.
 - Includes full or partial project-file rewrites.
 - Invents or alters project, solution, package, add-in, installer, or configuration filenames.
+- Names missing conventional docs, CI files, migrations, or manifests without labeling them as recommended new files.
 - Combines a basename from one inspected file with an extension from another file.
 - Makes dated framework, vendor, or package lifecycle/support claims without source evidence.
 - Provides complete `PackageReference` blocks.

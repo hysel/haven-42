@@ -59,16 +59,25 @@ for match in file_pattern.finditer(context_text):
         context_files.add(os.path.basename(value).lower())
 
 failures = []
-output_files = set()
+output_file_mentions = []
 
-for match in file_pattern.finditer(output_text):
-    value = match.group(0).strip("`'\"()[]{}:,;")
-    if value:
-        output_files.add(value)
+for line in output_text.splitlines():
+    for match in file_pattern.finditer(line):
+        value = match.group(0).strip("`'\"()[]{}:,;")
+        if value:
+            output_file_mentions.append((value, line))
 
-for value in sorted(output_files, key=str.lower):
+recommended_new_file_pattern = re.compile(r"recommended new file|missing file recommendation|new file recommendation|file to add|new documentation file|new config file", re.IGNORECASE)
+seen_output_files = set()
+for value, line in sorted(output_file_mentions, key=lambda item: item[0].lower()):
+    key = value.lower()
+    if key in seen_output_files:
+        continue
+    seen_output_files.add(key)
     leaf = os.path.basename(value)
     if value.lower() not in context_files and leaf.lower() not in context_files:
+        if recommended_new_file_pattern.search(line):
+            continue
         failures.append(f"FILENAME_NOT_IN_CONTEXT: {value}")
 
 claim_patterns = [
