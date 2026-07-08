@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added cross-platform release packaging scripts with archive, manifest, checksum, and install verification guidance.
@@ -48,6 +49,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added Milestone 15 roadmap and TODO tracking for staged multi-language engineering support beyond the current .NET-centered guidance.
@@ -107,6 +109,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added CPU architecture reporting to Windows, Linux, and macOS hardware profile scripts.
@@ -141,6 +144,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added documentation explaining how hardware profile scripts choose model recommendations from the local Ollama model list and catalog order.
@@ -164,6 +168,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added Linux and macOS validation/test wrapper scripts for contributors who prefer shell commands.
@@ -187,6 +192,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added automated pack tests for validation behavior, local config safety, model recommendation catalog structure, and Continue file reference integrity.
@@ -198,6 +204,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added Milestone 6 roadmap and TODO items for tool-enabled project changes and hardware-aware local model selection.
@@ -217,6 +224,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added Milestone 5 tracking for prompt quality hardening.
@@ -234,6 +242,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added runtime validation tracking documentation and security, performance, and release-readiness fixtures.
@@ -256,6 +265,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added GitHub Actions validation workflow for the pack validation script.
@@ -264,6 +274,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added validation checklists for prompts, rules, agents, templates, config, examples, documentation, and releases.
@@ -287,6 +298,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Project documentation foundation.
@@ -305,6 +317,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Initial repository structure for a Continue-based enterprise engineering pack.
