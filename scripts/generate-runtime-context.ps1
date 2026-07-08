@@ -146,22 +146,28 @@ Add-Section -Lines $lines -Title "Tracked File Inventory" -Content ($trackedFile
 $solutionFiles = Get-FilesByPattern -Patterns @("*.sln", "*.slnx")
 Add-Section -Lines $lines -Title "Solution Files" -Content $solutionFiles
 
-$projectFiles = Get-FilesByPattern -Patterns @("*.csproj", "*.vbproj", "*.fsproj", "*.props", "*.targets", "packages.config", "package.json", "pyproject.toml", "requirements*.txt", "pom.xml", "go.mod", "Cargo.toml")
+$projectFiles = Get-FilesByPattern -Patterns @("*.csproj", "*.vbproj", "*.fsproj", "*.props", "*.targets", "packages.config", "package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "pyproject.toml", "requirements*.txt", "pom.xml", "build.gradle", "settings.gradle", "gradle.properties", "go.mod", "go.sum", "Cargo.toml", "Cargo.lock")
 Add-Section -Lines $lines -Title "Project And Dependency Files" -Content $projectFiles
 
-$configFiles = Get-FilesByPattern -Patterns @("appsettings*.json", "Dockerfile", "docker-compose*.yml", "*.config", "*.runsettings", "Directory.Build.*", "global.json")
+$configFiles = Get-FilesByPattern -Patterns @("appsettings*.json", "Dockerfile", "docker-compose*.yml", "compose*.yml", "*.config", "*.runsettings", "Directory.Build.*", "global.json", "tsconfig*.json", "vite.config.*", "webpack.config.*", "jest.config.*", "vitest.config.*")
 Add-Section -Lines $lines -Title "Configuration Files" -Content $configFiles
+
+$infraFiles = Get-FilesByPattern -Patterns @("*.tf", "*.tfvars", "*.yaml", "*.yml")
+Add-Section -Lines $lines -Title "Infrastructure And Workflow Files" -Content $infraFiles
+
+$sqlFiles = Get-FilesByPattern -Patterns @("*.sql")
+Add-Section -Lines $lines -Title "Database Migration Files" -Content $sqlFiles
 
 $testFiles = $trackedFiles | Where-Object { $_ -match "(?i)(test|tests|spec)" } | Sort-Object
 Add-Section -Lines $lines -Title "Test-Related Files" -Content $testFiles
 
 $sourceFiles = $trackedFiles |
-    Where-Object { $_ -match "\.(cs|vb|fs)$" } |
-    Where-Object { $_ -notmatch "(?i)(bin|obj|designer|generated)" } |
+    Where-Object { $_ -match "\.(cs|vb|fs|py|js|jsx|ts|tsx|java|go|rs)$" } |
+    Where-Object { $_ -notmatch "(?i)(bin|obj|designer|generated|node_modules)" } |
     Sort-Object
-Add-Section -Lines $lines -Title ".NET Source Files" -Content $sourceFiles
+Add-Section -Lines $lines -Title "Source Files" -Content $sourceFiles
 
-$topLevelDocs = @("README.md", "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md", "docs/README.md")
+$topLevelDocs = @("README.md", "SAMPLE-METADATA.md", "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md", "docs/README.md")
 foreach ($doc in $topLevelDocs) {
     $docContent = Read-SmallFile -RelativePath $doc -MaxLines 120
     if ($docContent.Count -gt 0) {
@@ -169,8 +175,9 @@ foreach ($doc in $topLevelDocs) {
     }
 }
 
-foreach ($projectFile in $projectFiles) {
-    if ($projectFile -match "\.(csproj|vbproj|fsproj|props|targets|config|json|toml|txt|xml)$" -or [System.IO.Path]::GetFileName($projectFile) -in @("go.mod", "packages.config")) {
+$metadataFiles = @($projectFiles + $configFiles + $infraFiles + $sqlFiles) | Sort-Object -Unique
+foreach ($projectFile in $metadataFiles) {
+    if ($projectFile -match "\.(csproj|vbproj|fsproj|props|targets|config|json|toml|txt|xml|yaml|yml|tf|tfvars|sql)$" -or [System.IO.Path]::GetFileName($projectFile) -in @("Dockerfile", "go.mod", "go.sum", "packages.config", "Cargo.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock")) {
         $projectContent = Read-SmallFile -RelativePath $projectFile -MaxLines 160
         if ($projectContent.Count -gt 0) {
             Add-Section -Lines $lines -Title "Project File: $projectFile" -Content $projectContent

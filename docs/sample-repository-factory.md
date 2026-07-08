@@ -4,7 +4,7 @@
 
 The sample repository factory creates local, disposable repositories for validating prompts, agent surfaces, language guidance, and approved-write behavior without needing private or customer repositories.
 
-The generated repositories are intentionally small. They are not production templates and they do not install dependencies. Their purpose is to provide realistic file names, project markers, source files, tests, documentation, and configuration signals that an agent can inspect safely.
+The generated repositories are intentionally small. They are not production templates and they do not install dependencies. Their purpose is to provide realistic file names, project markers, source files, tests, documentation, configuration, infrastructure, and database signals that an agent can inspect safely.
 
 ## Generated Samples
 
@@ -65,8 +65,9 @@ Recommended validation flow:
 4. Run repository discovery.
 5. Confirm the agent reports actual files from the sample.
 6. Run implementation planning or code review.
-7. Verify output with `docs/runtime-output-verification.md` where applicable.
-8. Record sanitized evidence using `examples/multi-repository-validation.md` or `examples/sample-repository-factory-validation.md`.
+7. Confirm runtime context includes sample metadata plus language/project markers such as `package.json`, `tsconfig.json`, `Dockerfile`, Terraform, Kubernetes, and SQL migration files where applicable.
+8. Verify output with `docs/runtime-output-verification.md` where applicable.
+9. Record sanitized evidence using `examples/multi-repository-validation.md` or `examples/sample-repository-factory-validation.md`.
 
 ## Guardrails
 
@@ -79,5 +80,7 @@ Recommended validation flow:
 Initial script-level validation evidence is recorded in `examples/sample-repository-factory-validation.md`. This evidence covers generation, installation, and runtime context creation for generated samples. Focused CLI evidence also records read-only repository-discovery validation against generated Python and TypeScript samples.
 
 The first focused validation found and fixed two fixture-quality issues: generated PowerShell sample README content could leak factory script text when Markdown backticks were used in a double-quoted here-string, and runtime context generation could inherit parent repository git status when samples lived under ignored runtime output. Tests now cover both classes of regression.
+
+Runtime context generation now includes non-.NET metadata from generated TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL samples so repository discovery and review prompts have better grounding before model-backed validation.
 
 This does not replace editor/model Agent validation or approved-write validation.

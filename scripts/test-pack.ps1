@@ -797,6 +797,26 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
         Assert-True -Condition ($rerunResult.ExitCode -ne 0) -Message "Sample repository factory should refuse to overwrite without -Force."
         Assert-True -Condition ($rerunResult.Output -match "overwrite generated samples") -Message "Overwrite refusal should explain how to overwrite generated samples."
 
+        $runtimeContextScript = Join-Path $repoRoot "scripts/generate-runtime-context.ps1"
+        $contextTargets = @(
+            @{ Name = "typescript-frontend"; Expected = @("SAMPLE-METADATA.md", "tsconfig.json", "src/App.tsx") },
+            @{ Name = "node-service"; Expected = @("package.json", "Dockerfile", "src/server.js") },
+            @{ Name = "iac-terraform-kubernetes"; Expected = @("terraform/main.tf", "k8s/deployment.yaml", ".github/workflows/validate.yml") },
+            @{ Name = "sql-migrations"; Expected = @("schema/001_create_items.sql", "migrations/002_add_item_status.sql", "seeds/items.sql") }
+        )
+
+        foreach ($contextTarget in $contextTargets) {
+            $samplePath = Join-Path $tempRoot $contextTarget.Name
+            $contextPath = Join-Path $tempRoot "$($contextTarget.Name)-runtime-context.md"
+            $contextResult = Invoke-CommandCapture -FilePath $runtimeContextScript -Arguments @("-TargetRepo", $samplePath, "-OutputPath", $contextPath)
+            Assert-Equal -Actual $contextResult.ExitCode -Expected 0 -Message "Runtime context generation should succeed for $($contextTarget.Name)."
+            $context = Get-Content -LiteralPath $contextPath -Raw
+            Assert-True -Condition ($context -match "Source Files") -Message "Runtime context should include language-neutral source files section."
+            Assert-True -Condition ($context -match "Sample Metadata") -Message "Runtime context should include sample metadata excerpts."
+            foreach ($expectedSignal in $contextTarget.Expected) {
+                Assert-True -Condition ($context -match [regex]::Escape($expectedSignal)) -Message "Runtime context for $($contextTarget.Name) should include $expectedSignal."
+            }
+        }
         $forceResult = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputRoot", $tempRoot, "-Force")
         Assert-Equal -Actual $forceResult.ExitCode -Expected 0 -Message "Sample repository factory should overwrite with -Force."
     }

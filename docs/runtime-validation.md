@@ -804,3 +804,8 @@ The workflow was instructed to use the fixed template, avoid XML, and avoid dire
 - Treat the fixed `LegacyDotNetDependencyMigration` template as the safe human-reviewed path for this workflow.
 - Do not rely on this local model to generate legacy dependency migration plans without human review.
 - Validate this workflow later with a stronger model or with a narrower context that excludes raw project-file XML.
+## Non-.NET Runtime Context
+
+Runtime context generation includes common non-.NET project markers so generated samples and future real repositories can be reviewed with better grounding. Current context excerpts include package metadata, TypeScript configuration, Dockerfiles, Terraform files, Kubernetes and workflow YAML, SQL migrations, and sample metadata when present.
+
+Use this context as evidence for project classification, not as proof that dependencies build or tests pass. Build and test commands still need separate validation in the target repository.

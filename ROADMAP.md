@@ -24,7 +24,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, validation workflow guidance, and first legacy .NET category evidence are defined; additional real repository categories remain pending. |
 | Milestone 14: Agent Surface Portability And Broader Audience | Planned | Reposition the project as a local-first engineering agent pack, keep Continue as the first supported surface, and evaluate other open-source agent surfaces for non-enterprise and enterprise use. |
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
-| Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories. |
+| Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories; runtime context now includes non-.NET metadata from generated samples. |
 | Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python and TypeScript rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; editor/model workflow validation and additional ecosystems remain pending. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
@@ -453,7 +453,7 @@ Scope:
 Exit criteria:
 
 - A contributor can generate all sample repositories with one documented command.
-- Tests verify the factory creates expected language/project markers.
+- Tests verify the factory creates expected language/project markers and runtime context captures non-.NET metadata.
 - Generated samples are suitable for read-only and approved-write validation in disposable workspaces.
 
 ## Milestone 17: Agent Surface Compatibility Validation

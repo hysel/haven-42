@@ -275,7 +275,7 @@
 - [x] Record initial script-level validation evidence for generated Python and TypeScript samples.
 - [x] Use generated samples for focused read-only Continue CLI repository-discovery validation evidence.
 - [x] Use generated samples for model-backed multi-language validation evidence.
-- [ ] Improve runtime context generation for non-.NET project metadata as new ecosystems are added.
+- [x] Improve runtime context generation for non-.NET project metadata as new ecosystems are added.
 
 ## Milestone 17: Agent Surface Compatibility Validation
 

@@ -14,7 +14,8 @@ This project follows a simple changelog format:
 ### Added
 
 
-- Added shared asset installation design guidance for future centralized prompts/rules/docs reuse across multiple target repositories.- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
+
+- Added non-.NET runtime context generation coverage for generated TypeScript, Node, Infrastructure as Code, and SQL samples.- Added shared asset installation design guidance for future centralized prompts/rules/docs reuse across multiple target repositories.- Added sanitized hardware-aware recommendation validation evidence for install, recommendation, local-only config generation, and API preflight.
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Added cross-platform release packaging scripts with archive, manifest, checksum, and install verification guidance.

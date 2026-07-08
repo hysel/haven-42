@@ -48,7 +48,7 @@ fi
     head -n 200
 
   printf '\n## Top-Level Documentation Excerpts\n\n'
-  for doc in README.md PROJECT.md ARCHITECTURE.md STYLEGUIDE.md ROADMAP.md TODO.md AI.md; do
+  for doc in README.md SAMPLE-METADATA.md PROJECT.md ARCHITECTURE.md STYLEGUIDE.md ROADMAP.md TODO.md AI.md; do
     if [ -f "$TARGET_REPO/$doc" ]; then
       printf '### %s\n\n' "$doc"
       sed -n '1,80p' "$TARGET_REPO/$doc"
@@ -61,7 +61,7 @@ fi
     -path "$TARGET_REPO/.git" -prune -o \
     -path "$TARGET_REPO/bin" -prune -o \
     -path "$TARGET_REPO/obj" -prune -o \
-    -type f \( -name '*.csproj' -o -name '*.sln' -o -name '*.slnx' -o -name '*.fsproj' -o -name '*.vbproj' -o -name 'package.json' -o -name 'pyproject.toml' -o -name 'requirements*.txt' -o -name 'pom.xml' -o -name 'go.mod' -o -name 'Cargo.toml' \) -print |
+    -type f \( -name '*.csproj' -o -name '*.sln' -o -name '*.slnx' -o -name '*.fsproj' -o -name '*.vbproj' -o -name 'package.json' -o -name 'package-lock.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'pyproject.toml' -o -name 'requirements*.txt' -o -name 'pom.xml' -o -name 'build.gradle' -o -name 'settings.gradle' -o -name 'gradle.properties' -o -name 'go.mod' -o -name 'go.sum' -o -name 'Cargo.toml' -o -name 'Cargo.lock' \) -print |
     sed "s#^$TARGET_REPO/##" |
     sort
 
@@ -70,7 +70,7 @@ fi
     -path "$TARGET_REPO/.git" -prune -o \
     -path "$TARGET_REPO/bin" -prune -o \
     -path "$TARGET_REPO/obj" -prune -o \
-    -type f \( -name '*.csproj' -o -name '*.fsproj' -o -name '*.vbproj' -o -name 'package.json' -o -name 'pyproject.toml' -o -name 'requirements*.txt' -o -name 'pom.xml' -o -name 'go.mod' -o -name 'Cargo.toml' \) -print |
+    -type f \( -name '*.csproj' -o -name '*.fsproj' -o -name '*.vbproj' -o -name 'package.json' -o -name 'package-lock.json' -o -name 'pnpm-lock.yaml' -o -name 'yarn.lock' -o -name 'pyproject.toml' -o -name 'requirements*.txt' -o -name 'pom.xml' -o -name 'build.gradle' -o -name 'settings.gradle' -o -name 'gradle.properties' -o -name 'go.mod' -o -name 'go.sum' -o -name 'Cargo.toml' -o -name 'Cargo.lock' -o -name 'Dockerfile' -o -name 'docker-compose*.yml' -o -name 'compose*.yml' -o -name 'appsettings*.json' -o -name 'tsconfig*.json' -o -name 'vite.config.*' -o -name 'webpack.config.*' -o -name 'jest.config.*' -o -name 'vitest.config.*' -o -name '*.tf' -o -name '*.tfvars' -o -name '*.yaml' -o -name '*.yml' -o -name '*.sql' \) -print |
     sort |
     while IFS= read -r project_file; do
       relative_project_file="${project_file#"$TARGET_REPO/"}"
@@ -86,7 +86,7 @@ fi
     -path "$TARGET_REPO/bin" -prune -o \
     -path "$TARGET_REPO/obj" -prune -o \
     -path "$TARGET_REPO/node_modules" -prune -o \
-    -type f \( -name '*.cs' -o -name '*.fs' -o -name '*.js' -o -name '*.ts' -o -name '*.py' -o -name '*.java' -o -name '*.go' -o -name '*.rs' \) -print |
+    -type f \( -name '*.cs' -o -name '*.fs' -o -name '*.js' -o -name '*.jsx' -o -name '*.ts' -o -name '*.tsx' -o -name '*.py' -o -name '*.java' -o -name '*.go' -o -name '*.rs' \) -print |
     sed "s#^$TARGET_REPO/##" |
     sort |
     head -n 120

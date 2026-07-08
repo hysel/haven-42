@@ -602,6 +602,23 @@ test_sample_repository_factory() {
   ! grep -Eq "@['\"]|['\"]@" "$temp_root/python-api/README.md" || return 1
   ! grep -q "Write-SampleFile" "$temp_root/python-api/app/main.py" || return 1
 
+  "$REPO_ROOT/scripts/generate-runtime-context.shared.sh" --target-repo "$temp_root/typescript-frontend" --output-path "$temp_root/typescript-context.md" >/tmp/sample-typescript-context.out 2>&1 || return 1
+  grep -q "SAMPLE-METADATA.md" "$temp_root/typescript-context.md" || return 1
+  grep -q "tsconfig.json" "$temp_root/typescript-context.md" || return 1
+  grep -q "src/App.tsx" "$temp_root/typescript-context.md" || return 1
+
+  "$REPO_ROOT/scripts/generate-runtime-context.shared.sh" --target-repo "$temp_root/node-service" --output-path "$temp_root/node-context.md" >/tmp/sample-node-context.out 2>&1 || return 1
+  grep -q "Dockerfile" "$temp_root/node-context.md" || return 1
+  grep -q "src/server.js" "$temp_root/node-context.md" || return 1
+
+  "$REPO_ROOT/scripts/generate-runtime-context.shared.sh" --target-repo "$temp_root/iac-terraform-kubernetes" --output-path "$temp_root/iac-context.md" >/tmp/sample-iac-context.out 2>&1 || return 1
+  grep -q "terraform/main.tf" "$temp_root/iac-context.md" || return 1
+  grep -q "k8s/deployment.yaml" "$temp_root/iac-context.md" || return 1
+  grep -q ".github/workflows/validate.yml" "$temp_root/iac-context.md" || return 1
+
+  "$REPO_ROOT/scripts/generate-runtime-context.shared.sh" --target-repo "$temp_root/sql-migrations" --output-path "$temp_root/sql-context.md" >/tmp/sample-sql-context.out 2>&1 || return 1
+  grep -q "schema/001_create_items.sql" "$temp_root/sql-context.md" || return 1
+  grep -q "migrations/002_add_item_status.sql" "$temp_root/sql-context.md" || return 1
   ! "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" >/tmp/sample-factory-rerun.out 2>&1 || return 1
   grep -q "Use --force" /tmp/sample-factory-rerun.out || return 1
   "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" --force >/tmp/sample-factory-force.out 2>&1 || return 1
