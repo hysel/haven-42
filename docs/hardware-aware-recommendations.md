@@ -104,6 +104,44 @@ Do not commit this file. It may contain private model choices or a private Ollam
 
 Run with `-DryRun` or `--dry-run` first if you want to inspect what would happen without writing the local config.
 
+## Apply The Recommendation To Global Continue Config
+
+Some editor installations, especially Windows VS Code or VSCodium setups, load the global Continue config instead of the project-local `.continue/config.local.yaml`. Do not copy `config.local.yaml` into the global Continue config by hand. The local config uses project-relative `file://./...` references, and a global copy can make Continue look for prompts under the editor install folder.
+
+Instead, let the apply script generate the global config with absolute references to the target repository:
+
+Windows PowerShell:
+
+```powershell
+.\scripts\apply-recommended-agent-config.ps1 `
+  -TargetRepo C:\path\to\your-project `
+  -RecommendationPath .\runtime-validation-output\model-config-recommendation.json `
+  -OllamaBaseUrl http://your-local-ollama-host:11434 `
+  -GlobalConfig
+```
+
+Linux:
+
+```bash
+./scripts/apply-recommended-agent-config.linux.sh \
+  --target-repo /path/to/your-project \
+  --recommendation-path ./runtime-validation-output/model-config-recommendation.json \
+  --ollama-base-url http://your-local-ollama-host:11434 \
+  --global-config
+```
+
+macOS:
+
+```bash
+./scripts/apply-recommended-agent-config.macos.sh \
+  --target-repo /path/to/your-project \
+  --recommendation-path ./runtime-validation-output/model-config-recommendation.json \
+  --ollama-base-url http://your-local-ollama-host:11434 \
+  --global-config
+```
+
+The generated global config backs up the previous global config and omits `rules:` by default. That avoids duplicate rule warnings when the opened repository also contains `.continue/rules`. Use `-GlobalConfigIncludeRules` or `--global-config-include-rules` only when the editor will not load the project-local `.continue` folder.
+
 ## Next Stage
 
 The recommendation JSON can now generate a local-only Continue config. Continue to run editor read-only and approved-write smoke tests before trusting a model for project changes.

@@ -42,6 +42,7 @@ This project follows a simple changelog format:
 
 ### Fixed
 
+- Fixed hardware-aware config application so generated global Continue config uses absolute target repository file references and omits rules by default, preventing editor-install-folder prompt lookup failures.
 - Fixed PowerShell sample repository factory README generation so Markdown command examples do not leak factory script text into generated samples.
 - Added regression checks that generated sample README and source files do not contain factory script or here-string markers.
 
