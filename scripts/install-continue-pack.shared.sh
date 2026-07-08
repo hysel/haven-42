@@ -14,6 +14,8 @@ GLOBAL_CONFIG=false
 GLOBAL_CONFIG_PATH="${HOME:-}/.continue/config.yaml"
 GLOBAL_CONFIG_API_BASE=""
 GLOBAL_CONFIG_INCLUDE_RULES=false
+SHARED_ASSETS=false
+SHARED_ASSETS_PATH=""
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
@@ -53,6 +55,14 @@ while [ "$#" -gt 0 ]; do
       GLOBAL_CONFIG_INCLUDE_RULES=true
       shift
       ;;
+    --shared-assets|-SharedAssets)
+      SHARED_ASSETS=true
+      shift
+      ;;
+    --shared-assets-path|-SharedAssetsPath)
+      SHARED_ASSETS_PATH="$2"
+      shift 2
+      ;;
     *)
       printf 'Unknown argument: %s\n' "$1" >&2
       exit 1
@@ -90,6 +100,22 @@ if [ "$AUTO_MODEL_CONFIG" = true ] && [ "$MODEL_LANES" = true ]; then
   exit 1
 fi
 
+if [ "$SHARED_ASSETS" = true ] && { [ "$AUTO_MODEL_CONFIG" = true ] || [ "$MODEL_LANES" = true ] || [ "$READ_ONLY_PROFILE" = true ]; }; then
+  printf 'Shared-assets mode currently supports reusable assets and global config generation only. Do not combine it with --auto-model-config, --model-lanes, or read-only/approved-write install profiles.\n' >&2
+  exit 1
+fi
+
+if [ "$SHARED_ASSETS" = true ] && [ -z "$SHARED_ASSETS_PATH" ]; then
+  case "$(uname -s 2>/dev/null || true)" in
+    Darwin*) SHARED_ASSETS_PATH="$HOME/Library/Application Support/LocalEngineeringAgentPack/assets" ;;
+    *) SHARED_ASSETS_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/local-engineering-agent-pack/assets" ;;
+  esac
+fi
+
+if [ "$SHARED_ASSETS" = true ]; then
+  GLOBAL_CONFIG=true
+fi
+
 if [ ! -d "$SOURCE_CONTINUE" ]; then
   printf 'Source .continue folder does not exist: %s\n' "$SOURCE_CONTINUE" >&2
   exit 1
@@ -111,16 +137,30 @@ fi
 TARGET_CONTINUE="$TARGET_RESOLVED/.continue"
 BACKUP_CONTINUE="$TARGET_RESOLVED/.continue.backup-$(date '+%Y%m%d-%H%M%S')"
 BACKUP_GLOBAL_CONFIG="$GLOBAL_CONFIG_PATH.backup-$(date '+%Y%m%d-%H%M%S')"
+BACKUP_SHARED_ASSETS="$SHARED_ASSETS_PATH.backup-$(date '+%Y%m%d-%H%M%S')"
 
 printf 'Installing Continue pack into %s\n' "$TARGET_RESOLVED"
 printf 'Install profile: %s\n' "$INSTALL_PROFILE"
+if [ "$SHARED_ASSETS" = true ]; then
+  printf 'Shared-assets mode is enabled.\n'
+  printf 'Shared assets target: %s\n' "$SHARED_ASSETS_PATH"
+  printf 'Global Continue config update is enabled because shared-assets mode was requested.\n'
+fi
+
 
 if [ "$DRY_RUN" = true ]; then
   printf 'Dry run only. No files will be changed.\n'
-  if [ -d "$TARGET_CONTINUE" ]; then
-    printf 'Would back up existing .continue to %s\n' "$BACKUP_CONTINUE"
+  if [ "$SHARED_ASSETS" = true ]; then
+    if [ -d "$SHARED_ASSETS_PATH" ]; then
+      printf 'Would back up existing shared assets to %s\n' "$BACKUP_SHARED_ASSETS"
+    fi
+    printf 'Would copy reusable assets to %s excluding config.local*.yaml.\n' "$SHARED_ASSETS_PATH"
+  else
+    if [ -d "$TARGET_CONTINUE" ]; then
+      printf 'Would back up existing .continue to %s\n' "$BACKUP_CONTINUE"
+    fi
+    printf 'Would copy .continue files excluding config.local*.yaml.\n'
   fi
-  printf 'Would copy .continue files excluding config.local*.yaml.\n'
   if [ "$AUTO_MODEL_CONFIG" = true ]; then
     printf 'Would generate .continue/config.local.yaml using the hardware profile recommended model.\n'
   fi
@@ -144,12 +184,21 @@ if [ "$DRY_RUN" = true ]; then
   exit 0
 fi
 
-if [ -d "$TARGET_CONTINUE" ]; then
-  mv "$TARGET_CONTINUE" "$BACKUP_CONTINUE"
-  printf 'Backed up existing .continue to %s\n' "$BACKUP_CONTINUE"
+if [ "$SHARED_ASSETS" = true ]; then
+  ASSET_ROOT="$SHARED_ASSETS_PATH"
+  if [ -d "$ASSET_ROOT" ]; then
+    mv "$ASSET_ROOT" "$BACKUP_SHARED_ASSETS"
+    printf 'Backed up existing shared assets to %s\n' "$BACKUP_SHARED_ASSETS"
+  fi
+else
+  ASSET_ROOT="$TARGET_CONTINUE"
+  if [ -d "$TARGET_CONTINUE" ]; then
+    mv "$TARGET_CONTINUE" "$BACKUP_CONTINUE"
+    printf 'Backed up existing .continue to %s\n' "$BACKUP_CONTINUE"
+  fi
 fi
 
-mkdir -p "$TARGET_CONTINUE"
+mkdir -p "$ASSET_ROOT"
 
 while IFS= read -r source_file; do
   relative="${source_file#$SOURCE_CONTINUE/}"
@@ -157,28 +206,33 @@ while IFS= read -r source_file; do
     config.local*.yaml|config.local*.yml) continue ;;
   esac
 
-  destination="$TARGET_CONTINUE/$relative"
+  destination="$ASSET_ROOT/$relative"
   mkdir -p "$(dirname "$destination")"
   cp "$source_file" "$destination"
 done < <(find "$SOURCE_CONTINUE" -type f)
 
-if [ ! -f "$TARGET_CONTINUE/config.yaml" ]; then
-  printf 'Installed config is missing: %s\n' "$TARGET_CONTINUE/config.yaml" >&2
+if [ ! -f "$ASSET_ROOT/config.yaml" ]; then
+  printf 'Installed config is missing: %s\n' "$ASSET_ROOT/config.yaml" >&2
   exit 1
 fi
 
-CONFIG_CONTENT="$(cat "$TARGET_CONTINUE/config.yaml")"
+CONFIG_CONTENT="$(cat "$ASSET_ROOT/config.yaml")"
 FILE_REFS="$(printf '%s\n' "$CONFIG_CONTENT" | grep -Eo 'file://\./[^[:space:]]+' | sed 's#file://./##' || true)"
 
 while IFS= read -r ref; do
   [ -z "$ref" ] && continue
-  if [ ! -e "$TARGET_CONTINUE/$ref" ]; then
+  if [ ! -e "$ASSET_ROOT/$ref" ]; then
     printf 'Installed file reference does not resolve: %s\n' "$ref" >&2
     exit 1
   fi
 done <<EOF
 $FILE_REFS
 EOF
+
+if find "$ASSET_ROOT" -maxdepth 1 -type f \( -name 'config.local*.yaml' -o -name 'config.local*.yml' \) | grep -q .; then
+  printf 'Installed assets should not include local config overrides.\n' >&2
+  exit 1
+fi
 
 if [ "$READ_ONLY_PROFILE" = true ]; then
   {
@@ -325,10 +379,16 @@ if [ "$MODEL_LANES" = true ]; then
 fi
 
 if [ "$GLOBAL_CONFIG" = true ]; then
-  if [ -f "$TARGET_CONTINUE/config.local.yaml" ]; then
-    source_config="$TARGET_CONTINUE/config.local.yaml"
+  if [ "$SHARED_ASSETS" = true ]; then
+    config_root="$SHARED_ASSETS_PATH"
   else
-    source_config="$TARGET_CONTINUE/config.yaml"
+    config_root="$TARGET_CONTINUE"
+  fi
+
+  if [ -f "$config_root/config.local.yaml" ]; then
+    source_config="$config_root/config.local.yaml"
+  else
+    source_config="$config_root/config.yaml"
   fi
 
   if [ ! -f "$source_config" ]; then
@@ -343,13 +403,13 @@ if [ "$GLOBAL_CONFIG" = true ]; then
     printf 'Backed up existing global Continue config to %s\n' "$BACKUP_GLOBAL_CONFIG"
   fi
 
-  file_uri_base="file://$TARGET_CONTINUE"
+  file_uri_base="file://$config_root"
 
   {
     printf '# Global Continue config generated by install-continue-pack.shared.sh.\n'
-    printf '# This file points Continue at pack assets installed in a target repository.\n'
+    printf '# This file points Continue at reusable pack assets.\n'
     printf '# The rules section is omitted by default to avoid duplicate rules when the opened repository also has .continue/rules.\n'
-    printf '# Regenerate it when you move or reinstall the target repository.\n'
+    printf '# Regenerate it when you move or reinstall the referenced asset folder.\n'
     sed "s#file://./#${file_uri_base}/#g" "$source_config" |
       if [ "$GLOBAL_CONFIG_INCLUDE_RULES" = true ]; then
         cat
@@ -401,6 +461,12 @@ if [ "$GLOBAL_CONFIG" = true ]; then
   } > "$GLOBAL_CONFIG_PATH"
 
   printf 'Updated global Continue config: %s\n' "$GLOBAL_CONFIG_PATH"
+fi
+
+if [ "$SHARED_ASSETS" = true ]; then
+  printf 'Installed shared assets to %s\n' "$SHARED_ASSETS_PATH"
+else
+  printf 'Installed .continue to %s\n' "$TARGET_CONTINUE"
 fi
 
 printf 'Install complete.\n'

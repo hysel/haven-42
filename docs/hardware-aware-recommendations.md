@@ -148,4 +148,4 @@ The recommendation JSON can now generate a local-only Continue config. Continue 
 
 ## Shared Asset Planning
 
-Hardware-aware config generation currently writes project-local or global Continue config references for the selected target repository. For users who manage many repositories from one machine, see `docs/shared-asset-installation.md` for the planned centralized shared asset mode. That mode is not implemented yet; use it as design guidance, not as an install command reference.
+Hardware-aware config generation currently writes project-local or global Continue config references for the selected target repository. For users who manage many repositories from one machine, see `docs/shared-asset-installation.md` for centralized shared-assets mode. The installer can now copy reusable assets into one local folder and generate global Continue config references to that folder with `-SharedAssets` or `--shared-assets`.

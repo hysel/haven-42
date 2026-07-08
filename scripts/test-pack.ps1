@@ -1398,6 +1398,70 @@ Invoke-PackTest "install script can include rules in global config by explicit o
     }
 }
 
+
+Invoke-PackTest "install script supports centralized shared assets and global config" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "continue-shared-assets-test-$([guid]::NewGuid())"
+    $tempRepo = Join-Path $tempRoot "target-repo"
+    $sharedAssetsPath = Join-Path $tempRoot "shared-assets"
+    $globalConfigPath = Join-Path $tempRoot "global-config.yaml"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRepo | Out-Null
+
+        $dryRun = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-SharedAssets", "-SharedAssetsPath", $sharedAssetsPath, "-GlobalConfigPath", $globalConfigPath, "-DryRun")
+
+        Assert-Equal -Actual $dryRun.ExitCode -Expected 0 -Message "Shared-assets dry run should succeed."
+        Assert-True -Condition ($dryRun.Output -match "Shared-assets mode is enabled") -Message "Dry run should identify shared-assets mode."
+        Assert-True -Condition ($dryRun.Output -match "Would write global Continue config") -Message "Dry run should explain global config generation."
+        Assert-True -Condition (-not (Test-Path -LiteralPath $sharedAssetsPath)) -Message "Dry run should not create shared assets."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Shared-assets dry run should not create project .continue."
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-SharedAssets", "-SharedAssetsPath", $sharedAssetsPath, "-GlobalConfigPath", $globalConfigPath, "-GlobalConfigApiBase", "http://127.0.0.1:11434")
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Shared-assets install should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $sharedAssetsPath "config.yaml")) -Message "Shared assets should include config.yaml."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $sharedAssetsPath "prompts/repository-discovery.md")) -Message "Shared assets should include prompts."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $sharedAssetsPath "templates/LegacyDotNetDependencyMigration.md")) -Message "Shared assets should include templates."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $sharedAssetsPath "config.local.yaml"))) -Message "Shared assets should not include local config overrides."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Shared-assets install should not create project .continue."
+        Assert-True -Condition (Test-Path -LiteralPath $globalConfigPath) -Message "Shared-assets install should write global config."
+
+        $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
+        $sharedUri = ($sharedAssetsPath -replace '\\', '/')
+        Assert-True -Condition ($globalConfig -match [regex]::Escape("file://$sharedUri/prompts/repository-discovery.md")) -Message "Global config should point prompts at shared assets."
+        Assert-True -Condition ($globalConfig -match "apiBase: http://127\.0\.0\.1:11434") -Message "Global config should include requested local Ollama API base."
+        Assert-True -Condition ($globalConfig -notmatch "file://\./") -Message "Global config should not contain project-relative file references."
+        Assert-True -Condition ($globalConfig -notmatch "(?m)^rules:\s*$") -Message "Global config should omit rules by default."
+        Assert-True -Condition ($globalConfig -notmatch [regex]::Escape($tempRepo)) -Message "Global config should not point at the target repository in shared-assets mode."
+
+        $invalid = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-SharedAssets", "-SharedAssetsPath", (Join-Path $tempRoot "invalid-assets"), "-ModelLanes")
+
+        Assert-True -Condition ($invalid.ExitCode -ne 0) -Message "Shared-assets mode should reject project-local model lane generation."
+        Assert-True -Condition ($invalid.Output -match "Shared-assets mode currently supports reusable assets") -Message "Rejected shared-assets combination should explain the limitation."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "shared asset installer options are documented in scripts" {
+    $psScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") -Raw
+    $bashScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/install-continue-pack.shared.sh") -Raw
+
+    Assert-True -Condition ($psScript -match "SharedAssets") -Message "PowerShell installer should expose SharedAssets."
+    Assert-True -Condition ($psScript -match "shared-assets-path") -Message "PowerShell installer should expose shared-assets-path alias."
+    Assert-True -Condition ($bashScript -match "--shared-assets") -Message "Bash installer should expose shared-assets."
+    Assert-True -Condition ($bashScript -match "--shared-assets-path") -Message "Bash installer should expose shared-assets-path."
+    Assert-True -Condition ($bashScript -match "LocalEngineeringAgentPack/assets") -Message "Bash installer should define a macOS shared asset default."
+    Assert-True -Condition ($bashScript -match "local-engineering-agent-pack/assets") -Message "Bash installer should define a Linux shared asset default."
+}
+
 Invoke-PackTest "install script refuses to target pack repository" {
     $result = Invoke-CommandCapture `
         -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
@@ -2057,14 +2121,6 @@ Invoke-PackTest "recommended agent config generation writes local-only config" {
         Remove-Item -LiteralPath $targetRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-if ($failed) {
-    Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
-    exit 1
-}
-
-Write-Host "Test run passed. $testCount tests executed." -ForegroundColor Green
-exit 0
-
 Invoke-PackTest "shared asset installation docs define centralized config strategy" {
     $docPath = Join-Path $repoRoot "docs/shared-asset-installation.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -2091,3 +2147,10 @@ Invoke-PackTest "shared asset installation docs define centralized config strate
     Assert-True -Condition ($todo -match "centralized shared asset") -Message "TODO should track centralized shared asset work."
     Assert-True -Condition ($roadmap -match "centralized shared asset") -Message "Roadmap should track centralized shared asset work."
 }
+if ($failed) {
+    Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
+    exit 1
+}
+
+Write-Host "Test run passed. $testCount tests executed." -ForegroundColor Green
+exit 0

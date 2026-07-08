@@ -2,49 +2,17 @@
 
 ## Purpose
 
-Shared asset installation is a planned opt-in mode for people who use this pack across more than one target repository. The current installer copies `.continue` assets into each project and can generate a global Continue config that points at that one project copy. That is still the safest default for beginners and single-project users.
+Shared asset installation is an opt-in mode for people who use this pack across more than one target repository. Project-local install remains the safest default for beginners and single-project users. Shared-assets mode puts reusable pack assets in one local machine folder and generates the global Continue config so prompts, docs, templates, and optional rules resolve from that shared folder instead of from one project copy.
 
-A shared asset mode would put reusable pack assets in one local machine folder and generate editor configs that point there. Target repositories would keep only project-specific files, validation outputs, and local settings.
+Use this mode when your editor reliably loads the global Continue config, or when you maintain several repositories and do not want each one to carry a duplicate copy of the same pack assets.
 
-## Current Behavior
-
-Today the supported install path is project-local:
-
-- The installer copies reusable assets into the target repository's `.continue` folder.
-- Local-only config files can be generated in the target repository and are not committed by default.
-- The global Continue config can be generated with absolute references to the target repository's installed prompts and docs.
-- Generated global configs omit `rules:` by default to avoid duplicate rule warnings when the project-local `.continue/rules` folder is also loaded.
-
-This behavior remains the default because it is explicit, easy to inspect, and works without a central machine-level asset folder.
-
-## Problem
-
-Project-local install becomes repetitive when one user or team applies the pack to many repositories:
-
-- Every target repository receives its own copy of the same prompts, rules, templates, and docs.
-- The global Continue config can point cleanly at one installed project copy at a time unless it is regenerated.
-- Moving or deleting the target repository can break global config references.
-- Users can accidentally mix old assets in one repository with newer assets in another repository.
-
-## Design Goals
-
-A future shared asset mode should:
-
-- Keep project-local install as the default.
-- Be explicit and opt-in, never automatic.
-- Keep private endpoints, tokens, usernames, hostnames, and project paths out of committed files.
-- Support dry-run output before writing anything.
-- Back up any global config it changes.
-- Validate every generated `file://` reference.
-- Avoid duplicate rule warnings by default.
-- Work for Windows, Linux, and macOS users without requiring PowerShell on Linux or macOS.
-- Leave target repositories able to carry project-specific rules, evidence, and local validation outputs.
-
-## Proposed Modes
+## Current Modes
 
 ### Project-Local Mode
 
-Project-local mode is the current default. Use it when:
+Project-local mode is the default. The installer copies `.continue` assets into the target repository.
+
+Use it when:
 
 - You are installing the pack into one repository.
 - You want every repository to carry its own inspectable `.continue` assets.
@@ -53,97 +21,177 @@ Project-local mode is the current default. Use it when:
 
 ### Shared-Assets Mode
 
-Shared-assets mode would be an advanced option. Use it when:
+Shared-assets mode is advanced and explicit. The installer copies reusable assets into one local folder and updates the global Continue config to point at that folder.
+
+Use it when:
 
 - You work across multiple repositories on the same machine.
+- Your editor loads the global Continue config more reliably than project-local config.
 - You want one centrally updated copy of prompts, rules, docs, templates, and agents.
-- Your editor loads one global config file more reliably than project-local configs.
-- You are comfortable with generated absolute file references.
+- You are comfortable with generated absolute `file://` references in a local config file.
 
-## Suggested Shared Asset Locations
+## What Gets Copied
 
-The exact default paths are still open, but the installer should support an explicit path such as `-SharedAssetsPath` or `--shared-assets-path`.
+Shared-assets mode copies reusable files from this pack's `.continue` folder:
 
-Reasonable defaults are:
+- `config.yaml`
+- `agents/`
+- `prompts/`
+- `rules/`
+- `rule-packs/`
+- `templates/`
 
-- Windows: `%USERPROFILE%\.local-engineering-agent-pack\assets`
+It excludes local overrides such as `config.local.yaml` and `config.local*.yaml`.
+
+By default, the generated global Continue config omits the `rules:` section. This avoids duplicate rule warnings when the opened repository also contains `.continue/rules`. Use the explicit include-rules option only when the editor will not load project-local rules.
+
+## Default Shared Asset Locations
+
+If you do not pass an explicit shared asset path, the installers use a user-level local folder:
+
+- Windows: `%USERPROFILE%\.local-engineering-agent-packssets`
 - Linux: `${XDG_DATA_HOME:-$HOME/.local/share}/local-engineering-agent-pack/assets`
 - macOS: `$HOME/Library/Application Support/LocalEngineeringAgentPack/assets`
 
-The installer should print the resolved path during dry-run and install.
+You can override the location with `-SharedAssetsPath` or `--shared-assets-path`.
 
-## Config Generation Strategy
+## Windows Commands
 
-In shared-assets mode, generated editor config should use absolute references to the shared asset folder:
+Preview the install:
 
-- Prompts point to the shared `prompts` folder.
-- Docs point to the shared `templates` or documentation folder as needed.
-- Agents point to the shared `agents` folder when the target surface supports them.
-- Rules are omitted by default unless the user explicitly asks to include them.
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path	o\your-project" `
+  -SharedAssets `
+  -SharedAssetsPath "$HOME\.local-engineering-agent-packssets" `
+  -GlobalConfigPath "$HOME\.continue\config.yaml" `
+  -DryRun
+```
 
-The global Continue config must not contain project-relative references such as `file://./prompts/repository-discovery.md`. Those references only make sense from inside a project `.continue` folder and can make editors look for prompts under their install directory.
+Install shared assets and update the global Continue config:
 
-## Install Flow
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path	o\your-project" `
+  -SharedAssets `
+  -SharedAssetsPath "$HOME\.local-engineering-agent-packssets" `
+  -GlobalConfigPath "$HOME\.continue\config.yaml"
+```
 
-A future implementation should follow this order:
+Use a local-network Ollama endpoint only in the generated global config:
 
-1. Detect the pack source directory and target repository.
-2. Resolve the shared asset path.
-3. Run a dry-run preview unless the user explicitly requested install.
-4. Copy reusable pack assets into the shared asset path.
-5. Preserve or back up any existing shared asset folder before replacing it.
-6. Generate global editor config with absolute references to the shared asset path.
-7. Omit rules by default to avoid duplicate rule warnings.
-8. Validate that every generated `file://` reference exists.
-9. Print the next manual validation prompt for the editor surface.
+```powershell
+.\scripts\install-continue-pack.ps1 `
+  -TargetRepo "C:\path	o\your-project" `
+  -SharedAssets `
+  -GlobalConfigApiBase "http://127.0.0.1:11434"
+```
 
-## Validation Requirements
+## Linux Commands
 
-Shared-assets support should not be considered implemented until tests prove that:
+Preview the install:
 
-- Project-local install still works unchanged.
-- Shared asset install writes only to the chosen shared asset path and requested config file.
-- Dry-run mode writes nothing.
-- Backups are created before overwriting existing assets or config files.
-- Global config references resolve to real files.
-- Global config does not contain `file://./` references.
-- Rules are omitted by default and included only by explicit opt-in.
-- Windows, Linux, and macOS wrappers expose the same option names.
-- Documentation explains rollback and duplicate-rule behavior.
+```bash
+./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/.local/share/local-engineering-agent-pack/assets"   --global-config-path "$HOME/.continue/config.yaml"   --dry-run
+```
+
+Install shared assets and update the global Continue config:
+
+```bash
+./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/.local/share/local-engineering-agent-pack/assets"   --global-config-path "$HOME/.continue/config.yaml"
+```
+
+## macOS Commands
+
+Preview the install:
+
+```bash
+./scripts/install-continue-pack.macos.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/Library/Application Support/LocalEngineeringAgentPack/assets"   --global-config-path "$HOME/.continue/config.yaml"   --dry-run
+```
+
+Install shared assets and update the global Continue config:
+
+```bash
+./scripts/install-continue-pack.macos.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/Library/Application Support/LocalEngineeringAgentPack/assets"   --global-config-path "$HOME/.continue/config.yaml"
+```
+
+## Behavior
+
+When shared-assets mode is enabled, the installer:
+
+1. Requires a target repository path for safety checks and workflow context.
+2. Does not replace the target repository's `.continue` folder.
+3. Copies reusable assets into the shared asset path.
+4. Backs up an existing shared asset folder before replacing it.
+5. Generates the global Continue config automatically.
+6. Backs up the previous global Continue config before replacing it.
+7. Rewrites `file://./...` references into absolute references to the shared asset folder.
+8. Omits `rules:` by default to prevent duplicate rule warnings.
+9. Validates that copied `file://` references resolve.
+
+Shared-assets mode currently supports reusable assets and global config generation only. Do not combine it with `-AutoModelConfig`, `-ModelLanes`, or read-only/approved-write install profiles. Those profile features still write project-local config today.
+
+## Validation
+
+After installing, restart the editor and run this read-only test in Continue Agent mode:
+
+```text
+Use tools to inspect the repository root.
+Do not modify files.
+Do not guess.
+If tools are unavailable, say: TOOLS_UNAVAILABLE.
+Return only the actual top-level file and folder names you inspected.
+```
+
+Then verify externally:
+
+Windows PowerShell:
+
+```powershell
+git status --short
+Select-String -Path "$HOME\.continue\config.yaml" -Pattern "file://|rules:|prompts"
+```
+
+Linux or macOS:
+
+```bash
+git status --short
+grep -E "file://|rules:|prompts" "$HOME/.continue/config.yaml"
+```
+
+Expected result:
+
+- The global config contains absolute `file://` references to the shared asset folder.
+- The global config does not contain `file://./` references.
+- The global config does not contain `rules:` unless you explicitly included rules.
+- The opened repository remains clean unless you intentionally installed project-local assets separately.
 
 ## Security And Privacy
 
 The shared asset folder should contain reusable pack assets only. It must not contain:
 
 - API keys or tokens.
-- Private model server URLs.
+- Private model server URLs unless they are intentionally written to a local-only generated global config.
 - Private repository names.
 - User-specific validation outputs.
-- Local-only Continue config files that include machine-specific settings.
+- Raw runtime validation transcripts.
+- Local-only `config.local*.yaml` files.
 
-Generated config files may contain local absolute paths because editors need them, but those files should be treated as local machine state unless explicitly sanitized.
+Generated global config files may contain local absolute paths because editors need them. Treat those files as local machine state unless explicitly sanitized.
 
 ## Rollback
 
-Rollback should be simple:
+Rollback is straightforward:
 
 1. Restore the previous global Continue config backup.
 2. Remove or archive the shared asset folder.
 3. Re-run the installer in project-local mode if needed.
-4. Restart the editor and run the read-only tool validation prompt.
+4. Restart the editor.
+5. Run the read-only tool validation prompt again.
 
-## Implementation Plan
+## Known Limitations
 
-1. Keep this design document and validation coverage in place.
-2. Add installer flags for shared asset mode in PowerShell and Bash.
-3. Add dry-run tests for Windows, Linux, and macOS wrappers.
-4. Add generated global config validation for shared asset references.
-5. Update README and wiki setup flows once the implementation exists.
-6. Validate with a disposable sample repository before recommending it as a normal workflow.
-
-## Open Questions
-
-- Should the default shared asset path be user-level or configurable only?
-- Should the installer create a minimal project marker in each target repository?
-- Should shared assets support side-by-side pack versions?
-- How should non-Continue agent surfaces consume the same shared asset folder?
+- Shared-assets mode is currently implemented for Continue global config generation.
+- Project-local model profile generation remains separate.
+- Future non-Continue surfaces may reuse this folder layout, but they still need surface-specific validation evidence first.
+- The target repository can still have its own `.continue` folder for project-specific rules, evidence, or local overrides.

@@ -167,7 +167,7 @@
 - [x] Add explicit global Continue config generation for editor setups that ignore project-local config files.
 - [x] Ensure install outputs exclude local overrides, private endpoints, tokens, and machine-specific config.
 - [x] Document centralized shared asset installation design for teams or users with multiple target projects.
-- [ ] Implement centralized shared asset installation so global configs can point to one managed rules/prompts/docs folder instead of one project copy.
+- [x] Implement centralized shared asset installation so global configs can point to one managed rules/prompts/docs folder instead of one project copy.
 
 ## Milestone 10: ARM And Apple Silicon Model Support
 
