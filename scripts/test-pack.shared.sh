@@ -69,13 +69,14 @@ test_evidence_catalog_schema() {
     NR == 1 { next }
     NF != 8 { exit 1 }
     $1 == "" || $2 == "" || $3 == "" || $4 == "" || $5 == "" || $6 == "" || $7 == "" || $8 == "" { exit 1 }
-    $6 !~ /^(candidate-only|plan-review-candidate|read-only-tool-validated|read-only-cli-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass)$/ { exit 1 }
+    $6 !~ /^(candidate-only|plan-review-candidate|read-only-tool-validated|read-only-cli-validated|write-smoke-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass)$/ { exit 1 }
     $7 ~ /^[A-Za-z]:|^\/|\\|\.\./ { exit 1 }
     $0 ~ /192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|itama|Users\\|OneDrive|customer|token|secret/ { exit 1 }
     $6 == "approved-write-ready" { approved = 1 }
     $6 == "candidate-only" { candidate = 1 }
     $6 == "read-only-tool-validated" { readonly = 1 }
-    END { if (!approved || !candidate || !readonly) exit 1 }
+    $6 == "write-smoke-validated" { writesmoke = 1 }
+    END { if (!approved || !candidate || !readonly || !writesmoke) exit 1 }
   ' "$catalog" || return 1
   while IFS=$'\t' read -r area subject surface os model status evidence notes; do
     [ "$area" = "area" ] && continue
