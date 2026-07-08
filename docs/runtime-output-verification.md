@@ -57,10 +57,20 @@ The summary marks workflows as:
 
 - `Completed; verification passed`
 - `Failed guardrail verification`
+- `Failed guardrail verification; filename-fidelity fallback written`
 - `Tool call only output`
 - `Failed with exit code ...`
 
-Raw workflow outputs and verification files remain local in `runtime-validation-output/` until reviewed and sanitized.
+When verification fails with `FILENAME_NOT_IN_CONTEXT`, the runtime runner also writes a deterministic remediation artifact next to the original output:
+
+```text
+repository-discovery.filename-fidelity-fallback.md
+legacy-dotnet-dependency-migration.filename-fidelity-fallback.md
+```
+
+Treat the original model output as untrusted until the filename failures are reviewed. The fallback file lists the failed filename checks and gives a safe remediation template: re-read the supplied runtime context, keep only context-backed findings, label absent useful files as `recommended new file: <path>`, use `unconfirmed filename` when evidence is missing, then rerun verification.
+
+Raw workflow outputs, verification files, and fallback artifacts remain local in `runtime-validation-output/` until reviewed and sanitized.
 
 ## Limitations
 

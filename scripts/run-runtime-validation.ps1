@@ -161,6 +161,47 @@ function Invoke-OutputVerification {
     }
 }
 
+function New-FilenameFidelityFallback {
+    param(
+        [string]$WorkflowName,
+        [string]$VerificationOutput,
+        [string]$OutputPath,
+        [string]$FallbackPath
+    )
+
+    $filenameFailures = ($VerificationOutput -split "`n") | Where-Object { $_ -match '^FAIL FILENAME_NOT_IN_CONTEXT' }
+    if (-not $filenameFailures) {
+        return $false
+    }
+
+    $fallback = @(
+        "# Runtime Filename-Fidelity Fallback",
+        "",
+        "Workflow: $WorkflowName",
+        "Status: guardrail fallback required",
+        "Original output: $OutputPath",
+        "",
+        "## Why This Exists",
+        "",
+        "Deterministic verification found filename references that were not present in the supplied runtime context. Treat the original model output as untrusted until a human confirms or rewrites those references.",
+        "",
+        "## Failed Filename Checks",
+        "",
+        ($filenameFailures -join "`n"),
+        "",
+        "## Safe Remediation Template",
+        "",
+        "- Re-read the supplied runtime context before using the original output.",
+        "- Keep only findings tied to files that appear in the runtime context.",
+        '- Convert absent but useful files into `recommended new file: <path>` entries.',
+        '- Replace uncertain filenames with `unconfirmed filename` plus the evidence needed.',
+        "- Re-run runtime output verification before recording evidence as a pass."
+    ) -join "`n"
+
+    Set-Content -LiteralPath $FallbackPath -Value $fallback
+    return $true
+}
+
 $runtimeGuardrails = "Use only filenames that appear in the supplied runtime repository context. Do not invent or assume conventional files such as CHANGELOG.md, CONTRIBUTING.md, ARCHITECTURE.md, CI workflows, migration scripts, manifests, or .continue/config.yaml. If a useful file is absent, label it as recommended new file: <path> or missing file recommendation: <path>. If uncertain, write unconfirmed filename instead of naming it as existing."
 Push-Location -LiteralPath $TargetRepo
 try {
@@ -199,7 +240,18 @@ try {
             if ($verification.ExitCode -eq 0) {
                 $summaryRows.Add("| $($workflow.Name) | Completed; verification passed | $outputPath |")
             } else {
-                $summaryRows.Add("| $($workflow.Name) | Failed guardrail verification | $outputPath |")
+                $fallbackPath = Join-Path $runRoot "$($workflow.Name).filename-fidelity-fallback.md"
+                $fallbackWritten = New-FilenameFidelityFallback `
+                    -WorkflowName $workflow.Name `
+                    -VerificationOutput $verification.Output `
+                    -OutputPath $outputPath `
+                    -FallbackPath $fallbackPath
+
+                if ($fallbackWritten) {
+                    $summaryRows.Add("| $($workflow.Name) | Failed guardrail verification; filename-fidelity fallback written | $fallbackPath |")
+                } else {
+                    $summaryRows.Add("| $($workflow.Name) | Failed guardrail verification | $outputPath |")
+                }
             }
         } else {
             $summaryRows.Add("| $($workflow.Name) | Failed with exit code $exitCode | $outputPath |")

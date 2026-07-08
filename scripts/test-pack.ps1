@@ -1643,12 +1643,18 @@ Invoke-PackTest "runtime validation runner writes verification outputs" {
     Assert-True -Condition ($runner -match "EMPTY_MODEL_OUTPUT") -Message "PowerShell runtime runner should record empty model output instead of crashing."
     Assert-True -Condition ($runner -match "Use only filenames that appear in the supplied runtime repository context") -Message "PowerShell runtime runner should inject filename fidelity guardrails."
     Assert-True -Condition ($runner -match "recommended new file") -Message "PowerShell runtime runner should instruct models how to label absent recommended files."
+    Assert-True -Condition ($runner -match "New-FilenameFidelityFallback") -Message "PowerShell runtime runner should create filename-fidelity fallback artifacts."
+    Assert-True -Condition ($runner -match "filename-fidelity-fallback\.md") -Message "PowerShell runtime runner should write deterministic fallback files for filename verification failures."
+    Assert-True -Condition ($runner -match "FILENAME_NOT_IN_CONTEXT") -Message "PowerShell runtime runner fallback should be tied to filename verifier failures."
     Assert-True -Condition ($sharedRunner -match "verify-runtime-output\.shared\.sh") -Message "Bash runtime runner should call verifier."
     Assert-True -Condition ($sharedRunner -match "Local Ollama API preflight failed") -Message "Bash runtime runner should fail fast when local Ollama is unreachable."
     Assert-True -Condition ($sharedRunner -match "/api/tags") -Message "Bash runtime runner should preflight Ollama tags endpoint."
     Assert-True -Condition ($sharedRunner -match "EMPTY_MODEL_OUTPUT") -Message "Bash runtime runner should record empty model output instead of crashing."
     Assert-True -Condition ($sharedRunner -match "Use only filenames that appear in the supplied runtime repository context") -Message "Bash runtime runner should inject filename fidelity guardrails."
     Assert-True -Condition ($sharedRunner -match "recommended new file") -Message "Bash runtime runner should instruct models how to label absent recommended files."
+    Assert-True -Condition ($sharedRunner -match "write_filename_fidelity_fallback") -Message "Bash runtime runner should create filename-fidelity fallback artifacts."
+    Assert-True -Condition ($sharedRunner -match "filename-fidelity-fallback\.md") -Message "Bash runtime runner should write deterministic fallback files for filename verification failures."
+    Assert-True -Condition ($sharedRunner -match "FILENAME_NOT_IN_CONTEXT") -Message "Bash runtime runner fallback should be tied to filename verifier failures."
     Assert-True -Condition ($sharedRunner -match "\.verification\.txt") -Message "Bash runtime runner should write verification output files."
 }
 

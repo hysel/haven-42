@@ -340,6 +340,12 @@ test_runtime_validation_runner_writes_verification_outputs() {
     grep -q "verify-runtime-output.shared.sh" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
     grep -q "Local Ollama API preflight failed" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
     grep -q "/api/tags" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
+    grep -q "New-FilenameFidelityFallback" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "filename-fidelity-fallback.md" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "FILENAME_NOT_IN_CONTEXT" "$REPO_ROOT/scripts/run-runtime-validation.ps1" &&
+    grep -q "write_filename_fidelity_fallback" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
+    grep -q "filename-fidelity-fallback.md" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
+    grep -q "FILENAME_NOT_IN_CONTEXT" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh" &&
     grep -q ".verification.txt" "$REPO_ROOT/scripts/run-runtime-validation.shared.sh"
 }
 

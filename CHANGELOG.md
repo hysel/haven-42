@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added deterministic filename-fidelity fallback artifacts for runtime validation workflows that fail with `FILENAME_NOT_IN_CONTEXT`.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
 - Added runtime runner filename-fidelity instructions and regression coverage so model-backed validation receives the guardrail next to supplied context.
 - Added sanitized filename-fidelity hardening rerun evidence for generated Java, Go, Rust, SQL, and Infrastructure workflow validation.
