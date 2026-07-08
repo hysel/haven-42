@@ -800,9 +800,25 @@ JSON
   grep -q "3 - DEEP REVIEW - qwen3-coder:30b" "$local_config" || return 1
   grep -q "apiBase: http://example.local:11434" "$local_config" || return 1
   ! grep -q "$recommendation_path" "$local_config" || return 1
-  grep -q "config.local.yaml" "$REPO_ROOT/scripts/apply-recommended-agent-config.ps1" &&
-    grep -q "config.local.yaml" "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" &&
-    grep -q "apply-recommended-agent-config" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
+
+  global_config="$temp_root/global-config.yaml"
+  "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" \
+    --target-repo "$target_root" \
+    --recommendation-path "$recommendation_path" \
+    --ollama-base-url "http://example.local:11434" \
+    --global-config \
+    --global-config-path "$global_config" >/tmp/apply-recommended-global-config.out 2>&1 || return 1
+
+  [ -f "$global_config" ] || return 1
+  grep -q "1 - WRITE SAFE - qwen3.5:9b" "$global_config" || return 1
+  grep -q "prompts/repository-discovery.md" "$global_config" || return 1
+  ! grep -q "file://./" "$global_config" || return 1
+  ! grep -q "^rules:" "$global_config" || return 1
+  ! grep -q "$recommendation_path" "$global_config" || return 1
+
+  grep -q "GlobalConfig" "$REPO_ROOT/scripts/apply-recommended-agent-config.ps1" &&
+    grep -q -- "--global-config" "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" &&
+    grep -q "global Continue config" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "Do not commit this file" "$REPO_ROOT/docs/hardware-aware-recommendations.md"
 }
 run_test "validate-pack succeeds for repository" test_validate_succeeds

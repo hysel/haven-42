@@ -1923,12 +1923,25 @@ Invoke-PackTest "recommended agent config generation writes local-only config" {
         Assert-True -Condition ($localConfig -match "apiBase: http://example.local:11434") -Message "Local config should include the local-only endpoint when requested."
         Assert-True -Condition ($localConfig -notmatch [regex]::Escape($recommendationPath)) -Message "Local config should not record the recommendation file path."
 
+        $globalConfigPath = Join-Path $tempRoot "global-config.yaml"
+        $globalApply = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.ps1") `
+            -Arguments @("-TargetRepo", $targetRoot, "-RecommendationPath", $recommendationPath, "-OllamaBaseUrl", "http://example.local:11434", "-GlobalConfig", "-GlobalConfigPath", $globalConfigPath)
+        Assert-Equal -Actual $globalApply.ExitCode -Expected 0 -Message "Apply recommendation should write global config when requested."
+        Assert-True -Condition (Test-Path -LiteralPath $globalConfigPath) -Message "Global config should be written when requested."
+        $globalConfig = Get-Content -LiteralPath $globalConfigPath -Raw
+        Assert-True -Condition ($globalConfig -match "1 - WRITE SAFE - qwen3\.5:9b") -Message "Global config should include generated model lanes."
+        Assert-True -Condition ($globalConfig -match "prompts/repository-discovery\.md") -Message "Global config should include prompt references."
+        Assert-True -Condition ($globalConfig -notmatch "file://\./") -Message "Global config should not contain project-relative file URIs."
+        Assert-True -Condition ($globalConfig -notmatch "^rules:") -Message "Global config should omit rules by default."
+        Assert-True -Condition ($globalConfig -notmatch [regex]::Escape($recommendationPath)) -Message "Global config should not record the recommendation file path."
+
         $script = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.ps1") -Raw
         $sharedScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.shared.sh") -Raw
         $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/hardware-aware-recommendations.md") -Raw
-        Assert-True -Condition ($script -match "config.local.yaml") -Message "PowerShell apply script should write local config."
-        Assert-True -Condition ($sharedScript -match "config.local.yaml") -Message "Bash apply script should write local config."
-        Assert-True -Condition ($doc -match "apply-recommended-agent-config") -Message "Docs should explain apply recommendation script."
+        Assert-True -Condition ($script -match "GlobalConfig") -Message "PowerShell apply script should support global config output."
+        Assert-True -Condition ($sharedScript -match "--global-config") -Message "Bash apply script should support global config output."
+        Assert-True -Condition ($doc -match "global Continue config") -Message "Docs should explain global config generation."
         Assert-True -Condition ($doc -match "Do not commit this file") -Message "Docs should warn not to commit local config."
     }
     finally {

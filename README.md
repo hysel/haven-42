@@ -189,9 +189,11 @@ Quick checks:
 - Continue shows the local Ollama model from that config.
 - Continue can see the prompts such as `repository-discovery` and `implementation-plan`.
 
-If Continue does not show a model or prompts, make the copied `.continue/config.yaml` your active Continue config. Some editor setups use a global/default Continue config; in that case, copy this project's config into the default Continue config location or select it through your editor's Continue settings.
+If Continue does not show a model or prompts, make the copied `.continue/config.yaml` your active Continue config. Some editor setups use a global/default Continue config; in that case, use the installer or hardware-aware apply script with `-GlobalConfig` or `--global-config` so the global file is generated with absolute prompt, rule, and doc references.
 
-If you see duplicate rule warnings, you probably loaded the same rules from both the global Continue config and the project-local `.continue` folder. Keep only one active source of rules.
+Do not copy `.continue/config.local.yaml` into the global Continue config by hand. Local config files can contain `file://./...` references that only make sense inside the project `.continue` folder. When copied globally, they can make Continue look for prompts under the editor install folder.
+
+If you see duplicate rule warnings, you probably loaded the same rules from both the global Continue config and the project-local `.continue` folder. Regenerate the global config without the include-rules option; generated global configs omit rules by default.
 
 For VS Code, VSCodium, Agent mode, duplicate-rule, and CLI fallback checks, use `docs/editor-compatibility.md`.
 
