@@ -137,6 +137,61 @@ Do not include private repository names, private paths, private endpoints, usern
 - `llama3.1:8b-instruct-q5_K_M` is now an API-level candidate, but it still needs manual Continue editor validation.
 - GLM and DeepSeek remain poor fits for this pack's tool-backed Agent workflow in the current local setup.
 - Copied/custom local names should not remain in candidate lists unless they are installed locally or can be pulled by that exact name.
+
+## 2026-07-08 Generated Java, Go, Rust, SQL, And Infrastructure Workflow Validation
+
+### Summary
+
+- Validation type: Generated sample repository workflow validation
+- Repository categories: Java Spring API, Go service, Rust CLI, SQL migrations, Terraform/Kubernetes infrastructure sample
+- Operating system: Windows
+- Editor surface: Continue CLI through `npx @continuedev/cli`
+- Model: `qwen3.5:9b`
+- Provider: Ollama-compatible local endpoint, endpoint omitted
+- MCP state: Not used
+- Pack version or commit: `0.2.0` development branch after optional language rule-pack expansion
+
+### Setup
+
+- Generated disposable samples under ignored runtime output.
+- Confirmed local model server preflight before runtime workflows started.
+- Ran all runtime validation workflows against generated runtime context for each sample.
+- Kept raw outputs in ignored runtime output and committed only sanitized status evidence.
+
+### Results
+
+| Generated Sample | Workflows Run | Verification Passed | Empty Output | Filename-Fidelity Failures | Notes |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Java Spring API | 12 | 8 | 1 | 3 | Core review/planning workflows mostly passed; bug investigation returned no final text. |
+| Go service | 12 | 6 | 2 | 4 | Discovery and planning paths ran, but security/documentation/release-style outputs referenced absent files. |
+| Rust CLI | 12 | 5 | 1 | 6 | Code review returned no final text; several workflows referenced conventional files absent from the generated sample. |
+| SQL migrations | 12 | 5 | 0 | 7 | Several workflows invented or normalized migration filenames not present in supplied context. |
+| Terraform/Kubernetes infrastructure | 12 | 7 | 0 | 5 | Infrastructure review was usable, but some workflows referenced absent conventional docs or Kubernetes filenames. |
+
+### Failure Signals
+
+- `EMPTY_MODEL_OUTPUT`
+- `FILENAME_NOT_IN_CONTEXT`
+
+### What Worked
+
+- The runtime runner completed all workflows for all five generated samples without aborting on empty model output.
+- The new empty-output guard recorded `EMPTY_MODEL_OUTPUT` and allowed the remaining workflows to continue.
+- Repository discovery, architecture review, code review, implementation planning, security review, performance review, refactoring planner, product manager, and release-readiness each produced at least some passing evidence across the expanded language samples.
+- Runtime output verification caught filename drift before the evidence could be mistaken for a clean language-pack pass.
+
+### Gaps
+
+- The expanded validation is not a full editor/model pass for every language pack.
+- Some workflows still mention conventional files such as architecture, contributing, changelog, CI, Kubernetes, or migration filenames when those files are absent from generated context.
+- Empty output still occurs intermittently with the current local model, so no workflow should rely on a single model response as proof of quality.
+
+### Pack Follow-Up
+
+- Strengthen prompts so missing conventional files are described as recommendations, not as existing files.
+- Add filename-drift fixtures for generated Java, Go, Rust, SQL, and Infrastructure samples.
+- Keep optional language rule packs evidence-gated until repository-discovery, implementation-planning, and code-review workflows pass consistently per ecosystem.
+
 ### Sanitization Checklist
 
 - [x] No private repository names.

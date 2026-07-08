@@ -1604,9 +1604,11 @@ Invoke-PackTest "runtime validation runner writes verification outputs" {
     Assert-True -Condition ($runner -match "Local Ollama API preflight failed") -Message "PowerShell runtime runner should fail fast when local Ollama is unreachable."
     Assert-True -Condition ($runner -match "/api/tags") -Message "PowerShell runtime runner should preflight Ollama tags endpoint."
     Assert-True -Condition ($runner -match "Failed guardrail verification") -Message "PowerShell runtime runner should summarize verifier failures."
+    Assert-True -Condition ($runner -match "EMPTY_MODEL_OUTPUT") -Message "PowerShell runtime runner should record empty model output instead of crashing."
     Assert-True -Condition ($sharedRunner -match "verify-runtime-output\.shared\.sh") -Message "Bash runtime runner should call verifier."
     Assert-True -Condition ($sharedRunner -match "Local Ollama API preflight failed") -Message "Bash runtime runner should fail fast when local Ollama is unreachable."
     Assert-True -Condition ($sharedRunner -match "/api/tags") -Message "Bash runtime runner should preflight Ollama tags endpoint."
+    Assert-True -Condition ($sharedRunner -match "EMPTY_MODEL_OUTPUT") -Message "Bash runtime runner should record empty model output instead of crashing."
     Assert-True -Condition ($sharedRunner -match "\.verification\.txt") -Message "Bash runtime runner should write verification output files."
 }
 

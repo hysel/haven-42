@@ -129,6 +129,10 @@ for workflow in "${PROMPTS[@]}"; do
       -p "Use the supplied runtime repository context. Do not call tools. Produce final review text only."
   ) > "$output_path" 2>&1 || true
 
+  if [ ! -s "$output_path" ]; then
+    printf 'FAIL EMPTY_MODEL_OUTPUT\n' > "$verification_path"
+    continue
+  fi
   "$PACK_ROOT/scripts/verify-runtime-output.shared.sh" \
     --output-path "$output_path" \
     --context-path "$CONTEXT_PATH" \

@@ -13,9 +13,8 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added sanitized Generated Java, Go, Rust, SQL, and Infrastructure workflow validation evidence, including empty-output and filename-drift guardrail signals.
 - Added optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs with static generated-sample validation evidence while keeping them out of the default config.
-
-
 
 - Added non-.NET runtime context generation coverage for generated TypeScript, Node, Infrastructure as Code, and SQL samples.
 - Added shared asset installation design guidance for future centralized prompts/rules/docs reuse across multiple target repositories.
@@ -47,6 +46,8 @@ This project follows a simple changelog format:
 - Improved runtime context generation so nested target folders do not inherit parent repository git status and common multi-language project metadata is included in context excerpts.
 
 ### Fixed
+
+- Fixed runtime validation handling for empty model output so one empty response records EMPTY_MODEL_OUTPUT instead of aborting the run.
 
 - Fixed hardware-aware config application so generated global Continue config uses absolute target repository file references and omits rules by default, preventing editor-install-folder prompt lookup failures.
 - Fixed PowerShell sample repository factory README generation so Markdown command examples do not leak factory script text into generated samples.

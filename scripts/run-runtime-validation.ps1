@@ -181,11 +181,14 @@ try {
             -p "Use the supplied runtime repository context. Do not call tools. Do not request List, Read, Bash, or git status. Produce final review text only. $($workflow.Task)" 2>&1
 
         $exitCode = $LASTEXITCODE
-        $output | Set-Content -LiteralPath $outputPath
+        $outputText = if ($null -eq $output) { "" } else { ($output -join "`n") }
+        Set-Content -LiteralPath $outputPath -Value $outputText
 
-        $outputText = ($output -join "`n")
-
-        if ($exitCode -eq 0 -and (Test-ToolCallOnlyOutput -Text $outputText)) {
+        if ($exitCode -eq 0 -and [string]::IsNullOrWhiteSpace($outputText)) {
+            $verificationPath = Join-Path $runRoot "$($workflow.Name).verification.txt"
+            "FAIL EMPTY_MODEL_OUTPUT" | Set-Content -LiteralPath $verificationPath
+            $summaryRows.Add("| $($workflow.Name) | Empty output | $outputPath |")
+        } elseif ($exitCode -eq 0 -and (Test-ToolCallOnlyOutput -Text $outputText)) {
             $summaryRows.Add("| $($workflow.Name) | Tool call only output | $outputPath |")
         } elseif ($exitCode -eq 0) {
             $verification = Invoke-OutputVerification -OutputPath $outputPath -WorkflowName $workflow.Name

@@ -302,7 +302,7 @@
 - [x] Add optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
 - [x] Add evidence-gated rule selection guidance for optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code packs.
 - [x] Validate optional language rule packs against generated sample repositories with static evidence checks.
-- [ ] Validate rule packs against editor/model repository-discovery, implementation-planning, and code-review workflows.
+- [ ] Validate rule packs against editor/model repository-discovery, implementation-planning, and code-review workflows. Partial generated-sample evidence is recorded for Java, Go, Rust, SQL, and Infrastructure; remaining failures must be resolved before marking complete.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
 

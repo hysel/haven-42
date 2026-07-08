@@ -66,6 +66,7 @@ Do not record private repository names, customer names, internal hostnames, priv
 | 2026-07-05 | Private legacy .NET Framework Excel-DNA add-in repository category | Continue CLI with ignored local Ollama config and generated runtime context | Repository discovery, implementation planning, legacy dependency migration readiness | Partial pass: install and context generation worked, read-only outputs were final text, but discovery misstated a project filename and migration readiness included unsupported lifecycle and modernization claims | Keep as Milestone 13 category evidence; strengthen dependency-migration evidence rules before treating migration guidance as safe. |
 | 2026-07-05 | Private legacy .NET Framework Excel-DNA add-in repository category | Continue CLI with ignored local Ollama config and generated runtime context | Repository discovery and legacy dependency migration rerun after prompt guardrails | Failed guardrail: the model still synthesized an incorrect project filename and made package/framework compatibility claims without supplied source evidence | Add deterministic output verification or a stricter template fallback for filename fidelity and lifecycle/support claims. |
 | 2026-07-06 | Generated Python and TypeScript sample repositories | Continue CLI with ignored local Ollama config | Repository discovery, architecture review, code review, implementation planning, security review, performance review, documentation review, AI framework self-review, refactoring planner, product manager, release readiness | Partial pass: both generated samples completed all workflows with final text; most workflows passed runtime verification, while documentation and release-style workflows exposed filename-drift guardrail failures | Strengthen documentation, AI framework self-review, and release-readiness prompts so missing recommended files are not described as existing context. |
+| 2026-07-08 | Generated Java, Go, Rust, SQL, and Infrastructure sample repositories | Continue CLI with ignored local Ollama config and `qwen3.5:9b` | All runtime validation workflows | Partial pass: all five generated samples completed the workflow set without runner aborts; pass counts ranged from 5 to 8 of 12, with `EMPTY_MODEL_OUTPUT` and filename-drift guardrail failures remaining | Keep language packs evidence-gated; strengthen prompt filename-fidelity behavior before treating expanded language workflow validation as clean. |
 
 ## Local Model Server Preflight
 
@@ -73,7 +74,10 @@ When runtime validation uses a local Ollama config, the runner checks the config
 
 If the local model server does not respond, runtime validation fails fast with a sanitized `Local Ollama API preflight failed` message. Do not commit private endpoints or raw timeout traces. Start or repair the local model server, then rerun repository discovery, implementation planning, and code review.
 
-The generated multi-language validation status is recorded in `examples/multi-language-workflow-validation.md`, including the earlier preflight block and the later partial pass with filename-drift guardrail failures.
+If a model or CLI call returns no final text for a workflow, the runner records `EMPTY_MODEL_OUTPUT`, writes the expected output and verification files, and continues the run instead of aborting remaining workflows.
+
+The generated multi-language validation status is recorded in `examples/multi-language-workflow-validation.md`, including the earlier Python/TypeScript preflight block and the later Java, Go, Rust, SQL, and Infrastructure partial pass with `EMPTY_MODEL_OUTPUT` and filename-drift guardrail failures.
+
 ## Workflow Checklist
 
 Run these workflows during validation:
