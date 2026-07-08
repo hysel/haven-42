@@ -132,6 +132,7 @@ $requiredFiles = @(
     "docs/release.md",
     "docs/evidence-catalog.md",
     "docs/hardware-aware-recommendations.md",
+    "docs/shared-asset-installation.md",
     "docs/compatibility.md",
     "docs/runtime-validation.md",
     "docs/editor-compatibility.md",

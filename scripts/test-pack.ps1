@@ -1956,3 +1956,30 @@ if ($failed) {
 
 Write-Host "Test run passed. $testCount tests executed." -ForegroundColor Green
 exit 0
+
+Invoke-PackTest "shared asset installation docs define centralized config strategy" {
+    $docPath = Join-Path $repoRoot "docs/shared-asset-installation.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
+    $hardwareDocPath = Join-Path $repoRoot "docs/hardware-aware-recommendations.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Shared asset installation doc should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
+    $hardwareDoc = Get-Content -LiteralPath $hardwareDocPath -Raw
+
+    Assert-True -Condition ($doc -match "Project-Local Mode") -Message "Shared asset doc should preserve project-local mode."
+    Assert-True -Condition ($doc -match "Shared-Assets Mode") -Message "Shared asset doc should define shared-assets mode."
+    Assert-True -Condition ($doc -match "SharedAssetsPath") -Message "Shared asset doc should define explicit path option."
+    Assert-True -Condition ($doc -match "file://\./") -Message "Shared asset doc should warn against project-relative global references."
+    Assert-True -Condition ($doc -match "duplicate rule") -Message "Shared asset doc should cover duplicate-rule behavior."
+    Assert-True -Condition ($doc -match "Rollback") -Message "Shared asset doc should include rollback guidance."
+    Assert-True -Condition ($readme -match "docs/shared-asset-installation.md") -Message "README should link shared asset doc."
+    Assert-True -Condition ($hardwareDoc -match "docs/shared-asset-installation.md") -Message "Hardware-aware docs should link shared asset planning."
+    Assert-True -Condition ($todo -match "centralized shared asset") -Message "TODO should track centralized shared asset work."
+    Assert-True -Condition ($roadmap -match "centralized shared asset") -Message "Roadmap should track centralized shared asset work."
+}

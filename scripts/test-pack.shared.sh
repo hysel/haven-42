@@ -821,6 +821,19 @@ JSON
     grep -q "global Continue config" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "Do not commit this file" "$REPO_ROOT/docs/hardware-aware-recommendations.md"
 }
+
+test_shared_asset_installation_doc() {
+  grep -q "Project-Local Mode" "$REPO_ROOT/docs/shared-asset-installation.md" &&
+    grep -q "Shared-Assets Mode" "$REPO_ROOT/docs/shared-asset-installation.md" &&
+    grep -q "SharedAssetsPath" "$REPO_ROOT/docs/shared-asset-installation.md" &&
+    grep -q "file://\./" "$REPO_ROOT/docs/shared-asset-installation.md" &&
+    grep -q "duplicate rule" "$REPO_ROOT/docs/shared-asset-installation.md" &&
+    grep -q "Rollback" "$REPO_ROOT/docs/shared-asset-installation.md" &&
+    grep -q "docs/shared-asset-installation.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/shared-asset-installation.md" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
+    grep -q "centralized shared asset" "$REPO_ROOT/TODO.md" &&
+    grep -q "centralized shared asset" "$REPO_ROOT/ROADMAP.md"
+}
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
@@ -859,6 +872,7 @@ run_test "sample repository factory creates expected fixtures" test_sample_repos
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 run_test "hardware-aware recommendation scripts emit sanitized model lanes" test_hardware_aware_recommendation_scripts
+run_test "shared asset installation docs define centralized config strategy" test_shared_asset_installation_doc
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 
 if [ "$FAILED" -eq 1 ]; then

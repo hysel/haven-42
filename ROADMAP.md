@@ -28,7 +28,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python and TypeScript rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; editor/model workflow validation and additional ecosystems remain pending. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output and local-only Continue config generation are implemented for current scope; future surface reuse and easy UI remain planned. |
+| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output and local-only Continue config generation are implemented for current scope; future surface reuse, centralized shared asset config generation, and easy UI remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -261,6 +261,7 @@ Scope:
 - Document Windows, Linux, and macOS install/update commands. Done.
 - Add an explicit global Continue config update mode for editor setups that ignore project-local config files. Done.
 - Omit `rules:` from generated global config by default to avoid duplicate rule warnings when project-local `.continue/rules` are also loaded. Done.
+- Design centralized shared asset installation for users with multiple target repositories. Design documented in `docs/shared-asset-installation.md`; implementation remains planned.
 - Keep local overrides, private endpoints, tokens, and machine-specific config out of install outputs. Done for local config override exclusion.
 
 Exit criteria:

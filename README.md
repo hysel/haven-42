@@ -19,6 +19,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
+| Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |
 | Profile a remote LLM machine | `docs/remote-hardware-profile.md` |
 | Evaluate newer model candidates | `docs/online-model-discovery.md` |
 | Validate whether a model can use tools | `docs/model-tool-use-validation.md` |
@@ -635,7 +636,7 @@ Representative outputs for major workflows. These examples show expected structu
 
 Workflow documentation for enterprise review practices, including MCP research, setup guidance, workflow examples, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
 
-Use this folder for deeper instructions after the quick start. Important guides include local model selection, local Agent model testing, model tool-use validation, local model reliability, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
+Use this folder for deeper instructions after the quick start. Important guides include local model selection, local Agent model testing, model tool-use validation, local model reliability, shared asset installation planning, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
 
 ### `scripts`
 
@@ -797,6 +798,7 @@ Runtime status:
 
 ## Workflow Docs
 
+- `docs/shared-asset-installation.md`
 - `docs/sonarqube-review.md`
 - `docs/sonarqube-integration-options.md`
 - `docs/mcp-options.md`
