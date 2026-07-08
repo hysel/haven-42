@@ -25,7 +25,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 14: Agent Surface Portability And Broader Audience | In Progress | The project is repositioned as a local-first engineering agent pack, Continue remains the first supported surface, and an evidence-gated compatibility matrix now tracks other open-source agent surfaces. |
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
 | Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories; runtime context now includes non-.NET metadata from generated samples. |
-| Milestone 17: Agent Surface Compatibility Validation | In Progress | Cline now has a read-only validation guide and evidence template; real non-Continue surface validation evidence remains pending. |
+| Milestone 17: Agent Surface Compatibility Validation | In Progress | Cline has read-only generated-sample validation evidence for `qwen3-coder:30b` at 16k context; approved-write remains blocked and Aider validation remains pending. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; generated editor/model workflow evidence is recorded, prompt and runner filename-fidelity guardrails are in place, and runtime runners now write filename-fidelity fallback artifacts for deterministic filename failures. Remaining empty-output failures and any non-filename guardrail repeats require separate remediation before promotion. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
 | Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, and centralized shared asset config generation are implemented for current scope; future surface reuse and easy UI remain planned. |
@@ -463,7 +463,7 @@ Goal: Convert candidate agent surfaces from documentation into evidence-backed c
 Scope:
 
 - Add a Cline read-only validation guide and sanitized evidence template. Done.
-- Validate at least one generated sample repository with Cline in read-only mode.
+- Validate at least one generated sample repository with Cline in read-only mode. Done for generated Python sample with `qwen3-coder:30b` at 16k context.
 - Validate at least one generated sample repository with Aider in plan or patch mode.
 - Record surface, model, OS, tool permissions, failure signals, and changed-file verification.
 - Keep Continue as the supported first path until another surface has equivalent validation evidence.

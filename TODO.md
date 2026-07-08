@@ -282,9 +282,9 @@
 ## Milestone 17: Agent Surface Compatibility Validation
 
 - [x] Add Cline read-only validation guide and sanitized evidence template.
-- [ ] Validate Cline against a generated sample repository in read-only mode.
+- [x] Validate Cline against a generated sample repository in read-only mode.
 - [ ] Validate Aider against a generated sample repository in plan or patch mode.
-- [ ] Record sanitized evidence for each non-Continue agent surface.
+- [x] Record sanitized Cline read-only evidence for one non-Continue agent surface.
 - [ ] Keep approved-write status blocked until external changed-file verification passes.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation

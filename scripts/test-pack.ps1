@@ -616,7 +616,7 @@ Invoke-PackTest "agent surface docs define portability boundary" {
 }
 
 
-Invoke-PackTest "Cline read-only validation docs define candidate workflow" {
+Invoke-PackTest "Cline read-only validation docs define read-only workflow" {
     $docPath = Join-Path $repoRoot "docs/cline-readonly-validation.md"
     $evidencePath = Join-Path $repoRoot "examples/cline-readonly-validation.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -641,10 +641,10 @@ Invoke-PackTest "Cline read-only validation docs define candidate workflow" {
     Assert-True -Condition ($doc -match "HALLUCINATED_STRUCTURE") -Message "Cline doc should define hallucinated-structure failure signal."
     Assert-True -Condition ($doc -match "git status --short") -Message "Cline doc should require external git verification."
     Assert-True -Condition ($doc -match "examples/cline-readonly-validation.md") -Message "Cline doc should point at evidence template."
-    Assert-True -Condition ($evidence -match "Candidate only") -Message "Cline evidence template should start candidate-only."
+    Assert-True -Condition ($evidence -match "Read-only tool validated") -Message "Cline evidence should record read-only validation scope."
     Assert-True -Condition ($evidence -match "Validation Record Template") -Message "Cline evidence should include a reusable template."
     Assert-True -Condition ($readme -match "docs/cline-readonly-validation.md") -Message "README should link the Cline validation doc."
-    Assert-True -Condition ($catalog -match "Cline read-only validation workflow") -Message "Evidence catalog should include Cline candidate workflow."
+    Assert-True -Condition (($catalog -match "Cline read-only validation workflow") -and ($catalog -match "read-only-tool-validated")) -Message "Evidence catalog should include Cline read-only validation workflow."
     Assert-True -Condition ($todo -match "Cline read-only validation guide") -Message "TODO should track Cline validation guide completion."
     Assert-True -Condition ($roadmap -match "Cline read-only validation guide") -Message "Roadmap should track Cline validation guide completion."
 }

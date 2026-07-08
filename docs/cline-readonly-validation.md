@@ -11,12 +11,12 @@ The goal is to test whether Cline can safely inspect a generated sample reposito
 | Area | Status |
 | --- | --- |
 | Surface | Cline |
-| Validation level | Candidate |
-| Pack support | Documentation and evidence template only |
+| Validation level | Read-only validated for generated Python sample with `qwen3-coder:30b` at 16k context |
+| Pack support | Read-only validation guide and sanitized evidence records |
 | Write mode | Blocked |
 | Evidence target | `examples/cline-readonly-validation.md` |
 
-Cline should remain candidate-only until a real editor run proves repository discovery, file reads, grounded output, and clean git status in a disposable sample repository. The first generated-sample run is recorded as a failed tool-execution attempt in `examples/cline-readonly-validation.md`.
+Cline has one read-only validated generated-sample run with `qwen3-coder:30b` at 16k context. Earlier and smaller-model runs showed tool-execution failures or noisy unsupported claims, so Cline remains blocked for approved writes until a scoped write smoke test passes external verification.
 
 ## Before You Start
 
@@ -144,7 +144,7 @@ Do not commit raw transcripts, private paths, private endpoints, usernames, mach
 
 ## Promotion Rules
 
-- Keep Cline as `candidate-only` until a sanitized read-only evidence record is committed.
+- Keep Cline read-only validation scoped to the exact surface, model, OS, sample type, and context settings recorded in evidence.
 - Move Cline to `read-only-tool-validated` only after repository discovery and file-content reads pass on a generated sample.
 - Do not test write mode until read-only evidence exists.
 - Do not mark Cline `approved-write-ready` until a scoped write smoke test passes in a disposable repository and is verified with `git status`, `git diff --check`, and direct file-content inspection outside Cline.
