@@ -145,3 +145,7 @@ The generated global config backs up the previous global config and omits `rules
 ## Next Stage
 
 The recommendation JSON can now generate a local-only Continue config. Continue to run editor read-only and approved-write smoke tests before trusting a model for project changes.
+
+## Shared Asset Planning
+
+Hardware-aware config generation currently writes project-local or global Continue config references for the selected target repository. For users who manage many repositories from one machine, see `docs/shared-asset-installation.md` for the planned centralized shared asset mode. That mode is not implemented yet; use it as design guidance, not as an install command reference.
