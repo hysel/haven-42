@@ -22,7 +22,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
 | Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, validation workflow guidance, and first legacy .NET category evidence are defined; additional real repository categories remain pending. |
-| Milestone 14: Agent Surface Portability And Broader Audience | Planned | Reposition the project as a local-first engineering agent pack, keep Continue as the first supported surface, and evaluate other open-source agent surfaces for non-enterprise and enterprise use. |
+| Milestone 14: Agent Surface Portability And Broader Audience | In Progress | The project is repositioned as a local-first engineering agent pack, Continue remains the first supported surface, and an evidence-gated compatibility matrix now tracks other open-source agent surfaces. |
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
 | Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories; runtime context now includes non-.NET metadata from generated samples. |
 | Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
@@ -400,8 +400,8 @@ Scope:
 
 - Reposition the project name and product language around a local-first engineering agent pack rather than a Continue-only enterprise pack.
 - Keep Continue as the first supported and tested agent surface until another surface has equivalent validation evidence.
-- Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options.
-- Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready.
+- Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options. Done.
+- Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
 - Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams.
 - Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical.
 - Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets.

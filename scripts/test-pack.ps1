@@ -600,10 +600,16 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
 
     Assert-True -Condition ($doc -match "Continue is the first supported surface") -Message "Agent surface doc should keep Continue as the current supported surface."
+    Assert-True -Condition ($doc -match "Compatibility Matrix") -Message "Agent surface doc should include an explicit compatibility matrix."
     Assert-True -Condition ($doc -match "Candidate means") -Message "Agent surface doc should define candidate status."
+    Assert-True -Condition ($doc -match "Read-only validated") -Message "Agent surface doc should define read-only validation."
+    Assert-True -Condition ($doc -match "Plan validated") -Message "Agent surface doc should define plan validation."
     Assert-True -Condition ($doc -match "Approved-write ready") -Message "Agent surface doc should define approved-write readiness."
-    Assert-True -Condition ($doc -match "Cline") -Message "Agent surface doc should include Cline as a candidate."
-    Assert-True -Condition ($doc -match "Aider") -Message "Agent surface doc should include Aider as a candidate."
+    foreach ($surface in @("Continue", "Cline", "Aider", "Kilo Code", "OpenCode", "OpenHands", "Roo Code")) {
+        Assert-True -Condition ($doc -match [regex]::Escape($surface)) -Message "Agent surface doc should include $surface."
+    }
+    Assert-True -Condition ($doc -match "External verification commands") -Message "Agent surface doc should require external verification evidence."
+    Assert-True -Condition ($doc -match "Blocked") -Message "Agent surface doc should block unvalidated approved writes."
     Assert-True -Condition ($doc -match "Non-Enterprise Use") -Message "Agent surface doc should address non-enterprise users."
     Assert-True -Condition ($readme -match "docs/agent-surface-options.md") -Message "README should link agent surface options."
     Assert-True -Condition ($roadmap -match "Milestone 14: Agent Surface Portability And Broader Audience") -Message "Roadmap should include Milestone 14."
