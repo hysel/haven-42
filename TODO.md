@@ -236,7 +236,8 @@
 - [x] Record first sanitized Milestone 13 validation evidence for a legacy .NET repository category.
 - [x] Convert first legacy validation findings into filename-fidelity and lifecycle-claim prompt guardrails.
 - [x] Add deterministic output verification for filename fidelity, unsafe migration patterns, and lifecycle/support claims.
-- [ ] Add stricter template fallback for workflows that repeatedly fail deterministic output verification.
+- [x] Add deterministic filename-fidelity fallback artifacts for workflows that fail runtime output verification.
+- [ ] Add workflow-specific remediation templates for non-filename deterministic output verification failures if they recur.
 - [ ] Add generated local sample repositories for additional validation categories when real repositories are not available.
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
@@ -263,7 +264,7 @@
 - [x] Record generated multi-language workflow validation once local Ollama API is reachable.
 - [x] Record sanitized multi-language validation evidence for implementation planning and code review.
 - [x] Strengthen filename-drift guardrails for runtime prompts and runtime validation runners.
-- [ ] Add stricter template or remediation fallback for workflows that repeatedly fail deterministic filename-fidelity verification.
+- [x] Add deterministic filename-fidelity fallback artifacts for workflows that repeatedly fail deterministic filename-fidelity verification.
 
 ## Milestone 16: Sample Repository Factory
 

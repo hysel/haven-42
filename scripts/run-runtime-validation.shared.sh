@@ -115,6 +115,34 @@ PROMPTS=(
   "release-readiness"
 )
 
+write_filename_fidelity_fallback() {
+  workflow="$1"
+  verification_path="$2"
+  output_path="$3"
+  fallback_path="$4"
+
+  if ! grep -q '^FAIL FILENAME_NOT_IN_CONTEXT' "$verification_path"; then
+    return 1
+  fi
+
+  {
+    printf '# Runtime Filename-Fidelity Fallback\n\n'
+    printf 'Workflow: %s\n' "$workflow"
+    printf 'Status: guardrail fallback required\n'
+    printf 'Original output: %s\n\n' "$output_path"
+    printf '## Why This Exists\n\n'
+    printf 'Deterministic verification found filename references that were not present in the supplied runtime context. Treat the original model output as untrusted until a human confirms or rewrites those references.\n\n'
+    printf '## Failed Filename Checks\n\n'
+    grep '^FAIL FILENAME_NOT_IN_CONTEXT' "$verification_path"
+    printf '\n\n## Safe Remediation Template\n\n'
+    printf '%s\n' '- Re-read the supplied runtime context before using the original output.'
+    printf '%s\n' '- Keep only findings tied to files that appear in the runtime context.'
+    printf '%s\n' '- Convert absent but useful files into `recommended new file: <path>` entries.'
+    printf '%s\n' '- Replace uncertain filenames with `unconfirmed filename` plus the evidence needed.'
+    printf '%s\n' '- Re-run runtime output verification before recording evidence as a pass.'
+  } > "$fallback_path"
+}
+
 for workflow in "${PROMPTS[@]}"; do
   prompt_path="$PACK_ROOT/.continue/prompts/$workflow.md"
   output_path="$RUN_ROOT/$workflow.md"
@@ -138,6 +166,9 @@ for workflow in "${PROMPTS[@]}"; do
     --output-path "$output_path" \
     --context-path "$CONTEXT_PATH" \
     --workflow-name "$workflow" > "$verification_path" 2>&1 || true
+
+  fallback_path="$RUN_ROOT/$workflow.filename-fidelity-fallback.md"
+  write_filename_fidelity_fallback "$workflow" "$verification_path" "$output_path" "$fallback_path" || true
 done
 
 if [ "$APPEND_SUMMARY" = true ]; then
