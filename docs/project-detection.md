@@ -62,8 +62,13 @@ Current optional packs:
 
 - `.continue/rule-packs/python.md`
 - `.continue/rule-packs/typescript.md`
+- `.continue/rule-packs/java.md`
+- `.continue/rule-packs/go.md`
+- `.continue/rule-packs/rust.md`
+- `.continue/rule-packs/sql.md`
+- `.continue/rule-packs/infrastructure-as-code.md`
 
-These packs are supplemental. They are not part of the default `.continue/config.yaml` rule list, and they should not be treated as globally active rules. Use them only after classification finds matching Python or JavaScript/TypeScript evidence.
+These packs are supplemental. They are not part of the default `.continue/config.yaml` rule list, and they should not be treated as globally active rules. Use them only after classification finds matching ecosystem evidence.
 ## Prompt Integration
 
 Prompts that review, plan, or recommend changes should start with a short project classification pass before making stack-specific recommendations.
@@ -92,5 +97,6 @@ Minimum checks:
 
 - Python samples must not receive .NET-specific project-system advice.
 - TypeScript samples must use `package.json` evidence before naming Vite, Vitest, Jest, npm, or build scripts.
+- Java, Go, Rust, SQL, and Infrastructure as Code samples must use project metadata before naming frameworks, tools, deployment commands, or database engines.
 - Documentation/config packs must not be treated as application codebases unless application files are present.
 - Generic repositories with incomplete evidence must remain language-neutral.

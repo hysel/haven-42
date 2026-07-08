@@ -12,6 +12,11 @@ The default `.continue/config.yaml` loads only shared engineering rules. Optiona
 | --- | --- | --- |
 | `.continue/rule-packs/python.md` | Static generated-sample validation recorded | Python project metadata such as `pyproject.toml`, `requirements*.txt`, `setup.py`, `poetry.lock`, `Pipfile`, `pytest.ini`, `tox.ini`, or inspected Python package/source files. |
 | `.continue/rule-packs/typescript.md` | Static generated-sample validation recorded | JavaScript/TypeScript metadata such as `package.json`, lock files, `tsconfig.json`, frontend/build configs, or inspected `*.ts` / `*.tsx` source and test files. |
+| `.continue/rule-packs/java.md` | Static generated-sample validation recorded | Java project metadata such as `pom.xml`, `build.gradle`, `settings.gradle`, wrapper scripts, `src/main/java`, `src/test/java`, or inspected Java source and test files. |
+| `.continue/rule-packs/go.md` | Static generated-sample validation recorded | Go project metadata such as `go.mod`, `go.sum`, `cmd/`, `internal/`, `pkg/`, or inspected `*.go` / `*_test.go` files. |
+| `.continue/rule-packs/rust.md` | Static generated-sample validation recorded | Rust project metadata such as `Cargo.toml`, `Cargo.lock`, `src/main.rs`, `src/lib.rs`, workspace crates, or inspected Rust source and test files. |
+| `.continue/rule-packs/sql.md` | Static generated-sample validation recorded | SQL/database evidence such as migration folders, schema folders, `*.sql`, seed files, database changelog files, or inspected database ownership docs. |
+| `.continue/rule-packs/infrastructure-as-code.md` | Static generated-sample validation recorded | IaC evidence such as Terraform/OpenTofu files, Kubernetes manifests, Helm charts, Dockerfiles, Compose files, workflow files, cloud deployment templates, or inspected infrastructure docs. |
 
 ## How Agents Should Use Them
 
@@ -33,7 +38,7 @@ Before a language rule pack is promoted from optional to validated, test it agai
 
 Current evidence:
 
-- `examples/language-rule-pack-validation.md` records static generated-sample validation for the optional Python and TypeScript rule packs.
+- `examples/language-rule-pack-validation.md` records static generated-sample validation for the optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
 - `examples/sample-repository-factory-validation.md` records generated sample factory and focused repository-discovery validation evidence.
 
 The static generated-sample validation confirms that the optional rule packs match generated sample repository evidence and stay out of the default config. It does not prove editor/model behavior, implementation-planning quality, code-review quality, or approved-write readiness.

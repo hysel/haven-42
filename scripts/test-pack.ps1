@@ -634,6 +634,11 @@ Invoke-PackTest "language support docs define staged multi-language boundary" {
 Invoke-PackTest "optional language rule packs are evidence-gated and not globally loaded" {
     $pythonRulePath = Join-Path $repoRoot ".continue/rule-packs/python.md"
     $typescriptRulePath = Join-Path $repoRoot ".continue/rule-packs/typescript.md"
+    $javaRulePath = Join-Path $repoRoot ".continue/rule-packs/java.md"
+    $goRulePath = Join-Path $repoRoot ".continue/rule-packs/go.md"
+    $rustRulePath = Join-Path $repoRoot ".continue/rule-packs/rust.md"
+    $sqlRulePath = Join-Path $repoRoot ".continue/rule-packs/sql.md"
+    $iacRulePath = Join-Path $repoRoot ".continue/rule-packs/infrastructure-as-code.md"
     $languageRuleDocPath = Join-Path $repoRoot "docs/language-rule-packs.md"
     $languageSupportPath = Join-Path $repoRoot "docs/language-support.md"
     $languageEvidencePath = Join-Path $repoRoot "examples/language-rule-pack-validation.md"
@@ -646,12 +651,22 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
 
     Assert-True -Condition (Test-Path -LiteralPath $pythonRulePath) -Message "Python optional rule pack should exist."
     Assert-True -Condition (Test-Path -LiteralPath $typescriptRulePath) -Message "TypeScript optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $javaRulePath) -Message "Java optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $goRulePath) -Message "Go optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $rustRulePath) -Message "Rust optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $sqlRulePath) -Message "SQL optional rule pack should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $iacRulePath) -Message "Infrastructure as Code optional rule pack should exist."
     Assert-True -Condition (Test-Path -LiteralPath $languageRuleDocPath) -Message "Language rule-pack doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $languageEvidencePath) -Message "Language rule-pack validation evidence should exist."
     Assert-True -Condition (Test-Path -LiteralPath $workflowEvidencePath) -Message "Multi-language workflow validation evidence should exist."
 
     $pythonRule = Get-Content -LiteralPath $pythonRulePath -Raw
     $typescriptRule = Get-Content -LiteralPath $typescriptRulePath -Raw
+    $javaRule = Get-Content -LiteralPath $javaRulePath -Raw
+    $goRule = Get-Content -LiteralPath $goRulePath -Raw
+    $rustRule = Get-Content -LiteralPath $rustRulePath -Raw
+    $sqlRule = Get-Content -LiteralPath $sqlRulePath -Raw
+    $iacRule = Get-Content -LiteralPath $iacRulePath -Raw
     $languageRuleDoc = Get-Content -LiteralPath $languageRuleDocPath -Raw
     $languageSupport = Get-Content -LiteralPath $languageSupportPath -Raw
     $languageEvidence = Get-Content -LiteralPath $languageEvidencePath -Raw
@@ -668,6 +683,21 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition ($typescriptRule -match "optional: true") -Message "TypeScript rule pack should be marked optional."
     Assert-True -Condition ($typescriptRule -match "package\.json") -Message "TypeScript rule pack should require package metadata evidence."
     Assert-True -Condition ($typescriptRule -match "unconfirmed") -Message "TypeScript rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($javaRule -match "optional: true") -Message "Java rule pack should be marked optional."
+    Assert-True -Condition ($javaRule -match "pom\.xml") -Message "Java rule pack should require Java metadata evidence."
+    Assert-True -Condition ($javaRule -match "unconfirmed") -Message "Java rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($goRule -match "optional: true") -Message "Go rule pack should be marked optional."
+    Assert-True -Condition ($goRule -match "go\.mod") -Message "Go rule pack should require Go module evidence."
+    Assert-True -Condition ($goRule -match "unconfirmed") -Message "Go rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($rustRule -match "optional: true") -Message "Rust rule pack should be marked optional."
+    Assert-True -Condition ($rustRule -match "Cargo\.toml") -Message "Rust rule pack should require Cargo evidence."
+    Assert-True -Condition ($rustRule -match "unconfirmed") -Message "Rust rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($sqlRule -match "optional: true") -Message "SQL rule pack should be marked optional."
+    Assert-True -Condition ($sqlRule -match "\.sql") -Message "SQL rule pack should require SQL or migration evidence."
+    Assert-True -Condition ($sqlRule -match "unconfirmed") -Message "SQL rule pack should prefer unconfirmed over guesses."
+    Assert-True -Condition ($iacRule -match "optional: true") -Message "Infrastructure as Code rule pack should be marked optional."
+    Assert-True -Condition ($iacRule -match "Terraform") -Message "Infrastructure as Code rule pack should require IaC evidence."
+    Assert-True -Condition ($iacRule -match "unconfirmed") -Message "Infrastructure as Code rule pack should prefer unconfirmed over guesses."
     Assert-True -Condition ($languageRuleDoc -match "not referenced from") -Message "Language rule-pack doc should state packs are not globally loaded."
     Assert-True -Condition ($languageRuleDoc -match "docs/project-detection.md") -Message "Language rule-pack doc should require project detection."
     Assert-True -Condition ($languageRuleDoc -match "examples/language-rule-pack-validation\.md") -Message "Language rule-pack doc should link validation evidence."
@@ -678,12 +708,22 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition ($readme -match "examples/language-rule-pack-validation\.md") -Message "README should link language rule-pack evidence."
     Assert-True -Condition ($todo -match "Add optional Python rule pack") -Message "TODO should track Python rule-pack completion."
     Assert-True -Condition ($roadmap -match "Milestone 18: Language Rule Packs") -Message "Roadmap should include language rule packs milestone."
-    Assert-True -Condition ($roadmap -match "Optional Python and TypeScript rule packs") -Message "Roadmap should describe current optional packs."
+    Assert-True -Condition ($roadmap -match "Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs") -Message "Roadmap should describe current optional packs."
     Assert-True -Condition ($languageEvidence -match "Language Rule Pack Validation Evidence") -Message "Evidence should have expected title."
     Assert-True -Condition ($languageEvidence -match "python-api") -Message "Evidence should include Python generated sample."
     Assert-True -Condition ($languageEvidence -match "typescript-frontend") -Message "Evidence should include TypeScript generated sample."
+    Assert-True -Condition ($languageEvidence -match "java-spring-api") -Message "Evidence should include Java generated sample."
+    Assert-True -Condition ($languageEvidence -match "go-service") -Message "Evidence should include Go generated sample."
+    Assert-True -Condition ($languageEvidence -match "rust-cli") -Message "Evidence should include Rust generated sample."
+    Assert-True -Condition ($languageEvidence -match "sql-migrations") -Message "Evidence should include SQL generated sample."
+    Assert-True -Condition ($languageEvidence -match "iac-terraform-kubernetes") -Message "Evidence should include Infrastructure as Code generated sample."
     Assert-True -Condition ($languageEvidence -match "pyproject\.toml") -Message "Evidence should include Python project metadata signal."
     Assert-True -Condition ($languageEvidence -match "package\.json") -Message "Evidence should include TypeScript project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "pom\.xml") -Message "Evidence should include Java project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "go\.mod") -Message "Evidence should include Go project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "Cargo\.toml") -Message "Evidence should include Rust project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "schema/\*\.sql") -Message "Evidence should include SQL project metadata signal."
+    Assert-True -Condition ($languageEvidence -match "terraform/\*\.tf") -Message "Evidence should include IaC project metadata signal."
     Assert-True -Condition ($languageEvidence -match "does not prove editor/model behavior") -Message "Evidence should avoid overstating editor/model validation."
     Assert-True -Condition ($workflowEvidence -match "Multi-Language Workflow Validation Evidence") -Message "Workflow evidence should have expected title."
     Assert-True -Condition ($workflowEvidence -match "Local Ollama API preflight \| Passed") -Message "Workflow evidence should record successful local Ollama preflight after rerun."

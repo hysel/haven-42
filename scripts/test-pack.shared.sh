@@ -530,6 +530,11 @@ test_language_support_doc() {
 test_optional_language_rule_packs() {
   [ -f "$REPO_ROOT/.continue/rule-packs/python.md" ] &&
     [ -f "$REPO_ROOT/.continue/rule-packs/typescript.md" ] &&
+    [ -f "$REPO_ROOT/.continue/rule-packs/java.md" ] &&
+    [ -f "$REPO_ROOT/.continue/rule-packs/go.md" ] &&
+    [ -f "$REPO_ROOT/.continue/rule-packs/rust.md" ] &&
+    [ -f "$REPO_ROOT/.continue/rule-packs/sql.md" ] &&
+    [ -f "$REPO_ROOT/.continue/rule-packs/infrastructure-as-code.md" ] &&
     [ -f "$REPO_ROOT/docs/language-rule-packs.md" ] &&
     [ -f "$REPO_ROOT/examples/language-rule-pack-validation.md" ] &&
     [ -f "$REPO_ROOT/examples/multi-language-workflow-validation.md" ] &&
@@ -539,6 +544,21 @@ test_optional_language_rule_packs() {
     grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
     grep -q "package.json" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
     grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/typescript.md" &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/java.md" &&
+    grep -q "pom.xml" "$REPO_ROOT/.continue/rule-packs/java.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/java.md" &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/go.md" &&
+    grep -q "go.mod" "$REPO_ROOT/.continue/rule-packs/go.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/go.md" &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/rust.md" &&
+    grep -q "Cargo.toml" "$REPO_ROOT/.continue/rule-packs/rust.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/rust.md" &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/sql.md" &&
+    grep -q ".sql" "$REPO_ROOT/.continue/rule-packs/sql.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/sql.md" &&
+    grep -q "optional: true" "$REPO_ROOT/.continue/rule-packs/infrastructure-as-code.md" &&
+    grep -q "Terraform" "$REPO_ROOT/.continue/rule-packs/infrastructure-as-code.md" &&
+    grep -q "unconfirmed" "$REPO_ROOT/.continue/rule-packs/infrastructure-as-code.md" &&
     grep -q "not referenced from" "$REPO_ROOT/docs/language-rule-packs.md" &&
     grep -q "docs/project-detection.md" "$REPO_ROOT/docs/language-rule-packs.md" &&
     grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/docs/language-rule-packs.md" &&
@@ -547,12 +567,22 @@ test_optional_language_rule_packs() {
     grep -q "Optional Language Rule Packs" "$REPO_ROOT/docs/project-detection.md" &&
     grep -q "docs/language-rule-packs.md" "$REPO_ROOT/README.md" &&
     grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/README.md" &&
-    grep -q "Optional Python and TypeScript rule packs" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "Language Rule Pack Validation Evidence" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "python-api" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "typescript-frontend" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "java-spring-api" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "go-service" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "rust-cli" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "sql-migrations" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "iac-terraform-kubernetes" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "pyproject.toml" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "package.json" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "pom.xml" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "go.mod" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -q "Cargo.toml" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -Fq "schema/*.sql" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
+    grep -Fq "terraform/*.tf" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "does not prove editor/model behavior" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "Multi-Language Workflow Validation Evidence" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
     grep -q "Local Ollama API preflight | Passed" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
