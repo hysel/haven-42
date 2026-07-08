@@ -758,6 +758,53 @@ PY
     grep -q "does not read repository source code" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "hardware-aware model/config recommendation" "$REPO_ROOT/README.md"
 }
+
+test_recommended_agent_config_generation() {
+  temp_root="$(mktemp -d)"
+  target_root="$(mktemp -d)"
+  trap 'rm -rf "$temp_root" "$target_root"' RETURN
+  mkdir -p "$target_root/.continue"
+  cp "$REPO_ROOT/.continue/config.yaml" "$target_root/.continue/config.yaml"
+  recommendation_path="$temp_root/recommendation.json"
+  cat > "$recommendation_path" <<'JSON'
+{
+  "Recommendation": {
+    "Status": "recommended",
+    "WriteSafeModel": "qwen3.5:9b",
+    "PlanOnlyModel": "devstral-small-2:24b",
+    "DeepReviewModel": "qwen3-coder:30b"
+  },
+  "ContinueProfiles": {
+    "WriteSafe": {"Model":"qwen3.5:9b","Roles":["chat","edit","apply"],"ContextLength":16384,"MaxTokens":2048,"KeepAlive":1800},
+    "PlanOnly": {"Model":"devstral-small-2:24b","Roles":["chat"],"ContextLength":16384,"MaxTokens":2048,"KeepAlive":1800},
+    "DeepReview": {"Model":"qwen3-coder:30b","Roles":["chat"],"ContextLength":32768,"MaxTokens":4096,"KeepAlive":1800}
+  }
+}
+JSON
+
+  "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" \
+    --target-repo "$target_root" \
+    --recommendation-path "$recommendation_path" \
+    --dry-run >/tmp/apply-recommended-config-dry-run.out 2>&1 || return 1
+  grep -q "Would apply hardware-aware recommendation" /tmp/apply-recommended-config-dry-run.out || return 1
+
+  "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" \
+    --target-repo "$target_root" \
+    --recommendation-path "$recommendation_path" \
+    --ollama-base-url "http://example.local:11434" >/tmp/apply-recommended-config.out 2>&1 || return 1
+
+  local_config="$target_root/.continue/config.local.yaml"
+  [ -f "$local_config" ] || return 1
+  grep -q "1 - WRITE SAFE - qwen3.5:9b" "$local_config" || return 1
+  grep -q "2 - PLAN ONLY - devstral-small-2:24b" "$local_config" || return 1
+  grep -q "3 - DEEP REVIEW - qwen3-coder:30b" "$local_config" || return 1
+  grep -q "apiBase: http://example.local:11434" "$local_config" || return 1
+  ! grep -q "$recommendation_path" "$local_config" || return 1
+  grep -q "config.local.yaml" "$REPO_ROOT/scripts/apply-recommended-agent-config.ps1" &&
+    grep -q "config.local.yaml" "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" &&
+    grep -q "apply-recommended-agent-config" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
+    grep -q "Do not commit this file" "$REPO_ROOT/docs/hardware-aware-recommendations.md"
+}
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
@@ -796,6 +843,7 @@ run_test "sample repository factory creates expected fixtures" test_sample_repos
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 run_test "hardware-aware recommendation scripts emit sanitized model lanes" test_hardware_aware_recommendation_scripts
+run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

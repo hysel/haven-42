@@ -130,7 +130,7 @@ macOS:
 ./scripts/get-local-model-profile.macos.sh
 ```
 
-Then use `docs/local-model-selection.md` to choose the final model. For an offline recommendation JSON that uses your hardware profile, curated model catalog, and validation evidence, run `scripts/recommend-local-agent-config.*` and see `docs/hardware-aware-recommendations.md`. Treat every recommendation as a starting point, not proof that the model is safe for approved edits. Use `docs/model-tool-use-validation.md` before trusting a model for Agent tools or approved write mode.
+Then use `docs/local-model-selection.md` to choose the final model. For an offline recommendation JSON that uses your hardware profile, curated model catalog, and validation evidence, run `scripts/recommend-local-agent-config.*`; to write the result to local-only Continue config, run `scripts/apply-recommended-agent-config.*`. See `docs/hardware-aware-recommendations.md`. Treat every recommendation as a starting point, not proof that the model is safe for approved edits. Use `docs/model-tool-use-validation.md` before trusting a model for Agent tools or approved write mode.
 
 To install this pack and create a local-only config using the recommended installed model, use `--auto-model-config` with the install script.
 

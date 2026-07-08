@@ -63,6 +63,47 @@ The first implementation is deliberately conservative:
 
 Use `MaxDedicated` for the safest default because most local model servers run a model on one GPU. Use `TotalDedicated` only when your model server and model runner can actually use multiple GPUs effectively.
 
+## Apply The Recommendation To Local Config
+
+After reviewing the recommendation JSON, generate a local-only Continue config:
+
+Windows PowerShell:
+
+```powershell
+.\scripts\apply-recommended-agent-config.ps1 `
+  -TargetRepo C:\path\to\your-project `
+  -RecommendationPath .\runtime-validation-output\model-config-recommendation.json `
+  -OllamaBaseUrl http://your-local-ollama-host:11434
+```
+
+Linux:
+
+```bash
+./scripts/apply-recommended-agent-config.linux.sh \
+  --target-repo /path/to/your-project \
+  --recommendation-path ./runtime-validation-output/model-config-recommendation.json \
+  --ollama-base-url http://your-local-ollama-host:11434
+```
+
+macOS:
+
+```bash
+./scripts/apply-recommended-agent-config.macos.sh \
+  --target-repo /path/to/your-project \
+  --recommendation-path ./runtime-validation-output/model-config-recommendation.json \
+  --ollama-base-url http://your-local-ollama-host:11434
+```
+
+The generated file is:
+
+```text
+.continue/config.local.yaml
+```
+
+Do not commit this file. It may contain private model choices or a private Ollama endpoint.
+
+Run with `-DryRun` or `--dry-run` first if you want to inspect what would happen without writing the local config.
+
 ## Next Stage
 
-This recommendation JSON is the input contract for future local config generation. Until that wiring is complete, treat the output as guidance and continue to run editor read-only and approved-write smoke tests before trusting a model for project changes.
+The recommendation JSON can now generate a local-only Continue config. Continue to run editor read-only and approved-write smoke tests before trusting a model for project changes.

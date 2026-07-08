@@ -28,7 +28,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 17: Agent Surface Compatibility Validation | Planned | Convert candidate agent surfaces into evidence-backed compatibility results. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python and TypeScript rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; editor/model workflow validation and additional ecosystems remain pending. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output is implemented for current scope; generated local config wiring and easy UI remain planned. |
+| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output and local-only Continue config generation are implemented for current scope; future surface reuse and easy UI remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -511,7 +511,7 @@ Scope:
 
 - Add logic that evaluates detected GPU, VRAM, RAM, CPU, architecture, operating system, and model-host platform to decide which local models are reasonable candidates for the user's machine. Done for offline recommendation output.
 - Rank candidate models by workflow fit, resource fit, tool-use validation status, and conservative defaults so the user receives a clear recommended model plus alternatives. Done for offline recommendation output.
-- Generate best-fit local configuration for Continue first, including model lanes, roles, context length, max tokens, keep-alive settings, and local-only endpoint handling.
+- Generate best-fit local configuration for Continue first, including model lanes, roles, context length, max tokens, keep-alive settings, and local-only endpoint handling. Done for local-only Continue config output.
 - Keep the configuration engine surface-neutral enough to support future plugins or agent surfaces after they have compatibility evidence.
 - Ensure cloud tags, provider-specific tags, MLX tags, oversized models, and unsupported local pulls are filtered or explained before any model download is attempted.
 - Keep all generated machine-specific settings in local-only config files and out of committed shared configuration.

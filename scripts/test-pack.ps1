@@ -1877,6 +1877,65 @@ Invoke-PackTest "hardware-aware recommendation scripts emit sanitized model lane
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+Invoke-PackTest "recommended agent config generation writes local-only config" {
+    $tempRoot = Copy-RepositoryForTest
+    $targetRoot = Join-Path ([System.IO.Path]::GetTempPath()) "recommended-config-target-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $targetRoot | Out-Null
+        New-Item -ItemType Directory -Force -Path (Join-Path $targetRoot ".continue") | Out-Null
+        Copy-Item -LiteralPath (Join-Path $repoRoot ".continue/config.yaml") -Destination (Join-Path $targetRoot ".continue/config.yaml") -Force
+
+        $recommendationPath = Join-Path $tempRoot "recommendation.json"
+        @"
+{
+  "Recommendation": {
+    "Status": "recommended",
+    "WriteSafeModel": "qwen3.5:9b",
+    "PlanOnlyModel": "devstral-small-2:24b",
+    "DeepReviewModel": "qwen3-coder:30b"
+  },
+  "ContinueProfiles": {
+    "WriteSafe": {"Model":"qwen3.5:9b","Roles":["chat","edit","apply"],"ContextLength":16384,"MaxTokens":2048,"KeepAlive":1800},
+    "PlanOnly": {"Model":"devstral-small-2:24b","Roles":["chat"],"ContextLength":16384,"MaxTokens":2048,"KeepAlive":1800},
+    "DeepReview": {"Model":"qwen3-coder:30b","Roles":["chat"],"ContextLength":32768,"MaxTokens":4096,"KeepAlive":1800}
+  }
+}
+"@ | Set-Content -LiteralPath $recommendationPath
+
+        $dryRun = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.ps1") `
+            -Arguments @("-TargetRepo", $targetRoot, "-RecommendationPath", $recommendationPath, "-DryRun")
+        Assert-Equal -Actual $dryRun.ExitCode -Expected 0 -Message "Apply recommendation dry run should succeed."
+        Assert-True -Condition ($dryRun.Output -match "Would apply hardware-aware recommendation") -Message "Dry run should describe the local config write."
+
+        $apply = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.ps1") `
+            -Arguments @("-TargetRepo", $targetRoot, "-RecommendationPath", $recommendationPath, "-OllamaBaseUrl", "http://example.local:11434")
+        Assert-Equal -Actual $apply.ExitCode -Expected 0 -Message "Apply recommendation should succeed."
+
+        $localConfigPath = Join-Path $targetRoot ".continue/config.local.yaml"
+        Assert-True -Condition (Test-Path -LiteralPath $localConfigPath) -Message "Local config should be written."
+        $localConfig = Get-Content -LiteralPath $localConfigPath -Raw
+        Assert-True -Condition ($localConfig -match "1 - WRITE SAFE - qwen3\.5:9b") -Message "Local config should include WRITE SAFE lane."
+        Assert-True -Condition ($localConfig -match "2 - PLAN ONLY - devstral-small-2:24b") -Message "Local config should include PLAN ONLY lane."
+        Assert-True -Condition ($localConfig -match "3 - DEEP REVIEW - qwen3-coder:30b") -Message "Local config should include DEEP REVIEW lane."
+        Assert-True -Condition ($localConfig -match "apiBase: http://example.local:11434") -Message "Local config should include the local-only endpoint when requested."
+        Assert-True -Condition ($localConfig -notmatch [regex]::Escape($recommendationPath)) -Message "Local config should not record the recommendation file path."
+
+        $script = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.ps1") -Raw
+        $sharedScript = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/apply-recommended-agent-config.shared.sh") -Raw
+        $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/hardware-aware-recommendations.md") -Raw
+        Assert-True -Condition ($script -match "config.local.yaml") -Message "PowerShell apply script should write local config."
+        Assert-True -Condition ($sharedScript -match "config.local.yaml") -Message "Bash apply script should write local config."
+        Assert-True -Condition ($doc -match "apply-recommended-agent-config") -Message "Docs should explain apply recommendation script."
+        Assert-True -Condition ($doc -match "Do not commit this file") -Message "Docs should warn not to commit local config."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        Remove-Item -LiteralPath $targetRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
     exit 1

@@ -288,7 +288,7 @@
 - [x] Read sanitized model profile JSON plus curated model and evidence catalogs.
 - [x] Emit WRITE SAFE, PLAN ONLY, and DEEP REVIEW recommendation lanes without contacting external services.
 - [x] Add validation coverage for recommendation scripts, docs, and sanitized output behavior.
-- [ ] Generate local-only Continue config directly from the recommendation output.
+- [x] Generate local-only Continue config directly from the recommendation output.
 - [ ] Reuse the recommendation data model for future non-Continue agent surfaces.
 - [ ] Add a guided UI wrapper after script-level workflows are stable.
 
