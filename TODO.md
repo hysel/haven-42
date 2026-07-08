@@ -246,8 +246,8 @@
 ## Milestone 14: Agent Surface Portability And Broader Audience
 
 - [x] Reposition the project name and top-level purpose beyond Continue-only and enterprise-only language.
-- [ ] Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options.
-- [ ] Define validation levels for each agent surface: read-only, plan validated, approved-write ready.
+- [x] Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options.
+- [x] Define validation levels for each agent surface: read-only, plan validated, approved-write ready.
 - [ ] Evaluate at least one non-Continue open-source agent surface with sanitized evidence.
 - [ ] Decide whether install scripts should generate surface-specific config bundles instead of only `.continue` assets.
 - [ ] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance.

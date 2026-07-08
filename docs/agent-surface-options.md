@@ -4,7 +4,7 @@
 
 This document tracks possible agent surfaces for the Local Engineering Agent Pack.
 
-Continue is the first supported surface because it is the current validated path for local Ollama workflows, prompt loading, rule loading, and approved-write testing. Other open-source tools may become useful targets, but they must be validated before they are recommended for real project changes.
+Continue is the first supported surface because it is the current validated path for local Ollama workflows, prompt loading, rule loading, shared asset installation, and approved-write testing. Other open-source tools may become useful targets, but they must be validated before they are recommended for real project changes.
 
 ## What Counts As An Agent Surface
 
@@ -16,16 +16,19 @@ Examples:
 - A terminal coding assistant that can inspect a Git repository and propose patches.
 - A self-hosted agent platform that can run workflows against a mounted workspace.
 
-## Current Support Position
+## Compatibility Matrix
 
-| Surface | Current position | Why |
-| --- | --- | --- |
-| Continue | Supported first path | Existing config, install scripts, validation docs, model testing, and approved-write guidance target Continue today. |
-| Cline | Candidate to evaluate | Useful editor-agent shape for tool-backed workflows, but this pack has not validated its config, prompt, rule, or apply behavior yet. |
-| Aider | Candidate to evaluate | Mature Git-aware CLI workflow, but it would need CLI-specific prompt packaging and validation. |
-| Kilo Code | Candidate to evaluate | Possible editor/CLI surface, but needs compatibility and write-safety validation before recommendation. |
-| OpenCode | Candidate to evaluate | Possible terminal or IDE agent path, but needs validation against this pack's workflows. |
-| OpenHands | Candidate to evaluate | More platform-like than editor-focused; useful for heavier automation only after trust-boundary review. |
+This matrix is a support boundary, not a popularity ranking. A surface can be a good candidate and still be blocked for real edits until this pack has evidence that it reads the right workspace, targets the right files, and passes external verification.
+
+| Surface | Surface type | Current validation level | Current pack support | Approved-write position | Notes |
+| --- | --- | --- | --- | --- | --- |
+| Continue | VS Code-compatible extension, VSCodium extension, and CLI fallback | Approved-write ready for the validated local setup | Supported first path | Allowed only after the read-only, read-content, current-folder, and scoped write smoke tests pass in the user's actual setup | Existing config, install scripts, shared asset mode, validation docs, model testing, and approved-write guidance target Continue today. |
+| Cline | VS Code-compatible editor agent | Candidate | Not packaged yet | Blocked | Needs read-only repository discovery, prompt/rule packaging review, model/tool validation, and external changed-file verification. |
+| Aider | Git-aware CLI coding assistant | Candidate | Not packaged yet | Blocked | Likely needs CLI-specific prompt bundles and a patch/diff workflow rather than Continue-style config. |
+| Kilo Code | VS Code-compatible editor agent | Candidate | Not packaged yet | Blocked | Needs config loading, tool behavior, approval flow, and write-safety validation before recommendation. |
+| OpenCode | Terminal or IDE-oriented coding agent | Candidate | Not packaged yet | Blocked | Needs repository discovery, local model/tool behavior, and deterministic output verification against generated samples. |
+| OpenHands | Self-hosted/platform-style agent runtime | Candidate | Not packaged yet | Blocked | More platform-like than editor-focused; needs workspace mount, sandbox, secret, and trust-boundary review before write mode. |
+| Roo Code | VS Code-compatible editor agent | Candidate | Not packaged yet | Blocked | Worth tracking as another open-source editor-agent option, but no pack-specific validation exists yet. |
 
 Candidate means "worth testing", not "approved for edits".
 
@@ -33,14 +36,30 @@ Candidate means "worth testing", not "approved for edits".
 
 Use the same labels for every surface:
 
-| Level | Meaning |
-| --- | --- |
-| Candidate | The surface looks relevant, but this pack has not validated it yet. |
-| Read-only validated | The surface can discover the opened repository, list files, read target files, and produce grounded output without modifying files. |
-| Plan validated | The surface can produce implementation plans that preserve project constraints and pass deterministic output verification. |
-| Approved-write ready | The surface can make scoped edits only after approval, target the correct file, avoid duplicate writes, and pass external shell or Git verification. |
+| Level | Meaning | Minimum evidence |
+| --- | --- | --- |
+| Candidate | The surface looks relevant, but this pack has not validated it yet. | Surface name, expected operating mode, and reason it may fit the pack. |
+| Read-only validated | The surface can discover the opened repository, list files, read target files, and produce grounded output without modifying files. | Sanitized transcript or summary with exact inspected filenames, model/provider, OS, tool permission state, and failure signals. |
+| Plan validated | The surface can produce implementation plans that preserve project constraints and pass deterministic output verification. | Read-only evidence plus a plan output checked for filename fidelity, no unsupported claims, rollback, tests, and docs impact. |
+| Approved-write ready | The surface can make scoped edits only after approval, target the correct file, avoid duplicate writes, and pass external shell or Git verification. | Read-only and plan evidence plus a disposable-repo write test showing changed files through `git status`, `git diff --check`, and direct file-content verification outside the agent surface. |
 
 Do not mark a surface approved-write ready from model claims alone. Verify the changed files outside the agent surface.
+
+## Evidence Fields
+
+Every surface validation record should capture:
+
+- Surface name and version.
+- Editor, CLI, or runtime host.
+- Operating system.
+- Model name, provider, endpoint type, and whether the model supports tools in that surface.
+- Config source: project-local assets, centralized shared assets, global config, or generated local config.
+- MCP state, if any.
+- Prompt or workflow tested.
+- Tool permissions: read-only, ask-before-write, approved write, or unavailable.
+- Exact files inspected or changed, sanitized when necessary.
+- External verification commands and results.
+- Failure signal, using the documented labels when possible.
 
 ## Portability Rules
 
@@ -49,6 +68,7 @@ Do not mark a surface approved-write ready from model claims alone. Verify the c
 - Do not weaken safety rules to support another tool.
 - Do not commit private endpoints, local paths, tokens, raw transcripts, or customer/project names when recording validation evidence.
 - Treat local model behavior as surface-specific. A model that works in one editor or CLI may fail in another.
+- Treat approved-write support as surface plus model plus editor/runtime plus operating-system specific.
 
 ## Recommended Next Evaluation
 
@@ -56,7 +76,7 @@ Start with one non-Continue surface in read-only mode.
 
 Suggested order:
 
-1. Pick a generated local sample repository.
+1. Generate a local sample repository with `docs/sample-repository-factory.md`.
 2. Install or configure the candidate surface without write permissions if possible.
 3. Run repository discovery.
 4. Confirm actual file reads, not guessed summaries.
