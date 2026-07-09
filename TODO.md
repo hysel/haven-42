@@ -286,6 +286,8 @@
 - [ ] Validate Aider against a generated sample repository in plan or patch mode.
 - [x] Record sanitized Cline read-only evidence for one non-Continue agent surface.
 - [x] Validate Cline approved-write smoke test against a disposable generated sample with external verification.
+- [x] Add Cline CLI automation scripts for future read-only and disposable write-smoke model screening.
+- [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [ ] Keep real-project approved-write status blocked until a realistic scoped edit passes.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation

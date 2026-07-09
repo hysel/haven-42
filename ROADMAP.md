@@ -468,6 +468,8 @@ Scope:
 - Record surface, model, OS, tool permissions, failure signals, and changed-file verification.
 - Keep Continue as the supported first path until another surface has equivalent validation evidence.
 - Validate Cline approved-write smoke behavior against a disposable generated sample. Done for a README-only smoke test with `qwen3-coder:30b` at 16k context; realistic scoped edit validation remains pending.
+- Add a Cline CLI automation harness for future read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Cline CLI evidence remains pending.
+- Add a Continue CLI automation harness for focused read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Continue CLI evidence remains separate from editor Apply evidence.
 
 Exit criteria:
 

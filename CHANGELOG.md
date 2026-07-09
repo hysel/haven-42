@@ -10,6 +10,8 @@ This project follows a simple changelog format:
 - `Removed` for deprecated or deleted behavior
 
 ## Unreleased
+- Added Cline CLI model-test automation scripts and documentation for future read-only and disposable write-smoke screening.
+- Added Continue CLI model-test automation scripts and documentation for CLI-first read-only and disposable write-smoke screening.
 
 ### Added
 

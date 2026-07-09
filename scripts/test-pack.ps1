@@ -649,6 +649,70 @@ Invoke-PackTest "Cline read-only validation docs define read-only workflow" {
     Assert-True -Condition ($todo -match "Cline read-only validation guide") -Message "TODO should track Cline validation guide completion."
     Assert-True -Condition ($roadmap -match "Cline read-only validation guide") -Message "Roadmap should track Cline validation guide completion."
 }
+
+Invoke-PackTest "Cline CLI model testing docs define automation workflow" {
+    $docPath = Join-Path $repoRoot "docs/cline-cli-model-testing.md"
+    $psScriptPath = Join-Path $repoRoot "scripts/test-cline-cli-models.ps1"
+    $bashScriptPath = Join-Path $repoRoot "scripts/test-cline-cli-models.shared.sh"
+    $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
+    $readmePath = Join-Path $repoRoot "README.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Cline CLI testing doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell Cline CLI tester should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash Cline CLI tester should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $psScript = Get-Content -LiteralPath $psScriptPath -Raw
+    $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
+    $catalog = Get-Content -LiteralPath $catalogPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+
+    Assert-True -Condition ($doc -match "Cline CLI Model Testing") -Message "Cline CLI testing doc should have a clear title."
+    Assert-True -Condition ($doc -match "test-cline-cli-models") -Message "Cline CLI testing doc should mention automation scripts."
+    Assert-True -Condition ($doc -match "command-template") -Message "Cline CLI testing doc should describe command-template flexibility."
+    Assert-True -Condition ($doc -match "Write Smoke Test") -Message "Cline CLI testing doc should define write smoke test flow."
+    Assert-True -Condition ($psScript -match "ClineArgumentsTemplate") -Message "PowerShell Cline CLI tester should support argument templates."
+    Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell Cline CLI tester should support write-smoke tests."
+    Assert-True -Condition ($psScript -match "runtime-validation-output/sample-repositories") -Message "PowerShell Cline CLI tester should default to disposable generated samples."
+    Assert-True -Condition ($bashScript -match "CLINE_ARGS_TEMPLATE") -Message "Bash Cline CLI tester should support argument templates."
+    Assert-True -Condition ($bashScript -match "INCLUDE_WRITE_SMOKE") -Message "Bash Cline CLI tester should support write-smoke tests."
+    Assert-True -Condition ($catalog -match "Cline CLI model test harness") -Message "Evidence catalog should track Cline CLI harness validation."
+    Assert-True -Condition ($readme -match "docs/cline-cli-model-testing.md") -Message "README should link Cline CLI model testing doc."
+}
+Invoke-PackTest "Continue CLI model testing docs define automation workflow" {
+    $docPath = Join-Path $repoRoot "docs/continue-cli-model-testing.md"
+    $psScriptPath = Join-Path $repoRoot "scripts/test-continue-cli-models.ps1"
+    $bashScriptPath = Join-Path $repoRoot "scripts/test-continue-cli-models.shared.sh"
+    $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $surfaceDocPath = Join-Path $repoRoot "docs/agent-surface-options.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Continue CLI testing doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell Continue CLI tester should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash Continue CLI tester should exist."
+
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $psScript = Get-Content -LiteralPath $psScriptPath -Raw
+    $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
+    $catalog = Get-Content -LiteralPath $catalogPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $surfaceDoc = Get-Content -LiteralPath $surfaceDocPath -Raw
+
+    Assert-True -Condition ($doc -match "Continue CLI Model Testing") -Message "Continue CLI testing doc should have a clear title."
+    Assert-True -Condition ($doc -match "test-continue-cli-models") -Message "Continue CLI testing doc should mention automation scripts."
+    Assert-True -Condition ($doc -match "command-template") -Message "Continue CLI testing doc should describe command-template flexibility."
+    Assert-True -Condition ($doc -match "Write Smoke Test") -Message "Continue CLI testing doc should define write smoke test flow."
+    Assert-True -Condition ($doc -match "editor Apply") -Message "Continue CLI testing doc should distinguish CLI from editor Apply validation."
+    Assert-True -Condition ($psScript -match "ContinueArgumentsTemplate") -Message "PowerShell Continue CLI tester should support argument templates."
+    Assert-True -Condition ($psScript -match "ConfigPath") -Message "PowerShell Continue CLI tester should support config paths."
+    Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell Continue CLI tester should support write-smoke tests."
+    Assert-True -Condition ($psScript -match "runtime-validation-output/sample-repositories") -Message "PowerShell Continue CLI tester should default to disposable generated samples."
+    Assert-True -Condition ($bashScript -match "CONTINUE_ARGS_TEMPLATE") -Message "Bash Continue CLI tester should support argument templates."
+    Assert-True -Condition ($bashScript -match "INCLUDE_WRITE_SMOKE") -Message "Bash Continue CLI tester should support write-smoke tests."
+    Assert-True -Condition ($catalog -match "Continue CLI model test harness") -Message "Evidence catalog should track Continue CLI harness validation."
+    Assert-True -Condition ($readme -match "docs/continue-cli-model-testing.md") -Message "README should link Continue CLI model testing doc."
+    Assert-True -Condition ($surfaceDoc -match "docs/continue-cli-model-testing.md") -Message "Agent surface docs should link Continue CLI testing doc."
+}
 Invoke-PackTest "language support docs define staged multi-language boundary" {
     $docPath = Join-Path $repoRoot "docs/language-support.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -1617,6 +1681,14 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
         @{
             Name = "test-local-agent-models.macos.sh"
             Target = "test-local-agent-models.shared.sh"
+        },
+        @{
+            Name = "test-cline-cli-models.linux.sh"
+            Target = "test-cline-cli-models.shared.sh"
+        },
+        @{
+            Name = "test-cline-cli-models.macos.sh"
+            Target = "test-cline-cli-models.shared.sh"
         },
         @{
             Name = "generate-sample-repositories.linux.sh"

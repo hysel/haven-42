@@ -138,6 +138,8 @@ test_linux_macos_scripts_do_not_require_pwsh() {
     "$REPO_ROOT/scripts/pull-local-agent-models.macos.sh" \
     "$REPO_ROOT/scripts/test-local-agent-models.linux.sh" \
     "$REPO_ROOT/scripts/test-local-agent-models.macos.sh" \
+    "$REPO_ROOT/scripts/test-cline-cli-models.linux.sh" \
+    "$REPO_ROOT/scripts/test-cline-cli-models.macos.sh" \
     "$REPO_ROOT/scripts/generate-sample-repositories.linux.sh" \
     "$REPO_ROOT/scripts/generate-sample-repositories.macos.sh"
 }
@@ -522,6 +524,40 @@ test_agent_surface_options_doc() {
 }
 
 
+
+test_cline_cli_model_testing_doc() {
+  [ -f "$REPO_ROOT/docs/cline-cli-model-testing.md" ] &&
+    [ -f "$REPO_ROOT/scripts/test-cline-cli-models.ps1" ] &&
+    [ -f "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" ] &&
+    grep -q "Cline CLI Model Testing" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
+    grep -q "test-cline-cli-models" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
+    grep -q "command-template" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
+    grep -q "Write Smoke Test" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
+    grep -q "ClineArgumentsTemplate" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
+    grep -q "IncludeWriteSmoke" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
+    grep -q "CLINE_ARGS_TEMPLATE" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
+    grep -q "INCLUDE_WRITE_SMOKE" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
+    grep -q "Cline CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&
+    grep -q "docs/cline-cli-model-testing.md" "$REPO_ROOT/README.md"
+}
+test_continue_cli_model_testing_doc() {
+  [ -f "$REPO_ROOT/docs/continue-cli-model-testing.md" ] &&
+    [ -f "$REPO_ROOT/scripts/test-continue-cli-models.ps1" ] &&
+    [ -f "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" ] &&
+    grep -q "Continue CLI Model Testing" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "test-continue-cli-models" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "command-template" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "Write Smoke Test" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "Editor Apply" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "ContinueArgumentsTemplate" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
+    grep -q "ConfigPath" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
+    grep -q "IncludeWriteSmoke" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
+    grep -q "CONTINUE_ARGS_TEMPLATE" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
+    grep -q "INCLUDE_WRITE_SMOKE" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
+    grep -q "Continue CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&
+    grep -q "docs/continue-cli-model-testing.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/continue-cli-model-testing.md" "$REPO_ROOT/docs/agent-surface-options.md"
+}
 test_language_support_doc() {
   [ -f "$REPO_ROOT/docs/language-support.md" ] &&
     grep -q ".NET.*most mature" "$REPO_ROOT/docs/language-support.md" &&
@@ -919,6 +955,8 @@ run_test "multi-repository validation docs define sanitized evidence workflow" t
 run_test "sample repository factory validation evidence is sanitized" test_sample_repository_factory_validation_evidence
 run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc
 run_test "agent surface docs define portability boundary" test_agent_surface_options_doc
+run_test "Cline CLI model testing docs define automation workflow" test_cline_cli_model_testing_doc
+run_test "Continue CLI model testing docs define automation workflow" test_continue_cli_model_testing_doc
 run_test "language support docs define staged multi-language boundary" test_language_support_doc
 run_test "optional language rule packs are evidence-gated and not globally loaded" test_optional_language_rule_packs
 run_test "project detection docs and guidance are evidence-gated" test_project_detection_doc
