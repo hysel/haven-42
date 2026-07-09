@@ -103,7 +103,8 @@ The long-term direction is a small set of shared engines plus optional thin wrap
 
 Keep the shared harness as the source of behavior. Surface-specific wrappers should only provide friendly defaults such as command names, model flags, and install hints. If wrapper count becomes hard to maintain, prefer a registry-driven dispatcher or a future web UI that calls the shared harness directly.
 
-The planned web UI should call stable script entry points for hardware profiling, model discovery, model testing, configuration generation, and validation. It should not reimplement the business logic that already exists in scripts.
+The planned starter-toolkit web UI should call stable script entry points for hardware profiling, model discovery, model testing, configuration generation, installation, and validation. It should not reimplement the business logic that already exists in scripts. The UI should make evidence visible by separating tested, passed, failed, and recommended-only states before applying changes.
+
 ## Safety Rules
 
 - Use generated sample repositories by default.
