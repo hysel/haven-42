@@ -2332,6 +2332,75 @@ Invoke-PackTest "shared asset installation docs define centralized config strate
     Assert-True -Condition ($todo -match "centralized shared asset") -Message "TODO should track centralized shared asset work."
     Assert-True -Condition ($roadmap -match "centralized shared asset") -Message "Roadmap should track centralized shared asset work."
 }
+Invoke-PackTest "workflow registry defines stable UI entry points" {
+    $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $docPath = Join-Path $repoRoot "docs/workflow-registry.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $registryPath) -Message "Workflow registry should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Workflow registry docs should exist."
+
+    $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
+    $allowedSafetyLevels = @("read-only", "network-read", "network-write", "controlled-write", "approved-write")
+    $requiredWorkflowIds = @(
+        "profile-local-hardware",
+        "discover-online-models",
+        "test-local-agent-models",
+        "recommend-agent-config",
+        "apply-agent-config",
+        "install-pack-assets",
+        "generate-runtime-context",
+        "run-runtime-validation",
+        "test-agent-cli-surface",
+        "validate-pack",
+        "test-pack"
+    )
+
+    Assert-Equal -Actual $registry.schemaVersion -Expected 1 -Message "Workflow registry schema version changed."
+    Assert-True -Condition ($registry.workflows.Count -ge 10) -Message "Workflow registry should include core workflows."
+
+    $ids = @{}
+    foreach ($workflow in $registry.workflows) {
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($workflow.id)) -Message "Workflow should include id."
+        Assert-True -Condition (-not $ids.ContainsKey($workflow.id)) -Message "Workflow id should be unique: $($workflow.id)"
+        $ids[$workflow.id] = $true
+
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($workflow.name)) -Message "Workflow should include name: $($workflow.id)"
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($workflow.purpose)) -Message "Workflow should include purpose: $($workflow.id)"
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($workflow.category)) -Message "Workflow should include category: $($workflow.id)"
+        Assert-True -Condition ($workflow.safetyLevel -in $allowedSafetyLevels) -Message "Workflow has unsupported safety level: $($workflow.id)"
+        Assert-True -Condition ($null -ne $workflow.uiReady) -Message "Workflow should state UI readiness: $($workflow.id)"
+        Assert-True -Condition ($workflow.inputs.Count -gt 0) -Message "Workflow should list inputs: $($workflow.id)"
+        Assert-True -Condition ($workflow.outputs.Count -gt 0) -Message "Workflow should list outputs: $($workflow.id)"
+
+        foreach ($os in @("windows", "linux", "macos")) {
+            $entry = $workflow.entryPoints.$os
+            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($entry)) -Message "Workflow should include $os entry point: $($workflow.id)"
+            Assert-True -Condition ($entry -notmatch "^[A-Za-z]:|^/|\\|\.\.") -Message "Workflow entry point should be repository-relative and slash-normalized: $entry"
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $entry)) -Message "Workflow entry point should exist: $entry"
+        }
+
+        $serialized = $workflow | ConvertTo-Json -Depth 20
+        Assert-True -Condition ($serialized -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|Users\\|OneDrive|itama|token|secret") -Message "Workflow registry should stay sanitized: $($workflow.id)"
+    }
+
+    foreach ($id in $requiredWorkflowIds) {
+        Assert-True -Condition $ids.ContainsKey($id) -Message "Workflow registry should include $id."
+    }
+
+    Assert-True -Condition ($doc -match "Safety Levels") -Message "Workflow registry docs should explain safety levels."
+    Assert-True -Condition ($doc -match "UI Direction") -Message "Workflow registry docs should explain UI direction."
+    Assert-True -Condition ($doc -match "config/workflows\.json") -Message "Workflow registry docs should reference the JSON file."
+    Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
+    Assert-True -Condition ($roadmap -match "workflow registry") -Message "Roadmap should track workflow registry work."
+    Assert-True -Condition ($todo -match "workflow registry") -Message "TODO should track workflow registry work."
+}
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
     exit 1

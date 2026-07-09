@@ -19,6 +19,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Install the pack in a project | `Quick Start` |
 | Pick the right local model | `docs/local-model-selection.md` |
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
+| Review stable workflow entry points | `docs/workflow-registry.md` |
 | Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |
 | Profile a remote LLM machine | `docs/remote-hardware-profile.md` |
 | Evaluate newer model candidates | `docs/online-model-discovery.md` |

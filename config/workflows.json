@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "description": "Workflow registry for stable script and future UI entry points. Paths are repository-relative and intentionally contain no machine-specific values.",
+  "workflows": [
+    {
+      "id": "profile-local-hardware",
+      "name": "Profile Local Hardware",
+      "purpose": "Collect sanitized CPU, RAM, GPU, VRAM, platform, and local model information for model recommendation.",
+      "category": "discovery",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["outputPath", "ollamaBaseUrl"],
+      "outputs": ["modelProfileJson", "modelProfileMarkdown"],
+      "entryPoints": {
+        "windows": "scripts/get-local-model-profile.windows.ps1",
+        "linux": "scripts/get-local-model-profile.linux.sh",
+        "macos": "scripts/get-local-model-profile.macos.sh"
+      }
+    },
+    {
+      "id": "profile-remote-hardware",
+      "name": "Profile Remote Hardware",
+      "purpose": "Collect sanitized hardware and model profile information from a remote model host over SSH.",
+      "category": "discovery",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["sshTarget", "outputPath", "allowInteractiveSsh"],
+      "outputs": ["remoteModelProfileJson"],
+      "entryPoints": {
+        "windows": "scripts/get-remote-model-profile.ps1",
+        "linux": "scripts/get-remote-model-profile.linux.sh",
+        "macos": "scripts/get-remote-model-profile.macos.sh"
+      }
+    },
+    {
+      "id": "discover-online-models",
+      "name": "Discover Online Model Candidates",
+      "purpose": "Suggest candidate local models from public model metadata while keeping recommendations evidence-gated.",
+      "category": "model-selection",
+      "safetyLevel": "network-read",
+      "uiReady": true,
+      "inputs": ["families", "modelProfilePath", "vramSelectionMode", "outputPath"],
+      "outputs": ["onlineModelCandidatesJson"],
+      "entryPoints": {
+        "windows": "scripts/discover-online-model-candidates.ps1",
+        "linux": "scripts/discover-online-model-candidates.linux.sh",
+        "macos": "scripts/discover-online-model-candidates.macos.sh"
+      }
+    },
+    {
+      "id": "pull-local-agent-models",
+      "name": "Pull Local Agent Models",
+      "purpose": "Download selected local model candidates after hardware and validation review.",
+      "category": "model-installation",
+      "safetyLevel": "network-write",
+      "uiReady": true,
+      "inputs": ["models", "ollamaBaseUrl", "dryRun"],
+      "outputs": ["pullSummaryJson"],
+      "entryPoints": {
+        "windows": "scripts/pull-local-agent-models.ps1",
+        "linux": "scripts/pull-local-agent-models.linux.sh",
+        "macos": "scripts/pull-local-agent-models.macos.sh"
+      }
+    },
+    {
+      "id": "test-local-agent-models",
+      "name": "Test Local Agent Models",
+      "purpose": "Run API-level model preflight checks, optional pulls, cleanup, and unload behavior against a local model server.",
+      "category": "model-validation",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["models", "targetRepo", "ollamaBaseUrl", "modelProfilePath", "pullMissing", "unloadAfterEach", "removeFailedModels"],
+      "outputs": ["localAgentModelTestReportJson"],
+      "entryPoints": {
+        "windows": "scripts/test-local-agent-models.ps1",
+        "linux": "scripts/test-local-agent-models.linux.sh",
+        "macos": "scripts/test-local-agent-models.macos.sh"
+      }
+    },
+    {
+      "id": "recommend-agent-config",
+      "name": "Recommend Agent Config",
+      "purpose": "Create hardware-aware model lanes and local configuration recommendations from sanitized profile and evidence data.",
+      "category": "configuration",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["modelProfilePath", "modelCatalogPath", "evidenceCatalogPath", "outputPath"],
+      "outputs": ["recommendedAgentConfigJson"],
+      "entryPoints": {
+        "windows": "scripts/recommend-local-agent-config.ps1",
+        "linux": "scripts/recommend-local-agent-config.linux.sh",
+        "macos": "scripts/recommend-local-agent-config.macos.sh"
+      }
+    },
+    {
+      "id": "apply-agent-config",
+      "name": "Apply Agent Config",
+      "purpose": "Write local-only agent configuration from a recommendation result with dry-run support.",
+      "category": "configuration",
+      "safetyLevel": "approved-write",
+      "uiReady": true,
+      "inputs": ["targetRepo", "recommendationPath", "ollamaBaseUrl", "dryRun"],
+      "outputs": ["localConfigYaml"],
+      "entryPoints": {
+        "windows": "scripts/apply-recommended-agent-config.ps1",
+        "linux": "scripts/apply-recommended-agent-config.linux.sh",
+        "macos": "scripts/apply-recommended-agent-config.macos.sh"
+      }
+    },
+    {
+      "id": "install-pack-assets",
+      "name": "Install Pack Assets",
+      "purpose": "Install or update project-local or centralized agent assets with backups, dry-run, and global config support.",
+      "category": "installation",
+      "safetyLevel": "approved-write",
+      "uiReady": true,
+      "inputs": ["targetRepo", "sharedAssets", "globalConfigPath", "dryRun"],
+      "outputs": ["installedAssets", "backupFolder", "globalConfigYaml"],
+      "entryPoints": {
+        "windows": "scripts/install-continue-pack.ps1",
+        "linux": "scripts/install-continue-pack.linux.sh",
+        "macos": "scripts/install-continue-pack.macos.sh"
+      }
+    },
+    {
+      "id": "generate-runtime-context",
+      "name": "Generate Runtime Context",
+      "purpose": "Create sanitized repository context for model-backed validation and review workflows.",
+      "category": "validation",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["targetRepo", "outputPath"],
+      "outputs": ["runtimeContextMarkdown"],
+      "entryPoints": {
+        "windows": "scripts/generate-runtime-context.ps1",
+        "linux": "scripts/generate-runtime-context.linux.sh",
+        "macos": "scripts/generate-runtime-context.macos.sh"
+      }
+    },
+    {
+      "id": "run-runtime-validation",
+      "name": "Run Runtime Validation",
+      "purpose": "Execute configured validation prompts, collect raw local outputs, and optionally append sanitized summaries.",
+      "category": "validation",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["targetRepo", "configPath", "appendSummary"],
+      "outputs": ["runtimeValidationOutputFolder", "runtimeValidationSummary"],
+      "entryPoints": {
+        "windows": "scripts/run-runtime-validation.ps1",
+        "linux": "scripts/run-runtime-validation.linux.sh",
+        "macos": "scripts/run-runtime-validation.macos.sh"
+      }
+    },
+    {
+      "id": "verify-runtime-output",
+      "name": "Verify Runtime Output",
+      "purpose": "Check runtime validation output for invented filenames, unsupported claims, and other deterministic failure signals.",
+      "category": "validation",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["outputFolder", "targetRepo"],
+      "outputs": ["runtimeVerificationReport"],
+      "entryPoints": {
+        "windows": "scripts/verify-runtime-output.ps1",
+        "linux": "scripts/verify-runtime-output.linux.sh",
+        "macos": "scripts/verify-runtime-output.macos.sh"
+      }
+    },
+    {
+      "id": "test-agent-cli-surface",
+      "name": "Test Agent CLI Surface",
+      "purpose": "Screen CLI-capable agent surfaces with read-only and disposable write-smoke checks through the shared harness.",
+      "category": "agent-surface-validation",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["surfaceName", "surfaceKey", "agentCommand", "models", "targetRepo", "dryRun", "includeWriteSmoke"],
+      "outputs": ["agentCliSurfaceTestReportJson"],
+      "entryPoints": {
+        "windows": "scripts/test-agent-cli-surface-models.ps1",
+        "linux": "scripts/test-agent-cli-surface-models.linux.sh",
+        "macos": "scripts/test-agent-cli-surface-models.macos.sh"
+      }
+    },
+    {
+      "id": "generate-sample-repositories",
+      "name": "Generate Sample Repositories",
+      "purpose": "Create deterministic disposable sample repositories for validation without private source code.",
+      "category": "sample-generation",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["outputRoot", "force", "list"],
+      "outputs": ["sampleRepositories"],
+      "entryPoints": {
+        "windows": "scripts/generate-sample-repositories.ps1",
+        "linux": "scripts/generate-sample-repositories.linux.sh",
+        "macos": "scripts/generate-sample-repositories.macos.sh"
+      }
+    },
+    {
+      "id": "validate-pack",
+      "name": "Validate Pack",
+      "purpose": "Run static pack validation for config, docs, scripts, references, and safety invariants.",
+      "category": "release-readiness",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["expectedVersion"],
+      "outputs": ["validationConsoleOutput"],
+      "entryPoints": {
+        "windows": "scripts/validate-pack.ps1",
+        "linux": "scripts/validate-pack.linux.sh",
+        "macos": "scripts/validate-pack.macos.sh"
+      }
+    },
+    {
+      "id": "test-pack",
+      "name": "Test Pack",
+      "purpose": "Run the repository test suite used before commits, pushes, and releases.",
+      "category": "release-readiness",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["expectedVersion"],
+      "outputs": ["testConsoleOutput"],
+      "entryPoints": {
+        "windows": "scripts/test-pack.ps1",
+        "linux": "scripts/test-pack.linux.sh",
+        "macos": "scripts/test-pack.macos.sh"
+      }
+    },
+    {
+      "id": "build-release-package",
+      "name": "Build Release Package",
+      "purpose": "Create release archives, checksums, and release artifacts after validation passes.",
+      "category": "release-readiness",
+      "safetyLevel": "controlled-write",
+      "uiReady": false,
+      "inputs": ["version", "outputRoot", "dryRun"],
+      "outputs": ["releaseArchive", "checksumFile"],
+      "entryPoints": {
+        "windows": "scripts/build-release-package.ps1",
+        "linux": "scripts/build-release-package.linux.sh",
+        "macos": "scripts/build-release-package.macos.sh"
+      }
+    }
+  ]
+}
