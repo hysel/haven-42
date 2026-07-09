@@ -28,7 +28,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 17: Agent Surface Compatibility Validation | In Progress | Cline has read-only and disposable write-smoke validation evidence for `qwen3-coder:30b` at 16k context; real-project approved-write plus Aider, Roo Code, Kilo Code, and OpenCode live validation remain pending. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; generated editor/model workflow evidence is recorded, prompt and runner filename-fidelity guardrails are in place, and runtime runners now write filename-fidelity fallback artifacts for deterministic filename failures. Remaining empty-output failures and any non-filename guardrail repeats require separate remediation before promotion. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, and centralized shared asset config generation are implemented for current scope; future surface reuse, script consolidation, a stable script/API boundary, and a unified starter-toolkit web UI remain planned. |
+| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, and centralized shared asset config generation are implemented for current scope; future surface reuse, script consolidation, a shared command dispatcher, and a unified starter-toolkit web UI remain planned; the workflow registry foundation is implemented. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -524,8 +524,8 @@ Scope:
 - Add validation coverage that proves hardware-aware selection does not expose private paths, hostnames, usernames, endpoints, or raw hardware reports.
 - Reduce the number of scripts by consolidating repeated command-line workflows behind shared engines, registries, or dispatchers before adding more surface-specific scripts.
 - Keep thin wrapper scripts only where they improve beginner usability or platform ergonomics; avoid duplicating business logic across wrappers.
-- Define a machine-readable workflow registry that describes available tasks, inputs, outputs, safety level, platform support, and script entry points.
-- Define a stable script/API boundary so future tools can call hardware profiling, model discovery, model testing, configuration generation, installation, and validation without knowing each script family.
+- Define a machine-readable workflow registry that describes available tasks, inputs, outputs, safety level, platform support, and script entry points. Done.
+- Define a stable script/API boundary so future tools can call hardware profiling, model discovery, model testing, configuration generation, installation, and validation without knowing each script family. Workflow registry foundation is done; shared dispatcher remains pending.
 - Design a unified starter-toolkit web UI for people who want to use local AI for coding, with guided flows for setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.
 - Keep the web UI evidence-first: show what was tested, what passed, what failed, and what is only a recommendation before applying changes.
 - Generate a local evidence dashboard from validation JSON so users can compare models, agent surfaces, operating systems, write readiness, and risks before installing anything.
