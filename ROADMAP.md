@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, and a future easy UI.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, script consolidation, and a future unified web UI.
 
 ## Stage Status
 
@@ -28,7 +28,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 17: Agent Surface Compatibility Validation | In Progress | Cline has read-only and disposable write-smoke validation evidence for `qwen3-coder:30b` at 16k context; real-project approved-write plus Aider, Roo Code, Kilo Code, and OpenCode live validation remain pending. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; generated editor/model workflow evidence is recorded, prompt and runner filename-fidelity guardrails are in place, and runtime runners now write filename-fidelity fallback artifacts for deterministic filename failures. Remaining empty-output failures and any non-filename guardrail repeats require separate remediation before promotion. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, and centralized shared asset config generation are implemented for current scope; future surface reuse and easy UI remain planned. |
+| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, and centralized shared asset config generation are implemented for current scope; future surface reuse, script consolidation, and a unified web UI remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -522,11 +522,14 @@ Scope:
 - Ensure cloud tags, provider-specific tags, MLX tags, oversized models, and unsupported local pulls are filtered or explained before any model download is attempted.
 - Keep all generated machine-specific settings in local-only config files and out of committed shared configuration.
 - Add validation coverage that proves hardware-aware selection does not expose private paths, hostnames, usernames, endpoints, or raw hardware reports.
-- Add a potential easy UI as a final-stage workflow for users who prefer to run discovery, profiling, model testing, config generation, and validation from a guided interface.
+- Consolidate repeated command-line workflows behind shared engines, registries, or dispatchers before adding more surface-specific scripts.
+- Keep thin wrapper scripts only where they improve beginner usability or platform ergonomics; avoid duplicating business logic across wrappers.
+- Add a unified web UI as a final-stage workflow for users who prefer to run discovery, profiling, model testing, config generation, and validation from a guided interface.
 
 Exit criteria:
 
 - A user can run one documented flow that profiles hardware, discovers or reads candidate models, tests eligible models, and receives a recommended model/config result.
 - Continue local config generation uses the recommendation result without requiring manual YAML editing for common setups.
 - Future agent/plugin support can reuse the same model/config recommendation data without being hard-coded to Continue-only assumptions.
-- The final-stage UI is treated as an optional wrapper over tested scripts, not a replacement for script-level validation.
+- The final-stage UI is treated as an optional wrapper over tested shared engines, not a replacement for script-level validation.
+- The UI can call a small number of stable script entry points or a shared command dispatcher rather than many plugin-specific scripts.

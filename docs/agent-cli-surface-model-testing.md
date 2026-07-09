@@ -97,6 +97,13 @@ For CLI flags that differ from the default wrapper:
   -ModelArgumentTemplate 'actual model flag with {Model}'
 ```
 
+## Consolidation Direction
+
+The long-term direction is a small set of shared engines plus optional thin wrappers, not a full duplicated script family for every agent plugin.
+
+Keep the shared harness as the source of behavior. Surface-specific wrappers should only provide friendly defaults such as command names, model flags, and install hints. If wrapper count becomes hard to maintain, prefer a registry-driven dispatcher or a future web UI that calls the shared harness directly.
+
+The planned web UI should call stable script entry points for hardware profiling, model discovery, model testing, configuration generation, and validation. It should not reimplement the business logic that already exists in scripts.
 ## Safety Rules
 
 - Use generated sample repositories by default.

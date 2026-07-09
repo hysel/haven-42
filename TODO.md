@@ -301,7 +301,9 @@
 - [x] Generate local-only Continue config directly from the recommendation output.
 - [ ] Reuse the recommendation data model for future non-Continue agent surfaces.
 - [ ] Add config-generation strategy that can choose between project-local assets and centralized shared assets for Continue and future agent plugins.
-- [ ] Add a guided UI wrapper after script-level workflows are stable.
+- [ ] Consolidate similar script families behind shared engines, registries, or dispatchers before adding more plugin-specific wrappers.
+- [ ] Define the stable script/API boundary that a future unified web UI should call.
+- [ ] Add a unified web UI wrapper after script-level workflows are stable.
 
 ## Milestone 18: Language Rule Packs
 
