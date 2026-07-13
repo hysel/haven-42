@@ -2359,6 +2359,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         "install-pack-assets",
         "generate-runtime-context",
         "run-runtime-validation",
+        "test-local-agent-health",
         "test-agent-cli-surface",
         "validate-pack",
         "test-pack"
@@ -2419,6 +2420,34 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $missingResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "missing-workflow", "-DryRun")
     Assert-True -Condition ($missingResult.ExitCode -ne 0) -Message "Workflow dispatcher should fail for an unknown workflow."
     Assert-True -Condition ($missingResult.Output -match "Workflow not found") -Message "Workflow dispatcher should report an unknown workflow."
+}
+Invoke-PackTest "local agent health check reports setup status" {
+    $scriptPath = Join-Path $repoRoot "scripts/test-local-agent-health.ps1"
+    $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "continue-health-test-$([guid]::NewGuid())"
+    $outputPath = Join-Path $tempRoot "health.json"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+        $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-TargetRepo", $repoRoot, "-SkipOllama", "-AsJson", "-OutputPath", $outputPath)
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Local agent health check should succeed for a fixture repo."
+        Assert-True -Condition (Test-Path -LiteralPath $outputPath) -Message "Local agent health check should write JSON report."
+
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Health report schema version should be stable."
+        Assert-True -Condition ($report.OverallStatus -in @("pass", "warn", "skip")) -Message "Health report should not fail for the pack repository."
+        Assert-True -Condition ($report.OllamaCheckSkipped -eq $true) -Message "Health report should record skipped Ollama check."
+        Assert-True -Condition (@($report.Checks | Where-Object { $_.Id -eq "config.references" -and $_.Status -eq "pass" }).Count -eq 1) -Message "Health check should verify config references."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Health check output should stay sanitized."
+
+        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "test-local-agent-health", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-SkipOllama","-AsJson"]')
+        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve health check."
+        Assert-True -Condition ($dispatch.Output -match "scripts/test-local-agent-health\.ps1") -Message "Dispatcher should point at the health check script."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
