@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, Milestone 12 model tool-use validation evidence, and Milestone 13 broader multi-repository validation are complete. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, script consolidation, a stable workflow registry, and a future unified starter-toolkit web UI.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, Milestone 12 model tool-use validation evidence, Milestone 13 broader multi-repository validation, and Milestone 14 agent surface portability and broader-audience positioning are complete. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, script consolidation, a stable workflow registry, and a future unified starter-toolkit web UI.
 
 ## Stage Status
 
@@ -22,7 +22,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
 | Milestone 13: Broader Multi-Repository Validation | Complete | Sanitized legacy .NET evidence plus generated Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL category evidence satisfy the milestone coverage target; future real-repository runs continue as evidence expansion. |
-| Milestone 14: Agent Surface Portability And Broader Audience | In Progress | The project is repositioned as a local-first engineering agent pack, Continue remains the first supported surface, and an evidence-gated compatibility matrix now tracks other open-source agent surfaces. |
+| Milestone 14: Agent Surface Portability And Broader Audience | Complete | The project is repositioned as a local-first engineering agent pack for individual, team, and enterprise users; Continue remains the supported first path; non-Continue surfaces are tracked through evidence-gated validation levels, promotion gates, and config-bundle limits. |
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
 | Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories; runtime context now includes non-.NET metadata from generated samples. |
 | Milestone 17: Agent Surface Compatibility Validation | In Progress | Cline has read-only and disposable write-smoke validation evidence for `qwen3-coder:30b` at 16k context; Aider has generated Python and richer disposable Node service validation evidence; real-project approved-write plus Roo Code, Kilo Code, and OpenCode live validation remain pending. |
@@ -398,22 +398,22 @@ Goal: Make the project useful beyond one editor extension or one enterprise-only
 
 Scope:
 
-- Reposition the project name and product language around a local-first engineering agent pack rather than a Continue-only enterprise pack.
-- Keep Continue as the first supported and tested agent surface until another surface has equivalent validation evidence.
+- Reposition the project name and product language around a local-first engineering agent pack rather than a Continue-only enterprise pack. Done.
+- Keep Continue as the first supported and tested agent surface until another surface has equivalent validation evidence. Done as the support boundary.
 - Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options. Done.
 - Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
 - Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams. Done with a shared setup-paths guide.
-- Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical.
+- Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical. Done for the current docs, shared assets, validation harnesses, and evidence catalogs.
 - Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Continue remains the only supported generated config bundle today.
-- Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change.
+- Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change. Done for the repository docs and roadmap; external wiki updates remain release-process work when publishing.
 
 Exit criteria:
 
-- New users can understand that the project starts with Continue but is not limited to Continue forever.
-- Non-enterprise users can follow the quick start without feeling the pack assumes a corporate environment.
-- Enterprise users still see security, governance, validation, and auditability guidance.
-- At least one non-Continue open-source agent surface is evaluated with a documented read-only validation result.
-- Surface-specific limitations are documented before any surface is recommended for approved writes.
+- New users can understand that the project starts with Continue but is not limited to Continue forever. Done in the README and agent surface docs.
+- Non-enterprise users can follow the quick start without feeling the pack assumes a corporate environment. Done through beginner setup paths and non-enterprise guidance.
+- Enterprise users still see security, governance, validation, and auditability guidance. Done through the governance, validation, and evidence docs.
+- At least one non-Continue open-source agent surface is evaluated with a documented read-only validation result. Done with the Cline read-only validation path and sanitized evidence references.
+- Surface-specific limitations are documented before any surface is recommended for approved writes. Done through promotion gates, compatibility status, and config-bundle policy docs.
 
 ## Milestone 15: Multi-Language Engineering Support
 

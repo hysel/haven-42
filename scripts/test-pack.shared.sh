@@ -534,13 +534,18 @@ test_sample_repository_factory_doc() {
 test_agent_surface_options_doc() {
   [ -f "$REPO_ROOT/docs/agent-surface-options.md" ] &&
     grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Milestone 14 Completion Basis" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "docs/cline-readonly-validation.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "docs/surface-specific-config-bundles.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "docs/setup-paths.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Candidate means" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Approved-write ready" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Cline" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Aider" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
-    grep -q "Milestone 14: Agent Surface Portability And Broader Audience" "$REPO_ROOT/ROADMAP.md"
+    grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "\\[x\\] Complete Milestone 14 portability and broader-audience exit criteria" "$REPO_ROOT/TODO.md"
 }
 
 

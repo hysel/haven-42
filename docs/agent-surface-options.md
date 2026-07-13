@@ -22,6 +22,12 @@ This matrix is a support boundary, not a popularity ranking. A surface can be a 
 
 The install/configure/test parity view is tracked separately in `config/agent-surface-capabilities.json` and explained in `docs/agent-surface-capability-parity.md`. Promotion gates for non-Continue surfaces are tracked in `docs/agent-surface-promotion-gates.md`.
 
+## Milestone 14 Completion Basis
+
+Milestone 14 is complete for the current scope because the pack now presents itself as a local-first engineering agent pack rather than a Continue-only or enterprise-only bundle. Continue is the first supported surface, while every other surface stays evidence-gated through the compatibility matrix, `docs/agent-surface-promotion-gates.md`, `docs/surface-specific-config-bundles.md`, and `config/agent-surface-capabilities.json`.
+
+The non-Continue validation requirement is satisfied by the documented Cline read-only path in `docs/cline-readonly-validation.md` and the related sanitized evidence references. Beginner and team setup expectations are covered by `docs/setup-paths.md`, while approved-write readiness remains blocked for non-Continue surfaces until external verification proves scoped edits in the target surface.
+
 | Surface | Surface type | Current validation level | Current pack support | Approved-write position | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Continue | VS Code-compatible extension, VSCodium extension, and CLI | Approved-write ready for the validated local editor setup; CLI harness validated by tests | Supported first path plus CLI automation harness | Allowed only after the read-only, read-content, current-folder, and scoped write smoke tests pass in the user's actual setup | Existing config, install scripts, shared asset mode, validation docs, model testing, approved-write guidance, and `docs/continue-cli-model-testing.md` target Continue today. |

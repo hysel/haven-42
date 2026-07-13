@@ -613,15 +613,21 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     $docPath = Join-Path $repoRoot "docs/agent-surface-options.md"
     $readmePath = Join-Path $repoRoot "README.md"
     $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Agent surface options doc should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Continue is the first supported surface") -Message "Agent surface doc should keep Continue as the current supported surface."
     Assert-True -Condition ($doc -match "Compatibility Matrix") -Message "Agent surface doc should include an explicit compatibility matrix."
+    Assert-True -Condition ($doc -match "Milestone 14 Completion Basis") -Message "Agent surface doc should record Milestone 14 completion basis."
+    Assert-True -Condition ($doc -match "docs/cline-readonly-validation\.md") -Message "Agent surface doc should cite non-Continue read-only validation evidence."
+    Assert-True -Condition ($doc -match "docs/surface-specific-config-bundles\.md") -Message "Agent surface doc should cite surface-specific config bundle policy."
+    Assert-True -Condition ($doc -match "docs/setup-paths\.md") -Message "Agent surface doc should cite beginner and team setup paths."
     Assert-True -Condition ($doc -match "Candidate means") -Message "Agent surface doc should define candidate status."
     Assert-True -Condition ($doc -match "Read-only validated") -Message "Agent surface doc should define read-only validation."
     Assert-True -Condition ($doc -match "Plan validated") -Message "Agent surface doc should define plan validation."
@@ -633,7 +639,8 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     Assert-True -Condition ($doc -match "Blocked") -Message "Agent surface doc should block unvalidated approved writes."
     Assert-True -Condition ($doc -match "Non-Enterprise Use") -Message "Agent surface doc should address non-enterprise users."
     Assert-True -Condition ($readme -match "docs/agent-surface-options.md") -Message "README should link agent surface options."
-    Assert-True -Condition ($roadmap -match "Milestone 14: Agent Surface Portability And Broader Audience") -Message "Roadmap should include Milestone 14."
+    Assert-True -Condition ($roadmap -match "\| Milestone 14: Agent Surface Portability And Broader Audience \| Complete \|") -Message "Roadmap should mark Milestone 14 complete."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 14 portability and broader-audience exit criteria") -Message "TODO should mark Milestone 14 completion audit complete."
 }
 
 

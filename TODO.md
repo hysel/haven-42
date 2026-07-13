@@ -255,6 +255,7 @@
 - [x] Evaluate at least one non-Continue open-source agent surface with sanitized evidence.
 - [x] Decide whether install scripts should generate surface-specific config bundles instead of only `.continue` assets.
 - [x] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance.
+- [x] Complete Milestone 14 portability and broader-audience exit criteria with evidence-gated surface docs.
 
 ## Milestone 15: Multi-Language Engineering Support
 
