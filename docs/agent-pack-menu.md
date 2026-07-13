@@ -1,6 +1,6 @@
 # Agent Pack Menu
 
-The agent pack menu is the primary human-facing navigation layer over the workflow registry.
+The agent pack menu is the primary human-facing navigation layer over the workflow registry and the agent surface solution catalog.
 
 It groups the repository's scripts into a short list of intents:
 
@@ -26,6 +26,8 @@ Generate the menu on Linux or macOS:
 ./scripts/show-agent-pack-menu.macos.sh --markdown-output-path runtime-validation-output/agent-pack-menu.md --output-path runtime-validation-output/agent-pack-menu.json --as-json
 ```
 
-Use this menu before going to individual script docs. The appendix remains available for direct script parameters and troubleshooting: `docs/script-reference-appendix.md`.
+Use this menu before going to individual script docs. The generated agent surface snapshot comes from `config/agent-surface-solutions.json`, so install/configure/test status matches the evidence-gated solution catalog.
+
+The appendix remains available for direct script parameters and troubleshooting: `docs/script-reference-appendix.md`.
 
 For install/configure/test maturity by agent surface, use `docs/agent-surface-solutions.md`.

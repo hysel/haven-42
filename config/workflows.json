@@ -69,7 +69,7 @@
       "category": "evidence",
       "safetyLevel": "read-only",
       "uiReady": true,
-      "inputs": ["evidenceCatalogPath", "surfaceMatrixPath", "outputPath", "markdownOutputPath"],
+      "inputs": ["evidenceCatalogPath", "surfaceMatrixPath", "surfaceSolutionPath", "outputPath", "markdownOutputPath"],
       "outputs": ["evidenceDashboardJson", "evidenceDashboardMarkdown"],
       "entryPoints": {
         "windows": "scripts/generate-evidence-dashboard.ps1",
