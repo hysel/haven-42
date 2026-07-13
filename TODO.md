@@ -309,7 +309,7 @@
 - [ ] Keep the UI evidence-first by showing tested, passed, failed, and recommended-only states before applying changes.
 - [ ] Generate a local evidence dashboard from validation JSON files.
 - [ ] Add beginner setup mode for the common local-AI coding setup path.
-- [ ] Add a health check workflow for Ollama, models, config, duplicate rules, repository detection, and validation status.
+- [x] Add a health check workflow for Ollama, models, config, duplicate rules, repository detection, and validation status.
 - [ ] Add a safe cleanup workflow with dry-run support for failed models, stale runtime output, generated samples, and old backups.
 - [ ] Add a release readiness gate for validation, tests, docs/wiki freshness, whitespace checks, and optional remote workflow status.
 - [ ] Add a model scorecard for tool support, speed, quality, write behavior, context size, hardware tier, and recommended use.

@@ -168,6 +168,21 @@
       }
     },
     {
+      "id": "test-local-agent-health",
+      "name": "Test Local Agent Health",
+      "purpose": "Check local setup health for repository config, runtime output, and optional Ollama reachability without mutating user files.",
+      "category": "health",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["targetRepo", "ollamaBaseUrl", "skipOllama", "outputPath"],
+      "outputs": ["localAgentHealthReportJson", "healthConsoleOutput"],
+      "entryPoints": {
+        "windows": "scripts/test-local-agent-health.ps1",
+        "linux": "scripts/test-local-agent-health.linux.sh",
+        "macos": "scripts/test-local-agent-health.macos.sh"
+      }
+    },
+    {
       "id": "test-agent-cli-surface",
       "name": "Test Agent CLI Surface",
       "purpose": "Screen CLI-capable agent surfaces with read-only and disposable write-smoke checks through the shared harness.",

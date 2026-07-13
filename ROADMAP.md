@@ -28,7 +28,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 17: Agent Surface Compatibility Validation | In Progress | Cline has read-only and disposable write-smoke validation evidence for `qwen3-coder:30b` at 16k context; Aider has generated Python and richer disposable Node service validation evidence; real-project approved-write plus Roo Code, Kilo Code, and OpenCode live validation remain pending. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; generated editor/model workflow evidence is recorded, prompt and runner filename-fidelity guardrails are in place, and runtime runners now write filename-fidelity fallback artifacts for deterministic filename failures. Remaining empty-output failures and any non-filename guardrail repeats require separate remediation before promotion. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, centralized shared asset config generation, and a first shared workflow dispatcher are implemented for current scope; future surface reuse, deeper script consolidation, and a unified starter-toolkit web UI remain planned. |
+| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, centralized shared asset config generation, a first shared workflow dispatcher, and a local setup health check are implemented for current scope; future surface reuse, deeper script consolidation, and a unified starter-toolkit web UI remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -530,7 +530,7 @@ Scope:
 - Keep the web UI evidence-first: show what was tested, what passed, what failed, and what is only a recommendation before applying changes.
 - Generate a local evidence dashboard from validation JSON so users can compare models, agent surfaces, operating systems, write readiness, and risks before installing anything.
 - Add a beginner setup mode that guides users through the common local-AI coding path with minimal questions and exact next commands.
-- Add a health check workflow that verifies Ollama reachability, installed models, generated config, duplicate rules, repository detection, and read/write validation status.
+- Add a health check workflow that verifies Ollama reachability, generated config, duplicate local references, repository detection, and runtime validation output status. Done for current PowerShell and shell-wrapper scope.
 - Add a safe cleanup workflow with dry-run support for failed or unused local models, stale runtime outputs, old generated samples, and obsolete backup folders.
 - Add a release readiness gate that runs validation, tests, docs/wiki freshness checks, whitespace checks, and optionally remote workflow status before release or push.
 - Add a model scorecard that tracks tested models by tool support, speed, output quality, write behavior, context size, hardware tier, and recommended use.
