@@ -57,8 +57,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "profile-remote-hardware", "discover-online-models", "pull-local-agent-models"],
-          "evidence": ["docs/local-model-selection.md", "docs/online-model-discovery.md"]
+          "entryPoints": ["profile-local-hardware", "profile-remote-hardware", "discover-online-models", "generate-model-scorecard", "pull-local-agent-models"],
+          "evidence": ["docs/local-model-selection.md", "docs/online-model-discovery.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",
@@ -105,8 +105,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md"]
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",
@@ -153,8 +153,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md"]
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",
@@ -201,8 +201,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md"]
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",
@@ -249,8 +249,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md"]
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",
@@ -297,8 +297,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md"]
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",
@@ -345,8 +345,8 @@
         },
         "model-selection": {
           "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md"]
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
         },
         "evidence": {
           "status": "supported",

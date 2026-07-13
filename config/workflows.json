@@ -48,6 +48,21 @@
       }
     },
     {
+      "id": "generate-model-scorecard",
+      "name": "Generate Model Scorecard",
+      "purpose": "Summarize model readiness by model, surface, status, and evidence from the committed evidence catalog.",
+      "category": "model-selection",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["evidenceCatalogPath", "modelCatalogPath", "outputPath", "markdownOutputPath"],
+      "outputs": ["modelScorecardJson", "modelScorecardMarkdown"],
+      "entryPoints": {
+        "windows": "scripts/generate-model-scorecard.ps1",
+        "linux": "scripts/generate-model-scorecard.linux.sh",
+        "macos": "scripts/generate-model-scorecard.macos.sh"
+      }
+    },
+    {
       "id": "pull-local-agent-models",
       "name": "Pull Local Agent Models",
       "purpose": "Download selected local model candidates after hardware and validation review.",

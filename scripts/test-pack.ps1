@@ -2353,6 +2353,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $requiredWorkflowIds = @(
         "profile-local-hardware",
         "discover-online-models",
+        "generate-model-scorecard",
         "test-local-agent-models",
         "recommend-agent-config",
         "apply-agent-config",
@@ -2507,6 +2508,42 @@ Invoke-PackTest "release readiness gate checks core release invariants" {
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "test-release-readiness", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AllowDirty","-SkipTests"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve release readiness gate."
         Assert-True -Condition ($dispatch.Output -match "scripts/test-release-readiness\.ps1") -Message "Dispatcher should point at the release readiness script."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Invoke-PackTest "model scorecard summarizes evidence by model" {
+    $scriptPath = Join-Path $repoRoot "scripts/generate-model-scorecard.ps1"
+    $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
+    $docPath = Join-Path $repoRoot "docs/model-scorecard.md"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "model-scorecard-test-$([guid]::NewGuid())"
+    $jsonPath = Join-Path $tempRoot "scorecard.json"
+    $markdownPath = Join-Path $tempRoot "scorecard.md"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+        $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputPath", $jsonPath, "-MarkdownOutputPath", $markdownPath, "-AsJson")
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Model scorecard generation should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath $jsonPath) -Message "Model scorecard should write JSON output."
+        Assert-True -Condition (Test-Path -LiteralPath $markdownPath) -Message "Model scorecard should write Markdown output."
+
+        $report = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
+        $markdown = Get-Content -LiteralPath $markdownPath -Raw
+        $doc = Get-Content -LiteralPath $docPath -Raw
+
+        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Model scorecard schema version should be stable."
+        Assert-True -Condition ($report.ModelCount -ge 3) -Message "Model scorecard should include validated models."
+        Assert-True -Condition (@($report.Models | Where-Object { $_.Model -eq "qwen3.5:9b" -and $_.BestStatus -eq "approved-write-ready" }).Count -eq 1) -Message "Scorecard should preserve qwen3.5 approved-write evidence."
+        Assert-True -Condition (@($report.Models | Where-Object { $_.Model -eq "qwen3-coder:30b" }).Count -eq 1) -Message "Scorecard should include qwen3-coder evidence."
+        Assert-True -Condition (@($report.Models | Where-Object { $_.Model -eq "N/A" -or $_.Model -eq "local Ollama config" }).Count -eq 0) -Message "Scorecard should exclude non-model placeholders."
+        Assert-True -Condition ($markdown -match "Model Scorecard") -Message "Markdown scorecard should include title."
+        Assert-True -Condition ($doc -match "evidence-catalog\.tsv") -Message "Model scorecard doc should reference evidence catalog."
+
+        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "generate-model-scorecard", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
+        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve model scorecard."
+        Assert-True -Condition ($dispatch.Output -match "scripts/generate-model-scorecard\.ps1") -Message "Dispatcher should point at the scorecard script."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
