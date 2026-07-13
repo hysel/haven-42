@@ -14,4 +14,6 @@ The dashboard reports:
 - Known agent surface readiness from `config/agent-surface-capabilities.json`.
 - Distinct model names present in `config/evidence-catalog.tsv`.
 
+For install/configure/test solution status by agent, pair the dashboard with `docs/agent-surface-solutions.md`.
+
 The generator is read-only except for the optional output paths. Output files belong in ignored local folders such as `runtime-validation-output/`; committed shared files stay sanitized and machine-neutral.

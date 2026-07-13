@@ -27,3 +27,5 @@ Generate the menu on Linux or macOS:
 ```
 
 Use this menu before going to individual script docs. The appendix remains available for direct script parameters and troubleshooting: `docs/script-reference-appendix.md`.
+
+For install/configure/test maturity by agent surface, use `docs/agent-surface-solutions.md`.

@@ -2487,6 +2487,90 @@ Invoke-PackTest "agent surface capability matrix preserves parity" {
     Assert-True -Condition ($options -match "Compatibility Matrix") -Message "Surface options doc should retain compatibility matrix."
     Assert-True -Condition ($todo -match "surface-specific config") -Message "TODO should track surface-specific config work."
 }
+Invoke-PackTest "agent surface solutions define install configure and test" {
+    $solutionsPath = Join-Path $repoRoot "config/agent-surface-solutions.json"
+    $matrixPath = Join-Path $repoRoot "config/agent-surface-capabilities.json"
+    $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $docPath = Join-Path $repoRoot "docs/agent-surface-solutions.md"
+    $menuDocPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
+    $dashboardDocPath = Join-Path $repoRoot "docs/evidence-dashboard.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $solutionsPath) -Message "Agent surface solution catalog should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Agent surface solution docs should exist."
+
+    $solutions = Get-Content -LiteralPath $solutionsPath -Raw | ConvertFrom-Json
+    $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
+    $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $menuDoc = Get-Content -LiteralPath $menuDocPath -Raw
+    $dashboardDoc = Get-Content -LiteralPath $dashboardDocPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
+
+    $allowedStatuses = @($solutions.statusLevels)
+    $workflowIds = @{}
+    foreach ($workflow in $registry.workflows) {
+        $workflowIds[$workflow.id] = $true
+    }
+
+    Assert-Equal -Actual $solutions.schemaVersion -Expected 1 -Message "Agent surface solution schema version should be stable."
+    Assert-True -Condition (@($solutions.requiredActivities) -contains "install") -Message "Solution catalog should require install."
+    Assert-True -Condition (@($solutions.requiredActivities) -contains "configure") -Message "Solution catalog should require configure."
+    Assert-True -Condition (@($solutions.requiredActivities) -contains "test") -Message "Solution catalog should require test."
+    Assert-Equal -Actual @($solutions.surfaces).Count -Expected @($matrix.surfaces).Count -Message "Solution catalog should cover every capability matrix surface."
+
+    foreach ($matrixSurface in @($matrix.surfaces)) {
+        Assert-True -Condition (@($solutions.surfaces | Where-Object { $_.id -eq $matrixSurface.id }).Count -eq 1) -Message "Solution catalog should include $($matrixSurface.id)."
+    }
+
+    foreach ($surface in @($solutions.surfaces)) {
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.id)) -Message "Solution surface should include id."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.name)) -Message "Solution surface should include name: $($surface.id)"
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.currentValidationLevel)) -Message "Solution surface should include validation level: $($surface.id)"
+
+        foreach ($activity in @("install", "configure", "test")) {
+            $entry = $surface.$activity
+            Assert-True -Condition ($null -ne $entry) -Message "$($surface.id) should define $activity solution."
+            Assert-True -Condition ($entry.status -in $allowedStatuses) -Message "$($surface.id) $activity should use a known status."
+            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($entry.solution)) -Message "$($surface.id) $activity should describe a solution."
+            Assert-True -Condition ($null -ne $entry.workflowIds) -Message "$($surface.id) $activity should include workflowIds."
+            Assert-True -Condition ($entry.evidence.Count -gt 0) -Message "$($surface.id) $activity should include evidence."
+            Assert-True -Condition ($null -ne $entry.blockedReason) -Message "$($surface.id) $activity should include blockedReason field."
+
+            foreach ($workflowId in @($entry.workflowIds)) {
+                Assert-True -Condition $workflowIds.ContainsKey($workflowId) -Message "$($surface.id) $activity should reference known workflow $workflowId."
+            }
+
+            foreach ($evidence in @($entry.evidence)) {
+                Assert-True -Condition ($evidence -notmatch "^[A-Za-z]:|^/|\\|\.\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users|OneDrive|itama|token|secret") -Message "$($surface.id) $activity evidence should stay sanitized: $evidence"
+                Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "$($surface.id) $activity evidence should exist: $evidence"
+            }
+
+            if ($entry.status -in @("planned", "blocked")) {
+                Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($entry.blockedReason)) -Message "$($surface.id) $activity should explain planned or blocked status."
+            }
+        }
+    }
+
+    foreach ($support in @("health", "cleanup", "releaseReadiness", "modelSelection", "evidence")) {
+        $entry = $solutions.sharedSupport.$support
+        Assert-True -Condition ($null -ne $entry) -Message "Shared support should include $support."
+        Assert-True -Condition ($entry.status -in $allowedStatuses) -Message "Shared support $support should use a known status."
+        foreach ($workflowId in @($entry.workflowIds)) {
+            Assert-True -Condition $workflowIds.ContainsKey($workflowId) -Message "Shared support $support should reference known workflow $workflowId."
+        }
+    }
+
+    Assert-True -Condition ($doc -match "Install") -Message "Solution docs should mention install."
+    Assert-True -Condition ($doc -match "Configure") -Message "Solution docs should mention configure."
+    Assert-True -Condition ($doc -match "Test") -Message "Solution docs should mention test."
+    Assert-True -Condition ($menuDoc -match "docs/agent-surface-solutions.md") -Message "Menu docs should link solution catalog."
+    Assert-True -Condition ($dashboardDoc -match "docs/agent-surface-solutions.md") -Message "Evidence dashboard docs should link solution catalog."
+    Assert-True -Condition ($readme -match "docs/agent-surface-solutions.md") -Message "README should link solution catalog."
+    Assert-True -Condition ($todo -match "surface-neutral install/configure/test solution catalog") -Message "TODO should track solution catalog completion."
+}
 Invoke-PackTest "sample scenario packs reference existing assets" {
     $scenarioPath = Join-Path $repoRoot "config/sample-scenario-packs.json"
     $registryPath = Join-Path $repoRoot "config/workflows.json"
@@ -2721,12 +2805,12 @@ Invoke-PackTest "agent pack menu groups workflows by user intent" {
         Assert-True -Condition ($markdown -match "First-Time Setup") -Message "Agent pack menu markdown should include first-time setup."
         Assert-True -Condition ($doc -match "primary human-facing navigation") -Message "Agent pack menu docs should explain the menu role."
         Assert-True -Condition ($appendix -match "individual script documentation") -Message "Script appendix should preserve detailed script docs."
-        Assert-True -Condition ($result.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu output should stay sanitized."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu output should stay sanitized."
 
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "show-agent-pack-menu", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve agent pack menu."
         Assert-True -Condition ($dispatch.Output -match "scripts/show-agent-pack-menu\.ps1") -Message "Dispatcher should point at the agent pack menu script."
-        Assert-True -Condition ($dispatch.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu dispatcher output should stay sanitized."
+        Assert-True -Condition ($dispatch.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu dispatcher output should stay sanitized."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue

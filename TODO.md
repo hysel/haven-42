@@ -300,6 +300,7 @@
 - [x] Add validation coverage for recommendation scripts, docs, and sanitized output behavior.
 - [x] Generate local-only Continue config directly from the recommendation output.
 - [ ] Reuse the recommendation data model for future non-Continue agent surfaces.
+- [x] Add a surface-neutral install/configure/test solution catalog for every tracked agent surface.
 - [ ] Add config-generation strategy that can choose between project-local assets and centralized shared assets for Continue and future agent plugins.
 - [ ] Reduce the number of scripts by consolidating similar script families behind shared engines, registries, or dispatchers before adding more plugin-specific wrappers.
 - [x] Add a guided command/menu layer so end users choose from a small set of intents instead of individual scripts.

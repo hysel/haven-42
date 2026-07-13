@@ -15,6 +15,8 @@ Every agent surface should be tracked against the same activities:
 
 `config/agent-surface-capabilities.json` is the machine-readable source for that parity check.
 
+`config/agent-surface-solutions.json` is the companion solution catalog that translates the parity matrix into install, configure, and test answers for users.
+
 ## Status Meanings
 
 | Status | Meaning |
