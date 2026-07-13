@@ -2356,6 +2356,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         "generate-model-scorecard",
         "generate-evidence-dashboard",
         "get-beginner-setup-plan",
+        "show-agent-pack-menu",
         "test-local-agent-models",
         "recommend-agent-config",
         "apply-agent-config",
@@ -2679,6 +2680,53 @@ Invoke-PackTest "beginner setup plan maps first-run commands to workflows" {
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "get-beginner-setup-plan", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve beginner setup plan."
         Assert-True -Condition ($dispatch.Output -match "scripts/get-beginner-setup-plan\.ps1") -Message "Dispatcher should point at the beginner setup script."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Invoke-PackTest "agent pack menu groups workflows by user intent" {
+    $scriptPath = Join-Path $repoRoot "scripts/show-agent-pack-menu.ps1"
+    $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
+    $docPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
+    $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "agent-menu-test-$([guid]::NewGuid())"
+    $jsonPath = Join-Path $tempRoot "agent-menu.json"
+    $markdownPath = Join-Path $tempRoot "agent-menu.md"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+        $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Platform", "windows", "-OutputPath", $jsonPath, "-MarkdownOutputPath", $markdownPath, "-AsJson")
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Agent pack menu generation should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath $jsonPath) -Message "Agent pack menu should write JSON output."
+        Assert-True -Condition (Test-Path -LiteralPath $markdownPath) -Message "Agent pack menu should write Markdown output."
+
+        $report = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
+        $markdown = Get-Content -LiteralPath $markdownPath -Raw
+        $doc = Get-Content -LiteralPath $docPath -Raw
+        $appendix = Get-Content -LiteralPath $appendixPath -Raw
+
+        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Agent pack menu schema version should be stable."
+        Assert-Equal -Actual $report.Platform -Expected "windows" -Message "Agent pack menu should preserve selected platform."
+        Assert-True -Condition ($report.MenuItemCount -ge 7) -Message "Agent pack menu should include the core user intents."
+        foreach ($requiredItem in @("first-time-setup", "health-check", "model-choice", "install-configure", "validate-model-agent", "review-evidence", "cleanup", "release-readiness")) {
+            Assert-True -Condition (@($report.MenuItems | Where-Object { $_.Id -eq $requiredItem }).Count -eq 1) -Message "Agent pack menu should include $requiredItem."
+        }
+        Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "get-beginner-setup-plan" -and $_.BeginnerRecommended -eq $true }).Count -eq 1) -Message "Agent pack menu should recommend the beginner setup plan."
+        Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "install-pack-assets" -and $_.Command -match "-DryRun" }).Count -eq 1) -Message "Agent pack menu should keep install/configure dry-run first."
+        Assert-True -Condition ($report.SurfaceCount -ge 7) -Message "Agent pack menu should include agent surface snapshot."
+        Assert-Equal -Actual $report.Appendix -Expected "docs/script-reference-appendix.md" -Message "Agent pack menu should point at the script appendix."
+        Assert-True -Condition ($markdown -match "Agent Pack Menu") -Message "Agent pack menu markdown should include title."
+        Assert-True -Condition ($markdown -match "First-Time Setup") -Message "Agent pack menu markdown should include first-time setup."
+        Assert-True -Condition ($doc -match "primary human-facing navigation") -Message "Agent pack menu docs should explain the menu role."
+        Assert-True -Condition ($appendix -match "individual script documentation") -Message "Script appendix should preserve detailed script docs."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu output should stay sanitized."
+
+        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "show-agent-pack-menu", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
+        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve agent pack menu."
+        Assert-True -Condition ($dispatch.Output -match "scripts/show-agent-pack-menu\.ps1") -Message "Dispatcher should point at the agent pack menu script."
+        Assert-True -Condition ($dispatch.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu dispatcher output should stay sanitized."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue

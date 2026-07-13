@@ -20,6 +20,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Pick the right local model | `docs/local-model-selection.md` |
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
 | Review stable workflow entry points | `docs/workflow-registry.md` |
+| Choose from a short guided menu | `docs/agent-pack-menu.md` |
 | Generate a beginner setup plan | `docs/beginner-setup-mode.md` |
 | Look up individual script details | `docs/script-reference-appendix.md` |
 | Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |

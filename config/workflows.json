@@ -93,6 +93,21 @@
       }
     },
     {
+      "id": "show-agent-pack-menu",
+      "name": "Show Agent Pack Menu",
+      "purpose": "Generate a short intent-based menu over stable workflows so users do not need to choose from individual scripts.",
+      "category": "onboarding",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["platform", "outputPath", "markdownOutputPath"],
+      "outputs": ["agentPackMenuJson", "agentPackMenuMarkdown"],
+      "entryPoints": {
+        "windows": "scripts/show-agent-pack-menu.ps1",
+        "linux": "scripts/show-agent-pack-menu.linux.sh",
+        "macos": "scripts/show-agent-pack-menu.macos.sh"
+      }
+    },
+    {
       "id": "pull-local-agent-models",
       "name": "Pull Local Agent Models",
       "purpose": "Download selected local model candidates after hardware and validation review.",
