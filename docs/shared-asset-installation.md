@@ -193,5 +193,5 @@ Rollback is straightforward:
 
 - Shared-assets mode is currently implemented for Continue global config generation.
 - Project-local model profile generation remains separate.
-- Future non-Continue surfaces may reuse this folder layout, but they still need surface-specific validation evidence first.
+- Future non-Continue surfaces may reuse this folder layout, but they still need surface-specific validation evidence first. See `docs/surface-specific-config-bundles.md`.
 - The target repository can still have its own `.continue` folder for project-specific rules, evidence, or local overrides.

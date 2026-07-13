@@ -404,7 +404,7 @@ Scope:
 - Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
 - Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams.
 - Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical.
-- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets.
+- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Continue remains the only supported generated config bundle today.
 - Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change.
 
 Exit criteria:
@@ -536,7 +536,7 @@ Scope:
 - Add a safe cleanup workflow with dry-run support for stale runtime outputs, generated samples, failed diagnostic artifacts, and obsolete backup folders. Done for local artifact cleanup; model deletion remains explicit in model-testing workflows.
 - Add a release readiness gate that runs validation, tests, release package dry-run, git state, workflow registry checks, and agent-surface parity checks before release or push. Done for local gate scope; optional remote workflow status remains future work.
 - Add a model scorecard that tracks tested models by surface, evidence status, write readiness, and recommended use. Done for evidence-backed readiness; speed, quality, context size, and hardware tier remain future structured evidence fields.
-- Generate surface-specific plugin profiles only after each plugin has compatibility evidence, using the same recommendation and validation data model.
+- Generate surface-specific plugin profiles only after each plugin has compatibility evidence, using the same recommendation and validation data model. The gating policy is documented; implementation remains future work.
 - Add a surface-neutral install/configure/test solution catalog for every tracked agent surface. Done for current evidence-gated status and blocked-reason tracking.
 - Add sample scenario packs for common local-AI coding tasks such as legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup. Done for registry-backed scenario catalog and docs; future UI can expose these as guided lanes.
 

@@ -45,7 +45,7 @@ Shared workflows such as health checks, cleanup, model selection, release readin
 
 ## Gaps To Close
 
-- Generate surface-specific config bundles only after each surface has compatibility evidence.
+- Generate surface-specific config bundles only after each surface has compatibility evidence. The policy is tracked in `docs/surface-specific-config-bundles.md`.
 - Add install/configure workflows for Cline and Aider if their configuration formats are stable enough to support safely.
 - Confirm command shapes for Roo Code, Kilo Code, and OpenCode before promoting wrappers from scaffolded to validated.
 - Review OpenHands separately because platform-style agents have different workspace, sandbox, and secret boundaries.

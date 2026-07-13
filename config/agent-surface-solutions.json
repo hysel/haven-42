@@ -13,6 +13,19 @@
     "planned",
     "blocked"
   ],
+  "configBundlePolicy": {
+    "decision": "Generate surface-specific config bundles only after compatibility evidence exists for that surface. Continue remains the only supported generated config bundle today.",
+    "defaultSurface": "continue",
+    "sharedAssetStrategy": "Shared prompts, rules, docs, templates, validation scripts, and evidence formats should stay reusable across surfaces; generated surface config files must stay surface-specific.",
+    "promotionCriteria": [
+      "Documented install behavior for the surface.",
+      "Documented local model configuration format for the surface.",
+      "Read-only validation against a generated or disposable repository.",
+      "Scoped write validation with external diff or file verification before approved-write generation.",
+      "Sanitized evidence paths recorded in the solution catalog."
+    ],
+    "evidence": ["docs/surface-specific-config-bundles.md"]
+  },
   "sharedSupport": {
     "health": {
       "status": "supported",
@@ -46,6 +59,12 @@
       "name": "Continue",
       "type": "editor-and-cli",
       "currentValidationLevel": "approved-write-ready",
+      "configBundle": {
+        "status": "supported",
+        "strategy": "Generate Continue project-local or shared-asset config from hardware-aware model recommendations.",
+        "outputKind": ".continue assets and local-only Continue config",
+        "evidence": ["docs/shared-asset-installation.md", "docs/hardware-aware-recommendations.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "supported",
         "solution": "Install project-local or shared Continue assets with dry-run and backup support.",
@@ -73,6 +92,12 @@
       "name": "Cline",
       "type": "editor-agent",
       "currentValidationLevel": "write-smoke-test-validated",
+      "configBundle": {
+        "status": "planned",
+        "strategy": "Do not generate Cline config bundles until install and local model config boundaries are documented and tested.",
+        "outputKind": "future surface-specific bundle",
+        "evidence": ["docs/cline-readonly-validation.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "planned",
         "solution": "Documented validation exists, but reusable Cline installation is not automated yet.",
@@ -100,6 +125,12 @@
       "name": "Aider",
       "type": "cli-agent",
       "currentValidationLevel": "plan-and-scoped-edit-validated",
+      "configBundle": {
+        "status": "planned",
+        "strategy": "Do not generate Aider config bundles until a stable local model config shape and install path are validated.",
+        "outputKind": "future surface-specific CLI bundle",
+        "evidence": ["docs/aider-cli-model-testing.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "scaffolded",
         "solution": "Aider validation docs and shared harness exist; reusable install automation is not yet promoted.",
@@ -127,6 +158,12 @@
       "name": "Roo Code",
       "type": "editor-agent",
       "currentValidationLevel": "candidate",
+      "configBundle": {
+        "status": "planned",
+        "strategy": "Do not generate Roo Code config bundles until command shape, extension setup, and local model configuration are confirmed.",
+        "outputKind": "future surface-specific bundle",
+        "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "planned",
         "solution": "Track Roo Code as a candidate surface until install and config behavior are validated.",
@@ -154,6 +191,12 @@
       "name": "Kilo Code",
       "type": "editor-agent",
       "currentValidationLevel": "candidate",
+      "configBundle": {
+        "status": "planned",
+        "strategy": "Do not generate Kilo Code config bundles until command shape, extension setup, and local model configuration are confirmed.",
+        "outputKind": "future surface-specific bundle",
+        "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "planned",
         "solution": "Track Kilo Code as a candidate surface until install and config behavior are validated.",
@@ -181,6 +224,12 @@
       "name": "OpenCode",
       "type": "cli-agent",
       "currentValidationLevel": "candidate",
+      "configBundle": {
+        "status": "planned",
+        "strategy": "Do not generate OpenCode config bundles until CLI install and local model configuration behavior are confirmed.",
+        "outputKind": "future surface-specific CLI bundle",
+        "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "planned",
         "solution": "Track OpenCode as a candidate CLI surface until install and config behavior are validated.",
@@ -208,6 +257,12 @@
       "name": "OpenHands",
       "type": "platform-agent",
       "currentValidationLevel": "candidate",
+      "configBundle": {
+        "status": "blocked",
+        "strategy": "Do not generate OpenHands config bundles from this pack while workspace, sandbox, and credential boundaries remain platform-specific.",
+        "outputKind": "blocked platform bundle",
+        "evidence": ["docs/agent-surface-options.md", "docs/surface-specific-config-bundles.md"]
+      },
       "install": {
         "status": "blocked",
         "solution": "Do not automate OpenHands install from this pack yet.",

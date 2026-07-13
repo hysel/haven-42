@@ -2492,6 +2492,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     $matrixPath = Join-Path $repoRoot "config/agent-surface-capabilities.json"
     $registryPath = Join-Path $repoRoot "config/workflows.json"
     $docPath = Join-Path $repoRoot "docs/agent-surface-solutions.md"
+    $bundleDocPath = Join-Path $repoRoot "docs/surface-specific-config-bundles.md"
     $menuDocPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
     $dashboardDocPath = Join-Path $repoRoot "docs/evidence-dashboard.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -2499,11 +2500,13 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
 
     Assert-True -Condition (Test-Path -LiteralPath $solutionsPath) -Message "Agent surface solution catalog should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Agent surface solution docs should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $bundleDocPath) -Message "Surface-specific config bundle policy docs should exist."
 
     $solutions = Get-Content -LiteralPath $solutionsPath -Raw | ConvertFrom-Json
     $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
     $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $bundleDoc = Get-Content -LiteralPath $bundleDocPath -Raw
     $menuDoc = Get-Content -LiteralPath $menuDocPath -Raw
     $dashboardDoc = Get-Content -LiteralPath $dashboardDocPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
@@ -2519,6 +2522,10 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition (@($solutions.requiredActivities) -contains "install") -Message "Solution catalog should require install."
     Assert-True -Condition (@($solutions.requiredActivities) -contains "configure") -Message "Solution catalog should require configure."
     Assert-True -Condition (@($solutions.requiredActivities) -contains "test") -Message "Solution catalog should require test."
+    Assert-True -Condition ($null -ne $solutions.configBundlePolicy) -Message "Solution catalog should define config bundle policy."
+    Assert-Equal -Actual $solutions.configBundlePolicy.defaultSurface -Expected "continue" -Message "Continue should remain the default generated bundle surface."
+    Assert-True -Condition ($solutions.configBundlePolicy.decision -match "only after compatibility evidence") -Message "Config bundle policy should be evidence-gated."
+    Assert-True -Condition (@($solutions.configBundlePolicy.evidence) -contains "docs/surface-specific-config-bundles.md") -Message "Config bundle policy should cite policy docs."
     Assert-Equal -Actual @($solutions.surfaces).Count -Expected @($matrix.surfaces).Count -Message "Solution catalog should cover every capability matrix surface."
 
     foreach ($matrixSurface in @($matrix.surfaces)) {
@@ -2529,6 +2536,22 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.id)) -Message "Solution surface should include id."
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.name)) -Message "Solution surface should include name: $($surface.id)"
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.currentValidationLevel)) -Message "Solution surface should include validation level: $($surface.id)"
+        Assert-True -Condition ($null -ne $surface.configBundle) -Message "$($surface.id) should define config bundle status."
+        Assert-True -Condition ($surface.configBundle.status -in $allowedStatuses) -Message "$($surface.id) config bundle should use a known status."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.configBundle.strategy)) -Message "$($surface.id) config bundle should describe strategy."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.configBundle.outputKind)) -Message "$($surface.id) config bundle should describe output kind."
+        Assert-True -Condition ($surface.configBundle.evidence.Count -gt 0) -Message "$($surface.id) config bundle should include evidence."
+
+        foreach ($evidence in @($surface.configBundle.evidence)) {
+            Assert-True -Condition ($evidence -notmatch "^[A-Za-z]:|^/|\\|\.\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users|OneDrive|itama|token|secret") -Message "$($surface.id) config bundle evidence should stay sanitized: $evidence"
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "$($surface.id) config bundle evidence should exist: $evidence"
+        }
+
+        if ($surface.id -eq "continue") {
+            Assert-Equal -Actual $surface.configBundle.status -Expected "supported" -Message "Continue config bundle should remain supported."
+        } else {
+            Assert-True -Condition ($surface.configBundle.status -ne "supported") -Message "$($surface.id) config bundle should not be supported before evidence gates pass."
+        }
 
         foreach ($activity in @("install", "configure", "test")) {
             $entry = $surface.$activity
@@ -2566,10 +2589,15 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($doc -match "Install") -Message "Solution docs should mention install."
     Assert-True -Condition ($doc -match "Configure") -Message "Solution docs should mention configure."
     Assert-True -Condition ($doc -match "Test") -Message "Solution docs should mention test."
+    Assert-True -Condition ($doc -match "surface-specific-config-bundles\.md") -Message "Solution docs should link config bundle policy."
+    Assert-True -Condition ($bundleDoc -match "Continue remains the only supported generated config bundle today") -Message "Config bundle docs should preserve current decision."
+    Assert-True -Condition ($bundleDoc -match "Scoped write validation") -Message "Config bundle docs should require write validation before promotion."
     Assert-True -Condition ($menuDoc -match "docs/agent-surface-solutions.md") -Message "Menu docs should link solution catalog."
     Assert-True -Condition ($dashboardDoc -match "docs/agent-surface-solutions.md") -Message "Evidence dashboard docs should link solution catalog."
     Assert-True -Condition ($readme -match "docs/agent-surface-solutions.md") -Message "README should link solution catalog."
+    Assert-True -Condition ($readme -match "docs/surface-specific-config-bundles.md") -Message "README should link config bundle policy."
     Assert-True -Condition ($todo -match "surface-neutral install/configure/test solution catalog") -Message "TODO should track solution catalog completion."
+    Assert-True -Condition ($todo -match "\[x\] Decide whether install scripts should generate surface-specific config bundles") -Message "TODO should mark config bundle decision complete."
 }
 Invoke-PackTest "sample scenario packs reference existing assets" {
     $scenarioPath = Join-Path $repoRoot "config/sample-scenario-packs.json"

@@ -10,6 +10,8 @@ It answers the same three questions for every surface:
 
 The catalog does not make planned or blocked surfaces look ready. It records the current solution, status, evidence, and blocked reason for each agent.
 
+It also records the config-bundle policy. Continue is the only supported generated bundle today; future surface-specific bundles are gated by `docs/surface-specific-config-bundles.md`.
+
 ## Current Summary
 
 | Surface | Install | Configure | Test |
@@ -29,6 +31,7 @@ The catalog does not make planned or blocked surfaces look ready. It records the
 - Workflow IDs must exist in `config/workflows.json`.
 - Evidence paths must be repository-relative and sanitized.
 - Shared workflows can support many surfaces only when they do not assume a surface-specific configuration format.
+- Surface-specific config bundles must follow `docs/surface-specific-config-bundles.md`.
 - Planned and blocked surfaces must not be promoted by docs, menus, dashboards, or recommendation output.
 
 ## How To Use It

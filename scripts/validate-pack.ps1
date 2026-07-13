@@ -138,6 +138,7 @@ $requiredFiles = @(
     "docs/hardware-aware-recommendations.md",
     "docs/workflow-registry.md",
     "docs/agent-surface-solutions.md",
+    "docs/surface-specific-config-bundles.md",
     "docs/shared-asset-installation.md",
     "docs/compatibility.md",
     "docs/runtime-validation.md",

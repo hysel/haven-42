@@ -142,6 +142,7 @@ REQUIRED_FILES=(
   "docs/compatibility.md"
   "docs/runtime-validation.md"
   "docs/agent-surface-solutions.md"
+  "docs/surface-specific-config-bundles.md"
   "docs/shared-asset-installation.md"
   "docs/editor-compatibility.md"
   "docs/prompt-quality.md"
