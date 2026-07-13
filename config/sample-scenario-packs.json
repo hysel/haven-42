@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "description": "Common local-AI coding scenarios mapped to existing prompts, agents, workflows, and validation evidence.",
+  "scenarios": [
+    {
+      "id": "legacy-migration",
+      "title": "Legacy Migration",
+      "goal": "Plan dependency, framework, or architecture migration work before applying scoped edits.",
+      "recommendedPrompts": ["repository-discovery", "legacy-dotnet-dependency-migration", "implementation-plan", "code-review"],
+      "recommendedAgents": ["architect", "senior-engineer", "reviewer"],
+      "sampleRepositoryTypes": ["java-spring", "node-service", "python-api"],
+      "workflowIds": ["generate-runtime-context", "run-runtime-validation", "verify-runtime-output", "test-agent-cli-surface"],
+      "evidence": ["examples/multi-repository-validation.md", "examples/multi-language-workflow-validation.md"],
+      "writeReadiness": "plan-first"
+    },
+    {
+      "id": "config-refactoring",
+      "title": "Config Refactoring",
+      "goal": "Review configuration structure, detect risky drift, and propose small reversible changes.",
+      "recommendedPrompts": ["repository-discovery", "refactoring-planner", "implementation-plan", "code-review"],
+      "recommendedAgents": ["architect", "senior-engineer", "reviewer"],
+      "sampleRepositoryTypes": ["node-service", "iac-terraform-kubernetes", "sql-migrations"],
+      "workflowIds": ["generate-runtime-context", "verify-runtime-output", "test-local-agent-health"],
+      "evidence": ["examples/code-review.md", "examples/multi-language-workflow-validation.md"],
+      "writeReadiness": "dry-run-first"
+    },
+    {
+      "id": "bug-fixing",
+      "title": "Bug Fixing",
+      "goal": "Investigate reproducible failures, propose the smallest fix, and verify filenames against repository context.",
+      "recommendedPrompts": ["repository-discovery", "bug-investigation", "implementation-plan", "code-review"],
+      "recommendedAgents": ["senior-engineer", "reviewer"],
+      "sampleRepositoryTypes": ["python-api", "typescript-frontend", "go-service"],
+      "workflowIds": ["generate-runtime-context", "run-runtime-validation", "verify-runtime-output"],
+      "evidence": ["docs/runtime-output-verification.md", "examples/multi-language-workflow-validation.md"],
+      "writeReadiness": "scoped-edit"
+    },
+    {
+      "id": "security-review",
+      "title": "Security Review",
+      "goal": "Identify evidence-backed security risks without inventing dependencies, files, or secret values.",
+      "recommendedPrompts": ["repository-discovery", "security-review", "implementation-plan", "code-review"],
+      "recommendedAgents": ["security-engineer", "reviewer"],
+      "sampleRepositoryTypes": ["node-service", "java-spring", "iac-terraform-kubernetes"],
+      "workflowIds": ["generate-runtime-context", "run-runtime-validation", "verify-runtime-output"],
+      "evidence": ["examples/security-review.md", "docs/banned-output-patterns.md"],
+      "writeReadiness": "review-only-by-default"
+    },
+    {
+      "id": "test-generation",
+      "title": "Test Generation",
+      "goal": "Plan and generate tests only after repository discovery identifies the test framework and target files.",
+      "recommendedPrompts": ["repository-discovery", "implementation-plan", "code-review"],
+      "recommendedAgents": ["senior-engineer", "reviewer"],
+      "sampleRepositoryTypes": ["python-api", "typescript-frontend", "rust-cli"],
+      "workflowIds": ["generate-sample-repositories", "generate-runtime-context", "verify-runtime-output"],
+      "evidence": ["docs/sample-repository-factory.md", "docs/language-support.md"],
+      "writeReadiness": "scoped-edit"
+    },
+    {
+      "id": "documentation-cleanup",
+      "title": "Documentation Cleanup",
+      "goal": "Improve docs using repository evidence while avoiding unsupported lifecycle, install, or API claims.",
+      "recommendedPrompts": ["repository-discovery", "documentation", "code-review"],
+      "recommendedAgents": ["documentation", "reviewer"],
+      "sampleRepositoryTypes": ["python-api", "typescript-frontend", "sql-migrations"],
+      "workflowIds": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+      "evidence": ["docs/runtime-output-verification.md", "examples/repository-discovery.md"],
+      "writeReadiness": "review-then-edit"
+    }
+  ]
+}

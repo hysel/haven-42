@@ -314,7 +314,7 @@
 - [x] Add a release readiness gate for validation, tests, docs/wiki freshness, whitespace checks, and optional remote workflow status.
 - [x] Add a model scorecard for tool support, speed, quality, write behavior, context size, hardware tier, and recommended use.
 - [ ] Generate surface-specific plugin profiles only after compatibility evidence exists.
-- [ ] Add sample scenario packs for legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup.
+- [x] Add sample scenario packs for legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup.
 
 ## Milestone 18: Language Rule Packs
 

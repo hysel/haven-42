@@ -535,7 +535,7 @@ Scope:
 - Add a release readiness gate that runs validation, tests, release package dry-run, git state, workflow registry checks, and agent-surface parity checks before release or push. Done for local gate scope; optional remote workflow status remains future work.
 - Add a model scorecard that tracks tested models by surface, evidence status, write readiness, and recommended use. Done for evidence-backed readiness; speed, quality, context size, and hardware tier remain future structured evidence fields.
 - Generate surface-specific plugin profiles only after each plugin has compatibility evidence, using the same recommendation and validation data model.
-- Add sample scenario packs for common local-AI coding tasks such as legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup.
+- Add sample scenario packs for common local-AI coding tasks such as legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup. Done for registry-backed scenario catalog and docs; future UI can expose these as guided lanes.
 
 Exit criteria:
 

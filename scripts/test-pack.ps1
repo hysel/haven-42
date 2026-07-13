@@ -2486,6 +2486,63 @@ Invoke-PackTest "agent surface capability matrix preserves parity" {
     Assert-True -Condition ($options -match "Compatibility Matrix") -Message "Surface options doc should retain compatibility matrix."
     Assert-True -Condition ($todo -match "surface-specific config") -Message "TODO should track surface-specific config work."
 }
+Invoke-PackTest "sample scenario packs reference existing assets" {
+    $scenarioPath = Join-Path $repoRoot "config/sample-scenario-packs.json"
+    $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $docPath = Join-Path $repoRoot "docs/sample-scenario-packs.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $scenarioPath) -Message "Sample scenario pack catalog should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Sample scenario pack docs should exist."
+
+    $catalog = Get-Content -LiteralPath $scenarioPath -Raw | ConvertFrom-Json
+    $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $readme = Get-Content -LiteralPath $readmePath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
+
+    $workflowIds = @{}
+    foreach ($workflow in $registry.workflows) {
+        $workflowIds[$workflow.id] = $true
+    }
+
+    Assert-Equal -Actual $catalog.schemaVersion -Expected 1 -Message "Sample scenario pack schema version should be stable."
+    foreach ($requiredScenario in @("legacy-migration", "config-refactoring", "bug-fixing", "security-review", "test-generation", "documentation-cleanup")) {
+        Assert-True -Condition (@($catalog.scenarios | Where-Object { $_.id -eq $requiredScenario }).Count -eq 1) -Message "Scenario catalog should include $requiredScenario."
+    }
+
+    foreach ($scenario in @($catalog.scenarios)) {
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($scenario.title)) -Message "Scenario should include title: $($scenario.id)"
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($scenario.goal)) -Message "Scenario should include goal: $($scenario.id)"
+        Assert-True -Condition ($scenario.recommendedPrompts.Count -gt 0) -Message "Scenario should list prompts: $($scenario.id)"
+        Assert-True -Condition ($scenario.workflowIds.Count -gt 0) -Message "Scenario should list workflows: $($scenario.id)"
+        Assert-True -Condition ($scenario.evidence.Count -gt 0) -Message "Scenario should list evidence: $($scenario.id)"
+
+        foreach ($prompt in @($scenario.recommendedPrompts)) {
+            Assert-True -Condition ($prompt -notmatch "^[A-Za-z]:|^/|\\|\.\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users|OneDrive|itama|token|secret") -Message "Scenario prompt reference should stay sanitized: $prompt"
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot ".continue/prompts/$prompt.md")) -Message "Scenario prompt should exist: $prompt"
+        }
+
+        foreach ($agent in @($scenario.recommendedAgents)) {
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot ".continue/agents/$agent.md")) -Message "Scenario agent should exist: $agent"
+        }
+
+        foreach ($workflowId in @($scenario.workflowIds)) {
+            Assert-True -Condition $workflowIds.ContainsKey($workflowId) -Message "Scenario workflow should exist: $workflowId"
+        }
+
+        foreach ($evidence in @($scenario.evidence)) {
+            Assert-True -Condition ($evidence -notmatch "^[A-Za-z]:|^/|\\|\.\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users|OneDrive|itama|token|secret") -Message "Scenario evidence should stay sanitized: $evidence"
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "Scenario evidence should exist: $evidence"
+        }
+    }
+
+    Assert-True -Condition ($doc -match "Legacy migration") -Message "Scenario docs should list legacy migration."
+    Assert-True -Condition ($doc -match "approved-write status") -Message "Scenario docs should avoid promoting write readiness."
+    Assert-True -Condition ($readme -match "docs/sample-scenario-packs.md") -Message "README should link scenario pack docs."
+    Assert-True -Condition ($todo -match "sample scenario packs") -Message "TODO should track sample scenario packs."
+}
 Invoke-PackTest "release readiness gate checks core release invariants" {
     $scriptPath = Join-Path $repoRoot "scripts/test-release-readiness.ps1"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
