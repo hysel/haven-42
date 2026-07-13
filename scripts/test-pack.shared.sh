@@ -122,6 +122,9 @@ test_linux_macos_scripts_do_not_require_pwsh() {
   ! grep -Eq 'pwsh|PowerShell 7' \
     "$REPO_ROOT/scripts/validate-pack.linux.sh" \
     "$REPO_ROOT/scripts/validate-pack.macos.sh" \
+    "$REPO_ROOT/scripts/invoke-workflow.linux.sh" \
+    "$REPO_ROOT/scripts/invoke-workflow.macos.sh" \
+    "$REPO_ROOT/scripts/invoke-workflow.shared.sh" \
     "$REPO_ROOT/scripts/test-pack.linux.sh" \
     "$REPO_ROOT/scripts/test-pack.macos.sh" \
     "$REPO_ROOT/scripts/install-continue-pack.linux.sh" \

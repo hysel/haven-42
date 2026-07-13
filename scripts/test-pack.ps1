@@ -1799,6 +1799,14 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
         @{
             Name = "generate-sample-repositories.macos.sh"
             Target = "generate-sample-repositories.shared.sh"
+        },
+        @{
+            Name = "invoke-workflow.linux.sh"
+            Target = "invoke-workflow.shared.sh"
+        },
+        @{
+            Name = "invoke-workflow.macos.sh"
+            Target = "invoke-workflow.shared.sh"
         }
     )
 
@@ -2377,6 +2385,9 @@ Invoke-PackTest "shared asset installation docs define centralized config strate
 Invoke-PackTest "workflow registry defines stable UI entry points" {
     $registryPath = Join-Path $repoRoot "config/workflows.json"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
+    $linuxDispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.linux.sh"
+    $macosDispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.macos.sh"
+    $sharedShellDispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.shared.sh"
     $docPath = Join-Path $repoRoot "docs/workflow-registry.md"
     $consolidationPath = Join-Path $repoRoot "docs/script-consolidation-plan.md"
     $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
@@ -2387,6 +2398,9 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
 
     Assert-True -Condition (Test-Path -LiteralPath $registryPath) -Message "Workflow registry should exist."
     Assert-True -Condition (Test-Path -LiteralPath $dispatcherPath) -Message "Workflow dispatcher should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $linuxDispatcherPath) -Message "Linux workflow dispatcher should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $macosDispatcherPath) -Message "macOS workflow dispatcher should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $sharedShellDispatcherPath) -Message "Shared shell workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Workflow registry docs should exist."
     Assert-True -Condition (Test-Path -LiteralPath $consolidationPath) -Message "Script consolidation plan should exist."
     Assert-True -Condition (Test-Path -LiteralPath $appendixPath) -Message "Script reference appendix should exist."
@@ -2464,6 +2478,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($doc -match "docs/workflow-chooser.md") -Message "Workflow registry docs should link workflow chooser."
     Assert-True -Condition ($doc -match "docs/script-consolidation-plan.md") -Message "Workflow registry docs should link script consolidation plan."
     Assert-True -Condition ($doc -match "scripts/invoke-workflow\.ps1") -Message "Workflow registry docs should reference the dispatcher."
+    Assert-True -Condition ($doc -match "scripts/invoke-workflow\.\*\.sh") -Message "Workflow registry docs should reference cross-platform dispatchers."
     Assert-True -Condition ($doc -match "-List") -Message "Workflow registry docs should document dispatcher list mode."
     Assert-True -Condition ($doc -match "-DryRun") -Message "Workflow registry docs should document dispatcher dry-run mode."
     Assert-True -Condition ($doc -match "docs/autonomous-maintainer-queue.md") -Message "Workflow registry docs should link autonomous maintainer queue."
@@ -2484,13 +2499,16 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($consolidation -match "thin wrappers") -Message "Script consolidation plan should define thin wrapper direction."
     Assert-True -Condition ($consolidation -match "config/workflows\.json") -Message "Script consolidation plan should reference workflow registry."
     Assert-True -Condition ($consolidation -match "scripts/invoke-workflow\.ps1") -Message "Script consolidation plan should reference workflow dispatcher."
+    Assert-True -Condition ($consolidation -match "scripts/invoke-workflow\.\*\.sh") -Message "Script consolidation plan should reference cross-platform workflow dispatchers."
     Assert-True -Condition ($consolidation -match "Do Not Consolidate Yet") -Message "Script consolidation plan should define no-consolidate-yet cases."
     Assert-True -Condition ($consolidation -match "test-agent-cli-surface-models") -Message "Script consolidation plan should cover shared agent CLI testing."
     Assert-True -Condition ($consolidation -match "Roo Code" -and $consolidation -match "Kilo Code" -and $consolidation -match "OpenCode") -Message "Script consolidation plan should cover planned agent wrappers."
     Assert-True -Condition ($consolidation -match "scripts/test-pack\.ps1") -Message "Script consolidation plan should require pack tests."
     Assert-True -Condition ($roadmap -match "workflow registry") -Message "Roadmap should track workflow registry work."
+    Assert-True -Condition ($roadmap -match "PowerShell/Linux/macOS dispatchers are done") -Message "Roadmap should track cross-platform dispatcher work."
     Assert-True -Condition ($roadmap -match "Script consolidation planning is documented") -Message "Roadmap should track script consolidation planning."
     Assert-True -Condition ($todo -match "workflow registry") -Message "TODO should track workflow registry work."
+    Assert-True -Condition ($todo -match "\[x\] Add cross-platform workflow dispatcher wrappers") -Message "TODO should mark cross-platform dispatchers complete."
     Assert-True -Condition ($todo -match "\[x\] Add a script consolidation plan") -Message "TODO should mark script consolidation planning complete."
     Assert-True -Condition ($todo -match "\[ \] Execute script-family consolidation") -Message "TODO should keep script consolidation implementation pending."
 
@@ -2503,6 +2521,34 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($dryRunResult.Output -match "scripts/validate-pack\.ps1") -Message "Workflow dispatcher dry run should resolve validate-pack script."
     Assert-True -Condition ($dryRunResult.Output -match "read-only") -Message "Workflow dispatcher dry run should include safety level."
     Assert-True -Condition ($dryRunResult.Output -match "ExpectedVersion") -Message "Workflow dispatcher dry run should preserve passthrough arguments."
+
+    $sharedShell = Get-Content -LiteralPath $sharedShellDispatcherPath -Raw
+    $linuxDispatcher = Get-Content -LiteralPath $linuxDispatcherPath -Raw
+    $macosDispatcher = Get-Content -LiteralPath $macosDispatcherPath -Raw
+    Assert-True -Condition ($sharedShell -match "config/workflows\.json") -Message "Shared shell dispatcher should read workflow registry."
+    Assert-True -Condition ($sharedShell -match "Workflow not found") -Message "Shared shell dispatcher should report unknown workflows."
+    Assert-True -Condition ($sharedShell -notmatch "pwsh") -Message "Shared shell dispatcher should not require PowerShell."
+    Assert-True -Condition ($linuxDispatcher -match "invoke-workflow\.shared\.sh" -and $linuxDispatcher -match "--platform linux") -Message "Linux dispatcher should delegate to shared dispatcher."
+    Assert-True -Condition ($macosDispatcher -match "invoke-workflow\.shared\.sh" -and $macosDispatcher -match "--platform macos") -Message "macOS dispatcher should delegate to shared dispatcher."
+
+    if (Get-Command bash -ErrorAction SilentlyContinue) {
+        $linuxListResult = & bash $linuxDispatcherPath --list --json 2>&1
+        $linuxListText = $linuxListResult | Out-String
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux workflow dispatcher list mode should succeed."
+        Assert-True -Condition ($linuxListText -match '"Id":\s*"validate-pack"|\"Id\":\"validate-pack\"') -Message "Linux workflow dispatcher list output should include validate-pack."
+
+        $linuxDryRunResult = & bash $linuxDispatcherPath --workflow-id validate-pack --dry-run --json --workflow-arguments-json '["--expected-version","0.2.0"]' 2>&1
+        $linuxDryRunText = $linuxDryRunResult | Out-String
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux workflow dispatcher dry run should succeed."
+        Assert-True -Condition ($linuxDryRunText -match "scripts/validate-pack\.linux\.sh") -Message "Linux workflow dispatcher should resolve Linux validate-pack script."
+        Assert-True -Condition ($linuxDryRunText -match "read-only") -Message "Linux workflow dispatcher dry run should include safety level."
+        Assert-True -Condition ($linuxDryRunText -match "expected-version") -Message "Linux workflow dispatcher dry run should preserve passthrough arguments."
+
+        $macosDryRunResult = & bash $macosDispatcherPath --workflow-id validate-pack --dry-run --json 2>&1
+        $macosDryRunText = $macosDryRunResult | Out-String
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS workflow dispatcher dry run should succeed."
+        Assert-True -Condition ($macosDryRunText -match "scripts/validate-pack\.macos\.sh") -Message "macOS workflow dispatcher should resolve macOS validate-pack script."
+    }
 
     $missingResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "missing-workflow", "-DryRun")
     Assert-True -Condition ($missingResult.ExitCode -ne 0) -Message "Workflow dispatcher should fail for an unknown workflow."
