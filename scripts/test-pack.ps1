@@ -173,6 +173,8 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     $sharedScriptPath = Join-Path $repoRoot "scripts/build-release-package.shared.sh"
     $releaseDocPath = Join-Path $repoRoot "docs/release.md"
     $gitignorePath = Join-Path $repoRoot ".gitignore"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell release packager should exist."
     Assert-True -Condition (Test-Path -LiteralPath $linuxScriptPath) -Message "Linux release packager wrapper should exist."
@@ -190,6 +192,8 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     $sharedScript = Get-Content -LiteralPath $sharedScriptPath -Raw
     $releaseDoc = Get-Content -LiteralPath $releaseDocPath -Raw
     $gitignore = Get-Content -LiteralPath $gitignorePath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($psScript.Contains('git -C $repoRoot ls-files')) -Message "PowerShell packager should package tracked files."
     Assert-True -Condition ($psScript -match "Compress-Archive") -Message "PowerShell packager should create a zip archive."
@@ -204,9 +208,15 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     Assert-True -Condition ($sharedScript -match "config\\.local") -Message "Shared packager should exclude local config files."
     Assert-True -Condition ($sharedScript -match "runtime-validation-output") -Message "Shared packager should exclude runtime validation output."
     Assert-True -Condition ($releaseDoc -match "Build Release Artifacts") -Message "Release docs should explain artifact creation."
+    Assert-True -Condition ($releaseDoc -match "Milestone 19 Completion Basis") -Message "Release docs should record Milestone 19 completion basis."
+    Assert-True -Condition ($releaseDoc -match "config/evidence-catalog\.tsv") -Message "Release docs should cite evidence catalog for Milestone 19."
     Assert-True -Condition ($releaseDoc -match "Verify Checksums") -Message "Release docs should explain checksum verification."
     Assert-True -Condition ($releaseDoc -match "build-release-package") -Message "Release docs should mention packaging scripts."
     Assert-True -Condition ($releaseDoc -match "GitHub Release") -Message "Release docs should explain GitHub release uploads."
+    Assert-True -Condition ($roadmap -match "\| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging \| Complete \|") -Message "Roadmap should mark Milestone 19 complete."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 installer profile, evidence catalog, and release packaging exit criteria") -Message "TODO should mark Milestone 19 completion audit complete."
+    Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should keep future surface profile work in the architecture backlog."
+    Assert-True -Condition ($todo -match "\[ \] Add future surface-specific profile generation after non-Continue validation") -Message "TODO should keep future surface-specific profile generation pending."
     Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains "dist/") -Message "dist output should be ignored."
 }
 Invoke-PackTest "evidence catalog has valid schema and sanitized links" {

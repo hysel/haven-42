@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, Milestone 12 model tool-use validation evidence, Milestone 13 broader multi-repository validation, Milestone 14 agent surface portability and broader-audience positioning, Milestone 15 multi-language engineering support, Milestone 16 sample repository factory, and Milestone 17 agent surface compatibility validation are complete. Later roadmap tracks cover language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, script consolidation, a stable workflow registry, and a future unified starter-toolkit web UI.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, Milestone 12 model tool-use validation evidence, Milestone 13 broader multi-repository validation, Milestone 14 agent surface portability and broader-audience positioning, Milestone 15 multi-language engineering support, Milestone 16 sample repository factory, Milestone 17 agent surface compatibility validation, and Milestone 19 installer profiles, evidence catalog, and release packaging are complete. Later roadmap tracks cover language rule packs, hardware-aware model/config automation, script consolidation, a stable workflow registry, and a future unified starter-toolkit web UI.
 
 ## Stage Status
 
@@ -27,7 +27,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 16: Sample Repository Factory | Complete | Disposable sample repositories can be generated on Windows, Linux, and macOS for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL validation; evidence and tests cover fixture shape, runtime context, and sanitization. |
 | Milestone 17: Agent Surface Compatibility Validation | Complete | Cline has read-only and disposable write-smoke validation evidence, Aider has generated-sample read-only, write-smoke, and richer scoped-edit evidence, real-project approved-write remains blocked, and unconfirmed Roo Code, Kilo Code, and OpenCode live validation is tracked as future evidence expansion. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; generated editor/model workflow evidence is recorded, prompt and runner filename-fidelity guardrails are in place, and runtime runners now write filename-fidelity fallback artifacts for deterministic filename failures. Remaining empty-output failures and any non-filename guardrail repeats require separate remediation before promotion. |
-| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | In Progress | Installer profiles, the sanitized evidence catalog, and release packaging guidance are implemented for current scope; future surface-specific profiles remain after non-Continue validation. |
+| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Continue read-only and approved-write installer profiles, the sanitized evidence catalog, cross-platform release packaging, checksums, and install-command guidance are implemented and tested; future surface-specific profiles remain evidence-gated. |
 | Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, centralized shared asset config generation, a first shared workflow dispatcher, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, and model scorecard are implemented for current scope; future surface reuse, a guided command/menu layer, deeper script consolidation, and a unified starter-toolkit web UI remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
@@ -504,16 +504,16 @@ Goal: Make adoption easier as the pack grows across surfaces, languages, and val
 
 Scope:
 
-- Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces. Default, read-only, and approved-write Continue profiles are implemented for current scope.
-- Add language-focused install/profile options after language packs are validated.
+- Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces. Done for current scope with default, read-only, and approved-write Continue profiles; future surfaces remain evidence-gated.
+- Add language-focused install/profile options after language packs are validated. Future evidence-gated expansion; not a current completion blocker.
 - Create a sanitized evidence catalog for model, OS, editor, agent surface, language, and write-readiness results. Done for current scope in `config/evidence-catalog.tsv`.
 - Improve release packaging with GitHub release notes, downloadable archives, checksums, and install command examples. Done for current scope with cross-platform packaging scripts and checksum guidance.
 
 Exit criteria:
 
-- Users can choose the right profile without manually assembling config files.
-- Validation evidence is structured enough to compare models, surfaces, and languages over time.
-- Release artifacts are easy to install and verify.
+- Users can choose the right profile without manually assembling config files. Done for current Continue profiles.
+- Validation evidence is structured enough to compare models, surfaces, and languages over time. Done with `config/evidence-catalog.tsv`.
+- Release artifacts are easy to install and verify. Done with cross-platform package scripts and checksum guidance.
 ## Milestone 20: Hardware-Aware Model And Config Automation
 
 Goal: Turn hardware/profile evidence into practical model and configuration recommendations that a local user can apply without hand-tuning every setting.

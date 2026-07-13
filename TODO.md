@@ -315,9 +315,9 @@
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
 
 - [x] Add installer profile options for read-only review and approved-write workflows.
-- [ ] Add future surface-specific profile generation after non-Continue validation.
 - [x] Add a sanitized evidence catalog for model, surface, OS, language, and write-readiness results.
 - [x] Add release archive, checksum, and install-command guidance.
+- [x] Complete Milestone 19 installer profile, evidence catalog, and release packaging exit criteria.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
 
@@ -356,6 +356,7 @@
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
 - [ ] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode wrapper validation.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
+- [ ] Add future surface-specific profile generation after non-Continue validation.
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.
 - [ ] Confirm whether external wiki publishing is required for the next release.
 - [ ] Resolve Milestone 18 editor/model workflow failures before promoting Java, Go, Rust, SQL, and Infrastructure rule packs beyond evidence-gated status.

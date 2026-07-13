@@ -6,6 +6,12 @@ This document defines the release process for the Local Engineering Agent Pack.
 
 The release process is intentionally lightweight because this repository is configuration and documentation heavy, but each release should still be validated, versioned, tagged, and documented.
 
+## Milestone 19 Completion Basis
+
+Milestone 19 is complete for the current scope because Continue installer profiles cover default, read-only, and approved-write workflows; `config/evidence-catalog.tsv` provides the structured sanitized evidence index; and the release packaging scripts generate archives plus checksums on Windows, Linux, and macOS.
+
+Future surface-specific installer profiles remain evidence-gated until non-Continue surfaces have install, configure, and test evidence that can be represented safely in `config/agent-surface-solutions.json`.
+
 ## Versioning
 
 Use semantic versioning while the pack matures:

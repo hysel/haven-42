@@ -55,8 +55,14 @@ test_release_packaging_scripts() {
     grep -q "local" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q "runtime-validation-output" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q "Build Release Artifacts" "$REPO_ROOT/docs/release.md" &&
+    grep -q "Milestone 19 Completion Basis" "$REPO_ROOT/docs/release.md" &&
+    grep -q "config/evidence-catalog.tsv" "$REPO_ROOT/docs/release.md" &&
     grep -q "Verify Checksums" "$REPO_ROOT/docs/release.md" &&
     grep -q "GitHub Release" "$REPO_ROOT/docs/release.md" &&
+    grep -q "| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "\\[x\\] Complete Milestone 19 installer profile, evidence catalog, and release packaging exit criteria" "$REPO_ROOT/TODO.md" &&
+    grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Add future surface-specific profile generation after non-Continue validation" "$REPO_ROOT/TODO.md" &&
     grep -Fxq "dist/" "$REPO_ROOT/.gitignore"
 }
 test_evidence_catalog_schema() {
