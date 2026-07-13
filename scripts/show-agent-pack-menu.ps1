@@ -11,10 +11,10 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $registryPath = Join-Path $repoRoot "config/workflows.json"
-$surfaceMatrixPath = Join-Path $repoRoot "config/agent-surface-capabilities.json"
+$solutionCatalogPath = Join-Path $repoRoot "config/agent-surface-solutions.json"
 
 $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
-$surfaceMatrix = Get-Content -LiteralPath $surfaceMatrixPath -Raw | ConvertFrom-Json
+$solutionCatalog = Get-Content -LiteralPath $solutionCatalogPath -Raw | ConvertFrom-Json
 
 function Get-Workflow {
     param([string]$Id)
@@ -153,18 +153,21 @@ $menuItems = @(
         -Command (Get-ScriptCommand -Workflow $release -Arguments "-AllowDirty -AsJson -OutputPath runtime-validation-output/release-readiness.json")
 )
 
-$surfaceSummary = @($surfaceMatrix.surfaces | Sort-Object name | ForEach-Object {
-    $activities = @($_.activities.PSObject.Properties | ForEach-Object { $_.Value })
+$surfaceSummary = @($solutionCatalog.surfaces | Sort-Object name | ForEach-Object {
     [pscustomobject]@{
         Id = $_.id
         Name = $_.name
+        Type = $_.type
         ValidationLevel = $_.currentValidationLevel
-        InstallStatus = $_.activities.install.status
-        ConfigureStatus = $_.activities.configure.status
-        TestStatus = $_.activities.test.status
-        SupportedActivityCount = @($activities | Where-Object { $_.status -eq "supported" }).Count
-        ValidatedActivityCount = @($activities | Where-Object { $_.status -eq "validated" }).Count
-        BlockedActivityCount = @($activities | Where-Object { $_.status -eq "blocked" }).Count
+        InstallStatus = $_.install.status
+        ConfigureStatus = $_.configure.status
+        TestStatus = $_.test.status
+        InstallSolution = $_.install.solution
+        ConfigureSolution = $_.configure.solution
+        TestSolution = $_.test.solution
+        InstallBlockedReason = $_.install.blockedReason
+        ConfigureBlockedReason = $_.configure.blockedReason
+        TestBlockedReason = $_.test.blockedReason
     }
 })
 
@@ -173,7 +176,7 @@ $report = [pscustomobject]@{
     GeneratedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     Platform = $Platform
     SourceWorkflowRegistry = "config/workflows.json"
-    SourceSurfaceMatrix = "config/agent-surface-capabilities.json"
+    SourceSolutionCatalog = "config/agent-surface-solutions.json"
     MenuItemCount = $menuItems.Count
     MenuItems = $menuItems
     SurfaceCount = $surfaceSummary.Count
@@ -187,7 +190,7 @@ function ConvertTo-Markdown {
     $lines = @(
         "# Agent Pack Menu",
         "",
-        "Generated from `config/workflows.json` and `config/agent-surface-capabilities.json`.",
+        "Generated from `config/workflows.json` and `config/agent-surface-solutions.json`.",
         "",
         "## Recommended Actions",
         "",

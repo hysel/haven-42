@@ -2,6 +2,7 @@
 param(
     [string]$EvidenceCatalogPath,
     [string]$SurfaceMatrixPath,
+    [string]$SurfaceSolutionPath,
     [string]$OutputPath,
     [string]$MarkdownOutputPath,
     [switch]$AsJson
@@ -15,6 +16,9 @@ if (-not $EvidenceCatalogPath) {
 }
 if (-not $SurfaceMatrixPath) {
     $SurfaceMatrixPath = Join-Path $repoRoot "config/agent-surface-capabilities.json"
+}
+if (-not $SurfaceSolutionPath) {
+    $SurfaceSolutionPath = Join-Path $repoRoot "config/agent-surface-solutions.json"
 }
 
 function ConvertFrom-Tsv {
@@ -71,7 +75,7 @@ function ConvertTo-Markdown {
     $lines = @(
         "# Evidence Dashboard",
         "",
-        "Generated from `config/evidence-catalog.tsv` and `config/agent-surface-capabilities.json`.",
+        "Generated from `config/evidence-catalog.tsv`, `config/agent-surface-capabilities.json`, and `config/agent-surface-solutions.json`.",
         "",
         "## Summary",
         "",
@@ -105,6 +109,18 @@ function ConvertTo-Markdown {
 
     $lines += @(
         "",
+        "## Install Configure Test",
+        "",
+        "| Surface | Install | Configure | Test | Validation |",
+        "| --- | --- | --- | --- | --- |"
+    )
+
+    foreach ($surface in @($Report.SurfaceSolutionReadiness)) {
+        $lines += "| $($surface.Name) | $($surface.InstallStatus) | $($surface.ConfigureStatus) | $($surface.TestStatus) | $($surface.ValidationLevel) |"
+    }
+
+    $lines += @(
+        "",
         "## Models",
         "",
         "| Model |",
@@ -120,6 +136,7 @@ function ConvertTo-Markdown {
 
 $evidenceRows = ConvertFrom-Tsv -Path $EvidenceCatalogPath
 $surfaceMatrix = Get-Content -LiteralPath $SurfaceMatrixPath -Raw | ConvertFrom-Json
+$surfaceSolutions = Get-Content -LiteralPath $SurfaceSolutionPath -Raw | ConvertFrom-Json
 $models = Get-Models -Rows $evidenceRows
 
 $surfaceReadiness = @($surfaceMatrix.surfaces | ForEach-Object {
@@ -139,19 +156,40 @@ $surfaceReadiness = @($surfaceMatrix.surfaces | ForEach-Object {
     }
 } | Sort-Object Name)
 
+$surfaceSolutionReadiness = @($surfaceSolutions.surfaces | ForEach-Object {
+    [pscustomobject]@{
+        Id = $_.id
+        Name = $_.name
+        Type = $_.type
+        ValidationLevel = $_.currentValidationLevel
+        InstallStatus = $_.install.status
+        ConfigureStatus = $_.configure.status
+        TestStatus = $_.test.status
+        InstallSolution = $_.install.solution
+        ConfigureSolution = $_.configure.solution
+        TestSolution = $_.test.solution
+        InstallBlockedReason = $_.install.blockedReason
+        ConfigureBlockedReason = $_.configure.blockedReason
+        TestBlockedReason = $_.test.blockedReason
+    }
+} | Sort-Object Name)
+
 $report = [pscustomobject]@{
     SchemaVersion = 1
     GeneratedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     SourceEvidenceCatalog = "config/evidence-catalog.tsv"
     SourceSurfaceMatrix = "config/agent-surface-capabilities.json"
+    SourceSurfaceSolutions = "config/agent-surface-solutions.json"
     EvidenceCount = $evidenceRows.Count
     SurfaceCount = @($surfaceMatrix.surfaces).Count
+    SurfaceSolutionCount = @($surfaceSolutions.surfaces).Count
     ModelCount = $models.Count
     StatusCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "status" -OutputName "Status"
     AreaCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "area" -OutputName "Area"
     SurfaceEvidenceCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "surface" -OutputName "Surface"
     Models = $models
     SurfaceReadiness = $surfaceReadiness
+    SurfaceSolutionReadiness = $surfaceSolutionReadiness
 }
 
 if ($OutputPath) {
