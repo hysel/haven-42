@@ -553,9 +553,16 @@ test_agent_surface_options_doc() {
     grep -q "Cline" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Aider" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Milestone 17 Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "Roo Code, Kilo Code, and OpenCode remain future live-validation targets" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "future evidence expansion" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "\\[x\\] Complete Milestone 14 portability and broader-audience exit criteria" "$REPO_ROOT/TODO.md"
+    grep -q "| Milestone 17: Agent Surface Compatibility Validation | Complete |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "\\[x\\] Complete Milestone 14 portability and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[x\\] Complete Milestone 17 compatibility validation exit criteria" "$REPO_ROOT/TODO.md" &&
+    grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed" "$REPO_ROOT/TODO.md"
 }
 
 

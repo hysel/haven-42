@@ -731,6 +731,8 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $readmePath = Join-Path $repoRoot "README.md"
     $surfaceDocPath = Join-Path $repoRoot "docs/agent-surface-options.md"
     $promotionGatesPath = Join-Path $repoRoot "docs/agent-surface-promotion-gates.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Shared agent CLI testing doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $aiderDocPath) -Message "Aider CLI wrapper doc should exist."
@@ -750,8 +752,11 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $surfaceDoc = Get-Content -LiteralPath $surfaceDocPath -Raw
     $promotionGates = Get-Content -LiteralPath $promotionGatesPath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Agent CLI Surface Model Testing") -Message "Shared CLI testing doc should have a clear title."
+    Assert-True -Condition ($doc -match "future evidence expansion") -Message "Shared CLI doc should keep unconfirmed wrapper validation future-gated."
     foreach ($surface in @("Aider", "Roo Code", "Kilo Code", "OpenCode")) {
         Assert-True -Condition ($doc -match [regex]::Escape($surface)) -Message "Shared CLI testing doc should mention $surface."
         Assert-True -Condition ($catalog -match [regex]::Escape($surface)) -Message "Evidence catalog should mention $surface."
@@ -781,8 +786,14 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     foreach ($surface in @("Cline", "Aider", "Roo Code", "Kilo Code", "OpenCode", "OpenHands")) {
         Assert-True -Condition ($promotionGates -match [regex]::Escape($surface)) -Message "Promotion gates should cover $surface."
     }
+    Assert-True -Condition ($promotionGates -match "Milestone 17 Completion Basis") -Message "Promotion gates should record Milestone 17 completion basis."
     Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
+    Assert-True -Condition ($promotionGates -match "Roo Code, Kilo Code, and OpenCode remain future live-validation targets") -Message "Promotion gates should keep unconfirmed wrapper validation future-gated."
+    Assert-True -Condition ($roadmap -match "\| Milestone 17: Agent Surface Compatibility Validation \| Complete \|") -Message "Roadmap should mark Milestone 17 complete."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 17 compatibility validation exit criteria") -Message "TODO should mark Milestone 17 completion audit complete."
+    Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
+    Assert-True -Condition ($todo -match "\[ \] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed") -Message "TODO should keep unconfirmed wrapper live validation pending."
 
     $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
     $expectedSurfaceKeys = @("aider-cli", "roo-code-cli", "kilo-code-cli", "opencode-cli")

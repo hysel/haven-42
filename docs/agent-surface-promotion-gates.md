@@ -4,6 +4,12 @@ This document defines what a non-Continue agent surface must prove before the pa
 
 Continue remains the supported first path. Other surfaces can move forward only with sanitized evidence recorded in `config/evidence-catalog.tsv`, `config/agent-surface-solutions.json`, and a surface-specific evidence document.
 
+## Milestone 17 Completion Basis
+
+Milestone 17 is complete for the current scope because at least one non-Continue surface has sanitized read-only validation evidence, Cline has disposable write-smoke evidence, Aider has generated-sample read-only, write-smoke, and scoped-edit evidence, and real-project approved-write remains blocked until explicit non-generated repository validation passes.
+
+Roo Code, Kilo Code, and OpenCode remain future live-validation targets because their real command shapes or install/config behavior must be confirmed before generated-sample wrapper validation can be treated as surface evidence.
+
 ## Shared Gates
 
 | Gate | Required evidence |

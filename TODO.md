@@ -291,12 +291,17 @@
 - [x] Validate Cline against a generated sample repository in read-only mode.
 - [x] Add shared agent CLI automation scripts and thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening.
 - [x] Validate Aider against a generated sample repository in plan or patch mode.
-- [ ] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed.
 - [x] Record sanitized Cline read-only evidence for one non-Continue agent surface.
 - [x] Validate Cline approved-write smoke test against a disposable generated sample with external verification.
 - [x] Add Cline CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
+- [x] Complete Milestone 17 compatibility validation exit criteria while keeping unconfirmed wrapper live validation evidence-gated.
+
+## Future Agent Surface Evidence Expansion
+
+- [ ] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed.
+- [ ] Run explicitly approved non-generated repository validation before promoting any non-Continue surface to real-project approved-write ready.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
 

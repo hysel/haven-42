@@ -17,6 +17,8 @@ OpenHands is platform-style rather than a simple local CLI harness target, so it
 
 These scripts are automation scaffolding. A dry run proves the harness wiring, not that a surface or model works.
 
+For Milestone 17, Roo Code, Kilo Code, and OpenCode wrapper live validation remains future evidence expansion until each surface's real command shape is confirmed. Use command overrides for experiments, but do not promote those wrappers from scaffolded to validated from defaults alone.
+
 A surface is not approved-write ready until it passes:
 
 1. Read-only inspection against the intended repository or generated sample.
