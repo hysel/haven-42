@@ -132,6 +132,7 @@ $requiredFiles = @(
     "config/workflows.json",
     "config/agent-surface-capabilities.json",
     "config/agent-surface-solutions.json",
+    "config/agent-cli-surface-defaults.json",
     "config/sample-scenario-packs.json",
     "docs/release.md",
     "docs/evidence-catalog.md",

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "description": "Default command metadata for thin agent CLI model-test wrappers. Wrappers should load these defaults and delegate behavior to the shared agent CLI harness.",
+  "surfaces": [
+    {
+      "surfaceKey": "aider-cli",
+      "surfaceName": "Aider CLI",
+      "agentCommand": "aider",
+      "agentArgumentsTemplate": "--set-env OLLAMA_API_BASE={OllamaBaseUrl} --read README.md --read pyproject.toml --read app/main.py --read app/settings.py --read tests/test_main.py --message \"{Prompt}\" --yes-always --no-auto-commits --no-gitignore --map-tokens 0 --input-history-file \"{TempDir}\\aider-input-history.txt\" --chat-history-file \"{TempDir}\\aider-chat-history.md\" --no-check-update --analytics-disable --no-auto-lint --no-auto-test --line-endings lf",
+      "writeAgentArgumentsTemplate": "--set-env OLLAMA_API_BASE={OllamaBaseUrl} README.md --read pyproject.toml --read app/main.py --read app/settings.py --read tests/test_main.py --message \"{Prompt}\" --yes-always --no-auto-commits --no-gitignore --map-tokens 0 --input-history-file \"{TempDir}\\aider-input-history.txt\" --chat-history-file \"{TempDir}\\aider-chat-history.md\" --no-check-update --analytics-disable --no-auto-lint --no-auto-test --line-endings lf",
+      "modelArgumentTemplate": "--model \"ollama_chat/{Model}\"",
+      "installHint": "Install with pipx install aider-chat or pass the command override."
+    },
+    {
+      "surfaceKey": "roo-code-cli",
+      "surfaceName": "Roo Code",
+      "agentCommand": "roo-code",
+      "agentArgumentsTemplate": "--task \"{Prompt}\"",
+      "writeAgentArgumentsTemplate": "",
+      "modelArgumentTemplate": "--model \"{Model}\"",
+      "installHint": "Install or configure Roo Code CLI if available, or pass the command/template override. Editor extension validation is separate."
+    },
+    {
+      "surfaceKey": "kilo-code-cli",
+      "surfaceName": "Kilo Code",
+      "agentCommand": "kilo-code",
+      "agentArgumentsTemplate": "--task \"{Prompt}\"",
+      "writeAgentArgumentsTemplate": "",
+      "modelArgumentTemplate": "--model \"{Model}\"",
+      "installHint": "Install or configure Kilo Code CLI if available, or pass the command/template override. Editor extension validation is separate."
+    },
+    {
+      "surfaceKey": "opencode-cli",
+      "surfaceName": "OpenCode",
+      "agentCommand": "opencode",
+      "agentArgumentsTemplate": "run \"{Prompt}\"",
+      "writeAgentArgumentsTemplate": "",
+      "modelArgumentTemplate": "--model \"{Model}\"",
+      "installHint": "Install OpenCode or pass the command/template override."
+    }
+  ]
+}

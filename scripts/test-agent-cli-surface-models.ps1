@@ -1,15 +1,15 @@
 param(
-    [string]$SurfaceName = "Aider CLI",
+    [string]$SurfaceName,
     [string]$SurfaceKey = "aider-cli",
     [string[]]$Models = @(),
     [string]$TargetRepo,
     [string]$OutputPath,
     [string]$OllamaBaseUrl = "http://127.0.0.1:11434",
-    [string]$AgentCommand = "aider",
-    [string]$AgentArgumentsTemplate = '--message "{Prompt}" --yes-always --no-auto-commits',
+    [string]$AgentCommand,
+    [string]$AgentArgumentsTemplate,
     [string]$WriteAgentArgumentsTemplate,
-    [string]$ModelArgumentTemplate = '--model "ollama_chat/{Model}"',
-    [string]$InstallHint = "Install or configure the CLI, or pass -AgentCommand.",
+    [string]$ModelArgumentTemplate,
+    [string]$InstallHint,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
     [switch]$AllowNonGeneratedTarget,
@@ -19,6 +19,26 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
+
+$surfaceDefaultsPath = Join-Path $repoRoot "config/agent-cli-surface-defaults.json"
+if (Test-Path -LiteralPath $surfaceDefaultsPath) {
+    $surfaceDefaults = Get-Content -LiteralPath $surfaceDefaultsPath -Raw | ConvertFrom-Json
+    $surfaceDefault = @($surfaceDefaults.surfaces | Where-Object { $_.surfaceKey -eq $SurfaceKey } | Select-Object -First 1)
+    if ($surfaceDefault.Count -gt 0) {
+        if ([string]::IsNullOrWhiteSpace($SurfaceName)) { $SurfaceName = $surfaceDefault[0].surfaceName }
+        if ([string]::IsNullOrWhiteSpace($AgentCommand)) { $AgentCommand = $surfaceDefault[0].agentCommand }
+        if ([string]::IsNullOrWhiteSpace($AgentArgumentsTemplate)) { $AgentArgumentsTemplate = $surfaceDefault[0].agentArgumentsTemplate }
+        if ([string]::IsNullOrWhiteSpace($WriteAgentArgumentsTemplate)) { $WriteAgentArgumentsTemplate = $surfaceDefault[0].writeAgentArgumentsTemplate }
+        if ([string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) { $ModelArgumentTemplate = $surfaceDefault[0].modelArgumentTemplate }
+        if ([string]::IsNullOrWhiteSpace($InstallHint)) { $InstallHint = $surfaceDefault[0].installHint }
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($SurfaceName)) { $SurfaceName = "Aider CLI" }
+if ([string]::IsNullOrWhiteSpace($AgentCommand)) { $AgentCommand = "aider" }
+if ([string]::IsNullOrWhiteSpace($AgentArgumentsTemplate)) { $AgentArgumentsTemplate = '--message "{Prompt}" --yes-always --no-auto-commits' }
+if ([string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) { $ModelArgumentTemplate = '--model "ollama_chat/{Model}"' }
+if ([string]::IsNullOrWhiteSpace($InstallHint)) { $InstallHint = "Install or configure the CLI, or pass -AgentCommand." }
 
 if (-not $TargetRepo) {
     $TargetRepo = Join-Path $repoRoot "runtime-validation-output/sample-repositories/python-api"
