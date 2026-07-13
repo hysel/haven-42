@@ -6,6 +6,8 @@
 
 The registry keeps workflow metadata in one place so the project can reduce script duplication without losing beginner-friendly entry points.
 
+Use `docs/workflow-chooser.md` for a generated report that compares workflow IDs, safety levels, commands, and reference docs.
+
 ## What It Describes
 
 Each workflow records:

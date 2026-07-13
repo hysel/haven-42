@@ -28,6 +28,8 @@ Generate the menu on Linux or macOS:
 
 Use this menu before going to individual script docs. The generated agent surface snapshot comes from `config/agent-surface-solutions.json`, so install/configure/test status matches the evidence-gated solution catalog.
 
+Use `docs/workflow-chooser.md` when you need the complete workflow list with safety levels, commands, and reference docs.
+
 The appendix remains available for direct script parameters and troubleshooting: `docs/script-reference-appendix.md`.
 
 For install/configure/test maturity by agent surface, use `docs/agent-surface-solutions.md`.

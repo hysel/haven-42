@@ -6,6 +6,8 @@ The main user experience should stay workflow- and intent-based. Start with `doc
 
 Individual script docs remain available here for advanced users, maintainers, automation authors, and troubleshooting. They should not be the primary navigation path for beginners.
 
+Use `docs/workflow-chooser.md` for a generated complete workflow list before dropping down to individual script arguments.
+
 ## Navigation Rules
 
 - User-facing docs should start from intent, not script name.
@@ -34,6 +36,7 @@ Individual script docs remain available here for advanced users, maintainers, au
 | `recommend-agent-config` | Create hardware-aware model lanes and local configuration recommendations from sanitized profile and evidence data. | `read-only` | yes | `scripts/recommend-local-agent-config.ps1` | `docs/hardware-aware-recommendations.md` |
 | `run-runtime-validation` | Execute configured validation prompts, collect raw local outputs, and optionally append sanitized summaries. | `controlled-write` | yes | `scripts/run-runtime-validation.ps1` | `docs/runtime-validation.md` |
 | `show-agent-pack-menu` | Generate a short intent-based menu over stable workflows so users do not need to choose from individual scripts. | `read-only` | yes | `scripts/show-agent-pack-menu.ps1` | `docs/agent-pack-menu.md` |
+| `show-workflow-chooser` | Generate a complete registry-backed workflow chooser with safety levels, commands, and reference docs. | `read-only` | yes | `scripts/show-workflow-chooser.ps1` | `docs/workflow-chooser.md` |
 | `test-agent-cli-surface` | Screen CLI-capable agent surfaces with read-only and disposable write-smoke checks through the shared harness. | `controlled-write` | yes | `scripts/test-agent-cli-surface-models.ps1` | `docs/agent-cli-surface-model-testing.md` |
 | `test-local-agent-health` | Check local setup health for repository config, runtime output, and optional Ollama reachability without mutating user files. | `read-only` | yes | `scripts/test-local-agent-health.ps1` | `docs/workflow-registry.md` |
 | `test-local-agent-models` | Run API-level model preflight checks, optional pulls, cleanup, and unload behavior against a local model server. | `controlled-write` | yes | `scripts/test-local-agent-models.ps1` | `docs/local-agent-model-testing.md` |

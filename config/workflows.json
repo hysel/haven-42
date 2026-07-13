@@ -108,6 +108,21 @@
       }
     },
     {
+      "id": "show-workflow-chooser",
+      "name": "Show Workflow Chooser",
+      "purpose": "Generate a complete registry-backed workflow chooser with safety levels, commands, and reference docs.",
+      "category": "onboarding",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["platform", "outputPath", "markdownOutputPath"],
+      "outputs": ["workflowChooserJson", "workflowChooserMarkdown"],
+      "entryPoints": {
+        "windows": "scripts/show-workflow-chooser.ps1",
+        "linux": "scripts/show-workflow-chooser.linux.sh",
+        "macos": "scripts/show-workflow-chooser.macos.sh"
+      }
+    },
+    {
       "id": "pull-local-agent-models",
       "name": "Pull Local Agent Models",
       "purpose": "Download selected local model candidates after hardware and validation review.",

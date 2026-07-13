@@ -2373,6 +2373,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         "generate-evidence-dashboard",
         "get-beginner-setup-plan",
         "show-agent-pack-menu",
+        "show-workflow-chooser",
         "test-local-agent-models",
         "recommend-agent-config",
         "apply-agent-config",
@@ -2425,6 +2426,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($doc -match "Safety Levels") -Message "Workflow registry docs should explain safety levels."
     Assert-True -Condition ($doc -match "UI Direction") -Message "Workflow registry docs should explain UI direction."
     Assert-True -Condition ($doc -match "config/workflows\.json") -Message "Workflow registry docs should reference the JSON file."
+    Assert-True -Condition ($doc -match "docs/workflow-chooser.md") -Message "Workflow registry docs should link workflow chooser."
     Assert-True -Condition ($doc -match "scripts/invoke-workflow\.ps1") -Message "Workflow registry docs should reference the dispatcher."
     Assert-True -Condition ($doc -match "-List") -Message "Workflow registry docs should document dispatcher list mode."
     Assert-True -Condition ($doc -match "-DryRun") -Message "Workflow registry docs should document dispatcher dry-run mode."
@@ -2433,6 +2435,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($appendix -match "docs/agent-pack-menu.md") -Message "Script appendix should point beginners to the guided menu."
     Assert-True -Condition ($appendix -match "Maintenance Rule") -Message "Script appendix should define maintenance rule."
     Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
+    Assert-True -Condition ($readme -match "docs/workflow-chooser.md") -Message "README should link workflow chooser docs."
     Assert-True -Condition ($readme -match "docs/script-reference-appendix.md") -Message "README should link script appendix."
     Assert-True -Condition ($readme -match "docs/autonomous-maintainer-queue.md") -Message "README should link autonomous maintainer queue."
     Assert-True -Condition ($autonomousQueue -match "Safe Without Prompt") -Message "Autonomous queue should define safe autonomous work."
@@ -2515,6 +2518,60 @@ Invoke-PackTest "agent surface capability matrix preserves parity" {
     Assert-True -Condition ($doc -match "config/agent-surface-capabilities\.json") -Message "Parity doc should point to matrix."
     Assert-True -Condition ($options -match "Compatibility Matrix") -Message "Surface options doc should retain compatibility matrix."
     Assert-True -Condition ($todo -match "surface-specific config") -Message "TODO should track surface-specific config work."
+}
+Invoke-PackTest "workflow chooser summarizes registry commands" {
+    $scriptPath = Join-Path $repoRoot "scripts/show-workflow-chooser.ps1"
+    $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
+    $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $docPath = Join-Path $repoRoot "docs/workflow-chooser.md"
+    $menuDocPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
+    $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "workflow-chooser-test-$([guid]::NewGuid())"
+    $jsonPath = Join-Path $tempRoot "workflow-chooser.json"
+    $markdownPath = Join-Path $tempRoot "workflow-chooser.md"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+        $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Platform", "windows", "-OutputPath", $jsonPath, "-MarkdownOutputPath", $markdownPath, "-AsJson")
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Workflow chooser generation should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath $jsonPath) -Message "Workflow chooser should write JSON output."
+        Assert-True -Condition (Test-Path -LiteralPath $markdownPath) -Message "Workflow chooser should write Markdown output."
+
+        $report = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
+        $markdown = Get-Content -LiteralPath $markdownPath -Raw
+        $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+        $doc = Get-Content -LiteralPath $docPath -Raw
+        $menuDoc = Get-Content -LiteralPath $menuDocPath -Raw
+        $appendix = Get-Content -LiteralPath $appendixPath -Raw
+
+        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Workflow chooser schema version should be stable."
+        Assert-Equal -Actual $report.SourceWorkflowRegistry -Expected "config/workflows.json" -Message "Workflow chooser should identify source registry."
+        Assert-Equal -Actual $report.WorkflowCount -Expected @($registry.workflows).Count -Message "Workflow chooser should cover every registered workflow."
+        Assert-True -Condition ($report.UiReadyCount -ge 1) -Message "Workflow chooser should count UI-ready workflows."
+        Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "show-agent-pack-menu" -and $_.Reference -eq "docs/agent-pack-menu.md" }).Count -eq 1) -Message "Workflow chooser should include guided menu workflow."
+        Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "show-workflow-chooser" -and $_.Reference -eq "docs/workflow-chooser.md" }).Count -eq 1) -Message "Workflow chooser should reference its own docs."
+        Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "build-release-package" -and $_.UiReady -eq $false }).Count -eq 1) -Message "Workflow chooser should include non-UI workflows."
+        Assert-True -Condition (@($report.Workflows | Where-Object { $_.Command -match "scripts\\show-workflow-chooser\.ps1" }).Count -eq 1) -Message "Workflow chooser should include its Windows command."
+
+        foreach ($workflow in @($registry.workflows)) {
+            Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq $workflow.id }).Count -eq 1) -Message "Workflow chooser should include $($workflow.id)."
+        }
+
+        Assert-True -Condition ($markdown -match "Workflow Chooser") -Message "Workflow chooser markdown should include title."
+        Assert-True -Condition ($markdown -match "docs/script-reference-appendix.md") -Message "Workflow chooser markdown should link appendix."
+        Assert-True -Condition ($doc -match "config/workflows\.json") -Message "Workflow chooser docs should reference workflow registry."
+        Assert-True -Condition ($menuDoc -match "docs/workflow-chooser.md") -Message "Agent pack menu docs should link workflow chooser."
+        Assert-True -Condition ($appendix -match "show-workflow-chooser") -Message "Script appendix should cover workflow chooser."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Workflow chooser output should stay sanitized."
+
+        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "show-workflow-chooser", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
+        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve workflow chooser."
+        Assert-True -Condition ($dispatch.Output -match "scripts/show-workflow-chooser\.ps1") -Message "Dispatcher should point at the workflow chooser script."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 Invoke-PackTest "agent surface solutions define install configure and test" {
     $solutionsPath = Join-Path $repoRoot "config/agent-surface-solutions.json"
