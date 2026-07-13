@@ -2422,6 +2422,66 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($missingResult.ExitCode -ne 0) -Message "Workflow dispatcher should fail for an unknown workflow."
     Assert-True -Condition ($missingResult.Output -match "Workflow not found") -Message "Workflow dispatcher should report an unknown workflow."
 }
+Invoke-PackTest "agent surface capability matrix preserves parity" {
+    $matrixPath = Join-Path $repoRoot "config/agent-surface-capabilities.json"
+    $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $docPath = Join-Path $repoRoot "docs/agent-surface-capability-parity.md"
+    $optionsPath = Join-Path $repoRoot "docs/agent-surface-options.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
+
+    Assert-True -Condition (Test-Path -LiteralPath $matrixPath) -Message "Agent surface capability matrix should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Agent surface capability parity doc should exist."
+
+    $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
+    $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    $doc = Get-Content -LiteralPath $docPath -Raw
+    $options = Get-Content -LiteralPath $optionsPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
+
+    $allowedStatuses = @($matrix.statusLevels)
+    $workflowIds = @{}
+    foreach ($workflow in $registry.workflows) {
+        $workflowIds[$workflow.id] = $true
+    }
+
+    Assert-Equal -Actual $matrix.schemaVersion -Expected 1 -Message "Agent surface capability schema version changed."
+    Assert-True -Condition ($matrix.activities.Count -ge 8) -Message "Capability matrix should track core activities."
+    Assert-True -Condition ($matrix.surfaces.Count -ge 7) -Message "Capability matrix should track known agent surfaces."
+
+    foreach ($requiredSurface in @("continue", "cline", "aider", "roo-code", "kilo-code", "opencode", "openhands")) {
+        Assert-True -Condition (@($matrix.surfaces | Where-Object { $_.id -eq $requiredSurface }).Count -eq 1) -Message "Capability matrix should include $requiredSurface."
+    }
+
+    foreach ($surface in $matrix.surfaces) {
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.id)) -Message "Surface should include id."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.name)) -Message "Surface should include name: $($surface.id)"
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($surface.currentValidationLevel)) -Message "Surface should include validation level: $($surface.id)"
+
+        foreach ($activity in $matrix.activities) {
+            $entry = $surface.activities.$activity
+            Assert-True -Condition ($null -ne $entry) -Message "$($surface.id) should track $activity."
+            Assert-True -Condition ($entry.status -in $allowedStatuses) -Message "$($surface.id) $activity should use a known status."
+            Assert-True -Condition ($null -ne $entry.entryPoints) -Message "$($surface.id) $activity should include entry point list."
+            Assert-True -Condition ($entry.evidence.Count -gt 0) -Message "$($surface.id) $activity should include evidence references."
+
+            foreach ($entryPoint in @($entry.entryPoints)) {
+                Assert-True -Condition $workflowIds.ContainsKey($entryPoint) -Message "$($surface.id) $activity should reference known workflow $entryPoint."
+            }
+
+            foreach ($evidence in @($entry.evidence)) {
+                Assert-True -Condition ($evidence -notmatch "^[A-Za-z]:|^/|\\|\.\.|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users|OneDrive|itama|token|secret") -Message "$($surface.id) $activity evidence should stay sanitized: $evidence"
+                Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "$($surface.id) $activity evidence should exist: $evidence"
+            }
+        }
+    }
+
+    Assert-True -Condition ($doc -match "Install") -Message "Parity doc should mention install activity."
+    Assert-True -Condition ($doc -match "Configure") -Message "Parity doc should mention configure activity."
+    Assert-True -Condition ($doc -match "Test") -Message "Parity doc should mention test activity."
+    Assert-True -Condition ($doc -match "config/agent-surface-capabilities\.json") -Message "Parity doc should point to matrix."
+    Assert-True -Condition ($options -match "Compatibility Matrix") -Message "Surface options doc should retain compatibility matrix."
+    Assert-True -Condition ($todo -match "surface-specific config") -Message "TODO should track surface-specific config work."
+}
 Invoke-PackTest "local agent health check reports setup status" {
     $scriptPath = Join-Path $repoRoot "scripts/test-local-agent-health.ps1"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"

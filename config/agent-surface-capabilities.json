@@ -1,0 +1,359 @@
+{
+  "schemaVersion": 1,
+  "description": "Agent surface capability matrix for install, configure, test, and shared maintenance workflows. Status values are evidence-gated and intentionally avoid private machine details.",
+  "activities": [
+    "install",
+    "configure",
+    "test",
+    "health",
+    "cleanup",
+    "release-readiness",
+    "model-selection",
+    "evidence"
+  ],
+  "statusLevels": [
+    "supported",
+    "validated",
+    "scaffolded",
+    "planned",
+    "blocked"
+  ],
+  "surfaces": [
+    {
+      "id": "continue",
+      "name": "Continue",
+      "type": "editor-and-cli",
+      "currentValidationLevel": "approved-write-ready",
+      "activities": {
+        "install": {
+          "status": "supported",
+          "entryPoints": ["install-pack-assets"],
+          "evidence": ["docs/shared-asset-installation.md", "docs/editor-compatibility.md"]
+        },
+        "configure": {
+          "status": "supported",
+          "entryPoints": ["recommend-agent-config", "apply-agent-config"],
+          "evidence": ["docs/hardware-aware-recommendations.md"]
+        },
+        "test": {
+          "status": "validated",
+          "entryPoints": ["test-local-agent-models", "test-agent-cli-surface", "run-runtime-validation", "verify-runtime-output"],
+          "evidence": ["docs/continue-cli-model-testing.md", "docs/runtime-validation.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack", "build-release-package"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "profile-remote-hardware", "discover-online-models", "pull-local-agent-models"],
+          "evidence": ["docs/local-model-selection.md", "docs/online-model-discovery.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-catalog.md"]
+        }
+      }
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "type": "editor-agent",
+      "currentValidationLevel": "write-smoke-test-validated",
+      "activities": {
+        "install": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/cline-readonly-validation.md"]
+        },
+        "configure": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/cline-readonly-validation.md"]
+        },
+        "test": {
+          "status": "validated",
+          "entryPoints": ["test-agent-cli-surface"],
+          "evidence": ["docs/cline-cli-model-testing.md", "examples/cline-readonly-validation.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv"]
+        }
+      }
+    },
+    {
+      "id": "aider",
+      "name": "Aider",
+      "type": "cli-agent",
+      "currentValidationLevel": "plan-and-scoped-edit-validated",
+      "activities": {
+        "install": {
+          "status": "scaffolded",
+          "entryPoints": [],
+          "evidence": ["docs/aider-cli-model-testing.md"]
+        },
+        "configure": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/aider-cli-model-testing.md"]
+        },
+        "test": {
+          "status": "validated",
+          "entryPoints": ["test-agent-cli-surface"],
+          "evidence": ["docs/aider-cli-model-testing.md", "examples/aider-validation.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv"]
+        }
+      }
+    },
+    {
+      "id": "roo-code",
+      "name": "Roo Code",
+      "type": "editor-agent",
+      "currentValidationLevel": "candidate",
+      "activities": {
+        "install": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "configure": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "test": {
+          "status": "scaffolded",
+          "entryPoints": ["test-agent-cli-surface"],
+          "evidence": ["docs/agent-cli-surface-model-testing.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv"]
+        }
+      }
+    },
+    {
+      "id": "kilo-code",
+      "name": "Kilo Code",
+      "type": "editor-agent",
+      "currentValidationLevel": "candidate",
+      "activities": {
+        "install": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "configure": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "test": {
+          "status": "scaffolded",
+          "entryPoints": ["test-agent-cli-surface"],
+          "evidence": ["docs/agent-cli-surface-model-testing.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv"]
+        }
+      }
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "type": "cli-agent",
+      "currentValidationLevel": "candidate",
+      "activities": {
+        "install": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "configure": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "test": {
+          "status": "scaffolded",
+          "entryPoints": ["test-agent-cli-surface"],
+          "evidence": ["docs/agent-cli-surface-model-testing.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv"]
+        }
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "type": "platform-agent",
+      "currentValidationLevel": "candidate",
+      "activities": {
+        "install": {
+          "status": "blocked",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "configure": {
+          "status": "blocked",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "test": {
+          "status": "planned",
+          "entryPoints": [],
+          "evidence": ["docs/agent-surface-options.md"]
+        },
+        "health": {
+          "status": "supported",
+          "entryPoints": ["test-local-agent-health"],
+          "evidence": ["config/workflows.json"]
+        },
+        "cleanup": {
+          "status": "supported",
+          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "evidence": ["config/workflows.json"]
+        },
+        "release-readiness": {
+          "status": "supported",
+          "entryPoints": ["validate-pack", "test-pack"],
+          "evidence": ["docs/release.md"]
+        },
+        "model-selection": {
+          "status": "supported",
+          "entryPoints": ["profile-local-hardware", "discover-online-models", "test-local-agent-models"],
+          "evidence": ["docs/local-agent-model-testing.md"]
+        },
+        "evidence": {
+          "status": "supported",
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
+          "evidence": ["config/evidence-catalog.tsv"]
+        }
+      }
+    }
+  ]
+}

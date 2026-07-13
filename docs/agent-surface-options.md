@@ -20,6 +20,8 @@ Examples:
 
 This matrix is a support boundary, not a popularity ranking. A surface can be a good candidate and still be blocked for real edits until this pack has evidence that it reads the right workspace, targets the right files, and passes external verification.
 
+The install/configure/test parity view is tracked separately in `config/agent-surface-capabilities.json` and explained in `docs/agent-surface-capability-parity.md`.
+
 | Surface | Surface type | Current validation level | Current pack support | Approved-write position | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Continue | VS Code-compatible extension, VSCodium extension, and CLI | Approved-write ready for the validated local editor setup; CLI harness validated by tests | Supported first path plus CLI automation harness | Allowed only after the read-only, read-content, current-folder, and scoped write smoke tests pass in the user's actual setup | Existing config, install scripts, shared asset mode, validation docs, model testing, approved-write guidance, and `docs/continue-cli-model-testing.md` target Continue today. |
