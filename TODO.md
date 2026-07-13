@@ -237,11 +237,15 @@
 - [x] Convert first legacy validation findings into filename-fidelity and lifecycle-claim prompt guardrails.
 - [x] Add deterministic output verification for filename fidelity, unsafe migration patterns, and lifecycle/support claims.
 - [x] Add deterministic filename-fidelity fallback artifacts for workflows that fail runtime output verification.
-- [ ] Add workflow-specific remediation templates for non-filename deterministic output verification failures if they recur.
 - [x] Add generated local sample repositories for additional validation categories when real repositories are not available.
+- [x] Complete Milestone 13 coverage with legacy .NET real-category evidence plus generated Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL sample-category evidence.
+- [x] Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.
+
+## Future Multi-Repository Evidence Expansion
+
+- [ ] Add workflow-specific remediation templates for non-filename deterministic output verification failures if they recur.
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
-- [x] Keep private repository names, local paths, endpoints, raw transcripts, customer names, and source code out of committed evidence.
 
 ## Milestone 14: Agent Surface Portability And Broader Audience
 

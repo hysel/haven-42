@@ -512,7 +512,10 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     $docPath = Join-Path $repoRoot "docs/multi-repository-validation.md"
     $runtimeOutputVerificationPath = Join-Path $repoRoot "docs/runtime-output-verification.md"
     $templatePath = Join-Path $repoRoot "examples/multi-repository-validation.md"
+    $sampleEvidencePath = Join-Path $repoRoot "examples/sample-repository-factory-validation.md"
     $readmePath = Join-Path $repoRoot "README.md"
+    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Multi-repository validation doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $runtimeOutputVerificationPath) -Message "Runtime output verification doc should exist."
@@ -521,7 +524,10 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     $doc = Get-Content -LiteralPath $docPath -Raw
     $runtimeOutputVerification = Get-Content -LiteralPath $runtimeOutputVerificationPath -Raw
     $template = Get-Content -LiteralPath $templatePath -Raw
+    $sampleEvidence = Get-Content -LiteralPath $sampleEvidencePath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
+    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
+    $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Repository Categories") -Message "Multi-repository validation doc should define repository categories."
     Assert-True -Condition ($doc -match "Legacy \.NET") -Message "Multi-repository validation doc should cover legacy .NET repositories."
@@ -532,6 +538,8 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($doc -match "clean git working tree") -Message "Multi-repository validation doc should require clean-tree validation."
     Assert-True -Condition ($doc -match "deterministic output verification") -Message "Multi-repository validation doc should require output verification."
     Assert-True -Condition ($doc -match "local sample repositories") -Message "Multi-repository validation doc should allow generated local samples."
+    Assert-True -Condition ($doc -match "Milestone 13 Completion Basis") -Message "Multi-repository validation doc should define Milestone 13 completion basis."
+    Assert-True -Condition ($doc -match "Generated samples are acceptable for the milestone coverage target") -Message "Multi-repository validation doc should allow generated samples to satisfy milestone coverage."
     Assert-True -Condition ($doc -match "examples/multi-repository-validation.md") -Message "Multi-repository validation doc should reference the evidence template."
     Assert-True -Condition ($doc -match "docs/runtime-output-verification.md") -Message "Multi-repository validation doc should reference runtime output verification."
     Assert-True -Condition ($doc -match "Do not record") -Message "Multi-repository validation doc should define sanitization limits."
@@ -542,6 +550,13 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($template -match "Failure signals") -Message "Evidence template should record failure signals."
     Assert-True -Condition ($template -match "Sanitization Checklist") -Message "Evidence template should include sanitization checklist."
     Assert-True -Condition ($template -match "No private repository names") -Message "Evidence template should prohibit private repository names."
+    foreach ($sample in @("python-api", "typescript-frontend", "node-service", "java-spring-api", "go-service", "rust-cli", "iac-terraform-kubernetes", "sql-migrations")) {
+        Assert-True -Condition ($sampleEvidence -match [regex]::Escape($sample)) -Message "Sample evidence should support Milestone 13 category coverage for $sample."
+    }
+    Assert-True -Condition ($roadmap -match "Milestone 13: Broader Multi-Repository Validation \| Complete") -Message "Roadmap should mark Milestone 13 complete."
+    Assert-True -Condition ($roadmap -match "future real-repository runs continue as evidence expansion") -Message "Roadmap should keep real repository validation as evidence expansion."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 13 coverage") -Message "TODO should mark Milestone 13 coverage complete."
+    Assert-True -Condition ($todo -match "Future Multi-Repository Evidence Expansion") -Message "TODO should keep future multi-repository expansion separate."
     Assert-True -Condition ($readme -match "docs/multi-repository-validation.md") -Message "README should link multi-repository validation doc."
     Assert-True -Condition ($readme -match "docs/runtime-output-verification.md") -Message "README should link runtime output verification doc."
     Assert-True -Condition ($readme -match "examples/multi-repository-validation.md") -Message "README should link multi-repository validation template."

@@ -470,6 +470,8 @@ test_multi_repository_validation_doc() {
     grep -q "clean git working tree" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "deterministic output verification" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "local sample repositories" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Milestone 13 Completion Basis" "$REPO_ROOT/docs/multi-repository-validation.md" &&
+    grep -q "Generated samples are acceptable for the milestone coverage target" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "docs/runtime-output-verification.md" "$REPO_ROOT/docs/multi-repository-validation.md" &&
     grep -q "Do not record" "$REPO_ROOT/docs/multi-repository-validation.md" &&
@@ -480,6 +482,13 @@ test_multi_repository_validation_doc() {
     grep -q "Failure signals" "$REPO_ROOT/examples/multi-repository-validation.md" &&
     grep -q "Sanitization Checklist" "$REPO_ROOT/examples/multi-repository-validation.md" &&
     grep -q "No private repository names" "$REPO_ROOT/examples/multi-repository-validation.md" &&
+    grep -q "node-service" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "java-spring-api" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "iac-terraform-kubernetes" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
+    grep -q "Milestone 13: Broader Multi-Repository Validation | Complete" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "future real-repository runs continue as evidence expansion" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Complete Milestone 13 coverage" "$REPO_ROOT/TODO.md" &&
+    grep -q "Future Multi-Repository Evidence Expansion" "$REPO_ROOT/TODO.md" &&
     grep -q "docs/multi-repository-validation.md" "$REPO_ROOT/README.md" &&
     grep -q "docs/runtime-output-verification.md" "$REPO_ROOT/README.md" &&
     grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/README.md" &&

@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, and Milestone 12 model tool-use validation evidence are complete. Milestone 13 broader multi-repository validation is in progress. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, script consolidation, a stable workflow registry, and a future unified starter-toolkit web UI.
+The repository is in early implementation stage. Milestone 1, Milestone 2, Milestone 3, release hardening for version 0.1.3, CI validation for version 0.1.4, runtime validation tooling for version 0.1.5, Milestone 4 runtime validation and CI, Milestone 5 prompt quality hardening, Milestone 6 applied tooling and adaptive models, Milestone 7 cross-platform contributor experience, Milestone 8 real repository validation, Milestone 9 distribution and install experience, Milestone 10 ARM and Apple Silicon model support, Milestone 11 editor surface compatibility, Milestone 12 model tool-use validation evidence, and Milestone 13 broader multi-repository validation are complete. Milestone 14 broadens the project from a Continue-specific enterprise pack into a local-first engineering agent pack that can serve individual developers, small teams, and enterprise users. Milestone 15 tracks multi-language engineering support so the pack does not remain .NET-only over time. Milestone 16 starts the sample repository factory, with later roadmap tracks for language rule packs, installer profiles, evidence catalogs, release packaging, hardware-aware model/config automation, script consolidation, a stable workflow registry, and a future unified starter-toolkit web UI.
 
 ## Stage Status
 
@@ -21,7 +21,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. |
 | Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
-| Milestone 13: Broader Multi-Repository Validation | In Progress | Repository category coverage, sanitized evidence capture, validation workflow guidance, and first legacy .NET category evidence are defined; additional real repository categories remain pending. |
+| Milestone 13: Broader Multi-Repository Validation | Complete | Sanitized legacy .NET evidence plus generated Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL category evidence satisfy the milestone coverage target; future real-repository runs continue as evidence expansion. |
 | Milestone 14: Agent Surface Portability And Broader Audience | In Progress | The project is repositioned as a local-first engineering agent pack, Continue remains the first supported surface, and an evidence-gated compatibility matrix now tracks other open-source agent surfaces. |
 | Milestone 15: Multi-Language Engineering Support | Planned | Keep .NET as the first mature ecosystem while adding validated language guidance for Python, TypeScript, Java, Go, Rust, SQL, and infrastructure repositories. |
 | Milestone 16: Sample Repository Factory | In Progress | Generate disposable local sample repositories for language, agent-surface, and runtime validation without needing private repositories; runtime context now includes non-.NET metadata from generated samples. |
@@ -378,7 +378,7 @@ Scope:
 - Require clean-tree, config-source, model, editor, MCP, and tool-use status in evidence. Done.
 - Add validation and test coverage so the guide and template stay linked. Done.
 - Record first sanitized Milestone 13 validation evidence for a legacy .NET repository category. Done.
-- Validate the pack against additional real repositories when suitable targets are available.
+- Validate the pack against additional real repositories when suitable targets are available. Future evidence expansion, not a Milestone 13 completion blocker.
 - Convert repeated validation failures into prompt, rule, documentation, or script updates. First legacy validation findings for filename fidelity and lifecycle/support claims have been converted into prompt and test guardrails.
 - Add deterministic output verification or a stricter template fallback when local models continue to ignore filename-fidelity and lifecycle/support guardrails. Deterministic runtime output verification has been added; stricter template fallback remains available if verification shows repeated failures.
 - Add generated local sample repositories for additional validation categories when real repositories are not available. Done for Node, Java, Go, Rust, Infrastructure as Code, and SQL generated categories with sanitized script-level evidence.
@@ -386,7 +386,7 @@ Scope:
 
 Exit criteria:
 
-- At least three distinct repository categories have sanitized validation evidence.
+- At least three distinct repository categories have sanitized validation evidence. Done through legacy .NET real-category evidence plus generated Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL sample-category evidence.
 - Evidence records show setup, prompts tested, tool-use status, failure signals, and pack follow-up decisions.
 - Repeated failures are tracked and converted into pack improvements.
 - Additional repository-category coverage can use generated local samples when real repositories are not available.

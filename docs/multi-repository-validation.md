@@ -46,6 +46,18 @@ When additional real repositories are not available, create local sample reposit
 Do not skip the clean-tree check. It is the easiest way to avoid mixing pack
 validation with unrelated user changes.
 
+## Milestone 13 Completion Basis
+
+Milestone 13 is complete when the pack has sanitized evidence for at least three repository categories and the validation workflow itself is documented, tested, and reusable.
+
+Current completion evidence combines:
+
+- Legacy .NET real-category validation recorded in `docs/runtime-validation.md`.
+- Generated Python and TypeScript sample evidence recorded in `examples/sample-repository-factory-validation.md`.
+- Generated Node, Java, Go, Rust, Infrastructure as Code, and SQL sample-category evidence recorded in `examples/sample-repository-factory-validation.md`.
+
+Generated samples are acceptable for the milestone coverage target when additional real repositories are unavailable. They do not replace future real-repository evidence expansion, and they do not prove editor approved-write readiness by themselves.
+
 ## What To Record
 
 Record only reusable, sanitized evidence:
