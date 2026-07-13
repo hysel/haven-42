@@ -48,7 +48,7 @@ The UI should remain a wrapper over tested scripts and shared engines. It should
 
 ## Dispatcher Boundary
 
-`scripts/invoke-workflow.ps1` is the first stable dispatcher over the registry. It is intentionally small:
+`scripts/invoke-workflow.ps1` and the cross-platform `scripts/invoke-workflow.*.sh` wrappers are the stable dispatchers over the registry. They are intentionally small:
 
 - `-List` prints the available workflow IDs, names, categories, safety levels, and UI readiness.
 - `-WorkflowId <id> -DryRun` resolves the platform-specific entry point without invoking it.
@@ -63,6 +63,9 @@ Examples:
 .\scripts\invoke-workflow.ps1 -WorkflowId validate-pack -DryRun
 .\scripts\invoke-workflow.ps1 -WorkflowId validate-pack -- -ExpectedVersion 0.2.0
 pwsh -NoProfile -File .\scripts\invoke-workflow.ps1 -WorkflowId validate-pack -WorkflowArgumentsJson '["-ExpectedVersion","0.2.0"]'
+./scripts/invoke-workflow.linux.sh --list
+./scripts/invoke-workflow.linux.sh --workflow-id validate-pack --dry-run
+./scripts/invoke-workflow.macos.sh --workflow-id validate-pack --dry-run
 ```
 
 The dispatcher does not reinterpret workflow-specific arguments. Each underlying script remains the source of behavior, validation, and safety checks.
