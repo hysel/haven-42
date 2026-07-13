@@ -40,4 +40,6 @@ Start with `docs/agent-pack-menu.md` for the short user menu.
 
 Use this solution catalog when you need to compare agent surfaces or decide what work remains before a surface can be promoted from planned/scaffolded to supported or validated.
 
+Before changing a non-Continue surface status, use `docs/agent-surface-promotion-gates.md`.
+
 Use `docs/script-reference-appendix.md` for direct command details after you choose a workflow.

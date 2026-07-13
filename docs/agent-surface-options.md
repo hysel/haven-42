@@ -20,7 +20,7 @@ Examples:
 
 This matrix is a support boundary, not a popularity ranking. A surface can be a good candidate and still be blocked for real edits until this pack has evidence that it reads the right workspace, targets the right files, and passes external verification.
 
-The install/configure/test parity view is tracked separately in `config/agent-surface-capabilities.json` and explained in `docs/agent-surface-capability-parity.md`.
+The install/configure/test parity view is tracked separately in `config/agent-surface-capabilities.json` and explained in `docs/agent-surface-capability-parity.md`. Promotion gates for non-Continue surfaces are tracked in `docs/agent-surface-promotion-gates.md`.
 
 | Surface | Surface type | Current validation level | Current pack support | Approved-write position | Notes |
 | --- | --- | --- | --- | --- | --- |
@@ -76,6 +76,8 @@ Every surface validation record should capture:
 ## Recommended Next Evaluation
 
 Start with one non-Continue surface in read-only mode. Cline has the first recorded evidence path in `docs/cline-readonly-validation.md`; Aider is the next CLI-first candidate through `docs/aider-cli-model-testing.md`; shared CLI-surface screening is documented in `docs/agent-cli-surface-model-testing.md`.
+
+Use `docs/agent-surface-promotion-gates.md` before changing support status for any non-Continue surface.
 
 Suggested order:
 

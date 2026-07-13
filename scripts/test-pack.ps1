@@ -693,12 +693,14 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
     $readmePath = Join-Path $repoRoot "README.md"
     $surfaceDocPath = Join-Path $repoRoot "docs/agent-surface-options.md"
+    $promotionGatesPath = Join-Path $repoRoot "docs/agent-surface-promotion-gates.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Shared agent CLI testing doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $aiderDocPath) -Message "Aider CLI wrapper doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Aider evidence template should exist."
     Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell shared agent CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash shared agent CLI tester should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $promotionGatesPath) -Message "Agent surface promotion gates doc should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
     $aiderDoc = Get-Content -LiteralPath $aiderDocPath -Raw
@@ -708,6 +710,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $catalog = Get-Content -LiteralPath $catalogPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $surfaceDoc = Get-Content -LiteralPath $surfaceDocPath -Raw
+    $promotionGates = Get-Content -LiteralPath $promotionGatesPath -Raw
 
     Assert-True -Condition ($doc -match "Agent CLI Surface Model Testing") -Message "Shared CLI testing doc should have a clear title."
     foreach ($surface in @("Aider", "Roo Code", "Kilo Code", "OpenCode")) {
@@ -731,6 +734,13 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash shared CLI tester should support model unload after each run."
     Assert-True -Condition ($catalog -match "Shared agent CLI model test harness") -Message "Evidence catalog should track the shared CLI harness."
     Assert-True -Condition ($readme -match "docs/agent-cli-surface-model-testing.md") -Message "README should link shared agent CLI model testing doc."
+    Assert-True -Condition ($readme -match "docs/agent-surface-promotion-gates.md") -Message "README should link agent surface promotion gates."
+    Assert-True -Condition ($surfaceDoc -match "docs/agent-surface-promotion-gates.md") -Message "Agent surface options should link promotion gates."
+    foreach ($surface in @("Cline", "Aider", "Roo Code", "Kilo Code", "OpenCode", "OpenHands")) {
+        Assert-True -Condition ($promotionGates -match [regex]::Escape($surface)) -Message "Promotion gates should cover $surface."
+    }
+    Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
+    Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
 
     $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
     foreach ($base in $wrapperBases) {
@@ -2512,6 +2522,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     $registryPath = Join-Path $repoRoot "config/workflows.json"
     $docPath = Join-Path $repoRoot "docs/agent-surface-solutions.md"
     $bundleDocPath = Join-Path $repoRoot "docs/surface-specific-config-bundles.md"
+    $promotionGatesPath = Join-Path $repoRoot "docs/agent-surface-promotion-gates.md"
     $menuDocPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
     $dashboardDocPath = Join-Path $repoRoot "docs/evidence-dashboard.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -2520,12 +2531,14 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition (Test-Path -LiteralPath $solutionsPath) -Message "Agent surface solution catalog should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Agent surface solution docs should exist."
     Assert-True -Condition (Test-Path -LiteralPath $bundleDocPath) -Message "Surface-specific config bundle policy docs should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $promotionGatesPath) -Message "Agent surface promotion gates docs should exist."
 
     $solutions = Get-Content -LiteralPath $solutionsPath -Raw | ConvertFrom-Json
     $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
     $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
     $doc = Get-Content -LiteralPath $docPath -Raw
     $bundleDoc = Get-Content -LiteralPath $bundleDocPath -Raw
+    $promotionGates = Get-Content -LiteralPath $promotionGatesPath -Raw
     $menuDoc = Get-Content -LiteralPath $menuDocPath -Raw
     $dashboardDoc = Get-Content -LiteralPath $dashboardDocPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
@@ -2609,8 +2622,11 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($doc -match "Configure") -Message "Solution docs should mention configure."
     Assert-True -Condition ($doc -match "Test") -Message "Solution docs should mention test."
     Assert-True -Condition ($doc -match "surface-specific-config-bundles\.md") -Message "Solution docs should link config bundle policy."
+    Assert-True -Condition ($doc -match "agent-surface-promotion-gates\.md") -Message "Solution docs should link promotion gates."
     Assert-True -Condition ($bundleDoc -match "Continue remains the only supported generated config bundle today") -Message "Config bundle docs should preserve current decision."
     Assert-True -Condition ($bundleDoc -match "Scoped write validation") -Message "Config bundle docs should require write validation before promotion."
+    Assert-True -Condition ($promotionGates -match "Install supported") -Message "Promotion gates should define install promotion."
+    Assert-True -Condition ($promotionGates -match "Configure supported") -Message "Promotion gates should define configure promotion."
     Assert-True -Condition ($menuDoc -match "docs/agent-surface-solutions.md") -Message "Menu docs should link solution catalog."
     Assert-True -Condition ($dashboardDoc -match "docs/agent-surface-solutions.md") -Message "Evidence dashboard docs should link solution catalog."
     Assert-True -Condition ($readme -match "docs/agent-surface-solutions.md") -Message "README should link solution catalog."

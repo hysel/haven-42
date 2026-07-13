@@ -158,6 +158,7 @@ REQUIRED_FILES=(
   "docs/multi-repository-validation.md"
   "docs/runtime-output-verification.md"
   "docs/agent-surface-options.md"
+  "docs/agent-surface-promotion-gates.md"
   "docs/agent-surface-capability-parity.md"
   "docs/cline-readonly-validation.md"
   "docs/cline-cli-model-testing.md"

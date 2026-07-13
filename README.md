@@ -36,6 +36,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Verify runtime model output | `docs/runtime-output-verification.md` |
 | Compare other open-source agent surfaces | `docs/agent-surface-options.md` |
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
+| Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
 | Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |
 | Validate Cline read-only behavior | `docs/cline-readonly-validation.md` |
 | Automate Cline CLI model tests | `docs/cline-cli-model-testing.md` |
