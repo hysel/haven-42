@@ -139,6 +139,7 @@ REQUIRED_FILES=(
   "config/agent-surface-solutions.json"
   "config/sample-scenario-packs.json"
   "docs/release.md"
+  "docs/setup-paths.md"
   "docs/compatibility.md"
   "docs/workflow-chooser.md"
   "docs/autonomous-maintainer-queue.md"

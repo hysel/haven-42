@@ -402,7 +402,7 @@ Scope:
 - Keep Continue as the first supported and tested agent surface until another surface has equivalent validation evidence.
 - Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options. Done.
 - Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
-- Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams.
+- Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams. Done with a shared setup-paths guide.
 - Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical.
 - Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Continue remains the only supported generated config bundle today.
 - Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change.

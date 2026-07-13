@@ -250,7 +250,7 @@
 - [x] Define validation levels for each agent surface: read-only, plan validated, approved-write ready.
 - [x] Evaluate at least one non-Continue open-source agent surface with sanitized evidence.
 - [x] Decide whether install scripts should generate surface-specific config bundles instead of only `.continue` assets.
-- [ ] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance.
+- [x] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance.
 
 ## Milestone 15: Multi-Language Engineering Support
 

@@ -4,6 +4,8 @@ Beginner setup mode creates an ordered local setup plan from the workflow regist
 
 It is intentionally a plan generator, not an installer. The first output shows exactly which commands to run, which workflow each command uses, and where the workflow boundary changes from read-only to previewing a write.
 
+Use `docs/setup-paths.md` when you need to compare the quick beginner path with team or enterprise review and audit expectations.
+
 Generate the Windows plan:
 
 ```powershell

@@ -17,6 +17,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | If you want to... | Start here |
 | --- | --- |
 | Install the pack in a project | `Quick Start` |
+| Choose beginner or team setup path | `docs/setup-paths.md` |
 | Pick the right local model | `docs/local-model-selection.md` |
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
 | Review stable workflow entry points | `docs/workflow-registry.md` |

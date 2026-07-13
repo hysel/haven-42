@@ -2861,6 +2861,9 @@ Invoke-PackTest "beginner setup plan maps first-run commands to workflows" {
     $scriptPath = Join-Path $repoRoot "scripts/get-beginner-setup-plan.ps1"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $docPath = Join-Path $repoRoot "docs/beginner-setup-mode.md"
+    $setupPathsPath = Join-Path $repoRoot "docs/setup-paths.md"
+    $readmePath = Join-Path $repoRoot "README.md"
+    $todoPath = Join-Path $repoRoot "TODO.md"
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "beginner-setup-test-$([guid]::NewGuid())"
     $jsonPath = Join-Path $tempRoot "beginner-plan.json"
     $markdownPath = Join-Path $tempRoot "beginner-plan.md"
@@ -2876,6 +2879,9 @@ Invoke-PackTest "beginner setup plan maps first-run commands to workflows" {
         $report = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
         $markdown = Get-Content -LiteralPath $markdownPath -Raw
         $doc = Get-Content -LiteralPath $docPath -Raw
+        $setupPaths = Get-Content -LiteralPath $setupPathsPath -Raw
+        $readme = Get-Content -LiteralPath $readmePath -Raw
+        $todo = Get-Content -LiteralPath $todoPath -Raw
 
         Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Beginner setup plan schema version should be stable."
         Assert-Equal -Actual $report.Platform -Expected "windows" -Message "Beginner setup plan should preserve selected platform."
@@ -2886,6 +2892,13 @@ Invoke-PackTest "beginner setup plan maps first-run commands to workflows" {
         Assert-True -Condition ($markdown -match "Beginner Setup Plan") -Message "Beginner setup markdown should include title."
         Assert-True -Condition ($markdown -match "<your-project-path>") -Message "Beginner setup markdown should preserve target placeholder."
         Assert-True -Condition ($doc -match "RequiresReviewBeforeApply") -Message "Beginner setup docs should explain review boundary."
+        Assert-True -Condition ($doc -match "docs/setup-paths.md") -Message "Beginner setup docs should link setup paths."
+        Assert-True -Condition ($setupPaths -match "Beginner Path") -Message "Setup paths doc should define beginner path."
+        Assert-True -Condition ($setupPaths -match "Team Or Enterprise Path") -Message "Setup paths doc should define team or enterprise path."
+        Assert-True -Condition ($setupPaths -match "audit evidence") -Message "Setup paths doc should cover audit evidence."
+        Assert-True -Condition ($setupPaths -match "Beginner-friendly does not mean weaker safety") -Message "Setup paths doc should preserve shared safety boundary."
+        Assert-True -Condition ($readme -match "docs/setup-paths.md") -Message "README should link setup paths doc."
+        Assert-True -Condition ($todo -match "\[x\] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance") -Message "TODO should mark setup path alignment complete."
 
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "get-beginner-setup-plan", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve beginner setup plan."
