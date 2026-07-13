@@ -690,6 +690,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $evidencePath = Join-Path $repoRoot "examples/aider-validation.md"
     $psScriptPath = Join-Path $repoRoot "scripts/test-agent-cli-surface-models.ps1"
     $bashScriptPath = Join-Path $repoRoot "scripts/test-agent-cli-surface-models.shared.sh"
+    $surfaceDefaultsPath = Join-Path $repoRoot "config/agent-cli-surface-defaults.json"
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
     $readmePath = Join-Path $repoRoot "README.md"
     $surfaceDocPath = Join-Path $repoRoot "docs/agent-surface-options.md"
@@ -700,6 +701,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Aider evidence template should exist."
     Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell shared agent CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash shared agent CLI tester should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $surfaceDefaultsPath) -Message "Agent CLI surface defaults catalog should exist."
     Assert-True -Condition (Test-Path -LiteralPath $promotionGatesPath) -Message "Agent surface promotion gates doc should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
@@ -707,6 +709,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $evidence = Get-Content -LiteralPath $evidencePath -Raw
     $psScript = Get-Content -LiteralPath $psScriptPath -Raw
     $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
+    $surfaceDefaults = Get-Content -LiteralPath $surfaceDefaultsPath -Raw | ConvertFrom-Json
     $catalog = Get-Content -LiteralPath $catalogPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $surfaceDoc = Get-Content -LiteralPath $surfaceDocPath -Raw
@@ -726,6 +729,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($evidence -match "Aider Validation Evidence") -Message "Aider evidence template should have a clear title."
     Assert-True -Condition ($evidence -match "Sanitization Checklist") -Message "Aider evidence template should include sanitization checklist."
     Assert-True -Condition ($psScript -match "SurfaceName") -Message "PowerShell shared CLI tester should support surface names."
+    Assert-True -Condition ($psScript -match "agent-cli-surface-defaults\.json") -Message "PowerShell shared CLI tester should load default surface metadata from the catalog."
     Assert-True -Condition ($psScript -match "AgentArgumentsTemplate") -Message "PowerShell shared CLI tester should support argument templates."
     Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell shared CLI tester should support write-smoke tests."
     Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell shared CLI tester should support model unload after each run."
@@ -743,10 +747,21 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
 
     $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
+    $expectedSurfaceKeys = @("aider-cli", "roo-code-cli", "kilo-code-cli", "opencode-cli")
+    foreach ($key in $expectedSurfaceKeys) {
+        $default = @($surfaceDefaults.surfaces | Where-Object { $_.surfaceKey -eq $key })
+        Assert-True -Condition ($default.Count -eq 1) -Message "Agent CLI defaults catalog should define $key exactly once."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].surfaceName)) -Message "Agent CLI defaults should name $key."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].agentCommand)) -Message "Agent CLI defaults should define command for $key."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].agentArgumentsTemplate)) -Message "Agent CLI defaults should define read template for $key."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].modelArgumentTemplate)) -Message "Agent CLI defaults should define model template for $key."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].installHint)) -Message "Agent CLI defaults should define install hint for $key."
+    }
     foreach ($base in $wrapperBases) {
         $wrapperPs = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-$base-cli-models.ps1") -Raw
         $wrapperSh = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-$base-cli-models.shared.sh") -Raw
         Assert-True -Condition ($wrapperPs -match "test-agent-cli-surface-models.ps1") -Message "$base PowerShell wrapper should delegate to the shared harness."
+        Assert-True -Condition ($wrapperPs -match "SurfaceKey" -and $wrapperPs -notmatch "InstallHint") -Message "$base PowerShell wrapper should rely on shared surface defaults."
         Assert-True -Condition ($wrapperSh -match "test-agent-cli-surface-models.shared.sh") -Message "$base Bash wrapper should delegate to the shared harness."
     }
 }

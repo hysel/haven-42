@@ -137,6 +137,7 @@ REQUIRED_FILES=(
   "config/model-recommendations.mlx.tsv"
   "config/agent-surface-capabilities.json"
   "config/agent-surface-solutions.json"
+  "config/agent-cli-surface-defaults.json"
   "config/sample-scenario-packs.json"
   "docs/release.md"
   "docs/setup-paths.md"

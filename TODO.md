@@ -303,6 +303,7 @@
 - [x] Add a surface-neutral install/configure/test solution catalog for every tracked agent surface.
 - [x] Add config-generation strategy that can choose between project-local assets and centralized shared assets for Continue and future agent plugins.
 - [x] Add a script consolidation plan for shared engines, registries, dispatchers, thin wrappers, and no-consolidate-yet cases.
+- [x] Consolidate PowerShell agent CLI wrapper defaults behind the shared agent CLI harness default catalog.
 - [ ] Execute script-family consolidation behind shared engines, registries, or dispatchers before adding more plugin-specific wrappers.
 - [x] Add a guided command/menu layer so end users choose from a small set of intents instead of individual scripts.
 - [x] Keep individual script documentation as appendix/reference material for advanced users and maintainers.

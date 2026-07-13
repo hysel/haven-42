@@ -524,6 +524,7 @@ Scope:
 - Add validation coverage that proves hardware-aware selection does not expose private paths, hostnames, usernames, endpoints, or raw hardware reports.
 - Reduce the number of scripts by consolidating repeated command-line workflows behind shared engines, registries, or dispatchers before adding more surface-specific scripts.
 - Script consolidation planning is documented; implementation remains staged behind tests, appendix updates, and release-boundary migration notes.
+- First implementation slice done for PowerShell agent CLI wrapper defaults; Bash wrapper defaults and deeper script-family consolidation remain staged.
 - Keep thin wrapper scripts only where they improve beginner usability or platform ergonomics; avoid duplicating business logic across wrappers.
 - Define a machine-readable workflow registry that describes available tasks, inputs, outputs, safety level, platform support, and script entry points. Done.
 - Define a stable script/API boundary so future tools can call hardware profiling, model discovery, model testing, configuration generation, installation, and validation without knowing each script family. Workflow registry foundation and first PowerShell dispatcher are done; deeper cross-platform dispatcher reuse remains pending.
