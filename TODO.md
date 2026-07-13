@@ -284,7 +284,7 @@
 - [x] Add Cline read-only validation guide and sanitized evidence template.
 - [x] Validate Cline against a generated sample repository in read-only mode.
 - [x] Add shared agent CLI automation scripts and thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening.
-- [ ] Validate Aider against a generated sample repository in plan or patch mode.
+- [x] Validate Aider against a generated sample repository in plan or patch mode.
 - [ ] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed.
 - [x] Record sanitized Cline read-only evidence for one non-Continue agent surface.
 - [x] Validate Cline approved-write smoke test against a disposable generated sample with external verification.

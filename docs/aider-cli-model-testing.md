@@ -142,8 +142,18 @@ Aider CLI flags may change over time. The scripts therefore support command-temp
 Default prompt invocation:
 
 ```text
---message "{Prompt}" --yes-always --no-auto-commits
+--set-env OLLAMA_API_BASE={OllamaBaseUrl} --read README.md --read pyproject.toml --read app/main.py --read app/settings.py --read tests/test_main.py --message "{Prompt}" --yes-always --no-auto-commits --no-gitignore --map-tokens 0 --input-history-file "{TempDir}\aider-input-history.txt" --chat-history-file "{TempDir}\aider-chat-history.md" --no-check-update --analytics-disable --no-auto-lint --no-auto-test --line-endings lf
 ```
+
+The default uses Aider read-only file context because Aider CLI is not a tool-calling repository inspector in the same sense as editor agents. The generated Python sample is the default target, so the default `--read` files are specific to that fixture.
+
+Default write-smoke invocation:
+
+```text
+--set-env OLLAMA_API_BASE={OllamaBaseUrl} README.md --read pyproject.toml --read app/main.py --read app/settings.py --read tests/test_main.py --message "{Prompt}" --yes-always --no-auto-commits --no-gitignore --map-tokens 0 --input-history-file "{TempDir}\aider-input-history.txt" --chat-history-file "{TempDir}\aider-chat-history.md" --no-check-update --analytics-disable --no-auto-lint --no-auto-test --line-endings lf
+```
+
+The write-smoke template makes only `README.md` editable and keeps the supporting sample files read-only.
 
 Useful placeholders:
 
@@ -153,6 +163,8 @@ Useful placeholders:
 | `{Model}` | Current model under test. |
 | `{PromptFile}` | Temporary file containing the full prompt. |
 | `{TargetRepo}` | Target repository path. |
+| `{OllamaBaseUrl}` | Ollama base URL passed to the wrapper. |
+| `{TempDir}` | Local temporary directory for history files. |
 
 If your Aider CLI version supports a model flag, pass it explicitly.
 

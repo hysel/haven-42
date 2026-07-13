@@ -7,6 +7,7 @@ param(
     [string]$OllamaBaseUrl = "http://127.0.0.1:11434",
     [string]$AgentCommand = "aider",
     [string]$AgentArgumentsTemplate = '--message "{Prompt}" --yes-always --no-auto-commits',
+    [string]$WriteAgentArgumentsTemplate,
     [string]$ModelArgumentTemplate = '--model "ollama_chat/{Model}"',
     [string]$InstallHint = "Install or configure the CLI, or pass -AgentCommand.",
     [int]$TimeoutSeconds = 600,
@@ -77,11 +78,13 @@ function ConvertTo-ArgumentText {
         [string]$Prompt,
         [string]$Model,
         [string]$PromptFile,
-        [string]$TargetRepo
+        [string]$TargetRepo,
+        [string]$OllamaBaseUrl,
+        [string]$TempDir
     )
 
     $safePrompt = ($Prompt -replace "`r?`n", " ").Replace('"', "'")
-    return $Template.Replace("{Prompt}", $safePrompt).Replace("{Model}", $Model).Replace("{PromptFile}", $PromptFile).Replace("{TargetRepo}", $TargetRepo)
+    return $Template.Replace("{Prompt}", $safePrompt).Replace("{Model}", $Model).Replace("{PromptFile}", $PromptFile).Replace("{TargetRepo}", $TargetRepo).Replace("{OllamaBaseUrl}", $OllamaBaseUrl).Replace("{TempDir}", $TempDir)
 }
 
 function Invoke-AgentCommand {
@@ -94,10 +97,17 @@ function Invoke-AgentCommand {
 
     $promptFile = Join-Path ([System.IO.Path]::GetTempPath()) "$SurfaceKey-$Phase-$([guid]::NewGuid()).txt"
     Set-Content -LiteralPath $promptFile -Value $Prompt -Encoding UTF8
+    $tempDir = [System.IO.Path]::GetTempPath().TrimEnd("\", "/")
 
-    $arguments = ConvertTo-ArgumentText -Template $AgentArgumentsTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory
+    $agentTemplate = if ($Phase -eq "write" -and -not [string]::IsNullOrWhiteSpace($WriteAgentArgumentsTemplate)) {
+        $WriteAgentArgumentsTemplate
+    } else {
+        $AgentArgumentsTemplate
+    }
+
+    $arguments = ConvertTo-ArgumentText -Template $agentTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory -OllamaBaseUrl $OllamaBaseUrl -TempDir $tempDir
     if (-not [string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) {
-        $modelArguments = ConvertTo-ArgumentText -Template $ModelArgumentTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory
+        $modelArguments = ConvertTo-ArgumentText -Template $ModelArgumentTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory -OllamaBaseUrl $OllamaBaseUrl -TempDir $tempDir
         $arguments = "$modelArguments $arguments"
     }
 
@@ -211,7 +221,7 @@ New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutputPath) | Out
 
 $results = [System.Collections.Generic.List[object]]::new()
 $readPrompt = @"
-Use tools to inspect the opened repository root. Do not modify files. Do not create files. Do not run package installation. Do not guess. Return only the actual top-level files and folders inspected, the project type, key source and test files inspected, risks or missing information, and a failure signal. If tools are unavailable, say TOOLS_UNAVAILABLE.
+Use the available read-only repository context or tools to inspect the opened repository root. Do not modify files. Do not create files. Do not run package installation. Do not guess. Return only the actual top-level files and folders inspected, the project type, key source and test files inspected, risks or missing information, and a failure signal. If no repository context or tools are available, say TOOLS_UNAVAILABLE.
 "@
 
 $writeLine = "$SurfaceName approved-write smoke test passed."
@@ -235,7 +245,7 @@ foreach ($model in $modelsToTest) {
 
         $readRun = Invoke-AgentCommand -Model $model -Prompt $readPrompt -Phase "read" -RunDirectory $resolvedTarget
         $readOk = ($readRun.ExitCode -eq 0 -and -not $readRun.TimedOut -and $readRun.Stdout -match "README\.md" -and $readRun.Stdout -match "pyproject\.toml")
-        $readStatus = if ($readOk) { "read-only-tool-validated" } else { "failed" }
+        $readStatus = if ($readOk) { "read-only-context-validated" } else { "failed" }
         if (-not $readOk) { $failureSignals.Add("READ_VALIDATION_FAILED") }
 
         if (-not $DryRun) {
