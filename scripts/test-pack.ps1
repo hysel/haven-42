@@ -2707,6 +2707,7 @@ Invoke-PackTest "local agent health check reports setup status" {
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "test-local-agent-health", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-SkipOllama","-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve health check."
         Assert-True -Condition ($dispatch.Output -match "scripts/test-local-agent-health\.ps1") -Message "Dispatcher should point at the health check script."
+        Assert-True -Condition ($dispatch.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Health check dispatcher output should stay sanitized."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue

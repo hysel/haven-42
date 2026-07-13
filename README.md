@@ -21,6 +21,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
 | Review stable workflow entry points | `docs/workflow-registry.md` |
 | Generate a beginner setup plan | `docs/beginner-setup-mode.md` |
+| Look up individual script details | `docs/script-reference-appendix.md` |
 | Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |
 | Profile a remote LLM machine | `docs/remote-hardware-profile.md` |
 | Evaluate newer model candidates | `docs/online-model-discovery.md` |

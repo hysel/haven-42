@@ -95,7 +95,7 @@ $resolved = [pscustomobject]@{
     SafetyLevel = $workflow.safetyLevel
     Platform = $Platform
     EntryPoint = $entryPoint
-    ResolvedEntryPoint = $entryPath
+    ResolvedEntryPoint = $entryPoint
     Arguments = @($WorkflowArguments)
 }
 
