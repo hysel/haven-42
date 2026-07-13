@@ -140,6 +140,7 @@ REQUIRED_FILES=(
   "config/sample-scenario-packs.json"
   "docs/release.md"
   "docs/compatibility.md"
+  "docs/autonomous-maintainer-queue.md"
   "docs/runtime-validation.md"
   "docs/agent-surface-solutions.md"
   "docs/surface-specific-config-bundles.md"

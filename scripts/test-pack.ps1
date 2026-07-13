@@ -2337,6 +2337,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $docPath = Join-Path $repoRoot "docs/workflow-registry.md"
     $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
+    $autonomousQueuePath = Join-Path $repoRoot "docs/autonomous-maintainer-queue.md"
     $readmePath = Join-Path $repoRoot "README.md"
     $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
     $todoPath = Join-Path $repoRoot "TODO.md"
@@ -2345,10 +2346,12 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition (Test-Path -LiteralPath $dispatcherPath) -Message "Workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Workflow registry docs should exist."
     Assert-True -Condition (Test-Path -LiteralPath $appendixPath) -Message "Script reference appendix should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $autonomousQueuePath) -Message "Autonomous maintainer queue docs should exist."
 
     $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
     $doc = Get-Content -LiteralPath $docPath -Raw
     $appendix = Get-Content -LiteralPath $appendixPath -Raw
+    $autonomousQueue = Get-Content -LiteralPath $autonomousQueuePath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
     $todo = Get-Content -LiteralPath $todoPath -Raw
@@ -2415,11 +2418,17 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($doc -match "scripts/invoke-workflow\.ps1") -Message "Workflow registry docs should reference the dispatcher."
     Assert-True -Condition ($doc -match "-List") -Message "Workflow registry docs should document dispatcher list mode."
     Assert-True -Condition ($doc -match "-DryRun") -Message "Workflow registry docs should document dispatcher dry-run mode."
+    Assert-True -Condition ($doc -match "docs/autonomous-maintainer-queue.md") -Message "Workflow registry docs should link autonomous maintainer queue."
     Assert-True -Condition ($appendix -match "Workflow Reference") -Message "Script appendix should include workflow reference table."
     Assert-True -Condition ($appendix -match "docs/agent-pack-menu.md") -Message "Script appendix should point beginners to the guided menu."
     Assert-True -Condition ($appendix -match "Maintenance Rule") -Message "Script appendix should define maintenance rule."
     Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
     Assert-True -Condition ($readme -match "docs/script-reference-appendix.md") -Message "README should link script appendix."
+    Assert-True -Condition ($readme -match "docs/autonomous-maintainer-queue.md") -Message "README should link autonomous maintainer queue."
+    Assert-True -Condition ($autonomousQueue -match "Safe Without Prompt") -Message "Autonomous queue should define safe autonomous work."
+    Assert-True -Condition ($autonomousQueue -match "Needs Explicit Input") -Message "Autonomous queue should define input boundaries."
+    Assert-True -Condition ($autonomousQueue -match "scripts/test-pack.ps1") -Message "Autonomous queue should require pack tests."
+    Assert-True -Condition ($autonomousQueue -match "git status --short --branch") -Message "Autonomous queue should start from git status."
     Assert-True -Condition ($roadmap -match "workflow registry") -Message "Roadmap should track workflow registry work."
     Assert-True -Condition ($todo -match "workflow registry") -Message "TODO should track workflow registry work."
 

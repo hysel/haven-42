@@ -63,6 +63,10 @@ pwsh -NoProfile -File .\scripts\invoke-workflow.ps1 -WorkflowId validate-pack -W
 
 The dispatcher does not reinterpret workflow-specific arguments. Each underlying script remains the source of behavior, validation, and safety checks.
 
+## Autonomous Maintenance
+
+Use `docs/autonomous-maintainer-queue.md` for safe follow-up work that can proceed without more product input. The queue keeps autonomous changes tied to existing roadmap, TODO, registry, docs, and evidence boundaries.
+
 ## Maintenance Rules
 
 - Keep paths repository-relative.
