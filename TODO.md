@@ -304,7 +304,7 @@
 - [ ] Add config-generation strategy that can choose between project-local assets and centralized shared assets for Continue and future agent plugins.
 - [ ] Reduce the number of scripts by consolidating similar script families behind shared engines, registries, or dispatchers before adding more plugin-specific wrappers.
 - [x] Add a guided command/menu layer so end users choose from a small set of intents instead of individual scripts.
-- [ ] Keep individual script documentation as appendix/reference material for advanced users and maintainers.
+- [x] Keep individual script documentation as appendix/reference material for advanced users and maintainers.
 - [x] Define a machine-readable workflow registry for tasks, inputs, outputs, safety level, platform support, and script entry points.
 - [x] Define the stable script/API boundary that a future unified starter-toolkit web UI should call by adding a shared command dispatcher over the workflow registry.
 - [ ] Design a unified web UI for local-AI coding setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.

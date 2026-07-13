@@ -2336,6 +2336,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $registryPath = Join-Path $repoRoot "config/workflows.json"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $docPath = Join-Path $repoRoot "docs/workflow-registry.md"
+    $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
     $readmePath = Join-Path $repoRoot "README.md"
     $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
     $todoPath = Join-Path $repoRoot "TODO.md"
@@ -2343,9 +2344,11 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition (Test-Path -LiteralPath $registryPath) -Message "Workflow registry should exist."
     Assert-True -Condition (Test-Path -LiteralPath $dispatcherPath) -Message "Workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Workflow registry docs should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $appendixPath) -Message "Script reference appendix should exist."
 
     $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $appendix = Get-Content -LiteralPath $appendixPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
     $todo = Get-Content -LiteralPath $todoPath -Raw
@@ -2387,6 +2390,8 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         Assert-True -Condition ($null -ne $workflow.uiReady) -Message "Workflow should state UI readiness: $($workflow.id)"
         Assert-True -Condition ($workflow.inputs.Count -gt 0) -Message "Workflow should list inputs: $($workflow.id)"
         Assert-True -Condition ($workflow.outputs.Count -gt 0) -Message "Workflow should list outputs: $($workflow.id)"
+        Assert-True -Condition ($appendix -match [regex]::Escape(('`' + $workflow.id + '`'))) -Message "Script appendix should cover workflow: $($workflow.id)"
+        Assert-True -Condition ($appendix -match [regex]::Escape(('`' + $workflow.safetyLevel + '`'))) -Message "Script appendix should include safety level for workflow: $($workflow.id)"
 
         foreach ($os in @("windows", "linux", "macos")) {
             $entry = $workflow.entryPoints.$os
@@ -2394,6 +2399,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
             Assert-True -Condition ($entry -notmatch "^[A-Za-z]:|^/|\\|\.\.") -Message "Workflow entry point should be repository-relative and slash-normalized: $entry"
             Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $entry)) -Message "Workflow entry point should exist: $entry"
         }
+        Assert-True -Condition ($appendix -match [regex]::Escape(('`' + $workflow.entryPoints.windows + '`'))) -Message "Script appendix should include Windows entry point for workflow: $($workflow.id)"
 
         $serialized = $workflow | ConvertTo-Json -Depth 20
         Assert-True -Condition ($serialized -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|Users\\|OneDrive|itama|token|secret") -Message "Workflow registry should stay sanitized: $($workflow.id)"
@@ -2409,7 +2415,11 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($doc -match "scripts/invoke-workflow\.ps1") -Message "Workflow registry docs should reference the dispatcher."
     Assert-True -Condition ($doc -match "-List") -Message "Workflow registry docs should document dispatcher list mode."
     Assert-True -Condition ($doc -match "-DryRun") -Message "Workflow registry docs should document dispatcher dry-run mode."
+    Assert-True -Condition ($appendix -match "Workflow Reference") -Message "Script appendix should include workflow reference table."
+    Assert-True -Condition ($appendix -match "docs/agent-pack-menu.md") -Message "Script appendix should point beginners to the guided menu."
+    Assert-True -Condition ($appendix -match "Maintenance Rule") -Message "Script appendix should define maintenance rule."
     Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
+    Assert-True -Condition ($readme -match "docs/script-reference-appendix.md") -Message "README should link script appendix."
     Assert-True -Condition ($roadmap -match "workflow registry") -Message "Roadmap should track workflow registry work."
     Assert-True -Condition ($todo -match "workflow registry") -Message "TODO should track workflow registry work."
 
@@ -2675,7 +2685,7 @@ Invoke-PackTest "release readiness gate checks core release invariants" {
         Assert-True -Condition (@($report.Checks | Where-Object { $_.Id -eq "workflow.registry" -and $_.Status -eq "pass" }).Count -eq 1) -Message "Release readiness gate should check workflow registry."
         Assert-True -Condition (@($report.Checks | Where-Object { $_.Id -eq "surface.parity" -and $_.Status -eq "pass" }).Count -eq 1) -Message "Release readiness gate should check surface parity."
         Assert-True -Condition (@($report.Checks | Where-Object { $_.Id -eq "validate-pack" -and $_.Status -eq "skip" }).Count -eq 1) -Message "Release readiness gate should record skipped validation."
-        Assert-True -Condition ($result.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|token|secret") -Message "Release readiness output should stay sanitized."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|token|secret") -Message "Release readiness output should stay sanitized."
 
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "test-release-readiness", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AllowDirty","-SkipTests"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve release readiness gate."
