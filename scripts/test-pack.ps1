@@ -2354,6 +2354,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         "profile-local-hardware",
         "discover-online-models",
         "generate-model-scorecard",
+        "generate-evidence-dashboard",
         "test-local-agent-models",
         "recommend-agent-config",
         "apply-agent-config",
@@ -2544,6 +2545,44 @@ Invoke-PackTest "model scorecard summarizes evidence by model" {
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "generate-model-scorecard", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve model scorecard."
         Assert-True -Condition ($dispatch.Output -match "scripts/generate-model-scorecard\.ps1") -Message "Dispatcher should point at the scorecard script."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+Invoke-PackTest "evidence dashboard summarizes catalog and surface status" {
+    $scriptPath = Join-Path $repoRoot "scripts/generate-evidence-dashboard.ps1"
+    $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
+    $docPath = Join-Path $repoRoot "docs/evidence-dashboard.md"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "evidence-dashboard-test-$([guid]::NewGuid())"
+    $jsonPath = Join-Path $tempRoot "dashboard.json"
+    $markdownPath = Join-Path $tempRoot "dashboard.md"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+
+        $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputPath", $jsonPath, "-MarkdownOutputPath", $markdownPath, "-AsJson")
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Evidence dashboard generation should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath $jsonPath) -Message "Evidence dashboard should write JSON output."
+        Assert-True -Condition (Test-Path -LiteralPath $markdownPath) -Message "Evidence dashboard should write Markdown output."
+
+        $report = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
+        $markdown = Get-Content -LiteralPath $markdownPath -Raw
+        $doc = Get-Content -LiteralPath $docPath -Raw
+
+        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Evidence dashboard schema version should be stable."
+        Assert-True -Condition ($report.EvidenceCount -ge 20) -Message "Evidence dashboard should include catalog rows."
+        Assert-True -Condition ($report.SurfaceCount -ge 7) -Message "Evidence dashboard should include known surfaces."
+        Assert-True -Condition ($report.ModelCount -ge 3) -Message "Evidence dashboard should include validated models."
+        Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "approved-write-ready" }).Count -eq 1) -Message "Evidence dashboard should include approved-write-ready counts."
+        Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "validated-by-tests" }).Count -eq 1) -Message "Evidence dashboard should include validated-by-tests counts."
+        Assert-True -Condition (@($report.SurfaceReadiness | Where-Object { $_.Id -eq "continue" -and $_.SupportedActivities -ge 5 }).Count -eq 1) -Message "Evidence dashboard should summarize Continue readiness."
+        Assert-True -Condition ($markdown -match "Evidence Dashboard") -Message "Markdown dashboard should include title."
+        Assert-True -Condition ($doc -match "agent-surface-capabilities\.json") -Message "Evidence dashboard doc should reference surface matrix."
+
+        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "generate-evidence-dashboard", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
+        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve evidence dashboard."
+        Assert-True -Condition ($dispatch.Output -match "scripts/generate-evidence-dashboard\.ps1") -Message "Dispatcher should point at the evidence dashboard script."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue

@@ -528,7 +528,7 @@ Scope:
 - Define a stable script/API boundary so future tools can call hardware profiling, model discovery, model testing, configuration generation, installation, and validation without knowing each script family. Workflow registry foundation and first PowerShell dispatcher are done; deeper cross-platform dispatcher reuse remains pending.
 - Design a unified starter-toolkit web UI for people who want to use local AI for coding, with guided flows for setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.
 - Keep the web UI evidence-first: show what was tested, what passed, what failed, and what is only a recommendation before applying changes.
-- Generate a local evidence dashboard from validation JSON so users can compare models, agent surfaces, operating systems, write readiness, and risks before installing anything.
+- Generate a local evidence dashboard from validation JSON so users can compare models, agent surfaces, operating systems, write readiness, and risks before installing anything. Done for committed evidence catalog and surface readiness data; deeper runtime JSON ingestion remains future work.
 - Add a beginner setup mode that guides users through the common local-AI coding path with minimal questions and exact next commands.
 - Add a health check workflow that verifies Ollama reachability, generated config, duplicate local references, repository detection, and runtime validation output status. Done for current PowerShell and shell-wrapper scope.
 - Add a safe cleanup workflow with dry-run support for stale runtime outputs, generated samples, failed diagnostic artifacts, and obsolete backup folders. Done for local artifact cleanup; model deletion remains explicit in model-testing workflows.

@@ -62,8 +62,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-catalog.md"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-catalog.md", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -110,8 +110,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -158,8 +158,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -206,8 +206,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -254,8 +254,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -302,8 +302,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -350,8 +350,8 @@
         },
         "evidence": {
           "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output"],
-          "evidence": ["config/evidence-catalog.tsv"]
+          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     }

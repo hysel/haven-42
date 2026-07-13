@@ -63,6 +63,21 @@
       }
     },
     {
+      "id": "generate-evidence-dashboard",
+      "name": "Generate Evidence Dashboard",
+      "purpose": "Summarize evidence status, agent surface readiness, and tested model coverage from committed sanitized catalogs.",
+      "category": "evidence",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["evidenceCatalogPath", "surfaceMatrixPath", "outputPath", "markdownOutputPath"],
+      "outputs": ["evidenceDashboardJson", "evidenceDashboardMarkdown"],
+      "entryPoints": {
+        "windows": "scripts/generate-evidence-dashboard.ps1",
+        "linux": "scripts/generate-evidence-dashboard.linux.sh",
+        "macos": "scripts/generate-evidence-dashboard.macos.sh"
+      }
+    },
+    {
       "id": "pull-local-agent-models",
       "name": "Pull Local Agent Models",
       "purpose": "Download selected local model candidates after hardware and validation review.",
