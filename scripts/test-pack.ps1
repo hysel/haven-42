@@ -2360,6 +2360,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $registryPath = Join-Path $repoRoot "config/workflows.json"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $docPath = Join-Path $repoRoot "docs/workflow-registry.md"
+    $consolidationPath = Join-Path $repoRoot "docs/script-consolidation-plan.md"
     $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
     $autonomousQueuePath = Join-Path $repoRoot "docs/autonomous-maintainer-queue.md"
     $readmePath = Join-Path $repoRoot "README.md"
@@ -2369,11 +2370,13 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition (Test-Path -LiteralPath $registryPath) -Message "Workflow registry should exist."
     Assert-True -Condition (Test-Path -LiteralPath $dispatcherPath) -Message "Workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Workflow registry docs should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $consolidationPath) -Message "Script consolidation plan should exist."
     Assert-True -Condition (Test-Path -LiteralPath $appendixPath) -Message "Script reference appendix should exist."
     Assert-True -Condition (Test-Path -LiteralPath $autonomousQueuePath) -Message "Autonomous maintainer queue docs should exist."
 
     $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $consolidation = Get-Content -LiteralPath $consolidationPath -Raw
     $appendix = Get-Content -LiteralPath $appendixPath -Raw
     $autonomousQueue = Get-Content -LiteralPath $autonomousQueuePath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
@@ -2441,6 +2444,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($doc -match "UI Direction") -Message "Workflow registry docs should explain UI direction."
     Assert-True -Condition ($doc -match "config/workflows\.json") -Message "Workflow registry docs should reference the JSON file."
     Assert-True -Condition ($doc -match "docs/workflow-chooser.md") -Message "Workflow registry docs should link workflow chooser."
+    Assert-True -Condition ($doc -match "docs/script-consolidation-plan.md") -Message "Workflow registry docs should link script consolidation plan."
     Assert-True -Condition ($doc -match "scripts/invoke-workflow\.ps1") -Message "Workflow registry docs should reference the dispatcher."
     Assert-True -Condition ($doc -match "-List") -Message "Workflow registry docs should document dispatcher list mode."
     Assert-True -Condition ($doc -match "-DryRun") -Message "Workflow registry docs should document dispatcher dry-run mode."
@@ -2450,14 +2454,27 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($appendix -match "Maintenance Rule") -Message "Script appendix should define maintenance rule."
     Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
     Assert-True -Condition ($readme -match "docs/workflow-chooser.md") -Message "README should link workflow chooser docs."
+    Assert-True -Condition ($readme -match "docs/script-consolidation-plan.md") -Message "README should link script consolidation plan."
     Assert-True -Condition ($readme -match "docs/script-reference-appendix.md") -Message "README should link script appendix."
     Assert-True -Condition ($readme -match "docs/autonomous-maintainer-queue.md") -Message "README should link autonomous maintainer queue."
     Assert-True -Condition ($autonomousQueue -match "Safe Without Prompt") -Message "Autonomous queue should define safe autonomous work."
     Assert-True -Condition ($autonomousQueue -match "Needs Explicit Input") -Message "Autonomous queue should define input boundaries."
+    Assert-True -Condition ($autonomousQueue -match "docs/script-consolidation-plan.md") -Message "Autonomous queue should link script consolidation plan."
     Assert-True -Condition ($autonomousQueue -match "scripts/test-pack.ps1") -Message "Autonomous queue should require pack tests."
     Assert-True -Condition ($autonomousQueue -match "git status --short --branch") -Message "Autonomous queue should start from git status."
+    Assert-True -Condition ($consolidation -match "shared engines") -Message "Script consolidation plan should define shared engine direction."
+    Assert-True -Condition ($consolidation -match "thin wrappers") -Message "Script consolidation plan should define thin wrapper direction."
+    Assert-True -Condition ($consolidation -match "config/workflows\.json") -Message "Script consolidation plan should reference workflow registry."
+    Assert-True -Condition ($consolidation -match "scripts/invoke-workflow\.ps1") -Message "Script consolidation plan should reference workflow dispatcher."
+    Assert-True -Condition ($consolidation -match "Do Not Consolidate Yet") -Message "Script consolidation plan should define no-consolidate-yet cases."
+    Assert-True -Condition ($consolidation -match "test-agent-cli-surface-models") -Message "Script consolidation plan should cover shared agent CLI testing."
+    Assert-True -Condition ($consolidation -match "Roo Code" -and $consolidation -match "Kilo Code" -and $consolidation -match "OpenCode") -Message "Script consolidation plan should cover planned agent wrappers."
+    Assert-True -Condition ($consolidation -match "scripts/test-pack\.ps1") -Message "Script consolidation plan should require pack tests."
     Assert-True -Condition ($roadmap -match "workflow registry") -Message "Roadmap should track workflow registry work."
+    Assert-True -Condition ($roadmap -match "Script consolidation planning is documented") -Message "Roadmap should track script consolidation planning."
     Assert-True -Condition ($todo -match "workflow registry") -Message "TODO should track workflow registry work."
+    Assert-True -Condition ($todo -match "\[x\] Add a script consolidation plan") -Message "TODO should mark script consolidation planning complete."
+    Assert-True -Condition ($todo -match "\[ \] Execute script-family consolidation") -Message "TODO should keep script consolidation implementation pending."
 
     $listResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-List", "-Json")
     Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Workflow dispatcher list mode should succeed."

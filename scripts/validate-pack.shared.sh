@@ -143,6 +143,7 @@ REQUIRED_FILES=(
   "docs/config-generation-strategy.md"
   "docs/compatibility.md"
   "docs/workflow-chooser.md"
+  "docs/script-consolidation-plan.md"
   "docs/autonomous-maintainer-queue.md"
   "docs/runtime-validation.md"
   "docs/agent-surface-solutions.md"

@@ -13,6 +13,7 @@ Use it after the repository is clean, tests are passing, and the requested direc
 | Improve generated reports | Add read-only JSON or Markdown fields sourced from committed catalogs. | Generated output stays sanitized and schema changes are tested. |
 | Tighten validation guardrails | Add deterministic checks for leaks, stale docs, missing workflow coverage, or broken references. | The check fails for the bad state and passes for the current repository. |
 | Refine appendix/reference docs | Add exact command references for existing workflows while keeping beginner docs intent-based. | Every workflow remains covered by `docs/script-reference-appendix.md`. |
+| Plan script consolidation | Update `docs/script-consolidation-plan.md`, workflow docs, and tests before changing script families. | Shared engines, thin wrappers, and no-consolidate-yet cases are documented. |
 | Update roadmap and TODO state | Mark completed, tested work as done and keep remaining work concrete. | Roadmap, TODO, README, and tests agree. |
 
 ## Needs Explicit Input
@@ -37,7 +38,7 @@ Use it after the repository is clean, tests are passing, and the requested direc
 
 1. Keep the guided menu and appendix aligned with the workflow registry.
 2. Add registry-backed reports that reduce script choice for users.
-3. Consolidate repeated command families behind shared engines or dispatchers.
+3. Follow `docs/script-consolidation-plan.md` before consolidating repeated command families behind shared engines or dispatchers.
 4. Expand evidence dashboard inputs without changing committed sanitized evidence defaults.
 5. Document promotion gates for non-Continue agent surfaces.
 6. Design the future UI only after script-level workflows stay stable.

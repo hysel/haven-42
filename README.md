@@ -23,6 +23,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Understand config generation choices | `docs/config-generation-strategy.md` |
 | Review stable workflow entry points | `docs/workflow-registry.md` |
 | Compare all workflow commands and safety levels | `docs/workflow-chooser.md` |
+| Understand script consolidation boundaries | `docs/script-consolidation-plan.md` |
 | See maintainer tasks that can proceed without extra prompts | `docs/autonomous-maintainer-queue.md` |
 | Choose from a short guided menu | `docs/agent-pack-menu.md` |
 | Generate a beginner setup plan | `docs/beginner-setup-mode.md` |

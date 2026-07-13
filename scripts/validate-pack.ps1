@@ -140,6 +140,7 @@ $requiredFiles = @(
     "docs/hardware-aware-recommendations.md",
     "docs/workflow-registry.md",
     "docs/workflow-chooser.md",
+    "docs/script-consolidation-plan.md",
     "docs/autonomous-maintainer-queue.md",
     "docs/agent-surface-solutions.md",
     "docs/surface-specific-config-bundles.md",

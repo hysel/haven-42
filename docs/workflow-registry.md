@@ -8,6 +8,8 @@ The registry keeps workflow metadata in one place so the project can reduce scri
 
 Use `docs/workflow-chooser.md` for a generated report that compares workflow IDs, safety levels, commands, and reference docs.
 
+Use `docs/script-consolidation-plan.md` for the boundary between shared engines, thin wrappers, and scripts that should remain explicit.
+
 ## What It Describes
 
 Each workflow records:
@@ -75,4 +77,5 @@ Use `docs/autonomous-maintainer-queue.md` for safe follow-up work that can proce
 - Do not include hostnames, IP addresses, usernames, tokens, private repository names, or local machine paths.
 - Add new workflows only after the entry scripts exist or the roadmap clearly marks them as future work.
 - Prefer adding shared workflow entries over adding new per-plugin script families.
+- Follow `docs/script-consolidation-plan.md` before merging or removing script families.
 - Update `scripts/test-pack.ps1` when the registry schema changes.
