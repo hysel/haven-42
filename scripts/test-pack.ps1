@@ -735,6 +735,8 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell shared CLI tester should support model unload after each run."
     Assert-True -Condition ($psScript -match "Initialize-DisposableGitBaseline") -Message "PowerShell shared CLI tester should initialize a disposable Git baseline."
     Assert-True -Condition ($bashScript -match "AGENT_ARGS_TEMPLATE") -Message "Bash shared CLI tester should support argument templates."
+    Assert-True -Condition ($bashScript -match "agent-cli-surface-defaults\.json") -Message "Bash shared CLI tester should load default surface metadata from the catalog."
+    Assert-True -Condition ($bashScript -match "load_surface_defaults") -Message "Bash shared CLI tester should centralize default loading."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash shared CLI tester should support model unload after each run."
     Assert-True -Condition ($catalog -match "Shared agent CLI model test harness") -Message "Evidence catalog should track the shared CLI harness."
     Assert-True -Condition ($readme -match "docs/agent-cli-surface-model-testing.md") -Message "README should link shared agent CLI model testing doc."
@@ -763,6 +765,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
         Assert-True -Condition ($wrapperPs -match "test-agent-cli-surface-models.ps1") -Message "$base PowerShell wrapper should delegate to the shared harness."
         Assert-True -Condition ($wrapperPs -match "SurfaceKey" -and $wrapperPs -notmatch "InstallHint") -Message "$base PowerShell wrapper should rely on shared surface defaults."
         Assert-True -Condition ($wrapperSh -match "test-agent-cli-surface-models.shared.sh") -Message "$base Bash wrapper should delegate to the shared harness."
+        Assert-True -Condition ($wrapperSh -match "--surface-key" -and $wrapperSh -notmatch "--install-hint" -and $wrapperSh -notmatch "--agent-command") -Message "$base Bash wrapper should rely on shared surface defaults."
     }
 }
 Invoke-PackTest "Continue CLI model testing docs define automation workflow" {
