@@ -297,7 +297,11 @@ fallback_dispatch() {
       printf '  "EntryPoint": "%s",\n' "$(json_escape "$entry_point")"
       printf '  "ResolvedEntryPoint": "%s",\n' "$(json_escape "$entry_point")"
       printf '  "Arguments": '
-      json_array_from_args "${WORKFLOW_ARGS[@]}"
+      if [ "${#WORKFLOW_ARGS[@]}" -gt 0 ]; then
+        json_array_from_args "${WORKFLOW_ARGS[@]}"
+      else
+        json_array_from_args
+      fi
       printf '\n}\n'
     else
       printf 'Workflow: %s\n' "$WORKFLOW_ID"
@@ -319,7 +323,11 @@ fallback_dispatch() {
     printf '{"Id":"%s","EntryPoint":"%s","Platform":"%s"}\n' "$(json_escape "$WORKFLOW_ID")" "$(json_escape "$entry_point")" "$(json_escape "$PLATFORM")"
   fi
 
-  "$entry_path" "${WORKFLOW_ARGS[@]}"
+  if [ "${#WORKFLOW_ARGS[@]}" -gt 0 ]; then
+    "$entry_path" "${WORKFLOW_ARGS[@]}"
+  else
+    "$entry_path"
+  fi
 }
 
 while [ "$#" -gt 0 ]; do
@@ -352,7 +360,11 @@ fi
 if [ "$ENVELOPE" = true ] || [ -n "$REQUEST_JSON" ]; then
   for python_command in python3 python; do
     if command -v "$python_command" >/dev/null 2>&1; then
-      if try_python_dispatch "$python_command" "${WORKFLOW_ARGS[@]}"; then exit 0; else exit $?; fi
+      if [ "${#WORKFLOW_ARGS[@]}" -gt 0 ]; then
+        if try_python_dispatch "$python_command" "${WORKFLOW_ARGS[@]}"; then exit 0; else exit $?; fi
+      else
+        if try_python_dispatch "$python_command"; then exit 0; else exit $?; fi
+      fi
     fi
   done
   printf '{"schemaVersion":1,"kind":"workflow-execution","status":"failed","workflow":null,"events":[{"sequence":1,"type":"error","code":"JSON_RUNTIME_UNAVAILABLE","message":"python3 or python is required for workflow envelope mode."}],"result":{"exitCode":1,"invoked":false,"dryRun":false,"outputLineCount":0}}\n'
@@ -360,8 +372,14 @@ if [ "$ENVELOPE" = true ] || [ -n "$REQUEST_JSON" ]; then
 fi
 
 for python_command in python3 python; do
-  if try_python_dispatch "$python_command" "${WORKFLOW_ARGS[@]}"; then
-    exit 0
+  if [ "${#WORKFLOW_ARGS[@]}" -gt 0 ]; then
+    if try_python_dispatch "$python_command" "${WORKFLOW_ARGS[@]}"; then
+      exit 0
+    fi
+  else
+    if try_python_dispatch "$python_command"; then
+      exit 0
+    fi
   fi
 done
 
