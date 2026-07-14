@@ -1,6 +1,7 @@
 ---
 name: TypeScript Engineering
 optional: true
+globs: ["**/*.js", "**/*.jsx", "**/*.mjs", "**/*.cjs", "**/*.ts", "**/*.tsx", "**/package.json", "**/tsconfig*.json"]
 ---
 
 ## Scope

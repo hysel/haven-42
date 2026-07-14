@@ -34,7 +34,7 @@ Roo Code, Kilo Code, and OpenCode remain future live-validation targets because 
 | Roo Code | Shared wrapper scaffold exists. | Confirm real command shape, then run read-only generated-sample validation. |
 | Kilo Code | Shared wrapper scaffold exists. | Confirm real command shape, then run read-only generated-sample validation. |
 | OpenCode | Shared wrapper scaffold exists. | Confirm CLI install/config behavior, then run read-only generated-sample validation. |
-| OpenHands | Platform-agent candidate is blocked for install/config generation. | Define workspace, sandbox, credential, and mounted-repository boundaries before any pack automation. |
+| OpenHands | Platform-agent candidate is blocked for install/config generation. | Use the isolated generated-sample boundary in `docs/openhands-validation-boundary.md` before any validation automation. |
 
 ## Promotion Rules
 
@@ -43,6 +43,8 @@ Roo Code, Kilo Code, and OpenCode remain future live-validation targets because 
 - Do not promote real-project approved-write support from generated-sample evidence alone.
 - Do not reuse Continue config-generation status for another surface.
 - Keep private endpoints, usernames, local paths, tokens, private repositories, and raw transcripts out of committed evidence.
+
+- For OpenHands, follow `docs/openhands-validation-boundary.md`; generated-sample validation must remain isolated from host credentials, unrelated directories, privileged containers, and unrestricted network access.
 
 ## Evidence Update Checklist
 

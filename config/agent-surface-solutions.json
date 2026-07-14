@@ -261,27 +261,27 @@
         "status": "blocked",
         "strategy": "Do not generate OpenHands config bundles from this pack while workspace, sandbox, and credential boundaries remain platform-specific.",
         "outputKind": "blocked platform bundle",
-        "evidence": ["docs/agent-surface-options.md", "docs/surface-specific-config-bundles.md"]
+        "evidence": ["docs/agent-surface-options.md", "docs/openhands-validation-boundary.md", "docs/surface-specific-config-bundles.md"]
       },
       "install": {
         "status": "blocked",
         "solution": "Do not automate OpenHands install from this pack yet.",
         "workflowIds": [],
-        "evidence": ["docs/agent-surface-options.md"],
+        "evidence": ["docs/agent-surface-options.md", "docs/openhands-validation-boundary.md"],
         "blockedReason": "Platform-style agents have different workspace, sandbox, and credential boundaries."
       },
       "configure": {
         "status": "blocked",
         "solution": "Do not generate OpenHands config from this pack yet.",
         "workflowIds": [],
-        "evidence": ["docs/agent-surface-options.md"],
+        "evidence": ["docs/agent-surface-options.md", "docs/openhands-validation-boundary.md"],
         "blockedReason": "Configuration may involve platform and workspace boundary decisions outside this pack."
       },
       "test": {
         "status": "planned",
         "solution": "Define platform validation only after install and config boundaries are clear.",
         "workflowIds": [],
-        "evidence": ["docs/agent-surface-options.md"],
+        "evidence": ["docs/agent-surface-options.md", "docs/openhands-validation-boundary.md"],
         "blockedReason": "Validation workflow needs a confirmed safe execution model."
       }
     }

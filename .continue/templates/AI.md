@@ -18,6 +18,14 @@ Add the important directories and their responsibilities.
 - Do not claim unverified behavior.
 - Do not expose secrets or private data.
 
+## Tool And Change Boundaries
+
+- Read-only workflows:
+- Approved write scope:
+- Commands requiring explicit approval:
+- External systems and network boundaries:
+- Required post-edit verification:
+
 ## Architecture Boundaries
 
 - Document layers, dependency direction, and ownership.
@@ -31,6 +39,8 @@ Add the important directories and their responsibilities.
 - Architecture review:
 
 ## Validation
+
+Separate commands already verified from commands recommended for future runs.
 
 - List commands, checks, or manual verification steps.
 

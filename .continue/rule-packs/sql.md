@@ -1,6 +1,7 @@
 ---
 name: SQL And Database Engineering
 optional: true
+globs: ["**/*.sql"]
 ---
 
 ## Scope

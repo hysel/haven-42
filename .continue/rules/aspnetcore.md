@@ -1,5 +1,6 @@
 ---
 name: ASP.NET Core Standards
+globs: ["**/Program.cs", "**/Startup.cs", "**/appsettings*.json", "**/*Controller.cs", "**/*Endpoint.cs"]
 ---
 
 ## Scope
@@ -30,8 +31,9 @@ Apply these standards to ASP.NET Core APIs and services.
 - Is the API boundary thin and explicit?
 - Are validation, authorization, and errors handled consistently?
 - Are service lifetimes and middleware order safe?
+
 ## Evidence Gate
 
-Apply this rule only when inspected files or supplied context provide matching .NET evidence, such as `.sln`, `.slnx`, `.csproj`, `.fsproj`, `.vbproj`, `Directory.Build.*`, `packages.config`, `global.json`, `Program.cs`, `Startup.cs`, `appsettings*.json`, or related .NET source files.
+Apply this rule only when inspected files or supplied context confirm an ASP.NET Core web surface, such as ASP.NET SDK/framework references, `Program.cs` web-host setup, `Startup.cs`, controllers, endpoints, middleware, or matching web configuration.
 
-If .NET evidence is absent or unreadable, keep recommendations language-neutral and label .NET-specific assumptions as `unconfirmed`.
+If ASP.NET Core evidence is absent or unreadable, do not apply web-host, controller, endpoint, middleware, or ASP.NET service-lifetime recommendations; label those assumptions as `unconfirmed`.

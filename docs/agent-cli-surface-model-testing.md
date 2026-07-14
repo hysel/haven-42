@@ -61,9 +61,9 @@ Use the `.macos.sh` wrapper on macOS.
 | Surface | Windows | Linux/macOS wrappers | Default command assumption |
 | --- | --- | --- | --- |
 | Aider CLI | `scripts/test-aider-cli-models.ps1` | `scripts/test-aider-cli-models.linux.sh`, `scripts/test-aider-cli-models.macos.sh` | `aider` |
-| Roo Code | `scripts/test-roo-code-cli-models.ps1` | `scripts/test-roo-code-cli-models.linux.sh`, `scripts/test-roo-code-cli-models.macos.sh` | `roo-code` placeholder until confirmed |
-| Kilo Code | `scripts/test-kilo-code-cli-models.ps1` | `scripts/test-kilo-code-cli-models.linux.sh`, `scripts/test-kilo-code-cli-models.macos.sh` | `kilo-code` placeholder until confirmed |
-| OpenCode | `scripts/test-opencode-cli-models.ps1` | `scripts/test-opencode-cli-models.linux.sh`, `scripts/test-opencode-cli-models.macos.sh` | `opencode` |
+| Roo Code | `scripts/test-roo-code-cli-models.ps1` | `scripts/test-roo-code-cli-models.linux.sh`, `scripts/test-roo-code-cli-models.macos.sh` | No verified local CLI contract; wrapper remains override-only. |
+| Kilo Code | `scripts/test-kilo-code-cli-models.ps1` | `scripts/test-kilo-code-cli-models.linux.sh`, `scripts/test-kilo-code-cli-models.macos.sh` | `kilo` command is documented, but a safe non-interactive task syntax remains unverified. |
+| OpenCode | `scripts/test-opencode-cli-models.ps1` | `scripts/test-opencode-cli-models.linux.sh`, `scripts/test-opencode-cli-models.macos.sh` | `opencode run "{Prompt}"`; local Ollama needs a local-only `opencode.json` provider config. |
 
 For any surface whose CLI command or flags differ, pass command overrides rather than editing the harness.
 
@@ -115,3 +115,8 @@ The planned starter-toolkit web UI should call stable script entry points for ha
 - Use `-UnloadAfterEach` / `--unload-after-each` for remote or shared Ollama servers.
 - Treat every model and surface combination as separate evidence.
 - Do not commit raw output, private endpoints, local paths, usernames, tokens, or private repository names.
+## Confirmed Command Boundaries
+
+- **OpenCode:** The official CLI documents `opencode run "{Prompt}"` for non-interactive use. Its model identifier is `provider_id/model_id`; a local Ollama setup needs a local-only `opencode.json` custom provider using the Ollama `/v1` endpoint. Do not commit that endpoint or any credentials.
+- **Kilo Code:** The official project documents installation with `npm install -g @kilocode/cli` and starting the project CLI with `kilo`. Its non-interactive prompt, model-selection, and permission flags are not yet confirmed, so keep the wrapper override-only for live runs.
+- **Roo Code:** No stable local CLI contract is confirmed for this pack. Keep its wrapper override-only and validate the editor surface separately until an official CLI contract is available.

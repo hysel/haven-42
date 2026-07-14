@@ -1,5 +1,6 @@
 ---
 name: .NET Engineering
+globs: ["**/*.cs", "**/*.fs", "**/*.vb", "**/*.csproj", "**/*.fsproj", "**/*.vbproj", "**/*.sln", "**/*.slnx", "**/*.props", "**/*.targets"]
 ---
 
 ## Scope
