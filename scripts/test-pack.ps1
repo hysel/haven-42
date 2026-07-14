@@ -799,14 +799,17 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     foreach ($surface in @("Cline", "Aider", "Roo Code", "Kilo Code", "OpenCode", "OpenHands")) {
         Assert-True -Condition ($promotionGates -match [regex]::Escape($surface)) -Message "Promotion gates should cover $surface."
     }
-    Assert-True -Condition ($promotionGates -match "Milestone 17 Completion Basis") -Message "Promotion gates should record Milestone 17 completion basis."
+    Assert-True -Condition ($promotionGates -match "Milestone 17 Cline And Aider Completion Basis") -Message "Promotion gates should record scoped Milestone 17 completion basis."
+    Assert-True -Condition ($promotionGates -match "partial for full tracked-surface compatibility") -Message "Promotion gates should keep full surface compatibility gap visible."
     Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
     Assert-True -Condition ($promotionGates -match "Roo Code, Kilo Code, and OpenCode remain future live-validation targets") -Message "Promotion gates should keep unconfirmed wrapper validation future-gated."
-    Assert-True -Condition ($roadmap -match "\| Milestone 17: Agent Surface Compatibility Validation \| Complete \|") -Message "Roadmap should mark Milestone 17 complete."
-    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 17 compatibility validation exit criteria") -Message "TODO should mark Milestone 17 completion audit complete."
+    Assert-True -Condition ($roadmap -match "\| Milestone 17: Agent Surface Compatibility Validation \| Partial \|") -Message "Roadmap should mark Milestone 17 partial for full tracked-surface validation."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria") -Message "TODO should mark Cline/Aider Milestone 17 scope complete."
+    Assert-True -Condition ($todo -match "\[ \] Complete Milestone 17 full tracked-surface compatibility validation") -Message "TODO should keep full Milestone 17 surface validation pending."
     Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
     Assert-True -Condition ($todo -match "\[ \] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed") -Message "TODO should keep unconfirmed wrapper live validation pending."
+    Assert-True -Condition ($todo -match "\[ \] Define a safe OpenHands validation boundary before adding platform-agent validation automation") -Message "TODO should keep OpenHands validation boundary pending."
 
     $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
     $expectedSurfaceKeys = @("aider-cli", "roo-code-cli", "kilo-code-cli", "opencode-cli")
@@ -2884,6 +2887,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     }
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
     Assert-True -Condition ($doc -match "Roo Code, Kilo Code, and OpenCode") -Message "Solution architecture review should track unconfirmed agent wrapper command shapes."
+    Assert-True -Condition ($doc -match "Complete for Cline and Aider, partial for all tracked surfaces") -Message "Solution architecture review should classify Milestone 17 accurately."
+    Assert-True -Condition ($doc -match "OpenHands do not yet have full live validation evidence") -Message "Solution architecture review should keep full surface validation gap visible."
     Assert-True -Condition ($doc -match "Complete for Continue, partial for cross-agent parity") -Message "Solution architecture review should classify Milestone 19 accurately."
     Assert-True -Condition ($doc -match "actual install/configure/test script parity is missing") -Message "Solution architecture review should keep non-Continue install/configure gaps visible."
     Assert-True -Condition ($doc -match "EMPTY_MODEL_OUTPUT") -Message "Solution architecture review should track language validation failure signals."

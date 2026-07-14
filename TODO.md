@@ -296,11 +296,13 @@
 - [x] Add Cline CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
-- [x] Complete Milestone 17 compatibility validation exit criteria while keeping unconfirmed wrapper live validation evidence-gated.
+- [x] Complete Milestone 17 Cline and Aider compatibility validation exit criteria while keeping unconfirmed wrapper live validation evidence-gated.
+- [ ] Complete Milestone 17 full tracked-surface compatibility validation.
 
 ## Future Agent Surface Evidence Expansion
 
 - [ ] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed.
+- [ ] Define a safe OpenHands validation boundary before adding platform-agent validation automation.
 - [ ] Run explicitly approved non-generated repository validation before promoting any non-Continue surface to real-project approved-write ready.
 
 ## Milestone 18: Language Rule Packs
