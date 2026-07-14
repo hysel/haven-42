@@ -28,6 +28,18 @@ fail() {
   FAILED=1
 }
 
+matches_text() {
+  local content="$1"
+  local pattern="$2"
+  grep -Eq "$pattern" <<<"$content"
+}
+
+matches_text_i() {
+  local content="$1"
+  local pattern="$2"
+  grep -Eiq "$pattern" <<<"$content"
+}
+
 require_file() {
   if [ -e "$REPO_ROOT/$1" ]; then
     pass "required file exists: $1"
@@ -46,25 +58,25 @@ fi
 
 CONFIG_CONTENT="$(cat "$CONFIG_PATH" 2>/dev/null || true)"
 
-if printf '%s\n' "$CONFIG_CONTENT" | grep -Eq "^version:[[:space:]]+$EXPECTED_VERSION[[:space:]]*$"; then
+if matches_text "$CONFIG_CONTENT" "^version:[[:space:]]+$EXPECTED_VERSION[[:space:]]*$"; then
   pass "config version is $EXPECTED_VERSION"
 else
   fail "config version is $EXPECTED_VERSION"
 fi
 
-if printf '%s\n' "$CONFIG_CONTENT" | grep -Eq '^schema:[[:space:]]+v1[[:space:]]*$'; then
+if matches_text "$CONFIG_CONTENT" '^schema:[[:space:]]+v1[[:space:]]*$'; then
   pass "config schema is v1"
 else
   fail "config schema is v1"
 fi
 
-if printf '%s\n' "$CONFIG_CONTENT" | grep -Eq '^mcpServers:[[:space:]]+\[\][[:space:]]*$'; then
+if matches_text "$CONFIG_CONTENT" '^mcpServers:[[:space:]]+\[\][[:space:]]*$'; then
   pass "default MCP server list is empty"
 else
   fail "default MCP server list is empty"
 fi
 
-FILE_REFS="$(printf '%s\n' "$CONFIG_CONTENT" | grep -Eo 'file://\./[^[:space:]]+' | sed 's#file://./##' || true)"
+FILE_REFS="$(grep -Eo 'file://\./[^[:space:]]+' <<<"$CONFIG_CONTENT" | sed 's#file://./##' || true)"
 
 while IFS= read -r ref; do
   [ -z "$ref" ] && continue
@@ -329,10 +341,10 @@ while IFS= read -r file; do
   case "$file" in
     *.md|*.yaml|*.yml|*.ps1|*.sh|*.tsv|*.txt)
       content="$(cat "$file" 2>/dev/null || true)"
-      if printf '%s\n' "$content" | grep -Eiq "$PRIVATE_IP_PATTERN"; then
+      if matches_text_i "$content" "$PRIVATE_IP_PATTERN"; then
         fail "no private IP address committed: $rel"
       fi
-      if printf '%s\n' "$content" | grep -Eiq "$SECRET_PATTERN"; then
+      if matches_text_i "$content" "$SECRET_PATTERN"; then
         fail "no likely secret committed: $rel"
       fi
       ;;

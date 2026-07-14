@@ -1896,6 +1896,13 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
 }
 
 Invoke-PackTest "validation and test wrapper scripts call shared Bash scripts" {
+    $sharedValidatorPath = Join-Path $repoRoot "scripts/validate-pack.shared.sh"
+    $sharedValidator = Get-Content -LiteralPath $sharedValidatorPath -Raw
+
+    Assert-True -Condition ($sharedValidator -match "matches_text") -Message "Shared validator should use a helper for content regex checks."
+    Assert-True -Condition ($sharedValidator -notmatch 'printf ''%s\\n'' "\$CONFIG_CONTENT" \| grep -E') -Message "Shared validator should avoid CONFIG_CONTENT printf/grep pipelines under pipefail."
+    Assert-True -Condition ($sharedValidator -notmatch 'printf ''%s\\n'' "\$content" \| grep -Ei') -Message "Shared validator should avoid scanned-file printf/grep pipelines under pipefail."
+
     $wrappers = @(
         @{
             Name = "validate-pack.linux.sh"
