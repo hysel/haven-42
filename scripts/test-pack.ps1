@@ -2855,12 +2855,15 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
 }
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
+    $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"
     $readmePath = Join-Path $repoRoot "README.md"
     $todoPath = Join-Path $repoRoot "TODO.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Solution architecture review doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $uiDocPath) -Message "Unified starter toolkit UI design doc should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $uiDoc = Get-Content -LiteralPath $uiDocPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $todo = Get-Content -LiteralPath $todoPath -Raw
 
@@ -2872,11 +2875,22 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
     Assert-True -Condition ($doc -match "Roo Code, Kilo Code, and OpenCode") -Message "Solution architecture review should track unconfirmed agent wrapper command shapes."
     Assert-True -Condition ($doc -match "EMPTY_MODEL_OUTPUT") -Message "Solution architecture review should track language validation failure signals."
+    Assert-True -Condition ($uiDoc -match "Evidence States") -Message "Unified UI design should define evidence states."
+    foreach ($state in @("tested-passed", "tested-partial", "failed", "recommended-only", "blocked")) {
+        Assert-True -Condition ($uiDoc -match [regex]::Escape($state)) -Message "Unified UI design should include evidence state $state."
+    }
+    Assert-True -Condition ($uiDoc -match "config/workflows\.json") -Message "Unified UI design should use workflow registry as source of truth."
+    Assert-True -Condition ($uiDoc -match "scripts/invoke-workflow") -Message "Unified UI design should use workflow dispatcher boundary."
+    Assert-True -Condition ($uiDoc -match "local-first") -Message "Unified UI design should preserve local-first boundary."
     Assert-True -Condition ($readme -match "docs/solution-architecture-review\.md") -Message "README should link solution architecture review."
+    Assert-True -Condition ($readme -match "docs/unified-starter-toolkit-ui\.md") -Message "README should link unified UI design."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should include solution architecture backlog."
     Assert-True -Condition ($todo -match "\[x\] Add a milestone solution completeness audit") -Message "TODO should mark solution audit doc complete."
     Assert-True -Condition ($todo -match "\[ \] Provide or approve suitable non-generated repositories") -Message "TODO should track input-needed real repository targets."
     Assert-True -Condition ($todo -match "\[ \] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode") -Message "TODO should track input-needed wrapper command shapes."
+    Assert-True -Condition ($todo -match "\[x\] Design a unified web UI") -Message "TODO should mark unified UI design complete."
+    Assert-True -Condition ($todo -match "\[x\] Keep the UI evidence-first") -Message "TODO should mark evidence-first UI design complete."
+    Assert-True -Condition ($todo -match "\[ \] Add the unified web UI wrapper after script-level workflows are stable") -Message "TODO should keep UI implementation pending."
     Assert-True -Condition ($todo -match "\[ \] Confirm scope and priority for the unified starter-toolkit web UI") -Message "TODO should track UI scope input."
 }
 Invoke-PackTest "sample scenario packs reference existing assets" {

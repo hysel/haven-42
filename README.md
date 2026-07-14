@@ -27,6 +27,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Review milestone solution completeness | `docs/solution-architecture-review.md` |
 | See maintainer tasks that can proceed without extra prompts | `docs/autonomous-maintainer-queue.md` |
 | Choose from a short guided menu | `docs/agent-pack-menu.md` |
+| Review the future unified UI design | `docs/unified-starter-toolkit-ui.md` |
 | Generate a beginner setup plan | `docs/beginner-setup-mode.md` |
 | Look up individual script details | `docs/script-reference-appendix.md` |
 | Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |

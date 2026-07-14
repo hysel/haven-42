@@ -990,6 +990,7 @@ test_shared_asset_installation_doc() {
 
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
+    [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
     grep -q "Review Standard" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Milestone Audit" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "1: Minimum Usable Pack" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -1000,11 +1001,23 @@ test_solution_architecture_review_doc() {
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Roo Code, Kilo Code, and OpenCode" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "EMPTY_MODEL_OUTPUT" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Evidence States" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "tested-passed" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "tested-partial" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "recommended-only" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "blocked" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "config/workflows.json" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "scripts/invoke-workflow" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "local-first" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/README.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Provide or approve suitable non-generated repositories" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Add the unified web UI wrapper after script-level workflows are stable" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Confirm scope and priority for the unified starter-toolkit web UI" "$REPO_ROOT/TODO.md"
 }
 run_test "validate-pack succeeds for repository" test_validate_succeeds

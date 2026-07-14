@@ -338,9 +338,9 @@
 - [x] Define a machine-readable workflow registry for tasks, inputs, outputs, safety level, platform support, and script entry points.
 - [x] Define the stable script/API boundary that a future unified starter-toolkit web UI should call by adding a shared command dispatcher over the workflow registry.
 - [x] Add cross-platform workflow dispatcher wrappers for Linux and macOS over the shared workflow registry.
-- [ ] Design a unified web UI for local-AI coding setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.
+- [x] Design a unified web UI for local-AI coding setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.
 - [ ] Add the unified web UI wrapper after script-level workflows are stable.
-- [ ] Keep the UI evidence-first by showing tested, passed, failed, and recommended-only states before applying changes.
+- [x] Keep the UI evidence-first by showing tested, passed, failed, and recommended-only states before applying changes.
 - [x] Generate a local evidence dashboard from committed evidence and surface readiness data.
 - [x] Add beginner setup mode for the common local-AI coding setup path.
 - [x] Add a health check workflow for Ollama, models, config, duplicate rules, repository detection, and validation status.

@@ -35,7 +35,7 @@ Each milestone is considered complete only when it has:
 | 17: Agent Surface Compatibility Validation | Complete | Complete with future expansion | Cline and Aider meet current evidence gates; Roo Code, Kilo Code, and OpenCode live validation needs confirmed command shapes. |
 | 18: Language Rule Packs | In Progress | Partial | Optional rule packs and static evidence exist, but editor/model workflow failures remain for Java, Go, Rust, SQL, and Infrastructure samples. |
 | 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Complete with future expansion | Current Continue profiles, evidence catalog, and packaging are complete; future surface-specific profile generation remains gated by non-Continue evidence. |
-| 20: Hardware-Aware Model And Config Automation | In Progress | Partial | Recommendation, dashboard, menu, dispatcher, health, cleanup, and release readiness paths exist; deeper consolidation and unified UI remain design/implementation work. |
+| 20: Hardware-Aware Model And Config Automation | In Progress | Partial | Recommendation, dashboard, menu, dispatcher, health, cleanup, release readiness, and the unified UI design exist; deeper consolidation and UI implementation remain future work. |
 
 ## Input-Dependent Decisions
 
