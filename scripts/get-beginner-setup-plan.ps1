@@ -9,41 +9,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+Import-Module (Join-Path $PSScriptRoot "OnboardingGuidance.psm1") -Force
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $registryPath = Join-Path $repoRoot "config/workflows.json"
-$registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
-
-function Get-Workflow {
-    param([string]$Id)
-
-    $matches = @($registry.workflows | Where-Object { $_.id -eq $Id })
-    if ($matches.Count -ne 1) {
-        throw "Workflow not found or not unique: $Id"
-    }
-    return $matches[0]
-}
-
-function Get-ScriptCommand {
-    param(
-        [object]$Workflow,
-        [string]$Arguments = ""
-    )
-
-    $entry = $Workflow.entryPoints.$Platform
-    if ([string]::IsNullOrWhiteSpace($entry)) {
-        throw "Workflow $($Workflow.id) does not support $Platform."
-    }
-
-    if ($Platform -eq "windows") {
-        $path = ".\" + ($entry -replace "/", "\")
-        if ($entry -match "\.ps1$") {
-            return "pwsh -NoProfile -ExecutionPolicy Bypass -File $path $Arguments".Trim()
-        }
-        return "$path $Arguments".Trim()
-    }
-
-    return "./$entry $Arguments".Trim()
-}
+$registry = Import-OnboardingJson -Path $registryPath
 
 function New-Step {
     param(
@@ -55,7 +25,7 @@ function New-Step {
         [bool]$RequiresReview = $false
     )
 
-    $workflow = Get-Workflow -Id $WorkflowId
+    $workflow = Get-OnboardingWorkflow -Registry $registry -Id $WorkflowId
     [pscustomobject]@{
         Id = $Id
         Title = $Title
@@ -81,7 +51,7 @@ $steps = @(
         -Title "Check local setup health" `
         -WorkflowId "test-local-agent-health" `
         -Why "Verifies repository config and local output folders before changing anything." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "test-local-agent-health") -Arguments "-TargetRepo <your-project-path> -SkipOllama -AsJson -OutputPath runtime-validation-output/beginner-health.json")
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "test-local-agent-health") -Platform $Platform -Arguments "-TargetRepo <your-project-path> -SkipOllama -AsJson -OutputPath runtime-validation-output/beginner-health.json")
     New-Step `
         -Id "profile-hardware" `
         -Title "Profile local hardware and installed models" `
@@ -93,39 +63,39 @@ $steps = @(
         -Title "Generate evidence dashboard" `
         -WorkflowId "generate-evidence-dashboard" `
         -Why "Shows what is tested, validated, planned, or recommendation-only before installation." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "generate-evidence-dashboard") -Arguments "-OutputPath runtime-validation-output/evidence-dashboard.json -MarkdownOutputPath runtime-validation-output/evidence-dashboard.md -AsJson")
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "generate-evidence-dashboard") -Platform $Platform -Arguments "-OutputPath runtime-validation-output/evidence-dashboard.json -MarkdownOutputPath runtime-validation-output/evidence-dashboard.md -AsJson")
     New-Step `
         -Id "review-models" `
         -Title "Generate model scorecard" `
         -WorkflowId "generate-model-scorecard" `
         -Why "Summarizes model readiness from committed evidence before choosing a coding model." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "generate-model-scorecard") -Arguments "-OutputPath runtime-validation-output/model-scorecard.json -MarkdownOutputPath runtime-validation-output/model-scorecard.md -AsJson")
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "generate-model-scorecard") -Platform $Platform -Arguments "-OutputPath runtime-validation-output/model-scorecard.json -MarkdownOutputPath runtime-validation-output/model-scorecard.md -AsJson")
     New-Step `
         -Id "recommend-config" `
         -Title "Generate model and config recommendation" `
         -WorkflowId "recommend-agent-config" `
         -Why "Uses the hardware profile, model catalog, and evidence catalog to pick conservative model lanes." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "recommend-agent-config") -Arguments "-ModelProfilePath runtime-validation-output/local-model-profile.json -OutputPath runtime-validation-output/model-config-recommendation.json")
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "recommend-agent-config") -Platform $Platform -Arguments "-ModelProfilePath runtime-validation-output/local-model-profile.json -OutputPath runtime-validation-output/model-config-recommendation.json")
     New-Step `
         -Id "dry-run-config" `
         -Title "Preview local-only Continue config" `
         -WorkflowId "apply-agent-config" `
         -Why "Shows the local config change before writing project config files." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "apply-agent-config") -Arguments "-TargetRepo <your-project-path> -RecommendationPath runtime-validation-output/model-config-recommendation.json -DryRun") `
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "apply-agent-config") -Platform $Platform -Arguments "-TargetRepo <your-project-path> -RecommendationPath runtime-validation-output/model-config-recommendation.json -DryRun") `
         -RequiresReview $true
     New-Step `
         -Id "install-pack-dry-run" `
         -Title "Preview pack install" `
         -WorkflowId "install-pack-assets" `
         -Why "Confirms which files would be installed or backed up before copying assets." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "install-pack-assets") -Arguments "-TargetRepo <your-project-path> -DryRun") `
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "install-pack-assets") -Platform $Platform -Arguments "-TargetRepo <your-project-path> -DryRun") `
         -RequiresReview $true
     New-Step `
         -Id "test-models" `
         -Title "Test local agent models" `
         -WorkflowId "test-local-agent-models" `
         -Why "Runs API-level local model checks and unloads models after each test." `
-        -Command (Get-ScriptCommand -Workflow (Get-Workflow -Id "test-local-agent-models") -Arguments "-TargetRepo <your-project-path> -ModelProfilePath runtime-validation-output/local-model-profile.json -UnloadAfterEach -OutputPath runtime-validation-output/local-agent-model-tests.json")
+        -Command (Get-OnboardingScriptCommand -Workflow (Get-OnboardingWorkflow -Registry $registry -Id "test-local-agent-models") -Platform $Platform -Arguments "-TargetRepo <your-project-path> -ModelProfilePath runtime-validation-output/local-model-profile.json -UnloadAfterEach -OutputPath runtime-validation-output/local-agent-model-tests.json")
 )
 
 $report = [pscustomobject]@{
@@ -171,26 +141,6 @@ function ConvertTo-Markdown {
     return ($lines -join "`n") + "`n"
 }
 
-if ($OutputPath) {
-    $parent = Split-Path -Parent $OutputPath
-    if ($parent) {
-        New-Item -ItemType Directory -Force -Path $parent | Out-Null
-    }
-    $report | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $OutputPath -Encoding utf8
-}
-
-if ($MarkdownOutputPath) {
-    $parent = Split-Path -Parent $MarkdownOutputPath
-    if ($parent) {
-        New-Item -ItemType Directory -Force -Path $parent | Out-Null
-    }
-    ConvertTo-Markdown -Report $report | Set-Content -LiteralPath $MarkdownOutputPath -Encoding utf8
-}
-
-if ($AsJson -or $OutputPath) {
-    $report | ConvertTo-Json -Depth 20
-} else {
-    ConvertTo-Markdown -Report $report
-}
+Write-OnboardingReport -Report $report -MarkdownRenderer ${function:ConvertTo-Markdown} -OutputPath $OutputPath -MarkdownOutputPath $MarkdownOutputPath -AsJson:$AsJson
 
 exit 0

@@ -51,7 +51,7 @@ By default, the generated global Continue config omits the `rules:` section. Thi
 
 If you do not pass an explicit shared asset path, the installers use a user-level local folder:
 
-- Windows: `%USERPROFILE%\.local-engineering-agent-packssets`
+- Windows: `%USERPROFILE%\.local-engineering-agent-pack\assets`
 - Linux: `${XDG_DATA_HOME:-$HOME/.local/share}/local-engineering-agent-pack/assets`
 - macOS: `$HOME/Library/Application Support/LocalEngineeringAgentPack/assets`
 
@@ -63,9 +63,9 @@ Preview the install:
 
 ```powershell
 .\scripts\install-continue-pack.ps1 `
-  -TargetRepo "C:\path	o\your-project" `
+  -TargetRepo "C:\path\to\your-project" `
   -SharedAssets `
-  -SharedAssetsPath "$HOME\.local-engineering-agent-packssets" `
+  -SharedAssetsPath "$HOME\.local-engineering-agent-pack\assets" `
   -GlobalConfigPath "$HOME\.continue\config.yaml" `
   -DryRun
 ```
@@ -74,9 +74,9 @@ Install shared assets and update the global Continue config:
 
 ```powershell
 .\scripts\install-continue-pack.ps1 `
-  -TargetRepo "C:\path	o\your-project" `
+  -TargetRepo "C:\path\to\your-project" `
   -SharedAssets `
-  -SharedAssetsPath "$HOME\.local-engineering-agent-packssets" `
+  -SharedAssetsPath "$HOME\.local-engineering-agent-pack\assets" `
   -GlobalConfigPath "$HOME\.continue\config.yaml"
 ```
 
@@ -84,7 +84,7 @@ Use a local-network Ollama endpoint only in the generated global config:
 
 ```powershell
 .\scripts\install-continue-pack.ps1 `
-  -TargetRepo "C:\path	o\your-project" `
+  -TargetRepo "C:\path\to\your-project" `
   -SharedAssets `
   -GlobalConfigApiBase "http://127.0.0.1:11434"
 ```
@@ -130,6 +130,8 @@ When shared-assets mode is enabled, the installer:
 7. Rewrites `file://./...` references into absolute references to the shared asset folder.
 8. Omits `rules:` by default to prevent duplicate rule warnings.
 9. Validates that copied `file://` references resolve.
+10. Skips project-specific classification and language-rule activation because the same shared folder can serve repositories with different ecosystems.
+10. Skips project-specific classification and language-rule activation because the same shared folder can serve repositories with different ecosystems.
 
 Shared-assets mode currently supports reusable assets and global config generation only. Do not combine it with `-AutoModelConfig`, `-ModelLanes`, or read-only/approved-write install profiles. Those profile features still write project-local config today.
 
@@ -197,3 +199,5 @@ Rollback is straightforward:
 - Project-local model profile generation remains separate.
 - Future non-Continue surfaces may reuse this folder layout, but they still need surface-specific validation evidence first. See `docs/surface-specific-config-bundles.md`.
 - The target repository can still have its own `.continue` folder for project-specific rules, evidence, or local overrides.
+- Automatic language-rule activation requires project-local installation today. A future per-project overlay for centralized assets remains planned.
+- Automatic language-rule activation requires project-local installation today. A future per-project overlay for centralized assets remains planned.

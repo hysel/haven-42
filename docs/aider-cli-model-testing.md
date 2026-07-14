@@ -24,7 +24,25 @@ Aider CLI validation is CLI-specific and does not prove Continue, Cline, VS Code
 
 ## Install Aider CLI
 
-Aider is a Python-based CLI. A common isolated install path is:
+Aider is a Python-based CLI. The pack exposes the supported setup path through
+one cross-platform adapter.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\setup-agent-surface.ps1 -Surface aider -Action Plan
+.\scripts\setup-agent-surface.ps1 -Surface aider -Action Install -InstallMethod aider-install -DryRun
+```
+
+Linux or macOS:
+
+```bash
+./scripts/setup-agent-surface.linux.sh --surface aider --action Plan
+./scripts/setup-agent-surface.linux.sh --surface aider --action Install --install-method aider-install --dry-run
+```
+
+Remove dry-run only after reviewing the network install plan. The adapter also
+supports `pipx` and `uv`. A manual isolated install remains available:
 
 ```bash
 pipx install aider-chat
@@ -37,6 +55,44 @@ Windows PowerShell:
 ```powershell
 aider --version
 ```
+
+## Generate Local-Only Ollama Config
+
+The adapter writes `.aider.conf.local.yml` and requires launching Aider with
+`--config .aider.conf.local.yml`. When Git metadata is available, it adds the
+filename to the local repository's `.git/info/exclude`. Do not commit this file
+while it contains a private endpoint.
+
+Windows PowerShell:
+
+```powershell
+.\scripts\setup-agent-surface.ps1 `
+  -Surface aider `
+  -Action Configure `
+  -TargetRepo C:/path/to/project `
+  -Model qwen3.5:9b `
+  -OllamaBaseUrl http://your-local-ollama-host:11434
+```
+
+Linux:
+
+```bash
+./scripts/setup-agent-surface.linux.sh \
+  --surface aider \
+  --action Configure \
+  --target-repo /path/to/project \
+  --model qwen3.5:9b \
+  --ollama-base-url http://your-local-ollama-host:11434
+```
+
+Instead of a model, pass a hardware recommendation JSON plus the `WriteSafe`,
+`PlanOnly`, or `DeepReview` lane. The config uses `ollama_chat/<model>`, sets
+`OLLAMA_API_BASE`, and disables automatic and dirty commits. Run the adapter's
+`Health` action after configuration.
+
+Official references: [Aider installation](https://aider.chat/docs/install.html),
+[Ollama setup](https://aider.chat/docs/llms/ollama.html), and
+[YAML configuration](https://aider.chat/docs/config/aider_conf.html).
 
 Linux or macOS:
 
@@ -184,7 +240,8 @@ Linux or macOS example:
   --model-argument-template '--model "ollama_chat/{Model}"'
 ```
 
-If your Aider CLI uses configuration profiles instead of a model flag, switch profiles outside the script and run one model at a time.
+The test harness passes the model explicitly. Normal day-to-day use should use
+the generated local config with `aider --config .aider.conf.local.yml`.
 
 ## Dry Run
 

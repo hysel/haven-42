@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "description": "Curated local inference memory estimates. Values are planning assumptions, not measured guarantees.",
+  "defaults": {
+    "contextTargetTokens": 16384,
+    "memoryReserveGb": 4,
+    "memoryReservePercent": 10,
+    "unknownModelPolicy": "low-confidence-name-heuristic"
+  },
+  "profiles": [
+    {
+      "id": "qwen3.5-9b-q4-class",
+      "matchPattern": "^qwen3\\.5:9b$",
+      "parameterCountBillion": 9,
+      "activeParameterCountBillion": 9,
+      "architecture": "dense",
+      "quantizationAssumption": "Q4-class local artifact; verify the installed model manifest",
+      "estimatedWeightsGb": 6,
+      "kvCacheGbAtBaseline": 1.5,
+      "baselineContextTokens": 16384,
+      "runtimeOverheadGb": 1.5,
+      "memoryReserveGb": 4,
+      "memoryReservePercent": 10
+    },
+    {
+      "id": "devstral-small-2-24b-q4-class",
+      "matchPattern": "^devstral-small-2:24b$",
+      "parameterCountBillion": 24,
+      "activeParameterCountBillion": 24,
+      "architecture": "dense",
+      "quantizationAssumption": "Q4-class local artifact; verify the installed model manifest",
+      "estimatedWeightsGb": 16,
+      "kvCacheGbAtBaseline": 3,
+      "baselineContextTokens": 16384,
+      "runtimeOverheadGb": 3,
+      "memoryReserveGb": 4,
+      "memoryReservePercent": 10
+    },
+    {
+      "id": "qwen3-coder-30b-a3b-q4-class",
+      "matchPattern": "^qwen3-coder:30b$",
+      "parameterCountBillion": 30,
+      "activeParameterCountBillion": 3,
+      "architecture": "mixture-of-experts",
+      "quantizationAssumption": "Q4-class local artifact; verify the installed model manifest",
+      "estimatedWeightsGb": 20,
+      "kvCacheGbAtBaseline": 4,
+      "baselineContextTokens": 16384,
+      "runtimeOverheadGb": 3,
+      "memoryReserveGb": 5,
+      "memoryReservePercent": 10
+    }
+  ]
+}

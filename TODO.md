@@ -299,7 +299,7 @@
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
 - [x] Complete Milestone 17 Cline and Aider compatibility validation exit criteria while keeping unconfirmed wrapper live validation evidence-gated.
 - [ ] Complete Milestone 17 full tracked-surface compatibility validation.
-- [ ] Promote Aider as the first end-to-end non-Continue surface by completing install, local-model configuration, health, and test automation with sanitized evidence.
+- [x] Promote Aider as the first end-to-end non-Continue adapter by completing install, local-model configuration, health, and test automation with sanitized deterministic coverage; keep real-project approved write blocked.
 
 ## Future Agent Surface Evidence Expansion
 
@@ -317,8 +317,8 @@
 - [x] Add evidence-gated rule selection guidance for optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code packs.
 - [x] Validate optional language rule packs against generated sample repositories with static evidence checks.
 - [ ] Validate rule packs against editor/model repository-discovery, implementation-planning, code-review, and scoped-write workflows. Partial generated-sample evidence is recorded for Java, Go, Rust, SQL, and Infrastructure; remaining failures must be resolved before marking complete.
-- [ ] Add a machine-readable project-profile classifier with ecosystem, evidence, confidence, and selected rule-pack IDs.
-- [ ] Activate matching optional language rule packs through installer/config generation so installed projects do not require manual rule wiring.
+- [x] Add a machine-readable project-profile classifier with ecosystem, evidence, confidence, and selected rule-pack IDs.
+- [x] Activate matching optional language rule packs through project-local installer/config generation so installed projects do not require manual rule wiring.
 - [ ] Add medium-complexity language samples and a representative validation matrix covering discovery, planning, review, and scoped write.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
@@ -327,12 +327,12 @@
 - [x] Add a sanitized evidence catalog for model, surface, OS, language, and write-readiness results.
 - [x] Add release archive, checksum, and install-command guidance.
 - [x] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria.
-- [ ] Define Capability Evidence Contract v2 keyed by surface, model, provider, OS, surface version, operation, and validation mode.
-- [ ] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
-- [ ] Prevent write-readiness evidence from one agent surface from being inherited by another surface.
+- [x] Define Capability Evidence Contract v2 keyed by surface, model, provider, OS, surface version, operation, and validation mode.
+- [x] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
+- [x] Prevent write-readiness evidence from one agent surface from being inherited by another surface.
 - [ ] Complete Milestone 19 cross-agent install/configure/test script parity.
 - [ ] Add Cline install/configure automation or keep it blocked with exact evidence gaps.
-- [ ] Add Aider install/configure automation or keep it blocked with exact evidence gaps.
+- [x] Add Aider install/configure automation with an explicit local-only config and supported isolated install methods.
 - [ ] Keep Roo Code, Kilo Code, and OpenCode install/configure automation blocked until command and config shapes are confirmed.
 - [ ] Keep OpenHands install/configure/test automation blocked until platform workspace, sandbox, and credential boundaries are defined.
 
@@ -349,10 +349,11 @@
 - [x] Add a script consolidation plan for shared engines, registries, dispatchers, thin wrappers, and no-consolidate-yet cases.
 - [x] Consolidate PowerShell agent CLI wrapper defaults behind the shared agent CLI harness default catalog.
 - [x] Consolidate Bash agent CLI wrapper defaults behind the shared agent CLI harness default catalog.
-- [ ] Add lane-specific model scoring that keeps WRITE SAFE reliability-first and can select larger validated PLAN ONLY or DEEP REVIEW models when hardware permits.
-- [ ] Replace parameter-name-only VRAM estimates with metadata for quantization, context target, backend overhead, model architecture or MoE behavior, and configurable memory reserve.
-- [ ] Execute script-family consolidation behind shared engines, registries, or dispatchers before adding more plugin-specific wrappers.
-- [ ] Define a versioned workflow request, progress, result, warning, and error envelope for dispatchers and the future UI.
+- [x] Add lane-specific model scoring that keeps WRITE SAFE reliability-first and can select larger validated PLAN ONLY or DEEP REVIEW models when hardware permits.
+- [x] Replace parameter-name-only VRAM estimates for curated models with metadata for quantization assumptions, context target, backend overhead, model architecture or MoE behavior, and configurable memory reserve; retain a labeled low-confidence fallback for unknown tags.
+- [x] Consolidate the onboarding/navigation script family behind a shared PowerShell module and native wrapper dispatcher before adding more plugin-specific wrappers.
+- [ ] Replace the no-PowerShell informational fallback for beginner plan, agent menu, and workflow chooser with a fully native Linux/macOS renderer.
+- [x] Define a versioned workflow request, progress, result, warning, and error envelope for dispatchers and the future UI.
 - [x] Add a guided command/menu layer so end users choose from a small set of intents instead of individual scripts.
 - [x] Keep individual script documentation as appendix/reference material for advanced users and maintainers.
 - [x] Define a machine-readable workflow registry for tasks, inputs, outputs, safety level, platform support, and script entry points.
@@ -380,4 +381,4 @@
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.
 - [ ] Confirm whether external wiki publishing is required for the next release.
 - [ ] Resolve Milestone 18 editor/model workflow failures before promoting Java, Go, Rust, SQL, and Infrastructure rule packs beyond evidence-gated status.
-- [ ] Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams after the new contracts are implemented so documented maturity matches verified behavior.
+- [x] Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams after the new contracts are implemented so documented maturity matches verified behavior.

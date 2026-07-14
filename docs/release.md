@@ -6,13 +6,13 @@ This document defines the release process for the Local Engineering Agent Pack.
 
 The release process is intentionally lightweight because this repository is configuration and documentation heavy, but each release should still be validated, versioned, tagged, and documented.
 
-## Milestone 19 Continue Completion Basis
+## Milestone 19 Completion Basis
 
 Milestone 19 is complete for the Continue release-packaging scope because Continue installer profiles cover default, read-only, and approved-write workflows; `config/evidence-catalog.tsv` provides the structured sanitized evidence index; and the release packaging scripts generate archives plus checksums on Windows, Linux, and macOS.
 
-Milestone 19 is partial for cross-agent install/configure/test parity. Cline and Aider have validation evidence and test harnesses but do not yet have supported install/configure automation. Roo Code, Kilo Code, and OpenCode have test scaffolds but remain blocked on confirmed command and config shapes. OpenHands remains blocked until platform workspace, sandbox, and credential boundaries are defined.
+Milestone 19 is partial for cross-agent install/configure/test parity. Aider now has a supported cross-platform install/configure/health adapter plus its validation harness. Cline has validation evidence but no reusable install/configure adapter. Roo Code, Kilo Code, and OpenCode have test scaffolds but remain blocked on confirmed command and config shapes. OpenHands remains blocked by its platform workspace, sandbox, and credential boundaries.
 
-Future surface-specific installer profiles remain evidence-gated until non-Continue surfaces have install, configure, and test evidence that can be represented safely in `config/agent-surface-solutions.json`.
+Additional surface-specific installer profiles remain evidence-gated until each surface has install, configure, and test evidence that can be represented safely in `config/agent-surface-solutions.json`.
 
 ## Versioning
 

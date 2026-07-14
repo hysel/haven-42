@@ -208,14 +208,14 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     Assert-True -Condition ($sharedScript -match "config\\.local") -Message "Shared packager should exclude local config files."
     Assert-True -Condition ($sharedScript -match "runtime-validation-output") -Message "Shared packager should exclude runtime validation output."
     Assert-True -Condition ($releaseDoc -match "Build Release Artifacts") -Message "Release docs should explain artifact creation."
-    Assert-True -Condition ($releaseDoc -match "Milestone 19 Continue Completion Basis") -Message "Release docs should record Milestone 19 Continue completion basis."
+    Assert-True -Condition ($releaseDoc -match "Milestone 19 Completion Basis") -Message "Release docs should record the current Milestone 19 completion basis."
     Assert-True -Condition ($releaseDoc -match "config/evidence-catalog\.tsv") -Message "Release docs should cite evidence catalog for Milestone 19."
     Assert-True -Condition ($releaseDoc -match "partial for cross-agent install/configure/test parity") -Message "Release docs should keep cross-agent parity gap visible."
     Assert-True -Condition ($releaseDoc -match "Verify Checksums") -Message "Release docs should explain checksum verification."
     Assert-True -Condition ($releaseDoc -match "build-release-package") -Message "Release docs should mention packaging scripts."
     Assert-True -Condition ($releaseDoc -match "GitHub Release") -Message "Release docs should explain GitHub release uploads."
     Assert-True -Condition ($roadmap -match "\| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging \| Partial \|") -Message "Roadmap should mark Milestone 19 partial for cross-agent parity."
-    Assert-True -Condition ($roadmap -match "cross-agent install/configure/test script parity remains incomplete outside Continue") -Message "Roadmap should state the Milestone 19 cross-agent parity gap."
+    Assert-True -Condition ($roadmap -match "Cross-agent parity gap") -Message "Roadmap should state the Milestone 19 cross-agent parity gap."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria") -Message "TODO should mark Continue-scoped Milestone 19 completion complete."
     Assert-True -Condition ($todo -match "\[ \] Complete Milestone 19 cross-agent install/configure/test script parity") -Message "TODO should keep cross-agent Milestone 19 parity pending."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should keep future surface profile work in the architecture backlog."
@@ -228,6 +228,8 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     $allowedStatuses = @(
         "candidate-only",
         "plan-review-candidate",
+        "plan-validated",
+        "review-validated",
         "read-only-tool-validated",
         "read-only-cli-validated",
         "write-smoke-validated",
@@ -242,22 +244,23 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
 
     $lines = Get-Content -LiteralPath $catalogPath | Where-Object { $_.Trim().Length -gt 0 }
     Assert-True -Condition ($lines.Count -gt 1) -Message "Evidence catalog should include rows."
-    Assert-Equal -Actual $lines[0] -Expected "area`tsubject`tsurface`tos`tmodel`tstatus`tevidence`tnotes" -Message "Evidence catalog header changed."
+    Assert-Equal -Actual $lines[0] -Expected "schema_version`tarea`tsubject`tsurface`tsurface_version`tprovider`tos`tmodel`toperation`tvalidation_mode`tstatus`tevidence`tnotes" -Message "Evidence catalog header changed."
 
     $seenApprovedWrite = $false
     $seenCandidateOnly = $false
     $seenReadOnly = $false
 
     foreach ($line in $lines[1..($lines.Count - 1)]) {
-        $parts = $line -split "`t", 8
-        Assert-Equal -Actual $parts.Count -Expected 8 -Message "Evidence catalog row should have eight tab-delimited columns: $line"
+        $parts = $line -split "`t", 13
+        Assert-Equal -Actual $parts.Count -Expected 13 -Message "Evidence catalog row should have thirteen tab-delimited columns: $line"
 
         foreach ($part in $parts) {
             Assert-True -Condition ($part.Trim().Length -gt 0) -Message "Evidence catalog row contains an empty field: $line"
         }
 
-        $status = $parts[5]
-        $evidence = $parts[6]
+        Assert-Equal -Actual $parts[0] -Expected "2" -Message "Evidence catalog rows should use schema version 2."
+        $status = $parts[10]
+        $evidence = $parts[11]
         Assert-True -Condition ($status -in $allowedStatuses) -Message "Evidence catalog row has unsupported status: $line"
         Assert-True -Condition ($evidence -notmatch "^[A-Za-z]:|^/|\\") -Message "Evidence path should be repository-relative: $line"
         Assert-True -Condition ($evidence -notmatch "\.\.") -Message "Evidence path should not traverse directories: $line"
@@ -274,8 +277,16 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     Assert-True -Condition $seenReadOnly -Message "Evidence catalog should include read-only tool evidence."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $contractPath = Join-Path $repoRoot "config/capability-evidence-contract.json"
+    Assert-True -Condition (Test-Path -LiteralPath $contractPath) -Message "Capability Evidence Contract should exist."
+    $contract = Get-Content -LiteralPath $contractPath -Raw | ConvertFrom-Json
+    Assert-Equal -Actual $contract.schemaVersion -Expected 2 -Message "Capability Evidence Contract should be version 2."
+    Assert-True -Condition (-not $contract.aggregation.allowCrossSurfaceInheritance) -Message "Contract should prohibit cross-surface inheritance."
+    Assert-True -Condition (-not $contract.aggregation.allowCrossOperationInheritance) -Message "Contract should prohibit cross-operation inheritance."
+    Assert-True -Condition ($contract.aggregation.retainAllEvidencePaths) -Message "Contract should retain provenance."
     Assert-True -Condition ($doc -match "config/evidence-catalog\.tsv") -Message "Evidence catalog docs should reference the TSV file."
     Assert-True -Condition ($doc -match "approved-write-ready") -Message "Evidence catalog docs should define approved-write-ready."
+    Assert-True -Condition ($doc -match "Capability Evidence Contract v2") -Message "Evidence catalog docs should explain contract v2."
 }
 Invoke-PackTest "model recommendation catalog has valid schema" {
     $catalogPath = Join-Path $repoRoot "config/model-recommendations.tsv"
@@ -311,6 +322,23 @@ Invoke-PackTest "model recommendation catalog has valid schema" {
     $catalogText = Get-Content -LiteralPath $catalogPath -Raw
     Assert-True -Condition ($catalogText -match "simple-hardware default") -Message "Catalog should include the simple-hardware profile model."
     Assert-True -Condition ($catalogText -notmatch "rejected starter model") -Message "Catalog should avoid rejected starter-model guidance."
+}
+
+Invoke-PackTest "model fit catalog defines explicit memory assumptions" {
+    $catalogPath = Join-Path $repoRoot "config/model-fit-profiles.json"
+    $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
+    Assert-Equal -Actual $catalog.schemaVersion -Expected 1 -Message "Model fit catalog should use schema version 1."
+    Assert-True -Condition ($catalog.defaults.contextTargetTokens -ge 1024) -Message "Model fit catalog should define a usable default context target."
+    Assert-True -Condition ($catalog.defaults.memoryReserveGb -gt 0) -Message "Model fit catalog should define a positive memory reserve."
+    Assert-True -Condition ($catalog.profiles.Count -ge 1) -Message "Model fit catalog should include curated profiles."
+    foreach ($profile in $catalog.profiles) {
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($profile.matchPattern)) -Message "Each fit profile should define a match pattern."
+        Assert-True -Condition ($profile.estimatedWeightsGb -gt 0) -Message "Each fit profile should define estimated weight memory."
+        Assert-True -Condition ($profile.baselineContextTokens -gt 0 -and $profile.kvCacheGbAtBaseline -gt 0) -Message "Each fit profile should define context-sensitive cache assumptions."
+        Assert-True -Condition ($profile.runtimeOverheadGb -gt 0) -Message "Each fit profile should define runtime overhead."
+        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($profile.quantizationAssumption)) -Message "Each fit profile should disclose its quantization assumption."
+        Assert-True -Condition ($profile.architecture -in @("dense", "mixture-of-experts")) -Message "Each fit profile should identify its architecture class."
+    }
 }
 
 Invoke-PackTest "committed config uses a starter sample model" {
@@ -1016,6 +1044,48 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition ($workflowEvidence -match "FILENAME_NOT_IN_CONTEXT") -Message "Workflow evidence should record filename-drift guardrail failures."
     Assert-True -Condition ($config -notmatch "rule-packs") -Message "Default Continue config should not load optional language rule packs."
 }
+
+Invoke-PackTest "project classifier selects sanitized rule packs across generated ecosystems" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "project-profile-test-$([guid]::NewGuid())"
+    $classifier = Join-Path $repoRoot "scripts/get-project-profile.ps1"
+    $catalogPath = Join-Path $repoRoot "config/project-profile-rules.json"
+    $expected = [ordered]@{
+        "python-api" = "python"
+        "typescript-frontend" = "typescript"
+        "node-service" = "typescript"
+        "java-spring-api" = "java"
+        "go-service" = "go"
+        "rust-cli" = "rust"
+        "sql-migrations" = "sql"
+        "iac-terraform-kubernetes" = "infrastructure-as-code"
+    }
+
+    try {
+        Assert-True -Condition (Test-Path -LiteralPath $catalogPath) -Message "Project profile signal catalog should exist."
+        $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
+        Assert-Equal -Actual $catalog.schemaVersion -Expected 1 -Message "Project profile catalog should use schema version 1."
+
+        $generateResult = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/generate-sample-repositories.ps1") `
+            -Arguments @("-OutputRoot", $tempRoot)
+        Assert-Equal -Actual $generateResult.ExitCode -Expected 0 -Message "Sample repositories should be generated for classification tests."
+
+        foreach ($sampleName in $expected.Keys) {
+            $samplePath = Join-Path $tempRoot $sampleName
+            $profileJson = (& $classifier -TargetRepo $samplePath -AsJson | Out-String).Trim()
+            $profile = $profileJson | ConvertFrom-Json
+            Assert-Equal -Actual $profile.SchemaVersion -Expected 1 -Message "$sampleName should emit project profile schema version 1."
+            Assert-Equal -Actual $profile.ActivationMinimumConfidence -Expected "medium" -Message "$sampleName should retain the catalog activation threshold."
+            Assert-True -Condition ($expected[$sampleName] -in @($profile.SelectedRulePackIds)) -Message "$sampleName should select $($expected[$sampleName])."
+            Assert-True -Condition ($profileJson -notmatch [regex]::Escape($tempRoot)) -Message "$sampleName profile should not record the target path."
+            Assert-True -Condition (-not $profile.Privacy.TargetPathRecorded) -Message "$sampleName profile should declare that target paths are not recorded."
+            Assert-True -Condition (-not $profile.Privacy.FileContentsRead) -Message "$sampleName profile should declare that file contents are not read."
+        }
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
 Invoke-PackTest "project detection docs and guidance are evidence-gated" {
     $docPath = Join-Path $repoRoot "docs/project-detection.md"
     $languagePath = Join-Path $repoRoot "docs/language-support.md"
@@ -1461,7 +1531,39 @@ Invoke-PackTest "install script dry run does not modify target repository" {
 
         Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Install dry run should succeed."
         Assert-True -Condition ($result.Output -match "Dry run only") -Message "Dry-run output should identify that no files were changed."
+        Assert-True -Condition ($result.Output -match "Detected project ecosystem") -Message "Dry-run output should report project classification."
+        Assert-True -Condition ($result.Output -match "Would write \.continue/project-profile\.json") -Message "Dry-run output should report project profile activation."
         Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRepo ".continue"))) -Message "Dry run should not create .continue."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "install script activates only evidence-backed project rule packs" {
+    $tempRepo = Join-Path ([System.IO.Path]::GetTempPath()) "continue-project-profile-install-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRepo | Out-Null
+        "[project]" | Set-Content -LiteralPath (Join-Path $tempRepo "pyproject.toml")
+
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/install-continue-pack.ps1") `
+            -Arguments @("-TargetRepo", $tempRepo, "-ModelLanes")
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Project-aware install should succeed."
+
+        $profilePath = Join-Path $tempRepo ".continue/project-profile.json"
+        $activePython = Join-Path $tempRepo ".continue/rules/active-language-python.md"
+        $activeJava = Join-Path $tempRepo ".continue/rules/active-language-java.md"
+        Assert-True -Condition (Test-Path -LiteralPath $profilePath) -Message "Installer should write the sanitized project profile."
+        Assert-True -Condition (Test-Path -LiteralPath $activePython) -Message "Installer should activate the Python rule pack."
+        Assert-True -Condition (-not (Test-Path -LiteralPath $activeJava)) -Message "Installer should not activate unmatched Java guidance."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $tempRepo ".continue/config.local.yaml")) -Message "Model config generation should preserve project rule activation."
+
+        $profileJson = Get-Content -LiteralPath $profilePath -Raw
+        $profile = $profileJson | ConvertFrom-Json
+        Assert-True -Condition ("python" -in @($profile.SelectedRulePackIds)) -Message "Installed project profile should select Python."
+        Assert-True -Condition ($profileJson -notmatch [regex]::Escape($tempRepo)) -Message "Installed project profile should not record the target path."
     }
     finally {
         Remove-Item -LiteralPath $tempRepo -Recurse -Force -ErrorAction SilentlyContinue
@@ -2430,6 +2532,105 @@ Invoke-PackTest "hardware-aware recommendation scripts emit sanitized model lane
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+Invoke-PackTest "capability evidence v2 blocks cross-surface inheritance and aggregates conservatively" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "evidence-v2-recommendation-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $profilePath = Join-Path $tempRoot "model-profile.json"
+        $catalogPath = Join-Path $tempRoot "evidence.tsv"
+        $outputPath = Join-Path $tempRoot "recommendation.json"
+
+        @"
+{
+  "Platform": "Windows",
+  "CpuArchitecture": "x64",
+  "SystemRamGb": 32,
+  "Gpus": [{"Name":"fixture gpu","VramGb":16,"MemoryType":"dedicated"}],
+  "OllamaModels": ["qwen3.5:9b", "fixture-tool:1b"]
+}
+"@ | Set-Content -LiteralPath $profilePath
+
+        @"
+schema_version	area	subject	surface	surface_version	provider	os	model	operation	validation_mode	status	evidence	notes
+2	model-tool-use	passing write	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	approved-write-ready	examples/model-tool-use-validation.md	Passing record.
+2	model-tool-use	conflicting write	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	partial-pass	examples/model-tool-use-validation.md	Conservative duplicate.
+2	model-tool-use	other surface write	Cline	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	approved-write-ready	examples/cline-readonly-validation.md	Must not be inherited.
+2	model-tool-use	exact write only	Continue Agent	not-recorded	Ollama	Windows	fixture-tool:1b	scoped-write	editor-agent	approved-write-ready	examples/model-tool-use-validation.md	Must not imply plan readiness.
+"@ | Set-Content -LiteralPath $catalogPath
+
+        $result = Invoke-CommandCapture -FilePath (Join-Path $repoRoot "scripts/recommend-local-agent-config.ps1") -Arguments @("-ModelProfilePath", $profilePath, "-EvidenceCatalogPath", $catalogPath, "-OutputPath", $outputPath)
+
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Recommendation should process v2 duplicate evidence."
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        $candidate = @($report.Candidates | Where-Object { $_.Model -eq "qwen3.5:9b" })[0]
+        Assert-Equal -Actual $report.EvidenceContractVersion -Expected 2 -Message "Recommendation should report evidence contract v2."
+        Assert-Equal -Actual $report.EvidenceTarget.Surface -Expected "Continue Agent" -Message "Recommendation should report the exact target surface."
+        Assert-Equal -Actual $candidate.OperationEvidence.ScopedWrite.Status -Expected "partial-pass" -Message "Duplicate evidence should aggregate to the most conservative status."
+        Assert-Equal -Actual $candidate.OperationEvidence.ScopedWrite.RecordCount -Expected 2 -Message "Aggregation should retain duplicate record count."
+        Assert-Equal -Actual $candidate.OperationEvidence.ScopedWrite.Evidence.Count -Expected 1 -Message "Aggregation should retain unique provenance paths."
+        Assert-Equal -Actual $report.Recommendation.WriteSafeModel -Expected "fixture-tool:1b" -Message "Exact write evidence should remain eligible."
+        Assert-True -Condition ($null -eq $report.Recommendation.PlanOnlyModel) -Message "Write evidence should not be inherited by the plan operation."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "lane-specific scoring keeps write conservative and prefers fitting capacity for plan and review" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "lane-scoring-test-$([guid]::NewGuid())"
+
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $profilePath = Join-Path $tempRoot "model-profile.json"
+        $catalogPath = Join-Path $tempRoot "evidence.tsv"
+        $outputPath = Join-Path $tempRoot "recommendation.json"
+
+        @"
+{
+  "Platform": "Windows",
+  "CpuArchitecture": "x64",
+  "SystemRamGb": 128,
+  "Gpus": [{"Name":"fixture gpu","VramGb":64,"MemoryType":"dedicated"}],
+  "OllamaModels": ["qwen3.5:9b", "qwen3-coder:30b"]
+}
+"@ | Set-Content -LiteralPath $profilePath
+
+        @"
+schema_version	area	subject	surface	surface_version	provider	os	model	operation	validation_mode	status	evidence	notes
+2	model-tool-use	small write	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	approved-write-ready	examples/model-tool-use-validation.md	Small validated writer.
+2	model-tool-use	small plan	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	plan	editor-agent	plan-validated	examples/model-tool-use-validation.md	Small validated planner.
+2	model-tool-use	small review	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	review	editor-agent	review-validated	examples/model-tool-use-validation.md	Small validated reviewer.
+2	model-tool-use	large plan	Continue Agent	not-recorded	Ollama	Windows	qwen3-coder:30b	plan	editor-agent	plan-validated	examples/model-tool-use-validation.md	Large validated planner.
+2	model-tool-use	large review	Continue Agent	not-recorded	Ollama	Windows	qwen3-coder:30b	review	editor-agent	review-validated	examples/model-tool-use-validation.md	Large validated reviewer.
+"@ | Set-Content -LiteralPath $catalogPath
+
+        $result = Invoke-CommandCapture -FilePath (Join-Path $repoRoot "scripts/recommend-local-agent-config.ps1") -Arguments @("-ModelProfilePath", $profilePath, "-EvidenceCatalogPath", $catalogPath, "-OutputPath", $outputPath, "-ContextTargetTokens", "32768", "-MemoryReserveGb", "6")
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Lane-specific recommendation should succeed."
+
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        Assert-Equal -Actual $report.SelectionPolicy.Version -Expected 1 -Message "Recommendation should identify lane scoring policy version 1."
+        Assert-Equal -Actual $report.FitPolicy.Version -Expected 1 -Message "Recommendation should identify fit policy version 1."
+        Assert-Equal -Actual $report.FitPolicy.ContextTargetTokens -Expected 32768 -Message "Recommendation should preserve the requested context target."
+        Assert-Equal -Actual $report.Recommendation.WriteSafeModel -Expected "qwen3.5:9b" -Message "WRITE SAFE should keep the exact approved writer with greater headroom."
+        Assert-Equal -Actual $report.Recommendation.PlanOnlyModel -Expected "qwen3-coder:30b" -Message "PLAN ONLY should prefer the larger fitting model with exact plan evidence."
+        Assert-Equal -Actual $report.Recommendation.DeepReviewModel -Expected "qwen3-coder:30b" -Message "DEEP REVIEW should prefer the larger fitting model with exact review evidence."
+
+        $small = @($report.Candidates | Where-Object { $_.Model -eq "qwen3.5:9b" })[0]
+        $large = @($report.Candidates | Where-Object { $_.Model -eq "qwen3-coder:30b" })[0]
+        Assert-True -Condition $small.LaneScores.WriteSafe.Eligible -Message "Small model should expose eligible WRITE SAFE scoring."
+        Assert-Equal -Actual $small.ModelFit.Source -Expected "model-fit-catalog" -Message "Known models should use explicit fit metadata."
+        Assert-Equal -Actual $small.ModelFit.MemoryReserveGb -Expected 6 -Message "Explicit memory reserve should override the catalog reserve."
+        Assert-Equal -Actual $small.RecommendedMinVramGb -Expected 16.5 -Message "Context and reserve should affect the fit estimate."
+        Assert-True -Condition (-not $large.LaneScores.WriteSafe.Eligible) -Message "Large model should remain write-ineligible without exact write evidence."
+        Assert-True -Condition ($large.LaneScores.PlanOnly.Score -gt $small.LaneScores.PlanOnly.Score) -Message "Larger fitting validated planner should receive the higher plan score."
+        Assert-True -Condition ($large.LaneScores.DeepReview.Score -gt $small.LaneScores.DeepReview.Score) -Message "Larger fitting validated reviewer should receive the higher review score."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "recommended agent config generation writes local-only config" {
     $tempRoot = Copy-RepositoryForTest
     $targetRoot = Join-Path ([System.IO.Path]::GetTempPath()) "recommended-config-target-$([guid]::NewGuid())"
@@ -2546,11 +2747,13 @@ Invoke-PackTest "shared asset installation docs define centralized config strate
 }
 Invoke-PackTest "workflow registry defines stable UI entry points" {
     $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $envelopeContractPath = Join-Path $repoRoot "config/workflow-envelope-contract.json"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $linuxDispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.linux.sh"
     $macosDispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.macos.sh"
     $sharedShellDispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.shared.sh"
     $docPath = Join-Path $repoRoot "docs/workflow-registry.md"
+    $envelopeDocPath = Join-Path $repoRoot "docs/workflow-envelope-contract.md"
     $consolidationPath = Join-Path $repoRoot "docs/script-consolidation-plan.md"
     $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
     $autonomousQueuePath = Join-Path $repoRoot "docs/autonomous-maintainer-queue.md"
@@ -2559,17 +2762,21 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $todoPath = Join-Path $repoRoot "TODO.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $registryPath) -Message "Workflow registry should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $envelopeContractPath) -Message "Workflow envelope contract should exist."
     Assert-True -Condition (Test-Path -LiteralPath $dispatcherPath) -Message "Workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $linuxDispatcherPath) -Message "Linux workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $macosDispatcherPath) -Message "macOS workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $sharedShellDispatcherPath) -Message "Shared shell workflow dispatcher should exist."
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Workflow registry docs should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $envelopeDocPath) -Message "Workflow envelope docs should exist."
     Assert-True -Condition (Test-Path -LiteralPath $consolidationPath) -Message "Script consolidation plan should exist."
     Assert-True -Condition (Test-Path -LiteralPath $appendixPath) -Message "Script reference appendix should exist."
     Assert-True -Condition (Test-Path -LiteralPath $autonomousQueuePath) -Message "Autonomous maintainer queue docs should exist."
 
     $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    $envelopeContract = Get-Content -LiteralPath $envelopeContractPath -Raw | ConvertFrom-Json
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $envelopeDoc = Get-Content -LiteralPath $envelopeDocPath -Raw
     $consolidation = Get-Content -LiteralPath $consolidationPath -Raw
     $appendix = Get-Content -LiteralPath $appendixPath -Raw
     $autonomousQueue = Get-Content -LiteralPath $autonomousQueuePath -Raw
@@ -2588,6 +2795,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         "test-local-agent-models",
         "recommend-agent-config",
         "apply-agent-config",
+        "classify-project",
         "install-pack-assets",
         "generate-runtime-context",
         "run-runtime-validation",
@@ -2600,6 +2808,12 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     )
 
     Assert-Equal -Actual $registry.schemaVersion -Expected 1 -Message "Workflow registry schema version changed."
+    Assert-Equal -Actual $envelopeContract.schemaVersion -Expected 1 -Message "Workflow envelope schema version changed."
+    foreach ($eventType in @("accepted", "progress", "warning", "result", "error")) {
+        Assert-True -Condition ($eventType -in @($envelopeContract.response.eventTypes)) -Message "Workflow envelope should define event type $eventType."
+    }
+    Assert-True -Condition (-not [bool]$envelopeContract.privacy.argumentValuesReturnedByDefault) -Message "Workflow envelope should omit argument values by default."
+    Assert-True -Condition (-not [bool]$envelopeContract.privacy.childOutputReturnedByDefault) -Message "Workflow envelope should omit child output by default."
     Assert-True -Condition ($registry.workflows.Count -ge 10) -Message "Workflow registry should include core workflows."
 
     $ids = @{}
@@ -2643,6 +2857,9 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($doc -match "scripts/invoke-workflow\.\*\.sh") -Message "Workflow registry docs should reference cross-platform dispatchers."
     Assert-True -Condition ($doc -match "-List") -Message "Workflow registry docs should document dispatcher list mode."
     Assert-True -Condition ($doc -match "-DryRun") -Message "Workflow registry docs should document dispatcher dry-run mode."
+    Assert-True -Condition ($doc -match "Versioned Automation Envelope") -Message "Workflow registry docs should explain envelope mode."
+    Assert-True -Condition ($envelopeDoc -match "Privacy Boundary") -Message "Workflow envelope docs should explain privacy handling."
+    Assert-True -Condition ($envelopeDoc -match "-RequestJson" -and $envelopeDoc -match "--request-json") -Message "Workflow envelope docs should include Windows and native shell examples."
     Assert-True -Condition ($doc -match "docs/autonomous-maintainer-queue.md") -Message "Workflow registry docs should link autonomous maintainer queue."
     Assert-True -Condition ($appendix -match "Workflow Reference") -Message "Script appendix should include workflow reference table."
     Assert-True -Condition ($appendix -match "docs/agent-pack-menu.md") -Message "Script appendix should point beginners to the guided menu."
@@ -2674,8 +2891,10 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($roadmap -match "Script consolidation planning is documented") -Message "Roadmap should track script consolidation planning."
     Assert-True -Condition ($todo -match "workflow registry") -Message "TODO should track workflow registry work."
     Assert-True -Condition ($todo -match "\[x\] Add cross-platform workflow dispatcher wrappers") -Message "TODO should mark cross-platform dispatchers complete."
+    Assert-True -Condition ($todo -match "\[x\] Define a versioned workflow request") -Message "TODO should mark the workflow envelope contract complete."
     Assert-True -Condition ($todo -match "\[x\] Add a script consolidation plan") -Message "TODO should mark script consolidation planning complete."
-    Assert-True -Condition ($todo -match "\[ \] Execute script-family consolidation") -Message "TODO should keep script consolidation implementation pending."
+    Assert-True -Condition ($todo -match "\[x\] Consolidate the onboarding/navigation script family") -Message "TODO should mark the first script-family consolidation complete."
+    Assert-True -Condition ($todo -match "\[ \] Replace the no-PowerShell informational fallback") -Message "TODO should keep native onboarding rendering pending."
 
     $listResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-List", "-Json")
     Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Workflow dispatcher list mode should succeed."
@@ -2686,6 +2905,33 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($dryRunResult.Output -match "scripts/validate-pack\.ps1") -Message "Workflow dispatcher dry run should resolve validate-pack script."
     Assert-True -Condition ($dryRunResult.Output -match "read-only") -Message "Workflow dispatcher dry run should include safety level."
     Assert-True -Condition ($dryRunResult.Output -match "ExpectedVersion") -Message "Workflow dispatcher dry run should preserve passthrough arguments."
+
+    $requestJson = @{ schemaVersion = 1; requestId = "pack-test"; workflowId = "validate-pack"; platform = "windows"; dryRun = $true; arguments = @("-ExpectedVersion", "0.2.0") } | ConvertTo-Json -Compress
+    $envelopeResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-RequestJson", $requestJson)
+    Assert-Equal -Actual $envelopeResult.ExitCode -Expected 0 -Message "PowerShell workflow request envelope should succeed."
+    $envelope = $envelopeResult.Output | ConvertFrom-Json
+    Assert-Equal -Actual $envelope.SchemaVersion -Expected 1 -Message "PowerShell workflow response should use schema v1."
+    Assert-Equal -Actual $envelope.Status -Expected "planned" -Message "PowerShell dry-run envelope should be planned."
+    Assert-Equal -Actual $envelope.Workflow.ArgumentCount -Expected 2 -Message "PowerShell envelope should report argument count."
+    Assert-True -Condition (-not $envelope.Result.Invoked) -Message "PowerShell dry-run envelope should not invoke the workflow."
+    Assert-True -Condition ($envelopeResult.Output -notmatch "ExpectedVersion") -Message "PowerShell envelope should not echo argument values by default."
+    Assert-True -Condition ("warning" -in @($envelope.Events.Type)) -Message "PowerShell dry-run envelope should include a warning event."
+
+    $badRequestJson = '{"schemaVersion":1,"requestId":"pack-error","workflowId":"missing-workflow","platform":"windows","dryRun":true,"arguments":[]}'
+    $errorEnvelopeResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-RequestJson", $badRequestJson)
+    Assert-True -Condition ($errorEnvelopeResult.ExitCode -ne 0) -Message "PowerShell workflow envelope should preserve failure exit codes."
+    Assert-True -Condition ($errorEnvelopeResult.Output -match '"type":\s*"error"') -Message "PowerShell workflow failure should return an error event."
+    Assert-True -Condition ($errorEnvelopeResult.Output -match '"requestId":\s*"pack-error"') -Message "PowerShell workflow failure should preserve the request id."
+    Assert-True -Condition ($envelopeResult.Output -cmatch '"schemaVersion"' -and $envelopeResult.Output -cnotmatch '"SchemaVersion"') -Message "PowerShell envelope keys should match the lower-camel-case cross-platform wire format."
+
+    $executionRequestJson = @{ schemaVersion = 1; requestId = "pack-execution"; workflowId = "validate-pack"; platform = "windows"; dryRun = $false; arguments = @("-ExpectedVersion", "0.2.0") } | ConvertTo-Json -Compress
+    $executionEnvelopeResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-RequestJson", $executionRequestJson)
+    Assert-Equal -Actual $executionEnvelopeResult.ExitCode -Expected 0 -Message "PowerShell workflow envelope should preserve named arguments during execution."
+    $executionEnvelope = $executionEnvelopeResult.Output | ConvertFrom-Json
+    Assert-Equal -Actual $executionEnvelope.status -Expected "succeeded" -Message "PowerShell execution envelope should report success."
+    Assert-True -Condition ([bool]$executionEnvelope.result.invoked) -Message "PowerShell execution envelope should report invocation."
+    Assert-True -Condition ($executionEnvelope.result.outputLineCount -gt 0) -Message "PowerShell execution envelope should report captured output count."
+    Assert-True -Condition ("output" -notin @($executionEnvelope.result.PSObject.Properties.Name)) -Message "PowerShell execution envelope should omit child output by default."
 
     $sharedShell = Get-Content -LiteralPath $sharedShellDispatcherPath -Raw
     $linuxDispatcher = Get-Content -LiteralPath $linuxDispatcherPath -Raw
@@ -2708,6 +2954,15 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         Assert-True -Condition ($linuxDryRunText -match "scripts/validate-pack\.linux\.sh") -Message "Linux workflow dispatcher should resolve Linux validate-pack script."
         Assert-True -Condition ($linuxDryRunText -match "read-only") -Message "Linux workflow dispatcher dry run should include safety level."
         Assert-True -Condition ($linuxDryRunText -match "expected-version") -Message "Linux workflow dispatcher dry run should preserve passthrough arguments."
+
+        $linuxRequest = '{"schemaVersion":1,"requestId":"pack-bash","workflowId":"validate-pack","platform":"linux","dryRun":true,"arguments":["--expected-version","0.2.0"]}'
+        $linuxEnvelopeResult = & bash $linuxDispatcherPath --request-json $linuxRequest 2>&1
+        $linuxEnvelopeText = $linuxEnvelopeResult | Out-String
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux workflow request envelope should succeed."
+        $linuxEnvelope = $linuxEnvelopeText | ConvertFrom-Json
+        Assert-Equal -Actual $linuxEnvelope.schemaVersion -Expected 1 -Message "Linux workflow response should use schema v1."
+        Assert-Equal -Actual $linuxEnvelope.status -Expected "planned" -Message "Linux dry-run envelope should be planned."
+        Assert-True -Condition ($linuxEnvelopeText -notmatch "expected-version") -Message "Linux envelope should not echo argument values by default."
 
         $macosDryRunResult = & bash $macosDispatcherPath --workflow-id validate-pack --dry-run --json 2>&1
         $macosDryRunText = $macosDryRunResult | Out-String
@@ -2833,6 +3088,38 @@ Invoke-PackTest "workflow chooser summarizes registry commands" {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+Invoke-PackTest "onboarding generators share common engines" {
+    $modulePath = Join-Path $repoRoot "scripts/OnboardingGuidance.psm1"
+    $dispatcherPath = Join-Path $repoRoot "scripts/onboarding-guidance.shared.sh"
+    $module = Get-Content -LiteralPath $modulePath -Raw
+    $dispatcher = Get-Content -LiteralPath $dispatcherPath -Raw
+
+    foreach ($scriptName in @("get-beginner-setup-plan.ps1", "show-agent-pack-menu.ps1", "show-workflow-chooser.ps1")) {
+        $content = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/$scriptName") -Raw
+        Assert-True -Condition ($content -match "OnboardingGuidance\.psm1") -Message "$scriptName should import the shared onboarding module."
+        Assert-True -Condition ($content -match "Write-OnboardingReport") -Message "$scriptName should use shared report output."
+        Assert-True -Condition ($content -notmatch "function Get-ScriptCommand") -Message "$scriptName should not redefine platform command rendering."
+    }
+
+    $nativeViews = @{
+        "get-beginner-setup-plan.shared.sh" = "beginner-plan"
+        "show-agent-pack-menu.shared.sh" = "agent-menu"
+        "show-workflow-chooser.shared.sh" = "workflow-chooser"
+    }
+    foreach ($entry in $nativeViews.GetEnumerator()) {
+        $content = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/$($entry.Key)") -Raw
+        Assert-True -Condition ($content -match "onboarding-guidance\.shared\.sh") -Message "$($entry.Key) should delegate to the shared native dispatcher."
+        Assert-True -Condition ($content -match [regex]::Escape($entry.Value)) -Message "$($entry.Key) should select $($entry.Value)."
+        Assert-True -Condition ($content -notmatch "while \[") -Message "$($entry.Key) should remain a thin wrapper."
+    }
+
+    foreach ($functionName in @("Import-OnboardingJson", "Get-OnboardingWorkflow", "Get-OnboardingScriptCommand", "Write-OnboardingReport")) {
+        Assert-True -Condition ($module -match [regex]::Escape($functionName)) -Message "Shared onboarding module should expose $functionName."
+    }
+    foreach ($view in @("beginner-plan", "agent-menu", "workflow-chooser")) {
+        Assert-True -Condition ($dispatcher -match [regex]::Escape($view)) -Message "Native onboarding dispatcher should recognize $view."
+    }
+}
 Invoke-PackTest "agent surface solutions define install configure and test" {
     $solutionsPath = Join-Path $repoRoot "config/agent-surface-solutions.json"
     $matrixPath = Join-Path $repoRoot "config/agent-surface-capabilities.json"
@@ -2896,8 +3183,8 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
             Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "$($surface.id) config bundle evidence should exist: $evidence"
         }
 
-        if ($surface.id -eq "continue") {
-            Assert-Equal -Actual $surface.configBundle.status -Expected "supported" -Message "Continue config bundle should remain supported."
+        if ($surface.id -in @("continue", "aider")) {
+            Assert-Equal -Actual $surface.configBundle.status -Expected "supported" -Message "$($surface.id) config bundle should be supported after evidence gates pass."
         } else {
             Assert-True -Condition ($surface.configBundle.status -ne "supported") -Message "$($surface.id) config bundle should not be supported before evidence gates pass."
         }
@@ -2940,7 +3227,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($doc -match "Test") -Message "Solution docs should mention test."
     Assert-True -Condition ($doc -match "surface-specific-config-bundles\.md") -Message "Solution docs should link config bundle policy."
     Assert-True -Condition ($doc -match "agent-surface-promotion-gates\.md") -Message "Solution docs should link promotion gates."
-    Assert-True -Condition ($bundleDoc -match "Continue remains the only supported generated config bundle today") -Message "Config bundle docs should preserve current decision."
+    Assert-True -Condition ($bundleDoc -match "Continue and Aider") -Message "Config bundle docs should identify the supported generated config surfaces."
     Assert-True -Condition ($bundleDoc -match "Scoped write validation") -Message "Config bundle docs should require write validation before promotion."
     Assert-True -Condition ($promotionGates -match "Install supported") -Message "Promotion gates should define install promotion."
     Assert-True -Condition ($promotionGates -match "Configure supported") -Message "Promotion gates should define configure promotion."
@@ -2950,6 +3237,59 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($readme -match "docs/surface-specific-config-bundles.md") -Message "README should link config bundle policy."
     Assert-True -Condition ($todo -match "surface-neutral install/configure/test solution catalog") -Message "TODO should track solution catalog completion."
     Assert-True -Condition ($todo -match "\[x\] Decide whether install scripts should generate surface-specific config bundles") -Message "TODO should mark config bundle decision complete."
+}
+Invoke-PackTest "Aider adapter plans installs configures and reports health safely" {
+    $adapterPath = Join-Path $repoRoot "scripts/setup-agent-surface.ps1"
+    $sharedPath = Join-Path $repoRoot "scripts/setup-agent-surface.shared.sh"
+    $registryPath = Join-Path $repoRoot "config/workflows.json"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "aider-adapter-test-$([guid]::NewGuid())"
+    $recommendationPath = Join-Path $tempRoot "recommendation.json"
+
+    try {
+        New-Item -ItemType Directory -Force -Path (Join-Path $tempRoot ".git/info") | Out-Null
+        "" | Set-Content -LiteralPath (Join-Path $tempRoot ".git/info/exclude")
+        @"
+{
+  "Recommendation": {
+    "WriteSafeModel": "qwen3.5:9b",
+    "PlanOnlyModel": "devstral-small-2:24b",
+    "DeepReviewModel": "qwen3-coder:30b"
+  }
+}
+"@ | Set-Content -LiteralPath $recommendationPath
+
+        $plan = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Plan")
+        Assert-Equal -Actual $plan.ExitCode -Expected 0 -Message "Aider adapter plan should succeed."
+        Assert-True -Condition ($plan.Output -match "aider-install" -and $plan.Output -match "local-only") -Message "Aider plan should describe install and config safety."
+
+        $install = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Install", "-InstallMethod", "pipx", "-DryRun")
+        Assert-Equal -Actual $install.ExitCode -Expected 0 -Message "Aider install dry run should succeed."
+        Assert-True -Condition ($install.Output -match "pipx install aider-chat" -and $install.Output -match "no network install") -Message "Aider install dry run should be explicit and non-networking."
+
+        $configure = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Configure", "-TargetRepo", $tempRoot, "-RecommendationPath", $recommendationPath, "-Lane", "PlanOnly", "-OllamaBaseUrl", "http://example.invalid:11434")
+        Assert-Equal -Actual $configure.ExitCode -Expected 0 -Message "Aider config generation should succeed."
+        $configPath = Join-Path $tempRoot ".aider.conf.local.yml"
+        $config = Get-Content -LiteralPath $configPath -Raw
+        Assert-True -Condition ($config -match "model: ollama_chat/devstral-small-2:24b") -Message "Aider config should use the requested recommendation lane."
+        Assert-True -Condition ($config -match "OLLAMA_API_BASE=http://example\.invalid:11434") -Message "Aider config should contain the explicit local endpoint."
+        Assert-True -Condition ($config -match "auto-commits: false" -and $config -match "dirty-commits: false") -Message "Aider config should disable automatic commits."
+        Assert-True -Condition (@(Get-Content -LiteralPath (Join-Path $tempRoot ".git/info/exclude")) -contains ".aider.conf.local.yml") -Message "Generated Aider config should be locally excluded from Git."
+
+        $health = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Health", "-TargetRepo", $tempRoot, "-AiderCommand", (Get-Process -Id $PID).Path)
+        Assert-Equal -Actual $health.ExitCode -Expected 0 -Message "Aider health should pass with an available command and valid local config."
+        Assert-True -Condition ($health.Output -match '"Status":\s*"healthy"') -Message "Aider health should emit a healthy structured result."
+
+        $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+        $workflow = @($registry.workflows | Where-Object id -eq "setup-agent-surface")[0]
+        Assert-True -Condition ($null -ne $workflow -and $workflow.uiReady) -Message "Aider adapter should be exposed through the UI-ready workflow registry."
+        Assert-Equal -Actual $workflow.entryPoints.windows -Expected "scripts/setup-agent-surface.ps1" -Message "Workflow should use the unified Windows adapter."
+
+        $shared = Get-Content -LiteralPath $sharedPath -Raw
+        Assert-True -Condition ($shared -notmatch "pwsh") -Message "Native Aider adapter should not require PowerShell."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
@@ -2981,8 +3321,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "comparable install/configure/test support is not complete") -Message "Solution architecture review should keep Milestone 14 parity gap visible."
     Assert-True -Condition ($doc -match "Complete for Cline and Aider, partial for all tracked surfaces") -Message "Solution architecture review should classify Milestone 17 accurately."
     Assert-True -Condition ($doc -match "OpenHands do not yet have full live validation evidence") -Message "Solution architecture review should keep full surface validation gap visible."
-    Assert-True -Condition ($doc -match "Complete for Continue, partial for cross-agent parity") -Message "Solution architecture review should classify Milestone 19 accurately."
-    Assert-True -Condition ($doc -match "actual install/configure/test script parity is missing") -Message "Solution architecture review should keep non-Continue install/configure gaps visible."
+    Assert-True -Condition ($doc -match "Complete for Continue and Aider, partial for cross-agent parity") -Message "Solution architecture review should classify Milestone 19 accurately."
+    Assert-True -Condition ($doc -match "install/configure/test script parity is still missing") -Message "Solution architecture review should keep remaining surface install/configure gaps visible."
     Assert-True -Condition ($doc -match "EMPTY_MODEL_OUTPUT") -Message "Solution architecture review should track language validation failure signals."
     Assert-True -Condition ($uiDoc -match "Evidence States") -Message "Unified UI design should define evidence states."
     foreach ($state in @("tested-passed", "tested-partial", "failed", "recommended-only", "blocked")) {
@@ -3088,7 +3428,7 @@ Invoke-PackTest "release readiness gate checks core release invariants" {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-Invoke-PackTest "model scorecard summarizes evidence by model" {
+Invoke-PackTest "model scorecard summarizes capability evidence without cross-surface inheritance" {
     $scriptPath = Join-Path $repoRoot "scripts/generate-model-scorecard.ps1"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $docPath = Join-Path $repoRoot "docs/model-scorecard.md"
@@ -3108,11 +3448,12 @@ Invoke-PackTest "model scorecard summarizes evidence by model" {
         $markdown = Get-Content -LiteralPath $markdownPath -Raw
         $doc = Get-Content -LiteralPath $docPath -Raw
 
-        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Model scorecard schema version should be stable."
+        Assert-Equal -Actual $report.SchemaVersion -Expected 2 -Message "Model scorecard should emit capability contract v2."
         Assert-True -Condition ($report.ModelCount -ge 3) -Message "Model scorecard should include validated models."
-        Assert-True -Condition (@($report.Models | Where-Object { $_.Model -eq "qwen3.5:9b" -and $_.BestStatus -eq "approved-write-ready" }).Count -eq 1) -Message "Scorecard should preserve qwen3.5 approved-write evidence."
-        Assert-True -Condition (@($report.Models | Where-Object { $_.Model -eq "qwen3-coder:30b" }).Count -eq 1) -Message "Scorecard should include qwen3-coder evidence."
-        Assert-True -Condition (@($report.Models | Where-Object { $_.Model -eq "N/A" -or $_.Model -eq "local Ollama config" }).Count -eq 0) -Message "Scorecard should exclude non-model placeholders."
+        Assert-True -Condition ($report.CapabilityCount -gt $report.ModelCount) -Message "Scorecard should retain distinct surface and operation capabilities."
+        Assert-True -Condition (@($report.Capabilities | Where-Object { $_.Model -eq "qwen3.5:9b" -and $_.Surface -eq "Continue Agent" -and $_.Operation -eq "scoped-write" -and $_.Status -eq "approved-write-ready" }).Count -eq 1) -Message "Scorecard should preserve exact qwen3.5 Continue Agent write evidence."
+        Assert-True -Condition (@($report.Capabilities | Where-Object { $_.Model -eq "qwen3-coder:30b" }).Count -gt 1) -Message "Scorecard should retain qwen3-coder evidence per capability key."
+        Assert-True -Condition (@($report.Capabilities | Where-Object { $_.Model -eq "N/A" -or $_.Model -eq "local-config" }).Count -eq 0) -Message "Scorecard should exclude non-model placeholders."
         Assert-True -Condition ($markdown -match "Model Scorecard") -Message "Markdown scorecard should include title."
         Assert-True -Condition ($doc -match "evidence-catalog\.tsv") -Message "Model scorecard doc should reference evidence catalog."
 
@@ -3144,12 +3485,14 @@ Invoke-PackTest "evidence dashboard summarizes catalog and surface status" {
         $markdown = Get-Content -LiteralPath $markdownPath -Raw
         $doc = Get-Content -LiteralPath $docPath -Raw
 
-        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Evidence dashboard schema version should be stable."
+        Assert-Equal -Actual $report.SchemaVersion -Expected 2 -Message "Evidence dashboard should emit capability contract v2."
         Assert-True -Condition ($report.EvidenceCount -ge 20) -Message "Evidence dashboard should include catalog rows."
         Assert-True -Condition ($report.SurfaceCount -ge 7) -Message "Evidence dashboard should include known surfaces."
         Assert-True -Condition ($report.ModelCount -ge 3) -Message "Evidence dashboard should include validated models."
         Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "approved-write-ready" }).Count -eq 1) -Message "Evidence dashboard should include approved-write-ready counts."
         Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "validated-by-tests" }).Count -eq 1) -Message "Evidence dashboard should include validated-by-tests counts."
+        Assert-True -Condition (@($report.OperationCounts | Where-Object { $_.Operation -eq "scoped-write" }).Count -eq 1) -Message "Evidence dashboard should summarize operation-specific evidence."
+        Assert-True -Condition (@($report.ValidationModeCounts | Where-Object { $_.ValidationMode -eq "editor-agent" }).Count -eq 1) -Message "Evidence dashboard should summarize validation modes."
         Assert-True -Condition (@($report.SurfaceReadiness | Where-Object { $_.Id -eq "continue" -and $_.SupportedActivities -ge 5 }).Count -eq 1) -Message "Evidence dashboard should summarize Continue readiness."
         Assert-Equal -Actual $report.SourceSurfaceSolutions -Expected "config/agent-surface-solutions.json" -Message "Evidence dashboard should identify the surface solution catalog."
         Assert-True -Condition ($report.SurfaceSolutionCount -ge 7) -Message "Evidence dashboard should include surface solution statuses."

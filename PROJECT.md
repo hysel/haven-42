@@ -14,9 +14,22 @@ Continue is the first supported runtime surface, but the project identity is bro
 
 ## Current Stage
 
-The project is in early implementation stage.
+The project is in active implementation. Continue is the supported first
+surface, Aider is the first supported non-Continue install/configure/test
+adapter, Cline has limited evidence-backed validation, and broader surface
+parity remains in progress.
 
-The expected file layout exists and initial Continue configuration, agents, prompts, rules, and templates are implemented. The pack still needs validation in Continue before it should be treated as production-ready.
+Capability Evidence Contract v2 now prevents model readiness from being
+inherited across surfaces, operating systems, or operations. Deterministic
+project classification and project-local language-rule activation are
+implemented. Lane-specific model scoring now keeps WRITE SAFE
+reliability-first while allowing larger validated PLAN ONLY and DEEP REVIEW
+models when hardware permits. Model-backed language promotion, richer
+runtime-measured model metadata, additional script-family consolidation, and
+the optional web UI remain planned work. The onboarding/navigation family now
+shares catalog, command-rendering, output, and native-dispatch plumbing while
+preserving stable public commands. A schema-v1 workflow envelope now gives
+dispatchers and future UI callers a stable, privacy-conscious JSON boundary.
 
 ## Target Users
 

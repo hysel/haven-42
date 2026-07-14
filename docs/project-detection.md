@@ -56,7 +56,7 @@ Every project-aware workflow should be able to state:
 
 ## Optional Language Rule Packs
 
-Use `docs/language-rule-packs.md` to decide when optional language guidance can be applied.
+Use `docs/project-profile-classification.md` to generate a machine-readable profile and `docs/language-rule-packs.md` to understand how optional language guidance is activated.
 
 Current optional packs:
 
@@ -68,7 +68,7 @@ Current optional packs:
 - `.continue/rule-packs/sql.md`
 - `.continue/rule-packs/infrastructure-as-code.md`
 
-These packs are supplemental. They are not part of the default `.continue/config.yaml` rule list, and they should not be treated as globally active rules. Use them only after classification finds matching ecosystem evidence.
+These packs are supplemental. Their source files are not part of the default `.continue/config.yaml` rule list and must not be treated as globally active. Project-local installation copies only selected packs into `.continue/rules/active-language-<id>.md` after classification finds matching ecosystem evidence.
 ## Prompt Integration
 
 Prompts that review, plan, or recommend changes should start with a short project classification pass before making stack-specific recommendations.

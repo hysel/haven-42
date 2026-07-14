@@ -8,7 +8,7 @@ The goal is not to hide behavior. The goal is to move repeated behavior into sha
 
 ## Principles
 
-- Treat `config/workflows.json`, `scripts/invoke-workflow.ps1`, and the cross-platform `scripts/invoke-workflow.*.sh` wrappers as the stable workflow API for menus, reports, and the future UI.
+- Treat `config/workflows.json`, `config/workflow-envelope-contract.json`, `scripts/invoke-workflow.ps1`, and the cross-platform `scripts/invoke-workflow.*.sh` wrappers as the stable workflow API for menus, reports, and the future UI.
 - Keep repeated business logic in shared engines instead of duplicating it across surface-specific scripts.
 - Keep thin wrapper scripts when they improve beginner usability, cross-platform ergonomics, or agent-specific command naming.
 - Keep individual script docs in `docs/script-reference-appendix.md` for maintainers, troubleshooting, and automation authors.
@@ -19,7 +19,7 @@ The goal is not to hide behavior. The goal is to move repeated behavior into sha
 
 | Script family | Current direction | Boundary |
 | --- | --- | --- |
-| Workflow discovery and navigation | Consolidated around `config/workflows.json`, `scripts/show-agent-pack-menu.ps1`, `scripts/show-workflow-chooser.ps1`, `scripts/get-beginner-setup-plan.ps1`, `scripts/invoke-workflow.ps1`, and `scripts/invoke-workflow.*.sh`. | Keep registry IDs stable and expose new user flows through the registry first. |
+| Workflow discovery and navigation | Consolidated around `config/workflows.json`, `scripts/OnboardingGuidance.psm1`, `scripts/onboarding-guidance.shared.sh`, the three stable public onboarding commands, and the workflow dispatcher. | Shared mechanics live behind the public commands. Keep registry IDs stable and expose new user flows through the registry first. |
 | Validation and release gates | Keep explicit entry points such as `scripts/validate-pack.ps1`, `scripts/test-pack.ps1`, and `scripts/test-release-readiness.ps1`. | These are safety gates and should remain easy to run directly and through the dispatcher. |
 | Runtime validation | Keep `scripts/generate-runtime-context.ps1`, `scripts/run-runtime-validation.ps1`, and `scripts/verify-runtime-output.ps1` as separate workflow steps. | Consolidate only report parsing or shared evidence ingestion, not the user-visible validation stages. |
 | Model profiling and recommendation | Keep shared recommendation data and config generation as the engine behind local model choices. | Future agent surfaces should reuse the recommendation model instead of adding independent model-selection logic. |
@@ -35,6 +35,24 @@ The goal is not to hide behavior. The goal is to move repeated behavior into sha
 4. Keep wrapper scripts thin and deterministic.
 5. Deprecate a script in docs before removing it from the repository.
 6. Remove a script only at a release boundary with validation, tests, appendix updates, and changelog coverage.
+
+## Implemented Consolidations
+
+### Onboarding And Navigation
+
+The beginner setup plan, agent pack menu, and workflow chooser retain their
+documented entry points. Their PowerShell implementations now share:
+
+- catalog loading and validation;
+- workflow lookup;
+- platform-specific command rendering;
+- JSON and Markdown output handling; and
+- output-directory creation.
+
+Their Linux/macOS `.shared.sh` entry points now delegate argument parsing and
+view selection to one native dispatcher. Full report rendering still requires
+PowerShell; replacing that fallback with a native implementation remains
+tracked work and is not represented as complete cross-platform parity.
 
 ## Do Not Consolidate Yet
 

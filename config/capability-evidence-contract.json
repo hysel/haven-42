@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 2,
+  "format": "tsv",
+  "catalog": "config/evidence-catalog.tsv",
+  "keyFields": ["surface", "surface_version", "provider", "model", "os", "operation", "validation_mode"],
+  "columns": ["schema_version", "area", "subject", "surface", "surface_version", "provider", "os", "model", "operation", "validation_mode", "status", "evidence", "notes"],
+  "unknownValue": "not-recorded",
+  "notApplicableValue": "N/A",
+  "aggregation": {
+    "strategy": "most-conservative-status",
+    "retainAllEvidencePaths": true,
+    "allowCrossSurfaceInheritance": false,
+    "allowCrossOperationInheritance": false,
+    "allowCrossOsInheritance": false,
+    "allowUnknownVersionToMatchKnownVersion": false
+  },
+  "statuses": ["candidate-only", "plan-review-candidate", "plan-validated", "review-validated", "read-only-tool-validated", "read-only-cli-validated", "write-smoke-validated", "approved-write-ready", "static-validated", "validated-by-tests", "partial-pass"]
+}

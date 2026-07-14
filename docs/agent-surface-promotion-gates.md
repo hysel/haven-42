@@ -38,6 +38,8 @@ Roo Code, Kilo Code, and OpenCode remain future live-validation targets because 
 
 ## Promotion Rules
 
+Aider has passed the install-supported and configure-supported gates through `scripts/setup-agent-surface.*`. That promotion does not satisfy the separate real-project approved-write gate.
+
 - Do not promote `install.status` or `configure.status` to `supported` without install/config evidence for that surface.
 - Do not promote `test.status` to `validated` without a repeatable harness or documented manual validation path.
 - Do not promote real-project approved-write support from generated-sample evidence alone.

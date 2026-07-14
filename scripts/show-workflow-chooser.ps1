@@ -9,9 +9,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+Import-Module (Join-Path $PSScriptRoot "OnboardingGuidance.psm1") -Force
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $registryPath = Join-Path $repoRoot "config/workflows.json"
-$registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+$registry = Import-OnboardingJson -Path $registryPath
 
 $referenceByCategory = @{
     "agent-surface-validation" = "docs/agent-cli-surface-model-testing.md"
@@ -41,25 +43,6 @@ $referenceByWorkflow = @{
     "verify-runtime-output" = "docs/runtime-output-verification.md"
 }
 
-function Get-ScriptCommand {
-    param([object]$Workflow)
-
-    $entry = $Workflow.entryPoints.$Platform
-    if ([string]::IsNullOrWhiteSpace($entry)) {
-        throw "Workflow $($Workflow.id) does not support $Platform."
-    }
-
-    if ($Platform -eq "windows") {
-        $path = ".\" + ($entry -replace "/", "\")
-        if ($entry -match "\.ps1$") {
-            return "pwsh -NoProfile -ExecutionPolicy Bypass -File $path"
-        }
-        return $path
-    }
-
-    return "./$entry"
-}
-
 function Get-ReferencePath {
     param([object]$Workflow)
 
@@ -82,7 +65,7 @@ $items = @($registry.workflows | Sort-Object category, id | ForEach-Object {
         SafetyLevel = $_.safetyLevel
         UiReady = [bool]$_.uiReady
         Purpose = $_.purpose
-        Command = Get-ScriptCommand -Workflow $_
+        Command = Get-OnboardingScriptCommand -Workflow $_ -Platform $Platform
         Reference = Get-ReferencePath -Workflow $_
         Appendix = "docs/script-reference-appendix.md"
     }
@@ -126,26 +109,6 @@ function ConvertTo-Markdown {
     return ($lines -join "`n") + "`n"
 }
 
-if ($OutputPath) {
-    $parent = Split-Path -Parent $OutputPath
-    if ($parent) {
-        New-Item -ItemType Directory -Force -Path $parent | Out-Null
-    }
-    $report | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $OutputPath -Encoding utf8
-}
-
-if ($MarkdownOutputPath) {
-    $parent = Split-Path -Parent $MarkdownOutputPath
-    if ($parent) {
-        New-Item -ItemType Directory -Force -Path $parent | Out-Null
-    }
-    ConvertTo-Markdown -Report $report | Set-Content -LiteralPath $MarkdownOutputPath -Encoding utf8
-}
-
-if ($AsJson -or $OutputPath) {
-    $report | ConvertTo-Json -Depth 20
-} else {
-    ConvertTo-Markdown -Report $report
-}
+Write-OnboardingReport -Report $report -MarkdownRenderer ${function:ConvertTo-Markdown} -OutputPath $OutputPath -MarkdownOutputPath $MarkdownOutputPath -AsJson:$AsJson
 
 exit 0

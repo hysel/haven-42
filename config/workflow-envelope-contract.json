@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "description": "Versioned request and execution envelope for workflow dispatchers and future UI callers.",
+  "request": {
+    "required": ["schemaVersion", "workflowId"],
+    "properties": {
+      "schemaVersion": "integer; must equal 1",
+      "requestId": "optional caller-generated identifier without machine-specific data",
+      "workflowId": "stable id from config/workflows.json",
+      "platform": "windows, linux, or macos",
+      "dryRun": "boolean",
+      "arguments": "array of workflow-specific string arguments",
+      "includeOutput": "boolean; opt-in because child output may contain local data"
+    }
+  },
+  "response": {
+    "kind": "workflow-execution",
+    "statuses": ["planned", "succeeded", "failed"],
+    "eventTypes": ["accepted", "progress", "warning", "result", "error"],
+    "required": ["schemaVersion", "kind", "status", "workflow", "events", "result"]
+  },
+  "privacy": {
+    "argumentValuesReturnedByDefault": false,
+    "childOutputReturnedByDefault": false,
+    "persistRawOutputByDefault": false,
+    "notes": "Request arguments and optional child output may contain local paths, endpoints, or other private values. Callers must keep them local and sanitize evidence before committing it."
+  }
+}

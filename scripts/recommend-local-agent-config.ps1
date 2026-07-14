@@ -2,8 +2,16 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$ModelProfilePath,
     [string]$ModelCatalogPath,
+    [string]$ModelFitCatalogPath,
     [string]$EvidenceCatalogPath,
     [string]$OutputPath,
+    [string]$Surface = "Continue Agent",
+    [string]$SurfaceVersion = "not-recorded",
+    [string]$Provider = "Ollama",
+    [ValidateRange(1024, 1048576)]
+    [int]$ContextTargetTokens = 16384,
+    [ValidateRange(0, 1024)]
+    [Nullable[double]]$MemoryReserveGb,
     [ValidateSet("TotalDedicated", "MaxDedicated")]
     [string]$VramSelectionMode = "MaxDedicated"
 )
@@ -18,6 +26,10 @@ if (-not $ModelCatalogPath) {
 
 if (-not $EvidenceCatalogPath) {
     $EvidenceCatalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
+}
+
+if (-not $ModelFitCatalogPath) {
+    $ModelFitCatalogPath = Join-Path $repoRoot "config/model-fit-profiles.json"
 }
 
 if (-not $OutputPath) {
@@ -59,11 +71,80 @@ function Get-RecommendedMinVramGb {
     return 512
 }
 
+function Read-ModelFitCatalog {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        throw "ModelFitCatalogPath does not exist: $Path"
+    }
+
+    $catalog = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+    if ($catalog.schemaVersion -ne 1 -or $null -eq $catalog.defaults -or $null -eq $catalog.profiles) {
+        throw "Model fit catalog must use schemaVersion 1 and define defaults and profiles."
+    }
+    return $catalog
+}
+
+function Get-ModelFitEstimate {
+    param(
+        [string]$Model,
+        [object]$FitCatalog,
+        [int]$TargetContextTokens,
+        [Nullable[double]]$ReserveOverrideGb
+    )
+
+    $profile = @($FitCatalog.profiles | Where-Object { $Model -match $_.matchPattern } | Select-Object -First 1)[0]
+    if ($profile) {
+        $baseline = [math]::Max(1, [double]$profile.baselineContextTokens)
+        $kvCache = [double]$profile.kvCacheGbAtBaseline * ($TargetContextTokens / $baseline)
+        $subtotal = [double]$profile.estimatedWeightsGb + $kvCache + [double]$profile.runtimeOverheadGb
+        $fixedReserve = if ($null -ne $ReserveOverrideGb) { [double]$ReserveOverrideGb } elseif ($null -ne $profile.memoryReserveGb) { [double]$profile.memoryReserveGb } else { [double]$FitCatalog.defaults.memoryReserveGb }
+        $reservePercent = if ($null -ne $profile.memoryReservePercent) { [double]$profile.memoryReservePercent } else { [double]$FitCatalog.defaults.memoryReservePercent }
+        $reserve = if ($null -ne $ReserveOverrideGb) { $fixedReserve } else { [math]::Max($fixedReserve, $subtotal * ($reservePercent / 100)) }
+
+        return [pscustomobject]@{
+            Source = "model-fit-catalog"
+            Confidence = "curated-estimate"
+            ProfileId = $profile.id
+            Architecture = $profile.architecture
+            ParameterCountBillion = $profile.parameterCountBillion
+            ActiveParameterCountBillion = $profile.activeParameterCountBillion
+            QuantizationAssumption = $profile.quantizationAssumption
+            ContextTargetTokens = $TargetContextTokens
+            EstimatedWeightsGb = [math]::Round([double]$profile.estimatedWeightsGb, 2)
+            EstimatedKvCacheGb = [math]::Round($kvCache, 2)
+            RuntimeOverheadGb = [math]::Round([double]$profile.runtimeOverheadGb, 2)
+            MemoryReserveGb = [math]::Round($reserve, 2)
+            EstimatedRequiredVramGb = [math]::Round($subtotal + $reserve, 2)
+        }
+    }
+
+    $heuristic = Get-RecommendedMinVramGb -Model $Model
+    $reserve = if ($null -ne $ReserveOverrideGb -and $heuristic -gt 0 -and $heuristic -lt 999999) { [double]$ReserveOverrideGb } else { 0 }
+    return [pscustomobject]@{
+        Source = "model-name-heuristic"
+        Confidence = "low"
+        ProfileId = $null
+        Architecture = "unknown"
+        ParameterCountBillion = Get-ModelSizeBillion -Model $Model
+        ActiveParameterCountBillion = $null
+        QuantizationAssumption = "unknown"
+        ContextTargetTokens = $TargetContextTokens
+        EstimatedWeightsGb = $null
+        EstimatedKvCacheGb = $null
+        RuntimeOverheadGb = $null
+        MemoryReserveGb = if ($reserve -gt 0) { $reserve } else { $null }
+        EstimatedRequiredVramGb = if ($heuristic -gt 0 -and $heuristic -lt 999999) { [math]::Round($heuristic + $reserve, 2) } else { $null }
+    }
+}
+
 function Get-WorkflowRank {
     param([string]$Status)
 
     switch ($Status) {
         "approved-write-ready" { return 0 }
+        "review-validated" { return 0 }
+        "plan-validated" { return 0 }
         "read-only-tool-validated" { return 1 }
         "plan-review-candidate" { return 2 }
         default { return 3 }
@@ -131,26 +212,71 @@ function Read-ModelCatalog {
 function Read-EvidenceCatalog {
     param([string]$Path)
 
-    $evidence = @{}
-    if (-not (Test-Path -LiteralPath $Path)) { return $evidence }
+    if (-not (Test-Path -LiteralPath $Path)) { return @() }
+    return @(Import-Csv -LiteralPath $Path -Delimiter "`t")
+}
 
-    $lines = Get-Content -LiteralPath $Path | Select-Object -Skip 1
-    foreach ($line in $lines) {
-        if ([string]::IsNullOrWhiteSpace($line)) { continue }
-        $parts = $line -split "`t", 8
-        if ($parts.Count -lt 8 -or $parts[0] -ne "model-tool-use") { continue }
+function Get-EvidenceStatusRank {
+    param([string]$Status)
 
-        $model = $parts[4]
-        if (-not $evidence.ContainsKey($model)) {
-            $evidence[$model] = [pscustomobject]@{
-                Status = $parts[5]
-                Evidence = $parts[6]
-                Notes = $parts[7]
-            }
+    switch ($Status) {
+        "approved-write-ready" { return 100 }
+        "review-validated" { return 95 }
+        "plan-validated" { return 90 }
+        "write-smoke-validated" { return 80 }
+        "read-only-tool-validated" { return 70 }
+        "read-only-cli-validated" { return 60 }
+        "plan-review-candidate" { return 50 }
+        "validated-by-tests" { return 45 }
+        "static-validated" { return 40 }
+        "partial-pass" { return 20 }
+        "candidate-only" { return 10 }
+        default { return 0 }
+    }
+}
+
+function Get-AggregatedEvidence {
+    param(
+        [object[]]$Rows,
+        [string]$Model,
+        [string]$TargetSurface,
+        [string]$TargetSurfaceVersion,
+        [string]$TargetProvider,
+        [string]$OperatingSystem,
+        [string]$Operation,
+        [string]$ValidationMode
+    )
+
+    $matches = @($Rows | Where-Object {
+        $_.schema_version -eq "2" -and
+        $_.area -eq "model-tool-use" -and
+        $_.model -eq $Model -and
+        $_.surface -eq $TargetSurface -and
+        $_.surface_version -eq $TargetSurfaceVersion -and
+        $_.provider -eq $TargetProvider -and
+        $_.os -eq $OperatingSystem -and
+        $_.operation -eq $Operation -and
+        $_.validation_mode -eq $ValidationMode
+    })
+
+    if ($matches.Count -eq 0) { return $null }
+    $mostConservative = $matches | Sort-Object { Get-EvidenceStatusRank -Status $_.status } | Select-Object -First 1
+
+    return [pscustomobject]@{
+        Status = $mostConservative.status
+        RecordCount = $matches.Count
+        Evidence = @($matches | ForEach-Object { $_.evidence } | Sort-Object -Unique)
+        Notes = @($matches | ForEach-Object { $_.notes } | Sort-Object -Unique)
+        Key = [pscustomobject]@{
+            Surface = $TargetSurface
+            SurfaceVersion = $TargetSurfaceVersion
+            Provider = $TargetProvider
+            Model = $Model
+            OS = $OperatingSystem
+            Operation = $Operation
+            ValidationMode = $ValidationMode
         }
     }
-
-    return $evidence
 }
 
 function Get-PlatformEligibility {
@@ -187,7 +313,11 @@ function Add-Candidate {
         [string]$Model,
         [string]$Source,
         [object]$CatalogRow,
-        [hashtable]$Evidence,
+        [object[]]$EvidenceRows,
+        [string]$Surface,
+        [string]$SurfaceVersion,
+        [string]$Provider,
+        [string]$OperatingSystem,
         [Nullable[double]]$AvailableVramGb,
         [string]$Platform
     )
@@ -197,7 +327,8 @@ function Add-Candidate {
     if ($Seen.ContainsKey($modelName)) { return }
     $Seen[$modelName] = $true
 
-    $minVram = Get-RecommendedMinVramGb -Model $modelName
+    $fitEstimate = Get-ModelFitEstimate -Model $modelName -FitCatalog $modelFitCatalog -TargetContextTokens $ContextTargetTokens -ReserveOverrideGb $MemoryReserveGb
+    $minVram = if ($null -ne $fitEstimate.EstimatedRequiredVramGb) { [double]$fitEstimate.EstimatedRequiredVramGb } elseif ($modelName -match '(?i)(cloud|-mlx)') { 999999 } else { 0 }
     $fitsVram = $true
     if ($null -ne $AvailableVramGb -and $minVram -gt 0 -and $minVram -lt 999999) {
         $fitsVram = $minVram -le $AvailableVramGb
@@ -206,22 +337,107 @@ function Add-Candidate {
         $fitsVram = $false
     }
 
-    $evidenceItem = if ($Evidence.ContainsKey($modelName)) { $Evidence[$modelName] } else { $null }
-    $validationStatus = if ($evidenceItem) { $evidenceItem.Status } else { "candidate-only" }
+    $writeEvidence = Get-AggregatedEvidence -Rows $EvidenceRows -Model $modelName -TargetSurface $Surface -TargetSurfaceVersion $SurfaceVersion -TargetProvider $Provider -OperatingSystem $OperatingSystem -Operation "scoped-write" -ValidationMode "editor-agent"
+    $planEvidence = Get-AggregatedEvidence -Rows $EvidenceRows -Model $modelName -TargetSurface $Surface -TargetSurfaceVersion $SurfaceVersion -TargetProvider $Provider -OperatingSystem $OperatingSystem -Operation "plan" -ValidationMode "editor-agent"
+    $reviewEvidence = Get-AggregatedEvidence -Rows $EvidenceRows -Model $modelName -TargetSurface $Surface -TargetSurfaceVersion $SurfaceVersion -TargetProvider $Provider -OperatingSystem $OperatingSystem -Operation "review" -ValidationMode "editor-agent"
+    $validationStatus = if ($writeEvidence) { $writeEvidence.Status } else { "candidate-only" }
     $eligibility = Get-PlatformEligibility -Model $modelName -Platform $Platform
 
     $Candidates.Add([pscustomobject]@{
         Model = $modelName
         Source = $Source
         ValidationStatus = $validationStatus
-        Evidence = if ($evidenceItem) { $evidenceItem.Evidence } else { $null }
+        Evidence = if ($writeEvidence) { $writeEvidence.Evidence } else { @() }
+        OperationEvidence = [pscustomobject]@{
+            ScopedWrite = $writeEvidence
+            Plan = $planEvidence
+            Review = $reviewEvidence
+        }
         RecommendedMinVramGb = if ($minVram -gt 0 -and $minVram -lt 999999) { $minVram } else { $null }
+        ModelFit = $fitEstimate
         FitsAvailableVram = [bool]$fitsVram
+        Installed = $modelName -in @($installedModels)
+        ModelSizeBillion = Get-ModelSizeBillion -Model $modelName
         PlatformEligible = [bool]$eligibility.Eligible
         PlatformReason = $eligibility.Reason
         RecommendedUse = if ($CatalogRow) { $CatalogRow.RecommendedUse } else { "Validate locally before relying on this model." }
         ValidationNote = if ($CatalogRow) { $CatalogRow.ValidationNote } else { "Run read-only and approved-write smoke tests before granting edit/apply roles." }
     })
+}
+
+function Get-LaneScore {
+    param(
+        [object]$Candidate,
+        [ValidateSet("write", "plan", "review")][string]$Purpose,
+        [Nullable[double]]$AvailableVramGb
+    )
+
+    $laneName = switch ($Purpose) {
+        "write" { "WRITE SAFE" }
+        "plan" { "PLAN ONLY" }
+        default { "DEEP REVIEW" }
+    }
+    $evidence = switch ($Purpose) {
+        "write" { $Candidate.OperationEvidence.ScopedWrite }
+        "plan" { $Candidate.OperationEvidence.Plan }
+        default { $Candidate.OperationEvidence.Review }
+    }
+    $requiredStatus = switch ($Purpose) {
+        "write" { "approved-write-ready" }
+        "plan" { "plan-validated" }
+        default { "review-validated" }
+    }
+
+    $reasons = [System.Collections.Generic.List[string]]::new()
+    if (-not $Candidate.PlatformEligible) { $reasons.Add($Candidate.PlatformReason) }
+    if (-not $Candidate.FitsAvailableVram) { $reasons.Add("Model does not fit the selected VRAM estimate.") }
+    if (-not $evidence -or $evidence.Status -ne $requiredStatus) {
+        $actual = if ($evidence) { $evidence.Status } else { "missing" }
+        $reasons.Add("Exact $Purpose evidence requires $requiredStatus; found $actual.")
+    }
+
+    $eligible = $reasons.Count -eq 0
+    $score = 0.0
+    if ($eligible) {
+        $score += (Get-EvidenceStatusRank -Status $evidence.Status) * 100
+        if ($Candidate.Installed) {
+            $score += if ($Purpose -eq "write") { 500 } else { 100 }
+            $reasons.Add("Installed model bonus applied.")
+        }
+
+        if ($Purpose -eq "write") {
+            if ($null -ne $AvailableVramGb -and $Candidate.RecommendedMinVramGb) {
+                $headroom = [math]::Max(0, [double]$AvailableVramGb - [double]$Candidate.RecommendedMinVramGb)
+                $score += $headroom * 10
+                $reasons.Add("Reliability-first VRAM headroom score: $([math]::Round($headroom, 2)) GB.")
+            }
+            $score -= (Get-ModelPreferenceRank -Model $Candidate.Model) * 10
+        } else {
+            $capacity = if ($Candidate.ModelSizeBillion -gt 0) { [double]$Candidate.ModelSizeBillion } elseif ($Candidate.RecommendedMinVramGb) { [double]$Candidate.RecommendedMinVramGb } else { 0 }
+            $score += $capacity * 20
+            $reasons.Add("Capacity score applied for a fitting $laneName model: $capacity.")
+        }
+    }
+
+    return [pscustomobject]@{
+        Eligible = $eligible
+        Score = [math]::Round($score, 2)
+        RequiredStatus = $requiredStatus
+        EvidenceStatus = if ($evidence) { $evidence.Status } else { "missing" }
+        Rationale = @($reasons)
+    }
+}
+
+function Add-LaneScores {
+    param([object[]]$Candidates, [Nullable[double]]$AvailableVramGb)
+
+    foreach ($candidate in $Candidates) {
+        $candidate | Add-Member -NotePropertyName LaneScores -NotePropertyValue ([pscustomobject]@{
+            WriteSafe = Get-LaneScore -Candidate $candidate -Purpose "write" -AvailableVramGb $AvailableVramGb
+            PlanOnly = Get-LaneScore -Candidate $candidate -Purpose "plan" -AvailableVramGb $AvailableVramGb
+            DeepReview = Get-LaneScore -Candidate $candidate -Purpose "review" -AvailableVramGb $AvailableVramGb
+        }) -Force
+    }
 }
 
 function Select-PrimaryModel {
@@ -230,26 +446,17 @@ function Select-PrimaryModel {
         [string]$Purpose
     )
 
-    $eligible = @($Candidates | Where-Object { $_.PlatformEligible -and $_.FitsAvailableVram })
-    if ($eligible.Count -eq 0) { return $null }
-
-    if ($Purpose -eq "write") {
-        $eligible = @($eligible | Where-Object { $_.ValidationStatus -eq "approved-write-ready" })
-        if ($eligible.Count -eq 0) { return $null }
+    $scoreProperty = switch ($Purpose) {
+        "write" { "WriteSafe" }
+        "plan" { "PlanOnly" }
+        default { "DeepReview" }
     }
-    elseif ($Purpose -eq "plan") {
-        $eligible = @($eligible | Where-Object { $_.ValidationStatus -in @("approved-write-ready", "read-only-tool-validated", "plan-review-candidate") })
-    }
-    else {
-        $eligible = @($eligible | Where-Object { $_.ValidationStatus -ne "candidate-only" })
-    }
+    $eligible = @($Candidates | Where-Object { $_.LaneScores.$scoreProperty.Eligible })
 
     if ($eligible.Count -eq 0) { return $null }
 
     return @($eligible | Sort-Object `
-        @{ Expression = { Get-WorkflowRank -Status $_.ValidationStatus } }, `
-        @{ Expression = { if ($_.RecommendedMinVramGb) { [double]$_.RecommendedMinVramGb } else { 9999 } } }, `
-        @{ Expression = { Get-ModelPreferenceRank -Model $_.Model } }, `
+        @{ Expression = { $_.LaneScores.$scoreProperty.Score }; Descending = $true }, `
         @{ Expression = { $_.Model } } | Select-Object -First 1)[0]
 }
 
@@ -265,7 +472,8 @@ $installedModels = @($profile.OllamaModels | ForEach-Object { [string]$_ })
 
 Write-Host "[2/5] Reading model and evidence catalogs..."
 $catalogRows = @(Read-ModelCatalog -Path $ModelCatalogPath)
-$evidence = Read-EvidenceCatalog -Path $EvidenceCatalogPath
+$evidenceRows = @(Read-EvidenceCatalog -Path $EvidenceCatalogPath)
+$modelFitCatalog = Read-ModelFitCatalog -Path $ModelFitCatalogPath
 
 Write-Host "[3/5] Building hardware-aware candidate list..."
 $candidates = [System.Collections.Generic.List[object]]::new()
@@ -275,27 +483,29 @@ foreach ($row in $catalogRows) {
     if ($row.MatchPattern) {
         foreach ($installedModel in $installedModels) {
             if ($installedModel -match $row.MatchPattern) {
-                Add-Candidate -Candidates $candidates -Seen $seen -Model $installedModel -Source "installed-catalog-match" -CatalogRow $row -Evidence $evidence -AvailableVramGb $availableVramGb -Platform $platform
+                Add-Candidate -Candidates $candidates -Seen $seen -Model $installedModel -Source "installed-catalog-match" -CatalogRow $row -EvidenceRows $evidenceRows -Surface $Surface -SurfaceVersion $SurfaceVersion -Provider $Provider -OperatingSystem $platform -AvailableVramGb $availableVramGb -Platform $platform
             }
         }
     }
 
     if ($row.FallbackModel) {
-        Add-Candidate -Candidates $candidates -Seen $seen -Model $row.FallbackModel -Source "catalog-fallback" -CatalogRow $row -Evidence $evidence -AvailableVramGb $availableVramGb -Platform $platform
+        Add-Candidate -Candidates $candidates -Seen $seen -Model $row.FallbackModel -Source "catalog-fallback" -CatalogRow $row -EvidenceRows $evidenceRows -Surface $Surface -SurfaceVersion $SurfaceVersion -Provider $Provider -OperatingSystem $platform -AvailableVramGb $availableVramGb -Platform $platform
     }
 }
 
-foreach ($modelName in $evidence.Keys) {
-    Add-Candidate -Candidates $candidates -Seen $seen -Model $modelName -Source "evidence-catalog" -CatalogRow $null -Evidence $evidence -AvailableVramGb $availableVramGb -Platform $platform
+foreach ($modelName in @($evidenceRows | Where-Object {
+    $_.schema_version -eq "2" -and $_.area -eq "model-tool-use" -and
+    $_.surface -eq $Surface -and $_.surface_version -eq $SurfaceVersion -and
+    $_.provider -eq $Provider -and $_.os -eq $platform
+} | ForEach-Object { $_.model } | Sort-Object -Unique)) {
+    Add-Candidate -Candidates $candidates -Seen $seen -Model $modelName -Source "evidence-catalog" -CatalogRow $null -EvidenceRows $evidenceRows -Surface $Surface -SurfaceVersion $SurfaceVersion -Provider $Provider -OperatingSystem $platform -AvailableVramGb $availableVramGb -Platform $platform
 }
 
 Write-Host "[4/5] Selecting model lanes and config defaults..."
+Add-LaneScores -Candidates $candidates -AvailableVramGb $availableVramGb
 $writeModel = Select-PrimaryModel -Candidates $candidates -Purpose "write"
 $planModel = Select-PrimaryModel -Candidates $candidates -Purpose "plan"
 $reviewModel = Select-PrimaryModel -Candidates $candidates -Purpose "review"
-
-if (-not $planModel) { $planModel = $writeModel }
-if (-not $reviewModel) { $reviewModel = $planModel }
 
 $recommendationStatus = if ($writeModel) { "recommended" } else { "no-approved-write-model" }
 $nextStep = if ($writeModel) {
@@ -308,19 +518,42 @@ $report = [pscustomobject]@{
     GeneratedAt = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     ModelProfilePath = "redacted"
     ModelCatalogPath = "redacted"
+    ModelFitCatalogPath = "redacted"
     EvidenceCatalogPath = "redacted"
     Platform = $platform
+    EvidenceContractVersion = 2
+    EvidenceTarget = [pscustomobject]@{
+        Surface = $Surface
+        SurfaceVersion = $SurfaceVersion
+        Provider = $Provider
+        OS = $platform
+    }
     CpuArchitecture = $profile.CpuArchitecture
     SystemRamGb = $profile.SystemRamGb
     VramSelectionMode = $VramSelectionMode
     AvailableVramGb = $availableVramGb
     InstalledModelCount = $installedModels.Count
+    FitPolicy = [pscustomobject]@{
+        Version = 1
+        ContextTargetTokens = $ContextTargetTokens
+        MemoryReserveOverrideGb = $MemoryReserveGb
+        CatalogSchemaVersion = $modelFitCatalog.schemaVersion
+        UnknownModelPolicy = $modelFitCatalog.defaults.unknownModelPolicy
+        Note = "Catalog values are planning estimates; verify the installed artifact and runtime behavior before relying on a borderline fit."
+    }
+    SelectionPolicy = [pscustomobject]@{
+        Version = 1
+        WriteSafe = "Exact approved-write evidence first; prefer installed models and greater VRAM headroom."
+        PlanOnly = "Exact plan evidence first; prefer greater fitting model capacity with a small installed-model bonus."
+        DeepReview = "Exact review evidence first; prefer greater fitting model capacity with a small installed-model bonus."
+        UnknownModelSizeBehavior = "Unknown sizes receive no capacity bonus and remain subject to exact evidence and platform checks."
+    }
     Recommendation = [pscustomobject]@{
         Status = $recommendationStatus
         WriteSafeModel = if ($writeModel) { $writeModel.Model } else { $null }
         PlanOnlyModel = if ($planModel) { $planModel.Model } else { $null }
         DeepReviewModel = if ($reviewModel) { $reviewModel.Model } else { $null }
-        Reason = "Selected from catalog and validation evidence using platform compatibility, VRAM fit, and workflow validation status."
+        Reason = "Selected with lane-specific evidence, platform, VRAM, installation, headroom, and capacity scores."
         NextStep = $nextStep
     }
     ModelLanes = [pscustomobject]@{
@@ -335,7 +568,7 @@ $report = [pscustomobject]@{
         }
         PlanOnly = [pscustomobject]@{
             Model = if ($planModel) { $planModel.Model } else { $null }
-            RequiresValidationStatus = "approved-write-ready, read-only-tool-validated, or plan-review-candidate"
+            RequiresValidationStatus = "plan-validated for the exact capability key"
             ToolUse = "plan-review"
             RecommendedRoles = @("chat")
             RequiresSurfaceConfigGenerator = $true
@@ -343,7 +576,7 @@ $report = [pscustomobject]@{
         }
         DeepReview = [pscustomobject]@{
             Model = if ($reviewModel) { $reviewModel.Model } else { $null }
-            RequiresValidationStatus = "validated non-candidate model"
+            RequiresValidationStatus = "review-validated for the exact capability key"
             ToolUse = "deep-review"
             RecommendedRoles = @("chat")
             RequiresSurfaceConfigGenerator = $true

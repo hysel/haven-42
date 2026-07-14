@@ -6,9 +6,9 @@ Use `docs/config-generation-strategy.md` for the shared decision model that choo
 
 ## Decision
 
-Continue remains the only supported generated config bundle today.
+Continue and Aider have supported generated local configuration paths today.
 
-Future Cline, Aider, Roo Code, Kilo Code, OpenCode, or platform-agent bundles should be added only after the surface has:
+Future Cline, Roo Code, Kilo Code, OpenCode, or platform-agent bundles should be added only after the surface has:
 
 - Documented install behavior.
 - Documented local model configuration format.
@@ -27,7 +27,7 @@ Reusable pack assets should stay shared wherever possible:
 - Evidence formats.
 - Model recommendation data.
 
-Generated config files should stay surface-specific. A Continue config should not pretend to configure Cline, Aider, Roo Code, Kilo Code, OpenCode, or OpenHands. A future non-Continue bundle should translate shared evidence and model recommendations into that surface's native config format.
+Generated config files should stay surface-specific. Continue config does not configure Aider, and Aider config does not configure Continue or another agent. A non-Continue bundle must translate shared evidence and model recommendations into that surface's native format.
 
 ## Current Status
 
@@ -35,7 +35,7 @@ Generated config files should stay surface-specific. A Continue config should no
 | --- | --- | --- |
 | Continue | supported | Generate `.continue` assets and local-only Continue config from recommendation output. |
 | Cline | planned | Wait for tested install and local model config boundaries. |
-| Aider | planned | Wait for a validated CLI install and config shape. |
+| Aider | supported | Generate explicit local-only `.aider.conf.local.yml` through `setup-agent-surface.*`; launch with `aider --config` and keep real-project approved write blocked. |
 | Roo Code | planned | Wait for confirmed command, extension, and local model behavior. |
 | Kilo Code | planned | Wait for confirmed command, extension, and local model behavior. |
 | OpenCode | planned | Wait for confirmed CLI install and local model behavior. |

@@ -175,7 +175,7 @@ $surfaceSolutionReadiness = @($surfaceSolutions.surfaces | ForEach-Object {
 } | Sort-Object Name)
 
 $report = [pscustomobject]@{
-    SchemaVersion = 1
+    SchemaVersion = 2
     GeneratedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     SourceEvidenceCatalog = "config/evidence-catalog.tsv"
     SourceSurfaceMatrix = "config/agent-surface-capabilities.json"
@@ -187,6 +187,8 @@ $report = [pscustomobject]@{
     StatusCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "status" -OutputName "Status"
     AreaCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "area" -OutputName "Area"
     SurfaceEvidenceCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "surface" -OutputName "Surface"
+    OperationCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "operation" -OutputName "Operation"
+    ValidationModeCounts = ConvertTo-CountRows -Rows $evidenceRows -PropertyName "validation_mode" -OutputName "ValidationMode"
     Models = $models
     SurfaceReadiness = $surfaceReadiness
     SurfaceSolutionReadiness = $surfaceSolutionReadiness

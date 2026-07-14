@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "activationMinimumConfidence": "medium",
+  "ignoredDirectories": [
+    ".git",
+    ".continue",
+    ".idea",
+    ".vscode",
+    "bin",
+    "obj",
+    "node_modules",
+    ".venv",
+    "venv",
+    "target",
+    "dist",
+    "build",
+    "runtime-validation-output"
+  ],
+  "ecosystems": [
+    {
+      "id": "dotnet",
+      "displayName": ".NET",
+      "rulePackId": null,
+      "rulePackPath": null,
+      "strongPatterns": ["*.sln", "*.slnx", "*.csproj", "*.fsproj", "*.vbproj", "packages.config", "global.json"],
+      "supportingPatterns": ["*.cs", "*.fs", "*.vb", "appsettings*.json"]
+    },
+    {
+      "id": "python",
+      "displayName": "Python",
+      "rulePackId": "python",
+      "rulePackPath": "rule-packs/python.md",
+      "strongPatterns": ["pyproject.toml", "requirements*.txt", "setup.py", "poetry.lock", "Pipfile", "pytest.ini", "tox.ini"],
+      "supportingPatterns": ["*.py"]
+    },
+    {
+      "id": "javascript-typescript",
+      "displayName": "JavaScript and TypeScript",
+      "rulePackId": "typescript",
+      "rulePackPath": "rule-packs/typescript.md",
+      "strongPatterns": ["package.json", "package-lock.json", "pnpm-lock.yaml", "yarn.lock", "bun.lock", "tsconfig*.json"],
+      "supportingPatterns": ["*.js", "*.jsx", "*.mjs", "*.cjs", "*.ts", "*.tsx"]
+    },
+    {
+      "id": "java",
+      "displayName": "Java",
+      "rulePackId": "java",
+      "rulePackPath": "rule-packs/java.md",
+      "strongPatterns": ["pom.xml", "build.gradle", "build.gradle.kts", "settings.gradle", "settings.gradle.kts", "gradlew", "gradlew.bat"],
+      "supportingPatterns": ["*.java"]
+    },
+    {
+      "id": "go",
+      "displayName": "Go",
+      "rulePackId": "go",
+      "rulePackPath": "rule-packs/go.md",
+      "strongPatterns": ["go.mod", "go.sum", "go.work"],
+      "supportingPatterns": ["*.go"]
+    },
+    {
+      "id": "rust",
+      "displayName": "Rust",
+      "rulePackId": "rust",
+      "rulePackPath": "rule-packs/rust.md",
+      "strongPatterns": ["Cargo.toml", "Cargo.lock"],
+      "supportingPatterns": ["*.rs"]
+    },
+    {
+      "id": "sql",
+      "displayName": "SQL and database",
+      "rulePackId": "sql",
+      "rulePackPath": "rule-packs/sql.md",
+      "strongPatterns": ["migrations/*.sql", "migration/*.sql", "schema/*.sql", "schemas/*.sql", "db/*.sql"],
+      "supportingPatterns": ["*.sql"]
+    },
+    {
+      "id": "infrastructure-as-code",
+      "displayName": "Infrastructure as Code",
+      "rulePackId": "infrastructure-as-code",
+      "rulePackPath": "rule-packs/infrastructure-as-code.md",
+      "strongPatterns": ["*.tf", "*.tfvars", "*.hcl", "Dockerfile*", "docker-compose*.yml", "docker-compose*.yaml", "compose*.yml", "compose*.yaml", "Chart.yaml"],
+      "supportingPatterns": ["k8s/*.yml", "k8s/*.yaml", "kubernetes/*.yml", "kubernetes/*.yaml", ".github/workflows/*.yml", ".github/workflows/*.yaml"]
+    },
+    {
+      "id": "documentation-config-pack",
+      "displayName": "Documentation or configuration pack",
+      "rulePackId": null,
+      "rulePackPath": null,
+      "strongPatterns": [".continue/config.yaml", "config/workflows.json"],
+      "supportingPatterns": ["docs/*.md", "examples/*.md"]
+    }
+  ]
+}

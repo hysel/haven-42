@@ -7,12 +7,20 @@ The Local Engineering Agent Pack is organized as a documentation, configuration,
 The currently validated runtime architecture is:
 
 ```text
-Continue
-  loads .continue/config.yaml
-  exposes configured models, context providers, prompts, and rules
-  uses role-specific agents for specialized engineering workflows
-  applies reusable rules during code and documentation tasks
-  produces structured outputs through templates
+Agent surfaces
+  Continue -> project or shared .continue assets
+  Aider -> local-only generated Aider config
+  future surfaces -> evidence-gated adapters
+
+Reusable pack assets and catalogs
+  prompts, rules, agents, templates, project profiles, model fit, evidence
+        |
+        v
+config/workflows.json -> scripts/invoke-workflow.*
+        |                       |
+        |                       +-> schema-v1 request/result envelope
+        v
+tested workflow engines -> sanitized reports, local-only config, validation evidence
 ```
 
 The long-term architecture should keep prompts, rules, templates, validation scripts, and evidence formats portable enough to evaluate with other local-first coding-agent surfaces.
@@ -79,11 +87,53 @@ Rules should be concise, enforceable, and broadly applicable. They should define
 
 Rules should avoid task-specific instructions that belong in prompts.
 
+### Project Profiles And Optional Rule Activation
+
+`config/project-profile-rules.json` defines deterministic ecosystem signals.
+The cross-platform `get-project-profile` scripts inspect relative filenames,
+emit a sanitized project profile, and select optional language rule-pack IDs.
+
+During project-local installation, selected sources from
+`.continue/rule-packs/` are copied into
+`.continue/rules/active-language-<id>.md`. Unmatched source packs remain
+inactive. Shared-assets mode skips this project-specific step because one
+central asset folder can serve repositories with different ecosystems.
+
 ### Templates
 
 `.continue/templates` contains structured output formats for artifacts that may be committed or shared.
 
 Templates should make review outputs consistent and easy to scan.
+
+### Capability Evidence
+
+`config/capability-evidence-contract.json` defines Capability Evidence Contract
+v2, and `config/evidence-catalog.tsv` stores sanitized records. Capability
+readiness is keyed by surface, surface version, provider, model, operating
+system, operation, and validation mode.
+
+Recommendation and reporting consumers aggregate duplicate keys to the most
+conservative status while retaining provenance. They do not inherit write
+readiness across agent surfaces, operations, or operating systems.
+
+### Workflow Orchestration
+
+`config/workflows.json` provides stable workflow IDs and platform entry points.
+`config/workflow-envelope-contract.json` defines schema-v1 requests and
+execution responses for the PowerShell and native Linux/macOS dispatchers.
+
+The envelope reports accepted, progress, warning, result, and error events.
+Argument values and child output are omitted by default so future UI callers
+do not casually persist local paths, endpoints, or repository output. Existing
+direct CLI dispatcher behavior remains supported.
+
+The onboarding/navigation family preserves three beginner-facing commands but
+shares non-domain mechanics. `scripts/OnboardingGuidance.psm1` owns catalog
+loading, workflow lookup, platform command rendering, and report output for
+PowerShell. The Linux/macOS wrappers delegate argument routing to
+`scripts/onboarding-guidance.shared.sh`. Full native rendering for these
+informational views remains a known portability gap; native validation and
+installer workflows are unaffected and continue to require no PowerShell.
 
 ## Responsibility Boundaries
 
@@ -92,6 +142,9 @@ Templates should make review outputs consistent and easy to scan.
 - Prompts define task flow.
 - Rules define standards.
 - Templates define durable output shape.
+- Capability evidence defines what a specific surface/model/environment operation has actually proven.
+- Project profiles define which optional language rules a target repository activates and the filename evidence supporting that decision.
+- Workflow registry and envelope contracts define stable, versioned automation boundaries without owning workflow business logic.
 - Top-level docs define project intent and governance.
 
 ## Dependency Policy
@@ -132,6 +185,9 @@ The project domain is local-first engineering workflow guidance.
 - Finding: a concrete issue identified during review.
 - Recommendation: an actionable change or decision proposal.
 - Workflow: a repeatable task sequence such as repository discovery, code review, or security review.
+- Model lane: a purpose-specific local model role such as WRITE SAFE, PLAN ONLY, or DEEP REVIEW.
+- Selection policy: a versioned scoring contract that requires exact capability evidence and ranks eligible models for one model lane.
+- Model-fit profile: a versioned, reviewable memory-planning assumption for an exact model tag, including quantization assumption, weights, context-sensitive cache, runtime overhead, architecture, and reserve.
 
 ## Initial Architecture Decisions
 
@@ -143,6 +199,10 @@ The project domain is local-first engineering workflow guidance.
 - MCP and SonarQube support should be documented as integration targets until implemented.
 - Tool-enabled project changes should be treated as an approved execution mode, not the default review posture.
 - Local model selection should remain hardware-aware but portable, keeping machine-specific endpoints and hardware details out of committed shared config.
+- Model-lane eligibility must require exact surface, version, provider, operating system, operation, and validation-mode evidence; scores may rank eligible models but must not manufacture missing capability evidence.
+- WRITE SAFE selection should favor validated reliability and VRAM headroom, while planning and review may favor greater fitting capacity after exact lane evidence is established.
+- Curated model-fit profiles should take precedence over name-derived estimates, disclose every assumption, and keep unknown tags labeled as low-confidence rather than implying measured compatibility.
+- Future UI callers should use stable workflow IDs and the versioned envelope rather than invoking or parsing individual script families directly.
 
 ## Open Questions
 

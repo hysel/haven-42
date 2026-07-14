@@ -4,7 +4,7 @@
 
 Language rule packs provide ecosystem-specific guidance without making the default pack noisy or wrong for every repository.
 
-The default `.continue/config.yaml` loads shared engineering rules plus evidence-gated .NET, ASP.NET Core, and API rules. Optional language rule packs live under `.continue/rule-packs/` and should be used only after project detection confirms matching repository evidence.
+The default `.continue/config.yaml` loads shared engineering rules plus evidence-gated .NET, ASP.NET Core, and API rules. Optional language rule-pack sources live under `.continue/rule-packs/`. Project-local installation classifies the target and copies only matching packs into `.continue/rules/active-language-<id>.md`.
 
 ## Current Optional Packs
 
@@ -20,7 +20,7 @@ The default `.continue/config.yaml` loads shared engineering rules plus evidence
 
 ## How Agents Should Use Them
 
-1. Run project classification using `docs/project-detection.md`.
+1. Run project classification using `docs/project-detection.md` or the scripts in `docs/project-profile-classification.md`.
 2. Cite the files that prove the ecosystem.
 3. Use the matching optional rule pack as supplemental guidance only when evidence is high or medium confidence.
 4. Keep recommendations language-neutral when evidence is weak, missing, or unreadable.
@@ -28,9 +28,9 @@ The default `.continue/config.yaml` loads shared engineering rules plus evidence
 
 ## Default Config Behavior
 
-Optional rule packs are intentionally not referenced from `.continue/config.yaml`. The default config includes the shared rules and the evidence-gated .NET, ASP.NET Core, and API rules. Their file globs reduce irrelevant activation, while their evidence gates remain authoritative when repository classification is uncertain.
+Optional source rule packs are intentionally not referenced from `.continue/config.yaml`. The default config includes the shared rules and the evidence-gated .NET, ASP.NET Core, and API rules. Their file globs reduce irrelevant activation, while their evidence gates remain authoritative when repository classification is uncertain.
 
-Keeping the optional packs out of the default config prevents Python, JavaScript/TypeScript, Java, Go, Rust, SQL, or infrastructure advice from being applied to unrelated repositories. If a future installer profile enables optional language packs automatically, it must do so through explicit profile selection and evidence-gated documentation.
+Keeping the optional source packs out of the default config prevents Python, JavaScript/TypeScript, Java, Go, Rust, SQL, or infrastructure advice from being applied to unrelated repositories. Project-local installers now create a sanitized profile and materialize only selected packs under `.continue/rules/`. Shared-assets mode remains project-neutral and does not activate language packs.
 
 ## Validation Expectations
 

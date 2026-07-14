@@ -24,6 +24,10 @@ Each workflow records:
 - `outputs`: Expected output artifacts or result types.
 - `entryPoints`: Platform-specific script paths for Windows, Linux, and macOS.
 
+`classify-project` is the stable read-only entry point for repository ecosystem detection. It emits the sanitized profile used by project-local installers to activate matching optional language rules. See `docs/project-profile-classification.md`.
+
+`setup-agent-surface` is the approved-write adapter boundary for surface-native setup. Its first implementation supports Aider plan, isolated install, explicit local-only Ollama configuration, and health checks on Windows, Linux, and macOS. See `docs/aider-cli-model-testing.md`.
+
 ## Safety Levels
 
 | Safety level | Meaning |
@@ -69,6 +73,12 @@ pwsh -NoProfile -File .\scripts\invoke-workflow.ps1 -WorkflowId validate-pack -W
 ```
 
 The dispatcher does not reinterpret workflow-specific arguments. Each underlying script remains the source of behavior, validation, and safety checks.
+
+## Versioned Automation Envelope
+
+Future UI and automation callers should use the schema-v1 request envelope in `config/workflow-envelope-contract.json` through `-RequestJson` or `--request-json`. The response standardizes accepted, progress, warning, result, and error records while preserving the workflow process exit code.
+
+Argument values and child output are omitted by default. Use `includeOutput` only for transient local diagnostics, then sanitize before recording evidence. See `docs/workflow-envelope-contract.md` for examples and the privacy boundary.
 
 ## Autonomous Maintenance
 

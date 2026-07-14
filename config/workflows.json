@@ -183,6 +183,36 @@
       }
     },
     {
+      "id": "setup-agent-surface",
+      "name": "Set Up Agent Surface",
+      "purpose": "Plan, install, configure, or health-check an evidence-backed non-Continue agent adapter, starting with Aider.",
+      "category": "agent-surface-setup",
+      "safetyLevel": "approved-write",
+      "uiReady": true,
+      "inputs": ["surface", "action", "targetRepo", "modelOrRecommendation", "lane", "ollamaBaseUrl", "installMethod", "dryRun"],
+      "outputs": ["localSurfaceConfig", "healthResult", "nextCommand"],
+      "entryPoints": {
+        "windows": "scripts/setup-agent-surface.ps1",
+        "linux": "scripts/setup-agent-surface.linux.sh",
+        "macos": "scripts/setup-agent-surface.macos.sh"
+      }
+    },
+    {
+      "id": "classify-project",
+      "name": "Classify Project",
+      "purpose": "Inspect repository filenames without reading file contents, emit a sanitized project profile, and identify evidence-backed optional rule packs.",
+      "category": "configuration",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["targetRepo", "outputPath"],
+      "outputs": ["projectProfileJson", "selectedRulePackIds"],
+      "entryPoints": {
+        "windows": "scripts/get-project-profile.ps1",
+        "linux": "scripts/get-project-profile.linux.sh",
+        "macos": "scripts/get-project-profile.macos.sh"
+      }
+    },
+    {
       "id": "install-pack-assets",
       "name": "Install Pack Assets",
       "purpose": "Install or update project-local or centralized agent assets with backups, dry-run, and global config support.",

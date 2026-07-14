@@ -11,6 +11,7 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/generate-evidence-dashboar
 The dashboard reports:
 
 - Evidence row counts by readiness status, area, and surface.
+- Evidence row counts by operation and validation mode under Capability Evidence Contract v2.
 - Known agent surface readiness from `config/agent-surface-capabilities.json`.
 - Install/configure/test solution status from `config/agent-surface-solutions.json`.
 - Distinct model names present in `config/evidence-catalog.tsv`.

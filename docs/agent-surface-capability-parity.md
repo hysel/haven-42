@@ -29,7 +29,7 @@ Every agent surface should be tracked against the same activities:
 
 ## Current Shape
 
-Continue is the only fully supported install/configure path today. Cline and Aider have validation evidence, while Roo Code, Kilo Code, OpenCode, and OpenHands remain evidence-gated candidates.
+Continue remains the supported first editor path. Aider is the first supported non-Continue adapter for isolated installation, local-only Ollama configuration, health checks, and generated-sample CLI testing. Cline has validation evidence but no reusable install/configure adapter; Roo Code, Kilo Code, OpenCode, and OpenHands remain evidence-gated candidates.
 
 Shared workflows such as health checks, cleanup, model selection, release readiness, and evidence verification apply across surfaces because they operate on the local repository, local model server, generated outputs, or shared validation artifacts rather than a surface-specific configuration format.
 
@@ -46,6 +46,6 @@ Shared workflows such as health checks, cleanup, model selection, release readin
 ## Gaps To Close
 
 - Generate surface-specific config bundles only after each surface has compatibility evidence. The policy is tracked in `docs/surface-specific-config-bundles.md`.
-- Add install/configure workflows for Cline and Aider if their configuration formats are stable enough to support safely.
+- Add install/configure workflows for Cline after its configuration boundaries are stable enough to support safely; keep validating the existing Aider adapter across platforms.
 - Confirm command shapes for Roo Code, Kilo Code, and OpenCode before promoting wrappers from scaffolded to validated.
 - Review OpenHands separately because platform-style agents have different workspace, sandbox, and secret boundaries.

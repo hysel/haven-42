@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec "$SCRIPT_DIR/onboarding-guidance.shared.sh" beginner-plan "$@"
+"$SCRIPT_DIR/setup-agent-surface.shared.sh" "$@"

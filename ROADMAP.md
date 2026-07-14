@@ -26,9 +26,9 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 15: Multi-Language Engineering Support | Complete | .NET remains the most mature path, optional multi-language guidance is evidence-gated, and generated Python plus TypeScript samples have repository-discovery, implementation-planning, and code-review validation evidence. |
 | Milestone 16: Sample Repository Factory | Complete | Disposable sample repositories can be generated on Windows, Linux, and macOS for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL validation; evidence and tests cover fixture shape, runtime context, and sanitization. |
 | Milestone 17: Agent Surface Compatibility Validation | Partial | Cline has read-only and disposable write-smoke validation evidence, and Aider has generated-sample read-only, write-smoke, and richer scoped-edit evidence. Full tracked-surface validation remains incomplete for Roo Code, Kilo Code, OpenCode, and OpenHands. |
-| Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are added as evidence-gated supplemental guidance with static generated-sample validation recorded; generated editor/model workflow evidence is recorded, prompt and runner filename-fidelity guardrails are in place, and runtime runners now write filename-fidelity fallback artifacts for deterministic filename failures. Remaining empty-output failures and any non-filename guardrail repeats require separate remediation before promotion. |
-| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial | Continue read-only and approved-write installer profiles, the sanitized evidence catalog, cross-platform release packaging, checksums, and install-command guidance are implemented and tested; cross-agent install/configure/test script parity remains incomplete outside Continue. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, reusable surface-neutral model lanes, centralized shared asset config generation, a first shared workflow dispatcher, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, model scorecard, and unified UI design are implemented for current scope; deeper script consolidation, a future UI wrapper, and surface-specific profile generation remain planned. |
+| Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are evidence-gated; deterministic cross-platform project profiles and project-local installer activation are implemented. Representative editor/model planning, review, and scoped-write validation still blocks full promotion. |
+| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial | Continue profiles, the first Aider install/configure/health/test adapter, the sanitized evidence catalog, cross-platform release packaging, checksums, and install guidance are implemented and tested; parity remains incomplete for other agent surfaces. |
+| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, reusable surface-neutral model lanes, centralized shared asset config generation, workflow dispatch and envelopes, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, model scorecard, and the first onboarding/navigation script-family consolidation are implemented; a future UI wrapper, native no-PowerShell onboarding rendering, and additional surface-specific profile generation remain planned. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -404,7 +404,7 @@ Scope:
 - Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
 - Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams. Done with a shared setup-paths guide.
 - Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical. Done for the current docs, shared assets, validation harnesses, and evidence catalogs.
-- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Continue remains the only supported generated config bundle today.
+- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Continue and Aider now have supported local config generation paths.
 - Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change. Done for the repository docs and roadmap; external wiki updates remain release-process work when publishing.
 
 Exit criteria:
@@ -471,7 +471,7 @@ Scope:
 - Validate Cline approved-write smoke behavior against a disposable generated sample. Done for a README-only smoke test with `qwen3-coder:30b` at 16k context; realistic scoped edit validation remains pending.
 - Add a Cline CLI automation harness for future read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Cline CLI evidence remains pending.
 - Add a Continue CLI automation harness for focused read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Continue CLI evidence remains separate from editor Apply evidence.
-- Add a shared agent CLI automation harness plus thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening. Done for script, documentation, and evidence-template scaffolding; model-specific live evidence remains pending.
+- Add a shared agent CLI automation harness plus thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening. Done for shared scripts and documentation; Aider has model-specific generated-sample evidence, while Roo Code, Kilo Code, and OpenCode live evidence remains pending.
 
 Exit criteria:
 
@@ -484,7 +484,7 @@ Future evidence expansion:
 - Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples after their real command shapes are confirmed.
 - Define a safe OpenHands validation boundary before adding platform-agent validation automation. Done with an isolated generated-sample, sandbox, credential, mount, and network policy.
 - Run explicitly approved non-generated repository validation before any non-Continue surface is promoted to real-project approved-write ready.
-- Promote one non-Continue surface end to end before widening adapter support. Aider is the preferred next surface because generated-sample read-only and realistic scoped-edit evidence already exists; complete its install, local-model configuration, health, and test path before promoting additional surfaces.
+- Promote one non-Continue surface end to end before widening adapter support. Done for the Aider install, local-model configuration, health, and test adapter; real-project approved write remains blocked pending explicitly approved validation.
 
 ## Milestone 18: Language Rule Packs
 
@@ -496,8 +496,8 @@ Scope:
 - Define when each rule pack should apply based on repository evidence. Done for current optional language packs.
 - Add prompt guidance that keeps recommendations language-neutral when evidence is incomplete.
 - Validate each rule pack against generated samples before promoting it. Static generated-sample validation is recorded for Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code in `examples/language-rule-pack-validation.md`; model-backed workflow validation is recorded for generated Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure samples in `examples/multi-language-workflow-validation.md`. Prompt-level and runner-level filename-fidelity guardrails are now in place, but stricter fallback work remains because deterministic verification still catches model filename drift.
-- Add a machine-readable project-profile classifier that emits detected ecosystems, evidence files, confidence, and selected language-rule-pack IDs.
-- Make installers and config generators activate only the rule packs selected by the project profile. Copying optional files without loading them does not satisfy runtime multi-language support.
+- Add a machine-readable project-profile classifier that emits detected ecosystems, evidence files, confidence, and selected language-rule-pack IDs. Done with a sanitized, filename-only cross-platform classifier and `config/project-profile-rules.json`.
+- Make installers and config generators activate only the rule packs selected by the project profile. Done for project-local installation by materializing selected packs under `.continue/rules/`; shared-assets mode remains project-neutral pending a per-project overlay design.
 - Add medium-complexity generated samples and a representative language/workflow validation matrix so promotion is not based only on static checks or minimal fixtures.
 
 Exit criteria:
@@ -516,21 +516,21 @@ Scope:
 - Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces. Done for current Continue scope with default, read-only, and approved-write Continue profiles; incomplete for cross-agent install/configure/test script parity.
 - Add language-focused install/profile options after language packs are validated. Future evidence-gated expansion; not a current completion blocker.
 - Create a sanitized evidence catalog for model, OS, editor, agent surface, language, and write-readiness results. Done for current scope in `config/evidence-catalog.tsv`.
-- Evolve the catalog to Capability Evidence Contract v2, keyed by surface, model, provider, operating system, surface version, operation, and validation mode. A model validated for one surface must not inherit write readiness on another surface.
-- Aggregate duplicate evidence conservatively and retain provenance instead of selecting the first row for a model.
+- Evolve the catalog to Capability Evidence Contract v2, keyed by surface, model, provider, operating system, surface version, operation, and validation mode. Done with a machine-readable v2 contract and migrated catalog; a model validated for one surface does not inherit write readiness on another surface.
+- Aggregate duplicate evidence conservatively and retain provenance instead of selecting the first row for a model. Done in the PowerShell and cross-platform recommendation engines and capability-keyed scorecard.
 - Improve release packaging with GitHub release notes, downloadable archives, checksums, and install command examples. Done for current scope with cross-platform packaging scripts and checksum guidance.
 
 Exit criteria:
 
-- Users can choose the right profile without manually assembling config files. Done for current Continue profiles; incomplete for Cline, Aider, Roo Code, Kilo Code, OpenCode, and OpenHands install/configure script parity.
-- Validation evidence is structured enough to compare models, surfaces, and languages over time. The current TSV is a useful first catalog; Capability Evidence Contract v2 remains required before cross-surface automation can consume it safely.
+- Users can choose the right profile without manually assembling config files. Done for Continue profiles and Aider local config; incomplete for Cline, Roo Code, Kilo Code, OpenCode, and OpenHands install/configure parity.
+- Validation evidence is structured enough to compare models, surfaces, and languages over time. Done for the v2 catalog and current recommendation and scorecard consumers; new surface adapters must still add exact evidence before promotion.
 - Release artifacts are easy to install and verify. Done with cross-platform package scripts and checksum guidance.
 
 Cross-agent parity gap:
 
 - Continue has supported install, configure, and test automation.
 - Cline has validation evidence and test harness coverage, but install and configure automation remain planned.
-- Aider has validation evidence and test harness coverage, but install and configure automation remain scaffolded or planned.
+- Aider has supported install, local-only configure, health, and validated test automation; real-project approved write remains blocked.
 - Roo Code, Kilo Code, and OpenCode have test harness scaffolds, but install/configure automation remains planned pending confirmed command and config shapes.
 - OpenHands remains blocked because platform workspace, sandbox, and credential boundaries are outside this pack's current automation model.
 ## Milestone 20: Hardware-Aware Model And Config Automation
@@ -540,21 +540,21 @@ Goal: Turn hardware/profile evidence into practical model and configuration reco
 Scope:
 
 - Add logic that evaluates detected GPU, VRAM, RAM, CPU, architecture, operating system, and model-host platform to decide which local models are reasonable candidates for the user's machine. Done for offline recommendation output.
-- Rank candidate models by workflow fit, resource fit, tool-use validation status, and conservative defaults so the user receives a clear recommended model plus alternatives. A conservative first implementation exists, but lane-specific scoring remains incomplete because all tiers currently favor the smallest validated default.
-- Add lane-specific scoring: prioritize reliability for WRITE SAFE, while allowing larger validated models for PLAN ONLY and DEEP REVIEW when hardware permits.
-- Include quantization, context target, backend overhead, model architecture or MoE behavior, and a configurable memory reserve rather than estimating fit only from parameter count in the model name.
+- Rank candidate models by workflow fit, resource fit, tool-use validation status, and conservative defaults so the user receives a clear recommended model plus alternatives. Done with lane-specific policy version 1 and per-candidate score rationale.
+- Add lane-specific scoring: prioritize reliability and VRAM headroom for WRITE SAFE, while allowing larger validated models for PLAN ONLY and DEEP REVIEW when hardware permits. Done for exact evidence matches on Windows, Linux, and macOS recommendation paths.
+- Include quantization, context target, backend overhead, model architecture or MoE behavior, and a configurable memory reserve rather than estimating fit only from parameter count in the model name. Done for curated model-fit profiles with a labeled low-confidence fallback for unknown tags; runtime-measured metadata remains a future refinement.
 - Generate best-fit local configuration for Continue first, including model lanes, roles, context length, max tokens, keep-alive settings, and local-only endpoint handling. Done for local-only Continue config output.
 - Keep the configuration engine surface-neutral enough to support future plugins or agent surfaces after they have compatibility evidence. Done with a reusable `ModelLanes` recommendation contract; generated config remains evidence-gated per surface.
 - Ensure cloud tags, provider-specific tags, MLX tags, oversized models, and unsupported local pulls are filtered or explained before any model download is attempted.
 - Keep all generated machine-specific settings in local-only config files and out of committed shared configuration.
 - Add validation coverage that proves hardware-aware selection does not expose private paths, hostnames, usernames, endpoints, or raw hardware reports.
 - Reduce the number of scripts by consolidating repeated command-line workflows behind shared engines, registries, or dispatchers before adding more surface-specific scripts.
-- Script consolidation planning is documented; implementation remains staged behind tests, appendix updates, and release-boundary migration notes.
-- First implementation slices done for PowerShell and Bash agent CLI wrapper defaults; deeper script-family consolidation remains staged.
+- Script consolidation planning is documented, and the onboarding/navigation family now shares workflow lookup, command rendering, report output, and native argument dispatch while preserving its public commands.
+- Implementation slices are complete for PowerShell and Bash agent CLI wrapper defaults plus onboarding/navigation plumbing; further consolidation remains evidence-driven.
 - Keep thin wrapper scripts only where they improve beginner usability or platform ergonomics; avoid duplicating business logic across wrappers.
 - Define a machine-readable workflow registry that describes available tasks, inputs, outputs, safety level, platform support, and script entry points. Done.
 - Define a stable script/API boundary so future tools can call hardware profiling, model discovery, model testing, configuration generation, installation, and validation without knowing each script family. Workflow registry foundation and PowerShell/Linux/macOS dispatchers are done; deeper workflow execution reuse remains pending.
-- Standardize a versioned workflow request, progress, result, warning, and error envelope before the web UI calls the dispatcher. Raw passthrough argument arrays are not the final UI API.
+- Standardize a versioned workflow request, progress, result, warning, and error envelope before the web UI calls the dispatcher. Done with schema v1, privacy-safe defaults, structured failures, and PowerShell/native-shell parity.
 - Add a guided command/menu layer that presents a small set of user intents such as first-time setup, health check, model choice, install/configure an agent, validation, cleanup, and release readiness while calling existing workflows underneath. Done for registry-backed menu generation; future interactive command execution can build on it.
 - Keep per-script documentation available as appendix/reference material for advanced users, maintainers, and automation authors rather than presenting every script as a primary user choice. Done for registry-backed appendix coverage.
 - Design a unified starter-toolkit web UI for people who want to use local AI for coding, with guided flows for setup, hardware profiling, model choice, config generation, agent-surface testing, and validation. Done as an evidence-first architecture spec.
@@ -578,16 +578,16 @@ Exit criteria:
 - The UI can call a small number of stable script entry points, a workflow registry, or a shared command dispatcher rather than many plugin-specific scripts.
 - Users can start from a guided menu or beginner flow, while individual script docs remain available in an appendix for detailed reference and troubleshooting.
 - A beginner can use the UI to complete the common local-AI coding setup path without manually choosing scripts or editing YAML.
-- UI implementation does not begin until the evidence contract, project-profile activation, model-lane scoring, one non-Continue adapter, and versioned workflow envelope are validated.
+- UI implementation does not begin until the evidence contract, project-profile activation, model-lane scoring, one non-Continue adapter, and versioned workflow envelope are validated. Technical prerequisites are now validated; UI scope and priority still require a product decision.
 - Evidence dashboard, health check, cleanup, release gate, and model scorecard workflows all read from sanitized local artifacts and avoid committing private machine details.
 
 ### Recommended Implementation Order
 
-1. Define Capability Evidence Contract v2 and migrate recommendation lookups to surface-specific, operation-specific evidence.
-2. Add machine-readable project classification and runtime activation of matching language rule packs.
-3. Implement lane-specific model scoring and richer hardware/model-fit metadata.
-4. Complete Aider as the first end-to-end non-Continue install, configure, health, and test adapter.
-5. Standardize versioned workflow request/result/progress/error envelopes and consolidate repeated script-family business logic.
+1. Define Capability Evidence Contract v2 and migrate recommendation lookups to surface-specific, operation-specific evidence. Done.
+2. Add machine-readable project classification and runtime activation of matching language rule packs. Done for deterministic project-local installation.
+3. Implement lane-specific model scoring and richer hardware/model-fit metadata. Done for scoring policy version 1 and curated fit policy version 1; runtime-measured artifact metadata remains a future refinement.
+4. Complete Aider as the first end-to-end non-Continue install, configure, health, and test adapter. Done with local-only config and deterministic cross-platform coverage.
+5. Standardize versioned workflow request/result/progress/error envelopes and consolidate repeated script-family business logic. Envelope contract and the first onboarding/navigation consolidation are done; additional families remain evidence-driven.
 6. Expand medium-complexity samples and run a representative surface/language/mode validation matrix.
 7. Implement the unified web UI only after the preceding contracts and adapters are stable.
 8. Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams so documented maturity and runtime wiring match verified behavior.

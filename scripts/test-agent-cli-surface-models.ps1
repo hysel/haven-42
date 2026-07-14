@@ -72,15 +72,9 @@ function Get-DefaultModels {
     $models = [System.Collections.Generic.List[string]]::new()
 
     if (Test-Path -LiteralPath $catalog) {
-        $lines = Get-Content -LiteralPath $catalog
-        foreach ($line in $lines | Select-Object -Skip 1) {
-            if ([string]::IsNullOrWhiteSpace($line)) { continue }
-            $parts = $line -split "`t"
-            if ($parts.Count -lt 6) { continue }
-            $surface = $parts[2]
-            $model = $parts[4]
-            if ($surface -match [regex]::Escape($SurfaceName) -and $model -and $model -ne "N/A") {
-                $models.Add($model.Trim())
+        foreach ($row in @(Import-Csv -LiteralPath $catalog -Delimiter "`t")) {
+            if ($row.schema_version -eq "2" -and $row.surface -match [regex]::Escape($SurfaceName) -and $row.model -and $row.model -ne "N/A") {
+                $models.Add($row.model.Trim())
             }
         }
     }

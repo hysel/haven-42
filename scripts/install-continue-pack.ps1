@@ -215,6 +215,58 @@ function Test-InstalledPack {
     }
 }
 
+function Get-TargetProjectProfile {
+    $classifier = Join-Path $repoRoot "scripts/get-project-profile.ps1"
+    if (-not (Test-Path -LiteralPath $classifier -PathType Leaf)) {
+        throw "Project profile classifier is missing: $classifier"
+    }
+
+    $json = (& $classifier -TargetRepo $targetResolved -AsJson | Out-String).Trim()
+    if (-not $json) {
+        throw "Project profile classifier did not return JSON output."
+    }
+
+    return [pscustomobject]@{
+        Json = $json
+        Value = ($json | ConvertFrom-Json)
+    }
+}
+
+function Install-TargetProjectProfile {
+    param([Parameter(Mandatory = $true)][object]$ProfileResult)
+
+    $profilePath = Join-Path $targetContinue "project-profile.json"
+    Set-Content -LiteralPath $profilePath -Value $ProfileResult.Json -Encoding utf8
+
+    foreach ($rulePack in @($ProfileResult.Value.SelectedRulePacks)) {
+        $sourceRelative = [string]$rulePack.SourcePath
+        $activeRelative = [string]$rulePack.ActivePath
+        if ([System.IO.Path]::IsPathFullyQualified($sourceRelative) -or
+            [System.IO.Path]::IsPathFullyQualified($activeRelative) -or
+            $sourceRelative -match "(^|[/\\])\.\.([/\\]|$)" -or
+            $activeRelative -match "(^|[/\\])\.\.([/\\]|$)") {
+            throw "Project profile contains an unsafe rule-pack path."
+        }
+
+        $source = Join-Path $targetContinue $sourceRelative
+        $destination = Join-Path $targetContinue $activeRelative
+        if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+            throw "Selected project rule pack is missing: $sourceRelative"
+        }
+
+        $destinationDirectory = Split-Path -Parent $destination
+        New-Item -ItemType Directory -Force -Path $destinationDirectory | Out-Null
+        Copy-Item -LiteralPath $source -Destination $destination -Force
+    }
+
+    Write-Host "Installed sanitized project profile: $profilePath" -ForegroundColor Green
+    if (@($ProfileResult.Value.SelectedRulePackIds).Count -gt 0) {
+        Write-Host "Activated project rule packs: $(@($ProfileResult.Value.SelectedRulePackIds) -join ', ')" -ForegroundColor Green
+    } else {
+        Write-Host "No optional project rule packs were activated." -ForegroundColor Yellow
+    }
+}
+
 function Get-RecommendedModel {
     $profileScript = Join-Path $repoRoot "scripts/get-local-model-profile.windows.ps1"
 
@@ -561,6 +613,8 @@ function Write-GlobalContinueConfig {
     }
 }
 
+$targetProjectProfile = if ($SharedAssets) { $null } else { Get-TargetProjectProfile }
+
 Write-Plan "Install Local Engineering Agent Pack"
 Write-Plan "Source: $sourceContinue"
 Write-Plan "Target: $targetContinue"
@@ -582,6 +636,11 @@ if ($SharedAssets) {
     if (Test-Path -LiteralPath $sharedAssetsResolved) {
         Write-Plan "Existing shared assets will be backed up to: $backupSharedAssets"
     }
+    Write-Plan "Project-specific classification and rule activation are skipped in shared-assets mode."
+} else {
+    Write-Plan "Detected project ecosystem: $($targetProjectProfile.Value.PrimaryEcosystem) ($($targetProjectProfile.Value.Confidence) confidence)"
+    $selectedRulePacks = @($targetProjectProfile.Value.SelectedRulePackIds)
+    Write-Plan "Project rule packs selected: $(if ($selectedRulePacks.Count -gt 0) { $selectedRulePacks -join ', ' } else { 'none' })"
 }
 if ($AutoModelConfig) {
     Write-Plan "Auto model config is enabled. A target .continue/config.local.yaml file will be generated after install."
@@ -621,6 +680,7 @@ if ($DryRun) {
             $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
             Write-Host "- .continue/$relative"
         }
+        Write-Plan "Would write .continue/project-profile.json and activate the selected project rule packs under .continue/rules/."
     }
     if ($AutoModelConfig) {
         Write-Plan "Would generate .continue/config.local.yaml using the hardware profile recommended model."
@@ -661,6 +721,7 @@ if ($SharedAssets) {
     New-Item -ItemType Directory -Force -Path $targetContinue | Out-Null
     Copy-PackFiles
     Test-InstalledPack
+    Install-TargetProjectProfile -ProfileResult $targetProjectProfile
 }
 
 if ($AutoModelConfig) {

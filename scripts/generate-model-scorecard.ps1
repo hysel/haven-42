@@ -19,6 +19,8 @@ if (-not $ModelCatalogPath) {
 
 $statusRank = @{
     "approved-write-ready" = 100
+    "review-validated" = 95
+    "plan-validated" = 90
     "write-smoke-validated" = 80
     "read-only-tool-validated" = 65
     "read-only-cli-validated" = 60
@@ -71,6 +73,8 @@ function Get-ReadinessLabel {
 
     switch ($Status) {
         "approved-write-ready" { "approved-write ready" }
+        "review-validated" { "review validated" }
+        "plan-validated" { "plan validated" }
         "write-smoke-validated" { "disposable write-smoke validated" }
         "read-only-tool-validated" { "read-only tool validated" }
         "read-only-cli-validated" { "read-only CLI validated" }
@@ -89,12 +93,12 @@ function ConvertTo-Markdown {
         "",
         "Generated from `config/evidence-catalog.tsv` and `config/model-recommendations.tsv`.",
         "",
-        "| Model | Best readiness | Score | Surfaces | Evidence count | Recommended use |",
-        "| --- | --- | ---: | --- | ---: | --- |"
+        "| Model | Surface | OS | Operation | Mode | Readiness | Evidence count |",
+        "| --- | --- | --- | --- | --- | --- | ---: |"
     )
 
     foreach ($row in $Rows) {
-        $lines += "| $($row.Model) | $($row.BestReadiness) | $($row.Score) | $($row.Surfaces -join ', ') | $($row.EvidenceCount) | $($row.RecommendedUse) |"
+        $lines += "| $($row.Model) | $($row.Surface) | $($row.OS) | $($row.Operation) | $($row.ValidationMode) | $($row.Readiness) | $($row.EvidenceCount) |"
     }
 
     return ($lines -join "`n") + "`n"
@@ -117,31 +121,39 @@ if (Test-Path -LiteralPath $ModelCatalogPath) {
 
 $modelRows = @($evidenceRows | Where-Object {
     $_.model -and
-    $_.model -notin @("N/A", "local Ollama config") -and
+    $_.model -notin @("N/A", "local-config", "local Ollama config") -and
     $_.model -notmatch ","
 })
 
-$scorecardRows = @($modelRows | Group-Object model | ForEach-Object {
+$scorecardRows = @($modelRows | Group-Object { "$($_.surface)|$($_.surface_version)|$($_.provider)|$($_.model)|$($_.os)|$($_.operation)|$($_.validation_mode)" } | ForEach-Object {
     $rows = @($_.Group)
-    $best = $rows | Sort-Object { if ($statusRank.ContainsKey($_.status)) { $statusRank[$_.status] } else { 0 } } -Descending | Select-Object -First 1
-    $score = if ($statusRank.ContainsKey($best.status)) { $statusRank[$best.status] } else { 0 }
-    $surfaces = @($rows | ForEach-Object { $_.surface } | Sort-Object -Unique)
+    $mostConservative = $rows | Sort-Object { if ($statusRank.ContainsKey($_.status)) { $statusRank[$_.status] } else { 0 } } | Select-Object -First 1
+    $score = if ($statusRank.ContainsKey($mostConservative.status)) { $statusRank[$mostConservative.status] } else { 0 }
     $statuses = @($rows | ForEach-Object { $_.status } | Sort-Object -Unique)
 
     [pscustomobject]@{
-        Model = $_.Name
+        Model = $mostConservative.model
+        Surface = $mostConservative.surface
+        SurfaceVersion = $mostConservative.surface_version
+        Provider = $mostConservative.provider
+        OS = $mostConservative.os
+        Operation = $mostConservative.operation
+        ValidationMode = $mostConservative.validation_mode
         Score = $score
-        BestStatus = $best.status
-        BestReadiness = Get-ReadinessLabel -Status $best.status
-        Surfaces = $surfaces
+        Status = $mostConservative.status
+        Readiness = Get-ReadinessLabel -Status $mostConservative.status
         Statuses = $statuses
         EvidenceCount = $rows.Count
-        RecommendedUse = Get-RecommendedUse -Model $_.Name -CatalogRows $catalogRows
+        RecommendedUse = Get-RecommendedUse -Model $mostConservative.model -CatalogRows $catalogRows
         Evidence = @($rows | ForEach-Object {
             [pscustomobject]@{
                 Area = $_.area
                 Surface = $_.surface
+                SurfaceVersion = $_.surface_version
+                Provider = $_.provider
                 OS = $_.os
+                Operation = $_.operation
+                ValidationMode = $_.validation_mode
                 Status = $_.status
                 EvidencePath = $_.evidence
                 Notes = $_.notes
@@ -151,12 +163,13 @@ $scorecardRows = @($modelRows | Group-Object model | ForEach-Object {
 } | Sort-Object Score, Model -Descending)
 
 $report = [pscustomobject]@{
-    SchemaVersion = 1
+    SchemaVersion = 2
     GeneratedAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     SourceEvidenceCatalog = "config/evidence-catalog.tsv"
     SourceModelCatalog = "config/model-recommendations.tsv"
-    ModelCount = $scorecardRows.Count
-    Models = $scorecardRows
+    ModelCount = @($modelRows.model | Sort-Object -Unique).Count
+    CapabilityCount = $scorecardRows.Count
+    Capabilities = $scorecardRows
 }
 
 if ($OutputPath) {

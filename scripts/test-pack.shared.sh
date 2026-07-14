@@ -55,13 +55,13 @@ test_release_packaging_scripts() {
     grep -q "local" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q "runtime-validation-output" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q "Build Release Artifacts" "$REPO_ROOT/docs/release.md" &&
-    grep -q "Milestone 19 Continue Completion Basis" "$REPO_ROOT/docs/release.md" &&
+    grep -q "Milestone 19 Completion Basis" "$REPO_ROOT/docs/release.md" &&
     grep -q "config/evidence-catalog.tsv" "$REPO_ROOT/docs/release.md" &&
     grep -q "partial for cross-agent install/configure/test parity" "$REPO_ROOT/docs/release.md" &&
     grep -q "Verify Checksums" "$REPO_ROOT/docs/release.md" &&
     grep -q "GitHub Release" "$REPO_ROOT/docs/release.md" &&
     grep -q "| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "cross-agent install/configure/test script parity remains incomplete outside Continue" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Cross-agent parity gap" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Complete Milestone 19 cross-agent install/configure/test script parity" "$REPO_ROOT/TODO.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
@@ -73,25 +73,36 @@ test_evidence_catalog_schema() {
   doc="$REPO_ROOT/docs/evidence-catalog.md"
   [ -f "$catalog" ] || return 1
   [ -f "$doc" ] || return 1
-  head -n 1 "$catalog" | grep -q $'area\tsubject\tsurface\tos\tmodel\tstatus\tevidence\tnotes' || return 1
+  head -n 1 "$catalog" | grep -q $'schema_version\tarea\tsubject\tsurface\tsurface_version\tprovider\tos\tmodel\toperation\tvalidation_mode\tstatus\tevidence\tnotes' || return 1
   awk -F'\t' '
     NR == 1 { next }
-    NF != 8 { exit 1 }
-    $1 == "" || $2 == "" || $3 == "" || $4 == "" || $5 == "" || $6 == "" || $7 == "" || $8 == "" { exit 1 }
-    $6 !~ /^(candidate-only|plan-review-candidate|read-only-tool-validated|read-only-cli-validated|write-smoke-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass)$/ { exit 1 }
-    $7 ~ /^[A-Za-z]:|^\/|\\|\.\./ { exit 1 }
+    NF != 13 { exit 1 }
+    $1 != "2" { exit 1 }
+    $1 == "" || $2 == "" || $3 == "" || $4 == "" || $5 == "" || $6 == "" || $7 == "" || $8 == "" || $9 == "" || $10 == "" || $11 == "" || $12 == "" || $13 == "" { exit 1 }
+    $11 !~ /^(candidate-only|plan-review-candidate|plan-validated|review-validated|read-only-tool-validated|read-only-cli-validated|write-smoke-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass)$/ { exit 1 }
+    $12 ~ /^[A-Za-z]:|^\/|\\|\.\./ { exit 1 }
     $0 ~ /192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|itama|Users\\|OneDrive|customer|token|secret/ { exit 1 }
-    $6 == "approved-write-ready" { approved = 1 }
-    $6 == "candidate-only" { candidate = 1 }
-    $6 == "read-only-tool-validated" { readonly = 1 }
-    $6 == "write-smoke-validated" { writesmoke = 1 }
+    $11 == "approved-write-ready" { approved = 1 }
+    $11 == "candidate-only" { candidate = 1 }
+    $11 == "read-only-tool-validated" { readonly = 1 }
+    $11 == "write-smoke-validated" { writesmoke = 1 }
     END { if (!approved || !candidate || !readonly || !writesmoke) exit 1 }
   ' "$catalog" || return 1
-  while IFS=$'\t' read -r area subject surface os model status evidence notes; do
-    [ "$area" = "area" ] && continue
+  while IFS=$'\t' read -r schema_version area subject surface surface_version provider os model operation validation_mode status evidence notes; do
+    [ "$schema_version" = "schema_version" ] && continue
     [ -e "$REPO_ROOT/$evidence" ] || return 1
   done < "$catalog"
-  grep -q "config/evidence-catalog.tsv" "$doc" && grep -q "approved-write-ready" "$doc"
+  python3 - "$REPO_ROOT/config/capability-evidence-contract.json" <<'PY' &&
+import json
+import sys
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    contract = json.load(handle)
+assert contract["schemaVersion"] == 2
+assert contract["aggregation"]["allowCrossSurfaceInheritance"] is False
+assert contract["aggregation"]["allowCrossOperationInheritance"] is False
+assert contract["aggregation"]["retainAllEvidencePaths"] is True
+PY
+  grep -q "config/evidence-catalog.tsv" "$doc" && grep -q "approved-write-ready" "$doc" && grep -q "Capability Evidence Contract v2" "$doc"
 }
 test_catalog_schema() {
   awk -F'|' '
@@ -102,7 +113,25 @@ test_catalog_schema() {
     $2 == "" && $3 ~ / or / { exit 1 }
     END { exit 0 }
   ' "$REPO_ROOT/config/model-recommendations.tsv" &&
-    grep -q "simple-hardware default" "$REPO_ROOT/config/model-recommendations.tsv"
+    grep -q "simple-hardware default" "$REPO_ROOT/config/model-recommendations.tsv" &&
+    python3 - "$REPO_ROOT/config/model-fit-profiles.json" <<'PY'
+import json
+import sys
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    catalog = json.load(handle)
+assert catalog["schemaVersion"] == 1
+assert catalog["defaults"]["contextTargetTokens"] >= 1024
+assert catalog["defaults"]["memoryReserveGb"] > 0
+assert catalog["profiles"]
+for profile in catalog["profiles"]:
+    assert profile["matchPattern"]
+    assert profile["estimatedWeightsGb"] > 0
+    assert profile["kvCacheGbAtBaseline"] > 0
+    assert profile["baselineContextTokens"] > 0
+    assert profile["runtimeOverheadGb"] > 0
+    assert profile["quantizationAssumption"]
+    assert profile["architecture"] in {"dense", "mixture-of-experts"}
+PY
 }
 
 test_committed_config_uses_starter_model() {
@@ -179,7 +208,40 @@ test_install_dry_run() {
   temp_repo="$(mktemp -d)"
   "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --dry-run >/tmp/continue-install.out 2>&1 || return 1
   grep -q "Dry run only" /tmp/continue-install.out || return 1
+  grep -q "Detected project ecosystem" /tmp/continue-install.out || return 1
+  grep -q "Would write .continue/project-profile.json" /tmp/continue-install.out || return 1
   [ ! -e "$temp_repo/.continue" ]
+}
+
+test_project_profile_classifier() {
+  temp_repo="$(mktemp -d)"
+  printf '[project]\n' > "$temp_repo/pyproject.toml"
+  profile_path="$temp_repo/profile.json"
+  "$REPO_ROOT/scripts/get-project-profile.shared.sh" --target-repo "$temp_repo" --output-path "$profile_path" >/tmp/project-profile.out 2>&1 || return 1
+  python3 - "$profile_path" "$temp_repo" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    profile = json.load(handle)
+assert profile["SchemaVersion"] == 1
+assert profile["ActivationMinimumConfidence"] == "medium"
+assert "python" in profile["SelectedRulePackIds"]
+assert sys.argv[2] not in json.dumps(profile)
+assert profile["Privacy"]["TargetPathRecorded"] is False
+assert profile["Privacy"]["FileContentsRead"] is False
+PY
+}
+
+test_install_project_profile_activation() {
+  temp_repo="$(mktemp -d)"
+  printf '[project]\n' > "$temp_repo/pyproject.toml"
+  "$REPO_ROOT/scripts/install-continue-pack.shared.sh" --target-repo "$temp_repo" --model-lanes >/tmp/project-profile-install.out 2>&1 || return 1
+  [ -f "$temp_repo/.continue/project-profile.json" ] &&
+    [ -f "$temp_repo/.continue/rules/active-language-python.md" ] &&
+    [ ! -e "$temp_repo/.continue/rules/active-language-java.md" ] &&
+    [ -f "$temp_repo/.continue/config.local.yaml" ] &&
+    grep -q '"python"' "$temp_repo/.continue/project-profile.json"
 }
 
 test_install_auto_model_dry_run() {
@@ -924,10 +986,13 @@ test_hardware_aware_recommendation_scripts() {
   trap 'rm -rf "$temp_root"' RETURN
   profile_path="$temp_root/model-profile.json"
   output_path="$temp_root/recommendation.json"
+  lane_profile_path="$temp_root/lane-model-profile.json"
+  lane_catalog_path="$temp_root/lane-evidence.tsv"
+  lane_output_path="$temp_root/lane-recommendation.json"
 
   cat > "$profile_path" <<'JSON'
 {
-  "Platform": "Linux",
+  "Platform": "Windows",
   "CpuArchitecture": "x64",
   "SystemRamGb": 32,
   "Gpus": [
@@ -962,13 +1027,63 @@ assert report["Privacy"]["RepositoryContentSent"] is False
 assert report["Privacy"]["HardwareProfileSentOnline"] is False
 assert not re.search(r"Users|OneDrive|192\.168\.|localhost", text)
 PY
+
+  cat > "$lane_profile_path" <<'JSON'
+{
+  "Platform": "Linux",
+  "CpuArchitecture": "x64",
+  "SystemRamGb": 128,
+  "Gpus": [{"Name":"fixture gpu","VramGb":64,"MemoryType":"dedicated"}],
+  "OllamaModels": ["qwen3.5:9b", "qwen3-coder:30b"]
+}
+JSON
+
+  printf '%s\n' \
+    $'schema_version\tarea\tsubject\tsurface\tsurface_version\tprovider\tos\tmodel\toperation\tvalidation_mode\tstatus\tevidence\tnotes' \
+    $'2\tmodel-tool-use\tsmall write\tContinue Agent\tnot-recorded\tOllama\tLinux\tqwen3.5:9b\tscoped-write\teditor-agent\tapproved-write-ready\texamples/model-tool-use-validation.md\tSmall validated writer.' \
+    $'2\tmodel-tool-use\tsmall plan\tContinue Agent\tnot-recorded\tOllama\tLinux\tqwen3.5:9b\tplan\teditor-agent\tplan-validated\texamples/model-tool-use-validation.md\tSmall validated planner.' \
+    $'2\tmodel-tool-use\tsmall review\tContinue Agent\tnot-recorded\tOllama\tLinux\tqwen3.5:9b\treview\teditor-agent\treview-validated\texamples/model-tool-use-validation.md\tSmall validated reviewer.' \
+    $'2\tmodel-tool-use\tlarge plan\tContinue Agent\tnot-recorded\tOllama\tLinux\tqwen3-coder:30b\tplan\teditor-agent\tplan-validated\texamples/model-tool-use-validation.md\tLarge validated planner.' \
+    $'2\tmodel-tool-use\tlarge review\tContinue Agent\tnot-recorded\tOllama\tLinux\tqwen3-coder:30b\treview\teditor-agent\treview-validated\texamples/model-tool-use-validation.md\tLarge validated reviewer.' \
+    > "$lane_catalog_path"
+
+  "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" \
+    --model-profile-path "$lane_profile_path" \
+    --evidence-catalog-path "$lane_catalog_path" \
+    --output-path "$lane_output_path" \
+    --context-target-tokens 32768 \
+    --memory-reserve-gb 6 \
+    --vram-selection-mode MaxDedicated >/tmp/lane-scoring-recommendation.out 2>&1 || return 1
+
+  python3 - "$lane_output_path" <<'PY'
+import json
+import sys
+with open(sys.argv[1], "r", encoding="utf-8") as handle:
+    report = json.load(handle)
+assert report["SelectionPolicy"]["Version"] == 1
+assert report["FitPolicy"]["Version"] == 1
+assert report["FitPolicy"]["ContextTargetTokens"] == 32768
+assert report["Recommendation"]["WriteSafeModel"] == "qwen3.5:9b"
+assert report["Recommendation"]["PlanOnlyModel"] == "qwen3-coder:30b"
+assert report["Recommendation"]["DeepReviewModel"] == "qwen3-coder:30b"
+candidates = {item["Model"]: item for item in report["Candidates"]}
+assert candidates["qwen3.5:9b"]["LaneScores"]["WriteSafe"]["Eligible"] is True
+assert candidates["qwen3.5:9b"]["ModelFit"]["Source"] == "model-fit-catalog"
+assert candidates["qwen3.5:9b"]["ModelFit"]["MemoryReserveGb"] == 6
+assert candidates["qwen3.5:9b"]["RecommendedMinVramGb"] == 16.5
+assert candidates["qwen3-coder:30b"]["LaneScores"]["WriteSafe"]["Eligible"] is False
+assert candidates["qwen3-coder:30b"]["LaneScores"]["PlanOnly"]["Score"] > candidates["qwen3.5:9b"]["LaneScores"]["PlanOnly"]["Score"]
+assert candidates["qwen3-coder:30b"]["LaneScores"]["DeepReview"]["Score"] > candidates["qwen3.5:9b"]["LaneScores"]["DeepReview"]["Score"]
+PY
   grep -q "VramSelectionMode" "$REPO_ROOT/scripts/recommend-local-agent-config.ps1" &&
     grep -q "config/evidence-catalog.tsv" "$REPO_ROOT/scripts/recommend-local-agent-config.ps1" &&
     grep -q "python3 is required" "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" &&
     grep -q '"ModelLanes"' "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" &&
+    grep -q '"SelectionPolicy"' "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" &&
     grep -q "HardwareProfileSentOnline" "$REPO_ROOT/scripts/recommend-local-agent-config.shared.sh" &&
     grep -q "ModelLanes" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "WRITE SAFE" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
+    grep -q "Selection policy version 1" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "does not read repository source code" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "hardware-aware model/config recommendation" "$REPO_ROOT/README.md"
 }
@@ -1036,6 +1151,57 @@ JSON
     grep -q "Do not commit this file" "$REPO_ROOT/docs/hardware-aware-recommendations.md"
 }
 
+test_aider_surface_adapter() {
+  temp_root="$(mktemp -d)"
+  trap 'rm -rf "$temp_root"' RETURN
+  mkdir -p "$temp_root/.git/info"
+  : > "$temp_root/.git/info/exclude"
+  recommendation_path="$temp_root/recommendation.json"
+  cat > "$recommendation_path" <<'JSON'
+{
+  "Recommendation": {
+    "WriteSafeModel": "qwen3.5:9b",
+    "PlanOnlyModel": "devstral-small-2:24b",
+    "DeepReviewModel": "qwen3-coder:30b"
+  }
+}
+
+test_workflow_envelope_contract() {
+  command -v python3 >/dev/null 2>&1 || return 1
+  [ -f "$REPO_ROOT/config/workflow-envelope-contract.json" ] || return 1
+  [ -f "$REPO_ROOT/docs/workflow-envelope-contract.md" ] || return 1
+  request='{"schemaVersion":1,"requestId":"shell-pack-test","workflowId":"validate-pack","platform":"linux","dryRun":true,"arguments":["--expected-version","0.2.0"]}'
+  output="$("$REPO_ROOT/scripts/invoke-workflow.linux.sh" --request-json "$request")" || return 1
+  printf '%s' "$output" | python3 -c 'import json,sys; value=json.load(sys.stdin); assert value["schemaVersion"] == 1; assert value["status"] == "planned"; assert value["workflow"]["argumentCount"] == 2; assert not value["result"]["invoked"]; assert any(event["type"] == "warning" for event in value["events"])' || return 1
+  ! printf '%s' "$output" | grep -q 'expected-version'
+}
+JSON
+
+  "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Plan >/tmp/aider-adapter-plan.out 2>&1 || return 1
+  grep -q "local-only" /tmp/aider-adapter-plan.out || return 1
+  "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Install --install-method pipx --dry-run >/tmp/aider-adapter-install.out 2>&1 || return 1
+  grep -q "pipx install aider-chat" /tmp/aider-adapter-install.out || return 1
+  grep -q "no network install" /tmp/aider-adapter-install.out || return 1
+
+  "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" \
+    --action Configure \
+    --target-repo "$temp_root" \
+    --recommendation-path "$recommendation_path" \
+    --lane PlanOnly \
+    --ollama-base-url "http://example.invalid:11434" >/tmp/aider-adapter-configure.out 2>&1 || return 1
+
+  config_path="$temp_root/.aider.conf.local.yml"
+  [ -f "$config_path" ] || return 1
+  grep -q '^model: ollama_chat/devstral-small-2:24b$' "$config_path" || return 1
+  grep -q '^auto-commits: false$' "$config_path" || return 1
+  grep -q '^dirty-commits: false$' "$config_path" || return 1
+  grep -Fxq '.aider.conf.local.yml' "$temp_root/.git/info/exclude" || return 1
+
+  "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Health --target-repo "$temp_root" --aider-command sh >/tmp/aider-adapter-health.out 2>&1 || return 1
+  grep -q 'Aider adapter health: healthy' /tmp/aider-adapter-health.out || return 1
+  ! grep -q 'pwsh' "$REPO_ROOT/scripts/setup-agent-surface.shared.sh"
+}
+
 test_shared_asset_installation_doc() {
   grep -q "Project-Local Mode" "$REPO_ROOT/docs/shared-asset-installation.md" &&
     grep -q "Shared-Assets Mode" "$REPO_ROOT/docs/shared-asset-installation.md" &&
@@ -1065,8 +1231,8 @@ test_solution_architecture_review_doc() {
     grep -q "comparable install/configure/test support is not complete" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for Cline and Aider, partial for all tracked surfaces" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "OpenHands do not yet have full live validation evidence" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Complete for Continue, partial for cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "actual install/configure/test script parity is missing" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Complete for Continue and Aider, partial for cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "install/configure/test script parity is still missing" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "EMPTY_MODEL_OUTPUT" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Evidence States" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "tested-passed" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
@@ -1099,6 +1265,8 @@ run_test "shell wrapper scripts and hooks are executable in git" test_shell_scri
 run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_macos_scripts_do_not_require_pwsh
 run_test "runtime context generation captures useful files and excludes build output" test_runtime_context_generation
 run_test "install script dry run does not modify target repository" test_install_dry_run
+run_test "project classifier emits a sanitized evidence-backed profile" test_project_profile_classifier
+run_test "install script activates evidence-backed project rule packs" test_install_project_profile_activation
 run_test "install script auto model config dry run is explicit" test_install_auto_model_dry_run
 run_test "install script read-only profile omits edit roles" test_install_read_only_profile
 run_test "install script approved-write profile maps to model lanes" test_install_approved_write_profile
@@ -1132,6 +1300,8 @@ run_test "hardware-aware recommendation scripts emit sanitized model lanes" test
 run_test "shared asset installation docs define centralized config strategy" test_shared_asset_installation_doc
 run_test "solution architecture review tracks milestone gaps" test_solution_architecture_review_doc
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
+run_test "Aider surface adapter plans installs configures and reports health safely" test_aider_surface_adapter
+run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

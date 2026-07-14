@@ -138,6 +138,24 @@ TARGET_CONTINUE="$TARGET_RESOLVED/.continue"
 BACKUP_CONTINUE="$TARGET_RESOLVED/.continue.backup-$(date '+%Y%m%d-%H%M%S')"
 BACKUP_GLOBAL_CONFIG="$GLOBAL_CONFIG_PATH.backup-$(date '+%Y%m%d-%H%M%S')"
 BACKUP_SHARED_ASSETS="$SHARED_ASSETS_PATH.backup-$(date '+%Y%m%d-%H%M%S')"
+PROJECT_PROFILE_PATH=""
+
+cleanup_project_profile() {
+  if [ -n "$PROJECT_PROFILE_PATH" ] && [ -f "$PROJECT_PROFILE_PATH" ]; then
+    rm -f "$PROJECT_PROFILE_PATH"
+  fi
+}
+trap cleanup_project_profile EXIT
+
+if [ "$SHARED_ASSETS" = false ]; then
+  PROJECT_PROFILE_PATH="$(mktemp)"
+  "$REPO_ROOT/scripts/get-project-profile.shared.sh" \
+    --target-repo "$TARGET_RESOLVED" \
+    --output-path "$PROJECT_PROFILE_PATH" >/dev/null
+  primary_ecosystem="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["PrimaryEcosystem"])' "$PROJECT_PROFILE_PATH")"
+  profile_confidence="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["Confidence"])' "$PROJECT_PROFILE_PATH")"
+  selected_rule_packs="$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1], encoding="utf-8"))["SelectedRulePackIds"]))' "$PROJECT_PROFILE_PATH")"
+fi
 
 printf 'Installing Continue pack into %s\n' "$TARGET_RESOLVED"
 printf 'Install profile: %s\n' "$INSTALL_PROFILE"
@@ -145,6 +163,10 @@ if [ "$SHARED_ASSETS" = true ]; then
   printf 'Shared-assets mode is enabled.\n'
   printf 'Shared assets target: %s\n' "$SHARED_ASSETS_PATH"
   printf 'Global Continue config update is enabled because shared-assets mode was requested.\n'
+  printf 'Project-specific classification and rule activation are skipped in shared-assets mode.\n'
+else
+  printf 'Detected project ecosystem: %s (%s confidence)\n' "$primary_ecosystem" "$profile_confidence"
+  printf 'Project rule packs selected: %s\n' "${selected_rule_packs:-none}"
 fi
 
 
@@ -160,6 +182,7 @@ if [ "$DRY_RUN" = true ]; then
       printf 'Would back up existing .continue to %s\n' "$BACKUP_CONTINUE"
     fi
     printf 'Would copy .continue files excluding config.local*.yaml.\n'
+    printf 'Would write .continue/project-profile.json and activate selected project rule packs under .continue/rules/.\n'
   fi
   if [ "$AUTO_MODEL_CONFIG" = true ]; then
     printf 'Would generate .continue/config.local.yaml using the hardware profile recommended model.\n'
@@ -210,6 +233,38 @@ while IFS= read -r source_file; do
   mkdir -p "$(dirname "$destination")"
   cp "$source_file" "$destination"
 done < <(find "$SOURCE_CONTINUE" -type f)
+
+if [ "$SHARED_ASSETS" = false ]; then
+  cp "$PROJECT_PROFILE_PATH" "$TARGET_CONTINUE/project-profile.json"
+  while IFS=$'\t' read -r source_relative active_relative; do
+    [ -z "$source_relative" ] && continue
+    case "$source_relative|$active_relative" in
+      /*|*'../'*|*'/..'*)
+        printf 'Project profile contains an unsafe rule-pack path.\n' >&2
+        exit 1
+        ;;
+    esac
+    source_path="$TARGET_CONTINUE/$source_relative"
+    destination_path="$TARGET_CONTINUE/$active_relative"
+    if [ ! -f "$source_path" ]; then
+      printf 'Selected project rule pack is missing: %s\n' "$source_relative" >&2
+      exit 1
+    fi
+    mkdir -p "$(dirname "$destination_path")"
+    cp "$source_path" "$destination_path"
+  done < <(python3 - "$PROJECT_PROFILE_PATH" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    profile = json.load(handle)
+for item in profile["SelectedRulePacks"]:
+    print(f'{item["SourcePath"]}\t{item["ActivePath"]}')
+PY
+)
+  printf 'Installed sanitized project profile: %s\n' "$TARGET_CONTINUE/project-profile.json"
+  printf 'Activated project rule packs: %s\n' "${selected_rule_packs:-none}"
+fi
 
 if [ ! -f "$ASSET_ROOT/config.yaml" ]; then
   printf 'Installed config is missing: %s\n' "$ASSET_ROOT/config.yaml" >&2

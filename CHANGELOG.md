@@ -10,6 +10,16 @@ This project follows a simple changelog format:
 - `Removed` for deprecated or deleted behavior
 
 ## Unreleased
+
+- Added cross-platform, filename-only project classification with sanitized profile output and automatic project-local activation of matching optional language rule packs.
+- Added the `classify-project` workflow registry entry and documented the project-neutral limitation of centralized shared-assets mode.
+- Added lane-specific model scoring policy version 1 with exact capability-evidence gates, reliability-first WRITE SAFE selection, capacity-aware PLAN ONLY and DEEP REVIEW selection, and transparent per-candidate rationale.
+- Added model-fit policy version 1 with curated quantization, weights, context-sensitive cache, runtime overhead, architecture, and memory-reserve assumptions plus cross-platform context/reserve overrides.
+- Added a unified cross-platform agent-surface setup adapter with Aider install planning/execution, local-only Ollama config generation, health checks, workflow dispatch, and deterministic tests.
+- Added schema-v1 workflow request and execution envelopes with cross-platform dispatcher parity, structured progress/warning/result/error events, and privacy-safe output defaults for future UI automation.
+- Fixed malformed Windows paths in shared-assets documentation.
+- Added Capability Evidence Contract v2 with surface-, version-, provider-, OS-, operation-, and validation-mode-specific keys.
+- Migrated recommendation and scorecard consumers to conservative duplicate aggregation with retained provenance and no cross-surface write-readiness inheritance.
 - Added Cline CLI model-test automation scripts and documentation for future read-only and disposable write-smoke screening.
 - Added Continue CLI model-test automation scripts and documentation for CLI-first read-only and disposable write-smoke screening.
 
@@ -54,6 +64,8 @@ This project follows a simple changelog format:
 
 ### Changed
 
+- Consolidated beginner setup, agent menu, and workflow chooser plumbing behind a shared PowerShell module and native shell dispatcher while preserving all documented entry points.
+- Added regression and validation coverage for the shared onboarding engines; full no-PowerShell Linux/macOS rendering remains explicitly tracked.
 - Expanded Milestones 17 through 20 with ordered architecture work for surface-specific evidence, runtime language-rule activation, lane-specific model scoring, Aider adapter completion, versioned workflow envelopes, deeper validation, and UI gating.
 
 - Scoped optional language packs and default .NET/ASP.NET rules with file globs, strengthened API and ASP.NET evidence gates, and added evidence-status fields to review templates.

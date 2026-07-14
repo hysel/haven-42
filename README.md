@@ -1,6 +1,6 @@
 # Local Engineering Agent Pack
 
-Local-first engineering assistant pack for developers, small teams, and enterprise groups that want repeatable AI-assisted review workflows and opinionated guidance for .NET and Clean Architecture repositories.
+Local-first engineering assistant pack for developers, small teams, and enterprise groups that want repeatable AI-assisted workflows, shared engineering standards, and evidence-gated guidance across multiple programming ecosystems.
 
 In plain terms: this repository gives an AI coding agent a ready-made set of prompts, rules, and templates so it can help review, plan, and safely improve software projects in a more consistent way.
 
@@ -22,6 +22,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
 | Understand config generation choices | `docs/config-generation-strategy.md` |
 | Review stable workflow entry points | `docs/workflow-registry.md` |
+| Integrate automation with the versioned workflow envelope | `docs/workflow-envelope-contract.md` |
 | Compare all workflow commands and safety levels | `docs/workflow-chooser.md` |
 | Understand script consolidation boundaries | `docs/script-consolidation-plan.md` |
 | Review milestone solution completeness | `docs/solution-architecture-review.md` |
@@ -48,16 +49,18 @@ It is designed for people who want AI support to follow consistent engineering s
 | Automate Cline CLI model tests | `docs/cline-cli-model-testing.md` |
 | Automate shared agent CLI model tests | `docs/agent-cli-surface-model-testing.md` |
 | Automate Aider CLI model tests | `docs/aider-cli-model-testing.md` |
+| Install, configure, or health-check Aider | `docs/agent-surface-solutions.md` |
 | Automate Continue CLI model tests | `docs/continue-cli-model-testing.md` |
 | Track multi-language support | `docs/language-support.md` |
 | Use optional language rule packs | `docs/language-rule-packs.md` |
 | Review language rule-pack evidence | `examples/language-rule-pack-validation.md` |
 | Review multi-language workflow evidence | `examples/multi-language-workflow-validation.md` |
 | Detect project type before giving advice | `docs/project-detection.md` |
+| Generate and inspect the activated project profile | `docs/project-profile-classification.md` |
 | Generate local sample repositories | `docs/sample-repository-factory.md` |
 | Validate this pack | `Quick Validation` |
 | Build release artifacts | `docs/release.md` |
-| Review validation evidence | `docs/evidence-catalog.md` and `config/evidence-catalog.tsv` |
+| Review validation evidence | `docs/evidence-catalog.md`, `config/capability-evidence-contract.json`, and `config/evidence-catalog.tsv` |
 | Generate evidence and setup summaries | `docs/evidence-dashboard.md` and `docs/beginner-setup-mode.md` |
 | Use scenario packs for common coding tasks | `docs/sample-scenario-packs.md` |
 | Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
@@ -152,7 +155,7 @@ macOS:
 ./scripts/get-local-model-profile.macos.sh
 ```
 
-Then use `docs/local-model-selection.md` to choose the final model. For an offline recommendation JSON that uses your hardware profile, curated model catalog, and validation evidence, run `scripts/recommend-local-agent-config.*`; to write the result to local-only Continue config, run `scripts/apply-recommended-agent-config.*`. See `docs/hardware-aware-recommendations.md`. Treat every recommendation as a starting point, not proof that the model is safe for approved edits. Use `docs/model-tool-use-validation.md` before trusting a model for Agent tools or approved write mode.
+Then use `docs/local-model-selection.md` to choose the final model. For an offline recommendation JSON that uses your hardware profile, curated model and model-fit catalogs, context target, memory reserve, and validation evidence, run `scripts/recommend-local-agent-config.*`; to write the result to local-only Continue config, run `scripts/apply-recommended-agent-config.*`. See `docs/hardware-aware-recommendations.md`. Treat every recommendation as a starting point, not proof that the model is safe for approved edits. Use `docs/model-tool-use-validation.md` before trusting a model for Agent tools or approved write mode.
 
 To install this pack and create a local-only config using the recommended installed model, use `--auto-model-config` with the install script.
 

@@ -122,8 +122,9 @@ fi
 
 if [ "${#MODELS[@]}" -eq 0 ]; then
   if [ -f "$REPO_ROOT/config/evidence-catalog.tsv" ]; then
-    while IFS=$'\t' read -r area subject surface os model status evidence notes; do
-      [ "$area" = "area" ] && continue
+    while IFS=$'\t' read -r schema_version area subject surface surface_version provider os model operation validation_mode status evidence notes; do
+      [ "$schema_version" = "schema_version" ] && continue
+      [ "$schema_version" = "2" ] || continue
       case "$surface" in
         *"$SURFACE_NAME"*) [ -n "$model" ] && [ "$model" != "N/A" ] && MODELS+=("$model") ;;
       esac

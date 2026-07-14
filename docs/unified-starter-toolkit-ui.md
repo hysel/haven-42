@@ -23,6 +23,7 @@ The first screen should be the actual setup console, not a marketing page.
 | --- | --- |
 | Intent menu | `docs/agent-pack-menu.md`, `scripts/show-agent-pack-menu.*`, `config/workflows.json` |
 | Workflow execution | `scripts/invoke-workflow.*` |
+| Request and result contract | `config/workflow-envelope-contract.json` and `docs/workflow-envelope-contract.md` |
 | Evidence dashboard | `scripts/generate-evidence-dashboard.*`, `config/evidence-catalog.tsv`, `config/agent-surface-capabilities.json`, `config/agent-surface-solutions.json` |
 | Beginner setup | `scripts/get-beginner-setup-plan.*`, `docs/beginner-setup-mode.md` |
 | Model choice | `scripts/recommend-local-agent-config.*`, `docs/hardware-aware-recommendations.md` |
@@ -69,7 +70,7 @@ Every model, workflow, agent surface, and installer profile shown in the UI must
 
 ## Implementation Boundary
 
-The UI should call only stable workflow IDs from `config/workflows.json` through `scripts/invoke-workflow.*`. Any new UI action should first exist as a script or registry entry with tests.
+The UI should call only stable workflow IDs from `config/workflows.json` through `scripts/invoke-workflow.*` using the schema-v1 workflow envelope. Any new UI action should first exist as a script or registry entry with tests.
 
 The first implementation can be local-only and static/serverless if it shells out to existing scripts from the user machine. A hosted production service is out of scope because this pack is local-first and should not upload repository content, hardware profiles, local endpoints, or raw validation transcripts.
 
