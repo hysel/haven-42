@@ -1165,16 +1165,6 @@ test_aider_surface_adapter() {
     "DeepReviewModel": "qwen3-coder:30b"
   }
 }
-
-test_workflow_envelope_contract() {
-  command -v python3 >/dev/null 2>&1 || return 1
-  [ -f "$REPO_ROOT/config/workflow-envelope-contract.json" ] || return 1
-  [ -f "$REPO_ROOT/docs/workflow-envelope-contract.md" ] || return 1
-  request='{"schemaVersion":1,"requestId":"shell-pack-test","workflowId":"validate-pack","platform":"linux","dryRun":true,"arguments":["--expected-version","0.2.0"]}'
-  output="$("$REPO_ROOT/scripts/invoke-workflow.linux.sh" --request-json "$request")" || return 1
-  printf '%s' "$output" | python3 -c 'import json,sys; value=json.load(sys.stdin); assert value["schemaVersion"] == 1; assert value["status"] == "planned"; assert value["workflow"]["argumentCount"] == 2; assert not value["result"]["invoked"]; assert any(event["type"] == "warning" for event in value["events"])' || return 1
-  ! printf '%s' "$output" | grep -q 'expected-version'
-}
 JSON
 
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Plan >/tmp/aider-adapter-plan.out 2>&1 || return 1
@@ -1200,6 +1190,16 @@ JSON
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Health --target-repo "$temp_root" --aider-command sh >/tmp/aider-adapter-health.out 2>&1 || return 1
   grep -q 'Aider adapter health: healthy' /tmp/aider-adapter-health.out || return 1
   ! grep -q 'pwsh' "$REPO_ROOT/scripts/setup-agent-surface.shared.sh"
+}
+
+test_workflow_envelope_contract() {
+  command -v python3 >/dev/null 2>&1 || return 1
+  [ -f "$REPO_ROOT/config/workflow-envelope-contract.json" ] || return 1
+  [ -f "$REPO_ROOT/docs/workflow-envelope-contract.md" ] || return 1
+  request='{"schemaVersion":1,"requestId":"shell-pack-test","workflowId":"validate-pack","platform":"linux","dryRun":true,"arguments":["--expected-version","0.2.0"]}'
+  output="$("$REPO_ROOT/scripts/invoke-workflow.linux.sh" --request-json "$request")" || return 1
+  printf '%s' "$output" | python3 -c 'import json,sys; value=json.load(sys.stdin); assert value["schemaVersion"] == 1; assert value["status"] == "planned"; assert value["workflow"]["argumentCount"] == 2; assert not value["result"]["invoked"]; assert any(event["type"] == "warning" for event in value["events"])' || return 1
+  ! printf '%s' "$output" | grep -q 'expected-version'
 }
 
 test_shared_asset_installation_doc() {

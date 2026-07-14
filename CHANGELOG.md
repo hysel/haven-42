@@ -64,6 +64,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+- Fixed the native shell test harness so the workflow-envelope test is defined outside the Aider recommendation JSON heredoc, restoring Linux/macOS CI execution.
 - Consolidated beginner setup, agent menu, and workflow chooser plumbing behind a shared PowerShell module and native shell dispatcher while preserving all documented entry points.
 - Added regression and validation coverage for the shared onboarding engines; full no-PowerShell Linux/macOS rendering remains explicitly tracked.
 - Expanded Milestones 17 through 20 with ordered architecture work for surface-specific evidence, runtime language-rule activation, lane-specific model scoring, Aider adapter completion, versioned workflow envelopes, deeper validation, and UI gating.
