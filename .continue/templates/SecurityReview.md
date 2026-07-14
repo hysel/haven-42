@@ -4,6 +4,13 @@
 
 Summarize the security posture, highest-risk findings, and release impact.
 
+## Evidence Scope
+
+- Inspected files:
+- Confirmed security surfaces:
+- Unconfirmed assumptions:
+- Not-applicable review areas:
+
 ## Threat Model Notes
 
 - Assets:
@@ -16,6 +23,7 @@ Summarize the security posture, highest-risk findings, and release impact.
 
 ### Finding 1
 
+- Status: confirmed, likely, or unconfirmed
 - Severity:
 - Evidence:
 - Impact:

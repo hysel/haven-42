@@ -1,6 +1,7 @@
 ---
 name: Rust Engineering
 optional: true
+globs: ["**/*.rs", "**/Cargo.toml", "**/Cargo.lock"]
 ---
 
 ## Scope

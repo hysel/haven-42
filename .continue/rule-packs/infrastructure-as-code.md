@@ -1,6 +1,7 @@
 ---
 name: Infrastructure As Code Engineering
 optional: true
+globs: ["**/*.tf", "**/*.tfvars", "**/*.hcl", "**/Dockerfile*", "**/docker-compose*.yml", "**/docker-compose*.yaml", "**/compose*.yml", "**/compose*.yaml", "**/Chart.yaml", "**/values*.yaml", "**/values*.yml", ".github/workflows/*.yml", ".github/workflows/*.yaml"]
 ---
 
 ## Scope

@@ -256,7 +256,7 @@
 - [x] Decide whether install scripts should generate surface-specific config bundles instead of only `.continue` assets.
 - [x] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance.
 - [x] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria with evidence-gated surface docs.
-- [ ] Complete Milestone 14 full cross-agent support parity for every tracked surface.
+- [x] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19.
 
 ## Milestone 15: Multi-Language Engineering Support
 
@@ -299,11 +299,14 @@
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
 - [x] Complete Milestone 17 Cline and Aider compatibility validation exit criteria while keeping unconfirmed wrapper live validation evidence-gated.
 - [ ] Complete Milestone 17 full tracked-surface compatibility validation.
+- [ ] Promote Aider as the first end-to-end non-Continue surface by completing install, local-model configuration, health, and test automation with sanitized evidence.
 
 ## Future Agent Surface Evidence Expansion
 
-- [ ] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed.
-- [ ] Define a safe OpenHands validation boundary before adding platform-agent validation automation.
+- [ ] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed.
+- [ ] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed.
+- [ ] Configure OpenCode with a local-only Ollama provider and validate its opencode run wrapper against a generated sample.
+- [x] Define a safe OpenHands validation boundary before adding platform-agent validation automation.
 - [ ] Run explicitly approved non-generated repository validation before promoting any non-Continue surface to real-project approved-write ready.
 
 ## Milestone 18: Language Rule Packs
@@ -313,7 +316,10 @@
 - [x] Add optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
 - [x] Add evidence-gated rule selection guidance for optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code packs.
 - [x] Validate optional language rule packs against generated sample repositories with static evidence checks.
-- [ ] Validate rule packs against editor/model repository-discovery, implementation-planning, and code-review workflows. Partial generated-sample evidence is recorded for Java, Go, Rust, SQL, and Infrastructure; remaining failures must be resolved before marking complete.
+- [ ] Validate rule packs against editor/model repository-discovery, implementation-planning, code-review, and scoped-write workflows. Partial generated-sample evidence is recorded for Java, Go, Rust, SQL, and Infrastructure; remaining failures must be resolved before marking complete.
+- [ ] Add a machine-readable project-profile classifier with ecosystem, evidence, confidence, and selected rule-pack IDs.
+- [ ] Activate matching optional language rule packs through installer/config generation so installed projects do not require manual rule wiring.
+- [ ] Add medium-complexity language samples and a representative validation matrix covering discovery, planning, review, and scoped write.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
 
@@ -321,6 +327,9 @@
 - [x] Add a sanitized evidence catalog for model, surface, OS, language, and write-readiness results.
 - [x] Add release archive, checksum, and install-command guidance.
 - [x] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria.
+- [ ] Define Capability Evidence Contract v2 keyed by surface, model, provider, OS, surface version, operation, and validation mode.
+- [ ] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
+- [ ] Prevent write-readiness evidence from one agent surface from being inherited by another surface.
 - [ ] Complete Milestone 19 cross-agent install/configure/test script parity.
 - [ ] Add Cline install/configure automation or keep it blocked with exact evidence gaps.
 - [ ] Add Aider install/configure automation or keep it blocked with exact evidence gaps.
@@ -340,14 +349,17 @@
 - [x] Add a script consolidation plan for shared engines, registries, dispatchers, thin wrappers, and no-consolidate-yet cases.
 - [x] Consolidate PowerShell agent CLI wrapper defaults behind the shared agent CLI harness default catalog.
 - [x] Consolidate Bash agent CLI wrapper defaults behind the shared agent CLI harness default catalog.
+- [ ] Add lane-specific model scoring that keeps WRITE SAFE reliability-first and can select larger validated PLAN ONLY or DEEP REVIEW models when hardware permits.
+- [ ] Replace parameter-name-only VRAM estimates with metadata for quantization, context target, backend overhead, model architecture or MoE behavior, and configurable memory reserve.
 - [ ] Execute script-family consolidation behind shared engines, registries, or dispatchers before adding more plugin-specific wrappers.
+- [ ] Define a versioned workflow request, progress, result, warning, and error envelope for dispatchers and the future UI.
 - [x] Add a guided command/menu layer so end users choose from a small set of intents instead of individual scripts.
 - [x] Keep individual script documentation as appendix/reference material for advanced users and maintainers.
 - [x] Define a machine-readable workflow registry for tasks, inputs, outputs, safety level, platform support, and script entry points.
 - [x] Define the stable script/API boundary that a future unified starter-toolkit web UI should call by adding a shared command dispatcher over the workflow registry.
 - [x] Add cross-platform workflow dispatcher wrappers for Linux and macOS over the shared workflow registry.
 - [x] Design a unified web UI for local-AI coding setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.
-- [ ] Add the unified web UI wrapper after script-level workflows are stable.
+- [ ] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated.
 - [x] Keep the UI evidence-first by showing tested, passed, failed, and recommended-only states before applying changes.
 - [x] Generate a local evidence dashboard from committed evidence and surface readiness data.
 - [x] Add beginner setup mode for the common local-AI coding setup path.
@@ -368,3 +380,4 @@
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.
 - [ ] Confirm whether external wiki publishing is required for the next release.
 - [ ] Resolve Milestone 18 editor/model workflow failures before promoting Java, Go, Rust, SQL, and Infrastructure rule packs beyond evidence-gated status.
+- [ ] Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams after the new contracts are implemented so documented maturity matches verified behavior.

@@ -648,19 +648,19 @@ The Continue entry point. It defines local Ollama models, repository context pro
 
 ### `.continue/agents`
 
-Role-specific assistant definitions, including senior engineer, architect, security engineer, performance engineer, reviewer, documentation specialist, and product manager.
+Role-specific assistant definitions with a shared operating contract for permissions, tool use, untrusted repository content, failure reporting, and post-edit verification.
 
 ### `.continue/prompts`
 
-Task-oriented workflows for repository discovery, implementation planning, legacy .NET dependency migration, code review, bug investigation, architecture review, security review, performance review, and documentation.
+Task-oriented, read-only review and planning workflows with explicit evidence, tool-use, filename-fidelity, and failure-reporting contracts.
 
 ### `.continue/rules`
 
-Reusable engineering standards for general development, Git, .NET, ASP.NET Core, APIs, Clean Architecture, testing, logging, security, performance, and SonarQube.
+Reusable engineering standards with evidence gates and file globs that keep ecosystem-specific guidance scoped to matching repositories.
 
 ### `.continue/templates`
 
-Output templates for durable engineering artifacts such as architecture notes, AI guidance, security reviews, performance reviews, and legacy .NET dependency migration plans.
+Output templates for durable engineering artifacts with explicit evidence scope, confidence or finding status, validation, and open questions.
 
 ### `examples`
 
@@ -688,7 +688,7 @@ The repository contains an initial usable pack structure:
 - Model-backed execution has been validated with a test-time Ollama endpoint override.
 - MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-Version `0.1.12` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, tool-enabled workflow guidance, hardware-aware local model selection support, catalog-based model recommendations, local configuration safety guidance, ARM and Apple Silicon guidance, Linux/macOS runtime wrappers, cross-platform smoke tests, practical MCP examples, and improved README onboarding.
+Version `0.2.0` includes runtime validation tooling, prompt quality hardening, beginner setup guidance, tool-enabled workflow guidance, hardware-aware local model selection support, catalog-based model recommendations, local configuration safety guidance, ARM and Apple Silicon guidance, Linux/macOS runtime wrappers, cross-platform smoke tests, practical MCP examples, and improved README onboarding.
 
 ## Standard Usage
 

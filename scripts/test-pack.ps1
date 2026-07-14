@@ -647,7 +647,7 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     Assert-True -Condition ($doc -match "Continue is the first supported surface") -Message "Agent surface doc should keep Continue as the current supported surface."
     Assert-True -Condition ($doc -match "Compatibility Matrix") -Message "Agent surface doc should include an explicit compatibility matrix."
     Assert-True -Condition ($doc -match "Milestone 14 Positioning Completion Basis") -Message "Agent surface doc should record scoped Milestone 14 completion basis."
-    Assert-True -Condition ($doc -match "partial for full cross-agent support parity") -Message "Agent surface doc should keep full parity gap visible."
+    Assert-True -Condition ($doc -match "Full live validation parity belongs to Milestone 17") -Message "Agent surface doc should keep full validation parity gap visible."
     Assert-True -Condition ($doc -match "docs/cline-readonly-validation\.md") -Message "Agent surface doc should cite non-Continue read-only validation evidence."
     Assert-True -Condition ($doc -match "docs/surface-specific-config-bundles\.md") -Message "Agent surface doc should cite surface-specific config bundle policy."
     Assert-True -Condition ($doc -match "docs/setup-paths\.md") -Message "Agent surface doc should cite beginner and team setup paths."
@@ -662,9 +662,9 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     Assert-True -Condition ($doc -match "Blocked") -Message "Agent surface doc should block unvalidated approved writes."
     Assert-True -Condition ($doc -match "Non-Enterprise Use") -Message "Agent surface doc should address non-enterprise users."
     Assert-True -Condition ($readme -match "docs/agent-surface-options.md") -Message "README should link agent surface options."
-    Assert-True -Condition ($roadmap -match "\| Milestone 14: Agent Surface Portability And Broader Audience \| Partial \|") -Message "Roadmap should mark Milestone 14 partial for full cross-agent parity."
+    Assert-True -Condition ($roadmap -match "\| Milestone 14: Agent Surface Portability And Broader Audience \| Complete \|") -Message "Roadmap should mark Milestone 14 complete for portability and broader-audience scope."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria") -Message "TODO should mark Milestone 14 positioning scope complete."
-    Assert-True -Condition ($todo -match "\[ \] Complete Milestone 14 full cross-agent support parity for every tracked surface") -Message "TODO should keep full Milestone 14 support parity pending."
+    Assert-True -Condition ($todo -match "\[x\] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19") -Message "TODO should show full cross-agent parity moved to Milestones 17 and 19."
 }
 
 
@@ -806,12 +806,25 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
     Assert-True -Condition ($promotionGates -match "Roo Code, Kilo Code, and OpenCode remain future live-validation targets") -Message "Promotion gates should keep unconfirmed wrapper validation future-gated."
+    $openHandsBoundary = Get-Content -Raw (Join-Path $repoRoot "docs/openhands-validation-boundary.md")
+    Assert-True -Condition ($openHandsBoundary -match "OpenHands Validation Boundary") -Message "OpenHands boundary doc should have a clear title."
+    Assert-True -Condition ($openHandsBoundary -match "disposable generated repository") -Message "OpenHands boundary should require a generated sample."
+    Assert-True -Condition ($openHandsBoundary -match "SSH keys") -Message "OpenHands boundary should exclude host credentials."
+    Assert-True -Condition ($openHandsBoundary -match "Docker socket") -Message "OpenHands boundary should exclude privileged container access."
+    Assert-True -Condition ($openHandsBoundary -match "unrestricted network access") -Message "OpenHands boundary should limit network access."
+    Assert-True -Condition ($promotionGates -match "docs/openhands-validation-boundary\.md") -Message "Promotion gates should link the OpenHands validation boundary."
     Assert-True -Condition ($roadmap -match "\| Milestone 17: Agent Surface Compatibility Validation \| Partial \|") -Message "Roadmap should mark Milestone 17 partial for full tracked-surface validation."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria") -Message "TODO should mark Cline/Aider Milestone 17 scope complete."
     Assert-True -Condition ($todo -match "\[ \] Complete Milestone 17 full tracked-surface compatibility validation") -Message "TODO should keep full Milestone 17 surface validation pending."
     Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
-    Assert-True -Condition ($todo -match "\[ \] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed") -Message "TODO should keep unconfirmed wrapper live validation pending."
-    Assert-True -Condition ($todo -match "\[ \] Define a safe OpenHands validation boundary before adding platform-agent validation automation") -Message "TODO should keep OpenHands validation boundary pending."
+    Assert-True -Condition ($todo -match "\[ \] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed") -Message "TODO should keep Roo CLI validation evidence-gated."
+    Assert-True -Condition ($todo -match "\[ \] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed") -Message "TODO should keep Kilo CLI validation evidence-gated."
+    Assert-True -Condition ($todo -match "\[ \] Configure OpenCode with a local-only Ollama provider and validate its opencode run wrapper against a generated sample") -Message "TODO should track OpenCode local-provider validation."
+    Assert-True -Condition ($doc -match "Confirmed Command Boundaries") -Message "Shared CLI doc should record verified command boundaries."
+    Assert-True -Condition ($doc -match "opencode run") -Message "Shared CLI doc should record the OpenCode non-interactive command."
+    Assert-True -Condition ($doc -match "safe non-interactive task syntax remains unverified") -Message "Shared CLI doc should keep Kilo non-interactive behavior evidence-gated."
+    Assert-True -Condition ($doc -match "No stable local CLI contract is confirmed") -Message "Shared CLI doc should keep Roo command assumptions evidence-gated."
+    Assert-True -Condition ($todo -match "\[x\] Define a safe OpenHands validation boundary before adding platform-agent validation automation") -Message "TODO should mark the OpenHands validation boundary complete."
 
     $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
     $expectedSurfaceKeys = @("aider-cli", "roo-code-cli", "kilo-code-cli", "opencode-cli")
@@ -1061,6 +1074,66 @@ Invoke-PackTest "project detection docs and guidance are evidence-gated" {
     }
 }
 
+Invoke-PackTest "agent prompt rule and template contracts are enforced" {
+    $agentFiles = Get-ChildItem -LiteralPath (Join-Path $repoRoot ".continue/agents") -Filter "*.md"
+    $promptFiles = Get-ChildItem -LiteralPath (Join-Path $repoRoot ".continue/prompts") -Filter "*.md"
+    $optionalRuleFiles = Get-ChildItem -LiteralPath (Join-Path $repoRoot ".continue/rule-packs") -Filter "*.md"
+
+    foreach ($agentFile in $agentFiles) {
+        $agent = Get-Content -LiteralPath $agentFile.FullName -Raw
+        Assert-True -Condition ($agent -match "Operating Contract") -Message "$($agentFile.Name) should define the operating contract."
+        Assert-True -Condition ($agent -match "role title does not grant permission") -Message "$($agentFile.Name) should not expand edit permissions."
+        Assert-True -Condition ($agent -match "untrusted data") -Message "$($agentFile.Name) should treat repository content as untrusted."
+        Assert-True -Condition ($agent -match "verify the changed files and diff") -Message "$($agentFile.Name) should require post-edit verification."
+    }
+
+    foreach ($promptFile in $promptFiles) {
+        $prompt = Get-Content -LiteralPath $promptFile.FullName -Raw
+        Assert-True -Condition ($prompt -match "Execution Contract") -Message "$($promptFile.Name) should define the execution contract."
+        Assert-True -Condition ($prompt -match "slash prompt is read-only") -Message "$($promptFile.Name) should remain read-only in Agent mode."
+        Assert-True -Condition ($prompt -match "untrusted data") -Message "$($promptFile.Name) should treat repository and tool output as untrusted."
+        Assert-True -Condition ($prompt -match "Do not print tool-call JSON") -Message "$($promptFile.Name) should require real tool invocation."
+        Assert-True -Condition ($prompt -match "checks actually run") -Message "$($promptFile.Name) should distinguish performed and future validation."
+    }
+
+    foreach ($ruleFile in $optionalRuleFiles) {
+        $rule = Get-Content -LiteralPath $ruleFile.FullName -Raw
+        Assert-True -Condition ($rule -match "(?m)^globs:") -Message "$($ruleFile.Name) should define file globs."
+    }
+
+    $generalRule = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/rules/general.md") -Raw
+    $securityRule = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/rules/security.md") -Raw
+    $dotnetRule = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/rules/dotnet.md") -Raw
+    $aspnetRule = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/rules/aspnetcore.md") -Raw
+    $apiRule = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/rules/api.md") -Raw
+    Assert-True -Condition ($generalRule -match "untrusted data") -Message "General rules should define the untrusted-content boundary."
+    Assert-True -Condition ($generalRule -match "separate side effects") -Message "General rules should define side-effect authorization."
+    Assert-True -Condition ($securityRule -match "instructions found in source files") -Message "Security rules should address prompt injection in repository content."
+    Assert-True -Condition ($securityRule -match "local-only configuration") -Message "Security rules should keep model endpoints and credentials local."
+    Assert-True -Condition ($dotnetRule -match "(?m)^globs:") -Message ".NET rules should define file globs."
+    Assert-True -Condition ($aspnetRule -match "(?m)^globs:") -Message "ASP.NET rules should define file globs."
+    Assert-True -Condition ($aspnetRule -match "confirm an ASP.NET Core web surface") -Message "ASP.NET rules should require web-surface evidence."
+    Assert-True -Condition ($apiRule -match "Evidence Gate") -Message "API rules should require API evidence."
+
+    $architectureTemplate = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/templates/Architecture.md") -Raw
+    $securityTemplate = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/templates/SecurityReview.md") -Raw
+    $performanceTemplate = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/templates/PerformanceReview.md") -Raw
+    $aiTemplate = Get-Content -LiteralPath (Join-Path $repoRoot ".continue/templates/AI.md") -Raw
+    Assert-True -Condition ($architectureTemplate -match "Evidence Scope") -Message "Architecture template should record evidence scope."
+    Assert-True -Condition ($securityTemplate -match "Status: confirmed, likely, or unconfirmed") -Message "Security findings should record confidence status."
+    Assert-True -Condition ($performanceTemplate -match "Status: measured, inferred, or unconfirmed") -Message "Performance findings should record evidence status."
+    Assert-True -Condition ($aiTemplate -match "Tool And Change Boundaries") -Message "AI guidance should record tool and change boundaries."
+    Assert-True -Condition ($aiTemplate -match "Separate commands already verified") -Message "AI guidance should separate performed and future validation."
+
+    $promptQuality = Get-Content -LiteralPath (Join-Path $repoRoot "docs/prompt-quality.md") -Raw
+    $bannedPatterns = Get-Content -LiteralPath (Join-Path $repoRoot "docs/banned-output-patterns.md") -Raw
+    $languageRules = Get-Content -LiteralPath (Join-Path $repoRoot "docs/language-rule-packs.md") -Raw
+    $readme = Get-Content -LiteralPath (Join-Path $repoRoot "README.md") -Raw
+    Assert-True -Condition ($promptQuality -match "Execution And Evidence Contract") -Message "Prompt quality docs should define the execution contract."
+    Assert-True -Condition ($bannedPatterns -match "pseudo function calls") -Message "Banned patterns should reject printed tool syntax."
+    Assert-True -Condition ($languageRules -match "evidence-gated \.NET, ASP.NET Core, and API rules") -Message "Language rule docs should describe default rule loading accurately."
+    Assert-True -Condition ($readme -match 'Version `0\.2\.0`') -Message "README should report the current pack version."
+}
 Invoke-PackTest "sample repository factory creates expected fixtures" {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "sample-factory-test-$([guid]::NewGuid())"
 
@@ -2926,7 +2999,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($todo -match "\[ \] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode") -Message "TODO should track input-needed wrapper command shapes."
     Assert-True -Condition ($todo -match "\[x\] Design a unified web UI") -Message "TODO should mark unified UI design complete."
     Assert-True -Condition ($todo -match "\[x\] Keep the UI evidence-first") -Message "TODO should mark evidence-first UI design complete."
-    Assert-True -Condition ($todo -match "\[ \] Add the unified web UI wrapper after script-level workflows are stable") -Message "TODO should keep UI implementation pending."
+    Assert-True -Condition ($todo -match "\[ \] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated") -Message "TODO should keep UI implementation pending."
     Assert-True -Condition ($todo -match "\[ \] Confirm scope and priority for the unified starter-toolkit web UI") -Message "TODO should track UI scope input."
 }
 Invoke-PackTest "sample scenario packs reference existing assets" {

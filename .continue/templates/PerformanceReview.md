@@ -4,6 +4,13 @@
 
 Summarize performance posture, expected bottlenecks, and highest-value next action.
 
+## Evidence Scope
+
+- Inspected files:
+- Measurements available:
+- Unconfirmed assumptions:
+- Not-applicable review areas:
+
 ## Workload Assumptions
 
 - Users or requests:
@@ -16,6 +23,7 @@ Summarize performance posture, expected bottlenecks, and highest-value next acti
 
 ### Finding 1
 
+- Status: measured, inferred, or unconfirmed
 - Severity:
 - Evidence:
 - Impact:

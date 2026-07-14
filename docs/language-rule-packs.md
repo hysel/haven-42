@@ -4,7 +4,7 @@
 
 Language rule packs provide ecosystem-specific guidance without making the default pack noisy or wrong for every repository.
 
-The default `.continue/config.yaml` loads only shared engineering rules. Optional language rule packs live under `.continue/rule-packs/` and should be used only after project detection confirms matching repository evidence.
+The default `.continue/config.yaml` loads shared engineering rules plus evidence-gated .NET, ASP.NET Core, and API rules. Optional language rule packs live under `.continue/rule-packs/` and should be used only after project detection confirms matching repository evidence.
 
 ## Current Optional Packs
 
@@ -28,9 +28,9 @@ The default `.continue/config.yaml` loads only shared engineering rules. Optiona
 
 ## Default Config Behavior
 
-Optional rule packs are intentionally not referenced from `.continue/config.yaml`.
+Optional rule packs are intentionally not referenced from `.continue/config.yaml`. The default config includes the shared rules and the evidence-gated .NET, ASP.NET Core, and API rules. Their file globs reduce irrelevant activation, while their evidence gates remain authoritative when repository classification is uncertain.
 
-This prevents every installed pack from globally applying Python or TypeScript advice to .NET, SQL, infrastructure, documentation, or mixed repositories. If a future installer profile enables language packs automatically, it must do so through explicit profile selection and evidence-gated documentation.
+Keeping the optional packs out of the default config prevents Python, JavaScript/TypeScript, Java, Go, Rust, SQL, or infrastructure advice from being applied to unrelated repositories. If a future installer profile enables optional language packs automatically, it must do so through explicit profile selection and evidence-gated documentation.
 
 ## Validation Expectations
 

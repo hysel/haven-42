@@ -15,6 +15,9 @@ This project follows a simple changelog format:
 
 ### Added
 
+- Added shared agent operating contracts and read-only prompt execution contracts for permission boundaries, real tool invocation, untrusted repository content, failure reporting, and post-edit verification.
+
+
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added sanitized Cline generated-sample failure evidence showing candidate-only status after tool execution did not complete.
@@ -51,6 +54,12 @@ This project follows a simple changelog format:
 
 ### Changed
 
+- Expanded Milestones 17 through 20 with ordered architecture work for surface-specific evidence, runtime language-rule activation, lane-specific model scoring, Aider adapter completion, versioned workflow envelopes, deeper validation, and UI gating.
+
+- Scoped optional language packs and default .NET/ASP.NET rules with file globs, strengthened API and ASP.NET evidence gates, and added evidence-status fields to review templates.
+- Updated prompt-quality, banned-output, language-pack, README, and cross-platform regression guidance to match the new contracts and current version.
+
+
 - Updated runtime validation runners to fail fast with a sanitized local Ollama API preflight when local model servers are unreachable.
 - Updated language support and rule-pack documentation to distinguish static generated-sample validation from editor/model workflow validation.
 - Updated Python sample repository factory metadata to include `pyproject.toml` for stronger generated-sample validation.
@@ -69,6 +78,7 @@ This project follows a simple changelog format:
 ## 0.2.0 - 2026-07-05
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -120,6 +130,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+
 - Repositioned the project docs around the broader `Local Engineering Agent Pack` name while keeping Continue as the first supported and validated agent surface.
 - Changed generated model profiles to use `qwen3.5:9b` for WRITE SAFE, PLAN ONLY, and DEEP REVIEW by default so simple-hardware setups do not require 24B or 30B models.
 - Tuned the committed local model defaults to `contextLength: 16384` and `maxTokens: 2048` after VS Code and VSCodium Agent testing showed better responsiveness with smaller local output budgets.
@@ -136,6 +147,7 @@ This project follows a simple changelog format:
 ## 0.1.12 - 2026-07-03
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -168,6 +180,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+
 - Documented the current PowerShell install/update workflow in the README.
 - Documented Windows, Linux, and macOS install/update commands in the README.
 
@@ -179,6 +192,7 @@ This project follows a simple changelog format:
 ## 0.1.11 - 2026-07-03
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -197,6 +211,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+
 - Reworked the README quick start to cover Windows, Linux, and macOS setup and validation paths.
 - Added a README quick-start note explaining that model helper scripts use `config/model-recommendations.tsv`.
 - Added README path-selection, day-to-day usage, safe first prompt, and common-problem guidance.
@@ -211,6 +226,7 @@ This project follows a simple changelog format:
 ## 0.1.10 - 2026-07-02
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -245,6 +261,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
@@ -263,6 +280,7 @@ This project follows a simple changelog format:
 ## 0.1.7 - 2026-07-02
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -291,6 +309,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
@@ -316,6 +335,7 @@ This project follows a simple changelog format:
 
 ### Added
 
+
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
 - Added filename-fidelity gates to runtime review prompts and repository discovery so missing recommended files must be labeled instead of described as existing.
@@ -335,6 +355,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+
 - Tightened implementation planning guidance for legacy .NET project and dependency-management migrations.
 - Strengthened legacy project migration guardrails after runtime validation showed unsafe project-file rewrite recommendations.
 - Added explicit safeguards against mechanical `packages.config` migration recipes for custom MSBuild and add-in projects.
@@ -345,6 +366,7 @@ This project follows a simple changelog format:
 ## 0.1.4 - 2026-07-02
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -361,6 +383,7 @@ This project follows a simple changelog format:
 ## 0.1.3 - 2026-07-02
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -383,6 +406,7 @@ This project follows a simple changelog format:
 
 ### Changed
 
+
 - Selected the MIT License for repository reuse and redistribution.
 - Verified that Continue CLI can load the pack configuration.
 - Validated model-backed execution against a local-network Ollama endpoint used only as a test-time override.
@@ -392,6 +416,7 @@ This project follows a simple changelog format:
 ## 0.1.1
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.
@@ -413,11 +438,13 @@ This project follows a simple changelog format:
 
 ### Changed
 
+
 - README now documents early implementation status, setup assumptions, and pending runtime validation.
 
 ## 0.1.0
 
 ### Added
+
 
 - Added sanitized Cline approved-write smoke-test evidence for a disposable generated Python sample, while keeping real-project approved-write blocked.
 - Added sanitized Cline read-only generated-sample validation evidence for qwen3-coder:30b at 16k context, with approved-write still blocked.

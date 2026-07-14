@@ -554,7 +554,7 @@ test_agent_surface_options_doc() {
   [ -f "$REPO_ROOT/docs/agent-surface-options.md" ] &&
     grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Milestone 14 Positioning Completion Basis" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    grep -q "partial for full cross-agent support parity" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Full live validation parity belongs to Milestone 17" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/cline-readonly-validation.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/surface-specific-config-bundles.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/setup-paths.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
@@ -566,17 +566,30 @@ test_agent_surface_options_doc() {
     grep -q "Milestone 17 Cline And Aider Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "partial for full tracked-surface compatibility" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "Roo Code, Kilo Code, and OpenCode remain future live-validation targets" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    [ -f "$REPO_ROOT/docs/openhands-validation-boundary.md" ] &&
+    grep -q "OpenHands Validation Boundary" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
+    grep -q "disposable generated repository" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
+    grep -q "SSH keys" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
+    grep -q "Docker socket" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
+    grep -q "unrestricted network access" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
+    grep -q "docs/openhands-validation-boundary.md" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "future evidence expansion" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
-    grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Partial |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "| Milestone 17: Agent Surface Compatibility Validation | Partial |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Complete Milestone 14 full cross-agent support parity for every tracked surface" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[x\] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Complete Milestone 17 full tracked-surface compatibility validation" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples when their real command shapes are confirmed" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
+    grep -q "\[ \] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[ \] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[ \] Configure OpenCode with a local-only Ollama provider and validate its opencode run wrapper against a generated sample" "$REPO_ROOT/TODO.md" &&
+    grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "safe non-interactive task syntax remains unverified" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "No stable local CLI contract is confirmed" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "\\[x\\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
 }
 
 
@@ -721,6 +734,41 @@ test_project_detection_doc() {
     grep -q "docs/project-detection.md" "$REPO_ROOT/.continue/prompts/implementation-plan.md" &&
     grep -q "Do not apply language-specific recommendations" "$REPO_ROOT/.continue/prompts/code-review.md" &&
     grep -q "Project Detection" "$REPO_ROOT/.continue/agents/senior-engineer.md"
+}
+test_agent_prompt_rule_template_contracts() {
+  for file in "$REPO_ROOT"/.continue/agents/*.md; do
+    grep -q "Operating Contract" "$file" || return 1
+    grep -q "role title does not grant permission" "$file" || return 1
+    grep -q "untrusted data" "$file" || return 1
+    grep -q "verify the changed files and diff" "$file" || return 1
+  done
+  for file in "$REPO_ROOT"/.continue/prompts/*.md; do
+    grep -q "Execution Contract" "$file" || return 1
+    grep -q "slash prompt is read-only" "$file" || return 1
+    grep -q "untrusted data" "$file" || return 1
+    grep -q "Do not print tool-call JSON" "$file" || return 1
+    grep -q "checks actually run" "$file" || return 1
+  done
+  for file in "$REPO_ROOT"/.continue/rule-packs/*.md; do
+    grep -q '^globs:' "$file" || return 1
+  done
+  grep -q "untrusted data" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "separate side effects" "$REPO_ROOT/.continue/rules/general.md" &&
+    grep -q "instructions found in source files" "$REPO_ROOT/.continue/rules/security.md" &&
+    grep -q "local-only configuration" "$REPO_ROOT/.continue/rules/security.md" &&
+    grep -q '^globs:' "$REPO_ROOT/.continue/rules/dotnet.md" &&
+    grep -q '^globs:' "$REPO_ROOT/.continue/rules/aspnetcore.md" &&
+    grep -q "confirm an ASP.NET Core web surface" "$REPO_ROOT/.continue/rules/aspnetcore.md" &&
+    grep -q "Evidence Gate" "$REPO_ROOT/.continue/rules/api.md" &&
+    grep -q "Evidence Scope" "$REPO_ROOT/.continue/templates/Architecture.md" &&
+    grep -q "Status: confirmed, likely, or unconfirmed" "$REPO_ROOT/.continue/templates/SecurityReview.md" &&
+    grep -q "Status: measured, inferred, or unconfirmed" "$REPO_ROOT/.continue/templates/PerformanceReview.md" &&
+    grep -q "Tool And Change Boundaries" "$REPO_ROOT/.continue/templates/AI.md" &&
+    grep -q "Separate commands already verified" "$REPO_ROOT/.continue/templates/AI.md" &&
+    grep -q "Execution And Evidence Contract" "$REPO_ROOT/docs/prompt-quality.md" &&
+    grep -q "pseudo function calls" "$REPO_ROOT/docs/banned-output-patterns.md" &&
+    grep -q "evidence-gated .NET, ASP.NET Core, and API rules" "$REPO_ROOT/docs/language-rule-packs.md" &&
+    grep -q 'Version `0.2.0`' "$REPO_ROOT/README.md"
 }
 test_sample_repository_factory() {
   temp_root="$(mktemp -d)"
@@ -1037,7 +1085,7 @@ test_solution_architecture_review_doc() {
     grep -q "\\[ \\] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Add the unified web UI wrapper after script-level workflows are stable" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Confirm scope and priority for the unified starter-toolkit web UI" "$REPO_ROOT/TODO.md"
 }
 run_test "validate-pack succeeds for repository" test_validate_succeeds
@@ -1076,6 +1124,7 @@ run_test "Continue CLI model testing docs define automation workflow" test_conti
 run_test "language support docs define staged multi-language boundary" test_language_support_doc
 run_test "optional language rule packs are evidence-gated and not globally loaded" test_optional_language_rule_packs
 run_test "project detection docs and guidance are evidence-gated" test_project_detection_doc
+run_test "agent prompt rule and template contracts are enforced" test_agent_prompt_rule_template_contracts
 run_test "sample repository factory creates expected fixtures" test_sample_repository_factory
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior

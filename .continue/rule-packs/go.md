@@ -1,6 +1,7 @@
 ---
 name: Go Engineering
 optional: true
+globs: ["**/*.go", "**/go.mod", "**/go.sum"]
 ---
 
 ## Scope

@@ -10,7 +10,7 @@ It answers the same three questions for every surface:
 
 The catalog does not make planned or blocked surfaces look ready. It records the current solution, status, evidence, and blocked reason for each agent.
 
-It also records the config-bundle policy. Continue is the only supported generated bundle today; future surface-specific bundles are gated by `docs/surface-specific-config-bundles.md`.
+It also records the config-bundle policy. Continue is the only supported generated bundle today; future surface-specific bundles are gated by `docs/surface-specific-config-bundles.md`. Platform-agent validation must also follow `docs/openhands-validation-boundary.md`.
 
 ## Current Summary
 

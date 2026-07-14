@@ -1,6 +1,7 @@
 ---
 name: Python Engineering
 optional: true
+globs: ["**/*.py", "**/pyproject.toml", "**/requirements*.txt", "**/pytest.ini", "**/tox.ini"]
 ---
 
 ## Scope

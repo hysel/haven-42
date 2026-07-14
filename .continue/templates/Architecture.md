@@ -4,6 +4,13 @@
 
 Briefly describe the system, current architecture quality, and most important architectural risk.
 
+## Evidence Scope
+
+- Inspected files:
+- Confirmed architecture signals:
+- Unconfirmed assumptions:
+- Not-applicable review areas:
+
 ## Architecture Diagram
 
 ```text
@@ -16,7 +23,7 @@ Add a text diagram showing major layers, dependencies, and external integrations
 
 ## Weaknesses
 
-- List weaknesses or risks with evidence.
+- List weaknesses or risks with exact evidence and confidence: confirmed, likely, or unconfirmed.
 
 ## Evaluation
 

@@ -1,6 +1,7 @@
 ---
 name: Java Engineering
 optional: true
+globs: ["**/*.java", "**/pom.xml", "**/build.gradle", "**/build.gradle.kts", "**/settings.gradle", "**/settings.gradle.kts"]
 ---
 
 ## Scope

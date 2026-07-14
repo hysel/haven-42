@@ -26,7 +26,7 @@ The install/configure/test parity view is tracked separately in `config/agent-su
 
 Milestone 14 is complete for positioning and support-boundary documentation because the pack now presents itself as a local-first engineering agent pack rather than a Continue-only or enterprise-only bundle. Continue is the first supported surface, while every other surface stays evidence-gated through the compatibility matrix, `docs/agent-surface-promotion-gates.md`, `docs/surface-specific-config-bundles.md`, and `config/agent-surface-capabilities.json`.
 
-Milestone 14 remains partial for full cross-agent support parity. Continue has supported install/configure/test automation, but non-Continue surfaces do not yet have the same level of install, configure, and test coverage.
+Milestone 14 is complete for its portability and audience scope. It defines the support boundary, records comparable status visibility for tracked surfaces, and keeps non-Continue support evidence-gated. Full live validation parity belongs to Milestone 17, and full install/configure/test implementation parity belongs to Milestone 19.
 
 The non-Continue validation requirement is satisfied by the documented Cline read-only path in `docs/cline-readonly-validation.md` and the related sanitized evidence references. Beginner and team setup expectations are covered by `docs/setup-paths.md`, while approved-write readiness remains blocked for non-Continue surfaces until external verification proves scoped edits in the target surface.
 
