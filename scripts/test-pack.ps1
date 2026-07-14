@@ -2893,6 +2893,11 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Review Standard") -Message "Solution architecture review should define review standard."
+    Assert-True -Condition ($doc -match "Previous Chat Interpretation") -Message "Solution architecture review should preserve stricter prior chat interpretation."
+    Assert-True -Condition ($doc -match "documentation, scaffolding, or a candidate path") -Message "Solution architecture review should not treat scaffolding alone as complete."
+    Assert-True -Condition ($doc -match "comparable `Install`, `Configure`, and `Test` coverage") -Message "Solution architecture review should require install/configure/test parity for agent surface milestones."
+    Assert-True -Condition ($doc -match "Generated sample repositories can satisfy validation coverage") -Message "Solution architecture review should document generated-sample validation acceptance."
+    Assert-True -Condition ($doc -match "Hosted GitHub Actions status must be checked") -Message "Solution architecture review should require hosted CI status checks after pushes."
     Assert-True -Condition ($doc -match "Milestone Audit") -Message "Solution architecture review should include milestone audit."
     foreach ($milestone in @("1: Minimum Usable Pack", "17: Agent Surface Compatibility Validation", "18: Language Rule Packs", "19: Installer Profiles", "20: Hardware-Aware Model")) {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."

@@ -12,6 +12,16 @@ Each milestone is considered complete only when it has:
 - Safety guidance for local-only config, approval boundaries, sanitization, or rollback when relevant.
 - Remaining work moved to a future evidence or enhancement section instead of hidden inside a completed milestone.
 
+## Previous Chat Interpretation
+
+This audit applies the stricter completion standard from the maintainer discussion:
+
+- A milestone is not complete just because documentation, scaffolding, or a candidate path exists.
+- When a milestone covers agent surfaces, every tracked surface must have comparable `Install`, `Configure`, and `Test` coverage before the milestone can be marked fully complete.
+- If parity is not possible yet, the milestone must stay `Partial` or `In Progress`, and the exact blocker must stay visible in `TODO.md`.
+- Generated sample repositories can satisfy validation coverage when real repositories are not available, but real-repository runs remain future evidence expansion unless the milestone explicitly requires them.
+- Hosted GitHub Actions status must be checked after pushed commits before treating the work as closed.
+
 ## Milestone Audit
 
 | Milestone | Current status | Solution set status | Architect notes |
