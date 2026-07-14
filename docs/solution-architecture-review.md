@@ -34,7 +34,7 @@ Each milestone is considered complete only when it has:
 | 16: Sample Repository Factory | Complete | Complete | Cross-platform sample generation, fixture coverage, runtime context, and sanitized evidence are covered. |
 | 17: Agent Surface Compatibility Validation | Complete | Complete with future expansion | Cline and Aider meet current evidence gates; Roo Code, Kilo Code, and OpenCode live validation needs confirmed command shapes. |
 | 18: Language Rule Packs | In Progress | Partial | Optional rule packs and static evidence exist, but editor/model workflow failures remain for Java, Go, Rust, SQL, and Infrastructure samples. |
-| 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Complete with future expansion | Current Continue profiles, evidence catalog, and packaging are complete; future surface-specific profile generation remains gated by non-Continue evidence. |
+| 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial | Complete for Continue, partial for cross-agent parity | Current Continue profiles, evidence catalog, and packaging are complete; actual install/configure/test script parity is missing for non-Continue surfaces and must remain visible until evidence-backed automation exists. |
 | 20: Hardware-Aware Model And Config Automation | In Progress | Partial | Recommendation, dashboard, menu, dispatcher, health, cleanup, release readiness, and the unified UI design exist; deeper consolidation and UI implementation remain future work. |
 
 ## Input-Dependent Decisions
@@ -44,6 +44,7 @@ These should stay on `TODO.md` until the user or project owner provides input:
 - Suitable non-generated repositories for additional real-repository validation.
 - Confirmed command shapes for Roo Code, Kilo Code, and OpenCode wrapper validation.
 - Whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
+- Whether Milestone 19 should require actual install/configure/test scripts for Cline and Aider before being marked complete again.
 - Scope and priority for a unified starter-toolkit web UI.
 - Whether external wiki publishing is required for the next release.
 

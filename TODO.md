@@ -317,7 +317,12 @@
 - [x] Add installer profile options for read-only review and approved-write workflows.
 - [x] Add a sanitized evidence catalog for model, surface, OS, language, and write-readiness results.
 - [x] Add release archive, checksum, and install-command guidance.
-- [x] Complete Milestone 19 installer profile, evidence catalog, and release packaging exit criteria.
+- [x] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria.
+- [ ] Complete Milestone 19 cross-agent install/configure/test script parity.
+- [ ] Add Cline install/configure automation or keep it blocked with exact evidence gaps.
+- [ ] Add Aider install/configure automation or keep it blocked with exact evidence gaps.
+- [ ] Keep Roo Code, Kilo Code, and OpenCode install/configure automation blocked until command and config shapes are confirmed.
+- [ ] Keep OpenHands install/configure/test automation blocked until platform workspace, sandbox, and credential boundaries are defined.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
 
