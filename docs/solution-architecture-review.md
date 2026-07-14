@@ -29,7 +29,7 @@ Each milestone is considered complete only when it has:
 | 11: Editor Surface Compatibility | Complete | Complete | VS Code-compatible and VSCodium validation, duplicate-rule handling, and CLI fallback are documented. |
 | 12: Model Tool-Use Validation Evidence | Complete | Complete | Model lanes, preflight tooling, evidence templates, approved-write boundaries, and installer support are covered. |
 | 13: Broader Multi-Repository Validation | Complete | Complete with future expansion | Real legacy .NET plus generated category evidence satisfy completion; more real repos remain future evidence expansion. |
-| 14: Agent Surface Portability And Broader Audience | Complete | Complete | Surface matrix, promotion gates, setup paths, config-bundle policy, and non-Continue evidence are documented. |
+| 14: Agent Surface Portability And Broader Audience | Partial | Complete for positioning, partial for full cross-agent parity | Surface matrix, promotion gates, setup paths, config-bundle policy, and non-Continue evidence are documented; comparable install/configure/test support is not complete for every tracked surface. |
 | 15: Multi-Language Engineering Support | Complete | Complete with staged maturity | Python and TypeScript workflow evidence is complete for current scope; broader ecosystem promotion remains evidence-gated. |
 | 16: Sample Repository Factory | Complete | Complete | Cross-platform sample generation, fixture coverage, runtime context, and sanitized evidence are covered. |
 | 17: Agent Surface Compatibility Validation | Partial | Complete for Cline and Aider, partial for all tracked surfaces | Cline and Aider meet current evidence gates; Roo Code, Kilo Code, OpenCode, and OpenHands do not yet have full live validation evidence. |

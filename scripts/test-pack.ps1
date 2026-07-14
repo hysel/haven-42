@@ -646,7 +646,8 @@ Invoke-PackTest "agent surface docs define portability boundary" {
 
     Assert-True -Condition ($doc -match "Continue is the first supported surface") -Message "Agent surface doc should keep Continue as the current supported surface."
     Assert-True -Condition ($doc -match "Compatibility Matrix") -Message "Agent surface doc should include an explicit compatibility matrix."
-    Assert-True -Condition ($doc -match "Milestone 14 Completion Basis") -Message "Agent surface doc should record Milestone 14 completion basis."
+    Assert-True -Condition ($doc -match "Milestone 14 Positioning Completion Basis") -Message "Agent surface doc should record scoped Milestone 14 completion basis."
+    Assert-True -Condition ($doc -match "partial for full cross-agent support parity") -Message "Agent surface doc should keep full parity gap visible."
     Assert-True -Condition ($doc -match "docs/cline-readonly-validation\.md") -Message "Agent surface doc should cite non-Continue read-only validation evidence."
     Assert-True -Condition ($doc -match "docs/surface-specific-config-bundles\.md") -Message "Agent surface doc should cite surface-specific config bundle policy."
     Assert-True -Condition ($doc -match "docs/setup-paths\.md") -Message "Agent surface doc should cite beginner and team setup paths."
@@ -661,8 +662,9 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     Assert-True -Condition ($doc -match "Blocked") -Message "Agent surface doc should block unvalidated approved writes."
     Assert-True -Condition ($doc -match "Non-Enterprise Use") -Message "Agent surface doc should address non-enterprise users."
     Assert-True -Condition ($readme -match "docs/agent-surface-options.md") -Message "README should link agent surface options."
-    Assert-True -Condition ($roadmap -match "\| Milestone 14: Agent Surface Portability And Broader Audience \| Complete \|") -Message "Roadmap should mark Milestone 14 complete."
-    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 14 portability and broader-audience exit criteria") -Message "TODO should mark Milestone 14 completion audit complete."
+    Assert-True -Condition ($roadmap -match "\| Milestone 14: Agent Surface Portability And Broader Audience \| Partial \|") -Message "Roadmap should mark Milestone 14 partial for full cross-agent parity."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria") -Message "TODO should mark Milestone 14 positioning scope complete."
+    Assert-True -Condition ($todo -match "\[ \] Complete Milestone 14 full cross-agent support parity for every tracked surface") -Message "TODO should keep full Milestone 14 support parity pending."
 }
 
 
@@ -2887,6 +2889,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     }
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
     Assert-True -Condition ($doc -match "Roo Code, Kilo Code, and OpenCode") -Message "Solution architecture review should track unconfirmed agent wrapper command shapes."
+    Assert-True -Condition ($doc -match "Complete for positioning, partial for full cross-agent parity") -Message "Solution architecture review should classify Milestone 14 accurately."
+    Assert-True -Condition ($doc -match "comparable install/configure/test support is not complete") -Message "Solution architecture review should keep Milestone 14 parity gap visible."
     Assert-True -Condition ($doc -match "Complete for Cline and Aider, partial for all tracked surfaces") -Message "Solution architecture review should classify Milestone 17 accurately."
     Assert-True -Condition ($doc -match "OpenHands do not yet have full live validation evidence") -Message "Solution architecture review should keep full surface validation gap visible."
     Assert-True -Condition ($doc -match "Complete for Continue, partial for cross-agent parity") -Message "Solution architecture review should classify Milestone 19 accurately."

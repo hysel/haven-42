@@ -553,7 +553,8 @@ test_sample_repository_factory_doc() {
 test_agent_surface_options_doc() {
   [ -f "$REPO_ROOT/docs/agent-surface-options.md" ] &&
     grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    grep -q "Milestone 14 Completion Basis" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Milestone 14 Positioning Completion Basis" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "partial for full cross-agent support parity" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/cline-readonly-validation.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/surface-specific-config-bundles.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/setup-paths.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
@@ -567,9 +568,10 @@ test_agent_surface_options_doc() {
     grep -q "Roo Code, Kilo Code, and OpenCode remain future live-validation targets" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "future evidence expansion" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
-    grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Partial |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "| Milestone 17: Agent Surface Compatibility Validation | Partial |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "\\[x\\] Complete Milestone 14 portability and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[x\\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Complete Milestone 14 full cross-agent support parity for every tracked surface" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Complete Milestone 17 full tracked-surface compatibility validation" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
@@ -1011,6 +1013,8 @@ test_solution_architecture_review_doc() {
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Roo Code, Kilo Code, and OpenCode" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Complete for positioning, partial for full cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "comparable install/configure/test support is not complete" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for Cline and Aider, partial for all tracked surfaces" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "OpenHands do not yet have full live validation evidence" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for Continue, partial for cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
