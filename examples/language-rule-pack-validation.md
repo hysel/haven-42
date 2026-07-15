@@ -171,3 +171,27 @@ The combined operation lanes validate all 28 cells: Devstral Small 2 is the
 default model and Qwen 3.5 35B is the TypeScript scoped-write override.
 Each promoted scoped-write cell changed only its approved file, passed
 `git diff --check`, ended with the exact marker line, and returned final text.
+
+## Evidence: 2026-07-15 Native macOS Python Smoke
+
+- Surface: Continue CLI `1.5.47`
+- Operating system: native Apple Silicon macOS
+- Provider: local Ollama; endpoint omitted
+- Model: `qwen3.5:9b`
+- Fixture: `python-layered-api`
+- Raw output: ignored runtime output only
+- Model unload: verified after the run
+
+| Operation | Result | Promotion meaning |
+| --- | --- | --- |
+| Python repository discovery | Validated | Read-only evidence for this exact surface, model, and OS. |
+| Python implementation plan | Validated | Read-only evidence for this exact surface, model, and OS. |
+| Python code review | Validated | Read-only evidence for this exact surface, model, and OS. |
+| Python scoped write | Validated | Changed only the approved file, passed exact-marker and Git checks, returned structured output, and unloaded the model. |
+
+The runner initially exposed three portable-host defects: a missing local
+Ollama default when `apiBase` is omitted, a relative config path after changing
+to a fixture directory, and Bash 3.2 incompatibility. It also exposed a
+headless-output gap and an ambiguous marker prompt. Structured JSON output and
+an isolated marker line fixed those issues. The native macOS Python slice is
+now validated; the remaining language packs remain untested on macOS.

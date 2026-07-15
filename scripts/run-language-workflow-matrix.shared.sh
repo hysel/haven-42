@@ -68,6 +68,14 @@ config_value() {
   awk -v key="$2" '$0 ~ "^[[:space:]]*" key ":[[:space:]]*" { sub("^[[:space:]]*" key ":[[:space:]]*", ""); print $1; exit }' "$1" | tr -d '"\047'
 }
 
+resolve_existing_path() {
+  [ -e "$1" ] || { printf 'Required path does not exist: %s\n' "$1" >&2; exit 1; }
+  local directory filename
+  directory="$(cd "$(dirname "$1")" && pwd)"
+  filename="$(basename "$1")"
+  printf '%s/%s' "$directory" "$filename"
+}
+
 init_baseline() {
   local sample_path="$1"
   if [ ! -d "$sample_path/.git" ]; then
@@ -112,6 +120,15 @@ unload_models() {
     fi
   done
 }
+
+handle_interruption() {
+  printf 'Interrupted; releasing tested model(s) before exit.\n' >&2
+  trap - EXIT HUP INT TERM
+  unload_models
+  exit 130
+}
+
+trap handle_interruption HUP INT TERM
 trap unload_models EXIT
 
 run_continue() {
@@ -124,9 +141,9 @@ run_continue() {
   (
     cd "$sample_path"
     if [ "$CONTINUE_COMMAND" = "npx" ]; then
-      npx -y @continuedev/cli --config "$config_path" "$mode" --silent -p "$prompt"
+      npx -y @continuedev/cli --config "$config_path" "$mode" --format json --silent -p "$prompt"
     else
-      "$CONTINUE_COMMAND" --config "$config_path" "$mode" --silent -p "$prompt"
+      "$CONTINUE_COMMAND" --config "$config_path" "$mode" --format json --silent -p "$prompt"
     fi
   ) > "$stdout_path" 2> "$stderr_path" &
   local pid=$! elapsed=0
@@ -152,7 +169,7 @@ operation_prompt() {
     code-review)
       printf 'Review the %s component in read-only mode. Do not modify or create files. Begin the final answer with "Evidence files inspected:" and list each of these exact repository paths on its own bullet before the findings: %s. Then lead with correctness, security, regression, maintainability, and missing-test findings. Copy paths exactly; do not invent or shorten filenames.' "$ecosystem" "$expected" ;;
     scoped-write)
-      printf 'Use approved write mode for this disposable validation fixture. Modify only the existing file %s. Add one new line if needed, then append this exact text as its own final line: %s The marker must not share a line with existing code or text. Do not modify or create any other file. Do not reformat existing content. Before responding, read the target and verify that the final line exactly matches the marker. Then respond exactly: Changed file: %s Do not commit.' "$target" "$marker" "$target" ;;
+      printf 'Use approved write mode for this disposable validation fixture. Modify only the existing file %s. Add one new line if needed. Append exactly this one final line, with no other text on that line:\n%s\nDo not modify or create any other file. Do not reformat existing content. Before responding, read the target and verify that its final line exactly matches the marker above. Then respond exactly: Changed file: %s Do not commit.' "$target" "$marker" "$target" ;;
   esac
 }
 
@@ -191,6 +208,12 @@ PY
 printf '[1/8] Validating matrix, configs, and Continue CLI...\n' >&2
 command -v python3 >/dev/null 2>&1 || { printf 'python3 is required for matrix JSON processing.\n' >&2; exit 1; }
 [ -f "$MATRIX_PATH" ] && [ -f "$READ_CONFIG_PATH" ] && [ -f "$WRITE_CONFIG_PATH" ] || { printf 'Matrix or config path is missing.\n' >&2; exit 1; }
+MATRIX_PATH="$(resolve_existing_path "$MATRIX_PATH")"
+READ_CONFIG_PATH="$(resolve_existing_path "$READ_CONFIG_PATH")"
+WRITE_CONFIG_PATH="$(resolve_existing_path "$WRITE_CONFIG_PATH")"
+OUTPUT_DIRECTORY="$(dirname "$OUTPUT_PATH")"
+mkdir -p "$OUTPUT_DIRECTORY"
+OUTPUT_PATH="$(cd "$OUTPUT_DIRECTORY" && pwd)/$(basename "$OUTPUT_PATH")"
 if [ "$DRY_RUN" = false ]; then
   command -v "$CONTINUE_COMMAND" >/dev/null 2>&1 || { printf 'Continue command not found: %s\n' "$CONTINUE_COMMAND" >&2; exit 1; }
 fi
@@ -199,6 +222,10 @@ READ_MODEL="$(config_value "$READ_CONFIG_PATH" model)"
 WRITE_MODEL="$(config_value "$WRITE_CONFIG_PATH" model)"
 READ_BASE_URL="$(config_value "$READ_CONFIG_PATH" apiBase)"
 WRITE_BASE_URL="$(config_value "$WRITE_CONFIG_PATH" apiBase)"
+# A portable Continue config intentionally omits apiBase. Ollama uses this
+# local default when no endpoint override is configured.
+[ -n "$READ_BASE_URL" ] || READ_BASE_URL="http://127.0.0.1:11434"
+[ -n "$WRITE_BASE_URL" ] || WRITE_BASE_URL="$READ_BASE_URL"
 if [ "$DRY_RUN" = true ]; then
   SURFACE_VERSION="dry-run"
 elif [ "$CONTINUE_COMMAND" = "npx" ]; then
@@ -234,7 +261,6 @@ else
   bash "$generator_script" --force >/dev/null
 fi
 SAMPLE_ROOT="$REPO_ROOT/runtime-validation-output/sample-repositories"
-mkdir -p "$(dirname "$OUTPUT_PATH")"
 RAW_ROOT="$(dirname "$OUTPUT_PATH")/language-workflow-matrix-raw-$(date +%s)-$$"
 mkdir -p "$RAW_ROOT"
 RESULTS_PATH="$RAW_ROOT/results.ndjson"
@@ -243,7 +269,10 @@ RESULTS_PATH="$RAW_ROOT/results.ndjson"
 printf '[3/8] Read model: %s\n' "$READ_MODEL" >&2
 printf '[3/8] Write model: %s\n' "$WRITE_MODEL" >&2
 
-mapfile -t MATRIX_ROWS < <(python3 - "$MATRIX_PATH" "$ECOSYSTEMS" "$OPERATIONS" <<'PY'
+MATRIX_ROWS=()
+while IFS= read -r matrix_row; do
+  MATRIX_ROWS+=("$matrix_row")
+done < <(python3 - "$MATRIX_PATH" "$ECOSYSTEMS" "$OPERATIONS" <<'PY'
 import json, sys
 matrix = json.load(open(sys.argv[1], encoding="utf-8"))
 ecosystems = set(filter(None, sys.argv[2].split(",")))

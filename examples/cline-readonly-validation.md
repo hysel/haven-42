@@ -89,6 +89,17 @@ If tools are unavailable, say TOOLS_UNAVAILABLE.
 - [ ] No customer names.
 - [ ] No tokens or secrets.
 - [ ] No raw private-code transcript.
+
+## 2026-07-15 Cline CLI Isolated Read-Only Generated Sample Test
+
+- Surface: Cline CLI 3.0.41 on Windows.
+- Model/provider: Devstral Small 2 24B through an isolated OpenAI-compatible local Ollama profile.
+- Target: generated Python sample.
+- Tool permission mode: Headless auto-approval, required by the CLI for non-interactive tool calls.
+- Read result: README and project metadata were read successfully.
+- External verification: disposable Git status remained clean and whitespace validation passed.
+- Resource check: the tested model was unloaded after the run.
+- Decision: read-only CLI evidence is valid for this exact surface/model/OS path. It does not approve editor behavior, headless writes, or real-project changes.
 ## 2026-07-08 Cline Read-Only Generated Python Sample Test
 
 ### Summary

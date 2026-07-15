@@ -930,8 +930,14 @@ assert matrix["latestValidation"]["surfaceVersion"] == "1.5.47"
 assert "devstral-small-2:24b" in matrix["latestValidation"]["models"]
 assert "qwen3.5:35b" in matrix["latestValidation"]["models"]
 native = matrix["nativeOperatingSystemEvidence"]
-assert len(native) == 2
-assert all(item["operatingSystem"].startswith("Linux ") for item in native)
+assert len(native) == 3
+linux = [item for item in native if item["operatingSystem"].startswith("Linux ")]
+macos = [item for item in native if item["operatingSystem"] == "macOS (Apple Silicon)"]
+assert len(linux) == 2
+assert len(macos) == 1
+assert macos[0]["model"] == "qwen3.5:9b"
+assert macos[0]["validatedCells"] == 4
+assert macos[0]["failedCells"] == 0
 assert all(item["evidenceDocument"] for item in native)
 PY
   grep -q "Static fixture success alone never promotes" "$doc" &&
@@ -947,10 +953,19 @@ PY
     grep -q "AllowLoadedModels" "$runner" &&
     grep -q -- "--readonly" "$shared_runner" &&
     grep -q -- "--auto" "$shared_runner" &&
+    grep -q "trap handle_interruption HUP INT TERM" "$shared_runner" &&
+    grep -q -- "--format json" "$shared_runner" &&
     grep -q "unload_models" "$shared_runner" &&
+    grep -q 'http://127.0.0.1:11434' "$shared_runner" &&
+    grep -q 'resolve_existing_path' "$shared_runner" &&
+    ! grep -q 'mapfile' "$shared_runner" &&
+    grep -q 'with no other text on that line' "$shared_runner" &&
     grep -q -- "--allow-loaded-models" "$shared_runner" &&
     grep -q "run-language-workflow-matrix.shared.sh" "$linux_runner" &&
-    grep -q "run-language-workflow-matrix.shared.sh" "$macos_runner"
+    grep -q "run-language-workflow-matrix.shared.sh" "$macos_runner" &&
+    grep -q 'bootstrap-macos-agent-host.sh' "$REPO_ROOT/docs/macos-agent-host-bootstrap.md" &&
+    grep -q 'Native macOS Evidence' "$doc" &&
+    grep -q 'Native macOS Python Smoke' "$REPO_ROOT/examples/language-rule-pack-validation.md"
 }
 
 test_prompt_quality_guardrails_require_filename_fidelity() {

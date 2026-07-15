@@ -327,7 +327,7 @@
 - [x] Add native Linux/macOS matrix-runner parity with shared Bash orchestration and dry-run validation.
 - [x] Run the Linux matrix against live models in WSL2 Ubuntu 24.04. Devstral completed all 28 cells and Qwen completed the TypeScript scoped-write override with one-model-at-a-time unload safeguards.
 - [x] Extend language-aware selector lookup to consume Linux validation evidence without inheriting Windows evidence.
-- [ ] Run the macOS matrix against live models when Apple hardware or a cloud Mac is available.
+- [ ] Complete the native macOS matrix for the remaining language packs. Apple Silicon static validation passed, and Qwen 3.5 9B validates all four Python operations through Continue CLI with external scoped-write verification and model unload; JavaScript/TypeScript code review returned empty output twice on the 16 GB host, so that slice remains unpromoted.
 - [x] Generate a read-only language-aware model-lane recommendation from operation-level matrix evidence so a detected project and workflow select only a validated lane. Surface-specific runtime auto-switching remains a future adapter capability.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
@@ -340,7 +340,7 @@
 - [x] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
 - [x] Prevent write-readiness evidence from one agent surface from being inherited by another surface.
 - [ ] Complete Milestone 19 cross-agent install/configure/test script parity.
-- [ ] Add Cline install/configure automation or keep it blocked with exact evidence gaps.
+- [x] Keep Cline install/configure automation blocked with exact evidence gaps: npm installation is documented and validated, but provider setup requires an isolated CLI data directory plus headless auto-approval for tools; no general write profile is generated.
 - [x] Add Aider install/configure automation with an explicit local-only config and supported isolated install methods.
 - [ ] Keep Roo Code, Kilo Code, and OpenCode install/configure automation blocked until command and config shapes are confirmed.
 - [ ] Keep OpenHands install/configure/test automation blocked until platform workspace, sandbox, and credential boundaries are defined.

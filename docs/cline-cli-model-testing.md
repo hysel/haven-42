@@ -20,6 +20,13 @@ Treat the result as surface-specific evidence:
 Cline CLI != Cline VS Code extension != Cline VSCodium extension
 ```
 
+The current CLI supports an isolated `--data-dir` and non-interactive
+`cline auth` provider setup. A generated-sample read-only run passed through
+the OpenAI-compatible provider against a local Ollama endpoint with Devstral
+Small 2 24B. Headless tool calls require `--auto-approve true`; with approval
+disabled, Cline requests a TTY approval instead. Therefore this pack does not
+generate a general Cline write profile or promote headless write automation.
+
 ## Install Cline CLI
 
 Cline currently documents CLI installation with npm:
@@ -172,6 +179,12 @@ Linux or macOS example:
 
 If your Cline CLI uses configuration profiles instead of a model flag, switch profiles outside the script and run one model at a time.
 
+For an isolated local Ollama profile, use the documented CLI configuration
+boundary rather than committing provider settings. The OpenAI-compatible
+provider requires a base URL ending in `/v1` and an API-key value even when the
+local server does not enforce one. Keep the generated data directory local and
+excluded from source control.
+
 ## Dry Run
 
 Use dry run to verify report writing and script plumbing without invoking Cline.
@@ -208,7 +221,7 @@ Promote evidence only after external verification passes.
 ## Recommended Flow
 
 1. Run raw Ollama checks with `scripts/test-local-agent-models.*`.
-2. Run Cline CLI read-only checks with `scripts/test-cline-cli-models.*`.
+2. Configure an isolated Cline data directory through `cline auth` and run Cline CLI read-only checks with `--auto-approve true`.
 3. Run Cline CLI disposable write smoke checks for promising models.
 4. Run Cline editor extension read and write smoke tests.
 5. Only then consider a model/surface pair for realistic scoped edits.

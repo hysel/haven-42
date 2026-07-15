@@ -70,7 +70,7 @@ function Get-OperationPrompt {
         "scoped-write" {
             $target = $Entry.operationEvidence.'scoped-write'.targetFile
             $marker = $Entry.operationEvidence.'scoped-write'.marker
-            return "Use approved write mode for this disposable validation fixture. Modify only the existing file $target. Add one new line if needed, then append this exact text as its own final line: $marker The marker must not share a line with existing code or text. Do not modify or create any other file. Do not reformat existing content. Before responding, read the target and verify that the final line exactly matches the marker. Then respond exactly: Changed file: $target Do not commit."
+            return "Use approved write mode for this disposable validation fixture. Modify only the existing file $target. Add one new line if needed. Append exactly this one final line, with no other text on that line:`n$marker`nDo not modify or create any other file. Do not reformat existing content. Before responding, read the target and verify that its final line exactly matches the marker above. Then respond exactly: Changed file: $target Do not commit."
         }
         default { throw "Unsupported operation: $Operation" }
     }
@@ -100,7 +100,7 @@ function Invoke-Continue {
     else {
         @()
     }
-    $arguments += @("--config", $ConfigPath, $(if ($ReadOnly) { "--readonly" } else { "--auto" }), "--silent", "-p", $Prompt)
+    $arguments += @("--config", $ConfigPath, $(if ($ReadOnly) { "--readonly" } else { "--auto" }), "--format", "json", "--silent", "-p", $Prompt)
     foreach ($argument in $arguments) {
         [void]$startInfo.ArgumentList.Add($argument)
     }
@@ -216,6 +216,11 @@ $readModel = Get-ConfigValue -Path $readConfig -Key "model"
 $writeModel = Get-ConfigValue -Path $writeConfig -Key "model"
 $readBaseUrl = Get-ConfigValue -Path $readConfig -Key "apiBase"
 $writeBaseUrl = Get-ConfigValue -Path $writeConfig -Key "apiBase"
+
+# A portable Continue config intentionally omits apiBase. Ollama uses this
+# local default when no endpoint override is configured.
+if ([string]::IsNullOrWhiteSpace($readBaseUrl)) { $readBaseUrl = "http://127.0.0.1:11434" }
+if ([string]::IsNullOrWhiteSpace($writeBaseUrl)) { $writeBaseUrl = $readBaseUrl }
 
 if (-not $DryRun) {
     foreach ($baseUrl in @($readBaseUrl, $writeBaseUrl) | Select-Object -Unique) {

@@ -83,8 +83,24 @@ orchestration without contacting a model.
 Native Linux and macOS runners are available through
 `run-language-workflow-matrix.linux.sh` and
 `run-language-workflow-matrix.macos.sh`, which delegate to the shared Bash
-engine. Native Linux evidence is complete through WSL2 Ubuntu 24.04; native
-macOS evidence remains pending.
+engine. Native Linux evidence is complete through WSL2 Ubuntu 24.04. Native
+macOS has complete Apple Silicon evidence for the Python four-operation slice;
+the remaining language packs are pending for the full matrix.
+
+On the 16 GB Apple Silicon validation host, the `qwen3.5:9b` Ollama lane is
+appropriate for targeted smoke slices but was not practical for one continuous
+24-cell run: the remote command exceeded its 30-minute transport limit before
+it produced a report. Do not treat that interrupted attempt as evidence. Run
+remaining macOS cells in smaller batches, or use a Mac with more unified memory
+and a separately validated model lane. The shared runner releases its tested
+models on normal completion and on `HUP`, `INT`, or `TERM`; after a connection
+loss, check `/api/ps` before starting another run.
+
+A bounded JavaScript/TypeScript batch on the same host validated repository
+discovery, implementation planning, and scoped write. Its code-review cell
+returned empty output twice, including a one-cell retry, so the JavaScript /
+TypeScript slice is not promoted for this model and host. The model was
+verified unloaded after both runs.
 
 The Windows and Bash runners refuse to start when Ollama already has a loaded
 model. This protects the 64 GB validation budget from accidental concurrent
@@ -120,7 +136,23 @@ an Ollama server with one model loaded at a time. Devstral Small 2 completed
 all 28 required cells across clean runs. Qwen 3.5 35B separately completed the
 TypeScript scoped-write override. Each run verified model unload afterward.
 
-This is Linux CLI evidence, not native Linux editor-extension evidence. macOS
-live evidence remains pending. The language-aware selector recognizes the
-validated Linux evidence separately and must not silently reuse Windows
-evidence.
+This is Linux CLI evidence, not native Linux editor-extension evidence. The
+language-aware selector recognizes the validated Linux evidence separately and
+must not silently reuse Windows evidence.
+
+## Native macOS Evidence
+
+The macOS validation and test wrappers were run on a native Apple Silicon
+macOS host. Validation passed, and the 50 deterministic macOS wrapper checks
+passed after the validated-model installer was updated to prefer `python3`
+when `python` is unavailable.
+
+On 2026-07-15, Continue CLI `1.5.47` ran against local Ollama on a native
+Apple Silicon host with a single `qwen3.5:9b` model. Python
+`repository-discovery`, `implementation-plan`, `code-review`, and
+`scoped-write` passed. The scoped write changed only its approved file, ended
+with the exact required marker, passed `git diff --check`, returned structured
+headless output, and the runner confirmed model unload after every run. This is
+native macOS CLI evidence only, not editor-extension evidence. It promotes the
+Python slice for this exact surface/model/OS combination, not the remaining
+language packs.

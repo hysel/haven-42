@@ -257,7 +257,7 @@ done
 
 if python_module_exists "mlx_lm"; then
   already_detected=false
-  for tool in "${MLX_TOOLS[@]}"; do
+  for tool in "${MLX_TOOLS[@]-}"; do
     if [ "$tool" = "python3 module: mlx_lm" ]; then
       already_detected=true
       break
@@ -268,7 +268,7 @@ fi
 
 if python_module_exists "mlx"; then
   already_detected=false
-  for tool in "${MLX_TOOLS[@]}"; do
+  for tool in "${MLX_TOOLS[@]-}"; do
     if [ "$tool" = "python3 module: mlx" ]; then
       already_detected=true
       break
@@ -278,7 +278,7 @@ if python_module_exists "mlx"; then
 fi
 
 MLX_STATUS="not detected"
-if [ "${#MLX_TOOLS[@]}" -gt 0 ]; then
+if [ -n "${MLX_TOOLS[*]-}" ]; then
   MLX_STATUS="detected"
 fi
 
@@ -375,9 +375,9 @@ else
   printf 'Installed Ollama models: None detected\n'
 fi
 printf '\nMLX tooling: %s\n' "$MLX_STATUS"
-if [ "${#MLX_TOOLS[@]}" -gt 0 ]; then
+if [ -n "${MLX_TOOLS[*]-}" ]; then
   printf 'Detected MLX tools:\n'
-  for tool in "${MLX_TOOLS[@]}"; do
+  for tool in "${MLX_TOOLS[@]-}"; do
     printf -- '- %s\n' "$tool"
   done
 fi
