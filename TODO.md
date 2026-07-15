@@ -305,7 +305,10 @@
 
 - [ ] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed.
 - [ ] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed.
-- [ ] Configure OpenCode with a local-only Ollama provider and validate its opencode run wrapper against a generated sample.
+- [x] Add a local-only OpenCode Ollama config generator and documented npm install plan to the unified setup adapter.
+- [x] Validate OpenCode's installed CLI and `opencode run` wrapper against a generated sample with read-only and disposable write-smoke checks.
+- [x] Add an opt-in generated Python scoped-edit gate to the shared CLI harness; record live evidence separately before any surface promotion.
+- [x] Validate the OpenCode Devstral Small 2 generated Python scoped-edit gate with external changed-file, content, and whitespace verification.
 - [x] Define a safe OpenHands validation boundary before adding platform-agent validation automation.
 - [ ] Run explicitly approved non-generated repository validation before promoting any non-Continue surface to real-project approved-write ready.
 
@@ -316,10 +319,16 @@
 - [x] Add optional Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
 - [x] Add evidence-gated rule selection guidance for optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code packs.
 - [x] Validate optional language rule packs against generated sample repositories with static evidence checks.
-- [ ] Validate rule packs against editor/model repository-discovery, implementation-planning, code-review, and scoped-write workflows. Partial generated-sample evidence is recorded for Java, Go, Rust, SQL, and Infrastructure; remaining failures must be resolved before marking complete.
+- [x] Validate rule packs against Continue CLI repository-discovery, implementation-planning, code-review, and scoped-write workflows on generated medium fixtures. Composite Windows model lanes cover all 28 required cells, and Linux WSL2 evidence independently covers the same matrix.
 - [x] Add a machine-readable project-profile classifier with ecosystem, evidence, confidence, and selected rule-pack IDs.
 - [x] Activate matching optional language rule packs through project-local installer/config generation so installed projects do not require manual rule wiring.
-- [ ] Add medium-complexity language samples and a representative validation matrix covering discovery, planning, review, and scoped write.
+- [x] Add medium-complexity language samples and a representative validation matrix covering discovery, planning, review, and scoped write; keep editor/model operation cells pending until executed.
+- [x] Run the medium-fixture matrix through Continue CLI on Windows and record exact operation-to-model evidence; a Devstral Small 2 default plus Qwen 3.5 35B TypeScript-write override validates all 28 cells.
+- [x] Add native Linux/macOS matrix-runner parity with shared Bash orchestration and dry-run validation.
+- [x] Run the Linux matrix against live models in WSL2 Ubuntu 24.04. Devstral completed all 28 cells and Qwen completed the TypeScript scoped-write override with one-model-at-a-time unload safeguards.
+- [x] Extend language-aware selector lookup to consume Linux validation evidence without inheriting Windows evidence.
+- [ ] Run the macOS matrix against live models when Apple hardware or a cloud Mac is available.
+- [x] Generate a read-only language-aware model-lane recommendation from operation-level matrix evidence so a detected project and workflow select only a validated lane. Surface-specific runtime auto-switching remains a future adapter capability.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
 
@@ -352,7 +361,7 @@
 - [x] Add lane-specific model scoring that keeps WRITE SAFE reliability-first and can select larger validated PLAN ONLY or DEEP REVIEW models when hardware permits.
 - [x] Replace parameter-name-only VRAM estimates for curated models with metadata for quantization assumptions, context target, backend overhead, model architecture or MoE behavior, and configurable memory reserve; retain a labeled low-confidence fallback for unknown tags.
 - [x] Consolidate the onboarding/navigation script family behind a shared PowerShell module and native wrapper dispatcher before adding more plugin-specific wrappers.
-- [ ] Replace the no-PowerShell informational fallback for beginner plan, agent menu, and workflow chooser with a fully native Linux/macOS renderer.
+- [x] Replace the no-PowerShell informational fallback for beginner plan, agent menu, and workflow chooser with a native Linux/macOS Python 3 renderer.
 - [x] Define a versioned workflow request, progress, result, warning, and error envelope for dispatchers and the future UI.
 - [x] Add a guided command/menu layer so end users choose from a small set of intents instead of individual scripts.
 - [x] Keep individual script documentation as appendix/reference material for advanced users and maintainers.

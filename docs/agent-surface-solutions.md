@@ -21,7 +21,7 @@ It also records the config-bundle policy. Continue and Aider have supported gene
 | Aider | supported | supported | validated |
 | Roo Code | planned | planned | scaffolded |
 | Kilo Code | planned | planned | scaffolded |
-| OpenCode | planned | planned | scaffolded |
+| OpenCode | scaffolded | scaffolded | validated |
 | OpenHands | blocked | blocked | planned |
 
 ## Rules
@@ -47,5 +47,11 @@ Aider is the first non-Continue adapter promoted end to end. Use
 Ollama config generation, and health checks; use `scripts/test-aider-cli-models.*`
 for read-only and disposable write validation. This does not promote Aider to
 real-project approved-write readiness.
+
+OpenCode has a scaffolded local-only Ollama config and installer path through
+the same adapter. Devstral Small 2 24B passed disposable read and write-smoke
+validation with the installed CLI. See [OpenCode CLI model testing](opencode-cli-model-testing.md).
+It remains a candidate until explicitly approved non-generated repository
+validation passes.
 
 Use `docs/script-reference-appendix.md` for direct command details after you choose a workflow.

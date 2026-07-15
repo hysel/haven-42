@@ -168,6 +168,21 @@
       }
     },
     {
+      "id": "recommend-language-model-lane",
+      "name": "Recommend Language Model Lane",
+      "purpose": "Classify a project and recommend only the model lane validated for its optional language rule pack and requested workflow operation.",
+      "category": "configuration",
+      "safetyLevel": "read-only",
+      "uiReady": true,
+      "inputs": ["targetRepo", "operation", "operatingSystem", "surface", "surfaceVersion", "provider", "outputPath"],
+      "outputs": ["languageModelLaneRecommendationJson", "continueModelProfiles"],
+      "entryPoints": {
+        "windows": "scripts/recommend-language-model-lane.ps1",
+        "linux": "scripts/recommend-language-model-lane.linux.sh",
+        "macos": "scripts/recommend-language-model-lane.macos.sh"
+      }
+    },
+    {
       "id": "apply-agent-config",
       "name": "Apply Agent Config",
       "purpose": "Write local-only agent configuration from a recommendation result with dry-run support.",

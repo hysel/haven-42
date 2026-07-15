@@ -38,7 +38,7 @@ Generated config files should stay surface-specific. Continue config does not co
 | Aider | supported | Generate explicit local-only `.aider.conf.local.yml` through `setup-agent-surface.*`; launch with `aider --config` and keep real-project approved write blocked. |
 | Roo Code | planned | Wait for confirmed command, extension, and local model behavior. |
 | Kilo Code | planned | Wait for confirmed command, extension, and local model behavior. |
-| OpenCode | planned | Wait for confirmed CLI install and local model behavior. |
+| OpenCode | scaffolded | Generate a local-only `.opencode.local.json` through the unified adapter. Devstral Small 2 24B passed generated-sample read/write-smoke and constrained scoped-edit validation; non-generated-repository validation remains pending. |
 | OpenHands | blocked | Do not generate platform-agent config while workspace, sandbox, and credential boundaries remain outside this pack. |
 
 ## Implementation Rule

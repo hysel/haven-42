@@ -53,6 +53,8 @@ It is designed for people who want AI support to follow consistent engineering s
 | Automate Continue CLI model tests | `docs/continue-cli-model-testing.md` |
 | Track multi-language support | `docs/language-support.md` |
 | Use optional language rule packs | `docs/language-rule-packs.md` |
+| Review the representative language workflow matrix | `docs/language-workflow-validation-matrix.md` |
+| Select a validated model lane for a detected language and workflow | `docs/language-aware-model-lanes.md` |
 | Review language rule-pack evidence | `examples/language-rule-pack-validation.md` |
 | Review multi-language workflow evidence | `examples/multi-language-workflow-validation.md` |
 | Detect project type before giving advice | `docs/project-detection.md` |

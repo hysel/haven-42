@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("aider")]
+    [ValidateSet("aider", "opencode")]
     [string]$Surface = "aider",
     [ValidateSet("Plan", "Install", "Configure", "Health")]
     [string]$Action = "Plan",
@@ -9,9 +9,10 @@ param(
     [ValidateSet("WriteSafe", "PlanOnly", "DeepReview")]
     [string]$Lane = "WriteSafe",
     [string]$OllamaBaseUrl = "http://127.0.0.1:11434",
-    [ValidateSet("aider-install", "pipx", "uv")]
+    [ValidateSet("aider-install", "pipx", "uv", "npm")]
     [string]$InstallMethod = "aider-install",
     [string]$AiderCommand = "aider",
+    [string]$OpenCodeCommand = "opencode",
     [switch]$DryRun,
     [switch]$Force
 )
@@ -41,7 +42,12 @@ function Get-SafeEndpoint([string]$Value) {
     return $uri.AbsoluteUri.TrimEnd('/')
 }
 
-function Get-InstallPlan([string]$Method) {
+function Get-InstallPlan([string]$SurfaceName, [string]$Method) {
+    if ($SurfaceName -eq "opencode") {
+        if ($Method -ne "npm") { throw "OpenCode supports only the npm install method in this adapter." }
+        return @("npm install -g opencode-ai")
+    }
+
     switch ($Method) {
         "pipx" { return @("python -m pip install pipx", "pipx install aider-chat") }
         "uv" { return @("python -m pip install uv", "uv tool install --force --python python3.12 --with pip aider-chat@latest") }
@@ -49,27 +55,31 @@ function Get-InstallPlan([string]$Method) {
     }
 }
 
-if ($Surface -ne "aider") { throw "Unsupported surface: $Surface" }
-$configName = ".aider.conf.local.yml"
+$configName = if ($Surface -eq "aider") { ".aider.conf.local.yml" } else { ".opencode.local.json" }
+$commandName = if ($Surface -eq "aider") { $AiderCommand } else { $OpenCodeCommand }
+$displayName = if ($Surface -eq "aider") { "Aider" } else { "OpenCode" }
+if ($Surface -eq "opencode" -and $InstallMethod -eq "aider-install") { $InstallMethod = "npm" }
 
 if ($Action -eq "Plan") {
     [pscustomobject]@{
-        Surface = "Aider"
+        Surface = $displayName
         InstallMethod = $InstallMethod
-        InstallCommands = Get-InstallPlan -Method $InstallMethod
+        InstallCommands = Get-InstallPlan -SurfaceName $Surface -Method $InstallMethod
         ConfigFile = $configName
-        LaunchCommand = "$AiderCommand --config $configName"
-        TestCommand = ".\scripts\test-aider-cli-models.ps1 -Models <model>"
+        LaunchCommand = if ($Surface -eq "aider") { "$commandName --config $configName" } else { "`$env:OPENCODE_CONFIG='$configName'; $commandName" }
+        TestCommand = if ($Surface -eq "aider") { ".\scripts\test-aider-cli-models.ps1 -Models <model>" } else { ".\scripts\test-opencode-cli-models.ps1 -Models <model>" }
         Safety = "Generated config is local-only and must not be committed."
     } | ConvertTo-Json -Depth 5
     exit 0
 }
 
 if ($Action -eq "Install") {
-    $commands = Get-InstallPlan -Method $InstallMethod
-    foreach ($command in $commands) { Write-Host "Aider install step: $command" }
+    $commands = Get-InstallPlan -SurfaceName $Surface -Method $InstallMethod
+    foreach ($command in $commands) { Write-Host "$displayName install step: $command" }
     if ($DryRun) { Write-Host "Dry run complete; no network install was executed."; exit 0 }
-    if ($InstallMethod -eq "pipx") {
+    if ($Surface -eq "opencode") {
+        & npm install -g opencode-ai
+    } elseif ($InstallMethod -eq "pipx") {
         & python -m pip install pipx
         if ($LASTEXITCODE -ne 0) { throw "pipx bootstrap failed." }
         & pipx install aider-chat
@@ -83,7 +93,7 @@ if ($Action -eq "Install") {
         & aider-install
     }
     if ($LASTEXITCODE -ne 0) { throw "Aider installation failed." }
-    Write-Host "Aider installation completed. Run this script with -Action Health next."
+    Write-Host "$displayName installation completed. Run this script with -Action Health next."
     exit 0
 }
 
@@ -108,8 +118,23 @@ if ($Action -eq "Configure") {
         "map-tokens: 0"
         "line-endings: platform"
     ) -join [Environment]::NewLine
+    if ($Surface -eq "opencode") {
+        $openCodeEndpoint = if ($endpoint.EndsWith("/v1")) { $endpoint } else { "$endpoint/v1" }
+        $content = @{
+            '$schema' = "https://opencode.ai/config.json"
+            model = "ollama/$selectedModel"
+            provider = @{
+                ollama = @{
+                    npm = "@ai-sdk/openai-compatible"
+                    name = "Ollama (local)"
+                    options = @{ baseURL = $openCodeEndpoint }
+                    models = @{ $selectedModel = @{ name = "$selectedModel (local)" } }
+                }
+            }
+        } | ConvertTo-Json -Depth 10
+    }
     if ((Test-Path -LiteralPath $configPath) -and -not $Force) { throw "$configName already exists. Use -Force to replace it." }
-    Write-Host "Aider config target: $configPath"
+    Write-Host "$displayName config target: $configPath"
     Write-Host "Selected lane/model: $Lane / $selectedModel"
     if ($DryRun) { Write-Host "Dry run complete; no config was written."; exit 0 }
     Set-Content -LiteralPath $configPath -Value $content -NoNewline
@@ -118,19 +143,33 @@ if ($Action -eq "Configure") {
         $exclude = if (Test-Path -LiteralPath $excludePath) { @(Get-Content -LiteralPath $excludePath) } else { @() }
         if ($configName -notin $exclude) { Add-Content -LiteralPath $excludePath -Value $configName }
     }
-    Write-Host "Aider config written. Launch with: $AiderCommand --config $configName"
+    if ($Surface -eq "aider") {
+        Write-Host "Aider config written. Launch with: $AiderCommand --config $configName"
+    } else {
+        Write-Host "OpenCode config written. Launch with: `$env:OPENCODE_CONFIG='$configName'; $OpenCodeCommand"
+    }
     exit 0
 }
 
 $checks = [System.Collections.Generic.List[object]]::new()
-$aider = Get-Command $AiderCommand -ErrorAction SilentlyContinue
-$checks.Add([pscustomobject]@{ Name = "aider-command"; Status = if ($aider) { "pass" } else { "fail" }; Detail = if ($aider) { "$AiderCommand is available" } else { "$AiderCommand was not found on PATH" } })
+$agentCommand = Get-Command $commandName -ErrorAction SilentlyContinue
+$checks.Add([pscustomobject]@{ Name = "$Surface-command"; Status = if ($agentCommand) { "pass" } else { "fail" }; Detail = if ($agentCommand) { "$commandName is available" } else { "$commandName was not found on PATH" } })
 $checks.Add([pscustomobject]@{ Name = "local-config"; Status = if (Test-Path -LiteralPath $configPath) { "pass" } else { "fail" }; Detail = $configName })
 if (Test-Path -LiteralPath $configPath) {
     $configText = Get-Content -LiteralPath $configPath -Raw
-    $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = if ($configText -match '(?m)^model: ollama_chat/') { "pass" } else { "fail" }; Detail = "ollama_chat model configured" })
-    $checks.Add([pscustomobject]@{ Name = "safe-git-mode"; Status = if ($configText -match '(?m)^auto-commits: false\r?$' -and $configText -match '(?m)^dirty-commits: false\r?$') { "pass" } else { "fail" }; Detail = "automatic commits disabled" })
+    if ($Surface -eq "aider") {
+        $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = if ($configText -match '(?m)^model: ollama_chat/') { "pass" } else { "fail" }; Detail = "ollama_chat model configured" })
+        $checks.Add([pscustomobject]@{ Name = "safe-git-mode"; Status = if ($configText -match '(?m)^auto-commits: false\r?$' -and $configText -match '(?m)^dirty-commits: false\r?$') { "pass" } else { "fail" }; Detail = "automatic commits disabled" })
+    } else {
+        try {
+            $openCodeConfig = $configText | ConvertFrom-Json
+            $hasModel = $openCodeConfig.model -match '^ollama/' -and $null -ne $openCodeConfig.provider.ollama
+            $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = if ($hasModel) { "pass" } else { "fail" }; Detail = "Ollama provider and model configured" })
+        } catch {
+            $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = "fail"; Detail = "OpenCode config is not valid JSON" })
+        }
+    }
 }
 $status = if (@($checks | Where-Object Status -eq "fail").Count -eq 0) { "healthy" } else { "attention-required" }
-[pscustomobject]@{ Surface = "Aider"; Status = $status; Checks = @($checks); NextCommand = "$AiderCommand --config $configName --version" } | ConvertTo-Json -Depth 5
+[pscustomobject]@{ Surface = $displayName; Status = $status; Checks = @($checks); NextCommand = if ($Surface -eq "aider") { "$AiderCommand --config $configName --version" } else { "`$env:OPENCODE_CONFIG='$configName'; $OpenCodeCommand --version" } } | ConvertTo-Json -Depth 5
 if ($status -ne "healthy") { exit 1 }

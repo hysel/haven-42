@@ -16,6 +16,13 @@ This is different from `scripts/test-local-agent-models.*`:
 
 Aider CLI is useful for automated screening, but it does not prove realistic scoped-edit behavior in a real project.
 
+Current sanitized evidence is recorded in
+[`examples/aider-validation.md`](../examples/aider-validation.md). It includes
+generated-sample read-only and disposable write-smoke validation for
+`qwen3.5:9b`, plus deeper generated-sample scoped-edit evidence for
+`qwen3-coder:30b`. These results are model- and surface-specific; neither
+result approves real-project writes.
+
 Treat the result as surface-specific evidence:
 
 ```text

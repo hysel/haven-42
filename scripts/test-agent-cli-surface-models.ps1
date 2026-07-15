@@ -12,6 +12,7 @@ param(
     [string]$InstallHint,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
+    [switch]$IncludeScopedEdit,
     [switch]$AllowNonGeneratedTarget,
     [switch]$UnloadAfterEach,
     [switch]$DryRun
@@ -19,12 +20,14 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$surfaceDefaultFound = $false
 
 $surfaceDefaultsPath = Join-Path $repoRoot "config/agent-cli-surface-defaults.json"
 if (Test-Path -LiteralPath $surfaceDefaultsPath) {
     $surfaceDefaults = Get-Content -LiteralPath $surfaceDefaultsPath -Raw | ConvertFrom-Json
     $surfaceDefault = @($surfaceDefaults.surfaces | Where-Object { $_.surfaceKey -eq $SurfaceKey } | Select-Object -First 1)
     if ($surfaceDefault.Count -gt 0) {
+        $surfaceDefaultFound = $true
         if ([string]::IsNullOrWhiteSpace($SurfaceName)) { $SurfaceName = $surfaceDefault[0].surfaceName }
         if ([string]::IsNullOrWhiteSpace($AgentCommand)) { $AgentCommand = $surfaceDefault[0].agentCommand }
         if ([string]::IsNullOrWhiteSpace($AgentArgumentsTemplate)) { $AgentArgumentsTemplate = $surfaceDefault[0].agentArgumentsTemplate }
@@ -37,7 +40,7 @@ if (Test-Path -LiteralPath $surfaceDefaultsPath) {
 if ([string]::IsNullOrWhiteSpace($SurfaceName)) { $SurfaceName = "Aider CLI" }
 if ([string]::IsNullOrWhiteSpace($AgentCommand)) { $AgentCommand = "aider" }
 if ([string]::IsNullOrWhiteSpace($AgentArgumentsTemplate)) { $AgentArgumentsTemplate = '--message "{Prompt}" --yes-always --no-auto-commits' }
-if ([string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) { $ModelArgumentTemplate = '--model "ollama_chat/{Model}"' }
+if ([string]::IsNullOrWhiteSpace($ModelArgumentTemplate) -and -not $surfaceDefaultFound) { $ModelArgumentTemplate = '--model "ollama_chat/{Model}"' }
 if ([string]::IsNullOrWhiteSpace($InstallHint)) { $InstallHint = "Install or configure the CLI, or pass -AgentCommand." }
 
 if (-not $TargetRepo) {
@@ -59,12 +62,12 @@ function Invoke-OllamaUnload {
 
     $body = @{
         model = $Model
-        messages = @()
+        prompt = ""
         keep_alive = 0
         stream = $false
     } | ConvertTo-Json -Depth 10
 
-    Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/chat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $TimeoutSeconds | Out-Null
+    Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/generate" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $TimeoutSeconds | Out-Null
 }
 
 function Get-DefaultModels {
@@ -113,7 +116,7 @@ function Invoke-AgentCommand {
     Set-Content -LiteralPath $promptFile -Value $Prompt -Encoding UTF8
     $tempDir = [System.IO.Path]::GetTempPath().TrimEnd("\", "/")
 
-    $agentTemplate = if ($Phase -eq "write" -and -not [string]::IsNullOrWhiteSpace($WriteAgentArgumentsTemplate)) {
+    $agentTemplate = if ($Phase -match "write" -and -not [string]::IsNullOrWhiteSpace($WriteAgentArgumentsTemplate)) {
         $WriteAgentArgumentsTemplate
     } else {
         $AgentArgumentsTemplate
@@ -136,8 +139,15 @@ function Invoke-AgentCommand {
     }
 
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $resolvedCommand = Get-Command $AgentCommand -ErrorAction Stop
     $startInfo.FileName = $AgentCommand
     $startInfo.Arguments = $arguments
+    if ($resolvedCommand.CommandType -eq "ExternalScript" -and $resolvedCommand.Source -match '\.ps1$') {
+        $powerShell = Get-Command pwsh -ErrorAction SilentlyContinue
+        if (-not $powerShell) { $powerShell = Get-Command powershell -ErrorAction Stop }
+        $startInfo.FileName = $powerShell.Source
+        $startInfo.Arguments = "-NoProfile -File `"$($resolvedCommand.Source)`" $arguments"
+    }
     $startInfo.WorkingDirectory = $RunDirectory
     $startInfo.UseShellExecute = $false
     $startInfo.RedirectStandardOutput = $true
@@ -212,8 +222,8 @@ if (-not (Test-Path -LiteralPath $TargetRepo)) {
     throw "TargetRepo does not exist: $TargetRepo"
 }
 
-if ($IncludeWriteSmoke -and -not $AllowNonGeneratedTarget -and $TargetRepo -notmatch "runtime-validation-output[\\/]sample-repositories") {
-    throw "Write smoke tests are allowed only for generated disposable samples unless -AllowNonGeneratedTarget is set."
+if (($IncludeWriteSmoke -or $IncludeScopedEdit) -and -not $AllowNonGeneratedTarget -and $TargetRepo -notmatch "runtime-validation-output[\\/]sample-repositories") {
+    throw "Write and scoped-edit tests are allowed only for generated disposable samples unless -AllowNonGeneratedTarget is set."
 }
 
 $resolvedTarget = (Resolve-Path -LiteralPath $TargetRepo).Path
@@ -237,10 +247,16 @@ $results = [System.Collections.Generic.List[object]]::new()
 $readPrompt = @"
 Use the available read-only repository context or tools to inspect the opened repository root. Do not modify files. Do not create files. Do not run package installation. Do not guess. Return only the actual top-level files and folders inspected, the project type, key source and test files inspected, risks or missing information, and a failure signal. If no repository context or tools are available, say TOOLS_UNAVAILABLE.
 "@
+if ($SurfaceKey -eq "opencode-cli") {
+    $readPrompt = "Use repository tools to read README.md and pyproject.toml. Do not modify files. Return the exact two filenames you read. If either cannot be read, say TOOLS_UNAVAILABLE."
+}
 
 $writeLine = "$SurfaceName approved-write smoke test passed."
 $writePrompt = @"
 Use approved write mode for this disposable smoke test only. Modify the existing README.md by adding exactly this final line: $writeLine Do not modify any other files. Do not create new files. After editing, report the changed file and stop. Do not commit.
+"@
+$scopedPrompt = @"
+Use approved write mode for this disposable Python sample only. Modify only app/settings.py and tests/test_main.py. Add a Settings validation_label field with the exact default value local-agent-validation, then update the existing test to assert that Settings().validation_label equals local-agent-validation. Do not modify any other files. Do not create files. Do not commit. Run the existing tests if practical, then report the changed files and stop.
 "@
 
 $index = 0
@@ -249,6 +265,7 @@ foreach ($model in $modelsToTest) {
     Write-Host "[5/7] Testing model $index/$($modelsToTest.Count): $model"
     $readStatus = "not-run"
     $writeStatus = "not-run"
+    $scopedEditStatus = "not-run"
     $failureSignals = [System.Collections.Generic.List[string]]::new()
 
     try {
@@ -258,9 +275,14 @@ foreach ($model in $modelsToTest) {
         }
 
         $readRun = Invoke-AgentCommand -Model $model -Prompt $readPrompt -Phase "read" -RunDirectory $resolvedTarget
-        $readOk = ($readRun.ExitCode -eq 0 -and -not $readRun.TimedOut -and $readRun.Stdout -match "README\.md" -and $readRun.Stdout -match "pyproject\.toml")
+        $readOutput = "$($readRun.Stdout)`n$($readRun.Stderr)"
+        $readOk = ($readRun.ExitCode -eq 0 -and -not $readRun.TimedOut -and $readOutput -match "README\.md" -and $readOutput -match "pyproject\.toml")
         $readStatus = if ($readOk) { "read-only-context-validated" } else { "failed" }
-        if (-not $readOk) { $failureSignals.Add("READ_VALIDATION_FAILED") }
+        if (-not $readOk) {
+            $failureSignals.Add("READ_VALIDATION_FAILED")
+            $failureSignals.Add("READ_EXIT_$($readRun.ExitCode)")
+            if ($readRun.TimedOut) { $failureSignals.Add("READ_TIMED_OUT") }
+        }
 
         if (-not $DryRun) {
             $postReadStatus = Invoke-GitText -Arguments @("status", "--short")
@@ -268,17 +290,55 @@ foreach ($model in $modelsToTest) {
         }
 
         if ($IncludeWriteSmoke) {
-            $writeRun = Invoke-AgentCommand -Model $model -Prompt $writePrompt -Phase "write" -RunDirectory $resolvedTarget
-            $diffNames = Invoke-GitText -Arguments @("diff", "--name-only")
-            $changedFiles = @($diffNames -split "`r?`n" | Where-Object { $_ })
-            $diffCheck = Invoke-GitText -Arguments @("diff", "--check")
-            $readme = Get-Content -LiteralPath (Join-Path $resolvedTarget "README.md") -Raw
-            $expectedLine = [regex]::Escape($writeLine)
-            $writeOk = ($writeRun.ExitCode -eq 0 -and -not $writeRun.TimedOut -and $changedFiles.Count -eq 1 -and $changedFiles[0] -eq "README.md" -and -not $diffCheck -and $readme -match "$expectedLine`r?`n?$")
-            $writeStatus = if ($writeOk) { "write-smoke-validated" } else { "failed" }
-            if (-not $writeOk) { $failureSignals.Add("WRITE_VALIDATION_FAILED") }
+            if ($DryRun) {
+                $writeStatus = "write-smoke-validated"
+            }
+            else {
+                $writeRun = Invoke-AgentCommand -Model $model -Prompt $writePrompt -Phase "write" -RunDirectory $resolvedTarget
+                $diffNames = Invoke-GitText -Arguments @("diff", "--name-only")
+                $changedFiles = @($diffNames -split "`r?`n" | Where-Object { $_ })
+                $diffCheck = Invoke-GitText -Arguments @("diff", "--check")
+                $readme = Get-Content -LiteralPath (Join-Path $resolvedTarget "README.md") -Raw
+                $expectedLine = [regex]::Escape($writeLine)
+                $writeOk = ($writeRun.ExitCode -eq 0 -and -not $writeRun.TimedOut -and $changedFiles.Count -eq 1 -and $changedFiles[0] -eq "README.md" -and -not $diffCheck -and $readme -match "$expectedLine`r?`n?$")
+                $writeStatus = if ($writeOk) { "write-smoke-validated" } else { "failed" }
+                if (-not $writeOk) {
+                    $failureSignals.Add("WRITE_VALIDATION_FAILED")
+                    $failureSignals.Add("WRITE_EXIT_$($writeRun.ExitCode)")
+                    if ($writeRun.TimedOut) { $failureSignals.Add("WRITE_TIMED_OUT") }
+                }
 
-            Invoke-GitText -Arguments @("restore", "README.md") | Out-Null
+                Invoke-GitText -Arguments @("restore", "README.md") | Out-Null
+            }
+        }
+
+        if ($IncludeScopedEdit) {
+            $settingsPath = Join-Path $resolvedTarget "app/settings.py"
+            $testPath = Join-Path $resolvedTarget "tests/test_main.py"
+            if (-not (Test-Path -LiteralPath $settingsPath) -or -not (Test-Path -LiteralPath $testPath)) {
+                $scopedEditStatus = "failed"
+                $failureSignals.Add("SCOPED_EDIT_FIXTURE_UNSUPPORTED")
+            }
+            elseif ($DryRun) {
+                $scopedEditStatus = "scoped-edit-validated"
+            }
+            else {
+                $scopedRun = Invoke-AgentCommand -Model $model -Prompt $scopedPrompt -Phase "scoped-write" -RunDirectory $resolvedTarget
+                $diffNames = Invoke-GitText -Arguments @("diff", "--name-only")
+                $changedFiles = @($diffNames -split "`r?`n" | Where-Object { $_ } | Sort-Object)
+                $diffCheck = Invoke-GitText -Arguments @("diff", "--check")
+                $settings = Get-Content -LiteralPath $settingsPath -Raw
+                $test = Get-Content -LiteralPath $testPath -Raw
+                $scopedOk = ($scopedRun.ExitCode -eq 0 -and -not $scopedRun.TimedOut -and (@($changedFiles) -join "|") -eq "app/settings.py|tests/test_main.py" -and -not $diffCheck -and $settings -match "validation_label" -and $settings -match "local-agent-validation" -and $test -match "validation_label" -and $test -match "local-agent-validation")
+                $scopedEditStatus = if ($scopedOk) { "scoped-edit-validated" } else { "failed" }
+                if (-not $scopedOk) {
+                    $failureSignals.Add("SCOPED_EDIT_VALIDATION_FAILED")
+                    $failureSignals.Add("SCOPED_EDIT_EXIT_$($scopedRun.ExitCode)")
+                    if ($scopedRun.TimedOut) { $failureSignals.Add("SCOPED_EDIT_TIMED_OUT") }
+                }
+
+                Invoke-GitText -Arguments @("restore", "app/settings.py", "tests/test_main.py") | Out-Null
+            }
         }
     }
     catch {
@@ -301,6 +361,7 @@ foreach ($model in $modelsToTest) {
         Target = "generated-sample"
         ReadStatus = $readStatus
         WriteStatus = $writeStatus
+        ScopedEditStatus = $scopedEditStatus
         FailureSignals = @($failureSignals)
     })
 }
@@ -311,6 +372,7 @@ $report = [pscustomobject]@{
     SurfaceKey = $SurfaceKey
     Target = "generated-sample"
     IncludeWriteSmoke = [bool]$IncludeWriteSmoke
+    IncludeScopedEdit = [bool]$IncludeScopedEdit
     UnloadAfterEach = [bool]$UnloadAfterEach
     DryRun = [bool]$DryRun
     Results = @($results)
@@ -321,6 +383,6 @@ Write-Host "[6/7] Writing sanitized report..."
 $report | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
 
 foreach ($result in $results) {
-    Write-Host "$($result.Model): read=$($result.ReadStatus), write=$($result.WriteStatus), failures=$($result.FailureSignals -join ',')"
+    Write-Host "$($result.Model): read=$($result.ReadStatus), write=$($result.WriteStatus), scoped-edit=$($result.ScopedEditStatus), failures=$($result.FailureSignals -join ',')"
 }
 Write-Host "[7/7] Report written to $OutputPath"

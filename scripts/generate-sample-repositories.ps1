@@ -21,7 +21,10 @@ $samples = @(
     "go-service",
     "rust-cli",
     "iac-terraform-kubernetes",
-    "sql-migrations"
+    "sql-migrations",
+    "python-layered-api",
+    "typescript-service-medium",
+    "multi-language-platform"
 )
 
 if ($List) {
@@ -67,7 +70,8 @@ function Add-Metadata {
         [string]$SampleRoot,
         [string]$Name,
         [string]$Ecosystem,
-        [string]$Purpose
+        [string]$Purpose,
+        [string]$Complexity = "minimal"
     )
 
     Write-SampleFile $SampleRoot "SAMPLE-METADATA.md" @"
@@ -76,6 +80,7 @@ function Add-Metadata {
 Name: $Name
 Ecosystem: $Ecosystem
 Purpose: $Purpose
+Complexity: $Complexity
 Generated: deterministic local fixture
 
 This repository is a disposable validation sample for the Local Engineering Agent Pack. It is not a production starter template.
@@ -419,6 +424,345 @@ Write-SampleFile $root "VALIDATION.md" @"
 
 Review migration ordering, defaults, rollback strategy, and seed-data safety.
 "@
+
+$root = New-SampleRoot "python-layered-api"
+Add-Metadata $root "python-layered-api" "Python" "Layered API planning, review, and scoped-write validation." "medium"
+Write-SampleFile $root "README.md" @'
+# Python Layered API Sample
+
+Medium-complexity Python fixture with configuration, domain, repository,
+service, entry-point, and test boundaries.
+
+## Commands
+
+- `python -m pytest`
+- `python -m app.main`
+'@
+Write-SampleFile $root "SCENARIO.md" @'
+# Validation Scenario
+
+Review item-name normalization across the service and repository boundaries.
+For a scoped-write test, reject blank item names in `app/service.py` and add
+only the corresponding tests in `tests/test_service.py`.
+'@
+Write-SampleFile $root "pyproject.toml" @'
+[project]
+name = "sample-python-layered-api"
+version = "0.1.0"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+'@
+Write-SampleFile $root "app/config.py" @'
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Settings:
+    service_name: str = "sample-python-layered-api"
+    max_items: int = 100
+'@
+Write-SampleFile $root "app/domain.py" @'
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Item:
+    item_id: int
+    name: str
+'@
+Write-SampleFile $root "app/repository.py" @'
+from app.domain import Item
+
+
+class ItemRepository:
+    def __init__(self) -> None:
+        self._items: dict[int, Item] = {}
+
+    def save(self, item: Item) -> Item:
+        self._items[item.item_id] = item
+        return item
+
+    def find(self, item_id: int) -> Item | None:
+        return self._items.get(item_id)
+'@
+Write-SampleFile $root "app/service.py" @'
+from app.domain import Item
+from app.repository import ItemRepository
+
+
+class ItemService:
+    def __init__(self, repository: ItemRepository) -> None:
+        self._repository = repository
+
+    def create(self, item_id: int, name: str) -> Item:
+        item = Item(item_id=item_id, name=name.strip())
+        return self._repository.save(item)
+'@
+Write-SampleFile $root "app/main.py" @'
+from app.repository import ItemRepository
+from app.service import ItemService
+
+
+def build_service() -> ItemService:
+    return ItemService(ItemRepository())
+
+
+if __name__ == "__main__":
+    print(build_service().create(1, "sample"))
+'@
+Write-SampleFile $root "tests/test_service.py" @'
+from app.repository import ItemRepository
+from app.service import ItemService
+
+
+def test_create_trims_item_name():
+    service = ItemService(ItemRepository())
+    assert service.create(1, " sample ").name == "sample"
+'@
+Write-SampleFile $root "config/settings.example.json" @'
+{
+  "serviceName": "sample-python-layered-api",
+  "maxItems": 100
+}
+'@
+
+$root = New-SampleRoot "typescript-service-medium"
+Add-Metadata $root "typescript-service-medium" "TypeScript" "Layered service planning, review, and scoped-write validation." "medium"
+Write-SampleFile $root "README.md" @'
+# TypeScript Service Medium Sample
+
+Medium-complexity TypeScript fixture with domain, repository, service,
+configuration, entry-point, and test boundaries.
+'@
+Write-SampleFile $root "SCENARIO.md" @'
+# Validation Scenario
+
+Review identifier and display-name validation across the service boundary. For
+a scoped-write test, reject blank display names in `src/service.ts` and change
+only `src/service.ts` plus `tests/service.test.ts`.
+'@
+Write-SampleFile $root "package.json" @'
+{
+  "name": "typescript-service-medium-sample",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}
+'@
+Write-SampleFile $root "tsconfig.json" @'
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true
+  },
+  "include": ["src", "tests"]
+}
+'@
+Write-SampleFile $root "src/domain.ts" @'
+export interface Account {
+  id: string;
+  displayName: string;
+}
+'@
+Write-SampleFile $root "src/repository.ts" @'
+import type { Account } from './domain.js';
+
+export class AccountRepository {
+  private readonly accounts = new Map<string, Account>();
+
+  save(account: Account): Account {
+    this.accounts.set(account.id, account);
+    return account;
+  }
+
+  find(id: string): Account | undefined {
+    return this.accounts.get(id);
+  }
+}
+'@
+Write-SampleFile $root "src/service.ts" @'
+import type { Account } from './domain.js';
+import { AccountRepository } from './repository.js';
+
+export class AccountService {
+  constructor(private readonly repository: AccountRepository) {}
+
+  create(id: string, displayName: string): Account {
+    return this.repository.save({ id, displayName: displayName.trim() });
+  }
+}
+'@
+Write-SampleFile $root "src/config.ts" @'
+export interface ServiceConfig {
+  serviceName: string;
+  port: number;
+}
+
+export const defaultConfig: ServiceConfig = {
+  serviceName: 'typescript-service-medium-sample',
+  port: 3000,
+};
+'@
+Write-SampleFile $root "src/index.ts" @'
+import { AccountRepository } from './repository.js';
+import { AccountService } from './service.js';
+
+export const accountService = new AccountService(new AccountRepository());
+'@
+Write-SampleFile $root "tests/service.test.ts" @'
+import { describe, expect, it } from 'vitest';
+import { AccountRepository } from '../src/repository.js';
+import { AccountService } from '../src/service.js';
+
+describe('AccountService', () => {
+  it('trims display names', () => {
+    const service = new AccountService(new AccountRepository());
+    expect(service.create('a-1', ' Sample ').displayName).toBe('Sample');
+  });
+});
+'@
+
+$root = New-SampleRoot "multi-language-platform"
+Add-Metadata $root "multi-language-platform" "Java, Go, Rust, SQL, and Infrastructure as Code" "Polyglot platform discovery, planning, review, and scoped-write validation." "medium"
+Write-SampleFile $root "README.md" @'
+# Multi-Language Platform Sample
+
+Medium-complexity polyglot fixture containing a Java API, Go worker, Rust tool,
+SQL migrations, Terraform, and Kubernetes deployment configuration.
+'@
+Write-SampleFile $root "SCENARIO.md" @'
+# Validation Scenario
+
+Discover each component before applying language guidance. Planning and review
+must keep service boundaries separate. Scoped-write tests must name one
+component and may not edit another component without explicit approval.
+'@
+Write-SampleFile $root "services/catalog/pom.xml" @'
+<project xmlns="http://maven.apache.org/POM/4.0.0">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>example.platform</groupId>
+  <artifactId>catalog-service</artifactId>
+  <version>0.1.0</version>
+</project>
+'@
+Write-SampleFile $root "services/catalog/src/main/java/example/CatalogService.java" @'
+package example;
+
+public final class CatalogService {
+    public String normalizeName(String name) {
+        return name.trim();
+    }
+}
+'@
+Write-SampleFile $root "services/catalog/src/test/java/example/CatalogServiceTest.java" @'
+package example;
+
+class CatalogServiceTest {
+    void trimsNames() {
+        assert "sample".equals(new CatalogService().normalizeName(" sample "));
+    }
+}
+'@
+Write-SampleFile $root "workers/events/go.mod" @'
+module example.com/platform/events
+
+go 1.22
+'@
+Write-SampleFile $root "workers/events/event.go" @'
+package events
+
+import "strings"
+
+func NormalizeTopic(topic string) string {
+	return strings.TrimSpace(topic)
+}
+'@
+Write-SampleFile $root "workers/events/event_test.go" @'
+package events
+
+import "testing"
+
+func TestNormalizeTopic(t *testing.T) {
+	if NormalizeTopic(" updates ") != "updates" {
+		t.Fatal("expected trimmed topic")
+	}
+}
+'@
+Write-SampleFile $root "tools/manifest/Cargo.toml" @'
+[package]
+name = "manifest-tool"
+version = "0.1.0"
+edition = "2021"
+'@
+Write-SampleFile $root "tools/manifest/src/lib.rs" @'
+pub fn normalize_key(value: &str) -> String {
+    value.trim().to_lowercase()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn normalizes_keys() {
+        assert_eq!(normalize_key(" Item-Key "), "item-key");
+    }
+}
+'@
+Write-SampleFile $root "database/schema/001_catalog.sql" @'
+CREATE TABLE catalog_items (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
+'@
+Write-SampleFile $root "database/migrations/002_catalog_status.sql" @'
+ALTER TABLE catalog_items ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
+'@
+Write-SampleFile $root "infrastructure/terraform/main.tf" @'
+terraform {
+  required_version = ">= 1.6.0"
+}
+
+variable "environment" {
+  type = string
+}
+
+output "service_name" {
+  value = "catalog-${var.environment}"
+}
+'@
+Write-SampleFile $root "infrastructure/k8s/catalog.yaml" @'
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: catalog-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: catalog-service
+  template:
+    metadata:
+      labels:
+        app: catalog-service
+    spec:
+      containers:
+        - name: catalog-service
+          image: example/catalog-service:latest
+'@
 
 Write-Host "Generated sample repositories in: $outputRootPath" -ForegroundColor Green
 $samples | ForEach-Object { Write-Host "- $_" }

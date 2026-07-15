@@ -17,6 +17,9 @@ Generate the chooser on Linux or macOS:
 ./scripts/show-workflow-chooser.macos.sh --markdown-output-path runtime-validation-output/workflow-chooser.md --output-path runtime-validation-output/workflow-chooser.json --as-json
 ```
 
+The Linux and macOS wrappers use the native Python 3 renderer and do not
+require PowerShell.
+
 The report includes:
 
 - Workflow ID.

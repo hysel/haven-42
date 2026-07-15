@@ -19,6 +19,9 @@ Generate a Linux or macOS plan:
 ./scripts/get-beginner-setup-plan.macos.sh --markdown-output-path runtime-validation-output/beginner-setup-plan.md --output-path runtime-validation-output/beginner-setup-plan.json --as-json
 ```
 
+Linux and macOS use the native Python 3 renderer behind these wrappers. They
+do not require PowerShell. Python 3 is the only renderer prerequisite.
+
 The generated plan covers:
 
 - Health check.

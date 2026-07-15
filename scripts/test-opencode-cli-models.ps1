@@ -8,6 +8,7 @@ param(
     [string]$ModelArgumentTemplate,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
+    [switch]$IncludeScopedEdit,
     [switch]$AllowNonGeneratedTarget,
     [switch]$UnloadAfterEach,
     [switch]$DryRun
@@ -25,6 +26,7 @@ $arguments = @{
     ModelArgumentTemplate = $ModelArgumentTemplate
     TimeoutSeconds = $TimeoutSeconds
     IncludeWriteSmoke = $IncludeWriteSmoke
+    IncludeScopedEdit = $IncludeScopedEdit
     AllowNonGeneratedTarget = $AllowNonGeneratedTarget
     UnloadAfterEach = $UnloadAfterEach
     DryRun = $DryRun

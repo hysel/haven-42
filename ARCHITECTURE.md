@@ -144,6 +144,7 @@ installer workflows are unaffected and continue to require no PowerShell.
 - Templates define durable output shape.
 - Capability evidence defines what a specific surface/model/environment operation has actually proven.
 - Project profiles define which optional language rules a target repository activates and the filename evidence supporting that decision.
+- The language workflow validation matrix maps optional rule packs to medium-complexity fixtures and required operations while keeping unexecuted editor/model evidence explicitly pending.
 - Workflow registry and envelope contracts define stable, versioned automation boundaries without owning workflow business logic.
 - Top-level docs define project intent and governance.
 

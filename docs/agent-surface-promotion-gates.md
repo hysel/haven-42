@@ -8,9 +8,9 @@ Continue remains the supported first path. Other surfaces can move forward only 
 
 Milestone 17 has complete Cline and Aider evidence for the current documented scope because at least one non-Continue surface has sanitized read-only validation evidence, Cline has disposable write-smoke evidence, Aider has generated-sample read-only, write-smoke, and scoped-edit evidence, and real-project approved-write remains blocked until explicit non-generated repository validation passes.
 
-Milestone 17 remains partial for full tracked-surface compatibility because Roo Code, Kilo Code, OpenCode, and OpenHands do not yet have full live validation evidence.
+Milestone 17 remains partial for full tracked-surface compatibility because Roo Code, Kilo Code, and OpenHands do not yet have live validation evidence, and OpenCode has generated-sample-only evidence.
 
-Roo Code, Kilo Code, and OpenCode remain future live-validation targets because their real command shapes or install/config behavior must be confirmed before generated-sample wrapper validation can be treated as surface evidence.
+Roo Code and Kilo Code remain future live-validation targets because their real command shapes or install/config behavior must be confirmed before generated-sample wrapper validation can be treated as surface evidence. OpenCode's generated-sample evidence is recorded separately and still requires non-generated-repository validation.
 
 ## Shared Gates
 
@@ -33,7 +33,7 @@ Roo Code, Kilo Code, and OpenCode remain future live-validation targets because 
 | Aider | CLI read-only, disposable write-smoke, and richer generated-sample scoped edits exist. | Explicitly approved non-generated repository validation before real-project approved-write claims. |
 | Roo Code | Shared wrapper scaffold exists. | Confirm real command shape, then run read-only generated-sample validation. |
 | Kilo Code | Shared wrapper scaffold exists. | Confirm real command shape, then run read-only generated-sample validation. |
-| OpenCode | Shared wrapper scaffold exists. | Confirm CLI install/config behavior, then run read-only generated-sample validation. |
+| OpenCode | Installed CLI plus generated-sample read/write-smoke and constrained scoped-edit evidence exists for Devstral Small 2 24B. | Run explicitly approved non-generated repository validation. |
 | OpenHands | Platform-agent candidate is blocked for install/config generation. | Use the isolated generated-sample boundary in `docs/openhands-validation-boundary.md` before any validation automation. |
 
 ## Promotion Rules

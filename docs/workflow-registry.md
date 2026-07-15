@@ -26,6 +26,8 @@ Each workflow records:
 
 `classify-project` is the stable read-only entry point for repository ecosystem detection. It emits the sanitized profile used by project-local installers to activate matching optional language rules. See `docs/project-profile-classification.md`.
 
+`recommend-language-model-lane` combines filename-only classification with the validated language/workflow matrix. It returns an evidence-backed model lane for a requested operation, or no lane when the evidence context does not match. See `docs/language-aware-model-lanes.md`.
+
 `setup-agent-surface` is the approved-write adapter boundary for surface-native setup. Its first implementation supports Aider plan, isolated install, explicit local-only Ollama configuration, and health checks on Windows, Linux, and macOS. See `docs/aider-cli-model-testing.md`.
 
 `verify-hosted-ci` is the post-push release boundary. It resolves a GitHub

@@ -17,7 +17,7 @@ OpenHands is platform-style rather than a simple local CLI harness target, so it
 
 These scripts are automation scaffolding. A dry run proves the harness wiring, not that a surface or model works.
 
-For Milestone 17, Roo Code, Kilo Code, and OpenCode wrapper live validation remains future evidence expansion until each surface's real command shape is confirmed. Use command overrides for experiments, but do not promote those wrappers from scaffolded to validated from defaults alone.
+For Milestone 17, Roo Code and Kilo Code wrapper live validation remains future evidence expansion until each surface's real command shape is confirmed. OpenCode's documented `run`, provider/model, and local config contracts are reflected in the scaffold, and Devstral Small 2 24B has passed generated-sample read, write-smoke, and constrained scoped-edit checks. OpenCode still needs explicitly approved non-generated repository validation. Use command overrides for experiments, but do not promote wrappers to real-project approved-write readiness from disposable evidence alone.
 
 A surface is not approved-write ready until it passes:
 
@@ -25,6 +25,12 @@ A surface is not approved-write ready until it passes:
 2. Disposable write-smoke validation, if the surface supports writes.
 3. External verification with Git and direct file reads.
 4. A realistic scoped edit in a disposable or explicitly approved repository.
+
+The shared harness supports the fourth gate for the generated Python sample
+through `-IncludeScopedEdit` / `--include-scoped-edit`. It requires an exact
+two-file change to `app/settings.py` and `tests/test_main.py`, verifies both
+files externally, checks whitespace, and restores the disposable fixture. It
+does not permit a non-generated target unless the caller explicitly opts in.
 
 ## Shared Scripts
 
@@ -63,7 +69,7 @@ Use the `.macos.sh` wrapper on macOS.
 | Aider CLI | `scripts/test-aider-cli-models.ps1` | `scripts/test-aider-cli-models.linux.sh`, `scripts/test-aider-cli-models.macos.sh` | `aider` |
 | Roo Code | `scripts/test-roo-code-cli-models.ps1` | `scripts/test-roo-code-cli-models.linux.sh`, `scripts/test-roo-code-cli-models.macos.sh` | No verified local CLI contract; wrapper remains override-only. |
 | Kilo Code | `scripts/test-kilo-code-cli-models.ps1` | `scripts/test-kilo-code-cli-models.linux.sh`, `scripts/test-kilo-code-cli-models.macos.sh` | `kilo` command is documented, but a safe non-interactive task syntax remains unverified. |
-| OpenCode | `scripts/test-opencode-cli-models.ps1` | `scripts/test-opencode-cli-models.linux.sh`, `scripts/test-opencode-cli-models.macos.sh` | `opencode run "{Prompt}"`; local Ollama needs a local-only `opencode.json` provider config. |
+| OpenCode | `scripts/test-opencode-cli-models.ps1` | `scripts/test-opencode-cli-models.linux.sh`, `scripts/test-opencode-cli-models.macos.sh` | `opencode run --auto --model "ollama/{Model}" "{Prompt}"` for generated-sample validation only; generate `.opencode.local.json` with the unified adapter and use `OPENCODE_CONFIG`. |
 
 For any surface whose CLI command or flags differ, pass command overrides rather than editing the harness.
 
@@ -87,6 +93,16 @@ Use live tests only after the CLI command is installed and the model server is a
   -Models "qwen3.5:9b" `
   -UnloadAfterEach `
   -OllamaBaseUrl "http://127.0.0.1:11434"
+```
+
+For a generated Python scoped-edit test:
+
+```powershell
+.\scripts\test-opencode-cli-models.ps1 `
+  -Models "devstral-small-2:24b" `
+  -IncludeWriteSmoke `
+  -IncludeScopedEdit `
+  -UnloadAfterEach
 ```
 
 For CLI flags that differ from the default wrapper:

@@ -33,10 +33,10 @@
       "surfaceKey": "opencode-cli",
       "surfaceName": "OpenCode",
       "agentCommand": "opencode",
-      "agentArgumentsTemplate": "run \"{Prompt}\"",
+      "agentArgumentsTemplate": "run --auto --model \"ollama/{Model}\" \"{Prompt}\"",
       "writeAgentArgumentsTemplate": "",
-      "modelArgumentTemplate": "--model \"{Model}\"",
-      "installHint": "Install OpenCode or pass the command/template override."
+      "modelArgumentTemplate": "",
+      "installHint": "Install OpenCode with npm install -g opencode-ai, generate a local-only config with setup-agent-surface, or pass the command/template override."
     }
   ]
 }
