@@ -2,6 +2,33 @@
 
 This file records sanitized Aider validation evidence for this pack. It should not include private endpoints, local paths, usernames, raw transcripts, private repository names, customer names, or source code from private repositories.
 
+## Evidence: 2026-07-15 Qwen 3.5 9B Read And Write Smoke
+
+### Summary
+
+- Surface: Aider CLI
+- Aider version: 0.86.2
+- Operating system: Windows
+- Model: qwen3.5:9b
+- Provider: Ollama
+- Target repository source: generated disposable Python sample
+- Private details removed: Yes
+
+### Results
+
+| Test | Result | Notes |
+| --- | --- | --- |
+| Read-only context validation | Pass | The CLI completed the generated-sample read phase. |
+| Disposable write smoke | Pass | The harness verified the expected isolated write. |
+| External verification | Pass | Git and direct file checks passed before fixture cleanup. |
+| Model unload after validation | Pass | The Ollama process list was empty after the run. |
+
+### Decision
+
+- Validation level: read-only-tool-validated and write-smoke-validated for Aider CLI only.
+- Real-project approved-write position: blocked. This evidence does not validate a non-generated repository or another agent surface.
+- Failure signals: none.
+
 ## Current Status
 
 Aider is currently a candidate agent surface. Model-backed read-only context validation, disposable write-smoke validation, and realistic scoped-edit validation have passed for `qwen3-coder:30b` against the generated Python sample. A richer disposable Node service scoped edit has also passed with external Node test verification. Real-project approved-write readiness is still blocked until validation passes in an explicitly approved non-generated repository.

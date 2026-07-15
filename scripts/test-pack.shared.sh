@@ -627,7 +627,7 @@ test_agent_surface_options_doc() {
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Milestone 17 Cline And Aider Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "partial for full tracked-surface compatibility" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "Roo Code, Kilo Code, and OpenCode remain future live-validation targets" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "Roo Code and Kilo Code remain future live-validation targets" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     [ -f "$REPO_ROOT/docs/openhands-validation-boundary.md" ] &&
     grep -q "OpenHands Validation Boundary" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "disposable generated repository" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
@@ -646,7 +646,9 @@ test_agent_surface_options_doc() {
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
     grep -q "\[ \] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed" "$REPO_ROOT/TODO.md" &&
     grep -q "\[ \] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[ \] Configure OpenCode with a local-only Ollama provider and validate its opencode run wrapper against a generated sample" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[x\] Add a local-only OpenCode Ollama config generator" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[x\] Validate OpenCode's installed CLI" "$REPO_ROOT/TODO.md" &&
+    [ -f "$REPO_ROOT/docs/opencode-cli-model-testing.md" ] &&
     grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "safe non-interactive task syntax remains unverified" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
@@ -847,6 +849,15 @@ test_sample_repository_factory() {
   [ -f "$temp_root/rust-cli/Cargo.toml" ] || return 1
   [ -f "$temp_root/iac-terraform-kubernetes/terraform/main.tf" ] || return 1
   [ -f "$temp_root/sql-migrations/schema/001_create_items.sql" ] || return 1
+  [ -f "$temp_root/python-layered-api/app/service.py" ] || return 1
+  [ -f "$temp_root/python-layered-api/tests/test_service.py" ] || return 1
+  [ -f "$temp_root/typescript-service-medium/src/service.ts" ] || return 1
+  [ -f "$temp_root/typescript-service-medium/tests/service.test.ts" ] || return 1
+  [ -f "$temp_root/multi-language-platform/services/catalog/pom.xml" ] || return 1
+  [ -f "$temp_root/multi-language-platform/workers/events/go.mod" ] || return 1
+  [ -f "$temp_root/multi-language-platform/tools/manifest/Cargo.toml" ] || return 1
+  [ -f "$temp_root/multi-language-platform/database/schema/001_catalog.sql" ] || return 1
+  [ -f "$temp_root/multi-language-platform/infrastructure/terraform/main.tf" ] || return 1
 
   grep -q "# Python API Sample" "$temp_root/python-api/README.md" || return 1
   grep -q "python -m pytest" "$temp_root/python-api/README.md" || return 1
@@ -877,7 +888,69 @@ test_sample_repository_factory() {
   grep -q "Use --force" /tmp/sample-factory-rerun.out || return 1
   "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --output-root "$temp_root" --force >/tmp/sample-factory-force.out 2>&1 || return 1
   "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --list >/tmp/sample-factory-list.out 2>&1 || return 1
-  grep -q "python-api" /tmp/sample-factory-list.out && grep -q "sql-migrations" /tmp/sample-factory-list.out
+  grep -q "python-api" /tmp/sample-factory-list.out &&
+    grep -q "sql-migrations" /tmp/sample-factory-list.out &&
+    grep -q "python-layered-api" /tmp/sample-factory-list.out &&
+    grep -q "typescript-service-medium" /tmp/sample-factory-list.out &&
+    grep -q "multi-language-platform" /tmp/sample-factory-list.out
+}
+
+test_language_workflow_validation_matrix() {
+  command -v python3 >/dev/null 2>&1 || return 1
+  matrix="$REPO_ROOT/config/language-workflow-validation-matrix.json"
+  doc="$REPO_ROOT/docs/language-workflow-validation-matrix.md"
+  runner="$REPO_ROOT/scripts/run-language-workflow-matrix.ps1"
+  shared_runner="$REPO_ROOT/scripts/run-language-workflow-matrix.shared.sh"
+  linux_runner="$REPO_ROOT/scripts/run-language-workflow-matrix.linux.sh"
+  macos_runner="$REPO_ROOT/scripts/run-language-workflow-matrix.macos.sh"
+  [ -f "$matrix" ] && [ -f "$doc" ] && [ -f "$runner" ] && [ -f "$shared_runner" ] && [ -f "$linux_runner" ] && [ -f "$macos_runner" ] || return 1
+  python3 - "$matrix" <<'PY'
+import json
+import pathlib
+import sys
+
+matrix = json.loads(pathlib.Path(sys.argv[1]).read_text())
+expected_packs = {"python", "typescript", "java", "go", "rust", "sql", "infrastructure-as-code"}
+expected_operations = {"repository-discovery", "implementation-plan", "code-review", "scoped-write"}
+assert matrix["schemaVersion"] == 1
+assert set(matrix["requiredOperations"]) == expected_operations
+assert {entry["rulePackId"] for entry in matrix["entries"]} == expected_packs
+for entry in matrix["entries"]:
+    assert entry["fixtureComplexity"] == "medium"
+    assert entry["fixtureStatus"] == "static-validated"
+    assert set(entry["operations"]) == expected_operations
+    assert set(entry["operations"].values()) <= {"validated", "failed-model-validation"}
+    assert set(entry["operationEvidence"]) == expected_operations
+    assert set(entry["operationModels"]) == expected_operations
+validated = sum(value == "validated" for entry in matrix["entries"] for value in entry["operations"].values())
+failed = sum(value == "failed-model-validation" for entry in matrix["entries"] for value in entry["operations"].values())
+assert validated == 28
+assert failed == 0
+assert matrix["latestValidation"]["surfaceVersion"] == "1.5.47"
+assert "devstral-small-2:24b" in matrix["latestValidation"]["models"]
+assert "qwen3.5:35b" in matrix["latestValidation"]["models"]
+native = matrix["nativeOperatingSystemEvidence"]
+assert len(native) == 2
+assert all(item["operatingSystem"].startswith("Linux ") for item in native)
+assert all(item["evidenceDocument"] for item in native)
+PY
+  grep -q "Static fixture success alone never promotes" "$doc" &&
+    grep -q "external Git diff" "$doc" &&
+    grep -q "28 of 28" "$doc" &&
+    grep -q "Native Linux and macOS runners are available" "$doc" &&
+    grep -q "Native Linux Evidence" "$doc" &&
+    grep -q "language-workflow-validation-matrix.json" "$doc" &&
+    grep -q -- "--readonly" "$runner" &&
+    grep -q -- "--auto" "$runner" &&
+    grep -q "ConvertTo-SanitizedOutput" "$runner" &&
+    grep -q "UnloadAfterRun" "$runner" &&
+    grep -q "AllowLoadedModels" "$runner" &&
+    grep -q -- "--readonly" "$shared_runner" &&
+    grep -q -- "--auto" "$shared_runner" &&
+    grep -q "unload_models" "$shared_runner" &&
+    grep -q -- "--allow-loaded-models" "$shared_runner" &&
+    grep -q "run-language-workflow-matrix.shared.sh" "$linux_runner" &&
+    grep -q "run-language-workflow-matrix.shared.sh" "$macos_runner"
 }
 
 test_prompt_quality_guardrails_require_filename_fidelity() {
@@ -1319,6 +1392,7 @@ run_test "optional language rule packs are evidence-gated and not globally loade
 run_test "project detection docs and guidance are evidence-gated" test_project_detection_doc
 run_test "agent prompt rule and template contracts are enforced" test_agent_prompt_rule_template_contracts
 run_test "sample repository factory creates expected fixtures" test_sample_repository_factory
+run_test "medium language workflow matrix is complete and evidence-gated" test_language_workflow_validation_matrix
 run_test "prompt quality guardrails require filename fidelity and sourced lifecycle claims" test_prompt_quality_guardrails_require_filename_fidelity
 run_test "tool-use docs define platform-aware approved write behavior" test_tool_use_docs_define_platform_aware_write_behavior
 run_test "hardware-aware recommendation scripts emit sanitized model lanes" test_hardware_aware_recommendation_scripts

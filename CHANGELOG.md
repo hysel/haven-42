@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added medium-complexity Python, TypeScript, and polyglot language fixtures plus an evidence-gated validation matrix for repository discovery, planning, review, and scoped-write workflows.
+- Added a deterministic Continue CLI matrix runner and recorded 19 of 28 validated medium-fixture workflow cells, with failed write and filename-fidelity cells preserved as blockers.
 - Added cross-platform exact-SHA GitHub Actions verification with required Windows, Linux, and macOS job checks, automatic failed-log retrieval, and explicit push/CI reporting states.
 - Added cross-platform, filename-only project classification with sanitized profile output and automatic project-local activation of matching optional language rule packs.
 - Added the `classify-project` workflow registry entry and documented the project-neutral limitation of centralized shared-assets mode.

@@ -24,6 +24,9 @@ The committed evidence in `examples/sample-repository-factory-validation.md` rec
 | `rust-cli` | Rust CLI-style repository with Cargo metadata, source, and tests. |
 | `iac-terraform-kubernetes` | Infrastructure sample with Terraform, Kubernetes manifest, and GitHub Actions workflow. |
 | `sql-migrations` | SQL migration sample with schema, migration, seed data, and validation notes. |
+| `python-layered-api` | Medium Python sample with config, domain, repository, service, entry-point, and test boundaries. |
+| `typescript-service-medium` | Medium TypeScript sample with domain, repository, service, configuration, entry-point, and tests. |
+| `multi-language-platform` | Medium polyglot sample with Java, Go, Rust, SQL, Terraform, and Kubernetes component boundaries. |
 
 ## Windows
 
@@ -88,5 +91,11 @@ Initial script-level validation evidence is recorded in `examples/sample-reposit
 The first focused validation found and fixed two fixture-quality issues: generated PowerShell sample README content could leak factory script text when Markdown backticks were used in a double-quoted here-string, and runtime context generation could inherit parent repository git status when samples lived under ignored runtime output. Tests now cover both classes of regression.
 
 Runtime context generation now includes non-.NET metadata from generated TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL samples so repository discovery and review prompts have better grounding before model-backed validation.
+
+Milestone 18 adds three medium-complexity fixtures without replacing the
+minimal regression samples. Their representative operation coverage and
+pending model-validation states are defined in
+`config/language-workflow-validation-matrix.json` and documented in
+`docs/language-workflow-validation-matrix.md`.
 
 This does not replace editor/model Agent validation or approved-write validation.

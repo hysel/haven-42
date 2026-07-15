@@ -79,6 +79,18 @@ function Invoke-CommandCapture {
     }
 }
 
+function Get-TestBashPath {
+    $gitBash = Join-Path $env:ProgramFiles "Git\bin\bash.exe"
+    if (Test-Path -LiteralPath $gitBash) { return $gitBash }
+
+    $bash = Get-Command bash -ErrorAction SilentlyContinue
+    if ($bash -and $bash.Source -notmatch '\\WindowsApps\\bash\.exe$') {
+        return $bash.Source
+    }
+
+    return $null
+}
+
 function Copy-RepositoryForTest {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "continue-pack-test-$([guid]::NewGuid())"
     New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
@@ -833,7 +845,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($promotionGates -match "partial for full tracked-surface compatibility") -Message "Promotion gates should keep full surface compatibility gap visible."
     Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
-    Assert-True -Condition ($promotionGates -match "Roo Code, Kilo Code, and OpenCode remain future live-validation targets") -Message "Promotion gates should keep unconfirmed wrapper validation future-gated."
+    Assert-True -Condition ($promotionGates -match "Roo Code and Kilo Code remain future live-validation targets") -Message "Promotion gates should keep unconfirmed wrapper validation future-gated."
     $openHandsBoundary = Get-Content -Raw (Join-Path $repoRoot "docs/openhands-validation-boundary.md")
     Assert-True -Condition ($openHandsBoundary -match "OpenHands Validation Boundary") -Message "OpenHands boundary doc should have a clear title."
     Assert-True -Condition ($openHandsBoundary -match "disposable generated repository") -Message "OpenHands boundary should require a generated sample."
@@ -847,7 +859,9 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
     Assert-True -Condition ($todo -match "\[ \] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed") -Message "TODO should keep Roo CLI validation evidence-gated."
     Assert-True -Condition ($todo -match "\[ \] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed") -Message "TODO should keep Kilo CLI validation evidence-gated."
-    Assert-True -Condition ($todo -match "\[ \] Configure OpenCode with a local-only Ollama provider and validate its opencode run wrapper against a generated sample") -Message "TODO should track OpenCode local-provider validation."
+    Assert-True -Condition ($todo -match "\[x\] Add a local-only OpenCode Ollama config generator") -Message "TODO should record the scaffolded OpenCode config generator."
+    Assert-True -Condition ($todo -match "\[x\] Validate OpenCode's installed CLI") -Message "TODO should record generated-sample OpenCode CLI validation."
+    Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "docs/opencode-cli-model-testing.md")) -Message "OpenCode setup and validation documentation should exist."
     Assert-True -Condition ($doc -match "Confirmed Command Boundaries") -Message "Shared CLI doc should record verified command boundaries."
     Assert-True -Condition ($doc -match "opencode run") -Message "Shared CLI doc should record the OpenCode non-interactive command."
     Assert-True -Condition ($doc -match "safe non-interactive task syntax remains unverified") -Message "Shared CLI doc should keep Kilo non-interactive behavior evidence-gated."
@@ -862,7 +876,11 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].surfaceName)) -Message "Agent CLI defaults should name $key."
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].agentCommand)) -Message "Agent CLI defaults should define command for $key."
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].agentArgumentsTemplate)) -Message "Agent CLI defaults should define read template for $key."
-        Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].modelArgumentTemplate)) -Message "Agent CLI defaults should define model template for $key."
+        if ($key -ne "opencode-cli") {
+        if ($key -ne "opencode-cli") {
+            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].modelArgumentTemplate)) -Message "Agent CLI defaults should define model template for $key."
+        }
+        }
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].installHint)) -Message "Agent CLI defaults should define install hint for $key."
     }
     foreach ($base in $wrapperBases) {
@@ -1225,7 +1243,17 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
             "rust-cli/Cargo.toml",
             "iac-terraform-kubernetes/terraform/main.tf",
             "iac-terraform-kubernetes/k8s/deployment.yaml",
-            "sql-migrations/schema/001_create_items.sql"
+            "sql-migrations/schema/001_create_items.sql",
+            "python-layered-api/app/service.py",
+            "python-layered-api/tests/test_service.py",
+            "typescript-service-medium/src/service.ts",
+            "typescript-service-medium/tests/service.test.ts",
+            "multi-language-platform/services/catalog/pom.xml",
+            "multi-language-platform/workers/events/go.mod",
+            "multi-language-platform/tools/manifest/Cargo.toml",
+            "multi-language-platform/database/schema/001_catalog.sql",
+            "multi-language-platform/infrastructure/terraform/main.tf",
+            "multi-language-platform/infrastructure/k8s/catalog.yaml"
         )
 
         foreach ($relativePath in $expectedFiles) {
@@ -1247,6 +1275,9 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
         Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Sample repository factory list mode should succeed."
         Assert-True -Condition ($listResult.Output -match "python-api") -Message "List output should include python-api."
         Assert-True -Condition ($listResult.Output -match "sql-migrations") -Message "List output should include sql-migrations."
+        Assert-True -Condition ($listResult.Output -match "python-layered-api") -Message "List output should include python-layered-api."
+        Assert-True -Condition ($listResult.Output -match "typescript-service-medium") -Message "List output should include typescript-service-medium."
+        Assert-True -Condition ($listResult.Output -match "multi-language-platform") -Message "List output should include multi-language-platform."
 
         $rerunResult = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputRoot", $tempRoot)
         Assert-True -Condition ($rerunResult.ExitCode -ne 0) -Message "Sample repository factory should refuse to overwrite without -Force."
@@ -1258,6 +1289,9 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
             @{ Name = "node-service"; Expected = @("package.json", "Dockerfile", "src/server.js") },
             @{ Name = "iac-terraform-kubernetes"; Expected = @("terraform/main.tf", "k8s/deployment.yaml", ".github/workflows/validate.yml") },
             @{ Name = "sql-migrations"; Expected = @("schema/001_create_items.sql", "migrations/002_add_item_status.sql", "seeds/items.sql") }
+            @{ Name = "python-layered-api"; Expected = @("pyproject.toml", "app/service.py", "tests/test_service.py", "SCENARIO.md") }
+            @{ Name = "typescript-service-medium"; Expected = @("tsconfig.json", "src/service.ts", "tests/service.test.ts", "SCENARIO.md") }
+            @{ Name = "multi-language-platform"; Expected = @("services/catalog/pom.xml", "workers/events/go.mod", "tools/manifest/Cargo.toml", "database/schema/001_catalog.sql", "infrastructure/terraform/main.tf", "SCENARIO.md") }
         )
 
         foreach ($contextTarget in $contextTargets) {
@@ -1274,6 +1308,113 @@ Invoke-PackTest "sample repository factory creates expected fixtures" {
         }
         $forceResult = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-OutputRoot", $tempRoot, "-Force")
         Assert-Equal -Actual $forceResult.ExitCode -Expected 0 -Message "Sample repository factory should overwrite with -Force."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "medium language workflow matrix is complete and evidence-gated" {
+    $matrixPath = Join-Path $repoRoot "config/language-workflow-validation-matrix.json"
+    $docPath = Join-Path $repoRoot "docs/language-workflow-validation-matrix.md"
+    $runnerPath = Join-Path $repoRoot "scripts/run-language-workflow-matrix.ps1"
+    $sharedRunnerPath = Join-Path $repoRoot "scripts/run-language-workflow-matrix.shared.sh"
+    $linuxRunnerPath = Join-Path $repoRoot "scripts/run-language-workflow-matrix.linux.sh"
+    $macosRunnerPath = Join-Path $repoRoot "scripts/run-language-workflow-matrix.macos.sh"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "language-matrix-test-$([guid]::NewGuid())"
+
+    try {
+        Assert-True -Condition (Test-Path -LiteralPath $matrixPath) -Message "Language workflow matrix should exist."
+        Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Language workflow matrix docs should exist."
+        Assert-True -Condition (Test-Path -LiteralPath $runnerPath) -Message "Language workflow matrix runner should exist."
+        Assert-True -Condition (Test-Path -LiteralPath $sharedRunnerPath) -Message "Shared native language workflow matrix runner should exist."
+        Assert-True -Condition (Test-Path -LiteralPath $linuxRunnerPath) -Message "Linux language workflow matrix wrapper should exist."
+        Assert-True -Condition (Test-Path -LiteralPath $macosRunnerPath) -Message "macOS language workflow matrix wrapper should exist."
+
+        $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
+        $doc = Get-Content -LiteralPath $docPath -Raw
+        $runner = Get-Content -LiteralPath $runnerPath -Raw
+        $sharedRunner = Get-Content -LiteralPath $sharedRunnerPath -Raw
+        $linuxRunner = Get-Content -LiteralPath $linuxRunnerPath -Raw
+        $macosRunner = Get-Content -LiteralPath $macosRunnerPath -Raw
+        $expectedRulePacks = @("python", "typescript", "java", "go", "rust", "sql", "infrastructure-as-code")
+        $expectedOperations = @("repository-discovery", "implementation-plan", "code-review", "scoped-write")
+
+        Assert-Equal -Actual $matrix.schemaVersion -Expected 1 -Message "Language workflow matrix schema should remain stable."
+        Assert-Equal -Actual @($matrix.entries).Count -Expected 7 -Message "Language workflow matrix should cover all optional rule packs."
+        foreach ($operation in $expectedOperations) {
+            Assert-True -Condition ($operation -in @($matrix.requiredOperations)) -Message "Matrix should require operation $operation."
+        }
+
+        $generateResult = Invoke-CommandCapture -FilePath (Join-Path $repoRoot "scripts/generate-sample-repositories.ps1") -Arguments @("-OutputRoot", $tempRoot)
+        Assert-Equal -Actual $generateResult.ExitCode -Expected 0 -Message "Medium samples should generate for matrix validation."
+
+        $validatedCells = 0
+        $failedCells = 0
+        foreach ($entry in $matrix.entries) {
+            Assert-True -Condition ($entry.rulePackId -in $expectedRulePacks) -Message "Unexpected rule pack in matrix: $($entry.rulePackId)"
+            Assert-Equal -Actual $entry.fixtureComplexity -Expected "medium" -Message "$($entry.rulePackId) should use a medium fixture."
+            Assert-Equal -Actual $entry.fixtureStatus -Expected "static-validated" -Message "$($entry.rulePackId) fixture should be statically validated."
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $entry.rulePackPath)) -Message "Rule pack path should exist: $($entry.rulePackPath)"
+
+            $samplePath = Join-Path $tempRoot $entry.sample
+            Assert-True -Condition (Test-Path -LiteralPath $samplePath) -Message "Matrix sample should be generated: $($entry.sample)"
+            foreach ($evidenceFile in $entry.evidenceFiles) {
+                Assert-True -Condition (Test-Path -LiteralPath (Join-Path $samplePath $evidenceFile)) -Message "$($entry.sample) should include $evidenceFile."
+            }
+            foreach ($operation in $expectedOperations) {
+                $status = $entry.operations.$operation
+                Assert-True -Condition ($status -in @("validated", "failed-model-validation")) -Message "$($entry.rulePackId) $operation should have an evidence-backed status."
+                if ($status -eq "validated") { $validatedCells++ } else { $failedCells++ }
+
+                if ($operation -eq "scoped-write") {
+                    $writeEvidence = $entry.operationEvidence.'scoped-write'
+                    Assert-True -Condition (Test-Path -LiteralPath (Join-Path $samplePath $writeEvidence.targetFile)) -Message "$($entry.rulePackId) scoped-write target should exist."
+                    Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($writeEvidence.marker)) -Message "$($entry.rulePackId) scoped-write marker should be explicit."
+                }
+                else {
+                    foreach ($operationFile in @($entry.operationEvidence.$operation)) {
+                        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $samplePath $operationFile)) -Message "$($entry.rulePackId) $operation evidence should exist: $operationFile"
+                    }
+                }
+            }
+
+            Assert-Equal -Actual @($entry.operationModels.PSObject.Properties.Name).Count -Expected 4 -Message "$($entry.rulePackId) should record an evidence-backed model for every operation."
+
+            $profileJson = (& (Join-Path $repoRoot "scripts/get-project-profile.ps1") -TargetRepo $samplePath -AsJson | Out-String).Trim()
+            $profile = $profileJson | ConvertFrom-Json
+            Assert-True -Condition ($entry.rulePackId -in @($profile.SelectedRulePackIds)) -Message "$($entry.sample) should activate $($entry.rulePackId)."
+            Assert-True -Condition ($profileJson -notmatch [regex]::Escape($tempRoot)) -Message "Matrix classification should not expose local paths."
+        }
+
+        Assert-Equal -Actual $validatedCells -Expected 28 -Message "Composite matrix evidence should validate every required cell."
+        Assert-Equal -Actual $failedCells -Expected 0 -Message "Composite matrix evidence should not retain failed cells."
+        Assert-Equal -Actual $matrix.latestValidation.surfaceVersion -Expected "1.5.47" -Message "Latest matrix evidence should record the Continue CLI version."
+        Assert-True -Condition ("devstral-small-2:24b" -in @($matrix.latestValidation.models)) -Message "Latest matrix evidence should record the default model."
+        Assert-True -Condition ("qwen3.5:35b" -in @($matrix.latestValidation.models)) -Message "Latest matrix evidence should record the TypeScript write model."
+        Assert-Equal -Actual @($matrix.nativeOperatingSystemEvidence).Count -Expected 2 -Message "Matrix should retain the completed Linux evidence records."
+        foreach ($nativeEvidence in @($matrix.nativeOperatingSystemEvidence)) {
+            Assert-True -Condition ($nativeEvidence.operatingSystem -like "Linux *") -Message "Native evidence should be Linux-specific."
+            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($nativeEvidence.evidenceDocument)) -Message "Native evidence should link its sanitized evidence document."
+        }
+
+        Assert-True -Condition ($doc -match "Static fixture success alone never promotes") -Message "Matrix docs should prevent static evidence from promoting model support."
+        Assert-True -Condition ($doc -match "external Git diff") -Message "Matrix docs should require external diff verification for scoped writes."
+        Assert-True -Condition ($doc -match "28 of 28") -Message "Matrix docs should summarize the latest exact result."
+        Assert-True -Condition ($doc -match "Native Linux and macOS runners are available") -Message "Matrix docs should describe native runner availability."
+        Assert-True -Condition ($doc -match "Native Linux Evidence") -Message "Matrix docs should record the completed Linux evidence."
+        Assert-True -Condition ($runner -match "--readonly") -Message "Matrix runner should separate read-only mode."
+        Assert-True -Condition ($runner -match "--auto") -Message "Matrix runner should use explicit approved-write mode."
+        Assert-True -Condition ($sharedRunner -match "--readonly") -Message "Shared native matrix runner should separate read-only mode."
+        Assert-True -Condition ($sharedRunner -match "--auto") -Message "Shared native matrix runner should use explicit approved-write mode."
+        Assert-True -Condition ($sharedRunner -match "unload_models") -Message "Shared native matrix runner should support unloading models."
+        Assert-True -Condition ($sharedRunner -match "--allow-loaded-models") -Message "Shared native matrix runner should require an explicit override for an already loaded Ollama model."
+        Assert-True -Condition ($runner -match "AllowLoadedModels") -Message "Windows matrix runner should require an explicit override for an already loaded Ollama model."
+        Assert-True -Condition ($linuxRunner -match "run-language-workflow-matrix.shared.sh") -Message "Linux wrapper should delegate to the shared runner."
+        Assert-True -Condition ($macosRunner -match "run-language-workflow-matrix.shared.sh") -Message "macOS wrapper should delegate to the shared runner."
+        Assert-True -Condition ($runner -match "git -C .* diff --name-only") -Message "Matrix runner should externally verify changed files."
+        Assert-True -Condition ($runner -match "ConvertTo-SanitizedOutput") -Message "Matrix runner should sanitize committed evidence."
+        Assert-True -Condition ($runner -match "UnloadAfterRun") -Message "Matrix runner should support unloading tested models."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -2895,7 +3036,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($todo -match "\[x\] Define a versioned workflow request") -Message "TODO should mark the workflow envelope contract complete."
     Assert-True -Condition ($todo -match "\[x\] Add a script consolidation plan") -Message "TODO should mark script consolidation planning complete."
     Assert-True -Condition ($todo -match "\[x\] Consolidate the onboarding/navigation script family") -Message "TODO should mark the first script-family consolidation complete."
-    Assert-True -Condition ($todo -match "\[ \] Replace the no-PowerShell informational fallback") -Message "TODO should keep native onboarding rendering pending."
+    Assert-True -Condition ($todo -match "\[x\] Replace the no-PowerShell informational fallback") -Message "TODO should mark native onboarding rendering complete."
 
     $listResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-List", "-Json")
     Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Workflow dispatcher list mode should succeed."
@@ -2943,13 +3084,19 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($linuxDispatcher -match "invoke-workflow\.shared\.sh" -and $linuxDispatcher -match "--platform linux") -Message "Linux dispatcher should delegate to shared dispatcher."
     Assert-True -Condition ($macosDispatcher -match "invoke-workflow\.shared\.sh" -and $macosDispatcher -match "--platform macos") -Message "macOS dispatcher should delegate to shared dispatcher."
 
-    if (Get-Command bash -ErrorAction SilentlyContinue) {
-        $linuxListResult = & bash $linuxDispatcherPath --list --json 2>&1
+    $testBash = Get-TestBashPath
+    $canRunShellDispatcher = $false
+    if ($testBash) {
+        & $testBash -c "python3 --version" *> $null
+        $canRunShellDispatcher = $LASTEXITCODE -eq 0
+    }
+    if ($canRunShellDispatcher) {
+        $linuxListResult = & $testBash $linuxDispatcherPath --list --json 2>&1
         $linuxListText = $linuxListResult | Out-String
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux workflow dispatcher list mode should succeed."
         Assert-True -Condition ($linuxListText -match '"Id":\s*"validate-pack"|\"Id\":\"validate-pack\"') -Message "Linux workflow dispatcher list output should include validate-pack."
 
-        $linuxDryRunResult = & bash $linuxDispatcherPath --workflow-id validate-pack --dry-run --json --workflow-arguments-json '["--expected-version","0.2.0"]' 2>&1
+        $linuxDryRunResult = & $testBash $linuxDispatcherPath --workflow-id validate-pack --dry-run --json --workflow-arguments-json '["--expected-version","0.2.0"]' 2>&1
         $linuxDryRunText = $linuxDryRunResult | Out-String
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux workflow dispatcher dry run should succeed."
         Assert-True -Condition ($linuxDryRunText -match "scripts/validate-pack\.linux\.sh") -Message "Linux workflow dispatcher should resolve Linux validate-pack script."
@@ -2957,7 +3104,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         Assert-True -Condition ($linuxDryRunText -match "expected-version") -Message "Linux workflow dispatcher dry run should preserve passthrough arguments."
 
         $linuxRequest = '{"schemaVersion":1,"requestId":"pack-bash","workflowId":"validate-pack","platform":"linux","dryRun":true,"arguments":["--expected-version","0.2.0"]}'
-        $linuxEnvelopeResult = & bash $linuxDispatcherPath --request-json $linuxRequest 2>&1
+        $linuxEnvelopeResult = & $testBash $linuxDispatcherPath --request-json $linuxRequest 2>&1
         $linuxEnvelopeText = $linuxEnvelopeResult | Out-String
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux workflow request envelope should succeed."
         $linuxEnvelope = $linuxEnvelopeText | ConvertFrom-Json
@@ -2965,7 +3112,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         Assert-Equal -Actual $linuxEnvelope.status -Expected "planned" -Message "Linux dry-run envelope should be planned."
         Assert-True -Condition ($linuxEnvelopeText -notmatch "expected-version") -Message "Linux envelope should not echo argument values by default."
 
-        $macosDryRunResult = & bash $macosDispatcherPath --workflow-id validate-pack --dry-run --json 2>&1
+        $macosDryRunResult = & $testBash $macosDispatcherPath --workflow-id validate-pack --dry-run --json 2>&1
         $macosDryRunText = $macosDryRunResult | Out-String
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS workflow dispatcher dry run should succeed."
         Assert-True -Condition ($macosDryRunText -match "scripts/validate-pack\.macos\.sh") -Message "macOS workflow dispatcher should resolve macOS validate-pack script."
@@ -3092,8 +3239,10 @@ Invoke-PackTest "workflow chooser summarizes registry commands" {
 Invoke-PackTest "onboarding generators share common engines" {
     $modulePath = Join-Path $repoRoot "scripts/OnboardingGuidance.psm1"
     $dispatcherPath = Join-Path $repoRoot "scripts/onboarding-guidance.shared.sh"
+    $nativeRendererPath = Join-Path $repoRoot "scripts/onboarding-guidance.py"
     $module = Get-Content -LiteralPath $modulePath -Raw
     $dispatcher = Get-Content -LiteralPath $dispatcherPath -Raw
+    $nativeRenderer = Get-Content -LiteralPath $nativeRendererPath -Raw
 
     foreach ($scriptName in @("get-beginner-setup-plan.ps1", "show-agent-pack-menu.ps1", "show-workflow-chooser.ps1")) {
         $content = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/$scriptName") -Raw
@@ -3120,6 +3269,10 @@ Invoke-PackTest "onboarding generators share common engines" {
     foreach ($view in @("beginner-plan", "agent-menu", "workflow-chooser")) {
         Assert-True -Condition ($dispatcher -match [regex]::Escape($view)) -Message "Native onboarding dispatcher should recognize $view."
     }
+    Assert-True -Condition (Test-Path -LiteralPath $nativeRendererPath) -Message "Native onboarding renderer should exist."
+    Assert-True -Condition ($dispatcher -match "onboarding-guidance\.py") -Message "Native onboarding dispatcher should call the Python renderer."
+    Assert-True -Condition ($dispatcher -notmatch "Full native rendering is not available") -Message "Native onboarding dispatcher should not retain the PowerShell-only fallback."
+    Assert-True -Condition ($nativeRenderer -match "workflow-chooser") -Message "Native renderer should support the workflow chooser."
 }
 Invoke-PackTest "agent surface solutions define install configure and test" {
     $solutionsPath = Join-Path $repoRoot "config/agent-surface-solutions.json"

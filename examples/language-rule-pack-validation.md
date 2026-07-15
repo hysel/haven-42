@@ -4,6 +4,28 @@ This file records sanitized validation evidence for optional language rule packs
 
 Do not include private repository names, private paths, private endpoints, usernames, hostnames, tokens, raw private source code, or raw transcripts.
 
+## 2026-07-14 Medium Fixture And Matrix Static Validation
+
+### Summary
+
+- Validation type: Deterministic medium-fixture generation, project classification, evidence-path, and matrix schema validation
+- Samples: `python-layered-api`, `typescript-service-medium`, `multi-language-platform`
+- Rule packs covered: Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code
+- Operations represented: repository discovery, implementation planning, code review, and scoped write
+- Model/editor execution: Not run in this entry
+
+### Result
+
+The three medium-complexity fixtures generate on PowerShell and native-shell
+paths. Deterministic tests verify that every matrix evidence file exists and
+that project classification selects the expected optional rule pack without
+recording local paths or reading file contents.
+
+All operation cells remain `pending-model-validation`. This result proves
+fixture and matrix readiness only; it does not promote editor/model behavior or
+approved-write readiness. Scoped-write promotion still requires external Git
+diff verification.
+
 ## 2026-07-08 Generated Sample Static Validation
 
 ### Summary
@@ -75,3 +97,77 @@ This pass does not prove editor/model behavior, implementation-planning quality,
 - [x] No raw private source code.
 - [x] No raw transcripts.
 - [x] No customer, employer, or internal project identifiers.
+
+## 2026-07-14 Continue CLI Medium-Fixture Matrix Validation
+
+### Summary
+
+- Validation type: Model-backed language/workflow matrix validation
+- Surface: Continue CLI `1.5.47`
+- Operating system: Windows
+- Provider: Ollama-compatible local endpoint; endpoint omitted
+- Model: `qwen3.5:9b`
+- Fixtures: `python-layered-api`, `typescript-service-medium`, `multi-language-platform`
+- Raw output: Ignored runtime output only
+- Model unload: Confirmed after the run
+
+### Results
+
+| Ecosystem | Discovery | Planning | Review | Scoped write |
+| --- | --- | --- | --- | --- |
+| Python | Validated | Validated | Validated | Validated |
+| JavaScript / TypeScript | Validated | Validated | Validated | Failed |
+| Java | Validated | Failed | Failed | Failed |
+| Go | Validated | Validated | Failed | Failed |
+| Rust | Validated | Validated | Validated | Failed |
+| SQL | Validated | Validated | Validated | Failed |
+| Infrastructure as Code | Validated | Validated | Validated | Failed |
+
+Historical result: 19 validated cells and 9 failed cells out of 28.
+
+### Acceptance Checks
+
+- Read-only cells had to return final text and cite operation-specific fixture paths.
+- Scoped writes had to change exactly one approved existing file, append exactly one required marker, pass `git diff --check`, survive external content verification, and return sanitized final output.
+- Every fixture was restored to a clean Git baseline after validation.
+- The Ollama process list was empty after the runner unloaded the model.
+
+### Failure Signals
+
+- `EMPTY_OUTPUT`
+- `EXPECTED_FILE_MISSING`
+- `CLI_EXIT_1`
+- `WRITE_MARKER_MISMATCH`
+- `WRITE_FINAL_LINE_MISMATCH`
+
+The Java and Go review responses contained useful findings but did not cite the required full repository paths, so deterministic filename-fidelity gates rejected them. A controlled retry showed that the TypeScript write changed the approved file but placed the marker inline rather than as the required final line and returned no final output; the other five non-Python writes failed external verification. All six remain failed because promotion requires both verified change and sanitized final output.
+
+### Interpretation
+
+- Python is the first medium fixture with complete Continue CLI evidence across all four required operations for this exact surface, model, provider, and operating system.
+- Read-only behavior is substantially stronger than scoped-write behavior across the remaining language packs.
+- This evidence does not transfer write readiness to another model, operating system, editor surface, or agent plugin.
+
+### Sanitization Checklist
+
+- [x] No private repository names or source code.
+- [x] No private local paths.
+- [x] No endpoints, IP addresses, hostnames, or usernames.
+- [x] No tokens or secrets.
+- [x] No raw transcripts.
+
+## Evidence: 2026-07-15 Composite Language-Aware Matrix
+
+- Surface: Continue CLI `1.5.47` on Windows
+- Provider: Ollama-compatible local endpoint; endpoint omitted
+- Models: `devstral-small-2:24b` and `qwen3.5:35b`
+- Fixtures: `python-layered-api`, `typescript-service-medium`, and `multi-language-platform`
+- Raw output: ignored runtime output only
+- Model unload: verified after each run
+
+`devstral-small-2:24b` passed 27 of 28 cells, failing only TypeScript scoped
+write. `qwen3.5:35b` passed 27 of 28 cells, failing only Rust scoped write.
+The combined operation lanes validate all 28 cells: Devstral Small 2 is the
+default model and Qwen 3.5 35B is the TypeScript scoped-write override.
+Each promoted scoped-write cell changed only its approved file, passed
+`git diff --check`, ended with the exact marker line, and returned final text.

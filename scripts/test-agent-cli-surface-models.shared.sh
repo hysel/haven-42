@@ -14,6 +14,7 @@ MODEL_ARGS_TEMPLATE=""
 INSTALL_HINT=""
 TIMEOUT_SECONDS=600
 INCLUDE_WRITE_SMOKE=false
+INCLUDE_SCOPED_EDIT=false
 ALLOW_NON_GENERATED_TARGET=false
 DRY_RUN=false
 UNLOAD_AFTER_EACH=false
@@ -32,6 +33,7 @@ while [ "$#" -gt 0 ]; do
     --install-hint|-InstallHint) INSTALL_HINT="$2"; shift 2 ;;
     --timeout-seconds|-TimeoutSeconds) TIMEOUT_SECONDS="$2"; shift 2 ;;
     --include-write-smoke|-IncludeWriteSmoke) INCLUDE_WRITE_SMOKE=true; shift ;;
+    --include-scoped-edit|-IncludeScopedEdit) INCLUDE_SCOPED_EDIT=true; shift ;;
     --allow-non-generated-target|-AllowNonGeneratedTarget) ALLOW_NON_GENERATED_TARGET=true; shift ;;
     --dry-run|-DryRun) DRY_RUN=true; shift ;;
     --unload-after-each|-UnloadAfterEach) UNLOAD_AFTER_EACH=true; shift ;;
@@ -108,10 +110,10 @@ if [ ! -d "$TARGET_REPO" ]; then
   exit 1
 fi
 
-if [ "$INCLUDE_WRITE_SMOKE" = true ] && [ "$ALLOW_NON_GENERATED_TARGET" != true ]; then
+if { [ "$INCLUDE_WRITE_SMOKE" = true ] || [ "$INCLUDE_SCOPED_EDIT" = true ]; } && [ "$ALLOW_NON_GENERATED_TARGET" != true ]; then
   case "$TARGET_REPO" in
     *runtime-validation-output/sample-repositories*) ;;
-    *) printf 'Write smoke tests are allowed only for generated disposable samples unless --allow-non-generated-target is set.\n' >&2; exit 1 ;;
+    *) printf 'Write and scoped-edit tests are allowed only for generated disposable samples unless --allow-non-generated-target is set.\n' >&2; exit 1 ;;
   esac
 fi
 
@@ -138,7 +140,7 @@ unload_model() {
   model_name="$1"
   base_url="${OLLAMA_BASE_URL%/}"
   if command -v curl >/dev/null 2>&1; then
-    curl -fsS -X POST "$base_url/api/chat" -H 'Content-Type: application/json' -d "{\"model\":\"$model_name\",\"messages\":[],\"keep_alive\":0,\"stream\":false}" >/dev/null
+    curl -fsS -X POST "$base_url/api/generate" -H 'Content-Type: application/json' -d "{\"model\":\"$model_name\",\"prompt\":\"\",\"keep_alive\":0,\"stream\":false}" >/dev/null
   else
     return 1
   fi
@@ -172,6 +174,7 @@ printf '[4/7] Agent command: %s\n' "$AGENT_COMMAND" >&2
 read_prompt='Use tools to inspect the opened repository root. Do not modify files. Do not create files. Do not run package installation. Do not guess. Return only the actual top-level files and folders inspected, the project type, key source and test files inspected, risks or missing information, and a failure signal. If tools are unavailable, say TOOLS_UNAVAILABLE.'
 write_line="$SURFACE_NAME approved-write smoke test passed."
 write_prompt="Use approved write mode for this disposable smoke test only. Modify the existing README.md by adding exactly this final line: $write_line Do not modify any other files. Do not create new files. After editing, report the changed file and stop. Do not commit."
+scoped_prompt='Use approved write mode for this disposable Python sample only. Modify only app/settings.py and tests/test_main.py. Add a Settings validation_label field with the exact default value local-agent-validation, then update the existing test to assert that Settings().validation_label equals local-agent-validation. Do not modify any other files. Do not create files. Do not commit. Run the existing tests if practical, then report the changed files and stop.'
 
 json_results=()
 index=0
@@ -180,6 +183,7 @@ for model in "${MODELS[@]}"; do
   printf '[5/7] Testing model %s/%s: %s\n' "$index" "${#MODELS[@]}" "$model" >&2
   read_status='failed'
   write_status='not-run'
+  scoped_edit_status='not-run'
   failures='none'
 
   prompt="$read_prompt"
@@ -227,12 +231,41 @@ for model in "${MODELS[@]}"; do
     fi
   fi
 
+  if [ "$INCLUDE_SCOPED_EDIT" = true ]; then
+    if [ ! -f "$TARGET_REPO/app/settings.py" ] || [ ! -f "$TARGET_REPO/tests/test_main.py" ]; then
+      scoped_edit_status='failed'
+      failures="${failures},SCOPED_EDIT_FIXTURE_UNSUPPORTED"
+    else
+      prompt="$scoped_prompt"
+      args="${AGENT_ARGS_TEMPLATE//\{Prompt\}/$prompt}"
+      args="${args//\{Model\}/$model}"
+      args="${args//\{TargetRepo\}/$TARGET_REPO}"
+      model_args="${MODEL_ARGS_TEMPLATE//\{Model\}/$model}"
+      if [ "$DRY_RUN" = true ]; then
+        scoped_edit_status='scoped-edit-validated'
+      else
+        set +e
+        (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-scoped-edit.out 2>&1)
+        scoped_exit=$?
+        set -e
+        changed_files="$(cd "$TARGET_REPO" && git diff --name-only | sort)"
+        if [ "$scoped_exit" -eq 0 ] && [ "$changed_files" = "$(printf 'app/settings.py\ntests/test_main.py')" ] && (cd "$TARGET_REPO" && git diff --check >/dev/null) && grep -q 'validation_label' "$TARGET_REPO/app/settings.py" && grep -q 'local-agent-validation' "$TARGET_REPO/app/settings.py" && grep -q 'validation_label' "$TARGET_REPO/tests/test_main.py" && grep -q 'local-agent-validation' "$TARGET_REPO/tests/test_main.py"; then
+          scoped_edit_status='scoped-edit-validated'
+        else
+          scoped_edit_status='failed'
+          failures="${failures},SCOPED_EDIT_VALIDATION_FAILED"
+        fi
+        (cd "$TARGET_REPO" && git restore app/settings.py tests/test_main.py >/dev/null 2>&1 || true)
+      fi
+    fi
+  fi
+
   if [ "$UNLOAD_AFTER_EACH" = true ] && [ "$DRY_RUN" != true ]; then
     printf '[6/7] Unloading %s from Ollama...\n' "$model" >&2
     unload_model "$model" || failures="${failures},UNLOAD_FAILED"
   fi
-  json_results+=("{\"Model\":\"$model\",\"Surface\":\"$SURFACE_NAME\",\"Target\":\"generated-sample\",\"ReadStatus\":\"$read_status\",\"WriteStatus\":\"$write_status\",\"FailureSignal\":\"$failures\"}")
-  printf '%s: read=%s, write=%s, failures=%s\n' "$model" "$read_status" "$write_status" "$failures" >&2
+  json_results+=("{\"Model\":\"$model\",\"Surface\":\"$SURFACE_NAME\",\"Target\":\"generated-sample\",\"ReadStatus\":\"$read_status\",\"WriteStatus\":\"$write_status\",\"ScopedEditStatus\":\"$scoped_edit_status\",\"FailureSignal\":\"$failures\"}")
+  printf '%s: read=%s, write=%s, scoped-edit=%s, failures=%s\n' "$model" "$read_status" "$write_status" "$scoped_edit_status" "$failures" >&2
 done
 
 printf '[6/7] Writing sanitized report...\n' >&2
@@ -242,6 +275,7 @@ printf '[6/7] Writing sanitized report...\n' >&2
   printf '  "SurfaceKey": "%s",\n' "$SURFACE_KEY"
   printf '  "Target": "generated-sample",\n'
   printf '  "IncludeWriteSmoke": %s,\n' "$INCLUDE_WRITE_SMOKE"
+  printf '  "IncludeScopedEdit": %s,\n' "$INCLUDE_SCOPED_EDIT"
   printf '  "UnloadAfterEach": %s,\n' "$UNLOAD_AFTER_EACH"
   printf '  "DryRun": %s,\n' "$DRY_RUN"
   printf '  "Results": [\n'

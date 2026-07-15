@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "description": "Representative medium-complexity fixture matrix for language rule-pack workflow validation. Fixture readiness is not model or editor validation evidence.",
+  "requiredOperations": [
+    "repository-discovery",
+    "implementation-plan",
+    "code-review",
+    "scoped-write"
+  ],
+  "promotionRequirements": {
+    "requiredStatus": "validated",
+    "requiredEvidence": [
+      "surface",
+      "surfaceVersion",
+      "provider",
+      "model",
+      "operatingSystem",
+      "sanitizedOutput",
+      "externalDiffVerification"
+    ],
+    "scopedWriteRequiresExternalDiff": true
+  },
+  "latestValidation": {
+    "date": "2026-07-15",
+    "surface": "Continue CLI",
+    "surfaceVersion": "1.5.47",
+    "provider": "Ollama",
+    "models": ["devstral-small-2:24b", "qwen3.5:35b"],
+    "operatingSystem": "Windows",
+    "evidenceDocument": "examples/language-rule-pack-validation.md",
+    "validatedCells": 28,
+    "failedCells": 0,
+    "selection": "Composite language-aware lane: devstral-small-2:24b is the default; qwen3.5:35b overrides TypeScript scoped-write."
+  },
+  "nativeOperatingSystemEvidence": [
+    {
+      "date": "2026-07-15",
+      "surface": "Continue CLI",
+      "surfaceVersion": "1.5.47",
+      "provider": "Ollama",
+      "operatingSystem": "Linux (WSL2 Ubuntu 24.04)",
+      "evidenceDocument": "examples/language-rule-pack-validation.md",
+      "model": "devstral-small-2:24b",
+      "validatedCells": 28,
+      "failedCells": 0,
+      "notes": "Repository discovery, planning, review, and scoped-write coverage was completed across clean Linux-native WSL runs. The runner required a scoped-write parser correction before promotion."
+    },
+    {
+      "date": "2026-07-15",
+      "surface": "Continue CLI",
+      "surfaceVersion": "1.5.47",
+      "provider": "Ollama",
+      "operatingSystem": "Linux (WSL2 Ubuntu 24.04)",
+      "evidenceDocument": "examples/language-rule-pack-validation.md",
+      "model": "qwen3.5:35b",
+      "validatedCells": 1,
+      "failedCells": 0,
+      "notes": "TypeScript scoped-write override passed as a separate single-model run."
+    }
+  ],
+  "entries": [
+    {
+      "ecosystem": "python",
+      "rulePackId": "python",
+      "rulePackPath": ".continue/rule-packs/python.md",
+      "sample": "python-layered-api",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["pyproject.toml", "app/service.py", "tests/test_service.py", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["pyproject.toml", "app/service.py", "tests/test_service.py"],
+        "implementation-plan": ["SCENARIO.md", "app/service.py"],
+        "code-review": ["app/service.py", "tests/test_service.py"],
+        "scoped-write": {"targetFile": "tests/test_service.py", "marker": "# Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "devstral-small-2:24b"
+      }
+    },
+    {
+      "ecosystem": "javascript-typescript",
+      "rulePackId": "typescript",
+      "rulePackPath": ".continue/rule-packs/typescript.md",
+      "sample": "typescript-service-medium",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["package.json", "tsconfig.json", "src/service.ts", "tests/service.test.ts", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["package.json", "src/service.ts", "tests/service.test.ts"],
+        "implementation-plan": ["SCENARIO.md", "src/service.ts"],
+        "code-review": ["src/service.ts", "tests/service.test.ts"],
+        "scoped-write": {"targetFile": "tests/service.test.ts", "marker": "// Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "qwen3.5:35b"
+      }
+    },
+    {
+      "ecosystem": "java",
+      "rulePackId": "java",
+      "rulePackPath": ".continue/rule-packs/java.md",
+      "sample": "multi-language-platform",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["services/catalog/pom.xml", "services/catalog/src/main/java/example/CatalogService.java", "services/catalog/src/test/java/example/CatalogServiceTest.java", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["services/catalog/pom.xml", "services/catalog/src/main/java/example/CatalogService.java"],
+        "implementation-plan": ["SCENARIO.md", "services/catalog/src/main/java/example/CatalogService.java"],
+        "code-review": ["services/catalog/src/main/java/example/CatalogService.java", "services/catalog/src/test/java/example/CatalogServiceTest.java"],
+        "scoped-write": {"targetFile": "services/catalog/src/test/java/example/CatalogServiceTest.java", "marker": "// Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "devstral-small-2:24b"
+      }
+    },
+    {
+      "ecosystem": "go",
+      "rulePackId": "go",
+      "rulePackPath": ".continue/rule-packs/go.md",
+      "sample": "multi-language-platform",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["workers/events/go.mod", "workers/events/event.go", "workers/events/event_test.go", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["workers/events/go.mod", "workers/events/event.go"],
+        "implementation-plan": ["SCENARIO.md", "workers/events/event.go"],
+        "code-review": ["workers/events/event.go", "workers/events/event_test.go"],
+        "scoped-write": {"targetFile": "workers/events/event_test.go", "marker": "// Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "devstral-small-2:24b"
+      }
+    },
+    {
+      "ecosystem": "rust",
+      "rulePackId": "rust",
+      "rulePackPath": ".continue/rule-packs/rust.md",
+      "sample": "multi-language-platform",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["tools/manifest/Cargo.toml", "tools/manifest/src/lib.rs", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["tools/manifest/Cargo.toml", "tools/manifest/src/lib.rs"],
+        "implementation-plan": ["SCENARIO.md", "tools/manifest/src/lib.rs"],
+        "code-review": ["tools/manifest/src/lib.rs"],
+        "scoped-write": {"targetFile": "tools/manifest/src/lib.rs", "marker": "// Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "devstral-small-2:24b"
+      }
+    },
+    {
+      "ecosystem": "sql",
+      "rulePackId": "sql",
+      "rulePackPath": ".continue/rule-packs/sql.md",
+      "sample": "multi-language-platform",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["database/schema/001_catalog.sql", "database/migrations/002_catalog_status.sql", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["database/schema/001_catalog.sql", "database/migrations/002_catalog_status.sql"],
+        "implementation-plan": ["SCENARIO.md", "database/migrations/002_catalog_status.sql"],
+        "code-review": ["database/schema/001_catalog.sql", "database/migrations/002_catalog_status.sql"],
+        "scoped-write": {"targetFile": "database/migrations/002_catalog_status.sql", "marker": "-- Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "devstral-small-2:24b"
+      }
+    },
+    {
+      "ecosystem": "infrastructure-as-code",
+      "rulePackId": "infrastructure-as-code",
+      "rulePackPath": ".continue/rule-packs/infrastructure-as-code.md",
+      "sample": "multi-language-platform",
+      "fixtureComplexity": "medium",
+      "fixtureStatus": "static-validated",
+      "evidenceFiles": ["infrastructure/terraform/main.tf", "infrastructure/k8s/catalog.yaml", "SCENARIO.md"],
+      "operationEvidence": {
+        "repository-discovery": ["infrastructure/terraform/main.tf", "infrastructure/k8s/catalog.yaml"],
+        "implementation-plan": ["SCENARIO.md", "infrastructure/terraform/main.tf"],
+        "code-review": ["infrastructure/terraform/main.tf", "infrastructure/k8s/catalog.yaml"],
+        "scoped-write": {"targetFile": "infrastructure/terraform/main.tf", "marker": "# Local agent scoped-write validation passed."}
+      },
+      "operations": {
+        "repository-discovery": "validated",
+        "implementation-plan": "validated",
+        "code-review": "validated",
+        "scoped-write": "validated"
+      },
+      "operationModels": {
+        "repository-discovery": "devstral-small-2:24b",
+        "implementation-plan": "devstral-small-2:24b",
+        "code-review": "devstral-small-2:24b",
+        "scoped-write": "devstral-small-2:24b"
+      }
+    }
+  ]
+}

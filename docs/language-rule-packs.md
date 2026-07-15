@@ -40,6 +40,8 @@ Current evidence:
 
 - `examples/language-rule-pack-validation.md` records static generated-sample validation for the optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs.
 - `examples/sample-repository-factory-validation.md` records generated sample factory and focused repository-discovery validation evidence.
+- `config/language-workflow-validation-matrix.json` maps every optional rule pack to a medium-complexity fixture and the four required workflow operations.
+- `docs/language-workflow-validation-matrix.md` defines the promotion gate and keeps unexecuted model/editor cells pending.
 
 The static generated-sample validation confirms that the optional rule packs match generated sample repository evidence and stay out of the default config. It does not prove editor/model behavior, implementation-planning quality, code-review quality, or approved-write readiness.
 
@@ -48,5 +50,6 @@ Minimum validation:
 - repository discovery identifies the ecosystem from exact inspected files
 - implementation planning uses language-appropriate guidance without inventing frameworks
 - code review avoids unrelated .NET or other ecosystem recommendations
+- scoped write changes only the explicitly approved fixture files and is verified with an external Git diff
 - output verification catches unsupported framework, toolchain, or filename claims
 - documentation, TODO, roadmap, changelog, and wiki remain aligned
