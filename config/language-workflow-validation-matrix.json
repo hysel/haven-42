@@ -56,6 +56,18 @@
       "validatedCells": 1,
       "failedCells": 0,
       "notes": "TypeScript scoped-write override passed as a separate single-model run."
+    },
+    {
+      "date": "2026-07-15",
+      "surface": "Continue CLI",
+      "surfaceVersion": "1.5.47",
+      "provider": "Ollama",
+      "operatingSystem": "macOS (Apple Silicon)",
+      "evidenceDocument": "examples/language-rule-pack-validation.md",
+      "model": "qwen3.5:9b",
+      "validatedCells": 4,
+      "failedCells": 0,
+      "notes": "Python discovery, planning, review, and scoped-write completed on native macOS with structured headless output and verified model unload. This does not validate the remaining language packs."
     }
   ],
   "entries": [

@@ -60,6 +60,14 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/invoke-workflow.ps1 -Workf
 
 Use the platform-specific entry points when you need exact script behavior or script-specific arguments. The registry lists Windows, Linux, and macOS entry points for every workflow.
 
+## macOS Host Bootstrap
+
+`scripts/bootstrap-macos-agent-host.sh` is a macOS-only host-preparation
+helper. Run it without arguments to inspect prerequisites, or use `--install
+--with-ollama` to opt into Homebrew, Node.js, and Ollama installation. See
+`docs/macos-agent-host-bootstrap.md`; it does not pull a model or modify a
+target repository.
+
 ## Safety Levels
 
 | Safety level | Meaning |

@@ -96,7 +96,20 @@ if [ -f "$LOCAL_CONFIG" ]; then
   SOURCE_CONFIG="$LOCAL_CONFIG"
 fi
 
-python - "$SOURCE_CONFIG" "$LOCAL_CONFIG" "$PROFILE" "$MODEL" <<'PY'
+PYTHON_COMMAND=""
+for candidate in python3 python; do
+  if command -v "$candidate" >/dev/null 2>&1; then
+    PYTHON_COMMAND="$candidate"
+    break
+  fi
+done
+
+if [ -z "$PYTHON_COMMAND" ]; then
+  printf 'python3 or python is required to update the local model config.\n' >&2
+  exit 1
+fi
+
+"$PYTHON_COMMAND" - "$SOURCE_CONFIG" "$LOCAL_CONFIG" "$PROFILE" "$MODEL" <<'PY'
 from pathlib import Path
 import sys
 

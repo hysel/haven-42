@@ -1392,10 +1392,17 @@ Invoke-PackTest "medium language workflow matrix is complete and evidence-gated"
         Assert-Equal -Actual $matrix.latestValidation.surfaceVersion -Expected "1.5.47" -Message "Latest matrix evidence should record the Continue CLI version."
         Assert-True -Condition ("devstral-small-2:24b" -in @($matrix.latestValidation.models)) -Message "Latest matrix evidence should record the default model."
         Assert-True -Condition ("qwen3.5:35b" -in @($matrix.latestValidation.models)) -Message "Latest matrix evidence should record the TypeScript write model."
-        Assert-Equal -Actual @($matrix.nativeOperatingSystemEvidence).Count -Expected 2 -Message "Matrix should retain the completed Linux evidence records."
-        foreach ($nativeEvidence in @($matrix.nativeOperatingSystemEvidence)) {
-            Assert-True -Condition ($nativeEvidence.operatingSystem -like "Linux *") -Message "Native evidence should be Linux-specific."
-            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($nativeEvidence.evidenceDocument)) -Message "Native evidence should link its sanitized evidence document."
+        $nativeEvidence = @($matrix.nativeOperatingSystemEvidence)
+        Assert-Equal -Actual $nativeEvidence.Count -Expected 3 -Message "Matrix should retain the completed Linux and macOS evidence records."
+        $linuxEvidence = @($nativeEvidence | Where-Object { $_.operatingSystem -like "Linux *" })
+        $macosEvidence = @($nativeEvidence | Where-Object { $_.operatingSystem -eq "macOS (Apple Silicon)" })
+        Assert-Equal -Actual $linuxEvidence.Count -Expected 2 -Message "Matrix should retain the completed Linux evidence records."
+        Assert-Equal -Actual $macosEvidence.Count -Expected 1 -Message "Matrix should retain the completed macOS evidence record."
+        Assert-Equal -Actual $macosEvidence[0].model -Expected "qwen3.5:9b" -Message "macOS evidence should retain the validated model."
+        Assert-Equal -Actual $macosEvidence[0].validatedCells -Expected 4 -Message "macOS evidence should retain the Python validation count."
+        Assert-Equal -Actual $macosEvidence[0].failedCells -Expected 0 -Message "macOS evidence should not retain failed cells."
+        foreach ($item in $nativeEvidence) {
+            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($item.evidenceDocument)) -Message "Native evidence should link its sanitized evidence document."
         }
 
         Assert-True -Condition ($doc -match "Static fixture success alone never promotes") -Message "Matrix docs should prevent static evidence from promoting model support."
@@ -1408,6 +1415,7 @@ Invoke-PackTest "medium language workflow matrix is complete and evidence-gated"
         Assert-True -Condition ($sharedRunner -match "--readonly") -Message "Shared native matrix runner should separate read-only mode."
         Assert-True -Condition ($sharedRunner -match "--auto") -Message "Shared native matrix runner should use explicit approved-write mode."
         Assert-True -Condition ($sharedRunner -match "unload_models") -Message "Shared native matrix runner should support unloading models."
+        Assert-True -Condition ($sharedRunner -match "trap handle_interruption HUP INT TERM") -Message "Shared native matrix runner should release models when interrupted."
         Assert-True -Condition ($sharedRunner -match "--allow-loaded-models") -Message "Shared native matrix runner should require an explicit override for an already loaded Ollama model."
         Assert-True -Condition ($runner -match "AllowLoadedModels") -Message "Windows matrix runner should require an explicit override for an already loaded Ollama model."
         Assert-True -Condition ($linuxRunner -match "run-language-workflow-matrix.shared.sh") -Message "Linux wrapper should delegate to the shared runner."
