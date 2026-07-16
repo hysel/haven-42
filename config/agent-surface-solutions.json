@@ -207,17 +207,17 @@
       },
       "configure": {
         "status": "scaffolded",
-        "solution": "Generate a local-only Kilo config with Ollama /v1, a selected model, declared tool support, context and output limits, and ask-by-default permissions.",
+        "solution": "Generate a local-only Kilo config with the native Ollama provider, an Ollama /v1 endpoint, a selected model, declared tool support, context and output limits, and ask-by-default permissions.",
         "workflowIds": ["setup-agent-surface"],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Generation is statically tested; the configured provider reached tested models, but live task execution remains blocked."
+        "blockedReason": "Generation is statically tested and the harness injects KILO_CONFIG for every live command; the configured provider reached tested models, but live task execution remains blocked."
       },
       "test": {
         "status": "scaffolded",
-        "solution": "Use the shared agent CLI surface harness with kilo run --auto, JSON output, and ollama/model selection after local config and CLI installation are verified.",
+        "solution": "Use the shared agent CLI surface harness with kilo run --auto --agent code, JSON output, injected KILO_CONFIG, and ollama/model selection after local config and CLI installation are verified.",
         "workflowIds": ["test-agent-cli-surface"],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Live generated-sample validation reached tested models, but they did not execute the supplied repository tasks or tool calls."
+        "blockedReason": "Live generated-sample validation with qwen3.5:9b and devstral:24b returned generic acknowledgements without repository work; qwen3.5:35b emitted raw tool-like XML that Kilo did not execute."
       }
     },
     {

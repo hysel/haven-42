@@ -9,6 +9,7 @@ param(
     [string]$AgentArgumentsTemplate,
     [string]$WriteAgentArgumentsTemplate,
     [string]$ModelArgumentTemplate,
+    [string]$AgentConfigPath,
     [string]$InstallHint,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
@@ -160,6 +161,9 @@ function Invoke-AgentCommand {
     $startInfo.UseShellExecute = $false
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
+    if ($SurfaceKey -eq "kilo-code-cli" -and -not [string]::IsNullOrWhiteSpace($AgentConfigPath)) {
+        $startInfo.Environment["KILO_CONFIG"] = $AgentConfigPath
+    }
 
     $process = [System.Diagnostics.Process]::new()
     $process.StartInfo = $startInfo
@@ -236,6 +240,13 @@ if (($IncludeWriteSmoke -or $IncludeScopedEdit) -and -not $AllowNonGeneratedTarg
 
 $resolvedTarget = (Resolve-Path -LiteralPath $TargetRepo).Path
 Initialize-DisposableGitBaseline -RunDirectory $resolvedTarget
+if ($SurfaceKey -eq "kilo-code-cli" -and -not $DryRun) {
+    if ([string]::IsNullOrWhiteSpace($AgentConfigPath)) { $AgentConfigPath = Join-Path $resolvedTarget ".kilo.local.json" }
+    if (-not (Test-Path -LiteralPath $AgentConfigPath)) {
+        throw "Kilo Code requires a generated local config for live tests: $AgentConfigPath. Run setup-agent-surface with -Surface kilo -Action Configure against this generated sample first."
+    }
+    $AgentConfigPath = (Resolve-Path -LiteralPath $AgentConfigPath).Path
+}
 $modelsToTest = @($Models | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_.Trim() })
 if ($modelsToTest.Count -eq 0) {
     $modelsToTest = @(Get-DefaultModels)
@@ -248,6 +259,7 @@ if (-not $DryRun -and -not (Get-Command $AgentCommand -ErrorAction SilentlyConti
 Write-Host "[2/7] Target repository: generated sample $((Split-Path -Leaf $resolvedTarget))"
 Write-Host "[3/7] Candidate models: $($modelsToTest -join ', ')"
 Write-Host "[4/7] Agent command: $AgentCommand"
+if ($SurfaceKey -eq "kilo-code-cli" -and -not $DryRun) { Write-Host "[4/7] Kilo config: $AgentConfigPath" }
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutputPath) | Out-Null
 

@@ -6,8 +6,10 @@ param(
     [string]$AgentCommand,
     [string]$AgentArgumentsTemplate,
     [string]$ModelArgumentTemplate,
+    [string]$KiloConfigPath,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
+    [switch]$IncludeScopedEdit,
     [switch]$AllowNonGeneratedTarget,
     [switch]$UnloadAfterEach,
     [switch]$DryRun
@@ -22,10 +24,12 @@ $arguments = @{
     OllamaBaseUrl = $OllamaBaseUrl
     TimeoutSeconds = $TimeoutSeconds
     IncludeWriteSmoke = $IncludeWriteSmoke
+    IncludeScopedEdit = $IncludeScopedEdit
     AllowNonGeneratedTarget = $AllowNonGeneratedTarget
     UnloadAfterEach = $UnloadAfterEach
     DryRun = $DryRun
 }
+if ($PSBoundParameters.ContainsKey("KiloConfigPath")) { $arguments.AgentConfigPath = $KiloConfigPath }
 
 foreach ($optionalArgument in @("AgentCommand", "AgentArgumentsTemplate", "ModelArgumentTemplate")) {
     if ($PSBoundParameters.ContainsKey($optionalArgument)) {

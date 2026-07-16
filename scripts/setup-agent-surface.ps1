@@ -139,11 +139,9 @@ if ($Action -eq "Configure") {
         $kiloEndpoint = if ($endpoint.EndsWith("/v1")) { $endpoint } else { "$endpoint/v1" }
         $content = @{
             '$schema' = "https://app.kilo.ai/config.json"
-            model = "local-ollama/$selectedModel"
+            model = "ollama/$selectedModel"
             provider = @{
-                'local-ollama' = @{
-                    npm = "@ai-sdk/openai-compatible"
-                    name = "Ollama (local)"
+                ollama = @{
                     options = @{ baseURL = $kiloEndpoint; timeout = 600000 }
                     models = @{
                         $selectedModel = @{
@@ -189,7 +187,7 @@ if (Test-Path -LiteralPath $configPath) {
     } elseif ($Surface -eq "kilo") {
         try {
             $kiloConfig = $configText | ConvertFrom-Json
-            $hasModel = $kiloConfig.model -match '^local-ollama/' -and $null -ne $kiloConfig.provider.'local-ollama'
+            $hasModel = $kiloConfig.model -match '^ollama/' -and $null -ne $kiloConfig.provider.ollama
             $safePermissions = $kiloConfig.permission.'*' -eq "ask" -and $kiloConfig.permission.edit -eq "ask"
             $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = if ($hasModel) { "pass" } else { "fail" }; Detail = "Ollama provider and model configured" })
             $checks.Add([pscustomobject]@{ Name = "safe-permissions"; Status = if ($safePermissions) { "pass" } else { "fail" }; Detail = "default and edit permissions require approval" })

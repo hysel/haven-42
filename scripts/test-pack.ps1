@@ -881,6 +881,8 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
         }
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].installHint)) -Message "Agent CLI defaults should define install hint for $key."
     }
+    $kiloDefault = @($surfaceDefaults.surfaces | Where-Object { $_.surfaceKey -eq "kilo-code-cli" } | Select-Object -First 1)
+    Assert-True -Condition ($kiloDefault[0].agentArgumentsTemplate -match '--agent code') -Message "Kilo Code defaults should explicitly select the code agent for repository validation."
     foreach ($base in $wrapperBases) {
         $wrapperPs = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-$base-cli-models.ps1") -Raw
         $wrapperSh = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-$base-cli-models.shared.sh") -Raw
@@ -3447,10 +3449,10 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
         Assert-Equal -Actual $kiloConfigure.ExitCode -Expected 0 -Message "Kilo Code config generation should succeed."
         $kiloConfigPath = Join-Path $tempRoot ".kilo.local.json"
         $kiloConfig = Get-Content -LiteralPath $kiloConfigPath -Raw | ConvertFrom-Json
-        Assert-Equal -Actual $kiloConfig.model -Expected "local-ollama/qwen3.5:9b" -Message "Kilo Code config should use the requested recommendation lane."
-        Assert-True -Condition ($null -ne $kiloConfig.provider.'local-ollama') -Message "Kilo Code config should define the local Ollama provider."
-        Assert-Equal -Actual $kiloConfig.provider.'local-ollama'.options.baseURL -Expected "http://example.invalid:11434/v1" -Message "Kilo Code config should use an OpenAI-compatible Ollama endpoint."
-        Assert-True -Condition ($kiloConfig.provider.'local-ollama'.models.'qwen3.5:9b'.tool_call) -Message "Kilo Code config should declare tool-call capability."
+        Assert-Equal -Actual $kiloConfig.model -Expected "ollama/qwen3.5:9b" -Message "Kilo Code config should use the requested recommendation lane."
+        Assert-True -Condition ($null -ne $kiloConfig.provider.ollama) -Message "Kilo Code config should define the native Ollama provider."
+        Assert-Equal -Actual $kiloConfig.provider.ollama.options.baseURL -Expected "http://example.invalid:11434/v1" -Message "Kilo Code config should use an OpenAI-compatible Ollama endpoint."
+        Assert-True -Condition ($kiloConfig.provider.ollama.models.'qwen3.5:9b'.tool_call) -Message "Kilo Code config should declare tool-call capability."
         Assert-True -Condition ($kiloConfig.permission.'*' -eq "ask" -and $kiloConfig.permission.edit -eq "ask") -Message "Kilo Code config should require approval for writes."
         Assert-True -Condition (@(Get-Content -LiteralPath (Join-Path $tempRoot ".git/info/exclude")) -contains ".kilo.local.json") -Message "Generated Kilo Code config should be locally excluded from Git."
 
@@ -3493,7 +3495,7 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
 
         $shared = Get-Content -LiteralPath $sharedPath -Raw
         Assert-True -Condition ($shared -notmatch "pwsh") -Message "Native Aider adapter should not require PowerShell."
-        Assert-True -Condition ($shared -match "local-ollama") -Message "Native adapter should generate Kilo Code's local Ollama provider config."
+        Assert-True -Condition ($shared -match '"model": "ollama/" \+ model') -Message "Native adapter should generate Kilo Code's native Ollama provider config."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue

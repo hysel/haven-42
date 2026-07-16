@@ -24,9 +24,9 @@
       "surfaceKey": "kilo-code-cli",
       "surfaceName": "Kilo Code",
       "agentCommand": "kilo",
-      "agentArgumentsTemplate": "run --auto --format json \"{Prompt}\"",
+      "agentArgumentsTemplate": "run --auto --agent code --format json \"{Prompt}\"",
       "writeAgentArgumentsTemplate": "",
-      "modelArgumentTemplate": "--model \"local-ollama/{Model}\"",
+      "modelArgumentTemplate": "--model \"ollama/{Model}\"",
       "installHint": "Install with npm install -g @kilocode/cli, generate a local-only Kilo config with setup-agent-surface, then validate only against a generated disposable sample."
     },
     {

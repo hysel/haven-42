@@ -56,9 +56,13 @@ It remains partial for real-project approved-write readiness until explicitly
 approved non-generated repository validation passes.
 
 Kilo Code now has an explicit npm install plan and a local-only
-`.kilo.local.json` generator through the same adapter. It uses the documented
-Ollama `/v1` provider shape, model tool metadata, token limits, and
-ask-by-default permissions. Live generated-sample validation is still pending;
+`.kilo.local.json` generator through the same adapter. It uses Kilo's native
+Ollama provider with an Ollama `/v1` endpoint, model tool metadata, token
+limits, and ask-by-default permissions. The harness injects that exact config
+through `KILO_CONFIG` and explicitly selects Kilo's `code` agent. Live
+generated-sample validation remains blocked: tested local models either return
+generic acknowledgements without repository work or emit raw tool syntax that
+Kilo does not execute.
 do not treat generated config as real-project approval.
 
 Use `docs/script-reference-appendix.md` for direct command details after you choose a workflow.

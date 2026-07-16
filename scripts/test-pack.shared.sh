@@ -1289,8 +1289,8 @@ JSON
   python3 - "$temp_root/.kilo.local.json" <<'PY' || return 1
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as handle: config = json.load(handle)
-assert config["model"] == "local-ollama/qwen3.5:9b"
-assert config["provider"]["local-ollama"]["options"]["baseURL"] == "http://example.invalid:11434/v1"
+assert config["model"] == "ollama/qwen3.5:9b"
+assert config["provider"]["ollama"]["options"]["baseURL"] == "http://example.invalid:11434/v1"
 assert config["permission"]["*"] == "ask"
 PY
   grep -Fxq '.kilo.local.json' "$temp_root/.git/info/exclude" || return 1

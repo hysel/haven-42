@@ -153,8 +153,8 @@ elif surface == "kilo":
     endpoint = endpoint if endpoint.endswith("/v1") else endpoint + "/v1"
     text = json.dumps({
         "$schema": "https://app.kilo.ai/config.json",
-        "model": "local-ollama/" + model,
-        "provider": {"local-ollama": {"npm": "@ai-sdk/openai-compatible", "name": "Ollama (local)", "options": {"baseURL": endpoint, "timeout": 600000}, "models": {model: {"name": model + " (local)", "tool_call": True, "limit": {"context": 32768, "output": 8192}}}}},
+        "model": "ollama/" + model,
+        "provider": {"ollama": {"options": {"baseURL": endpoint, "timeout": 600000}, "models": {model: {"name": model + " (local)", "tool_call": True, "limit": {"context": 32768, "output": 8192}}}}},
         "permission": {"*": "ask", "bash": "ask", "edit": "ask"}
     }, indent=2)
 else:
@@ -198,8 +198,8 @@ if [ -f "$config_path" ]; then
 import json, sys
 with open(sys.argv[1], encoding="utf-8") as handle:
     config = json.load(handle)
-assert str(config.get("model", "")).startswith("local-ollama/")
-assert config.get("provider", {}).get("local-ollama")
+assert str(config.get("model", "")).startswith("ollama/")
+assert config.get("provider", {}).get("ollama")
 assert config.get("permission", {}).get("*") == "ask"
 assert config.get("permission", {}).get("edit") == "ask"
 PY
