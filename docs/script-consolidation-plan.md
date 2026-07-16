@@ -23,7 +23,7 @@ The goal is not to hide behavior. The goal is to move repeated behavior into sha
 | Validation and release gates | Keep explicit entry points such as `scripts/validate-pack.ps1`, `scripts/test-pack.ps1`, and `scripts/test-release-readiness.ps1`. | These are safety gates and should remain easy to run directly and through the dispatcher. |
 | Runtime validation | Keep `scripts/generate-runtime-context.ps1`, `scripts/run-runtime-validation.ps1`, and `scripts/verify-runtime-output.ps1` as separate workflow steps. | Consolidate only report parsing or shared evidence ingestion, not the user-visible validation stages. |
 | Model profiling and recommendation | Keep shared recommendation data and config generation as the engine behind local model choices. | Future agent surfaces should reuse the recommendation model instead of adding independent model-selection logic. |
-| Agent CLI surface testing | Keep `scripts/test-agent-cli-surface-models.ps1`, shell equivalents, and `config/agent-cli-surface-defaults.json` as the shared engine/default catalog for Aider, Roo Code, Kilo Code, and OpenCode wrappers. | PowerShell and Bash surface wrappers should only set surface keys, overrides, or platform-friendly arguments. |
+| Agent CLI surface testing | Keep `scripts/test-agent-cli-surface-models.ps1`, shell equivalents, and `config/agent-cli-surface-defaults.json` as the shared engine/default catalog for active Aider, Kilo Code, and OpenCode wrappers. Roo Code metadata is historical only. | PowerShell and Bash surface wrappers should only set surface keys, overrides, or platform-friendly arguments. |
 | Continue and Cline validation | Keep separate wrappers while config locations, CLI behavior, and read/write safety checks differ. | Consolidate shared assertions only after behavior matches in evidence. |
 | Install, cleanup, and package scripts | Keep direct scripts for safety-sensitive operations and release automation. | Add dispatcher entries and reports, but avoid hiding dry-run and approval boundaries. |
 
@@ -57,7 +57,7 @@ tracked work and is not represented as complete cross-platform parity.
 ## Do Not Consolidate Yet
 
 - Surface-specific config generators for planned or blocked agent surfaces.
-- Roo Code, Kilo Code, and OpenCode command behavior beyond the shared `test-agent-cli-surface-models` engine until command shapes are confirmed.
+- Kilo Code live task and tool behavior beyond its documented command, install plan, and local-only configuration. Current remote-Ollama model tests reached the provider but did not execute repository tasks. OpenCode remains subject to non-generated-repository validation. Evaluate a maintained Roo Code successor separately.
 - Local model pull, unload, or deletion behavior without explicit user intent.
 - Cleanup operations that are not covered by dry-run output and tests.
 - Any behavior that would require storing private hostnames, IP addresses, usernames, tokens, local paths, or raw hardware reports.

@@ -627,7 +627,7 @@ test_agent_surface_options_doc() {
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Milestone 17 Cline And Aider Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "partial for full tracked-surface compatibility" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "Roo Code and Kilo Code remain future live-validation targets" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "Roo Code is historical only" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     [ -f "$REPO_ROOT/docs/openhands-validation-boundary.md" ] &&
     grep -q "OpenHands Validation Boundary" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "disposable generated repository" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
@@ -644,15 +644,15 @@ test_agent_surface_options_doc() {
     grep -q "\\[x\\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Complete Milestone 17 full tracked-surface compatibility validation" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[ \] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[ \] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[x\] Retire Roo Code from future validation" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[ \] Validate Kilo Code wrapper against a generated sample with an installed CLI and reachable Ollama model" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Add a local-only OpenCode Ollama config generator" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Validate OpenCode's installed CLI" "$REPO_ROOT/TODO.md" &&
     [ -f "$REPO_ROOT/docs/opencode-cli-model-testing.md" ] &&
     grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q "safe non-interactive task syntax remains unverified" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q "No stable local CLI contract is confirmed" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "Live runs therefore require explicit command and prompt-template overrides" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "upstream project is archived" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "\\[x\\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
 }
 
@@ -1314,7 +1314,7 @@ test_solution_architecture_review_doc() {
     grep -q "19: Installer Profiles" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Roo Code, Kilo Code, and OpenCode" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "installed Kilo Code CLI" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for positioning, partial for full cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "comparable install/configure/test support is not complete" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for Cline and Aider, partial for all tracked surfaces" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -1336,7 +1336,7 @@ test_solution_architecture_review_doc() {
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Reuse the recommendation data model for future non-Continue agent surfaces" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Provide or approve suitable non-generated repositories" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Validate Kilo Code wrapper against a generated sample with an installed CLI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated" "$REPO_ROOT/TODO.md" &&

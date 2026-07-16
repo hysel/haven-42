@@ -14,20 +14,20 @@
     {
       "surfaceKey": "roo-code-cli",
       "surfaceName": "Roo Code",
-      "agentCommand": "roo-code",
-      "agentArgumentsTemplate": "--task \"{Prompt}\"",
+      "agentCommand": "roo",
+      "agentArgumentsTemplate": "{Prompt}",
       "writeAgentArgumentsTemplate": "",
       "modelArgumentTemplate": "--model \"{Model}\"",
-      "installHint": "Install or configure Roo Code CLI if available, or pass the command/template override. Editor extension validation is separate."
+      "installHint": "Retired upstream: do not install Roo Code for new setups. Retain this metadata only for explicit historical experiments with command/template overrides."
     },
     {
       "surfaceKey": "kilo-code-cli",
       "surfaceName": "Kilo Code",
-      "agentCommand": "kilo-code",
-      "agentArgumentsTemplate": "--task \"{Prompt}\"",
+      "agentCommand": "kilo",
+      "agentArgumentsTemplate": "run --auto --format json \"{Prompt}\"",
       "writeAgentArgumentsTemplate": "",
-      "modelArgumentTemplate": "--model \"{Model}\"",
-      "installHint": "Install or configure Kilo Code CLI if available, or pass the command/template override. Editor extension validation is separate."
+      "modelArgumentTemplate": "--model \"local-ollama/{Model}\"",
+      "installHint": "Install with npm install -g @kilocode/cli, generate a local-only Kilo config with setup-agent-surface, then validate only against a generated disposable sample."
     },
     {
       "surfaceKey": "opencode-cli",

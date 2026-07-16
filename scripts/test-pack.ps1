@@ -811,7 +811,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Agent CLI Surface Model Testing") -Message "Shared CLI testing doc should have a clear title."
-    Assert-True -Condition ($doc -match "future evidence expansion") -Message "Shared CLI doc should keep unconfirmed wrapper validation future-gated."
+    Assert-True -Condition ($doc -match "live validation is blocked by task execution") -Message "Shared CLI doc should keep Kilo Code's live task-execution blocker explicit."
     foreach ($surface in @("Aider", "Roo Code", "Kilo Code", "OpenCode")) {
         Assert-True -Condition ($doc -match [regex]::Escape($surface)) -Message "Shared CLI testing doc should mention $surface."
         Assert-True -Condition ($catalog -match [regex]::Escape($surface)) -Message "Evidence catalog should mention $surface."
@@ -845,7 +845,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($promotionGates -match "partial for full tracked-surface compatibility") -Message "Promotion gates should keep full surface compatibility gap visible."
     Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
-    Assert-True -Condition ($promotionGates -match "Roo Code and Kilo Code remain future live-validation targets") -Message "Promotion gates should keep unconfirmed wrapper validation future-gated."
+    Assert-True -Condition ($promotionGates -match "Roo Code is historical only") -Message "Promotion gates should keep Roo Code retired upstream."
     $openHandsBoundary = Get-Content -Raw (Join-Path $repoRoot "docs/openhands-validation-boundary.md")
     Assert-True -Condition ($openHandsBoundary -match "OpenHands Validation Boundary") -Message "OpenHands boundary doc should have a clear title."
     Assert-True -Condition ($openHandsBoundary -match "disposable generated repository") -Message "OpenHands boundary should require a generated sample."
@@ -857,15 +857,15 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria") -Message "TODO should mark Cline/Aider Milestone 17 scope complete."
     Assert-True -Condition ($todo -match "\[ \] Complete Milestone 17 full tracked-surface compatibility validation") -Message "TODO should keep full Milestone 17 surface validation pending."
     Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
-    Assert-True -Condition ($todo -match "\[ \] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed") -Message "TODO should keep Roo CLI validation evidence-gated."
-    Assert-True -Condition ($todo -match "\[ \] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed") -Message "TODO should keep Kilo CLI validation evidence-gated."
+    Assert-True -Condition ($todo -match "\[x\] Retire Roo Code from future validation") -Message "TODO should keep Roo Code retired upstream."
+    Assert-True -Condition ($todo -match "\[ \] Resolve Kilo Code's current local-model task-execution failure") -Message "TODO should keep Kilo CLI validation evidence-gated."
     Assert-True -Condition ($todo -match "\[x\] Add a local-only OpenCode Ollama config generator") -Message "TODO should record the scaffolded OpenCode config generator."
     Assert-True -Condition ($todo -match "\[x\] Validate OpenCode's installed CLI") -Message "TODO should record generated-sample OpenCode CLI validation."
     Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "docs/opencode-cli-model-testing.md")) -Message "OpenCode setup and validation documentation should exist."
     Assert-True -Condition ($doc -match "Confirmed Command Boundaries") -Message "Shared CLI doc should record verified command boundaries."
     Assert-True -Condition ($doc -match "opencode run") -Message "Shared CLI doc should record the OpenCode non-interactive command."
-    Assert-True -Condition ($doc -match "safe non-interactive task syntax remains unverified") -Message "Shared CLI doc should keep Kilo non-interactive behavior evidence-gated."
-    Assert-True -Condition ($doc -match "No stable local CLI contract is confirmed") -Message "Shared CLI doc should keep Roo command assumptions evidence-gated."
+    Assert-True -Condition ($doc -match "instead of executing the supplied repository task") -Message "Shared CLI doc should keep Kilo task execution evidence-gated."
+    Assert-True -Condition ($doc -match "upstream project is archived") -Message "Shared CLI doc should keep Roo Code retired upstream."
     Assert-True -Condition ($todo -match "\[x\] Define a safe OpenHands validation boundary before adding platform-agent validation automation") -Message "TODO should mark the OpenHands validation boundary complete."
 
     $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
@@ -877,9 +877,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].agentCommand)) -Message "Agent CLI defaults should define command for $key."
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].agentArgumentsTemplate)) -Message "Agent CLI defaults should define read template for $key."
         if ($key -ne "opencode-cli") {
-        if ($key -ne "opencode-cli") {
             Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].modelArgumentTemplate)) -Message "Agent CLI defaults should define model template for $key."
-        }
         }
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].installHint)) -Message "Agent CLI defaults should define install hint for $key."
     }
@@ -3400,7 +3398,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($todo -match "surface-neutral install/configure/test solution catalog") -Message "TODO should track solution catalog completion."
     Assert-True -Condition ($todo -match "\[x\] Decide whether install scripts should generate surface-specific config bundles") -Message "TODO should mark config bundle decision complete."
 }
-Invoke-PackTest "Aider adapter plans installs configures and reports health safely" {
+Invoke-PackTest "agent surface adapters plan installs configure and report health safely" {
     $adapterPath = Join-Path $repoRoot "scripts/setup-agent-surface.ps1"
     $sharedPath = Join-Path $repoRoot "scripts/setup-agent-surface.shared.sh"
     $registryPath = Join-Path $repoRoot "config/workflows.json"
@@ -3437,6 +3435,21 @@ Invoke-PackTest "Aider adapter plans installs configures and reports health safe
         Assert-True -Condition ($config -match "auto-commits: false" -and $config -match "dirty-commits: false") -Message "Aider config should disable automatic commits."
         Assert-True -Condition (@(Get-Content -LiteralPath (Join-Path $tempRoot ".git/info/exclude")) -contains ".aider.conf.local.yml") -Message "Generated Aider config should be locally excluded from Git."
 
+        $kiloPlan = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Plan", "-Surface", "kilo")
+        Assert-Equal -Actual $kiloPlan.ExitCode -Expected 0 -Message "Kilo Code adapter plan should succeed."
+        Assert-True -Condition ($kiloPlan.Output -match "@kilocode/cli" -and $kiloPlan.Output -match "local-only") -Message "Kilo Code plan should describe its npm install and local config boundary."
+
+        $kiloConfigure = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Configure", "-Surface", "kilo", "-TargetRepo", $tempRoot, "-RecommendationPath", $recommendationPath, "-Lane", "WriteSafe", "-OllamaBaseUrl", "http://example.invalid:11434")
+        Assert-Equal -Actual $kiloConfigure.ExitCode -Expected 0 -Message "Kilo Code config generation should succeed."
+        $kiloConfigPath = Join-Path $tempRoot ".kilo.local.json"
+        $kiloConfig = Get-Content -LiteralPath $kiloConfigPath -Raw | ConvertFrom-Json
+        Assert-Equal -Actual $kiloConfig.model -Expected "local-ollama/qwen3.5:9b" -Message "Kilo Code config should use the requested recommendation lane."
+        Assert-True -Condition ($null -ne $kiloConfig.provider.'local-ollama') -Message "Kilo Code config should define the local Ollama provider."
+        Assert-Equal -Actual $kiloConfig.provider.'local-ollama'.options.baseURL -Expected "http://example.invalid:11434/v1" -Message "Kilo Code config should use an OpenAI-compatible Ollama endpoint."
+        Assert-True -Condition ($kiloConfig.provider.'local-ollama'.models.'qwen3.5:9b'.tool_call) -Message "Kilo Code config should declare tool-call capability."
+        Assert-True -Condition ($kiloConfig.permission.'*' -eq "ask" -and $kiloConfig.permission.edit -eq "ask") -Message "Kilo Code config should require approval for writes."
+        Assert-True -Condition (@(Get-Content -LiteralPath (Join-Path $tempRoot ".git/info/exclude")) -contains ".kilo.local.json") -Message "Generated Kilo Code config should be locally excluded from Git."
+
         $health = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Health", "-TargetRepo", $tempRoot, "-AiderCommand", (Get-Process -Id $PID).Path)
         Assert-Equal -Actual $health.ExitCode -Expected 0 -Message "Aider health should pass with an available command and valid local config."
         Assert-True -Condition ($health.Output -match '"Status":\s*"healthy"') -Message "Aider health should emit a healthy structured result."
@@ -3448,6 +3461,7 @@ Invoke-PackTest "Aider adapter plans installs configures and reports health safe
 
         $shared = Get-Content -LiteralPath $sharedPath -Raw
         Assert-True -Condition ($shared -notmatch "pwsh") -Message "Native Aider adapter should not require PowerShell."
+        Assert-True -Condition ($shared -match "local-ollama") -Message "Native adapter should generate Kilo Code's local Ollama provider config."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -3478,10 +3492,10 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
-    Assert-True -Condition ($doc -match "Roo Code, Kilo Code, and OpenCode") -Message "Solution architecture review should track unconfirmed agent wrapper command shapes."
+    Assert-True -Condition ($doc -match "installed Kilo Code CLI") -Message "Solution architecture review should track the remaining Kilo Code live-validation gap."
     Assert-True -Condition ($doc -match "Complete for positioning, partial for full cross-agent parity") -Message "Solution architecture review should classify Milestone 14 accurately."
     Assert-True -Condition ($doc -match "comparable install/configure/test support is not complete") -Message "Solution architecture review should keep Milestone 14 parity gap visible."
-    Assert-True -Condition ($doc -match "Complete for Cline and Aider, partial for all tracked surfaces") -Message "Solution architecture review should classify Milestone 17 accurately."
+    Assert-True -Condition ($doc -match "Complete for Cline and Aider, partial for active tracked surfaces") -Message "Solution architecture review should classify Milestone 17 accurately."
     Assert-True -Condition ($doc -match "OpenHands do not yet have full live validation evidence") -Message "Solution architecture review should keep full surface validation gap visible."
     Assert-True -Condition ($doc -match "Complete for Continue and Aider, partial for cross-agent parity") -Message "Solution architecture review should classify Milestone 19 accurately."
     Assert-True -Condition ($doc -match "install/configure/test script parity is still missing") -Message "Solution architecture review should keep remaining surface install/configure gaps visible."
@@ -3498,7 +3512,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should include solution architecture backlog."
     Assert-True -Condition ($todo -match "\[x\] Add a milestone solution completeness audit") -Message "TODO should mark solution audit doc complete."
     Assert-True -Condition ($todo -match "\[ \] Provide or approve suitable non-generated repositories") -Message "TODO should track input-needed real repository targets."
-    Assert-True -Condition ($todo -match "\[ \] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode") -Message "TODO should track input-needed wrapper command shapes."
+    Assert-True -Condition ($todo -match "\[ \] Resolve Kilo Code's current local-model task-execution failure") -Message "TODO should track the remaining Kilo Code live-validation gap."
     Assert-True -Condition ($todo -match "\[x\] Design a unified web UI") -Message "TODO should mark unified UI design complete."
     Assert-True -Condition ($todo -match "\[x\] Keep the UI evidence-first") -Message "TODO should mark evidence-first UI design complete."
     Assert-True -Condition ($todo -match "\[ \] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated") -Message "TODO should keep UI implementation pending."

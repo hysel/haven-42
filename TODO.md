@@ -303,8 +303,9 @@
 
 ## Future Agent Surface Evidence Expansion
 
-- [ ] Validate Roo Code wrapper against a generated sample when an official local CLI contract is confirmed.
-- [ ] Validate Kilo Code wrapper against a generated sample when safe non-interactive prompt, model, and permission flags are confirmed.
+- [x] Retire Roo Code from future validation and configuration work after its upstream project was archived and the extension was shut down; retain historical references only.
+- [x] Confirm Kilo Code's documented npm install, local Ollama config, and non-interactive `kilo run --auto` command shape; add a local-only config generator and npm install plan.
+- [ ] Resolve Kilo Code's current local-model task-execution failure, then rerun generated-sample read/write validation. The configured remote Ollama provider reaches `qwen3.5:9b`, `qwen3-coder:30b`, and `devstral:24b`, but each current test stopped without inspecting files or using tools.
 - [x] Add a local-only OpenCode Ollama config generator and documented npm install plan to the unified setup adapter.
 - [x] Validate OpenCode's installed CLI and `opencode run` wrapper against a generated sample with read-only and disposable write-smoke checks.
 - [x] Add an opt-in generated Python scoped-edit gate to the shared CLI harness; record live evidence separately before any surface promotion.
@@ -342,7 +343,7 @@
 - [ ] Complete Milestone 19 cross-agent install/configure/test script parity.
 - [x] Keep Cline install/configure automation blocked with exact evidence gaps: npm installation is documented and validated, but provider setup requires an isolated CLI data directory plus headless auto-approval for tools; no general write profile is generated.
 - [x] Add Aider install/configure automation with an explicit local-only config and supported isolated install methods.
-- [ ] Keep Roo Code, Kilo Code, and OpenCode install/configure automation blocked until command and config shapes are confirmed.
+- [ ] Validate Kilo Code install/configure behavior against an installed CLI and generated sample before promoting its scaffolded adapter; do not create new Roo Code automation.
 - [ ] Keep OpenHands install/configure/test automation blocked until platform workspace, sandbox, and credential boundaries are defined.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
@@ -385,7 +386,7 @@
 
 - [x] Add a milestone solution completeness audit covering completed and active roadmap stages.
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
-- [ ] Confirm real command shapes for Roo Code, Kilo Code, and OpenCode wrapper validation.
+- [ ] Confirm Kilo Code's safe non-interactive command and local-model selection syntax, then run generated-sample validation with explicit overrides; evaluate a maintained Roo Code successor before adding another editor-agent adapter.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
 - [ ] Add future surface-specific profile generation after non-Continue validation.
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.

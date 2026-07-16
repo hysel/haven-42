@@ -11,7 +11,8 @@
     "validated",
     "scaffolded",
     "planned",
-    "blocked"
+    "blocked",
+    "retired"
   ],
   "configBundlePolicy": {
     "decision": "Generate surface-specific config bundles only after compatibility evidence exists for that surface. Continue and Aider have supported generated local config paths today.",
@@ -157,33 +158,33 @@
       "id": "roo-code",
       "name": "Roo Code",
       "type": "editor-agent",
-      "currentValidationLevel": "candidate",
+      "currentValidationLevel": "retired-upstream",
       "configBundle": {
-        "status": "planned",
-        "strategy": "Do not generate Roo Code config bundles until command shape, extension setup, and local model configuration are confirmed.",
-        "outputKind": "future surface-specific bundle",
+        "status": "retired",
+        "strategy": "Do not generate Roo Code config bundles because the upstream project is archived and the extension is shut down.",
+        "outputKind": "none",
         "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
       },
       "install": {
-        "status": "planned",
-        "solution": "Track Roo Code as a candidate surface until install and config behavior are validated.",
+        "status": "retired",
+        "solution": "Do not add Roo Code installation automation for new users.",
         "workflowIds": [],
         "evidence": ["docs/agent-surface-options.md"],
-        "blockedReason": "Install automation waits for confirmed command and extension setup behavior."
+        "blockedReason": "Upstream project is archived and the extension is shut down."
       },
       "configure": {
-        "status": "planned",
-        "solution": "Configuration generation is planned after compatibility evidence is available.",
+        "status": "retired",
+        "solution": "Do not generate new Roo Code configuration.",
         "workflowIds": [],
         "evidence": ["docs/agent-surface-options.md"],
-        "blockedReason": "Config shape and local model support need validation before generation."
+        "blockedReason": "Upstream project is archived and the extension is shut down."
       },
       "test": {
-        "status": "scaffolded",
-        "solution": "Use the shared agent CLI surface harness once the real command shape is confirmed.",
-        "workflowIds": ["test-agent-cli-surface"],
+        "status": "retired",
+        "solution": "Do not schedule new Roo Code validation; retain only historical references.",
+        "workflowIds": [],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Live command validation remains pending."
+        "blockedReason": "Upstream project is archived and the extension is shut down."
       }
     },
     {
@@ -192,31 +193,31 @@
       "type": "editor-agent",
       "currentValidationLevel": "candidate",
       "configBundle": {
-        "status": "planned",
-        "strategy": "Do not generate Kilo Code config bundles until command shape, extension setup, and local model configuration are confirmed.",
-        "outputKind": "future surface-specific bundle",
+        "status": "scaffolded",
+        "strategy": "Generate a local-only .kilo.local.json with an Ollama provider, explicit tool metadata, and ask-by-default permissions. Do not treat config generation as live surface validation.",
+        "outputKind": "local-only .kilo.local.json",
         "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
       },
       "install": {
-        "status": "planned",
-        "solution": "Track Kilo Code as a candidate surface until install and config behavior are validated.",
-        "workflowIds": [],
-        "evidence": ["docs/agent-surface-options.md"],
-        "blockedReason": "Install automation waits for confirmed command and extension setup behavior."
+        "status": "scaffolded",
+        "solution": "Use the unified adapter's explicit npm install plan for @kilocode/cli.",
+        "workflowIds": ["setup-agent-surface"],
+        "evidence": ["docs/agent-cli-surface-model-testing.md"],
+        "blockedReason": "The install plan is dry-run tested. Live generated-sample validation reached the configured provider but did not execute repository tasks."
       },
       "configure": {
-        "status": "planned",
-        "solution": "Configuration generation is planned after compatibility evidence is available.",
-        "workflowIds": [],
-        "evidence": ["docs/agent-surface-options.md"],
-        "blockedReason": "Config shape and local model support need validation before generation."
+        "status": "scaffolded",
+        "solution": "Generate a local-only Kilo config with Ollama /v1, a selected model, declared tool support, context and output limits, and ask-by-default permissions.",
+        "workflowIds": ["setup-agent-surface"],
+        "evidence": ["docs/agent-cli-surface-model-testing.md"],
+        "blockedReason": "Generation is statically tested; the configured provider reached tested models, but live task execution remains blocked."
       },
       "test": {
         "status": "scaffolded",
-        "solution": "Use the shared agent CLI surface harness once the real command shape is confirmed.",
+        "solution": "Use the shared agent CLI surface harness with kilo run --auto, JSON output, and ollama/model selection after local config and CLI installation are verified.",
         "workflowIds": ["test-agent-cli-surface"],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Live command validation remains pending."
+        "blockedReason": "Live generated-sample validation reached tested models, but they did not execute the supplied repository tasks or tool calls."
       }
     },
     {

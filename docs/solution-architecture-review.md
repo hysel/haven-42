@@ -42,7 +42,7 @@ This audit applies the stricter completion standard from the maintainer discussi
 | 14: Agent Surface Portability And Broader Audience | Partial | Complete for positioning, partial for full cross-agent parity | Surface matrix, promotion gates, setup paths, config-bundle policy, and non-Continue evidence are documented; comparable install/configure/test support is not complete for every tracked surface. |
 | 15: Multi-Language Engineering Support | Complete | Complete with staged maturity | Python and TypeScript workflow evidence is complete for current scope; broader ecosystem promotion remains evidence-gated. |
 | 16: Sample Repository Factory | Complete | Complete | Cross-platform sample generation, fixture coverage, runtime context, and sanitized evidence are covered. |
-| 17: Agent Surface Compatibility Validation | Partial | Complete for Cline and Aider, partial for all tracked surfaces | Cline and Aider meet current evidence gates; Roo Code, Kilo Code, OpenCode, and OpenHands do not yet have full live validation evidence. |
+| 17: Agent Surface Compatibility Validation | Partial | Complete for Cline and Aider, partial for active tracked surfaces | Cline and Aider meet current evidence gates; Kilo Code, OpenCode, and OpenHands do not yet have full live validation evidence. Roo Code is historical only because its upstream project is retired. |
 | 18: Language Rule Packs | In Progress | Partial | Optional rule packs and static evidence exist, but editor/model workflow failures remain for Java, Go, Rust, SQL, and Infrastructure samples. |
 | 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial | Complete for Continue and Aider, partial for cross-agent parity | Capability Evidence Contract v2, Continue profiles, the supported Aider install/configure/health adapter, and packaging are complete; install/configure/test script parity is still missing for Cline and the remaining candidate surfaces. |
 | 20: Hardware-Aware Model And Config Automation | In Progress | Partial | Recommendation, lane-specific scoring, curated model-fit metadata, dashboard, menu, dispatcher, versioned workflow envelope, health, cleanup, release readiness, the first non-Continue adapter, and the unified UI design exist; runtime-measured fit metadata, deeper consolidation, and UI implementation remain future work. |
@@ -52,7 +52,7 @@ This audit applies the stricter completion standard from the maintainer discussi
 These should stay on `TODO.md` until the user or project owner provides input:
 
 - Suitable non-generated repositories for additional real-repository validation.
-- Confirmed command shapes for Roo Code, Kilo Code, and OpenCode wrapper validation.
+- An installed Kilo Code CLI plus generated-sample validation against a reachable local Ollama model, and an evaluation of a maintained Roo Code successor.
 - Safe validation boundary for OpenHands as a platform-style agent.
 - Which surface should receive the next install/configure adapter after Aider.
 - Whether Milestone 19 should require actual install/configure/test scripts for every tracked candidate or only promoted surfaces before being marked complete.

@@ -21,6 +21,9 @@ param(
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $surfaceDefaultFound = $false
+$agentCommandWasProvided = $PSBoundParameters.ContainsKey("AgentCommand")
+$agentArgumentsTemplateWasProvided = $PSBoundParameters.ContainsKey("AgentArgumentsTemplate")
+$requiresExplicitLiveOverrides = $false
 
 $surfaceDefaultsPath = Join-Path $repoRoot "config/agent-cli-surface-defaults.json"
 if (Test-Path -LiteralPath $surfaceDefaultsPath) {
@@ -34,6 +37,7 @@ if (Test-Path -LiteralPath $surfaceDefaultsPath) {
         if ([string]::IsNullOrWhiteSpace($WriteAgentArgumentsTemplate)) { $WriteAgentArgumentsTemplate = $surfaceDefault[0].writeAgentArgumentsTemplate }
         if ([string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) { $ModelArgumentTemplate = $surfaceDefault[0].modelArgumentTemplate }
         if ([string]::IsNullOrWhiteSpace($InstallHint)) { $InstallHint = $surfaceDefault[0].installHint }
+        $requiresExplicitLiveOverrides = [bool]$surfaceDefault[0].requiresExplicitLiveOverrides
     }
 }
 
@@ -42,6 +46,10 @@ if ([string]::IsNullOrWhiteSpace($AgentCommand)) { $AgentCommand = "aider" }
 if ([string]::IsNullOrWhiteSpace($AgentArgumentsTemplate)) { $AgentArgumentsTemplate = '--message "{Prompt}" --yes-always --no-auto-commits' }
 if ([string]::IsNullOrWhiteSpace($ModelArgumentTemplate) -and -not $surfaceDefaultFound) { $ModelArgumentTemplate = '--model "ollama_chat/{Model}"' }
 if ([string]::IsNullOrWhiteSpace($InstallHint)) { $InstallHint = "Install or configure the CLI, or pass -AgentCommand." }
+
+if (-not $DryRun -and $requiresExplicitLiveOverrides -and (-not $agentCommandWasProvided -or -not $agentArgumentsTemplateWasProvided)) {
+    throw "$SurfaceName live tests require explicit -AgentCommand and -AgentArgumentsTemplate values until its non-interactive command syntax is confirmed. Use -DryRun to validate the harness wiring."
+}
 
 if (-not $TargetRepo) {
     $TargetRepo = Join-Path $repoRoot "runtime-validation-output/sample-repositories/python-api"

@@ -16,7 +16,8 @@
     "validated",
     "scaffolded",
     "planned",
-    "blocked"
+    "blocked",
+    "retired"
   ],
   "surfaces": [
     {
@@ -167,21 +168,21 @@
       "id": "roo-code",
       "name": "Roo Code",
       "type": "editor-agent",
-      "currentValidationLevel": "candidate",
+      "currentValidationLevel": "retired-upstream",
       "activities": {
         "install": {
-          "status": "planned",
+          "status": "retired",
           "entryPoints": [],
           "evidence": ["docs/agent-surface-options.md"]
         },
         "configure": {
-          "status": "planned",
+          "status": "retired",
           "entryPoints": [],
           "evidence": ["docs/agent-surface-options.md"]
         },
         "test": {
-          "status": "scaffolded",
-          "entryPoints": ["test-agent-cli-surface"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["docs/agent-cli-surface-model-testing.md"]
         },
         "health": {

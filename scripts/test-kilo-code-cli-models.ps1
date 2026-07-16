@@ -20,14 +20,17 @@ $arguments = @{
     TargetRepo = $TargetRepo
     OutputPath = $OutputPath
     OllamaBaseUrl = $OllamaBaseUrl
-    AgentCommand = $AgentCommand
-    AgentArgumentsTemplate = $AgentArgumentsTemplate
-    ModelArgumentTemplate = $ModelArgumentTemplate
     TimeoutSeconds = $TimeoutSeconds
     IncludeWriteSmoke = $IncludeWriteSmoke
     AllowNonGeneratedTarget = $AllowNonGeneratedTarget
     UnloadAfterEach = $UnloadAfterEach
     DryRun = $DryRun
+}
+
+foreach ($optionalArgument in @("AgentCommand", "AgentArgumentsTemplate", "ModelArgumentTemplate")) {
+    if ($PSBoundParameters.ContainsKey($optionalArgument)) {
+        $arguments[$optionalArgument] = Get-Variable -Name $optionalArgument -ValueOnly
+    }
 }
 
 & $scriptPath @arguments

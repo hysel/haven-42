@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("aider", "opencode")]
+    [ValidateSet("aider", "kilo", "opencode")]
     [string]$Surface = "aider",
     [ValidateSet("Plan", "Install", "Configure", "Health")]
     [string]$Action = "Plan",
@@ -12,6 +12,7 @@ param(
     [ValidateSet("aider-install", "pipx", "uv", "npm")]
     [string]$InstallMethod = "aider-install",
     [string]$AiderCommand = "aider",
+    [string]$KiloCommand = "kilo",
     [string]$OpenCodeCommand = "opencode",
     [switch]$DryRun,
     [switch]$Force
@@ -43,8 +44,9 @@ function Get-SafeEndpoint([string]$Value) {
 }
 
 function Get-InstallPlan([string]$SurfaceName, [string]$Method) {
-    if ($SurfaceName -eq "opencode") {
-        if ($Method -ne "npm") { throw "OpenCode supports only the npm install method in this adapter." }
+    if ($SurfaceName -in @("kilo", "opencode")) {
+        if ($Method -ne "npm") { throw "$SurfaceName supports only the npm install method in this adapter." }
+        if ($SurfaceName -eq "kilo") { return @("npm install -g @kilocode/cli") }
         return @("npm install -g opencode-ai")
     }
 
@@ -55,10 +57,10 @@ function Get-InstallPlan([string]$SurfaceName, [string]$Method) {
     }
 }
 
-$configName = if ($Surface -eq "aider") { ".aider.conf.local.yml" } else { ".opencode.local.json" }
-$commandName = if ($Surface -eq "aider") { $AiderCommand } else { $OpenCodeCommand }
-$displayName = if ($Surface -eq "aider") { "Aider" } else { "OpenCode" }
-if ($Surface -eq "opencode" -and $InstallMethod -eq "aider-install") { $InstallMethod = "npm" }
+$configName = switch ($Surface) { "aider" { ".aider.conf.local.yml" } "kilo" { ".kilo.local.json" } default { ".opencode.local.json" } }
+$commandName = switch ($Surface) { "aider" { $AiderCommand } "kilo" { $KiloCommand } default { $OpenCodeCommand } }
+$displayName = switch ($Surface) { "aider" { "Aider" } "kilo" { "Kilo Code" } default { "OpenCode" } }
+if ($Surface -in @("kilo", "opencode") -and $InstallMethod -eq "aider-install") { $InstallMethod = "npm" }
 
 if ($Action -eq "Plan") {
     [pscustomobject]@{
@@ -66,8 +68,8 @@ if ($Action -eq "Plan") {
         InstallMethod = $InstallMethod
         InstallCommands = Get-InstallPlan -SurfaceName $Surface -Method $InstallMethod
         ConfigFile = $configName
-        LaunchCommand = if ($Surface -eq "aider") { "$commandName --config $configName" } else { "`$env:OPENCODE_CONFIG='$configName'; $commandName" }
-        TestCommand = if ($Surface -eq "aider") { ".\scripts\test-aider-cli-models.ps1 -Models <model>" } else { ".\scripts\test-opencode-cli-models.ps1 -Models <model>" }
+        LaunchCommand = switch ($Surface) { "aider" { "$commandName --config $configName" } "kilo" { "`$env:KILO_CONFIG='$configName'; $commandName" } default { "`$env:OPENCODE_CONFIG='$configName'; $commandName" } }
+        TestCommand = if ($Surface -eq "aider") { ".\scripts\test-aider-cli-models.ps1 -Models <model>" } elseif ($Surface -eq "kilo") { ".\scripts\test-kilo-code-cli-models.ps1 -Models <model>" } else { ".\scripts\test-opencode-cli-models.ps1 -Models <model>" }
         Safety = "Generated config is local-only and must not be committed."
     } | ConvertTo-Json -Depth 5
     exit 0
@@ -77,8 +79,9 @@ if ($Action -eq "Install") {
     $commands = Get-InstallPlan -SurfaceName $Surface -Method $InstallMethod
     foreach ($command in $commands) { Write-Host "$displayName install step: $command" }
     if ($DryRun) { Write-Host "Dry run complete; no network install was executed."; exit 0 }
-    if ($Surface -eq "opencode") {
-        & npm install -g opencode-ai
+    if ($Surface -in @("kilo", "opencode")) {
+        $package = if ($Surface -eq "kilo") { "@kilocode/cli" } else { "opencode-ai" }
+        & npm install -g $package
     } elseif ($InstallMethod -eq "pipx") {
         & python -m pip install pipx
         if ($LASTEXITCODE -ne 0) { throw "pipx bootstrap failed." }
@@ -132,6 +135,27 @@ if ($Action -eq "Configure") {
                 }
             }
         } | ConvertTo-Json -Depth 10
+    } elseif ($Surface -eq "kilo") {
+        $kiloEndpoint = if ($endpoint.EndsWith("/v1")) { $endpoint } else { "$endpoint/v1" }
+        $content = @{
+            '$schema' = "https://app.kilo.ai/config.json"
+            model = "local-ollama/$selectedModel"
+            provider = @{
+                'local-ollama' = @{
+                    npm = "@ai-sdk/openai-compatible"
+                    name = "Ollama (local)"
+                    options = @{ baseURL = $kiloEndpoint; timeout = 600000 }
+                    models = @{
+                        $selectedModel = @{
+                            name = "$selectedModel (local)"
+                            tool_call = $true
+                            limit = @{ context = 32768; output = 8192 }
+                        }
+                    }
+                }
+            }
+            permission = @{ '*' = "ask"; bash = "ask"; edit = "ask" }
+        } | ConvertTo-Json -Depth 10
     }
     if ((Test-Path -LiteralPath $configPath) -and -not $Force) { throw "$configName already exists. Use -Force to replace it." }
     Write-Host "$displayName config target: $configPath"
@@ -145,6 +169,8 @@ if ($Action -eq "Configure") {
     }
     if ($Surface -eq "aider") {
         Write-Host "Aider config written. Launch with: $AiderCommand --config $configName"
+    } elseif ($Surface -eq "kilo") {
+        Write-Host "Kilo Code config written. Launch with: `$env:KILO_CONFIG='$configName'; $KiloCommand"
     } else {
         Write-Host "OpenCode config written. Launch with: `$env:OPENCODE_CONFIG='$configName'; $OpenCodeCommand"
     }
@@ -160,6 +186,16 @@ if (Test-Path -LiteralPath $configPath) {
     if ($Surface -eq "aider") {
         $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = if ($configText -match '(?m)^model: ollama_chat/') { "pass" } else { "fail" }; Detail = "ollama_chat model configured" })
         $checks.Add([pscustomobject]@{ Name = "safe-git-mode"; Status = if ($configText -match '(?m)^auto-commits: false\r?$' -and $configText -match '(?m)^dirty-commits: false\r?$') { "pass" } else { "fail" }; Detail = "automatic commits disabled" })
+    } elseif ($Surface -eq "kilo") {
+        try {
+            $kiloConfig = $configText | ConvertFrom-Json
+            $hasModel = $kiloConfig.model -match '^local-ollama/' -and $null -ne $kiloConfig.provider.'local-ollama'
+            $safePermissions = $kiloConfig.permission.'*' -eq "ask" -and $kiloConfig.permission.edit -eq "ask"
+            $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = if ($hasModel) { "pass" } else { "fail" }; Detail = "Ollama provider and model configured" })
+            $checks.Add([pscustomobject]@{ Name = "safe-permissions"; Status = if ($safePermissions) { "pass" } else { "fail" }; Detail = "default and edit permissions require approval" })
+        } catch {
+            $checks.Add([pscustomobject]@{ Name = "ollama-model"; Status = "fail"; Detail = "Kilo config is not valid JSON" })
+        }
     } else {
         try {
             $openCodeConfig = $configText | ConvertFrom-Json
@@ -171,5 +207,5 @@ if (Test-Path -LiteralPath $configPath) {
     }
 }
 $status = if (@($checks | Where-Object Status -eq "fail").Count -eq 0) { "healthy" } else { "attention-required" }
-[pscustomobject]@{ Surface = $displayName; Status = $status; Checks = @($checks); NextCommand = if ($Surface -eq "aider") { "$AiderCommand --config $configName --version" } else { "`$env:OPENCODE_CONFIG='$configName'; $OpenCodeCommand --version" } } | ConvertTo-Json -Depth 5
+[pscustomobject]@{ Surface = $displayName; Status = $status; Checks = @($checks); NextCommand = switch ($Surface) { "aider" { "$AiderCommand --config $configName --version" } "kilo" { "`$env:KILO_CONFIG='$configName'; $KiloCommand --version" } default { "`$env:OPENCODE_CONFIG='$configName'; $OpenCodeCommand --version" } } } | ConvertTo-Json -Depth 5
 if ($status -ne "healthy") { exit 1 }

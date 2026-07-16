@@ -7,7 +7,7 @@ Use this workflow to screen CLI-capable coding agent surfaces with the same disp
 The shared harness supports:
 
 - Aider CLI
-- Roo Code CLI candidates
+- Roo Code CLI historical compatibility only
 - Kilo Code CLI candidates
 - OpenCode CLI
 
@@ -17,7 +17,9 @@ OpenHands is platform-style rather than a simple local CLI harness target, so it
 
 These scripts are automation scaffolding. A dry run proves the harness wiring, not that a surface or model works.
 
-For Milestone 17, Roo Code and Kilo Code wrapper live validation remains future evidence expansion until each surface's real command shape is confirmed. OpenCode's documented `run`, provider/model, and local config contracts are reflected in the scaffold, and Devstral Small 2 24B has passed generated-sample read, write-smoke, and constrained scoped-edit checks. OpenCode still needs explicitly approved non-generated repository validation. Use command overrides for experiments, but do not promote wrappers to real-project approved-write readiness from disposable evidence alone.
+For Milestone 17, Kilo Code's documented command shape and local-only config are scaffolded, but live validation is blocked by task execution rather than command discovery. Roo Code is historical only: its upstream project is archived and the extension is shut down, so do not use its wrapper for new validation. OpenCode's documented `run`, provider/model, and local config contracts are reflected in the scaffold, and Devstral Small 2 24B has passed generated-sample read, write-smoke, and constrained scoped-edit checks. OpenCode still needs explicitly approved non-generated repository validation. Use command overrides for experiments, but do not promote wrappers to real-project approved-write readiness from disposable evidence alone.
+
+Kilo Code's documented local-only remote-Ollama configuration path was exercised with `qwen3.5:9b`, `qwen3-coder:30b`, and `devstral:24b`. The provider reached each model, but the agents returned generic greetings or configuration-skill output instead of executing the supplied repository task. Treat Kilo as configuration-scaffolded and live-validation-blocked until this behavior is resolved.
 
 A surface is not approved-write ready until it passes:
 
@@ -67,17 +69,16 @@ Use the `.macos.sh` wrapper on macOS.
 | Surface | Windows | Linux/macOS wrappers | Default command assumption |
 | --- | --- | --- | --- |
 | Aider CLI | `scripts/test-aider-cli-models.ps1` | `scripts/test-aider-cli-models.linux.sh`, `scripts/test-aider-cli-models.macos.sh` | `aider` |
-| Roo Code | `scripts/test-roo-code-cli-models.ps1` | `scripts/test-roo-code-cli-models.linux.sh`, `scripts/test-roo-code-cli-models.macos.sh` | No verified local CLI contract; wrapper remains override-only. |
-| Kilo Code | `scripts/test-kilo-code-cli-models.ps1` | `scripts/test-kilo-code-cli-models.linux.sh`, `scripts/test-kilo-code-cli-models.macos.sh` | `kilo` command is documented, but a safe non-interactive task syntax remains unverified. |
+| Roo Code | Historical wrapper only | Historical wrapper only | Upstream retired; do not install or validate for new setups. |
+| Kilo Code | `scripts/test-kilo-code-cli-models.ps1` | `scripts/test-kilo-code-cli-models.linux.sh`, `scripts/test-kilo-code-cli-models.macos.sh` | `kilo run --auto --format json --model "local-ollama/{Model}" "{Prompt}"`; generate `.kilo.local.json` through the unified adapter and set `KILO_CONFIG` before live generated-sample validation. The adapter uses Kilo's OpenAI-compatible custom-provider path for remote Ollama hosts. |
 | OpenCode | `scripts/test-opencode-cli-models.ps1` | `scripts/test-opencode-cli-models.linux.sh`, `scripts/test-opencode-cli-models.macos.sh` | `opencode run --auto --model "ollama/{Model}" "{Prompt}"` for generated-sample validation only; generate `.opencode.local.json` with the unified adapter and use `OPENCODE_CONFIG`. |
 
-For any surface whose CLI command or flags differ, pass command overrides rather than editing the harness.
+For any active surface whose CLI command or flags differ, pass command overrides rather than editing the harness.
 
 ## Dry Run Examples
 
 ```powershell
 .\scripts\test-aider-cli-models.ps1 -Models "qwen3.5:9b" -DryRun
-.\scripts\test-roo-code-cli-models.ps1 -Models "qwen3.5:9b" -DryRun
 .\scripts\test-kilo-code-cli-models.ps1 -Models "qwen3.5:9b" -DryRun
 .\scripts\test-opencode-cli-models.ps1 -Models "qwen3.5:9b" -DryRun
 ```
@@ -105,10 +106,12 @@ For a generated Python scoped-edit test:
   -UnloadAfterEach
 ```
 
-For CLI flags that differ from the default wrapper:
+For a maintained successor or any active surface whose CLI flags differ from a verified default:
 
 ```powershell
-.\scripts\test-roo-code-cli-models.ps1 `
+.\scripts\test-agent-cli-surface-models.ps1 `
+  -SurfaceName "Successor Name" `
+  -SurfaceKey "successor-cli" `
   -Models "qwen3.5:9b" `
   -AgentCommand "actual-command" `
   -AgentArgumentsTemplate 'actual flags with {Prompt}' `
@@ -134,5 +137,5 @@ The planned starter-toolkit web UI should call stable script entry points for ha
 ## Confirmed Command Boundaries
 
 - **OpenCode:** The official CLI documents `opencode run "{Prompt}"` for non-interactive use. Its model identifier is `provider_id/model_id`; a local Ollama setup needs a local-only `opencode.json` custom provider using the Ollama `/v1` endpoint. Do not commit that endpoint or any credentials.
-- **Kilo Code:** The official project documents installation with `npm install -g @kilocode/cli` and starting the project CLI with `kilo`. Its non-interactive prompt, model-selection, and permission flags are not yet confirmed, so keep the wrapper override-only for live runs.
-- **Roo Code:** No stable local CLI contract is confirmed for this pack. Keep its wrapper override-only and validate the editor surface separately until an official CLI contract is available.
+- **Kilo Code:** The official project documents `npm install -g @kilocode/cli` and `kilo run --auto "{Prompt}"`, with `--model provider/model` and `--format json`. Generate `.kilo.local.json` through the unified adapter, set `KILO_CONFIG` for the process, and keep real-project approved-write blocked until explicitly approved non-generated repository validation passes.
+- **Roo Code:** The upstream project is archived and the extension is shut down. Do not add new integration, configuration, or live-validation work; retain historical metadata only.

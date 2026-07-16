@@ -8,13 +8,15 @@ Use `docs/config-generation-strategy.md` for the shared decision model that choo
 
 Continue and Aider have supported generated local configuration paths today.
 
-Future Cline, Roo Code, Kilo Code, OpenCode, or platform-agent bundles should be added only after the surface has:
+Future Cline, Kilo Code, OpenCode, or platform-agent bundles should be added only after the surface has:
 
 - Documented install behavior.
 - Documented local model configuration format.
 - Read-only validation against a generated or disposable repository.
 - Scoped write validation with external diff or file verification before approved-write config generation.
 - Sanitized evidence recorded in `config/agent-surface-solutions.json`.
+
+Roo Code is historical only because its upstream project is retired.
 
 ## Bundle Boundary
 
@@ -36,8 +38,8 @@ Generated config files should stay surface-specific. Continue config does not co
 | Continue | supported | Generate `.continue` assets and local-only Continue config from recommendation output. |
 | Cline | planned | Wait for tested install and local model config boundaries. |
 | Aider | supported | Generate explicit local-only `.aider.conf.local.yml` through `setup-agent-surface.*`; launch with `aider --config` and keep real-project approved write blocked. |
-| Roo Code | planned | Wait for confirmed command, extension, and local model behavior. |
-| Kilo Code | planned | Wait for confirmed command, extension, and local model behavior. |
+| Roo Code | retired | Do not generate new bundles; evaluate a maintained successor separately. |
+| Kilo Code | scaffolded | Generate a local-only `.kilo.local.json` through the unified adapter. Keep real-project writes blocked: current remote-Ollama live runs reached models but did not execute repository tasks or tools. |
 | OpenCode | scaffolded | Generate a local-only `.opencode.local.json` through the unified adapter. Devstral Small 2 24B passed generated-sample read/write-smoke and constrained scoped-edit validation; non-generated-repository validation remains pending. |
 | OpenHands | blocked | Do not generate platform-agent config while workspace, sandbox, and credential boundaries remain outside this pack. |
 

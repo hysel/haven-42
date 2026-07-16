@@ -19,8 +19,8 @@ It also records the config-bundle policy. Continue and Aider have supported gene
 | Continue | supported | supported | validated |
 | Cline | planned | planned | validated |
 | Aider | supported | supported | validated |
-| Roo Code | planned | planned | scaffolded |
-| Kilo Code | planned | planned | scaffolded |
+| Roo Code | retired | retired | retired |
+| Kilo Code | scaffolded | scaffolded | scaffolded |
 | OpenCode | scaffolded | scaffolded | validated |
 | OpenHands | blocked | blocked | planned |
 
@@ -53,5 +53,11 @@ the same adapter. Devstral Small 2 24B passed disposable read and write-smoke
 validation with the installed CLI. See [OpenCode CLI model testing](opencode-cli-model-testing.md).
 It remains a candidate until explicitly approved non-generated repository
 validation passes.
+
+Kilo Code now has an explicit npm install plan and a local-only
+`.kilo.local.json` generator through the same adapter. It uses the documented
+Ollama `/v1` provider shape, model tool metadata, token limits, and
+ask-by-default permissions. Live generated-sample validation is still pending;
+do not treat generated config as real-project approval.
 
 Use `docs/script-reference-appendix.md` for direct command details after you choose a workflow.

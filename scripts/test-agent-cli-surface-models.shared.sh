@@ -12,6 +12,9 @@ AGENT_COMMAND=""
 AGENT_ARGS_TEMPLATE=""
 MODEL_ARGS_TEMPLATE=""
 INSTALL_HINT=""
+AGENT_COMMAND_EXPLICIT=false
+AGENT_ARGS_TEMPLATE_EXPLICIT=false
+REQUIRES_EXPLICIT_LIVE_OVERRIDES=false
 TIMEOUT_SECONDS=600
 INCLUDE_WRITE_SMOKE=false
 INCLUDE_SCOPED_EDIT=false
@@ -27,8 +30,8 @@ while [ "$#" -gt 0 ]; do
     --target-repo|-TargetRepo) TARGET_REPO="$2"; shift 2 ;;
     --output-path|-OutputPath) OUTPUT_PATH="$2"; shift 2 ;;
     --ollama-base-url|-OllamaBaseUrl) OLLAMA_BASE_URL="$2"; shift 2 ;;
-    --agent-command|-AgentCommand) AGENT_COMMAND="$2"; shift 2 ;;
-    --agent-arguments-template|-AgentArgumentsTemplate) AGENT_ARGS_TEMPLATE="$2"; shift 2 ;;
+    --agent-command|-AgentCommand) AGENT_COMMAND="$2"; AGENT_COMMAND_EXPLICIT=true; shift 2 ;;
+    --agent-arguments-template|-AgentArgumentsTemplate) AGENT_ARGS_TEMPLATE="$2"; AGENT_ARGS_TEMPLATE_EXPLICIT=true; shift 2 ;;
     --model-argument-template|-ModelArgumentTemplate) MODEL_ARGS_TEMPLATE="$2"; shift 2 ;;
     --install-hint|-InstallHint) INSTALL_HINT="$2"; shift 2 ;;
     --timeout-seconds|-TimeoutSeconds) TIMEOUT_SECONDS="$2"; shift 2 ;;
@@ -60,7 +63,7 @@ with open(path, "r", encoding="utf-8") as handle:
     data = json.load(handle)
 surface = next((item for item in data.get("surfaces", []) if item.get("surfaceKey") == key), None)
 if surface:
-    fields = ("surfaceName", "agentCommand", "agentArgumentsTemplate", "modelArgumentTemplate", "installHint")
+    fields = ("surfaceName", "agentCommand", "agentArgumentsTemplate", "modelArgumentTemplate", "installHint", "requiresExplicitLiveOverrides")
     print("\x1f".join(str(surface.get(field) or "") for field in fields))' "$defaults_path" "$SURFACE_KEY" 2>/dev/null)"; then
       [ -n "$defaults_text" ] && break
     fi
@@ -75,18 +78,20 @@ if surface:
       default_agent_args_template="$(printf '%s\n' "$surface_block" | sed -n 's/^[[:space:]]*"agentArgumentsTemplate": "\(.*\)",\?$/\1/p' | head -n 1 | sed 's/\\"/"/g; s/\\\\/\\/g')"
       default_model_args_template="$(printf '%s\n' "$surface_block" | sed -n 's/^[[:space:]]*"modelArgumentTemplate": "\(.*\)",\?$/\1/p' | head -n 1 | sed 's/\\"/"/g; s/\\\\/\\/g')"
       default_install_hint="$(printf '%s\n' "$surface_block" | sed -n 's/^[[:space:]]*"installHint": "\(.*\)"$/\1/p' | head -n 1 | sed 's/\\"/"/g; s/\\\\/\\/g')"
-      defaults_text="$default_surface_name"$'\037'"$default_agent_command"$'\037'"$default_agent_args_template"$'\037'"$default_model_args_template"$'\037'"$default_install_hint"
+      default_requires_explicit_live_overrides="$(printf '%s\n' "$surface_block" | sed -n 's/^[[:space:]]*"requiresExplicitLiveOverrides": \(true\|false\),\?$/\1/p' | head -n 1)"
+      defaults_text="$default_surface_name"$'\037'"$default_agent_command"$'\037'"$default_agent_args_template"$'\037'"$default_model_args_template"$'\037'"$default_install_hint"$'\037'"$default_requires_explicit_live_overrides"
     fi
   fi
 
   [ -n "$defaults_text" ] || return 0
-  IFS=$'\037' read -r default_surface_name default_agent_command default_agent_args_template default_model_args_template default_install_hint <<< "$defaults_text"
+  IFS=$'\037' read -r default_surface_name default_agent_command default_agent_args_template default_model_args_template default_install_hint default_requires_explicit_live_overrides <<< "$defaults_text"
 
   [ -z "$SURFACE_NAME" ] && SURFACE_NAME="$default_surface_name"
   [ -z "$AGENT_COMMAND" ] && AGENT_COMMAND="$default_agent_command"
   [ -z "$AGENT_ARGS_TEMPLATE" ] && AGENT_ARGS_TEMPLATE="$default_agent_args_template"
   [ -z "$MODEL_ARGS_TEMPLATE" ] && MODEL_ARGS_TEMPLATE="$default_model_args_template"
   [ -z "$INSTALL_HINT" ] && INSTALL_HINT="$default_install_hint"
+  [ -n "$default_requires_explicit_live_overrides" ] && REQUIRES_EXPLICIT_LIVE_OVERRIDES="$default_requires_explicit_live_overrides"
 }
 
 load_surface_defaults
@@ -96,6 +101,11 @@ load_surface_defaults
 [ -z "$AGENT_ARGS_TEMPLATE" ] && AGENT_ARGS_TEMPLATE='--message "{Prompt}" --yes-always --no-auto-commits'
 [ -z "$MODEL_ARGS_TEMPLATE" ] && MODEL_ARGS_TEMPLATE='--model "ollama_chat/{Model}"'
 [ -z "$INSTALL_HINT" ] && INSTALL_HINT="Install or configure the CLI, or pass --agent-command."
+
+if [ "$DRY_RUN" != true ] && [ "$REQUIRES_EXPLICIT_LIVE_OVERRIDES" = true ] && { [ "$AGENT_COMMAND_EXPLICIT" != true ] || [ "$AGENT_ARGS_TEMPLATE_EXPLICIT" != true ]; }; then
+  printf '%s live tests require explicit --agent-command and --agent-arguments-template values until its non-interactive command syntax is confirmed. Use --dry-run to validate the harness wiring.\n' "$SURFACE_NAME" >&2
+  exit 1
+fi
 
 if [ -z "$OUTPUT_PATH" ]; then
   OUTPUT_PATH="$REPO_ROOT/runtime-validation-output/$SURFACE_KEY-model-tests-$(date '+%Y%m%d-%H%M%S').json"

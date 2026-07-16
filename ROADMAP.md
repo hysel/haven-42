@@ -25,7 +25,7 @@ The repository is in early implementation stage. Milestone 1, Milestone 2, Miles
 | Milestone 14: Agent Surface Portability And Broader Audience | Complete | The project is repositioned as a local-first engineering agent pack for individual, team, and enterprise users, and non-Continue surfaces are tracked through evidence-gated validation levels, promotion gates, config-bundle limits, and parity catalogs. Full cross-agent validation and install/configure/test implementation remain tracked in Milestones 17 and 19. |
 | Milestone 15: Multi-Language Engineering Support | Complete | .NET remains the most mature path, optional multi-language guidance is evidence-gated, and generated Python plus TypeScript samples have repository-discovery, implementation-planning, and code-review validation evidence. |
 | Milestone 16: Sample Repository Factory | Complete | Disposable sample repositories can be generated on Windows, Linux, and macOS for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL validation; evidence and tests cover fixture shape, runtime context, and sanitization. |
-| Milestone 17: Agent Surface Compatibility Validation | Partial | Cline has read-only and disposable write-smoke validation evidence, Aider has generated-sample read-only, write-smoke, and richer scoped-edit evidence, and OpenCode has generated-sample read/write-smoke and constrained scoped-edit evidence with Devstral Small 2 24B. Full tracked-surface validation remains incomplete for Roo Code, Kilo Code, OpenHands, and explicitly approved OpenCode real-repository validation. |
+| Milestone 17: Agent Surface Compatibility Validation | Partial | Cline has read-only and disposable write-smoke validation evidence, Aider has generated-sample read-only, write-smoke, and richer scoped-edit evidence, and OpenCode has generated-sample read/write-smoke and constrained scoped-edit evidence with Devstral Small 2 24B. Roo Code is retired upstream and is no longer an active target. Kilo Code's local-only remote-Ollama configuration reaches models, but current tested models returned greetings instead of task/tool execution; it remains blocked. Full tracked-surface validation remains incomplete for Kilo Code, OpenHands, and explicitly approved OpenCode real-repository validation. |
 | Milestone 18: Language Rule Packs | In Progress | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are evidence-gated; deterministic project profiles, project-local activation, medium fixtures, and a 28-cell Continue CLI matrix are implemented. Windows and Linux Continue CLI evidence is recorded separately, and the language-aware selector consumes each platform's evidence. Native macOS validates the complete Python four-operation slice with Qwen 3.5 9B; its JavaScript/TypeScript code-review cell returned empty output twice on the 16 GB host, and the remaining language packs still need macOS evidence. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial | Continue profiles, the first Aider install/configure/health/test adapter, and an OpenCode local-only config plus npm install path are implemented and tested. OpenCode generated-sample read/write/scoped-edit evidence exists, but cross-agent install/configure/test parity and other-surface evidence remain incomplete. |
 | Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, reusable surface-neutral model lanes, centralized shared asset config generation, workflow dispatch and envelopes, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, model scorecard, and native Linux/macOS onboarding rendering are implemented; a future UI wrapper and additional surface-specific profile generation remain planned. |
@@ -471,17 +471,17 @@ Scope:
 - Validate Cline approved-write smoke behavior against a disposable generated sample. Done for a README-only smoke test with `qwen3-coder:30b` at 16k context; realistic scoped edit validation remains pending.
 - Add a Cline CLI automation harness for future read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Cline CLI evidence remains pending.
 - Add a Continue CLI automation harness for focused read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Continue CLI evidence remains separate from editor Apply evidence.
-- Add a shared agent CLI automation harness plus thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening. Done for shared scripts and documentation; Aider has model-specific generated-sample evidence, while Roo Code, Kilo Code, and OpenCode live evidence remains pending.
+- Add a shared agent CLI automation harness plus thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening. Done for shared scripts and documentation; Aider and OpenCode have model-specific generated-sample evidence, Kilo Code live evidence remains pending, and Roo Code is retained only as an upstream-retired historical surface.
 
 Exit criteria:
 
 - At least one non-Continue surface has sanitized read-only validation evidence. Done with Cline and Aider generated-sample evidence.
 - Approved-write recommendations remain blocked until scoped-write and external verification pass. Done through promotion gates and evidence catalog status.
-- Every tracked surface has install/configure/test validation status. Partial: Cline and Aider have evidence; Roo Code, Kilo Code, OpenCode, and OpenHands remain incomplete.
+- Every tracked surface has install/configure/test validation status. Partial: Cline and Aider have evidence; Kilo Code, OpenCode, and OpenHands remain incomplete. Roo Code is retired upstream and not a new-integration target.
 
 Future evidence expansion:
 
-- Validate Roo Code, Kilo Code, and OpenCode wrappers against generated samples after their real command shapes are confirmed.
+- Install Kilo Code, generate its local-only Ollama config, and run generated-sample read/write validation with one model at a time; evaluate a maintained Roo Code successor separately before adding it to the tracked surface list.
 - Define a safe OpenHands validation boundary before adding platform-agent validation automation. Done with an isolated generated-sample, sandbox, credential, mount, and network policy.
 - Run explicitly approved non-generated repository validation before any non-Continue surface is promoted to real-project approved-write ready.
 - Promote one non-Continue surface end to end before widening adapter support. Done for the Aider install, local-model configuration, health, and test adapter; real-project approved write remains blocked pending explicitly approved validation.
@@ -525,7 +525,7 @@ Scope:
 
 Exit criteria:
 
-- Users can choose the right profile without manually assembling config files. Done for Continue profiles and Aider local config; incomplete for Cline, Roo Code, Kilo Code, OpenCode, and OpenHands install/configure parity.
+- Users can choose the right profile without manually assembling config files. Done for Continue profiles and Aider local config; incomplete for Cline, Kilo Code, OpenCode, and OpenHands install/configure parity. Roo Code is historical only because its upstream project is retired.
 - Validation evidence is structured enough to compare models, surfaces, and languages over time. Done for the v2 catalog and current recommendation and scorecard consumers; new surface adapters must still add exact evidence before promotion.
 - Release artifacts are easy to install and verify. Done with cross-platform package scripts and checksum guidance.
 
@@ -534,7 +534,7 @@ Cross-agent parity gap:
 - Continue has supported install, configure, and test automation.
 - Cline has validation evidence and test harness coverage, but install and configure automation remain planned.
 - Aider has supported install, local-only configure, health, and validated test automation; real-project approved write remains blocked.
-- Roo Code, Kilo Code, and OpenCode have test harness scaffolds, but install/configure automation remains planned pending confirmed command and config shapes.
+- Kilo Code has a dry-run-capable test harness but install/configure automation remains planned pending confirmed non-interactive command and config behavior. OpenCode has an install path and local-only config generator, but it still needs explicitly approved non-generated repository validation. Roo Code is retained only for historical compatibility because its upstream project is retired.
 - OpenHands remains blocked because platform workspace, sandbox, and credential boundaries are outside this pack's current automation model.
 ## Milestone 20: Hardware-Aware Model And Config Automation
 

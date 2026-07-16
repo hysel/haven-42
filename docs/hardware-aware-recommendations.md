@@ -88,7 +88,7 @@ Fit policy version 1 uses `config/model-fit-profiles.json` for exact curated tag
 
 Unknown tags use a `low`-confidence model-name heuristic and expose that source in `ModelFit.Source`; they are not silently treated as measured profiles. Catalog values are planning assumptions, not guarantees. Verify the exact installed artifact, quantization, runner, drivers, concurrent load, and observed memory use before relying on a borderline fit.
 
-`ModelLanes` is the reusable recommendation contract for surface adapters. `ContinueProfiles` is the Continue-specific projection used by the Continue apply script. The Aider adapter consumes a selected `ModelLanes` lane and emits Aider-native config; do not generate Cline, Roo Code, Kilo Code, OpenCode, or other surface config directly from `ContinueProfiles`.
+`ModelLanes` is the reusable recommendation contract for surface adapters. `ContinueProfiles` is the Continue-specific projection used by the Continue apply script. The Aider adapter consumes a selected `ModelLanes` lane and emits Aider-native config; do not generate Cline, Kilo Code, OpenCode, or other surface config directly from `ContinueProfiles`. Roo Code is historical only because its upstream project is retired.
 
 ## VRAM Mode
 
