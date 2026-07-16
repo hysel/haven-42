@@ -3840,7 +3840,7 @@ Invoke-PackTest "local agent health check reports setup status" {
         Assert-True -Condition ($report.OverallStatus -in @("pass", "warn", "skip")) -Message "Health report should not fail for the pack repository."
         Assert-True -Condition ($report.OllamaCheckSkipped -eq $true) -Message "Health report should record skipped Ollama check."
         Assert-True -Condition (@($report.Checks | Where-Object { $_.Id -eq "config.references" -and $_.Status -eq "pass" }).Count -eq 1) -Message "Health check should verify config references."
-        Assert-True -Condition ($result.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|token|secret") -Message "Health check output should stay sanitized."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|Users\\|OneDrive|itama|https?://[^\s/@]+:[^\s/@]+@|api[_-]?key|authorization|bearer\s+") -Message "Health check output should stay sanitized."
 
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "test-local-agent-health", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-SkipOllama","-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve health check."
