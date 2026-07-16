@@ -343,7 +343,7 @@
 - [ ] Complete Milestone 19 cross-agent install/configure/test script parity.
 - [x] Keep Cline install/configure automation blocked with exact evidence gaps: npm installation is documented and validated, but provider setup requires an isolated CLI data directory plus headless auto-approval for tools; no general write profile is generated.
 - [x] Add Aider install/configure automation with an explicit local-only config and supported isolated install methods.
-- [ ] Validate Kilo Code install/configure behavior against an installed CLI and generated sample before promoting its scaffolded adapter; do not create new Roo Code automation.
+- [ ] Resolve Kilo Code's local-model task execution, then rerun generated-sample validation before promoting its scaffolded adapter; do not create new Roo Code automation.
 - [ ] Keep OpenHands install/configure/test automation blocked until platform workspace, sandbox, and credential boundaries are defined.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
@@ -386,7 +386,7 @@
 
 - [x] Add a milestone solution completeness audit covering completed and active roadmap stages.
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
-- [ ] Confirm Kilo Code's safe non-interactive command and local-model selection syntax, then run generated-sample validation with explicit overrides; evaluate a maintained Roo Code successor before adding another editor-agent adapter.
+- [ ] Resolve Kilo Code's local-model task execution with the documented command and local-only config, then run generated-sample validation; evaluate a maintained Roo Code successor before adding another editor-agent adapter.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
 - [ ] Add future surface-specific profile generation after non-Continue validation.
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.

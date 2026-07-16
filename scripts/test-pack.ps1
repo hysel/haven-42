@@ -3492,7 +3492,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
-    Assert-True -Condition ($doc -match "installed Kilo Code CLI") -Message "Solution architecture review should track the remaining Kilo Code live-validation gap."
+    Assert-True -Condition ($doc -match "Kilo Code's current local-model task-execution failure") -Message "Solution architecture review should track the remaining Kilo Code live-validation gap."
     Assert-True -Condition ($doc -match "Complete for positioning, partial for full cross-agent parity") -Message "Solution architecture review should classify Milestone 14 accurately."
     Assert-True -Condition ($doc -match "comparable install/configure/test support is not complete") -Message "Solution architecture review should keep Milestone 14 parity gap visible."
     Assert-True -Condition ($doc -match "Complete for Cline and Aider, partial for active tracked surfaces") -Message "Solution architecture review should classify Milestone 17 accurately."

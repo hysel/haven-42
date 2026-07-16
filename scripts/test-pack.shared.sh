@@ -635,7 +635,7 @@ test_agent_surface_options_doc() {
     grep -q "Docker socket" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "unrestricted network access" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "docs/openhands-validation-boundary.md" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "future evidence expansion" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "live validation is blocked by task execution" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "| Milestone 17: Agent Surface Compatibility Validation | Partial |" "$REPO_ROOT/ROADMAP.md" &&
@@ -645,13 +645,13 @@ test_agent_surface_options_doc() {
     grep -q "\\[ \\] Complete Milestone 17 full tracked-surface compatibility validation" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Retire Roo Code from future validation" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[ \] Validate Kilo Code wrapper against a generated sample with an installed CLI and reachable Ollama model" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[ \] Resolve Kilo Code's current local-model task-execution failure" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Add a local-only OpenCode Ollama config generator" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Validate OpenCode's installed CLI" "$REPO_ROOT/TODO.md" &&
     [ -f "$REPO_ROOT/docs/opencode-cli-model-testing.md" ] &&
     grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q "Live runs therefore require explicit command and prompt-template overrides" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "instead of executing the supplied repository task" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "upstream project is archived" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "\\[x\\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
 }
@@ -1314,10 +1314,10 @@ test_solution_architecture_review_doc() {
     grep -q "19: Installer Profiles" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "installed Kilo Code CLI" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Kilo Code" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for positioning, partial for full cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "comparable install/configure/test support is not complete" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Complete for Cline and Aider, partial for all tracked surfaces" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Complete for Cline and Aider, partial for active tracked surfaces" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "OpenHands do not yet have full live validation evidence" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for Continue and Aider, partial for cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "install/configure/test script parity is still missing" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -1336,7 +1336,7 @@ test_solution_architecture_review_doc() {
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Reuse the recommendation data model for future non-Continue agent surfaces" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Provide or approve suitable non-generated repositories" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Validate Kilo Code wrapper against a generated sample with an installed CLI" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Resolve Kilo Code's current local-model task-execution failure" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated" "$REPO_ROOT/TODO.md" &&
