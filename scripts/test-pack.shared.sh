@@ -165,6 +165,8 @@ test_macos_wrapper_help_surface() {
   grep -q 'pack virtual environment: mlx_lm.server' "$REPO_ROOT/scripts/get-local-model-profile.macos.sh" || return 1
   grep -q -- '--mlx-config' "$REPO_ROOT/scripts/install-continue-pack.shared.sh" || return 1
   grep -q 'provider: openai' "$REPO_ROOT/scripts/install-continue-pack.shared.sh" || return 1
+  grep -q 'MlxStatus.*\[\[:space:\]\]\*' "$REPO_ROOT/scripts/install-continue-pack.shared.sh" || return 1
+  grep -q 'MlxRecommendation.*\[\[:space:\]\]\*' "$REPO_ROOT/scripts/install-continue-pack.shared.sh" || return 1
   for script in "$REPO_ROOT/scripts"/*.macos.sh; do
     bash -n "$script" || return 1
     bash "$script" --help >/dev/null || return 1

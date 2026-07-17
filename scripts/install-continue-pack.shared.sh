@@ -406,8 +406,8 @@ if [ "$MLX_CONFIG" = true ]; then
   fi
 
   profile_json="$("$profile_script" --json)"
-  mlx_status="$(printf '%s\n' "$profile_json" | sed -n 's/.*"MlxStatus":"\([^"]*\)".*/\1/p' | head -n 1)"
-  recommended_mlx_model="$(printf '%s\n' "$profile_json" | sed -n 's/.*"MlxRecommendation":{"PrimaryModel":"\([^"]*\)".*/\1/p' | head -n 1)"
+  mlx_status="$(printf '%s\n' "$profile_json" | sed -n 's/.*"MlxStatus":[[:space:]]*"\([^"]*\)".*/\1/p' | head -n 1)"
+  recommended_mlx_model="$(printf '%s\n' "$profile_json" | sed -n 's/.*"MlxRecommendation":[[:space:]]*{"PrimaryModel":"\([^"]*\)".*/\1/p' | head -n 1)"
 
   if [ "$mlx_status" != "detected" ]; then
     printf '%s\n' 'MLX tooling was not detected. Run scripts/bootstrap-macos-agent-host.sh --install --with-mlx first.' >&2
