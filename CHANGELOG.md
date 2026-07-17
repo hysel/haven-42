@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added bounded Apple Silicon MLX validation evidence for the smaller Qwen 3.5 4B model, including structured tool, Continue CLI read, and disposable scoped-write checks.
+
 - Added OpenAI-compatible local-endpoint support to the native language workflow matrix runner, including MLX health checks and explicit externally managed server unload behavior.
 - Made the native language workflow matrix locate Homebrew `npx` in non-interactive macOS sessions, preventing a missing-PATH failure on prepared Mac hosts.
 

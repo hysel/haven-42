@@ -83,6 +83,32 @@ Apple Silicon host. This does not promote it to editor Agent or multi-language
 matrix support; repeat validation for every surface and workflow you intend to
 use.
 
+## VSCodium And Continue Editor Validation
+
+The editor test requires an interactive macOS desktop session. Install
+VSCodium with Homebrew, then open it once from the desktop so macOS completes
+its first-run checks:
+
+```bash
+brew install --cask vscodium
+codium --version
+```
+
+Install Continue through VSCodium's Extensions view when it is available. If
+the extension catalog does not offer Continue, download the current Continue
+VSIX from the official Continue release path, then choose **Extensions**,
+**...**, and **Install from VSIX...** in VSCodium. Open a disposable generated
+sample repository, configure a loopback-only MLX endpoint in a local Continue
+configuration, and restart VSCodium.
+
+Run a read-only smoke prompt first: ask the agent to read `README.md` and
+return its first heading. Then run a one-file write smoke prompt that appends a
+unique marker to `README.md`. Approve exactly one edit, verify the changed file
+and `git diff --check` in the terminal, then restore the disposable fixture.
+Record the editor version, Continue version, model, provider, OS, and whether
+the editor showed a single correctly targeted apply action. Do not treat CLI
+evidence as editor Agent evidence.
+
 ## Continue CLI Smoke Test
 
 Create a local config that targets the local Ollama service, then run a small

@@ -20,6 +20,8 @@ addresses, credentials, or raw model transcripts.
 | Qwen 3.5 9B OptiQ 4-bit Continue CLI read, plan, review, and scoped write smoke | Passed | Read-only responses cited fixture files; only `README.md` changed in the write smoke, the exact final marker was present once, and `git diff --check` passed before cleanup. | One-file disposable write only; not broad approved-write or editor evidence. |
 | Qwen 3.5 9B 4-bit endpoint tool call | Passed | The endpoint returned a required function call with valid JSON arguments. | Separate quantization evidence; editor behavior remains unproven. |
 | Qwen 3.5 9B 4-bit Continue CLI read and scoped write smoke | Passed | The focused read response cited the approved fixture files; only `README.md` changed in the write smoke and external Git checks passed before cleanup. | The plan was useful but did not cite every requested file, so it is not promoted as strict plan evidence. |
+| Qwen 3.5 4B 4-bit endpoint tool call | Passed | The endpoint returned a required function call with valid JSON arguments. | Small-model endpoint evidence only; editor behavior remains unproven. |
+| Qwen 3.5 4B 4-bit Continue CLI read and scoped write smoke | Passed | The focused read returned the inspected fixture project name; only `README.md` changed in the write smoke, the exact marker was present once, and `git diff --check` passed before cleanup. | Do not infer plan, review, editor Agent, or full language-matrix readiness. |
 | Devstral Small 2 24B 4-bit endpoint tool call | Failed | The MLX endpoint returned a normal response but not the required structured tool call. | The server logged a Mistral tokenizer regex warning; the installed server did not expose the documented fix as a command-line option. Do not use this MLX candidate for tool-backed workflows. |
 
 ## Outcome
@@ -34,6 +36,11 @@ CLI read, and disposable scoped-write checks. It does not yet have the same
 strict plan and review evidence as the OptiQ quantization. Devstral Small 2
 24B 4-bit is intentionally excluded from MLX tool-backed recommendations until
 the tokenizer/runtime issue is resolved and independently retested.
+
+The smaller Qwen 3.5 4B 4-bit quantization passed the endpoint structured-tool
+call plus focused Continue CLI read and disposable scoped-write checks. It is
+a low-resource candidate for targeted workflows, not a substitute for the 9B
+OptiQ model's plan and review evidence.
 
 On 2026-07-17, the OptiQ model also ran through the native language workflow
 matrix runner after the host's non-interactive Homebrew `npx` path was resolved.

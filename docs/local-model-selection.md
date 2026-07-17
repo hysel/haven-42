@@ -584,6 +584,12 @@ Use the macOS bootstrap guide for the local-only serving configuration.
 
 `mlx-community/Qwen3.5-9B-4bit` also passed the endpoint tool-call, focused
 Continue CLI read, and disposable scoped-write smoke checks. The tested
+`mlx-community/Qwen3.5-4B-4bit` is the smaller validated MLX candidate: it
+passed the endpoint tool-call, focused Continue CLI read, and disposable
+scoped-write smoke checks. It is appropriate only for targeted workflows until
+it separately passes plan, review, editor, and language-matrix validation.
+
+The tested
 `Devstral-Small-2-24B-Instruct-2512-4bit` MLX candidate did not return the
 required structured tool call and logged a Mistral tokenizer warning. Keep that
 candidate out of MLX tool-backed workflows unless a current runtime provides a
