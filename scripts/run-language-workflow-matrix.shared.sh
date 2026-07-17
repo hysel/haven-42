@@ -10,6 +10,7 @@ OUTPUT_PATH=""
 ECOSYSTEMS=""
 OPERATIONS=""
 CONTINUE_COMMAND="npx"
+USE_NPX=false
 TIMEOUT_SECONDS=900
 UNLOAD_AFTER_RUN=false
 REQUIRE_IDLE_SERVER=true
@@ -76,6 +77,31 @@ resolve_existing_path() {
   printf '%s/%s' "$directory" "$filename"
 }
 
+resolve_continue_command() {
+  if [ "$CONTINUE_COMMAND" != "npx" ]; then
+    return
+  fi
+
+  if command -v npx >/dev/null 2>&1; then
+    CONTINUE_COMMAND="$(command -v npx)"
+  else
+    # Homebrew can be outside PATH in non-interactive macOS SSH sessions.
+    for candidate in /opt/homebrew/bin/npx /usr/local/bin/npx; do
+      if [ -x "$candidate" ]; then
+        CONTINUE_COMMAND="$candidate"
+        break
+      fi
+    done
+  fi
+
+  [ -x "$CONTINUE_COMMAND" ] || {
+    printf 'Continue CLI requires npx. Install Node.js or pass --continue-command <path>.\n' >&2
+    exit 1
+  }
+  export PATH="$(dirname "$CONTINUE_COMMAND"):$PATH"
+  USE_NPX=true
+}
+
 init_baseline() {
   local sample_path="$1"
   if [ ! -d "$sample_path/.git" ]; then
@@ -94,13 +120,32 @@ READ_MODEL=""
 WRITE_MODEL=""
 READ_BASE_URL=""
 WRITE_BASE_URL=""
+READ_PROVIDER=""
+WRITE_PROVIDER=""
+
+endpoint_reachable() {
+  local provider="$1" base="$2"
+  case "$provider" in
+    ollama) curl -fsS --max-time 15 "${base%/}/api/version" >/dev/null ;;
+    openai) curl -fsS --max-time 15 "${base%/}/models" >/dev/null ;;
+    *) printf 'Unsupported model provider for matrix validation: %s\n' "$provider" >&2; return 1 ;;
+  esac
+}
+
 unload_models() {
   [ "$UNLOAD_AFTER_RUN" = true ] && [ "$DRY_RUN" = false ] || return 0
   printf '[7/8] Unloading tested models...\n' >&2
-  local pair base model
-  for pair in "$READ_BASE_URL|$READ_MODEL" "$WRITE_BASE_URL|$WRITE_MODEL"; do
-    base="${pair%%|*}"; model="${pair#*|}"
+  local pair provider base model
+  for pair in "$READ_PROVIDER|$READ_BASE_URL|$READ_MODEL" "$WRITE_PROVIDER|$WRITE_BASE_URL|$WRITE_MODEL"; do
+    provider="${pair%%|*}"
+    pair="${pair#*|}"
+    base="${pair%%|*}"
+    model="${pair#*|}"
     [ -n "$base" ] && [ -n "$model" ] || continue
+    if [ "$provider" != "ollama" ]; then
+      printf '[7/8] Skipping unload for %s: the %s endpoint is externally managed.\n' "$model" "$provider" >&2
+      continue
+    fi
     local unloaded=false attempt loaded
     for attempt in 1 2 3; do
       curl -fsS --max-time 60 -H 'Content-Type: application/json' \
@@ -140,8 +185,8 @@ run_continue() {
   fi
   (
     cd "$sample_path"
-    if [ "$CONTINUE_COMMAND" = "npx" ]; then
-      npx -y @continuedev/cli --config "$config_path" "$mode" --format json --silent -p "$prompt"
+    if [ "$USE_NPX" = true ]; then
+      "$CONTINUE_COMMAND" -y @continuedev/cli --config "$config_path" "$mode" --format json --silent -p "$prompt"
     else
       "$CONTINUE_COMMAND" --config "$config_path" "$mode" --format json --silent -p "$prompt"
     fi
@@ -174,10 +219,10 @@ operation_prompt() {
 }
 
 append_result() {
-  local ecosystem="$1" rule_pack="$2" sample="$3" operation="$4" status="$5" model="$6" external_diff="$7" signals="$8" stdout_path="$9" sample_path="${10}"
-  python3 - "$RESULTS_PATH" "$stdout_path" "$REPO_ROOT" "$sample_path" "$ecosystem" "$rule_pack" "$sample" "$operation" "$status" "$SURFACE_VERSION" "$model" "$external_diff" "$signals" <<'PY'
+  local ecosystem="$1" rule_pack="$2" sample="$3" operation="$4" status="$5" provider="$6" model="$7" external_diff="$8" signals="$9" stdout_path="${10}" sample_path="${11}"
+  python3 - "$RESULTS_PATH" "$stdout_path" "$REPO_ROOT" "$sample_path" "$ecosystem" "$rule_pack" "$sample" "$operation" "$status" "$SURFACE_VERSION" "$provider" "$model" "$external_diff" "$signals" <<'PY'
 import json, pathlib, re, sys
-result_path, stdout_path, root, sample_path, ecosystem, rule_pack, sample, operation, status, version, model, external_diff, signals = sys.argv[1:]
+result_path, stdout_path, root, sample_path, ecosystem, rule_pack, sample, operation, status, version, provider, model, external_diff, signals = sys.argv[1:]
 text = pathlib.Path(stdout_path).read_text(encoding="utf-8", errors="replace")
 for value in (root, sample_path):
     text = text.replace(value, "<local-value>")
@@ -193,7 +238,7 @@ result = {
     "Status": status,
     "Surface": "Continue CLI",
     "SurfaceVersion": version,
-    "Provider": "Ollama",
+    "Provider": provider,
     "Model": model,
     "OperatingSystem": sys.platform,
     "SanitizedOutput": text.strip(),
@@ -205,7 +250,7 @@ with open(result_path, "a", encoding="utf-8") as handle:
 PY
 }
 
-printf '[1/8] Validating matrix, configs, and Continue CLI...\n' >&2
+printf '[1/8] Validating matrix, configs, endpoint, and Continue CLI...\n' >&2
 command -v python3 >/dev/null 2>&1 || { printf 'python3 is required for matrix JSON processing.\n' >&2; exit 1; }
 [ -f "$MATRIX_PATH" ] && [ -f "$READ_CONFIG_PATH" ] && [ -f "$WRITE_CONFIG_PATH" ] || { printf 'Matrix or config path is missing.\n' >&2; exit 1; }
 MATRIX_PATH="$(resolve_existing_path "$MATRIX_PATH")"
@@ -215,29 +260,34 @@ OUTPUT_DIRECTORY="$(dirname "$OUTPUT_PATH")"
 mkdir -p "$OUTPUT_DIRECTORY"
 OUTPUT_PATH="$(cd "$OUTPUT_DIRECTORY" && pwd)/$(basename "$OUTPUT_PATH")"
 if [ "$DRY_RUN" = false ]; then
-  command -v "$CONTINUE_COMMAND" >/dev/null 2>&1 || { printf 'Continue command not found: %s\n' "$CONTINUE_COMMAND" >&2; exit 1; }
+  resolve_continue_command
+  [ "$USE_NPX" = true ] || command -v "$CONTINUE_COMMAND" >/dev/null 2>&1 || { printf 'Continue command not found: %s\n' "$CONTINUE_COMMAND" >&2; exit 1; }
 fi
 
 READ_MODEL="$(config_value "$READ_CONFIG_PATH" model)"
 WRITE_MODEL="$(config_value "$WRITE_CONFIG_PATH" model)"
+READ_PROVIDER="$(config_value "$READ_CONFIG_PATH" provider)"
+WRITE_PROVIDER="$(config_value "$WRITE_CONFIG_PATH" provider)"
 READ_BASE_URL="$(config_value "$READ_CONFIG_PATH" apiBase)"
 WRITE_BASE_URL="$(config_value "$WRITE_CONFIG_PATH" apiBase)"
 # A portable Continue config intentionally omits apiBase. Ollama uses this
 # local default when no endpoint override is configured.
+[ -n "$READ_PROVIDER" ] || READ_PROVIDER="ollama"
+[ -n "$WRITE_PROVIDER" ] || WRITE_PROVIDER="$READ_PROVIDER"
 [ -n "$READ_BASE_URL" ] || READ_BASE_URL="http://127.0.0.1:11434"
 [ -n "$WRITE_BASE_URL" ] || WRITE_BASE_URL="$READ_BASE_URL"
 if [ "$DRY_RUN" = true ]; then
   SURFACE_VERSION="dry-run"
-elif [ "$CONTINUE_COMMAND" = "npx" ]; then
-  SURFACE_VERSION="$(npx -y @continuedev/cli --version 2>/dev/null || true)"
+elif [ "$USE_NPX" = true ]; then
+  SURFACE_VERSION="$("$CONTINUE_COMMAND" -y @continuedev/cli --version 2>/dev/null || true)"
 else
   SURFACE_VERSION="$("$CONTINUE_COMMAND" --version 2>/dev/null || true)"
 fi
 [ -n "$SURFACE_VERSION" ] || SURFACE_VERSION="unconfirmed"
 if [ "$DRY_RUN" = false ]; then
-  curl -fsS --max-time 15 "${READ_BASE_URL%/}/api/version" >/dev/null
-  [ "$WRITE_BASE_URL" = "$READ_BASE_URL" ] || curl -fsS --max-time 15 "${WRITE_BASE_URL%/}/api/version" >/dev/null
-  if [ "$REQUIRE_IDLE_SERVER" = true ]; then
+  endpoint_reachable "$READ_PROVIDER" "$READ_BASE_URL"
+  [ "$WRITE_PROVIDER|$WRITE_BASE_URL" = "$READ_PROVIDER|$READ_BASE_URL" ] || endpoint_reachable "$WRITE_PROVIDER" "$WRITE_BASE_URL"
+  if [ "$REQUIRE_IDLE_SERVER" = true ] && [ "$READ_PROVIDER" = "ollama" ]; then
     loaded_models="$(curl -fsS --max-time 15 "${READ_BASE_URL%/}/api/ps" | python3 -c 'import json,sys; print(",".join(sorted(str(x.get("name","")) for x in json.load(sys.stdin).get("models",[]))))')"
     if [ -n "$loaded_models" ]; then
       printf 'Refusing to start: Ollama already has loaded model(s): %s. Unload them first, or explicitly use --allow-loaded-models.\n' "$loaded_models" >&2
@@ -267,7 +317,9 @@ RESULTS_PATH="$RAW_ROOT/results.ndjson"
 : > "$RESULTS_PATH"
 
 printf '[3/8] Read model: %s\n' "$READ_MODEL" >&2
+printf '[3/8] Read provider: %s\n' "$READ_PROVIDER" >&2
 printf '[3/8] Write model: %s\n' "$WRITE_MODEL" >&2
+printf '[3/8] Write provider: %s\n' "$WRITE_PROVIDER" >&2
 
 MATRIX_ROWS=()
 while IFS= read -r matrix_row; do
@@ -308,8 +360,8 @@ for row in "${MATRIX_ROWS[@]}"; do
   prompt="$(operation_prompt "$ecosystem" "$operation" "$expected_csv" "$target" "$marker")"
   stdout_path="$RAW_ROOT/${ecosystem//[^a-zA-Z0-9._-]/-}-${operation}.stdout.txt"
   stderr_path="$RAW_ROOT/${ecosystem//[^a-zA-Z0-9._-]/-}-${operation}.stderr.txt"
-  config="$READ_CONFIG_PATH"; mode="--readonly"; model="$READ_MODEL"
-  [ "$operation" = "scoped-write" ] && { config="$WRITE_CONFIG_PATH"; mode="--auto"; model="$WRITE_MODEL"; }
+  config="$READ_CONFIG_PATH"; mode="--readonly"; provider="$READ_PROVIDER"; model="$READ_MODEL"
+  [ "$operation" = "scoped-write" ] && { config="$WRITE_CONFIG_PATH"; mode="--auto"; provider="$WRITE_PROVIDER"; model="$WRITE_MODEL"; }
   printf '[5/8] Running %s/%s: %s / %s\n' "$index" "$total" "$ecosystem" "$operation" >&2
   started="$(date +%s)"
   set +e
@@ -349,7 +401,7 @@ for row in "${MATRIX_ROWS[@]}"; do
     [ -z "$(git -C "$sample_path" status --short)" ] || signals+=("UNEXPECTED_READ_WRITE")
   fi
   [ "${#signals[@]}" -eq 0 ] && { status="validated"; signals=("none"); } || status="failed"
-  append_result "$ecosystem" "$rule_pack" "$sample" "$operation" "$status" "$model" "$external_diff" "$(IFS='|'; echo "${signals[*]}")" "$stdout_path" "$sample_path"
+  append_result "$ecosystem" "$rule_pack" "$sample" "$operation" "$status" "$provider" "$model" "$external_diff" "$(IFS='|'; echo "${signals[*]}")" "$stdout_path" "$sample_path"
   elapsed=$(( $(date +%s) - started ))
   printf '[5/8] Completed %s / %s: %s in %ss\n' "$ecosystem" "$operation" "$status" "$elapsed" >&2
 done
@@ -358,11 +410,12 @@ printf '[6/8] Writing sanitized matrix report...\n' >&2
 python3 - "$RESULTS_PATH" "$OUTPUT_PATH" "$SURFACE_VERSION" "$READ_MODEL" "$WRITE_MODEL" <<'PY'
 import json, pathlib, sys
 results = [json.loads(line) for line in pathlib.Path(sys.argv[1]).read_text(encoding="utf-8").splitlines() if line]
+providers = sorted({result["Provider"] for result in results})
 report = {
     "SchemaVersion": 1,
     "Surface": "Continue CLI",
     "SurfaceVersion": sys.argv[3],
-    "Provider": "Ollama",
+    "Provider": providers[0] if len(providers) == 1 else "Mixed",
     "OperatingSystem": "native-shell",
     "ReadModel": sys.argv[4],
     "WriteModel": sys.argv[5],

@@ -971,7 +971,12 @@ PY
     grep -q "UNREAD_SOURCE_CLAIM" "$shared_runner" &&
     grep -q "Use the available read tools to open every named evidence file" "$shared_runner" &&
     grep -q 'http://127.0.0.1:11434' "$shared_runner" &&
+    grep -q 'openai) curl -fsS' "$shared_runner" &&
+    grep -q 'Skipping unload for' "$shared_runner" &&
+    grep -q 'OpenAI-compatible endpoint' "$doc" &&
     grep -q 'resolve_existing_path' "$shared_runner" &&
+    grep -q 'resolve_continue_command' "$shared_runner" &&
+    grep -q '/opt/homebrew/bin/npx' "$shared_runner" &&
     ! grep -q 'mapfile' "$shared_runner" &&
     grep -q 'with no other text on that line' "$shared_runner" &&
     grep -q -- "--allow-loaded-models" "$shared_runner" &&
