@@ -17,6 +17,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | If you want to... | Start here |
 | --- | --- |
 | Install the pack in a project | `Quick Start` |
+| Set up Continue in VS Code or VSCodium | `docs/vscode-continue-setup.md` |
 | Choose beginner or team setup path | `docs/setup-paths.md` |
 | Pick the right local model | `docs/local-model-selection.md` |
 | Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
@@ -70,6 +71,11 @@ It is designed for people who want AI support to follow consistent engineering s
 | Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
 
 ## Quick Start
+
+**Using VS Code or VSCodium for the first time?** Start with
+`docs/vscode-continue-setup.md`. It uses the installer to generate the global
+Continue config, includes native Windows and macOS commands, avoids
+duplicate-rule warnings, and ends with safe read and write checks.
 
 Use this path if you are new to Continue, Ollama, or command-line tools. The steps work on Windows, Linux, and macOS.
 
@@ -547,6 +553,21 @@ config:
 ```bash
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --global-config
 ```
+
+For Apple Silicon MLX instead of Ollama, start a loopback-only MLX server and
+use the dedicated MLX config mode. It generates an OpenAI-compatible model
+configuration rather than placing an MLX model name in an Ollama config:
+
+```bash
+./scripts/install-continue-pack.macos.sh \
+  --target-repo /path/to/your-project \
+  --global-config \
+  --mlx-config \
+  --mlx-api-base http://127.0.0.1:8080/v1
+```
+
+See `docs/macos-agent-host-bootstrap.md` for the loopback-only MLX server and
+VSCodium validation steps.
 
 Use shared assets for multiple repositories:
 

@@ -439,10 +439,21 @@ Invoke-PackTest "compatibility docs include cloud and container smoke tests" {
 
 Invoke-PackTest "editor compatibility docs cover config and tool validation" {
     $docPath = Join-Path $repoRoot "docs/editor-compatibility.md"
+    $setupDocPath = Join-Path $repoRoot "docs/vscode-continue-setup.md"
     $evidencePath = Join-Path $repoRoot "examples/editor-surface-validation.md"
     $content = Get-Content -LiteralPath $docPath -Raw
+    $setupDoc = Get-Content -LiteralPath $setupDocPath -Raw
     $evidence = Get-Content -LiteralPath $evidencePath -Raw
 
+    Assert-True -Condition (Test-Path -LiteralPath $setupDocPath) -Message "VS Code setup guide should exist."
+    Assert-True -Condition ($setupDoc -match "-GlobalConfig") -Message "VS Code setup guide should document global config generation."
+    Assert-True -Condition ($setupDoc -match "Continue Agent write test passed") -Message "VS Code setup guide should include a controlled write test."
+    Assert-True -Condition ($setupDoc -match "Duplicate rules") -Message "VS Code setup guide should explain duplicate-rule prevention."
+    Assert-True -Condition ($setupDoc -match "TOOLS_UNAVAILABLE") -Message "VS Code setup guide should include a read-tool failure signal."
+    Assert-True -Condition ($setupDoc -match "install-continue-pack\.macos\.sh") -Message "VS Code setup guide should include the native macOS installer."
+    Assert-True -Condition ($setupDoc -match "~/.continue/config\.yaml") -Message "VS Code setup guide should document the macOS Continue config path."
+    Assert-True -Condition ($setupDoc -match "generate-sample-repositories\.macos\.sh") -Message "VS Code setup guide should provide a disposable macOS sample path."
+    Assert-True -Condition ($setupDoc -match "--mlx-config") -Message "VS Code setup guide should include the MLX installer route."
     Assert-True -Condition ($content -match "VS Code") -Message "Editor compatibility docs should cover VS Code."
     Assert-True -Condition ($content -match "VSCodium") -Message "Editor compatibility docs should cover VSCodium."
     Assert-True -Condition ($content -match "project-local") -Message "Editor compatibility docs should explain project-local config."

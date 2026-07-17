@@ -83,6 +83,25 @@ Apple Silicon host. This does not promote it to editor Agent or multi-language
 matrix support; repeat validation for every surface and workflow you intend to
 use.
 
+## Generate Continue Config For The MLX Server
+
+Do not put an MLX model name in an Ollama Continue config. After the MLX server
+is running, use the macOS installer with `--mlx-config`. It reads the separate
+MLX recommendation from the host profile, writes a local-only OpenAI-compatible
+model block, and generates the global Continue config with the correct asset
+references:
+
+```bash
+./scripts/install-continue-pack.macos.sh \
+  --target-repo /path/to/your-project \
+  --global-config \
+  --mlx-config \
+  --mlx-api-base http://127.0.0.1:8080/v1
+```
+
+Use `--dry-run` first. The installer intentionally does not pull or start an
+MLX model; start the loopback-only server above before opening Continue.
+
 ## VSCodium And Continue Editor Validation
 
 The editor test requires an interactive macOS desktop session. Install

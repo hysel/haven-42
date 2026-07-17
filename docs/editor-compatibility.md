@@ -4,6 +4,10 @@
 
 Use this guide to test whether Continue is using this pack correctly in VS Code, VSCodium, or the Continue CLI.
 
+For a beginner-friendly Windows VS Code installation sequence, use
+`docs/vscode-continue-setup.md` first. This document remains the reference for
+cross-editor compatibility and diagnostics.
+
 The pack should stay editor-neutral. The committed `.continue/config.yaml` should work as a project-local config, while editor-specific paths, private endpoints, and local model experiments stay in local-only config files.
 
 ## Supported Surfaces
