@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a second successful Apple Silicon MLX Qwen 3.5 9B quantization validation and recorded the Devstral Small 2 24B MLX structured-tool-call failure as candidate-only evidence.
+
 - Added an opt-in macOS MLX bootstrap path using a pack-managed Python 3.12 virtual environment, including safe migration of incompatible older MLX environments.
 - Added native Apple Silicon MLX evidence for an OpenAI-compatible endpoint and bounded Continue CLI read, plan, review, and disposable scoped-write smoke workflows.
 - Added CI-enforced syntax and help-surface validation for every native macOS wrapper.

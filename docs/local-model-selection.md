@@ -582,6 +582,13 @@ disposable scoped-write smoke test on Apple Silicon. It is a bounded Continue
 CLI result, not a claim of editor Agent compatibility or broad write approval.
 Use the macOS bootstrap guide for the local-only serving configuration.
 
+`mlx-community/Qwen3.5-9B-4bit` also passed the endpoint tool-call, focused
+Continue CLI read, and disposable scoped-write smoke checks. The tested
+`Devstral-Small-2-24B-Instruct-2512-4bit` MLX candidate did not return the
+required structured tool call and logged a Mistral tokenizer warning. Keep that
+candidate out of MLX tool-backed workflows unless a current runtime provides a
+documented fix and a full retest passes.
+
 Do not add MLX-only model names to `config/model-recommendations.tsv`. Use `config/model-recommendations.mlx.tsv` for MLX candidate guidance. If future providers are added, prefer provider-specific catalogs or a richer provider-aware schema instead of mixing discovery mechanisms in one file.
 
 ## Unified, Shared, And Dedicated Memory
