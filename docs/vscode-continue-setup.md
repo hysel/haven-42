@@ -382,8 +382,22 @@ default to prevent duplicate-rule warnings.
 2. Select **File > Open Folder** and open the target project, not the pack.
 3. Open Continue and use its config selector/gear beside **Local Config** to
    confirm `~/.continue/config.yaml` is active.
-4. Run the read-only test in the Windows section above.
-5. Run the controlled write test only after the read-only test passes. Use
+4. If you are using the generated Python sample, prepare its disposable test
+   environment once before asking an agent to make a code change:
+
+```bash
+cd "$TARGET_REPO"
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip pytest
+python -m pytest
+```
+
+   Use `python3` to create the environment on a clean macOS host. After
+   activation, `python` is supplied by that environment. The sample's
+   `.gitignore` excludes `.venv`, `__pycache__`, and `.pytest_cache`.
+5. Run the read-only test in the Windows section above.
+6. Run the controlled write test only after the read-only test passes. Use
    these macOS terminal checks afterward:
 
 ```bash
@@ -392,6 +406,18 @@ test -f ./continue-agent-write-test.md && cat ./continue-agent-write-test.md
 git diff --check
 rm ./continue-agent-write-test.md
 ```
+
+7. For a real scoped code change, run the relevant command directly after
+   inspecting the diff. For the generated Python sample:
+
+```bash
+python -m app.main
+python -m pytest
+git diff --check
+```
+
+When finished, leave the environment with `deactivate`. Remove it only when
+you no longer need the sample: `rm -rf .venv`.
 
 For native Apple Silicon and MLX model-host setup, see
 `docs/macos-agent-host-bootstrap.md`.

@@ -877,7 +877,11 @@ test_sample_repository_factory() {
   [ -f "$temp_root/multi-language-platform/infrastructure/terraform/main.tf" ] || return 1
 
   grep -q "# Python API Sample" "$temp_root/python-api/README.md" || return 1
+  grep -q "python3 -m venv .venv" "$temp_root/python-api/README.md" || return 1
   grep -q "python -m pytest" "$temp_root/python-api/README.md" || return 1
+  [ -f "$temp_root/python-api/.gitignore" ] || return 1
+  grep -Fxq ".venv/" "$temp_root/python-api/.gitignore" || return 1
+  grep -Fxq "__pycache__/" "$temp_root/python-api/.gitignore" || return 1
   grep -q "\[project\]" "$temp_root/python-api/pyproject.toml" || return 1
   grep -q "\[tool.pytest.ini_options\]" "$temp_root/python-api/pyproject.toml" || return 1
   ! grep -q "Write-SampleFile" "$temp_root/python-api/README.md" || return 1

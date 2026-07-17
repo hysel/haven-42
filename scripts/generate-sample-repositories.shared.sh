@@ -118,8 +118,34 @@ Small Python API-style sample used for local agent validation.
 
 ## Commands
 
-- `python -m pytest`
-- `python -m app.main`
+Create a local virtual environment before running tests. The environment and
+test cache are ignored by Git.
+
+macOS or Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip pytest
+python -m pytest
+python -m app.main
+```
+
+Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip pytest
+python -m pytest
+python -m app.main
+```
+EOF_FILE
+
+write_file "$root" ".gitignore" <<'EOF_FILE'
+.venv/
+__pycache__/
+.pytest_cache/
 EOF_FILE
 
 write_file "$root" "pyproject.toml" <<'EOF_FILE'
@@ -442,8 +468,34 @@ service, entry-point, and test boundaries.
 
 ## Commands
 
-- `python -m pytest`
-- `python -m app.main`
+Create a local virtual environment before running tests. The environment and
+test cache are ignored by Git.
+
+macOS or Linux:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip pytest
+python -m pytest
+python -m app.main
+```
+
+Windows PowerShell:
+
+```powershell
+py -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip pytest
+python -m pytest
+python -m app.main
+```
+EOF_FILE
+
+write_file "$root" ".gitignore" <<'EOF_FILE'
+.venv/
+__pycache__/
+.pytest_cache/
 EOF_FILE
 write_file "$root" "SCENARIO.md" <<'EOF_FILE'
 # Validation Scenario
