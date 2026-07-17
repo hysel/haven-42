@@ -84,6 +84,20 @@ model release and verifies that the model is no longer resident before reporting
 success. Use `-Operations` to run a smaller slice and `-DryRun` to validate
 orchestration without contacting a model.
 
+The native Bash runner also supports a local OpenAI-compatible endpoint such
+as an Apple Silicon MLX server. Set `provider: openai` and an `apiBase` ending
+in `/v1` in both Continue configs. It probes `/v1/models` instead of Ollama's
+API and records `MLX`/OpenAI-compatible runs with their declared provider.
+`--unload-after-run` continues to unload Ollama models, but intentionally does
+not terminate an externally managed MLX server; stop or restart that server
+through its own service manager after the matrix if memory must be released.
+
+On macOS, the runner also resolves Homebrew's standard `npx` locations when a
+non-interactive SSH shell does not inherit the Homebrew `PATH`. Node.js is
+still required. This solves host setup, not model-output quality: promote an
+MLX result only after the selected model completes the required cells with
+non-empty, evidence-bearing final output.
+
 Native Linux and macOS runners are available through
 `run-language-workflow-matrix.linux.sh` and
 `run-language-workflow-matrix.macos.sh`, which delegate to the shared Bash

@@ -34,3 +34,12 @@ CLI read, and disposable scoped-write checks. It does not yet have the same
 strict plan and review evidence as the OptiQ quantization. Devstral Small 2
 24B 4-bit is intentionally excluded from MLX tool-backed recommendations until
 the tokenizer/runtime issue is resolved and independently retested.
+
+On 2026-07-17, the OptiQ model also ran through the native language workflow
+matrix runner after the host's non-interactive Homebrew `npx` path was resolved.
+It completed direct tool-backed Continue CLI reads and writes, but returned an
+empty final response for the matrix's evidence-heavy discovery prompt, even
+with a larger response allowance. The endpoint and runner were healthy. Keep
+the model eligible for its bounded smoke workflows, but do not promote it as a
+full cross-language default until all required matrix cells emit evidence-
+bearing output and scoped writes pass external diff verification.

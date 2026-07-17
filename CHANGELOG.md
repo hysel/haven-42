@@ -11,6 +11,9 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added OpenAI-compatible local-endpoint support to the native language workflow matrix runner, including MLX health checks and explicit externally managed server unload behavior.
+- Made the native language workflow matrix locate Homebrew `npx` in non-interactive macOS sessions, preventing a missing-PATH failure on prepared Mac hosts.
+
 - Added a second successful Apple Silicon MLX Qwen 3.5 9B quantization validation and recorded the Devstral Small 2 24B MLX structured-tool-call failure as candidate-only evidence.
 
 - Added an opt-in macOS MLX bootstrap path using a pack-managed Python 3.12 virtual environment, including safe migration of incompatible older MLX environments.
