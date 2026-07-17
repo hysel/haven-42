@@ -328,7 +328,7 @@
 - [x] Add native Linux/macOS matrix-runner parity with shared Bash orchestration and dry-run validation.
 - [x] Run the Linux matrix against live models in WSL2 Ubuntu 24.04. Devstral completed all 28 cells and Qwen completed the TypeScript scoped-write override with one-model-at-a-time unload safeguards.
 - [x] Extend language-aware selector lookup to consume Linux validation evidence without inheriting Windows evidence.
-- [ ] Complete the native macOS matrix for the remaining language packs. Apple Silicon static validation passed, and Qwen 3.5 9B validates all four Python operations through Continue CLI with external scoped-write verification and model unload; a JavaScript/TypeScript code-review retest returned `TOOLS_UNAVAILABLE` after the runner required real file reads, so that slice remains unpromoted.
+- [x] Complete the native macOS matrix for all language packs. On 2026-07-17, Devstral Small 2 completed all 28 Continue CLI cells across separate bounded Apple Silicon runs with exact-file checks, external scoped-write verification, and confirmed model unload. The earlier Qwen 3.5 9B TypeScript reliability failure remains evidence against that weaker lane, not against the rule packs.
 - [x] Generate a read-only language-aware model-lane recommendation from operation-level matrix evidence so a detected project and workflow select only a validated lane. Surface-specific runtime auto-switching remains a future adapter capability.
 
 ## Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging
@@ -391,5 +391,5 @@
 - [ ] Add future surface-specific profile generation after non-Continue validation.
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.
 - [ ] Confirm whether external wiki publishing is required for the next release.
-- [ ] Resolve Milestone 18 editor/model workflow failures before promoting Java, Go, Rust, SQL, and Infrastructure rule packs beyond evidence-gated status.
+- [x] Resolve the native macOS Milestone 18 workflow gap. Devstral Small 2 completed all required generated-fixture CLI cells; language rule packs remain evidence-gated for real repositories and editor surfaces.
 - [x] Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams after the new contracts are implemented so documented maturity matches verified behavior.

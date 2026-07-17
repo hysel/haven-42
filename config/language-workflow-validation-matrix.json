@@ -68,6 +68,18 @@
       "validatedCells": 4,
       "failedCells": 0,
       "notes": "Python discovery, planning, review, and scoped-write completed on native macOS with structured headless output and verified model unload. This does not validate the remaining language packs."
+    },
+    {
+      "date": "2026-07-17",
+      "surface": "Continue CLI",
+      "surfaceVersion": "1.5.47",
+      "provider": "Ollama",
+      "operatingSystem": "macOS (Apple Silicon)",
+      "evidenceDocument": "examples/language-rule-pack-validation.md",
+      "model": "devstral-small-2:24b",
+      "validatedCells": 28,
+      "failedCells": 0,
+      "notes": "All seven generated language fixtures completed repository discovery, implementation planning, code review, and externally verified scoped write on a native Apple Silicon host. Each bounded run verified model unload."
     }
   ],
   "entries": [

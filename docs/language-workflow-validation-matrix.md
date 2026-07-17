@@ -88,27 +88,26 @@ Native Linux and macOS runners are available through
 `run-language-workflow-matrix.linux.sh` and
 `run-language-workflow-matrix.macos.sh`, which delegate to the shared Bash
 engine. Native Linux evidence is complete through WSL2 Ubuntu 24.04. Native
-macOS has complete Apple Silicon evidence for the Python four-operation slice;
-the remaining language packs are pending for the full matrix.
+macOS evidence is complete for all 28 required cells on Apple Silicon using the
+validated Devstral Small 2 lane.
 
 On the 16 GB Apple Silicon validation host, the `qwen3.5:9b` Ollama lane is
 appropriate for targeted smoke slices but was not practical for one continuous
 24-cell run: the remote command exceeded its 30-minute transport limit before
 it produced a report. Do not treat that interrupted attempt as evidence. Run
 remaining macOS cells in smaller batches, or use a Mac with more unified memory
-and a separately validated model lane. The shared runner releases its tested
+and a separately validated model lane. This guidance remains useful for smaller
+Mac hosts. The shared runner releases its tested
 models on normal completion and on `HUP`, `INT`, or `TERM`; after a connection
 loss, check `/api/ps` before starting another run.
 
-A bounded JavaScript/TypeScript batch on the same host validated repository
-discovery, implementation planning, and scoped write. Its code-review cell
-initially returned empty output twice. A fresh native Apple Silicon retest on
-2026-07-16 exposed a stricter issue: the model first claimed that source files
-were unavailable, then returned `TOOLS_UNAVAILABLE` when explicitly required
-to read them. The runner now records `UNREAD_SOURCE_CLAIM` for the former
-response and `MODEL_FAILURE_SIGNAL` for the latter. The JavaScript/TypeScript
-slice is not promoted for this model and host. The model was verified unloaded
-after every run.
+The smaller `qwen3.5:9b` lane remains useful for targeted macOS smoke tests,
+but it did not consistently reproduce exact root-relative evidence paths in
+the TypeScript runner. On 2026-07-17, `devstral-small-2:24b` completed the
+full TypeScript matrix and the remaining Java, Go, Rust, SQL, and
+Infrastructure as Code matrices in separate bounded runs. Every cell passed
+the exact-file and external scoped-write checks, and the model was verified
+unloaded after each run.
 
 The Windows and Bash runners refuse to start when Ollama already has a loaded
 model. This protects the 64 GB validation budget from accidental concurrent
@@ -164,3 +163,11 @@ headless output, and the runner confirmed model unload after every run. This is
 native macOS CLI evidence only, not editor-extension evidence. It promotes the
 Python slice for this exact surface/model/OS combination, not the remaining
 language packs.
+
+On 2026-07-17, Continue CLI `1.5.47` ran the complete 28-cell matrix on a
+native Apple Silicon host with local Ollama and `devstral-small-2:24b`. Python,
+JavaScript/TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code each
+passed repository discovery, implementation planning, code review, and scoped
+write. The runner verified the constrained external diff for every scoped-write
+cell and unloaded the model after every bounded ecosystem run. This is native
+macOS CLI evidence only; it does not claim editor-extension validation.

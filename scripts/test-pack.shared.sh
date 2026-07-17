@@ -930,14 +930,13 @@ assert matrix["latestValidation"]["surfaceVersion"] == "1.5.47"
 assert "devstral-small-2:24b" in matrix["latestValidation"]["models"]
 assert "qwen3.5:35b" in matrix["latestValidation"]["models"]
 native = matrix["nativeOperatingSystemEvidence"]
-assert len(native) == 3
+assert len(native) == 4
 linux = [item for item in native if item["operatingSystem"].startswith("Linux ")]
 macos = [item for item in native if item["operatingSystem"] == "macOS (Apple Silicon)"]
 assert len(linux) == 2
-assert len(macos) == 1
-assert macos[0]["model"] == "qwen3.5:9b"
-assert macos[0]["validatedCells"] == 4
-assert macos[0]["failedCells"] == 0
+assert len(macos) == 2
+assert sum(item["model"] == "qwen3.5:9b" and item["validatedCells"] == 4 and item["failedCells"] == 0 for item in macos) == 1
+assert sum(item["model"] == "devstral-small-2:24b" and item["validatedCells"] == 28 and item["failedCells"] == 0 for item in macos) == 1
 assert all(item["evidenceDocument"] for item in native)
 PY
   grep -q "Static fixture success alone never promotes" "$doc" &&

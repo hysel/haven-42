@@ -11,13 +11,13 @@ This document tracks how the Local Engineering Agent Pack should grow beyond its
 | Ecosystem | Current status | Notes |
 | --- | --- | --- |
 | .NET / ASP.NET Core | Most mature | Existing rules, prompts, examples, and validation are strongest here. |
-| Python | Optional rule pack added; generated-sample workflow validation recorded | Repository discovery, implementation planning, and code review passed generated-sample validation; real-repository and editor Apply validation remain future evidence work. |
-| JavaScript / TypeScript | Optional rule pack added; generated-sample workflow validation recorded | Repository discovery, implementation planning, and code review passed generated-sample validation; real-repository and editor Apply validation remain future evidence work. |
-| Java / Spring | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
-| Go | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
-| Rust | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
-| SQL / database projects | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
-| Infrastructure as Code | Optional rule pack added; static generated-sample validation recorded | Needs implementation-planning, code-review, and editor/model validation before promotion. |
+| Python | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with evidence-backed lanes; real-repository and editor Apply validation remain future work. |
+| JavaScript / TypeScript | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with evidence-backed lanes; real-repository and editor Apply validation remain future work. |
+| Java / Spring | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with the validated Devstral lane; real-repository and editor validation remain future work. |
+| Go | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with the validated Devstral lane; real-repository and editor validation remain future work. |
+| Rust | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with the validated Devstral lane; real-repository and editor validation remain future work. |
+| SQL / database projects | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with the validated Devstral lane; real-repository and editor validation remain future work. |
+| Infrastructure as Code | Optional rule pack with complete generated-fixture CLI evidence | All four operations passed on Windows, Linux, and native macOS with the validated Devstral lane; real-repository and editor validation remain future work. |
 
 ## Project Detection
 
@@ -67,7 +67,12 @@ Each language pack should define:
 
 ## Recommended Validation Sequence
 
-Python and JavaScript/TypeScript are the first generated-sample workflow validation targets because they cover common personal, small-team, and open-source project shapes. Java, Go, Rust, SQL, and Infrastructure as Code now have optional static rule packs, but still need model/editor workflow validation before promotion.
+Python and JavaScript/TypeScript remain the first generated-sample workflow
+validation targets because they cover common personal, small-team, and
+open-source project shapes. Java, Go, Rust, SQL, and Infrastructure as Code now
+also have complete generated-fixture Continue CLI validation on Windows, Linux,
+and native macOS through evidence-backed lanes. Real-repository and editor
+validation remain separate promotion work.
 
 Suggested sequence:
 

@@ -193,8 +193,8 @@ The runner initially exposed three portable-host defects: a missing local
 Ollama default when `apiBase` is omitted, a relative config path after changing
 to a fixture directory, and Bash 3.2 incompatibility. It also exposed a
 headless-output gap and an ambiguous marker prompt. Structured JSON output and
-an isolated marker line fixed those issues. The native macOS Python slice is
-now validated; the remaining language packs remain untested on macOS.
+an isolated marker line fixed those issues. The native macOS Python slice was
+the first validated slice; the remaining language packs were tested later.
 
 ## Evidence: 2026-07-16 Native macOS TypeScript Tooling Blocker
 
@@ -210,5 +210,31 @@ The first retest named the expected files but admitted it had not read them.
 The matrix runner now rejects that output with `UNREAD_SOURCE_CLAIM`. After the
 prompt explicitly required read tools, the model returned `TOOLS_UNAVAILABLE`.
 This is a safe failed-model-validation result, not language-rule-pack evidence.
-Do not promote JavaScript/TypeScript or any other remaining macOS language pack
-for this surface/model lane from filename-only output.
+Do not promote JavaScript/TypeScript or any other macOS language pack for this
+Qwen 3.5 9B surface/model lane from filename-only output.
+
+## Evidence: 2026-07-17 Native macOS Complete Matrix
+
+- Surface: Continue CLI `1.5.47`
+- Operating system: native Apple Silicon macOS
+- Provider: local Ollama; endpoint omitted
+- Model: `devstral-small-2:24b`
+- Fixtures: generated medium-complexity Python, TypeScript, Java, Go, Rust,
+  SQL, and Infrastructure as Code samples
+- Raw output: ignored runtime output only
+- Model unload: verified after every bounded ecosystem run
+
+| Ecosystem | Discovery | Planning | Review | Scoped write |
+| --- | --- | --- | --- | --- |
+| Python | Validated | Validated | Validated | Validated |
+| JavaScript / TypeScript | Validated | Validated | Validated | Validated |
+| Java | Validated | Validated | Validated | Validated |
+| Go | Validated | Validated | Validated | Validated |
+| Rust | Validated | Validated | Validated | Validated |
+| SQL | Validated | Validated | Validated | Validated |
+| Infrastructure as Code | Validated | Validated | Validated | Validated |
+
+Every scoped-write cell changed only its approved file and passed the external
+diff and exact-marker checks. This promotes the complete matrix for this exact
+Continue CLI, Ollama, model, and native macOS combination. It does not promote
+editor-extension behavior or weaker model lanes.

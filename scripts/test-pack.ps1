@@ -1393,14 +1393,13 @@ Invoke-PackTest "medium language workflow matrix is complete and evidence-gated"
         Assert-True -Condition ("devstral-small-2:24b" -in @($matrix.latestValidation.models)) -Message "Latest matrix evidence should record the default model."
         Assert-True -Condition ("qwen3.5:35b" -in @($matrix.latestValidation.models)) -Message "Latest matrix evidence should record the TypeScript write model."
         $nativeEvidence = @($matrix.nativeOperatingSystemEvidence)
-        Assert-Equal -Actual $nativeEvidence.Count -Expected 3 -Message "Matrix should retain the completed Linux and macOS evidence records."
+        Assert-Equal -Actual $nativeEvidence.Count -Expected 4 -Message "Matrix should retain the completed Linux and macOS evidence records."
         $linuxEvidence = @($nativeEvidence | Where-Object { $_.operatingSystem -like "Linux *" })
         $macosEvidence = @($nativeEvidence | Where-Object { $_.operatingSystem -eq "macOS (Apple Silicon)" })
         Assert-Equal -Actual $linuxEvidence.Count -Expected 2 -Message "Matrix should retain the completed Linux evidence records."
-        Assert-Equal -Actual $macosEvidence.Count -Expected 1 -Message "Matrix should retain the completed macOS evidence record."
-        Assert-Equal -Actual $macosEvidence[0].model -Expected "qwen3.5:9b" -Message "macOS evidence should retain the validated model."
-        Assert-Equal -Actual $macosEvidence[0].validatedCells -Expected 4 -Message "macOS evidence should retain the Python validation count."
-        Assert-Equal -Actual $macosEvidence[0].failedCells -Expected 0 -Message "macOS evidence should not retain failed cells."
+        Assert-Equal -Actual $macosEvidence.Count -Expected 2 -Message "Matrix should retain the completed macOS evidence records."
+        Assert-True -Condition (@($macosEvidence | Where-Object { $_.model -eq "qwen3.5:9b" -and $_.validatedCells -eq 4 -and $_.failedCells -eq 0 }).Count -eq 1) -Message "macOS evidence should retain the Qwen Python smoke validation."
+        Assert-True -Condition (@($macosEvidence | Where-Object { $_.model -eq "devstral-small-2:24b" -and $_.validatedCells -eq 28 -and $_.failedCells -eq 0 }).Count -eq 1) -Message "macOS evidence should retain the complete Devstral validation."
         foreach ($item in $nativeEvidence) {
             Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($item.evidenceDocument)) -Message "Native evidence should link its sanitized evidence document."
         }
