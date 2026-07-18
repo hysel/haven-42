@@ -595,8 +595,11 @@ Use the macOS bootstrap guide for the local-only serving configuration.
 Continue CLI read, and disposable scoped-write smoke checks. The tested
 `mlx-community/Qwen3.5-4B-4bit` is the smaller validated MLX candidate: it
 passed the endpoint tool-call, focused Continue CLI read, and disposable
-scoped-write smoke checks. It is appropriate only for targeted workflows until
-it separately passes plan, review, editor, and language-matrix validation.
+scoped-write smoke checks. A later strict VSCodium replacement test targeted
+the correct file but appended content and introduced trailing blank lines in
+two attempts, so it is not approved for editor writes. Keep it to targeted
+read-only and Continue CLI disposable workflows until it separately passes
+plan, review, editor, and language-matrix validation.
 
 The tested
 `Devstral-Small-2-24B-Instruct-2512-4bit` MLX candidate did not return the
