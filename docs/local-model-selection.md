@@ -567,7 +567,7 @@ For the pack-managed macOS MLX runtime, the profile also detects
 `$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server` even when the
 virtual environment is not on `PATH`.
 
-When MLX tooling is detected, the macOS helper also reports a separate MLX recommendation from `config/model-recommendations.mlx.tsv`. This recommendation is a candidate, not a verified installed model. It does not replace the Ollama recommendation and it does not change the default beginner setup path.
+When MLX tooling is detected, the macOS helper also reports a separate MLX recommendation from `config/model-recommendations.mlx.tsv`. This recommendation is a candidate, not a verified installed model. On a host with no local Ollama models, the MLX recommendation is the applicable local-host recommendation and the text profile explicitly marks the Ollama fallback as not applicable. When both runtimes are available, select the recommendation that matches the runtime you intend to configure; do not place an MLX model in an Ollama configuration.
 
 MLX tiering is intentionally more conservative than the generic RAM tier
 because unified memory is shared by macOS, the editor, and the model runtime.

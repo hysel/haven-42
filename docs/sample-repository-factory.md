@@ -6,6 +6,11 @@ The sample repository factory creates local, disposable repositories for validat
 
 The generated repositories are intentionally small. They are not production templates and they do not install dependencies. Their purpose is to provide realistic file names, project markers, source files, tests, documentation, configuration, infrastructure, and database signals that an agent can inspect safely. Python fixtures include a `.gitignore` for the disposable `.venv`, `__pycache__`, and pytest cache created when you run their documented tests.
 
+The basic `python-api` fixture supports Python 3.9 or later so it can run on a
+clean macOS host. The medium `python-layered-api` fixture uses newer Python
+syntax and requires Python 3.10 or later; use the Homebrew Python installed by
+the macOS bootstrap helper when validating that fixture on an older Mac.
+
 ## Milestone 16 Completion Basis
 
 Milestone 16 is complete for the current scope because contributors can generate all sample repositories with one documented command on Windows, Linux, or macOS, and the generated samples cover Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL validation categories.

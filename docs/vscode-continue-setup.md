@@ -297,7 +297,23 @@ If Git is not available, install the macOS Command Line Tools first:
 xcode-select --install
 ```
 
-### 2. Choose The Mac Model Host
+### 2. Bootstrap A New Mac
+
+Treat a newly created Mac as an empty host. Install the pack-managed MLX
+runtime before profiling or configuring Continue:
+
+```bash
+cd ~/local-engineering-agent-pack
+./scripts/bootstrap-macos-agent-host.sh --install --with-mlx
+```
+
+This installs only the local MLX prerequisites. It does not install Ollama or
+download a model. If you already ran this command on the current machine, the
+helper reports the available tools instead of requiring a different setup path.
+Every replacement or newly provisioned Mac starts at step 1 again; do not reuse
+paths, models, or configuration assumptions from an earlier instance.
+
+### 3. Choose The Mac Model Host
 
 Run the Mac hardware profile before generating the Continue config:
 
@@ -310,11 +326,13 @@ the Windows section with the macOS installer. If it reports **MLX tooling:
 detected** but no Ollama models, use the MLX route below. Do not configure an
 MLX model as an Ollama model.
 
-Start the recommended MLX server in a separate Terminal window. The first
-start downloads the selected model, so leave this window running:
+Start the recommended MLX server in a separate Terminal window. Use the exact
+model named by the profile's `MLX recommendation`; the first start downloads
+it, so leave this window running. For example, a 16 GB Apple Silicon host is
+normally assigned `mlx-community/Qwen3.5-4B-4bit`:
 
 ```bash
-MODEL='mlx-community/Qwen3.5-9B-OptiQ-4bit'
+MODEL='mlx-community/Qwen3.5-4B-4bit'
 "$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server" \
   --model "$MODEL" --host 127.0.0.1 --port 8080
 ```
@@ -325,7 +343,7 @@ In a second Terminal window, confirm the loopback-only endpoint responds:
 curl --fail --silent http://127.0.0.1:8080/v1/models
 ```
 
-### 3. Preview The macOS Install
+### 4. Preview The macOS Install
 
 If you generated the sample above, set the target variable first:
 
@@ -353,7 +371,7 @@ Then preview the install:
 Check that the reported target project is correct. The installer should also
 report the global Continue config it would update.
 
-### 4. Install And Generate The macOS Config
+### 5. Install And Generate The macOS Config
 
 Run the same command without `--dry-run`:
 
@@ -376,38 +394,84 @@ that model config and is normally written to:
 It backs up existing configuration before replacement and omits global rules by
 default to prevent duplicate-rule warnings.
 
-### 5. Open And Test In VSCodium
+### 6. Prepare A Disposable Editor Test
 
-1. Fully quit and reopen VSCodium.
-2. Select **File > Open Folder** and open the target project, not the pack.
-3. Open Continue and use its config selector/gear beside **Local Config** to
-   confirm `~/.continue/config.yaml` is active.
-4. If you are using the generated Python sample, prepare its disposable test
-   environment once before asking an agent to make a code change:
+The commands below automate the safe setup work: they create the sample,
+install the Continue configuration, prepare Python tests, and establish a Git
+baseline. They do not start an MLX server or operate the VSCodium approval UI.
+
+For a constrained Apple Silicon host, use the MLX model named by the profile.
+On a 16 GB host, the pack selects
+`mlx-community/Qwen3.5-4B-4bit`.
 
 ```bash
+cd ~/local-engineering-agent-pack
+
+./scripts/generate-sample-repositories.macos.sh --force
+
+TARGET_REPO="$PWD/runtime-validation-output/sample-repositories/python-api"
+
+./scripts/install-continue-pack.macos.sh \
+  --target-repo "$TARGET_REPO" \
+  --global-config \
+  --mlx-config \
+  --mlx-api-base "http://127.0.0.1:8080/v1"
+
 cd "$TARGET_REPO"
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip pytest
 python -m pytest
+
+printf 'before\n' > continue-agent-write-test.md
+git init -q
+git add .
+git -c user.name="Validation User" \
+  -c user.email="validation@example.invalid" \
+  commit -qm "Initial editor validation fixture"
 ```
 
-   Use `python3` to create the environment on a clean macOS host. After
-   activation, `python` is supplied by that environment. The sample's
-   `.gitignore` excludes `.venv`, `__pycache__`, and `.pytest_cache`.
-5. Run the read-only test in the Windows section above.
-6. Run the controlled write test only after the read-only test passes. Use
-   these macOS terminal checks afterward:
+The generated fixture ignores the virtual environment and Python caches. The
+baseline commit makes the post-edit check deterministic. Run this only in the
+generated sample: `--force` replaces all generated samples in the output
+folder.
+
+### 7. Open And Test In VSCodium
+
+1. Fully quit and reopen VSCodium.
+2. Select **File > Open Folder** and open the target project, not the pack.
+3. Open Continue and use its config selector/gear beside **Local Config** to
+   confirm `~/.continue/config.yaml` is active.
+4. Run the read-only test in the Windows section above.
+5. Run this existing-file write test only after the read-only test passes:
+
+```text
+Use approved write mode for this smoke test only.
+
+Edit the existing file continue-agent-write-test.md in the opened repository root.
+Replace its entire content with exactly:
+
+Continue Agent write test passed.
+
+Do not modify any other files.
+Do not create a new file.
+Do not append.
+Use one edit tool call.
+Stop after the first Apply diff.
+Do not commit.
+```
+
+   Approve only the one edit and save the file if VSCodium shows it as unsaved.
+   Then run these macOS terminal checks afterward:
 
 ```bash
 git status --short
-test -f ./continue-agent-write-test.md && cat ./continue-agent-write-test.md
+git diff -- continue-agent-write-test.md
 git diff --check
-rm ./continue-agent-write-test.md
+cat ./continue-agent-write-test.md
 ```
 
-7. For a real scoped code change, run the relevant command directly after
+6. For a real scoped code change, run the relevant command directly after
    inspecting the diff. For the generated Python sample:
 
 ```bash
@@ -416,8 +480,8 @@ python -m pytest
 git diff --check
 ```
 
-When finished, leave the environment with `deactivate`. Remove it only when
-you no longer need the sample: `rm -rf .venv`.
+When finished, leave the environment with `deactivate`. Remove the disposable
+fixture or environment only when you no longer need it.
 
 For native Apple Silicon and MLX model-host setup, see
 `docs/macos-agent-host-bootstrap.md`.

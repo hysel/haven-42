@@ -327,6 +327,14 @@ fi
 
 recommend_mlx_from_catalog "$MLX_TIER"
 
+# An MLX-only Apple Silicon host should not be told to pull the generic Ollama
+# fallback. Keep the JSON field present for callers, but make its meaning clear.
+if [ "$MLX_STATUS" = "detected" ] && [ "${#OLLAMA_MODELS[@]}" -eq 0 ]; then
+  RECOMMENDED_MODEL="Not applicable on this MLX-only host"
+  RECOMMENDED_USE="Use the MLX recommendation above; no local Ollama model is available."
+  VALIDATION_NOTE="Keep the MLX endpoint bound to loopback and validate the intended editor workflow before approved writes."
+fi
+
 GENERATED="$(date '+%Y-%m-%d %H:%M')"
 
 if [ "$AS_JSON" = true ]; then
@@ -401,7 +409,11 @@ printf 'MLX recommendation: %s\n' "$MLX_RECOMMENDED_MODEL"
 printf 'MLX use: %s\n' "$MLX_RECOMMENDED_USE"
 printf 'MLX validation note: %s\n' "$MLX_VALIDATION_NOTE"
 printf '\nRecommendation tier: %s\n\n' "$TIER"
-printf 'Recommended model: %s\n' "$RECOMMENDED_MODEL"
-printf 'Recommended use: %s\n' "$RECOMMENDED_USE"
-printf 'Validation note: %s\n\n' "$VALIDATION_NOTE"
+if [ "$RECOMMENDED_MODEL" = "Not applicable on this MLX-only host" ]; then
+  printf 'Ollama recommendation: not applicable; use the MLX recommendation above.\n\n'
+else
+  printf 'Recommended model: %s\n' "$RECOMMENDED_MODEL"
+  printf 'Recommended use: %s\n' "$RECOMMENDED_USE"
+  printf 'Validation note: %s\n\n' "$VALIDATION_NOTE"
+fi
 printf 'Use docs/local-model-selection.md to choose the final model. This helper does not collect hostnames, IP addresses, usernames, or local paths.\n'

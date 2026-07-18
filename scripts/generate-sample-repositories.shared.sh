@@ -153,7 +153,7 @@ write_file "$root" "pyproject.toml" <<'EOF_FILE'
 name = "sample-python-api"
 version = "0.1.0"
 description = "Generated Python API validation fixture"
-requires-python = ">=3.11"
+requires-python = ">=3.9"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -508,7 +508,7 @@ write_file "$root" "pyproject.toml" <<'EOF_FILE'
 [project]
 name = "sample-python-layered-api"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

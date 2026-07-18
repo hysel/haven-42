@@ -3,6 +3,11 @@
 Use this helper on a native macOS host when you need a local Ollama, MLX, and
 Continue CLI validation environment. It supports Apple Silicon and Intel Macs.
 
+Start from this guide whenever the Mac is new, recreated, or otherwise not
+known to have the pack and prerequisites installed. Do not assume a previous
+Mac instance still has a clone, Homebrew, MLX, VSCodium, Continue, models, or
+generated samples.
+
 The script is intentionally opt-in: its default mode only reports available
 tools. `--install` may install Homebrew and Node.js. `--with-ollama` may also
 install Ollama through Homebrew. `--with-mlx` installs a dedicated Homebrew
@@ -53,10 +58,13 @@ setting up and validating an MLX serving runtime.
 
 ## MLX Local Server And Continue CLI
 
-MLX is an Apple Silicon serving path. Run it only on the loopback interface:
+MLX is an Apple Silicon serving path. Run it only on the loopback interface.
+Use the exact model named by the hardware profile's `MLX recommendation`; the
+example below is the smaller candidate intended for a 16 GB Apple Silicon
+host:
 
 ```bash
-MODEL='mlx-community/Qwen3.5-9B-OptiQ-4bit'
+MODEL='mlx-community/Qwen3.5-4B-4bit'
 "$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server" \
   --model "$MODEL" --host 127.0.0.1 --port 8080
 ```
@@ -77,12 +85,12 @@ models:
     capabilities: [tool_use]
 ```
 
-The model above passed direct OpenAI-compatible tool-call validation, Continue
-CLI read tooling, and a disposable single-file write smoke test on an Apple
-Silicon host. It also has one VSCodium Continue Agent generated-Python scoped
-edit pass with external direct-run, pytest, and whitespace verification. This
-remains bounded evidence: repeat validation for every editor version, model
-quantization, repository type, and workflow you intend to use.
+The 9B OptiQ MLX model passed direct OpenAI-compatible tool-call validation,
+Continue CLI read tooling, and a disposable single-file write smoke test on an
+Apple Silicon host. It also has one VSCodium Continue Agent generated-Python
+scoped edit pass with external direct-run, pytest, and whitespace verification.
+This remains bounded evidence: repeat validation for every editor version,
+model quantization, repository type, and workflow you intend to use.
 
 ## Generate Continue Config For The MLX Server
 
@@ -121,13 +129,14 @@ VSIX from the official Continue release path, then choose **Extensions**,
 sample repository, configure a loopback-only MLX endpoint in a local Continue
 configuration, and restart VSCodium.
 
-Run a read-only smoke prompt first: ask the agent to read `README.md` and
-return its first heading. Then run a one-file write smoke prompt that appends a
-unique marker to `README.md`. Approve exactly one edit, verify the changed file
-and `git diff --check` in the terminal, then restore the disposable fixture.
-Record the editor version, Continue version, model, provider, OS, and whether
-the editor showed a single correctly targeted apply action. Do not treat CLI
-evidence as editor Agent evidence.
+Use the guided VSCodium flow in `docs/vscode-continue-setup.md` to generate
+the sample, install configuration, prepare the virtual environment, and create
+the isolated Git baseline. Run a read-only smoke prompt first, then use its
+existing-file write test. Approve exactly one edit and verify the changed file
+with the documented `git diff` and whitespace checks. Record the editor
+version, Continue version, model, provider, OS, and whether the editor showed
+a single correctly targeted apply action. Do not treat CLI evidence as editor
+Agent evidence.
 
 ## Continue CLI Smoke Test
 
