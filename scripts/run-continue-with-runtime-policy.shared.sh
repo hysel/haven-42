@@ -3,8 +3,27 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MODEL=""; PROMPT=""; CONFIG_PATH=""; TARGET_REPO="$(pwd)"; OLLAMA_BASE_URL="http://127.0.0.1:11434"; CONTINUE_COMMAND="npx"; TIMEOUT_SECONDS=900; READ_ONLY=false; DRY_RUN=false
+usage() {
+  printf '%s\n' \
+    'Usage: run-continue-with-runtime-policy [options]' \
+    '' \
+    'Required:' \
+    '  --model MODEL                 Ollama model name.' \
+    '  --prompt PROMPT               Prompt passed to Continue CLI.' \
+    '' \
+    'Options:' \
+    '  --config-path PATH            Continue config path.' \
+    '  --target-repo PATH            Repository to run against.' \
+    '  --ollama-base-url URL         Ollama API base URL.' \
+    '  --continue-command COMMAND    Continue launcher (default: npx).' \
+    '  --timeout-seconds SECONDS     Command timeout (default: 900).' \
+    '  --readonly                    Run Continue in read-only mode.' \
+    '  --dry-run                     Print the planned action only.' \
+    '  -h, --help                    Show this help.'
+}
 while [ "$#" -gt 0 ]; do
   case "$1" in
+    -h|--help) usage; exit 0 ;;
     --model) MODEL="$2"; shift 2 ;; --prompt) PROMPT="$2"; shift 2 ;; --config-path) CONFIG_PATH="$2"; shift 2 ;; --target-repo) TARGET_REPO="$2"; shift 2 ;; --ollama-base-url) OLLAMA_BASE_URL="$2"; shift 2 ;; --continue-command) CONTINUE_COMMAND="$2"; shift 2 ;; --timeout-seconds) TIMEOUT_SECONDS="$2"; shift 2 ;; --readonly) READ_ONLY=true; shift ;; --dry-run) DRY_RUN=true; shift ;; *) printf 'Unknown argument: %s\n' "$1" >&2; exit 1 ;; esac
 done
 [ -n "$MODEL" ] && [ -n "$PROMPT" ] || { printf '%s\n' '--model and --prompt are required.' >&2; exit 1; }
