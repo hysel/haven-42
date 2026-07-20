@@ -16,7 +16,7 @@ fi
 [ -f "$POLICY_PATH" ] || { printf 'Model runtime policy does not exist: %s\n' "$POLICY_PATH" >&2; exit 1; }
 
 POLICY_PYTHON=""
-for candidate in python3 python; do
+for candidate in python3 python py py.exe; do
   if command -v "$candidate" >/dev/null 2>&1; then
     POLICY_PYTHON="$candidate"
     break
