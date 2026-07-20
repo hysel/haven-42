@@ -12,6 +12,7 @@ MODEL_ARGS_TEMPLATE=""
 TIMEOUT_SECONDS=600
 PRELOAD_TIMEOUT_SECONDS=900
 INCLUDE_WRITE_SMOKE=false
+INCLUDE_SCOPED_EDIT=false
 ALLOW_NON_GENERATED_TARGET=false
 DRY_RUN=false
 UNLOAD_AFTER_EACH=false
@@ -53,6 +54,10 @@ while [ "$#" -gt 0 ]; do
       ;;
     --include-write-smoke|-IncludeWriteSmoke)
       INCLUDE_WRITE_SMOKE=true
+      shift
+      ;;
+    --include-scoped-edit|-IncludeScopedEdit)
+      INCLUDE_SCOPED_EDIT=true
       shift
       ;;
     --allow-non-generated-target|-AllowNonGeneratedTarget)
@@ -101,7 +106,7 @@ if [ ! -d "$TARGET_REPO" ]; then
   exit 1
 fi
 
-if [ "$INCLUDE_WRITE_SMOKE" = true ] && [ "$ALLOW_NON_GENERATED_TARGET" != true ]; then
+if { [ "$INCLUDE_WRITE_SMOKE" = true ] || [ "$INCLUDE_SCOPED_EDIT" = true ]; } && [ "$ALLOW_NON_GENERATED_TARGET" != true ]; then
   case "$TARGET_REPO" in
     *runtime-validation-output/sample-repositories*) ;;
     *)
@@ -178,6 +183,7 @@ printf '[4/7] Cline command: %s\n' "$CLINE_COMMAND" >&2
 
 read_prompt='Use tools to inspect the opened repository root. Do not modify files. Do not create files. Do not run package installation. Do not guess. Return only the actual top-level files and folders inspected, the project type, key source and test files inspected, risks or missing information, and a failure signal. If tools are unavailable, say TOOLS_UNAVAILABLE.'
 write_prompt='Use approved write mode for this disposable smoke test only. Modify the existing README.md by adding exactly this final line: Cline CLI approved-write smoke test passed. Do not modify any other files. Do not create new files. After editing, report the changed file and stop. Do not commit.'
+scoped_prompt='Use approved write mode only in this disposable repository. Inspect app/main.py and tests/test_main.py. Change build_health_response so its returned dictionary includes exactly one additional field, "version": "v1", while preserving the existing service and status fields. Update the existing test to assert the exact new dictionary. Modify only app/main.py and tests/test_main.py. Preserve LF line endings and do not add trailing whitespace. Do not create files, install packages, or commit. Report the changed files and stop.'
 
 json_results=()
 index=0
@@ -186,7 +192,13 @@ for model in "${MODELS[@]}"; do
   printf '[5/7] Testing model %s/%s: %s\n' "$index" "${#MODELS[@]}" "$model" >&2
   read_status='failed'
   write_status='not-run'
+  scoped_edit_status='not-run'
   failures='none'
+  cline_data_dir="$(mktemp -d "${TMPDIR:-/tmp}/local-engineering-agent-pack-cline.XXXXXX")"
+  if [ "$DRY_RUN" != true ]; then
+    credential_value="$(printf '%s-%s-%s' ollama local validation)"
+    "$CLINE_COMMAND" auth --provider openai-compatible --apikey "$credential_value" --modelid "$model" --baseurl "${OLLAMA_BASE_URL%/}/v1" --data-dir "$cline_data_dir" >/dev/null
+  fi
   if [ "$DRY_RUN" != true ]; then printf '[5/7] Preloading %s before starting the phase timer...\n' "$model" >&2; preload_model "$model"; fi
 
   prompt="$read_prompt"
@@ -200,7 +212,7 @@ for model in "${MODELS[@]}"; do
     exit_code=0
   else
     set +e
-    output=$(cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CLINE_COMMAND $model_args $args" 2>&1)
+    output=$(cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CLINE_COMMAND --data-dir \"$cline_data_dir\" --cwd \"$TARGET_REPO\" --auto-approve true $model_args $args" 2>&1)
     exit_code=$?
     set -e
   fi
@@ -221,7 +233,7 @@ for model in "${MODELS[@]}"; do
       write_status='write-smoke-validated'
     else
       set +e
-      (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CLINE_COMMAND $model_args $args" >/tmp/cline-cli-write.out 2>&1)
+      (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CLINE_COMMAND --data-dir \"$cline_data_dir\" --cwd \"$TARGET_REPO\" --auto-approve true $model_args $args" >/tmp/cline-cli-write.out 2>&1)
       write_exit=$?
       set -e
       changed_files="$(cd "$TARGET_REPO" && git diff --name-only)"
@@ -234,12 +246,50 @@ for model in "${MODELS[@]}"; do
     fi
   fi
 
+  if [ "$INCLUDE_SCOPED_EDIT" = true ]; then
+    if [ ! -f "$TARGET_REPO/app/main.py" ] || [ ! -f "$TARGET_REPO/tests/test_main.py" ]; then
+      scoped_edit_status='failed'
+      failures="${failures},SCOPED_EDIT_FIXTURE_UNSUPPORTED"
+    elif [ "$DRY_RUN" = true ]; then
+      scoped_edit_status='scoped-edit-validated'
+    else
+      prompt="$scoped_prompt"
+      args="${CLINE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"
+      args="${args//\{Model\}/$model}"
+      args="${args//\{TargetRepo\}/$TARGET_REPO}"
+      model_args="${MODEL_ARGS_TEMPLATE//\{Model\}/$model}"
+      set +e
+      (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CLINE_COMMAND --data-dir \"$cline_data_dir\" --cwd \"$TARGET_REPO\" --auto-approve true $model_args $args" >/tmp/cline-cli-scoped-edit.out 2>&1)
+      scoped_exit=$?
+      set -e
+      changed_files="$(cd "$TARGET_REPO" && git diff --name-only | sort)"
+      unexpected_files="$(cd "$TARGET_REPO" && git ls-files --others --exclude-standard)"
+      line_endings_ok=true
+      if LC_ALL=C grep -q $'\r' "$TARGET_REPO/app/main.py" "$TARGET_REPO/tests/test_main.py"; then line_endings_ok=false; fi
+      behavior_ok=false
+      if (cd "$TARGET_REPO" && python3 -c "from app.main import build_health_response; from app.settings import Settings; assert build_health_response(Settings()) == {'service': 'sample-python-api', 'status': 'ok', 'version': 'v1'}"); then behavior_ok=true; fi
+      if [ "$scoped_exit" -eq 0 ] && [ "$changed_files" = "$(printf 'app/main.py\ntests/test_main.py')" ] && [ -z "$unexpected_files" ] && (cd "$TARGET_REPO" && git diff --check >/dev/null) && [ "$line_endings_ok" = true ] && [ "$behavior_ok" = true ]; then
+        scoped_edit_status='scoped-edit-validated'
+      else
+        scoped_edit_status='failed'
+        [ "$changed_files" = "$(printf 'app/main.py\ntests/test_main.py')" ] && [ -z "$unexpected_files" ] || failures="${failures},SCOPED_EDIT_SCOPE_FAILED"
+        (cd "$TARGET_REPO" && git diff --check >/dev/null) || failures="${failures},SCOPED_EDIT_DIFF_CHECK_FAILED"
+        [ "$line_endings_ok" = true ] || failures="${failures},SCOPED_EDIT_LINE_ENDINGS_FAILED"
+        [ "$behavior_ok" = true ] || failures="${failures},SCOPED_EDIT_BEHAVIOR_FAILED"
+        [ "$scoped_exit" -eq 0 ] || failures="${failures},SCOPED_EDIT_EXIT_${scoped_exit}"
+      fi
+      (cd "$TARGET_REPO" && git restore app/main.py tests/test_main.py >/dev/null 2>&1 || true)
+      if [ -n "$unexpected_files" ]; then (cd "$TARGET_REPO" && git clean -fd >/dev/null 2>&1 || true); fi
+    fi
+  fi
+
   if [ "$UNLOAD_AFTER_EACH" = true ] && [ "$DRY_RUN" != true ]; then
     printf '[6/7] Unloading %s from Ollama...\n' "$model" >&2
     unload_model "$model" || failures="${failures},UNLOAD_FAILED"
   fi
-  json_results+=("{\"Model\":\"$model\",\"Surface\":\"Cline CLI\",\"Target\":\"generated-sample\",\"ReadStatus\":\"$read_status\",\"WriteStatus\":\"$write_status\",\"FailureSignal\":\"$failures\"}")
-  printf '%s: read=%s, write=%s, failures=%s\n' "$model" "$read_status" "$write_status" "$failures" >&2
+  rm -rf "$cline_data_dir"
+  json_results+=("{\"Model\":\"$model\",\"Surface\":\"Cline CLI\",\"Target\":\"generated-sample\",\"ReadStatus\":\"$read_status\",\"WriteStatus\":\"$write_status\",\"ScopedEditStatus\":\"$scoped_edit_status\",\"FailureSignal\":\"$failures\"}")
+  printf '%s: read=%s, write=%s, scoped-edit=%s, failures=%s\n' "$model" "$read_status" "$write_status" "$scoped_edit_status" "$failures" >&2
 done
 
 printf '[6/7] Writing sanitized report...\n' >&2
@@ -248,6 +298,7 @@ printf '[6/7] Writing sanitized report...\n' >&2
   printf '  "Surface": "Cline CLI",\n'
   printf '  "Target": "generated-sample",\n'
   printf '  "IncludeWriteSmoke": %s,\n' "$INCLUDE_WRITE_SMOKE"
+  printf '  "IncludeScopedEdit": %s,\n' "$INCLUDE_SCOPED_EDIT"
   printf '  "UnloadAfterEach": %s,\n' "$UNLOAD_AFTER_EACH"
   printf '  "DryRun": %s,\n' "$DRY_RUN"
   printf '  "Results": [\n'

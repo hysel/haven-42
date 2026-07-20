@@ -726,9 +726,14 @@ test_cline_cli_model_testing_doc() {
     grep -q "system-temporary" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
     grep -q "ClineArgumentsTemplate" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
     grep -q "IncludeWriteSmoke" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
+    grep -q "IncludeScopedEdit" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
+    grep -q "New-ClineTemporaryProfile" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
+    grep -q "Test-LfOnly" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
     grep -q "Initialize-DisposableGitBaseline" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
     grep -q "CLINE_ARGS_TEMPLATE" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
     grep -q "INCLUDE_WRITE_SMOKE" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
+    grep -q "INCLUDE_SCOPED_EDIT" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
+    grep -q "SCOPED_EDIT_LINE_ENDINGS_FAILED" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
     grep -q "Cline CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&

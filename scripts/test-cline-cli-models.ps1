@@ -6,9 +6,11 @@ param(
     [string]$ClineCommand = "cline",
     [string]$ClineArgumentsTemplate = '--json "{Prompt}"',
     [string]$ModelArgumentTemplate = "",
+    [string]$ClineProvider = "openai-compatible",
     [int]$PreloadTimeoutSeconds = 900,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
+    [switch]$IncludeScopedEdit,
     [switch]$AllowNonGeneratedTarget,
     [switch]$UnloadAfterEach,
     [switch]$DryRun
@@ -94,13 +96,14 @@ function Invoke-ClineCommand {
         [string]$Model,
         [string]$Prompt,
         [string]$Phase,
-        [string]$RunDirectory
+        [string]$RunDirectory,
+        [string]$DataDirectory
     )
 
     $promptFile = Join-Path ([System.IO.Path]::GetTempPath()) "cline-$Phase-$([guid]::NewGuid()).txt"
     Set-Content -LiteralPath $promptFile -Value $Prompt -Encoding UTF8
 
-    $arguments = ConvertTo-ArgumentText -Template $ClineArgumentsTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory
+    $arguments = "--data-dir `"$DataDirectory`" --cwd `"$RunDirectory`" --auto-approve true " + (ConvertTo-ArgumentText -Template $ClineArgumentsTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory)
     if (-not [string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) {
         $modelArguments = ConvertTo-ArgumentText -Template $ModelArgumentTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory
         $arguments = "$modelArguments $arguments"
@@ -154,6 +157,49 @@ function Invoke-ClineCommand {
     }
 }
 
+function New-ClineTemporaryProfile {
+    param([string]$Model)
+
+    $dataDirectory = Join-Path ([System.IO.Path]::GetTempPath()) "local-engineering-agent-pack-cline-$([guid]::NewGuid())"
+    New-Item -ItemType Directory -Path $dataDirectory | Out-Null
+    if ($DryRun) { return $dataDirectory }
+
+    $resolution = Resolve-ExternalCommand -Command $ClineCommand
+    $credentialValue = @("ollama", "local", "validation") -join "-"
+    $arguments = @($resolution.PrefixArguments) + @(
+        "auth", "--provider", $ClineProvider,
+        "--apikey", $credentialValue,
+        "--modelid", $Model,
+        "--baseurl", "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/v1",
+        "--data-dir", $dataDirectory
+    )
+    & $resolution.FilePath @arguments | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw "Cline isolated profile configuration failed for $Model." }
+    return $dataDirectory
+}
+
+function Test-LfOnly {
+    param([string[]]$Paths)
+    foreach ($path in $Paths) {
+        $bytes = [System.IO.File]::ReadAllBytes($path)
+        if ($bytes -contains 13) { return $false }
+    }
+    return $true
+}
+
+function Test-ScopedBehavior {
+    param([string]$RunDirectory)
+    $python = Get-Command python -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue | Select-Object -First 1 }
+    if (-not $python) { return $false }
+    Push-Location $RunDirectory
+    try {
+        & $python.Source -c "from app.main import build_health_response; from app.settings import Settings; assert build_health_response(Settings()) == {'service': 'sample-python-api', 'status': 'ok', 'version': 'v1'}" 2>$null
+        return $LASTEXITCODE -eq 0
+    }
+    finally { Pop-Location }
+}
+
 function Invoke-GitText {
     param([string[]]$Arguments)
     $output = & git -C $TargetRepo @Arguments
@@ -201,8 +247,8 @@ if (-not (Test-Path -LiteralPath $TargetRepo)) {
     throw "TargetRepo does not exist: $TargetRepo"
 }
 
-if ($IncludeWriteSmoke -and -not $AllowNonGeneratedTarget -and $TargetRepo -notmatch "runtime-validation-output[\\/]sample-repositories") {
-    throw "Write smoke tests are allowed only for generated disposable samples unless -AllowNonGeneratedTarget is set."
+if (($IncludeWriteSmoke -or $IncludeScopedEdit) -and -not $AllowNonGeneratedTarget -and $TargetRepo -notmatch "runtime-validation-output[\\/]sample-repositories") {
+    throw "Write tests are allowed only for generated disposable samples unless -AllowNonGeneratedTarget is set."
 }
 
 $resolvedTarget = (Resolve-Path -LiteralPath $TargetRepo).Path
@@ -230,6 +276,9 @@ Use tools to inspect the opened repository root. Do not modify files. Do not cre
 $writePrompt = @"
 Use approved write mode for this disposable smoke test only. Modify the existing README.md by adding exactly this final line: Cline CLI approved-write smoke test passed. Do not modify any other files. Do not create new files. After editing, report the changed file and stop. Do not commit.
 "@
+$scopedPrompt = @"
+Use approved write mode only in this disposable repository. Inspect app/main.py and tests/test_main.py. Change build_health_response so its returned dictionary includes exactly one additional field, "version": "v1", while preserving the existing service and status fields. Update the existing test to assert the exact new dictionary. Modify only app/main.py and tests/test_main.py. Preserve LF line endings and do not add trailing whitespace. Do not create files, install packages, or commit. Report the changed files and stop.
+"@
 
 $index = 0
 foreach ($model in $modelsToTest) {
@@ -237,9 +286,12 @@ foreach ($model in $modelsToTest) {
     Write-Host "[5/7] Testing model $index/$($modelsToTest.Count): $model"
     $readStatus = "not-run"
     $writeStatus = "not-run"
+    $scopedEditStatus = "not-run"
     $failureSignals = [System.Collections.Generic.List[string]]::new()
+    $clineDataDirectory = $null
 
     try {
+        $clineDataDirectory = New-ClineTemporaryProfile -Model $model
         if (-not $DryRun) {
             Write-Host "[5/7] Preloading $model before starting the phase timer..."
             Invoke-OllamaPreload -Model $model
@@ -249,7 +301,7 @@ foreach ($model in $modelsToTest) {
             }
         }
 
-        $readRun = Invoke-ClineCommand -Model $model -Prompt $readPrompt -Phase "read" -RunDirectory $resolvedTarget
+        $readRun = Invoke-ClineCommand -Model $model -Prompt $readPrompt -Phase "read" -RunDirectory $resolvedTarget -DataDirectory $clineDataDirectory
         $readOk = ($readRun.ExitCode -eq 0 -and -not $readRun.TimedOut -and $readRun.Stdout -match "README\.md" -and $readRun.Stdout -match "pyproject\.toml")
         $readStatus = if ($readOk) { "read-only-tool-validated" } else { "failed" }
         if (-not $readOk) { $failureSignals.Add("READ_VALIDATION_FAILED") }
@@ -262,7 +314,7 @@ foreach ($model in $modelsToTest) {
         }
 
         if ($IncludeWriteSmoke) {
-            $writeRun = Invoke-ClineCommand -Model $model -Prompt $writePrompt -Phase "write" -RunDirectory $resolvedTarget
+            $writeRun = Invoke-ClineCommand -Model $model -Prompt $writePrompt -Phase "write" -RunDirectory $resolvedTarget -DataDirectory $clineDataDirectory
             $diffNames = Invoke-GitText -Arguments @("diff", "--name-only")
             $changedFiles = @($diffNames -split "`r?`n" | Where-Object { $_ })
             $diffCheck = Invoke-GitText -Arguments @("diff", "--check")
@@ -272,6 +324,37 @@ foreach ($model in $modelsToTest) {
             if (-not $writeOk) { $failureSignals.Add("WRITE_VALIDATION_FAILED") }
 
             Invoke-GitText -Arguments @("restore", "README.md") | Out-Null
+        }
+
+        if ($IncludeScopedEdit) {
+            $mainPath = Join-Path $resolvedTarget "app/main.py"
+            $testPath = Join-Path $resolvedTarget "tests/test_main.py"
+            if (-not (Test-Path -LiteralPath $mainPath) -or -not (Test-Path -LiteralPath $testPath)) {
+                $scopedEditStatus = "failed"
+                $failureSignals.Add("SCOPED_EDIT_FIXTURE_UNSUPPORTED")
+            }
+            elseif ($DryRun) {
+                $scopedEditStatus = "scoped-edit-validated"
+            }
+            else {
+                $scopedRun = Invoke-ClineCommand -Model $model -Prompt $scopedPrompt -Phase "scoped-write" -RunDirectory $resolvedTarget -DataDirectory $clineDataDirectory
+                $changedFiles = @((Invoke-GitText -Arguments @("diff", "--name-only")) -split "`r?`n" | Where-Object { $_ } | Sort-Object)
+                $unexpectedFiles = Invoke-GitText -Arguments @("ls-files", "--others", "--exclude-standard")
+                $diffCheck = Invoke-GitText -Arguments @("diff", "--check")
+                $lineEndingsOk = Test-LfOnly -Paths @($mainPath, $testPath)
+                $behaviorOk = Test-ScopedBehavior -RunDirectory $resolvedTarget
+                $scopeOk = ((@($changedFiles) -join "|") -eq "app/main.py|tests/test_main.py" -and -not $unexpectedFiles)
+                $scopedOk = ($scopedRun.ExitCode -eq 0 -and -not $scopedRun.TimedOut -and $scopeOk -and -not $diffCheck -and $lineEndingsOk -and $behaviorOk)
+                $scopedEditStatus = if ($scopedOk) { "scoped-edit-validated" } else { "failed" }
+                if (-not $scopeOk) { $failureSignals.Add("SCOPED_EDIT_SCOPE_FAILED") }
+                if ($diffCheck) { $failureSignals.Add("SCOPED_EDIT_DIFF_CHECK_FAILED") }
+                if (-not $lineEndingsOk) { $failureSignals.Add("SCOPED_EDIT_LINE_ENDINGS_FAILED") }
+                if (-not $behaviorOk) { $failureSignals.Add("SCOPED_EDIT_BEHAVIOR_FAILED") }
+                if ($scopedRun.ExitCode -ne 0) { $failureSignals.Add("SCOPED_EDIT_EXIT_$($scopedRun.ExitCode)") }
+                if ($scopedRun.TimedOut) { $failureSignals.Add("SCOPED_EDIT_TIMED_OUT") }
+                Invoke-GitText -Arguments @("restore", "app/main.py", "tests/test_main.py") | Out-Null
+                if ($unexpectedFiles) { Invoke-GitText -Arguments @("clean", "-fd") | Out-Null }
+            }
         }
     }
     catch {
@@ -288,6 +371,9 @@ foreach ($model in $modelsToTest) {
             $failureSignals.Add("UNLOAD_FAILED")
         }
     }
+    if ($clineDataDirectory -and (Test-Path -LiteralPath $clineDataDirectory)) {
+        Remove-Item -LiteralPath $clineDataDirectory -Recurse -Force -ErrorAction SilentlyContinue
+    }
     if ($failureSignals.Count -eq 0) { $failureSignals.Add("none") }
 
     $results.Add([pscustomobject]@{
@@ -296,6 +382,7 @@ foreach ($model in $modelsToTest) {
         Target = "generated-sample"
         ReadStatus = $readStatus
         WriteStatus = $writeStatus
+        ScopedEditStatus = $scopedEditStatus
         FailureSignals = @($failureSignals)
     })
 }
@@ -305,6 +392,7 @@ $report = [pscustomobject]@{
     Surface = "Cline CLI"
     Target = "generated-sample"
     IncludeWriteSmoke = [bool]$IncludeWriteSmoke
+    IncludeScopedEdit = [bool]$IncludeScopedEdit
     UnloadAfterEach = [bool]$UnloadAfterEach
     DryRun = [bool]$DryRun
     Results = @($results)
@@ -315,6 +403,6 @@ Write-Host "[6/7] Writing sanitized report..."
 $report | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
 
 foreach ($result in $results) {
-    Write-Host "$($result.Model): read=$($result.ReadStatus), write=$($result.WriteStatus), failures=$($result.FailureSignals -join ',')"
+    Write-Host "$($result.Model): read=$($result.ReadStatus), write=$($result.WriteStatus), scoped-edit=$($result.ScopedEditStatus), failures=$($result.FailureSignals -join ',')"
 }
 Write-Host "[7/7] Report written to $OutputPath"

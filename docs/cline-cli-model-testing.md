@@ -161,6 +161,45 @@ promotion blocked, and require all of these checks for the next attempt:
 - edited text files preserve the repository line-ending convention;
 - no helper or temporary files are created in the target repository.
 
+Run the hardened scoped-edit gate with:
+
+Windows PowerShell:
+
+```powershell
+.\scripts\test-cline-cli-models.ps1 `
+  -Models "devstral-small-2:24b" `
+  -OllamaBaseUrl "http://your-local-ollama-host:11434" `
+  -IncludeScopedEdit `
+  -TimeoutSeconds 600
+```
+
+Linux or macOS:
+
+```bash
+./scripts/test-cline-cli-models.linux.sh \
+  --models "devstral-small-2:24b" \
+  --ollama-base-url "http://your-local-ollama-host:11434" \
+  --include-scoped-edit \
+  --timeout-seconds 600
+```
+
+The harness creates a fresh Cline profile under the operating system's
+temporary directory for each model, authenticates the local OpenAI-compatible
+provider there, passes explicit `--cwd` and `--auto-approve true` arguments,
+and removes the temporary profile after the run. A scoped edit passes only when
+the process succeeds, exactly the expected source and test files change, no
+unexpected files appear, the dependency-free Python behavior assertion passes,
+`git diff --check` is clean, and both edited files remain LF-only. The harness
+restores the disposable fixture and unloads the model according to runtime
+policy whether the model passes or fails.
+
+The first live run of this hardened gate correctly returned
+`SCOPED_EDIT_SCOPE_FAILED`, `SCOPED_EDIT_DIFF_CHECK_FAILED`, and
+`SCOPED_EDIT_LINE_ENDINGS_FAILED`: Cline changed the source file, its test-file
+edit failed, and the source edit used non-LF line endings. The harness restored
+the fixture, removed its temporary profile, and unloaded the model. This is a
+successful harness validation but remains failed model evidence.
+
 ## CLI Argument Templates
 
 Cline CLI flags may change over time. The scripts therefore support command-template placeholders instead of hardcoding every provider flag.

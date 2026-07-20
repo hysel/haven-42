@@ -11,6 +11,9 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Hardened the Cline CLI model harness with per-model system-temporary profiles, explicit workspace anchoring, a realistic scoped source-and-test edit mode, exact changed-file and unexpected-file checks, dependency-free behavior verification, whitespace and LF-only validation, cleanup, and sanitized failure signals on Windows, Linux, and macOS.
+- Recorded the hardened Cline rerun: read-only passed, while the scoped edit was correctly rejected for incomplete source/test scope, dirty whitespace, and non-LF output; fixture restoration, temporary-profile cleanup, and model unload passed.
+
 - Recorded Cline CLI 3.0.46 realistic scoped-edit evidence: exact file scope and behavior passed with Devstral Small 2 24B, but mixed line endings failed whitespace validation, so scoped-edit promotion remains blocked; documented use of system-temporary isolated state to avoid synchronized-workspace session collisions.
 
 - Added shared OS-aware PowerShell command resolution for native executables, Windows npm `.cmd` shims, and standalone `.ps1` scripts; applied it across Cline, shared agent, Continue, runtime-policy, and language-matrix process harnesses.

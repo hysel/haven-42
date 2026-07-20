@@ -317,3 +317,27 @@ Do not commit.
 - Failure signals: `DIFF_CHECK_FAILED`, `MIXED_LINE_ENDINGS`, `REPAIR_NONCOMPLETION`.
 - Operational finding: on this Windows setup, a Cline data directory inside the synchronized repository caused repeatable `EEXIST` session-persistence failures after the first tool call. A fresh system-temporary data directory avoided that failure.
 - Next gate: repeat a bounded generated-sample source-and-test edit with external scope, behavior, whitespace, line-ending, and unexpected-file verification all passing.
+
+### Hardened Harness Rerun
+
+The new automated scoped-edit gate repeated the Devstral Small 2 24B task with
+per-model system-temporary Cline state and explicit workspace anchoring. The
+read-only phase passed. During the scoped edit, Cline changed `app/main.py` but
+its attempted edit of `tests/test_main.py` failed. The harness rejected the run
+instead of accepting the model's completion claim.
+
+| Automated gate | Result |
+| --- | --- |
+| Read-only inspection | Passed |
+| Cline process completion | Passed |
+| Exact two-file scope | Failed; only the source edit completed |
+| External behavior assertion | Passed for the source behavior |
+| `git diff --check` | Failed |
+| LF-only edited files | Failed |
+| Fixture restoration | Passed; clean after the run |
+| Temporary profile cleanup | Passed |
+| Model unload | Passed |
+
+Failure signals: `SCOPED_EDIT_SCOPE_FAILED`,
+`SCOPED_EDIT_DIFF_CHECK_FAILED`, and `SCOPED_EDIT_LINE_ENDINGS_FAILED`.
+Scoped-edit promotion remains blocked.
