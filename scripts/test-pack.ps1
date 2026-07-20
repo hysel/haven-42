@@ -3946,6 +3946,35 @@ Invoke-PackTest "hosted CI verifier enforces exact-SHA cross-platform completion
     Assert-True -Condition ($doc -match "Never reuse a successful run") -Message "Hosted CI docs should reject stale run evidence."
     Assert-True -Condition ($queue -match 'Never call a push successful before `CI passed`') -Message "Maintainer queue should forbid premature success claims."
 }
+Invoke-PackTest "model residency policy is applied across runtime and config paths" {
+    $samplePolicy = Join-Path $repoRoot "config/model-runtime-policy.sample.json"
+    $policyReader = Join-Path $repoRoot "scripts/get-model-runtime-policy.ps1"
+    $shellPolicyReader = Join-Path $repoRoot "scripts/get-model-runtime-policy.shared.sh"
+    $paths = @(
+        "scripts/run-kilo-code-validation.ps1",
+        "scripts/run-language-workflow-matrix.ps1",
+        "scripts/run-language-workflow-matrix.shared.sh",
+        "scripts/test-agent-cli-surface-models.ps1",
+        "scripts/test-agent-cli-surface-models.shared.sh",
+        "scripts/test-continue-cli-models.ps1",
+        "scripts/test-continue-cli-models.shared.sh",
+        "scripts/test-cline-cli-models.ps1",
+        "scripts/test-cline-cli-models.shared.sh",
+        "scripts/test-local-agent-models.ps1",
+        "scripts/test-local-agent-models.shared.sh",
+        "scripts/apply-recommended-agent-config.ps1",
+        "scripts/apply-recommended-agent-config.shared.sh",
+        "scripts/install-continue-pack.ps1",
+        "scripts/install-continue-pack.shared.sh",
+        "scripts/install-validated-model.ps1",
+        "scripts/install-validated-model.shared.sh"
+    ) | ForEach-Object { Join-Path $repoRoot $_ }
+    $policy = Get-Content -LiteralPath $samplePolicy -Raw | ConvertFrom-Json
+    Assert-Equal -Actual $policy.residencyMode -Expected "unload-after-run" -Message "Default policy should unload models."
+    Assert-Equal -Actual $policy.maxResidentModels -Expected 1 -Message "Default policy should allow one resident model."
+    foreach ($path in @($policyReader, $shellPolicyReader) + $paths) { Assert-True -Condition (Test-Path -LiteralPath $path) -Message "Residency policy asset should exist: $path" }
+    foreach ($path in $paths) { Assert-True -Condition ((Get-Content -LiteralPath $path -Raw) -match "model-runtime-policy|runtimePolicy|RUNTIME_RESIDENCY_MODE") -Message "Runner should consume the residency policy: $path" }
+}
 
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red

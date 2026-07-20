@@ -1430,6 +1430,22 @@ test_hosted_ci_verifier_contract() {
     grep -q 'Never reuse a successful run' "$doc"
 }
 
+test_model_residency_policy_contract() {
+  [ -f "$REPO_ROOT/config/model-runtime-policy.sample.json" ] &&
+    grep -q '"residencyMode": "unload-after-run"' "$REPO_ROOT/config/model-runtime-policy.sample.json" &&
+    grep -q '"maxResidentModels": 1' "$REPO_ROOT/config/model-runtime-policy.sample.json" &&
+    [ -f "$REPO_ROOT/scripts/get-model-runtime-policy.ps1" ] &&
+    [ -f "$REPO_ROOT/scripts/get-model-runtime-policy.shared.sh" ] &&
+    grep -q 'runtimePolicy' "$REPO_ROOT/scripts/run-language-workflow-matrix.ps1" &&
+    grep -q 'RUNTIME_RESIDENCY_MODE' "$REPO_ROOT/scripts/run-language-workflow-matrix.shared.sh" &&
+    grep -q 'runtimePolicy' "$REPO_ROOT/scripts/test-local-agent-models.ps1" &&
+    grep -q 'RUNTIME_RESIDENCY_MODE' "$REPO_ROOT/scripts/test-local-agent-models.shared.sh" &&
+    grep -q 'continueKeepAliveSeconds' "$REPO_ROOT/scripts/apply-recommended-agent-config.ps1" &&
+    grep -q 'CONTINUE_KEEP_ALIVE_SECONDS' "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" &&
+    grep -q 'continueKeepAliveSeconds' "$REPO_ROOT/scripts/install-continue-pack.ps1" &&
+    grep -q 'CONTINUE_KEEP_ALIVE_SECONDS' "$REPO_ROOT/scripts/install-continue-pack.shared.sh"
+}
+
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
@@ -1481,6 +1497,7 @@ run_test "recommended agent config generation writes local-only config" test_rec
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract
 run_test "hosted CI verifier enforces exact-SHA cross-platform completion" test_hosted_ci_verifier_contract
+run_test "model residency policy is applied across runtime and config paths" test_model_residency_policy_contract
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2
