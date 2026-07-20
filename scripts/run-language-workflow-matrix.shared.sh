@@ -12,6 +12,7 @@ OPERATIONS=""
 CONTINUE_COMMAND="npx"
 USE_NPX=false
 TIMEOUT_SECONDS=900
+LOAD_TIMEOUT_SECONDS=900
 UNLOAD_AFTER_RUN=false
 REQUIRE_IDLE_SERVER=true
 DRY_RUN=false
@@ -52,6 +53,7 @@ while [ "$#" -gt 0 ]; do
     --output-path) require_value "$@"; OUTPUT_PATH="$2"; shift 2 ;;
     --continue-command) require_value "$@"; CONTINUE_COMMAND="$2"; shift 2 ;;
     --timeout-seconds) require_value "$@"; TIMEOUT_SECONDS="$2"; shift 2 ;;
+    --load-timeout-seconds) require_value "$@"; LOAD_TIMEOUT_SECONDS="$2"; shift 2 ;;
     --unload-after-run) UNLOAD_AFTER_RUN=true; shift ;;
     --allow-loaded-models) REQUIRE_IDLE_SERVER=false; shift ;;
     --dry-run) DRY_RUN=true; shift ;;
@@ -202,6 +204,12 @@ run_continue() {
     elapsed=$((elapsed + 1))
   done
   wait "$pid"
+}
+
+preload_ollama_model() {
+  local base_url="${1%/}" model="$2"
+  curl -fsS --max-time "$LOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/generate" -H 'Content-Type: application/json' -d "{\"model\":\"$model\",\"prompt\":\"\",\"keep_alive\":\"15m\",\"stream\":false}" >/dev/null
+  curl -fsS --max-time 30 "$base_url/api/ps" | grep -Fq "\"$model\""
 }
 
 operation_prompt() {
@@ -360,9 +368,10 @@ for row in "${MATRIX_ROWS[@]}"; do
   prompt="$(operation_prompt "$ecosystem" "$operation" "$expected_csv" "$target" "$marker")"
   stdout_path="$RAW_ROOT/${ecosystem//[^a-zA-Z0-9._-]/-}-${operation}.stdout.txt"
   stderr_path="$RAW_ROOT/${ecosystem//[^a-zA-Z0-9._-]/-}-${operation}.stderr.txt"
-  config="$READ_CONFIG_PATH"; mode="--readonly"; provider="$READ_PROVIDER"; model="$READ_MODEL"
-  [ "$operation" = "scoped-write" ] && { config="$WRITE_CONFIG_PATH"; mode="--auto"; provider="$WRITE_PROVIDER"; model="$WRITE_MODEL"; }
+  config="$READ_CONFIG_PATH"; mode="--readonly"; provider="$READ_PROVIDER"; model="$READ_MODEL"; base_url="$READ_BASE_URL"
+  [ "$operation" = "scoped-write" ] && { config="$WRITE_CONFIG_PATH"; mode="--auto"; provider="$WRITE_PROVIDER"; model="$WRITE_MODEL"; base_url="$WRITE_BASE_URL"; }
   printf '[5/8] Running %s/%s: %s / %s\n' "$index" "$total" "$ecosystem" "$operation" >&2
+  if [ "$DRY_RUN" = false ] && [ "$provider" = "ollama" ]; then printf '[5/8] Preloading %s before starting the cell timer...\n' "$model" >&2; preload_ollama_model "$base_url" "$model"; fi
   started="$(date +%s)"
   set +e
   run_continue "$sample_path" "$config" "$mode" "$prompt" "$stdout_path" "$stderr_path"

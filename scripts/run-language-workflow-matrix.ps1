@@ -6,6 +6,7 @@ param(
     [string[]]$Operations = @(),
     [string]$OutputPath,
     [string]$ContinueCommand = "npx",
+    [int]$LoadTimeoutSeconds = 900,
     [int]$TimeoutSeconds = 900,
     [switch]$UnloadAfterRun,
     [switch]$AllowLoadedModels,
@@ -138,6 +139,16 @@ function Invoke-OllamaUnload {
     return $false
 }
 
+function Invoke-OllamaPreload {
+    param([string]$BaseUrl, [string]$Model)
+
+    $base = $BaseUrl.TrimEnd('/')
+    $body = @{ model = $Model; prompt = ""; keep_alive = "15m"; stream = $false } | ConvertTo-Json
+    Invoke-RestMethod -Uri "$base/api/generate" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $LoadTimeoutSeconds | Out-Null
+    $models = @((Invoke-RestMethod -Uri "$base/api/ps" -Method Get -TimeoutSec 30).models)
+    if (@($models | Where-Object { $_.name -eq $Model -or $_.model -eq $Model }).Count -eq 0) { throw "Ollama did not report $Model as loaded after preflight." }
+}
+
 function Invoke-TestedModelUnload {
     if (-not $UnloadAfterRun) { return }
 
@@ -263,12 +274,16 @@ try {
         foreach ($operation in $selectedOperations) {
         $index++
         Write-Host "[5/8] Running $index/$total`: $($entry.ecosystem) / $operation"
-        $cellStarted = Get-Date
         Initialize-SampleBaseline -Path $samplePath
         $isWrite = $operation -eq "scoped-write"
         $config = if ($isWrite) { $writeConfig } else { $readConfig }
         $model = if ($isWrite) { $writeModel } else { $readModel }
         $prompt = Get-OperationPrompt -Entry $entry -Operation $operation
+        if (-not $DryRun) {
+            Write-Host "[5/8] Preloading $model before starting the cell timer..."
+            Invoke-OllamaPreload -BaseUrl $(if ($isWrite) { $writeBaseUrl } else { $readBaseUrl }) -Model $model
+        }
+        $cellStarted = Get-Date
         $run = Invoke-Continue -ConfigPath $config -WorkingDirectory $samplePath -Prompt $prompt -ReadOnly (-not $isWrite)
 
         $safeName = "$($entry.ecosystem)-$operation" -replace "[^a-zA-Z0-9._-]", "-"
