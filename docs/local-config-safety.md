@@ -100,6 +100,14 @@ The same policy is applied when this pack creates a Continue configuration:
 `preloadKeepAliveMinutes` value in seconds. This keeps generated end-user
 configuration aligned with the validation runners.
 
+## Continue CLI Runtime Launcher
+
+Some Continue CLI versions do not honor `keepAlive: 0`. For a reliable
+one-shot Continue run, use `scripts/run-continue-with-runtime-policy.ps1` (or
+the `.shared.sh` equivalent) with `--model`, `--prompt`, and `--config-path`.
+It preflights the resident-model limit and explicitly unloads the named model
+after Continue exits when the policy is `unload-after-run`.
+
 ## Before You Commit
 
 Run:
