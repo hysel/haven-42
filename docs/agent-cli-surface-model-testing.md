@@ -84,6 +84,11 @@ only the generated sample by default. For that disposable target only, it also
 removes the obsolete `.kilo/kilo.json` created by earlier adapter versions;
 it never removes a legacy config from a non-generated repository.
 
+The launcher preloads the selected model and confirms it through Ollama's
+running-model endpoint before starting Kilo's per-phase `-TimeoutSeconds`
+clock. Use `-LoadTimeoutSeconds` for the separate cold-load allowance and
+`-PreloadKeepAliveMinutes` to keep that one model resident for the validation.
+
 ```powershell
 .\scripts\run-kilo-code-validation.ps1 `
   -Model "devstral-small-2:24b" `
