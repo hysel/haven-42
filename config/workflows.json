@@ -258,6 +258,21 @@
       }
     },
     {
+      "id": "run-continue-with-runtime-policy",
+      "name": "Run Continue With Runtime Policy",
+      "purpose": "Run one Continue CLI prompt with resident-model limits and explicit unload enforcement when configured.",
+      "category": "validation",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["model", "prompt", "configPath", "targetRepo", "ollamaBaseUrl", "continueCommand", "readOnly"],
+      "outputs": ["continueCliOutput", "residentModelCleanup"],
+      "entryPoints": {
+        "windows": "scripts/run-continue-with-runtime-policy.ps1",
+        "linux": "scripts/run-continue-with-runtime-policy.linux.sh",
+        "macos": "scripts/run-continue-with-runtime-policy.macos.sh"
+      }
+    },
+    {
       "id": "run-runtime-validation",
       "name": "Run Runtime Validation",
       "purpose": "Execute configured validation prompts, collect raw local outputs, and optionally append sanitized summaries.",
