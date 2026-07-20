@@ -80,6 +80,9 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+IFS=$'\t' read -r RUNTIME_RESIDENCY_MODE MAX_RESIDENT_MODELS PRELOAD_KEEP_ALIVE_MINUTES <<< "$("$SCRIPT_DIR/get-model-runtime-policy.shared.sh")"
+if [ "$RUNTIME_RESIDENCY_MODE" = "unload-after-run" ]; then UNLOAD_AFTER_EACH=true; fi
+
 printf '[1/8] Preparing local Agent model test run...\n' >&2
 if ! command -v python3 >/dev/null 2>&1; then
   printf 'python3 is required for this validation script.\n' >&2
@@ -96,7 +99,7 @@ for model in "${MODELS[@]}"; do
   MODEL_ARGS+=(--model "$model")
 done
 
-python3 - "$REPO_ROOT" "$OLLAMA_BASE_URL" "$TARGET_REPO" "$OUTPUT_PATH" "$PULL_MISSING" "$UNLOAD_AFTER_EACH" "$REMOVE_FAILED_MODELS" "$MODEL_PROFILE_PATH" "$VRAM_SELECTION_MODE" "$AVAILABLE_VRAM_GB" "$INCLUDE_OVERSIZED_MODELS" "$TIMEOUT_SECONDS" "${MODEL_ARGS[@]}" <<'PY'
+python3 - "$REPO_ROOT" "$OLLAMA_BASE_URL" "$TARGET_REPO" "$OUTPUT_PATH" "$PULL_MISSING" "$UNLOAD_AFTER_EACH" "$REMOVE_FAILED_MODELS" "$MODEL_PROFILE_PATH" "$VRAM_SELECTION_MODE" "$AVAILABLE_VRAM_GB" "$INCLUDE_OVERSIZED_MODELS" "$TIMEOUT_SECONDS" "$MAX_RESIDENT_MODELS" "$PRELOAD_KEEP_ALIVE_MINUTES" "${MODEL_ARGS[@]}" <<'PY'
 import argparse
 import json
 import os
@@ -106,7 +109,7 @@ import time
 import urllib.error
 import urllib.request
 
-repo_root, base_url, target_repo, output_path, pull_missing, unload_after_each, remove_failed_models, model_profile_path, vram_selection_mode, available_vram_gb, include_oversized_models, timeout_seconds, *rest = sys.argv[1:]
+repo_root, base_url, target_repo, output_path, pull_missing, unload_after_each, remove_failed_models, model_profile_path, vram_selection_mode, available_vram_gb, include_oversized_models, timeout_seconds, max_resident_models, preload_keep_alive_minutes, *rest = sys.argv[1:]
 print("[2/8] Validating target repository path...", file=sys.stderr)
 pull_missing = pull_missing.lower() == "true"
 unload_after_each = unload_after_each.lower() == "true"
@@ -114,6 +117,8 @@ remove_failed_models = remove_failed_models.lower() == "true"
 available_vram_gb = float(available_vram_gb or 0)
 include_oversized_models = include_oversized_models.lower() == "true"
 timeout_seconds = int(timeout_seconds or 120)
+max_resident_models = int(max_resident_models)
+preload_keep_alive_minutes = int(preload_keep_alive_minutes)
 
 parser = argparse.ArgumentParser(add_help=False)
 parser.add_argument("--model", action="append", default=[])
@@ -318,8 +323,17 @@ def delete_model(model):
     except Exception as exc:
         return {"Attempted": True, "Success": False, "Error": str(exc)}
 
-def load_model(model, keep_alive="10m"):
+def load_model(model, keep_alive=None):
     try:
+        if keep_alive not in (0, "0"):
+            running = get_json("/api/ps").get("models", [])
+            other_resident = [item for item in running if item.get("name") != model and item.get("model") != model]
+            if len(other_resident) >= max_resident_models:
+                return {"Success": False, "Error": f"Runtime policy blocks loading {model}: {len(other_resident)} other model(s) are resident."}
+            if other_resident:
+                print(f"Runtime policy warning: another model is resident before loading {model}.", file=sys.stderr)
+        if keep_alive is None:
+            keep_alive = f"{preload_keep_alive_minutes}m"
         post_json("/api/chat", {"model": model, "messages": [], "keep_alive": keep_alive, "stream": False})
         return {"Success": True, "Error": None}
     except Exception as exc:

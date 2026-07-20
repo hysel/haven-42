@@ -15,6 +15,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$runtimePolicy = (& (Join-Path $PSScriptRoot "get-model-runtime-policy.ps1") | ConvertFrom-Json)
+if ($runtimePolicy.residencyMode -eq "unload-after-run") { $UnloadAfterRun = $true } else { $AllowLoadedModels = $true }
 $sampleRoot = Join-Path $repoRoot "runtime-validation-output/sample-repositories"
 $resolvedContinueCommand = $ContinueCommand
 
@@ -143,7 +145,11 @@ function Invoke-OllamaPreload {
     param([string]$BaseUrl, [string]$Model)
 
     $base = $BaseUrl.TrimEnd('/')
-    $body = @{ model = $Model; prompt = ""; keep_alive = "15m"; stream = $false } | ConvertTo-Json
+    $models = @((Invoke-RestMethod -Uri "$base/api/ps" -Method Get -TimeoutSec 30).models)
+    $otherResident = @($models | Where-Object { $_.name -ne $Model -and $_.model -ne $Model })
+    if ($otherResident.Count -ge [int]$runtimePolicy.maxResidentModels) { throw "Runtime policy blocks loading ${Model}: $($otherResident.Count) other model(s) are resident." }
+    if ($otherResident.Count -gt 0) { Write-Warning "Runtime policy warning: another model is resident before loading $Model." }
+    $body = @{ model = $Model; prompt = ""; keep_alive = "$($runtimePolicy.preloadKeepAliveMinutes)m"; stream = $false } | ConvertTo-Json
     Invoke-RestMethod -Uri "$base/api/generate" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $LoadTimeoutSeconds | Out-Null
     $models = @((Invoke-RestMethod -Uri "$base/api/ps" -Method Get -TimeoutSec 30).models)
     if (@($models | Where-Object { $_.name -eq $Model -or $_.model -eq $Model }).Count -eq 0) { throw "Ollama did not report $Model as loaded after preflight." }

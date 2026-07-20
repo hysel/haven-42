@@ -18,6 +18,8 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$runtimePolicy = (& (Join-Path $PSScriptRoot "get-model-runtime-policy.ps1") | ConvertFrom-Json)
+if ($runtimePolicy.residencyMode -eq "unload-after-run") { $UnloadAfterEach = $true }
 Write-Host "[1/8] Preparing local Agent model test run..."
 
 if (-not $ModelCatalogPath) {
@@ -50,6 +52,11 @@ function Invoke-OllamaJson {
 function Get-OllamaTags {
     $uri = "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/tags"
     return Invoke-RestMethod -Uri $uri -Method Get -TimeoutSec $TimeoutSeconds
+}
+
+function Get-OllamaRunningModels {
+    $uri = "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/ps"
+    return @(Invoke-RestMethod -Uri $uri -Method Get -TimeoutSec $TimeoutSeconds).models
 }
 
 function Get-CandidateModels {
@@ -296,6 +303,15 @@ function Set-ModelLoaded {
     )
 
     try {
+        if ($KeepAlive -ne 0 -and $KeepAlive -ne "0") {
+            $otherResident = @(Get-OllamaRunningModels | Where-Object { $_.name -ne $Model -and $_.model -ne $Model })
+            if ($otherResident.Count -ge [int]$runtimePolicy.maxResidentModels) {
+                throw "Runtime policy blocks loading ${Model}: $($otherResident.Count) other model(s) are resident."
+            }
+            if ($otherResident.Count -gt 0) {
+                Write-Warning "Runtime policy warning: another model is resident before loading $Model."
+            }
+        }
         Invoke-OllamaJson -Path "/api/chat" -Body @{
             model = $Model
             messages = @()
@@ -692,7 +708,7 @@ foreach ($model in $candidateModels) {
     }
 
     Write-Host "[6/8] Loading $model and running API preflight checks..."
-    $loadResult = Set-ModelLoaded -Model $model -KeepAlive "10m"
+    $loadResult = Set-ModelLoaded -Model $model -KeepAlive "$($runtimePolicy.preloadKeepAliveMinutes)m"
     $toolResult = Invoke-ToolCallTest -Model $model
     $contentResult = Invoke-ExactContentTest -Model $model
     $failureSignal = Get-FailureSignal -LoadResult $loadResult -ToolResult $toolResult -ContentResult $contentResult

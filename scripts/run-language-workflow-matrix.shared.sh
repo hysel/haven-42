@@ -62,6 +62,9 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+IFS=$'\t' read -r RUNTIME_RESIDENCY_MODE MAX_RESIDENT_MODELS PRELOAD_KEEP_ALIVE_MINUTES <<< "$("$SCRIPT_DIR/get-model-runtime-policy.shared.sh")"
+if [ "$RUNTIME_RESIDENCY_MODE" = "unload-after-run" ]; then UNLOAD_AFTER_RUN=true; else REQUIRE_IDLE_SERVER=false; fi
+
 [ -n "$WRITE_CONFIG_PATH" ] || WRITE_CONFIG_PATH="$READ_CONFIG_PATH"
 if [ -z "$OUTPUT_PATH" ]; then
   OUTPUT_PATH="$REPO_ROOT/runtime-validation-output/language-workflow-matrix-$(date +%Y%m%d-%H%M%S).json"
@@ -208,7 +211,12 @@ run_continue() {
 
 preload_ollama_model() {
   local base_url="${1%/}" model="$2"
-  curl -fsS --max-time "$LOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/generate" -H 'Content-Type: application/json' -d "{\"model\":\"$model\",\"prompt\":\"\",\"keep_alive\":\"15m\",\"stream\":false}" >/dev/null
+  local running other_count
+  running="$(curl -fsS --max-time 30 "$base_url/api/ps")"
+  other_count="$(printf '%s' "$running" | python3 -c 'import json,sys; model=sys.argv[1]; print(sum(1 for item in json.load(sys.stdin).get("models", []) if item.get("name") != model and item.get("model") != model))' "$model")"
+  if [ "$other_count" -ge "$MAX_RESIDENT_MODELS" ]; then printf 'Runtime policy blocks loading %s: %s other model(s) are resident.\n' "$model" "$other_count" >&2; return 1; fi
+  if [ "$other_count" -gt 0 ]; then printf 'Runtime policy warning: another model is resident before loading %s.\n' "$model" >&2; fi
+  curl -fsS --max-time "$LOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/generate" -H 'Content-Type: application/json' -d "{\"model\":\"$model\",\"prompt\":\"\",\"keep_alive\":\"${PRELOAD_KEEP_ALIVE_MINUTES}m\",\"stream\":false}" >/dev/null
   curl -fsS --max-time 30 "$base_url/api/ps" | grep -Fq "\"$model\""
 }
 

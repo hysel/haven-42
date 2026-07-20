@@ -85,6 +85,9 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+IFS=$'\t' read -r RUNTIME_RESIDENCY_MODE MAX_RESIDENT_MODELS PRELOAD_KEEP_ALIVE_MINUTES <<< "$("$SCRIPT_DIR/get-model-runtime-policy.shared.sh")"
+if [ "$RUNTIME_RESIDENCY_MODE" = "unload-after-run" ]; then UNLOAD_AFTER_EACH=true; fi
+
 if [ -z "$OUTPUT_PATH" ]; then
   OUTPUT_PATH="$REPO_ROOT/runtime-validation-output/cline-cli-model-tests-$(date '+%Y%m%d-%H%M%S').json"
 fi
@@ -141,7 +144,11 @@ unload_model() {
 }
 preload_model() {
   model_name="$1"; base_url="${OLLAMA_BASE_URL%/}"
-  curl -fsS --max-time "$PRELOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/chat" -H 'Content-Type: application/json' -d "{\"model\":\"$model_name\",\"messages\":[],\"keep_alive\":\"15m\",\"stream\":false}" >/dev/null
+  running="$(curl -fsS --max-time 30 "$base_url/api/ps")"
+  other_count="$(printf '%s' "$running" | python3 -c 'import json,sys; model=sys.argv[1]; print(sum(1 for item in json.load(sys.stdin).get("models", []) if item.get("name") != model and item.get("model") != model))' "$model_name")"
+  if [ "$other_count" -ge "$MAX_RESIDENT_MODELS" ]; then printf 'Runtime policy blocks loading %s: %s other model(s) are resident.\n' "$model_name" "$other_count" >&2; return 1; fi
+  if [ "$other_count" -gt 0 ]; then printf 'Runtime policy warning: another model is resident before loading %s.\n' "$model_name" >&2; fi
+  curl -fsS --max-time "$PRELOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/chat" -H 'Content-Type: application/json' -d "{\"model\":\"$model_name\",\"messages\":[],\"keep_alive\":\"${PRELOAD_KEEP_ALIVE_MINUTES}m\",\"stream\":false}" >/dev/null
   curl -fsS --max-time 30 "$base_url/api/ps" | grep -Fq "\"$model_name\""
 }
 initialize_disposable_git_baseline() {

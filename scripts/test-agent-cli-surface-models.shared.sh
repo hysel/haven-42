@@ -54,10 +54,17 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
+IFS=$'\t' read -r RUNTIME_RESIDENCY_MODE MAX_RESIDENT_MODELS PRELOAD_KEEP_ALIVE_MINUTES <<< "$("$SCRIPT_DIR/get-model-runtime-policy.shared.sh")"
+if [ "$RUNTIME_RESIDENCY_MODE" = "unload-after-run" ]; then UNLOAD_AFTER_EACH=true; fi
+
 preload_ollama_model() {
   local model="$1"
-  local body
-  body="$(printf '{\"model\":\"%s\",\"prompt\":\"\",\"keep_alive\":\"15m\",\"stream\":false}' "$model")"
+  local body running other_count
+  running="$(curl --fail --silent --show-error --max-time 30 "$OLLAMA_BASE_URL/api/ps")"
+  other_count="$(printf '%s' "$running" | python3 -c 'import json,sys; model=sys.argv[1]; print(sum(1 for item in json.load(sys.stdin).get("models", []) if item.get("name") != model and item.get("model") != model))' "$model")"
+  if [ "$other_count" -ge "$MAX_RESIDENT_MODELS" ]; then printf 'Runtime policy blocks loading %s: %s other model(s) are resident.\n' "$model" "$other_count" >&2; return 1; fi
+  if [ "$other_count" -gt 0 ]; then printf 'Runtime policy warning: another model is resident before loading %s.\n' "$model" >&2; fi
+  body="$(printf '{\"model\":\"%s\",\"prompt\":\"\",\"keep_alive\":\"%sm\",\"stream\":false}' "$model" "$PRELOAD_KEEP_ALIVE_MINUTES")"
   curl --fail --silent --show-error --max-time "$PRELOAD_TIMEOUT_SECONDS" -X POST "$OLLAMA_BASE_URL/api/generate" -H 'Content-Type: application/json' -d "$body" >/dev/null
   curl --fail --silent --show-error --max-time 30 "$OLLAMA_BASE_URL/api/ps" | grep -Fq "\"$model\"" || { printf 'Ollama did not report %s as loaded after preflight.\n' "$model" >&2; return 1; }
 }
