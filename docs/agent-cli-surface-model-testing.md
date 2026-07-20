@@ -75,6 +75,20 @@ Use the `.macos.sh` wrapper on macOS.
 
 For any active surface whose CLI command or flags differ, pass command overrides rather than editing the harness.
 
+For a single-model Kilo run that may need more time than an interactive host
+permits, use `scripts/run-kilo-code-validation.ps1` from a user-managed
+PowerShell session. It accepts one required `-Model` and always sends a final
+Ollama unload request, including after a failed validation. It still targets
+only the generated sample by default:
+
+```powershell
+.\scripts\run-kilo-code-validation.ps1 `
+  -Model "devstral-small-2:24b" `
+  -OllamaBaseUrl "http://192.0.2.42:11434" `
+  -IncludeWriteSmoke `
+  -IncludeScopedEdit
+```
+
 ## Dry Run Examples
 
 ```powershell
