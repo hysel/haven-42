@@ -90,9 +90,10 @@ Do not copy that value back into committed docs or `.continue/config.yaml`.
 Copy `config/model-runtime-policy.sample.json` to
 `config/model-runtime-policy.local.json` to choose whether a local model is
 unloaded after a run or remains loaded for interactive use. The default policy
-unloads after a run and permits only one resident model. Model launchers read
-Ollama's live resident-model list before loading; they warn about an existing
-model and block a second model at the configured limit.
+unloads after a run and permits only one resident model. The model launchers
+and direct model-check runners read Ollama's live resident-model list before
+loading; they warn about an existing model and block a second model at the
+configured limit.
 
 ## Before You Commit
 
