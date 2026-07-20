@@ -9,7 +9,8 @@ param(
     [string]$ContinueCommand = "npx",
     [int]$LoadTimeoutSeconds = 900,
     [int]$TimeoutSeconds = 900,
-    [switch]$ReadOnly
+    [switch]$ReadOnly,
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Stop"
@@ -27,6 +28,7 @@ if ($resolvedCommand -match '(?i)\.ps1$') {
     $cmdShim = [System.IO.Path]::ChangeExtension($resolvedCommand, ".cmd")
     if (Test-Path -LiteralPath $cmdShim) { $resolvedCommand = $cmdShim }
 }
+if ($DryRun) { Write-Host "Would run Continue with model $Model under the $($policy.residencyMode) runtime policy."; exit 0 }
 
 function Invoke-OllamaUnload {
     $body = @{ model = $Model; prompt = ""; keep_alive = 0; stream = $false } | ConvertTo-Json

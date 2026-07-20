@@ -2,15 +2,16 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODEL=""; PROMPT=""; CONFIG_PATH=""; TARGET_REPO="$(pwd)"; OLLAMA_BASE_URL="http://127.0.0.1:11434"; CONTINUE_COMMAND="npx"; TIMEOUT_SECONDS=900; READ_ONLY=false
+MODEL=""; PROMPT=""; CONFIG_PATH=""; TARGET_REPO="$(pwd)"; OLLAMA_BASE_URL="http://127.0.0.1:11434"; CONTINUE_COMMAND="npx"; TIMEOUT_SECONDS=900; READ_ONLY=false; DRY_RUN=false
 while [ "$#" -gt 0 ]; do
   case "$1" in
-    --model) MODEL="$2"; shift 2 ;; --prompt) PROMPT="$2"; shift 2 ;; --config-path) CONFIG_PATH="$2"; shift 2 ;; --target-repo) TARGET_REPO="$2"; shift 2 ;; --ollama-base-url) OLLAMA_BASE_URL="$2"; shift 2 ;; --continue-command) CONTINUE_COMMAND="$2"; shift 2 ;; --timeout-seconds) TIMEOUT_SECONDS="$2"; shift 2 ;; --readonly) READ_ONLY=true; shift ;; *) printf 'Unknown argument: %s\n' "$1" >&2; exit 1 ;; esac
+    --model) MODEL="$2"; shift 2 ;; --prompt) PROMPT="$2"; shift 2 ;; --config-path) CONFIG_PATH="$2"; shift 2 ;; --target-repo) TARGET_REPO="$2"; shift 2 ;; --ollama-base-url) OLLAMA_BASE_URL="$2"; shift 2 ;; --continue-command) CONTINUE_COMMAND="$2"; shift 2 ;; --timeout-seconds) TIMEOUT_SECONDS="$2"; shift 2 ;; --readonly) READ_ONLY=true; shift ;; --dry-run) DRY_RUN=true; shift ;; *) printf 'Unknown argument: %s\n' "$1" >&2; exit 1 ;; esac
 done
 [ -n "$MODEL" ] && [ -n "$PROMPT" ] || { printf '%s\n' '--model and --prompt are required.' >&2; exit 1; }
 [ -n "$CONFIG_PATH" ] || CONFIG_PATH="$TARGET_REPO/.continue/config.local.yaml"
 [ -f "$CONFIG_PATH" ] && [ -d "$TARGET_REPO" ] || { printf '%s\n' 'ConfigPath or TargetRepo does not exist.' >&2; exit 1; }
 IFS=$'\t' read -r RESIDENCY_MODE MAX_RESIDENT PRELOAD_MINUTES <<< "$("$SCRIPT_DIR/get-model-runtime-policy.shared.sh")"
+if [ "$DRY_RUN" = true ]; then printf 'Would run Continue with model %s under the %s runtime policy.\n' "$MODEL" "$RESIDENCY_MODE"; exit 0; fi
 POLICY_PYTHON="python3"; command -v "$POLICY_PYTHON" >/dev/null 2>&1 || POLICY_PYTHON="python"; command -v "$POLICY_PYTHON" >/dev/null 2>&1 || POLICY_PYTHON="py"
 command -v "$POLICY_PYTHON" >/dev/null 2>&1 || { printf '%s\n' 'python3, python, or py is required.' >&2; exit 1; }
 BASE="${OLLAMA_BASE_URL%/}"
