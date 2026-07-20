@@ -27,6 +27,12 @@ Small 2 24B. Headless tool calls require `--auto-approve true`; with approval
 disabled, Cline requests a TTY approval instead. Therefore this pack does not
 generate a general Cline write profile or promote headless write automation.
 
+On Windows, keep the isolated `--data-dir` outside OneDrive or another
+synchronized workspace. Cline CLI 3.0.46 repeatedly failed after its first
+tool call with an `EEXIST` session-persistence error when the data directory
+was inside the synchronized repository, while a fresh system-temporary data
+directory completed the same task.
+
 ## Install Cline CLI
 
 Cline currently documents CLI installation with npm:
@@ -139,6 +145,21 @@ macOS:
 ```
 
 The script verifies the write outside Cline with Git and direct file inspection, then restores the disposable README.
+
+## Scoped-Edit Status
+
+A Windows Cline CLI 3.0.46 run with Devstral Small 2 24B completed a bounded
+two-file Python source-and-test edit and passed external file-scope and behavior
+checks. It did not pass `git diff --check`: `app/main.py` contained mixed line
+endings after the edit. A bounded repair attempt then exhausted the model output
+limit without completing. Treat this as `partial-pass`, keep Cline scoped-edit
+promotion blocked, and require all of these checks for the next attempt:
+
+- only the expected source and test files changed;
+- the exact behavior assertion passes outside Cline;
+- `git diff --check` is clean;
+- edited text files preserve the repository line-ending convention;
+- no helper or temporary files are created in the target repository.
 
 ## CLI Argument Templates
 

@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Recorded Cline CLI 3.0.46 realistic scoped-edit evidence: exact file scope and behavior passed with Devstral Small 2 24B, but mixed line endings failed whitespace validation, so scoped-edit promotion remains blocked; documented use of system-temporary isolated state to avoid synchronized-workspace session collisions.
+
 - Added shared OS-aware PowerShell command resolution for native executables, Windows npm `.cmd` shims, and standalone `.ps1` scripts; applied it across Cline, shared agent, Continue, runtime-policy, and language-matrix process harnesses.
 - Added workflow entry-point and portable-template regression tests covering Windows, Linux, and macOS, plus explicit OS-selection rules and compatibility guidance.
 

@@ -295,6 +295,7 @@
 - [x] Validate Aider against a generated sample repository in plan or patch mode.
 - [x] Record sanitized Cline read-only evidence for one non-Continue agent surface.
 - [x] Validate Cline approved-write smoke test against a disposable generated sample with external verification.
+- [ ] Repeat Cline's realistic generated-sample scoped edit until exact file scope, behavior, `git diff --check`, line-ending preservation, and unexpected-file checks pass together. The 2026-07-20 Devstral attempt passed scope and behavior but introduced mixed line endings; its bounded repair attempt did not complete.
 - [x] Add Cline CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.

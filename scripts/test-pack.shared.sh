@@ -722,6 +722,8 @@ test_cline_cli_model_testing_doc() {
     grep -q "test-cline-cli-models" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
     grep -q "command-template" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
     grep -q "Write Smoke Test" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
+    grep -q "Scoped-Edit Status" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
+    grep -q "system-temporary" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
     grep -q "ClineArgumentsTemplate" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
     grep -q "IncludeWriteSmoke" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
     grep -q "Initialize-DisposableGitBaseline" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
@@ -730,6 +732,7 @@ test_cline_cli_model_testing_doc() {
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
     grep -q "Cline CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&
+    grep -q "Cline CLI Devstral Small 2 realistic scoped-edit attempt" "$REPO_ROOT/config/evidence-catalog.tsv" &&
     grep -q "docs/cline-cli-model-testing.md" "$REPO_ROOT/README.md"
 }
 test_continue_cli_model_testing_doc() {

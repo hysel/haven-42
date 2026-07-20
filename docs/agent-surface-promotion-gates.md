@@ -29,7 +29,7 @@ Kilo Code remains a live-validation blocker. Its documented command shape, nativ
 
 | Surface | Current position | Next gate |
 | --- | --- | --- |
-| Cline | Read-only and minimal disposable write-smoke evidence exists. | Realistic scoped edit against a generated sample with external changed-file and behavior verification. |
+| Cline | Read-only and minimal disposable write-smoke evidence exists. A realistic Devstral scoped-edit attempt passed exact file scope and behavior but failed whitespace validation because it introduced mixed line endings; its repair attempt did not complete. | Repeat the generated-sample scoped edit and require external changed-file, behavior, `git diff --check`, line-ending, and unexpected-file verification to pass together. |
 | Aider | CLI read-only, disposable write-smoke, and richer generated-sample scoped edits exist. | Explicitly approved non-generated repository validation before real-project approved-write claims. |
 | Roo Code | Upstream retired. | Do not promote or add new validation; evaluate a maintained successor separately. |
 | Kilo Code | Shared wrapper, npm install plan, native-Ollama project-local config generator, explicit `code` agent selection, and isolated user-profile execution exist; renewed live task execution is blocked. | Resolve model/surface tool-protocol compatibility, then rerun generated-sample read-only, write-smoke, and scoped-edit tests one model at a time, unloading each model after testing. |

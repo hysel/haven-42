@@ -840,6 +840,7 @@ Invoke-PackTest "Cline CLI model testing docs define automation workflow" {
     Assert-True -Condition ($doc -match "test-cline-cli-models") -Message "Cline CLI testing doc should mention automation scripts."
     Assert-True -Condition ($doc -match "command-template") -Message "Cline CLI testing doc should describe command-template flexibility."
     Assert-True -Condition ($doc -match "Write Smoke Test") -Message "Cline CLI testing doc should define write smoke test flow."
+    Assert-True -Condition ($doc -match "Scoped-Edit Status" -and $doc -match "system-temporary") -Message "Cline CLI docs should preserve the scoped-edit failure and synchronized-workspace workaround."
     Assert-True -Condition ($psScript -match "ClineArgumentsTemplate") -Message "PowerShell Cline CLI tester should support argument templates."
     Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell Cline CLI tester should support write-smoke tests."
     Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell Cline CLI tester should support model unload after each run."
@@ -851,6 +852,7 @@ Invoke-PackTest "Cline CLI model testing docs define automation workflow" {
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Cline CLI tester should support model unload after each run."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Cline CLI tester should support model unload after each run."
     Assert-True -Condition ($catalog -match "Cline CLI model test harness") -Message "Evidence catalog should track Cline CLI harness validation."
+    Assert-True -Condition ($catalog -match "Cline CLI Devstral Small 2 realistic scoped-edit attempt" -and $catalog -match "partial-pass") -Message "Evidence catalog should preserve the failed Cline scoped-edit promotion gate."
     Assert-True -Condition ($readme -match "docs/cline-cli-model-testing.md") -Message "README should link Cline CLI model testing doc."
 }
 Invoke-PackTest "agent CLI surface testing docs define shared automation workflow" {

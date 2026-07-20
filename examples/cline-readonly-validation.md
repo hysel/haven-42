@@ -289,3 +289,31 @@ Do not commit.
 - Status: Write smoke-test validated for disposable generated Python sample.
 - Failure signal: None.
 - Promotion decision: Do not mark Cline broadly approved-write ready for real projects yet. Next write validation must use a realistic scoped code or configuration edit in a disposable sample and pass external Git and file-content verification.
+
+## 2026-07-20 Cline CLI Realistic Scoped-Edit Attempt
+
+### Summary
+
+- Surface: Cline CLI 3.0.46 on Windows.
+- Model/provider: `devstral-small-2:24b` through an isolated OpenAI-compatible Ollama profile.
+- Target: fresh disposable generated Python sample with an isolated Git baseline.
+- Task: add a `version: v1` health-response field and update its existing exact-dictionary test; only `app/main.py` and `tests/test_main.py` were allowed to change.
+- Private endpoint, local paths, raw output, and profile credentials are omitted.
+
+### External Verification
+
+| Check | Result |
+| --- | --- |
+| Cline process result | Passed; exit code 0 after moving isolated state to a system-temporary directory |
+| Changed-file scope | Passed; only `app/main.py` and `tests/test_main.py` changed |
+| Direct Python behavior assertion | Passed; exact response contained `service`, `status`, and `version` |
+| `git diff --check` | Failed; mixed line endings in `app/main.py` were reported as trailing whitespace |
+| Bounded repair attempt | Failed; the model proposed a helper script and exhausted its output-token limit before completing |
+| Model unload | Passed; the target model was not resident after each attempt |
+
+### Decision
+
+- Status: Partial pass; do not promote Cline scoped-edit or approved-write readiness.
+- Failure signals: `DIFF_CHECK_FAILED`, `MIXED_LINE_ENDINGS`, `REPAIR_NONCOMPLETION`.
+- Operational finding: on this Windows setup, a Cline data directory inside the synchronized repository caused repeatable `EEXIST` session-persistence failures after the first tool call. A fresh system-temporary data directory avoided that failure.
+- Next gate: repeat a bounded generated-sample source-and-test edit with external scope, behavior, whitespace, line-ending, and unexpected-file verification all passing.
