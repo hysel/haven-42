@@ -26,7 +26,7 @@ Generate the menu on Linux or macOS:
 ./scripts/show-agent-pack-menu.macos.sh --markdown-output-path runtime-validation-output/agent-pack-menu.md --output-path runtime-validation-output/agent-pack-menu.json --as-json
 ```
 
-Use this menu before going to individual script docs. The generated agent surface snapshot comes from `config/agent-surface-solutions.json` and includes only surfaces whose `showInDefaultMenu` policy is enabled. Candidate, quarantined, and historical surfaces remain available in the evidence dashboard and detailed solution catalog without appearing as setup choices.
+Use this menu before going to individual script docs. The generated agent surface snapshot comes from `config/agent-surface-solutions.json` and includes only surfaces whose `showInDefaultMenu` policy is enabled. Candidate and historical surfaces remain available in the detailed solution catalog without appearing as setup choices; failed integrations are removed entirely.
 
 The Linux and macOS wrappers use the native Python 3 renderer and do not
 require PowerShell.

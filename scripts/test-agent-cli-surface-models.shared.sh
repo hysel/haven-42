@@ -11,7 +11,6 @@ OLLAMA_BASE_URL="http://127.0.0.1:11434"
 AGENT_COMMAND=""
 AGENT_ARGS_TEMPLATE=""
 MODEL_ARGS_TEMPLATE=""
-AGENT_CONFIG_PATH=""
 INSTALL_HINT=""
 AGENT_COMMAND_EXPLICIT=false
 AGENT_ARGS_TEMPLATE_EXPLICIT=false
@@ -35,7 +34,6 @@ while [ "$#" -gt 0 ]; do
     --agent-command|-AgentCommand) AGENT_COMMAND="$2"; AGENT_COMMAND_EXPLICIT=true; shift 2 ;;
     --agent-arguments-template|-AgentArgumentsTemplate) AGENT_ARGS_TEMPLATE="$2"; AGENT_ARGS_TEMPLATE_EXPLICIT=true; shift 2 ;;
     --model-argument-template|-ModelArgumentTemplate) MODEL_ARGS_TEMPLATE="$2"; shift 2 ;;
-    --agent-config-path|-AgentConfigPath) AGENT_CONFIG_PATH="$2"; shift 2 ;;
     --install-hint|-InstallHint) INSTALL_HINT="$2"; shift 2 ;;
     --timeout-seconds|-TimeoutSeconds) TIMEOUT_SECONDS="$2"; shift 2 ;;
     --preload-timeout-seconds|-PreloadTimeoutSeconds) PRELOAD_TIMEOUT_SECONDS="$2"; shift 2 ;;
@@ -134,15 +132,6 @@ if [ ! -d "$TARGET_REPO" ]; then
   "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --force >/dev/null
 fi
 
-if [ "$SURFACE_KEY" = "kilo-code-cli" ] && [ "$DRY_RUN" != true ]; then
-  [ -n "$AGENT_CONFIG_PATH" ] || AGENT_CONFIG_PATH="$TARGET_REPO/.kilo/kilo.jsonc"
-  if [ ! -f "$AGENT_CONFIG_PATH" ]; then
-    printf 'Kilo Code requires a generated local config for live tests: %s. Run setup-agent-surface with --surface kilo --action Configure against this generated sample first.\n' "$AGENT_CONFIG_PATH" >&2
-    exit 1
-  fi
-  AGENT_CONFIG_PATH="$(cd "$(dirname "$AGENT_CONFIG_PATH")" && pwd)/$(basename "$AGENT_CONFIG_PATH")"
-fi
-
 if [ ! -d "$TARGET_REPO" ]; then
   printf 'TargetRepo does not exist: %s\n' "$TARGET_REPO" >&2
   exit 1
@@ -208,7 +197,6 @@ printf '[1/7] Preparing %s model test run...\n' "$SURFACE_NAME" >&2
 printf '[2/7] Target repository: generated sample %s\n' "$(basename "$TARGET_REPO")" >&2
 printf '[3/7] Candidate models: %s\n' "${MODELS[*]}" >&2
 printf '[4/7] Agent command: %s\n' "$AGENT_COMMAND" >&2
-[ "$SURFACE_KEY" != "kilo-code-cli" ] || [ "$DRY_RUN" = true ] || printf '[4/7] Kilo config: %s\n' "$AGENT_CONFIG_PATH" >&2
 
 read_prompt='Use tools to inspect the opened repository root. Do not modify files. Do not create files. Do not run package installation. Do not guess. Return only the actual top-level files and folders inspected, the project type, key source and test files inspected, risks or missing information, and a failure signal. If tools are unavailable, say TOOLS_UNAVAILABLE.'
 write_line="$SURFACE_NAME approved-write smoke test passed."
@@ -241,14 +229,7 @@ for model in "${MODELS[@]}"; do
     exit_code=0
   else
     set +e
-    if [ "$SURFACE_KEY" = "kilo-code-cli" ]; then
-      kilo_home="$(mktemp -d "${TMPDIR:-/tmp}/local-engineering-agent-pack-kilo.XXXXXX")"
-      mkdir -p "$kilo_home/.config" "$kilo_home/.data"
-      output=$(cd "$TARGET_REPO" && HOME="$kilo_home" USERPROFILE="$kilo_home" XDG_CONFIG_HOME="$kilo_home/.config" XDG_DATA_HOME="$kilo_home/.data" timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" 2>&1)
-      rm -rf "$kilo_home"
-    else
-      output=$(cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" 2>&1)
-    fi
+    output=$(cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" 2>&1)
     exit_code=$?
     set -e
   fi
@@ -269,13 +250,7 @@ for model in "${MODELS[@]}"; do
       write_status='write-smoke-validated'
     else
       set +e
-      if [ "$SURFACE_KEY" = "kilo-code-cli" ]; then
-        kilo_home="$(mktemp -d "${TMPDIR:-/tmp}/local-engineering-agent-pack-kilo.XXXXXX")"; mkdir -p "$kilo_home/.config" "$kilo_home/.data"
-        (cd "$TARGET_REPO" && HOME="$kilo_home" USERPROFILE="$kilo_home" XDG_CONFIG_HOME="$kilo_home/.config" XDG_DATA_HOME="$kilo_home/.data" timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-write.out 2>&1)
-        rm -rf "$kilo_home"
-      else
-        (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-write.out 2>&1)
-      fi
+      (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-write.out 2>&1)
       write_exit=$?
       set -e
       changed_files="$(cd "$TARGET_REPO" && git diff --name-only)"
@@ -302,13 +277,7 @@ for model in "${MODELS[@]}"; do
         scoped_edit_status='scoped-edit-validated'
       else
         set +e
-        if [ "$SURFACE_KEY" = "kilo-code-cli" ]; then
-          kilo_home="$(mktemp -d "${TMPDIR:-/tmp}/local-engineering-agent-pack-kilo.XXXXXX")"; mkdir -p "$kilo_home/.config" "$kilo_home/.data"
-          (cd "$TARGET_REPO" && HOME="$kilo_home" USERPROFILE="$kilo_home" XDG_CONFIG_HOME="$kilo_home/.config" XDG_DATA_HOME="$kilo_home/.data" timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-scoped-edit.out 2>&1)
-          rm -rf "$kilo_home"
-        else
-          (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-scoped-edit.out 2>&1)
-        fi
+        (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-scoped-edit.out 2>&1)
         scoped_exit=$?
         set -e
         changed_files="$(cd "$TARGET_REPO" && git diff --name-only | sort)"

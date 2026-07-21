@@ -61,7 +61,7 @@ test_release_packaging_scripts() {
     grep -q "Verify Checksums" "$REPO_ROOT/docs/release.md" &&
     grep -q "GitHub Release" "$REPO_ROOT/docs/release.md" &&
     grep -q "| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "Future candidate and quarantine expansion" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Future candidate expansion" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters" "$REPO_ROOT/TODO.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
@@ -173,7 +173,6 @@ test_os_aware_command_contract() {
   [ -f "$REPO_ROOT/scripts/CommandResolution.psm1" ] &&
     grep -q 'windows-cmd-shim' "$REPO_ROOT/scripts/CommandResolution.psm1" &&
     grep -q 'powershell-script' "$REPO_ROOT/scripts/CommandResolution.psm1" &&
-    grep -q 'Resolve-ExternalCommand' "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
     grep -q 'Resolve-ExternalCommand' "$REPO_ROOT/scripts/test-agent-cli-surface-models.ps1" &&
     ! grep -q '{TempDir}\\' "$REPO_ROOT/config/agent-cli-surface-defaults.json" &&
     python3 - "$REPO_ROOT" <<'PY'
@@ -234,8 +233,6 @@ test_linux_macos_scripts_do_not_require_pwsh() {
     "$REPO_ROOT/scripts/pull-local-agent-models.macos.sh" \
     "$REPO_ROOT/scripts/test-local-agent-models.linux.sh" \
     "$REPO_ROOT/scripts/test-local-agent-models.macos.sh" \
-    "$REPO_ROOT/scripts/test-cline-cli-models.linux.sh" \
-    "$REPO_ROOT/scripts/test-cline-cli-models.macos.sh" \
     "$REPO_ROOT/scripts/generate-sample-repositories.linux.sh" \
     "$REPO_ROOT/scripts/generate-sample-repositories.macos.sh"
 }
@@ -672,7 +669,7 @@ test_agent_surface_options_doc() {
     grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Milestone 14 Positioning Completion Basis" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Full live validation parity belongs to Milestone 17" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    grep -q "docs/cline-readonly-validation.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Aider and OpenCode generated-sample evidence" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/surface-specific-config-bundles.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/setup-paths.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Candidate means" "$REPO_ROOT/docs/agent-surface-options.md" &&
@@ -681,7 +678,7 @@ test_agent_surface_options_doc() {
     grep -q "Aider" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Milestone 17 Supported-Surface Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "Quarantine Restoration Gate" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "fresh integration proposal" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Roo Code is historical" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     [ -f "$REPO_ROOT/docs/openhands-validation-boundary.md" ] &&
     grep -q "OpenHands Validation Boundary" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
@@ -690,7 +687,6 @@ test_agent_surface_options_doc() {
     grep -q "Docker socket" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "unrestricted network access" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "docs/openhands-validation-boundary.md" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "live write validation is blocked by task execution" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "| Milestone 17: Agent Surface Compatibility Validation | Complete |" "$REPO_ROOT/ROADMAP.md" &&
@@ -699,50 +695,37 @@ test_agent_surface_options_doc() {
     grep -q "\\[x\\] Complete Milestone 17 for the promoted supported-surface set" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Retire Roo Code from future validation" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[ \] Retest Kilo after a concrete task-execution/tool-protocol fix or version change" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Add a local-only OpenCode Ollama config generator" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Validate OpenCode's installed CLI" "$REPO_ROOT/TODO.md" &&
     [ -f "$REPO_ROOT/docs/opencode-cli-model-testing.md" ] &&
-    [ -f "$REPO_ROOT/examples/kilo-validation.md" ] &&
     grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q ".kilo/kilo.jsonc" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q "passes the generated-sample read-only gate" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "hasValidationFailure" "$REPO_ROOT/scripts/test-agent-cli-surface-models.ps1" &&
     grep -q 'ScopedEditStatus.*failed' "$REPO_ROOT/scripts/test-agent-cli-surface-models.shared.sh" &&
-    grep -q "Kilo Code CLI Qwen 3.5 35B generated-sample validation" "$REPO_ROOT/config/evidence-catalog.tsv" &&
     grep -q "upstream project is archived" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "\\[x\\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
 }
 
 
 
-test_cline_cli_model_testing_doc() {
-  [ -f "$REPO_ROOT/docs/cline-cli-model-testing.md" ] &&
-    [ -f "$REPO_ROOT/scripts/test-cline-cli-models.ps1" ] &&
-    [ -f "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" ] &&
-    grep -q "Cline CLI Model Testing" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
-    grep -q "test-cline-cli-models" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
-    grep -q "command-template" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
-    grep -q "Write Smoke Test" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
-    grep -q "Scoped-Edit Status" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
-    grep -q "system-temporary" "$REPO_ROOT/docs/cline-cli-model-testing.md" &&
-    grep -q "ClineArgumentsTemplate" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
-    grep -q "IncludeWriteSmoke" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
-    grep -q "IncludeScopedEdit" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
-    grep -q "New-ClineTemporaryProfile" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
-    grep -q "Test-LfOnly" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
-    grep -q "Initialize-DisposableGitBaseline" "$REPO_ROOT/scripts/test-cline-cli-models.ps1" &&
-    grep -q "CLINE_ARGS_TEMPLATE" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
-    grep -q "INCLUDE_WRITE_SMOKE" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
-    grep -q "INCLUDE_SCOPED_EDIT" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
-    grep -q "SCOPED_EDIT_LINE_ENDINGS_FAILED" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
-    grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
-    grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-cline-cli-models.shared.sh" &&
-    grep -q "Cline CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&
-    grep -q "Cline CLI Devstral Small 2 realistic scoped-edit attempt" "$REPO_ROOT/config/evidence-catalog.tsv" &&
-    grep -q "Review quarantined Cline and Kilo evidence" "$REPO_ROOT/README.md" &&
-    grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md"
+test_removed_agent_integrations() {
+  for path in \
+    docs/cline-readonly-validation.md \
+    docs/cline-cli-model-testing.md \
+    examples/cline-readonly-validation.md \
+    examples/kilo-validation.md \
+    scripts/run-kilo-code-validation.ps1 \
+    scripts/test-cline-cli-models.ps1 \
+    scripts/test-cline-cli-models.shared.sh \
+    scripts/test-kilo-code-cli-models.ps1 \
+    scripts/test-kilo-code-cli-models.shared.sh; do
+    [ ! -e "$REPO_ROOT/$path" ] || return 1
+  done
+  ! grep -Eqi 'cline|kilo' "$REPO_ROOT/config/agent-surface-solutions.json" &&
+    ! grep -Eqi 'cline|kilo' "$REPO_ROOT/config/agent-surface-capabilities.json" &&
+    ! grep -Eqi 'cline|kilo' "$REPO_ROOT/config/agent-cli-surface-defaults.json" &&
+    ! grep -Eqi 'cline|kilo' "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" &&
+    grep -q "Removed Integrations" "$REPO_ROOT/docs/agent-surface-options.md"
 }
 test_continue_cli_model_testing_doc() {
   [ -f "$REPO_ROOT/docs/continue-cli-model-testing.md" ] &&
@@ -1356,15 +1339,6 @@ JSON
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Health --target-repo "$temp_root" --aider-command sh >/tmp/aider-adapter-health.out 2>&1 || return 1
   grep -q 'Aider adapter health: healthy' /tmp/aider-adapter-health.out || return 1
 
-  for kilo_action in Plan Install Configure Health; do
-    if "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface kilo --action "$kilo_action" --target-repo "$temp_root" --recommendation-path "$recommendation_path" --lane WriteSafe --ollama-base-url 'http://example.invalid:11434' --dry-run >/tmp/kilo-adapter-blocked.out 2>&1; then
-      return 1
-    fi
-    grep -q 'Kilo Code support is quarantined' /tmp/kilo-adapter-blocked.out || return 1
-  done
-  [ ! -e "$temp_root/.kilo/kilo.jsonc" ] || return 1
-  grep -q '@kilocode/cli' "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" || return 1
-
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface opencode --action Plan >/tmp/opencode-adapter-plan.out 2>&1 || return 1
   grep -q 'opencode-ai' /tmp/opencode-adapter-plan.out || return 1
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface opencode --action Install --dry-run >/tmp/opencode-adapter-install.out 2>&1 || return 1
@@ -1417,11 +1391,11 @@ test_solution_architecture_review_doc() {
     grep -q "19: Installer Profiles" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "qualifying upstream Cline or Kilo change" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "new integration proposal" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for positioning and support-tier governance" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for the promoted supported-surface set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "OpenHands is a candidate with a defined isolation boundary" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Quarantined and candidate surfaces are excluded from supported parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Candidate surfaces are excluded from supported parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "EMPTY_MODEL_OUTPUT" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Evidence States" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "tested-passed" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
@@ -1437,7 +1411,6 @@ test_solution_architecture_review_doc() {
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Reuse the recommendation data model for future non-Continue agent surfaces" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Provide or approve suitable non-generated repositories" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Retest Kilo after a concrete task-execution/tool-protocol fix or version change" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated" "$REPO_ROOT/TODO.md" &&
@@ -1524,7 +1497,7 @@ run_test "multi-repository validation docs define sanitized evidence workflow" t
 run_test "sample repository factory validation evidence is sanitized" test_sample_repository_factory_validation_evidence
 run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc
 run_test "agent surface docs define portability boundary" test_agent_surface_options_doc
-run_test "Cline CLI model testing docs define automation workflow" test_cline_cli_model_testing_doc
+run_test "failed agent integrations have no executable surface" test_removed_agent_integrations
 run_test "Continue CLI model testing docs define automation workflow" test_continue_cli_model_testing_doc
 run_test "language support docs define staged multi-language boundary" test_language_support_doc
 run_test "optional language rule packs are evidence-gated and not globally loaded" test_optional_language_rule_packs

@@ -26,7 +26,7 @@ result approves real-project writes.
 Treat the result as surface-specific evidence:
 
 ```text
-Aider CLI validation is CLI-specific and does not prove Continue, Cline, VS Code, or VSCodium behavior.
+Aider CLI validation is CLI-specific and does not prove Continue, VS Code, VSCodium, or another agent surface's behavior.
 ```
 
 ## Install Aider CLI

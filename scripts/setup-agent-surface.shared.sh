@@ -10,7 +10,6 @@ LANE="WriteSafe"
 OLLAMA_BASE_URL="http://127.0.0.1:11434"
 INSTALL_METHOD="aider-install"
 AIDER_COMMAND="aider"
-KILO_COMMAND="kilo"
 OPENCODE_COMMAND="opencode"
 DRY_RUN=0
 FORCE=0
@@ -26,7 +25,6 @@ while [ "$#" -gt 0 ]; do
     --ollama-base-url|-OllamaBaseUrl) OLLAMA_BASE_URL="$2"; shift 2 ;;
     --install-method|-InstallMethod) INSTALL_METHOD="$2"; shift 2 ;;
     --aider-command|-AiderCommand) AIDER_COMMAND="$2"; shift 2 ;;
-    --kilo-command|-KiloCommand) KILO_COMMAND="$2"; shift 2 ;;
     --opencode-command|-OpenCodeCommand) OPENCODE_COMMAND="$2"; shift 2 ;;
     --dry-run|-DryRun) DRY_RUN=1; shift ;;
     --force|-Force) FORCE=1; shift ;;
@@ -34,26 +32,17 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-case "$SURFACE" in aider|kilo|opencode) ;; *) printf 'Unsupported surface: %s\n' "$SURFACE" >&2; exit 1 ;; esac
+case "$SURFACE" in aider|opencode) ;; *) printf 'Unsupported surface: %s\n' "$SURFACE" >&2; exit 1 ;; esac
 case "$ACTION" in Plan|Install|Configure|Health) ;; *) printf 'Unsupported action: %s\n' "$ACTION" >&2; exit 1 ;; esac
 case "$LANE" in WriteSafe|PlanOnly|DeepReview) ;; *) printf 'Unsupported lane: %s\n' "$LANE" >&2; exit 1 ;; esac
 case "$INSTALL_METHOD" in aider-install|pipx|uv|npm) ;; *) printf 'Unsupported install method: %s\n' "$INSTALL_METHOD" >&2; exit 1 ;; esac
 
-if [ "$SURFACE" = "kilo" ]; then
-  printf '%s\n' 'Kilo Code support is quarantined at CLI 7.4.11 after failed write and scoped-edit gates. The retained setup code and test harness are maintainer-only until a relevant upstream version or tool-protocol change passes revalidation.' >&2
-  exit 2
-fi
-
-if { [ "$SURFACE" = "kilo" ] || [ "$SURFACE" = "opencode" ]; } && [ "$INSTALL_METHOD" = "aider-install" ]; then INSTALL_METHOD="npm"; fi
+if [ "$SURFACE" = "opencode" ] && [ "$INSTALL_METHOD" = "aider-install" ]; then INSTALL_METHOD="npm"; fi
 
 if [ "$SURFACE" = "aider" ]; then
   config_name=".aider.conf.local.yml"
   command_name="$AIDER_COMMAND"
   display_name="Aider"
-elif [ "$SURFACE" = "kilo" ]; then
-  config_name=".kilo/kilo.jsonc"
-  command_name="$KILO_COMMAND"
-  display_name="Kilo Code"
 else
   config_name=".opencode.local.json"
   command_name="$OPENCODE_COMMAND"
@@ -61,9 +50,9 @@ else
 fi
 
 print_install_plan() {
-  if [ "$SURFACE" = "kilo" ] || [ "$SURFACE" = "opencode" ]; then
+  if [ "$SURFACE" = "opencode" ]; then
     [ "$INSTALL_METHOD" = "npm" ] || { printf '%s supports only the npm install method in this adapter.\n' "$display_name" >&2; exit 1; }
-    if [ "$SURFACE" = "kilo" ]; then printf '%s\n' 'npm install -g @kilocode/cli'; else printf '%s\n' 'npm install -g opencode-ai'; fi
+    printf '%s\n' 'npm install -g opencode-ai'
     return
   fi
   case "$INSTALL_METHOD" in
@@ -79,9 +68,6 @@ if [ "$ACTION" = "Plan" ]; then
   if [ "$SURFACE" = "aider" ]; then
     launch_command="$command_name --config $config_name"
     test_command="./scripts/test-aider-cli-models.linux.sh --model <model>"
-  elif [ "$SURFACE" = "kilo" ]; then
-    launch_command="$command_name"
-    test_command="./scripts/test-kilo-code-cli-models.linux.sh --model <model>"
   else
     launch_command="OPENCODE_CONFIG=$config_name $command_name"
     test_command="./scripts/test-opencode-cli-models.linux.sh --model <model>"
@@ -93,9 +79,7 @@ fi
 if [ "$ACTION" = "Install" ]; then
   print_install_plan | sed "s/^/$display_name install step: /"
   [ "$DRY_RUN" -eq 0 ] || { printf 'Dry run complete; no network install was executed.\n'; exit 0; }
-  if [ "$SURFACE" = "kilo" ]; then
-    npm install -g @kilocode/cli
-  elif [ "$SURFACE" = "opencode" ]; then
+  if [ "$SURFACE" = "opencode" ]; then
     npm install -g opencode-ai
   else case "$INSTALL_METHOD" in
     pipx) python3 -m pip install pipx; pipx install aider-chat ;;
@@ -155,14 +139,6 @@ if surface == "opencode":
             }
         }
     }, indent=2)
-elif surface == "kilo":
-    endpoint = endpoint if endpoint.endswith("/v1") else endpoint + "/v1"
-    text = json.dumps({
-        "$schema": "https://app.kilo.ai/config.json",
-        "model": "ollama/" + model,
-        "provider": {"ollama": {"options": {"baseURL": endpoint, "timeout": 600000}, "models": {model: {"name": model + " (local)", "tool_call": True, "limit": {"context": 32768, "output": 8192}}}}},
-        "permission": {"*": "ask", "bash": "ask", "edit": "ask"}
-    }, indent=2)
 else:
     text = f"""# Generated local-only Aider config. Do not commit this file.
 model: ollama_chat/{model}
@@ -180,14 +156,10 @@ PY
   if [ -d "$target_repo/.git" ]; then
     mkdir -p "$target_repo/.git/info"
     touch "$target_repo/.git/info/exclude"
-    exclude_entry="$config_name"
-    [ "$SURFACE" != "kilo" ] || exclude_entry=".kilo/"
-    grep -Fxq "$exclude_entry" "$target_repo/.git/info/exclude" || printf '%s\n' "$exclude_entry" >> "$target_repo/.git/info/exclude"
+    grep -Fxq "$config_name" "$target_repo/.git/info/exclude" || printf '%s\n' "$config_name" >> "$target_repo/.git/info/exclude"
   fi
   if [ "$SURFACE" = "aider" ]; then
     printf 'Aider config written. Launch with: %s --config %s\n' "$AIDER_COMMAND" "$config_name"
-  elif [ "$SURFACE" = "kilo" ]; then
-    printf 'Kilo Code config written. Launch from the repository root with: %s\n' "$KILO_COMMAND"
   else
     printf 'OpenCode config written. Launch with: OPENCODE_CONFIG=%s %s\n' "$config_name" "$OPENCODE_COMMAND"
   fi
@@ -201,16 +173,6 @@ if [ -f "$config_path" ]; then
   if [ "$SURFACE" = "aider" ]; then
     grep -q '^model: ollama_chat/' "$config_path" || { printf 'FAIL ollama-model\n'; failures=$((failures + 1)); }
     grep -q '^auto-commits: false$' "$config_path" && grep -q '^dirty-commits: false$' "$config_path" || { printf 'FAIL safe-git-mode\n'; failures=$((failures + 1)); }
-  elif [ "$SURFACE" = "kilo" ]; then
-    python3 - "$config_path" <<'PY' || { printf 'FAIL kilo-config\n'; failures=$((failures + 1)); }
-import json, sys
-with open(sys.argv[1], encoding="utf-8") as handle:
-    config = json.load(handle)
-assert str(config.get("model", "")).startswith("ollama/")
-assert config.get("provider", {}).get("ollama")
-assert config.get("permission", {}).get("*") == "ask"
-assert config.get("permission", {}).get("edit") == "ask"
-PY
   else
     python3 - "$config_path" <<'PY' || { printf 'FAIL ollama-model\n'; failures=$((failures + 1)); }
 import json, sys

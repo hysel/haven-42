@@ -62,4 +62,4 @@ Before adding a non-Continue config generator:
 5. Update `config/agent-surface-solutions.json`.
 6. Add tests proving generated output is local-only and sanitized.
 
-The Aider and OpenCode adapters demonstrate this boundary by consuming surface-neutral recommendations rather than inheriting Continue configuration. Cline and Kilo Code are quarantined, so their retained code must not generate end-user config until a qualifying upstream change passes every restoration gate. Roo Code is historical only because its upstream project is retired.
+The Aider and OpenCode adapters demonstrate this boundary by consuming surface-neutral recommendations rather than inheriting Continue configuration. Failed integrations have no retained config-generation code. Roo Code is historical only because its upstream project is retired.

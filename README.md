@@ -48,7 +48,6 @@ It is designed for people who want AI support to follow consistent engineering s
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
 | Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
 | Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |
-| Review quarantined Cline and Kilo evidence | `docs/agent-surface-options.md` and `docs/agent-surface-promotion-gates.md` |
 | Automate shared agent CLI model tests | `docs/agent-cli-surface-model-testing.md` |
 | Automate Aider CLI model tests | `docs/aider-cli-model-testing.md` |
 | Install, configure, or health-check Aider | `docs/agent-surface-solutions.md` |
@@ -861,7 +860,6 @@ Runtime status:
 - `examples/sonarqube-review.md`
 - `examples/editor-surface-validation.md`
 - `examples/model-tool-use-validation.md`
-- `examples/cline-readonly-validation.md`
 - `examples/multi-repository-validation.md`
 - `examples/sample-repository-factory-validation.md`
 - `examples/fixtures/repository-context.md`
@@ -891,7 +889,6 @@ Runtime status:
 - `docs/multi-repository-validation.md`
 - `docs/runtime-output-verification.md`
 - `docs/agent-surface-options.md`
-- `docs/cline-readonly-validation.md`
 - `docs/model-tool-use-validation.md`
 - `docs/local-model-reliability.md`
 - `docs/banned-output-patterns.md`

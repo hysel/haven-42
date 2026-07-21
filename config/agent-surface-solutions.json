@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "description": "Surface-neutral install, configure, test, and shared workflow solutions for supported, candidate, quarantined, and historical agent surfaces. Status values are evidence-gated and do not promote blocked surfaces to supported.",
-  "supportTiers": ["supported", "candidate", "quarantined", "historical"],
+  "description": "Surface-neutral install, configure, test, and shared workflow solutions for supported, candidate, and historical agent surfaces. Status values are evidence-gated and do not promote blocked surfaces to supported.",
+  "supportTiers": ["supported", "candidate", "historical"],
   "requiredActivities": [
     "install",
     "configure",
@@ -92,41 +92,6 @@
       }
     },
     {
-      "id": "cline",
-      "name": "Cline",
-      "type": "editor-agent",
-      "supportTier": "quarantined",
-      "showInDefaultMenu": false,
-      "currentValidationLevel": "quarantined-at-cline-cli-3.0.46",
-      "configBundle": {
-        "status": "blocked",
-        "strategy": "Do not generate Cline config bundles while Cline CLI 3.0.46 is quarantined for failed Windows scoped-edit line-ending and behavior gates.",
-        "outputKind": "none while quarantined",
-        "evidence": ["docs/cline-readonly-validation.md", "docs/surface-specific-config-bundles.md"]
-      },
-      "install": {
-        "status": "blocked",
-        "solution": "Do not offer Cline installation through the supported setup path while the surface is quarantined.",
-        "workflowIds": [],
-        "evidence": ["docs/cline-readonly-validation.md"],
-        "blockedReason": "Cline CLI 3.0.46 failed hardened Windows scoped-edit gates; retain evidence and harnesses for a version-triggered retest only."
-      },
-      "configure": {
-        "status": "blocked",
-        "solution": "Do not generate Cline configuration while the surface is quarantined.",
-        "workflowIds": [],
-        "evidence": ["docs/cline-readonly-validation.md"],
-        "blockedReason": "Configuration support can be reconsidered only after a relevant Cline version passes read, write, scoped-edit, cleanup, and OS-specific validation."
-      },
-      "test": {
-        "status": "blocked",
-        "solution": "Retain the shared harness and evidence for maintainer regression testing after a qualifying Cline version change; do not present it as an end-user test path.",
-        "workflowIds": [],
-        "evidence": ["docs/cline-cli-model-testing.md", "examples/cline-readonly-validation.md"],
-        "blockedReason": "Current-version testing is complete and failed promotion gates; do not cycle more models on Cline CLI 3.0.46."
-      }
-    },
-    {
       "id": "aider",
       "name": "Aider",
       "type": "cli-agent",
@@ -144,7 +109,7 @@
         "solution": "Use the unified surface setup adapter with aider-install, pipx, or uv and an explicit dry-run path.",
         "workflowIds": ["setup-agent-surface"],
         "evidence": ["docs/aider-cli-model-testing.md"],
-        "blockedReason": "Current-version testing is complete and failed promotion gates; do not cycle more models on Cline CLI 3.0.46."
+        "blockedReason": ""
       },
       "configure": {
         "status": "supported",
@@ -194,41 +159,6 @@
         "workflowIds": [],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
         "blockedReason": "Upstream project is archived and the extension is shut down."
-      }
-    },
-    {
-      "id": "kilo-code",
-      "name": "Kilo Code",
-      "type": "editor-agent",
-      "supportTier": "quarantined",
-      "showInDefaultMenu": false,
-      "currentValidationLevel": "quarantined-at-kilo-cli-7.4.11",
-      "configBundle": {
-        "status": "blocked",
-        "strategy": "Do not generate new Kilo configuration while CLI 7.4.11 is quarantined; retain the generator implementation only for a version-triggered regression retest.",
-        "outputKind": "none while quarantined",
-        "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
-      },
-      "install": {
-        "status": "blocked",
-        "solution": "Do not offer Kilo installation through the supported setup path while CLI 7.4.11 is quarantined.",
-        "workflowIds": [],
-        "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Devstral passed read-only but failed write/scoped gates, and Qwen 35B failed all gates despite zero phase exits."
-      },
-      "configure": {
-        "status": "blocked",
-        "solution": "Do not generate Kilo configuration through the supported setup adapter while the surface is quarantined.",
-        "workflowIds": [],
-        "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "The retained generator is statically tested, but current live write and scoped-edit validation failed through Kilo's task/tool protocol."
-      },
-      "test": {
-        "status": "blocked",
-        "solution": "Retain the shared Kilo harness for maintainer regression testing after a qualifying version or tool-protocol change; do not present it as an end-user test path.",
-        "workflowIds": [],
-        "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Current CLI 7.4.11 failed required write/scoped gates; retest only after a concrete upstream change."
       }
     },
     {

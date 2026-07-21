@@ -238,9 +238,7 @@ Invoke-PackTest "commands and workflows resolve for the active operating system"
 
     $defaults = Get-Content -LiteralPath (Join-Path $repoRoot "config/agent-cli-surface-defaults.json") -Raw
     Assert-True -Condition ($defaults -notmatch '\{TempDir\}\\') -Message "Shared CLI templates must not append Windows-only separators to TempDir."
-    $clineHarness = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-cline-cli-models.ps1") -Raw
     $agentHarness = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-agent-cli-surface-models.ps1") -Raw
-    Assert-True -Condition ($clineHarness -match "Resolve-ExternalCommand") -Message "Cline should use shared OS-aware command resolution."
     Assert-True -Condition ($agentHarness -match "Resolve-ExternalCommand") -Message "The shared agent harness should use OS-aware command resolution."
 }
 
@@ -294,7 +292,7 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     Assert-True -Condition ($releaseDoc -match "build-release-package") -Message "Release docs should mention packaging scripts."
     Assert-True -Condition ($releaseDoc -match "GitHub Release") -Message "Release docs should explain GitHub release uploads."
     Assert-True -Condition ($roadmap -match "\| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging \| Complete \|") -Message "Roadmap should mark Milestone 19 complete for supported-surface parity."
-    Assert-True -Condition ($roadmap -match "Future candidate and quarantine expansion") -Message "Roadmap should preserve non-supported surface expansion separately."
+    Assert-True -Condition ($roadmap -match "Future candidate expansion") -Message "Roadmap should preserve non-supported surface expansion separately."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria") -Message "TODO should mark Continue-scoped Milestone 19 completion complete."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters") -Message "TODO should record completed adapter parity without promoting blocked surfaces."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should keep future surface profile work in the architecture backlog."
@@ -766,14 +764,14 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     Assert-True -Condition ($doc -match "Compatibility Matrix") -Message "Agent surface doc should include an explicit compatibility matrix."
     Assert-True -Condition ($doc -match "Milestone 14 Positioning Completion Basis") -Message "Agent surface doc should record scoped Milestone 14 completion basis."
     Assert-True -Condition ($doc -match "Full live validation parity belongs to Milestone 17") -Message "Agent surface doc should keep full validation parity gap visible."
-    Assert-True -Condition ($doc -match "docs/cline-readonly-validation\.md") -Message "Agent surface doc should cite non-Continue read-only validation evidence."
+    Assert-True -Condition ($doc -match "Aider and OpenCode generated-sample evidence") -Message "Agent surface doc should cite maintained non-Continue validation evidence."
     Assert-True -Condition ($doc -match "docs/surface-specific-config-bundles\.md") -Message "Agent surface doc should cite surface-specific config bundle policy."
     Assert-True -Condition ($doc -match "docs/setup-paths\.md") -Message "Agent surface doc should cite beginner and team setup paths."
     Assert-True -Condition ($doc -match "Candidate means") -Message "Agent surface doc should define candidate status."
     Assert-True -Condition ($doc -match "Read-only validated") -Message "Agent surface doc should define read-only validation."
     Assert-True -Condition ($doc -match "Plan validated") -Message "Agent surface doc should define plan validation."
     Assert-True -Condition ($doc -match "Approved-write ready") -Message "Agent surface doc should define approved-write readiness."
-    foreach ($surface in @("Continue", "Cline", "Aider", "Kilo Code", "OpenCode", "OpenHands", "Roo Code")) {
+    foreach ($surface in @("Continue", "Aider", "OpenCode", "OpenHands", "Roo Code")) {
         Assert-True -Condition ($doc -match [regex]::Escape($surface)) -Message "Agent surface doc should include $surface."
     }
     Assert-True -Condition ($doc -match "External verification commands") -Message "Agent surface doc should require external verification evidence."
@@ -786,84 +784,36 @@ Invoke-PackTest "agent surface docs define portability boundary" {
 }
 
 
-Invoke-PackTest "Cline read-only validation docs define read-only workflow" {
-    $docPath = Join-Path $repoRoot "docs/cline-readonly-validation.md"
-    $evidencePath = Join-Path $repoRoot "examples/cline-readonly-validation.md"
-    $readmePath = Join-Path $repoRoot "README.md"
-    $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
-    $todoPath = Join-Path $repoRoot "TODO.md"
-    $roadmapPath = Join-Path $repoRoot "ROADMAP.md"
-
-    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Cline read-only validation doc should exist."
-    Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Cline read-only evidence template should exist."
-
-    $doc = Get-Content -LiteralPath $docPath -Raw
-    $evidence = Get-Content -LiteralPath $evidencePath -Raw
-    $readme = Get-Content -LiteralPath $readmePath -Raw
-    $catalog = Get-Content -LiteralPath $catalogPath -Raw
-    $todo = Get-Content -LiteralPath $todoPath -Raw
-    $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
-
-    Assert-True -Condition ($doc -match "read-only validation path") -Message "Cline doc should keep validation scoped."
-    Assert-True -Condition ($doc -match "Write mode") -Message "Cline doc should mention write mode status."
-    Assert-True -Condition (($doc -match "write smoke-test") -and ($doc -match "real-project approved-write blocked")) -Message "Cline doc should distinguish write smoke test from real-project approved write."
-    Assert-True -Condition ($doc -match "TOOLS_UNAVAILABLE") -Message "Cline doc should define tool-unavailable failure signals."
-    Assert-True -Condition ($doc -match "HALLUCINATED_STRUCTURE") -Message "Cline doc should define hallucinated-structure failure signal."
-    Assert-True -Condition ($doc -match "git status --short") -Message "Cline doc should require external git verification."
-    Assert-True -Condition ($doc -match "examples/cline-readonly-validation.md") -Message "Cline doc should point at evidence template."
-    Assert-True -Condition (($evidence -match "Read-only tool validated") -and ($evidence -match "Write smoke-test validated")) -Message "Cline evidence should record read and write-smoke validation scope."
-    Assert-True -Condition ($evidence -match "Validation Record Template") -Message "Cline evidence should include a reusable template."
-    Assert-True -Condition ($readme -match "docs/cline-readonly-validation.md") -Message "README should link the Cline validation doc."
-    Assert-True -Condition (($catalog -match "Cline read-only validation workflow") -and ($catalog -match "read-only-tool-validated") -and ($catalog -match "Cline approved-write smoke test") -and ($catalog -match "write-smoke-validated")) -Message "Evidence catalog should include Cline read and write-smoke validation workflows."
-    Assert-True -Condition ($todo -match "Cline read-only validation guide") -Message "TODO should track Cline validation guide completion."
-    Assert-True -Condition ($roadmap -match "Cline read-only validation guide") -Message "Roadmap should track Cline validation guide completion."
-}
-
-Invoke-PackTest "Cline CLI model testing docs define automation workflow" {
-    $docPath = Join-Path $repoRoot "docs/cline-cli-model-testing.md"
-    $psScriptPath = Join-Path $repoRoot "scripts/test-cline-cli-models.ps1"
-    $bashScriptPath = Join-Path $repoRoot "scripts/test-cline-cli-models.shared.sh"
-    $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
-    $readmePath = Join-Path $repoRoot "README.md"
-
-    Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Cline CLI testing doc should exist."
-    Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell Cline CLI tester should exist."
-    Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash Cline CLI tester should exist."
-
-    $doc = Get-Content -LiteralPath $docPath -Raw
-    $psScript = Get-Content -LiteralPath $psScriptPath -Raw
-    $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
-    $catalog = Get-Content -LiteralPath $catalogPath -Raw
-    $readme = Get-Content -LiteralPath $readmePath -Raw
-
-    Assert-True -Condition ($doc -match "Cline CLI Model Testing") -Message "Cline CLI testing doc should have a clear title."
-    Assert-True -Condition ($doc -match "test-cline-cli-models") -Message "Cline CLI testing doc should mention automation scripts."
-    Assert-True -Condition ($doc -match "command-template") -Message "Cline CLI testing doc should describe command-template flexibility."
-    Assert-True -Condition ($doc -match "Write Smoke Test") -Message "Cline CLI testing doc should define write smoke test flow."
-    Assert-True -Condition ($doc -match "Scoped-Edit Status" -and $doc -match "system-temporary") -Message "Cline CLI docs should preserve the scoped-edit failure and synchronized-workspace workaround."
-    Assert-True -Condition ($psScript -match "ClineArgumentsTemplate") -Message "PowerShell Cline CLI tester should support argument templates."
-    Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell Cline CLI tester should support write-smoke tests."
-    Assert-True -Condition ($psScript -match "IncludeScopedEdit" -and $psScript -match "New-ClineTemporaryProfile") -Message "PowerShell Cline CLI tester should use isolated temporary state for scoped edits."
-    Assert-True -Condition ($psScript -match "Test-LfOnly" -and $psScript -match "Test-ScopedBehavior" -and $psScript -match "SCOPED_EDIT_SCOPE_FAILED") -Message "PowerShell Cline scoped edits should require line-ending, behavior, and exact-scope verification."
-    Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell Cline CLI tester should support model unload after each run."
-    Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell Cline CLI tester should support model unload after each run."
-    Assert-True -Condition ($psScript -match "runtime-validation-output/sample-repositories") -Message "PowerShell Cline CLI tester should default to disposable generated samples."
-    Assert-True -Condition ($psScript -match "Initialize-DisposableGitBaseline") -Message "PowerShell Cline CLI tester should initialize a disposable Git baseline."
-    Assert-True -Condition ($bashScript -match "CLINE_ARGS_TEMPLATE") -Message "Bash Cline CLI tester should support argument templates."
-    Assert-True -Condition ($bashScript -match "INCLUDE_WRITE_SMOKE") -Message "Bash Cline CLI tester should support write-smoke tests."
-    Assert-True -Condition ($bashScript -match "INCLUDE_SCOPED_EDIT" -and $bashScript -match "mktemp -d") -Message "Bash Cline CLI tester should use isolated temporary state for scoped edits."
-    Assert-True -Condition ($bashScript -match "SCOPED_EDIT_LINE_ENDINGS_FAILED" -and $bashScript -match "SCOPED_EDIT_BEHAVIOR_FAILED" -and $bashScript -match "SCOPED_EDIT_SCOPE_FAILED") -Message "Bash Cline scoped edits should require line-ending, behavior, and exact-scope verification."
-    Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Cline CLI tester should support model unload after each run."
-    Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Cline CLI tester should support model unload after each run."
-    Assert-True -Condition ($catalog -match "Cline CLI model test harness") -Message "Evidence catalog should track Cline CLI harness validation."
-    Assert-True -Condition ($catalog -match "Cline CLI Devstral Small 2 realistic scoped-edit attempt" -and $catalog -match "partial-pass") -Message "Evidence catalog should preserve the failed Cline scoped-edit promotion gate."
-    Assert-True -Condition ($readme -match "Review quarantined Cline and Kilo evidence" -and $readme -match "docs/agent-surface-options.md") -Message "README should route quarantined Cline evidence through the support boundary instead of beginner setup."
+Invoke-PackTest "failed agent integrations have no executable surface" {
+    $removedPaths = @(
+        "docs/cline-readonly-validation.md",
+        "docs/cline-cli-model-testing.md",
+        "examples/cline-readonly-validation.md",
+        "examples/kilo-validation.md",
+        "scripts/run-kilo-code-validation.ps1",
+        "scripts/test-cline-cli-models.ps1",
+        "scripts/test-cline-cli-models.shared.sh",
+        "scripts/test-kilo-code-cli-models.ps1",
+        "scripts/test-kilo-code-cli-models.shared.sh"
+    )
+    foreach ($path in $removedPaths) {
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $repoRoot $path))) -Message "Removed integration asset should stay absent: $path"
+    }
+    $solutions = Get-Content -LiteralPath (Join-Path $repoRoot "config/agent-surface-solutions.json") -Raw
+    $capabilities = Get-Content -LiteralPath (Join-Path $repoRoot "config/agent-surface-capabilities.json") -Raw
+    $defaults = Get-Content -LiteralPath (Join-Path $repoRoot "config/agent-cli-surface-defaults.json") -Raw
+    $adapter = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/setup-agent-surface.ps1") -Raw
+    $sharedAdapter = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/setup-agent-surface.shared.sh") -Raw
+    foreach ($activeContract in @($solutions, $capabilities, $defaults, $adapter, $sharedAdapter)) {
+        Assert-True -Condition ($activeContract -notmatch '(?i)cline|kilo') -Message "Active surface contracts should not retain removed integration code."
+    }
+    $surfaceDoc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/agent-surface-options.md") -Raw
+    Assert-True -Condition ($surfaceDoc -match "Removed Integrations" -and $surfaceDoc -match "fresh integration proposal") -Message "Surface docs should explain the narrow removal policy."
 }
 Invoke-PackTest "agent CLI surface testing docs define shared automation workflow" {
     $docPath = Join-Path $repoRoot "docs/agent-cli-surface-model-testing.md"
     $aiderDocPath = Join-Path $repoRoot "docs/aider-cli-model-testing.md"
     $evidencePath = Join-Path $repoRoot "examples/aider-validation.md"
-    $kiloEvidencePath = Join-Path $repoRoot "examples/kilo-validation.md"
     $psScriptPath = Join-Path $repoRoot "scripts/test-agent-cli-surface-models.ps1"
     $bashScriptPath = Join-Path $repoRoot "scripts/test-agent-cli-surface-models.shared.sh"
     $surfaceDefaultsPath = Join-Path $repoRoot "config/agent-cli-surface-defaults.json"
@@ -877,7 +827,6 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Shared agent CLI testing doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $aiderDocPath) -Message "Aider CLI wrapper doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Aider evidence template should exist."
-    Assert-True -Condition (Test-Path -LiteralPath $kiloEvidencePath) -Message "Kilo validation evidence should exist."
     Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell shared agent CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash shared agent CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $surfaceDefaultsPath) -Message "Agent CLI surface defaults catalog should exist."
@@ -886,7 +835,6 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $doc = Get-Content -LiteralPath $docPath -Raw
     $aiderDoc = Get-Content -LiteralPath $aiderDocPath -Raw
     $evidence = Get-Content -LiteralPath $evidencePath -Raw
-    $kiloEvidence = Get-Content -LiteralPath $kiloEvidencePath -Raw
     $psScript = Get-Content -LiteralPath $psScriptPath -Raw
     $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
     $surfaceDefaults = Get-Content -LiteralPath $surfaceDefaultsPath -Raw | ConvertFrom-Json
@@ -898,8 +846,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Agent CLI Surface Model Testing") -Message "Shared CLI testing doc should have a clear title."
-    Assert-True -Condition ($doc -match "live write validation is blocked by task execution") -Message "Shared CLI doc should keep Kilo Code's live task-execution blocker explicit."
-    foreach ($surface in @("Aider", "Roo Code", "Kilo Code", "OpenCode")) {
+    foreach ($surface in @("Aider", "Roo Code", "OpenCode")) {
         Assert-True -Condition ($doc -match [regex]::Escape($surface)) -Message "Shared CLI testing doc should mention $surface."
         Assert-True -Condition ($catalog -match [regex]::Escape($surface)) -Message "Evidence catalog should mention $surface."
         Assert-True -Condition ($surfaceDoc -match [regex]::Escape($surface)) -Message "Agent surface docs should mention $surface."
@@ -923,17 +870,14 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($bashScript -match "load_surface_defaults") -Message "Bash shared CLI tester should centralize default loading."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash shared CLI tester should support model unload after each run."
     Assert-True -Condition ($bashScript -match 'ReadStatus.*failed' -and $bashScript -match 'ScopedEditStatus.*failed' -and $bashScript -match 'exit 1') -Message "Bash shared CLI tester should return nonzero when a requested gate fails."
-    Assert-True -Condition ($kiloEvidence -match "Kilo Code Validation Evidence" -and $kiloEvidence -match "qwen3\.5:35b" -and $kiloEvidence -match "exit-0 model failures") -Message "Kilo evidence should record the current cross-model zero-exit failures."
-    Assert-True -Condition ($catalog -match "Kilo Code CLI Devstral generated-sample validation" -and $catalog -match "Kilo Code CLI Qwen 3\.5 35B generated-sample validation") -Message "Evidence catalog should track both current Kilo model results."
     Assert-True -Condition ($catalog -match "Shared agent CLI model test harness") -Message "Evidence catalog should track the shared CLI harness."
     Assert-True -Condition ($readme -match "docs/agent-cli-surface-model-testing.md") -Message "README should link shared agent CLI model testing doc."
     Assert-True -Condition ($readme -match "docs/agent-surface-promotion-gates.md") -Message "README should link agent surface promotion gates."
     Assert-True -Condition ($surfaceDoc -match "docs/agent-surface-promotion-gates.md") -Message "Agent surface options should link promotion gates."
-    foreach ($surface in @("Cline", "Aider", "Roo Code", "Kilo Code", "OpenCode", "OpenHands")) {
+    foreach ($surface in @("Aider", "Roo Code", "OpenCode", "OpenHands")) {
         Assert-True -Condition ($promotionGates -match [regex]::Escape($surface)) -Message "Promotion gates should cover $surface."
     }
     Assert-True -Condition ($promotionGates -match "Milestone 17 Supported-Surface Completion Basis") -Message "Promotion gates should record supported-surface Milestone 17 completion basis."
-    Assert-True -Condition ($promotionGates -match "Quarantine Restoration Gate") -Message "Promotion gates should define how quarantined surfaces can return."
     Assert-True -Condition ($promotionGates -match "Approved-write ready") -Message "Promotion gates should define approved-write readiness."
     Assert-True -Condition ($promotionGates -match "real-project approved-write") -Message "Promotion gates should block real-project promotion from generated evidence alone."
     Assert-True -Condition ($promotionGates -match "Roo Code is historical") -Message "Promotion gates should keep Roo Code retired upstream."
@@ -950,18 +894,16 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 17 for the promoted supported-surface set") -Message "TODO should record supported-surface Milestone 17 completion."
     Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
     Assert-True -Condition ($todo -match "\[x\] Retire Roo Code from future validation") -Message "TODO should keep Roo Code retired upstream."
-    Assert-True -Condition ($todo -match "\[ \] Retest Kilo after a concrete task-execution/tool-protocol fix or version change") -Message "TODO should keep Kilo CLI validation evidence-gated."
     Assert-True -Condition ($todo -match "\[x\] Add a local-only OpenCode Ollama config generator") -Message "TODO should record the scaffolded OpenCode config generator."
     Assert-True -Condition ($todo -match "\[x\] Validate OpenCode's installed CLI") -Message "TODO should record generated-sample OpenCode CLI validation."
     Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "docs/opencode-cli-model-testing.md")) -Message "OpenCode setup and validation documentation should exist."
     Assert-True -Condition ($doc -match "Confirmed Command Boundaries") -Message "Shared CLI doc should record verified command boundaries."
     Assert-True -Condition ($doc -match "opencode run") -Message "Shared CLI doc should record the OpenCode non-interactive command."
-    Assert-True -Condition ($doc -match [regex]::Escape(".kilo/kilo.jsonc") -and $doc -match "passes the generated-sample read-only gate") -Message "Shared CLI doc should keep Kilo task execution evidence-gated."
     Assert-True -Condition ($doc -match "upstream project is archived") -Message "Shared CLI doc should keep Roo Code retired upstream."
     Assert-True -Condition ($todo -match "\[x\] Define a safe OpenHands validation boundary before adding platform-agent validation automation") -Message "TODO should mark the OpenHands validation boundary complete."
 
-    $wrapperBases = @("aider", "roo-code", "kilo-code", "opencode")
-    $expectedSurfaceKeys = @("aider-cli", "roo-code-cli", "kilo-code-cli", "opencode-cli")
+    $wrapperBases = @("aider", "roo-code", "opencode")
+    $expectedSurfaceKeys = @("aider-cli", "roo-code-cli", "opencode-cli")
     foreach ($key in $expectedSurfaceKeys) {
         $default = @($surfaceDefaults.surfaces | Where-Object { $_.surfaceKey -eq $key })
         Assert-True -Condition ($default.Count -eq 1) -Message "Agent CLI defaults catalog should define $key exactly once."
@@ -973,8 +915,6 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
         }
         Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($default[0].installHint)) -Message "Agent CLI defaults should define install hint for $key."
     }
-    $kiloDefault = @($surfaceDefaults.surfaces | Where-Object { $_.surfaceKey -eq "kilo-code-cli" } | Select-Object -First 1)
-    Assert-True -Condition ($kiloDefault[0].agentArgumentsTemplate -match '--agent code') -Message "Kilo Code defaults should explicitly select the code agent for repository validation."
     foreach ($base in $wrapperBases) {
         $wrapperPs = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-$base-cli-models.ps1") -Raw
         $wrapperSh = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-$base-cli-models.shared.sh") -Raw
@@ -2271,14 +2211,6 @@ Invoke-PackTest "runtime context and validation wrapper scripts call shared Bash
             Target = "test-local-agent-models.shared.sh"
         },
         @{
-            Name = "test-cline-cli-models.linux.sh"
-            Target = "test-cline-cli-models.shared.sh"
-        },
-        @{
-            Name = "test-cline-cli-models.macos.sh"
-            Target = "test-cline-cli-models.shared.sh"
-        },
-        @{
             Name = "test-aider-cli-models.linux.sh"
             Target = "test-aider-cli-models.shared.sh"
         },
@@ -2799,7 +2731,7 @@ Invoke-PackTest "capability evidence v2 blocks cross-surface inheritance and agg
 schema_version	area	subject	surface	surface_version	provider	os	model	operation	validation_mode	status	evidence	notes
 2	model-tool-use	passing write	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	approved-write-ready	examples/model-tool-use-validation.md	Passing record.
 2	model-tool-use	conflicting write	Continue Agent	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	partial-pass	examples/model-tool-use-validation.md	Conservative duplicate.
-2	model-tool-use	other surface write	Cline	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	approved-write-ready	examples/cline-readonly-validation.md	Must not be inherited.
+2	model-tool-use	other surface write	OtherAgent	not-recorded	Ollama	Windows	qwen3.5:9b	scoped-write	editor-agent	approved-write-ready	examples/editor-surface-validation.md	Must not be inherited.
 2	model-tool-use	exact write only	Continue Agent	not-recorded	Ollama	Windows	fixture-tool:1b	scoped-write	editor-agent	approved-write-ready	examples/model-tool-use-validation.md	Must not imply plan readiness.
 "@ | Set-Content -LiteralPath $catalogPath
 
@@ -3129,7 +3061,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($consolidation -match "scripts/invoke-workflow\.\*\.sh") -Message "Script consolidation plan should reference cross-platform workflow dispatchers."
     Assert-True -Condition ($consolidation -match "Do Not Consolidate Yet") -Message "Script consolidation plan should define no-consolidate-yet cases."
     Assert-True -Condition ($consolidation -match "test-agent-cli-surface-models") -Message "Script consolidation plan should cover shared agent CLI testing."
-    Assert-True -Condition ($consolidation -match "Roo Code" -and $consolidation -match "Kilo Code" -and $consolidation -match "OpenCode") -Message "Script consolidation plan should cover planned agent wrappers."
+    Assert-True -Condition ($consolidation -match "Roo Code" -and $consolidation -match "Aider" -and $consolidation -match "OpenCode") -Message "Script consolidation plan should cover maintained and historical agent wrappers."
     Assert-True -Condition ($consolidation -match "scripts/test-pack\.ps1") -Message "Script consolidation plan should require pack tests."
     Assert-True -Condition ($roadmap -match "workflow registry") -Message "Roadmap should track workflow registry work."
     Assert-True -Condition ($roadmap -match "PowerShell/Linux/macOS dispatchers are done") -Message "Roadmap should track cross-platform dispatcher work."
@@ -3249,10 +3181,10 @@ Invoke-PackTest "agent surface capability matrix preserves parity" {
 
     Assert-Equal -Actual $matrix.schemaVersion -Expected 1 -Message "Agent surface capability schema version changed."
     Assert-True -Condition ($matrix.activities.Count -ge 8) -Message "Capability matrix should track core activities."
-    Assert-True -Condition ($matrix.surfaces.Count -ge 7) -Message "Capability matrix should track known agent surfaces."
-    Assert-True -Condition (@($matrix.supportTiers) -contains "quarantined") -Message "Capability matrix should define quarantined support."
+    Assert-True -Condition ($matrix.surfaces.Count -ge 5) -Message "Capability matrix should track maintained, candidate, and historical agent surfaces."
+    Assert-True -Condition (@($matrix.supportTiers) -notcontains "quarantined") -Message "Capability matrix should not retain a quarantine tier after failed integrations are removed."
 
-    foreach ($requiredSurface in @("continue", "cline", "aider", "roo-code", "kilo-code", "opencode", "openhands")) {
+    foreach ($requiredSurface in @("continue", "aider", "roo-code", "opencode", "openhands")) {
         Assert-True -Condition (@($matrix.surfaces | Where-Object { $_.id -eq $requiredSurface }).Count -eq 1) -Message "Capability matrix should include $requiredSurface."
     }
 
@@ -3281,14 +3213,6 @@ Invoke-PackTest "agent surface capability matrix preserves parity" {
         }
     }
 
-    foreach ($quarantinedId in @("cline", "kilo-code")) {
-        $quarantined = @($matrix.surfaces | Where-Object id -eq $quarantinedId)[0]
-        Assert-Equal -Actual $quarantined.supportTier -Expected "quarantined" -Message "$quarantinedId should remain quarantined in the parity matrix."
-        Assert-True -Condition (-not $quarantined.showInDefaultMenu) -Message "$quarantinedId should be hidden from default setup."
-        foreach ($activity in @("install", "configure", "test")) {
-            Assert-Equal -Actual $quarantined.activities.$activity.status -Expected "blocked" -Message "$quarantinedId $activity should be blocked."
-        }
-    }
     $openCode = @($matrix.surfaces | Where-Object id -eq "opencode")[0]
     Assert-True -Condition ($openCode.supportTier -eq "supported" -and $openCode.activities.install.status -eq "supported" -and $openCode.activities.configure.status -eq "supported" -and $openCode.activities.test.status -eq "validated") -Message "OpenCode capability status should match its supported adapter evidence."
 
@@ -3429,7 +3353,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition (@($solutions.requiredActivities) -contains "install") -Message "Solution catalog should require install."
     Assert-True -Condition (@($solutions.requiredActivities) -contains "configure") -Message "Solution catalog should require configure."
     Assert-True -Condition (@($solutions.requiredActivities) -contains "test") -Message "Solution catalog should require test."
-    Assert-True -Condition (@($solutions.supportTiers) -contains "quarantined") -Message "Solution catalog should define the quarantine tier."
+    Assert-True -Condition (@($solutions.supportTiers) -notcontains "quarantined") -Message "Solution catalog should not retain a quarantine tier after failed integrations are removed."
     Assert-True -Condition ($null -ne $solutions.configBundlePolicy) -Message "Solution catalog should define config bundle policy."
     Assert-Equal -Actual $solutions.configBundlePolicy.defaultSurface -Expected "continue" -Message "Continue should remain the default generated bundle surface."
     Assert-True -Condition ($solutions.configBundlePolicy.decision -match "only after compatibility evidence") -Message "Config bundle policy should be evidence-gated."
@@ -3489,15 +3413,6 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
         }
     }
 
-    foreach ($quarantinedId in @("cline", "kilo-code")) {
-        $quarantined = @($solutions.surfaces | Where-Object id -eq $quarantinedId)[0]
-        Assert-Equal -Actual $quarantined.supportTier -Expected "quarantined" -Message "$quarantinedId should be quarantined."
-        foreach ($activity in @("install", "configure", "test")) {
-            Assert-Equal -Actual $quarantined.$activity.status -Expected "blocked" -Message "$quarantinedId $activity should be blocked."
-            Assert-Equal -Actual @($quarantined.$activity.workflowIds).Count -Expected 0 -Message "$quarantinedId $activity should not expose an end-user workflow."
-        }
-    }
-
     foreach ($support in @("health", "cleanup", "releaseReadiness", "modelSelection", "evidence")) {
         $entry = $solutions.sharedSupport.$support
         Assert-True -Condition ($null -ne $entry) -Message "Shared support should include $support."
@@ -3512,7 +3427,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($doc -match "Test") -Message "Solution docs should mention test."
     Assert-True -Condition ($doc -match "surface-specific-config-bundles\.md") -Message "Solution docs should link config bundle policy."
     Assert-True -Condition ($doc -match "agent-surface-promotion-gates\.md") -Message "Solution docs should link promotion gates."
-    Assert-True -Condition ($doc -match "Cline CLI 3\.0\.46 and Kilo CLI 7\.4\.11 are quarantined") -Message "Solution docs should explain the quarantine boundary."
+    Assert-True -Condition ($doc -match "Failed integrations are removed") -Message "Solution docs should explain the narrow removal boundary."
     Assert-True -Condition ($bundleDoc -match "Continue, Aider, and OpenCode") -Message "Config bundle docs should identify the supported generated config surfaces."
     Assert-True -Condition ($bundleDoc -match "Scoped write validation") -Message "Config bundle docs should require write validation before promotion."
     Assert-True -Condition ($promotionGates -match "Install supported") -Message "Promotion gates should define install promotion."
@@ -3561,21 +3476,6 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
         Assert-True -Condition ($config -match "auto-commits: false" -and $config -match "dirty-commits: false") -Message "Aider config should disable automatic commits."
         Assert-True -Condition (@(Get-Content -LiteralPath (Join-Path $tempRoot ".git/info/exclude")) -contains ".aider.conf.local.yml") -Message "Generated Aider config should be locally excluded from Git."
 
-        $kiloPlan = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Plan", "-Surface", "kilo")
-        Assert-True -Condition ($kiloPlan.ExitCode -ne 0) -Message "Kilo Code adapter plan should be blocked while quarantined."
-        Assert-True -Condition ($kiloPlan.Output -match "quarantined at CLI 7\.4\.11") -Message "Kilo Code adapter should explain the version-pinned quarantine."
-
-        $kiloConfigure = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Configure", "-Surface", "kilo", "-TargetRepo", $tempRoot, "-RecommendationPath", $recommendationPath, "-Lane", "WriteSafe", "-OllamaBaseUrl", "http://example.invalid:11434")
-        Assert-True -Condition ($kiloConfigure.ExitCode -ne 0) -Message "Kilo Code config generation should be blocked while quarantined."
-        $kiloConfigPath = Join-Path (Join-Path $tempRoot ".kilo") "kilo.jsonc"
-        Assert-True -Condition (-not (Test-Path -LiteralPath $kiloConfigPath)) -Message "Quarantined Kilo setup should not write config."
-
-        $kiloInstall = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Install", "-Surface", "kilo", "-DryRun")
-        Assert-True -Condition ($kiloInstall.ExitCode -ne 0 -and $kiloInstall.Output -match "maintainer-only") -Message "Kilo Code install should remain blocked while retaining maintainer guidance."
-
-        $kiloHealth = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Health", "-Surface", "kilo", "-TargetRepo", $tempRoot, "-KiloCommand", (Get-Process -Id $PID).Path)
-        Assert-True -Condition ($kiloHealth.ExitCode -ne 0 -and $kiloHealth.Output -match "quarantined") -Message "Kilo Code health should not imply supported readiness while quarantined."
-
         $openCodePlan = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Plan", "-Surface", "opencode")
         Assert-Equal -Actual $openCodePlan.ExitCode -Expected 0 -Message "OpenCode adapter plan should succeed."
         Assert-True -Condition ($openCodePlan.Output -match "opencode-ai" -and $openCodePlan.Output -match "local-only") -Message "OpenCode plan should describe its npm install and local config boundary."
@@ -3607,8 +3507,7 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
 
         $shared = Get-Content -LiteralPath $sharedPath -Raw
         Assert-True -Condition ($shared -notmatch "pwsh") -Message "Native Aider adapter should not require PowerShell."
-        Assert-True -Condition ($shared -match '"model": "ollama/" \+ model') -Message "Native adapter should generate Kilo Code's native Ollama provider config."
-        Assert-True -Condition ($shared -match "Kilo Code support is quarantined") -Message "Native adapter should block Kilo before retained generator code runs."
+        Assert-True -Condition ($shared -match '"model": "ollama/" \+ model') -Message "Native adapter should generate OpenCode's native Ollama provider config."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -3639,11 +3538,11 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
-    Assert-True -Condition ($doc -match "qualifying upstream Cline or Kilo change") -Message "Solution architecture review should keep quarantine retesting version-triggered."
+    Assert-True -Condition ($doc -match "new integration proposal") -Message "Solution architecture review should require removed surfaces to restart through promotion gates."
     Assert-True -Condition ($doc -match "Complete for positioning and support-tier governance") -Message "Solution architecture review should classify Milestone 14 accurately."
     Assert-True -Condition ($doc -match "Complete for the promoted supported-surface set") -Message "Solution architecture review should classify supported-surface Milestones 17 and 19 accurately."
     Assert-True -Condition ($doc -match "OpenHands is a candidate with a defined isolation boundary") -Message "Solution architecture review should keep OpenHands candidate scope visible."
-    Assert-True -Condition ($doc -match "Quarantined and candidate surfaces are excluded from supported parity") -Message "Solution architecture review should define Milestone 19 parity boundaries."
+    Assert-True -Condition ($doc -match "Candidate surfaces are excluded from supported parity") -Message "Solution architecture review should define Milestone 19 parity boundaries."
     Assert-True -Condition ($doc -match "EMPTY_MODEL_OUTPUT") -Message "Solution architecture review should track language validation failure signals."
     Assert-True -Condition ($uiDoc -match "Evidence States") -Message "Unified UI design should define evidence states."
     foreach ($state in @("tested-passed", "tested-partial", "failed", "recommended-only", "blocked")) {
@@ -3657,7 +3556,6 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should include solution architecture backlog."
     Assert-True -Condition ($todo -match "\[x\] Add a milestone solution completeness audit") -Message "TODO should mark solution audit doc complete."
     Assert-True -Condition ($todo -match "\[ \] Provide or approve suitable non-generated repositories") -Message "TODO should track input-needed real repository targets."
-    Assert-True -Condition ($todo -match "\[ \] Retest Kilo after a concrete task-execution/tool-protocol fix or version change") -Message "TODO should retain version-triggered Kilo retesting."
     Assert-True -Condition ($todo -match "\[x\] Design a unified web UI") -Message "TODO should mark unified UI design complete."
     Assert-True -Condition ($todo -match "\[x\] Keep the UI evidence-first") -Message "TODO should mark evidence-first UI design complete."
     Assert-True -Condition ($todo -match "\[ \] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated") -Message "TODO should keep UI implementation pending."
@@ -3808,7 +3706,7 @@ Invoke-PackTest "evidence dashboard summarizes catalog and surface status" {
 
         Assert-Equal -Actual $report.SchemaVersion -Expected 2 -Message "Evidence dashboard should emit capability contract v2."
         Assert-True -Condition ($report.EvidenceCount -ge 20) -Message "Evidence dashboard should include catalog rows."
-        Assert-True -Condition ($report.SurfaceCount -ge 7) -Message "Evidence dashboard should include known surfaces."
+        Assert-True -Condition ($report.SurfaceCount -ge 5) -Message "Evidence dashboard should include maintained, candidate, and historical surfaces."
         Assert-True -Condition ($report.ModelCount -ge 3) -Message "Evidence dashboard should include validated models."
         Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "approved-write-ready" }).Count -eq 1) -Message "Evidence dashboard should include approved-write-ready counts."
         Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "validated-by-tests" }).Count -eq 1) -Message "Evidence dashboard should include validated-by-tests counts."
@@ -3816,7 +3714,7 @@ Invoke-PackTest "evidence dashboard summarizes catalog and surface status" {
         Assert-True -Condition (@($report.ValidationModeCounts | Where-Object { $_.ValidationMode -eq "editor-agent" }).Count -eq 1) -Message "Evidence dashboard should summarize validation modes."
         Assert-True -Condition (@($report.SurfaceReadiness | Where-Object { $_.Id -eq "continue" -and $_.SupportedActivities -ge 5 }).Count -eq 1) -Message "Evidence dashboard should summarize Continue readiness."
         Assert-Equal -Actual $report.SourceSurfaceSolutions -Expected "config/agent-surface-solutions.json" -Message "Evidence dashboard should identify the surface solution catalog."
-        Assert-True -Condition ($report.SurfaceSolutionCount -ge 7) -Message "Evidence dashboard should include surface solution statuses."
+        Assert-True -Condition ($report.SurfaceSolutionCount -ge 5) -Message "Evidence dashboard should include active surface solution statuses."
         Assert-True -Condition (@($report.SurfaceSolutionReadiness | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Evidence dashboard should summarize Continue install/configure/test status."
         Assert-True -Condition (@($report.SurfaceSolutionReadiness | Where-Object { $_.Id -eq "openhands" -and $_.InstallStatus -eq "blocked" -and $_.ConfigureStatus -eq "blocked" }).Count -eq 1) -Message "Evidence dashboard should preserve blocked surface status."
         Assert-True -Condition ($markdown -match "Evidence Dashboard") -Message "Markdown dashboard should include title."
@@ -3916,7 +3814,7 @@ Invoke-PackTest "agent pack menu groups workflows by user intent" {
         Assert-Equal -Actual $report.SurfaceCount -Expected 3 -Message "Agent pack menu should include only promoted supported surfaces."
         Assert-Equal -Actual $report.SourceSolutionCatalog -Expected "config/agent-surface-solutions.json" -Message "Agent pack menu should identify the solution catalog."
         Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" -and $_.InstallSolution }).Count -eq 1) -Message "Agent pack menu should use solution catalog status for Continue."
-        foreach ($hiddenSurface in @("cline", "kilo-code", "roo-code", "openhands")) {
+        foreach ($hiddenSurface in @("roo-code", "openhands")) {
             Assert-Equal -Actual @($report.AgentSurfaces | Where-Object { $_.Id -eq $hiddenSurface }).Count -Expected 0 -Message "$hiddenSurface should be excluded from the default agent menu."
         }
         Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "opencode" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Agent pack menu should include supported OpenCode status."
@@ -4055,15 +3953,12 @@ Invoke-PackTest "model residency policy is applied across runtime and config pat
     $policyReader = Join-Path $repoRoot "scripts/get-model-runtime-policy.ps1"
     $shellPolicyReader = Join-Path $repoRoot "scripts/get-model-runtime-policy.shared.sh"
     $paths = @(
-        "scripts/run-kilo-code-validation.ps1",
         "scripts/run-language-workflow-matrix.ps1",
         "scripts/run-language-workflow-matrix.shared.sh",
         "scripts/test-agent-cli-surface-models.ps1",
         "scripts/test-agent-cli-surface-models.shared.sh",
         "scripts/test-continue-cli-models.ps1",
         "scripts/test-continue-cli-models.shared.sh",
-        "scripts/test-cline-cli-models.ps1",
-        "scripts/test-cline-cli-models.shared.sh",
         "scripts/test-local-agent-models.ps1",
         "scripts/test-local-agent-models.shared.sh",
         "scripts/apply-recommended-agent-config.ps1",

@@ -251,7 +251,7 @@
 ## Milestone 14: Agent Surface Portability And Broader Audience
 
 - [x] Reposition the project name and top-level purpose beyond Continue-only and enterprise-only language.
-- [x] Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options.
+- [x] Add an agent-surface compatibility matrix for maintained, candidate, and historical open-source options.
 - [x] Define validation levels for each agent surface: read-only, plan validated, approved-write ready.
 - [x] Evaluate at least one non-Continue open-source agent surface with sanitized evidence.
 - [x] Decide whether install scripts should generate surface-specific config bundles instead of only `.continue` assets.
@@ -289,24 +289,16 @@
 
 ## Milestone 17: Agent Surface Compatibility Validation
 
-- [x] Add Cline read-only validation guide and sanitized evidence template.
-- [x] Validate Cline against a generated sample repository in read-only mode.
-- [x] Add shared agent CLI automation scripts and thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening.
+- [x] Add shared agent CLI automation scripts and thin wrappers for maintained Aider and OpenCode read-only and disposable write-smoke model screening.
 - [x] Validate Aider against a generated sample repository in plan or patch mode.
-- [x] Record sanitized Cline read-only evidence for one non-Continue agent surface.
-- [x] Validate Cline approved-write smoke test against a disposable generated sample with external verification.
-- [ ] Retest Cline's hardened realistic scoped edit after a relevant Cline editor-tool/line-ending fix or version upgrade. Cline CLI 3.0.46 Windows diagnostics with both Devstral Small 2 24B and Qwen 3 Coder 30B produced non-LF edits that failed `git diff --check`; Qwen also failed grounded read and scoped behavior gates. Do not cycle more models on this version.
-- [x] Add Cline CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
-- [x] Complete Milestone 17 for the promoted supported-surface set: Continue, Aider, and OpenCode have explicit validation positions; quarantined, candidate, and historical surfaces remain visible but do not count as supported parity.
+- [x] Complete Milestone 17 for the promoted supported-surface set: Continue, Aider, and OpenCode have explicit validation positions; candidate and historical surfaces do not count as supported parity.
 - [x] Promote Aider as the first end-to-end non-Continue adapter by completing install, local-model configuration, health, and test automation with sanitized deterministic coverage; keep real-project approved write blocked.
 
 ## Future Agent Surface Evidence Expansion
 
 - [x] Retire Roo Code from future validation and configuration work after its upstream project was archived and the extension was shut down; retain historical references only.
-- [x] Confirm Kilo Code's documented npm install, local Ollama config, and non-interactive `kilo run --auto` command shape; add a local-only config generator and npm install plan.
-- [ ] Retest Kilo after a concrete task-execution/tool-protocol fix or version change. On current CLI 7.4.11, Devstral passes read-only but fails write-smoke and scoped-edit despite exit `0`; Qwen 3.5 35B fails all three gates despite exit `0`. The harness now returns nonzero for aggregate validation failure; do not cycle more models without a surface change.
 - [x] Add a local-only OpenCode Ollama config generator and documented npm install plan to the unified setup adapter.
 - [x] Validate OpenCode's installed CLI and `opencode run` wrapper against a generated sample with read-only and disposable write-smoke checks.
 - [x] Add an opt-in generated Python scoped-edit gate to the shared CLI harness; record live evidence separately before any surface promotion.
@@ -341,10 +333,9 @@
 - [x] Define Capability Evidence Contract v2 keyed by surface, model, provider, OS, surface version, operation, and validation mode.
 - [x] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
 - [x] Prevent write-readiness evidence from one agent surface from being inherited by another surface.
-- [x] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters: Aider and OpenCode share dry-run-safe setup, local-only config, repository-local exclusion, health checks, and deterministic cross-platform contract tests. Cline, Kilo Code, and OpenHands remain separately evidence-blocked.
-- [x] Quarantine Cline CLI 3.0.46 from supported install/configure/test paths while retaining version-pinned evidence and the hardened maintainer harness for a qualifying upstream editing or line-ending change.
+- [x] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters: Aider and OpenCode share dry-run-safe setup, local-only config, repository-local exclusion, health checks, and deterministic cross-platform contract tests. OpenHands remains separately evidence-blocked.
 - [x] Add Aider install/configure automation with an explicit local-only config and supported isolated install methods.
-- [x] Quarantine Kilo CLI 7.4.11 from supported install/configure/test paths while retaining its generator code, version-pinned evidence, and sequential unload-safe maintainer harness for a qualifying upstream change.
+- [x] Remove failed Cline and Kilo integrations from scripts, adapters, active catalogs, detailed evidence, and restoration backlog; require a fresh proposal and complete promotion-gate validation before either can return.
 - [x] Keep OpenHands outside supported install/configure/test parity under the defined rootless workspace, sandbox, credential, mount, and deny-by-default network boundary until an implementation is explicitly approved and validated.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
@@ -400,7 +391,6 @@
 
 - [x] Add a milestone solution completeness audit covering completed and active roadmap stages.
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
-- [x] Validate Kilo Code with the documented command, project-local `.kilo/kilo.jsonc`, isolated user profile, and explicit `code` agent. Devstral read-only passed, Devstral write/scoped and all Qwen 35B gates failed, models were unloaded, and further retries remain blocked pending a relevant Kilo version or task-execution/tool-protocol change.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
 - [ ] Add future surface-specific profile generation after non-Continue validation.
 - [ ] Confirm scope and priority for the unified starter-toolkit web UI.

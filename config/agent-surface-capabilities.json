@@ -19,7 +19,7 @@
     "blocked",
     "retired"
   ],
-  "supportTiers": ["supported", "candidate", "quarantined", "historical"],
+  "supportTiers": ["supported", "candidate", "historical"],
   "surfaces": [
     {
       "id": "continue",
@@ -68,56 +68,6 @@
           "status": "supported",
           "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
           "evidence": ["config/evidence-catalog.tsv", "docs/evidence-catalog.md", "docs/evidence-dashboard.md"]
-        }
-      }
-    },
-    {
-      "id": "cline",
-      "name": "Cline",
-      "type": "editor-agent",
-      "supportTier": "quarantined",
-      "showInDefaultMenu": false,
-      "currentValidationLevel": "quarantined-at-cline-cli-3.0.46",
-      "activities": {
-        "install": {
-          "status": "blocked",
-          "entryPoints": [],
-          "evidence": ["docs/cline-readonly-validation.md"]
-        },
-        "configure": {
-          "status": "blocked",
-          "entryPoints": [],
-          "evidence": ["docs/cline-readonly-validation.md"]
-        },
-        "test": {
-          "status": "blocked",
-          "entryPoints": [],
-          "evidence": ["docs/cline-cli-model-testing.md", "examples/cline-readonly-validation.md"]
-        },
-        "health": {
-          "status": "supported",
-          "entryPoints": ["test-local-agent-health"],
-          "evidence": ["config/workflows.json"]
-        },
-        "cleanup": {
-          "status": "supported",
-          "entryPoints": ["cleanup-local-agent-artifacts"],
-          "evidence": ["config/workflows.json"]
-        },
-        "release-readiness": {
-          "status": "supported",
-          "entryPoints": ["validate-pack", "test-pack", "test-release-readiness"],
-          "evidence": ["docs/release.md"]
-        },
-        "model-selection": {
-          "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
-        },
-        "evidence": {
-          "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
-          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
         }
       }
     },
@@ -191,56 +141,6 @@
         },
         "test": {
           "status": "retired",
-          "entryPoints": [],
-          "evidence": ["docs/agent-cli-surface-model-testing.md"]
-        },
-        "health": {
-          "status": "supported",
-          "entryPoints": ["test-local-agent-health"],
-          "evidence": ["config/workflows.json"]
-        },
-        "cleanup": {
-          "status": "supported",
-          "entryPoints": ["cleanup-local-agent-artifacts"],
-          "evidence": ["config/workflows.json"]
-        },
-        "release-readiness": {
-          "status": "supported",
-          "entryPoints": ["validate-pack", "test-pack", "test-release-readiness"],
-          "evidence": ["docs/release.md"]
-        },
-        "model-selection": {
-          "status": "supported",
-          "entryPoints": ["profile-local-hardware", "discover-online-models", "generate-model-scorecard", "test-local-agent-models"],
-          "evidence": ["docs/local-agent-model-testing.md", "docs/model-scorecard.md"]
-        },
-        "evidence": {
-          "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
-          "evidence": ["config/evidence-catalog.tsv", "docs/evidence-dashboard.md"]
-        }
-      }
-    },
-    {
-      "id": "kilo-code",
-      "name": "Kilo Code",
-      "type": "editor-agent",
-      "supportTier": "quarantined",
-      "showInDefaultMenu": false,
-      "currentValidationLevel": "quarantined-at-kilo-cli-7.4.11",
-      "activities": {
-        "install": {
-          "status": "blocked",
-          "entryPoints": [],
-          "evidence": ["docs/agent-surface-options.md"]
-        },
-        "configure": {
-          "status": "blocked",
-          "entryPoints": [],
-          "evidence": ["docs/agent-surface-options.md"]
-        },
-        "test": {
-          "status": "blocked",
           "entryPoints": [],
           "evidence": ["docs/agent-cli-surface-model-testing.md"]
         },

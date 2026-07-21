@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestones 1 through 19 are complete for their defined supported-surface and generated-fixture scopes. Cline CLI 3.0.46 and Kilo CLI 7.4.11 are quarantined after failed promotion gates, Roo Code is historical, and OpenHands remains a candidate with a defined but unimplemented isolation boundary; none are counted as supported-surface parity. Later roadmap tracks cover hardware-aware model/config automation, script consolidation, a stable workflow registry, a future unified starter-toolkit web UI, and general-purpose AI capabilities.
+The repository is in early implementation stage. Milestones 1 through 19 are complete for their defined supported-surface and generated-fixture scopes. Continue, Aider, and OpenCode form the maintained surface set; failed integrations are removed rather than carried as partial implementations. Roo Code is historical, and OpenHands remains a candidate with a defined but unimplemented isolation boundary. Later roadmap tracks cover hardware-aware model/config automation, script consolidation, a stable workflow registry, a future unified starter-toolkit web UI, and general-purpose AI capabilities.
 
 ## Stage Status
 
@@ -25,9 +25,9 @@ The repository is in early implementation stage. Milestones 1 through 19 are com
 | Milestone 14: Agent Surface Portability And Broader Audience | Complete | The project is repositioned as a local-first engineering agent pack for individual, team, and enterprise users, and non-Continue surfaces are tracked through evidence-gated validation levels, promotion gates, config-bundle limits, and parity catalogs. Full cross-agent validation and install/configure/test implementation remain tracked in Milestones 17 and 19. |
 | Milestone 15: Multi-Language Engineering Support | Complete | .NET remains the most mature path, optional multi-language guidance is evidence-gated, and generated Python plus TypeScript samples have repository-discovery, implementation-planning, and code-review validation evidence. |
 | Milestone 16: Sample Repository Factory | Complete | Disposable sample repositories can be generated on Windows, Linux, and macOS for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL validation; evidence and tests cover fixture shape, runtime context, and sanitization. |
-| Milestone 17: Agent Surface Compatibility Validation | Complete | Continue, Aider, and OpenCode have explicit evidence-backed validation positions for the supported-surface scope. Cline and Kilo are quarantined with retained version-pinned evidence and maintainer harnesses, Roo Code is historical, OpenHands remains a candidate, and real-project approved write stays separately evidence-gated. |
+| Milestone 17: Agent Surface Compatibility Validation | Complete | Continue, Aider, and OpenCode have explicit evidence-backed validation positions for the supported-surface scope. Failed integrations were removed, Roo Code is historical, OpenHands remains a candidate, and real-project approved write stays separately evidence-gated. |
 | Milestone 18: Language Rule Packs | Complete | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are evidence-gated; deterministic project profiles, project-local activation, medium fixtures, and a 28-cell Continue CLI matrix are implemented. Windows, Linux, and native Apple Silicon macOS evidence is recorded separately, and the language-aware selector consumes each platform's evidence. The macOS matrix completed with Devstral Small 2 in bounded single-model runs with external scoped-write verification. |
-| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Continue profiles plus Aider and OpenCode install/configure/health/test paths satisfy supported-surface parity with deterministic cross-platform contracts. Cline and Kilo are quarantined, OpenHands is a candidate, and Roo Code is historical, so their future work does not represent supported installer parity. |
+| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Continue profiles plus Aider and OpenCode install/configure/health/test paths satisfy supported-surface parity with deterministic cross-platform contracts. Failed integrations are absent from active catalogs and scripts; OpenHands is a candidate and Roo Code is historical. |
 | Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, reusable surface-neutral model lanes, centralized shared asset config generation, workflow dispatch and envelopes, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, model scorecard, and native Linux/macOS onboarding rendering are implemented; a future UI wrapper and additional surface-specific profile generation remain planned. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Planned | Expand the future product beyond programming agents with repository-optional chat, writing, summarization, image-generation routing, a provider-neutral capability registry, deterministic onboarding, and an optional LLM intent router that cannot bypass safety policy. |
 
@@ -401,7 +401,7 @@ Scope:
 
 - Reposition the project name and product language around a local-first engineering agent pack rather than a Continue-only enterprise pack. Done.
 - Keep Continue as the first supported and tested agent surface until another surface has equivalent validation evidence. Done as the support boundary.
-- Add an agent-surface compatibility matrix for Continue, Cline, Aider, Kilo Code, OpenCode, OpenHands, and other credible open-source options. Done for status visibility; full support parity remains incomplete.
+- Add an agent-surface compatibility matrix for maintained, candidate, and historical open-source options. Done for status visibility; failed integrations are removed instead of retained as partial surfaces.
 - Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
 - Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams. Done with a shared setup-paths guide.
 - Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical. Done for the current docs, shared assets, validation harnesses, and evidence catalogs.
@@ -413,7 +413,7 @@ Exit criteria:
 - New users can understand that the project starts with Continue but is not limited to Continue forever. Done in the README and agent surface docs.
 - Non-enterprise users can follow the quick start without feeling the pack assumes a corporate environment. Done through beginner setup paths and non-enterprise guidance.
 - Enterprise users still see security, governance, validation, and auditability guidance. Done through the governance, validation, and evidence docs.
-- At least one non-Continue open-source agent surface is evaluated with a documented read-only validation result. Done with the Cline read-only validation path and sanitized evidence references.
+- At least one non-Continue open-source agent surface is evaluated with a documented read-only validation result. Done with Aider and OpenCode generated-sample evidence.
 - Surface-specific limitations are documented before any surface is recommended for approved writes. Done through promotion gates, compatibility status, and config-bundle policy docs.
 - Every tracked agent surface has comparable install, configure, and test status visibility. Done through the compatibility matrix, promotion gates, surface solution catalog, and capability parity catalog. Actual validation and install/configure/test implementation parity remains tracked in Milestones 17 and 19.
 
@@ -464,25 +464,21 @@ Goal: Convert candidate agent surfaces from documentation into evidence-backed c
 
 Scope:
 
-- Add a Cline read-only validation guide and sanitized evidence template. Done.
-- Validate at least one generated sample repository with Cline in read-only mode. Done for generated Python sample with `qwen3-coder:30b` at 16k context.
 - Validate at least one generated sample repository with Aider in plan or patch mode. Done for generated Python read-only, write-smoke, and scoped-edit validation, plus richer disposable Node service scoped-edit validation with `qwen3-coder:30b`.
 - Record surface, model, OS, tool permissions, failure signals, and changed-file verification. Done for current Aider generated-sample scope.
 - Keep Continue as the supported first path until another surface has equivalent validation evidence. Done; no non-Continue surface is promoted to equivalent approved-write support.
-- Validate Cline approved-write smoke behavior against a disposable generated sample. Done for a README-only smoke test with `qwen3-coder:30b` at 16k context. A realistic Devstral source-and-test edit passed scope and behavior but failed whitespace validation due to mixed line endings; a full scoped-edit pass remains pending.
-- Add a Cline CLI automation harness for future read-only and disposable write-smoke model screening. Done with version-pinned evidence; the harness is retained for maintainer-only retesting after a relevant upstream change.
 - Add a Continue CLI automation harness for focused read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Continue CLI evidence remains separate from editor Apply evidence.
-- Add a shared agent CLI automation harness plus thin wrappers for Aider, Roo Code, Kilo Code, and OpenCode future read-only and disposable write-smoke model screening. Done for shared scripts and documentation; Aider and OpenCode have model-specific generated-sample evidence, Kilo Code has current partial-pass live evidence and remains write-blocked pending a surface change, and Roo Code is retained only as an upstream-retired historical surface.
+- Add a shared agent CLI automation harness plus thin wrappers for maintained CLI surfaces. Done for Aider and OpenCode; Roo Code remains historical only.
 
 Exit criteria:
 
-- At least one non-Continue surface has sanitized read-only validation evidence. Done with Cline and Aider generated-sample evidence.
+- At least one non-Continue surface has sanitized read-only validation evidence. Done with Aider and OpenCode generated-sample evidence.
 - Approved-write recommendations remain blocked until scoped-write and external verification pass. Done through promotion gates and evidence catalog status.
-- Every promoted supported surface has install/configure/test validation status. Done for Continue, Aider, and OpenCode. Candidate, quarantined, and historical surfaces remain visible in evidence catalogs without counting as supported parity.
+- Every promoted supported surface has install/configure/test validation status. Done for Continue, Aider, and OpenCode. Candidate and historical surfaces remain visible without counting as supported parity; failed integrations are removed.
 
 Future evidence expansion:
 
-- Resolve Kilo Code's observed local-model tool-protocol failure, then rerun generated-sample read/write/scoped-edit validation with one model at a time and unload each model after testing; evaluate a maintained Roo Code successor separately before adding it to the tracked surface list.
+- Evaluate a maintained Roo Code successor separately before adding it to the tracked surface list.
 - Define a safe OpenHands validation boundary before adding platform-agent validation automation. Done with an isolated generated-sample, sandbox, credential, mount, and network policy.
 - Run explicitly approved non-generated repository validation before any non-Continue surface is promoted to real-project approved-write ready.
 - Promote one non-Continue surface end to end before widening adapter support. Done for the Aider install, local-model configuration, health, and test adapter; real-project approved write remains blocked pending explicitly approved validation.
@@ -517,7 +513,7 @@ Goal: Make adoption easier as the pack grows across surfaces, languages, and val
 
 Scope:
 
-- Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces. Done for Continue profiles plus evidence-backed Aider and OpenCode setup adapters; quarantined and candidate surfaces are excluded from supported setup.
+- Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces. Done for Continue profiles plus evidence-backed Aider and OpenCode setup adapters; candidate surfaces are excluded from supported setup.
 - Add language-focused install/profile options after language packs are validated. Future evidence-gated expansion; not a current completion blocker.
 - Create a sanitized evidence catalog for model, OS, editor, agent surface, language, and write-readiness results. Done for current scope in `config/evidence-catalog.tsv`.
 - Evolve the catalog to Capability Evidence Contract v2, keyed by surface, model, provider, operating system, surface version, operation, and validation mode. Done with a machine-readable v2 contract and migrated catalog; a model validated for one surface does not inherit write readiness on another surface.
@@ -526,14 +522,14 @@ Scope:
 
 Exit criteria:
 
-- Users can choose the right profile without manually assembling config files. Done for the supported Continue, Aider, and OpenCode set. Quarantined, candidate, and historical surfaces are excluded from default choices.
+- Users can choose the right profile without manually assembling config files. Done for the supported Continue, Aider, and OpenCode set. Candidate and historical surfaces are excluded from default choices.
 - Validation evidence is structured enough to compare models, surfaces, and languages over time. Done for the v2 catalog and current recommendation and scorecard consumers; new surface adapters must still add exact evidence before promotion.
 - Release artifacts are easy to install and verify. Done with cross-platform package scripts and checksum guidance.
 
-Future candidate and quarantine expansion:
+Future candidate expansion:
 
 - Continue, Aider, and OpenCode have supported install, configure, health, and test paths within their documented evidence limits; real-project approved write remains blocked for non-Continue surfaces.
-- Cline and Kilo retain evidence and maintainer harnesses but remain quarantined and absent from default setup until qualifying upstream changes pass restoration gates.
+- Failed integrations are removed from scripts, adapters, active catalogs, and detailed evidence; reintroduction requires a fresh proposal and full promotion-gate validation.
 - Roo Code is retained only for historical compatibility because its upstream project is retired.
 - OpenHands has a defined rootless workspace, credential, sandbox, and network boundary, but remains a candidate until an explicitly approved implementation passes generated-sample validation.
 ## Milestone 20: Hardware-Aware Model And Config Automation

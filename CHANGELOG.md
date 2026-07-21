@@ -11,7 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
-- Quarantined Cline CLI 3.0.46 and Kilo CLI 7.4.11 from default menus and supported install/configure/test paths while preserving version-pinned evidence and maintainer regression harnesses; aligned OpenCode's supported adapter status, strengthened the OpenHands isolation contract, and completed Milestones 17 and 19 for the promoted supported-surface set.
+- Removed all Cline and Kilo scripts, adapters, active catalog entries, detailed evidence files, and restoration backlog after both integrations failed required promotion gates; the maintained surface set is now Continue, Aider, and OpenCode.
+- Strengthened the OpenHands isolation contract and completed Milestones 17 and 19 for the promoted supported-surface set.
 
 ## 0.3.0 - 2026-07-21
 

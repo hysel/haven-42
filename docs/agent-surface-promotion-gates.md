@@ -8,9 +8,7 @@ Continue remains the supported first path. Other surfaces can move forward only 
 
 Milestone 17 is complete for the promoted support set because Continue, Aider, and OpenCode have explicit evidence-backed validation positions, at least one non-Continue surface has passed read-only, write-smoke, and scoped-edit gates, and real-project approved-write remains blocked until explicit non-generated repository validation passes.
 
-Candidate, quarantined, and historical surfaces do not count toward supported-surface parity. Cline CLI 3.0.46 and Kilo CLI 7.4.11 are quarantined after failed promotion gates, OpenHands remains a candidate with a defined isolation boundary, and Roo Code is historical. Their evidence remains visible without making Milestone 17 or 19 claim support for them.
-
-Kilo Code is no longer a supported-surface blocker. Its current CLI, documented command shape, retained native-Ollama project-local generator, explicit `code` agent selection, and isolated user-profile execution are recorded. Devstral passes read-only but not write or scoped-edit gates; Qwen 35B fails all three gates. Cline and Kilo remain excluded from default setup until a qualifying upstream change passes every restoration gate. OpenCode's generated-sample evidence is recorded separately and still requires non-generated-repository validation.
+Candidate and historical surfaces do not count toward supported-surface parity. OpenHands remains a candidate with a defined isolation boundary, and Roo Code is historical. Cline and Kilo Code were removed after failing required gates; neither has scripts, adapters, or active catalog entries in the pack. A future proposal for either must begin as a new integration and pass every shared gate. OpenCode's generated-sample evidence is recorded separately and still requires non-generated-repository validation.
 
 ## Shared Gates
 
@@ -29,16 +27,14 @@ Kilo Code is no longer a supported-surface blocker. Its current CLI, documented 
 
 | Surface | Current position | Next gate |
 | --- | --- | --- |
-| Cline | Quarantined at CLI 3.0.46; version-pinned evidence and the hardened maintainer harness are retained. | After a relevant upstream change, pass read, write, scoped-edit, cleanup, and OS-specific gates before restoring any supported status. |
 | Aider | CLI read-only, disposable write-smoke, and richer generated-sample scoped edits exist. | Explicitly approved non-generated repository validation before real-project approved-write claims. |
 | Roo Code | Upstream retired. | Do not promote or add new validation; evaluate a maintained successor separately. |
-| Kilo Code | Quarantined at CLI 7.4.11; version-pinned evidence, generator code, and the isolated maintainer harness are retained. | After a concrete task-execution/tool-protocol change, pass read, write, scoped-edit, cleanup, and OS-specific gates before restoring any supported status. |
 | OpenCode | Installed CLI plus generated-sample read/write-smoke and constrained scoped-edit evidence exists for Devstral Small 2 24B. | Run explicitly approved non-generated repository validation. |
 | OpenHands | Platform-agent candidate is blocked for install/config generation. | Use the isolated generated-sample boundary in `docs/openhands-validation-boundary.md` before any validation automation. |
 
-## Quarantine Restoration Gate
+## Removed Integration Re-entry Gate
 
-A quarantined surface must not appear in the default menu, accept supported setup/configuration actions, or influence write-readiness recommendations. Restoration requires a relevant upstream change plus successful read-only, write-smoke, scoped-edit, cleanup, and OS-specific validation with external verification. Updating only the model does not qualify when the recorded blocker is surface behavior.
+A removed integration has no retained executable path or active catalog entry. Re-entry requires a fresh proposal, new implementation, and successful read-only, write-smoke, scoped-edit, cleanup, and OS-specific validation with external verification before any supported status is added.
 
 ## Promotion Rules
 

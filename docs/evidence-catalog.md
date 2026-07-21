@@ -16,7 +16,7 @@ The complete key combines surface, surface version, provider, model, operating
 system, operation, and validation mode.
 
 Consumers must match every key field. A write result from Continue cannot make
-the same model write-ready in Cline, Aider, or another surface. A read result
+the same model write-ready in Aider, OpenCode, or another surface. A read result
 cannot become plan, review, or write evidence. Windows evidence cannot be
 silently inherited on Linux or macOS.
 

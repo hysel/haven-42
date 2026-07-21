@@ -28,21 +28,17 @@ Milestone 14 is complete for positioning and support-boundary documentation beca
 
 Milestone 14 is complete for its portability and audience scope. It defines the support boundary, records comparable status visibility for tracked surfaces, and keeps non-Continue support evidence-gated. Full live validation parity belongs to Milestone 17, and full install/configure/test implementation parity belongs to Milestone 19.
 
-The non-Continue validation requirement is satisfied by the documented Cline read-only path in `docs/cline-readonly-validation.md` and the related sanitized evidence references. Beginner and team setup expectations are covered by `docs/setup-paths.md`, while approved-write readiness remains blocked for non-Continue surfaces until external verification proves scoped edits in the target surface.
+The non-Continue validation requirement is satisfied by Aider and OpenCode generated-sample evidence. Beginner and team setup expectations are covered by `docs/setup-paths.md`, while approved-write readiness remains blocked for non-Continue surfaces until external verification proves scoped edits in the target surface.
 
 | Surface | Surface type | Current validation level | Current pack support | Approved-write position | Notes |
 | --- | --- | --- | --- | --- | --- |
 | Continue | VS Code-compatible extension, VSCodium extension, and CLI | Approved-write ready for the validated local editor setup; CLI harness validated by tests | Supported first path plus CLI automation harness | Allowed only after the read-only, read-content, current-folder, and scoped write smoke tests pass in the user's actual setup | Existing config, install scripts, shared asset mode, validation docs, model testing, approved-write guidance, and `docs/continue-cli-model-testing.md` target Continue today. |
-| Cline | VS Code-compatible editor agent plus CLI | Quarantined at CLI 3.0.46; historical read/write-smoke evidence is retained, but Devstral and Qwen Windows source edits failed LF/whitespace gates | Not offered in default setup, install, configuration, or end-user testing; maintainer harness retained | All new writes and support promotion blocked | Retest the retained harness only after a relevant Cline editing fix or upgrade. |
 | Aider | Git-aware CLI coding assistant | Generated-sample read-only, plan, write-smoke, and scoped-edit evidence; adapter tests validated | Supported isolated install, local-only Ollama config, health, and CLI test adapter | Blocked for real-project approved write | Use `scripts/setup-agent-surface.*`, `docs/aider-cli-model-testing.md`, and `examples/aider-validation.md`; explicitly approved non-generated-repository validation remains pending. |
-| Kilo Code | VS Code-compatible editor agent | Quarantined at CLI 7.4.11; Devstral read-only passed, but Devstral and Qwen 35B write/scoped gates failed despite exit `0` | Not offered in default setup, install, configuration, or end-user testing; generator and harness retained for maintainers | All new writes and support promotion blocked | See `examples/kilo-validation.md`; retest only after a Kilo tool-protocol/task-execution fix or version change. |
 | OpenCode | Terminal or IDE-oriented coding agent | Generated-sample read, write-smoke, and scoped-edit validated | Supported install, local-only configuration, health, and test adapter | Real-project approved write blocked | Requires explicitly approved non-generated-repository validation before real-project promotion. |
 | OpenHands | Self-hosted/platform-style agent runtime | Candidate with a defined isolation boundary | Not packaged and excluded from default setup | Blocked | Requires an explicitly approved rootless isolated runtime implementation before generated-sample validation. |
 | Roo Code | Archived VS Code-compatible editor agent | Retired upstream | Historical wrapper metadata only; no new setup or validation work | Blocked | The official project was archived and the extension shut down in May 2026. Do not use it for new setups; evaluate a maintained successor separately. |
 
 Candidate means "worth testing", not "approved for edits".
-
-Quarantined means current-version validation is complete and failed promotion gates. Quarantined surfaces are not end-user support options, but their sanitized evidence and maintainer-only regression harnesses are preserved for a qualifying upstream change.
 
 ## Validation Levels
 
@@ -85,7 +81,11 @@ Every surface validation record should capture:
 
 ## Recommended Next Evaluation
 
-Start with Aider or OpenCode in a generated repository and read-only mode. Cline and Kilo are maintainer-only quarantined tracks, OpenHands is a candidate awaiting an approved isolated implementation, and Roo Code is historical. Shared CLI-surface screening remains documented in `docs/agent-cli-surface-model-testing.md` for supported validation and version-triggered quarantine regression work.
+Start with Aider or OpenCode in a generated repository and read-only mode. OpenHands is a candidate awaiting an approved isolated implementation, and Roo Code is historical. Shared CLI-surface screening remains documented in `docs/agent-cli-surface-model-testing.md` for maintained surfaces.
+
+## Removed Integrations
+
+Cline and Kilo Code were evaluated and did not pass the pack's required write and scoped-edit gates. Their scripts, adapters, active catalog entries, and detailed evidence files were removed to keep the maintained solution narrow. Adding either surface later is a fresh integration proposal that must satisfy the same promotion gates as any new surface.
 
 Use `docs/agent-surface-promotion-gates.md` before changing support status for any non-Continue surface.
 

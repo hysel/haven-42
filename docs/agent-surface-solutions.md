@@ -8,7 +8,7 @@ It answers the same three questions for every surface:
 - How do I configure it?
 - How do I test it?
 
-The catalog does not make candidate, quarantined, historical, or blocked surfaces look ready. It records the support tier, default-menu visibility, current solution, status, evidence, and blocked reason for each agent.
+The catalog does not make candidate, historical, or blocked surfaces look ready. It records the support tier, default-menu visibility, current solution, status, evidence, and blocked reason for each tracked agent.
 
 It also records the config-bundle policy. Continue, Aider, and OpenCode have supported generated local config paths; future surface-specific bundles are gated by `docs/surface-specific-config-bundles.md`. Platform-agent validation must also follow `docs/openhands-validation-boundary.md`.
 
@@ -17,23 +17,21 @@ It also records the config-bundle policy. Continue, Aider, and OpenCode have sup
 | Surface | Install | Configure | Test |
 | --- | --- | --- | --- |
 | Continue | supported | supported | validated |
-| Cline | blocked | blocked | blocked |
 | Aider | supported | supported | validated |
 | Roo Code | retired | retired | retired |
-| Kilo Code | blocked | blocked | blocked |
 | OpenCode | supported | supported | validated |
 | OpenHands | blocked | blocked | blocked |
 
 ## Rules
 
-- Every surface must define install, configure, and test.
+- Every tracked surface must define install, configure, and test.
 - Every activity must include a status, solution, workflow list, evidence list, and blocked reason field.
 - Workflow IDs must exist in `config/workflows.json`.
 - Evidence paths must be repository-relative and sanitized.
 - Shared workflows can support many surfaces only when they do not assume a surface-specific configuration format.
 - Surface-specific config bundles must follow `docs/surface-specific-config-bundles.md`.
 - Planned and blocked surfaces must not be promoted by docs, menus, dashboards, or recommendation output.
-- Quarantined, candidate, and historical surfaces remain in evidence dashboards but are excluded from the default setup menu.
+- Candidate and historical surfaces remain excluded from the default setup menu.
 
 ## How To Use It
 
@@ -56,10 +54,8 @@ with the installed CLI. See [OpenCode CLI model testing](opencode-cli-model-test
 It remains partial for real-project approved-write readiness until explicitly
 approved non-generated repository validation passes.
 
-Cline CLI 3.0.46 and Kilo CLI 7.4.11 are quarantined. Their version-pinned
-evidence, retained config code, and isolated test harnesses remain available to
-maintainers for a future version-triggered regression run, but neither surface
-appears in the default menu or accepts supported install/configure actions.
-Restoration requires read, write, scoped-edit, cleanup, and OS-specific gates.
+Failed integrations are removed from the active solution catalog and executable
+surface. Reintroducing one requires a fresh proposal and complete promotion-gate
+validation.
 
 Use `docs/script-reference-appendix.md` for direct command details after you choose a workflow.

@@ -15,9 +15,8 @@ Continue is the first supported runtime surface, but the project identity is bro
 ## Current Stage
 
 The project is in active implementation. Continue is the supported first
-surface, Aider is the first supported non-Continue install/configure/test
-adapter, Cline has limited evidence-backed validation, and broader surface
-parity remains in progress.
+surface, while Aider and OpenCode are the fully maintained non-Continue
+install/configure/test adapters. Broader surface parity is evidence-gated.
 
 Capability Evidence Contract v2 now prevents model readiness from being
 inherited across surfaces, operating systems, or operations. Deterministic

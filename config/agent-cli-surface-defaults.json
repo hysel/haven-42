@@ -21,15 +21,6 @@
       "installHint": "Retired upstream: do not install Roo Code for new setups. Retain this metadata only for explicit historical experiments with command/template overrides."
     },
     {
-      "surfaceKey": "kilo-code-cli",
-      "surfaceName": "Kilo Code",
-      "agentCommand": "kilo",
-      "agentArgumentsTemplate": "run --auto --agent code --format json \"{Prompt}\"",
-      "writeAgentArgumentsTemplate": "",
-      "modelArgumentTemplate": "--model \"ollama/{Model}\"",
-      "installHint": "Quarantined at Kilo CLI 7.4.11. Retain this harness for maintainers and rerun only after a qualifying upstream task/tool-protocol change."
-    },
-    {
       "surfaceKey": "opencode-cli",
       "surfaceName": "OpenCode",
       "agentCommand": "opencode",
