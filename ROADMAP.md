@@ -29,6 +29,7 @@ The repository is in early implementation stage. Milestones 1 through 16 and Mil
 | Milestone 18: Language Rule Packs | Complete | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are evidence-gated; deterministic project profiles, project-local activation, medium fixtures, and a 28-cell Continue CLI matrix are implemented. Windows, Linux, and native Apple Silicon macOS evidence is recorded separately, and the language-aware selector consumes each platform's evidence. The macOS matrix completed with Devstral Small 2 in bounded single-model runs with external scoped-write verification. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial | Continue profiles plus Aider and OpenCode install/configure/health adapters are implemented with deterministic cross-platform contracts. OpenCode generated-sample read/write/scoped-edit evidence exists, but real-project approval and the separately blocked Cline, Kilo Code, and OpenHands work remain incomplete. |
 | Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, reusable surface-neutral model lanes, centralized shared asset config generation, workflow dispatch and envelopes, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, model scorecard, and native Linux/macOS onboarding rendering are implemented; a future UI wrapper and additional surface-specific profile generation remain planned. |
+| Milestone 21: General-Purpose AI Assistant And Intent Routing | Planned | Expand the future product beyond programming agents with repository-optional chat, writing, summarization, image-generation routing, a provider-neutral capability registry, deterministic onboarding, and an optional LLM intent router that cannot bypass safety policy. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -594,3 +595,40 @@ Exit criteria:
 6. Expand medium-complexity samples and define a representative surface/language/mode validation matrix. Done for fixtures and static coverage; execute and record the model-backed operation cells next.
 7. Implement the unified web UI only after the preceding contracts and adapters are stable.
 8. Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams so documented maturity and runtime wiring match verified behavior.
+
+## Milestone 21: General-Purpose AI Assistant And Intent Routing
+
+Goal: Let new AI users describe an ordinary task without first understanding repositories, coding agents, model hosts, or individual scripts, while preserving the engineering pack as the most mature evidence-gated capability domain.
+
+Scope:
+
+- Add a first-run "What would you like to do?" experience with top-level choices for chat, writing or summarization, image creation, software work, and local-AI setup or troubleshooting.
+- Define a provider-neutral capability registry above the engineering workflow registry. Capabilities describe user intent and typed outputs; providers describe how text, images, or engineering workflows are executed.
+- Allow general-purpose capabilities to run without a repository by using an explicit session or user-selected artifact workspace.
+- Implement a deterministic menu and rule-based intent fallback that remains usable when no model is installed, the model server is unavailable, or LLM routing confidence is low.
+- Optionally use an LLM to ask follow-up questions and propose capability IDs. Treat its output as an untrusted routing suggestion that must pass capability availability, policy, privacy, and approval checks.
+- Add provider adapters for general text/chat, writing and summarization, image generation, and the existing engineering workflow dispatcher without assuming one model or provider supports every modality.
+- Represent results as typed artifacts such as chat messages, Markdown documents, images, reports, configuration plans, or reviewed repository changes.
+- Show whether each capability is local or external and whether it reads a repository, writes files, downloads models, calls a network service, or requires approval.
+- Keep file, network, and repository safety enforcement in application policy rather than relying on model prompts.
+- Keep engineering write readiness tied to existing surface-, model-, provider-, OS-, operation-, and validation-specific evidence; general chat success must not promote a model for source-code edits.
+
+Exit criteria:
+
+- A new user can start with an ordinary-language goal or deterministic menu without selecting a script, agent surface, or repository.
+- General chat and writing tasks can run without repository context and produce clearly identified typed results.
+- Image generation appears only when a compatible configured provider is available and identifies its output location before writing.
+- The deterministic fallback produces testable capability selections without an LLM.
+- An optional LLM router can ask clarifying questions and recommend capabilities but cannot invoke unavailable or disallowed actions or bypass approval requirements.
+- The existing workflow registry and dispatcher remain the source of truth for engineering operations.
+- Local versus external execution and all material read, write, download, and network effects are disclosed before execution.
+
+### Recommended Implementation Order
+
+1. Define the capability registry, typed artifact contract, availability states, and policy metadata.
+2. Add the deterministic first-run intent experience and repository-optional session workspace.
+3. Implement one local text/chat adapter plus writing and summarization capabilities.
+4. Connect software-work requests to the existing workflow registry and dispatcher.
+5. Add provider discovery and one evidence-gated image-generation adapter.
+6. Add the optional LLM intent router with confidence thresholds, clarification, deterministic fallback, and policy enforcement.
+7. Add tested multi-step composition only after individual capability and artifact contracts are stable.

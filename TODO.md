@@ -384,6 +384,20 @@
 - [ ] Generate surface-specific plugin profiles only after compatibility evidence exists.
 - [x] Add sample scenario packs for legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup.
 
+## Milestone 21: General-Purpose AI Assistant And Intent Routing
+
+- [ ] Define a provider-neutral capability registry above the engineering workflow registry for chat, writing, summarization, image creation, software work, and local-AI setup.
+- [ ] Define typed result artifacts, capability availability states, privacy disclosures, and safety metadata for local and external providers.
+- [ ] Add a repository-optional session workspace for general-purpose tasks.
+- [ ] Add a deterministic first-run "What would you like to do?" menu and rule-based intent fallback that does not require an LLM.
+- [ ] Add one local text/chat adapter and general writing and summarization capabilities.
+- [ ] Route software-work capabilities through the existing workflow registry and dispatcher without weakening engineering evidence gates.
+- [ ] Add provider discovery and one evidence-gated image-generation adapter without assuming chat models support image generation.
+- [ ] Add an optional LLM intent router that can clarify and suggest capability IDs but cannot bypass availability, privacy, policy, or approval checks.
+- [ ] Add cross-platform contract tests for deterministic routing, unavailable capabilities, typed artifacts, repository-free operation, and safety enforcement.
+- [ ] Add multi-step task composition only after the individual capability and artifact contracts are stable.
+- [ ] Prepare the next minor release as `0.3.0` by curating `Unreleased`, updating version-bearing files, running the release gate, and tagging only after exact-SHA hosted CI passes.
+
 ## Solution Architecture Review Backlog
 
 - [x] Add a milestone solution completeness audit covering completed and active roadmap stages.

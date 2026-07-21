@@ -22,7 +22,7 @@ Use semantic versioning while the pack matures:
 - Minor: new workflows, new rule groups, new optional integrations, or meaningful pack capability additions.
 - Major: breaking config changes, incompatible Continue schema changes, or default integration/model posture changes.
 
-Current early releases should remain in the `0.1.x` range until the pack is validated across more repositories.
+The current released baseline is `0.2.0`. Work after the `v0.2.0` tag remains under `Unreleased` until a release is deliberately prepared. The next planned release is `0.3.0` because the accumulated non-breaking workflow, adapter, cross-platform, and product-scope additions qualify as a minor release; do not change version-bearing files or create the tag until the release readiness gate and exact-SHA hosted CI pass.
 
 ## Files To Update
 

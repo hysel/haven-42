@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The future starter-toolkit UI should give local-AI coding users one guided surface for setup, hardware profiling, model choice, config generation, agent-surface testing, validation, cleanup, and release readiness.
+The future starter-toolkit UI should give new and experienced AI users one guided surface for general chat and content tasks, software work, setup, hardware profiling, model choice, config generation, agent-surface testing, validation, cleanup, and release readiness.
 
 The UI must be a wrapper over existing workflow registry entries and tested scripts. It should not reimplement hardware profiling, recommendation logic, config generation, evidence parsing, or validation.
 
@@ -11,13 +11,14 @@ The UI must be a wrapper over existing workflow registry entries and tested scri
 | User | Need |
 | --- | --- |
 | Beginner local user | A short path from prerequisites to health check, model recommendation, install, and validation. |
+| General AI user | A repository-optional path to chat, writing, summarization, image creation, and clearly identified output artifacts. |
 | Advanced local user | Direct access to profile, recommend, test, install, evidence, cleanup, and release workflows. |
 | Maintainer | A dashboard over milestone status, evidence gaps, workflow registry coverage, and release readiness. |
 | Team or enterprise user | Evidence-first install/configuration decisions with audit-friendly output and no private data committed. |
 
 ## First Screens
 
-The first screen should be the actual setup console, not a marketing page.
+The first screen should ask what the user wants to do, then route to an available capability or the setup console when prerequisites are missing.
 
 | Area | Source of truth |
 | --- | --- |
@@ -29,6 +30,8 @@ The first screen should be the actual setup console, not a marketing page.
 | Model choice | `scripts/recommend-local-agent-config.*`, `docs/hardware-aware-recommendations.md` |
 | Install/configure/test by surface | `config/agent-surface-solutions.json`, `docs/agent-surface-solutions.md` |
 | Script appendix | `docs/script-reference-appendix.md` |
+
+Milestone 21 adds a provider-neutral capability registry above this engineering workflow layer. The capability registry owns user intent, modality, availability, policy metadata, and typed results; `config/workflows.json` remains the source of truth when the selected capability is an engineering operation.
 
 ## Evidence States
 
@@ -50,6 +53,8 @@ Every model, workflow, agent surface, and installer profile shown in the UI must
 - Approved-write workflows must require a dry-run or review step before applying changes.
 - Local-only config files must stay uncommitted.
 - The UI must show whether an action reads the current repository, writes generated output, writes config, or touches a model server.
+- An LLM may suggest a capability or ask a clarifying question, but application policy must independently validate availability, filesystem scope, network use, and required approval.
+- The UI must offer deterministic navigation when no routing model is available or routing confidence is insufficient.
 
 ## Main Flows
 
@@ -68,6 +73,9 @@ Every model, workflow, agent surface, and installer profile shown in the UI must
 5. Maintenance:
    Run validation, tests, release readiness, cleanup, and packaging through registry-backed workflows.
 
+6. General-purpose assistance:
+   Start without a repository, select or describe a chat, writing, summarization, or image task, disclose local versus external execution, and return a typed artifact.
+
 ## Implementation Boundary
 
 The UI should call only stable workflow IDs from `config/workflows.json` through `scripts/invoke-workflow.*` using the schema-v1 workflow envelope. Any new UI action should first exist as a script or registry entry with tests.
@@ -81,3 +89,5 @@ These remain on `TODO.md`:
 - Confirm scope and priority for the unified starter-toolkit web UI.
 - Add the unified web UI wrapper after script-level workflows are stable.
 - Keep surface-specific profile generation gated by non-Continue compatibility evidence.
+- Define the Milestone 21 capability and artifact contracts before adding general-purpose UI actions.
+- Decide which local text and image providers form the first supported vertical slice.
