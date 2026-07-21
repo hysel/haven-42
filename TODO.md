@@ -299,8 +299,7 @@
 - [x] Add Cline CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
-- [x] Complete Milestone 17 Cline and Aider compatibility validation exit criteria while keeping unconfirmed wrapper live validation evidence-gated.
-- [ ] Complete Milestone 17 full tracked-surface compatibility validation.
+- [x] Complete Milestone 17 for the promoted supported-surface set: Continue, Aider, and OpenCode have explicit validation positions; quarantined, candidate, and historical surfaces remain visible but do not count as supported parity.
 - [x] Promote Aider as the first end-to-end non-Continue adapter by completing install, local-model configuration, health, and test automation with sanitized deterministic coverage; keep real-project approved write blocked.
 
 ## Future Agent Surface Evidence Expansion
@@ -343,10 +342,10 @@
 - [x] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
 - [x] Prevent write-readiness evidence from one agent surface from being inherited by another surface.
 - [x] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters: Aider and OpenCode share dry-run-safe setup, local-only config, repository-local exclusion, health checks, and deterministic cross-platform contract tests. Cline, Kilo Code, and OpenHands remain separately evidence-blocked.
-- [x] Keep Cline install/configure automation blocked with exact evidence gaps: npm installation is documented and validated, but provider setup requires an isolated CLI data directory plus headless auto-approval for tools; no general write profile is generated.
+- [x] Quarantine Cline CLI 3.0.46 from supported install/configure/test paths while retaining version-pinned evidence and the hardened maintainer harness for a qualifying upstream editing or line-ending change.
 - [x] Add Aider install/configure automation with an explicit local-only config and supported isolated install methods.
-- [ ] Resolve Kilo Code's current local-model task-execution failure, then rerun generated-sample read/write/scoped-edit validation before promoting its scaffolded adapter; keep runs sequential and unload each model after testing; do not create new Roo Code automation.
-- [ ] Keep OpenHands install/configure/test automation blocked until platform workspace, sandbox, and credential boundaries are defined.
+- [x] Quarantine Kilo CLI 7.4.11 from supported install/configure/test paths while retaining its generator code, version-pinned evidence, and sequential unload-safe maintainer harness for a qualifying upstream change.
+- [x] Keep OpenHands outside supported install/configure/test parity under the defined rootless workspace, sandbox, credential, mount, and deny-by-default network boundary until an implementation is explicitly approved and validated.
 
 ## Milestone 20: Hardware-Aware Model And Config Automation
 

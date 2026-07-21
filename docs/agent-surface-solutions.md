@@ -8,7 +8,7 @@ It answers the same three questions for every surface:
 - How do I configure it?
 - How do I test it?
 
-The catalog does not make planned or blocked surfaces look ready. It records the current solution, status, evidence, and blocked reason for each agent.
+The catalog does not make candidate, quarantined, historical, or blocked surfaces look ready. It records the support tier, default-menu visibility, current solution, status, evidence, and blocked reason for each agent.
 
 It also records the config-bundle policy. Continue, Aider, and OpenCode have supported generated local config paths; future surface-specific bundles are gated by `docs/surface-specific-config-bundles.md`. Platform-agent validation must also follow `docs/openhands-validation-boundary.md`.
 
@@ -17,12 +17,12 @@ It also records the config-bundle policy. Continue, Aider, and OpenCode have sup
 | Surface | Install | Configure | Test |
 | --- | --- | --- | --- |
 | Continue | supported | supported | validated |
-| Cline | planned | planned | validated |
+| Cline | blocked | blocked | blocked |
 | Aider | supported | supported | validated |
 | Roo Code | retired | retired | retired |
-| Kilo Code | scaffolded | scaffolded | scaffolded |
+| Kilo Code | blocked | blocked | blocked |
 | OpenCode | supported | supported | validated |
-| OpenHands | blocked | blocked | planned |
+| OpenHands | blocked | blocked | blocked |
 
 ## Rules
 
@@ -33,6 +33,7 @@ It also records the config-bundle policy. Continue, Aider, and OpenCode have sup
 - Shared workflows can support many surfaces only when they do not assume a surface-specific configuration format.
 - Surface-specific config bundles must follow `docs/surface-specific-config-bundles.md`.
 - Planned and blocked surfaces must not be promoted by docs, menus, dashboards, or recommendation output.
+- Quarantined, candidate, and historical surfaces remain in evidence dashboards but are excluded from the default setup menu.
 
 ## How To Use It
 
@@ -55,14 +56,10 @@ with the installed CLI. See [OpenCode CLI model testing](opencode-cli-model-test
 It remains partial for real-project approved-write readiness until explicitly
 approved non-generated repository validation passes.
 
-Kilo Code now has an explicit npm install plan and a project-local
-`.kilo/kilo.jsonc` generator through the same adapter. It uses Kilo's native
-Ollama provider with an Ollama `/v1` endpoint, model tool metadata, token
-limits, and ask-by-default permissions. The harness explicitly selects Kilo's
-`code` agent and uses an isolated user profile so Kilo reads the project-local
-configuration. With the documented `.jsonc` path and preload-aware timing,
-Devstral Small 2 24B passes generated-sample read-only validation. Write-smoke
-and scoped-edit validation remain required before any readiness claim beyond
-read-only evidence. Do not treat generated config as real-project approval.
+Cline CLI 3.0.46 and Kilo CLI 7.4.11 are quarantined. Their version-pinned
+evidence, retained config code, and isolated test harnesses remain available to
+maintainers for a future version-triggered regression run, but neither surface
+appears in the default menu or accepts supported install/configure actions.
+Restoration requires read, write, scoped-edit, cleanup, and OS-specific gates.
 
 Use `docs/script-reference-appendix.md` for direct command details after you choose a workflow.

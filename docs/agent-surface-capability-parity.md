@@ -29,7 +29,7 @@ Every agent surface should be tracked against the same activities:
 
 ## Current Shape
 
-Continue remains the supported first editor path. Aider is the first supported non-Continue adapter for isolated installation, local-only Ollama configuration, health checks, and generated-sample CLI testing. Cline has validation evidence but no reusable install/configure adapter; Kilo Code, OpenCode, and OpenHands remain evidence-gated candidates. Roo Code is historical only because its upstream project is retired.
+Continue remains the supported first editor path. Aider and OpenCode are supported non-Continue adapters within their generated-sample evidence limits. Cline CLI 3.0.46 and Kilo CLI 7.4.11 are quarantined and excluded from default setup; OpenHands remains a candidate with a defined but unimplemented isolation boundary. Roo Code is historical only because its upstream project is retired.
 
 Shared workflows such as health checks, cleanup, model selection, release readiness, and evidence verification apply across surfaces because they operate on the local repository, local model server, generated outputs, or shared validation artifacts rather than a surface-specific configuration format.
 
@@ -46,6 +46,6 @@ Shared workflows such as health checks, cleanup, model selection, release readin
 ## Gaps To Close
 
 - Generate surface-specific config bundles only after each surface has compatibility evidence. The policy is tracked in `docs/surface-specific-config-bundles.md`.
-- Add install/configure workflows for Cline after its configuration boundaries are stable enough to support safely; keep validating the existing Aider adapter across platforms.
-- Validate Kilo Code's installed CLI and local-only Ollama config against a generated sample before promoting its wrapper from scaffolding to validated; evaluate a maintained Roo Code successor separately.
-- Review OpenHands separately because platform-style agents have different workspace, sandbox, and secret boundaries.
+- Retest the retained Cline and Kilo harnesses only after relevant upstream version or tool-protocol changes; require all promotion gates before restoring default-menu visibility.
+- Run explicitly approved non-generated-repository validation for Aider or OpenCode before any real-project approved-write claim.
+- Implement OpenHands only inside the documented rootless workspace, credential, and network boundary before adding validation automation.

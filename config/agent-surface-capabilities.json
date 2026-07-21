@@ -19,11 +19,14 @@
     "blocked",
     "retired"
   ],
+  "supportTiers": ["supported", "candidate", "quarantined", "historical"],
   "surfaces": [
     {
       "id": "continue",
       "name": "Continue",
       "type": "editor-and-cli",
+      "supportTier": "supported",
+      "showInDefaultMenu": true,
       "currentValidationLevel": "approved-write-ready",
       "activities": {
         "install": {
@@ -72,21 +75,23 @@
       "id": "cline",
       "name": "Cline",
       "type": "editor-agent",
-      "currentValidationLevel": "write-smoke-test-validated",
+      "supportTier": "quarantined",
+      "showInDefaultMenu": false,
+      "currentValidationLevel": "quarantined-at-cline-cli-3.0.46",
       "activities": {
         "install": {
-          "status": "planned",
+          "status": "blocked",
           "entryPoints": [],
           "evidence": ["docs/cline-readonly-validation.md"]
         },
         "configure": {
-          "status": "planned",
+          "status": "blocked",
           "entryPoints": [],
           "evidence": ["docs/cline-readonly-validation.md"]
         },
         "test": {
-          "status": "validated",
-          "entryPoints": ["test-agent-cli-surface"],
+          "status": "blocked",
+          "entryPoints": [],
           "evidence": ["docs/cline-cli-model-testing.md", "examples/cline-readonly-validation.md"]
         },
         "health": {
@@ -120,6 +125,8 @@
       "id": "aider",
       "name": "Aider",
       "type": "cli-agent",
+      "supportTier": "supported",
+      "showInDefaultMenu": true,
       "currentValidationLevel": "plan-and-scoped-edit-validated",
       "activities": {
         "install": {
@@ -168,6 +175,8 @@
       "id": "roo-code",
       "name": "Roo Code",
       "type": "editor-agent",
+      "supportTier": "historical",
+      "showInDefaultMenu": false,
       "currentValidationLevel": "retired-upstream",
       "activities": {
         "install": {
@@ -216,21 +225,23 @@
       "id": "kilo-code",
       "name": "Kilo Code",
       "type": "editor-agent",
-      "currentValidationLevel": "candidate",
+      "supportTier": "quarantined",
+      "showInDefaultMenu": false,
+      "currentValidationLevel": "quarantined-at-kilo-cli-7.4.11",
       "activities": {
         "install": {
-          "status": "planned",
+          "status": "blocked",
           "entryPoints": [],
           "evidence": ["docs/agent-surface-options.md"]
         },
         "configure": {
-          "status": "planned",
+          "status": "blocked",
           "entryPoints": [],
           "evidence": ["docs/agent-surface-options.md"]
         },
         "test": {
-          "status": "scaffolded",
-          "entryPoints": ["test-agent-cli-surface"],
+          "status": "blocked",
+          "entryPoints": [],
           "evidence": ["docs/agent-cli-surface-model-testing.md"]
         },
         "health": {
@@ -264,22 +275,24 @@
       "id": "opencode",
       "name": "OpenCode",
       "type": "cli-agent",
-      "currentValidationLevel": "candidate",
+      "supportTier": "supported",
+      "showInDefaultMenu": true,
+      "currentValidationLevel": "generated-sample-scoped-edit-validated",
       "activities": {
         "install": {
-          "status": "planned",
-          "entryPoints": [],
-          "evidence": ["docs/agent-surface-options.md"]
+          "status": "supported",
+          "entryPoints": ["setup-agent-surface"],
+          "evidence": ["docs/opencode-cli-model-testing.md"]
         },
         "configure": {
-          "status": "planned",
-          "entryPoints": [],
-          "evidence": ["docs/agent-surface-options.md"]
+          "status": "supported",
+          "entryPoints": ["setup-agent-surface"],
+          "evidence": ["docs/opencode-cli-model-testing.md"]
         },
         "test": {
-          "status": "scaffolded",
+          "status": "validated",
           "entryPoints": ["test-agent-cli-surface"],
-          "evidence": ["docs/agent-cli-surface-model-testing.md"]
+          "evidence": ["docs/opencode-cli-model-testing.md"]
         },
         "health": {
           "status": "supported",
@@ -312,6 +325,8 @@
       "id": "openhands",
       "name": "OpenHands",
       "type": "platform-agent",
+      "supportTier": "candidate",
+      "showInDefaultMenu": false,
       "currentValidationLevel": "candidate",
       "activities": {
         "install": {
@@ -325,7 +340,7 @@
           "evidence": ["docs/agent-surface-options.md"]
         },
         "test": {
-          "status": "planned",
+          "status": "blocked",
           "entryPoints": [],
           "evidence": ["docs/agent-surface-options.md"]
         },

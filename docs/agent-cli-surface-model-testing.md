@@ -1,5 +1,7 @@
 # Agent CLI Surface Model Testing
 
+> Cline CLI 3.0.46 and Kilo CLI 7.4.11 are quarantined. Their wrappers, config code, and evidence are retained for maintainer-only regression testing after qualifying upstream changes, not for default setup or current-version model cycling.
+
 ## Purpose
 
 Use this workflow to screen CLI-capable coding agent surfaces with the same disposable repository tests instead of maintaining separate full scripts for every agent plugin.

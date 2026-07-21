@@ -62,9 +62,10 @@ def menu(workflows, solutions, platform):
         workflow = workflows[workflow_id]
         items.append({"Title": title, "Intent": intent, "PrimaryWorkflowId": workflow_id,
                       "SafetyLevel": workflow["safetyLevel"], "Command": command(workflow, platform, arguments)})
+    visible_surfaces = [item for item in solutions["surfaces"] if item.get("showInDefaultMenu", True)]
     surfaces = [{"Name": item["name"], "ValidationLevel": item["currentValidationLevel"],
                  "InstallStatus": item["install"]["status"], "ConfigureStatus": item["configure"]["status"],
-                 "TestStatus": item["test"]["status"]} for item in sorted(solutions["surfaces"], key=lambda item: item["name"])]
+                 "TestStatus": item["test"]["status"]} for item in sorted(visible_surfaces, key=lambda item: item["name"])]
     report = common(platform)
     report.update({"SourceSolutionCatalog": "config/agent-surface-solutions.json", "MenuItemCount": len(items),
                    "MenuItems": items, "SurfaceCount": len(surfaces), "AgentSurfaces": surfaces})

@@ -48,8 +48,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
 | Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
 | Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |
-| Validate Cline read-only behavior | `docs/cline-readonly-validation.md` |
-| Automate Cline CLI model tests | `docs/cline-cli-model-testing.md` |
+| Review quarantined Cline and Kilo evidence | `docs/agent-surface-options.md` and `docs/agent-surface-promotion-gates.md` |
 | Automate shared agent CLI model tests | `docs/agent-cli-surface-model-testing.md` |
 | Automate Aider CLI model tests | `docs/aider-cli-model-testing.md` |
 | Install, configure, or health-check Aider | `docs/agent-surface-solutions.md` |

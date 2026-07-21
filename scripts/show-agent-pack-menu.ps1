@@ -123,7 +123,7 @@ $menuItems = @(
         -Command (Get-OnboardingScriptCommand -Workflow $release -Platform $Platform -Arguments "-AllowDirty -AsJson -OutputPath runtime-validation-output/release-readiness.json")
 )
 
-$surfaceSummary = @($solutionCatalog.surfaces | Sort-Object name | ForEach-Object {
+$surfaceSummary = @($solutionCatalog.surfaces | Where-Object { $_.showInDefaultMenu -ne $false } | Sort-Object name | ForEach-Object {
     [pscustomobject]@{
         Id = $_.id
         Name = $_.name

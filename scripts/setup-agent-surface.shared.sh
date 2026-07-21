@@ -39,6 +39,11 @@ case "$ACTION" in Plan|Install|Configure|Health) ;; *) printf 'Unsupported actio
 case "$LANE" in WriteSafe|PlanOnly|DeepReview) ;; *) printf 'Unsupported lane: %s\n' "$LANE" >&2; exit 1 ;; esac
 case "$INSTALL_METHOD" in aider-install|pipx|uv|npm) ;; *) printf 'Unsupported install method: %s\n' "$INSTALL_METHOD" >&2; exit 1 ;; esac
 
+if [ "$SURFACE" = "kilo" ]; then
+  printf '%s\n' 'Kilo Code support is quarantined at CLI 7.4.11 after failed write and scoped-edit gates. The retained setup code and test harness are maintainer-only until a relevant upstream version or tool-protocol change passes revalidation.' >&2
+  exit 2
+fi
+
 if { [ "$SURFACE" = "kilo" ] || [ "$SURFACE" = "opencode" ]; } && [ "$INSTALL_METHOD" = "aider-install" ]; then INSTALL_METHOD="npm"; fi
 
 if [ "$SURFACE" = "aider" ]; then

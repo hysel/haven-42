@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
-  "description": "Surface-neutral install, configure, test, and shared workflow solutions for supported and candidate agent surfaces. Status values are evidence-gated and do not promote planned surfaces to supported.",
+  "description": "Surface-neutral install, configure, test, and shared workflow solutions for supported, candidate, quarantined, and historical agent surfaces. Status values are evidence-gated and do not promote blocked surfaces to supported.",
+  "supportTiers": ["supported", "candidate", "quarantined", "historical"],
   "requiredActivities": [
     "install",
     "configure",
@@ -59,6 +60,8 @@
       "id": "continue",
       "name": "Continue",
       "type": "editor-and-cli",
+      "supportTier": "supported",
+      "showInDefaultMenu": true,
       "currentValidationLevel": "approved-write-ready",
       "configBundle": {
         "status": "supported",
@@ -92,39 +95,43 @@
       "id": "cline",
       "name": "Cline",
       "type": "editor-agent",
-      "currentValidationLevel": "write-smoke-test-validated",
+      "supportTier": "quarantined",
+      "showInDefaultMenu": false,
+      "currentValidationLevel": "quarantined-at-cline-cli-3.0.46",
       "configBundle": {
-        "status": "planned",
-        "strategy": "Do not generate Cline config bundles until install and local model config boundaries are documented and tested.",
-        "outputKind": "future surface-specific bundle",
+        "status": "blocked",
+        "strategy": "Do not generate Cline config bundles while Cline CLI 3.0.46 is quarantined for failed Windows scoped-edit line-ending and behavior gates.",
+        "outputKind": "none while quarantined",
         "evidence": ["docs/cline-readonly-validation.md", "docs/surface-specific-config-bundles.md"]
       },
       "install": {
-        "status": "planned",
-        "solution": "Documented validation exists, but reusable Cline installation is not automated yet.",
+        "status": "blocked",
+        "solution": "Do not offer Cline installation through the supported setup path while the surface is quarantined.",
         "workflowIds": [],
         "evidence": ["docs/cline-readonly-validation.md"],
-        "blockedReason": "Reusable install automation waits for stable, tested Cline setup and config boundaries."
+        "blockedReason": "Cline CLI 3.0.46 failed hardened Windows scoped-edit gates; retain evidence and harnesses for a version-triggered retest only."
       },
       "configure": {
-        "status": "planned",
-        "solution": "Surface-specific local model config generation is tracked but not promoted.",
+        "status": "blocked",
+        "solution": "Do not generate Cline configuration while the surface is quarantined.",
         "workflowIds": [],
         "evidence": ["docs/cline-readonly-validation.md"],
-        "blockedReason": "Config generation waits for compatibility evidence beyond current validation docs."
+        "blockedReason": "Configuration support can be reconsidered only after a relevant Cline version passes read, write, scoped-edit, cleanup, and OS-specific validation."
       },
       "test": {
-        "status": "validated",
-        "solution": "Use the shared agent CLI surface harness and Cline validation evidence.",
-        "workflowIds": ["test-agent-cli-surface"],
+        "status": "blocked",
+        "solution": "Retain the shared harness and evidence for maintainer regression testing after a qualifying Cline version change; do not present it as an end-user test path.",
+        "workflowIds": [],
         "evidence": ["docs/cline-cli-model-testing.md", "examples/cline-readonly-validation.md"],
-        "blockedReason": ""
+        "blockedReason": "Current-version testing is complete and failed promotion gates; do not cycle more models on Cline CLI 3.0.46."
       }
     },
     {
       "id": "aider",
       "name": "Aider",
       "type": "cli-agent",
+      "supportTier": "supported",
+      "showInDefaultMenu": true,
       "currentValidationLevel": "plan-and-scoped-edit-validated",
       "configBundle": {
         "status": "supported",
@@ -137,7 +144,7 @@
         "solution": "Use the unified surface setup adapter with aider-install, pipx, or uv and an explicit dry-run path.",
         "workflowIds": ["setup-agent-surface"],
         "evidence": ["docs/aider-cli-model-testing.md"],
-        "blockedReason": ""
+        "blockedReason": "Current-version testing is complete and failed promotion gates; do not cycle more models on Cline CLI 3.0.46."
       },
       "configure": {
         "status": "supported",
@@ -158,6 +165,8 @@
       "id": "roo-code",
       "name": "Roo Code",
       "type": "editor-agent",
+      "supportTier": "historical",
+      "showInDefaultMenu": false,
       "currentValidationLevel": "retired-upstream",
       "configBundle": {
         "status": "retired",
@@ -191,40 +200,44 @@
       "id": "kilo-code",
       "name": "Kilo Code",
       "type": "editor-agent",
-      "currentValidationLevel": "candidate",
+      "supportTier": "quarantined",
+      "showInDefaultMenu": false,
+      "currentValidationLevel": "quarantined-at-kilo-cli-7.4.11",
       "configBundle": {
-        "status": "scaffolded",
-        "strategy": "Generate a project-local .kilo/kilo.jsonc with an Ollama provider, explicit tool metadata, and ask-by-default permissions. Do not treat config generation as live surface validation.",
-        "outputKind": "project-local .kilo/kilo.jsonc",
+        "status": "blocked",
+        "strategy": "Do not generate new Kilo configuration while CLI 7.4.11 is quarantined; retain the generator implementation only for a version-triggered regression retest.",
+        "outputKind": "none while quarantined",
         "evidence": ["docs/agent-cli-surface-model-testing.md", "docs/surface-specific-config-bundles.md"]
       },
       "install": {
-        "status": "scaffolded",
-        "solution": "Use the unified adapter's explicit npm install plan for @kilocode/cli.",
-        "workflowIds": ["setup-agent-surface"],
+        "status": "blocked",
+        "solution": "Do not offer Kilo installation through the supported setup path while CLI 7.4.11 is quarantined.",
+        "workflowIds": [],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "The install plan is dry-run tested. Live generated-sample validation reached the configured provider but did not execute repository tasks."
+        "blockedReason": "Devstral passed read-only but failed write/scoped gates, and Qwen 35B failed all gates despite zero phase exits."
       },
       "configure": {
-        "status": "scaffolded",
-        "solution": "Generate a local-only Kilo config with the native Ollama provider, an Ollama /v1 endpoint, a selected model, declared tool support, context and output limits, and ask-by-default permissions.",
-        "workflowIds": ["setup-agent-surface"],
+        "status": "blocked",
+        "solution": "Do not generate Kilo configuration through the supported setup adapter while the surface is quarantined.",
+        "workflowIds": [],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Generation is statically tested. Renewed generated-sample diagnostics use an isolated user profile and project-local configuration, but models still do not complete the repository task through Kilo's tool protocol."
+        "blockedReason": "The retained generator is statically tested, but current live write and scoped-edit validation failed through Kilo's task/tool protocol."
       },
       "test": {
-        "status": "scaffolded",
-        "solution": "Use the shared agent CLI surface harness with kilo run --auto --agent code, JSON output, project-local configuration, and Ollama/model selection after local config and CLI installation are verified.",
-        "workflowIds": ["test-agent-cli-surface"],
+        "status": "blocked",
+        "solution": "Retain the shared Kilo harness for maintainer regression testing after a qualifying version or tool-protocol change; do not present it as an end-user test path.",
+        "workflowIds": [],
         "evidence": ["docs/agent-cli-surface-model-testing.md"],
-        "blockedReason": "Live generated-sample validation with qwen3.5:9b and devstral:24b returned generic acknowledgements without repository work; qwen3.5:35b emitted raw tool-like XML that Kilo did not execute."
+        "blockedReason": "Current CLI 7.4.11 failed required write/scoped gates; retest only after a concrete upstream change."
       }
     },
     {
       "id": "opencode",
       "name": "OpenCode",
       "type": "cli-agent",
-      "currentValidationLevel": "partial",
+      "supportTier": "supported",
+      "showInDefaultMenu": true,
+      "currentValidationLevel": "generated-sample-scoped-edit-validated",
       "configBundle": {
         "status": "supported",
         "strategy": "Generate an explicit local-only OpenCode Ollama config through the unified adapter; generated-sample evidence supports installation and configuration, but does not approve real-project writes.",
@@ -257,10 +270,12 @@
       "id": "openhands",
       "name": "OpenHands",
       "type": "platform-agent",
+      "supportTier": "candidate",
+      "showInDefaultMenu": false,
       "currentValidationLevel": "candidate",
       "configBundle": {
         "status": "blocked",
-        "strategy": "Do not generate OpenHands config bundles from this pack while workspace, sandbox, and credential boundaries remain platform-specific.",
+        "strategy": "Do not generate OpenHands config bundles until the documented rootless workspace, sandbox, credential, mount, and network boundary has an explicitly approved implementation and validation evidence.",
         "outputKind": "blocked platform bundle",
         "evidence": ["docs/agent-surface-options.md", "docs/openhands-validation-boundary.md", "docs/surface-specific-config-bundles.md"]
       },
@@ -279,11 +294,11 @@
         "blockedReason": "Configuration may involve platform and workspace boundary decisions outside this pack."
       },
       "test": {
-        "status": "planned",
-        "solution": "Define platform validation only after install and config boundaries are clear.",
+        "status": "blocked",
+        "solution": "Use the documented isolated generated-sample boundary only after an execution environment is explicitly approved; no end-user test adapter is available.",
         "workflowIds": [],
         "evidence": ["docs/agent-surface-options.md", "docs/openhands-validation-boundary.md"],
-        "blockedReason": "Validation workflow needs a confirmed safe execution model."
+        "blockedReason": "The safety boundary is defined, but a rootless isolated runtime, workspace mount policy, credential-free provider path, and network policy have not been implemented and validated."
       }
     }
   ]

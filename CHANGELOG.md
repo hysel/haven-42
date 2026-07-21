@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Quarantined Cline CLI 3.0.46 and Kilo CLI 7.4.11 from default menus and supported install/configure/test paths while preserving version-pinned evidence and maintainer regression harnesses; aligned OpenCode's supported adapter status, strengthened the OpenHands isolation contract, and completed Milestones 17 and 19 for the promoted supported-surface set.
+
 ## 0.3.0 - 2026-07-21
 
 - Added roadmap and UI architecture for a repository-optional general-purpose AI assistant, including a provider-neutral capability layer, deterministic and optional LLM intent routing, typed artifacts, chat and image modalities, and policy enforcement outside model prompts.

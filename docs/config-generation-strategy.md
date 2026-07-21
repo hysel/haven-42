@@ -62,4 +62,4 @@ Before adding a non-Continue config generator:
 5. Update `config/agent-surface-solutions.json`.
 6. Add tests proving generated output is local-only and sanitized.
 
-The Aider adapter now demonstrates this boundary by consuming `ModelLanes` rather than `ContinueProfiles`. Cline, Kilo Code, OpenCode, and future tools can follow the same pattern after their promotion gates pass. Roo Code is historical only because its upstream project is retired.
+The Aider and OpenCode adapters demonstrate this boundary by consuming surface-neutral recommendations rather than inheriting Continue configuration. Cline and Kilo Code are quarantined, so their retained code must not generate end-user config until a qualifying upstream change passes every restoration gate. Roo Code is historical only because its upstream project is retired.

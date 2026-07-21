@@ -8,7 +8,7 @@ Use `docs/config-generation-strategy.md` for the shared decision model that choo
 
 Continue, Aider, and OpenCode have supported generated local configuration paths today.
 
-Future Cline, Kilo Code, or platform-agent bundles should be added only after the surface has:
+Future quarantined, candidate, or platform-agent bundles should be added only after the surface has:
 
 - Documented install behavior.
 - Documented local model configuration format.
@@ -36,12 +36,12 @@ Generated config files should stay surface-specific. Continue config does not co
 | Surface | Bundle status | Policy |
 | --- | --- | --- |
 | Continue | supported | Generate `.continue` assets and local-only Continue config from recommendation output. |
-| Cline | planned | Wait for tested install and local model config boundaries. |
+| Cline | blocked | Quarantined at CLI 3.0.46; do not generate end-user config until a qualifying version passes every restoration gate. |
 | Aider | supported | Generate explicit local-only `.aider.conf.local.yml` through `setup-agent-surface.*`; launch with `aider --config` and keep real-project approved write blocked. |
 | Roo Code | retired | Do not generate new bundles; evaluate a maintained successor separately. |
-| Kilo Code | scaffolded | Generate project-local `.kilo/kilo.jsonc` through the unified adapter and keep the `.kilo/` directory locally excluded from Git. Current CLI 7.4.11 passes Devstral read-only but fails write/scoped validation; keep writes blocked until a relevant surface change and successful rerun. |
+| Kilo Code | blocked | Quarantined at CLI 7.4.11; retain generator code for maintainer regression testing but reject supported setup/configuration actions until a qualifying upstream change passes every restoration gate. |
 | OpenCode | supported | Generate a local-only `.opencode.local.json` through the unified adapter with dry-run-safe install planning, repository-local exclusion, and health checks. Devstral Small 2 24B passed generated-sample read/write-smoke and constrained scoped-edit validation; non-generated-repository validation remains pending for real-project approved-write claims. |
-| OpenHands | blocked | Do not generate platform-agent config while workspace, sandbox, and credential boundaries remain outside this pack. |
+| OpenHands | blocked | The isolation boundary is defined, but do not generate platform-agent config until a rootless isolated implementation is explicitly approved and validated. |
 
 ## Implementation Rule
 

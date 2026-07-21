@@ -1,5 +1,7 @@
 # Cline Read-Only Validation
 
+> Support status: quarantined at Cline CLI 3.0.46. This document and its harness are retained for maintainer regression testing after a relevant upstream editing or line-ending change; Cline is not a default setup or supported end-user surface.
+
 ## Purpose
 
 This guide defines the first non-Continue agent-surface validation path for the Local Engineering Agent Pack.

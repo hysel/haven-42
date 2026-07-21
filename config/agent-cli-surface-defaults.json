@@ -27,7 +27,7 @@
       "agentArgumentsTemplate": "run --auto --agent code --format json \"{Prompt}\"",
       "writeAgentArgumentsTemplate": "",
       "modelArgumentTemplate": "--model \"ollama/{Model}\"",
-      "installHint": "Install with npm install -g @kilocode/cli, generate a local-only Kilo config with setup-agent-surface, then validate only against a generated disposable sample."
+      "installHint": "Quarantined at Kilo CLI 7.4.11. Retain this harness for maintainers and rerun only after a qualifying upstream task/tool-protocol change."
     },
     {
       "surfaceKey": "opencode-cli",

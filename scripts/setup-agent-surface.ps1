@@ -20,6 +20,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+if ($Surface -eq "kilo") {
+    [Console]::Error.WriteLine("Kilo Code support is quarantined at CLI 7.4.11 after failed write and scoped-edit gates. The retained setup code and test harness are maintainer-only until a relevant upstream version or tool-protocol change passes revalidation.")
+    exit 2
+}
+
 function Resolve-AdapterModel {
     if ($Model) { return $Model }
     if (-not $RecommendationPath) { throw "Model or RecommendationPath is required for Configure." }

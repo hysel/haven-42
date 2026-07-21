@@ -57,11 +57,11 @@ test_release_packaging_scripts() {
     grep -q "Build Release Artifacts" "$REPO_ROOT/docs/release.md" &&
     grep -q "Milestone 19 Completion Basis" "$REPO_ROOT/docs/release.md" &&
     grep -q "config/evidence-catalog.tsv" "$REPO_ROOT/docs/release.md" &&
-    grep -q "partial for cross-agent install/configure/test parity" "$REPO_ROOT/docs/release.md" &&
+    grep -q "complete for the promoted supported-surface set" "$REPO_ROOT/docs/release.md" &&
     grep -q "Verify Checksums" "$REPO_ROOT/docs/release.md" &&
     grep -q "GitHub Release" "$REPO_ROOT/docs/release.md" &&
-    grep -q "| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Partial |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "Cross-agent parity gap" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Future candidate and quarantine expansion" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters" "$REPO_ROOT/TODO.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
@@ -680,9 +680,9 @@ test_agent_surface_options_doc() {
     grep -q "Cline" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Aider" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    grep -q "Milestone 17 Cline And Aider Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "partial for full tracked-surface compatibility" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "Roo Code is historical only" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "Milestone 17 Supported-Surface Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "Quarantine Restoration Gate" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
+    grep -q "Roo Code is historical" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     [ -f "$REPO_ROOT/docs/openhands-validation-boundary.md" ] &&
     grep -q "OpenHands Validation Boundary" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "disposable generated repository" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
@@ -693,11 +693,10 @@ test_agent_surface_options_doc() {
     grep -q "live write validation is blocked by task execution" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "| Milestone 17: Agent Surface Compatibility Validation | Partial |" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "| Milestone 17: Agent Surface Compatibility Validation | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[x\\] Complete Milestone 17 Cline and Aider compatibility validation exit criteria" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Complete Milestone 17 full tracked-surface compatibility validation" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[x\\] Complete Milestone 17 for the promoted supported-surface set" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Retire Roo Code from future validation" "$REPO_ROOT/TODO.md" &&
     grep -q "\[ \] Retest Kilo after a concrete task-execution/tool-protocol fix or version change" "$REPO_ROOT/TODO.md" &&
@@ -1426,12 +1425,10 @@ test_solution_architecture_review_doc() {
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Kilo Code" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Complete for positioning, partial for full cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "comparable install/configure/test support is not complete" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Complete for Cline, Aider, and OpenCode, partial for active tracked surfaces" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "OpenHands do not yet have full live validation evidence" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Complete for Continue, Aider, and OpenCode, partial for cross-agent parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "install/configure/test parity remains blocked" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Complete for positioning and support-tier governance" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Complete for the promoted supported-surface set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "OpenHands is a candidate with a defined isolation boundary" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Quarantined and candidate surfaces are excluded from supported parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "EMPTY_MODEL_OUTPUT" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Evidence States" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "tested-passed" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
@@ -1447,7 +1444,7 @@ test_solution_architecture_review_doc() {
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Reuse the recommendation data model for future non-Continue agent surfaces" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Provide or approve suitable non-generated repositories" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Resolve Kilo Code's current local-model task-execution failure" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[ \\] Retest Kilo after a concrete task-execution/tool-protocol fix or version change" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated" "$REPO_ROOT/TODO.md" &&
