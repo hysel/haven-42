@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "description": "Typed result artifact contract for general-purpose capabilities and engineering workflow routing.",
+  "requiredEnvelopeFields": ["schemaVersion", "artifactType", "status", "createdAtUtc", "sourceCapabilityId", "content", "policy"],
+  "statuses": ["planned", "succeeded", "failed", "blocked"],
+  "artifactTypes": [
+    { "id": "chat-message", "mediaTypes": ["text/plain", "text/markdown"], "defaultExtension": ".md", "contentShape": "role and message text" },
+    { "id": "markdown-document", "mediaTypes": ["text/markdown"], "defaultExtension": ".md", "contentShape": "title and Markdown body" },
+    { "id": "image", "mediaTypes": ["image/png", "image/jpeg", "image/webp"], "defaultExtension": ".png", "contentShape": "local artifact path plus dimensions and provider-safe metadata" },
+    { "id": "engineering-report", "mediaTypes": ["application/json", "text/markdown"], "defaultExtension": ".json", "contentShape": "workflow result or evidence report" },
+    { "id": "configuration-plan", "mediaTypes": ["application/json", "text/markdown"], "defaultExtension": ".json", "contentShape": "proposed local configuration and disclosed effects" },
+    { "id": "repository-change-review", "mediaTypes": ["application/json", "text/markdown"], "defaultExtension": ".json", "contentShape": "changed-file summary, external verification, and approval evidence" }
+  ],
+  "policy": {
+    "requiredFields": ["localExecution", "externalProvider", "repositoryRead", "fileWrite", "networkAccess", "modelDownload", "approvalRequired"],
+    "artifactPathDisclosedBeforeWrite": true,
+    "rawLocalPathsCommitted": false,
+    "rawProviderOutputCommitted": false,
+    "notes": "Artifact metadata must disclose material effects. Local paths, endpoints, prompts, and raw outputs remain local unless explicitly sanitized."
+  }
+}

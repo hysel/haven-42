@@ -3529,6 +3529,50 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+Invoke-PackTest "capability registry and deterministic routing enforce policy boundaries" {
+    $registryPath = Join-Path $repoRoot "config/capabilities.json"
+    $artifactPath = Join-Path $repoRoot "config/typed-artifact-contract.json"
+    $resolverPath = Join-Path $repoRoot "scripts/resolve-capability.ps1"
+    $registry = Get-Content -LiteralPath $registryPath -Raw | ConvertFrom-Json
+    $artifactContract = Get-Content -LiteralPath $artifactPath -Raw | ConvertFrom-Json
+
+    Assert-Equal -Actual $registry.schemaVersion -Expected 1 -Message "Capability registry schema should be version 1."
+    Assert-Equal -Actual $artifactContract.schemaVersion -Expected 1 -Message "Typed artifact schema should be version 1."
+    Assert-Equal -Actual @($registry.capabilities).Count -Expected 6 -Message "Initial registry should define six top-level capabilities."
+    Assert-Equal -Actual @($registry.capabilities.id | Sort-Object -Unique).Count -Expected @($registry.capabilities).Count -Message "Capability ids should be unique."
+    $artifactIds = @($artifactContract.artifactTypes.id)
+    $availabilityStates = @($registry.availabilityStates)
+    foreach ($capability in @($registry.capabilities)) {
+        Assert-True -Condition ($availabilityStates -contains $capability.availability.state) -Message "Capability availability should use a declared state: $($capability.id)"
+        foreach ($artifactType in @($capability.outputArtifactTypes)) {
+            Assert-True -Condition ($artifactIds -contains $artifactType) -Message "Capability should reference a declared artifact type: $($capability.id)/$artifactType"
+        }
+        foreach ($policyField in @("readsRepository", "writesFiles", "networkAccess", "downloadsModels", "externalProvider", "requiresApproval")) {
+            Assert-True -Condition ($null -ne $capability.policy.$policyField) -Message "Capability should disclose policy field $policyField`: $($capability.id)"
+        }
+    }
+    Assert-True -Condition (@($registry.capabilities | Where-Object { $_.id -eq "general.chat" -and $_.availability.state -eq "configuration-required" }).Count -eq 1) -Message "Chat should remain configuration-required before provider promotion."
+    Assert-True -Condition (@($registry.capabilities | Where-Object { $_.id -eq "media.image.create" -and $_.availability.state -eq "configuration-required" }).Count -eq 1) -Message "Image creation should remain configuration-required before provider promotion."
+    Assert-True -Condition (@($registry.capabilities | Where-Object { $_.id -eq "engineering.software-work" -and $_.workflowSource -eq "config/workflows.json" }).Count -eq 1) -Message "Software work should preserve the engineering workflow source of truth."
+
+    $chat = (Invoke-CommandCapture -FilePath $resolverPath -Arguments @("-Text", "I want to chat with AI", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $chat.Status -Expected "selected" -Message "Chat phrase should resolve deterministically."
+    Assert-Equal -Actual $chat.Selected.Id -Expected "general.chat" -Message "Chat phrase should select general.chat."
+    Assert-Equal -Actual $chat.InvocationAllowed -Expected $false -Message "Routing must never auto-invoke a capability."
+
+    $software = (Invoke-CommandCapture -FilePath $resolverPath -Arguments @("-Text", "please review code", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $software.Selected.Id -Expected "engineering.software-work" -Message "Software phrase should route to engineering workflows."
+    Assert-Equal -Actual $software.Selected.Availability.state -Expected "available" -Message "Engineering routing foundation should be available."
+
+    $ambiguous = (Invoke-CommandCapture -FilePath $resolverPath -Arguments @("-Text", "write code", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $ambiguous.Status -Expected "needs-clarification" -Message "Ambiguous wording should require clarification."
+    Assert-Equal -Actual @($ambiguous.Candidates).Count -Expected 2 -Message "Ambiguous write/code input should retain both candidates."
+
+    $unmatched = (Invoke-CommandCapture -FilePath $resolverPath -Arguments @("-Text", "do something unusual", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $unmatched.Status -Expected "unmatched" -Message "Unknown intent should return the deterministic fallback."
+    Assert-Equal -Actual $unmatched.InvocationAllowed -Expected $false -Message "Unmatched intent must not invoke anything."
+}
+
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
     $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"

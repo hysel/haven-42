@@ -2,6 +2,12 @@
 
 This file records important project decisions. Use it for choices that affect architecture, compatibility, governance, or long-term maintenance.
 
+## 2026-07-21: Keep capability selection separate from execution authority
+
+Status: Accepted
+
+The provider-neutral capability registry describes user intent, typed outputs, availability, and material effects above the engineering workflow registry. Deterministic or future LLM routing may select or suggest a capability, but routing never invokes it. Provider availability, privacy, filesystem scope, network effects, artifact destination, engineering evidence, and approvals are enforced independently before execution.
+
 ## 2026-07-21: Place capability contracts before the unified product UI
 
 Status: Accepted

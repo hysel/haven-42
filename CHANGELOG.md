@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added Milestone 21 capability and typed-artifact contracts plus deterministic non-LLM routing on Windows, Linux, and macOS; provider-backed general capabilities remain configuration-required and routing never auto-invokes actions.
 - Realigned the roadmap dependency order: Milestone 20 is complete as the workflow and automation foundation, Milestone 21 owns general-purpose capability and routing contracts, and new Milestone 22 owns the unified UI and later multi-step composition.
 - Added deterministic cross-platform wiki synchronization, generated navigation, retired-page cleanup, and a required hosted wiki freshness gate so mapped wiki documentation stays aligned with the repository.
 - Adopted a pass-to-ship admission policy for agent software: candidate evaluations stay disposable and untracked, successful integrations must pass all promotion and cross-platform gates before repository admission, and failed evaluations produce documentation only with no retained operational artifacts.
