@@ -3550,7 +3550,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "Generated sample repositories can satisfy validation coverage") -Message "Solution architecture review should document generated-sample validation acceptance."
     Assert-True -Condition ($doc -match "Hosted GitHub Actions status must be checked") -Message "Solution architecture review should require hosted CI status checks after pushes."
     Assert-True -Condition ($doc -match "Milestone Audit") -Message "Solution architecture review should include milestone audit."
-    foreach ($milestone in @("1: Minimum Usable Pack", "17: Agent Surface Compatibility Validation", "18: Language Rule Packs", "19: Installer Profiles", "20: Hardware-Aware Model")) {
+    foreach ($milestone in @("1: Minimum Usable Pack", "17: Agent Surface Compatibility Validation", "18: Language Rule Packs", "19: Installer Profiles", "20: Hardware-Aware Model", "21: General-Purpose AI Assistant", "22: Unified Product UI")) {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
@@ -3559,6 +3559,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "Complete for the promoted supported-surface set") -Message "Solution architecture review should classify supported-surface Milestones 17 and 19 accurately."
     Assert-True -Condition ($doc -match "OpenHands is a candidate with a defined isolation boundary") -Message "Solution architecture review should keep OpenHands candidate scope visible."
     Assert-True -Condition ($doc -match "Candidate surfaces are excluded from supported parity") -Message "Solution architecture review should define Milestone 19 parity boundaries."
+    Assert-True -Condition ($doc -match "Complete for the workflow-foundation scope") -Message "Solution architecture review should close Milestone 20 at its foundation boundary."
     Assert-True -Condition ($doc -match "EMPTY_MODEL_OUTPUT") -Message "Solution architecture review should track language validation failure signals."
     Assert-True -Condition ($uiDoc -match "Evidence States") -Message "Unified UI design should define evidence states."
     foreach ($state in @("tested-passed", "tested-partial", "failed", "recommended-only", "blocked")) {
@@ -3574,8 +3575,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($todo -match "\[ \] Provide or approve suitable non-generated repositories") -Message "TODO should track input-needed real repository targets."
     Assert-True -Condition ($todo -match "\[x\] Design a unified web UI") -Message "TODO should mark unified UI design complete."
     Assert-True -Condition ($todo -match "\[x\] Keep the UI evidence-first") -Message "TODO should mark evidence-first UI design complete."
-    Assert-True -Condition ($todo -match "\[ \] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated") -Message "TODO should keep UI implementation pending."
-    Assert-True -Condition ($todo -match "\[ \] Confirm scope and priority for the unified starter-toolkit web UI") -Message "TODO should track UI scope input."
+    Assert-True -Condition ($todo -match "\[x\] Hand unified UI implementation to Milestone 22") -Message "TODO should close the Milestone 20 UI handoff."
+    Assert-True -Condition ($todo -match "## Milestone 22: Unified Product UI And Task Composition") -Message "TODO should track UI implementation under Milestone 22."
 }
 Invoke-PackTest "sample scenario packs reference existing assets" {
     $scenarioPath = Join-Path $repoRoot "config/sample-scenario-packs.json"

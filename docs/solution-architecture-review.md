@@ -45,7 +45,9 @@ This audit applies the stricter completion standard from the maintainer discussi
 | 17: Agent Surface Compatibility Validation | Complete | Complete for the promoted supported-surface set | Continue, Aider, and OpenCode have explicit evidence-backed validation positions. Failed and retired integrations were removed. OpenHands is a candidate with a defined isolation boundary and remains documentation-only. |
 | 18: Language Rule Packs | Complete | Complete for the generated-fixture scope | Optional rule packs, project activation, cross-platform matrix evidence, and language-aware selection are complete; real-project/editor expansion remains separately evidence-gated. |
 | 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Complete for the promoted supported-surface set | Capability Evidence Contract v2, Continue profiles, supported Aider and OpenCode install/configure/health/test paths, and packaging are complete. Candidate surfaces are excluded from supported parity. |
-| 20: Hardware-Aware Model And Config Automation | In Progress | Partial | Recommendation, lane-specific scoring, curated model-fit metadata, dashboard, menu, dispatcher, versioned workflow envelope, health, cleanup, release readiness, the first non-Continue adapter, and the unified UI design exist; runtime-measured fit metadata, deeper consolidation, and UI implementation remain future work. |
+| 20: Hardware-Aware Model And Config Automation | Complete | Complete for the workflow-foundation scope | Recommendation, lane-specific scoring, curated model-fit metadata, dashboard, menu, dispatcher, versioned workflow envelope, health, cleanup, release readiness, the first non-Continue adapter, and the UI-facing foundation are implemented. Runtime-measured refinements remain optional evidence expansion. |
+| 21: General-Purpose AI Assistant And Intent Routing | Planned | Not started | Capability, artifact, provider, routing, repository-optional workspace, and policy contracts must be implemented before product UI integration. |
+| 22: Unified Product UI And Task Composition | Planned | Dependency-gated | UI implementation follows the completed Milestone 20 workflow foundation and stable Milestone 21 capability contracts; multi-step composition follows individual capability validation. |
 
 ## Input-Dependent Decisions
 
@@ -55,12 +57,11 @@ These should stay on `TODO.md` until the user or project owner provides input:
 - A new integration proposal, full implementation, and complete promotion-gate evidence before any previously removed surface is reconsidered.
 - Approval of a rootless isolated OpenHands implementation under the documented boundary before generated-sample validation automation is added.
 - Which candidate surface, if any, should enter promotion after the current supported set.
-- Scope and priority for a unified starter-toolkit web UI.
-- Whether external wiki publishing is required for the next release.
+- The first evidence-gated local text and image providers for Milestone 21.
 
 ## Enhancement Recommendations
 
-- Keep Milestone 20 open until its remaining UI and evidence-driven automation work is complete.
+- Keep Milestone 20 closed as the workflow foundation; track general-purpose capability work in Milestone 21 and product UI work in Milestone 22.
 - Prefer strengthening deterministic remediation for `EMPTY_MODEL_OUTPUT` and filename-drift failures before promoting more language rule packs.
 - Keep beginner navigation centered on `docs/agent-pack-menu.md`, with script details in `docs/script-reference-appendix.md`.
 - Continue using `config/agent-surface-solutions.json` as the install/configure/test source of truth for agent surfaces.

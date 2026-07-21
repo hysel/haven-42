@@ -2,6 +2,12 @@
 
 This file records important project decisions. Use it for choices that affect architecture, compatibility, governance, or long-term maintenance.
 
+## 2026-07-21: Place capability contracts before the unified product UI
+
+Status: Accepted
+
+Milestone 20 closes as the completed hardware-aware automation and workflow foundation. Milestone 21 implements general-purpose capability, artifact, provider, workspace, routing, and policy contracts. Milestone 22 then implements the unified local-first UI and, only after individual capability validation, bounded multi-step composition. Future surface-specific agent profiles remain evidence-gated integration work and do not keep Milestone 20 open.
+
 ## 2026-07-21: Treat mapped wiki pages as generated release documentation
 
 Status: Accepted

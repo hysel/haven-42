@@ -1404,6 +1404,9 @@ test_solution_architecture_review_doc() {
     grep -q "18: Language Rule Packs" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "19: Installer Profiles" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "21: General-Purpose AI Assistant" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "22: Unified Product UI" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Complete for the workflow-foundation scope" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "new integration proposal" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for positioning and support-tier governance" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -1427,8 +1430,8 @@ test_solution_architecture_review_doc() {
     grep -q "\\[ \\] Provide or approve suitable non-generated repositories" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[ \\] Confirm scope and priority for the unified starter-toolkit web UI" "$REPO_ROOT/TODO.md"
+    grep -q "\\[x\\] Hand unified UI implementation to Milestone 22" "$REPO_ROOT/TODO.md" &&
+    grep -q "## Milestone 22: Unified Product UI And Task Composition" "$REPO_ROOT/TODO.md"
 }
 test_hosted_ci_verifier_contract() {
   windows="$REPO_ROOT/scripts/verify-hosted-ci.ps1"
