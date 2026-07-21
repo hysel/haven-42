@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "description": "Provider adapter catalog. Endpoint values, credentials, and machine-specific configuration are runtime-only and must never be committed.",
+  "availabilityStates": ["available", "configuration-required", "unavailable", "blocked", "failed"],
+  "providers": [
+    {
+      "id": "ollama.local-text",
+      "name": "Local Ollama Text",
+      "kind": "text-generation",
+      "protocol": "ollama-chat",
+      "execution": "local-or-user-controlled-network",
+      "capabilityIds": ["general.chat", "content.write", "content.summarize"],
+      "defaultAvailability": "configuration-required",
+      "requirements": ["runtime endpoint", "installed explicit model", "successful health discovery", "user-approved execution"],
+      "entryPoints": {
+        "windows": "scripts/invoke-local-text-capability.ps1",
+        "linux": "scripts/invoke-local-text-capability.linux.sh",
+        "macos": "scripts/invoke-local-text-capability.macos.sh"
+      },
+      "validationStatus": "live-validated",
+      "notes": "Fixture and bounded Windows local-endpoint chat, writing, summarization, typed-artifact, sanitization, cleanup, and cross-platform contract validation passed. Runtime endpoint and installed-model availability remain configuration-dependent."
+    }
+  ]
+}
