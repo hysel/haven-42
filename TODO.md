@@ -393,6 +393,11 @@
 ## Milestone 22: Unified Product UI And Task Composition
 
 - [ ] Select and document the local-first UI runtime and packaging boundary.
+- [ ] Define hardware discovery and consent-driven local image-provider onboarding that does not require an external server.
+- [ ] Validate a pinned Windows NVIDIA CUDA image-provider profile before shipping its local installer or runtime files.
+- [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
+- [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
+- [ ] Validate a pinned Apple Silicon MPS image-provider profile on a physical Mac as the last native hardware gate before shipping its local installer or runtime files.
 - [ ] Implement the unified UI over the Milestone 20 workflow foundation and Milestone 21 capability registry.
 - [ ] Add first-run intent navigation, capability availability, evidence states, and policy disclosures.
 - [ ] Render typed artifacts plus versioned progress, warning, result, and error envelopes.

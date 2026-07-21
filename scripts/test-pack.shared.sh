@@ -1583,7 +1583,11 @@ test_solution_architecture_review_doc() {
     grep -q "\\[x\\] Design a unified web UI" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Keep the UI evidence-first" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Hand unified UI implementation to Milestone 22" "$REPO_ROOT/TODO.md" &&
-    grep -q "## Milestone 22: Unified Product UI And Task Composition" "$REPO_ROOT/TODO.md"
+    grep -q "## Milestone 22: Unified Product UI And Task Composition" "$REPO_ROOT/TODO.md" &&
+    grep -q "Windows Intel GPU/XPU" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Intel GPU support must pass installation, XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter gates" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "shared Linux provider as an optional advanced deployment" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "\[ \] Validate a pinned Windows Intel GPU/XPU image-provider profile" "$REPO_ROOT/TODO.md"
 }
 test_hosted_ci_verifier_contract() {
   windows="$REPO_ROOT/scripts/verify-hosted-ci.ps1"
