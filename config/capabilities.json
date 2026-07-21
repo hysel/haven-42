@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "description": "Provider-neutral user capability registry above the engineering workflow registry. Routing may select a capability but never bypass availability, policy, or approval checks.",
+  "availabilityStates": ["available", "configuration-required", "unavailable", "blocked", "failed"],
+  "repositoryModes": ["none", "optional", "required"],
+  "capabilities": [
+    {
+      "id": "general.chat",
+      "name": "Chat",
+      "category": "general-assistance",
+      "modality": "text",
+      "description": "Have a repository-optional general conversation with a configured text provider.",
+      "outputArtifactTypes": ["chat-message"],
+      "repositoryMode": "none",
+      "providerKinds": ["text-generation"],
+      "availability": { "state": "configuration-required", "reason": "No general-purpose text provider adapter has been promoted yet." },
+      "policy": { "readsRepository": false, "writesFiles": false, "networkAccess": "provider-dependent", "downloadsModels": false, "externalProvider": "provider-dependent", "requiresApproval": false },
+      "routing": { "phrases": ["chat with ai", "have a conversation", "ask a question"], "keywords": ["chat", "conversation", "question"] }
+    },
+    {
+      "id": "content.write",
+      "name": "Write Content",
+      "category": "content",
+      "modality": "text",
+      "description": "Draft general-purpose written content without requiring a repository.",
+      "outputArtifactTypes": ["markdown-document"],
+      "repositoryMode": "none",
+      "providerKinds": ["text-generation"],
+      "availability": { "state": "configuration-required", "reason": "No general-purpose writing provider adapter has been promoted yet." },
+      "policy": { "readsRepository": false, "writesFiles": true, "networkAccess": "provider-dependent", "downloadsModels": false, "externalProvider": "provider-dependent", "requiresApproval": true },
+      "routing": { "phrases": ["write a document", "draft an email", "help me write"], "keywords": ["write", "draft", "email", "document"] }
+    },
+    {
+      "id": "content.summarize",
+      "name": "Summarize Content",
+      "category": "content",
+      "modality": "text",
+      "description": "Summarize user-selected text or documents without assuming repository access.",
+      "outputArtifactTypes": ["markdown-document"],
+      "repositoryMode": "none",
+      "providerKinds": ["text-generation"],
+      "availability": { "state": "configuration-required", "reason": "No general-purpose summarization provider adapter has been promoted yet." },
+      "policy": { "readsRepository": false, "writesFiles": true, "networkAccess": "provider-dependent", "downloadsModels": false, "externalProvider": "provider-dependent", "requiresApproval": true },
+      "routing": { "phrases": ["summarize this", "summarize a document", "condense this text"], "keywords": ["summarize", "summary", "condense"] }
+    },
+    {
+      "id": "media.image.create",
+      "name": "Create Image",
+      "category": "media",
+      "modality": "image",
+      "description": "Create an image through a compatible evidence-gated image provider.",
+      "outputArtifactTypes": ["image"],
+      "repositoryMode": "none",
+      "providerKinds": ["image-generation"],
+      "availability": { "state": "configuration-required", "reason": "No image-generation provider adapter has been promoted yet." },
+      "policy": { "readsRepository": false, "writesFiles": true, "networkAccess": "provider-dependent", "downloadsModels": false, "externalProvider": "provider-dependent", "requiresApproval": true },
+      "routing": { "phrases": ["generate an image", "create an image", "make a picture"], "keywords": ["image", "picture", "illustration"] }
+    },
+    {
+      "id": "engineering.software-work",
+      "name": "Software Work",
+      "category": "engineering",
+      "modality": "workflow",
+      "description": "Route software requests into the existing evidence-gated engineering workflow registry.",
+      "outputArtifactTypes": ["engineering-report", "repository-change-review"],
+      "repositoryMode": "optional",
+      "providerKinds": ["engineering-workflow"],
+      "availability": { "state": "available", "reason": "The engineering workflow registry and dispatcher are validated." },
+      "policy": { "readsRepository": "workflow-dependent", "writesFiles": "workflow-dependent", "networkAccess": "workflow-dependent", "downloadsModels": "workflow-dependent", "externalProvider": "workflow-dependent", "requiresApproval": "workflow-dependent" },
+      "routing": { "phrases": ["work on code", "review code", "fix a bug", "software project"], "keywords": ["code", "software", "bug", "repository", "programming"] },
+      "workflowSource": "config/workflows.json"
+    },
+    {
+      "id": "setup.local-ai",
+      "name": "Set Up Local AI",
+      "category": "setup",
+      "modality": "workflow",
+      "description": "Route local-AI setup, model choice, health, and troubleshooting requests into validated workflows.",
+      "outputArtifactTypes": ["configuration-plan", "engineering-report"],
+      "repositoryMode": "optional",
+      "providerKinds": ["engineering-workflow"],
+      "availability": { "state": "available", "reason": "Validated setup, health, model, and configuration workflows exist." },
+      "policy": { "readsRepository": "workflow-dependent", "writesFiles": "workflow-dependent", "networkAccess": "workflow-dependent", "downloadsModels": "workflow-dependent", "externalProvider": false, "requiresApproval": "workflow-dependent" },
+      "routing": { "phrases": ["set up local ai", "configure ollama", "troubleshoot ollama", "choose a model"], "keywords": ["ollama", "setup", "configure", "model", "installation"] },
+      "workflowSource": "config/workflows.json"
+    }
+  ]
+}

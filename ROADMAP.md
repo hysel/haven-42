@@ -598,12 +598,12 @@ Goal: Let new AI users describe an ordinary task without first understanding rep
 Scope:
 
 - Add a first-run "What would you like to do?" experience with top-level choices for chat, writing or summarization, image creation, software work, and local-AI setup or troubleshooting.
-- Define a provider-neutral capability registry above the engineering workflow registry. Capabilities describe user intent and typed outputs; providers describe how text, images, or engineering workflows are executed.
+- Define a provider-neutral capability registry above the engineering workflow registry. Capabilities describe user intent and typed outputs; providers describe how text, images, or engineering workflows are executed. Done for schema version 1 and the initial six capability families.
 - Allow general-purpose capabilities to run without a repository by using an explicit session or user-selected artifact workspace.
-- Implement a deterministic menu and rule-based intent fallback that remains usable when no model is installed, the model server is unavailable, or LLM routing confidence is low.
+- Implement a deterministic menu and rule-based intent fallback that remains usable when no model is installed, the model server is unavailable, or LLM routing confidence is low. Registry-driven deterministic resolution is done; the first-run menu integration remains next.
 - Optionally use an LLM to ask follow-up questions and propose capability IDs. Treat its output as an untrusted routing suggestion that must pass capability availability, policy, privacy, and approval checks.
 - Add provider adapters for general text/chat, writing and summarization, image generation, and the existing engineering workflow dispatcher without assuming one model or provider supports every modality.
-- Represent results as typed artifacts such as chat messages, Markdown documents, images, reports, configuration plans, or reviewed repository changes.
+- Represent results as typed artifacts such as chat messages, Markdown documents, images, reports, configuration plans, or reviewed repository changes. Done for typed artifact contract version 1; provider-backed artifact creation remains future work.
 - Show whether each capability is local or external and whether it reads a repository, writes files, downloads models, calls a network service, or requires approval.
 - Keep file, network, and repository safety enforcement in application policy rather than relying on model prompts.
 - Keep engineering write readiness tied to existing surface-, model-, provider-, OS-, operation-, and validation-specific evidence; general chat success must not promote a model for source-code edits.
@@ -620,7 +620,7 @@ Exit criteria:
 
 ### Recommended Implementation Order
 
-1. Define the capability registry, typed artifact contract, availability states, and policy metadata.
+1. Define the capability registry, typed artifact contract, availability states, and policy metadata. Done.
 2. Add the deterministic first-run intent experience and repository-optional session workspace.
 3. Implement one local text/chat adapter plus writing and summarization capabilities.
 4. Connect software-work requests to the existing workflow registry and dispatcher.

@@ -47,6 +47,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Compare other open-source agent surfaces | `docs/agent-surface-options.md` |
 | Review the pass-to-ship policy for new agents | `docs/agent-integration-admission-policy.md` |
 | Keep the GitHub wiki synchronized | `docs/wiki-maintenance.md` |
+| Understand general-purpose capabilities and deterministic routing | `docs/capability-registry.md` and `docs/deterministic-intent-routing.md` |
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
 | Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
 | Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |

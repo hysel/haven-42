@@ -1394,6 +1394,41 @@ test_shared_asset_installation_doc() {
     grep -q "centralized shared asset" "$REPO_ROOT/ROADMAP.md"
 }
 
+test_capability_registry_and_routing() {
+  registry="$REPO_ROOT/config/capabilities.json"
+  artifacts="$REPO_ROOT/config/typed-artifact-contract.json"
+  resolver="$REPO_ROOT/scripts/resolve-capability.shared.sh"
+  python3 - "$registry" "$artifacts" <<'PY'
+import json, sys
+registry = json.load(open(sys.argv[1], encoding="utf-8"))
+artifacts = json.load(open(sys.argv[2], encoding="utf-8"))
+assert registry["schemaVersion"] == 1
+assert artifacts["schemaVersion"] == 1
+assert len(registry["capabilities"]) == 6
+assert len({item["id"] for item in registry["capabilities"]}) == 6
+artifact_ids = {item["id"] for item in artifacts["artifactTypes"]}
+states = set(registry["availabilityStates"])
+for capability in registry["capabilities"]:
+    assert capability["availability"]["state"] in states
+    assert set(capability["outputArtifactTypes"]) <= artifact_ids
+    assert {"readsRepository", "writesFiles", "networkAccess", "downloadsModels", "externalProvider", "requiresApproval"} <= set(capability["policy"])
+PY
+  chat="$($resolver --text 'I want to chat with AI' --json)" || return 1
+  software="$($resolver --text 'please review code' --json)" || return 1
+  ambiguous="$($resolver --text 'write code' --json)" || return 1
+  unmatched="$($resolver --text 'do something unusual' --json)" || return 1
+  python3 - "$chat" "$software" "$ambiguous" "$unmatched" <<'PY'
+import json, sys
+chat, software, ambiguous, unmatched = [json.loads(value) for value in sys.argv[1:]]
+assert chat["Status"] == "selected" and chat["Selected"]["Id"] == "general.chat"
+assert chat["InvocationAllowed"] is False
+assert software["Selected"]["Id"] == "engineering.software-work"
+assert software["Selected"]["Availability"]["state"] == "available"
+assert ambiguous["Status"] == "needs-clarification" and len(ambiguous["Candidates"]) == 2
+assert unmatched["Status"] == "unmatched" and unmatched["InvocationAllowed"] is False
+PY
+}
+
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
     [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
@@ -1545,6 +1580,7 @@ run_test "tool-use docs define platform-aware approved write behavior" test_tool
 run_test "hardware-aware recommendation scripts emit sanitized model lanes" test_hardware_aware_recommendation_scripts
 run_test "shared asset installation docs define centralized config strategy" test_shared_asset_installation_doc
 run_test "solution architecture review tracks milestone gaps" test_solution_architecture_review_doc
+run_test "capability registry and deterministic routing enforce policy boundaries" test_capability_registry_and_routing
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract
