@@ -3611,6 +3611,56 @@ Invoke-PackTest "general AI sessions are repository optional and dry-run first" 
     }
 }
 
+Invoke-PackTest "local text capabilities are session bound and typed" {
+    $sessionScript = Join-Path $repoRoot "scripts/start-ai-session.ps1"
+    $providerScript = Join-Path $repoRoot "scripts/invoke-local-text-capability.ps1"
+    $fixturePath = Join-Path $repoRoot "examples/fixtures/ollama-chat-response.json"
+    $providerRegistry = Get-Content -LiteralPath (Join-Path $repoRoot "config/providers.json") -Raw | ConvertFrom-Json
+    $artifactContract = Get-Content -LiteralPath (Join-Path $repoRoot "config/typed-artifact-contract.json") -Raw | ConvertFrom-Json
+    $tempRoot = Join-Path ([IO.Path]::GetTempPath()) "local-text-capability-test-$([guid]::NewGuid())"
+    try {
+        Assert-True -Condition (@($providerRegistry.providers | Where-Object { $_.id -eq "ollama.local-text" -and $_.validationStatus -eq "live-validated" }).Count -eq 1) -Message "Local text adapter should retain bounded live validation status."
+        foreach ($capabilityId in @("general.chat", "content.write", "content.summarize")) {
+            Assert-True -Condition (@($providerRegistry.providers[0].capabilityIds) -contains $capabilityId) -Message "Provider registry should map $capabilityId."
+            $sessionId = $capabilityId -replace '\.', '-'
+            $sessionResult = Invoke-CommandCapture -FilePath $sessionScript -Arguments @("-CapabilityId", $capabilityId, "-WorkspaceRoot", $tempRoot, "-SessionId", $sessionId, "-Apply", "-AsJson")
+            Assert-Equal -Actual $sessionResult.ExitCode -Expected 0 -Message "Session setup should succeed for $capabilityId."
+        }
+
+        $chatSession = Join-Path $tempRoot "general-chat"
+        $plan = (Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "general.chat", "-Prompt", "private prompt marker", "-Model", "fixture-model", "-SessionPath", $chatSession, "-ArtifactName", "chat.json", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $plan.Status -Expected "planned" -Message "Provider should be dry-run first."
+        Assert-Equal -Actual $plan.NetworkUsed -Expected $false -Message "Provider dry-run should not use a network."
+        Assert-Equal -Actual $plan.ArtifactWritten -Expected $false -Message "Provider dry-run should not write an artifact."
+        Assert-True -Condition (-not (Test-Path -LiteralPath $plan.ArtifactPath)) -Message "Dry-run artifact should stay absent."
+
+        $chat = (Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "general.chat", "-Prompt", "private prompt marker", "-Model", "fixture-model", "-SessionPath", $chatSession, "-ArtifactName", "chat.json", "-ResponseFixturePath", $fixturePath, "-Execute", "-Apply", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $chat.Status -Expected "succeeded" -Message "Fixture-backed chat should succeed."
+        Assert-Equal -Actual $chat.Artifact.artifactType -Expected "chat-message" -Message "Chat should emit a chat-message artifact."
+        Assert-Equal -Actual $chat.NetworkUsed -Expected $false -Message "Fixture validation should not claim network use."
+        Assert-Equal -Actual $chat.RepositoryRead -Expected $false -Message "General chat should not read a repository."
+        $artifactText = Get-Content -LiteralPath $chat.ArtifactPath -Raw
+        $artifact = $artifactText | ConvertFrom-Json
+        foreach ($field in @($artifactContract.requiredEnvelopeFields)) {
+            Assert-True -Condition ($null -ne $artifact.$field) -Message "Persisted artifact should include $field."
+        }
+        Assert-True -Condition ($artifactText -notmatch "private prompt marker|127\.0\.0\.1|11434") -Message "Artifact should omit prompt and endpoint values."
+
+        $writeSession = Join-Path $tempRoot "content-write"
+        $writing = (Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "content.write", "-Prompt", "draft content", "-Model", "fixture-model", "-SessionPath", $writeSession, "-ResponseFixturePath", $fixturePath, "-Execute", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $writing.Artifact.artifactType -Expected "markdown-document" -Message "Writing should emit a Markdown document artifact."
+        Assert-Equal -Actual $writing.ArtifactWritten -Expected $false -Message "Execute without apply should not persist output."
+
+        $mismatch = Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "content.summarize", "-Prompt", "summarize", "-Model", "fixture-model", "-SessionPath", $chatSession, "-ResponseFixturePath", $fixturePath, "-Execute", "-AsJson")
+        Assert-True -Condition ($mismatch.ExitCode -ne 0) -Message "Provider should reject a capability/session mismatch."
+        $overwrite = Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "general.chat", "-Prompt", "again", "-Model", "fixture-model", "-SessionPath", $chatSession, "-ArtifactName", "chat.json", "-ResponseFixturePath", $fixturePath, "-Execute", "-Apply", "-AsJson")
+        Assert-True -Condition ($overwrite.ExitCode -ne 0) -Message "Provider should refuse to overwrite an artifact."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
     $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"

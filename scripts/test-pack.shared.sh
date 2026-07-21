@@ -1456,6 +1456,29 @@ PY
   return "$result"
 }
 
+test_local_text_capability_adapter() {
+  root="$(mktemp -d)"
+  session="$REPO_ROOT/scripts/start-ai-session.shared.sh"
+  provider="$REPO_ROOT/scripts/invoke-local-text-capability.shared.sh"
+  fixture="$REPO_ROOT/examples/fixtures/ollama-chat-response.json"
+  $session --capability-id content.summarize --workspace-root "$root" --session-id summary --apply --json >/dev/null || { rm -rf "$root"; return 1; }
+  plan="$($provider --capability-id content.summarize --prompt 'private prompt marker' --model fixture-model --session-path "$root/summary" --artifact-name summary.json --json)" || { rm -rf "$root"; return 1; }
+  result="$($provider --capability-id content.summarize --prompt 'private prompt marker' --model fixture-model --session-path "$root/summary" --artifact-name summary.json --response-fixture-path "$fixture" --execute --apply --json)" || { rm -rf "$root"; return 1; }
+  python3 - "$plan" "$result" "$root/summary/artifacts/summary.json" <<'PY'
+import json, pathlib, sys
+plan, result = json.loads(sys.argv[1]), json.loads(sys.argv[2])
+artifact_path = pathlib.Path(sys.argv[3])
+assert plan["Status"] == "planned" and plan["NetworkUsed"] is False and plan["ArtifactWritten"] is False
+assert result["Status"] == "succeeded" and result["Artifact"]["artifactType"] == "markdown-document"
+assert result["NetworkUsed"] is False and result["RepositoryRead"] is False and result["PromptPersisted"] is False
+text = artifact_path.read_text(encoding="utf-8")
+assert "private prompt marker" not in text and "127.0.0.1" not in text and "11434" not in text
+PY
+  result_code=$?
+  rm -rf "$root"
+  return "$result_code"
+}
+
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
     [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
@@ -1609,6 +1632,7 @@ run_test "shared asset installation docs define centralized config strategy" tes
 run_test "solution architecture review tracks milestone gaps" test_solution_architecture_review_doc
 run_test "capability registry and deterministic routing enforce policy boundaries" test_capability_registry_and_routing
 run_test "general AI sessions are repository optional and dry-run first" test_general_ai_session_workspace
+run_test "local text capabilities are session bound and typed" test_local_text_capability_adapter
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract

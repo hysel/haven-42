@@ -22,6 +22,8 @@ docs/capability-registry.md	Capability-Registry.md	Capability Registry
 docs/typed-artifact-contract.md	Typed-Artifact-Contract.md	Typed Artifact Contract
 docs/deterministic-intent-routing.md	Deterministic-Intent-Routing.md	Deterministic Intent Routing
 docs/general-ai-session-workspace.md	General-AI-Session-Workspace.md	General AI Session Workspace
+docs/local-text-capabilities.md	Local-Text-Capabilities.md	Local Text Capabilities
+examples/local-text-capability-validation.md	Local-Text-Capability-Validation.md	Local Text Capability Validation
 docs/release.md	Release-Guidance.md	Release Guidance
 docs/hosted-ci-verification.md	Hosted-CI-Verification.md	Hosted CI Verification
 docs/wiki-maintenance.md	Wiki-Maintenance.md	Wiki Maintenance
