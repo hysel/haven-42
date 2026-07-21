@@ -3573,6 +3573,44 @@ Invoke-PackTest "capability registry and deterministic routing enforce policy bo
     Assert-Equal -Actual $unmatched.InvocationAllowed -Expected $false -Message "Unmatched intent must not invoke anything."
 }
 
+Invoke-PackTest "general AI sessions are repository optional and dry-run first" {
+    $scriptPath = Join-Path $repoRoot "scripts/start-ai-session.ps1"
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "general-ai-session-test-$([guid]::NewGuid())"
+    try {
+        $menu = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-List", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $menu.Kind -Expected "capability-menu" -Message "First-run output should be a capability menu."
+        Assert-Equal -Actual @($menu.Items).Count -Expected 6 -Message "Menu should expose every top-level capability."
+        Assert-True -Condition (@($menu.Items | Where-Object { $_.Id -eq "general.chat" -and $_.Availability -eq "configuration-required" }).Count -eq 1) -Message "Menu should disclose unavailable chat configuration."
+
+        $plan = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-CapabilityId", "general.chat", "-WorkspaceRoot", $tempRoot, "-SessionId", "dry-run-session", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $plan.Status -Expected "planned" -Message "Session command should be dry-run first."
+        Assert-Equal -Actual $plan.WorkspaceCreated -Expected $false -Message "Dry-run should not create a workspace."
+        Assert-Equal -Actual $plan.CapabilityInvoked -Expected $false -Message "Session planning should not invoke a provider."
+        Assert-True -Condition (-not (Test-Path -LiteralPath $plan.SessionPath)) -Message "Dry-run session path should remain absent."
+        Assert-Equal -Actual $plan.Disclosures.ArtifactPathDisclosedBeforeWrite -Expected $true -Message "Plan should disclose artifact paths before a write."
+
+        $created = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Text", "summarize a document", "-WorkspaceRoot", $tempRoot, "-SessionId", "created-session", "-Apply", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $created.Status -Expected "created" -Message "Explicit apply should create the session workspace."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $created.SessionPath "session.json") -PathType Leaf) -Message "Created session should contain local metadata."
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $created.SessionPath "artifacts") -PathType Container) -Message "Created session should contain an artifact directory."
+        $metadataText = Get-Content -LiteralPath (Join-Path $created.SessionPath "session.json") -Raw
+        $metadata = $metadataText | ConvertFrom-Json
+        Assert-Equal -Actual $metadata.capabilityId -Expected "content.summarize" -Message "Metadata should record the selected capability."
+        Assert-True -Condition ($metadataText -notmatch "summarize a document") -Message "Session metadata should not retain the user prompt."
+
+        $ambiguous = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Text", "write code", "-WorkspaceRoot", $tempRoot, "-SessionId", "ambiguous-session", "-Apply", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $ambiguous.Status -Expected "needs-clarification" -Message "Ambiguous input should not create a session."
+        Assert-Equal -Actual $ambiguous.WorkspaceCreated -Expected $false -Message "Ambiguous input should not write a workspace."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRoot "ambiguous-session"))) -Message "Ambiguous session folder should stay absent."
+
+        $insideRepo = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-CapabilityId", "general.chat", "-WorkspaceRoot", (Join-Path $repoRoot "local-session"), "-SessionId", "blocked", "-AsJson")
+        Assert-True -Condition ($insideRepo.ExitCode -ne 0) -Message "Session workspaces inside the pack repository should be rejected."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
     $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"

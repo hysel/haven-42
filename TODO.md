@@ -380,8 +380,8 @@
 - [x] Define a provider-neutral capability registry above the engineering workflow registry for chat, writing, summarization, image creation, software work, and local-AI setup.
 - [x] Define typed result artifacts, capability availability states, privacy disclosures, and safety metadata for local and external providers.
 - [x] Add deterministic registry routing with explicit-ID selection, phrase and keyword matching, ambiguity handling, unmatched fallback, and no automatic invocation.
-- [ ] Add a repository-optional session workspace for general-purpose tasks.
-- [ ] Add a deterministic first-run "What would you like to do?" menu and rule-based intent fallback that does not require an LLM.
+- [x] Add a repository-optional, dry-run-first session workspace for general-purpose tasks.
+- [x] Add a deterministic first-run "What would you like to do?" menu and rule-based intent fallback that does not require an LLM.
 - [ ] Add one local text/chat adapter and general writing and summarization capabilities.
 - [ ] Route software-work capabilities through the existing workflow registry and dispatcher without weakening engineering evidence gates.
 - [ ] Add provider discovery and one evidence-gated image-generation adapter without assuming chat models support image generation.
