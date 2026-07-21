@@ -383,7 +383,8 @@
 - [x] Add a repository-optional, dry-run-first session workspace for general-purpose tasks.
 - [x] Add a deterministic first-run "What would you like to do?" menu and rule-based intent fallback that does not require an LLM.
 - [x] Add one dry-run-first local Ollama text adapter with bounded live chat, writing, summarization, typed-artifact, sanitization, cleanup, and cross-platform contract evidence.
-- [ ] Route software-work capabilities through the existing workflow registry and dispatcher without weakening engineering evidence gates.
+- [x] Route software-work capabilities into deterministic, non-invoking plans over the existing workflow registry without weakening engineering evidence gates.
+- [x] Add offline-first provider availability discovery with an explicit bounded Ollama health probe that never persists endpoint values or downloads models.
 - [ ] Add provider discovery and one evidence-gated image-generation adapter without assuming chat models support image generation.
 - [ ] Add an optional LLM intent router that can clarify and suggest capability IDs but cannot bypass availability, privacy, policy, or approval checks.
 - [ ] Add cross-platform contract tests for deterministic routing, unavailable capabilities, typed artifacts, repository-free operation, and safety enforcement.

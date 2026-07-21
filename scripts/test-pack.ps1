@@ -3661,6 +3661,41 @@ Invoke-PackTest "local text capabilities are session bound and typed" {
     }
 }
 
+Invoke-PackTest "provider discovery and engineering routing preserve policy boundaries" {
+    $discoveryPath = Join-Path $repoRoot "scripts/discover-capability-availability.ps1"
+    $routePath = Join-Path $repoRoot "scripts/resolve-engineering-route.ps1"
+    $fixturePath = Join-Path $repoRoot "examples/fixtures/ollama-tags-response.json"
+    $routeRegistry = Get-Content -LiteralPath (Join-Path $repoRoot "config/engineering-routes.json") -Raw | ConvertFrom-Json
+    $workflowRegistry = Get-Content -LiteralPath (Join-Path $repoRoot "config/workflows.json") -Raw | ConvertFrom-Json
+    $workflowIds = @($workflowRegistry.workflows.id)
+
+    foreach ($route in @($routeRegistry.routes)) {
+        Assert-True -Condition ($route.capabilityId -in @("engineering.software-work", "setup.local-ai")) -Message "Engineering routes should stay in engineering or local-AI capability domains."
+        foreach ($workflowId in @($route.workflowIds)) {
+            Assert-True -Condition ($workflowIds -contains $workflowId) -Message "Route should reference an existing workflow: $workflowId"
+        }
+    }
+
+    $offline = (Invoke-CommandCapture -FilePath $discoveryPath -Arguments @("-CapabilityId", "general.chat", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $offline.ProbeUsed -Expected $false -Message "Provider discovery should be offline by default."
+    Assert-Equal -Actual $offline.CapabilityInvoked -Expected $false -Message "Provider discovery should never invoke a capability."
+    Assert-Equal -Actual $offline.Items[0].EffectiveAvailability -Expected "configuration-required" -Message "Unprobed runtime provider should require configuration."
+
+    $probeOutput = (Invoke-CommandCapture -FilePath $discoveryPath -Arguments @("-CapabilityId", "general.chat", "-Probe", "-Model", "example-text-model:latest", "-OllamaBaseUrl", "http://private-runtime.invalid:11434", "-ResponseFixturePath", $fixturePath, "-AsJson")).Output
+    $probe = $probeOutput | ConvertFrom-Json
+    Assert-Equal -Actual $probe.Probe.status -Expected "available" -Message "Fixture probe should find the explicit installed model."
+    Assert-Equal -Actual $probe.Probe.source -Expected "validation-fixture" -Message "Fixture probe should disclose its source."
+    Assert-Equal -Actual $probe.EndpointPersisted -Expected $false -Message "Discovery should never persist provider endpoints."
+    Assert-True -Condition ($probeOutput -notmatch "private-runtime|11434") -Message "Discovery output should omit runtime endpoint values."
+
+    $route = (Invoke-CommandCapture -FilePath $routePath -Arguments @("-Text", "please review code", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $route.Status -Expected "selected" -Message "Review intent should select one engineering route."
+    Assert-Equal -Actual $route.SelectedRouteId -Expected "engineering.review" -Message "Review intent should select the review plan."
+    Assert-Equal -Actual $route.InvocationAllowed -Expected $false -Message "Route selection must never invoke workflows."
+    Assert-True -Condition (@($route.Steps | Where-Object WorkflowId -eq "verify-runtime-output").Count -eq 1) -Message "Review plan should preserve output verification."
+    Assert-True -Condition (@($route.Steps | Where-Object SafetyLevel -ne "read-only").Count -gt 0) -Message "Route should preserve workflow safety levels instead of flattening them."
+}
+
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
     $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"

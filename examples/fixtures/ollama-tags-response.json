@@ -1,0 +1,5 @@
+{
+  "models": [
+    { "name": "example-text-model:latest", "model": "example-text-model:latest" }
+  ]
+}

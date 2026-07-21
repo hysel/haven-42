@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "description": "Deterministic intent routes from engineering and local-AI capabilities to existing workflow registry entries. Routes select plans only and never invoke workflows.",
+  "routes": [
+    {
+      "id": "engineering.review",
+      "capabilityId": "engineering.software-work",
+      "name": "Review or validate software",
+      "phrases": ["review code", "validate code", "check my changes"],
+      "keywords": ["review", "validate", "test", "quality"],
+      "workflowIds": ["generate-runtime-context", "run-runtime-validation", "verify-runtime-output"],
+      "requiresRepository": true
+    },
+    {
+      "id": "engineering.project-setup",
+      "capabilityId": "engineering.software-work",
+      "name": "Prepare an engineering repository",
+      "phrases": ["set up repository", "configure coding agent", "prepare project"],
+      "keywords": ["repository", "project", "install", "configure"],
+      "workflowIds": ["classify-project", "recommend-language-model-lane", "install-pack-assets"],
+      "requiresRepository": true
+    },
+    {
+      "id": "engineering.release",
+      "capabilityId": "engineering.software-work",
+      "name": "Validate a pack release",
+      "phrases": ["validate release", "prepare release", "check ci"],
+      "keywords": ["release", "ci", "package"],
+      "workflowIds": ["validate-pack", "test-pack", "test-release-readiness", "verify-hosted-ci"],
+      "requiresRepository": true
+    },
+    {
+      "id": "local-ai.setup",
+      "capabilityId": "setup.local-ai",
+      "name": "Set up local AI",
+      "phrases": ["set up local ai", "configure ollama", "choose a model"],
+      "keywords": ["setup", "configure", "ollama", "model"],
+      "workflowIds": ["profile-local-hardware", "recommend-agent-config", "apply-agent-config", "test-local-agent-health"],
+      "requiresRepository": false
+    },
+    {
+      "id": "local-ai.troubleshoot",
+      "capabilityId": "setup.local-ai",
+      "name": "Troubleshoot local AI",
+      "phrases": ["troubleshoot ollama", "local ai health", "test local model"],
+      "keywords": ["troubleshoot", "health", "failed", "model"],
+      "workflowIds": ["test-local-agent-health", "profile-local-hardware", "test-local-agent-models"],
+      "requiresRepository": false
+    }
+  ]
+}
