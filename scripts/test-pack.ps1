@@ -3806,6 +3806,11 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($todo -match "\[x\] Keep the UI evidence-first") -Message "TODO should mark evidence-first UI design complete."
     Assert-True -Condition ($todo -match "\[x\] Hand unified UI implementation to Milestone 22") -Message "TODO should close the Milestone 20 UI handoff."
     Assert-True -Condition ($todo -match "## Milestone 22: Unified Product UI And Task Composition") -Message "TODO should track UI implementation under Milestone 22."
+    $roadmap = Get-Content -LiteralPath (Join-Path $repoRoot "ROADMAP.md") -Raw
+    Assert-True -Condition ($roadmap -match "Windows Intel GPU/XPU") -Message "Roadmap should include Intel GPUs as a native image-provider candidate."
+    Assert-True -Condition ($roadmap -match "Intel GPU support must pass installation, XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter gates") -Message "Intel GPU candidate should retain independent pass-before-ship gates."
+    Assert-True -Condition ($roadmap -match "shared Linux provider as an optional advanced deployment") -Message "Roadmap should not require an external server for consumer image generation."
+    Assert-True -Condition ($todo -match "\[ \] Validate a pinned Windows Intel GPU/XPU image-provider profile") -Message "TODO should track live Intel GPU provider validation."
 }
 Invoke-PackTest "sample scenario packs reference existing assets" {
     $scenarioPath = Join-Path $repoRoot "config/sample-scenario-packs.json"

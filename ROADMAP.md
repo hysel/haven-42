@@ -636,6 +636,8 @@ Scope:
 
 - Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
 - Present deterministic first-run choices for chat, writing, summarization, image creation, software work, and local-AI setup.
+- Make native local image generation the default consumer path instead of requiring an external server. Detect hardware and select only an independently promoted provider profile: Windows NVIDIA CUDA, Windows Intel GPU/XPU, Windows AMD GPU, or Apple Silicon MPS. Keep a shared Linux provider as an optional advanced deployment.
+- Treat every operating-system and accelerator combination as separate evidence. In particular, Intel GPU support must pass installation, XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter gates before any Intel runtime files or installer automation ship.
 - Support repository-optional sessions and clearly identify every artifact location before a write.
 - Show capability availability, evidence status, local versus external execution, network effects, repository access, and approval requirements before execution.
 - Reuse the Milestone 20 evidence dashboard, health, cleanup, recommendation, installation, validation, and release-readiness workflows.
@@ -659,6 +661,7 @@ Exit criteria:
 2. Implement first-run navigation and capability availability views over the Milestone 21 registry.
 3. Render typed artifacts and workflow progress/error envelopes.
 4. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20.
-5. Add repository-free text and image flows only for providers promoted in Milestone 21.
-6. Add cross-platform UI contract and packaging tests.
-7. Add bounded multi-step composition with explicit intermediate artifacts and approvals.
+5. Validate and promote native desktop image-provider profiles independently, beginning with Windows NVIDIA and Windows Intel GPU/XPU, then Windows AMD and Apple Silicon MPS; ship no profile automation until its exact hardware path passes.
+6. Add repository-free text and image flows only for providers promoted in Milestone 21 or through the native desktop provider gates above.
+7. Add cross-platform UI contract and packaging tests.
+8. Add bounded multi-step composition with explicit intermediate artifacts and approvals.
