@@ -188,7 +188,7 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     $dependabot = Get-Content -LiteralPath $dependabotPath -Raw
 
     Assert-True -Condition ($actionSources -notmatch "actions/checkout@v[1-5]\b") -Message "Checkout versions older than v6 must not be used."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@v6\b").Count) -Expected 5 -Message "All live and generated workflows should use checkout v6."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@v6\b").Count) -Expected 6 -Message "All live and generated workflows should use checkout v6."
     Assert-True -Condition ($dependabot -match "package-ecosystem:\s*github-actions") -Message "Dependabot should monitor GitHub Actions dependencies."
     Assert-True -Condition ($dependabot -match "interval:\s*weekly") -Message "GitHub Actions dependency checks should run weekly."
 }
@@ -3928,6 +3928,41 @@ Invoke-PackTest "local agent cleanup workflow is dry-run first" {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
+Invoke-PackTest "wiki synchronization is deterministic and hosted" {
+    $syncPath = Join-Path $repoRoot "scripts/sync-wiki.ps1"
+    $mapPath = Join-Path $repoRoot "config/wiki-sync.tsv"
+    $retiredPath = Join-Path $repoRoot "config/wiki-retired-pages.txt"
+    $workflowPath = Join-Path $repoRoot ".github/workflows/validate-pack.yml"
+    $maintenancePath = Join-Path $repoRoot "docs/wiki-maintenance.md"
+    $tempWiki = Join-Path ([System.IO.Path]::GetTempPath()) "wiki-sync-test-$([guid]::NewGuid())"
+    try {
+        New-Item -ItemType Directory -Path $tempWiki | Out-Null
+        $entries = @(Import-Csv -LiteralPath $mapPath -Delimiter "`t")
+        Assert-True -Condition ($entries.Count -ge 40) -Message "Wiki map should cover the maintained documentation set."
+        Assert-Equal -Actual @($entries.page | Sort-Object -Unique).Count -Expected $entries.Count -Message "Wiki destination pages should be unique."
+        foreach ($entry in $entries) {
+            Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $entry.source) -PathType Leaf) -Message "Mapped wiki source should exist: $($entry.source)"
+        }
+        Assert-True -Condition ((Get-Content -LiteralPath $retiredPath -Raw) -match "Cline-CLI-Model-Testing\.md") -Message "Retired Cline wiki automation should stay removed."
+
+        $syncResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki)
+        Assert-Equal -Actual $syncResult.ExitCode -Expected 0 -Message "Wiki synchronization should populate an empty wiki directory."
+        $checkResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki, "-Check")
+        Assert-Equal -Actual $checkResult.ExitCode -Expected 0 -Message "Wiki check should pass immediately after synchronization."
+        Set-Content -LiteralPath (Join-Path $tempWiki "Home.md") -Value "stale" -NoNewline
+        $staleResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki, "-Check")
+        Assert-True -Condition ($staleResult.ExitCode -ne 0) -Message "Wiki check should reject stale mapped content."
+
+        $workflow = Get-Content -LiteralPath $workflowPath -Raw
+        $maintenance = Get-Content -LiteralPath $maintenancePath -Raw
+        Assert-True -Condition ($workflow -match "name: Wiki synchronization" -and $workflow -match "sync-wiki\.linux\.sh.+--check") -Message "Hosted CI should compare the live wiki to mapped sources."
+        Assert-True -Condition ($maintenance -match "commit the wiki before pushing the main repository") -Message "Wiki docs should define two-repository change order."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempWiki -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
 Invoke-PackTest "hosted CI verifier enforces exact-SHA cross-platform completion" {
     $windowsPath = Join-Path $repoRoot "scripts/verify-hosted-ci.ps1"
     $sharedPath = Join-Path $repoRoot "scripts/verify-hosted-ci.shared.sh"
@@ -3952,7 +3987,7 @@ Invoke-PackTest "hosted CI verifier enforces exact-SHA cross-platform completion
         Assert-True -Condition ($content -match "run.+watch") -Message "Verifier should wait for the hosted run."
         Assert-True -Condition ($content -match "--exit-status") -Message "Verifier should propagate hosted run failure."
         Assert-True -Condition ($content -match "--log-failed") -Message "Verifier should retrieve failed logs."
-        foreach ($job in @("Windows PowerShell validation", "Linux script smoke tests", "macOS script smoke tests")) {
+        foreach ($job in @("Wiki synchronization", "Windows PowerShell validation", "Linux script smoke tests", "macOS script smoke tests")) {
             Assert-True -Condition ($content -match [regex]::Escape($job)) -Message "Verifier should require hosted job: $job"
         }
         foreach ($state in @("Pushed", "CI running", "CI passed", "CI failed")) {

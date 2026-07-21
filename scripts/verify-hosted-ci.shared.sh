@@ -100,7 +100,8 @@ failed=0
 [ "$run_status" = "completed" ] || failed=1
 [ "$run_conclusion" = "success" ] || failed=1
 
-required_jobs='Windows PowerShell validation
+required_jobs='Wiki synchronization
+Windows PowerShell validation
 Linux script smoke tests
 macOS script smoke tests'
 while IFS= read -r required_job; do

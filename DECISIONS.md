@@ -2,6 +2,12 @@
 
 This file records important project decisions. Use it for choices that affect architecture, compatibility, governance, or long-term maintenance.
 
+## 2026-07-21: Treat mapped wiki pages as generated release documentation
+
+Status: Accepted
+
+The main repository is authoritative for mapped GitHub wiki content. Cross-platform synchronization scripts copy mapped sources, regenerate navigation, and remove explicitly retired pages. Mapped wiki pages are committed to the separate wiki repository before the related main-repository push, and hosted CI rejects a main commit when the live wiki is stale. This prevents support, release, and safety guidance from drifting across the two repositories.
+
 ## Format
 
 Each decision should use this structure:

@@ -10,6 +10,22 @@ permissions:
   contents: read
 
 jobs:
+  wiki:
+    name: Wiki synchronization
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Clone wiki
+        shell: bash
+        run: git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.wiki.git" "$RUNNER_TEMP/local-engineering-agent-pack.wiki"
+
+      - name: Verify mapped wiki pages
+        shell: bash
+        run: ./scripts/sync-wiki.linux.sh --wiki-path "$RUNNER_TEMP/local-engineering-agent-pack.wiki" --check
+
   windows:
     name: Windows PowerShell validation
     runs-on: windows-latest

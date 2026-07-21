@@ -84,6 +84,8 @@ Run the validation script before release-oriented changes:
 .\scripts\validate-pack.ps1
 ```
 
+When mapped documentation changes, synchronize and commit the separate GitHub wiki before pushing the main repository. Follow `docs/wiki-maintenance.md`; hosted CI rejects stale mapped wiki pages.
+
 Also review:
 
 - `docs/validation-checklists.md`

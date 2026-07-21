@@ -164,7 +164,7 @@ test_github_actions_dependencies() {
   checkout_count="$(printf '%s' "$action_sources" | grep -Ec 'actions/checkout@v6([^0-9]|$)')"
 
   ! printf '%s' "$action_sources" | grep -Eq 'actions/checkout@v[1-5]([^0-9]|$)' &&
-    [ "$checkout_count" -eq 5 ] &&
+    [ "$checkout_count" -eq 6 ] &&
     grep -Eq 'package-ecosystem:[[:space:]]*github-actions' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Eq 'interval:[[:space:]]*weekly' "$REPO_ROOT/.github/dependabot.yml"
 }
@@ -1447,12 +1447,30 @@ test_hosted_ci_verifier_contract() {
     grep -q 'run watch' "$shared" &&
     grep -q -- '--exit-status' "$shared" &&
     grep -q -- '--log-failed' "$shared" &&
+    grep -q 'Wiki synchronization' "$shared" &&
     grep -q 'Windows PowerShell validation' "$shared" &&
     grep -q 'Linux script smoke tests' "$shared" &&
     grep -q 'macOS script smoke tests' "$shared" &&
     grep -q 'State: %s' "$shared" &&
     grep -q 'exact 40-character commit SHA' "$doc" &&
     grep -q 'Never reuse a successful run' "$doc"
+}
+
+test_wiki_synchronization() {
+  wiki_temp="$(mktemp -d)"
+  sync="$REPO_ROOT/scripts/sync-wiki.shared.sh"
+  "$sync" --wiki-path "$wiki_temp" >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
+  "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
+  printf 'stale' > "$wiki_temp/Home.md"
+  if "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1; then
+    rm -rf "$wiki_temp"
+    return 1
+  fi
+  rm -rf "$wiki_temp"
+  grep -q 'Cline-CLI-Model-Testing.md' "$REPO_ROOT/config/wiki-retired-pages.txt" &&
+    grep -q 'name: Wiki synchronization' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -Eq 'sync-wiki\.linux\.sh.+--check' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q 'commit the wiki before pushing the main repository' "$REPO_ROOT/docs/wiki-maintenance.md"
 }
 
 test_model_residency_policy_contract() {
@@ -1528,6 +1546,7 @@ run_test "recommended agent config generation writes local-only config" test_rec
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract
 run_test "hosted CI verifier enforces exact-SHA cross-platform completion" test_hosted_ci_verifier_contract
+run_test "wiki synchronization is deterministic and hosted" test_wiki_synchronization
 run_test "model residency policy is applied across runtime and config paths" test_model_residency_policy_contract
 
 if [ "$FAILED" -eq 1 ]; then

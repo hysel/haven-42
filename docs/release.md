@@ -38,6 +38,8 @@ For each release, update:
 
 Update `DECISIONS.md` when the release includes a durable policy, architecture, compatibility, or governance decision.
 
+Synchronize the separate GitHub wiki whenever a mapped source changes. Follow `docs/wiki-maintenance.md`, commit and push the wiki first, and do not complete the release while the hosted `Wiki synchronization` job is failing.
+
 ## Validation Checklist
 
 Before tagging a release:
@@ -55,6 +57,7 @@ Before tagging a release:
 - [ ] Confirm new examples and fixtures are sanitized.
 - [ ] Confirm shell scripts and hooks are executable in Git before pushing.
 - [ ] Confirm `CHANGELOG.md` has a release entry.
+- [ ] Run the wiki synchronization script, review and commit the wiki repository, and confirm `--check` or `-Check` passes.
 - [ ] After pushing, run the exact-SHA hosted verifier and require `CI passed` for the Windows, Linux, and macOS jobs.
 
 ## Verify The Pushed Commit

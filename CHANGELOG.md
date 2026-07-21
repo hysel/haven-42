@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added deterministic cross-platform wiki synchronization, generated navigation, retired-page cleanup, and a required hosted wiki freshness gate so mapped wiki documentation stays aligned with the repository.
 - Adopted a pass-to-ship admission policy for agent software: candidate evaluations stay disposable and untracked, successful integrations must pass all promotion and cross-platform gates before repository admission, and failed evaluations produce documentation only with no retained operational artifacts.
 - Removed retired Roo Code wrappers and active metadata so the repository immediately conforms to the new admission policy.
 - Removed all Cline and Kilo scripts, adapters, active catalog entries, detailed evidence files, and restoration backlog after both integrations failed required promotion gates; the maintained surface set is now Continue, Aider, and OpenCode.
