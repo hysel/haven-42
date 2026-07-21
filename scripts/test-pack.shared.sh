@@ -1429,6 +1429,33 @@ assert unmatched["Status"] == "unmatched" and unmatched["InvocationAllowed"] is 
 PY
 }
 
+test_general_ai_session_workspace() {
+  session_root="$(mktemp -d)"
+  session_script="$REPO_ROOT/scripts/start-ai-session.shared.sh"
+  menu="$($session_script --list --json)" || { rm -rf "$session_root"; return 1; }
+  plan="$($session_script --capability-id general.chat --workspace-root "$session_root" --session-id dry-run-session --json)" || { rm -rf "$session_root"; return 1; }
+  created="$($session_script --text 'summarize a document' --workspace-root "$session_root" --session-id created-session --apply --json)" || { rm -rf "$session_root"; return 1; }
+  ambiguous="$($session_script --text 'write code' --workspace-root "$session_root" --session-id ambiguous-session --apply --json)" || { rm -rf "$session_root"; return 1; }
+  python3 - "$menu" "$plan" "$created" "$ambiguous" "$session_root" <<'PY'
+import json, pathlib, sys
+menu, plan, created, ambiguous = [json.loads(value) for value in sys.argv[1:5]]
+root = pathlib.Path(sys.argv[5])
+assert menu["Kind"] == "capability-menu" and len(menu["Items"]) == 6
+assert plan["Status"] == "planned" and plan["WorkspaceCreated"] is False and plan["CapabilityInvoked"] is False
+assert not pathlib.Path(plan["SessionPath"]).exists()
+assert created["Status"] == "created" and pathlib.Path(created["SessionPath"], "session.json").is_file()
+assert pathlib.Path(created["SessionPath"], "artifacts").is_dir()
+metadata_text = pathlib.Path(created["SessionPath"], "session.json").read_text(encoding="utf-8")
+assert json.loads(metadata_text)["capabilityId"] == "content.summarize"
+assert "summarize a document" not in metadata_text
+assert ambiguous["Status"] == "needs-clarification" and ambiguous["WorkspaceCreated"] is False
+assert not (root / "ambiguous-session").exists()
+PY
+  result=$?
+  rm -rf "$session_root"
+  return "$result"
+}
+
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
     [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
@@ -1581,6 +1608,7 @@ run_test "hardware-aware recommendation scripts emit sanitized model lanes" test
 run_test "shared asset installation docs define centralized config strategy" test_shared_asset_installation_doc
 run_test "solution architecture review tracks milestone gaps" test_solution_architecture_review_doc
 run_test "capability registry and deterministic routing enforce policy boundaries" test_capability_registry_and_routing
+run_test "general AI sessions are repository optional and dry-run first" test_general_ai_session_workspace
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract
