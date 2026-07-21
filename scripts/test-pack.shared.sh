@@ -1479,6 +1479,28 @@ PY
   return "$result_code"
 }
 
+test_provider_discovery_and_engineering_routes() {
+  discovery="$REPO_ROOT/scripts/discover-capability-availability.shared.sh"
+  router="$REPO_ROOT/scripts/resolve-engineering-route.shared.sh"
+  fixture="$REPO_ROOT/examples/fixtures/ollama-tags-response.json"
+  offline="$($discovery --capability-id general.chat --json)" || return 1
+  probe="$($discovery --capability-id general.chat --probe --model example-text-model:latest --ollama-base-url http://private-runtime.invalid:11434 --response-fixture-path "$fixture" --json)" || return 1
+  route="$($router --text 'please review code' --json)" || return 1
+  python3 - "$REPO_ROOT/config/engineering-routes.json" "$REPO_ROOT/config/workflows.json" "$offline" "$probe" "$route" <<'PY'
+import json, pathlib, sys
+routes = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["routes"]
+workflows = {item["id"] for item in json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))["workflows"]}
+offline, probe, route = map(json.loads, sys.argv[3:])
+assert all(workflow_id in workflows for item in routes for workflow_id in item["workflowIds"])
+assert offline["ProbeUsed"] is False and offline["CapabilityInvoked"] is False
+assert offline["Items"][0]["EffectiveAvailability"] == "configuration-required"
+assert probe["Probe"]["status"] == "available" and probe["Probe"]["source"] == "validation-fixture"
+assert probe["EndpointPersisted"] is False and "private-runtime" not in sys.argv[4] and "11434" not in sys.argv[4]
+assert route["Status"] == "selected" and route["SelectedRouteId"] == "engineering.review"
+assert route["InvocationAllowed"] is False and any(step["WorkflowId"] == "verify-runtime-output" for step in route["Steps"])
+PY
+}
+
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
     [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
@@ -1633,6 +1655,7 @@ run_test "solution architecture review tracks milestone gaps" test_solution_arch
 run_test "capability registry and deterministic routing enforce policy boundaries" test_capability_registry_and_routing
 run_test "general AI sessions are repository optional and dry-run first" test_general_ai_session_workspace
 run_test "local text capabilities are session bound and typed" test_local_text_capability_adapter
+run_test "provider discovery and engineering routing preserve policy boundaries" test_provider_discovery_and_engineering_routes
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract

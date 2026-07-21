@@ -13,6 +13,7 @@ This project follows a simple changelog format:
 
 - Added and live-validated the session-bound local Ollama text adapter for bounded chat, writing, and summarization with explicit execute/apply gates, typed artifacts, sanitization, cleanup, and no repository reads.
 - Added a cross-platform, repository-optional general AI session command with deterministic first-run capability menu, dry-run-first workspace planning, explicit effect disclosures, safe local metadata, and no automatic capability invocation.
+- Added offline-first capability availability discovery and deterministic engineering workflow route plans with explicit probing, no endpoint persistence, no automatic invocation, and Windows, Linux, and macOS entry points.
 - Added Milestone 21 capability and typed-artifact contracts plus deterministic non-LLM routing on Windows, Linux, and macOS; provider-backed general capabilities remain configuration-required and routing never auto-invokes actions.
 - Realigned the roadmap dependency order: Milestone 20 is complete as the workflow and automation foundation, Milestone 21 owns general-purpose capability and routing contracts, and new Milestone 22 owns the unified UI and later multi-step composition.
 - Added deterministic cross-platform wiki synchronization, generated navigation, retired-page cleanup, and a required hosted wiki freshness gate so mapped wiki documentation stays aligned with the repository.
