@@ -158,7 +158,7 @@ function ConvertTo-Markdown {
     param([object]$Report)
 
     $lines = @(
-        "# Agent Pack Menu",
+        "# Haven 42 Menu",
         "",
         "Generated from `config/workflows.json` and `config/agent-surface-solutions.json`.",
         "",

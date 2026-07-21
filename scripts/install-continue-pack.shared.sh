@@ -142,7 +142,7 @@ fi
 if [ "$SHARED_ASSETS" = true ] && [ -z "$SHARED_ASSETS_PATH" ]; then
   case "$(uname -s 2>/dev/null || true)" in
     Darwin*) SHARED_ASSETS_PATH="$HOME/Library/Application Support/LocalEngineeringAgentPack/assets" ;;
-    *) SHARED_ASSETS_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/local-engineering-agent-pack/assets" ;;
+    *) SHARED_ASSETS_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/haven-42/assets" ;;
   esac
 fi
 

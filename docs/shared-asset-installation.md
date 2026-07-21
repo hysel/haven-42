@@ -51,8 +51,8 @@ By default, the generated global Continue config omits the `rules:` section. Thi
 
 If you do not pass an explicit shared asset path, the installers use a user-level local folder:
 
-- Windows: `%USERPROFILE%\.local-engineering-agent-pack\assets`
-- Linux: `${XDG_DATA_HOME:-$HOME/.local/share}/local-engineering-agent-pack/assets`
+- Windows: `%USERPROFILE%\.haven-42\assets`
+- Linux: `${XDG_DATA_HOME:-$HOME/.local/share}/haven-42/assets`
 - macOS: `$HOME/Library/Application Support/LocalEngineeringAgentPack/assets`
 
 You can override the location with `-SharedAssetsPath` or `--shared-assets-path`.
@@ -65,7 +65,7 @@ Preview the install:
 .\scripts\install-continue-pack.ps1 `
   -TargetRepo "C:\path\to\your-project" `
   -SharedAssets `
-  -SharedAssetsPath "$HOME\.local-engineering-agent-pack\assets" `
+  -SharedAssetsPath "$HOME\.haven-42\assets" `
   -GlobalConfigPath "$HOME\.continue\config.yaml" `
   -DryRun
 ```
@@ -76,7 +76,7 @@ Install shared assets and update the global Continue config:
 .\scripts\install-continue-pack.ps1 `
   -TargetRepo "C:\path\to\your-project" `
   -SharedAssets `
-  -SharedAssetsPath "$HOME\.local-engineering-agent-pack\assets" `
+  -SharedAssetsPath "$HOME\.haven-42\assets" `
   -GlobalConfigPath "$HOME\.continue\config.yaml"
 ```
 
@@ -94,13 +94,13 @@ Use a local-network Ollama endpoint only in the generated global config:
 Preview the install:
 
 ```bash
-./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/.local/share/local-engineering-agent-pack/assets"   --global-config-path "$HOME/.continue/config.yaml"   --dry-run
+./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/.local/share/haven-42/assets"   --global-config-path "$HOME/.continue/config.yaml"   --dry-run
 ```
 
 Install shared assets and update the global Continue config:
 
 ```bash
-./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/.local/share/local-engineering-agent-pack/assets"   --global-config-path "$HOME/.continue/config.yaml"
+./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --shared-assets-path "$HOME/.local/share/haven-42/assets"   --global-config-path "$HOME/.continue/config.yaml"
 ```
 
 ## macOS Commands

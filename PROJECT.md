@@ -2,21 +2,25 @@
 
 ## Name
 
-Local Engineering Agent Pack
+Haven 42
+
+Tagline: Your private, local AI station.
 
 ## Purpose
 
-This repository defines a local-first engineering agent pack for developers, small teams, consultants, and enterprise engineering groups that want repeatable AI-assisted workflows and consistent guidance for .NET, ASP.NET Core, APIs, Clean Architecture, security, performance, testing, and documentation.
+This repository defines an evidence-gated, local-first AI workbench for individual users, developers, teams, consultants, and enterprise groups. It combines repeatable software-engineering workflows with repository-optional chat, writing, summarization, and image capabilities under common routing, approval, privacy, and typed-artifact contracts.
 
-The pack is intended to turn common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories.
+The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product direction adds an approachable local web experience over the same tested contracts.
 
-Continue is the first supported runtime surface, but the project identity is broader than Continue. The reusable assets should remain portable enough to evaluate with other open-source coding agents as they become useful.
+Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities have a live-validated Ollama adapter, Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
 
 ## Current Stage
 
-The project is in active implementation. Continue is the supported first
-surface, while Aider and OpenCode are the fully maintained non-Continue
-install/configure/test adapters. Broader surface parity is evidence-gated.
+Milestones 1 through 21 are complete for their defined scopes. Milestone 22
+owns the planned local web UI and task composition, Milestone 23 owns native
+local image profiles, and Milestones 24 and 25 track documentation-only music,
+audio, and video research. Broader surface and provider parity remains
+evidence-gated.
 
 Capability Evidence Contract v2 now prevents model readiness from being
 inherited across surfaces, operating systems, or operations. Deterministic
@@ -43,7 +47,7 @@ dispatchers and future UI callers a stable, privacy-conscious JSON boundary.
 
 ## Goals
 
-- Provide a usable local-first agent pack for practical engineering workflows.
+- Provide a usable local-first AI workbench for practical engineering and general-purpose workflows.
 - Favor local-first operation through Continue, Ollama, and future validated local agent surfaces.
 - Make AI-assisted reviews repeatable and auditable.
 - Encode practical .NET, ASP.NET Core, Clean Architecture, API, security, testing, logging, performance, and Git guidance.

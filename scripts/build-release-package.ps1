@@ -54,7 +54,7 @@ if ($packVersion -notmatch "^\d+\.\d+\.\d+([-.][0-9A-Za-z.-]+)?$") {
     throw "Version '$packVersion' is not a supported semantic version."
 }
 
-$packageName = "local-engineering-agent-pack-$packVersion"
+$packageName = "haven-42-$packVersion"
 $outputRoot = if ([System.IO.Path]::IsPathRooted($OutputDirectory)) { $OutputDirectory } else { Join-Path $repoRoot $OutputDirectory }
 $archivePath = Join-Path $outputRoot "$packageName.zip"
 $checksumPath = Join-Path $outputRoot "$packageName.sha256"
@@ -108,7 +108,7 @@ if ($DryRun) {
 Assert-CleanGitTree
 
 New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
-$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "local-engineering-agent-pack-release-$([guid]::NewGuid())"
+$tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "haven-42-release-$([guid]::NewGuid())"
 $packageRoot = Join-Path $tempRoot $packageName
 
 try {

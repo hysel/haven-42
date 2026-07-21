@@ -63,6 +63,6 @@ These should stay on `TODO.md` until the user or project owner provides input:
 
 - Keep Milestone 20 closed as the workflow foundation; track general-purpose capability work in Milestone 21 and product UI work in Milestone 22.
 - Prefer strengthening deterministic remediation for `EMPTY_MODEL_OUTPUT` and filename-drift failures before promoting more language rule packs.
-- Keep beginner navigation centered on `docs/agent-pack-menu.md`, with script details in `docs/script-reference-appendix.md`.
+- Keep beginner navigation centered on `docs/haven-42-menu.md`, with script details in `docs/script-reference-appendix.md`.
 - Continue using `config/agent-surface-solutions.json` as the install/configure/test source of truth for agent surfaces.
 - Keep future work in clearly named TODO sections when it depends on user input, external tools, or non-generated repositories.

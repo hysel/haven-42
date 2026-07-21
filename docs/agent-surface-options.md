@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document tracks possible agent surfaces for the Local Engineering Agent Pack.
+This document tracks possible engineering agent surfaces for Haven 42.
 
 Continue is the first supported surface because it is the current validated path for local Ollama workflows, prompt loading, rule loading, shared asset installation, and approved-write testing. Other open-source tools may become useful targets, but they must be validated before they are recommended for real project changes.
 

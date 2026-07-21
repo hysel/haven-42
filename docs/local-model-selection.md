@@ -564,7 +564,7 @@ The macOS helper reports MLX tooling separately when it can detect common comman
 Detection means the tooling is visible to the current shell. It does not prove that an MLX model is installed, loaded, served through an API, or compatible with Continue.
 
 For the pack-managed macOS MLX runtime, the profile also detects
-`$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server` even when the
+`$HOME/.haven-42-mlx/bin/mlx_lm.server` even when the
 virtual environment is not on `PATH`.
 
 When MLX tooling is detected, the macOS helper also reports a separate MLX recommendation from `config/model-recommendations.mlx.tsv`. This recommendation is a candidate, not a verified installed model. On a host with no local Ollama models, the MLX recommendation is the applicable local-host recommendation and the text profile explicitly marks the Ollama fallback as not applicable. When both runtimes are available, select the recommendation that matches the runtime you intend to configure; do not place an MLX model in an Ollama configuration.

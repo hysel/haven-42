@@ -44,7 +44,7 @@ test_validate_fails_for_wrong_version() {
 test_release_packaging_scripts() {
   output="$($REPO_ROOT/scripts/build-release-package.shared.sh --version 0.3.0 --dry-run --allow-dirty 2>&1)" || return 1
   printf '%s\n' "$output" | grep -q "Release package plan" || return 1
-  printf '%s\n' "$output" | grep -q "local-engineering-agent-pack-0.3.0.tar.gz" || return 1
+  printf '%s\n' "$output" | grep -q "haven-42-0.3.0.tar.gz" || return 1
   printf '%s\n' "$output" | grep -q "\.sha256" || return 1
   printf '%s\n' "$output" | grep -q "Excluded: .git, .vscode, runtime-validation-output, dist, local configs" || return 1
   grep -q "tar -C" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
@@ -1549,6 +1549,19 @@ PY
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
     [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
+    [ -f "$REPO_ROOT/BRANDING.md" ] &&
+    [ -f "$REPO_ROOT/docs/haven-42-menu.md" ] &&
+    [ -f "$REPO_ROOT/scripts/show-haven-42-menu.ps1" ] &&
+    [ ! -e "$REPO_ROOT/docs/agent-pack-menu.md" ] &&
+    [ ! -e "$REPO_ROOT/scripts/show-agent-pack-menu.ps1" ] &&
+    grep -q '^# Haven 42$' "$REPO_ROOT/README.md" &&
+    grep -q 'Your private, local AI station' "$REPO_ROOT/README.md" &&
+    grep -q '^name: Haven 42$' "$REPO_ROOT/.continue/config.yaml" &&
+    grep -q 'Canonical repository: `hysel/haven-42`' "$REPO_ROOT/BRANDING.md" &&
+    grep -q 'Clean-Rename Policy' "$REPO_ROOT/BRANDING.md" &&
+    grep -q 'PACKAGE_NAME="haven-42-$PACK_VERSION"' "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
+    grep -q 'haven-42/assets' "$REPO_ROOT/scripts/install-continue-pack.shared.sh" &&
+    grep -q '\.haven-42-mlx' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" &&
     grep -q "Review Standard" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Milestone Audit" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "1: Minimum Usable Pack" "$REPO_ROOT/docs/solution-architecture-review.md" &&

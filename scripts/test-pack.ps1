@@ -261,7 +261,7 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     $result = Invoke-CommandCapture -FilePath $psScriptPath -Arguments @("-Version", "0.3.0", "-DryRun", "-AllowDirty")
     Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "PowerShell release packager dry run should succeed."
     Assert-True -Condition ($result.Output -match "Release package plan") -Message "Dry run should print a release package plan."
-    Assert-True -Condition ($result.Output -match "local-engineering-agent-pack-0\.3\.0\.zip") -Message "Dry run should name the Windows archive."
+    Assert-True -Condition ($result.Output -match "haven-42-0\.3\.0\.zip") -Message "Dry run should use the Haven 42 Windows archive name."
     Assert-True -Condition ($result.Output -match "\.sha256") -Message "Dry run should name a checksum file."
     Assert-True -Condition ($result.Output -match "Excluded: \.git, \.vscode, runtime-validation-output, dist, local configs") -Message "Dry run should explain excluded local files."
 
@@ -2104,7 +2104,7 @@ Invoke-PackTest "shared asset installer options are documented in scripts" {
     Assert-True -Condition ($bashScript -match "--shared-assets") -Message "Bash installer should expose shared-assets."
     Assert-True -Condition ($bashScript -match "--shared-assets-path") -Message "Bash installer should expose shared-assets-path."
     Assert-True -Condition ($bashScript -match "LocalEngineeringAgentPack/assets") -Message "Bash installer should define a macOS shared asset default."
-    Assert-True -Condition ($bashScript -match "local-engineering-agent-pack/assets") -Message "Bash installer should define a Linux shared asset default."
+    Assert-True -Condition ($bashScript -match "haven-42/assets") -Message "Bash installer should define the Haven 42 Linux shared asset default."
 }
 
 Invoke-PackTest "install script refuses to target pack repository" {
@@ -2980,7 +2980,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
         "generate-model-scorecard",
         "generate-evidence-dashboard",
         "get-beginner-setup-plan",
-        "show-agent-pack-menu",
+        "show-haven-42-menu",
         "show-workflow-chooser",
         "test-local-agent-models",
         "recommend-agent-config",
@@ -3053,7 +3053,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($envelopeDoc -match "-RequestJson" -and $envelopeDoc -match "--request-json") -Message "Workflow envelope docs should include Windows and native shell examples."
     Assert-True -Condition ($doc -match "docs/autonomous-maintainer-queue.md") -Message "Workflow registry docs should link autonomous maintainer queue."
     Assert-True -Condition ($appendix -match "Workflow Reference") -Message "Script appendix should include workflow reference table."
-    Assert-True -Condition ($appendix -match "docs/agent-pack-menu.md") -Message "Script appendix should point beginners to the guided menu."
+    Assert-True -Condition ($appendix -match "docs/haven-42-menu.md") -Message "Script appendix should point beginners to the guided menu."
     Assert-True -Condition ($appendix -match "Maintenance Rule") -Message "Script appendix should define maintenance rule."
     Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
     Assert-True -Condition ($readme -match "docs/workflow-chooser.md") -Message "README should link workflow chooser docs."
@@ -3243,7 +3243,7 @@ Invoke-PackTest "workflow chooser summarizes registry commands" {
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
     $registryPath = Join-Path $repoRoot "config/workflows.json"
     $docPath = Join-Path $repoRoot "docs/workflow-chooser.md"
-    $menuDocPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
+    $menuDocPath = Join-Path $repoRoot "docs/haven-42-menu.md"
     $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "workflow-chooser-test-$([guid]::NewGuid())"
     $jsonPath = Join-Path $tempRoot "workflow-chooser.json"
@@ -3268,7 +3268,7 @@ Invoke-PackTest "workflow chooser summarizes registry commands" {
         Assert-Equal -Actual $report.SourceWorkflowRegistry -Expected "config/workflows.json" -Message "Workflow chooser should identify source registry."
         Assert-Equal -Actual $report.WorkflowCount -Expected @($registry.workflows).Count -Message "Workflow chooser should cover every registered workflow."
         Assert-True -Condition ($report.UiReadyCount -ge 1) -Message "Workflow chooser should count UI-ready workflows."
-        Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "show-agent-pack-menu" -and $_.Reference -eq "docs/agent-pack-menu.md" }).Count -eq 1) -Message "Workflow chooser should include guided menu workflow."
+        Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "show-haven-42-menu" -and $_.Reference -eq "docs/haven-42-menu.md" }).Count -eq 1) -Message "Workflow chooser should include guided menu workflow."
         Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "show-workflow-chooser" -and $_.Reference -eq "docs/workflow-chooser.md" }).Count -eq 1) -Message "Workflow chooser should reference its own docs."
         Assert-True -Condition (@($report.Workflows | Where-Object { $_.Id -eq "build-release-package" -and $_.UiReady -eq $false }).Count -eq 1) -Message "Workflow chooser should include non-UI workflows."
         Assert-True -Condition (@($report.Workflows | Where-Object { $_.Command -match "scripts\\show-workflow-chooser\.ps1" }).Count -eq 1) -Message "Workflow chooser should include its Windows command."
@@ -3280,7 +3280,7 @@ Invoke-PackTest "workflow chooser summarizes registry commands" {
         Assert-True -Condition ($markdown -match "Workflow Chooser") -Message "Workflow chooser markdown should include title."
         Assert-True -Condition ($markdown -match "docs/script-reference-appendix.md") -Message "Workflow chooser markdown should link appendix."
         Assert-True -Condition ($doc -match "config/workflows\.json") -Message "Workflow chooser docs should reference workflow registry."
-        Assert-True -Condition ($menuDoc -match "docs/workflow-chooser.md") -Message "Agent pack menu docs should link workflow chooser."
+        Assert-True -Condition ($menuDoc -match "docs/workflow-chooser.md") -Message "Haven 42 menu docs should link workflow chooser."
         Assert-True -Condition ($appendix -match "show-workflow-chooser") -Message "Script appendix should cover workflow chooser."
         Assert-True -Condition ($result.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Workflow chooser output should stay sanitized."
 
@@ -3300,7 +3300,7 @@ Invoke-PackTest "onboarding generators share common engines" {
     $dispatcher = Get-Content -LiteralPath $dispatcherPath -Raw
     $nativeRenderer = Get-Content -LiteralPath $nativeRendererPath -Raw
 
-    foreach ($scriptName in @("get-beginner-setup-plan.ps1", "show-agent-pack-menu.ps1", "show-workflow-chooser.ps1")) {
+    foreach ($scriptName in @("get-beginner-setup-plan.ps1", "show-haven-42-menu.ps1", "show-workflow-chooser.ps1")) {
         $content = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/$scriptName") -Raw
         Assert-True -Condition ($content -match "OnboardingGuidance\.psm1") -Message "$scriptName should import the shared onboarding module."
         Assert-True -Condition ($content -match "Write-OnboardingReport") -Message "$scriptName should use shared report output."
@@ -3309,7 +3309,7 @@ Invoke-PackTest "onboarding generators share common engines" {
 
     $nativeViews = @{
         "get-beginner-setup-plan.shared.sh" = "beginner-plan"
-        "show-agent-pack-menu.shared.sh" = "agent-menu"
+        "show-haven-42-menu.shared.sh" = "agent-menu"
         "show-workflow-chooser.shared.sh" = "workflow-chooser"
     }
     foreach ($entry in $nativeViews.GetEnumerator()) {
@@ -3337,7 +3337,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     $docPath = Join-Path $repoRoot "docs/agent-surface-solutions.md"
     $bundleDocPath = Join-Path $repoRoot "docs/surface-specific-config-bundles.md"
     $promotionGatesPath = Join-Path $repoRoot "docs/agent-surface-promotion-gates.md"
-    $menuDocPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
+    $menuDocPath = Join-Path $repoRoot "docs/haven-42-menu.md"
     $dashboardDocPath = Join-Path $repoRoot "docs/evidence-dashboard.md"
     $readmePath = Join-Path $repoRoot "README.md"
     $todoPath = Join-Path $repoRoot "TODO.md"
@@ -3763,6 +3763,9 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"
     $readmePath = Join-Path $repoRoot "README.md"
     $todoPath = Join-Path $repoRoot "TODO.md"
+    $projectPath = Join-Path $repoRoot "PROJECT.md"
+    $brandingPath = Join-Path $repoRoot "BRANDING.md"
+    $configPath = Join-Path $repoRoot ".continue/config.yaml"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Solution architecture review doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $uiDocPath) -Message "Unified starter toolkit UI design doc should exist."
@@ -3771,6 +3774,9 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $uiDoc = Get-Content -LiteralPath $uiDocPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $todo = Get-Content -LiteralPath $todoPath -Raw
+    $project = Get-Content -LiteralPath $projectPath -Raw
+    $branding = Get-Content -LiteralPath $brandingPath -Raw
+    $continueConfig = Get-Content -LiteralPath $configPath -Raw
 
     Assert-True -Condition ($doc -match "Review Standard") -Message "Solution architecture review should define review standard."
     Assert-True -Condition ($doc -match "Previous Chat Interpretation") -Message "Solution architecture review should preserve stricter prior chat interpretation."
@@ -3799,6 +3805,19 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($uiDoc -match "local-first") -Message "Unified UI design should preserve local-first boundary."
     Assert-True -Condition ($readme -match "docs/solution-architecture-review\.md") -Message "README should link solution architecture review."
     Assert-True -Condition ($readme -match "docs/unified-starter-toolkit-ui\.md") -Message "README should link unified UI design."
+    Assert-True -Condition ($readme -match "(?m)^# Haven 42$") -Message "README should use the Haven 42 product name."
+    Assert-True -Condition ($readme -match "Your private, local AI station") -Message "README should use the Haven 42 tagline."
+    Assert-True -Condition ($project -match "(?ms)## Name\s+Haven 42") -Message "Project identity should use Haven 42."
+    Assert-True -Condition ($continueConfig -match "(?m)^name: Haven 42$") -Message "Continue config should use Haven 42."
+    Assert-True -Condition ($branding -match "Clean-Rename Policy") -Message "Branding policy should record the clean rename."
+    Assert-True -Condition ($branding -match 'Canonical repository: `hysel/haven-42`') -Message "Branding policy should record the canonical repository."
+    Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "docs/haven-42-menu.md")) -Message "Haven 42 menu doc should exist."
+    Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $repoRoot "docs/agent-pack-menu.md"))) -Message "Old agent-pack menu doc should be removed."
+    Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "scripts/show-haven-42-menu.ps1")) -Message "Haven 42 menu script should exist."
+    Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $repoRoot "scripts/show-agent-pack-menu.ps1"))) -Message "Old agent-pack menu script should be removed."
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/build-release-package.ps1") -Raw) -match 'haven-42-\$packVersion') -Message "Release artifacts should use the Haven 42 prefix."
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/install-continue-pack.shared.sh") -Raw) -match "haven-42/assets") -Message "Shared asset defaults should use Haven 42."
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/bootstrap-macos-agent-host.sh") -Raw) -match "\.haven-42-mlx") -Message "Managed MLX path should use Haven 42."
     foreach ($marker in @("local-first AI workbench", "Continue, Aider, and OpenCode", "general.chat", "content.write", "content.summarize", "media.image.create", "pass-before-ship", "Milestone 22: Unified Product UI And Task Composition", "Milestone 23: Native Local Image Generation", "Milestone 24: Local Music And Audio Generation", "Milestone 25: Local Video Generation")) {
         Assert-True -Condition ($readme -match [regex]::Escape($marker)) -Message "README should reflect current product position: $marker"
     }
@@ -4071,10 +4090,10 @@ Invoke-PackTest "beginner setup plan maps first-run commands to workflows" {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
     }
 }
-Invoke-PackTest "agent pack menu groups workflows by user intent" {
-    $scriptPath = Join-Path $repoRoot "scripts/show-agent-pack-menu.ps1"
+Invoke-PackTest "Haven 42 menu groups workflows by user intent" {
+    $scriptPath = Join-Path $repoRoot "scripts/show-haven-42-menu.ps1"
     $dispatcherPath = Join-Path $repoRoot "scripts/invoke-workflow.ps1"
-    $docPath = Join-Path $repoRoot "docs/agent-pack-menu.md"
+    $docPath = Join-Path $repoRoot "docs/haven-42-menu.md"
     $appendixPath = Join-Path $repoRoot "docs/script-reference-appendix.md"
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "agent-menu-test-$([guid]::NewGuid())"
     $jsonPath = Join-Path $tempRoot "agent-menu.json"
@@ -4084,43 +4103,43 @@ Invoke-PackTest "agent pack menu groups workflows by user intent" {
         New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
 
         $result = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Platform", "windows", "-OutputPath", $jsonPath, "-MarkdownOutputPath", $markdownPath, "-AsJson")
-        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Agent pack menu generation should succeed."
-        Assert-True -Condition (Test-Path -LiteralPath $jsonPath) -Message "Agent pack menu should write JSON output."
-        Assert-True -Condition (Test-Path -LiteralPath $markdownPath) -Message "Agent pack menu should write Markdown output."
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Haven 42 menu generation should succeed."
+        Assert-True -Condition (Test-Path -LiteralPath $jsonPath) -Message "Haven 42 menu should write JSON output."
+        Assert-True -Condition (Test-Path -LiteralPath $markdownPath) -Message "Haven 42 menu should write Markdown output."
 
         $report = Get-Content -LiteralPath $jsonPath -Raw | ConvertFrom-Json
         $markdown = Get-Content -LiteralPath $markdownPath -Raw
         $doc = Get-Content -LiteralPath $docPath -Raw
         $appendix = Get-Content -LiteralPath $appendixPath -Raw
 
-        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Agent pack menu schema version should be stable."
-        Assert-Equal -Actual $report.Platform -Expected "windows" -Message "Agent pack menu should preserve selected platform."
-        Assert-True -Condition ($report.MenuItemCount -ge 7) -Message "Agent pack menu should include the core user intents."
+        Assert-Equal -Actual $report.SchemaVersion -Expected 1 -Message "Haven 42 menu schema version should be stable."
+        Assert-Equal -Actual $report.Platform -Expected "windows" -Message "Haven 42 menu should preserve selected platform."
+        Assert-True -Condition ($report.MenuItemCount -ge 7) -Message "Haven 42 menu should include the core user intents."
         foreach ($requiredItem in @("first-time-setup", "health-check", "model-choice", "install-configure", "validate-model-agent", "review-evidence", "cleanup", "release-readiness")) {
-            Assert-True -Condition (@($report.MenuItems | Where-Object { $_.Id -eq $requiredItem }).Count -eq 1) -Message "Agent pack menu should include $requiredItem."
+            Assert-True -Condition (@($report.MenuItems | Where-Object { $_.Id -eq $requiredItem }).Count -eq 1) -Message "Haven 42 menu should include $requiredItem."
         }
-        Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "get-beginner-setup-plan" -and $_.BeginnerRecommended -eq $true }).Count -eq 1) -Message "Agent pack menu should recommend the beginner setup plan."
-        Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "install-pack-assets" -and $_.Command -match "-DryRun" }).Count -eq 1) -Message "Agent pack menu should keep install/configure dry-run first."
-        Assert-Equal -Actual $report.SurfaceCount -Expected 3 -Message "Agent pack menu should include only promoted supported surfaces."
-        Assert-Equal -Actual $report.SourceSolutionCatalog -Expected "config/agent-surface-solutions.json" -Message "Agent pack menu should identify the solution catalog."
-        Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" -and $_.InstallSolution }).Count -eq 1) -Message "Agent pack menu should use solution catalog status for Continue."
+        Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "get-beginner-setup-plan" -and $_.BeginnerRecommended -eq $true }).Count -eq 1) -Message "Haven 42 menu should recommend the beginner setup plan."
+        Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "install-pack-assets" -and $_.Command -match "-DryRun" }).Count -eq 1) -Message "Haven 42 menu should keep install/configure dry-run first."
+        Assert-Equal -Actual $report.SurfaceCount -Expected 3 -Message "Haven 42 menu should include only promoted supported surfaces."
+        Assert-Equal -Actual $report.SourceSolutionCatalog -Expected "config/agent-surface-solutions.json" -Message "Haven 42 menu should identify the solution catalog."
+        Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" -and $_.InstallSolution }).Count -eq 1) -Message "Haven 42 menu should use solution catalog status for Continue."
         foreach ($hiddenSurface in @("openhands")) {
             Assert-Equal -Actual @($report.AgentSurfaces | Where-Object { $_.Id -eq $hiddenSurface }).Count -Expected 0 -Message "$hiddenSurface should be excluded from the default agent menu."
         }
-        Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "opencode" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Agent pack menu should include supported OpenCode status."
-        Assert-Equal -Actual $report.Appendix -Expected "docs/script-reference-appendix.md" -Message "Agent pack menu should point at the script appendix."
-        Assert-True -Condition ($markdown -match "Agent Pack Menu") -Message "Agent pack menu markdown should include title."
-        Assert-True -Condition ($markdown -match "First-Time Setup") -Message "Agent pack menu markdown should include first-time setup."
-        Assert-True -Condition ($markdown -match "agent-surface-solutions\.json") -Message "Agent pack menu markdown should reference the solution catalog."
-        Assert-True -Condition ($doc -match "primary human-facing navigation") -Message "Agent pack menu docs should explain the menu role."
-        Assert-True -Condition ($doc -match "agent-surface-solutions\.json") -Message "Agent pack menu docs should reference the solution catalog."
+        Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "opencode" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Haven 42 menu should include supported OpenCode status."
+        Assert-Equal -Actual $report.Appendix -Expected "docs/script-reference-appendix.md" -Message "Haven 42 menu should point at the script appendix."
+        Assert-True -Condition ($markdown -match "Haven 42 Menu") -Message "Haven 42 menu markdown should include title."
+        Assert-True -Condition ($markdown -match "First-Time Setup") -Message "Haven 42 menu markdown should include first-time setup."
+        Assert-True -Condition ($markdown -match "agent-surface-solutions\.json") -Message "Haven 42 menu markdown should reference the solution catalog."
+        Assert-True -Condition ($doc -match "primary human-facing navigation") -Message "Haven 42 menu docs should explain the menu role."
+        Assert-True -Condition ($doc -match "agent-surface-solutions\.json") -Message "Haven 42 menu docs should reference the solution catalog."
         Assert-True -Condition ($appendix -match "individual script documentation") -Message "Script appendix should preserve detailed script docs."
-        Assert-True -Condition ($result.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu output should stay sanitized."
+        Assert-True -Condition ($result.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Haven 42 menu output should stay sanitized."
 
-        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "show-agent-pack-menu", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
-        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve agent pack menu."
-        Assert-True -Condition ($dispatch.Output -match "scripts/show-agent-pack-menu\.ps1") -Message "Dispatcher should point at the agent pack menu script."
-        Assert-True -Condition ($dispatch.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Agent pack menu dispatcher output should stay sanitized."
+        $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "show-haven-42-menu", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
+        Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve the Haven 42 menu."
+        Assert-True -Condition ($dispatch.Output -match "scripts/show-haven-42-menu\.ps1") -Message "Dispatcher should point at the Haven 42 menu script."
+        Assert-True -Condition ($dispatch.Output -notmatch "192\.168\.[0-9]{1,3}\.[0-9]{1,3}|10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3}|Users\\|OneDrive|itama|token|secret") -Message "Haven 42 menu dispatcher output should stay sanitized."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue

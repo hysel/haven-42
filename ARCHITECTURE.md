@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Local Engineering Agent Pack is organized as a documentation, configuration, and workflow repository. Its first supported deliverable is the `.continue` directory, supported by top-level project documentation.
+Haven 42 is organized as a provider-neutral capability, configuration, documentation, and workflow repository. Its engineering foundation includes the `.continue` directory plus maintained Aider and OpenCode paths; its general-purpose layer adds repository-optional sessions, routing, provider adapters, and typed artifacts.
 
 The currently validated runtime architecture is:
 

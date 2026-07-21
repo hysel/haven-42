@@ -26,7 +26,7 @@ $referenceByCategory = @{
     "model-installation" = "docs/local-agent-model-testing.md"
     "model-selection" = "docs/local-model-selection.md"
     "model-validation" = "docs/local-agent-model-testing.md"
-    "onboarding" = "docs/agent-pack-menu.md"
+    "onboarding" = "docs/haven-42-menu.md"
     "release-readiness" = "docs/release.md"
     "sample-generation" = "docs/sample-repository-factory.md"
     "validation" = "docs/runtime-validation.md"
@@ -38,7 +38,7 @@ $referenceByWorkflow = @{
     "generate-model-scorecard" = "docs/model-scorecard.md"
     "get-beginner-setup-plan" = "docs/beginner-setup-mode.md"
     "profile-remote-hardware" = "docs/remote-hardware-profile.md"
-    "show-agent-pack-menu" = "docs/agent-pack-menu.md"
+    "show-haven-42-menu" = "docs/haven-42-menu.md"
     "show-workflow-chooser" = "docs/workflow-chooser.md"
     "verify-runtime-output" = "docs/runtime-output-verification.md"
 }
@@ -90,7 +90,7 @@ function ConvertTo-Markdown {
         "",
         "Generated from `config/workflows.json`.",
         "",
-        "Start with `docs/agent-pack-menu.md` for the guided beginner path. Use this chooser when you need the complete workflow list.",
+        "Start with `docs/haven-42-menu.md` for the guided beginner path. Use this chooser when you need the complete workflow list.",
         "",
         "| Category | Workflow | Safety | UI | Command | Reference |",
         "| --- | --- | --- | --- | --- | --- |"

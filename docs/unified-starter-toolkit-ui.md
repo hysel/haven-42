@@ -22,7 +22,7 @@ The first screen should ask what the user wants to do, then route to an availabl
 
 | Area | Source of truth |
 | --- | --- |
-| Intent menu | `docs/agent-pack-menu.md`, `scripts/show-agent-pack-menu.*`, `config/workflows.json` |
+| Intent menu | `docs/haven-42-menu.md`, `scripts/show-haven-42-menu.*`, `config/workflows.json` |
 | Workflow execution | `scripts/invoke-workflow.*` |
 | Request and result contract | `config/workflow-envelope-contract.json` and `docs/workflow-envelope-contract.md` |
 | Evidence dashboard | `scripts/generate-evidence-dashboard.*`, `config/evidence-catalog.tsv`, `config/agent-surface-capabilities.json`, `config/agent-surface-solutions.json` |

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines prompt-quality expectations for high-risk workflows in the Local Engineering Agent Pack.
+This document defines prompt-quality expectations for high-risk Haven 42 workflows.
 
 Use it when validating prompt changes, local-model behavior, examples, and fixtures.
 

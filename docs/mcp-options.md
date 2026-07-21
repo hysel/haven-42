@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document evaluates Model Context Protocol options for the Local Engineering Agent Pack.
+This document evaluates Model Context Protocol options for Haven 42.
 
 The goal is to identify useful MCP integrations without compromising the pack's local-first posture, portability, or compatibility with Ollama-backed systems.
 

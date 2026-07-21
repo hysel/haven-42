@@ -6,7 +6,7 @@ invokable: true
 
 ## Purpose
 
-Review the Local Engineering Agent Pack itself as a reusable engineering-assistant product.
+Review Haven 42 itself as a reusable local-first AI product.
 
 ## Execution Contract
 

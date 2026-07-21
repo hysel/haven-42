@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document evaluates SonarQube integration paths for the Local Engineering Agent Pack.
+This document evaluates SonarQube integration paths for Haven 42.
 
 The goal is to make SonarQube findings easier to use in AI-assisted review while preserving the pack's local-first posture, compatibility with Ollama-backed systems, and safe handling of enterprise quality data.
 

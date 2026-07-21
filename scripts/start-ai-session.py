@@ -68,7 +68,7 @@ else:
             "Reason": "A unique capability is required before a session workspace can be planned.",
         }
     else:
-        workspace_root = pathlib.Path(args.workspace_root or pathlib.Path(tempfile.gettempdir()) / "local-engineering-agent-pack" / "sessions").resolve()
+        workspace_root = pathlib.Path(args.workspace_root or pathlib.Path(tempfile.gettempdir()) / "haven-42" / "sessions").resolve()
         if is_within(workspace_root, repo_root):
             parser.error(f"Session workspaces must stay outside the pack repository: {workspace_root}")
         session_id = args.session_id or f"session-{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{uuid.uuid4().hex[:8]}"

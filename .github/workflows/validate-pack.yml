@@ -20,11 +20,11 @@ jobs:
 
       - name: Clone wiki
         shell: bash
-        run: git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.wiki.git" "$RUNNER_TEMP/local-engineering-agent-pack.wiki"
+        run: git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.wiki.git" "$RUNNER_TEMP/haven-42.wiki"
 
       - name: Verify mapped wiki pages
         shell: bash
-        run: ./scripts/sync-wiki.linux.sh --wiki-path "$RUNNER_TEMP/local-engineering-agent-pack.wiki" --check
+        run: ./scripts/sync-wiki.linux.sh --wiki-path "$RUNNER_TEMP/haven-42.wiki" --check
 
   windows:
     name: Windows PowerShell validation

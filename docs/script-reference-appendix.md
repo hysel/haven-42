@@ -2,7 +2,7 @@
 
 This appendix is the long-form home for individual script documentation.
 
-The main user experience should stay workflow- and intent-based. Start with `docs/agent-pack-menu.md` or `docs/beginner-setup-mode.md` before choosing individual scripts.
+The main user experience should stay workflow- and intent-based. Start with `docs/haven-42-menu.md` or `docs/beginner-setup-mode.md` before choosing individual scripts.
 
 Individual script docs remain available here for advanced users, maintainers, automation authors, and troubleshooting. They should not be the primary navigation path for beginners.
 
@@ -38,7 +38,7 @@ Use `docs/workflow-chooser.md` for a generated complete workflow list before dro
 | `recommend-language-model-lane` | Select an evidence-backed model lane from detected language rule packs and the requested workflow operation. | `read-only` | yes | `scripts/recommend-language-model-lane.ps1` | `docs/language-aware-model-lanes.md` |
 | `run-continue-with-runtime-policy` | Run one Continue CLI prompt with resident-model limits and explicit model cleanup when unload mode is configured. | `controlled-write` | yes | `scripts/run-continue-with-runtime-policy.ps1` | `docs/local-config-safety.md` |
 | `run-runtime-validation` | Execute configured validation prompts, collect raw local outputs, and optionally append sanitized summaries. | `controlled-write` | yes | `scripts/run-runtime-validation.ps1` | `docs/runtime-validation.md` |
-| `show-agent-pack-menu` | Generate a short intent-based menu over stable workflows so users do not need to choose from individual scripts. | `read-only` | yes | `scripts/show-agent-pack-menu.ps1` | `docs/agent-pack-menu.md` |
+| `show-haven-42-menu` | Generate a short intent-based menu over stable workflows so users do not need to choose from individual scripts. | `read-only` | yes | `scripts/show-haven-42-menu.ps1` | `docs/haven-42-menu.md` |
 | `show-workflow-chooser` | Generate a complete registry-backed workflow chooser with safety levels, commands, and reference docs. | `read-only` | yes | `scripts/show-workflow-chooser.ps1` | `docs/workflow-chooser.md` |
 | `setup-agent-surface` | Plan, install, configure, or health-check non-Continue surfaces through a surface-native adapter. Aider is supported; OpenCode has a dry-run-tested local-only setup path pending live CLI validation. | `approved-write` | yes | `scripts/setup-agent-surface.ps1` | `docs/aider-cli-model-testing.md`, `docs/opencode-cli-model-testing.md` |
 | `test-agent-cli-surface` | Screen CLI-capable agent surfaces with read-only and disposable write-smoke checks through the shared harness. | `controlled-write` | yes | `scripts/test-agent-cli-surface-models.ps1` | `docs/agent-cli-surface-model-testing.md` |
@@ -56,7 +56,7 @@ Use the dispatcher when you want a stable workflow ID instead of a script path:
 
 ```powershell
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/invoke-workflow.ps1 -List
-pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/invoke-workflow.ps1 -WorkflowId show-agent-pack-menu -DryRun
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/invoke-workflow.ps1 -WorkflowId show-haven-42-menu -DryRun
 ```
 
 Use the platform-specific entry points when you need exact script behavior or script-specific arguments. The registry lists Windows, Linux, and macOS entry points for every workflow.
@@ -82,4 +82,4 @@ Python 3.12 MLX runtime on Apple Silicon; it also does not pull a model.
 
 ## Maintenance Rule
 
-When a workflow is added to `config/workflows.json`, add it to this appendix, link an appropriate reference doc, and keep beginner-facing docs pointed at `docs/agent-pack-menu.md` first.
+When a workflow is added to `config/workflows.json`, add it to this appendix, link an appropriate reference doc, and keep beginner-facing docs pointed at `docs/haven-42-menu.md` first.

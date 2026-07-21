@@ -103,7 +103,7 @@ Purpose: $purpose
 Complexity: $complexity
 Generated: deterministic local fixture
 
-This repository is a disposable validation sample for the Local Engineering Agent Pack. It is not a production starter template.
+This repository is a disposable validation sample for Haven 42. It is not a production starter template.
 EOF_METADATA
 }
 

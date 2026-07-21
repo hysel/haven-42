@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines the release process for the Local Engineering Agent Pack.
+This document defines the release process for Haven 42.
 
 The release process is intentionally lightweight because this repository is configuration and documentation heavy, but each release should still be validated, versioned, tagged, and documented.
 
@@ -148,20 +148,20 @@ exist only for local packaging smoke tests.
 Windows PowerShell:
 
 ```powershell
-Get-FileHash .\dist\local-engineering-agent-pack-0.3.0.zip -Algorithm SHA256
-Get-Content .\dist\local-engineering-agent-pack-0.3.0.sha256
+Get-FileHash .\dist\haven-42-0.3.0.zip -Algorithm SHA256
+Get-Content .\dist\haven-42-0.3.0.sha256
 ```
 
 Linux:
 
 ```bash
-sha256sum -c dist/local-engineering-agent-pack-0.3.0.sha256
+sha256sum -c dist/haven-42-0.3.0.sha256
 ```
 
 macOS:
 
 ```bash
-shasum -a 256 -c dist/local-engineering-agent-pack-0.3.0.sha256
+shasum -a 256 -c dist/haven-42-0.3.0.sha256
 ```
 
 The checksum file uses the standard format:

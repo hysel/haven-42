@@ -1,6 +1,8 @@
-# Local Engineering Agent Pack
+# Haven 42
 
-The Local Engineering Agent Pack is evolving into an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. The current name reflects its origin; a deliberate product rename is under consideration.
+**Your private, local AI station.**
+
+Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. It was previously named Local Engineering Agent Pack. Because the project had no external users at rebrand time, product-specific paths and commands use the Haven 42 identity without a legacy compatibility layer.
 
 Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have a validated Ollama adapter, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video generation remains roadmap-only. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
 
@@ -9,7 +11,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 ## Start Here
 
 - New users: [[Quick Start|Quick-Start]]
-- Choose a workflow: [[Agent Pack Menu|Agent-Pack-Menu]]
+- Choose a workflow: [[Haven 42 Menu|Haven-42-Menu]]
 - Select a local model: [[Local Model Selection|Local-Model-Selection]]
 - Compare supported agents: [[Agent Surface Options|Agent-Surface-Options]]
 - Understand the pass-before-ship rule: [[Agent Integration Admission Policy|Agent-Integration-Admission-Policy]]
@@ -35,4 +37,4 @@ Model and tool behavior remains specific to the agent surface, model, operating 
 
 The current release line is `0.3.0`. Work after that release remains under `Unreleased` until a new version is deliberately prepared and exact-SHA hosted CI succeeds.
 
-The repository is available at [hysel/local-engineering-agent-pack](https://github.com/hysel/local-engineering-agent-pack).
+The repository is available at [hysel/haven-42](https://github.com/hysel/haven-42).

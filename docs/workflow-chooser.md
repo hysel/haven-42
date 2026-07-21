@@ -2,7 +2,7 @@
 
 The workflow chooser is a complete registry-backed report for users and maintainers who need to compare all stable workflows without reading every script. It is generated from `config/workflows.json`.
 
-Start with `docs/agent-pack-menu.md` for the short guided path. Use this chooser when you need the full workflow list with safety levels, commands, and reference docs.
+Start with `docs/haven-42-menu.md` for the short guided path. Use this chooser when you need the full workflow list with safety levels, commands, and reference docs.
 
 Generate the chooser on Windows:
 

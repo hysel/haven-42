@@ -85,7 +85,7 @@ if ($routing.Status -ne "selected") {
 }
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
-    $WorkspaceRoot = Join-Path ([System.IO.Path]::GetTempPath()) "local-engineering-agent-pack/sessions"
+    $WorkspaceRoot = Join-Path ([System.IO.Path]::GetTempPath()) "haven-42/sessions"
 }
 $workspaceFullPath = [System.IO.Path]::GetFullPath($WorkspaceRoot)
 if (Test-IsWithinPath -Child $workspaceFullPath -Parent $repoRoot) {

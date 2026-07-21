@@ -34,7 +34,7 @@ It also records the config-bundle policy. Continue, Aider, and OpenCode have sup
 
 ## How To Use It
 
-Start with `docs/agent-pack-menu.md` for the short user menu.
+Start with `docs/haven-42-menu.md` for the short user menu.
 
 Use this solution catalog when you need to compare agent surfaces or decide what work remains before a surface can be promoted from planned/scaffolded to supported or validated.
 

@@ -2,3 +2,4 @@ Cline-CLI-Model-Testing.md
 Cline-Read-Only-Validation.md
 Model-Selection.md
 Prompt-And-Rule-Reliability.md
+Agent-Pack-Menu.md

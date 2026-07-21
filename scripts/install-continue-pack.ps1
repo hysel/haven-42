@@ -108,7 +108,7 @@ if (-not $GlobalConfigPath) {
 }
 
 if ($SharedAssets -and -not $SharedAssetsPath) {
-    $SharedAssetsPath = Join-Path $HOME ".local-engineering-agent-pack/assets"
+    $SharedAssetsPath = Join-Path $HOME ".haven-42/assets"
 }
 
 if ($SharedAssets) {
@@ -617,7 +617,7 @@ function Write-GlobalContinueConfig {
 
 $targetProjectProfile = if ($SharedAssets) { $null } else { Get-TargetProjectProfile }
 
-Write-Plan "Install Local Engineering Agent Pack"
+Write-Plan "Install Haven 42 engineering assets"
 Write-Plan "Source: $sourceContinue"
 Write-Plan "Target: $targetContinue"
 

@@ -35,7 +35,7 @@ if command -v brew >/dev/null 2>&1 && [ "$INSTALL" = true ]; then
   if [ "$INSTALL_MLX" = true ]; then
     brew list python@3.12 >/dev/null 2>&1 || brew install python@3.12
     MLX_PYTHON="$(brew --prefix python@3.12)/bin/python3.12"
-    MLX_VENV="$HOME/.local-engineering-agent-pack-mlx"
+    MLX_VENV="$HOME/.haven-42-mlx"
     [ -x "$MLX_PYTHON" ] || { printf '%s\n' 'Homebrew Python 3.12 was not found after installation.' >&2; exit 1; }
     if [ -x "$MLX_VENV/bin/python" ] && ! "$MLX_VENV/bin/python" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
       backup_path="$MLX_VENV.incompatible-python-$(date '+%Y%m%d-%H%M%S')"
@@ -53,7 +53,7 @@ for command_name in brew node npm ollama git python3 curl; do
   else printf '%s: missing\n' "$command_name"; fi
 done
 
-MLX_VENV="$HOME/.local-engineering-agent-pack-mlx"
+MLX_VENV="$HOME/.haven-42-mlx"
 if [ -x "$MLX_VENV/bin/mlx_lm.server" ]; then
   printf '%s\n' 'MLX runtime: available (pack virtual environment)'
 else

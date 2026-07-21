@@ -9,19 +9,19 @@ Do not edit mapped wiki pages directly. Edit their repository source, run synchr
 Windows PowerShell:
 
 ```powershell
-.\scripts\sync-wiki.ps1 -WikiPath "..\local-engineering-agent-pack.wiki"
+.\scripts\sync-wiki.ps1 -WikiPath "..\haven-42.wiki"
 ```
 
 Linux:
 
 ```bash
-./scripts/sync-wiki.linux.sh --wiki-path ../local-engineering-agent-pack.wiki
+./scripts/sync-wiki.linux.sh --wiki-path ../haven-42.wiki
 ```
 
 macOS:
 
 ```bash
-./scripts/sync-wiki.macos.sh --wiki-path ../local-engineering-agent-pack.wiki
+./scripts/sync-wiki.macos.sh --wiki-path ../haven-42.wiki
 ```
 
 The scripts copy mapped pages byte-for-byte, regenerate `_Sidebar.md`, and remove explicitly retired pages. They do not commit or push either repository.
@@ -31,11 +31,11 @@ The scripts copy mapped pages byte-for-byte, regenerate `_Sidebar.md`, and remov
 Use `-Check` on Windows or `--check` on Linux and macOS to fail when the wiki differs from its mapped sources:
 
 ```powershell
-.\scripts\sync-wiki.ps1 -WikiPath "..\local-engineering-agent-pack.wiki" -Check
+.\scripts\sync-wiki.ps1 -WikiPath "..\haven-42.wiki" -Check
 ```
 
 ```bash
-./scripts/sync-wiki.linux.sh --wiki-path ../local-engineering-agent-pack.wiki --check
+./scripts/sync-wiki.linux.sh --wiki-path ../haven-42.wiki --check
 ```
 
 Hosted CI clones the public wiki and runs this check. The exact-SHA verifier requires the `Wiki synchronization` job in addition to the Windows, Linux, and macOS repository jobs.

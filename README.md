@@ -1,10 +1,12 @@
-# Local Engineering Agent Pack
+# Haven 42
 
-An evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS.
+**Your private, local AI station.**
+
+Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS.
 
 The project began as a reusable pack for coding agents. It now provides a provider-neutral core for discovering capabilities, selecting safe workflows, running supported local agent surfaces, and producing typed artifacts without making a cloud service the default. The future product experience is a local web UI that asks what the user wants to accomplish and routes the request through these tested contracts.
 
-The current repository name reflects its origin, not the full product direction. A deliberate rename is being evaluated; no compatibility-breaking rename has been made yet.
+Haven 42 was previously named Local Engineering Agent Pack. Because the project had no external users at the time of the rebrand, product-specific paths, workflow IDs, scripts, and release artifacts adopt the new identity without a legacy compatibility layer; see [`BRANDING.md`](BRANDING.md).
 
 ## What Works Today
 
@@ -74,7 +76,7 @@ For software work, the pack supplies repeatable discovery, implementation planni
 | Understand script consolidation boundaries | `docs/script-consolidation-plan.md` |
 | Review milestone solution completeness | `docs/solution-architecture-review.md` |
 | See maintainer tasks that can proceed without extra prompts | `docs/autonomous-maintainer-queue.md` |
-| Choose from a short guided menu | `docs/agent-pack-menu.md` |
+| Choose from a short guided menu | `docs/haven-42-menu.md` |
 | Review the future unified UI design | `docs/unified-starter-toolkit-ui.md` |
 | Generate a beginner setup plan | `docs/beginner-setup-mode.md` |
 | Look up individual script details | `docs/script-reference-appendix.md` |
@@ -733,6 +735,7 @@ DECISIONS.md
 PROJECT.md
 README.md
 ROADMAP.md
+BRANDING.md
 STYLEGUIDE.md
 TODO.md
 ```
@@ -991,21 +994,21 @@ For runtime validation against a target repository, run the command for your ope
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\local-engineering-agent-pack"
+$Pack = "C:\path\to\haven-42"
 & "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/local-engineering-agent-pack"
+PACK="/path/to/haven-42"
 "$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD"
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/local-engineering-agent-pack"
+PACK="/path/to/haven-42"
 "$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD"
 ```
 
@@ -1016,21 +1019,21 @@ To generate a context file without relying on Continue tool execution, run the c
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\local-engineering-agent-pack"
+$Pack = "C:\path\to\haven-42"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/local-engineering-agent-pack"
+PACK="/path/to/haven-42"
 "$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/local-engineering-agent-pack"
+PACK="/path/to/haven-42"
 "$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 

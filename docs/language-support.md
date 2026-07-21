@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document tracks how the Local Engineering Agent Pack should grow beyond its current .NET-centered guidance.
+This document tracks how Haven 42 should grow beyond its current .NET-centered engineering guidance.
 
 .NET, ASP.NET Core, APIs, and Clean Architecture remain the most mature and most validated path today. Multi-language support is now staged and evidence-gated, not a claim that every ecosystem is already equally supported.
 

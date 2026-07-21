@@ -60,7 +60,7 @@ if ! printf '%s' "$PACK_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Z
   exit 1
 fi
 
-PACKAGE_NAME="local-engineering-agent-pack-$PACK_VERSION"
+PACKAGE_NAME="haven-42-$PACK_VERSION"
 case "$OUTPUT_DIR" in
   /*) OUTPUT_ROOT="$OUTPUT_DIR" ;;
   *) OUTPUT_ROOT="$REPO_ROOT/$OUTPUT_DIR" ;;

@@ -2,4 +2,4 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec "$SCRIPT_DIR/show-agent-pack-menu.shared.sh" --platform linux "$@"
+exec "$SCRIPT_DIR/show-haven-42-menu.shared.sh" --platform linux "$@"

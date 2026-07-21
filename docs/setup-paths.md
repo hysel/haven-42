@@ -8,7 +8,7 @@ Use this path when you want a local coding assistant working quickly on one mach
 
 Start here:
 
-- `docs/agent-pack-menu.md`
+- `docs/haven-42-menu.md`
 - `docs/beginner-setup-mode.md`
 - `docs/workflow-chooser.md`
 

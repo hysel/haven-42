@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for improving the Local Engineering Agent Pack.
+Thank you for improving Haven 42.
 
 This repository is primarily documentation, Continue configuration, rules, prompts, agents, templates, examples, and validation guidance. Changes should make the pack more reusable, safer for enterprise repositories, and easier to validate.
 

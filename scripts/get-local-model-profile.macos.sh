@@ -253,7 +253,7 @@ if command_exists ollama; then
 fi
 
 MLX_TOOLS=()
-PACK_MLX_SERVER="$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server"
+PACK_MLX_SERVER="$HOME/.haven-42-mlx/bin/mlx_lm.server"
 if [ -x "$PACK_MLX_SERVER" ]; then
   MLX_TOOLS+=("pack virtual environment: mlx_lm.server")
 fi

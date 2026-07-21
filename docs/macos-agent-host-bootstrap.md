@@ -65,7 +65,7 @@ host:
 
 ```bash
 MODEL='mlx-community/Qwen3.5-4B-4bit'
-"$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server" \
+"$HOME/.haven-42-mlx/bin/mlx_lm.server" \
   --model "$MODEL" --host 127.0.0.1 --port 8080
 ```
 

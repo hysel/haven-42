@@ -73,7 +73,7 @@ def menu(workflows, solutions, platform):
 
 
 def chooser(registry, platform):
-    references = {"onboarding": "docs/agent-pack-menu.md", "model-selection": "docs/local-model-selection.md",
+    references = {"onboarding": "docs/haven-42-menu.md", "model-selection": "docs/local-model-selection.md",
                   "validation": "docs/runtime-validation.md", "installation": "docs/shared-asset-installation.md"}
     items = []
     for workflow in sorted(registry["workflows"], key=lambda item: (item["category"], item["id"])):
@@ -92,7 +92,7 @@ def markdown(view, report):
         for item in report["Steps"]:
             lines.append("| {} | {} | {} | {} |".format(item["Title"], item["WorkflowId"], item["SafetyLevel"], "yes" if item["RequiresReviewBeforeApply"] else "no"))
     elif view == "agent-menu":
-        lines = ["# Agent Pack Menu", "", "| Action | Intent | Safety | Workflow |", "| --- | --- | --- | --- |"]
+        lines = ["# Haven 42 Menu", "", "| Action | Intent | Safety | Workflow |", "| --- | --- | --- | --- |"]
         for item in report["MenuItems"]:
             lines.append("| {} | {} | {} | {} |".format(item["Title"], item["Intent"], item["SafetyLevel"], item["PrimaryWorkflowId"]))
     else:

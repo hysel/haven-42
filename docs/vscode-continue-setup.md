@@ -25,14 +25,14 @@ You need:
 - The Continue extension installed in VS Code.
 - Ollama running and at least one chat model installed, or the address of an
   Ollama server you control.
-- A clone of this Local Engineering Agent Pack.
+- A clone of Haven 42.
 - The path to the project you want Continue to inspect or change.
 
-Open PowerShell in the Local Engineering Agent Pack folder before running the
+Open PowerShell in the Haven 42 folder before running the
 commands below. Replace the example project path with your own project path.
 
 ```powershell
-Set-Location "C:\path\to\local-engineering-agent-pack"
+Set-Location "C:\path\to\haven-42"
 ```
 
 ## No Project To Test Yet?
@@ -169,7 +169,7 @@ See `docs/troubleshooting.md` for the safe checks if the warning remains.
 ### 6. Open The Correct Project In VS Code
 
 1. In VS Code, select **File > Open Folder**.
-2. Select `C:\path\to\your-project`, not the Local Engineering Agent Pack
+2. Select `C:\path\to\your-project`, not the Haven 42
    folder.
 3. Confirm the Explorer shows the real files of the project you want to work
    on.
@@ -287,8 +287,8 @@ The scripts use Bash and do not require PowerShell.
 In Terminal, clone the pack once into a stable location:
 
 ```bash
-git clone https://github.com/hysel/local-engineering-agent-pack.git
-cd local-engineering-agent-pack
+git clone https://github.com/hysel/haven-42.git
+cd haven-42
 ```
 
 If Git is not available, install the macOS Command Line Tools first:
@@ -303,7 +303,7 @@ Treat a newly created Mac as an empty host. Install the pack-managed MLX
 runtime before profiling or configuring Continue:
 
 ```bash
-cd ~/local-engineering-agent-pack
+cd ~/haven-42
 ./scripts/bootstrap-macos-agent-host.sh --install --with-mlx
 ```
 
@@ -333,7 +333,7 @@ normally assigned `mlx-community/Qwen3.5-4B-4bit`:
 
 ```bash
 MODEL='mlx-community/Qwen3.5-4B-4bit'
-"$HOME/.local-engineering-agent-pack-mlx/bin/mlx_lm.server" \
+"$HOME/.haven-42-mlx/bin/mlx_lm.server" \
   --model "$MODEL" --host 127.0.0.1 --port 8080
 ```
 
@@ -405,7 +405,7 @@ On a 16 GB host, the pack selects
 `mlx-community/Qwen3.5-4B-4bit`.
 
 ```bash
-cd ~/local-engineering-agent-pack
+cd ~/haven-42
 
 ./scripts/generate-sample-repositories.macos.sh --force
 

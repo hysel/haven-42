@@ -69,7 +69,7 @@ if args.execute:
         image_bytes = base64.b64decode(fixture["imageBase64"], validate=True)
         provider_source = "validation-fixture"
     else:
-        node_prefix = "agent-pack/" + uuid.uuid4().hex
+        node_prefix = "haven-42/" + uuid.uuid4().hex
         workflow = {
             "3": {"class_type": "KSampler", "inputs": {"seed": args.seed, "steps": args.steps, "cfg": args.cfg, "sampler_name": "euler", "scheduler": "normal", "denoise": 1.0, "model": ["4", 0], "positive": ["6", 0], "negative": ["7", 0], "latent_image": ["5", 0]}},
             "4": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": args.model}},
@@ -80,7 +80,7 @@ if args.execute:
             "9": {"class_type": "SaveImage", "inputs": {"filename_prefix": node_prefix, "images": ["8", 0]}},
         }
         base_url = args.comfyui_base_url.rstrip("/")
-        prompt_id = request_json(base_url + "/prompt", "POST", {"prompt": workflow, "client_id": "local-engineering-agent-pack"}, args.timeout_seconds)["prompt_id"]
+        prompt_id = request_json(base_url + "/prompt", "POST", {"prompt": workflow, "client_id": "haven-42"}, args.timeout_seconds)["prompt_id"]
         deadline, image_info = time.monotonic() + args.timeout_seconds, None
         while time.monotonic() < deadline:
             history = request_json(base_url + "/history/" + urllib.parse.quote(prompt_id), timeout=args.timeout_seconds)

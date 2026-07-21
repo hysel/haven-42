@@ -40,7 +40,7 @@ The goal is not to hide behavior. The goal is to move repeated behavior into sha
 
 ### Onboarding And Navigation
 
-The beginner setup plan, agent pack menu, and workflow chooser retain their
+The beginner setup plan, Haven 42 menu, and workflow chooser retain their
 documented entry points. Their PowerShell implementations now share:
 
 - catalog loading and validation;

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use this guide when the Local Engineering Agent Pack does not load, prompts do not appear, or local model execution fails.
+Use this guide when Haven 42 does not load, prompts do not appear, or local model execution fails.
 
 ## Quick Checks
 
@@ -206,21 +206,21 @@ Fallback:
 Windows:
 
 ```powershell
-$Pack = "C:\path\to\local-engineering-agent-pack"
+$Pack = "C:\path\to\haven-42"
 & "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
 ```
 
 Linux:
 
 ```bash
-PACK="/path/to/local-engineering-agent-pack"
+PACK="/path/to/haven-42"
 "$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
 macOS:
 
 ```bash
-PACK="/path/to/local-engineering-agent-pack"
+PACK="/path/to/haven-42"
 "$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
 ```
 
