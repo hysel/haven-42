@@ -20,6 +20,8 @@ docs/workflow-envelope-contract.md	Workflow-Envelope-Contract.md	Workflow Envelo
 docs/workflow-chooser.md	Workflow-Chooser.md	Workflow Chooser
 docs/capability-registry.md	Capability-Registry.md	Capability Registry
 docs/capability-availability-and-engineering-routing.md	Capability-Availability-And-Engineering-Routing.md	Capability Availability And Engineering Routing
+docs/optional-llm-intent-routing.md	Optional-LLM-Intent-Routing.md	Optional LLM Intent Routing
+examples/optional-llm-routing-validation.md	Optional-LLM-Routing-Validation.md	Optional LLM Routing Validation
 docs/typed-artifact-contract.md	Typed-Artifact-Contract.md	Typed Artifact Contract
 docs/deterministic-intent-routing.md	Deterministic-Intent-Routing.md	Deterministic Intent Routing
 docs/general-ai-session-workspace.md	General-AI-Session-Workspace.md	General AI Session Workspace

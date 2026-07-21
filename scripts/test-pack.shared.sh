@@ -1501,6 +1501,25 @@ assert route["InvocationAllowed"] is False and any(step["WorkflowId"] == "verify
 PY
 }
 
+test_optional_llm_routing_boundary() {
+  router="$REPO_ROOT/scripts/suggest-capability-route.shared.sh"
+  fixture="$REPO_ROOT/examples/fixtures/ollama-capability-route-response.json"
+  invalid_fixture="$REPO_ROOT/examples/fixtures/ollama-invalid-capability-route-response.json"
+  plan="$($router --text 'private routing text' --model fixture-model --json)" || return 1
+  valid="$($router --text 'private routing text' --model fixture-model --ollama-base-url http://private-runtime.invalid:11434 --response-fixture-path "$fixture" --execute --json)" || return 1
+  invalid="$($router --text 'do something' --model fixture-model --response-fixture-path "$invalid_fixture" --execute --json)" || return 1
+  python3 - "$plan" "$valid" "$invalid" <<'PY'
+import json, sys
+plan, valid, invalid = map(json.loads, sys.argv[1:])
+assert plan["Status"] == "planned" and plan["InvocationAllowed"] is False
+assert valid["Status"] == "suggested" and valid["Selected"]["Id"] == "content.summarize"
+assert valid["RegistryValidated"] is True and valid["ExecutionEligible"] is False
+assert valid["InvocationAllowed"] is False and valid["PromptPersisted"] is False and valid["EndpointPersisted"] is False
+assert "private routing text" not in sys.argv[2] and "private-runtime" not in sys.argv[2] and "11434" not in sys.argv[2]
+assert invalid["Status"] == "rejected" and invalid["RegistryValidated"] is False and invalid["InvocationAllowed"] is False
+PY
+}
+
 test_solution_architecture_review_doc() {
   [ -f "$REPO_ROOT/docs/solution-architecture-review.md" ] &&
     [ -f "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" ] &&
@@ -1656,6 +1675,7 @@ run_test "capability registry and deterministic routing enforce policy boundarie
 run_test "general AI sessions are repository optional and dry-run first" test_general_ai_session_workspace
 run_test "local text capabilities are session bound and typed" test_local_text_capability_adapter
 run_test "provider discovery and engineering routing preserve policy boundaries" test_provider_discovery_and_engineering_routes
+run_test "optional LLM routing is advisory and registry gated" test_optional_llm_routing_boundary
 run_test "recommended agent config generation writes local-only config" test_recommended_agent_config_generation
 run_test "agent surface adapters plan installs configure and report health safely" test_agent_surface_adapters
 run_test "workflow envelope contract is versioned private by default and cross-platform" test_workflow_envelope_contract

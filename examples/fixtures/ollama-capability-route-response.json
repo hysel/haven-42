@@ -1,0 +1,6 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "{\"capabilityId\":\"content.summarize\",\"needsClarification\":false,\"clarificationQuestion\":null}"
+  }
+}

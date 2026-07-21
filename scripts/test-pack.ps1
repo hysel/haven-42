@@ -3696,6 +3696,31 @@ Invoke-PackTest "provider discovery and engineering routing preserve policy boun
     Assert-True -Condition (@($route.Steps | Where-Object SafetyLevel -ne "read-only").Count -gt 0) -Message "Route should preserve workflow safety levels instead of flattening them."
 }
 
+Invoke-PackTest "optional LLM routing is advisory and registry gated" {
+    $scriptPath = Join-Path $repoRoot "scripts/suggest-capability-route.ps1"
+    $fixturePath = Join-Path $repoRoot "examples/fixtures/ollama-capability-route-response.json"
+    $invalidFixturePath = Join-Path $repoRoot "examples/fixtures/ollama-invalid-capability-route-response.json"
+
+    $plan = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Text", "private routing text", "-Model", "fixture-model", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $plan.Status -Expected "planned" -Message "Optional LLM routing should be dry-run first."
+    Assert-Equal -Actual $plan.InvocationAllowed -Expected $false -Message "A routing plan must never invoke a capability."
+
+    $raw = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Text", "private routing text", "-Model", "fixture-model", "-OllamaBaseUrl", "http://private-runtime.invalid:11434", "-ResponseFixturePath", $fixturePath, "-Execute", "-AsJson")).Output
+    $valid = $raw | ConvertFrom-Json
+    Assert-Equal -Actual $valid.Status -Expected "suggested" -Message "A registered fixture suggestion should pass the registry gate."
+    Assert-Equal -Actual $valid.Selected.Id -Expected "content.summarize" -Message "The fixture should suggest summarization."
+    Assert-Equal -Actual $valid.RegistryValidated -Expected $true -Message "The suggestion should be validated against the registry."
+    Assert-Equal -Actual $valid.ExecutionEligible -Expected $false -Message "Configuration-required availability should block execution eligibility."
+    Assert-Equal -Actual $valid.InvocationAllowed -Expected $false -Message "A valid suggestion must still not invoke a capability."
+    Assert-Equal -Actual $valid.PromptPersisted -Expected $false -Message "Routing text should not be persisted."
+    Assert-True -Condition ($raw -notmatch "private routing text|private-runtime|11434") -Message "Router output should omit prompt and endpoint values."
+
+    $invalid = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-Text", "do something", "-Model", "fixture-model", "-ResponseFixturePath", $invalidFixturePath, "-Execute", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $invalid.Status -Expected "rejected" -Message "An unregistered capability suggestion should be rejected."
+    Assert-Equal -Actual $invalid.RegistryValidated -Expected $false -Message "Unknown IDs must fail registry validation."
+    Assert-Equal -Actual $invalid.InvocationAllowed -Expected $false -Message "Rejected suggestions must not invoke anything."
+}
+
 Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $docPath = Join-Path $repoRoot "docs/solution-architecture-review.md"
     $uiDocPath = Join-Path $repoRoot "docs/unified-starter-toolkit-ui.md"

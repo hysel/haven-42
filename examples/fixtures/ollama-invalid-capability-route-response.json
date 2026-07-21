@@ -1,0 +1,6 @@
+{
+  "message": {
+    "role": "assistant",
+    "content": "{\"capabilityId\":\"unsafe.unregistered-action\",\"needsClarification\":false,\"clarificationQuestion\":null}"
+  }
+}

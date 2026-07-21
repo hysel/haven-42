@@ -386,7 +386,7 @@
 - [x] Route software-work capabilities into deterministic, non-invoking plans over the existing workflow registry without weakening engineering evidence gates.
 - [x] Add offline-first provider availability discovery with an explicit bounded Ollama health probe that never persists endpoint values or downloads models.
 - [ ] Add provider discovery and one evidence-gated image-generation adapter without assuming chat models support image generation.
-- [ ] Add an optional LLM intent router that can clarify and suggest capability IDs but cannot bypass availability, privacy, policy, or approval checks.
+- [x] Add an optional LLM intent router that can clarify and suggest capability IDs but cannot bypass availability, privacy, policy, or approval checks.
 - [ ] Add cross-platform contract tests for deterministic routing, unavailable capabilities, typed artifacts, repository-free operation, and safety enforcement.
 - [ ] Hand stable individual capabilities and artifact contracts to Milestone 22.
 
