@@ -23,6 +23,7 @@ docs/capability-availability-and-engineering-routing.md	Capability-Availability-
 docs/optional-llm-intent-routing.md	Optional-LLM-Intent-Routing.md	Optional LLM Intent Routing
 examples/optional-llm-routing-validation.md	Optional-LLM-Routing-Validation.md	Optional LLM Routing Validation
 docs/local-image-capability.md	Local-Image-Capability.md	Local Image Capability
+docs/comfyui-image-provider-setup.md	ComfyUI-Image-Provider-Setup.md	ComfyUI Image Provider Setup
 examples/local-image-capability-validation.md	Local-Image-Capability-Validation.md	Local Image Capability Validation
 docs/typed-artifact-contract.md	Typed-Artifact-Contract.md	Typed Artifact Contract
 docs/deterministic-intent-routing.md	Deterministic-Intent-Routing.md	Deterministic Intent Routing

@@ -1648,6 +1648,30 @@ test_model_residency_policy_contract() {
     grep -q 'trap' "$REPO_ROOT/scripts/run-continue-with-runtime-policy.shared.sh"
 }
 
+test_comfyui_setup_guide_contract() {
+  guide="$REPO_ROOT/docs/comfyui-image-provider-setup.md"
+  [ -f "$guide" ] || return 1
+  grep -Fq 'v0.28.2' "$guide" &&
+    grep -Fq '306af3a8771a8232d26bd20acbfc6b07f862ad2b' "$guide" &&
+    grep -Fq '2.11.0+cu126' "$guide" &&
+    grep -Fq '31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b' "$guide" &&
+    grep -Fq '127.0.0.1:8188' "$guide" &&
+    grep -Fq -- '--disable-metadata' "$guide" &&
+    grep -Fq -- '--disable-all-custom-nodes' "$guide" &&
+    grep -Fq -- '--disable-api-nodes' "$guide" &&
+    grep -Fq 'NoNewPrivileges=true' "$guide" &&
+    grep -Fq 'ProtectSystem=strict' "$guide" &&
+    grep -Fq 'sha256sum --check' "$guide" &&
+    grep -Fq 'SSH tunneling' "$guide" &&
+    grep -Fq 'ProviderRetainedOutput' "$guide" &&
+    grep -Fq 'moving branch' "$guide" &&
+    grep -Fq 'scripts, templates, workflows, or configuration' "$guide" &&
+    grep -Eiq 'dedicated Ed25519 key' "$guide" &&
+    grep -Eiq 'Never copy or transmit the private key' "$guide" &&
+    ! grep -Eq '(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})' "$guide" &&
+    ! grep -Eq 'ssh-ed25519[[:space:]]+AAAA[A-Za-z0-9+/]+' "$guide"
+}
+
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
@@ -1709,6 +1733,7 @@ run_test "workflow envelope contract is versioned private by default and cross-p
 run_test "hosted CI verifier enforces exact-SHA cross-platform completion" test_hosted_ci_verifier_contract
 run_test "wiki synchronization is deterministic and hosted" test_wiki_synchronization
 run_test "model residency policy is applied across runtime and config paths" test_model_residency_policy_contract
+run_test "ComfyUI setup guide preserves the validated secure provider profile" test_comfyui_setup_guide_contract
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

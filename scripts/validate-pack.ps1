@@ -155,6 +155,7 @@ $requiredFiles = @(
     "docs/capability-availability-and-engineering-routing.md",
     "docs/optional-llm-intent-routing.md",
     "docs/local-image-capability.md",
+    "docs/comfyui-image-provider-setup.md",
     "docs/typed-artifact-contract.md",
     "docs/deterministic-intent-routing.md",
     "docs/general-ai-session-workspace.md",

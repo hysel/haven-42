@@ -4263,6 +4263,37 @@ Invoke-PackTest "model residency policy is applied across runtime and config pat
     Assert-True -Condition ($commandResolver -match "windows-cmd-shim" -and $commandResolver -match "ChangeExtension") -Message "Shared command resolution should support Windows npm cmd shims."
 }
 
+Invoke-PackTest "ComfyUI setup guide preserves the validated secure provider profile" {
+    $path = Join-Path $repoRoot "docs/comfyui-image-provider-setup.md"
+    Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "ComfyUI setup guide should exist."
+    $content = Get-Content -LiteralPath $path -Raw
+
+    foreach ($marker in @(
+        "v0.28.2",
+        "306af3a8771a8232d26bd20acbfc6b07f862ad2b",
+        "2.11.0+cu126",
+        "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b",
+        "127.0.0.1:8188",
+        "--disable-metadata",
+        "--disable-all-custom-nodes",
+        "--disable-api-nodes",
+        "NoNewPrivileges=true",
+        "ProtectSystem=strict",
+        "sha256sum --check",
+        "SSH tunneling",
+        "ProviderRetainedOutput",
+        "moving branch",
+        "scripts, templates, workflows, or configuration"
+    )) {
+        Assert-True -Condition ($content.Contains($marker)) -Message "ComfyUI setup guide should retain marker: $marker"
+    }
+
+    Assert-True -Condition ($content -match "(?i)dedicated Ed25519 key") -Message "Guide should require a dedicated SSH key."
+    Assert-True -Condition ($content -match "(?i)Never copy or transmit the private key") -Message "Guide should protect the private key."
+    Assert-True -Condition ($content -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "Guide should not contain a private address."
+    Assert-True -Condition ($content -notmatch "ssh-ed25519\s+AAAA[A-Za-z0-9+/]+") -Message "Guide should not contain an actual public key."
+}
+
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
     exit 1

@@ -49,6 +49,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Keep the GitHub wiki synchronized | `docs/wiki-maintenance.md` |
 | Understand general-purpose capabilities and intent routing | `docs/capability-registry.md`, `docs/deterministic-intent-routing.md`, `docs/capability-availability-and-engineering-routing.md`, and `docs/optional-llm-intent-routing.md` |
 | Generate repository-free local images | `docs/local-image-capability.md` and `examples/local-image-capability-validation.md` |
+| Install the validated local image provider | `docs/comfyui-image-provider-setup.md` |
 | Start a repository-optional general AI session | `docs/general-ai-session-workspace.md` |
 | Validate the candidate local chat, writing, and summarization adapter | `docs/local-text-capabilities.md` |
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
