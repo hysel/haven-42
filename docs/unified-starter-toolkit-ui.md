@@ -82,12 +82,12 @@ The UI should call only stable workflow IDs from `config/workflows.json` through
 
 The first implementation can be local-only and static/serverless if it shells out to existing scripts from the user machine. A hosted production service is out of scope because this pack is local-first and should not upload repository content, hardware profiles, local endpoints, or raw validation transcripts.
 
-## Open Decisions
+## Roadmap Placement
 
-These remain on `TODO.md`:
+Milestone 20 completed the stable workflow, evidence, onboarding, and dispatcher foundation. Milestone 21 defines and validates general-purpose capabilities, typed artifacts, providers, repository-optional sessions, and routing policy. Milestone 22 implements this UI and later bounded multi-step composition over those two foundations.
 
-- Confirm scope and priority for the unified starter-toolkit web UI.
-- Add the unified web UI wrapper after script-level workflows are stable.
+Remaining product decisions stay on `TODO.md`:
+
 - Keep surface-specific profile generation gated by non-Continue compatibility evidence.
-- Define the Milestone 21 capability and artifact contracts before adding general-purpose UI actions.
-- Decide which local text and image providers form the first supported vertical slice.
+- Decide which local text and image providers form the first supported Milestone 21 vertical slice.
+- Select the local-first Milestone 22 UI runtime and packaging boundary without introducing a hosted-service dependency.

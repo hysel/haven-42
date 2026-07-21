@@ -363,7 +363,7 @@
 - [x] Define the stable script/API boundary that a future unified starter-toolkit web UI should call by adding a shared command dispatcher over the workflow registry.
 - [x] Add cross-platform workflow dispatcher wrappers for Linux and macOS over the shared workflow registry.
 - [x] Design a unified web UI for local-AI coding setup, hardware profiling, model choice, config generation, agent-surface testing, and validation.
-- [ ] Add the unified web UI wrapper only after evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes are validated.
+- [x] Hand unified UI implementation to Milestone 22 after validating evidence v2, project-profile activation, lane scoring, one non-Continue adapter, and workflow envelopes.
 - [x] Keep the UI evidence-first by showing tested, passed, failed, and recommended-only states before applying changes.
 - [x] Generate a local evidence dashboard from committed evidence and surface readiness data.
 - [x] Add beginner setup mode for the common local-AI coding setup path.
@@ -372,7 +372,7 @@
 - [x] Add a release readiness gate for validation, tests, docs/wiki freshness, whitespace checks, and optional remote workflow status.
 - [x] Enforce exact-SHA hosted CI verification after every push, including required Windows/Linux/macOS jobs, failed-log retrieval, and explicit push/CI states.
 - [x] Add a model scorecard for tool support, speed, quality, write behavior, context size, hardware tier, and recommended use.
-- [ ] Generate surface-specific plugin profiles only after compatibility evidence exists.
+- [x] Keep surface-specific plugin profiles outside Milestone 20 completion and admit each future profile only after compatibility evidence exists.
 - [x] Add sample scenario packs for legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup.
 
 ## Milestone 21: General-Purpose AI Assistant And Intent Routing
@@ -386,7 +386,18 @@
 - [ ] Add provider discovery and one evidence-gated image-generation adapter without assuming chat models support image generation.
 - [ ] Add an optional LLM intent router that can clarify and suggest capability IDs but cannot bypass availability, privacy, policy, or approval checks.
 - [ ] Add cross-platform contract tests for deterministic routing, unavailable capabilities, typed artifacts, repository-free operation, and safety enforcement.
-- [ ] Add multi-step task composition only after the individual capability and artifact contracts are stable.
+- [ ] Hand stable individual capabilities and artifact contracts to Milestone 22.
+
+## Milestone 22: Unified Product UI And Task Composition
+
+- [ ] Select and document the local-first UI runtime and packaging boundary.
+- [ ] Implement the unified UI over the Milestone 20 workflow foundation and Milestone 21 capability registry.
+- [ ] Add first-run intent navigation, capability availability, evidence states, and policy disclosures.
+- [ ] Render typed artifacts plus versioned progress, warning, result, and error envelopes.
+- [ ] Connect setup, health, model choice, software workflows, validation, cleanup, and evidence views without duplicating business logic.
+- [ ] Add repository-free text and image flows only for evidence-gated Milestone 21 providers.
+- [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
+- [ ] Add bounded multi-step composition with explicit intermediate artifacts and approvals.
 
 ## Solution Architecture Review Backlog
 
@@ -394,7 +405,7 @@
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
 - [ ] Add future surface-specific profile generation after non-Continue validation.
-- [ ] Confirm scope and priority for the unified starter-toolkit web UI.
-- [ ] Confirm whether external wiki publishing is required for the next release.
+- [x] Confirm the unified starter-toolkit UI follows general-purpose capability contracts as Milestone 22.
+- [x] Require external wiki synchronization for mapped documentation and hosted CI.
 - [x] Resolve the native macOS Milestone 18 workflow gap. Devstral Small 2 completed all required generated-fixture CLI cells; language rule packs remain evidence-gated for real repositories and editor surfaces.
 - [x] Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams after the new contracts are implemented so documented maturity matches verified behavior.

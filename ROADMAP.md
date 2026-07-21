@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestones 1 through 19 are complete for their defined supported-surface and generated-fixture scopes. Continue, Aider, and OpenCode form the maintained surface set; failed or retired integrations are removed rather than carried as partial implementations. OpenHands remains a documentation-only candidate with a defined but unimplemented isolation boundary. Later roadmap tracks cover hardware-aware model/config automation, script consolidation, a stable workflow registry, a future unified starter-toolkit web UI, and general-purpose AI capabilities.
+The repository is in early implementation stage. Milestones 1 through 20 are complete for their defined supported-surface, generated-fixture, and workflow-foundation scopes. Continue, Aider, and OpenCode form the maintained surface set; failed or retired integrations are removed rather than carried as partial implementations. OpenHands remains a documentation-only candidate with a defined but unimplemented isolation boundary. Milestone 21 adds general-purpose capabilities and intent routing before Milestone 22 builds the unified product UI and multi-step experience over those contracts.
 
 ## Stage Status
 
@@ -28,8 +28,9 @@ The repository is in early implementation stage. Milestones 1 through 19 are com
 | Milestone 17: Agent Surface Compatibility Validation | Complete | Continue, Aider, and OpenCode have explicit evidence-backed validation positions for the supported-surface scope. Failed or retired integrations were removed, OpenHands remains a documentation-only candidate, and real-project approved write stays separately evidence-gated. |
 | Milestone 18: Language Rule Packs | Complete | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are evidence-gated; deterministic project profiles, project-local activation, medium fixtures, and a 28-cell Continue CLI matrix are implemented. Windows, Linux, and native Apple Silicon macOS evidence is recorded separately, and the language-aware selector consumes each platform's evidence. The macOS matrix completed with Devstral Small 2 in bounded single-model runs with external scoped-write verification. |
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Continue profiles plus Aider and OpenCode install/configure/health/test paths satisfy supported-surface parity with deterministic cross-platform contracts. Failed or retired integrations are absent from active catalogs and scripts; OpenHands is documentation-only. |
-| Milestone 20: Hardware-Aware Model And Config Automation | In Progress | Offline hardware-aware recommendation output, local-only Continue config generation, reusable surface-neutral model lanes, centralized shared asset config generation, workflow dispatch and envelopes, local setup health check, safe cleanup workflow, release readiness gate, surface parity matrix, model scorecard, and native Linux/macOS onboarding rendering are implemented; a future UI wrapper and additional surface-specific profile generation remain planned. |
+| Milestone 20: Hardware-Aware Model And Config Automation | Complete | Hardware-aware recommendations, local-only config generation, surface-neutral model lanes, workflow dispatch and envelopes, setup health, cleanup, release readiness, evidence views, cross-platform onboarding, and the stable UI-facing foundation are implemented. Future surface profiles remain separately evidence-gated. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Planned | Expand the future product beyond programming agents with repository-optional chat, writing, summarization, image-generation routing, a provider-neutral capability registry, deterministic onboarding, and an optional LLM intent router that cannot bypass safety policy. |
+| Milestone 22: Unified Product UI And Task Composition | Planned | Build the local-first unified UI over the stable Milestone 20 workflow foundation and Milestone 21 capability contracts, then add tested multi-step composition without bypassing evidence, privacy, or approval policy. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -564,7 +565,7 @@ Scope:
 - Add a safe cleanup workflow with dry-run support for stale runtime outputs, generated samples, failed diagnostic artifacts, and obsolete backup folders. Done for local artifact cleanup; model deletion remains explicit in model-testing workflows.
 - Add a release readiness gate that runs validation, tests, release package dry-run, git state, workflow registry checks, and agent-surface parity checks before release or push. Done for local gate scope, with a separate exact-SHA hosted verifier that waits for GitHub Actions and checks every required Windows, Linux, and macOS job after push.
 - Add a model scorecard that tracks tested models by surface, evidence status, write readiness, and recommended use. Done for evidence-backed readiness; speed, quality, context size, and hardware tier remain future structured evidence fields.
-- Generate surface-specific plugin profiles only after each plugin has compatibility evidence, using the same recommendation and validation data model. The gating policy is documented; implementation remains future work.
+- Keep surface-specific plugin profiles outside the supported pack until each plugin has compatibility evidence. The reusable data model and gating policy are complete; individual future profiles are new evidence-gated integration work rather than a Milestone 20 blocker.
 - Add a surface-neutral install/configure/test solution catalog for every tracked agent surface. Done for current evidence-gated status and blocked-reason tracking.
 - Add sample scenario packs for common local-AI coding tasks such as legacy migration, config refactoring, bug fixing, security review, test generation, and documentation cleanup. Done for registry-backed scenario catalog and docs; future UI can expose these as guided lanes.
 
@@ -576,8 +577,7 @@ Exit criteria:
 - The final-stage UI is treated as an optional wrapper over tested shared engines, not a replacement for script-level validation.
 - The UI can call a small number of stable script entry points, a workflow registry, or a shared command dispatcher rather than many plugin-specific scripts.
 - Users can start from a guided menu or beginner flow, while individual script docs remain available in an appendix for detailed reference and troubleshooting.
-- A beginner can use the UI to complete the common local-AI coding setup path without manually choosing scripts or editing YAML.
-- UI implementation does not begin until the evidence contract, project-profile activation, model-lane scoring, one non-Continue adapter, and versioned workflow envelope are validated. Technical prerequisites are now validated; UI scope and priority still require a product decision.
+- The future UI can call the completed stable entry points without requiring plugin-specific business logic. UI implementation belongs to Milestone 22 after Milestone 21 defines general-purpose capability and artifact contracts.
 - Evidence dashboard, health check, cleanup, release gate, and model scorecard workflows all read from sanitized local artifacts and avoid committing private machine details.
 
 ### Recommended Implementation Order
@@ -588,8 +588,8 @@ Exit criteria:
 4. Complete Aider as the first end-to-end non-Continue install, configure, health, and test adapter. Done with local-only config and deterministic cross-platform coverage.
 5. Standardize versioned workflow request/result/progress/error envelopes and consolidate repeated script-family business logic. Envelope contract and the first onboarding/navigation consolidation are done; additional families remain evidence-driven.
 6. Expand medium-complexity samples and define a representative surface/language/mode validation matrix. Done for fixtures and static coverage; execute and record the model-backed operation cells next.
-7. Implement the unified web UI only after the preceding contracts and adapters are stable.
-8. Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams so documented maturity and runtime wiring match verified behavior.
+7. Hand the stable workflow, evidence, and onboarding foundation to Milestone 21 capability work and Milestone 22 UI implementation. Done.
+8. Refresh `PROJECT.md`, `ARCHITECTURE.md`, README status text, and surface diagrams so documented maturity and runtime wiring match verified behavior. Done.
 
 ## Milestone 21: General-Purpose AI Assistant And Intent Routing
 
@@ -626,4 +626,39 @@ Exit criteria:
 4. Connect software-work requests to the existing workflow registry and dispatcher.
 5. Add provider discovery and one evidence-gated image-generation adapter.
 6. Add the optional LLM intent router with confidence thresholds, clarification, deterministic fallback, and policy enforcement.
-7. Add tested multi-step composition only after individual capability and artifact contracts are stable.
+7. Hand stable individual capabilities and artifact contracts to Milestone 22 for UI integration and tested multi-step composition.
+
+## Milestone 22: Unified Product UI And Task Composition
+
+Goal: Provide one local-first product surface over the completed engineering workflows and general-purpose capability platform without reimplementing their business logic or weakening their safety boundaries.
+
+Scope:
+
+- Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
+- Present deterministic first-run choices for chat, writing, summarization, image creation, software work, and local-AI setup.
+- Support repository-optional sessions and clearly identify every artifact location before a write.
+- Show capability availability, evidence status, local versus external execution, network effects, repository access, and approval requirements before execution.
+- Reuse the Milestone 20 evidence dashboard, health, cleanup, recommendation, installation, validation, and release-readiness workflows.
+- Reuse Milestone 21 routing and provider contracts; keep LLM routing advisory and policy enforcement deterministic.
+- Add accessible progress, warning, failure, retry, and recovery experiences over the versioned workflow envelope.
+- Add tested multi-step task composition only after individual capabilities and artifact contracts have passed their own gates.
+- Keep future surface-specific profiles outside the UI until their exact integrations pass the agent admission policy.
+
+Exit criteria:
+
+- A beginner can complete the common local-AI setup path without selecting scripts or manually editing configuration.
+- A general AI user can complete repository-free chat, writing, summarization, or an available image task and locate the typed result artifact.
+- A software user can enter the existing engineering workflow system without the UI bypassing evidence or approved-write gates.
+- Unavailable, blocked, failed, and recommendation-only capabilities are visibly distinct and cannot be presented as validated.
+- Every material read, write, network call, model download, and external-provider action is disclosed before execution.
+- Windows, Linux, and macOS contract tests cover routing, workflow dispatch, artifacts, failures, recovery, and safe composition.
+
+### Recommended Implementation Order
+
+1. Select the local UI runtime and package boundary without introducing a hosted-service dependency.
+2. Implement first-run navigation and capability availability views over the Milestone 21 registry.
+3. Render typed artifacts and workflow progress/error envelopes.
+4. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20.
+5. Add repository-free text and image flows only for providers promoted in Milestone 21.
+6. Add cross-platform UI contract and packaging tests.
+7. Add bounded multi-step composition with explicit intermediate artifacts and approvals.
