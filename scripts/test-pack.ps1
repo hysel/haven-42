@@ -3799,6 +3799,12 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($uiDoc -match "local-first") -Message "Unified UI design should preserve local-first boundary."
     Assert-True -Condition ($readme -match "docs/solution-architecture-review\.md") -Message "README should link solution architecture review."
     Assert-True -Condition ($readme -match "docs/unified-starter-toolkit-ui\.md") -Message "README should link unified UI design."
+    foreach ($marker in @("local-first AI workbench", "Continue, Aider, and OpenCode", "general.chat", "content.write", "content.summarize", "media.image.create", "pass-before-ship", "Milestone 22: Unified Product UI And Task Composition", "Milestone 23: Native Local Image Generation", "Milestone 24: Local Music And Audio Generation", "Milestone 25: Local Video Generation")) {
+        Assert-True -Condition ($readme -match [regex]::Escape($marker)) -Message "README should reflect current product position: $marker"
+    }
+    Assert-True -Condition ($readme -match "Linux ComfyUI/SDXL.*validated") -Message "README should state the bounded validated image baseline."
+    Assert-True -Condition ($readme -match "music/audio and video generation are roadmap research only") -Message "README should keep unshipped media capabilities clearly gated."
+    Assert-True -Condition ($readme -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "README should not contain a private address."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should include solution architecture backlog."
     Assert-True -Condition ($todo -match "\[x\] Add a milestone solution completeness audit") -Message "TODO should mark solution audit doc complete."
     Assert-True -Condition ($todo -match "\[ \] Provide or approve suitable non-generated repositories") -Message "TODO should track input-needed real repository targets."

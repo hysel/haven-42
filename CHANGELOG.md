@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Refreshed the README and wiki landing page to reflect the provider-neutral local AI workbench direction, current maintained surfaces, validated general text and Linux image capabilities, pass-before-ship model, and Milestones 22 through 25 without prematurely renaming the repository.
 - Added and live-validated the session-bound local Ollama text adapter for bounded chat, writing, and summarization with explicit execute/apply gates, typed artifacts, sanitization, cleanup, and no repository reads.
 - Added a cross-platform, repository-optional general AI session command with deterministic first-run capability menu, dry-run-first workspace planning, explicit effect disclosures, safe local metadata, and no automatic capability invocation.
 - Added offline-first capability availability discovery and deterministic engineering workflow route plans with explicit probing, no endpoint persistence, no automatic invocation, and Windows, Linux, and macOS entry points.

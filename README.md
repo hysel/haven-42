@@ -1,16 +1,62 @@
 # Local Engineering Agent Pack
 
-Local-first engineering assistant pack for developers, small teams, and enterprise groups that want repeatable AI-assisted workflows, shared engineering standards, and evidence-gated guidance across multiple programming ecosystems.
+An evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS.
 
-In plain terms: this repository gives an AI coding agent a ready-made set of prompts, rules, and templates so it can help review, plan, and safely improve software projects in a more consistent way.
+The project began as a reusable pack for coding agents. It now provides a provider-neutral core for discovering capabilities, selecting safe workflows, running supported local agent surfaces, and producing typed artifacts without making a cloud service the default. The future product experience is a local web UI that asks what the user wants to accomplish and routes the request through these tested contracts.
 
-Continue is the first supported agent surface because it is the current tested path for local Ollama workflows. The project is intentionally moving toward reusable agent assets that can also be validated with other open-source coding assistants over time.
+The current repository name reflects its origin, not the full product direction. A deliberate rename is being evaluated; no compatibility-breaking rename has been made yet.
+
+## What Works Today
+
+| Area | Current position |
+| --- | --- |
+| Engineering agents | Continue, Aider, and OpenCode are the maintained surfaces, with OS-aware setup and validation paths. |
+| Engineering workflows | Repository discovery, planning, review, scoped changes, language-aware guidance, workflow dispatch, and evidence reporting are implemented. |
+| General local text | `general.chat`, `content.write`, and `content.summarize` have a live-validated, session-bound Ollama adapter. |
+| Local images | `media.image.create` has a live-validated Linux ComfyUI/SDXL provider and typed PNG artifacts. Native Windows NVIDIA, Intel GPU/XPU, AMD, and Apple Silicon profiles remain candidates until independently validated. |
+| Product UI | A local web UI and multi-step task composition are designed and planned for Milestone 22; no UI implementation is shipped yet. |
+| Music and video | Local music/audio and video generation are roadmap research only. No scripts, adapters, harnesses, workflows, or configuration ship before promotion gates pass. |
+
+## Product Direction
+
+```text
+Local web UI (planned)
+        |
+Capability registry and deterministic routing
+        |
+Workflow dispatcher and approval policy
+        |
+Local providers and supported agent surfaces
+        |
+Typed artifacts, validation evidence, and recovery
+```
+
+The design keeps provider selection, evidence state, permissions, privacy disclosures, and write approval outside model prompts. Optional LLM routing may suggest an intent, but deterministic policy decides what can actually run.
+
+## Evidence Before Features
+
+Every integration follows a pass-before-ship rule. Exact software versions are evaluated on their claimed operating system, hardware, provider, and operation. Failed or incomplete candidates may be documented, but they do not leave scripts, adapters, harnesses, templates, configuration, workflows, or active catalog entries in the shipped solution.
+
+Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recommended-only`, and `blocked` capabilities. A fixture contract proves portable behavior; it does not claim that untested native hardware or software works.
+
+## Roadmap At A Glance
+
+| Milestone | Status | Outcome |
+| --- | --- | --- |
+| Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
+| Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, local text and image adapters, capability discovery, routing, and typed artifacts. |
+| Milestone 22: Unified Product UI And Task Composition | Planned | Local web experience, guided intent selection, and evidence-preserving multi-step tasks. |
+| Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; consumer-local Windows and macOS profiles remain gated. |
+| Milestone 24: Local Music And Audio Generation | Planned | Evaluate local providers, licenses, hardware profiles, safety, and typed audio artifacts. |
+| Milestone 25: Local Video Generation | Planned | Evaluate consumer-local image-to-video and text-to-video candidates without premature integration. |
+
+See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
 
 ## Purpose
 
-The goal of this pack is to provide a reusable engineering assistant setup, starting with Continue, with workflows for repository discovery, implementation planning, code review, security review, architecture review, performance review, documentation, and product management.
+The goal is to make useful local AI capabilities approachable without weakening engineering-grade safety. New users should eventually be able to describe a task in a single local interface; experienced users and automation can continue using the same versioned scripts, registries, and envelopes directly.
 
-It is designed for people who want AI support to follow consistent engineering standards instead of relying on ad hoc prompts, whether they are hobby developers, consultants, small teams, or enterprise engineering groups.
+For software work, the pack supplies repeatable discovery, implementation planning, code review, security review, architecture review, performance review, documentation, and product-management workflows. For general tasks, it supplies repository-optional sessions and explicit local capability boundaries for chat, writing, summarization, and image creation.
 
 ## Which Path Should I Use?
 
@@ -51,7 +97,7 @@ It is designed for people who want AI support to follow consistent engineering s
 | Generate repository-free local images | `docs/local-image-capability.md` and `examples/local-image-capability-validation.md` |
 | Install the validated local image provider | `docs/comfyui-image-provider-setup.md` |
 | Start a repository-optional general AI session | `docs/general-ai-session-workspace.md` |
-| Validate the candidate local chat, writing, and summarization adapter | `docs/local-text-capabilities.md` |
+| Use the validated local chat, writing, and summarization adapter | `docs/local-text-capabilities.md` |
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
 | Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
 | Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |
@@ -651,7 +697,10 @@ Use `docs/local-config-safety.md` before adding local endpoints, model experimen
 
 ## Intended Capabilities
 
-- Local LLM support through Continue and Ollama
+- Local LLM support through maintained Continue, Aider, and OpenCode surfaces
+- Repository-optional local chat, writing, and summarization through Ollama
+- Repository-optional local image generation through the validated Linux ComfyUI/SDXL profile
+- Deterministic capability discovery, intent routing, workflow dispatch, and typed artifacts
 - Enterprise .NET and ASP.NET Core guidance
 - Clean Architecture review and implementation support
 - Repository discovery and system understanding workflows
@@ -660,7 +709,8 @@ Use `docs/local-config-safety.md` before adding local endpoints, model experimen
 - Security, performance, and SonarQube-oriented review guidance
 - Documentation and product-management assistant roles
 - Reusable templates for architecture, AI, security, and performance artifacts
-- Future MCP integration points for richer repository and tool context
+- Optional MCP integration points for richer repository and tool context
+- A planned local web UI over the same versioned capability and workflow contracts
 
 ## Repository Layout
 
@@ -723,17 +773,18 @@ Repository validation automation for release checks and portable configuration i
 
 ## Current Status
 
-The repository contains an initial usable pack structure:
+The repository contains a mature workflow foundation and an early general-purpose capability layer:
 
 - `.continue/config.yaml` targets Continue `schema: v1`.
 - Local-first Ollama model defaults are defined.
-- Core rules, prompts, agents, and templates are implemented.
+- Continue, Aider, and OpenCode are maintained; failed or retired surfaces are not shipped as partial integrations.
+- Core engineering rules, prompts, agents, templates, workflow registries, and dispatch envelopes are implemented.
 - Configured local rule and prompt file references have been statically checked.
-- Continue CLI can load the pack configuration.
-- Model-backed execution has been validated with a test-time Ollama endpoint override.
+- Repository-optional chat, writing, summarization, and Linux image generation have live-validated local adapters.
+- Windows, Linux, and macOS contracts are covered in hosted CI; native provider claims remain specific to recorded evidence.
 - MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
 
-Version `0.3.0` adds evidence-gated cross-agent validation, hardware-aware model lanes, Apple Silicon MLX support, OS-aware command execution, model-residency controls, exact-SHA hosted CI verification, workflow registries and dispatch envelopes, guided onboarding, release automation, and the planned general-purpose AI capability layer.
+Version `0.3.0` established evidence-gated cross-agent validation, hardware-aware model lanes, Apple Silicon MLX support, OS-aware command execution, model-residency controls, exact-SHA hosted CI verification, workflow registries and dispatch envelopes, guided onboarding, release automation, and the general-purpose AI capability foundation. Later work remains under `Unreleased` until the next deliberate release.
 
 ## Standard Usage
 

@@ -1,8 +1,10 @@
 # Local Engineering Agent Pack
 
-The Local Engineering Agent Pack provides local-first, evidence-gated workflows for software engineering agents on Windows, Linux, and macOS.
+The Local Engineering Agent Pack is evolving into an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. The current name reflects its origin; a deliberate product rename is under consideration.
 
-The maintained agent surfaces are Continue, Aider, and OpenCode. OpenHands is documentation-only while its isolated validation boundary remains unimplemented. Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries.
+Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have a validated Ollama adapter, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video generation remains roadmap-only. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
+
+Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries. Fixture-backed cross-platform contracts do not broaden native runtime or hardware claims.
 
 ## Start Here
 
@@ -12,7 +14,16 @@ The maintained agent surfaces are Continue, Aider, and OpenCode. OpenHands is do
 - Compare supported agents: [[Agent Surface Options|Agent-Surface-Options]]
 - Understand the pass-before-ship rule: [[Agent Integration Admission Policy|Agent-Integration-Admission-Policy]]
 - Review current plans: [[Roadmap|Roadmap]]
+- Review local image support: [[Local Image Capability|Local-Image-Capability]]
+- Install the validated Linux image provider: [[ComfyUI Image Provider Setup|ComfyUI-Image-Provider-Setup]]
 - Prepare a release: [[Release Guidance|Release-Guidance]]
+
+## Current Roadmap
+
+- Milestone 22 — planned local web UI and task composition.
+- Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
+- Milestone 24 — local music/audio research only.
+- Milestone 25 — local video research only.
 
 ## Support Model
 

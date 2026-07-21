@@ -1576,6 +1576,20 @@ test_solution_architecture_review_doc() {
     grep -q "local-first" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/README.md" &&
     grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/README.md" &&
+    grep -q "local-first AI workbench" "$REPO_ROOT/README.md" &&
+    grep -q "Continue, Aider, and OpenCode" "$REPO_ROOT/README.md" &&
+    grep -q "general.chat" "$REPO_ROOT/README.md" &&
+    grep -q "content.write" "$REPO_ROOT/README.md" &&
+    grep -q "content.summarize" "$REPO_ROOT/README.md" &&
+    grep -q "media.image.create" "$REPO_ROOT/README.md" &&
+    grep -q "pass-before-ship" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 22: Unified Product UI And Task Composition" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 23: Native Local Image Generation" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 24: Local Music And Audio Generation" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 25: Local Video Generation" "$REPO_ROOT/README.md" &&
+    grep -q "Linux ComfyUI/SDXL.*validated" "$REPO_ROOT/README.md" &&
+    grep -q "music/audio and video generation are roadmap research only" "$REPO_ROOT/README.md" &&
+    ! grep -Eq '(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})' "$REPO_ROOT/README.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Reuse the recommendation data model for future non-Continue agent surfaces" "$REPO_ROOT/TODO.md" &&
