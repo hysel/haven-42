@@ -603,9 +603,9 @@ Scope:
 - Implement a deterministic menu and rule-based intent fallback that remains usable when no model is installed, the model server is unavailable, or LLM routing confidence is low. Done for registry-driven resolution, first-run menu output, ambiguity handling, and unmatched fallback.
 - Optionally use an LLM to ask follow-up questions and propose capability IDs. Treat its output as an untrusted routing suggestion that must pass capability availability, policy, privacy, and approval checks. Done with a dry-run-first cross-platform advisory router that rejects unknown IDs and never invokes capabilities.
 - Add provider adapters for general text/chat, writing and summarization, image generation, and the existing engineering workflow dispatcher without assuming one model or provider supports every modality. The local Ollama text adapter is live-validated for bounded chat, writing, and summarization, and deterministic engineering route plans now preserve existing workflow safety levels; image generation remains a separate evidence-gated slice.
-- Represent results as typed artifacts such as chat messages, Markdown documents, images, reports, configuration plans, or reviewed repository changes. Done for typed artifact contract version 1; provider-backed artifact creation remains future work.
-- Show whether each capability is local or external and whether it reads a repository, writes files, downloads models, calls a network service, or requires approval.
-- Keep file, network, and repository safety enforcement in application policy rather than relying on model prompts.
+- Represent results as typed artifacts such as chat messages, Markdown documents, images, reports, configuration plans, or reviewed repository changes. Done for typed artifact contract version 1 and the local text adapter; image artifacts remain gated on image-provider admission.
+- Show whether each capability is local or external and whether it reads a repository, writes files, downloads models, calls a network service, or requires approval. Done in capability, provider-discovery, session, and route result contracts.
+- Keep file, network, and repository safety enforcement in application policy rather than relying on model prompts. Done for deterministic routing, provider discovery, local text execution, and advisory LLM routing boundaries.
 - Keep engineering write readiness tied to existing surface-, model-, provider-, OS-, operation-, and validation-specific evidence; general chat success must not promote a model for source-code edits.
 
 Exit criteria:
@@ -625,10 +625,8 @@ Exit criteria:
 3. Implement one local text/chat adapter plus writing and summarization capabilities. Done for the dry-run-first, session-bound `ollama.local-text` adapter with fixture, live Windows, typed-artifact, sanitization, cleanup, and cross-platform contract evidence.
 4. Add runtime provider availability discovery and deterministic engineering route plans without provider or workflow auto-invocation. Done with offline-first Windows, Linux, and macOS entry points, an explicit bounded Ollama probe, and workflow-ID integrity checks.
 5. Add the optional LLM routing layer as an untrusted suggestion boundary. Done with structured output, committed-registry validation, explicit clarification/rejection states, no persistence, and no automatic invocation.
-4. Connect software-work requests to the existing workflow registry and dispatcher.
-5. Add provider discovery and one evidence-gated image-generation adapter.
-6. Add the optional LLM intent router with confidence thresholds, clarification, deterministic fallback, and policy enforcement.
-7. Hand stable individual capabilities and artifact contracts to Milestone 22 for UI integration and tested multi-step composition.
+6. Add provider discovery and one evidence-gated image-generation adapter. Pending provider selection, runtime access, and validation.
+7. Hand stable individual capabilities and artifact contracts to Milestone 22 for UI integration and tested multi-step composition after image-provider admission.
 
 ## Milestone 22: Unified Product UI And Task Composition
 
