@@ -10,7 +10,7 @@ Milestone 17 has complete Cline and Aider evidence for the current documented sc
 
 Milestone 17 remains partial for full tracked-surface compatibility because Kilo Code and OpenHands do not yet have live validation evidence, and OpenCode has generated-sample-only evidence. Roo Code is retired upstream and not an active target.
 
-Kilo Code remains a live-validation blocker. Its documented command shape, native-Ollama project-local configuration, explicit `code` agent selection, and isolated user-profile execution are scaffolded and statically tested. Renewed generated-sample diagnostics found raw tool-schema-like output from `qwen3.5:9b` and bounded-read non-completion from larger coding models, so no model evidence supports promotion. Roo Code is historical only because its upstream project is retired. OpenCode's generated-sample evidence is recorded separately and still requires non-generated-repository validation.
+Kilo Code remains a live-validation blocker. Its current CLI, documented command shape, native-Ollama project-local configuration, explicit `code` agent selection, and isolated user-profile execution are validated. Devstral passes read-only but not write or scoped-edit gates; Qwen 35B fails all three gates. The failed phases exit `0`, so only external verification and the harness's aggregate nonzero result are authoritative. Roo Code is historical only because its upstream project is retired. OpenCode's generated-sample evidence is recorded separately and still requires non-generated-repository validation.
 
 ## Shared Gates
 
@@ -32,7 +32,7 @@ Kilo Code remains a live-validation blocker. Its documented command shape, nativ
 | Cline | Read-only and minimal disposable write-smoke evidence exists. Devstral and Qwen diagnostics through Cline CLI 3.0.46 on Windows both produced non-LF edits that failed `git diff --check`; Qwen also failed grounded read and scoped behavior gates. | Keep Windows scoped edits blocked for Cline CLI 3.0.46. Retest the hardened gate only after a relevant Cline editor-tool/line-ending fix or version upgrade. |
 | Aider | CLI read-only, disposable write-smoke, and richer generated-sample scoped edits exist. | Explicitly approved non-generated repository validation before real-project approved-write claims. |
 | Roo Code | Upstream retired. | Do not promote or add new validation; evaluate a maintained successor separately. |
-| Kilo Code | Shared wrapper, npm install plan, native-Ollama project-local config generator, explicit `code` agent selection, and isolated user-profile execution exist; renewed live task execution is blocked. | Resolve model/surface tool-protocol compatibility, then rerun generated-sample read-only, write-smoke, and scoped-edit tests one model at a time, unloading each model after testing. |
+| Kilo Code | Current CLI 7.4.11, config generation, isolated profiles, and read-only Devstral execution are validated; Devstral write/scoped gates and all Qwen 35B gates fail despite zero phase exits. | Wait for a concrete Kilo task-execution/tool-protocol fix or version change, then rerun one model through external read, write, and scoped verification. |
 | OpenCode | Installed CLI plus generated-sample read/write-smoke and constrained scoped-edit evidence exists for Devstral Small 2 24B. | Run explicitly approved non-generated repository validation. |
 | OpenHands | Platform-agent candidate is blocked for install/config generation. | Use the isolated generated-sample boundary in `docs/openhands-validation-boundary.md` before any validation automation. |
 

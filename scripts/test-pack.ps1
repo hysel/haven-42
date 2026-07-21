@@ -863,6 +863,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $docPath = Join-Path $repoRoot "docs/agent-cli-surface-model-testing.md"
     $aiderDocPath = Join-Path $repoRoot "docs/aider-cli-model-testing.md"
     $evidencePath = Join-Path $repoRoot "examples/aider-validation.md"
+    $kiloEvidencePath = Join-Path $repoRoot "examples/kilo-validation.md"
     $psScriptPath = Join-Path $repoRoot "scripts/test-agent-cli-surface-models.ps1"
     $bashScriptPath = Join-Path $repoRoot "scripts/test-agent-cli-surface-models.shared.sh"
     $surfaceDefaultsPath = Join-Path $repoRoot "config/agent-cli-surface-defaults.json"
@@ -876,6 +877,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Shared agent CLI testing doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $aiderDocPath) -Message "Aider CLI wrapper doc should exist."
     Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Aider evidence template should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $kiloEvidencePath) -Message "Kilo validation evidence should exist."
     Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell shared agent CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash shared agent CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $surfaceDefaultsPath) -Message "Agent CLI surface defaults catalog should exist."
@@ -884,6 +886,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $doc = Get-Content -LiteralPath $docPath -Raw
     $aiderDoc = Get-Content -LiteralPath $aiderDocPath -Raw
     $evidence = Get-Content -LiteralPath $evidencePath -Raw
+    $kiloEvidence = Get-Content -LiteralPath $kiloEvidencePath -Raw
     $psScript = Get-Content -LiteralPath $psScriptPath -Raw
     $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
     $surfaceDefaults = Get-Content -LiteralPath $surfaceDefaultsPath -Raw | ConvertFrom-Json
@@ -895,7 +898,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     $todo = Get-Content -LiteralPath $todoPath -Raw
 
     Assert-True -Condition ($doc -match "Agent CLI Surface Model Testing") -Message "Shared CLI testing doc should have a clear title."
-    Assert-True -Condition ($doc -match "live validation is blocked by task execution") -Message "Shared CLI doc should keep Kilo Code's live task-execution blocker explicit."
+    Assert-True -Condition ($doc -match "live write validation is blocked by task execution") -Message "Shared CLI doc should keep Kilo Code's live task-execution blocker explicit."
     foreach ($surface in @("Aider", "Roo Code", "Kilo Code", "OpenCode")) {
         Assert-True -Condition ($doc -match [regex]::Escape($surface)) -Message "Shared CLI testing doc should mention $surface."
         Assert-True -Condition ($catalog -match [regex]::Escape($surface)) -Message "Evidence catalog should mention $surface."
@@ -913,11 +916,15 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($psScript -match "AgentArgumentsTemplate") -Message "PowerShell shared CLI tester should support argument templates."
     Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell shared CLI tester should support write-smoke tests."
     Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell shared CLI tester should support model unload after each run."
+    Assert-True -Condition ($psScript -match 'hasValidationFailure' -and $psScript -match 'if \(\$hasValidationFailure\) \{ exit 1 \}') -Message "PowerShell shared CLI tester should return nonzero when a requested gate fails."
     Assert-True -Condition ($psScript -match "Initialize-DisposableGitBaseline") -Message "PowerShell shared CLI tester should initialize a disposable Git baseline."
     Assert-True -Condition ($bashScript -match "AGENT_ARGS_TEMPLATE") -Message "Bash shared CLI tester should support argument templates."
     Assert-True -Condition ($bashScript -match "agent-cli-surface-defaults\.json") -Message "Bash shared CLI tester should load default surface metadata from the catalog."
     Assert-True -Condition ($bashScript -match "load_surface_defaults") -Message "Bash shared CLI tester should centralize default loading."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash shared CLI tester should support model unload after each run."
+    Assert-True -Condition ($bashScript -match 'ReadStatus.*failed' -and $bashScript -match 'ScopedEditStatus.*failed' -and $bashScript -match 'exit 1') -Message "Bash shared CLI tester should return nonzero when a requested gate fails."
+    Assert-True -Condition ($kiloEvidence -match "Kilo Code Validation Evidence" -and $kiloEvidence -match "qwen3\.5:35b" -and $kiloEvidence -match "exit-0 model failures") -Message "Kilo evidence should record the current cross-model zero-exit failures."
+    Assert-True -Condition ($catalog -match "Kilo Code CLI Devstral generated-sample validation" -and $catalog -match "Kilo Code CLI Qwen 3\.5 35B generated-sample validation") -Message "Evidence catalog should track both current Kilo model results."
     Assert-True -Condition ($catalog -match "Shared agent CLI model test harness") -Message "Evidence catalog should track the shared CLI harness."
     Assert-True -Condition ($readme -match "docs/agent-cli-surface-model-testing.md") -Message "README should link shared agent CLI model testing doc."
     Assert-True -Condition ($readme -match "docs/agent-surface-promotion-gates.md") -Message "README should link agent surface promotion gates."
@@ -942,7 +949,7 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($todo -match "\[ \] Complete Milestone 17 full tracked-surface compatibility validation") -Message "TODO should keep full Milestone 17 surface validation pending."
     Assert-True -Condition ($todo -match "Future Agent Surface Evidence Expansion") -Message "TODO should track future agent surface evidence expansion."
     Assert-True -Condition ($todo -match "\[x\] Retire Roo Code from future validation") -Message "TODO should keep Roo Code retired upstream."
-    Assert-True -Condition ($todo -match "\[ \] Resolve Kilo Code's current local-model task-execution failure") -Message "TODO should keep Kilo CLI validation evidence-gated."
+    Assert-True -Condition ($todo -match "\[ \] Retest Kilo after a concrete task-execution/tool-protocol fix or version change") -Message "TODO should keep Kilo CLI validation evidence-gated."
     Assert-True -Condition ($todo -match "\[x\] Add a local-only OpenCode Ollama config generator") -Message "TODO should record the scaffolded OpenCode config generator."
     Assert-True -Condition ($todo -match "\[x\] Validate OpenCode's installed CLI") -Message "TODO should record generated-sample OpenCode CLI validation."
     Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "docs/opencode-cli-model-testing.md")) -Message "OpenCode setup and validation documentation should exist."

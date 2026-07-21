@@ -351,3 +351,10 @@ printf '[6/7] Writing sanitized report...\n' >&2
   printf '}\n'
 } > "$OUTPUT_PATH"
 printf '[7/7] Report written to %s\n' "$OUTPUT_PATH" >&2
+
+for result in "${json_results[@]}"; do
+  case "$result" in
+    *'"ReadStatus":"failed"'*|*'"WriteStatus":"failed"'*|*'"ScopedEditStatus":"failed"'*) exit 1 ;;
+  esac
+done
+exit 0

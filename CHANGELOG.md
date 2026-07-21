@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Recorded current Kilo CLI 7.4.11 Windows evidence: Devstral read-only passed while its write/scoped gates failed, and Qwen 3.5 35B failed all gates; strengthened the shared PowerShell and Unix harnesses to return nonzero when any requested validation gate fails despite a surface phase exiting zero.
+
 - Hardened the Cline CLI model harness with per-model system-temporary profiles, explicit workspace anchoring, a realistic scoped source-and-test edit mode, exact changed-file and unexpected-file checks, dependency-free behavior verification, whitespace and LF-only validation, cleanup, and sanitized failure signals on Windows, Linux, and macOS.
 - Recorded the hardened Cline rerun: read-only passed, while the scoped edit was correctly rejected for incomplete source/test scope, dirty whitespace, and non-LF output; fixture restoration, temporary-profile cleanup, and model unload passed.
 - Compared Devstral Small 2 24B and Qwen 3 Coder 30B through Cline CLI 3.0.46 on Windows: both produced non-LF source edits that failed whitespace validation, while Qwen also failed grounded read and scoped behavior gates; further Windows scoped-edit promotion is blocked pending a relevant Cline fix or upgrade.

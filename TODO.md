@@ -307,7 +307,7 @@
 
 - [x] Retire Roo Code from future validation and configuration work after its upstream project was archived and the extension was shut down; retain historical references only.
 - [x] Confirm Kilo Code's documented npm install, local Ollama config, and non-interactive `kilo run --auto` command shape; add a local-only config generator and npm install plan.
-- [ ] Resolve Kilo Code's Devstral write-task failure, then rerun write-smoke and scoped-edit validation. The documented `.kilo/kilo.jsonc` adapter, explicit `code` agent, isolated user-profile execution, preload stage, and read-only gate are verified; Devstral exits the write-smoke invocation without changing `README.md`.
+- [ ] Retest Kilo after a concrete task-execution/tool-protocol fix or version change. On current CLI 7.4.11, Devstral passes read-only but fails write-smoke and scoped-edit despite exit `0`; Qwen 3.5 35B fails all three gates despite exit `0`. The harness now returns nonzero for aggregate validation failure; do not cycle more models without a surface change.
 - [x] Add a local-only OpenCode Ollama config generator and documented npm install plan to the unified setup adapter.
 - [x] Validate OpenCode's installed CLI and `opencode run` wrapper against a generated sample with read-only and disposable write-smoke checks.
 - [x] Add an opt-in generated Python scoped-edit gate to the shared CLI harness; record live evidence separately before any surface promotion.

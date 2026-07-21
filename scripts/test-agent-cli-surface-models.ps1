@@ -437,3 +437,9 @@ foreach ($result in $results) {
     Write-Host "$($result.Model): read=$($result.ReadStatus), write=$($result.WriteStatus), scoped-edit=$($result.ScopedEditStatus), failures=$($result.FailureSignals -join ',')"
 }
 Write-Host "[7/7] Report written to $OutputPath"
+
+$hasValidationFailure = @($results | Where-Object {
+    $_.ReadStatus -eq "failed" -or $_.WriteStatus -eq "failed" -or $_.ScopedEditStatus -eq "failed"
+}).Count -gt 0
+if ($hasValidationFailure) { exit 1 }
+exit 0

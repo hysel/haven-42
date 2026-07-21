@@ -690,7 +690,7 @@ test_agent_surface_options_doc() {
     grep -q "Docker socket" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "unrestricted network access" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "docs/openhands-validation-boundary.md" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "live validation is blocked by task execution" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "live write validation is blocked by task execution" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "| Milestone 17: Agent Surface Compatibility Validation | Partial |" "$REPO_ROOT/ROADMAP.md" &&
@@ -700,14 +700,18 @@ test_agent_surface_options_doc() {
     grep -q "\\[ \\] Complete Milestone 17 full tracked-surface compatibility validation" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Retire Roo Code from future validation" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[ \] Resolve Kilo Code's current local-model task-execution failure" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[ \] Retest Kilo after a concrete task-execution/tool-protocol fix or version change" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Add a local-only OpenCode Ollama config generator" "$REPO_ROOT/TODO.md" &&
     grep -q "\[x\] Validate OpenCode's installed CLI" "$REPO_ROOT/TODO.md" &&
     [ -f "$REPO_ROOT/docs/opencode-cli-model-testing.md" ] &&
+    [ -f "$REPO_ROOT/examples/kilo-validation.md" ] &&
     grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q ".kilo/kilo.jsonc" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "passes the generated-sample read-only gate" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
+    grep -q "hasValidationFailure" "$REPO_ROOT/scripts/test-agent-cli-surface-models.ps1" &&
+    grep -q 'ScopedEditStatus.*failed' "$REPO_ROOT/scripts/test-agent-cli-surface-models.shared.sh" &&
+    grep -q "Kilo Code CLI Qwen 3.5 35B generated-sample validation" "$REPO_ROOT/config/evidence-catalog.tsv" &&
     grep -q "upstream project is archived" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
     grep -q "\\[x\\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
 }
