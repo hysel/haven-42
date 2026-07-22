@@ -13,7 +13,7 @@ The machine-readable source is `config/inference-engine-registry.json`. Unknown 
 | Engine | Decision | Boundary |
 | --- | --- | --- |
 | Ollama | Validated exact profiles | Existing Linux NVIDIA/CUDA and Windows AMD/ROCm evidence only. |
-| llama.cpp | HIP validated; Vulkan failed | Windows AMD HIP passed the bounded engine checks. Vulkan failed the applicable-patch gate and remains documentation-only. |
+| llama.cpp | CUDA and HIP validated; Vulkan failed | Linux NVIDIA CUDA and Windows AMD HIP passed their exact bounded engine cells. Vulkan failed the Windows AMD applicable-patch gate and remains documentation-only. |
 | OpenVINO GenAI | Parked | Wait for representative Intel GPU hardware; ship no integration assets meanwhile. |
 | llama.cpp SYCL | Parked | Wait for representative Intel GPU hardware. Current upstream SYCL scope is Intel hardware. |
 | LM Studio | Optional external API | The end user installs it. Haven 42 may call its published loopback API but does not embed or redistribute it. |

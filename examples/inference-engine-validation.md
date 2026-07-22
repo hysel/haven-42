@@ -27,8 +27,32 @@ The model is an Apache-2.0 quantization of `Qwen/Qwen3.5-9B`. The llama.cpp rele
 
 The HIP patch changed only `False` to `True` in the supplied two-line function and passed `git apply --check`. Vulkan repeatedly produced a malformed hunk or an extraneous separator; the captured candidate failed `git apply --check` with a corrupt-patch result. Faster inference did not override the functional gate.
 
-Decision: admit llama.cpp HIP only for this exact backend evidence cell. Do not infer agent-surface approved-write readiness. Keep Vulkan documentation-only and ship no Vulkan installer, adapter, harness, runtime configuration, or active evidence-catalog entry. Intel SYCL and OpenVINO GenAI remain parked until representative Intel GPU hardware is available. Metal remains physical-Mac-last.
+Decision for the Windows AMD comparison: admit llama.cpp HIP only for this exact backend evidence cell. Do not infer agent-surface approved-write readiness. Keep Vulkan documentation-only and ship no Vulkan installer, adapter, harness, runtime configuration, or active evidence-catalog entry. Intel SYCL and OpenVINO GenAI remain parked until representative Intel GPU hardware is available. Metal remains physical-Mac-last.
 
 An initial attempt used the official Ollama Qwen 3.5 9B model blob pinned by digest. Upstream llama.cpp rejected it before inference because its Qwen 3.5 rope metadata had a different array layout. The blob was removed and is not treated as backend evidence; model-format compatibility must be proven per engine even when both engines use GGUF.
 
 After validation, both listeners were stopped and the downloaded model, runtime archives, extracted binaries, logs, and patch fixture were removed. No application, service, startup entry, model, or runtime remained installed.
+
+## Linux NVIDIA llama.cpp CUDA
+
+Validation ran on 2026-07-22 using Linux x64, NVIDIA driver `580.159.04`, and a Quadro RTX 5000 16 GB with compute capability 7.5. CUDA device order was explicitly set to PCI bus order before selecting the GPU; without that setting, CUDA's default ordering selected a different device than the same numeric `nvidia-smi` index. The test did not begin until `llama-cli --list-devices` reported only the RTX 5000.
+
+Upstream published no Linux CUDA binary for `b10088`, so the three required binaries were built non-root from exact commit `67b9b0e7f6ce45d929a4411907d3c48ec719e81c`. The disposable toolchain used SHA-verified micromamba `2.8.1-0`, CUDA NVCC `12.4.131`, CUDA runtime `12.4.127`, cuBLAS `12.4.5.8`, and Ninja `1.13.2`. The resolved package transaction carried per-package SHA-256 values. The build targeted only `sm_75`, disabled native CPU specialization and both source and prebuilt web UI assets, and did not require NCCL because the evidence cell was single-GPU.
+
+The test reused the same revision-pinned Q4_K_M model and SHA-256 recorded above, with a 4,096-token context and one server slot.
+
+| Check | Linux CUDA result |
+| --- | ---: |
+| Backend/device discovery | Quadro RTX 5000, compute capability 7.5 |
+| Reported device memory | 15,927 MiB |
+| Loaded GPU memory | 5,285 MiB |
+| Server readiness | 3.68 s |
+| Fixed 128-token prompt benchmark | 1,346.31 tokens/s |
+| Fixed 64-token generation benchmark | 63.33 tokens/s |
+| Exact bounded response, first / warm | 0.238 s / 0.130 s, Pass |
+| Required structured tool call and JSON arguments | 0.849 s, Pass |
+| Git-applicable one-word engineering patch | 1.296 s, Pass |
+
+The generated patch changed only `False` to `True` and passed an external `git apply --check`. Decision: admit llama.cpp CUDA for this exact Linux NVIDIA profile as engine-level evidence. This does not establish agent-surface approved-write readiness, multi-GPU behavior, another NVIDIA architecture, a different driver/toolchain/model/context, or a consumer installation path.
+
+The loopback server and SSH tunnel were stopped. The model, pinned source, CUDA environment, compiler caches, build outputs, logs, and patch fixture were removed. The existing Ollama and ComfyUI services remained active and unchanged, and no llama.cpp listener or installation remained.

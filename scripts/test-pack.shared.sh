@@ -2027,6 +2027,8 @@ assert engines["selection"]["silentCpuFallbackAllowed"] is False
 assert engines["selection"]["evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed"] is False
 by_id = {item["id"]: item for item in engines["engines"]}
 llama_backends = {item["id"]: item for item in by_id["llama.cpp"]["backends"]}
+assert llama_backends["cuda"]["status"] == "validated-exact-profile"
+assert llama_backends["cuda"]["profiles"] == ["linux-x64-nvidia-rtx5000-16gb"]
 assert llama_backends["hip"]["status"] == "validated-exact-profile"
 assert "vulkan" not in llama_backends
 assert llama_backends["sycl"]["status"] == "parked-hardware-required"

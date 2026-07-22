@@ -19,7 +19,7 @@ Haven 42 was previously named Local Engineering Agent Pack. Because the project 
 | Product UI | Milestone 22 is in progress with Tauri 2 and private typed sidecar IPC selected. Windows dependency resolution found Rust maintenance blockers, so no desktop runtime is shipped. |
 | Music and video | Current documentation-only candidate inventories and a shared consent policy are recorded. No provider scripts, adapters, harnesses, workflows, or configuration ship before promotion gates pass. |
 | Model quantization | Versioned contracts, sanitized profiling, and trusted-artifact selection are implemented; exact Linux NVIDIA and Windows AMD Ollama comparisons passed, while every other hardware/runtime cell remains evidence-gated. |
-| Inference engines | Provider, engine, backend, and model layers are separated. llama.cpp HIP passed on the exact Windows AMD profile; Vulkan failed the patch gate, Intel work is parked pending hardware, IPEX-LLM is retired, and LM Studio is optional API-only software. |
+| Inference engines | Provider, engine, backend, and model layers are separated. llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD; Vulkan failed the patch gate, Intel work is parked pending hardware, IPEX-LLM is retired, and LM Studio is optional API-only software. |
 
 ## Product Direction
 
@@ -55,7 +55,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; consumer-local Windows and macOS profiles remain gated. |
 | Milestone 24: Local Music And Audio Generation | Research in progress | Immutable candidate facts and consent policy are recorded; live providers remain unpromoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Linux NVIDIA and Windows AMD Ollama comparisons passed; llama.cpp HIP passed on Windows AMD while Vulkan failed the patch gate. Intel is parked pending hardware and physical Mac remains last. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD. Vulkan failed its patch gate, Intel is parked, and physical Mac remains last. |
 
 See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
 

@@ -4665,6 +4665,9 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-Equal -Actual ($engines.layers -join ",") -Expected "capability,provider-contract,inference-engine,hardware-backend,model-artifact" -Message "Inference engine registry should preserve layer separation."
     Assert-True -Condition (-not $engines.selection.silentCpuFallbackAllowed -and -not $engines.selection.evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed) -Message "Engine selection should reject silent fallback and cross-profile evidence inheritance."
     $llama = @($engines.engines | Where-Object { $_.id -eq "llama.cpp" })[0]
+    $cuda = @($llama.backends | Where-Object { $_.id -eq "cuda" })[0]
+    Assert-Equal -Actual $cuda.status -Expected "validated-exact-profile" -Message "Only the exact llama.cpp CUDA profile should be validated."
+    Assert-Equal -Actual ($cuda.profiles -join ",") -Expected "linux-x64-nvidia-rtx5000-16gb" -Message "llama.cpp CUDA evidence should remain bound to the tested RTX 5000 profile."
     Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "hip" })[0].status) -Expected "validated-exact-profile" -Message "Only the exact llama.cpp HIP profile should be validated."
     Assert-Equal -Actual @($llama.backends | Where-Object { $_.id -eq "vulkan" }).Count -Expected 0 -Message "Failed Vulkan backend must remain documentation-only and absent from the active registry."
     Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "sycl" })[0].status) -Expected "parked-hardware-required" -Message "Intel SYCL should remain parked pending hardware."

@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a fail-closed inference-engine registry and exact llama.cpp evidence: CUDA passed on Linux NVIDIA RTX 5000 and HIP passed on Windows AMD, while failed Vulkan remains documentation-only, Intel paths remain parked, IPEX-LLM is retired, and LM Studio is optional API-only software.
 - Added fail-closed, consent-driven consumer-local image-provider onboarding with exact OS/accelerator evidence boundaries and no candidate installer admission.
 - Recorded immutable documentation-only ACE-Step, Stable Audio, HunyuanVideo, Wan2.2, and LTX-2.3 candidate identities, sizes, checksums, licenses, claimed operations, and unresolved gates.
 - Added a shared generative-media consent policy for reference media, voice and likeness, lyrics and style requests, attribution, commercial use, disclosure, retention, and cleanup.

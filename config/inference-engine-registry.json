@@ -42,11 +42,12 @@
       "status": "validated-exact-profile",
       "providerContracts": ["openai-compatible-loopback-api"],
       "backends": [
+        { "id": "cuda", "status": "validated-exact-profile", "profiles": ["linux-x64-nvidia-rtx5000-16gb"] },
         { "id": "hip", "status": "validated-exact-profile", "profiles": ["windows-x64-amd-rx7800xt-16gb"] },
         { "id": "sycl", "status": "parked-hardware-required", "profiles": [] },
         { "id": "metal", "status": "parked-hardware-required", "profiles": [] }
       ],
-      "notes": "HIP passed the exact Windows AMD profile. Non-admitted backend evaluations remain documentation-only. Intel SYCL is parked until Intel GPU hardware is available; Metal remains physical-Mac-last."
+      "notes": "CUDA passed the exact Linux NVIDIA RTX 5000 profile and HIP passed the exact Windows AMD profile. Non-admitted backend evaluations remain documentation-only. Intel SYCL is parked until Intel GPU hardware is available; Metal remains physical-Mac-last."
     },
     {
       "id": "openvino-genai",
