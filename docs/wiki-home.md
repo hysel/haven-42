@@ -24,6 +24,8 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Review video candidates: [[Local Video Provider Candidates|Local-Video-Provider-Candidates]]
 - Plan hardware-adaptive quantization: [[Hardware-Adaptive Quantization|Hardware-Adaptive-Quantization]]
 - Review quantization validation evidence: [[Quantization Validation|Quantization-Validation]]
+- Understand engine/backend selection: [[Inference Engine Architecture|Inference-Engine-Architecture]]
+- Review exact engine evidence: [[Inference Engine Validation|Inference-Engine-Validation]]
 - Prepare a release: [[Release Guidance|Release-Guidance]]
 - Choose Fast, Integration, or Full validation: [[Test Tiers|Test-Tiers]]
 - Review desktop storage, update, and rollback boundaries: [[Desktop Storage And Updates|Desktop-Storage-And-Updates]]
@@ -34,7 +36,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.
-- Milestone 26 — foundation complete with exact Linux NVIDIA and Windows AMD Ollama comparisons passed; broader workload and platform cells remain open.
+- Milestone 26 — exact Linux NVIDIA and Windows AMD Ollama comparisons passed; llama.cpp HIP passed on Windows AMD, Vulkan failed the patch gate, Intel is parked pending hardware, and broader cells remain open.
 
 ## Support Model
 

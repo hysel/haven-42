@@ -2008,6 +2008,7 @@ image = json.loads((root / "config/local-image-onboarding-contract.json").read_t
 plan = json.loads((root / "config/quantization-plan-contract.json").read_text(encoding="utf-8"))
 artifact = json.loads((root / "config/quantized-artifact-manifest-contract.json").read_text(encoding="utf-8"))
 matrix = json.loads((root / "config/quantization-support-matrix.json").read_text(encoding="utf-8"))
+engines = json.loads((root / "config/inference-engine-registry.json").read_text(encoding="utf-8"))
 assert image["schemaVersion"] == 1
 assert image["externalServerRequired"] is False
 assert image["executionDefault"] == "dry-run"
@@ -2020,6 +2021,25 @@ assert artifact["output"]["storageOutsideEngineAndRepository"] is True
 assert artifact["activation"]["previousKnownGoodRetained"] is True
 assert matrix["defaultDecision"] == "no-safe-recommendation"
 assert {item["format"] for item in matrix["formats"]} == {"gguf", "mlx", "awq", "gptq", "fp8", "int4"}
+assert engines["schemaVersion"] == 1
+assert engines["layers"] == ["capability", "provider-contract", "inference-engine", "hardware-backend", "model-artifact"]
+assert engines["selection"]["silentCpuFallbackAllowed"] is False
+assert engines["selection"]["evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed"] is False
+by_id = {item["id"]: item for item in engines["engines"]}
+llama_backends = {item["id"]: item for item in by_id["llama.cpp"]["backends"]}
+assert llama_backends["hip"]["status"] == "validated-exact-profile"
+assert "vulkan" not in llama_backends
+assert llama_backends["sycl"]["status"] == "parked-hardware-required"
+assert by_id["openvino-genai"]["status"] == "parked-hardware-required"
+assert by_id["ipex-llm"]["status"] == "retired"
+assert by_id["lm-studio"]["status"] == "optional-external-api"
+assert by_id["lm-studio"]["redistributionAllowedByHaven42"] is False
+assert by_id["lm-studio"]["embeddingAllowedByHaven42"] is False
+script_names = "\n".join(path.name for path in (root / "scripts").rglob("*") if path.is_file())
+assert not re.search(r"(?:ipex|openvino|sycl|lm-studio|vulkan)", script_names, re.I)
+engine_doc = (root / "docs/inference-engine-architecture.md").read_text(encoding="utf-8")
+for marker in ("provider contract", "failed candidates leave documentation only", "Parked", "Optional external API", "Retired"):
+    assert marker in engine_doc
 for registry in ("config/capabilities.json", "config/workflows.json"):
     text = (root / registry).read_text(encoding="utf-8")
     assert "audio.music.create" not in text
@@ -2032,6 +2052,8 @@ for doc in (
     "docs/local-video-provider-candidates.md",
     "docs/generative-media-consent-policy.md",
     "docs/hardware-adaptive-quantization.md",
+    "docs/inference-engine-architecture.md",
+    "examples/inference-engine-validation.md",
 ):
     assert doc in wiki
     assert not private_ip.search((root / doc).read_text(encoding="utf-8"))

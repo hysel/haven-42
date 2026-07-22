@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "description": "Evidence-gated inference engines and hardware backends. Capability routing selects a provider contract first; engine and backend selection never inherits evidence across profiles.",
+  "statusValues": [
+    "validated-exact-profile",
+    "candidate",
+    "parked-hardware-required",
+    "optional-external-api",
+    "retired"
+  ],
+  "selection": {
+    "defaultDecision": "no-supported-engine",
+    "silentCpuFallbackAllowed": false,
+    "evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed": false,
+    "failedCandidateLeavesDocumentationOnly": true,
+    "userInstalledExternalSoftwareMayBeCalledOnlyThroughPublishedApi": true
+  },
+  "layers": [
+    "capability",
+    "provider-contract",
+    "inference-engine",
+    "hardware-backend",
+    "model-artifact"
+  ],
+  "engines": [
+    {
+      "id": "ollama",
+      "license": "MIT",
+      "distribution": "external-runtime",
+      "status": "validated-exact-profile",
+      "providerContracts": ["ollama-api"],
+      "backends": [
+        { "id": "cuda", "status": "validated-exact-profile", "profiles": ["linux-x64-nvidia-16gb"] },
+        { "id": "rocm", "status": "validated-exact-profile", "profiles": ["windows-x64-amd-rx7800xt-16gb"] }
+      ],
+      "notes": "Validation applies only to the exact profiles and evidence records; it is not a cross-platform runtime claim."
+    },
+    {
+      "id": "llama.cpp",
+      "license": "MIT",
+      "distribution": "external-runtime",
+      "status": "validated-exact-profile",
+      "providerContracts": ["openai-compatible-loopback-api"],
+      "backends": [
+        { "id": "hip", "status": "validated-exact-profile", "profiles": ["windows-x64-amd-rx7800xt-16gb"] },
+        { "id": "sycl", "status": "parked-hardware-required", "profiles": [] },
+        { "id": "metal", "status": "parked-hardware-required", "profiles": [] }
+      ],
+      "notes": "HIP passed the exact Windows AMD profile. Non-admitted backend evaluations remain documentation-only. Intel SYCL is parked until Intel GPU hardware is available; Metal remains physical-Mac-last."
+    },
+    {
+      "id": "openvino-genai",
+      "license": "Apache-2.0",
+      "distribution": "external-runtime",
+      "status": "parked-hardware-required",
+      "providerContracts": [],
+      "backends": [
+        { "id": "intel-cpu-gpu-npu", "status": "parked-hardware-required", "profiles": [] }
+      ],
+      "notes": "Parked until representative Intel hardware is available. No executable integration assets ship."
+    },
+    {
+      "id": "lm-studio",
+      "license": "proprietary",
+      "distribution": "user-installed-only",
+      "status": "optional-external-api",
+      "providerContracts": ["openai-compatible-loopback-api"],
+      "backends": [],
+      "redistributionAllowedByHaven42": false,
+      "embeddingAllowedByHaven42": false,
+      "notes": "Optional user-installed provider accessed only through its published local API; Haven 42 does not redistribute or embed it."
+    },
+    {
+      "id": "ipex-llm",
+      "license": "Apache-2.0",
+      "distribution": "none",
+      "status": "retired",
+      "providerContracts": [],
+      "backends": [],
+      "archivedUpstreamDate": "2026-01-28",
+      "notes": "Upstream is archived. Documentation record only; no scripts, harnesses, runtime configuration, or packaged assets ship."
+    }
+  ]
+}

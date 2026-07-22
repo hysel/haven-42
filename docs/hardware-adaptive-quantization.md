@@ -87,3 +87,9 @@ Q4_K_M is also preferred for this exact Windows AMD cell: it used 3.6 GB less lo
 An initial Q4_K_M sample was invalidated because another GPU-heavy application was running; throughput rose from 7.65 to 71.99 tokens per second after that application closed. Hardware-adaptive validation must therefore disclose competing GPU workloads, start from an idle accelerator where practical, and repeat anomalous measurements before recording a recommendation.
 
 The temporary loopback server, verified standalone runtime, ROCm package, both model artifacts, logs, and pointer file were removed after validation. No service, startup entry, application installation, model, or temporary listener remained. This evidence does not transfer to Vulkan, another AMD GPU or driver, another model or runtime, larger contexts, higher concurrency, long-document quality, or agent-surface approved writes.
+
+## Inference Engine And Backend Boundary
+
+Quantization compatibility is also engine-specific. A separate Windows AMD test used the same revision-pinned Q4_K_M GGUF with llama.cpp `b10088`. HIP passed backend discovery, bounded text, required tool calling, a Git-applicable engineering patch, and cleanup. Vulkan delivered higher fixed-benchmark throughput but produced malformed patches that failed `git apply --check`, so it was not promoted. An official Ollama GGUF blob was also rejected by upstream llama.cpp because its Qwen 3.5 metadata layout differed. Equal model family, quantization label, and container format do not establish cross-engine compatibility.
+
+See `config/inference-engine-registry.json`, `docs/inference-engine-architecture.md`, and `examples/inference-engine-validation.md`. Intel SYCL and OpenVINO GenAI are parked until representative Intel GPU hardware is available; they have no shipped executable integration assets.
