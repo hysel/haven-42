@@ -4,7 +4,7 @@
 
 Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. It was previously named Local Engineering Agent Pack. Because the project had no external users at rebrand time, product-specific paths and commands use the Haven 42 identity without a legacy compatibility layer.
 
-Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have a validated Ollama adapter, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only. Quantization contracts, sanitized profiling, and dry-run trusted-artifact selection are implemented without admitting a conversion path. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
+Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have a validated Ollama adapter, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only. Quantization contracts, sanitized profiling, and trusted-artifact selection are implemented, and the first exact Linux NVIDIA Ollama comparison has passed without admitting a conversion path. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
 
 Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries. Fixture-backed cross-platform contracts do not broaden native runtime or hardware claims.
 
@@ -33,7 +33,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.
-- Milestone 26 — contracts, sanitized profiling, and dry-run selection complete; live exact-profile validation open.
+- Milestone 26 — foundation complete and the first Linux NVIDIA Ollama comparison passed; broader workload and platform cells remain open.
 
 ## Support Model
 
