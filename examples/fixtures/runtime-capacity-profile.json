@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "platform": "linux-x64",
+  "availableSystemMemoryMiB": 32768,
+  "availableDiskMiB": 131072,
+  "accelerator": {
+    "vendor": "NVIDIA",
+    "model": "fixture-gpu",
+    "totalMemoryMiB": 16384,
+    "freeMemoryMiB": 15000,
+    "utilizationPercent": 0,
+    "measurementSource": "fixture"
+  },
+  "competingWorkloadDetected": false
+}

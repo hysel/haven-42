@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "description": "Sanitized, exact-profile performance and functional evidence for one provider/model/runtime/hardware/workload cell.",
+  "required": ["schemaVersion", "evidenceId", "measuredAtUtc", "identity", "environment", "workload", "metrics", "checks", "cleanup", "privacy"],
+  "identityRequired": ["providerId", "protocol", "runtimeVersion", "modelId", "modelRevision", "modelArtifactSha256"],
+  "environmentRequired": ["operatingSystem", "architecture", "acceleratorVendor", "acceleratorModel", "acceleratorMemoryMiB", "driverVersion"],
+  "workloadRequired": ["capabilityId", "contextTokens", "concurrency", "sampleCount"],
+  "metricsRequired": ["modelSizeBytes", "coldLoadMilliseconds", "firstTokenMilliseconds", "promptTokensPerSecond", "generationTokensPerSecond", "peakAcceleratorMemoryMiB", "peakSystemMemoryMiB"],
+  "cleanupRequired": ["modelUnloaded", "serverStopped", "disposableFilesRemoved", "unrelatedServicesPreserved"],
+  "privacyRequired": ["endpointPersisted", "promptPersisted", "rawResponsePersisted", "machinePathPersisted", "processListPersisted"],
+  "checkStatuses": ["passed", "failed", "blocked", "not-applicable"],
+  "aggregation": {
+    "compareOnlyExactIdentityAndWorkload": true,
+    "missingMetricIsUnknown": true,
+    "functionalFailureCannotBeOffsetByPerformance": true
+  }
+}

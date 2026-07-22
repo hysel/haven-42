@@ -437,6 +437,7 @@
 - [ ] Validate a pinned Windows NVIDIA CUDA image-provider profile before shipping its local installer or runtime files.
 - [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
 - [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
+  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, and uninstall checks; cancellation, forced recovery, update/rollback, repeated-run stability, and consumer onboarding remain open.
 - [ ] Validate a pinned Apple Silicon MPS image-provider profile on a physical Mac as the last native hardware gate before shipping its local installer or runtime files.
 - [x] Keep custom nodes and external API nodes disabled unless each exact extension independently passes promotion.
 - [ ] Add native installer and provider lifecycle files only after the exact profile passes; failed profiles leave documentation only.
@@ -446,6 +447,7 @@
 - [x] Record exact ACE-Step 1.5 and accessible Stable Audio 3.0 candidate versions, model cards, download sizes, checksums, licenses, supported operations, and claimed hardware paths without adding executable integration assets; retain gated Small Music metadata as an explicit open evidence gap.
   - ACE-Step 1.5, Stable Audio Small SFX, and Stable Audio Medium are recorded from official immutable sources; gated Stable Audio Small Music did not expose exact anonymous revision/file metadata and remains open.
 - [ ] Externally evaluate ACE-Step 1.5 on Linux CUDA for REST health, instrumental and vocal generation, typed WAV/FLAC artifact requirements, privacy, cancellation, recovery, cleanup, and uninstall behavior.
+  - Commit `6d467e4b5081ccb0abf1ec1bf4fdf9051a2d34b0` passed a disposable deterministic instrumental REST/WAV structure and cleanup cell on a V100 32 GB profile. Vocal, signal/clipping, listening, cancellation, forced recovery, retention, and typed-adapter checks remain open.
 - [ ] Externally evaluate Stable Audio 3.0 Small and Medium for sound effects, instrumental music, editing, duration, licensing, and consumer hardware fit.
 - [ ] Validate Windows NVIDIA CUDA, Windows Intel XPU, Windows AMD ROCm, Apple Silicon MLX, and Linux CUDA independently; keep the physical Mac run last.
 - [x] Add reference-audio, voice-cloning, identifiable-voice, lyrics, artist-style, attribution, and commercial-use consent policy before provider promotion.

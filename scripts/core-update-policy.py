@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import re
@@ -124,18 +125,79 @@ def evaluate(manifest: dict, host: dict, package_path: Path | None = None) -> di
     }
 
 
+def run_self_tests() -> int:
+    """Exercise hostile manifests without network, staging, or activation."""
+    manifest = json.loads((ROOT / "examples/fixtures/core-update-manifest.json").read_text(encoding="utf-8"))
+    package_path = ROOT / "examples/fixtures/core-update-package.bin"
+    host = {
+        "os": "windows", "architecture": "x64", "targetTriple": "x86_64-pc-windows-msvc",
+        "currentVersion": "0.3.0", "updaterVersion": "0.3.0", "channel": "stable",
+        "engineApiVersion": 1, "desktopIpcSchemaVersion": 1, "workflowEnvelopeSchemaVersion": 1,
+        "typedArtifactSchemaVersion": 1, "configurationSchemaVersion": 1,
+    }
+    passed = 0
+
+    def allow(candidate: dict, package: Path | None = None) -> None:
+        nonlocal passed
+        result = evaluate(candidate, copy.deepcopy(host), package)
+        assert result["ActivationAllowed"] is False
+        passed += 1
+
+    def deny(mutator, expected: str, host_override: dict | None = None, package: Path | None = None) -> None:
+        nonlocal passed
+        candidate = copy.deepcopy(manifest)
+        mutator(candidate)
+        target_host = copy.deepcopy(host)
+        if host_override:
+            target_host.update(host_override)
+        try:
+            evaluate(candidate, target_host, package)
+        except UpdatePolicyError as error:
+            if str(error) != expected:
+                raise AssertionError(f"expected {expected}, received {error}") from error
+            passed += 1
+            return
+        raise AssertionError(f"expected {expected}")
+
+    allow(copy.deepcopy(manifest))
+    allow(copy.deepcopy(manifest), package_path)
+    deny(lambda value: value.update(releaseVersion="0.3.0"), "not-a-newer-release")
+    deny(lambda value: value["assets"].append(copy.deepcopy(value["assets"][0])), "exactly-one-host-asset-required")
+    deny(lambda value: value.update(releaseCommit="main"), "invalid-release-commit")
+    deny(lambda value: value.update(unexpected=True), "invalid-manifest-shape")
+    deny(lambda value: value["assets"][0].update(downloadUrl="http://github.com/file"), "unapproved-downloadUrl-url")
+    deny(lambda value: value["assets"][0].update(sha256="ABC"), "invalid-asset-sha256")
+    deny(lambda value: value["assets"][0].update(sizeBytes=0), "invalid-asset-size")
+    deny(lambda value: value.update(manifestSignature=""), "manifest-signature-required")
+    deny(lambda value: value.update(schemaVersion=2), "manifest-policy-rejected")
+    deny(lambda value: None, "channel-mismatch", {"channel": "beta"})
+    deny(lambda value: value.update(minimumUpdaterVersion="9.0.0"), "updater-too-old")
+    deny(lambda value: value["compatibility"].update(engineApiVersion=2), "engine-api-incompatible")
+    deny(lambda value: value["compatibility"].update(desktopIpcSchemaVersions=[2]), "schema-incompatible")
+    deny(lambda value: value["assets"][0].update(targetTriple="x86_64-unknown-linux-gnu"), "exactly-one-host-asset-required")
+    deny(lambda value: value["assets"][0].update(sha256="0" * 64), "package-hash-mismatch", package=package_path)
+    print(f"Core update hostile self-test passed: {passed} cases.")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Plan or verify immutable core-update inputs without downloading, staging, or activating code.")
-    parser.add_argument("--manifest-path", required=True)
+    parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--manifest-path")
     parser.add_argument("--package-path")
-    parser.add_argument("--host-os", required=True, choices=["windows", "linux", "macos"])
-    parser.add_argument("--host-architecture", required=True, choices=["x64", "arm64", "intel64"])
-    parser.add_argument("--target-triple", required=True)
-    parser.add_argument("--current-version", required=True)
-    parser.add_argument("--updater-version", required=True)
+    parser.add_argument("--host-os", choices=["windows", "linux", "macos"])
+    parser.add_argument("--host-architecture", choices=["x64", "arm64", "intel64"])
+    parser.add_argument("--target-triple")
+    parser.add_argument("--current-version")
+    parser.add_argument("--updater-version")
     parser.add_argument("--channel", default="stable", choices=["stable", "beta"])
     parser.add_argument("--json", action="store_true")
     args = parser.parse_args()
+    if args.self_test:
+        return run_self_tests()
+    required = (args.manifest_path, args.host_os, args.host_architecture, args.target_triple, args.current_version, args.updater_version)
+    if any(value is None for value in required):
+        parser.error("manifest and host arguments are required unless --self-test is used")
     host = {
         "os": args.host_os, "architecture": args.host_architecture, "targetTriple": args.target_triple,
         "currentVersion": args.current_version, "updaterVersion": args.updater_version, "channel": args.channel,

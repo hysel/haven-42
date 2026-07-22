@@ -6,7 +6,7 @@
 
 Discovery remains local and reports the operating system, architecture, system memory, available storage, accelerator vendor and model, usable dedicated or unified memory, and installed driver or runtime versions. Missing accelerator or memory evidence makes a profile unavailable; it must never silently select CPU execution.
 
-Provider selection requires an exact operating-system and accelerator match. The validated Linux NVIDIA V100 ComfyUI/SDXL profile does not promote Windows NVIDIA, Windows Intel XPU, Windows AMD, Apple Silicon MPS, or any CPU profile.
+Provider selection requires an exact operating-system and accelerator match. The validated Linux NVIDIA V100 ComfyUI/SDXL profile does not promote another profile. A disposable Windows 11/RX 7800 XT/ComfyUI v0.28.0 AMD portable cell passed production-adapter generation, visual, privacy, history, restart, and uninstall checks, but remains partial until cancellation, forced recovery, update/rollback, and consumer onboarding pass. See `examples/windows-amd-image-provider-validation.md`.
 
 ## Consent Boundary
 
@@ -18,4 +18,4 @@ A candidate-only profile produces an unavailable result and setup guidance. It c
 
 A passing provider must start on demand, bind to `127.0.0.1`, confirm the intended accelerator, stop after a bounded idle period, and keep provider state outside the replaceable Haven 42 engine. Installation, health, model checksum, generation, PNG validation, metadata, cancellation, recovery, cleanup, update, rollback, and uninstall all belong to the exact profile gate.
 
-The first native validation order remains Windows NVIDIA, Windows Intel XPU, Windows AMD, and finally Apple Silicon on a physical Mac. Failed profiles leave documentation only and ship no runtime or installer assets.
+Remaining native validation prioritizes Windows NVIDIA and Windows Intel XPU, completion of the Windows AMD gate, and finally Apple Silicon on a physical Mac. Failed or partial profiles leave evidence only and ship no runtime or installer assets.

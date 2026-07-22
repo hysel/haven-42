@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "description": "Provider-neutral promotion checks for local text runtimes. Passing one check never promotes another operation, protocol, model, operating system, or hardware profile.",
+  "requiredIdentity": [
+    "providerId",
+    "protocol",
+    "runtimeVersion",
+    "modelId",
+    "modelRevision",
+    "modelArtifactSha256",
+    "operatingSystem",
+    "hardwareProfile",
+    "contextTokens",
+    "concurrency"
+  ],
+  "protocols": ["ollama-chat", "openai-chat-completions"],
+  "requiredChecks": [
+    "capacity-preflight",
+    "provider-health",
+    "model-discovery",
+    "exact-output",
+    "general-chat",
+    "writing",
+    "summarization",
+    "structured-tool-call",
+    "read-only-engineering",
+    "implementation-plan",
+    "git-applicable-patch",
+    "timeout",
+    "cancellation",
+    "sanitization",
+    "unload-or-shutdown",
+    "cleanup"
+  ],
+  "checkStatuses": ["passed", "failed", "blocked", "not-applicable"],
+  "promotion": {
+    "allRequiredChecksMustPass": true,
+    "notApplicableRequiresDocumentedReason": true,
+    "crossProviderInheritance": false,
+    "crossProtocolInheritance": false,
+    "crossModelInheritance": false,
+    "crossOperatingSystemInheritance": false,
+    "crossHardwareInheritance": false,
+    "crossOperationInheritance": false,
+    "failedCandidateShipsExecutableAssets": false
+  },
+  "privacy": {
+    "persistEndpoint": false,
+    "persistPrompt": false,
+    "persistRawResponse": false,
+    "persistMachinePath": false,
+    "persistProcessList": false
+  }
+}

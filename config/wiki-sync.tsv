@@ -14,6 +14,7 @@ docs/model-tool-use-validation.md	Model-Tool-Use-Validation.md	Model Tool Use Va
 docs/evidence-catalog.md	Evidence-Catalog.md	Evidence Catalog
 docs/capability-evidence-contract.md	Capability-Evidence-Contract.md	Capability Evidence Contract
 docs/evidence-dashboard.md	Evidence-Dashboard.md	Evidence Dashboard
+docs/solution-architecture-review.md	Solution-Architecture-Review.md	Solution Architecture Review
 docs/model-scorecard.md	Model-Scorecard.md	Model Scorecard
 docs/workflow-registry.md	Workflow-Registry.md	Workflow Registry
 docs/workflow-envelope-contract.md	Workflow-Envelope-Contract.md	Workflow Envelope Contract
@@ -81,4 +82,10 @@ docs/desktop-runtime-dependency-evaluation.md	Desktop-Runtime-Dependency-Evaluat
 docs/desktop-dependency-resolution-evidence.md	Desktop-Dependency-Resolution-Evidence.md	Desktop Dependency Resolution Evidence
 docs/desktop-ipc-contract.md	Desktop-IPC-Contract.md	Desktop IPC Contract
 docs/desktop-storage-and-updates.md	Desktop-Storage-And-Updates.md	Desktop Storage And Updates
+docs/workflow-reliability.md	Workflow-Reliability.md	Workflow Reliability
+docs/security-threat-model.md	Security-Threat-Model.md	Security Threat Model
+docs/local-data-lifecycle.md	Local-Data-Lifecycle.md	Local Data Lifecycle
+examples/laguna-xs-2.1-validation.md	Laguna-XS-2.1-Validation.md	Laguna XS 2.1 Validation
+examples/local-audio-provider-validation.md	Local-Audio-Provider-Validation.md	Local Audio Provider Validation
+examples/windows-amd-image-provider-validation.md	Windows-AMD-Image-Provider-Validation.md	Windows AMD Image Provider Validation
 ROADMAP.md	Roadmap.md	Roadmap

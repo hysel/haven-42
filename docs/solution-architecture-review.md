@@ -46,8 +46,12 @@ This audit applies the stricter completion standard from the maintainer discussi
 | 18: Language Rule Packs | Complete | Complete for the generated-fixture scope | Optional rule packs, project activation, cross-platform matrix evidence, and language-aware selection are complete; real-project/editor expansion remains separately evidence-gated. |
 | 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Complete for the promoted supported-surface set | Capability Evidence Contract v2, Continue profiles, supported Aider and OpenCode install/configure/health/test paths, and packaging are complete. Candidate surfaces are excluded from supported parity. |
 | 20: Hardware-Aware Model And Config Automation | Complete | Complete for the workflow-foundation scope | Recommendation, lane-specific scoring, curated model-fit metadata, dashboard, menu, dispatcher, versioned workflow envelope, health, cleanup, release readiness, the first non-Continue adapter, and the UI-facing foundation are implemented. Runtime-measured refinements remain optional evidence expansion. |
-| 21: General-Purpose AI Assistant And Intent Routing | Planned | Not started | Capability, artifact, provider, routing, repository-optional workspace, and policy contracts must be implemented before product UI integration. |
-| 22: Unified Product UI And Task Composition | Planned | Dependency-gated | UI implementation follows the completed Milestone 20 workflow foundation and stable Milestone 21 capability contracts; multi-step composition follows individual capability validation. |
+| 21: General-Purpose AI Assistant And Intent Routing | Complete | Complete for the promoted provider set | Repository-optional sessions, deterministic and bounded LLM routing, typed artifacts, provider discovery, Ollama text, exact-profile Linux NVIDIA/CUDA llama.cpp text, Linux ComfyUI images, and engineering route plans are implemented. New providers remain independently evidence-gated. |
+| 22: Unified Product UI And Task Composition | In progress | Architecture-complete; runtime dependency-gated | Tauri/private-IPC architecture, storage ownership, update/rollback contracts, workflow reliability, a threat model, local-data lifecycle, a 46-case sidecar suite, and 17 hostile updater cases are present. The native bridge, packaging, signing, visual UI, and composition runtime remain open. |
+| 23: Native Local Image Generation | In progress | One promoted profile plus one partial native cell | Linux ComfyUI/SDXL is promoted. Windows AMD/RX 7800 XT passed generation, visual, privacy, restart, and cleanup gates but still requires cancellation, forced recovery, update/rollback, repeated-run, and onboarding evidence. Windows NVIDIA, Windows Intel, and Apple Silicon remain open. |
+| 24: Local Music And Audio Generation | Live feasibility in progress | One partial instrumental cell | ACE-Step produced a structurally valid deterministic WAV on Linux CUDA and cleaned up, but vocal, signal quality, listening, cancellation, recovery, retention, and adapter gates remain. No executable audio integration ships. |
+| 25: Local Video Generation | Research in progress | Candidate inventory only | HunyuanVideo, Wan2.2, and LTX-2.3 identities and consent requirements are recorded. Hardware fit and live provider evidence remain open, so no executable integration ships. |
+| 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Foundations and two hardware cells complete | Hardware profiling, trusted-artifact selection, format/runtime boundaries, Ollama comparisons on Linux NVIDIA and Windows AMD, and llama.cpp CUDA/HIP engine evidence are complete for their exact cells. Conversion, activation, rollback, broader hardware, and UI integration remain open. |
 
 ## Input-Dependent Decisions
 
@@ -56,13 +60,18 @@ These should stay on `TODO.md` until the user or project owner provides input:
 - Suitable non-generated repositories for additional real-repository validation.
 - A new integration proposal, full implementation, and complete promotion-gate evidence before any previously removed surface is reconsidered.
 - Approval of a rootless isolated OpenHands implementation under the documented boundary before generated-sample validation automation is added.
-- Which candidate surface, if any, should enter promotion after the current supported set.
-- The first evidence-gated local text and image providers for Milestone 21.
+- Which candidate agent surface, if any, should enter promotion after the current supported set.
+- Visual UI navigation, layout, and interaction decisions for Milestone 22.
+- Licensing-policy selection beyond recording and honoring each dependency and model's existing terms.
+- Signing enrollment or paid signing services.
+- Tests requiring hardware not already available, including Intel GPU, Windows NVIDIA, and final physical-Mac release gates.
 
 ## Enhancement Recommendations
 
-- Keep Milestone 20 closed as the workflow foundation; track general-purpose capability work in Milestone 21 and product UI work in Milestone 22.
+- Keep Milestones 20 and 21 closed for their defined foundation and promoted-provider scopes; track product runtime work in Milestone 22 and new native providers in Milestones 23 through 25.
 - Prefer strengthening deterministic remediation for `EMPTY_MODEL_OUTPUT` and filename-drift failures before promoting more language rule packs.
 - Keep beginner navigation centered on `docs/haven-42-menu.md`, with script details in `docs/script-reference-appendix.md`.
 - Continue using `config/agent-surface-solutions.json` as the install/configure/test source of truth for agent surfaces.
+- Add automated status-consistency checks so the roadmap, TODO, README, project summary, and this audit cannot silently disagree about completed or active milestones.
+- Standardize provider conformance, structured performance evidence, runtime-capacity preflight, workflow cancellation/retry semantics, threat boundaries, and local-data lifecycle policy before the visual UI is implemented.
 - Keep future work in clearly named TODO sections when it depends on user input, external tools, or non-generated repositories.

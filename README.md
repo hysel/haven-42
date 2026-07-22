@@ -14,10 +14,10 @@ Haven 42 was previously named Local Engineering Agent Pack. Because the project 
 | --- | --- |
 | Engineering agents | Continue, Aider, and OpenCode are the maintained surfaces, with OS-aware setup and validation paths. |
 | Engineering workflows | Repository discovery, planning, review, scoped changes, language-aware guidance, workflow dispatch, and evidence reporting are implemented. |
-| General local text | `general.chat`, `content.write`, and `content.summarize` use one provider-neutral, session-bound adapter. Ollama is live-validated. llama.cpp is live-validated on its exact Linux NVIDIA/CUDA profile and remains engine-evidence-only on Windows AMD/HIP; every selection fails closed outside admitted profiles. |
-| Local images | `media.image.create` has a live-validated Linux ComfyUI/SDXL provider and typed PNG artifacts. Native Windows NVIDIA, Intel GPU/XPU, AMD, and Apple Silicon profiles remain candidates until independently validated. |
+| General local text | `general.chat`, `content.write`, and `content.summarize` use one provider-neutral, session-bound adapter. Ollama is live-validated, including an exact Linux Laguna XS 2.1 conformance cell. llama.cpp is live-validated on its exact Linux NVIDIA/CUDA profile and remains engine-evidence-only on Windows AMD/HIP; every selection fails closed outside admitted profiles. |
+| Local images | `media.image.create` has a live-validated Linux ComfyUI/SDXL provider and typed PNG artifacts. A native Windows AMD/RX 7800 XT cell partially passed; cancellation and consumer-onboarding gates remain. Windows NVIDIA, Intel GPU/XPU, and Apple Silicon remain candidates. |
 | Product UI | Milestone 22 is in progress with Tauri 2 and private typed sidecar IPC selected. An offline updater policy verifies exact manifest, compatibility, asset, size, and checksum inputs but cannot download, stage, or activate code. Published dependency blockers still prevent a desktop runtime from shipping. |
-| Music and video | Current documentation-only candidate inventories and a shared consent policy are recorded. No provider scripts, adapters, harnesses, workflows, or configuration ship before promotion gates pass. |
+| Music and video | Documentation-only candidate inventories remain the shipping boundary. ACE-Step has a partial exact-profile Linux CUDA instrumental pass; video remains documentation-only. No provider scripts, adapters, harnesses, workflows, or configuration ship before full promotion gates pass. |
 | Model quantization | Versioned contracts, sanitized profiling, and trusted-artifact selection are implemented; exact Linux NVIDIA and Windows AMD Ollama comparisons passed, while every other hardware/runtime cell remains evidence-gated. |
 | Inference engines | Provider, engine, backend, and model layers are separated. llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD; Vulkan failed the patch gate, Intel work is parked pending hardware, IPEX-LLM is retired, and LM Studio is optional API-only software. |
 
@@ -52,8 +52,8 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, provider-neutral local text, local images, capability discovery, routing, and typed artifacts. |
 | Milestone 22: Unified Product UI And Task Composition | In progress | Tauri/private-IPC architecture selected; dependency, security, packaging, signing, and cross-platform validation come before UI shipping. |
-| Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; consumer-local Windows and macOS profiles remain gated. |
-| Milestone 24: Local Music And Audio Generation | Research in progress | Immutable candidate facts and consent policy are recorded; live providers remain unpromoted. |
+| Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; Windows AMD has a partial native pass, while remaining consumer-local gates stay open. |
+| Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD. Vulkan failed its patch gate, Intel is parked, and physical Mac remains last. |
 
@@ -81,6 +81,8 @@ For software work, the pack supplies repeatable discovery, implementation planni
 | Understand config generation choices | `docs/config-generation-strategy.md` |
 | Review stable workflow entry points | `docs/workflow-registry.md` |
 | Integrate automation with the versioned workflow envelope | `docs/workflow-envelope-contract.md` |
+| Review timeout, cancellation, retries, and resume behavior | `docs/workflow-reliability.md` |
+| Review security boundaries and local data retention | `docs/security-threat-model.md` and `docs/local-data-lifecycle.md` |
 | Compare all workflow commands and safety levels | `docs/workflow-chooser.md` |
 | Understand script consolidation boundaries | `docs/script-consolidation-plan.md` |
 | Review milestone solution completeness | `docs/solution-architecture-review.md` |

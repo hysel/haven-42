@@ -3954,9 +3954,14 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "Generated sample repositories can satisfy validation coverage") -Message "Solution architecture review should document generated-sample validation acceptance."
     Assert-True -Condition ($doc -match "Hosted GitHub Actions status must be checked") -Message "Solution architecture review should require hosted CI status checks after pushes."
     Assert-True -Condition ($doc -match "Milestone Audit") -Message "Solution architecture review should include milestone audit."
-    foreach ($milestone in @("1: Minimum Usable Pack", "17: Agent Surface Compatibility Validation", "18: Language Rule Packs", "19: Installer Profiles", "20: Hardware-Aware Model", "21: General-Purpose AI Assistant", "22: Unified Product UI")) {
+    foreach ($milestone in @("1: Minimum Usable Pack", "17: Agent Surface Compatibility Validation", "18: Language Rule Packs", "19: Installer Profiles", "20: Hardware-Aware Model", "21: General-Purpose AI Assistant", "22: Unified Product UI", "23: Native Local Image Generation", "24: Local Music And Audio Generation", "25: Local Video Generation", "26: Hardware-Adaptive Model Quantization")) {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
+    Assert-True -Condition ($doc -match "21: General-Purpose AI Assistant And Intent Routing \| Complete \| Complete for the promoted provider set") -Message "Solution audit should keep completed Milestone 21 aligned with the roadmap."
+    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress \| Architecture-complete; runtime dependency-gated") -Message "Solution audit should keep Milestone 22 in progress and dependency-gated."
+    Assert-True -Condition ($doc -notmatch "21: General-Purpose AI Assistant And Intent Routing \| Planned" -and $doc -notmatch "22: Unified Product UI And Task Composition \| Planned") -Message "Solution audit must not retain stale Milestone 21 or 22 status."
+    Assert-True -Condition ($roadmap -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should align with the architecture audit for Milestones 21 and 22."
+    Assert-True -Condition ($readme -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $readme -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "README should align with the architecture audit for Milestones 21 and 22."
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
     Assert-True -Condition ($doc -match "new integration proposal") -Message "Solution architecture review should require removed surfaces to restart through promotion gates."
     Assert-True -Condition ($doc -match "Complete for positioning and support-tier governance") -Message "Solution architecture review should classify Milestone 14 accurately."
@@ -3965,6 +3970,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "Candidate surfaces are excluded from supported parity") -Message "Solution architecture review should define Milestone 19 parity boundaries."
     Assert-True -Condition ($doc -match "Complete for the workflow-foundation scope") -Message "Solution architecture review should close Milestone 20 at its foundation boundary."
     Assert-True -Condition ($doc -match "EMPTY_MODEL_OUTPUT") -Message "Solution architecture review should track language validation failure signals."
+    Assert-True -Condition ($doc -match "automated status-consistency checks") -Message "Solution architecture review should require future status drift prevention."
     Assert-True -Condition ($uiDoc -match "Evidence States") -Message "Unified UI design should define evidence states."
     foreach ($state in @("tested-passed", "tested-partial", "failed", "recommended-only", "blocked")) {
         Assert-True -Condition ($uiDoc -match [regex]::Escape($state)) -Message "Unified UI design should include evidence state $state."
@@ -4658,6 +4664,57 @@ Invoke-PackTest "core update policy fails closed before cryptographic admission"
     Assert-True -Condition (-not $result.ActivationAllowed -and -not $result.NetworkUsed -and -not $result.FilesWritten -and -not $result.UserDataTouched) -Message "The policy engine must not download, stage, activate, or touch user data."
     $wrongTarget = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-ManifestPath", $manifestPath, "-HostOs", "linux", "-HostArchitecture", "x64", "-TargetTriple", "x86_64-unknown-linux-gnu", "-CurrentVersion", "0.3.0", "-UpdaterVersion", "0.3.0", "-AsJson")
     Assert-True -Condition ($wrongTarget.ExitCode -ne 0) -Message "A host without exactly one matching asset must fail closed."
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for updater hostile tests."
+    $hostileOutput = @(& $python.Source (Join-Path $repoRoot "scripts/core-update-policy.py") --self-test 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Core updater hostile self-test should pass."
+    Assert-True -Condition (($hostileOutput -join "`n") -match "passed: 17 cases") -Message "Core updater should execute every hostile manifest regression case."
+}
+
+Invoke-PackTest "workflow reliability threat model and data lifecycle fail closed" {
+    $workflowContractPath = Join-Path $repoRoot "config/workflow-reliability-contract.json"
+    $lifecycleContractPath = Join-Path $repoRoot "config/local-data-lifecycle-contract.json"
+    $envelopePath = Join-Path $repoRoot "config/workflow-envelope-contract.json"
+    $workflow = Get-Content -LiteralPath $workflowContractPath -Raw | ConvertFrom-Json
+    $lifecycle = Get-Content -LiteralPath $lifecycleContractPath -Raw | ConvertFrom-Json
+    $envelope = Get-Content -LiteralPath $envelopePath -Raw | ConvertFrom-Json
+    Assert-True -Condition ($workflow.timeouts.requiredForExecution -and -not $workflow.cancellation.unrelatedProcessTerminationAllowed) -Message "Reliability must bound execution and preserve unrelated processes."
+    Assert-True -Condition (-not $workflow.retries.writeOperationsRetryByDefault -and $workflow.idempotency.keyRequiredForRetriedEffects) -Message "Writes must not silently retry."
+    Assert-True -Condition ($workflow.events.exactlyOneTerminalEvent -and -not $workflow.events.eventsAfterTerminalAllowed) -Message "Event streams must terminate exactly once."
+    Assert-True -Condition (-not $workflow.resumability.default -and $workflow.resumability.resumeRequiresSameWorkflowVersionAndApprovalScope) -Message "Resume must be opt-in and approval-bound."
+    Assert-True -Condition ($lifecycle.deletion.preexistingModelsNeverDeletedByCleanup -and $lifecycle.deletion.failedOperationCleanupLimitedToRunOwnedData) -Message "Cleanup must preserve preexisting data."
+    Assert-True -Condition (-not $lifecycle.defaults.telemetry -and -not $lifecycle.defaults.rawPromptPersistence -and $lifecycle.export.secretsExcluded) -Message "Local data defaults must minimize persistence."
+    Assert-Equal -Actual $envelope.reliabilityExtension.contract -Expected "config/workflow-reliability-contract.json" -Message "Workflow envelope should name its reliability extension."
+    foreach ($path in @("docs/workflow-reliability.md", "docs/security-threat-model.md", "docs/local-data-lifecycle.md")) {
+        $fullPath = Join-Path $repoRoot $path
+        Assert-True -Condition ((Get-Content -LiteralPath $fullPath -Raw).Length -gt 500) -Message "Reliability and security documentation should be substantive: $path"
+    }
+    $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
+    foreach ($mapping in @("docs/workflow-reliability.md", "docs/security-threat-model.md", "docs/local-data-lifecycle.md", "examples/laguna-xs-2.1-validation.md")) {
+        Assert-True -Condition ($wikiMap -match [regex]::Escape($mapping)) -Message "New evidence and policy documentation should be mapped to the wiki."
+    }
+}
+
+Invoke-PackTest "provider performance evidence and capacity preflight fail closed" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 should be available for policy validation."
+    $evidenceValidator = Join-Path $repoRoot "scripts/validate-model-performance-evidence.py"
+    $evidenceFixture = Join-Path $repoRoot "examples/fixtures/model-performance-evidence.json"
+    $capacityScript = Join-Path $repoRoot "scripts/runtime-capacity-preflight.ps1"
+    $capacityFixture = Join-Path $repoRoot "examples/fixtures/runtime-capacity-profile.json"
+    $contractPaths = @("config/provider-conformance-contract.json", "config/model-performance-evidence-contract.json", "config/runtime-capacity-contract.json") | ForEach-Object { Join-Path $repoRoot $_ }
+    foreach ($path in @($evidenceValidator, $evidenceFixture, $capacityScript, $capacityFixture) + $contractPaths) {
+        Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Provider evidence foundation should exist: $path"
+    }
+    & $python.Source $evidenceValidator --evidence-path $evidenceFixture *> $null
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Sanitized exact-cell performance evidence should validate."
+    $ready = (Invoke-CommandCapture -FilePath $capacityScript -Arguments @("-ProfilePath", $capacityFixture, "-RequiredAcceleratorMiB", "8000", "-RequiredSystemMiB", "8000", "-RequiredDiskMiB", "8000", "-ReserveMiB", "1000", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $ready.Decision -Expected "ready" -Message "Fixture with measured headroom should pass."
+    Assert-True -Condition (-not $ready.NetworkUsed -and -not $ready.FilesWritten -and -not $ready.ProcessesTerminated -and -not $ready.DriverOrServiceChanged) -Message "Capacity preflight should have no machine effects."
+    $tooLarge = Invoke-CommandCapture -FilePath $capacityScript -Arguments @("-ProfilePath", $capacityFixture, "-RequiredAcceleratorMiB", "16000", "-RequiredSystemMiB", "8000", "-RequiredDiskMiB", "8000", "-ReserveMiB", "1000", "-AsJson")
+    Assert-True -Condition ($tooLarge.ExitCode -ne 0 -and $tooLarge.Output -match 'insufficient-capacity') -Message "Insufficient accelerator headroom should fail closed."
 }
 
 Invoke-PackTest "media onboarding and quantization foundations fail closed" {

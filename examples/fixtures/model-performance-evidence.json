@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "fixture-local-text-exact-cell",
+  "measuredAtUtc": "2026-07-22T00:00:00Z",
+  "identity": {
+    "providerId": "fixture.local-text",
+    "protocol": "ollama-chat",
+    "runtimeVersion": "fixture-1.0.0",
+    "modelId": "fixture/model-q4",
+    "modelRevision": "0123456789abcdef0123456789abcdef01234567",
+    "modelArtifactSha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "environment": {
+    "operatingSystem": "linux",
+    "architecture": "x64",
+    "acceleratorVendor": "NVIDIA",
+    "acceleratorModel": "fixture-gpu",
+    "acceleratorMemoryMiB": 16384,
+    "driverVersion": "fixture-driver"
+  },
+  "workload": {
+    "capabilityId": "general.chat",
+    "contextTokens": 4096,
+    "concurrency": 1,
+    "sampleCount": 1
+  },
+  "metrics": {
+    "modelSizeBytes": 1024,
+    "coldLoadMilliseconds": 1000.0,
+    "firstTokenMilliseconds": 100.0,
+    "promptTokensPerSecond": 200.0,
+    "generationTokensPerSecond": 50.0,
+    "peakAcceleratorMemoryMiB": 4096,
+    "peakSystemMemoryMiB": 1024
+  },
+  "checks": [
+    {"id": "exact-output", "status": "passed"},
+    {"id": "cleanup", "status": "passed"}
+  ],
+  "cleanup": {
+    "modelUnloaded": true,
+    "serverStopped": true,
+    "disposableFilesRemoved": true,
+    "unrelatedServicesPreserved": true
+  },
+  "privacy": {
+    "endpointPersisted": false,
+    "promptPersisted": false,
+    "rawResponsePersisted": false,
+    "machinePathPersisted": false,
+    "processListPersisted": false
+  }
+}

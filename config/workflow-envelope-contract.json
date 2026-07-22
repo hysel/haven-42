@@ -19,6 +19,11 @@
     "eventTypes": ["accepted", "progress", "warning", "result", "error"],
     "required": ["schemaVersion", "kind", "status", "workflow", "events", "result"]
   },
+  "reliabilityExtension": {
+    "contract": "config/workflow-reliability-contract.json",
+    "optionalForSchemaVersion": 1,
+    "notes": "Callers that request retries, cancellation, resumability, or parent/child execution must satisfy the separate fail-closed reliability contract."
+  },
   "privacy": {
     "argumentValuesReturnedByDefault": false,
     "childOutputReturnedByDefault": false,

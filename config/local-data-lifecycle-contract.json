@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "description": "Ownership, retention, export, and deletion rules for local Haven 42 data.",
+  "classes": [
+    {"id": "engine", "owner": "product", "retention": "installed-version", "deleteWithUninstallDefault": true},
+    {"id": "configuration", "owner": "user", "retention": "until-user-deletes", "deleteWithUninstallDefault": false},
+    {"id": "models", "owner": "user-or-provider", "retention": "until-explicit-removal", "deleteWithUninstallDefault": false},
+    {"id": "artifacts", "owner": "user", "retention": "until-user-deletes", "deleteWithUninstallDefault": false},
+    {"id": "session-temporary", "owner": "session", "retention": "session-end", "deleteWithUninstallDefault": true},
+    {"id": "logs", "owner": "user", "retention": "bounded-local", "deleteWithUninstallDefault": false}
+  ],
+  "defaults": {
+    "telemetry": false,
+    "cloudSync": false,
+    "rawPromptPersistence": false,
+    "rawResponsePersistence": false,
+    "secretPersistence": false,
+    "secureCredentialStoreRequiredForCredentials": true
+  },
+  "deletion": {
+    "previewRequired": true,
+    "explicitClassSelectionRequired": true,
+    "providerOwnedDataRequiresProviderSpecificConfirmation": true,
+    "preexistingModelsNeverDeletedByCleanup": true,
+    "failedOperationCleanupLimitedToRunOwnedData": true,
+    "recoveryDisclosureRequired": true
+  },
+  "export": {
+    "optIn": true,
+    "manifestRequired": true,
+    "secretsExcluded": true,
+    "machinePathsSanitizedByDefault": true,
+    "integrityHashesRequired": true
+  }
+}
