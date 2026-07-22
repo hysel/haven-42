@@ -6,6 +6,10 @@ Haven 42 is organized as a provider-neutral capability, configuration, documenta
 
 The currently validated runtime architecture is:
 
+`capability -> provider contract -> inference engine -> hardware backend -> model artifact`
+
+Text capability discovery and invocation currently normalize Ollama and OpenAI-compatible llama.cpp APIs behind one dry-run-first contract. OpenAI-compatible selection requires an exact admitted engine, backend, and hardware profile from `config/inference-engine-registry.json`; unknown, failed, parked, and cross-profile combinations fail closed.
+
 ```text
 Agent surfaces
   Continue -> project or shared .continue assets

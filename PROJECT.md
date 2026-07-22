@@ -12,7 +12,7 @@ This repository defines an evidence-gated, local-first AI workbench for individu
 
 The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product direction adds an approachable Tauri desktop experience with a bundled local web UI over the same tested contracts.
 
-Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities have a live-validated Ollama adapter, Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
+Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, while llama.cpp's OpenAI-compatible path is contract-validated and fail-closed to its two exact admitted engine profiles pending a direct live server run. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
 
 ## Current Stage
 

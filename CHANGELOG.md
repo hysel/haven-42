@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Generalized local text discovery and execution across Ollama and OpenAI-compatible llama.cpp contracts, with backward-compatible Ollama arguments, exact engine/backend/hardware admission, no silent fallback, normalized typed artifacts, endpoint sanitization, and Windows plus shared Linux/macOS fail-closed tests. The Ollama path passed a fresh live probe and chat run; the llama.cpp adapter remains contract-validated pending a direct live server run even though its exact CUDA and HIP engine cells already passed.
 - Added a fail-closed inference-engine registry and exact llama.cpp evidence: CUDA passed on Linux NVIDIA RTX 5000 and HIP passed on Windows AMD, while failed Vulkan remains documentation-only, Intel paths remain parked, IPEX-LLM is retired, and LM Studio is optional API-only software.
 - Added fail-closed, consent-driven consumer-local image-provider onboarding with exact OS/accelerator evidence boundaries and no candidate installer admission.
 - Recorded immutable documentation-only ACE-Step, Stable Audio, HunyuanVideo, Wan2.2, and LTX-2.3 candidate identities, sizes, checksums, licenses, claimed operations, and unresolved gates.

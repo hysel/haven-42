@@ -9,7 +9,13 @@ param(
     [string]$Model,
     [Parameter(Mandatory = $true)]
     [string]$SessionPath,
+    [ValidateSet("ollama.local-text", "llamacpp.local-text")]
+    [string]$ProviderId = "ollama.local-text",
+    [string]$RuntimeBaseUrl,
     [string]$OllamaBaseUrl = "http://127.0.0.1:11434",
+    [string]$EngineId,
+    [string]$BackendId,
+    [string]$HardwareProfile,
     [string]$ArtifactName = "result.json",
     [int]$TimeoutSeconds = 120,
     [string]$ResponseFixturePath,
@@ -20,6 +26,19 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
+$providers = @((Get-Content -LiteralPath (Join-Path $repoRoot "config/providers.json") -Raw | ConvertFrom-Json).providers)
+$provider = @($providers | Where-Object id -eq $ProviderId) | Select-Object -First 1
+if (-not $provider -or @($provider.capabilityIds) -notcontains $CapabilityId) { throw "Provider is unknown or does not support the requested capability." }
+$runtimeSelection = $null
+if ($provider.protocol -eq "openai-chat-completions") {
+    if ([string]::IsNullOrWhiteSpace($EngineId) -or [string]::IsNullOrWhiteSpace($BackendId) -or [string]::IsNullOrWhiteSpace($HardwareProfile)) { throw "OpenAI-compatible providers require EngineId, BackendId, and HardwareProfile." }
+    $engines = @((Get-Content -LiteralPath (Join-Path $repoRoot "config/inference-engine-registry.json") -Raw | ConvertFrom-Json).engines)
+    $engine = @($engines | Where-Object id -eq $EngineId) | Select-Object -First 1
+    $backend = if ($engine) { @($engine.backends | Where-Object id -eq $BackendId) | Select-Object -First 1 } else { $null }
+    $admitted = $engine -and $engine.status -eq "validated-exact-profile" -and @($engine.providerContracts) -contains $provider.providerContract -and $backend -and $backend.status -eq "validated-exact-profile" -and @($backend.profiles) -contains $HardwareProfile
+    if (-not $admitted) { throw "Engine, backend, and hardware profile are not an admitted exact profile for this provider." }
+    $runtimeSelection = [ordered]@{ engineId = $EngineId; backendId = $BackendId; hardwareProfile = $HardwareProfile; admission = "validated-exact-profile" }
+} elseif ($EngineId -or $BackendId -or $HardwareProfile) { throw "Explicit engine selection is only supported for engine-backed OpenAI-compatible providers." }
 $sessionFullPath = [IO.Path]::GetFullPath($SessionPath)
 $repoPrefix = $repoRoot.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
 if ($sessionFullPath.Equals($repoRoot, [StringComparison]::OrdinalIgnoreCase) -or $sessionFullPath.StartsWith($repoPrefix, [StringComparison]::OrdinalIgnoreCase)) {
@@ -53,7 +72,8 @@ if ($Execute) {
         $response = Get-Content -LiteralPath $ResponseFixturePath -Raw | ConvertFrom-Json
         $providerSource = "validation-fixture"
     } else {
-        $uri = $OllamaBaseUrl.TrimEnd('/') + "/api/chat"
+        $baseUrl = if ($RuntimeBaseUrl) { $RuntimeBaseUrl } elseif ($provider.protocol -eq "ollama-chat") { $OllamaBaseUrl } else { "http://127.0.0.1:8080" }
+        $uri = $baseUrl.TrimEnd('/') + $(if ($provider.protocol -eq "ollama-chat") { "/api/chat" } else { "/v1/chat/completions" })
         $body = @{
             model = $Model
             stream = $false
@@ -61,12 +81,13 @@ if ($Execute) {
                 @{ role = "system"; content = $systemPrompt },
                 @{ role = "user"; content = $Prompt }
             )
-            options = @{ temperature = 0.2 }
-        } | ConvertTo-Json -Depth 8
+        }
+        if ($provider.protocol -eq "ollama-chat") { $body.options = @{ temperature = 0.2 } } else { $body.temperature = 0.2 }
+        $body = $body | ConvertTo-Json -Depth 8
         $response = Invoke-RestMethod -Method Post -Uri $uri -ContentType "application/json" -Body $body -TimeoutSec $TimeoutSeconds
-        $providerSource = "ollama-chat"
+        $providerSource = $provider.protocol
     }
-    $content = [string]$response.message.content
+    $content = if ($provider.protocol -eq "ollama-chat") { [string]$response.message.content } else { [string]$response.choices[0].message.content }
     if ([string]::IsNullOrWhiteSpace($content)) { throw "Local text provider returned empty content." }
 }
 
@@ -76,13 +97,15 @@ $artifactContent = if ($CapabilityId -eq "general.chat") {
 } else {
     [ordered]@{ title = if ($CapabilityId -eq "content.write") { "Generated Writing" } else { "Summary" }; body = $content }
 }
+$providerMetadata = [ordered]@{ id = $provider.id; model = $Model; source = $providerSource }
+if ($runtimeSelection) { $providerMetadata.runtimeSelection = $runtimeSelection }
 $artifact = [ordered]@{
     schemaVersion = 1
     artifactType = $artifactType
     status = if ($Execute) { "succeeded" } else { "planned" }
     createdAtUtc = (Get-Date).ToUniversalTime().ToString("o")
     sourceCapabilityId = $CapabilityId
-    provider = @{ id = "ollama.local-text"; model = $Model; source = $providerSource }
+    provider = $providerMetadata
     content = $artifactContent
     policy = @{
         localExecution = $true
@@ -103,19 +126,22 @@ $result = [pscustomobject]@{
     Kind = "local-text-capability"
     Status = if ($Execute) { "succeeded" } else { "planned" }
     CapabilityId = $CapabilityId
-    ProviderId = "ollama.local-text"
+    ProviderId = $provider.id
+    Protocol = $provider.protocol
+    RuntimeSelection = $runtimeSelection
     Model = $Model
     ArtifactPath = $artifactPath
     ArtifactWritten = [bool]$Apply
     NetworkUsed = [bool]($Execute -and [string]::IsNullOrWhiteSpace($ResponseFixturePath))
     PromptPersisted = $false
+    EndpointPersisted = $false
     RepositoryRead = $false
     Artifact = $artifact
 }
 if ($AsJson) { $result | ConvertTo-Json -Depth 12 }
 else {
     Write-Output "Capability: $CapabilityId"
-    Write-Output "Provider: ollama.local-text"
+    Write-Output "Provider: $($provider.id)"
     Write-Output "Status: $($result.Status)"
     Write-Output "Artifact: $artifactPath"
     Write-Output "Artifact written: $([bool]$Apply)"

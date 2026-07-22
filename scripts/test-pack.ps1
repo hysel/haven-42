@@ -3766,6 +3766,7 @@ Invoke-PackTest "local text capabilities are session bound and typed" {
     $sessionScript = Join-Path $repoRoot "scripts/start-ai-session.ps1"
     $providerScript = Join-Path $repoRoot "scripts/invoke-local-text-capability.ps1"
     $fixturePath = Join-Path $repoRoot "examples/fixtures/ollama-chat-response.json"
+    $openAiFixturePath = Join-Path $repoRoot "examples/fixtures/openai-chat-response.json"
     $providerRegistry = Get-Content -LiteralPath (Join-Path $repoRoot "config/providers.json") -Raw | ConvertFrom-Json
     $artifactContract = Get-Content -LiteralPath (Join-Path $repoRoot "config/typed-artifact-contract.json") -Raw | ConvertFrom-Json
     $tempRoot = Join-Path ([IO.Path]::GetTempPath()) "local-text-capability-test-$([guid]::NewGuid())"
@@ -3802,6 +3803,14 @@ Invoke-PackTest "local text capabilities are session bound and typed" {
         Assert-Equal -Actual $writing.Artifact.artifactType -Expected "markdown-document" -Message "Writing should emit a Markdown document artifact."
         Assert-Equal -Actual $writing.ArtifactWritten -Expected $false -Message "Execute without apply should not persist output."
 
+        $llama = (Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "content.write", "-Prompt", "draft locally", "-Model", "example-text-model", "-SessionPath", $writeSession, "-ProviderId", "llamacpp.local-text", "-EngineId", "llama.cpp", "-BackendId", "hip", "-HardwareProfile", "windows-x64-amd-rx7800xt-16gb", "-ResponseFixturePath", $openAiFixturePath, "-Execute", "-AsJson")).Output | ConvertFrom-Json
+        Assert-Equal -Actual $llama.ProviderId -Expected "llamacpp.local-text" -Message "OpenAI-compatible execution should retain the selected provider."
+        Assert-Equal -Actual $llama.Protocol -Expected "openai-chat-completions" -Message "llama.cpp should use the OpenAI-compatible chat contract."
+        Assert-Equal -Actual $llama.RuntimeSelection.admission -Expected "validated-exact-profile" -Message "Runtime selection should disclose exact-profile admission."
+        Assert-Equal -Actual $llama.Artifact.content.body -Expected "Fixture provider response." -Message "OpenAI-compatible responses should produce the same typed artifact."
+        $blocked = Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "content.write", "-Prompt", "draft locally", "-Model", "example-text-model", "-SessionPath", $writeSession, "-ProviderId", "llamacpp.local-text", "-EngineId", "llama.cpp", "-BackendId", "vulkan", "-HardwareProfile", "windows-x64-amd-rx7800xt-16gb", "-ResponseFixturePath", $openAiFixturePath, "-Execute", "-AsJson")
+        Assert-True -Condition ($blocked.ExitCode -ne 0) -Message "A non-admitted engine/backend/profile combination must fail closed."
+
         $mismatch = Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "content.summarize", "-Prompt", "summarize", "-Model", "fixture-model", "-SessionPath", $chatSession, "-ResponseFixturePath", $fixturePath, "-Execute", "-AsJson")
         Assert-True -Condition ($mismatch.ExitCode -ne 0) -Message "Provider should reject a capability/session mismatch."
         $overwrite = Invoke-CommandCapture -FilePath $providerScript -Arguments @("-CapabilityId", "general.chat", "-Prompt", "again", "-Model", "fixture-model", "-SessionPath", $chatSession, "-ArtifactName", "chat.json", "-ResponseFixturePath", $fixturePath, "-Execute", "-Apply", "-AsJson")
@@ -3816,6 +3825,7 @@ Invoke-PackTest "provider discovery and engineering routing preserve policy boun
     $discoveryPath = Join-Path $repoRoot "scripts/discover-capability-availability.ps1"
     $routePath = Join-Path $repoRoot "scripts/resolve-engineering-route.ps1"
     $fixturePath = Join-Path $repoRoot "examples/fixtures/ollama-tags-response.json"
+    $openAiFixturePath = Join-Path $repoRoot "examples/fixtures/openai-models-response.json"
     $routeRegistry = Get-Content -LiteralPath (Join-Path $repoRoot "config/engineering-routes.json") -Raw | ConvertFrom-Json
     $workflowRegistry = Get-Content -LiteralPath (Join-Path $repoRoot "config/workflows.json") -Raw | ConvertFrom-Json
     $workflowIds = @($workflowRegistry.workflows.id)
@@ -3838,6 +3848,12 @@ Invoke-PackTest "provider discovery and engineering routing preserve policy boun
     Assert-Equal -Actual $probe.Probe.source -Expected "validation-fixture" -Message "Fixture probe should disclose its source."
     Assert-Equal -Actual $probe.EndpointPersisted -Expected $false -Message "Discovery should never persist provider endpoints."
     Assert-True -Condition ($probeOutput -notmatch "private-runtime|11434") -Message "Discovery output should omit runtime endpoint values."
+
+    $llamaProbe = (Invoke-CommandCapture -FilePath $discoveryPath -Arguments @("-CapabilityId", "general.chat", "-ProviderId", "llamacpp.local-text", "-Probe", "-Model", "example-text-model", "-EngineId", "llama.cpp", "-BackendId", "cuda", "-HardwareProfile", "linux-x64-nvidia-rtx5000-16gb", "-RuntimeBaseUrl", "http://private-runtime.invalid:8080", "-ResponseFixturePath", $openAiFixturePath, "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $llamaProbe.Probe.status -Expected "available" -Message "OpenAI-compatible model discovery should find the explicit model."
+    Assert-Equal -Actual $llamaProbe.Probe.runtimeSelection.admission -Expected "validated-exact-profile" -Message "Discovery should disclose exact-profile admission."
+    $blockedProbe = Invoke-CommandCapture -FilePath $discoveryPath -Arguments @("-CapabilityId", "general.chat", "-ProviderId", "llamacpp.local-text", "-Probe", "-Model", "example-text-model", "-EngineId", "llama.cpp", "-BackendId", "sycl", "-HardwareProfile", "linux-x64-intel", "-ResponseFixturePath", $openAiFixturePath, "-AsJson")
+    Assert-True -Condition ($blockedProbe.ExitCode -ne 0) -Message "Parked hardware profiles must not become selectable through discovery."
 
     $route = (Invoke-CommandCapture -FilePath $routePath -Arguments @("-Text", "please review code", "-AsJson")).Output | ConvertFrom-Json
     Assert-Equal -Actual $route.Status -Expected "selected" -Message "Review intent should select one engineering route."

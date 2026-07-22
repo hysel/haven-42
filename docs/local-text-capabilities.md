@@ -1,6 +1,6 @@
 # Local Text Capabilities
 
-The live-validated `ollama.local-text` adapter supports repository-free chat, writing, and summarization through an explicit local Ollama model. It remains runtime configuration-dependent: one validated environment does not prove that every endpoint, model, operating system, or prompt will work. Sanitized evidence is recorded in `examples/local-text-capability-validation.md`.
+One provider-neutral adapter supports repository-free chat, writing, and summarization. `ollama.local-text` uses Ollama's chat API and is live-validated. `llamacpp.local-text` uses the OpenAI-compatible chat-completions API and is contract-validated; it becomes selectable only when the caller supplies an exact `llama.cpp` engine/backend/hardware profile admitted by `config/inference-engine-registry.json`. A direct live llama.cpp server adapter run remains open, so its status is not promoted to live-validated.
 
 Create a matching session first with `scripts/start-ai-session.*`. Then preview the provider plan without network or file writes:
 
@@ -15,10 +15,22 @@ Create a matching session first with `scripts/start-ai-session.*`. Then preview 
 
 Add `-Execute` to contact the runtime-only Ollama endpoint. Add `-Apply` only when the disclosed JSON artifact path is correct and should be written. Linux and macOS use `scripts/invoke-local-text-capability.linux.sh` or `.macos.sh` with `--capability-id`, `--prompt`, `--model`, `--session-path`, `--execute`, `--apply`, and `--json`.
 
+For an already-running llama.cpp server on the validated Windows AMD/HIP profile:
+
+```powershell
+.\scripts\invoke-local-text-capability.ps1 `
+  -CapabilityId general.chat -Prompt "Explain dependency injection simply." `
+  -Model "your-loaded-model" -SessionPath "C:\local-ai-sessions\chat-session" `
+  -ProviderId llamacpp.local-text -EngineId llama.cpp -BackendId hip `
+  -HardwareProfile windows-x64-amd-rx7800xt-16gb -RuntimeBaseUrl "http://127.0.0.1:8080" -AsJson
+```
+
+The admitted Linux form uses `--provider-id llamacpp.local-text --engine-id llama.cpp --backend-id cuda --hardware-profile linux-x64-nvidia-rtx5000-16gb --runtime-base-url http://127.0.0.1:8080`. Dry-run remains the default. Haven 42 does not install, start, download, or silently fall back to CPU for either runtime.
+
 ## Safety Contract
 
 - Dry-run is the default and performs no network call.
-- `Execute` is required before contacting Ollama.
+- `Execute` is required before contacting any runtime.
 - `Apply` requires `Execute` and is required before writing an artifact.
 - The session must exist outside the pack repository and match the requested capability.
 - The exact artifact path is returned before execution and cannot escape `artifacts/`.
@@ -26,7 +38,8 @@ Add `-Execute` to contact the runtime-only Ollama endpoint. Add `-Apply` only wh
 - The prompt and endpoint are not stored in `session.json` or artifact metadata.
 - Provider output is stored only in the explicitly approved local artifact.
 - Repository content is not read by these general-purpose capabilities.
-- The adapter does not pull models. The requested model must already be installed.
+- The adapter does not install runtimes, start servers, or pull models. The requested model must already be installed or loaded.
+- OpenAI-compatible execution requires an exact admitted engine, backend, and hardware profile; parked or unknown combinations fail before network use.
 
 `-ResponseFixturePath` and `--response-fixture-path` exist only for deterministic adapter contract tests. Fixture success is not live-provider evidence.
 

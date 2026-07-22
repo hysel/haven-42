@@ -21,6 +21,24 @@
       "notes": "Fixture and bounded Windows local-endpoint chat, writing, summarization, typed-artifact, sanitization, cleanup, and cross-platform contract validation passed. Runtime endpoint and installed-model availability remain configuration-dependent."
     },
     {
+      "id": "llamacpp.local-text",
+      "name": "Local llama.cpp Text",
+      "kind": "text-generation",
+      "protocol": "openai-chat-completions",
+      "providerContract": "openai-compatible-loopback-api",
+      "execution": "local-or-user-controlled-network",
+      "capabilityIds": ["general.chat", "content.write", "content.summarize"],
+      "defaultAvailability": "configuration-required",
+      "requirements": ["runtime endpoint", "loaded explicit model", "admitted exact engine profile", "successful health discovery", "user-approved execution"],
+      "entryPoints": {
+        "windows": "scripts/invoke-local-text-capability.ps1",
+        "linux": "scripts/invoke-local-text-capability.linux.sh",
+        "macos": "scripts/invoke-local-text-capability.macos.sh"
+      },
+      "validationStatus": "contract-validated",
+      "notes": "The shared adapter contract passed on Windows, Linux, and macOS paths. Transport selection is admitted only for exact llama.cpp engine/backend/hardware profiles in the inference engine registry. HIP on Windows AMD and CUDA on Linux NVIDIA passed bounded engine validation, but the adapter awaits a direct live llama.cpp server run; other profiles fail closed."
+    },
+    {
       "id": "comfyui.local-image",
       "name": "Local ComfyUI Image",
       "kind": "image-generation",

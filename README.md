@@ -14,7 +14,7 @@ Haven 42 was previously named Local Engineering Agent Pack. Because the project 
 | --- | --- |
 | Engineering agents | Continue, Aider, and OpenCode are the maintained surfaces, with OS-aware setup and validation paths. |
 | Engineering workflows | Repository discovery, planning, review, scoped changes, language-aware guidance, workflow dispatch, and evidence reporting are implemented. |
-| General local text | `general.chat`, `content.write`, and `content.summarize` have a live-validated, session-bound Ollama adapter. |
+| General local text | `general.chat`, `content.write`, and `content.summarize` use one provider-neutral, session-bound adapter. Ollama is live-validated; llama.cpp OpenAI-compatible transport is contract-validated and selectable only for the exact admitted Windows AMD/HIP and Linux NVIDIA/CUDA profiles. |
 | Local images | `media.image.create` has a live-validated Linux ComfyUI/SDXL provider and typed PNG artifacts. Native Windows NVIDIA, Intel GPU/XPU, AMD, and Apple Silicon profiles remain candidates until independently validated. |
 | Product UI | Milestone 22 is in progress with Tauri 2 and private typed sidecar IPC selected. Windows dependency resolution found Rust maintenance blockers, so no desktop runtime is shipped. |
 | Music and video | Current documentation-only candidate inventories and a shared consent policy are recorded. No provider scripts, adapters, harnesses, workflows, or configuration ship before promotion gates pass. |
@@ -50,7 +50,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone | Status | Outcome |
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
-| Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, local text and image adapters, capability discovery, routing, and typed artifacts. |
+| Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, provider-neutral local text, local images, capability discovery, routing, and typed artifacts. |
 | Milestone 22: Unified Product UI And Task Composition | In progress | Tauri/private-IPC architecture selected; dependency, security, packaging, signing, and cross-platform validation come before UI shipping. |
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; consumer-local Windows and macOS profiles remain gated. |
 | Milestone 24: Local Music And Audio Generation | Research in progress | Immutable candidate facts and consent policy are recorded; live providers remain unpromoted. |
@@ -111,7 +111,7 @@ For software work, the pack supplies repeatable discovery, implementation planni
 | Generate repository-free local images | `docs/local-image-capability.md` and `examples/local-image-capability-validation.md` |
 | Install the validated local image provider | `docs/comfyui-image-provider-setup.md` |
 | Start a repository-optional general AI session | `docs/general-ai-session-workspace.md` |
-| Use the validated local chat, writing, and summarization adapter | `docs/local-text-capabilities.md` |
+| Use local chat, writing, and summarization providers | `docs/local-text-capabilities.md` |
 | Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
 | Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
 | Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |

@@ -16,11 +16,13 @@ Discovery is offline by default. It reads `config/capabilities.json` and `config
 .\scripts\discover-capability-availability.ps1 -CapabilityId general.chat -AsJson
 ```
 
-An explicit probe may check the Ollama tags endpoint for an already-installed model. It never pulls a model and its output contains neither the endpoint nor credentials.
+An explicit probe may check Ollama `/api/tags` or an admitted OpenAI-compatible provider's `/v1/models` endpoint for an already-installed or loaded model. It never installs a runtime, starts a server, pulls a model, or exposes the endpoint or credentials.
 
 ```powershell
 .\scripts\discover-capability-availability.ps1 -CapabilityId general.chat -Probe -Model <installed-model> -OllamaBaseUrl <runtime-url> -AsJson
 ```
+
+llama.cpp discovery additionally requires `-ProviderId llamacpp.local-text -EngineId llama.cpp -BackendId <hip-or-cuda> -HardwareProfile <exact-admitted-profile> -RuntimeBaseUrl <runtime-url>`. The registry rejects parked, failed, unknown, and cross-profile selections before any network request.
 
 Linux and macOS use `discover-capability-availability.linux.sh` and `.macos.sh`. They select `python3`, then `python`, and fail clearly when Python 3 is absent.
 

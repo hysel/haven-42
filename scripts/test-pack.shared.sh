@@ -1590,16 +1590,22 @@ test_local_text_capability_adapter() {
   session="$REPO_ROOT/scripts/start-ai-session.shared.sh"
   provider="$REPO_ROOT/scripts/invoke-local-text-capability.shared.sh"
   fixture="$REPO_ROOT/examples/fixtures/ollama-chat-response.json"
+  openai_fixture="$REPO_ROOT/examples/fixtures/openai-chat-response.json"
   $session --capability-id content.summarize --workspace-root "$root" --session-id summary --apply --json >/dev/null || { rm -rf "$root"; return 1; }
   plan="$($provider --capability-id content.summarize --prompt 'private prompt marker' --model fixture-model --session-path "$root/summary" --artifact-name summary.json --json)" || { rm -rf "$root"; return 1; }
   result="$($provider --capability-id content.summarize --prompt 'private prompt marker' --model fixture-model --session-path "$root/summary" --artifact-name summary.json --response-fixture-path "$fixture" --execute --apply --json)" || { rm -rf "$root"; return 1; }
-  python3 - "$plan" "$result" "$root/summary/artifacts/summary.json" <<'PY'
+  llama="$($provider --capability-id content.summarize --prompt 'private prompt marker' --model example-text-model --session-path "$root/summary" --provider-id llamacpp.local-text --engine-id llama.cpp --backend-id cuda --hardware-profile linux-x64-nvidia-rtx5000-16gb --response-fixture-path "$openai_fixture" --execute --json)" || { rm -rf "$root"; return 1; }
+  ! $provider --capability-id content.summarize --prompt blocked --model example-text-model --session-path "$root/summary" --provider-id llamacpp.local-text --engine-id llama.cpp --backend-id sycl --hardware-profile linux-x64-intel --response-fixture-path "$openai_fixture" --execute --json >/dev/null 2>&1 || { rm -rf "$root"; return 1; }
+  python3 - "$plan" "$result" "$llama" "$root/summary/artifacts/summary.json" <<'PY'
 import json, pathlib, sys
 plan, result = json.loads(sys.argv[1]), json.loads(sys.argv[2])
-artifact_path = pathlib.Path(sys.argv[3])
+llama = json.loads(sys.argv[3])
+artifact_path = pathlib.Path(sys.argv[4])
 assert plan["Status"] == "planned" and plan["NetworkUsed"] is False and plan["ArtifactWritten"] is False
 assert result["Status"] == "succeeded" and result["Artifact"]["artifactType"] == "markdown-document"
 assert result["NetworkUsed"] is False and result["RepositoryRead"] is False and result["PromptPersisted"] is False
+assert llama["ProviderId"] == "llamacpp.local-text" and llama["Protocol"] == "openai-chat-completions"
+assert llama["RuntimeSelection"]["admission"] == "validated-exact-profile"
 text = artifact_path.read_text(encoding="utf-8")
 assert "private prompt marker" not in text and "127.0.0.1" not in text and "11434" not in text
 PY
@@ -1612,19 +1618,24 @@ test_provider_discovery_and_engineering_routes() {
   discovery="$REPO_ROOT/scripts/discover-capability-availability.shared.sh"
   router="$REPO_ROOT/scripts/resolve-engineering-route.shared.sh"
   fixture="$REPO_ROOT/examples/fixtures/ollama-tags-response.json"
+  openai_fixture="$REPO_ROOT/examples/fixtures/openai-models-response.json"
   offline="$($discovery --capability-id general.chat --json)" || return 1
   probe="$($discovery --capability-id general.chat --probe --model example-text-model:latest --ollama-base-url http://private-runtime.invalid:11434 --response-fixture-path "$fixture" --json)" || return 1
+  llama_probe="$($discovery --capability-id general.chat --provider-id llamacpp.local-text --probe --model example-text-model --engine-id llama.cpp --backend-id cuda --hardware-profile linux-x64-nvidia-rtx5000-16gb --runtime-base-url http://private-runtime.invalid:8080 --response-fixture-path "$openai_fixture" --json)" || return 1
+  ! $discovery --capability-id general.chat --provider-id llamacpp.local-text --probe --model example-text-model --engine-id llama.cpp --backend-id sycl --hardware-profile linux-x64-intel --response-fixture-path "$openai_fixture" --json >/dev/null 2>&1 || return 1
   route="$($router --text 'please review code' --json)" || return 1
-  python3 - "$REPO_ROOT/config/engineering-routes.json" "$REPO_ROOT/config/workflows.json" "$offline" "$probe" "$route" <<'PY'
+  python3 - "$REPO_ROOT/config/engineering-routes.json" "$REPO_ROOT/config/workflows.json" "$offline" "$probe" "$llama_probe" "$route" <<'PY'
 import json, pathlib, sys
 routes = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))["routes"]
 workflows = {item["id"] for item in json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))["workflows"]}
-offline, probe, route = map(json.loads, sys.argv[3:])
+offline, probe, llama_probe, route = map(json.loads, sys.argv[3:])
 assert all(workflow_id in workflows for item in routes for workflow_id in item["workflowIds"])
 assert offline["ProbeUsed"] is False and offline["CapabilityInvoked"] is False
 assert offline["Items"][0]["EffectiveAvailability"] == "configuration-required"
 assert probe["Probe"]["status"] == "available" and probe["Probe"]["source"] == "validation-fixture"
 assert probe["EndpointPersisted"] is False and "private-runtime" not in sys.argv[4] and "11434" not in sys.argv[4]
+assert llama_probe["Probe"]["status"] == "available"
+assert llama_probe["Probe"]["runtimeSelection"]["admission"] == "validated-exact-profile"
 assert route["Status"] == "selected" and route["SelectedRouteId"] == "engineering.review"
 assert route["InvocationAllowed"] is False and any(step["WorkflowId"] == "verify-runtime-output" for step in route["Steps"])
 PY

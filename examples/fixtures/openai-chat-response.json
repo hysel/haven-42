@@ -1,0 +1,7 @@
+{
+  "id": "fixture-chat",
+  "object": "chat.completion",
+  "choices": [
+    { "index": 0, "message": { "role": "assistant", "content": "Fixture provider response." }, "finish_reason": "stop" }
+  ]
+}
