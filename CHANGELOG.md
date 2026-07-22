@@ -11,6 +11,9 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Pinned the direct Milestone 22 desktop dependency candidates without adding runtime manifests, and documented their licenses, platform prerequisites, supply-chain gates, excluded packages, and re-evaluation triggers.
+- Added schema-v1 private desktop IPC and default-deny Tauri authority contracts covering registered operations, native path grants, effect-bound approvals, strict events, local content, sidecar lifecycle, privacy, and required negative tests.
+- Normalized Python CRLF output at the shared Bash installer boundary so Git Bash on Windows activates the intended rule-pack filename instead of creating a carriage-return-suffixed path.
 - Selected Tauri 2 with bundled React/TypeScript/Vite assets and a packaged Haven 42 engine sidecar as the Milestone 22 desktop boundary; ordinary desktop operation uses private typed stdin/stdout IPC with no generic shell bridge or listening port, while hardened loopback mode remains separately gated for headless use.
 - Defined cross-platform package and signing policy: unsigned development builds, GitHub-hosted platform builds, free Windows signing paths before paid Artifact Signing, Apple enrollment deferred until the first public macOS beta, signed/notarized public macOS packages, signed public Windows packages, attested Linux artifacts, and a final physical-Mac release gate.
 - Made hosted CI authentication preflight advisory when exact public run APIs remain queryable; repository and exact-SHA run access still fail closed when the authoritative API request is unavailable.

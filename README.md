@@ -80,7 +80,8 @@ For software work, the pack supplies repeatable discovery, implementation planni
 | See maintainer tasks that can proceed without extra prompts | `docs/autonomous-maintainer-queue.md` |
 | Choose from a short guided menu | `docs/haven-42-menu.md` |
 | Review the future unified UI design | `docs/unified-starter-toolkit-ui.md` |
-| Review the desktop runtime, packaging, and signing boundary | `docs/unified-starter-toolkit-ui.md` and `DECISIONS.md` |
+| Review the desktop runtime, packaging, and signing boundary | `docs/unified-starter-toolkit-ui.md`, `docs/desktop-runtime-dependency-evaluation.md`, and `DECISIONS.md` |
+| Integrate with the private desktop bridge contract | `docs/desktop-ipc-contract.md`, `config/desktop-ipc-contract.json`, and `config/desktop-capability-policy.json` |
 | Generate a beginner setup plan | `docs/beginner-setup-mode.md` |
 | Look up individual script details | `docs/script-reference-appendix.md` |
 | Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |

@@ -668,8 +668,8 @@ Exit criteria:
 ### Recommended Implementation Order
 
 1. Select the local UI runtime and package boundary without introducing a hosted-service dependency. Done with Tauri 2, bundled React/TypeScript/Vite assets, a packaged engine sidecar, and private typed stdin/stdout IPC.
-2. Define and test the Tauri capability allowlist, IPC schema, native path-selection boundary, local-only content policy, and headless loopback separation.
-3. Validate pinned dependency and license choices, then scaffold the smallest Windows, Linux, and macOS package slice.
+2. Define and statically validate the Tauri capability allowlist, IPC schema, native path-selection boundary, local-only content policy, and headless loopback separation. Done for the versioned contracts; native bridge enforcement and adversarial runtime tests remain promotion gates.
+3. Validate pinned dependency and license choices, then scaffold the smallest Windows, Linux, and macOS package slice. Direct candidates are reviewed; the resolved lock graphs, reports, and native package evidence remain required before admission.
 4. Implement first-run navigation and capability availability views over the Milestone 21 registry.
 5. Render typed artifacts and workflow progress/error envelopes.
 6. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20.

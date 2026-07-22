@@ -4369,6 +4369,59 @@ Invoke-PackTest "ComfyUI setup guide preserves the validated secure provider pro
     Assert-True -Condition ($content -notmatch "ssh-ed25519\s+AAAA[A-Za-z0-9+/]+") -Message "Guide should not contain an actual public key."
 }
 
+Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
+    $dependencyPath = Join-Path $repoRoot "docs/desktop-runtime-dependency-evaluation.md"
+    $contractDocPath = Join-Path $repoRoot "docs/desktop-ipc-contract.md"
+    $ipcPath = Join-Path $repoRoot "config/desktop-ipc-contract.json"
+    $policyPath = Join-Path $repoRoot "config/desktop-capability-policy.json"
+    foreach ($path in @($dependencyPath, $contractDocPath, $ipcPath, $policyPath)) {
+        Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Desktop contract asset should exist: $path"
+    }
+
+    $dependency = Get-Content -LiteralPath $dependencyPath -Raw
+    $contractDoc = Get-Content -LiteralPath $contractDocPath -Raw
+    $ipc = Get-Content -LiteralPath $ipcPath -Raw | ConvertFrom-Json
+    $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+    $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
+
+    foreach ($marker in @("architecture-approved but not admitted for shipment", "2.11.5", "19.2.8", "8.1.5", "7.0.2", "24.18.0", "1.97.1", "6.21.0", "not a cross-compiler")) {
+        Assert-True -Condition ($dependency.Contains($marker)) -Message "Desktop dependency review should retain marker: $marker"
+    }
+    foreach ($excluded in @("Electron", "remote JavaScript", "generic filesystem plugin", "updater plugin")) {
+        Assert-True -Condition ($dependency.Contains($excluded)) -Message "Desktop dependency review should retain excluded surface: $excluded"
+    }
+
+    Assert-Equal -Actual $ipc.schemaVersion -Expected 1 -Message "Desktop IPC contract should be schema v1."
+    Assert-Equal -Actual $ipc.transport.kind -Expected "stdio-json-lines" -Message "Desktop IPC should use private stdio JSON Lines."
+    Assert-True -Condition (-not $ipc.transport.listeningSocket) -Message "Desktop IPC must not listen on a socket."
+    Assert-True -Condition (-not $ipc.transport.remoteContentAllowed) -Message "Desktop IPC must not allow remote content."
+    Assert-Equal -Actual $ipc.transport.maxMessageBytes -Expected 1048576 -Message "Desktop IPC should bound message size."
+    Assert-True -Condition (-not $ipc.request.additionalProperties) -Message "Desktop requests should reject extra properties."
+    foreach ($field in @("command", "shell", "executable", "program", "argv", "cwd", "rawPath", "url", "endpoint")) {
+        Assert-True -Condition ($ipc.request.forbiddenProperties -contains $field) -Message "Desktop IPC should forbid renderer field: $field"
+    }
+    Assert-True -Condition ($ipc.operationResolution.unknownIdsRejected) -Message "Desktop IPC should reject unknown operation ids."
+    Assert-True -Condition ($ipc.operationResolution.workflowMustBeUiReady) -Message "Desktop IPC should require UI-ready workflows."
+    Assert-True -Condition (-not $ipc.pathGrants.rawCanonicalRootReturnedToRendererByDefault) -Message "Desktop IPC should hide raw canonical paths by default."
+    Assert-True -Condition ($ipc.approvals.defaultDeny) -Message "Desktop approvals should default deny."
+    Assert-True -Condition (-not $ipc.privacy.persistMessagesByDefault) -Message "Desktop messages should not persist by default."
+
+    Assert-Equal -Actual $policy.defaultDecision -Expected "deny" -Message "Desktop authority policy should default deny."
+    Assert-True -Condition ($policy.contentPolicy.bundledLocalAssetsOnly) -Message "Desktop UI should load bundled local assets only."
+    foreach ($property in @("remoteCapabilities", "genericShellPermission", "genericProcessPermission", "genericFilesystemPermission", "genericUrlOpenPermission", "listeningSocket")) {
+        Assert-True -Condition (-not $policy.tauriAuthority.$property) -Message "Desktop authority should disable: $property"
+    }
+    Assert-Equal -Actual $policy.tauriAuthority.allowedRendererCommands.Count -Expected 7 -Message "Desktop renderer command allowlist should remain narrow."
+    Assert-True -Condition (-not $policy.networkPolicy.telemetry -and -not $policy.networkPolicy.crashUpload) -Message "Desktop policy should disable telemetry and crash uploads."
+    Assert-True -Condition (-not $policy.headlessSeparation.inheritsDesktopEvidence) -Message "Headless mode must not inherit desktop evidence."
+
+    foreach ($marker in @("renderer is untrusted input", "raw paths", "single-use", "Required Negative Tests", "headless-loopback")) {
+        Assert-True -Condition ($contractDoc -match [regex]::Escape($marker)) -Message "Desktop IPC guide should retain marker: $marker"
+    }
+    Assert-True -Condition ($wikiMap -match "docs/desktop-runtime-dependency-evaluation\.md") -Message "Desktop dependency review should be mapped to the wiki."
+    Assert-True -Condition ($wikiMap -match "docs/desktop-ipc-contract\.md") -Message "Desktop IPC guide should be mapped to the wiki."
+}
+
 if ($failed) {
     Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
     exit 1

@@ -1749,6 +1749,64 @@ run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
 run_test "evidence catalog has valid schema and sanitized links" test_evidence_catalog_schema
+test_desktop_runtime_and_ipc_contracts() {
+  dependency="$REPO_ROOT/docs/desktop-runtime-dependency-evaluation.md"
+  contract_doc="$REPO_ROOT/docs/desktop-ipc-contract.md"
+  ipc="$REPO_ROOT/config/desktop-ipc-contract.json"
+  policy="$REPO_ROOT/config/desktop-capability-policy.json"
+
+  python3 - "$ipc" "$policy" <<'PY' || return 1
+import json
+import pathlib
+import sys
+
+ipc = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+policy = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+assert ipc["schemaVersion"] == 1
+assert ipc["transport"]["kind"] == "stdio-json-lines"
+assert ipc["transport"]["listeningSocket"] is False
+assert ipc["transport"]["remoteContentAllowed"] is False
+assert ipc["transport"]["maxMessageBytes"] == 1048576
+assert ipc["request"]["additionalProperties"] is False
+for field in ("command", "shell", "executable", "program", "argv", "cwd", "rawPath", "url", "endpoint"):
+    assert field in ipc["request"]["forbiddenProperties"]
+assert ipc["operationResolution"]["unknownIdsRejected"] is True
+assert ipc["operationResolution"]["workflowMustBeUiReady"] is True
+assert ipc["pathGrants"]["rawCanonicalRootReturnedToRendererByDefault"] is False
+assert ipc["approvals"]["defaultDeny"] is True
+assert ipc["privacy"]["persistMessagesByDefault"] is False
+assert policy["defaultDecision"] == "deny"
+assert policy["contentPolicy"]["bundledLocalAssetsOnly"] is True
+for field in ("remoteCapabilities", "genericShellPermission", "genericProcessPermission", "genericFilesystemPermission", "genericUrlOpenPermission", "listeningSocket"):
+    assert policy["tauriAuthority"][field] is False
+assert len(policy["tauriAuthority"]["allowedRendererCommands"]) == 7
+assert policy["networkPolicy"]["telemetry"] is False
+assert policy["networkPolicy"]["crashUpload"] is False
+assert policy["headlessSeparation"]["inheritsDesktopEvidence"] is False
+PY
+
+  grep -q "architecture-approved but not admitted for shipment" "$dependency" &&
+    grep -q "2.11.5" "$dependency" &&
+    grep -q "19.2.8" "$dependency" &&
+    grep -q "8.1.5" "$dependency" &&
+    grep -q "7.0.2" "$dependency" &&
+    grep -q "24.18.0" "$dependency" &&
+    grep -q "1.97.1" "$dependency" &&
+    grep -q "6.21.0" "$dependency" &&
+    grep -q "not a cross-compiler" "$dependency" &&
+    grep -q "Electron" "$dependency" &&
+    grep -q "remote JavaScript" "$dependency" &&
+    grep -q "generic filesystem plugin" "$dependency" &&
+    grep -q "updater plugin" "$dependency" &&
+    grep -q "renderer is untrusted input" "$contract_doc" &&
+    grep -q "raw paths" "$contract_doc" &&
+    grep -q "single-use" "$contract_doc" &&
+    grep -q "Required Negative Tests" "$contract_doc" &&
+    grep -q "headless-loopback" "$contract_doc" &&
+    grep -q "docs/desktop-runtime-dependency-evaluation.md" "$REPO_ROOT/config/wiki-sync.tsv" &&
+    grep -q "docs/desktop-ipc-contract.md" "$REPO_ROOT/config/wiki-sync.tsv"
+}
+
 run_test "model recommendation catalog has valid schema" test_catalog_schema
 run_test "committed config uses starter sample model" test_committed_config_uses_starter_model
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
@@ -1807,6 +1865,7 @@ run_test "hosted CI verifier enforces exact-SHA cross-platform completion" test_
 run_test "wiki synchronization is deterministic and hosted" test_wiki_synchronization
 run_test "model residency policy is applied across runtime and config paths" test_model_residency_policy_contract
 run_test "ComfyUI setup guide preserves the validated secure provider profile" test_comfyui_setup_guide_contract
+run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2

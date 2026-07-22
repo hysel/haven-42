@@ -393,8 +393,10 @@
 ## Milestone 22: Unified Product UI And Task Composition
 
 - [x] Select and document Tauri 2 with bundled React/TypeScript/Vite assets, a packaged Haven 42 engine sidecar, private typed stdin/stdout IPC, and a separately promoted headless loopback mode.
-- [ ] Pin and review the exact Tauri, Rust, frontend, WebView, sidecar-packaging, installer, and license dependency set before scaffolding shippable runtime files.
-- [ ] Define a versioned desktop IPC schema and Tauri capability allowlist that reject arbitrary commands, unknown workflow/capability IDs, malformed envelopes, unauthorized paths, and remote UI navigation.
+- [x] Pin and review the direct Tauri, Rust, frontend, WebView, sidecar-packaging, installer, and license candidate set without scaffolding shippable runtime files.
+- [x] Define a versioned desktop IPC schema and Tauri capability allowlist that reject arbitrary commands, unknown workflow/capability IDs, malformed envelopes, unauthorized paths, and remote UI navigation.
+- [ ] Resolve and lock the full npm, Cargo, Python, native-library, and packaging dependency graph; generate vulnerability, provenance, checksum, and third-party-license reports before runtime admission.
+- [ ] Implement native bridge and sidecar negative tests for malformed/oversized messages, command injection, path/grant escape, approval replay, remote content, cancellation, lifecycle, and privilege boundaries.
 - [ ] Define Windows, Linux, and macOS application, configuration, state, workspace, artifact, cache, update, and rollback locations without mixing immutable engine and user-owned data.
 - [ ] Add platform package promotion gates for Windows x64/ARM64, Linux x64/ARM64 on a bounded distribution matrix, and macOS Apple Silicon/Intel, with a physical Mac reserved for the final public-release flow.
 - [ ] Pursue Microsoft Store or SignPath Foundation Windows signing before paid Artifact Signing; defer Apple Developer enrollment until the first public macOS beta is otherwise ready.

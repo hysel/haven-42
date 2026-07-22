@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed private desktop bridge contract between bundled local Tauri assets and the packaged Haven 42 engine sidecar.",
+  "transport": {
+    "kind": "stdio-json-lines",
+    "listeningSocket": false,
+    "oneMessagePerLine": true,
+    "utf8Only": true,
+    "maxMessageBytes": 1048576,
+    "remoteContentAllowed": false
+  },
+  "request": {
+    "required": ["schemaVersion", "requestId", "operationKind", "operationId", "mode", "input"],
+    "additionalProperties": false,
+    "properties": {
+      "schemaVersion": "integer; must equal 1",
+      "requestId": "1-64 ASCII letters, digits, period, underscore, or hyphen; unique while active",
+      "operationKind": "capability or workflow",
+      "operationId": "exact registered id resolved from the registry selected by operationKind",
+      "mode": "plan, execute, or apply; the operation policy may allow fewer modes",
+      "input": "operation-specific object validated against its registered schema",
+      "pathGrantIds": "optional array of unexpired native-issued path grant ids",
+      "approvalTokenId": "optional opaque native-issued token bound to this request and disclosed effects",
+      "includeOutput": "optional boolean; false by default because output may contain local data"
+    },
+    "forbiddenProperties": ["command", "shell", "executable", "program", "argv", "cwd", "rawPath", "url", "endpoint"]
+  },
+  "cancelRequest": {
+    "required": ["schemaVersion", "requestId", "cancelRequestId"],
+    "additionalProperties": false,
+    "rules": [
+      "cancelRequestId must identify an active request owned by the same desktop session",
+      "cancellation is best-effort and must produce one terminal result or error event",
+      "cancellation cannot select or signal an arbitrary operating-system process"
+    ]
+  },
+  "operationResolution": {
+    "capabilityRegistry": "config/capabilities.json",
+    "workflowRegistry": "config/workflows.json",
+    "unknownIdsRejected": true,
+    "workflowMustBeUiReady": true,
+    "unavailableBlockedOrFailedCapabilitiesRejected": true,
+    "rendererCannotSupplyImplementationPath": true
+  },
+  "pathGrants": {
+    "issuedBy": "native bridge after user-driven native selection or an application-owned path decision",
+    "types": ["repository-read", "repository-write", "artifact-write", "user-content-read"],
+    "requiredFields": ["grantId", "type", "canonicalRoot", "issuedAtUtc", "expiresAtUtc", "sessionId"],
+    "rawCanonicalRootReturnedToRendererByDefault": false,
+    "rules": [
+      "grant ids are opaque, session-bound, expiring, and non-transferable",
+      "the native bridge canonicalizes every target before access",
+      "path traversal, root escape, disallowed symlink or reparse-point escape, and grant-type mismatch are rejected",
+      "a read grant never implies write permission",
+      "application, engine, update, rollback, credential, and private-key directories cannot be user-granted"
+    ]
+  },
+  "approvals": {
+    "defaultDeny": true,
+    "requiredFor": ["file write", "network access", "model download", "external provider", "apply mode", "approved-write workflow"],
+    "tokenRules": [
+      "tokens are opaque, single-use, session-bound, short-lived, and stored only in native memory",
+      "tokens bind requestId, operationId, mode, disclosed effects, selected path grants, and expiry",
+      "changed input, effects, operation, grants, session, or expiry invalidates the token"
+    ]
+  },
+  "events": {
+    "types": ["accepted", "progress", "warning", "result", "error"],
+    "required": ["schemaVersion", "requestId", "sequence", "type", "timestampUtc"],
+    "sequenceStartsAt": 1,
+    "sequenceStrictlyIncreases": true,
+    "exactlyOneTerminalEvent": true,
+    "terminalTypes": ["result", "error"],
+    "resultUsesTypedArtifactContract": true,
+    "workflowEventsExtend": "config/workflow-envelope-contract.json",
+    "artifactContract": "config/typed-artifact-contract.json"
+  },
+  "privacy": {
+    "returnInputByDefault": false,
+    "returnRawPathsByDefault": false,
+    "returnChildOutputByDefault": false,
+    "persistMessagesByDefault": false,
+    "logPromptOrArtifactContentByDefault": false,
+    "notes": "Renderer messages, prompts, paths, endpoints, provider output, and artifact content remain local and are minimized. Sanitized evidence is an explicit separate action."
+  },
+  "failureRules": [
+    "reject malformed JSON, oversized lines, invalid UTF-8, unsupported schema versions, duplicate active request ids, and additional properties",
+    "reject unknown operation ids before examining operation input",
+    "reject direct commands, executable paths, arbitrary arguments, raw filesystem paths, URLs, and endpoints",
+    "reject missing, expired, reused, mismatched, or over-broad grants and approvals",
+    "terminate the sidecar session after repeated framing violations without attempting partial recovery"
+  ]
+}

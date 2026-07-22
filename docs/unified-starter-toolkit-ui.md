@@ -84,6 +84,8 @@ The accepted desktop runtime is Tauri 2 with a React and TypeScript UI built by 
 
 The desktop application does not listen on a TCP port. A separately hardened loopback server may be evaluated for headless Linux, SSH-tunneled access, development, and diagnostics, but it is not the ordinary Windows, Linux desktop, or macOS runtime and cannot inherit desktop promotion evidence.
 
+The pinned direct dependency candidates and non-admission decision are recorded in `docs/desktop-runtime-dependency-evaluation.md`. The renderer/native/engine message and authority boundaries are versioned in `config/desktop-ipc-contract.json`, `config/desktop-capability-policy.json`, and `docs/desktop-ipc-contract.md`.
+
 A hosted production service is out of scope because Haven 42 is local-first and should not upload repository content, hardware profiles, local endpoints, prompts, generated artifacts, or raw validation transcripts.
 
 ## Desktop Security Boundary

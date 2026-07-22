@@ -2,6 +2,21 @@
 
 This file records important project decisions. Use it for choices that affect architecture, compatibility, governance, or long-term maintenance.
 
+## 2026-07-22: Admit Desktop Dependencies And Authority In Evidence-Gated Slices
+
+Status: Accepted
+
+Context:
+Selecting Tauri did not by itself establish a safe resolved dependency graph or renderer-to-engine authority model. Adding a generated starter application would immediately admit transitive packages, filesystem/process surfaces, and platform assumptions before they had been reviewed or tested.
+
+Decision:
+Record exact direct dependency candidates separately from runtime admission. Begin with Tauri 2.11.5, its version-matched official packages, React 19.2.8, Vite 8.1.5, TypeScript 7.0.2, Node.js 24.18.0 LTS, Rust 1.97.1, and PyInstaller 6.21.0. Ship no manifest, lock file, frontend source, crate, sidecar binary, or installer in this slice. Before implementation admission, resolve the full platform-specific graphs and pass vulnerability, license, provenance, checksum, private-IPC, packaging, and lifecycle gates.
+
+Use a default-deny versioned desktop contract. The renderer may name only registered capability or UI-ready workflow IDs. Native-issued path grants and effect-bound approval tokens replace raw paths and implicit authority. The bridge exposes no generic shell, process, filesystem, URL, remote-content, or listening-socket surface. Headless loopback operation remains a separately promoted product mode.
+
+Consequences:
+The repository gains testable architecture contracts without prematurely claiming that a desktop application works. The initial implementation slice stays narrow, and any dependency or permission expansion requires an explicit re-evaluation. Native enforcement and adversarial tests are still required before the desktop runtime can ship.
+
 ## 2026-07-21: Use Tauri With Private Typed IPC For The Desktop Product
 
 Status: Accepted

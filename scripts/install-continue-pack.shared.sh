@@ -186,9 +186,9 @@ if [ "$SHARED_ASSETS" = false ]; then
   "$REPO_ROOT/scripts/get-project-profile.shared.sh" \
     --target-repo "$TARGET_RESOLVED" \
     --output-path "$PROJECT_PROFILE_PATH" >/dev/null
-  primary_ecosystem="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["PrimaryEcosystem"])' "$PROJECT_PROFILE_PATH")"
-  profile_confidence="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["Confidence"])' "$PROJECT_PROFILE_PATH")"
-  selected_rule_packs="$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1], encoding="utf-8"))["SelectedRulePackIds"]))' "$PROJECT_PROFILE_PATH")"
+  primary_ecosystem="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["PrimaryEcosystem"])' "$PROJECT_PROFILE_PATH" | tr -d '\r')"
+  profile_confidence="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["Confidence"])' "$PROJECT_PROFILE_PATH" | tr -d '\r')"
+  selected_rule_packs="$(python3 -c 'import json,sys; print(", ".join(json.load(open(sys.argv[1], encoding="utf-8"))["SelectedRulePackIds"]))' "$PROJECT_PROFILE_PATH" | tr -d '\r')"
 fi
 
 printf 'Installing Continue pack into %s\n' "$TARGET_RESOLVED"
@@ -274,6 +274,8 @@ done < <(find "$SOURCE_CONTINUE" -type f)
 if [ "$SHARED_ASSETS" = false ]; then
   cp "$PROJECT_PROFILE_PATH" "$TARGET_CONTINUE/project-profile.json"
   while IFS=$'\t' read -r source_relative active_relative; do
+    source_relative="${source_relative%$'\r'}"
+    active_relative="${active_relative%$'\r'}"
     [ -z "$source_relative" ] && continue
     case "$source_relative|$active_relative" in
       /*|*'../'*|*'/..'*)

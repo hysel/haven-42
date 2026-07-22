@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "description": "Default-deny desktop authority policy for the Haven 42 Tauri bridge and packaged engine sidecar.",
+  "defaultDecision": "deny",
+  "contentPolicy": {
+    "bundledLocalAssetsOnly": true,
+    "remoteApplicationPages": false,
+    "remoteScripts": false,
+    "remoteStyles": false,
+    "remoteFonts": false,
+    "remoteFrames": false,
+    "inlineScript": false,
+    "unsafeEval": false,
+    "navigationOutsideApplication": "deny",
+    "externalLinks": "native allowlist command with explicit user action only"
+  },
+  "tauriAuthority": {
+    "windowLabels": ["main"],
+    "remoteCapabilities": false,
+    "genericShellPermission": false,
+    "genericProcessPermission": false,
+    "genericFilesystemPermission": false,
+    "genericUrlOpenPermission": false,
+    "listeningSocket": false,
+    "allowedRendererCommands": [
+      "desktop_get_registry_snapshot",
+      "desktop_select_path",
+      "desktop_plan_operation",
+      "desktop_approve_operation",
+      "desktop_execute_operation",
+      "desktop_cancel_operation",
+      "desktop_open_approved_external_link"
+    ],
+    "nativeOnlyOperations": [
+      "start_packaged_engine_sidecar",
+      "stop_packaged_engine_sidecar",
+      "canonicalize_and_issue_path_grant",
+      "validate_approval_token",
+      "enforce_message_limits"
+    ]
+  },
+  "registries": {
+    "capabilities": "config/capabilities.json",
+    "workflows": "config/workflows.json",
+    "artifacts": "config/typed-artifact-contract.json",
+    "ipc": "config/desktop-ipc-contract.json"
+  },
+  "operationAdmission": {
+    "unknownCapability": "deny",
+    "unknownWorkflow": "deny",
+    "workflowUiReadyFalseOrMissing": "deny",
+    "capabilityUnavailable": "deny",
+    "capabilityBlocked": "deny",
+    "capabilityFailed": "deny",
+    "configurationRequired": "show setup path; deny execution until runtime discovery passes",
+    "policyConflict": "deny",
+    "missingEffectDisclosure": "deny",
+    "missingRequiredApproval": "deny"
+  },
+  "pathPolicy": {
+    "rawRendererPathsAccepted": false,
+    "nativePathGrantRequired": true,
+    "canonicalizationRequired": true,
+    "symlinkAndReparseEscapeRejected": true,
+    "readDoesNotImplyWrite": true,
+    "writePreviewRequired": true,
+    "artifactLocationDisclosedBeforeWrite": true
+  },
+  "networkPolicy": {
+    "default": "deny",
+    "providerAccess": "registered provider plus disclosed operation plus approval when required",
+    "modelDownload": "separate explicit approval",
+    "updateCheck": "not admitted in the initial slice",
+    "telemetry": false,
+    "crashUpload": false
+  },
+  "sidecarPolicy": {
+    "packagedBinaryOnly": true,
+    "targetTripleMatched": true,
+    "rendererMayChooseBinary": false,
+    "rendererMaySupplyArguments": false,
+    "rendererMaySupplyWorkingDirectory": false,
+    "inheritsMinimalEnvironment": true,
+    "privateStdioOnly": true,
+    "shutdownOnDesktopExit": true
+  },
+  "headlessSeparation": {
+    "inheritsDesktopEvidence": false,
+    "enabledByDefault": false,
+    "separateThreatModelAndPromotion": true,
+    "loopbackOnlyIfPromoted": true
+  }
+}
