@@ -1978,7 +1978,7 @@ PY
     grep -q "single-use" "$contract_doc" &&
     grep -q "Required Negative Tests" "$contract_doc" &&
     grep -q "headless-loopback" "$contract_doc" &&
-    grep -q "immutable engine" "$storage_doc" &&
+    grep -q "Immutable engine" "$storage_doc" &&
     grep -q "user-owned" "$storage_doc" &&
     grep -q "Windows Credential Manager" "$storage_doc" &&
     grep -q "Secret Service" "$storage_doc" &&
