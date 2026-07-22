@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed reliability extension for workflow timeout, cancellation, retry, idempotency, and resumability.",
+  "timeouts": {
+    "requiredForExecution": true,
+    "maximumSeconds": 3600,
+    "terminalStatus": "timed-out",
+    "childProcessesMustBeObserved": true
+  },
+  "cancellation": {
+    "requestAndSessionBindingRequired": true,
+    "cooperativeFirst": true,
+    "boundedEscalationAllowedOnlyForOwnedProcesses": true,
+    "unrelatedProcessTerminationAllowed": false,
+    "terminalStatus": "cancelled"
+  },
+  "retries": {
+    "defaultMaximumAttempts": 1,
+    "maximumAttempts": 3,
+    "writeOperationsRetryByDefault": false,
+    "retryableClasses": ["provider-transient", "rate-limited", "owned-process-startup"],
+    "nonRetryableClasses": ["validation", "approval", "policy", "capacity", "user-data-conflict"]
+  },
+  "idempotency": {
+    "keyRequiredForRetriedEffects": true,
+    "scope": ["sessionId", "workflowId", "requestId", "effectDigest"],
+    "completedEffectReplayDecision": "return-prior-result",
+    "ambiguousEffectDecision": "manual-recovery-required"
+  },
+  "parentChild": {
+    "parentCancellationPropagates": true,
+    "childFailureAggregation": "explicit",
+    "orphanExecutionAllowed": false,
+    "maximumDepth": 8
+  },
+  "resumability": {
+    "default": false,
+    "checkpointMustBeVersioned": true,
+    "checkpointMustExcludeSecretsAndRawOutput": true,
+    "resumeRequiresSameWorkflowVersionAndApprovalScope": true,
+    "writesResumeAtVerifiedBoundaryOnly": true
+  },
+  "events": {
+    "monotonicSequenceRequired": true,
+    "exactlyOneTerminalEvent": true,
+    "eventsAfterTerminalAllowed": false
+  },
+  "privacy": {
+    "persistArgumentsByDefault": false,
+    "persistRawOutputByDefault": false,
+    "persistEndpointByDefault": false,
+    "telemetry": false
+  }
+}

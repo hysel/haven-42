@@ -1711,6 +1711,15 @@ test_solution_architecture_review_doc() {
     grep -q "20: Hardware-Aware Model" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "21: General-Purpose AI Assistant" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "22: Unified Product UI" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "23: Native Local Image Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "24: Local Music And Audio Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "25: Local Video Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "26: Hardware-Adaptive Model Quantization" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "21: General-Purpose AI Assistant And Intent Routing | Complete | Complete for the promoted provider set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "22: Unified Product UI And Task Composition | In progress | Architecture-complete; runtime dependency-gated" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    ! grep -q "21: General-Purpose AI Assistant And Intent Routing | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    ! grep -q "22: Unified Product UI And Task Composition | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "automated status-consistency checks" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for the workflow-foundation scope" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Input-Dependent Decisions" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "new integration proposal" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -1734,6 +1743,9 @@ test_solution_architecture_review_doc() {
     grep -q "Microsoft Store MSIX signing or the SignPath Foundation" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "Defer Apple Developer Program enrollment" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "Milestone 22: Unified Product UI And Task Composition | In progress" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete" "$REPO_ROOT/README.md" &&
+    grep -q "Milestone 22: Unified Product UI And Task Composition | In progress" "$REPO_ROOT/README.md" &&
     grep -q "\[x\] Select and document Tauri 2" "$REPO_ROOT/TODO.md" &&
     grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/README.md" &&
     grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/README.md" &&
@@ -2023,7 +2035,51 @@ assert value["OperatingSystemCompatibilityVerified"] is False
 assert value["ActivationAllowed"] is False and value["NetworkUsed"] is False
 assert value["FilesWritten"] is False and value["UserDataTouched"] is False
 PY
-  ! "$policy" --manifest-path "$manifest" --host-os linux --host-architecture x64 --target-triple x86_64-unknown-linux-gnu --current-version 0.3.0 --updater-version 0.3.0 --json >/dev/null 2>&1
+  ! "$policy" --manifest-path "$manifest" --host-os linux --host-architecture x64 --target-triple x86_64-unknown-linux-gnu --current-version 0.3.0 --updater-version 0.3.0 --json >/dev/null 2>&1 || return 1
+  hostile_output="$(python3 "$REPO_ROOT/scripts/core-update-policy.py" --self-test 2>&1)" || return 1
+  printf ''%s\n'' "$hostile_output" | grep -q "passed: 17 cases"
+}
+
+test_workflow_reliability_and_data_lifecycle() {
+  python3 - "$REPO_ROOT" <<''PY'' || return 1
+import json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+workflow = json.loads((root / "config/workflow-reliability-contract.json").read_text(encoding="utf-8"))
+lifecycle = json.loads((root / "config/local-data-lifecycle-contract.json").read_text(encoding="utf-8"))
+envelope = json.loads((root / "config/workflow-envelope-contract.json").read_text(encoding="utf-8"))
+assert workflow["timeouts"]["requiredForExecution"] is True
+assert workflow["cancellation"]["unrelatedProcessTerminationAllowed"] is False
+assert workflow["retries"]["writeOperationsRetryByDefault"] is False
+assert workflow["idempotency"]["keyRequiredForRetriedEffects"] is True
+assert workflow["events"]["exactlyOneTerminalEvent"] is True
+assert workflow["events"]["eventsAfterTerminalAllowed"] is False
+assert workflow["resumability"]["default"] is False
+assert workflow["resumability"]["resumeRequiresSameWorkflowVersionAndApprovalScope"] is True
+assert lifecycle["deletion"]["preexistingModelsNeverDeletedByCleanup"] is True
+assert lifecycle["deletion"]["failedOperationCleanupLimitedToRunOwnedData"] is True
+assert lifecycle["defaults"]["telemetry"] is False
+assert lifecycle["defaults"]["rawPromptPersistence"] is False
+assert lifecycle["export"]["secretsExcluded"] is True
+assert envelope["reliabilityExtension"]["contract"] == "config/workflow-reliability-contract.json"
+for relative in ("docs/workflow-reliability.md", "docs/security-threat-model.md", "docs/local-data-lifecycle.md"):
+    assert len((root / relative).read_text(encoding="utf-8")) > 500
+wiki = (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
+for relative in ("docs/workflow-reliability.md", "docs/security-threat-model.md", "docs/local-data-lifecycle.md", "examples/laguna-xs-2.1-validation.md"):
+    assert relative in wiki
+PY
+}
+
+test_provider_evidence_and_capacity() {
+  python3 "$REPO_ROOT/scripts/validate-model-performance-evidence.py" --evidence-path "$REPO_ROOT/examples/fixtures/model-performance-evidence.json" >/dev/null || return 1
+  output="$("$REPO_ROOT/scripts/runtime-capacity-preflight.shared.sh" --profile-path "$REPO_ROOT/examples/fixtures/runtime-capacity-profile.json" --required-accelerator-mib 8000 --required-system-mib 8000 --required-disk-mib 8000 --reserve-mib 1000 --json)" || return 1
+  python3 - "$output" <<'PY' || return 1
+import json, sys
+value = json.loads(sys.argv[1])
+assert value["Decision"] == "ready"
+assert value["NetworkUsed"] is False and value["FilesWritten"] is False
+assert value["ProcessesTerminated"] is False and value["DriverOrServiceChanged"] is False
+PY
+  ! "$REPO_ROOT/scripts/runtime-capacity-preflight.shared.sh" --profile-path "$REPO_ROOT/examples/fixtures/runtime-capacity-profile.json" --required-accelerator-mib 16000 --required-system-mib 8000 --required-disk-mib 8000 --reserve-mib 1000 --json >/dev/null 2>&1
 }
 
 test_media_onboarding_and_quantization_foundations() {
@@ -2166,6 +2222,8 @@ run_test "ComfyUI setup guide preserves the validated secure provider profile" t
 run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
 run_test "desktop sidecar IPC policy rejects hostile messages" test_desktop_sidecar_ipc_policy
 run_test "core update policy fails closed before cryptographic admission" test_core_update_policy
+run_test "workflow reliability threat model and data lifecycle fail closed" test_workflow_reliability_and_data_lifecycle
+run_test "provider performance evidence and capacity preflight fail closed" test_provider_evidence_and_capacity
 run_test "media onboarding and quantization foundations fail closed" test_media_onboarding_and_quantization_foundations
 
 if [ "$FAILED" -eq 1 ]; then

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed capacity decision before a model download, load, or benchmark.",
+  "requiredProfileFields": ["schemaVersion", "platform", "availableSystemMemoryMiB", "availableDiskMiB", "accelerator", "competingWorkloadDetected"],
+  "requiredAcceleratorFields": ["vendor", "model", "totalMemoryMiB", "freeMemoryMiB", "utilizationPercent", "measurementSource"],
+  "decisions": ["ready", "defer", "measurement-required", "insufficient-capacity"],
+  "rules": {
+    "unknownRequiredMeasurement": "measurement-required",
+    "competingWorkload": "defer",
+    "acceleratorUtilizationAtOrAboveLimit": "defer",
+    "insufficientMemoryOrDisk": "insufficient-capacity",
+    "terminateCompetingProcess": false,
+    "installDriver": false,
+    "changeService": false
+  },
+  "privacy": {
+    "includeProcessNames": false,
+    "includeMachineName": false,
+    "includeUserName": false,
+    "includeRawPath": false
+  }
+}
