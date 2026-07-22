@@ -4637,8 +4637,11 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $artifactContractPath = Join-Path $repoRoot "config/quantized-artifact-manifest-contract.json"
     $matrixPath = Join-Path $repoRoot "config/quantization-support-matrix.json"
     $plannerPath = Join-Path $repoRoot "scripts/quantization-planner.py"
+    $engineRegistryPath = Join-Path $repoRoot "config/inference-engine-registry.json"
+    $engineDocPath = Join-Path $repoRoot "docs/inference-engine-architecture.md"
+    $engineEvidencePath = Join-Path $repoRoot "examples/inference-engine-validation.md"
 
-    foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath)) {
+    foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath, $engineRegistryPath, $engineDocPath, $engineEvidencePath)) {
         Assert-True -Condition (Test-Path -LiteralPath $path) -Message "Roadmap foundation file should exist: $path"
     }
 
@@ -4646,6 +4649,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $plan = Get-Content -LiteralPath $planContractPath -Raw | ConvertFrom-Json
     $artifact = Get-Content -LiteralPath $artifactContractPath -Raw | ConvertFrom-Json
     $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
+    $engines = Get-Content -LiteralPath $engineRegistryPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $image.schemaVersion -Expected 1 -Message "Image onboarding contract should be schema v1."
     Assert-True -Condition (-not $image.externalServerRequired -and $image.executionDefault -eq "dry-run") -Message "Consumer image onboarding should be local and dry-run first."
     Assert-True -Condition (-not $image.discovery.silentCpuFallbackAllowed) -Message "Image onboarding should reject silent CPU fallback."
@@ -4656,6 +4660,25 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-Equal -Actual $matrix.defaultDecision -Expected "no-safe-recommendation" -Message "Unknown quantization compatibility should fail closed."
     foreach ($format in @("gguf", "mlx", "awq", "gptq", "fp8", "int4")) {
         Assert-True -Condition (@($matrix.formats | Where-Object { $_.format -eq $format }).Count -eq 1) -Message "Quantization matrix should include $format."
+    }
+    Assert-Equal -Actual $engines.schemaVersion -Expected 1 -Message "Inference engine registry should be schema v1."
+    Assert-Equal -Actual ($engines.layers -join ",") -Expected "capability,provider-contract,inference-engine,hardware-backend,model-artifact" -Message "Inference engine registry should preserve layer separation."
+    Assert-True -Condition (-not $engines.selection.silentCpuFallbackAllowed -and -not $engines.selection.evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed) -Message "Engine selection should reject silent fallback and cross-profile evidence inheritance."
+    $llama = @($engines.engines | Where-Object { $_.id -eq "llama.cpp" })[0]
+    Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "hip" })[0].status) -Expected "validated-exact-profile" -Message "Only the exact llama.cpp HIP profile should be validated."
+    Assert-Equal -Actual @($llama.backends | Where-Object { $_.id -eq "vulkan" }).Count -Expected 0 -Message "Failed Vulkan backend must remain documentation-only and absent from the active registry."
+    Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "sycl" })[0].status) -Expected "parked-hardware-required" -Message "Intel SYCL should remain parked pending hardware."
+    $openvino = @($engines.engines | Where-Object { $_.id -eq "openvino-genai" })[0]
+    $ipex = @($engines.engines | Where-Object { $_.id -eq "ipex-llm" })[0]
+    $lmStudio = @($engines.engines | Where-Object { $_.id -eq "lm-studio" })[0]
+    Assert-Equal -Actual $openvino.status -Expected "parked-hardware-required" -Message "OpenVINO GenAI should remain parked pending Intel hardware."
+    Assert-Equal -Actual $ipex.status -Expected "retired" -Message "Archived IPEX-LLM should be retired."
+    Assert-True -Condition ($lmStudio.status -eq "optional-external-api" -and -not $lmStudio.redistributionAllowedByHaven42 -and -not $lmStudio.embeddingAllowedByHaven42) -Message "LM Studio must remain optional, API-only, and unbundled."
+    $candidateScriptNames = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "scripts") -File -Recurse | Select-Object -ExpandProperty Name)
+    Assert-True -Condition (-not (($candidateScriptNames -join "`n") -match '(?i)(ipex|openvino|sycl|lm-studio|vulkan)')) -Message "Retired, parked, optional, and failed engines must not ship scripts or harnesses."
+    $engineDoc = Get-Content -LiteralPath $engineDocPath -Raw
+    foreach ($marker in @("provider contract", "failed candidates leave documentation only", "Parked", "Optional external API", "Retired")) {
+        Assert-True -Condition ($engineDoc -match [regex]::Escape($marker)) -Message "Inference engine architecture should retain marker: $marker"
     }
 
     $capabilities = Get-Content -LiteralPath (Join-Path $repoRoot "config/capabilities.json") -Raw
@@ -4679,7 +4702,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $wrapper)) -Message "OS-aware quantization wrapper should exist: $wrapper"
     }
 
-    foreach ($doc in @("docs/local-image-provider-onboarding.md", "docs/local-audio-provider-candidates.md", "docs/local-video-provider-candidates.md", "docs/generative-media-consent-policy.md", "docs/hardware-adaptive-quantization.md")) {
+    foreach ($doc in @("docs/local-image-provider-onboarding.md", "docs/local-audio-provider-candidates.md", "docs/local-video-provider-candidates.md", "docs/generative-media-consent-policy.md", "docs/hardware-adaptive-quantization.md", "docs/inference-engine-architecture.md", "examples/inference-engine-validation.md")) {
         $content = Get-Content -LiteralPath (Join-Path $repoRoot $doc) -Raw
         Assert-True -Condition ($content -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "Roadmap evidence should not contain private endpoints: $doc"
         Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match [regex]::Escape($doc)) -Message "Roadmap foundation doc should be mapped to the wiki: $doc"
