@@ -26,6 +26,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — local music/audio research only.
 - Milestone 25 — local video research only.
+- Milestone 26 — hardware-adaptive model quantization and trusted artifact selection.
 
 ## Support Model
 

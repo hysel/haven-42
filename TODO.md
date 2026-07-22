@@ -459,3 +459,16 @@
 - [ ] Define `media.video.create`, typed MP4/WebM artifacts, discovery, and a dry-run-first adapter only after an exact provider profile passes every external gate.
 - [ ] Ship no video scripts, adapters, harnesses, templates, workflows, configuration, registry entries, runtime files, or installer automation for a failed or documentation-only candidate.
 - [ ] Expose video generation in the unified UI only after provider promotion, native evidence, consent, cleanup, packaging, and exact-SHA hosted checks pass.
+
+## Milestone 26: Hardware-Adaptive Model Quantization
+
+- [ ] Define versioned quantization-plan and artifact-manifest contracts with immutable source identity, license, hashes, pinned tools, recipe parameters, runtime compatibility, local storage, and cleanup state.
+- [ ] Extend sanitized hardware profiling with accelerator capabilities, usable memory, runtime and driver versions, instruction support, storage headroom, context target, concurrency, and workload lane.
+- [ ] Implement dry-run selection that prefers a trusted compatible pre-quantized artifact and explains when local conversion is unnecessary or unsafe.
+- [ ] Define explicit support matrices for GGUF/Ollama or llama.cpp, Apple Silicon MLX, and accelerator-specific AWQ, GPTQ, FP8, or INT4 paths without treating equal bit counts as interchangeable.
+- [ ] Add provenance, checksum, derivative-license, redistribution, calibration-data privacy, download-size, temporary-storage, compute-time, and cleanup disclosures before conversion.
+- [ ] Define comparative gates for load time, first-token latency, throughput, peak memory, disk use, context stability, accelerator use, general capability quality, tool calls, and engineering workflow reliability.
+- [ ] Validate one disposable Linux NVIDIA GGUF/Ollama path first; notify the user before every phase that needs the local Ollama server.
+- [ ] Validate Windows NVIDIA, Windows Intel, Windows AMD, and Apple Silicon paths independently, keeping physical Mac testing last.
+- [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
+- [ ] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.

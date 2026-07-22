@@ -2,7 +2,7 @@
 
 ## Status
 
-The repository is in early implementation stage. Milestones 1 through 21 are complete for their defined supported-surface, generated-fixture, workflow-foundation, and general-capability scopes. Continue, Aider, and OpenCode form the maintained surface set; failed or retired integrations are removed rather than carried as partial implementations. OpenHands remains a documentation-only candidate with a defined but unimplemented isolation boundary. Milestone 22 is in progress with its Tauri/private-IPC desktop architecture selected; implementation remains gated by dependency, security, packaging, and cross-platform evidence. Milestone 23 makes the existing Linux image capability visible while evidence-gating native desktop profiles. Milestones 24 and 25 are documentation-only future expansions for local music/audio and video generation.
+The repository is in early implementation stage. Milestones 1 through 21 are complete for their defined supported-surface, generated-fixture, workflow-foundation, and general-capability scopes. Continue, Aider, and OpenCode form the maintained surface set; failed or retired integrations are removed rather than carried as partial implementations. OpenHands remains a documentation-only candidate with a defined but unimplemented isolation boundary. Milestone 22 is in progress with its Tauri/private-IPC desktop architecture selected; implementation remains gated by dependency, security, packaging, and cross-platform evidence. Milestone 23 makes the existing Linux image capability visible while evidence-gating native desktop profiles. Milestones 24 and 25 are documentation-only future expansions for local music/audio and video generation. Milestone 26 plans evidence-gated hardware-adaptive model quantization and trusted artifact selection.
 
 ## Stage Status
 
@@ -34,6 +34,7 @@ The repository is in early implementation stage. Milestones 1 through 21 are com
 | Milestone 23: Native Local Image Generation | In progress | The pinned Linux ComfyUI/SDXL provider and typed adapter are live-validated; consumer-local Windows NVIDIA, Intel XPU, AMD, and Apple Silicon profiles remain independently evidence-gated. |
 | Milestone 24: Local Music And Audio Generation | Planned | Evaluate local music providers and hardware profiles without shipping any adapter, installer, model configuration, or harness until the exact provider, license, operating system, accelerator, and operation pass the promotion gates. |
 | Milestone 25: Local Video Generation | Planned | Evaluate consumer-local text-to-video and image-to-video providers, licensing, identity consent, artifacts, and native hardware profiles without shipping executable integration before promotion. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Planned | Select or reproducibly create a trusted model artifact for the user's exact hardware and runtime, then promote it only after resource, quality, license, and workflow validation. |
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -784,3 +785,42 @@ Exit criteria:
 6. Add the promoted provider to the UI only after offline fixtures, native live evidence, consent, cleanup, packaging, and exact-SHA hosted checks pass.
 
 Official candidate references: [HunyuanVideo 1.5](https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5), [Wan2.2](https://github.com/Wan-Video/Wan2.2), [ComfyUI Wan2.2 workflow](https://docs.comfy.org/tutorials/video/wan/wan2_2), [LTX-2.3 system requirements](https://docs.ltx.io/open-source-model/getting-started/system-requirements), [LTX pipelines](https://github.com/Lightricks/LTX-2/blob/main/packages/ltx-pipelines/README.md), and [LTX license](https://github.com/Lightricks/LTX-2/blob/main/LICENSE).
+
+## Milestone 26: Hardware-Adaptive Model Quantization
+
+Goal: Give an end user a faster and more reliable local-model experience by selecting a trusted existing quantization or reproducibly creating a local derivative that matches the user's exact hardware, runtime, workload, and quality requirements.
+
+Scope:
+
+- Extend hardware discovery beyond a coarse resource tier to include accelerator vendor and model, usable VRAM or unified memory, CPU architecture and instruction support, system RAM, available storage, model runtime, driver/runtime versions, expected context, concurrency, and workload lane.
+- Prefer an official or otherwise independently trusted pre-quantized artifact when an exact compatible option exists. Local quantization is a fallback, not an automatic first step.
+- Evaluate runtime-specific formats and methods independently, including GGUF quantizations for llama.cpp/Ollama, MLX quantizations for Apple Silicon, and compatible weight-only or reduced-precision formats such as AWQ, GPTQ, FP8, or INT4 only where the selected backend and accelerator explicitly support them.
+- Never infer compatibility from a bit count alone. Quantization method, kernel support, model architecture, expert layout, KV-cache precision, context target, batch size, and CPU/GPU offload can materially change fit and performance.
+- Resolve every source model and input artifact to an immutable revision, verify checksums where published, inspect model and dataset licenses, and record whether derivative creation and redistribution are permitted.
+- Keep source weights and generated derivatives outside the replaceable application and repository trees. Never overwrite the source artifact; retain a manifest that records source revision, input hashes, tool versions, parameters, output hashes, format, license, and intended runtime.
+- Require explicit consent before downloading source weights or beginning a potentially long conversion. Disclose expected download size, temporary and final storage, estimated memory, compute time, network use, and cleanup options.
+- Do not use private repositories, prompts, conversations, or user documents as calibration data by default. Any calibration corpus must have recorded provenance, license, privacy classification, and explicit user approval.
+- Measure cold-load time, time to first token, tokens per second, peak VRAM or unified memory, peak system RAM, disk size, accelerator use, context stability, and concurrent-session behavior on the target machine.
+- Compare the candidate against its higher-precision source or a trusted baseline using the exact intended lanes: general chat, summarization, tool calling, read-only engineering work, and approved-write workflows where applicable. A memory or speed pass cannot compensate for unacceptable quality loss or malformed tool behavior.
+- Generate a recommendation with alternatives and a confidence level. The user chooses whether to adopt the derivative; the system preserves the previous known-good model/configuration for rollback.
+- Treat each model revision, quantization recipe, runtime version, operating system, accelerator, context target, and operation as separate evidence. Never promote one combination based on another combination's result.
+- Apply the repository's pass-before-ship rule: failed or incomplete quantization candidates leave only a concise sanitized decision record and add no scripts, conversion harnesses, runtime configuration, model artifacts, or active catalog entries.
+
+Exit criteria:
+
+- A dry-run can explain whether the best choice is an existing trusted artifact, a local derivative, or no safe recommendation, without downloading or changing model state.
+- A local quantization plan is reproducible from immutable source identifiers, verified inputs, pinned tools, explicit parameters, and a machine-readable manifest.
+- The workflow refuses unsupported accelerator/runtime/format combinations and detects unexpected CPU fallback or excessive memory pressure.
+- The candidate passes resource, functional, quality, tool-use, cleanup, and rollback gates on the exact target profile before it becomes selectable as validated.
+- Machine-specific paths, hardware identifiers, endpoints, calibration content, and model files remain local and are excluded from commits and release packages.
+- The unified UI can disclose the tradeoffs, request approval, show progress and storage use, compare measured results, activate the selected artifact, and restore the previous known-good configuration.
+
+### Recommended Implementation Order
+
+1. Define a versioned quantization-plan and quantized-artifact manifest contract, including immutable source identity, license, hashes, recipe, runtime compatibility, local storage, and cleanup state.
+2. Extend hardware and runtime profiling with the exact inputs needed for format selection, context planning, offload, and capacity checks while keeping reports sanitized.
+3. Implement dry-run selection of trusted existing artifacts before adding any local conversion path.
+4. Define bounded benchmark and quality gates that compare source and candidate artifacts across the user's intended capability and engineering lanes.
+5. Validate one Linux NVIDIA GGUF/Ollama path in a disposable environment, using the user's local Ollama host only after explicit test-phase notice and approval.
+6. Add Windows NVIDIA, Windows Intel, Windows AMD, and Apple Silicon paths only when an exact runtime and format have credible native support; keep physical Mac validation last.
+7. Add conversion, activation, rollback, cleanup, and UI integration only for exact profiles that pass all promotion gates.

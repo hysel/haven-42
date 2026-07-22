@@ -19,8 +19,9 @@ Continue, Aider, and OpenCode are the maintained engineering surfaces. General t
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22 is
 in progress with Tauri 2, private typed sidecar IPC, and cross-platform
 packaging selected for the local web UI and task composition. Milestone 23 owns native
-local image profiles, and Milestones 24 and 25 track documentation-only music,
-audio, and video research. Broader surface and provider parity remains
+local image profiles, Milestones 24 and 25 track documentation-only music,
+audio, and video research, and Milestone 26 plans hardware-adaptive model
+quantization. Broader surface and provider parity remains
 evidence-gated.
 
 Capability Evidence Contract v2 now prevents model readiness from being

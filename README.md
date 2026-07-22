@@ -53,6 +53,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; consumer-local Windows and macOS profiles remain gated. |
 | Milestone 24: Local Music And Audio Generation | Planned | Evaluate local providers, licenses, hardware profiles, safety, and typed audio artifacts. |
 | Milestone 25: Local Video Generation | Planned | Evaluate consumer-local image-to-video and text-to-video candidates without premature integration. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Planned | Select trusted quantizations or reproducibly create and validate local derivatives for the user's exact hardware and runtime. |
 
 See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
 
