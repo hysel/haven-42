@@ -1882,16 +1882,21 @@ test_desktop_runtime_and_ipc_contracts() {
   dependency="$REPO_ROOT/docs/desktop-runtime-dependency-evaluation.md"
   resolution="$REPO_ROOT/docs/desktop-dependency-resolution-evidence.md"
   contract_doc="$REPO_ROOT/docs/desktop-ipc-contract.md"
+  storage_doc="$REPO_ROOT/docs/desktop-storage-and-updates.md"
   ipc="$REPO_ROOT/config/desktop-ipc-contract.json"
   policy="$REPO_ROOT/config/desktop-capability-policy.json"
+  storage="$REPO_ROOT/config/desktop-storage-contract.json"
+  update="$REPO_ROOT/config/core-update-manifest-contract.json"
 
-  python3 - "$ipc" "$policy" <<'PY' || return 1
+  python3 - "$ipc" "$policy" "$storage" "$update" <<'PY' || return 1
 import json
 import pathlib
 import sys
 
 ipc = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
 policy = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+storage = json.loads(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8"))
+update = json.loads(pathlib.Path(sys.argv[4]).read_text(encoding="utf-8"))
 assert ipc["schemaVersion"] == 1
 assert ipc["transport"]["kind"] == "stdio-json-lines"
 assert ipc["transport"]["listeningSocket"] is False
@@ -1913,6 +1918,31 @@ assert len(policy["tauriAuthority"]["allowedRendererCommands"]) == 7
 assert policy["networkPolicy"]["telemetry"] is False
 assert policy["networkPolicy"]["crashUpload"] is False
 assert policy["headlessSeparation"]["inheritsDesktopEvidence"] is False
+assert storage["schemaVersion"] == 1
+assert storage["resolutionRules"]["resolveWithNativePlatformApis"] is True
+assert storage["resolutionRules"]["persistUnexpandedEnvironmentPaths"] is False
+for platform in ("windows", "linux", "macos"):
+    values = storage["platforms"][platform]
+    for field in ("immutableApplication", "configuration", "state", "cache", "managedModels", "defaultArtifacts", "updateDownloads", "stagedVersions", "activationJournal", "credentials"):
+        assert values[field]
+assert "user-content" in storage["lifecycleRules"]["updateMustPreserve"]
+assert "provider-data" in storage["lifecycleRules"]["updateMustPreserve"]
+assert storage["lifecycleRules"]["rollbackMustNotDowngradeUserDataWithoutCompatibleMigration"] is True
+assert update["schemaVersion"] == 1
+assert update["transport"]["movingBranchAllowed"] is False
+assert update["transport"]["gitPullAllowed"] is False
+assert update["transport"]["defaultUpdateMode"] == "disabled"
+assert update["manifest"]["releaseTagMustBeImmutable"] is True
+assert update["manifest"]["releaseCommitMustBeFullSha"] is True
+for field in ("sizeBytes", "sha256", "signatureOrAttestation", "sbomUrl", "thirdPartyNoticesUrl"):
+    assert field in update["asset"]["required"]
+assert update["activation"]["atomic"] is True
+assert update["activation"]["inPlaceOverwriteAllowed"] is False
+assert update["activation"]["automaticRollbackOnHealthFailure"] is True
+assert update["activation"]["userDataIncludedInEnginePackage"] is False
+assert update["activation"]["modelsIncludedInEnginePackage"] is False
+assert update["privacy"]["telemetry"] is False
+assert update["privacy"]["updateCheckSendsHardwareProfile"] is False
 PY
 
   grep -q "architecture-approved but not admitted for shipment" "$dependency" &&
@@ -1948,9 +1978,22 @@ PY
     grep -q "single-use" "$contract_doc" &&
     grep -q "Required Negative Tests" "$contract_doc" &&
     grep -q "headless-loopback" "$contract_doc" &&
+    grep -q "immutable engine" "$storage_doc" &&
+    grep -q "user-owned" "$storage_doc" &&
+    grep -q "Windows Credential Manager" "$storage_doc" &&
+    grep -q "Secret Service" "$storage_doc" &&
+    grep -q "macOS Keychain" "$storage_doc" &&
+    grep -q 'unattended `git pull`' "$storage_doc" &&
+    grep -q "Atomically" "$storage_doc" &&
     grep -q "docs/desktop-runtime-dependency-evaluation.md" "$REPO_ROOT/config/wiki-sync.tsv" &&
     grep -q "docs/desktop-dependency-resolution-evidence.md" "$REPO_ROOT/config/wiki-sync.tsv" &&
-    grep -q "docs/desktop-ipc-contract.md" "$REPO_ROOT/config/wiki-sync.tsv"
+    grep -q "docs/desktop-ipc-contract.md" "$REPO_ROOT/config/wiki-sync.tsv" &&
+    grep -q "docs/desktop-storage-and-updates.md" "$REPO_ROOT/config/wiki-sync.tsv"
+}
+
+test_desktop_sidecar_ipc_policy() {
+  output="$(python3 "$REPO_ROOT/scripts/desktop-ipc-policy.py" --self-test 2>&1)" || return 1
+  printf '%s\n' "$output" | grep -q "passed: 29 cases"
 }
 
 run_test "model recommendation catalog has valid schema" test_catalog_schema
@@ -2014,6 +2057,7 @@ run_test "wiki synchronization is deterministic and hosted" test_wiki_synchroniz
 run_test "model residency policy is applied across runtime and config paths" test_model_residency_policy_contract
 run_test "ComfyUI setup guide preserves the validated secure provider profile" test_comfyui_setup_guide_contract
 run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
+run_test "desktop sidecar IPC policy rejects hostile messages" test_desktop_sidecar_ipc_policy
 
 if [ "$FAILED" -eq 1 ]; then
   printf 'Test run failed. Tier=%s; %s tests executed; %s skipped; %s seconds.\n' "$TEST_TIER" "$TEST_COUNT" "$SKIPPED_COUNT" "$((SECONDS - RUN_STARTED_SECONDS))" >&2

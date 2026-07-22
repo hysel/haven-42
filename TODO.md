@@ -397,16 +397,18 @@
 - [x] Define a versioned desktop IPC schema and Tauri capability allowlist that reject arbitrary commands, unknown workflow/capability IDs, malformed envelopes, unauthorized paths, and remote UI navigation.
 - [x] Resolve and audit the exact disposable Windows x64 npm, Cargo, and PyInstaller candidate graphs without admitting their manifests, locks, tools, or outputs.
 - [ ] Resolve the five Windows-reachable unmaintained `rust-unic` advisories through an upstream update or a time-bounded reviewed exception, then repeat the audit with an attested or controlled source-built tool.
-- [ ] Run native `cargo check`, minimal Tauri build, SBOM, and package inspection on a disposable Windows runner with Microsoft C++ build tools before admitting runtime files.
+  - Upstream commit `dd725f4b13c3` removes the chain and passed the controlled disposable probe; keep this open until the fix ships in a reviewed Tauri release.
+- [x] Run native `cargo check`, minimal Tauri build, SBOM, and package inspection on a disposable Windows runner with Microsoft C++ build tools before admitting runtime files.
 - [ ] Resolve and lock the full npm, Cargo, Python, native-library, and packaging dependency graph; generate vulnerability, provenance, checksum, and third-party-license reports before runtime admission.
 - [ ] Implement native bridge and sidecar negative tests for malformed/oversized messages, command injection, path/grant escape, approval replay, remote content, cancellation, lifecycle, and privilege boundaries.
-- [ ] Define Windows, Linux, and macOS application, configuration, state, workspace, artifact, cache, update, and rollback locations without mixing immutable engine and user-owned data.
+  - The offline engine-side validator now passes hostile message, operation, grant, approval, cancellation, and event tests; native bridge, canonical path, WebView, process lifecycle, and privilege tests remain open until a runtime is admissible.
+- [x] Define Windows, Linux, and macOS application, configuration, state, workspace, artifact, cache, update, and rollback locations without mixing immutable engine and user-owned data.
 - [ ] Add platform package promotion gates for Windows x64/ARM64, Linux x64/ARM64 on a bounded distribution matrix, and macOS Apple Silicon/Intel, with a physical Mac reserved for the final public-release flow.
 - [ ] Pursue Microsoft Store or SignPath Foundation Windows signing before paid Artifact Signing; defer Apple Developer enrollment until the first public macOS beta is otherwise ready.
-- [ ] Define a versioned core-engine update manifest for immutable Windows, macOS, and Linux assets published through GitHub Releases.
+- [x] Define a versioned core-engine update manifest for immutable Windows, macOS, and Linux assets published through GitHub Releases.
 - [ ] Add opt-in automatic stable-release checks, downloads, and installation without using unattended `git pull` or a moving branch.
 - [ ] Verify downloaded engine assets with checksums and a release signature or attestation before staging or activation.
-- [ ] Keep engine binaries separate from user configuration, workspaces, models, provider data, generated artifacts, and evidence during updates.
+- [x] Keep engine binaries separate from user configuration, workspaces, models, provider data, generated artifacts, and evidence in the versioned storage and update contracts.
 - [ ] Add compatibility preflight, atomic activation, post-update health checks, automatic rollback, retained-version cleanup, offline behavior, and a disabled-update mode.
 - [ ] Implement the unified UI over the Milestone 20 workflow foundation and Milestone 21 capability registry.
 - [ ] Add first-run intent navigation, capability availability, evidence states, and policy disclosures.

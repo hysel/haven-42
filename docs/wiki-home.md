@@ -21,6 +21,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Install the validated Linux image provider: [[ComfyUI Image Provider Setup|ComfyUI-Image-Provider-Setup]]
 - Prepare a release: [[Release Guidance|Release-Guidance]]
 - Choose Fast, Integration, or Full validation: [[Test Tiers|Test-Tiers]]
+- Review desktop storage, update, and rollback boundaries: [[Desktop Storage And Updates|Desktop-Storage-And-Updates]]
 
 ## Current Roadmap
 

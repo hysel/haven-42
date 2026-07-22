@@ -83,3 +83,9 @@ Before any runtime code is admitted, automated tests must prove rejection of:
 10. headless-loopback settings appearing in the ordinary desktop build.
 
 These contract checks are necessary but not sufficient. Native Windows, Linux, and macOS build/install/launch/shutdown/uninstall tests, WebView inspection, dependency audits, sidecar packaging, state preservation, and signing gates remain separate promotion requirements.
+
+## Sidecar Policy Reference
+
+`scripts/desktop-ipc-policy.py` implements the engine-side, standard-library admission boundary and an offline hostile self-test. It rejects malformed and oversized frames, invalid UTF-8, extra or forbidden command/path/URL fields, wrong schemas, duplicate active requests, unknown or non-UI operations, unavailable execution, invalid grants, missing/replayed/expired/mismatched approvals, cross-session cancellation, and invalid event sequences or terminal events.
+
+This is sidecar policy evidence only. It is not a listening service, accepts no production message-processing CLI mode, starts no process, and grants no filesystem or network authority. The future native Rust bridge must independently enforce the same rules plus canonical path, symlink/reparse, protected-directory, WebView, process lifecycle, and privilege tests against the admitted runtime. No native bridge test is marked complete until that code exists and passes on each promoted platform.

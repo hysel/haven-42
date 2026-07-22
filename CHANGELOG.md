@@ -11,6 +11,10 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Defined cross-platform desktop storage ownership and a strict signed immutable-release update/rollback manifest contract without admitting an updater or runtime scaffold.
+- Recorded a successful controlled-source Windows x64 Tauri native-build probe for the upstream `urlpattern 0.6` fix while keeping the unpublished dependency and all runtime files blocked from shipment.
+- Added a standard-library desktop sidecar IPC admission policy with hostile offline tests while leaving native bridge and lifecycle gates explicitly open.
+
 - Added timed Fast, Integration, and Full test tiers, removed duplicate hosted validation steps, and added exact-clean-tree Full-test receipts so pre-push can skip only an identical local rerun while GitHub remains authoritative.
 - Replaced family-bound Ollama-only discovery with a source-neutral schema and shared engine supporting independent Ollama and Hugging Face queries, immutable revisions, license and gated metadata, formats, quantization signals, runtime candidates, and candidate-only trust gates.
 - Recorded the disposable Windows x64 desktop dependency resolution: npm and PyInstaller graphs passed integrity, license, installation, and vulnerability checks, while Windows-reachable unmaintained Rust crates, Linux-only GTK3/glib findings, audit-tool provenance, and the unrun native Tauri build blocked runtime admission.

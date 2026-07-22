@@ -4524,9 +4524,12 @@ Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
     $dependencyPath = Join-Path $repoRoot "docs/desktop-runtime-dependency-evaluation.md"
     $resolutionPath = Join-Path $repoRoot "docs/desktop-dependency-resolution-evidence.md"
     $contractDocPath = Join-Path $repoRoot "docs/desktop-ipc-contract.md"
+    $storageDocPath = Join-Path $repoRoot "docs/desktop-storage-and-updates.md"
     $ipcPath = Join-Path $repoRoot "config/desktop-ipc-contract.json"
     $policyPath = Join-Path $repoRoot "config/desktop-capability-policy.json"
-    foreach ($path in @($dependencyPath, $resolutionPath, $contractDocPath, $ipcPath, $policyPath)) {
+    $storagePath = Join-Path $repoRoot "config/desktop-storage-contract.json"
+    $updatePath = Join-Path $repoRoot "config/core-update-manifest-contract.json"
+    foreach ($path in @($dependencyPath, $resolutionPath, $contractDocPath, $storageDocPath, $ipcPath, $policyPath, $storagePath, $updatePath)) {
         Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Desktop contract asset should exist: $path"
     }
 
@@ -4535,6 +4538,8 @@ Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
     $contractDoc = Get-Content -LiteralPath $contractDocPath -Raw
     $ipc = Get-Content -LiteralPath $ipcPath -Raw | ConvertFrom-Json
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+    $storage = Get-Content -LiteralPath $storagePath -Raw | ConvertFrom-Json
+    $update = Get-Content -LiteralPath $updatePath -Raw | ConvertFrom-Json
     $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
 
     foreach ($marker in @("architecture-approved but not admitted for shipment", "2.11.5", "19.2.8", "8.1.5", "7.0.2", "24.18.0", "1.97.1", "6.21.0", "not a cross-compiler")) {
@@ -4575,12 +4580,55 @@ Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
     Assert-True -Condition (-not $policy.networkPolicy.telemetry -and -not $policy.networkPolicy.crashUpload) -Message "Desktop policy should disable telemetry and crash uploads."
     Assert-True -Condition (-not $policy.headlessSeparation.inheritsDesktopEvidence) -Message "Headless mode must not inherit desktop evidence."
 
+    Assert-Equal -Actual $storage.schemaVersion -Expected 1 -Message "Desktop storage contract should be schema v1."
+    Assert-True -Condition ($storage.resolutionRules.resolveWithNativePlatformApis) -Message "Desktop paths should use native platform resolution."
+    Assert-True -Condition (-not $storage.resolutionRules.persistUnexpandedEnvironmentPaths) -Message "Desktop paths should not persist unresolved environment values."
+    foreach ($platform in @("windows", "linux", "macos")) {
+        $platformConfig = $storage.platforms.$platform
+        foreach ($field in @("immutableApplication", "configuration", "state", "cache", "managedModels", "defaultArtifacts", "updateDownloads", "stagedVersions", "activationJournal", "credentials")) {
+            Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($platformConfig.$field)) -Message "Desktop storage should define $platform $field."
+        }
+    }
+    Assert-True -Condition ($storage.lifecycleRules.updateMustPreserve -contains "user-content" -and $storage.lifecycleRules.updateMustPreserve -contains "provider-data") -Message "Updates must preserve user and provider data."
+    Assert-True -Condition ($storage.lifecycleRules.rollbackMustNotDowngradeUserDataWithoutCompatibleMigration) -Message "Rollback must protect user-data compatibility."
+
+    Assert-Equal -Actual $update.schemaVersion -Expected 1 -Message "Core update manifest contract should be schema v1."
+    Assert-True -Condition (-not $update.transport.movingBranchAllowed -and -not $update.transport.gitPullAllowed) -Message "Core updates should reject moving branches and git pull."
+    Assert-Equal -Actual $update.transport.defaultUpdateMode -Expected "disabled" -Message "Automatic updates should default disabled."
+    Assert-True -Condition ($update.manifest.releaseTagMustBeImmutable -and $update.manifest.releaseCommitMustBeFullSha) -Message "Update manifests should bind immutable releases and commits."
+    foreach ($field in @("sizeBytes", "sha256", "signatureOrAttestation", "sbomUrl", "thirdPartyNoticesUrl")) {
+        Assert-True -Condition ($update.asset.required -contains $field) -Message "Update assets should require $field."
+    }
+    Assert-True -Condition ($update.activation.atomic -and -not $update.activation.inPlaceOverwriteAllowed -and $update.activation.automaticRollbackOnHealthFailure) -Message "Core activation should be atomic, side-by-side, and rollback capable."
+    Assert-True -Condition (-not $update.activation.userDataIncludedInEnginePackage -and -not $update.activation.modelsIncludedInEnginePackage) -Message "Core packages must exclude user data and models."
+    Assert-True -Condition (-not $update.privacy.telemetry -and -not $update.privacy.updateCheckSendsHardwareProfile) -Message "Update checks should be telemetry-free and minimize data."
+
     foreach ($marker in @("renderer is untrusted input", "raw paths", "single-use", "Required Negative Tests", "headless-loopback")) {
         Assert-True -Condition ($contractDoc -match [regex]::Escape($marker)) -Message "Desktop IPC guide should retain marker: $marker"
+    }
+    $storageDoc = Get-Content -LiteralPath $storageDocPath -Raw
+    foreach ($marker in @("immutable engine", "user-owned", "Windows Credential Manager", "Secret Service", "macOS Keychain", 'unattended `git pull`', "Atomically")) {
+        Assert-True -Condition ($storageDoc -match [regex]::Escape($marker)) -Message "Desktop storage/update guide should retain marker: $marker"
     }
     Assert-True -Condition ($wikiMap -match "docs/desktop-runtime-dependency-evaluation\.md") -Message "Desktop dependency review should be mapped to the wiki."
     Assert-True -Condition ($wikiMap -match "docs/desktop-dependency-resolution-evidence\.md") -Message "Desktop dependency evidence should be mapped to the wiki."
     Assert-True -Condition ($wikiMap -match "docs/desktop-ipc-contract\.md") -Message "Desktop IPC guide should be mapped to the wiki."
+    Assert-True -Condition ($wikiMap -match "docs/desktop-storage-and-updates\.md") -Message "Desktop storage/update guide should be mapped to the wiki."
+}
+
+Invoke-PackTest "desktop sidecar IPC policy rejects hostile messages" {
+    $scriptPath = Join-Path $repoRoot "scripts/desktop-ipc-policy.py"
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if ($python) {
+        $output = @(& $python.Source $scriptPath --self-test 2>&1)
+    }
+    else {
+        $launcher = Get-Command py -ErrorAction SilentlyContinue
+        Assert-True -Condition ($null -ne $launcher) -Message "Python 3 is required for the desktop IPC policy self-test."
+        $output = @(& $launcher.Source -3 $scriptPath --self-test 2>&1)
+    }
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Desktop IPC policy hostile self-test should pass."
+    Assert-True -Condition (($output -join "`n") -match "passed: 29 cases") -Message "Desktop IPC policy should execute every hostile regression case."
 }
 
 if ($failed) {

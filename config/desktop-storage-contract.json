@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "org.haven42.desktop",
+  "description": "Cross-platform ownership and location contract that separates immutable Haven 42 engine assets from user-owned configuration, workspaces, models, artifacts, credentials, caches, updates, and rollback state.",
+  "resolutionRules": {
+    "resolveWithNativePlatformApis": true,
+    "persistUnexpandedEnvironmentPaths": false,
+    "allowUserSelectedLocationsOnlyThroughPathGrants": true,
+    "canonicalizeBeforeUse": true,
+    "createWithUserOnlyPermissionsWhereSupported": true,
+    "followPlatformPackageManagerForImmutableApplication": true
+  },
+  "ownershipClasses": {
+    "immutable-engine": "Versioned application and packaged engine files; never mixed with mutable user data.",
+    "user-configuration": "User preferences and provider references; preserved across update, rollback, repair, and uninstall unless separately approved.",
+    "user-content": "User-selected repositories, inputs, and generated artifacts; never deleted by engine update or ordinary uninstall.",
+    "provider-data": "Models and provider-owned data; retained and removed only through an explicit provider cleanup workflow.",
+    "reconstructible-cache": "Safe to remove while the application is stopped; never the only copy of user content or rollback metadata.",
+    "update-state": "Verified downloads, staged versions, activation journal, and retained rollback versions.",
+    "secret": "Stored through the operating-system credential service, never ordinary configuration files."
+  },
+  "platforms": {
+    "windows": {
+      "immutableApplication": "installer-managed per-user application location; preferred default is FOLDERID_UserProgramFiles/Haven 42",
+      "configuration": "FOLDERID_RoamingAppData/Haven42/config",
+      "state": "FOLDERID_LocalAppData/Haven42/state",
+      "cache": "FOLDERID_LocalAppData/Haven42/cache",
+      "managedModels": "FOLDERID_LocalAppData/Haven42/models",
+      "defaultArtifacts": "FOLDERID_Documents/Haven 42/Artifacts",
+      "updateDownloads": "FOLDERID_LocalAppData/Haven42/updates/downloads",
+      "stagedVersions": "FOLDERID_LocalAppData/Haven42/updates/versions",
+      "activationJournal": "FOLDERID_LocalAppData/Haven42/updates/activation.json",
+      "credentials": "Windows Credential Manager"
+    },
+    "linux": {
+      "immutableApplication": "package-manager location or XDG_DATA_HOME/haven42/versions for a per-user portable install",
+      "configuration": "XDG_CONFIG_HOME/haven42",
+      "state": "XDG_STATE_HOME/haven42",
+      "cache": "XDG_CACHE_HOME/haven42",
+      "managedModels": "XDG_DATA_HOME/haven42/models",
+      "defaultArtifacts": "user-selected XDG documents directory/Haven 42/Artifacts",
+      "updateDownloads": "XDG_CACHE_HOME/haven42/updates/downloads",
+      "stagedVersions": "XDG_DATA_HOME/haven42/versions",
+      "activationJournal": "XDG_STATE_HOME/haven42/update-activation.json",
+      "credentials": "Secret Service compatible keyring; otherwise no persistent secret"
+    },
+    "macos": {
+      "immutableApplication": "signed installer-managed Haven 42.app in the user-selected Applications directory",
+      "configuration": "NSApplicationSupportDirectory/Haven 42/config",
+      "state": "NSApplicationSupportDirectory/Haven 42/state",
+      "cache": "NSCachesDirectory/org.haven42.desktop",
+      "managedModels": "NSApplicationSupportDirectory/Haven 42/models",
+      "defaultArtifacts": "NSDocumentDirectory/Haven 42/Artifacts",
+      "updateDownloads": "NSCachesDirectory/org.haven42.desktop/updates/downloads",
+      "stagedVersions": "NSApplicationSupportDirectory/Haven 42/updates/versions",
+      "activationJournal": "NSApplicationSupportDirectory/Haven 42/state/update-activation.json",
+      "credentials": "macOS Keychain"
+    }
+  },
+  "workspaceRules": [
+    "repositories and user-selected inputs remain in their original user-owned locations",
+    "access requires canonical expiring path grants from the desktop IPC contract",
+    "temporary session workspaces live under state and are never treated as the source repository",
+    "an application update cannot move, rewrite, archive, or delete a workspace"
+  ],
+  "lifecycleRules": {
+    "updateMayReplace": ["immutable-engine", "reconstructible-cache"],
+    "updateMustPreserve": ["user-configuration", "user-content", "provider-data", "secret", "update-state"],
+    "rollbackMayRead": ["update-state", "user-configuration"],
+    "rollbackMustNotDowngradeUserDataWithoutCompatibleMigration": true,
+    "ordinaryUninstallPreserves": ["user-configuration", "user-content", "provider-data"],
+    "explicitCleanupRequiresPreviewAndApproval": true
+  }
+}

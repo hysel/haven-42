@@ -4,7 +4,7 @@
 
 Evaluation date: 2026-07-22
 
-The Milestone 22 desktop stack is **architecture-approved but not admitted for shipment**. This review pins the smallest candidate set so reproducible implementation and platform testing can begin later. It does not add a package manifest, lock file, Rust crate, frontend source tree, installer, or executable runtime. The first disposable Windows resolution is recorded in `docs/desktop-dependency-resolution-evidence.md`; Rust maintenance and native-build blockers prevented runtime admission.
+The Milestone 22 desktop stack is **architecture-approved but not admitted for shipment**. This review pins the smallest candidate set so reproducible implementation and platform testing can begin later. It does not add a package manifest, lock file, Rust crate, frontend source tree, installer, or executable runtime. The disposable Windows evidence is recorded in `docs/desktop-dependency-resolution-evidence.md`. A pinned upstream Tauri source commit removes the Windows `rust-unic` chain and passes a native probe, but the fix is not in a published Tauri release, so runtime admission remains blocked.
 
 Haven 42's pass-before-ship rule applies to the complete resolved dependency graph, not just the direct packages in this document. Exact lock files, checksums, vulnerability reports, license output, and native test evidence are required before a package can be promoted.
 

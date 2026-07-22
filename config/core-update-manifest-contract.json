@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "description": "Signed immutable-release manifest contract for opt-in Haven 42 core-engine updates from GitHub Releases.",
+  "transport": {
+    "source": "GitHub Releases",
+    "httpsOnly": true,
+    "movingBranchAllowed": false,
+    "gitPullAllowed": false,
+    "redirectsRequireHttpsAndApprovedHosts": true,
+    "defaultUpdateMode": "disabled"
+  },
+  "manifest": {
+    "required": [
+      "schemaVersion",
+      "releaseVersion",
+      "channel",
+      "publishedAtUtc",
+      "releaseTag",
+      "releaseCommit",
+      "minimumUpdaterVersion",
+      "compatibility",
+      "assets",
+      "manifestSignature"
+    ],
+    "additionalProperties": false,
+    "releaseTagMustBeImmutable": true,
+    "releaseCommitMustBeFullSha": true,
+    "channels": ["stable", "beta"],
+    "automaticBetaSelection": false
+  },
+  "asset": {
+    "required": [
+      "assetId",
+      "os",
+      "architecture",
+      "targetTriple",
+      "packageType",
+      "downloadUrl",
+      "sizeBytes",
+      "sha256",
+      "signatureOrAttestation",
+      "sbomUrl",
+      "thirdPartyNoticesUrl"
+    ],
+    "additionalProperties": false,
+    "operatingSystems": ["windows", "linux", "macos"],
+    "architectures": ["x64", "arm64", "intel64"],
+    "sha256LowercaseHexLength": 64,
+    "sizeMustMatch": true,
+    "targetTripleMustMatchHost": true,
+    "signatureOrAttestationRequired": true
+  },
+  "compatibility": {
+    "required": [
+      "minimumOperatingSystem",
+      "engineApiVersion",
+      "desktopIpcSchemaVersions",
+      "workflowEnvelopeSchemaVersions",
+      "typedArtifactSchemaVersions",
+      "configurationSchemaVersions"
+    ],
+    "unknownSchemaDecision": "deny",
+    "downgradeRequiresExplicitCompatiblePath": true
+  },
+  "verificationOrder": [
+    "fetch manifest from an approved immutable release URL",
+    "verify manifest signature or repository attestation",
+    "validate strict schema and stable channel policy",
+    "select the exact operating-system architecture and target-triple asset",
+    "check compatibility and available storage before download",
+    "download into the platform update-download directory",
+    "verify exact byte size and SHA-256",
+    "verify asset signature or attestation and provenance",
+    "verify SBOM and third-party notices are present",
+    "stage without touching the active engine or user-owned data",
+    "run staged preflight and health checks",
+    "activate atomically and record the prior version",
+    "run post-activation health checks and roll back automatically on failure"
+  ],
+  "activation": {
+    "atomic": true,
+    "inPlaceOverwriteAllowed": false,
+    "activeVersionSelectedByJournal": true,
+    "retainPreviousKnownGoodVersion": true,
+    "automaticRollbackOnHealthFailure": true,
+    "configurationMigrationMustBeReversibleOrForwardCompatible": true,
+    "userDataIncludedInEnginePackage": false,
+    "modelsIncludedInEnginePackage": false,
+    "providerDataIncludedInEnginePackage": false
+  },
+  "privacy": {
+    "updateCheckSendsHardwareProfile": false,
+    "updateCheckSendsWorkspaceData": false,
+    "updateCheckSendsModelInventory": false,
+    "telemetry": false
+  }
+}

@@ -6,9 +6,35 @@ Evaluation date: 2026-07-22
 
 Status: **blocked; do not admit desktop runtime manifests or scaffolding**.
 
-The npm and PyInstaller candidate graphs resolved cleanly in a disposable Windows workspace. The Cargo graph contains five Windows-reachable unmaintained Rust crates, and this machine lacks the Microsoft C++ build tools required to compile a Tauri application. The universal lock graph also contains Linux-only unmaintained GTK3 crates and an unsound `glib` advisory. These findings do not invalidate the architecture choice, but they fail Haven 42's dependency-admission gate for a shippable runtime.
+The npm and PyInstaller candidate graphs resolved cleanly in a disposable Windows workspace. The released Tauri `2.11.5` graph still contains five Windows-reachable unmaintained Rust crates. Tauri upstream commit `dd725f4b13c30a86b398ccc59eb498f151f461c5` upgrades `urlpattern` to `0.6.0`, removes that chain, and passed a controlled-source audit plus native Windows x64 compile/link probe. The fix is not yet in a published Tauri release, so it is evidence of an available upstream resolution—not a shippable dependency pin.
+
+The universal lock graph still contains Linux-only unmaintained GTK3 crates and an unsound `glib` advisory. Those packages were absent from the Windows x64 target tree but remain a separate Linux promotion blocker. These findings do not invalidate the architecture choice, but no desktop runtime may enter the repository until an official release contains the Windows fix and each target's complete graph passes independently.
 
 No evaluation manifest, lock file, package directory, virtual environment, Rust toolchain, audit binary, probe executable, or build output from this run is shipped in the repository.
+
+## Patched-Source Windows Native Probe
+
+The successful disposable probe is [GitHub Actions run 29934029322](https://github.com/hysel/haven-42/actions/runs/29934029322), built from temporary branch commit `0989f65d5dd423348b6094017c313aa472c2a24d`. The temporary workflow, manifests, locks, sources, generated icon, audit tools, SBOMs, executable, and build output are evaluation-only and are not merged into `main`.
+
+| Check | Result |
+| --- | --- |
+| Runner | GitHub-hosted `windows-2025`, Windows x64 MSVC |
+| Rust / Cargo | `1.97.1`; exact target `x86_64-pc-windows-msvc` |
+| Tauri dependency | Released `tauri 2.11.5` with only `tauri-utils` patched to upstream commit `dd725f4b13c30a86b398ccc59eb498f151f461c5` |
+| Patched graph | 438 lock packages; 256 packages in Windows-targeted Cargo metadata |
+| Removed chain | `urlpattern 0.6.0` present; `unic-char-property`, `unic-char-range`, `unic-common`, `unic-ucd-ident`, and `unic-ucd-version` absent |
+| Controlled audit tool | `cargo-audit 0.22.2`, compiled from its locked crate source on the runner |
+| Cargo audit | Zero known vulnerabilities; 12 universal-lock warnings, none reachable in the Windows x64 target tree |
+| npm audit | Zero known vulnerabilities for the minimal native probe's pinned Tauri CLI graph; the separate full frontend candidate graph remains recorded above |
+| SBOM | CycloneDX Cargo SBOM with 255 components plus a minimal npm CycloneDX SBOM |
+| License inventory | 413 records; the only missing license was the local disposable probe package, not a third-party package |
+| Native checks | `cargo check --locked --target x86_64-pc-windows-msvc` and `tauri build --no-bundle` passed |
+| PE inspection | Unsigned development PE, 11,139,584 bytes, SHA-256 `5fa79a6ff6e819c19ebd726056a6f655281d76aa032627c267853bbb00f0e55f` |
+| Admission | `false`; no bundle, installer, sidecar, renderer, IPC bridge, lifecycle, signing, or product runtime evidence |
+
+The runner's preinstalled Node `22.23.1` and npm `10.9.8` were sufficient only for the minimal `@tauri-apps/cli 2.11.4` native probe. They do not replace the previously resolved exact Node `24.18.0` / npm `11.16.0` full frontend candidate evidence, and a future admitted build must use one pinned toolchain consistently.
+
+The two failed precursor runs are not promotion evidence. The first used an unsupported informational flag after all three audit tools compiled; the second omitted Tauri's required Windows icon resource. Both were corrected only on the disposable branch, and the final run repeated every preceding gate before passing.
 
 ## Scope And Method
 
@@ -126,8 +152,9 @@ Do not add `package.json`, npm lock files, `Cargo.toml`, Cargo lock files, Rust 
 
 The next admissible work is:
 
-1. Repeat the Windows Cargo audit with a controlled, source-built or attested audit tool.
-2. Obtain an upstream resolution or explicitly reviewed time-bounded exception for the five Windows-reachable unmaintained crates. An exception must explain exposure, reachability, alternatives, monitoring, and expiry.
-3. Use a disposable GitHub-hosted Windows runner with the required Microsoft C++ tools to run `cargo check`, a minimal Tauri build, dependency/SBOM generation, and package inspection. Do not install a large compiler toolchain on the maintainer workstation merely to satisfy this gate.
+1. Wait for and review a published Tauri release containing the `urlpattern 0.6` change; do not ship the development-branch patch.
+2. Repeat the complete Windows graph, controlled audit, SBOM, license, native build, and package inspection against that exact release.
+3. Resolve and lock the full frontend, Python sidecar, WebView, native-library, and packaging graph under one pinned build image.
 4. Keep Linux blocked until its GTK3 and `glib` findings are separately resolved or accepted through a Linux-specific review.
-5. Only after those gates pass, propose the smallest non-visual Tauri bridge scaffold for repository admission. Stop for user discussion before implementing visual interface design.
+5. Run the required native bridge, sidecar, lifecycle, path/grant, approval, cancellation, remote-content, and privilege negative tests against actual admitted code.
+6. Only after those gates pass, propose the smallest non-visual Tauri bridge scaffold for repository admission. Stop for user discussion before implementing visual interface design.
