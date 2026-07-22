@@ -49,3 +49,21 @@ Create a local request JSON containing `source`, `target`, `hardwareProfile`, op
 ```
 
 The result always reports `network`, `downloads`, `writes`, `conversion`, and `activation` as false. A `local-derivative` result is only a proposal for a later approved and independently validated workflow.
+
+## Validated Linux NVIDIA Cell
+
+On 2026-07-22, the first disposable trusted-artifact comparison passed on Linux x64 with Ollama 0.32.1 and an NVIDIA 16 GB accelerator profile. The exact comparison used Qwen 3.5 9B, a 4,096-token context, concurrency one, and the official Ollama `Q4_K_M` and `Q8_0` artifacts. Ollama verified the downloaded Q8_0 artifact before use.
+
+| Check | Q4_K_M | Q8_0 |
+| --- | ---: | ---: |
+| Reported model storage | 6.6 GB | 11 GB |
+| Loaded accelerator memory | 5.6 GB | 9.2 GB |
+| Cold total / load time | 10.26 s / 10.06 s | 10.17 s / 9.96 s |
+| Warm bounded response | 0.92 s | 0.90 s |
+| Warm generation rate | 79.61 tokens/s | 66.50 tokens/s |
+| Required structured tool call | Pass | Pass |
+| Bounded unified-diff engineering task | Pass | Pass |
+
+Q4_K_M is the preferred existing artifact for this exact cell: it preserved the tested functional behavior, used 3.6 GB less loaded accelerator memory, required about 4.4 GB less model storage, and generated about 19.7% more tokens per second. This is selection evidence, not local-conversion evidence. It does not transfer to another model revision, runtime, accelerator, context, concurrency level, or workload lane.
+
+The Q8_0 candidate was stopped and removed after the comparison; the original Q4_K_M model remained installed. No endpoint, hostname, IP address, GPU UUID, local path, prompt content, or model file is part of the committed evidence. See `examples/quantization-validation.md` for the sanitized decision record.
