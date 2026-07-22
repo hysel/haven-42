@@ -4644,7 +4644,20 @@ Invoke-PackTest "desktop sidecar IPC policy rejects hostile messages" {
         $output = @(& $launcher.Source -3 $scriptPath --self-test 2>&1)
     }
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Desktop IPC policy hostile self-test should pass."
-    Assert-True -Condition (($output -join "`n") -match "passed: 29 cases") -Message "Desktop IPC policy should execute every hostile regression case."
+    Assert-True -Condition (($output -join "`n") -match "passed: 46 cases") -Message "Desktop IPC policy should execute every hostile regression case."
+}
+
+Invoke-PackTest "core update policy fails closed before cryptographic admission" {
+    $scriptPath = Join-Path $repoRoot "scripts/core-update-policy.ps1"
+    $manifestPath = Join-Path $repoRoot "examples/fixtures/core-update-manifest.json"
+    $packagePath = Join-Path $repoRoot "examples/fixtures/core-update-package.bin"
+    $result = (Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-ManifestPath", $manifestPath, "-PackagePath", $packagePath, "-HostOs", "windows", "-HostArchitecture", "x64", "-TargetTriple", "x86_64-pc-windows-msvc", "-CurrentVersion", "0.3.0", "-UpdaterVersion", "0.3.0", "-AsJson")).Output | ConvertFrom-Json
+    Assert-Equal -Actual $result.Status -Expected "verified-bytes-awaiting-cryptographic-attestation" -Message "Exact fixture bytes should pass local verification only."
+    Assert-True -Condition ($result.BytesVerified -and -not $result.ManifestSignatureVerified -and -not $result.AssetAttestationVerified) -Message "Byte verification must not claim cryptographic admission."
+    Assert-True -Condition (-not $result.CompatibilityPreflightComplete -and -not $result.OperatingSystemCompatibilityVerified) -Message "Static schema matching must not claim a completed native compatibility preflight."
+    Assert-True -Condition (-not $result.ActivationAllowed -and -not $result.NetworkUsed -and -not $result.FilesWritten -and -not $result.UserDataTouched) -Message "The policy engine must not download, stage, activate, or touch user data."
+    $wrongTarget = Invoke-CommandCapture -FilePath $scriptPath -Arguments @("-ManifestPath", $manifestPath, "-HostOs", "linux", "-HostArchitecture", "x64", "-TargetTriple", "x86_64-unknown-linux-gnu", "-CurrentVersion", "0.3.0", "-UpdaterVersion", "0.3.0", "-AsJson")
+    Assert-True -Condition ($wrongTarget.ExitCode -ne 0) -Message "A host without exactly one matching asset must fail closed."
 }
 
 Invoke-PackTest "media onboarding and quantization foundations fail closed" {

@@ -33,7 +33,12 @@ def _load_json(relative_path: str) -> dict[str, Any]:
 
 
 def _utc(value: str) -> datetime:
-    parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    if not isinstance(value, str):
+        raise PolicyError("invalid-time")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as error:
+        raise PolicyError("invalid-time") from error
     if parsed.tzinfo is None:
         raise PolicyError("invalid-time")
     return parsed.astimezone(timezone.utc)
@@ -87,7 +92,7 @@ class DesktopIpcPolicy:
         forbidden = set(definition["forbiddenProperties"])
         _walk_forbidden(request, forbidden)
 
-        if request["schemaVersion"] != self.contract["schemaVersion"]:
+        if isinstance(request["schemaVersion"], bool) or not isinstance(request["schemaVersion"], int) or request["schemaVersion"] != self.contract["schemaVersion"]:
             raise PolicyError("unsupported-schema")
         if not isinstance(request["requestId"], str) or not REQUEST_ID.fullmatch(request["requestId"]):
             raise PolicyError("invalid-request-id")
@@ -142,7 +147,9 @@ class DesktopIpcPolicy:
 
     def _validate_grants(self, request: dict[str, Any], runtime: dict[str, Any]) -> list[dict[str, Any]]:
         grant_ids = request.get("pathGrantIds", [])
-        if not isinstance(grant_ids, list) or len(grant_ids) != len(set(grant_ids)) or not all(isinstance(item, str) for item in grant_ids):
+        if not isinstance(grant_ids, list) or not all(isinstance(item, str) for item in grant_ids):
+            raise PolicyError("invalid-grant-list")
+        if len(grant_ids) != len(set(grant_ids)):
             raise PolicyError("invalid-grant-list")
         grants_by_id = runtime.get("grants", {})
         session_id = runtime.get("sessionId")
@@ -325,9 +332,16 @@ def run_self_tests() -> int:
     deny("multiple-lines", _encoded(_request()) + b"\n{}")
     deny("message-too-large", b" " * (policy.contract["transport"]["maxMessageBytes"] + 1))
     deny("unsupported-schema", _encoded(_request(schemaVersion=2)))
+    deny("unsupported-schema", _encoded(_request(schemaVersion=True)))
     deny("additional-property", _encoded(_request(extra=True)))
     deny("forbidden-field", _encoded(_request(input={"command": "calc.exe"})))
+    for field in ("endpoint", "url", "executable", "argv", "cwd", "rawPath"):
+        deny("forbidden-field", _encoded(_request(input={"nested": {field: "blocked"}})))
     deny("invalid-request-id", _encoded(_request(requestId="bad request")))
+    deny("invalid-include-output", _encoded(_request(includeOutput="yes")))
+    deny("invalid-grant-list", _encoded(_request(pathGrantIds=["grant-write", "grant-write"])))
+    deny("invalid-grant-list", _encoded(_request(pathGrantIds=[{"grantId": "grant-write"}])))
+    deny("unknown-grant", _encoded(_request(pathGrantIds=["missing-grant"])))
     duplicate = _base_runtime()
     duplicate["activeRequestIds"] = ["request-1"]
     deny("duplicate-active-request", _encoded(_request()), duplicate)
@@ -346,6 +360,12 @@ def run_self_tests() -> int:
     protected = _base_runtime()
     protected["grants"]["grant-write"]["protectedDirectory"] = True
     deny("grant-path-rejected", _encoded(_request(pathGrantIds=["grant-write"])), protected)
+    not_canonical = _base_runtime()
+    not_canonical["grants"]["grant-write"]["canonicalizationPassed"] = False
+    deny("grant-path-rejected", _encoded(_request(pathGrantIds=["grant-write"])), not_canonical)
+    invalid_grant_type = _base_runtime()
+    invalid_grant_type["grants"]["grant-write"]["type"] = "engine-write"
+    deny("grant-type-invalid", _encoded(_request(pathGrantIds=["grant-write"])), invalid_grant_type)
 
     approved_request = _request(
         operationId="apply-agent-config",
@@ -375,12 +395,17 @@ def run_self_tests() -> int:
     expired_approval = copy.deepcopy(approved_runtime)
     expired_approval["approvals"]["approval-ok"]["expiresAtUtc"] = "2026-07-22T15:59:00Z"
     deny("approval-expired", _encoded(approved_request), expired_approval)
+    cross_approval = copy.deepcopy(approved_runtime)
+    cross_approval["approvals"]["approval-ok"]["sessionId"] = "session-b"
+    deny("approval-session-mismatch", _encoded(approved_request), cross_approval)
 
     policy.validate_cancel({"schemaVersion": 1, "requestId": "cancel-1", "cancelRequestId": "active-a"}, runtime)
     passed += 1
     _expect_error("cancel-session-mismatch", lambda: policy.validate_cancel({"schemaVersion": 1, "requestId": "cancel-1", "cancelRequestId": "active-b"}, runtime))
     passed += 1
     _expect_error("invalid-cancel-shape", lambda: policy.validate_cancel({"schemaVersion": 1, "requestId": "cancel-1", "cancelRequestId": "active-a", "pid": 1}, runtime))
+    passed += 1
+    _expect_error("cancel-target-inactive", lambda: policy.validate_cancel({"schemaVersion": 1, "requestId": "cancel-1", "cancelRequestId": "missing"}, runtime))
     passed += 1
 
     valid_events = [
@@ -395,6 +420,12 @@ def run_self_tests() -> int:
     passed += 1
     duplicate_terminal = valid_events + [{"schemaVersion": 1, "requestId": "request-1", "sequence": 3, "type": "error"}]
     _expect_error("event-after-terminal", lambda: policy.validate_events(duplicate_terminal, "request-1"))
+    passed += 1
+    _expect_error("terminal-event-count", lambda: policy.validate_events(valid_events[:1], "request-1"))
+    passed += 1
+    wrong_binding = copy.deepcopy(valid_events)
+    wrong_binding[0]["requestId"] = "another-request"
+    _expect_error("event-binding-mismatch", lambda: policy.validate_events(wrong_binding, "request-1"))
     passed += 1
 
     print(f"Desktop IPC sidecar policy self-test passed: {passed} cases.")

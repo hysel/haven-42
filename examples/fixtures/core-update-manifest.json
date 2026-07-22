@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "releaseVersion": "0.4.0",
+  "channel": "stable",
+  "publishedAtUtc": "2026-07-22T18:00:00Z",
+  "releaseTag": "v0.4.0",
+  "releaseCommit": "0123456789abcdef0123456789abcdef01234567",
+  "minimumUpdaterVersion": "0.3.0",
+  "compatibility": {
+    "minimumOperatingSystem": { "windows": "10", "linux": "kernel-5.15", "macos": "13" },
+    "engineApiVersion": 1,
+    "desktopIpcSchemaVersions": [1],
+    "workflowEnvelopeSchemaVersions": [1],
+    "typedArtifactSchemaVersions": [1],
+    "configurationSchemaVersions": [1]
+  },
+  "assets": [
+    {
+      "assetId": "windows-x64-fixture",
+      "os": "windows",
+      "architecture": "x64",
+      "targetTriple": "x86_64-pc-windows-msvc",
+      "packageType": "zip",
+      "downloadUrl": "https://github.com/hysel/haven-42/releases/download/v0.4.0/haven-42-fixture.zip",
+      "sizeBytes": 28,
+      "sha256": "4604d5f0febb8ed95f4e027a3b2d3ef0195e86751bcdaaac95110cb4cd37caab",
+      "signatureOrAttestation": "https://github.com/hysel/haven-42/attestations/fixture",
+      "sbomUrl": "https://github.com/hysel/haven-42/releases/download/v0.4.0/haven-42-fixture.sbom.json",
+      "thirdPartyNoticesUrl": "https://github.com/hysel/haven-42/releases/download/v0.4.0/THIRD-PARTY-NOTICES.txt"
+    }
+  ],
+  "manifestSignature": "fixture-only-not-a-release-signature"
+}

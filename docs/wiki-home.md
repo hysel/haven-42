@@ -4,7 +4,7 @@
 
 Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. It was previously named Local Engineering Agent Pack. Because the project had no external users at rebrand time, product-specific paths and commands use the Haven 42 identity without a legacy compatibility layer.
 
-Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have a validated Ollama adapter, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only. Quantization contracts, sanitized profiling, and trusted-artifact selection are implemented, and the first exact Linux NVIDIA Ollama comparison has passed without admitting a conversion path. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
+Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have validated Ollama and exact-profile Linux NVIDIA/CUDA llama.cpp adapters, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only. Quantization contracts, sanitized profiling, trusted-artifact selection, an offline updater policy, and a 46-case sidecar policy suite are implemented without admitting a desktop runtime. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
 
 Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries. Fixture-backed cross-platform contracts do not broaden native runtime or hardware claims.
 
@@ -32,7 +32,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 
 ## Current Roadmap
 
-- Milestone 22 — planned local web UI and task composition.
+- Milestone 22 — local web UI and task composition in progress; architecture, private IPC, storage/update contracts, an offline updater policy, and hostile sidecar policy tests exist, while the runtime remains dependency-blocked.
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.

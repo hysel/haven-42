@@ -12,13 +12,13 @@ This repository defines an evidence-gated, local-first AI workbench for individu
 
 The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product direction adds an approachable Tauri desktop experience with a bundled local web UI over the same tested contracts.
 
-Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, while llama.cpp's OpenAI-compatible path is contract-validated and fail-closed to its two exact admitted engine profiles pending a direct live server run. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
+Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence, and every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
 
 ## Current Stage
 
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22 is
-in progress with Tauri 2, private typed sidecar IPC, and cross-platform
-packaging selected for the local web UI and task composition. Milestone 23 owns native
+in progress with Tauri 2, private typed sidecar IPC, cross-platform storage contracts,
+and a non-activating offline updater policy selected for the local web UI and task composition. Milestone 23 owns native
 local image profiles and now has consumer-local discovery and consent contracts.
 Milestones 24 and 25 retain documentation-only audio/video candidate inventories and
 shared media-consent policy. Milestone 26 now has quantization plan/artifact contracts,
