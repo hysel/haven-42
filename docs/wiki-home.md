@@ -23,6 +23,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Review audio candidates and consent: [[Local Audio Provider Candidates|Local-Audio-Provider-Candidates]] and [[Generative Media Consent Policy|Generative-Media-Consent-Policy]]
 - Review video candidates: [[Local Video Provider Candidates|Local-Video-Provider-Candidates]]
 - Plan hardware-adaptive quantization: [[Hardware-Adaptive Quantization|Hardware-Adaptive-Quantization]]
+- Review quantization validation evidence: [[Quantization Validation|Quantization-Validation]]
 - Prepare a release: [[Release Guidance|Release-Guidance]]
 - Choose Fast, Integration, or Full validation: [[Test Tiers|Test-Tiers]]
 - Review desktop storage, update, and rollback boundaries: [[Desktop Storage And Updates|Desktop-Storage-And-Updates]]
@@ -33,7 +34,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.
-- Milestone 26 — foundation complete and the first Linux NVIDIA Ollama comparison passed; broader workload and platform cells remain open.
+- Milestone 26 — foundation complete with exact Linux NVIDIA and Windows AMD Ollama comparisons passed; broader workload and platform cells remain open.
 
 ## Support Model
 

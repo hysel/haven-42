@@ -18,7 +18,7 @@ Haven 42 was previously named Local Engineering Agent Pack. Because the project 
 | Local images | `media.image.create` has a live-validated Linux ComfyUI/SDXL provider and typed PNG artifacts. Native Windows NVIDIA, Intel GPU/XPU, AMD, and Apple Silicon profiles remain candidates until independently validated. |
 | Product UI | Milestone 22 is in progress with Tauri 2 and private typed sidecar IPC selected. Windows dependency resolution found Rust maintenance blockers, so no desktop runtime is shipped. |
 | Music and video | Current documentation-only candidate inventories and a shared consent policy are recorded. No provider scripts, adapters, harnesses, workflows, or configuration ship before promotion gates pass. |
-| Model quantization | Versioned contracts, sanitized profiling, and trusted-artifact selection are implemented; the first Linux NVIDIA Ollama comparison passed, while every other hardware/runtime cell remains evidence-gated. |
+| Model quantization | Versioned contracts, sanitized profiling, and trusted-artifact selection are implemented; exact Linux NVIDIA and Windows AMD Ollama comparisons passed, while every other hardware/runtime cell remains evidence-gated. |
 
 ## Product Direction
 
@@ -54,7 +54,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; consumer-local Windows and macOS profiles remain gated. |
 | Milestone 24: Local Music And Audio Generation | Research in progress | Immutable candidate facts and consent policy are recorded; live providers remain unpromoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
-| Milestone 26: Hardware-Adaptive Model Quantization | First live cell validated | The Linux NVIDIA Ollama Q4_K_M/Q8_0 comparison passed for one exact profile; Windows GPU and broader workload cells remain, with physical Mac last. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Two live cells validated | Linux NVIDIA and Windows AMD Ollama Q4_K_M/Q8_0 comparisons passed for exact profiles; Windows NVIDIA, Windows Intel, broader workloads, and Apple Silicon remain, with physical Mac last. |
 
 See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
 

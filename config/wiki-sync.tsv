@@ -29,6 +29,7 @@ docs/local-audio-provider-candidates.md	Local-Audio-Provider-Candidates.md	Local
 docs/local-video-provider-candidates.md	Local-Video-Provider-Candidates.md	Local Video Provider Candidates
 docs/generative-media-consent-policy.md	Generative-Media-Consent-Policy.md	Generative Media Consent Policy
 docs/hardware-adaptive-quantization.md	Hardware-Adaptive-Quantization.md	Hardware-Adaptive Quantization
+examples/quantization-validation.md	Quantization-Validation.md	Quantization Validation
 examples/local-image-capability-validation.md	Local-Image-Capability-Validation.md	Local Image Capability Validation
 docs/typed-artifact-contract.md	Typed-Artifact-Contract.md	Typed Artifact Contract
 docs/deterministic-intent-routing.md	Deterministic-Intent-Routing.md	Deterministic Intent Routing

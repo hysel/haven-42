@@ -67,3 +67,23 @@ On 2026-07-22, the first disposable trusted-artifact comparison passed on Linux 
 Q4_K_M is the preferred existing artifact for this exact cell: it preserved the tested functional behavior, used 3.6 GB less loaded accelerator memory, required about 4.4 GB less model storage, and generated about 19.7% more tokens per second. This is selection evidence, not local-conversion evidence. It does not transfer to another model revision, runtime, accelerator, context, concurrency level, or workload lane.
 
 The Q8_0 candidate was stopped and removed after the comparison; the original Q4_K_M model remained installed. No endpoint, hostname, IP address, GPU UUID, local path, prompt content, or model file is part of the committed evidence. See `examples/quantization-validation.md` for the sanitized decision record.
+
+## Validated Windows AMD Cell
+
+On 2026-07-22, a second disposable comparison passed on Windows 11 x64 with Ollama 0.32.1, its packaged ROCm 7.1 backend, and a Radeon RX 7800 XT 16 GB `gfx1101` profile. The runtime archives were checked against the SHA-256 digests published with the Ollama release. Both official Qwen 3.5 9B artifacts used all 34 model layers on the GPU at a 4,096-token context and concurrency one.
+
+| Check | Q4_K_M | Q8_0 |
+| --- | ---: | ---: |
+| Reported model storage | 6.6 GB | 11 GB |
+| Loaded accelerator memory | 5.6 GB | 9.2 GB |
+| Cold total / load time | 9.32 s / 9.12 s | 11.81 s / 11.58 s |
+| Warm bounded response | 0.63 s | 0.67 s |
+| Warm generation rate | 71.99 tokens/s | 58.41 tokens/s |
+| Required structured tool call | Pass | Pass |
+| Bounded unified-diff engineering task | Pass | Pass |
+
+Q4_K_M is also preferred for this exact Windows AMD cell: it used 3.6 GB less loaded accelerator memory, required about 4.4 GB less model storage, loaded faster, and generated about 23.2% more tokens per second while retaining the tested functional behavior.
+
+An initial Q4_K_M sample was invalidated because another GPU-heavy application was running; throughput rose from 7.65 to 71.99 tokens per second after that application closed. Hardware-adaptive validation must therefore disclose competing GPU workloads, start from an idle accelerator where practical, and repeat anomalous measurements before recording a recommendation.
+
+The temporary loopback server, verified standalone runtime, ROCm package, both model artifacts, logs, and pointer file were removed after validation. No service, startup entry, application installation, model, or temporary listener remained. This evidence does not transfer to Vulkan, another AMD GPU or driver, another model or runtime, larger contexts, higher concurrency, long-document quality, or agent-surface approved writes.
