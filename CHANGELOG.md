@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added timed Fast, Integration, and Full test tiers, removed duplicate hosted validation steps, and added exact-clean-tree Full-test receipts so pre-push can skip only an identical local rerun while GitHub remains authoritative.
+- Replaced family-bound Ollama-only discovery with a source-neutral schema and shared engine supporting independent Ollama and Hugging Face queries, immutable revisions, license and gated metadata, formats, quantization signals, runtime candidates, and candidate-only trust gates.
 - Recorded the disposable Windows x64 desktop dependency resolution: npm and PyInstaller graphs passed integrity, license, installation, and vulnerability checks, while Windows-reachable unmaintained Rust crates, Linux-only GTK3/glib findings, audit-tool provenance, and the unrun native Tauri build blocked runtime admission.
 - Pinned the direct Milestone 22 desktop dependency candidates without adding runtime manifests, and documented their licenses, platform prerequisites, supply-chain gates, excluded packages, and re-evaluation triggers.
 - Added schema-v1 private desktop IPC and default-deny Tauri authority contracts covering registered operations, native path grants, effect-bound approvals, strict events, local content, sidecar lifecycle, privacy, and required negative tests.

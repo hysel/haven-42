@@ -39,7 +39,7 @@
       "category": "model-selection",
       "safetyLevel": "network-read",
       "uiReady": true,
-      "inputs": ["families", "modelProfilePath", "vramSelectionMode", "outputPath"],
+      "inputs": ["sources", "queries", "families", "modelProfilePath", "vramSelectionMode", "outputPath"],
       "outputs": ["onlineModelCandidatesJson"],
       "entryPoints": {
         "windows": "scripts/discover-online-model-candidates.ps1",

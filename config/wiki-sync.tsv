@@ -33,6 +33,7 @@ examples/local-text-capability-validation.md	Local-Text-Capability-Validation.md
 examples/capability-availability-validation.md	Capability-Availability-Validation.md	Capability Availability Validation
 docs/release.md	Release-Guidance.md	Release Guidance
 docs/hosted-ci-verification.md	Hosted-CI-Verification.md	Hosted CI Verification
+docs/test-tiers.md	Test-Tiers.md	Test Tiers
 docs/wiki-maintenance.md	Wiki-Maintenance.md	Wiki Maintenance
 docs/agent-integration-admission-policy.md	Agent-Integration-Admission-Policy.md	Agent Integration Admission Policy
 docs/agent-surface-options.md	Agent-Surface-Options.md	Agent Surface Options

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "description": "Public metadata sources and source-specific seed queries for optional model discovery.",
+  "defaultSources": ["ollama", "huggingface"],
+  "sources": [
+    {
+      "id": "ollama",
+      "type": "ollama-library",
+      "baseUrl": "https://ollama.com/library",
+      "defaultQueries": ["qwen3.5", "qwen3-coder", "devstral", "gpt-oss", "glm", "laguna-xs-2.1"]
+    },
+    {
+      "id": "huggingface",
+      "type": "huggingface-hub",
+      "baseUrl": "https://huggingface.co",
+      "defaultQueries": ["agentic coding", "tool calling", "GGUF"]
+    }
+  ]
+}

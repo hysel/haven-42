@@ -5,15 +5,28 @@ repo_root="$(git rev-parse --show-toplevel)"
 
 printf '%s\n' "Running pre-push pack validation..."
 
+receipt_path="$(git rev-parse --git-dir)/haven-42-test-receipt-v1"
+head_commit="$(git rev-parse HEAD)"
+head_tree="$(git rev-parse 'HEAD^{tree}')"
+if [ -z "$(git status --porcelain=v1)" ] &&
+   [ -f "$receipt_path" ] &&
+   grep -Fxq "schema=1" "$receipt_path" &&
+   grep -Fxq "commit=$head_commit" "$receipt_path" &&
+   grep -Fxq "tree=$head_tree" "$receipt_path" &&
+   grep -Fxq "tier=full" "$receipt_path"; then
+  printf '%s\n' "Exact-tree full-test receipt found; skipping duplicate local suite."
+  exit 0
+fi
+
 if command -v pwsh >/dev/null 2>&1; then
-  pwsh -NoProfile -ExecutionPolicy Bypass -File "$repo_root/scripts/test-pack.ps1"
+  pwsh -NoProfile -ExecutionPolicy Bypass -File "$repo_root/scripts/test-pack.ps1" -Tier Full
 else
   case "$(uname -s 2>/dev/null || printf unknown)" in
     Darwin*)
-      "$repo_root/scripts/test-pack.macos.sh"
+      "$repo_root/scripts/test-pack.macos.sh" --tier full
       ;;
     *)
-      "$repo_root/scripts/test-pack.linux.sh"
+      "$repo_root/scripts/test-pack.linux.sh" --tier full
       ;;
   esac
 fi

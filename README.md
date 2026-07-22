@@ -199,6 +199,11 @@ Optional online model discovery is candidate research only. It should not
 change the offline default setup, pull models automatically, or mark a model as
 tool-safe without local validation. See `docs/online-model-discovery.md`.
 
+Discovery can query independent Ollama and Hugging Face source adapters using
+arbitrary search terms rather than a fixed family allowlist. Every result stays
+candidate-only until its exact artifact, license, hardware, runtime, surface,
+and operation pass local validation.
+
 To pull and preflight Agent model candidates through the Ollama API before
 manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
@@ -373,8 +378,10 @@ tracked pre-push hook once per clone:
 .\scripts\install-git-hooks.ps1
 ```
 
-The hook runs the pack tests before `git push`, including the executable-bit
-check for Linux and macOS shell scripts.
+The hook requires a Full pack test before `git push`, including the executable-bit
+check for Linux and macOS shell scripts. If the exact clean commit and tree just
+passed Full, a private `.git` receipt prevents an identical local rerun. GitHub
+still runs Full independently.
 
 After pushing, verify the exact commit on GitHub rather than assuming the push
 is complete because local tests passed:
@@ -391,25 +398,28 @@ Linux and macOS use `verify-hosted-ci.linux.sh` and
 Windows PowerShell:
 
 ```powershell
-.\scripts\validate-pack.ps1
-.\scripts\test-pack.ps1
+.\scripts\test-pack.ps1 -Tier Fast
+.\scripts\test-pack.ps1 -Tier Full
 ```
 
 Linux:
 
 ```bash
-./scripts/validate-pack.linux.sh
-./scripts/test-pack.linux.sh
+./scripts/test-pack.linux.sh --tier fast
+./scripts/test-pack.linux.sh --tier full
 ```
 
 macOS:
 
 ```bash
-./scripts/validate-pack.macos.sh
-./scripts/test-pack.macos.sh
+./scripts/test-pack.macos.sh --tier fast
+./scripts/test-pack.macos.sh --tier full
 ```
 
-The Linux and macOS validation scripts are native Bash scripts and do not require PowerShell.
+Full includes static validation. Use the Integration tier when working on
+installers, generated artifacts, routing, or packaging. Each test reports its
+duration; see `docs/test-tiers.md`. The Linux and macOS test scripts are native
+Bash scripts and do not require PowerShell.
 
 ## Install Or Update A Target Repository
 
@@ -965,33 +975,34 @@ Runtime status:
 
 ## Validation
 
-Run the local validation script before release-oriented changes:
+Run the Fast tier during editing:
 
 ```powershell
-.\scripts\validate-pack.ps1
+.\scripts\test-pack.ps1 -Tier Fast
 ```
 
-Run the automated pack tests:
+Run the Full tier before push or release:
 
 ```powershell
-.\scripts\test-pack.ps1
+.\scripts\test-pack.ps1 -Tier Full
 ```
 
 On Linux:
 
 ```bash
-./scripts/validate-pack.linux.sh
-./scripts/test-pack.linux.sh
+./scripts/test-pack.linux.sh --tier fast
+./scripts/test-pack.linux.sh --tier full
 ```
 
 On macOS:
 
 ```bash
-./scripts/validate-pack.macos.sh
-./scripts/test-pack.macos.sh
+./scripts/test-pack.macos.sh --tier fast
+./scripts/test-pack.macos.sh --tier full
 ```
 
-The Linux and macOS scripts are native Bash scripts. They do not require PowerShell.
+The Full tier already includes pack validation. The Linux and macOS scripts are
+native Bash scripts and do not require PowerShell. See `docs/test-tiers.md`.
 
 The script checks the configured version, required files, local `.continue` file references, default MCP posture, and obvious committed private endpoints or secrets.
 

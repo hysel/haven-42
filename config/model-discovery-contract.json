@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "description": "Provider-neutral candidate discovery contract. Discovery records claims and provenance but never grants runtime or tool-use readiness.",
+  "candidateRequiredFields": [
+    "Model",
+    "ArtifactId",
+    "SourceId",
+    "SourceType",
+    "Publisher",
+    "Revision",
+    "License",
+    "Gated",
+    "PipelineTag",
+    "Formats",
+    "RuntimeCandidates",
+    "QuantizationSignals",
+    "ProvenanceStatus",
+    "ValidationStatus",
+    "Status",
+    "Reason",
+    "NextStep"
+  ],
+  "sourceTypes": ["ollama-library", "huggingface-hub"],
+  "provenanceStatuses": ["catalog-recorded", "publisher-identity-unverified", "immutable-revision-recorded"],
+  "validationStatuses": ["candidate-only"],
+  "rules": {
+    "pullsModels": false,
+    "rewritesContinueConfig": false,
+    "repositoryContentSent": false,
+    "hardwareProfileSent": false,
+    "sourceClaimsDoNotPromote": true,
+    "communityArtifactsRequireIndependentReview": true,
+    "missingLicenseBlocksAutomaticPromotion": true
+  }
+}

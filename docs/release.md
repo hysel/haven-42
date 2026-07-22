@@ -46,9 +46,9 @@ Before tagging a release:
 
 - [ ] Run the local release readiness gate: `.\scripts\test-release-readiness.ps1`.
 - [ ] Enable local Git hooks once per clone: `.\scripts\install-git-hooks.ps1`.
-- [ ] Run Windows validation: `.\scripts\validate-pack.ps1` and `.\scripts\test-pack.ps1`.
-- [ ] Run Linux validation when Bash is available: `./scripts/validate-pack.linux.sh` and `./scripts/test-pack.linux.sh`.
-- [ ] Run macOS validation when available: `./scripts/validate-pack.macos.sh` and `./scripts/test-pack.macos.sh`.
+- [ ] Run the Windows Full tier: `.\scripts\test-pack.ps1 -Tier Full`.
+- [ ] Run the Linux Full tier when Bash is available: `./scripts/test-pack.linux.sh --tier full`.
+- [ ] Run the macOS Full tier when available: `./scripts/test-pack.macos.sh --tier full`.
 - [ ] Confirm `.continue/config.yaml` has the intended version.
 - [ ] Confirm Continue can load `.continue/config.yaml` when runtime validation is available.
 - [ ] Confirm local Ollama model assumptions are still documented.

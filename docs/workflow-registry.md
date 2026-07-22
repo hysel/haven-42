@@ -35,6 +35,15 @@ Actions run by exact commit SHA, waits with exit status, checks all required
 cross-platform jobs, and retrieves failed logs. See
 `docs/hosted-ci-verification.md`.
 
+`discover-online-models` is a source-neutral, network-read discovery boundary.
+Callers can select one or more configured sources and provide arbitrary search
+queries. The current adapters normalize Ollama library and Hugging Face Hub
+metadata into the same candidate contract, including immutable revisions when
+available, license and gating signals, formats, quantization hints, possible
+runtimes, provenance, and validation status. Discovery never downloads a model
+or rewrites an active configuration; candidates must pass the normal validation
+and promotion gates before use.
+
 ## Safety Levels
 
 | Safety level | Meaning |

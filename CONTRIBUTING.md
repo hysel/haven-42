@@ -78,11 +78,16 @@ For Continue-specific changes, also inspect:
 
 ## Validation
 
-Run the validation script before release-oriented changes:
+Run the Fast tier while editing and Full before pushing:
 
 ```powershell
-.\scripts\validate-pack.ps1
+.\scripts\test-pack.ps1 -Tier Fast
+.\scripts\test-pack.ps1 -Tier Full
 ```
+
+Use `docs/test-tiers.md` for Integration-only runs, timing output, and the
+exact-tree receipt used to avoid duplicate pre-push work. GitHub Actions always
+runs Full independently.
 
 When mapped documentation changes, synchronize and commit the separate GitHub wiki before pushing the main repository. Follow `docs/wiki-maintenance.md`; hosted CI rejects stale mapped wiki pages.
 

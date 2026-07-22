@@ -5,6 +5,32 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 FAILED=0
 TEST_COUNT=0
+SKIPPED_COUNT=0
+TEST_TIER="full"
+NO_RECEIPT=false
+RUN_STARTED_SECONDS=$SECONDS
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --tier|-Tier)
+      TEST_TIER="$(printf '%s' "$2" | tr '[:upper:]' '[:lower:]')"
+      shift 2
+      ;;
+    --no-receipt|-NoReceipt)
+      NO_RECEIPT=true
+      shift
+      ;;
+    *)
+      printf 'Unknown argument: %s\n' "$1" >&2
+      exit 1
+      ;;
+  esac
+done
+
+case "$TEST_TIER" in
+  fast|integration|full) ;;
+  *) printf 'Tier must be fast, integration, or full.\n' >&2; exit 1 ;;
+esac
 
 pass() {
   printf 'PASS %s\n' "$1"
@@ -16,14 +42,78 @@ fail() {
 }
 
 run_test() {
-  TEST_COUNT=$((TEST_COUNT + 1))
   name="$1"
   shift
+  category="fast"
+  case "$name" in
+    "release packaging scripts define archives, checksums, and sanitized dry runs"|\
+    "runtime context generation captures useful files and excludes build output"|\
+    "install script dry run does not modify target repository"|\
+    "project classifier emits a sanitized evidence-backed profile"|\
+    "install script activates evidence-backed project rule packs"|\
+    "install script auto model config dry run is explicit"|\
+    "install script read-only profile omits edit roles"|\
+    "install script approved-write profile maps to model lanes"|\
+    "install script model lanes generate scoped roles"|\
+    "validated model installer updates local-only config"|\
+    "validated model installer dry run is local only"|\
+    "install script global config dry run is explicit"|\
+    "install script writes global config with target references"|\
+    "install script can include rules in global config by explicit opt-in"|\
+    "runtime validation fails before CLI execution for missing target repository"|\
+    "runtime output verifier catches invented filenames and unsupported claims"|\
+    "runtime validation runner writes verification outputs"|\
+    "sample repository factory creates expected fixtures"|\
+    "medium language workflow matrix is complete and evidence-gated"|\
+    "hardware-aware recommendation scripts emit sanitized model lanes"|\
+    "capability registry and deterministic routing enforce policy boundaries"|\
+    "general AI sessions are repository optional and dry-run first"|\
+    "local text capabilities are session bound and typed"|\
+    "provider discovery and engineering routing preserve policy boundaries"|\
+    "optional LLM routing is advisory and registry gated"|\
+    "local image capability is session bound typed and evidence gated"|\
+    "recommended agent config generation writes local-only config"|\
+    "agent surface adapters plan installs configure and report health safely"|\
+    "workflow envelope contract is versioned private by default and cross-platform"|\
+    "wiki synchronization is deterministic and hosted"|\
+    "online model discovery normalizes Ollama and Hugging Face fixtures") category="integration" ;;
+  esac
+  if { [ "$TEST_TIER" = "fast" ] && [ "$category" = "integration" ]; } ||
+     { [ "$TEST_TIER" = "integration" ] && [ "$category" != "integration" ]; }; then
+    SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+    return
+  fi
+  TEST_COUNT=$((TEST_COUNT + 1))
+  started_seconds=$SECONDS
   if "$@"; then
-    pass "$name"
+    pass "$name [$((SECONDS - started_seconds)) s]"
   else
     fail "$name" "test command failed"
   fi
+}
+
+write_test_receipt() {
+  [ "$NO_RECEIPT" = false ] || return 0
+  [ "$TEST_TIER" = "full" ] || return 0
+  [ -z "$(git -C "$REPO_ROOT" status --porcelain=v1 2>/dev/null)" ] || {
+    printf 'Receipt not written: the working tree is not clean.\n'
+    return 0
+  }
+  commit="$(git -C "$REPO_ROOT" rev-parse HEAD 2>/dev/null)" || return 0
+  tree="$(git -C "$REPO_ROOT" rev-parse 'HEAD^{tree}' 2>/dev/null)" || return 0
+  git_dir="$(git -C "$REPO_ROOT" rev-parse --git-dir 2>/dev/null)" || return 0
+  case "$git_dir" in
+    /*|[A-Za-z]:*) ;;
+    *) git_dir="$REPO_ROOT/$git_dir" ;;
+  esac
+  {
+    printf 'schema=1\n'
+    printf 'commit=%s\n' "$commit"
+    printf 'tree=%s\n' "$tree"
+    printf 'tier=full\n'
+    printf 'runner=native-shell\n'
+  } > "$git_dir/haven-42-test-receipt-v1"
+  printf 'Wrote exact-tree full-test receipt for %s.\n' "$commit"
 }
 
 assert_file() {
@@ -167,6 +257,18 @@ test_github_actions_dependencies() {
     [ "$checkout_count" -eq 6 ] &&
     grep -Eq 'package-ecosystem:[[:space:]]*github-actions' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Eq 'interval:[[:space:]]*weekly' "$REPO_ROOT/.github/dependabot.yml"
+}
+
+test_test_tier_contract() {
+  grep -q 'ValidateSet("Fast", "Integration", "Full")' "$REPO_ROOT/scripts/test-pack.ps1" &&
+    grep -q 'RUN_STARTED_SECONDS' "$REPO_ROOT/scripts/test-pack.shared.sh" &&
+    grep -q 'haven-42-test-receipt-v1' "$REPO_ROOT/scripts/test-pack.ps1" &&
+    grep -q 'haven-42-test-receipt-v1' "$REPO_ROOT/scripts/test-pack.shared.sh" &&
+    grep -q 'Exact-tree full-test receipt found' "$REPO_ROOT/.githooks/pre-push" &&
+    grep -q -- '-Tier Full -NoReceipt' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q -- '--tier full --no-receipt' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    ! grep -q 'Run pack validation' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q 'GitHub Actions always runs Full independently' "$REPO_ROOT/docs/test-tiers.md"
 }
 
 test_os_aware_command_contract() {
@@ -568,7 +670,7 @@ test_model_tool_use_validation_doc() {
 
 test_online_model_discovery_doc() {
   [ -f "$REPO_ROOT/docs/online-model-discovery.md" ] &&
-    grep -q "candidate model names only" "$REPO_ROOT/docs/online-model-discovery.md" &&
+    grep -q "candidate metadata only" "$REPO_ROOT/docs/online-model-discovery.md" &&
     grep -q "default workflow stays offline" "$REPO_ROOT/docs/online-model-discovery.md" &&
     grep -q "must not" "$REPO_ROOT/docs/online-model-discovery.md" &&
     grep -q "Pull models automatically" "$REPO_ROOT/docs/online-model-discovery.md" &&
@@ -578,6 +680,33 @@ test_online_model_discovery_doc() {
     grep -q "docs/online-model-discovery.md" "$REPO_ROOT/README.md" &&
     grep -q "docs/online-model-discovery.md" "$REPO_ROOT/docs/local-model-selection.md" &&
     grep -q "do not discover newer" "$REPO_ROOT/docs/local-agent-model-testing.md"
+}
+
+test_multi_source_model_discovery() {
+  temp_root="$(mktemp -d)"
+  output_path="$temp_root/candidates.json"
+  "$REPO_ROOT/scripts/discover-online-model-candidates.shared.sh" \
+    --sources ollama,huggingface \
+    --families qwen3.5 \
+    --source-html-path "$REPO_ROOT/examples/fixtures/ollama-model-library.html" \
+    --hugging-face-json-path "$REPO_ROOT/examples/fixtures/huggingface-model-search-response.json" \
+    --output-path "$output_path" >/tmp/multi-source-model-discovery.out 2>&1 || { rm -rf "$temp_root"; return 1; }
+  python3 - "$output_path" "$REPO_ROOT/config/model-discovery-contract.json" <<'PY'
+import json, sys
+report = json.load(open(sys.argv[1], encoding="utf-8"))
+contract = json.load(open(sys.argv[2], encoding="utf-8"))
+assert report["SchemaVersion"] == 2
+assert set(report["Sources"]) == {"ollama", "huggingface"}
+assert report["PullsModels"] is False and report["RewritesContinueConfig"] is False
+hub = [item for item in report["Candidates"] if item["SourceId"] == "huggingface"]
+assert len(hub) == 2
+assert all(item["ValidationStatus"] == "candidate-only" for item in report["Candidates"])
+assert any("gguf" in item["Formats"] and "ollama-import" in item["RuntimeCandidates"] and item["DirectOllamaPull"] is False for item in hub)
+assert {"Revision", "License", "QuantizationSignals"}.issubset(contract["candidateRequiredFields"])
+PY
+  result=$?
+  rm -rf "$temp_root"
+  return "$result"
 }
 
 test_multi_repository_validation_doc() {
@@ -1829,6 +1958,7 @@ run_test "committed config uses starter sample model" test_committed_config_uses
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
 run_test "shell wrapper scripts and hooks are executable in git" test_shell_scripts_executable
 run_test "GitHub Actions dependencies are current and monitored" test_github_actions_dependencies
+run_test "test tiers are timed and exact-tree receipt gated" test_test_tier_contract
 run_test "commands and workflows are OS aware" test_os_aware_command_contract
 run_test "native macOS wrappers have a validated help surface and MLX bootstrap contract" test_macos_wrapper_help_surface
 run_test "Linux/macOS user-facing scripts do not require PowerShell" test_linux_macos_scripts_do_not_require_pwsh
@@ -1852,6 +1982,7 @@ run_test "hardware profile scripts expose platform-specific markers" test_profil
 run_test "editor compatibility docs cover config and tool validation" test_editor_compatibility_doc
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
+run_test "online model discovery normalizes Ollama and Hugging Face fixtures" test_multi_source_model_discovery
 run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
 run_test "sample repository factory validation evidence is sanitized" test_sample_repository_factory_validation_evidence
 run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc
@@ -1885,8 +2016,9 @@ run_test "ComfyUI setup guide preserves the validated secure provider profile" t
 run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
 
 if [ "$FAILED" -eq 1 ]; then
-  printf 'Test run failed. %s tests executed.\n' "$TEST_COUNT" >&2
+  printf 'Test run failed. Tier=%s; %s tests executed; %s skipped; %s seconds.\n' "$TEST_TIER" "$TEST_COUNT" "$SKIPPED_COUNT" "$((SECONDS - RUN_STARTED_SECONDS))" >&2
   exit 1
 fi
 
-printf 'Test run passed. %s tests executed.\n' "$TEST_COUNT"
+write_test_receipt
+printf 'Test run passed. Tier=%s; %s tests executed; %s skipped; %s seconds.\n' "$TEST_TIER" "$TEST_COUNT" "$SKIPPED_COUNT" "$((SECONDS - RUN_STARTED_SECONDS))"

@@ -1,5 +1,8 @@
 param(
-    [string]$ExpectedVersion = "0.3.0"
+    [string]$ExpectedVersion = "0.3.0",
+    [ValidateSet("Fast", "Integration", "Full")]
+    [string]$Tier = "Full",
+    [switch]$NoReceipt
 )
 
 $ErrorActionPreference = "Stop"
@@ -7,11 +10,71 @@ $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $failed = $false
 $testCount = 0
+$skippedCount = 0
+$runStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+$integrationTests = @(
+    "validate-pack ignores local config overrides",
+    "validate-pack fails when private endpoint is committed",
+    "validate-pack fails when required safety doc is missing",
+    "release packaging scripts define archives, checksums, and sanitized dry runs",
+    "project classifier selects sanitized rule packs across generated ecosystems",
+    "sample repository factory creates expected fixtures",
+    "medium language workflow matrix is complete and evidence-gated",
+    "runtime context generation captures useful files and excludes build output",
+    "runtime context generation fails for missing target repository",
+    "runtime context generation accepts shell-friendly argument aliases",
+    "install script dry run does not modify target repository",
+    "install script activates only evidence-backed project rule packs",
+    "install script auto model config dry run is explicit",
+    "install script read-only profile omits edit roles",
+    "install script approved-write profile maps to model lanes",
+    "install script model lanes generate scoped roles",
+    "validated model installer updates local-only config",
+    "validated model installer dry run is local only",
+    "install script global config dry run is explicit",
+    "install script backs up existing .continue and excludes local config",
+    "install script writes global config with target references and omits rules by default",
+    "install script can include rules in global config by explicit opt-in",
+    "install script supports centralized shared assets and global config",
+    "install script refuses to target pack repository",
+    "install script accepts shell-friendly argument aliases",
+    "runtime validation fails before CLI execution for missing target repository",
+    "runtime output verifier catches invented filenames and unsupported claims",
+    "runtime validation runner writes verification outputs",
+    "online model discovery parses a local fixture without network",
+    "online model discovery supports local VRAM annotation without leaking profiles",
+    "online model discovery normalizes Ollama and Hugging Face fixtures",
+    "hardware-aware recommendation scripts emit sanitized model lanes",
+    "capability evidence v2 blocks cross-surface inheritance and aggregates conservatively",
+    "lane-specific scoring keeps write conservative and prefers fitting capacity for plan and review",
+    "recommended agent config generation writes local-only config",
+    "workflow registry defines stable UI entry points",
+    "workflow chooser summarizes registry commands",
+    "onboarding generators share common engines",
+    "agent surface adapters plan installs configure and report health safely",
+    "capability registry and deterministic routing enforce policy boundaries",
+    "general AI sessions are repository optional and dry-run first",
+    "local text capabilities are session bound and typed",
+    "provider discovery and engineering routing preserve policy boundaries",
+    "optional LLM routing is advisory and registry gated",
+    "local image capability is session bound typed and evidence gated",
+    "release readiness gate checks core release invariants",
+    "model scorecard summarizes capability evidence without cross-surface inheritance",
+    "evidence dashboard summarizes catalog and surface status",
+    "beginner setup plan maps first-run commands to workflows",
+    "Haven 42 menu groups workflows by user intent",
+    "local agent health check reports setup status",
+    "local agent cleanup workflow is dry-run first",
+    "wiki synchronization is deterministic and hosted"
+)
 
 function Add-TestPass {
-    param([string]$Name)
+    param(
+        [string]$Name,
+        [long]$ElapsedMilliseconds
+    )
 
-    Write-Host "PASS $Name" -ForegroundColor Green
+    Write-Host "PASS $Name [$ElapsedMilliseconds ms]" -ForegroundColor Green
 }
 
 function Add-TestFailure {
@@ -30,15 +93,51 @@ function Invoke-PackTest {
         [scriptblock]$Test
     )
 
+    $isIntegration = $script:integrationTests -contains $Name
+    if (($script:Tier -eq "Fast" -and $isIntegration) -or ($script:Tier -eq "Integration" -and -not $isIntegration)) {
+        $script:skippedCount++
+        return
+    }
+
     $script:testCount++
+    $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
 
     try {
         & $Test
-        Add-TestPass -Name $Name
+        $stopwatch.Stop()
+        Add-TestPass -Name $Name -ElapsedMilliseconds $stopwatch.ElapsedMilliseconds
     }
     catch {
+        $stopwatch.Stop()
         Add-TestFailure -Name $Name -Message $_.Exception.Message
     }
+}
+
+function Write-TestReceipt {
+    if ($NoReceipt -or $Tier -ne "Full") { return }
+
+    $status = @(& git -C $repoRoot status --porcelain=v1 2>$null)
+    if ($LASTEXITCODE -ne 0 -or $status.Count -gt 0) {
+        Write-Host "Receipt not written: the working tree is not clean." -ForegroundColor Yellow
+        return
+    }
+
+    $commit = (& git -C $repoRoot rev-parse HEAD 2>$null | Select-Object -First 1).Trim()
+    $tree = (& git -C $repoRoot rev-parse 'HEAD^{tree}' 2>$null | Select-Object -First 1).Trim()
+    $gitDirectory = (& git -C $repoRoot rev-parse --git-dir 2>$null | Select-Object -First 1).Trim()
+    if ($LASTEXITCODE -ne 0 -or -not $commit -or -not $tree -or -not $gitDirectory) { return }
+    if (-not [System.IO.Path]::IsPathRooted($gitDirectory)) {
+        $gitDirectory = Join-Path $repoRoot $gitDirectory
+    }
+
+    @(
+        "schema=1",
+        "commit=$commit",
+        "tree=$tree",
+        "tier=full",
+        "runner=windows"
+    ) | Set-Content -LiteralPath (Join-Path $gitDirectory "haven-42-test-receipt-v1") -Encoding UTF8
+    Write-Host "Wrote exact-tree full-test receipt for $commit."
 }
 
 function Assert-True {
@@ -191,6 +290,21 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@v6\b").Count) -Expected 6 -Message "All live and generated workflows should use checkout v6."
     Assert-True -Condition ($dependabot -match "package-ecosystem:\s*github-actions") -Message "Dependabot should monitor GitHub Actions dependencies."
     Assert-True -Condition ($dependabot -match "interval:\s*weekly") -Message "GitHub Actions dependency checks should run weekly."
+}
+
+Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
+    $windowsRunner = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-pack.ps1") -Raw
+    $sharedRunner = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-pack.shared.sh") -Raw
+    $hook = Get-Content -LiteralPath (Join-Path $repoRoot ".githooks/pre-push") -Raw
+    $workflow = Get-Content -LiteralPath (Join-Path $repoRoot ".github/workflows/validate-pack.yml") -Raw
+    $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/test-tiers.md") -Raw
+    Assert-True -Condition ($windowsRunner -match 'ValidateSet\("Fast", "Integration", "Full"\)' -and $windowsRunner -match "Stopwatch") -Message "Windows tests should expose timed Fast, Integration, and Full tiers."
+    Assert-True -Condition ($sharedRunner -match 'fast\|integration\|full' -and $sharedRunner -match "RUN_STARTED_SECONDS") -Message "Native tests should expose timed Fast, Integration, and Full tiers."
+    Assert-True -Condition ($windowsRunner -match "haven-42-test-receipt-v1" -and $sharedRunner -match "haven-42-test-receipt-v1") -Message "Both runners should write the same receipt contract."
+    Assert-True -Condition ($hook -match "Exact-tree full-test receipt found" -and $hook -match "HEAD\^\{tree\}") -Message "Pre-push should require an exact commit/tree receipt."
+    Assert-True -Condition ($workflow -match "-Tier Full -NoReceipt" -and $workflow -match "--tier full --no-receipt") -Message "Hosted CI should always run Full without trusting local receipts."
+    Assert-True -Condition (([regex]::Matches($workflow, "Run pack validation")).Count -eq 0) -Message "Hosted CI should not run validation separately when Full tests already include it."
+    Assert-True -Condition ($doc -match "GitHub Actions always runs Full independently") -Message "Test-tier docs should preserve hosted CI authority."
 }
 
 Invoke-PackTest "commands and workflows resolve for the active operating system" {
@@ -625,7 +739,7 @@ Invoke-PackTest "online model discovery docs preserve offline local-first defaul
     $agentTesting = Get-Content -LiteralPath $agentTestingPath -Raw
 
     Assert-True -Condition ($doc -match "optional") -Message "Online discovery doc should mark discovery optional."
-    Assert-True -Condition ($doc -match "candidate model names only") -Message "Online discovery doc should limit output to candidate model names."
+    Assert-True -Condition ($doc -match "candidate metadata only") -Message "Online discovery doc should keep normalized results candidate-only."
     Assert-True -Condition ($doc -match "default workflow stays offline") -Message "Online discovery doc should preserve offline default workflow."
     Assert-True -Condition ($doc -match "must not") -Message "Online discovery doc should define hard limits."
     Assert-True -Condition ($doc -match "Pull models automatically") -Message "Online discovery doc should prevent implicit model pulls."
@@ -2420,6 +2534,7 @@ Invoke-PackTest "configuration-pack fixture documents bad recommendations" {
 Invoke-PackTest "online model discovery scripts are candidate-only and cross-platform" {
     $scriptNames = @(
         "discover-online-model-candidates.ps1",
+        "discover-online-model-candidates.py",
         "discover-online-model-candidates.shared.sh"
     )
 
@@ -2487,8 +2602,44 @@ Invoke-PackTest "online model discovery parses a local fixture without network" 
         Assert-True -Condition ($models -contains "devstral-small-2:24b") -Message "Discovery report should include devstral fixture candidate."
         $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/online-model-discovery.md") -Raw
         Assert-True -Condition ($doc -match "VRAM-Aware Candidate Annotation") -Message "Online discovery docs should explain local VRAM annotation."
-        Assert-True -Condition ($doc -match "terminal output shows each family") -Message "Online discovery docs should explain terminal discovery output."
+        Assert-True -Condition ($doc -match "queried source") -Message "Online discovery docs should explain source-neutral discovery output."
         Assert-True -Condition ($doc -match "HardwareProfileSent") -Message "Online discovery docs should state hardware profiles are not sent online."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "online model discovery normalizes Ollama and Hugging Face fixtures" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "multi-source-model-discovery-$([guid]::NewGuid())"
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $outputPath = Join-Path $tempRoot "candidates.json"
+        $result = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/discover-online-model-candidates.ps1") `
+            -Arguments @(
+                "-Sources", "ollama,huggingface",
+                "-Families", "qwen3.5",
+                "-SourceHtmlPath", (Join-Path $repoRoot "examples/fixtures/ollama-model-library.html"),
+                "-HuggingFaceJsonPath", (Join-Path $repoRoot "examples/fixtures/huggingface-model-search-response.json"),
+                "-OutputPath", $outputPath
+            )
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Multi-source fixture discovery should pass."
+        $report = Get-Content -LiteralPath $outputPath -Raw | ConvertFrom-Json
+        $contract = Get-Content -LiteralPath (Join-Path $repoRoot "config/model-discovery-contract.json") -Raw | ConvertFrom-Json
+        $sources = Get-Content -LiteralPath (Join-Path $repoRoot "config/model-discovery-sources.json") -Raw | ConvertFrom-Json
+        Assert-Equal -Actual $report.SchemaVersion -Expected 2 -Message "Discovery report should use normalized schema v2."
+        Assert-True -Condition (@($report.Sources) -contains "ollama" -and @($report.Sources) -contains "huggingface") -Message "Report should identify both source adapters."
+        Assert-True -Condition (@($sources.defaultSources) -contains "ollama" -and @($sources.defaultSources) -contains "huggingface") -Message "Source catalog should enable independent Ollama and Hugging Face discovery."
+        Assert-True -Condition (@($contract.candidateRequiredFields) -contains "Revision" -and @($contract.candidateRequiredFields) -contains "License" -and @($contract.candidateRequiredFields) -contains "QuantizationSignals") -Message "Contract should require provenance, licensing, and quantization metadata."
+        $hub = @($report.Candidates | Where-Object { $_.SourceId -eq "huggingface" })
+        Assert-Equal -Actual $hub.Count -Expected 2 -Message "Hugging Face fixture candidates should be normalized and deduplicated."
+        $gguf = @($hub | Where-Object { $_.Formats -contains "gguf" }) | Select-Object -First 1
+        $gated = @($hub | Where-Object { $_.Gated -eq "manual" }) | Select-Object -First 1
+        Assert-True -Condition ($null -ne $gguf -and $gguf.RuntimeCandidates -contains "ollama-import" -and $gguf.DirectOllamaPull -eq $false) -Message "Hub GGUF should be an import candidate, not a direct Ollama pull."
+        Assert-True -Condition ($null -ne $gated -and $gated.ValidationStatus -eq "candidate-only") -Message "Gated Hub models should remain candidate-only."
+        Assert-True -Condition (@($report.Candidates | Where-Object { $_.ValidationStatus -ne "candidate-only" }).Count -eq 0) -Message "Discovery must never promote candidates."
+        Assert-True -Condition ($report.PullsModels -eq $false -and $report.RewritesContinueConfig -eq $false) -Message "Multi-source discovery must remain read-only."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -4433,9 +4584,12 @@ Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
 }
 
 if ($failed) {
-    Write-Host "Test run failed. $testCount tests executed." -ForegroundColor Red
+    $runStopwatch.Stop()
+    Write-Host "Test run failed. Tier=$Tier; $testCount tests executed; $skippedCount skipped; $([math]::Round($runStopwatch.Elapsed.TotalSeconds, 2)) seconds." -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Test run passed. $testCount tests executed." -ForegroundColor Green
+Write-TestReceipt
+$runStopwatch.Stop()
+Write-Host "Test run passed. Tier=$Tier; $testCount tests executed; $skippedCount skipped; $([math]::Round($runStopwatch.Elapsed.TotalSeconds, 2)) seconds." -ForegroundColor Green
 exit 0

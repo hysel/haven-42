@@ -34,13 +34,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Run pack validation
+      - name: Run full pack tests
         shell: pwsh
-        run: ./scripts/validate-pack.ps1
-
-      - name: Run pack tests
-        shell: pwsh
-        run: ./scripts/test-pack.ps1
+        run: ./scripts/test-pack.ps1 -Tier Full -NoReceipt
 
   validate:
     name: Linux script smoke tests
@@ -50,13 +46,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Run Linux validation wrapper
+      - name: Run full Linux test wrapper
         shell: bash
-        run: ./scripts/validate-pack.linux.sh
-
-      - name: Run Linux test wrapper
-        shell: bash
-        run: ./scripts/test-pack.linux.sh
+        run: ./scripts/test-pack.linux.sh --tier full --no-receipt
 
       - name: Run Linux hardware profile smoke test
         shell: bash
@@ -98,13 +90,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Run macOS validation wrapper
+      - name: Run full macOS test wrapper
         shell: bash
-        run: ./scripts/validate-pack.macos.sh
-
-      - name: Run macOS test wrapper
-        shell: bash
-        run: ./scripts/test-pack.macos.sh
+        run: ./scripts/test-pack.macos.sh --tier full --no-receipt
 
       - name: Validate every macOS wrapper surface
         shell: bash

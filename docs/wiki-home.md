@@ -13,12 +13,14 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - New users: [[Quick Start|Quick-Start]]
 - Choose a workflow: [[Haven 42 Menu|Haven-42-Menu]]
 - Select a local model: [[Local Model Selection|Local-Model-Selection]]
+- Discover candidates across Ollama and Hugging Face: [[Online Model Discovery|Online-Model-Discovery]]
 - Compare supported agents: [[Agent Surface Options|Agent-Surface-Options]]
 - Understand the pass-before-ship rule: [[Agent Integration Admission Policy|Agent-Integration-Admission-Policy]]
 - Review current plans: [[Roadmap|Roadmap]]
 - Review local image support: [[Local Image Capability|Local-Image-Capability]]
 - Install the validated Linux image provider: [[ComfyUI Image Provider Setup|ComfyUI-Image-Provider-Setup]]
 - Prepare a release: [[Release Guidance|Release-Guidance]]
+- Choose Fast, Integration, or Full validation: [[Test Tiers|Test-Tiers]]
 
 ## Current Roadmap
 

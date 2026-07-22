@@ -1,0 +1,30 @@
+[
+  {
+    "_id": "fixture-laguna",
+    "id": "example-org/Laguna-Fixture-GGUF",
+    "author": "example-org",
+    "sha": "1111111111111111111111111111111111111111",
+    "pipeline_tag": "text-generation",
+    "library_name": "transformers",
+    "tags": ["text-generation", "gguf", "license:apache-2.0", "ollama", "tool-calling", "33B"],
+    "gated": false,
+    "downloads": 42,
+    "likes": 7,
+    "lastModified": "2026-07-22T00:00:00.000Z",
+    "siblings": [{"rfilename": "fixture-Q4_K_M.gguf"}]
+  },
+  {
+    "_id": "fixture-antares",
+    "id": "example-security/antares-fixture",
+    "author": "example-security",
+    "sha": "2222222222222222222222222222222222222222",
+    "pipeline_tag": "text-generation",
+    "library_name": "transformers",
+    "tags": ["text-generation", "safetensors", "license:apache-2.0", "security", "tool-calling", "1B"],
+    "gated": "manual",
+    "downloads": 12,
+    "likes": 3,
+    "lastModified": "2026-07-21T00:00:00.000Z",
+    "siblings": [{"rfilename": "model.safetensors"}]
+  }
+]
