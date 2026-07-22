@@ -8,7 +8,7 @@ The capability registry can request text generation without assuming Ollama, lla
 
 The machine-readable source is `config/inference-engine-registry.json`. Unknown combinations fail closed, silent CPU fallback is prohibited, and failed candidates leave documentation only.
 
-The shared local-text discovery and invocation entry points implement this boundary for `ollama.local-text` and `llamacpp.local-text`. They normalize Ollama and OpenAI-compatible response shapes without treating protocol compatibility as evidence inheritance. Ollama passed a fresh live adapter probe and chat call. llama.cpp selection requires one exact admitted CUDA or HIP profile and currently has portable contract evidence; its first direct live server adapter run remains an explicit promotion gate.
+The shared local-text discovery and invocation entry points implement this boundary for `ollama.local-text` and `llamacpp.local-text`. They normalize Ollama and OpenAI-compatible response shapes without treating protocol compatibility as evidence inheritance. Ollama passed a fresh live adapter probe and chat call. llama.cpp passed its first direct server discovery and invocation on the exact Linux NVIDIA/CUDA profile; Windows AMD/HIP retains bounded engine evidence only, and every selection still requires an exact admitted profile.
 
 ## Current Decisions
 

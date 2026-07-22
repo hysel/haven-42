@@ -8,6 +8,8 @@ Status: **blocked; do not admit desktop runtime manifests or scaffolding**.
 
 The npm and PyInstaller candidate graphs resolved cleanly in a disposable Windows workspace. The released Tauri `2.11.5` graph still contains five Windows-reachable unmaintained Rust crates. Tauri upstream commit `dd725f4b13c30a86b398ccc59eb498f151f461c5` upgrades `urlpattern` to `0.6.0`, removes that chain, and passed a controlled-source audit plus native Windows x64 compile/link probe. The fix is not yet in a published Tauri release, so it is evidence of an available upstream resolution—not a shippable dependency pin.
 
+A publication recheck on 2026-07-22 found Tauri release/crate `2.11.5`, `@tauri-apps/cli 2.11.4`, `tauri-utils 2.9.3`, and `urlpattern 0.6.0` still current for this boundary. No newer published Tauri release carries the reviewed fix, so the blocker and no-runtime decision remain unchanged.
+
 The universal lock graph still contains Linux-only unmaintained GTK3 crates and an unsound `glib` advisory. Those packages were absent from the Windows x64 target tree but remain a separate Linux promotion blocker. These findings do not invalidate the architecture choice, but no desktop runtime may enter the repository until an official release contains the Windows fix and each target's complete graph passes independently.
 
 No evaluation manifest, lock file, package directory, virtual environment, Rust toolchain, audit binary, probe executable, or build output from this run is shipped in the repository.

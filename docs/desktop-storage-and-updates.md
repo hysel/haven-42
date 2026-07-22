@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. `config/core-update-manifest-contract.json` defines the future immutable core-engine update boundary. These are architecture contracts, not an admitted updater or desktop runtime.
+`config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. `config/core-update-manifest-contract.json` defines the future immutable core-engine update boundary. `scripts/core-update-policy.py` can validate those inputs offline, but it is not a downloader, installer, activator, or admitted desktop runtime.
 
 The central rule is simple: an application update may replace the versioned engine, but it must not own or silently change the user's configuration, repositories, generated artifacts, models, provider data, or credentials.
 
@@ -60,6 +60,12 @@ The required sequence is:
 
 Rollback cannot silently downgrade user data. A configuration migration must be reversible or forward-compatible before activation is allowed.
 
+## Offline Policy Reference
+
+The cross-platform `core-update-policy` wrappers validate strict manifest shape, a full release commit, channel and version ordering, engine/schema compatibility, exactly one host OS/architecture/target asset, approved HTTPS GitHub hosts, and—when package bytes are supplied—exact size and SHA-256. The fixture command is exercised by the Full test suite.
+
+The result always reports manifest-signature verification, asset-attestation verification, OS compatibility completion, compatibility preflight completion, and activation as false. The policy makes no network request, writes no file, touches no user data, and cannot download, stage, activate, roll back, or clean an engine version. Those capabilities remain native-runtime promotion gates.
+
 ## Current Admission State
 
-No updater, update service, Tauri plugin, manifest publisher, background task, runtime scaffold, or installer is admitted by these contracts. Implementation still requires negative tests, native package evidence, signatures or attestations, offline behavior, disabled-update behavior, lifecycle checks, and exact-SHA hosted CI.
+No updater, update service, Tauri plugin, manifest publisher, background task, runtime scaffold, or installer is admitted. The offline policy is preparatory evidence only. Implementation still requires a trusted native signature/attestation verifier, negative tests, native package evidence, disabled-update behavior, lifecycle checks, atomic activation, health checks, rollback, and exact-SHA hosted CI.

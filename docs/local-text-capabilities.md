@@ -1,6 +1,6 @@
 # Local Text Capabilities
 
-One provider-neutral adapter supports repository-free chat, writing, and summarization. `ollama.local-text` uses Ollama's chat API and is live-validated. `llamacpp.local-text` uses the OpenAI-compatible chat-completions API and is contract-validated; it becomes selectable only when the caller supplies an exact `llama.cpp` engine/backend/hardware profile admitted by `config/inference-engine-registry.json`. A direct live llama.cpp server adapter run remains open, so its status is not promoted to live-validated.
+One provider-neutral adapter supports repository-free chat, writing, and summarization. `ollama.local-text` uses Ollama's chat API and is live-validated. `llamacpp.local-text` uses the OpenAI-compatible chat-completions API and is live-validated for the exact Linux NVIDIA/CUDA profile admitted by `config/inference-engine-registry.json`. Its direct pinned-server run passed discovery, profile admission, invocation, exact output, sanitization, and cleanup. Windows AMD/HIP retains engine-only evidence until its adapter is run directly, and every other profile fails closed.
 
 Create a matching session first with `scripts/start-ai-session.*`. Then preview the provider plan without network or file writes:
 

@@ -401,11 +401,12 @@
 - [x] Run native `cargo check`, minimal Tauri build, SBOM, and package inspection on a disposable Windows runner with Microsoft C++ build tools before admitting runtime files.
 - [ ] Resolve and lock the full npm, Cargo, Python, native-library, and packaging dependency graph; generate vulnerability, provenance, checksum, and third-party-license reports before runtime admission.
 - [ ] Implement native bridge and sidecar negative tests for malformed/oversized messages, command injection, path/grant escape, approval replay, remote content, cancellation, lifecycle, and privilege boundaries.
-  - The offline engine-side validator now passes hostile message, operation, grant, approval, cancellation, and event tests; native bridge, canonical path, WebView, process lifecycle, and privilege tests remain open until a runtime is admissible.
+  - The offline engine-side validator now passes 46 hostile message, operation, grant, approval, cancellation, and event tests; native bridge, canonical path, WebView, process lifecycle, and privilege tests remain open until a runtime is admissible.
 - [x] Define Windows, Linux, and macOS application, configuration, state, workspace, artifact, cache, update, and rollback locations without mixing immutable engine and user-owned data.
 - [ ] Add platform package promotion gates for Windows x64/ARM64, Linux x64/ARM64 on a bounded distribution matrix, and macOS Apple Silicon/Intel, with a physical Mac reserved for the final public-release flow.
 - [ ] Pursue Microsoft Store or SignPath Foundation Windows signing before paid Artifact Signing; defer Apple Developer enrollment until the first public macOS beta is otherwise ready.
 - [x] Define a versioned core-engine update manifest for immutable Windows, macOS, and Linux assets published through GitHub Releases.
+- [x] Add a cross-platform offline core-update policy that strictly validates manifest shape, immutable release identity, exact host asset, compatibility schemas, byte size, and SHA-256 while always denying download, staging, and activation.
 - [ ] Add opt-in automatic stable-release checks, downloads, and installation without using unattended `git pull` or a moving branch.
 - [ ] Verify downloaded engine assets with checksums and a release signature or attestation before staging or activation.
 - [x] Keep engine binaries separate from user configuration, workspaces, models, provider data, generated artifacts, and evidence in the versioned storage and update contracts.
@@ -442,7 +443,7 @@
 
 ## Milestone 24: Local Music And Audio Generation
 
-- [ ] Record exact ACE-Step 1.5 and Stable Audio 3.0 candidate versions, model cards, download sizes, checksums, licenses, supported operations, and claimed hardware paths without adding executable integration assets.
+- [x] Record exact ACE-Step 1.5 and accessible Stable Audio 3.0 candidate versions, model cards, download sizes, checksums, licenses, supported operations, and claimed hardware paths without adding executable integration assets; retain gated Small Music metadata as an explicit open evidence gap.
   - ACE-Step 1.5, Stable Audio Small SFX, and Stable Audio Medium are recorded from official immutable sources; gated Stable Audio Small Music did not expose exact anonymous revision/file metadata and remains open.
 - [ ] Externally evaluate ACE-Step 1.5 on Linux CUDA for REST health, instrumental and vocal generation, typed WAV/FLAC artifact requirements, privacy, cancellation, recovery, cleanup, and uninstall behavior.
 - [ ] Externally evaluate Stable Audio 3.0 Small and Medium for sound effects, instrumental music, editing, duration, licensing, and consumer hardware fit.
@@ -471,7 +472,8 @@
 - [x] Define explicit support matrices for GGUF/Ollama or llama.cpp, Apple Silicon MLX, and accelerator-specific AWQ, GPTQ, FP8, or INT4 paths without treating equal bit counts as interchangeable.
 - [x] Add provenance, checksum, derivative-license, redistribution, calibration-data privacy, download-size, temporary-storage, compute-time, and cleanup disclosures before conversion.
 - [x] Define comparative gates for load time, first-token latency, throughput, peak memory, disk use, context stability, accelerator use, general capability quality, tool calls, and engineering workflow reliability.
-- [ ] Validate one disposable Linux NVIDIA GGUF/Ollama path first; notify the user before every phase that needs the local Ollama server.
-- [ ] Validate Windows NVIDIA, Windows Intel, Windows AMD, and Apple Silicon paths independently, keeping physical Mac testing last.
+- [x] Validate one disposable Linux NVIDIA GGUF/Ollama path first; the exact Qwen 3.5 9B Q4_K_M versus Q8_0 evidence and cleanup record are complete.
+- [x] Validate the exact Windows AMD/Ollama quantization comparison independently; the RX 7800 XT 16 GB profile passed and does not transfer to another platform or runtime.
+- [ ] Validate Windows NVIDIA, Windows Intel, and Apple Silicon paths independently, keeping physical Mac testing last; Windows Intel remains parked until representative Intel GPU hardware is available.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.

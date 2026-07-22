@@ -56,3 +56,9 @@ The test reused the same revision-pinned Q4_K_M model and SHA-256 recorded above
 The generated patch changed only `False` to `True` and passed an external `git apply --check`. Decision: admit llama.cpp CUDA for this exact Linux NVIDIA profile as engine-level evidence. This does not establish agent-surface approved-write readiness, multi-GPU behavior, another NVIDIA architecture, a different driver/toolchain/model/context, or a consumer installation path.
 
 The loopback server and SSH tunnel were stopped. The model, pinned source, CUDA environment, compiler caches, build outputs, logs, and patch fixture were removed. The existing Ollama and ComfyUI services remained active and unchanged, and no llama.cpp listener or installation remained.
+
+### Direct provider-adapter gate
+
+The same pinned Linux CUDA environment was rebuilt without embedded or prebuilt UI assets and launched with `--no-ui` on loopback. Haven 42's production discovery and invocation scripts reached it through a verified SSH tunnel. `/v1/models` discovery, exact engine/backend/hardware admission, the `llamacpp.local-text` provider, OpenAI-compatible chat-completions mapping, and exact requested output all passed. The adapter request completed in 5.953 seconds; the server recorded 258.57 prompt tokens/s and 62.34 generated tokens/s, with 5,279 MiB loaded on the RTX 5000. No artifact or endpoint was persisted.
+
+This promotes the local-text adapter only for the exact Linux NVIDIA/CUDA evidence cell. Windows AMD/HIP retains engine-only evidence. The server, tunnel, model, source, toolchain, build output, caches, and logs were removed after the adapter run.

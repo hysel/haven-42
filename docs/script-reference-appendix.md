@@ -59,6 +59,8 @@ pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/invoke-workflow.ps1 -List
 pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/invoke-workflow.ps1 -WorkflowId show-haven-42-menu -DryRun
 ```
 
+Maintainers can exercise the preparatory offline update boundary directly with `scripts/core-update-policy.ps1` on Windows or the `.linux.sh` and `.macos.sh` wrappers on Unix. It validates an immutable manifest and optional local package bytes but cannot download, write, stage, attest, or activate a release. See `docs/desktop-storage-and-updates.md`.
+
 Use the platform-specific entry points when you need exact script behavior or script-specific arguments. The registry lists Windows, Linux, and macOS entry points for every workflow.
 
 ## Candidate-Foundation Utilities

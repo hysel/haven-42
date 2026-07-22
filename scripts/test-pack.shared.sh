@@ -2004,7 +2004,26 @@ PY
 
 test_desktop_sidecar_ipc_policy() {
   output="$(python3 "$REPO_ROOT/scripts/desktop-ipc-policy.py" --self-test 2>&1)" || return 1
-  printf '%s\n' "$output" | grep -q "passed: 29 cases"
+  printf '%s\n' "$output" | grep -q "passed: 46 cases"
+}
+
+test_core_update_policy() {
+  policy="$REPO_ROOT/scripts/core-update-policy.shared.sh"
+  manifest="$REPO_ROOT/examples/fixtures/core-update-manifest.json"
+  package="$REPO_ROOT/examples/fixtures/core-update-package.bin"
+  output="$($policy --manifest-path "$manifest" --package-path "$package" --host-os windows --host-architecture x64 --target-triple x86_64-pc-windows-msvc --current-version 0.3.0 --updater-version 0.3.0 --json)" || return 1
+  python3 - "$output" <<'PY' || return 1
+import json, sys
+value = json.loads(sys.argv[1])
+assert value["Status"] == "verified-bytes-awaiting-cryptographic-attestation"
+assert value["BytesVerified"] is True
+assert value["ManifestSignatureVerified"] is False and value["AssetAttestationVerified"] is False
+assert value["CompatibilityPreflightComplete"] is False
+assert value["OperatingSystemCompatibilityVerified"] is False
+assert value["ActivationAllowed"] is False and value["NetworkUsed"] is False
+assert value["FilesWritten"] is False and value["UserDataTouched"] is False
+PY
+  ! "$policy" --manifest-path "$manifest" --host-os linux --host-architecture x64 --target-triple x86_64-unknown-linux-gnu --current-version 0.3.0 --updater-version 0.3.0 --json >/dev/null 2>&1
 }
 
 test_media_onboarding_and_quantization_foundations() {
@@ -2146,6 +2165,7 @@ run_test "model residency policy is applied across runtime and config paths" tes
 run_test "ComfyUI setup guide preserves the validated secure provider profile" test_comfyui_setup_guide_contract
 run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
 run_test "desktop sidecar IPC policy rejects hostile messages" test_desktop_sidecar_ipc_policy
+run_test "core update policy fails closed before cryptographic admission" test_core_update_policy
 run_test "media onboarding and quantization foundations fail closed" test_media_onboarding_and_quantization_foundations
 
 if [ "$FAILED" -eq 1 ]; then

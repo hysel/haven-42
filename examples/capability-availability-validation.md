@@ -10,7 +10,7 @@ The explicit probe called only Ollama's tags endpoint, found the already-install
 
 No model was run, loaded, pulled, unloaded, or deleted. Offline fixture tests cover installed and unprobed states, and the engineering route tests verify that every planned workflow exists while `InvocationAllowed` remains false.
 
-The provider-neutral extension passed OpenAI-compatible `/v1/models` fixture mapping for the exact admitted Linux NVIDIA/CUDA llama.cpp profile and rejected a parked SYCL profile before network use. A fresh live Ollama probe on 2026-07-22 also returned `available` for an already-installed model without persisting its endpoint. Direct live llama.cpp discovery remains open.
+The provider-neutral extension passed OpenAI-compatible `/v1/models` fixture mapping for the exact admitted Linux NVIDIA/CUDA llama.cpp profile and rejected a parked SYCL profile before network use. A fresh live Ollama probe on 2026-07-22 returned `available` for an already-installed model without persisting its endpoint. Direct llama.cpp discovery then returned `available` through a verified loopback tunnel against pinned build `b10088`; the endpoint was not persisted and the disposable server environment was removed.
 
 ## Limits
 
