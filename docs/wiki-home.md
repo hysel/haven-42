@@ -32,7 +32,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 
 ## Current Roadmap
 
-- Milestone 22 — local web UI and task composition in progress; the first product slice, first-run/navigation/approval wireframes, and registry-backed nonvisual view model now sit over the private IPC and storage/update contracts, while execution and the native runtime remain dependency-blocked.
+- Milestone 22 — local web UI and task composition in progress; the first slice plus 46 engine-side and 55 native-authority policy cases are complete, while actual Tauri/Rust bridge, platform security, and packaging remain dependency-blocked.
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.

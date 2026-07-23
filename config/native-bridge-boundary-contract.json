@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "description": "Fail-closed policy contract for authority owned by the future native desktop bridge. This is executable policy evidence, not admitted Tauri or native runtime code.",
+  "implementationStatus": "policy-model-only",
+  "runtimeAdmitted": false,
+  "defaultDecision": "deny",
+  "pathGrants": {
+    "allowedTypes": ["repository-read", "repository-write", "artifact-write", "user-content-read"],
+    "allowedSelectionSources": ["native-user-dialog", "application-owned-path"],
+    "rawRendererPathAccepted": false,
+    "absoluteCanonicalPathRequired": true,
+    "existingCanonicalRootRequired": true,
+    "networkPathAllowed": false,
+    "symlinkOrReparseEscapeAllowed": false,
+    "protectedPurposes": ["application", "engine", "update", "rollback", "credentials", "private-keys"],
+    "maximumLifetimeSeconds": 300,
+    "opaqueGrantIdReturned": true,
+    "canonicalRootReturned": false,
+    "sessionBound": true,
+    "readImpliesWrite": false
+  },
+  "approvalTokens": {
+    "nativeMemoryOnly": true,
+    "opaqueToRenderer": true,
+    "singleUse": true,
+    "maximumLifetimeSeconds": 120,
+    "boundFields": ["sessionId", "requestId", "operationId", "mode", "effects", "grantIds", "inputDigest"],
+    "changedBindingInvalidates": true,
+    "rememberApprovalAllowed": false
+  },
+  "externalLinks": {
+    "explicitUserGestureRequired": true,
+    "allowedSchemes": ["https"],
+    "credentialsAllowed": false,
+    "nonDefaultPortsAllowed": false,
+    "controlCharactersAllowed": false,
+    "ambiguousEncodedPathsAllowed": false,
+    "pathBoundaryMatchRequired": true,
+    "fragmentsAllowed": true,
+    "allowlist": [
+      { "host": "github.com", "pathPrefixes": ["/hysel/haven-42", "/hysel/haven-42/wiki"] },
+      { "host": "tauri.app", "pathPrefixes": ["/", "/security/", "/distribute/", "/start/"] }
+    ]
+  },
+  "sidecarLifecycle": {
+    "states": ["stopped", "starting", "running", "stopping", "crashed"],
+    "initialState": "stopped",
+    "allowedTransitions": {
+      "stopped": { "start-requested": "starting" },
+      "starting": { "start-succeeded": "running", "start-failed": "stopped" },
+      "running": { "stop-requested": "stopping", "crashed": "crashed" },
+      "stopping": { "exited": "stopped", "shutdown-timeout": "crashed" },
+      "crashed": { "reset": "stopped" }
+    },
+    "packagedBinaryIdentityRequired": true,
+    "targetTripleMatchRequired": true,
+    "rendererMaySelectBinary": false,
+    "rendererMaySupplyArguments": false,
+    "rendererMaySupplyWorkingDirectory": false,
+    "singleSidecarPerSession": true,
+    "privateStdioOnly": true,
+    "listeningSocketAllowed": false,
+    "elevationAllowed": false,
+    "serviceInstallationAllowed": false,
+    "startupEntryAllowed": false,
+    "firewallChangeAllowed": false,
+    "unrelatedProcessTerminationAllowed": false,
+    "ownedProcessTreeOnly": true,
+    "shutdownTimeoutSeconds": 10,
+    "environmentAllowlist": ["SystemRoot", "WINDIR", "LANG", "LC_ALL", "NO_COLOR"]
+  },
+  "cancellation": {
+    "activeRequestRequired": true,
+    "sameSessionRequired": true,
+    "operatingSystemPidAcceptedFromRenderer": false,
+    "arbitrarySignalAcceptedFromRenderer": false,
+    "ownedRequestOnly": true,
+    "exactlyOneTerminalEventRequired": true
+  },
+  "privilegeBoundary": {
+    "runElevated": false,
+    "installService": false,
+    "createStartupEntry": false,
+    "modifyFirewall": false,
+    "modifyDrivers": false,
+    "writeApplicationDirectoryAtRuntime": false,
+    "inheritCredentials": false,
+    "persistSecretsInRenderer": false
+  },
+  "promotion": {
+    "policyModelPassesAsNativeEvidence": false,
+    "requiresActualNativeBridgeTests": true,
+    "requiresExactPlatformPackageTests": true,
+    "failedOrBlockedRuntimeLeavesDocumentationAndPolicyOnly": true
+  }
+}

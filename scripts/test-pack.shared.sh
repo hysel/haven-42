@@ -1716,7 +1716,7 @@ test_solution_architecture_review_doc() {
     grep -q "25: Local Video Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "26: Hardware-Adaptive Model Quantization" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "21: General-Purpose AI Assistant And Intent Routing | Complete | Complete for the promoted provider set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "22: Unified Product UI And Task Composition | In progress | First slice complete; runtime dependency-gated" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "22: Unified Product UI And Task Composition | In progress | First slice and policy boundary complete; native runtime dependency-gated" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "21: General-Purpose AI Assistant And Intent Routing | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "22: Unified Product UI And Task Composition | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "automated status-consistency checks" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -2019,6 +2019,40 @@ test_desktop_sidecar_ipc_policy() {
   printf '%s\n' "$output" | grep -q "passed: 46 cases"
 }
 
+test_native_bridge_boundary_policy() {
+  output="$(python3 "$REPO_ROOT/scripts/native-bridge-boundary-policy.py" --self-test 2>&1)" || return 1
+  printf '%s\n' "$output" | grep -q "passed: 55 cases" || return 1
+  python3 - "$REPO_ROOT" <<'PY' || return 1
+import json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+contract = json.loads((root / "config/native-bridge-boundary-contract.json").read_text(encoding="utf-8"))
+assert contract["schemaVersion"] == 1
+assert contract["runtimeAdmitted"] is False and contract["defaultDecision"] == "deny"
+assert contract["pathGrants"]["rawRendererPathAccepted"] is False
+assert contract["pathGrants"]["networkPathAllowed"] is False
+assert contract["pathGrants"]["symlinkOrReparseEscapeAllowed"] is False
+assert contract["approvalTokens"]["rememberApprovalAllowed"] is False
+assert contract["approvalTokens"]["singleUse"] is True
+assert contract["approvalTokens"]["nativeMemoryOnly"] is True
+assert contract["sidecarLifecycle"]["rendererMaySelectBinary"] is False
+assert contract["sidecarLifecycle"]["rendererMaySupplyArguments"] is False
+assert contract["sidecarLifecycle"]["elevationAllowed"] is False
+assert contract["sidecarLifecycle"]["listeningSocketAllowed"] is False
+assert contract["sidecarLifecycle"]["unrelatedProcessTerminationAllowed"] is False
+assert contract["privilegeBoundary"]["installService"] is False
+assert contract["privilegeBoundary"]["modifyFirewall"] is False
+assert contract["privilegeBoundary"]["modifyDrivers"] is False
+assert contract["promotion"]["policyModelPassesAsNativeEvidence"] is False
+assert contract["promotion"]["requiresActualNativeBridgeTests"] is True
+evidence = (root / "docs/native-bridge-boundary-evidence.md").read_text(encoding="utf-8")
+assert "policy model passed; native runtime remains blocked and unadmitted" in evidence
+assert "does not prove Tauri command registration" in evidence
+assert "docs/native-bridge-boundary-evidence.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
+for runtime_file in ("package.json", "package-lock.json", "Cargo.toml", "Cargo.lock", "tauri.conf.json"):
+    assert not (root / runtime_file).exists()
+PY
+}
+
 test_core_update_policy() {
   policy="$REPO_ROOT/scripts/core-update-policy.shared.sh"
   manifest="$REPO_ROOT/examples/fixtures/core-update-manifest.json"
@@ -2256,6 +2290,7 @@ run_test "model residency policy is applied across runtime and config paths" tes
 run_test "ComfyUI setup guide preserves the validated secure provider profile" test_comfyui_setup_guide_contract
 run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
 run_test "desktop sidecar IPC policy rejects hostile messages" test_desktop_sidecar_ipc_policy
+run_test "native bridge authority model rejects hostile boundaries" test_native_bridge_boundary_policy
 run_test "core update policy fails closed before cryptographic admission" test_core_update_policy
 run_test "workflow reliability threat model and data lifecycle fail closed" test_workflow_reliability_and_data_lifecycle
 run_test "provider performance evidence and capacity preflight fail closed" test_provider_evidence_and_capacity

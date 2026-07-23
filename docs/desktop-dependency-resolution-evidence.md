@@ -8,7 +8,7 @@ Status: **blocked; do not admit desktop runtime manifests or scaffolding**.
 
 The npm and PyInstaller candidate graphs resolved cleanly in a disposable Windows workspace. The released Tauri `2.11.5` graph still contains five Windows-reachable unmaintained Rust crates. Tauri upstream commit `dd725f4b13c30a86b398ccc59eb498f151f461c5` upgrades `urlpattern` to `0.6.0`, removes that chain, and passed a controlled-source audit plus native Windows x64 compile/link probe. The fix is not yet in a published Tauri release, so it is evidence of an available upstream resolution—not a shippable dependency pin.
 
-A publication recheck on 2026-07-22 found Tauri release/crate `2.11.5`, `@tauri-apps/cli 2.11.4`, `tauri-utils 2.9.3`, and `urlpattern 0.6.0` still current for this boundary. No newer published Tauri release carries the reviewed fix, so the blocker and no-runtime decision remain unchanged.
+A second official publication recheck on 2026-07-22 found Tauri release/crate `2.11.5`, `@tauri-apps/cli 2.11.4`, `tauri-utils 2.9.3`, and `urlpattern 0.6.0` still current for this boundary. No newer published Tauri release carries the reviewed fix, so the blocker and no-runtime decision remain unchanged.
 
 The universal lock graph still contains Linux-only unmaintained GTK3 crates and an unsound `glib` advisory. Those packages were absent from the Windows x64 target tree but remain a separate Linux promotion blocker. These findings do not invalidate the architecture choice, but no desktop runtime may enter the repository until an official release contains the Windows fix and each target's complete graph passes independently.
 
@@ -158,5 +158,5 @@ The next admissible work is:
 2. Repeat the complete Windows graph, controlled audit, SBOM, license, native build, and package inspection against that exact release.
 3. Resolve and lock the full frontend, Python sidecar, WebView, native-library, and packaging graph under one pinned build image.
 4. Keep Linux blocked until its GTK3 and `glib` findings are separately resolved or accepted through a Linux-specific review.
-5. Run the required native bridge, sidecar, lifecycle, path/grant, approval, cancellation, remote-content, and privilege negative tests against actual admitted code.
-6. Only after those gates pass, propose the smallest non-visual Tauri bridge scaffold for repository admission. Stop for user discussion before implementing visual interface design.
+5. Translate the 55-case native-authority policy model and 46-case engine-side policy into required native bridge, sidecar, lifecycle, path/grant, approval, cancellation, remote-content, and privilege tests against actual admitted code.
+6. Only after those gates pass, propose the smallest non-visual Tauri bridge scaffold for repository admission. The first-slice navigation and interaction checkpoint is complete; visual renderer implementation still follows native admission.

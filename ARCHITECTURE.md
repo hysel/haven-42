@@ -51,6 +51,8 @@ The desktop path loads no remote UI code, exposes no generic shell bridge, and l
 
 The first product slice is defined by `config/ui-navigation-contract.json` and rendered as framework-neutral state by `scripts/build-ui-view-model.py`. The model joins only registered capabilities, providers, UI-ready workflows, and optional runtime availability evidence. It exposes no executable path, endpoint, approval token, or execution authority; `runtimeAdmitted` and `executionEnabled` stay false until the native bridge passes its separate gates. See `docs/product-ui-first-slice.md`.
 
+The future native-owned authority is separately modeled by `config/native-bridge-boundary-contract.json` and `scripts/native-bridge-boundary-policy.py`. Its 55 offline cases cover canonical path grants, protected roots, external-link allowlisting, approval replay, sidecar lifecycle, environment filtering, cancellation ownership, and privilege rejection. This policy starts no process and grants no authority; it complements the 46 engine-side IPC cases but is not native implementation evidence. See `docs/native-bridge-boundary-evidence.md`.
+
 ## Repository Layers
 
 ### Project Documentation
