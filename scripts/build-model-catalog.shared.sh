@@ -4,6 +4,23 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+usage() {
+  cat <<'EOF'
+Usage: build-model-catalog [options]
+
+Assemble a read-only, security-aware model catalog from a bounded discovery report and the committed evidence catalog.
+
+Options:
+  --discovery-report PATH  Candidate discovery JSON input (required).
+  --output-path PATH       Exclusive JSON output path; defaults under runtime-validation-output.
+  --help, -h               Show this help text.
+EOF
+}
+
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  usage
+  exit 0
+fi
 if ! command -v python3 >/dev/null 2>&1; then
   printf 'python3 is required for model catalog assembly.\n' >&2
   exit 1
