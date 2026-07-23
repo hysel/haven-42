@@ -1698,10 +1698,11 @@ test_solution_architecture_review_doc() {
     grep -q 'Your private, local AI station' "$REPO_ROOT/README.md" &&
     grep -q '^name: Haven 42$' "$REPO_ROOT/.continue/config.yaml" &&
     grep -q 'Canonical repository: `hysel/haven-42`' "$REPO_ROOT/BRANDING.md" &&
-    grep -q 'Clean-Rename Policy' "$REPO_ROOT/BRANDING.md" &&
+    grep -q 'Product Identity Policy' "$REPO_ROOT/BRANDING.md" &&
     grep -q 'PACKAGE_NAME="haven-42-$PACK_VERSION"' "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q 'haven-42/assets' "$REPO_ROOT/scripts/install-continue-pack.shared.sh" &&
     grep -q '\.haven-42-mlx' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" &&
+    ! git -C "$REPO_ROOT" grep -n -I -i -E 'engineering[ -]+agent[ -]+pack|local[ _-]+engineering[ _-]+agent[ _-]+pack' -- . >/dev/null 2>&1 &&
     grep -q "Review Standard" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Milestone Audit" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "1: Minimum Usable Pack" "$REPO_ROOT/docs/solution-architecture-review.md" &&

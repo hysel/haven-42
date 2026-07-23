@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Removed rename-era identity language so tracked product documentation, prompts, tests, packages, and wiki content use only the Haven 42 name and canonical repository identity.
 - Added a product-wide progressive onboarding contract for chat, agents, generative media, models, engines, connections, storage, and updates: every configurable area offers guided setup, existing setup, and not-now; both active paths expose structured advanced controls; and the engine derives validated, customized, unverified, or blocked without admitting runtime behavior.
 - Expanded the exact Windows AMD ComfyUI/SDXL partial evidence with repeated-run timing, active cancellation, invalid-workflow recovery, forced process recovery, post-restart adapter success, metadata and signal inspection, retention cleanup, and complete disposable uninstall. Promotion remains blocked because no newer immutable AMD release exists for a real update/rollback test and consumer onboarding/installer behavior remains unadmitted; no Windows runtime, installer, or test harness ships.
 - Rechecked the official Tauri release, crates.io, and npm registries; the reviewed `urlpattern 0.6` fix remains unpublished, so runtime admission stays blocked. Added a 55-case native-authority policy model for path grants, external links, approvals, sidecar lifecycle, cancellation, environment filtering, and privilege rejection without adding Tauri or runtime files.
@@ -221,7 +222,7 @@ This project follows a simple changelog format:
 ### Changed
 
 
-- Repositioned the project docs around the broader `Local Engineering Agent Pack` name while keeping Continue as the first supported and validated agent surface.
+- Expanded the project documentation beyond a Continue-only audience while keeping Continue as the first supported and validated agent surface.
 - Changed generated model profiles to use `qwen3.5:9b` for WRITE SAFE, PLAN ONLY, and DEEP REVIEW by default so simple-hardware setups do not require 24B or 30B models.
 - Tuned the committed local model defaults to `contextLength: 16384` and `maxTokens: 2048` after VS Code and VSCodium Agent testing showed better responsiveness with smaller local output budgets.
 - Clarified approved write mode so models must use edit/apply tools after explicit approval or report that write tools are unavailable.

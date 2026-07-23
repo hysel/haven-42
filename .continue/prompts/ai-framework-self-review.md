@@ -1,6 +1,6 @@
 ---
 name: ai-framework-self-review
-description: Review this local-first engineering agent pack as a reusable software product.
+description: Review Haven 42 as a reusable local-first AI product.
 invokable: true
 ---
 
