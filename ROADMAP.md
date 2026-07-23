@@ -642,6 +642,8 @@ Scope:
 - Permit only registered capability and workflow IDs through narrowly scoped Tauri permissions; ship no arbitrary shell bridge, unrestricted filesystem API, remote UI code, or default listening port.
 - Keep hardened loopback/browser operation as a separately tested option for headless Linux, SSH-tunneled use, development, and diagnostics.
 - Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
+- Keep chat as the primary interaction surface with compact sticky navigation and provider/system configuration. Done for the local web slice; responsive contract and visual regression coverage remain part of each UI change.
+- Evaluate text models independently for chat, writing, and summarization before automatic defaults. The first writing matrix tracks Qwen 3.5 9B as the adapter control plus Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H as unpromoted candidates.
 - Present deterministic first-run choices for chat, writing, summarization, image creation, software work, and local-AI setup.
 - Present beginner recommendations and advanced model controls from one engine-derived catalog decision that combines exact artifact identity, license, hardware fit, provenance, and evidence without allowing the renderer to promote a model.
 - Support repository-optional sessions and clearly identify every artifact location before a write.

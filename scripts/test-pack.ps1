@@ -4899,7 +4899,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "59 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "63 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $policy.runtimeId -Expected "haven42.local-web" -Message "Local-web runtime identity should be stable."
     Assert-True -Condition ($policy.implementationStatus -eq "text-tools-admitted" -and -not $policy.bind.remoteBindAllowed) -Message "Only the loopback text-tool runtime should be admitted."
@@ -4909,9 +4909,16 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     foreach ($wrapper in @("scripts/start-haven42-web.ps1", "scripts/start-haven42-web.linux.sh", "scripts/start-haven42-web.macos.sh", "scripts/start-haven42-web.shared.sh")) {
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $wrapper) -PathType Leaf) -Message "Cross-platform local-web launcher should exist: $wrapper"
     }
-    $assets = (Get-Content -LiteralPath (Join-Path $repoRoot "web/static/index.html") -Raw) + (Get-Content -LiteralPath (Join-Path $repoRoot "web/static/app.js") -Raw)
+    $html = Get-Content -LiteralPath (Join-Path $repoRoot "web/static/index.html") -Raw
+    $styles = Get-Content -LiteralPath (Join-Path $repoRoot "web/static/styles.css") -Raw
+    $assets = $html + (Get-Content -LiteralPath (Join-Path $repoRoot "web/static/app.js") -Raw)
+    $writingDoc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/writing-model-evaluation.md") -Raw
+    $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
     Assert-True -Condition ($assets -notmatch '(?i)(src|href)\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
-    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match "docs/local-web-mvp\.md") -Message "Local-web guidance should be mapped to the wiki."
+    Assert-True -Condition ($html.IndexOf('id="text-panel"') -lt $html.IndexOf('id="connection-panel"') -and $html -match 'interaction-grid' -and $html -match 'configuration-column') -Message "Chat should be the primary interaction before the compact configuration column."
+    Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."
+    Assert-True -Condition ($writingDoc -match 'qwen3\.5:9b' -and $writingDoc -match 'gemma3:12b' -and $writingDoc -match 'mistral-small3\.2' -and $writingDoc -match 'granite4:7b-a1b-h' -and $writingDoc -match 'No candidate.*product default') -Message "Writing-model candidates must remain evidence-gated and unpromoted."
+    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
 }
 
 Invoke-PackTest "media onboarding and quantization foundations fail closed" {

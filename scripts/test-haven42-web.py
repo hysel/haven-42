@@ -388,10 +388,16 @@ def main() -> int:
         ]
         assert policy["browser"]["remoteAssetsAllowed"] is False
         javascript = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
+        html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
+        styles = (ROOT / "web/static/styles.css").read_text(encoding="utf-8")
         assert "innerHTML" not in javascript and "X-Haven-Token" in javascript
         assert "/api/text" in javascript and "content.summarize" in javascript
         assert "trust-scope" not in javascript and "modelSelections" in javascript
-        checks += 9
+        assert html.count('id="connection-panel"') == 1 and html.count('id="status-panel"') == 1
+        assert html.index('id="text-panel"') < html.index('id="connection-panel"')
+        assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
+        assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
+        checks += 13
     finally:
         app.shutdown()
         app.server_close()

@@ -763,6 +763,7 @@ Use a stronger model when:
 
 ## Related Docs
 
+- `docs/writing-model-evaluation.md`
 - `docs/local-model-reliability.md`
 - `docs/online-model-discovery.md`
 - `docs/model-tool-use-validation.md`

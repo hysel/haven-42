@@ -10,7 +10,7 @@ The project began as a reusable pack for coding agents. It now provides a provid
 
 | Capability | Status | What that means |
 | --- | --- | --- |
-| Local browser assistant | **Available** | Enter an Ollama address, then choose separate models for private chat, writing, or summarization. The balanced default keeps the active model warm for five idle minutes. |
+| Local browser assistant | **Available** | Chat is the primary workspace, with sticky navigation and compact provider/system setup on the side. Chat, writing, and summarization remember separate models, and the balanced default keeps one active model warm for five idle minutes. |
 | Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
 | Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
@@ -194,6 +194,8 @@ To pull and preflight Agent model candidates through the Ollama API before
 manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
 ## Model Selection
+
+The current qwen3.5:9b writing evidence validates the adapter contract, not comparative writing quality. Gemma 3, Mistral Small 3.2, and Granite 4 are unpromoted candidates for a controlled, capability-specific evaluation; see docs/writing-model-evaluation.md. Haven 42 must not call a candidate the best writing model or make it an automatic default before its exact artifact, license, execution-host fit, performance, and blind quality evidence pass.
 
 If you are unsure which model fits your machine, run the hardware profile script. If your LLM runs on another machine, use `docs/remote-hardware-profile.md` to collect that machine's profile over SSH:
 

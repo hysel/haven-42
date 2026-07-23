@@ -26,6 +26,12 @@ macOS:
 
 The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-open` on Linux and macOS to start without opening the default browser. Use `-Port` or `--port` to select another loopback port.
 
+## Chat-First Layout
+
+The conversation workspace is the primary desktop interaction. The left navigation stays pinned below the local header, the headline is deliberately compact, and provider plus sanitized system configuration remain in a bounded sticky column on the right. On narrower windows the page collapses to one column with chat first and setup available through the Models or System navigation controls.
+
+This layout change does not broaden browser authority: configuration, messages, and responses remain in memory, and the browser still has no shell, filesystem, repository, model-download, or arbitrary-network surface.
+
 ## Connect Ollama
 
 For Ollama on the same computer, keep the default loopback endpoint. For an Ollama server on your trusted home or work network, enter its literal private IP endpoint, such as `http://<trusted-lan-ip>:11434`, and select **Connect**. Haven 42 classifies loopback versus private-LAN scope on the server; users do not need to select a connection scope.
