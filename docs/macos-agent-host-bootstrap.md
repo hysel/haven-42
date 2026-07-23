@@ -8,11 +8,10 @@ known to have the pack and prerequisites installed. Do not assume a previous
 Mac instance still has a clone, Homebrew, MLX, VSCodium, Continue, models, or
 generated samples.
 
-The script is intentionally opt-in: its default mode only reports available
-tools. `--install` may install Homebrew and Node.js. `--with-ollama` may also
-install Ollama through Homebrew. `--with-mlx` installs a dedicated Homebrew
-Python 3.12 virtual environment with `mlx-lm`. It never pulls a model or edits
-a project.
+The script is discovery-only: its default mode reports available tools without
+changing the host. `--install`, `--with-ollama`, and `--with-mlx` are retained
+only to produce an explicit fail-closed refusal. Haven 42 does not execute
+moving Homebrew bootstrap sources or unresolved package dependency trees.
 
 ## Check The Host
 
@@ -22,19 +21,11 @@ a project.
 
 ## Install Required Tools
 
-```bash
-./scripts/bootstrap-macos-agent-host.sh --install --with-ollama
-```
-
-For an Apple Silicon MLX runtime instead of, or alongside, Ollama:
-
-```bash
-./scripts/bootstrap-macos-agent-host.sh --install --with-mlx
-```
-
-The helper intentionally uses Homebrew Python 3.12. The macOS-provided Python
-can be older and may resolve an `mlx-lm` version that does not support current
-model architectures such as Qwen 3.5.
+Install reviewed exact versions through the tools' official user-managed
+package workflows. Do not pipe a remote installer into a shell. After each
+install, rerun the discovery command above and record only sanitized version
+and readiness evidence. Apple Silicon MLX and Ollama remain separate runtimes;
+validate each exact runtime, model, and hardware combination before promotion.
 
 After installation, start the Ollama service, pull a model suitable for the
 available unified memory, and profile the host:
@@ -155,3 +146,7 @@ matrix slice on disposable fixtures:
 The runner rejects a preloaded Ollama server by default and verifies that it
 unloads the tested model after the run. A passing read-only cell does not make
 approved writes safe: retain the per-surface, per-model, per-OS evidence gate.
+
+## Security change: discovery-only bootstrap
+
+The bootstrap helper is now discovery-only. Automated `--install` execution fails closed because Homebrew formulae, bootstrap scripts, and transitive Python packages are not represented by an admitted immutable dependency manifest with verified artifacts. Install prerequisites through a user-managed, reviewed process, then rerun the helper without `--install` to inspect readiness. Do not pipe remote scripts into a shell.

@@ -46,3 +46,7 @@ The admitted Linux form uses `--provider-id llamacpp.local-text --engine-id llam
 ## Promotion Boundary
 
 Live validation must record only sanitized provider ID, model ID, operating system, capability, nonempty-output result, artifact validation, and failure signals. Never record the endpoint, prompt contents, local session path, or raw response. Writing and summarization quality should be evaluated separately from basic transport and artifact correctness.
+
+## Endpoint trust and prompt privacy
+
+The default endpoint trust scope is `loopback`. For a private LAN runtime, explicitly add `-EndpointTrustScope trusted-lan` or `--endpoint-trust-scope trusted-lan`; this authorizes only private/loopback resolution and reports execution as network-based, not same-machine local execution. External endpoints require explicit `external` scope and HTTPS. Redirects are denied and JSON responses are bounded to 8 MiB. Prefer `-PromptFile`/`-PromptStdin` or `--prompt-file`/`--prompt-stdin` for sensitive prompts. See `docs/provider-endpoint-security.md`.

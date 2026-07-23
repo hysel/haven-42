@@ -50,5 +50,5 @@ The following recommendations should fail this fixture unless backed by explicit
 - Add authorization checks to API endpoints.
 - Add database rollback scripts.
 - Add structured logging to application services.
-- Replace the documented `npx @continuedev/cli` fallback with `cn` only.
+- Replace the documented `npx @continuedev/cli@1.5.47` fallback with `cn` only.
 - Centralize duplicate configuration without naming duplicated files or settings.

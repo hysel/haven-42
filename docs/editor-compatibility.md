@@ -16,7 +16,7 @@ The pack should stay editor-neutral. The committed `.continue/config.yaml` shoul
 | --- | --- | --- |
 | VS Code | Usually installs extensions from Microsoft's Marketplace. | Continue can load the project-local `.continue/config.yaml`, show the configured model, and run prompts. |
 | VSCodium | Usually installs extensions from Open VSX. Extension versions and command names may differ from VS Code. | Continue can load the project-local `.continue/config.yaml`, show the configured model, and run prompts without duplicate global rules. |
-| Continue CLI | Useful fallback when editor behavior is unclear. | `npx @continuedev/cli --config .continue/config.yaml` can load the same config. |
+| Continue CLI | Useful fallback when editor behavior is unclear. | `npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml` uses the exact validated CLI identity. |
 
 ## Project-Local Config Rule
 
@@ -224,13 +224,13 @@ Use the CLI fallback when the editor does not clearly show which config is activ
 Windows PowerShell:
 
 ```powershell
-npx -y @continuedev/cli --config .continue/config.yaml --readonly -p "Reply OK"
+npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml --readonly -p "Reply OK"
 ```
 
 Linux or macOS:
 
 ```bash
-npx -y @continuedev/cli --config .continue/config.yaml --readonly -p "Reply OK"
+npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml --readonly -p "Reply OK"
 ```
 
 If the CLI loads the config but the editor does not, the issue is likely editor config selection, extension version, or global config precedence.

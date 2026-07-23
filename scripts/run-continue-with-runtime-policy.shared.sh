@@ -40,5 +40,5 @@ running="$(curl -fsS --max-time 30 "$BASE/api/ps")"
 other="$(printf '%s' "$running" | "$POLICY_PYTHON" -c 'import json,sys; m=sys.argv[1]; print(sum(1 for x in json.load(sys.stdin).get("models",[]) if x.get("name") != m and x.get("model") != m))' "$MODEL")"
 [ "$other" -lt "$MAX_RESIDENT" ] || { printf 'Runtime policy blocks loading %s: %s other model(s) are resident.\n' "$MODEL" "$other" >&2; exit 1; }
 curl -fsS --max-time 900 -X POST "$BASE/api/generate" -H 'Content-Type: application/json' -d "{\"model\":\"$MODEL\",\"prompt\":\"\",\"keep_alive\":\"${PRELOAD_MINUTES}m\",\"stream\":false}" >/dev/null
-args=(); [ "$CONTINUE_COMMAND" = npx ] && args+=(-y @continuedev/cli); args+=(--config "$CONFIG_PATH"); [ "$READ_ONLY" = true ] && args+=(--readonly) || args+=(--auto); args+=(--format json --silent -p "$PROMPT")
+args=(); [ "$CONTINUE_COMMAND" = npx ] && args+=(-y @continuedev/cli@1.5.47); args+=(--config "$CONFIG_PATH"); [ "$READ_ONLY" = true ] && args+=(--readonly) || args+=(--auto); args+=(--format json --silent -p "$PROMPT")
 cd "$TARGET_REPO"; if command -v timeout >/dev/null 2>&1; then timeout "$TIMEOUT_SECONDS" "$CONTINUE_COMMAND" "${args[@]}"; else "$CONTINUE_COMMAND" "${args[@]}"; fi

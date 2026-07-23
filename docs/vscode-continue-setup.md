@@ -420,7 +420,6 @@ TARGET_REPO="$PWD/runtime-validation-output/sample-repositories/python-api"
 cd "$TARGET_REPO"
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip pytest
 python -m pytest
 
 printf 'before\n' > continue-agent-write-test.md

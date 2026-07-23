@@ -549,3 +549,5 @@ This project follows a simple changelog format:
 - Added offline hardware-aware model/config recommendation scripts and documentation for converting profile JSON into WRITE SAFE, PLAN ONLY, and DEEP REVIEW guidance.
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Initial repository structure for a Continue-based enterprise engineering pack.
+
+- Hardened the repository with a security policy, ownership/review templates, immutable GitHub Action pins, bounded CI, pinned CodeQL analysis, blocked mutable installers, explicit provider endpoint trust scopes, redirect denial, response-size limits, prompt stdin/file support, exclusive artifact writes, and shell-free CLI harness execution.

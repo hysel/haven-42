@@ -11,7 +11,7 @@ Run these checks from the repository root:
 ```powershell
 git status --short --branch
 Test-Path .continue/config.yaml
-npx -y @continuedev/cli --help
+npx -y @continuedev/cli@1.5.47 --help
 ```
 
 If using Ollama locally:
@@ -35,7 +35,7 @@ Checks:
 
 ```powershell
 Test-Path .continue/config.yaml
-npx -y @continuedev/cli --config .continue/config.yaml --readonly -p "Reply OK"
+npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml --readonly -p "Reply OK"
 ```
 
 Fixes:
@@ -61,7 +61,7 @@ Checks:
 
 ```powershell
 Get-Command cn -ErrorAction SilentlyContinue
-npx @continuedev/cli --version
+npx -y @continuedev/cli@1.5.47 --version
 ```
 
 Fixes:
@@ -69,13 +69,13 @@ Fixes:
 - Use the CLI through `npx`:
 
 ```powershell
-npx @continuedev/cli --config .continue/config.yaml
+npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml
 ```
 
 - Or install the CLI globally:
 
 ```powershell
-npm install -g @continuedev/cli
+npm install -g @continuedev/cli@1.5.47
 ```
 
 After global installation, close and reopen PowerShell before retrying `cn`.

@@ -127,6 +127,9 @@ $requiredFiles = @(
     "CHANGELOG.md",
     "LICENSE",
     "CONTRIBUTING.md",
+    "SECURITY.md",
+    ".github/CODEOWNERS",
+    ".github/pull_request_template.md",
     "config/model-recommendations.tsv",
     "config/model-recommendations.mlx.tsv",
     "config/model-fit-profiles.json",
@@ -145,6 +148,9 @@ $requiredFiles = @(
     "config/onboarding-setting-schemas.json",
     "config/desktop-storage-contract.json",
     "config/core-update-manifest-contract.json",
+    ".github/workflows/codeql.yml",
+    "docs/provider-endpoint-security.md",
+    "scripts/provider_security.py",
     "config/agent-surface-capabilities.json",
     "config/agent-surface-solutions.json",
     "config/agent-cli-surface-defaults.json",
@@ -447,6 +453,8 @@ $requiredFiles = @(
     "examples/language-rule-pack-validation.md",
     "examples/multi-language-workflow-validation.md",
     ".github/workflows/validate-pack.yml",
+    ".github/CODEOWNERS",
+    ".github/pull_request_template.md",
     ".githooks/pre-push"
 )
 

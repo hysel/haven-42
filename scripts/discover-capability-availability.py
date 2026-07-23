@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import argparse, json, pathlib, urllib.request
+from provider_security import MAX_JSON_RESPONSE_BYTES, ProviderSecurityError, read_json, validate_base_url
 
 parser = argparse.ArgumentParser(description="Discover configured capability providers without invoking a capability.")
 parser.add_argument("--capability-registry", required=True, help=argparse.SUPPRESS)
@@ -10,6 +11,7 @@ parser.add_argument("--provider-id", default="ollama.local-text")
 parser.add_argument("--model")
 parser.add_argument("--runtime-base-url")
 parser.add_argument("--ollama-base-url", help=argparse.SUPPRESS)
+parser.add_argument("--endpoint-trust-scope", choices=["loopback", "trusted-lan", "external"], default="loopback")
 parser.add_argument("--engine-id")
 parser.add_argument("--backend-id")
 parser.add_argument("--hardware-profile")
@@ -44,15 +46,16 @@ if args.probe:
             response = json.loads(pathlib.Path(args.response_fixture_path).read_text(encoding="utf-8")); source = "validation-fixture"
         else:
             default_url = "http://127.0.0.1:11434" if provider["protocol"] == "ollama-chat" else "http://127.0.0.1:8080"
-            base_url = args.runtime_base_url or args.ollama_base_url or default_url
+            endpoint_policy = validate_base_url(args.runtime_base_url or args.ollama_base_url or default_url, args.endpoint_trust_scope)
+            base_url = endpoint_policy["baseUrl"]
             suffix = "/api/tags" if provider["protocol"] == "ollama-chat" else "/v1/models"
-            with urllib.request.urlopen(urllib.request.Request(base_url.rstrip("/") + suffix), timeout=args.timeout_seconds) as stream: response = json.load(stream)
+            response = read_json(urllib.request.Request(base_url + suffix), args.timeout_seconds, MAX_JSON_RESPONSE_BYTES)
             source = "ollama-tags" if provider["protocol"] == "ollama-chat" else "openai-models"
         records = response.get("models", []) if provider["protocol"] == "ollama-chat" else response.get("data", [])
         names = {item.get("name") or item.get("model") or item.get("id") for item in records}
         installed = args.model in names
         probe_result = {"providerId": provider["id"], "status": "available" if installed else "configuration-required", "modelInstalled": installed, "source": source, "runtimeSelection": selection}
-    except Exception:
+    except (OSError, ProviderSecurityError, ValueError):
         probe_result = {"providerId": provider["id"], "status": "unavailable", "modelInstalled": False, "source": "health-discovery-failed", "runtimeSelection": selection}
 
 items = []

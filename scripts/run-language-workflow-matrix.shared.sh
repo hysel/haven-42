@@ -191,7 +191,7 @@ run_continue() {
   (
     cd "$sample_path"
     if [ "$USE_NPX" = true ]; then
-      "$CONTINUE_COMMAND" -y @continuedev/cli --config "$config_path" "$mode" --format json --silent -p "$prompt"
+      "$CONTINUE_COMMAND" -y @continuedev/cli@1.5.47 --config "$config_path" "$mode" --format json --silent -p "$prompt"
     else
       "$CONTINUE_COMMAND" --config "$config_path" "$mode" --format json --silent -p "$prompt"
     fi
@@ -295,7 +295,7 @@ WRITE_BASE_URL="$(config_value "$WRITE_CONFIG_PATH" apiBase)"
 if [ "$DRY_RUN" = true ]; then
   SURFACE_VERSION="dry-run"
 elif [ "$USE_NPX" = true ]; then
-  SURFACE_VERSION="$("$CONTINUE_COMMAND" -y @continuedev/cli --version 2>/dev/null || true)"
+  SURFACE_VERSION="$("$CONTINUE_COMMAND" -y @continuedev/cli@1.5.47 --version 2>/dev/null || true)"
 else
   SURFACE_VERSION="$("$CONTINUE_COMMAND" --version 2>/dev/null || true)"
 fi

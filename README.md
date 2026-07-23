@@ -1078,3 +1078,7 @@ See `ROADMAP.md`.
 ## License
 
 MIT License. See `LICENSE`.
+
+### Security posture
+
+Security-sensitive operations fail closed. Provider endpoints use explicit `loopback`, `trusted-lan`, or HTTPS-only `external` trust scopes; redirects and oversized responses are rejected; prompt-file/stdin channels avoid child-process command-line exposure; and artifacts are created without silent overwrite or link following. Third-party automated installers are blocked until immutable reviewed dependency manifests and verified artifacts are admitted. See `SECURITY.md` for private reporting and `docs/provider-endpoint-security.md` for provider rules.

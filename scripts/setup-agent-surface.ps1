@@ -10,7 +10,7 @@ param(
     [string]$Lane = "WriteSafe",
     [string]$OllamaBaseUrl = "http://127.0.0.1:11434",
     [ValidateSet("aider-install", "pipx", "uv", "npm")]
-    [string]$InstallMethod = "aider-install",
+    [string]$InstallMethod = "pipx",
     [string]$AiderCommand = "aider",
     [string]$OpenCodeCommand = "opencode",
     [switch]$DryRun,
@@ -45,19 +45,20 @@ function Get-SafeEndpoint([string]$Value) {
 function Get-InstallPlan([string]$SurfaceName, [string]$Method) {
     if ($SurfaceName -eq "opencode") {
         if ($Method -ne "npm") { throw "$SurfaceName supports only the npm install method in this adapter." }
-        return @("npm install -g opencode-ai")
+        return @("user-managed exact install required: opencode-ai@1.18.2")
     }
 
     switch ($Method) {
-        "pipx" { return @("python -m pip install pipx", "pipx install aider-chat") }
-        "uv" { return @("python -m pip install uv", "uv tool install --force --python python3.12 --with pip aider-chat@latest") }
-        default { return @("python -m pip install aider-install", "aider-install") }
+        "pipx" { return @("user-managed pipx required", "user-managed exact install required: aider-chat==0.86.2") }
+        "uv" { return @("user-managed uv required", "user-managed exact install required: aider-chat==0.86.2") }
+        default { return @("aider-install bootstrap is blocked because it does not provide an admitted immutable dependency closure") }
     }
 }
 
 $configName = if ($Surface -eq "aider") { ".aider.conf.local.yml" } else { ".opencode.local.json" }
 $commandName = if ($Surface -eq "aider") { $AiderCommand } else { $OpenCodeCommand }
 $displayName = if ($Surface -eq "aider") { "Aider" } else { "OpenCode" }
+if ($Surface -eq "opencode" -and -not $PSBoundParameters.ContainsKey("InstallMethod")) { $InstallMethod = "npm" }
 if ($Surface -eq "opencode" -and $InstallMethod -eq "aider-install") { $InstallMethod = "npm" }
 
 if ($Action -eq "Plan") {
@@ -76,25 +77,7 @@ if ($Action -eq "Plan") {
 if ($Action -eq "Install") {
     $commands = Get-InstallPlan -SurfaceName $Surface -Method $InstallMethod
     foreach ($command in $commands) { Write-Host "$displayName install step: $command" }
-    if ($DryRun) { Write-Host "Dry run complete; no network install was executed."; exit 0 }
-    if ($Surface -eq "opencode") {
-        & npm install -g opencode-ai
-    } elseif ($InstallMethod -eq "pipx") {
-        & python -m pip install pipx
-        if ($LASTEXITCODE -ne 0) { throw "pipx bootstrap failed." }
-        & pipx install aider-chat
-    } elseif ($InstallMethod -eq "uv") {
-        & python -m pip install uv
-        if ($LASTEXITCODE -ne 0) { throw "uv bootstrap failed." }
-        & uv tool install --force --python python3.12 --with pip aider-chat@latest
-    } else {
-        & python -m pip install aider-install
-        if ($LASTEXITCODE -ne 0) { throw "aider-install bootstrap failed." }
-        & aider-install
-    }
-    if ($LASTEXITCODE -ne 0) { throw "Aider installation failed." }
-    Write-Host "$displayName installation completed. Run this script with -Action Health next."
-    exit 0
+    throw "Automated third-party installation is blocked until an immutable reviewed dependency manifest and verified artifacts are admitted."
 }
 
 if (-not $TargetRepo) { throw "TargetRepo is required for $Action." }

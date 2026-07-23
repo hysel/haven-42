@@ -50,3 +50,7 @@ Model and tool behavior remains specific to the agent surface, model, operating 
 The current release line is `0.3.0`. Work after that release remains under `Unreleased` until a new version is deliberately prepared and exact-SHA hosted CI succeeds.
 
 The repository is available at [hysel/haven-42](https://github.com/hysel/haven-42).
+
+## Security
+
+Provider endpoints are trust-scoped and bounded, mutable automated installers are blocked, CI actions are commit-pinned, and vulnerabilities should be reported privately through the repository security policy. See `docs/provider-endpoint-security.md`.

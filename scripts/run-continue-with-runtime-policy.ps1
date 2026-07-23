@@ -42,7 +42,7 @@ try {
     $preload = @{ model = $Model; prompt = ""; keep_alive = "$($policy.preloadKeepAliveMinutes)m"; stream = $false } | ConvertTo-Json
     Invoke-RestMethod -Uri "$base/api/generate" -Method Post -Body $preload -ContentType "application/json" -TimeoutSec $LoadTimeoutSeconds | Out-Null
 
-    $arguments = if ($ContinueCommand -eq "npx") { @("-y", "@continuedev/cli") } else { @() }
+    $arguments = if ($ContinueCommand -eq "npx") { @("-y", "@continuedev/cli@1.5.47") } else { @() }
     $arguments += @("--config", (Resolve-Path -LiteralPath $ConfigPath).Path, $(if ($ReadOnly) { "--readonly" } else { "--auto" }), "--format", "json", "--silent", "-p", $Prompt)
     $start = [System.Diagnostics.ProcessStartInfo]::new()
     $start.FileName = $resolvedCommand

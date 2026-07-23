@@ -14,3 +14,7 @@ Linux and macOS use the corresponding `.linux.sh` and `.macos.sh` entry points. 
 The validated service binds localhost only, is accessed through SSH tunneling, runs as a dedicated non-root account, disables image metadata, custom nodes, and external API nodes, and uses a pinned checkpoint with a verified checksum. Deployments must rediscover these runtime properties rather than inheriting them from evidence.
 
 See [Local Image Capability Validation](../examples/local-image-capability-validation.md).
+
+## Endpoint trust and bounded output
+
+ComfyUI defaults to the `loopback` trust scope. A private LAN ComfyUI host requires explicit `-EndpointTrustScope trusted-lan` or `--endpoint-trust-scope trusted-lan`. Redirects are denied, response JSON is bounded to 8 MiB, images are bounded to 64 MiB, and artifacts are created exclusively without following links. Prefer prompt files or standard input for sensitive prompts. See `docs/provider-endpoint-security.md`.

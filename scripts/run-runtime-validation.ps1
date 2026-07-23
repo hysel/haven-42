@@ -215,7 +215,7 @@ try {
 
         Write-Host "Running $($workflow.Name)..." -ForegroundColor Cyan
 
-        $output = & npx @continuedev/cli `
+        $output = & npx -y @continuedev/cli@1.5.47 `
             --config $ConfigPath `
             --prompt $promptPath `
             --prompt $ContextPath `
@@ -270,7 +270,7 @@ $draft = @"
 
 Repository type: TODO sanitize repository type
 Model setup: TODO record model setup
-Continue surface: Continue CLI through npx @continuedev/cli
+Continue surface: Continue CLI 1.5.47 through an exact npx package identity
 Config used: TODO confirm sanitized config path
 
 Raw outputs were written to an ignored local folder:

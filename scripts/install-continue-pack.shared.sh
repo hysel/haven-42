@@ -417,7 +417,7 @@ if [ "$MLX_CONFIG" = true ]; then
   recommended_mlx_model="$(printf '%s\n' "$profile_json" | sed -n 's/.*"MlxRecommendation":[[:space:]]*{"PrimaryModel":"\([^"]*\)".*/\1/p' | head -n 1)"
 
   if [ "$mlx_status" != "detected" ]; then
-    printf '%s\n' 'MLX tooling was not detected. Run scripts/bootstrap-macos-agent-host.sh --install --with-mlx first.' >&2
+    printf '%s\n' 'MLX tooling was not detected. Install a reviewed exact MLX environment through a user-managed workflow, then rerun discovery.' >&2
     exit 1
   fi
   if [ -z "$recommended_mlx_model" ] || [ "$recommended_mlx_model" = "Not available" ]; then

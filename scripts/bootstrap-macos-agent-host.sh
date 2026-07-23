@@ -19,32 +19,15 @@ done
 [ "$INSTALL_MLX" = false ] || [ "$INSTALL" = true ] || { printf '%s\n' '--with-mlx requires --install.' >&2; exit 1; }
 
 ensure_brew_path() {
-  if [ -x /opt/homebrew/bin/brew ]; then eval "$(/opt/homebrew/bin/brew shellenv)";
-  elif [ -x /usr/local/bin/brew ]; then eval "$(/usr/local/bin/brew shellenv)"; fi
+  if [ -x /opt/homebrew/bin/brew ]; then PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH";
+  elif [ -x /usr/local/bin/brew ]; then PATH="/usr/local/bin:/usr/local/sbin:$PATH"; fi
 }
 
 ensure_brew_path
-if ! command -v brew >/dev/null 2>&1; then
-  if [ "$INSTALL" = false ]; then printf '%s\n' 'Homebrew: missing (rerun with --install to install it)';
-  else /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; ensure_brew_path; fi
-fi
-
-if command -v brew >/dev/null 2>&1 && [ "$INSTALL" = true ]; then
-  command -v node >/dev/null 2>&1 || brew install node
-  if [ "$INSTALL_OLLAMA" = true ] && ! command -v ollama >/dev/null 2>&1; then brew install ollama; fi
-  if [ "$INSTALL_MLX" = true ]; then
-    brew list python@3.12 >/dev/null 2>&1 || brew install python@3.12
-    MLX_PYTHON="$(brew --prefix python@3.12)/bin/python3.12"
-    MLX_VENV="$HOME/.haven-42-mlx"
-    [ -x "$MLX_PYTHON" ] || { printf '%s\n' 'Homebrew Python 3.12 was not found after installation.' >&2; exit 1; }
-    if [ -x "$MLX_VENV/bin/python" ] && ! "$MLX_VENV/bin/python" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)'; then
-      backup_path="$MLX_VENV.incompatible-python-$(date '+%Y%m%d-%H%M%S')"
-      printf 'Existing MLX virtual environment uses an unsupported Python version; preserving it at %s\n' "$backup_path"
-      mv "$MLX_VENV" "$backup_path"
-    fi
-    [ -x "$MLX_VENV/bin/python" ] || "$MLX_PYTHON" -m venv "$MLX_VENV"
-    "$MLX_VENV/bin/python" -m pip install --upgrade pip mlx-lm
-  fi
+if [ "$INSTALL" = true ]; then
+  printf '%s\n' 'Automated macOS installation is blocked: Haven 42 does not execute moving Homebrew or Python package sources.' >&2
+  printf '%s\n' 'Install reviewed exact tool versions through their official package workflow, then rerun this script without --install for read-only discovery.' >&2
+  exit 2
 fi
 
 printf 'Platform: macOS %s\n' "$(uname -m)"
@@ -57,7 +40,7 @@ MLX_VENV="$HOME/.haven-42-mlx"
 if [ -x "$MLX_VENV/bin/mlx_lm.server" ]; then
   printf '%s\n' 'MLX runtime: available (pack virtual environment)'
 else
-  printf '%s\n' 'MLX runtime: not detected (rerun with --install --with-mlx to install it)'
+  printf '%s\n' 'MLX runtime: not detected (install a reviewed exact MLX environment through a user-managed workflow)'
 fi
 
 if command -v ollama >/dev/null 2>&1; then
@@ -69,7 +52,7 @@ if command -v ollama >/dev/null 2>&1; then
     printf '%s\n' 'Next: start Ollama, pull a validated model, then run the macOS matrix.'
   fi
 else
-  printf '%s\n' 'Next: rerun with --install --with-ollama when you are ready to install Ollama.'
+  printf '%s\n' 'Next: install a reviewed Ollama version through its official package workflow, then rerun this read-only discovery.'
 fi
 
 if [ -x "$MLX_VENV/bin/mlx_lm.server" ]; then

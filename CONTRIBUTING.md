@@ -115,3 +115,7 @@ required hosted jobs report success. See `docs/hosted-ci-verification.md`.
 - [ ] New agent-specific assets have complete pass-to-ship evidence, or the change contains documentation only for a failed evaluation.
 - [ ] `CHANGELOG.md` records user-visible changes.
 - [ ] Validation has been run or skipped with a clear reason.
+
+## Security changes
+
+Report vulnerabilities privately as described in `SECURITY.md`. Changes to provider boundaries, workflow dispatch, installers, updates, releases, permissions, or CI must complete the pull-request security checklist and receive CODEOWNERS review. Do not weaken a fail-closed gate to make a test pass.

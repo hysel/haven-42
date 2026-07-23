@@ -146,6 +146,9 @@ REQUIRED_FILES=(
   "CHANGELOG.md"
   "LICENSE"
   "CONTRIBUTING.md"
+  "SECURITY.md"
+  ".github/CODEOWNERS"
+  ".github/pull_request_template.md"
   "config/model-recommendations.tsv"
   "config/model-recommendations.mlx.tsv"
   "config/model-discovery-contract.json"
@@ -166,6 +169,9 @@ REQUIRED_FILES=(
   "config/native-bridge-boundary-contract.json"
   "config/desktop-storage-contract.json"
   "config/core-update-manifest-contract.json"
+  ".github/workflows/codeql.yml"
+  "docs/provider-endpoint-security.md"
+  "scripts/provider_security.py"
   "config/providers.json"
   "config/engineering-routes.json"
   "docs/release.md"
@@ -418,6 +424,8 @@ REQUIRED_FILES=(
   "examples/multi-language-workflow-validation.md"
   "config/language-workflow-validation-matrix.json"
   ".github/workflows/validate-pack.yml"
+  ".github/CODEOWNERS"
+  ".github/pull_request_template.md"
   ".githooks/pre-push"
 )
 

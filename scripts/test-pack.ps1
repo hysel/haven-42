@@ -286,8 +286,12 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     $actionSources = (Get-Content -LiteralPath $workflowPath -Raw) + "`n" + (($generatorPaths | ForEach-Object { Get-Content -LiteralPath $_ -Raw }) -join "`n")
     $dependabot = Get-Content -LiteralPath $dependabotPath -Raw
 
-    Assert-True -Condition ($actionSources -notmatch "actions/checkout@v[1-5]\b") -Message "Checkout versions older than v6 must not be used."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@v6\b").Count) -Expected 6 -Message "All live and generated workflows should use checkout v6."
+    $checkoutSha = "d23441a48e516b6c34aea4fa41551a30e30af803"
+    Assert-True -Condition ($actionSources -notmatch "actions/checkout@(v\d+|main|master)\b") -Message "Checkout references must not use mutable tags or branches."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 6 -Message "All live and generated workflows should pin the reviewed checkout v6 commit."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 6 -Message "Every checkout should disable persisted credentials."
+    $workflow = Get-Content -LiteralPath $workflowPath -Raw
+    Assert-True -Condition ($workflow -match "(?m)^concurrency:" -and $workflow -match "timeout-minutes:") -Message "Validation workflow should bound concurrency and job duration."
     Assert-True -Condition ($dependabot -match "package-ecosystem:\s*github-actions") -Message "Dependabot should monitor GitHub Actions dependencies."
     Assert-True -Condition ($dependabot -match "interval:\s*weekly") -Message "GitHub Actions dependency checks should run weekly."
 }
@@ -638,7 +642,7 @@ Invoke-PackTest "editor compatibility docs cover config and tool validation" {
     Assert-True -Condition ($content -match "project-local") -Message "Editor compatibility docs should explain project-local config."
     Assert-True -Condition ($content -match "Duplicate rule") -Message "Editor compatibility docs should cover duplicate rules."
     Assert-True -Condition ($content -match "Agent mode") -Message "Editor compatibility docs should cover Agent mode."
-    Assert-True -Condition ($content -like "*npx -y @continuedev/cli --config .continue/config.yaml*") -Message "Editor compatibility docs should include CLI fallback command."
+    Assert-True -Condition ($content -like "*npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml*") -Message "Editor compatibility docs should include the exact validated CLI fallback command."
     Assert-True -Condition ($content -match "Terminal Preflight Checks") -Message "Editor compatibility docs should include terminal preflight checks."
     Assert-True -Condition ($content -match "examples/editor-surface-validation.md") -Message "Editor compatibility docs should reference sanitized evidence."
     Assert-True -Condition ($evidence -match "Editor Surface Validation Evidence") -Message "Editor evidence should have the expected title."
@@ -2528,7 +2532,7 @@ Invoke-PackTest "configuration-pack fixture documents bad recommendations" {
 
     Assert-True -Condition ($content -match "not an application codebase") -Message "Fixture should define the non-application scenario."
     Assert-True -Condition ($content -match "Known Bad Recommendations") -Message "Fixture should document known bad recommendations."
-    Assert-True -Condition ($content -match "npx @continuedev/cli") -Message "Fixture should protect the documented npx fallback."
+    Assert-True -Condition ($content -match "@continuedev/cli@1\.5\.47") -Message "Fixture should protect the exact validated Continue CLI fallback."
 }
 
 Invoke-PackTest "online model discovery scripts are candidate-only and cross-platform" {
@@ -3628,11 +3632,11 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
 
         $plan = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Plan")
         Assert-Equal -Actual $plan.ExitCode -Expected 0 -Message "Aider adapter plan should succeed."
-        Assert-True -Condition ($plan.Output -match "aider-install" -and $plan.Output -match "local-only") -Message "Aider plan should describe install and config safety."
+        Assert-True -Condition ($plan.Output -match "aider-chat==0\.86\.2" -and $plan.Output -match "local-only") -Message "Aider plan should describe the reviewed exact version and config safety."
 
         $install = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Install", "-InstallMethod", "pipx", "-DryRun")
-        Assert-Equal -Actual $install.ExitCode -Expected 0 -Message "Aider install dry run should succeed."
-        Assert-True -Condition ($install.Output -match "pipx install aider-chat" -and $install.Output -match "no network install") -Message "Aider install dry run should be explicit and non-networking."
+        Assert-True -Condition ($install.ExitCode -ne 0) -Message "Aider automated installation must fail closed."
+        Assert-True -Condition ($install.Output -match "aider-chat==0\.86\.2" -and $install.Output -match "Automated third-party installation is blocked") -Message "Aider install refusal should name the reviewed version and immutable-manifest gate."
 
         $configure = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Configure", "-TargetRepo", $tempRoot, "-RecommendationPath", $recommendationPath, "-Lane", "PlanOnly", "-OllamaBaseUrl", "http://example.invalid:11434")
         Assert-Equal -Actual $configure.ExitCode -Expected 0 -Message "Aider config generation should succeed."
@@ -3648,8 +3652,8 @@ Invoke-PackTest "agent surface adapters plan installs configure and report healt
         Assert-True -Condition ($openCodePlan.Output -match "opencode-ai" -and $openCodePlan.Output -match "local-only") -Message "OpenCode plan should describe its npm install and local config boundary."
 
         $openCodeInstall = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Install", "-Surface", "opencode", "-DryRun")
-        Assert-Equal -Actual $openCodeInstall.ExitCode -Expected 0 -Message "OpenCode install dry run should succeed."
-        Assert-True -Condition ($openCodeInstall.Output -match "opencode-ai" -and $openCodeInstall.Output -match "no network install") -Message "OpenCode install dry run should be explicit and non-networking."
+        Assert-True -Condition ($openCodeInstall.ExitCode -ne 0) -Message "OpenCode automated installation must fail closed."
+        Assert-True -Condition ($openCodeInstall.Output -match "opencode-ai@1\.18\.2" -and $openCodeInstall.Output -match "Automated third-party installation is blocked") -Message "OpenCode install refusal should name the reviewed version and immutable-manifest gate."
 
         $openCodeConfigure = Invoke-CommandCapture -FilePath $adapterPath -Arguments @("-Action", "Configure", "-Surface", "opencode", "-TargetRepo", $tempRoot, "-RecommendationPath", $recommendationPath, "-Lane", "PlanOnly", "-OllamaBaseUrl", "http://example.invalid:11434")
         Assert-Equal -Actual $openCodeConfigure.ExitCode -Expected 0 -Message "OpenCode config generation should succeed."

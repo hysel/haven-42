@@ -1,0 +1,16 @@
+# Security-sensitive policy and release surfaces
+/.github/ @hysel
+/SECURITY.md @hysel
+/config/desktop-*.json @hysel
+/config/*update*.json @hysel
+/config/*security*.json @hysel
+/config/providers.json @hysel
+/config/workflows.json @hysel
+/scripts/*install* @hysel
+/scripts/*update* @hysel
+/scripts/*provider* @hysel
+/scripts/invoke-* @hysel
+/scripts/build-release-package* @hysel
+/scripts/test-release-readiness* @hysel
+/docs/security-threat-model.md @hysel
+/docs/release.md @hysel

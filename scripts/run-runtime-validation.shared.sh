@@ -87,7 +87,7 @@ SUMMARY_PATH="$RUN_ROOT/runtime-validation-summary-draft.md"
   printf '## Runtime Validation Run - %s\n\n' "$(date '+%Y-%m-%d %H:%M')"
   printf 'Repository type: TODO sanitize repository type\n'
   printf 'Model setup: TODO record model setup\n'
-  printf 'Continue surface: Continue CLI through npx @continuedev/cli\n'
+  printf 'Continue surface: Continue CLI 1.5.47 through an exact npx package identity\n'
   printf 'Config used: TODO confirm sanitized config path\n\n'
   printf 'Raw outputs were written to an ignored local folder:\n\n%s\n\n' "$RUN_ROOT"
   printf 'Runtime context used:\n\n%s\n\n' "$CONTEXT_PATH"
@@ -150,7 +150,7 @@ for workflow in "${PROMPTS[@]}"; do
   [ -f "$prompt_path" ] || continue
   (
     cd "$TARGET_REPO"
-    npx @continuedev/cli \
+    npx -y @continuedev/cli@1.5.47 \
       --config "$CONFIG_PATH" \
       --prompt "$prompt_path" \
       --prompt "$CONTEXT_PATH" \

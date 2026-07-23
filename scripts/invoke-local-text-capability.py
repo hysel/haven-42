@@ -1,27 +1,37 @@
 #!/usr/bin/env python3
-import argparse, datetime, json, os, pathlib, re, urllib.request
+import argparse, datetime, json, os, pathlib, re, sys, urllib.request
+from provider_security import MAX_JSON_RESPONSE_BYTES, ProviderSecurityError, prepare_artifact_directory, read_json, validate_base_url, write_new_file
 
 parser = argparse.ArgumentParser(description="Plan or execute a session-bound local text capability through an admitted provider.")
 parser.add_argument("--repo-root", required=True, help=argparse.SUPPRESS)
 parser.add_argument("--provider-registry", required=True, help=argparse.SUPPRESS)
 parser.add_argument("--engine-registry", required=True, help=argparse.SUPPRESS)
 parser.add_argument("--capability-id", required=True, choices=["general.chat", "content.write", "content.summarize"])
-parser.add_argument("--prompt", required=True)
+prompt_group = parser.add_mutually_exclusive_group(required=True)
+prompt_group.add_argument("--prompt")
+prompt_group.add_argument("--prompt-file")
+prompt_group.add_argument("--prompt-stdin", action="store_true")
 parser.add_argument("--model", required=True)
 parser.add_argument("--session-path", required=True)
 parser.add_argument("--provider-id", default="ollama.local-text")
 parser.add_argument("--runtime-base-url")
 parser.add_argument("--ollama-base-url", help=argparse.SUPPRESS)
+parser.add_argument("--endpoint-trust-scope", choices=["loopback", "trusted-lan", "external"], default="loopback")
 parser.add_argument("--engine-id")
 parser.add_argument("--backend-id")
 parser.add_argument("--hardware-profile")
 parser.add_argument("--artifact-name", default="result.json")
 parser.add_argument("--timeout-seconds", type=int, default=120)
+parser.add_argument("--maximum-response-bytes", type=int, default=MAX_JSON_RESPONSE_BYTES)
 parser.add_argument("--response-fixture-path")
 parser.add_argument("--execute", action="store_true")
 parser.add_argument("--apply", action="store_true")
 parser.add_argument("--json", action="store_true")
 args = parser.parse_args()
+if args.prompt_file:
+    args.prompt = pathlib.Path(args.prompt_file).read_text(encoding="utf-8")
+elif args.prompt_stdin:
+    args.prompt = sys.stdin.read(1024 * 1024 + 1)
 
 providers = json.loads(pathlib.Path(args.provider_registry).read_text(encoding="utf-8"))["providers"]
 provider = next((item for item in providers if item["id"] == args.provider_id), None)
@@ -42,7 +52,8 @@ elif any([args.engine_id, args.backend_id, args.hardware_profile]):
     parser.error("Explicit engine selection is only supported for engine-backed OpenAI-compatible providers.")
 
 repo_root = pathlib.Path(args.repo_root).resolve()
-session_path = pathlib.Path(args.session_path).resolve()
+session_path_input = pathlib.Path(args.session_path)
+session_path = session_path_input.resolve()
 try:
     if os.path.commonpath([str(session_path), str(repo_root)]) == str(repo_root): parser.error("Provider sessions must stay outside the pack repository.")
 except ValueError: pass
@@ -51,7 +62,10 @@ if not metadata_path.is_file(): parser.error(f"Session metadata is missing: {met
 session = json.loads(metadata_path.read_text(encoding="utf-8"))
 if session.get("capabilityId") != args.capability_id: parser.error("Session capability does not match the requested capability.")
 if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,95}\.json", args.artifact_name): parser.error("Artifact name must be a safe JSON filename.")
-if not args.prompt.strip() or not args.model.strip(): parser.error("Prompt and model must not be empty.")
+if not args.prompt.strip() or len(args.prompt.encode("utf-8")) > 1024 * 1024: parser.error("Prompt must be from 1 byte through 1 MiB.")
+if not args.model.strip() or len(args.model) > 256: parser.error("Model must be from 1 through 256 characters.")
+if args.timeout_seconds < 1 or args.timeout_seconds > 3600: parser.error("Timeout must be from 1 through 3600 seconds.")
+if args.maximum_response_bytes < 1 or args.maximum_response_bytes > MAX_JSON_RESPONSE_BYTES: parser.error("Maximum response size exceeds policy.")
 if args.apply and not args.execute: parser.error("--apply requires --execute.")
 artifact_directory = (session_path / "artifacts").resolve()
 artifact_path = (artifact_directory / args.artifact_name).resolve()
@@ -65,19 +79,27 @@ systems = {
 }
 content = None
 provider_source = "not-executed"
+endpoint_policy = {"trustScope": "not-used", "executionLocation": "not-executed", "externalProvider": False}
 if args.execute:
     if args.response_fixture_path:
         response = json.loads(pathlib.Path(args.response_fixture_path).read_text(encoding="utf-8"))
         provider_source = "validation-fixture"
     else:
         default_url = "http://127.0.0.1:11434" if provider["protocol"] == "ollama-chat" else "http://127.0.0.1:8080"
-        base_url = args.runtime_base_url or args.ollama_base_url or default_url
+        try:
+            endpoint_policy = validate_base_url(args.runtime_base_url or args.ollama_base_url or default_url, args.endpoint_trust_scope)
+        except ProviderSecurityError as error:
+            parser.error(str(error))
+        base_url = endpoint_policy["baseUrl"]
         payload = {"model": args.model, "stream": False, "messages": [{"role": "system", "content": systems[args.capability_id]}, {"role": "user", "content": args.prompt}]}
         if provider["protocol"] == "ollama-chat": payload["options"] = {"temperature": 0.2}
         else: payload["temperature"] = 0.2
         suffix = "/api/chat" if provider["protocol"] == "ollama-chat" else "/v1/chat/completions"
         request = urllib.request.Request(base_url.rstrip("/") + suffix, data=json.dumps(payload).encode(), headers={"Content-Type": "application/json"}, method="POST")
-        with urllib.request.urlopen(request, timeout=args.timeout_seconds) as stream: response = json.loads(stream.read().decode())
+        try:
+            response = read_json(request, args.timeout_seconds, args.maximum_response_bytes)
+        except ProviderSecurityError as error:
+            parser.error(str(error))
         provider_source = provider["protocol"]
     if provider["protocol"] == "ollama-chat": content = str(response.get("message", {}).get("content", ""))
     else:
@@ -87,17 +109,21 @@ if args.execute:
 
 artifact_type = "chat-message" if args.capability_id == "general.chat" else "markdown-document"
 artifact_content = {"role": "assistant", "text": content} if args.capability_id == "general.chat" else {"title": "Generated Writing" if args.capability_id == "content.write" else "Summary", "body": content}
-provider_metadata = {"id": provider["id"], "model": args.model, "source": provider_source}
+provider_metadata = {"id": provider["id"], "model": args.model, "source": provider_source, "trustScope": endpoint_policy["trustScope"], "executionLocation": endpoint_policy["executionLocation"]}
 if selection: provider_metadata["runtimeSelection"] = selection
 artifact = {
     "schemaVersion": 1, "artifactType": artifact_type, "status": "succeeded" if args.execute else "planned",
     "createdAtUtc": datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z"), "sourceCapabilityId": args.capability_id,
     "provider": provider_metadata, "content": artifact_content,
-    "policy": {"localExecution": True, "externalProvider": False, "repositoryRead": False, "fileWrite": bool(args.apply), "networkAccess": bool(args.execute and not args.response_fixture_path), "modelDownload": False, "approvalRequired": bool(args.apply)}
+    "policy": {"localExecution": endpoint_policy["executionLocation"] == "same-machine", "externalProvider": endpoint_policy["externalProvider"], "repositoryRead": False, "fileWrite": bool(args.apply), "networkAccess": bool(args.execute and not args.response_fixture_path), "modelDownload": False, "approvalRequired": bool(args.apply)}
 }
 if args.apply:
-    artifact_directory.mkdir(parents=True, exist_ok=True)
-    artifact_path.write_text(json.dumps(artifact, indent=2) + "\n", encoding="utf-8")
+    try:
+        artifact_directory = prepare_artifact_directory(session_path_input)
+        artifact_path = artifact_directory / args.artifact_name
+        write_new_file(artifact_path, (json.dumps(artifact, indent=2) + "\n").encode("utf-8"))
+    except (OSError, ProviderSecurityError) as error:
+        parser.error(f"artifact-write-rejected: {error}")
 result = {"SchemaVersion": 1, "Kind": "local-text-capability", "Status": "succeeded" if args.execute else "planned", "CapabilityId": args.capability_id, "ProviderId": provider["id"], "Protocol": provider["protocol"], "RuntimeSelection": selection, "Model": args.model, "ArtifactPath": str(artifact_path), "ArtifactWritten": bool(args.apply), "NetworkUsed": bool(args.execute and not args.response_fixture_path), "PromptPersisted": False, "EndpointPersisted": False, "RepositoryRead": False, "Artifact": artifact}
 if args.json: print(json.dumps(result, indent=2))
 else:

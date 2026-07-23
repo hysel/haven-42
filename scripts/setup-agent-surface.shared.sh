@@ -8,7 +8,8 @@ MODEL=""
 RECOMMENDATION_PATH=""
 LANE="WriteSafe"
 OLLAMA_BASE_URL="http://127.0.0.1:11434"
-INSTALL_METHOD="aider-install"
+INSTALL_METHOD="pipx"
+INSTALL_METHOD_SET=0
 AIDER_COMMAND="aider"
 OPENCODE_COMMAND="opencode"
 DRY_RUN=0
@@ -23,7 +24,7 @@ while [ "$#" -gt 0 ]; do
     --recommendation-path|-RecommendationPath) RECOMMENDATION_PATH="$2"; shift 2 ;;
     --lane|-Lane) LANE="$2"; shift 2 ;;
     --ollama-base-url|-OllamaBaseUrl) OLLAMA_BASE_URL="$2"; shift 2 ;;
-    --install-method|-InstallMethod) INSTALL_METHOD="$2"; shift 2 ;;
+    --install-method|-InstallMethod) INSTALL_METHOD="$2"; INSTALL_METHOD_SET=1; shift 2 ;;
     --aider-command|-AiderCommand) AIDER_COMMAND="$2"; shift 2 ;;
     --opencode-command|-OpenCodeCommand) OPENCODE_COMMAND="$2"; shift 2 ;;
     --dry-run|-DryRun) DRY_RUN=1; shift ;;
@@ -37,6 +38,7 @@ case "$ACTION" in Plan|Install|Configure|Health) ;; *) printf 'Unsupported actio
 case "$LANE" in WriteSafe|PlanOnly|DeepReview) ;; *) printf 'Unsupported lane: %s\n' "$LANE" >&2; exit 1 ;; esac
 case "$INSTALL_METHOD" in aider-install|pipx|uv|npm) ;; *) printf 'Unsupported install method: %s\n' "$INSTALL_METHOD" >&2; exit 1 ;; esac
 
+if [ "$SURFACE" = "opencode" ] && [ "$INSTALL_METHOD_SET" -eq 0 ]; then INSTALL_METHOD="npm"; fi
 if [ "$SURFACE" = "opencode" ] && [ "$INSTALL_METHOD" = "aider-install" ]; then INSTALL_METHOD="npm"; fi
 
 if [ "$SURFACE" = "aider" ]; then
@@ -52,13 +54,13 @@ fi
 print_install_plan() {
   if [ "$SURFACE" = "opencode" ]; then
     [ "$INSTALL_METHOD" = "npm" ] || { printf '%s supports only the npm install method in this adapter.\n' "$display_name" >&2; exit 1; }
-    printf '%s\n' 'npm install -g opencode-ai'
+    printf '%s\n' 'user-managed exact install required: opencode-ai@1.18.2'
     return
   fi
   case "$INSTALL_METHOD" in
-    pipx) printf '%s\n' 'python3 -m pip install pipx' 'pipx install aider-chat' ;;
-    uv) printf '%s\n' 'python3 -m pip install uv' 'uv tool install --force --python python3.12 --with pip aider-chat@latest' ;;
-    *) printf '%s\n' 'python3 -m pip install aider-install' 'aider-install' ;;
+    pipx) printf '%s\n' 'user-managed pipx required' 'user-managed exact install required: aider-chat==0.86.2' ;;
+    uv) printf '%s\n' 'user-managed uv required' 'user-managed exact install required: aider-chat==0.86.2' ;;
+    *) printf '%s\n' 'aider-install bootstrap is blocked because it does not provide an admitted immutable dependency closure' ;;
   esac
 }
 
@@ -78,16 +80,8 @@ fi
 
 if [ "$ACTION" = "Install" ]; then
   print_install_plan | sed "s/^/$display_name install step: /"
-  [ "$DRY_RUN" -eq 0 ] || { printf 'Dry run complete; no network install was executed.\n'; exit 0; }
-  if [ "$SURFACE" = "opencode" ]; then
-    npm install -g opencode-ai
-  else case "$INSTALL_METHOD" in
-    pipx) python3 -m pip install pipx; pipx install aider-chat ;;
-    uv) python3 -m pip install uv; uv tool install --force --python python3.12 --with pip aider-chat@latest ;;
-    *) python3 -m pip install aider-install; aider-install ;;
-  esac; fi
-  printf '%s installation completed. Run this script with --action Health next.\n' "$display_name"
-  exit 0
+  printf '%s\n' 'Automated third-party installation is blocked until an immutable reviewed dependency manifest and verified artifacts are admitted.' >&2
+  exit 2
 fi
 
 [ -n "$TARGET_REPO" ] || { printf 'Target repo is required for %s.\n' "$ACTION" >&2; exit 1; }

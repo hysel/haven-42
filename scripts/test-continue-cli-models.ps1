@@ -5,7 +5,7 @@ param(
     [string]$OllamaBaseUrl = "http://127.0.0.1:11434",
     [string]$ConfigPath,
     [string]$ContinueCommand = "npx",
-    [string]$ContinueArgumentsTemplate = '-y @continuedev/cli --config "{ConfigPath}" --readonly -p "{Prompt}"',
+    [string]$ContinueArgumentsTemplate = '-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --readonly -p "{Prompt}"',
     [string]$ModelArgumentTemplate = "",
     [int]$PreloadTimeoutSeconds = 900,
     [int]$TimeoutSeconds = 600,

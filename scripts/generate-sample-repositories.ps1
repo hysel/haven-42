@@ -106,7 +106,6 @@ macOS or Linux:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip pytest
 python -m pytest
 python -m app.main
 ```
@@ -116,7 +115,6 @@ Windows PowerShell:
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip pytest
 python -m pytest
 python -m app.main
 ```
@@ -421,7 +419,9 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
       - run: echo validate infrastructure sample
 "@
 
@@ -469,7 +469,6 @@ macOS or Linux:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip pytest
 python -m pytest
 python -m app.main
 ```
@@ -479,7 +478,6 @@ Windows PowerShell:
 ```powershell
 py -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip pytest
 python -m pytest
 python -m app.main
 ```

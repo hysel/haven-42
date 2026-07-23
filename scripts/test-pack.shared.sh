@@ -251,10 +251,15 @@ test_github_actions_dependencies() {
     "$REPO_ROOT/.github/workflows/validate-pack.yml" \
     "$REPO_ROOT/scripts/generate-sample-repositories.ps1" \
     "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh")"
-  checkout_count="$(printf '%s' "$action_sources" | grep -Ec 'actions/checkout@v6([^0-9]|$)')"
+  checkout_sha='d23441a48e516b6c34aea4fa41551a30e30af803'
+  checkout_count="$(printf '%s' "$action_sources" | grep -Ec "actions/checkout@${checkout_sha}([^0-9a-f]|$)")"
+  credential_count="$(printf '%s' "$action_sources" | grep -Ec 'persist-credentials:[[:space:]]*false')"
 
-  ! printf '%s' "$action_sources" | grep -Eq 'actions/checkout@v[1-5]([^0-9]|$)' &&
+  ! printf '%s' "$action_sources" | grep -Eq 'actions/checkout@(v[0-9]+|main|master)([^0-9]|$)' &&
     [ "$checkout_count" -eq 6 ] &&
+    [ "$credential_count" -eq 6 ] &&
+    grep -Eq '^concurrency:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q 'timeout-minutes:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -Eq 'package-ecosystem:[[:space:]]*github-actions' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Eq 'interval:[[:space:]]*weekly' "$REPO_ROOT/.github/dependabot.yml"
 }
@@ -296,9 +301,9 @@ PY
 test_macos_wrapper_help_surface() {
   [ -x "$REPO_ROOT/scripts/run-macos-wrapper.sh" ] || return 1
   [ -x "$REPO_ROOT/scripts/test-macos-script-surface.macos.sh" ] || return 1
-  grep -q -- '--with-mlx' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" || return 1
-  grep -q 'python@3.12' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" || return 1
-  grep -q 'incompatible-python' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" || return 1
+  grep -q 'Automated macOS installation is blocked' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" || return 1
+  ! grep -Eq 'curl[^|]*\|[[:space:]]*(bash|sh)' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" || return 1
+  ! grep -Eq '(^|[[:space:]])(brew|pip3?|python3? -m pip)[[:space:]]+install' "$REPO_ROOT/scripts/bootstrap-macos-agent-host.sh" || return 1
   grep -q 'pack virtual environment: mlx_lm.server' "$REPO_ROOT/scripts/get-local-model-profile.macos.sh" || return 1
   grep -q 'MLX_TIER="Low"' "$REPO_ROOT/scripts/get-local-model-profile.macos.sh" || return 1
   grep -q '\[ "$RAM_INT" -ge 24 \]' "$REPO_ROOT/scripts/get-local-model-profile.macos.sh" || return 1
@@ -595,7 +600,7 @@ test_editor_compatibility_doc() {
     grep -q "project-local" "$REPO_ROOT/docs/editor-compatibility.md" &&
     grep -q "Duplicate rule" "$REPO_ROOT/docs/editor-compatibility.md" &&
     grep -q "Agent mode" "$REPO_ROOT/docs/editor-compatibility.md" &&
-    grep -q "npx -y @continuedev/cli --config .continue/config.yaml" "$REPO_ROOT/docs/editor-compatibility.md" &&
+    grep -q "npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml" "$REPO_ROOT/docs/editor-compatibility.md" &&
     grep -q "Terminal Preflight Checks" "$REPO_ROOT/docs/editor-compatibility.md" &&
     grep -q "examples/editor-surface-validation.md" "$REPO_ROOT/docs/editor-compatibility.md" &&
     grep -q "Editor Surface Validation Evidence" "$REPO_ROOT/examples/editor-surface-validation.md" &&
@@ -1460,10 +1465,11 @@ test_agent_surface_adapters() {
 JSON
 
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Plan >/tmp/aider-adapter-plan.out 2>&1 || return 1
+  grep -q "aider-chat==0.86.2" /tmp/aider-adapter-plan.out || return 1
   grep -q "local-only" /tmp/aider-adapter-plan.out || return 1
-  "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Install --install-method pipx --dry-run >/tmp/aider-adapter-install.out 2>&1 || return 1
-  grep -q "pipx install aider-chat" /tmp/aider-adapter-install.out || return 1
-  grep -q "no network install" /tmp/aider-adapter-install.out || return 1
+  ! "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --action Install --install-method pipx --dry-run >/tmp/aider-adapter-install.out 2>&1 || return 1
+  grep -q "aider-chat==0.86.2" /tmp/aider-adapter-install.out || return 1
+  grep -q "Automated third-party installation is blocked" /tmp/aider-adapter-install.out || return 1
 
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" \
     --action Configure \
@@ -1484,9 +1490,9 @@ JSON
 
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface opencode --action Plan >/tmp/opencode-adapter-plan.out 2>&1 || return 1
   grep -q 'opencode-ai' /tmp/opencode-adapter-plan.out || return 1
-  "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface opencode --action Install --dry-run >/tmp/opencode-adapter-install.out 2>&1 || return 1
-  grep -q 'opencode-ai' /tmp/opencode-adapter-install.out || return 1
-  grep -q 'no network install' /tmp/opencode-adapter-install.out || return 1
+  ! "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface opencode --action Install --dry-run >/tmp/opencode-adapter-install.out 2>&1 || return 1
+  grep -q 'opencode-ai@1.18.2' /tmp/opencode-adapter-install.out || return 1
+  grep -q 'Automated third-party installation is blocked' /tmp/opencode-adapter-install.out || return 1
   "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" --surface opencode --action Configure --target-repo "$temp_root" --recommendation-path "$recommendation_path" --lane PlanOnly --ollama-base-url 'http://example.invalid:11434' >/tmp/opencode-adapter-configure.out 2>&1 || return 1
   python3 - "$temp_root/.opencode.local.json" <<'PY' || return 1
 import json, sys
@@ -2197,13 +2203,16 @@ PY
 test_product_ui_first_slice() {
   python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --self-test | grep -q "5 cases" || return 1
   python3 "$REPO_ROOT/scripts/evaluate-onboarding-configuration.py" --self-test | grep -q "11 cases" || return 1
-  decision="$(python3 "$REPO_ROOT/scripts/evaluate-onboarding-configuration.py" --request-path "$REPO_ROOT/examples/fixtures/onboarding-settings-request.json" --admission-path "$REPO_ROOT/examples/fixtures/onboarding-trusted-admission.json" --json)" || return 1
-  model="$(python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --platform linux)" || return 1
-  python3 - "$REPO_ROOT" "$model" "$decision" <<'PY' || return 1
+  ui_temp="$(mktemp -d)" || return 1
+  decision_file="$ui_temp/decision.json"
+  model_file="$ui_temp/model.json"
+  python3 "$REPO_ROOT/scripts/evaluate-onboarding-configuration.py" --request-path "$REPO_ROOT/examples/fixtures/onboarding-settings-request.json" --admission-path "$REPO_ROOT/examples/fixtures/onboarding-trusted-admission.json" --json >"$decision_file" || { rm -rf "$ui_temp"; return 1; }
+  python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --platform linux >"$model_file" || { rm -rf "$ui_temp"; return 1; }
+  python3 - "$REPO_ROOT" "$model_file" "$decision_file" <<'PY' || { rm -rf "$ui_temp"; return 1; }
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
-model = json.loads(sys.argv[2])
-decision = json.loads(sys.argv[3])
+model = json.loads(pathlib.Path(sys.argv[2]).read_text(encoding="utf-8"))
+decision = json.loads(pathlib.Path(sys.argv[3]).read_text(encoding="utf-8"))
 ui = json.loads((root / "config/ui-navigation-contract.json").read_text(encoding="utf-8"))
 onboarding = json.loads((root / "config/progressive-onboarding-contract.json").read_text(encoding="utf-8"))
 setting_schemas = json.loads((root / "config/onboarding-setting-schemas.json").read_text(encoding="utf-8"))
@@ -2251,6 +2260,7 @@ assert "What do you want to do?" in (root / "docs/product-ui-first-slice.md").re
 assert "docs/product-ui-first-slice.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 assert "Advanced mode is control, not a bypass" in (root / "docs/progressive-onboarding.md").read_text(encoding="utf-8")
 PY
+  rm -rf "$ui_temp"
 }
 
 run_test "model recommendation catalog has valid schema" test_catalog_schema

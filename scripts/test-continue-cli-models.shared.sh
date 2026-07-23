@@ -8,7 +8,7 @@ CONFIG_PATH=""
 OUTPUT_PATH=""
 OLLAMA_BASE_URL="http://127.0.0.1:11434"
 CONTINUE_COMMAND="npx"
-CONTINUE_ARGS_TEMPLATE='-y @continuedev/cli --config "{ConfigPath}" --readonly -p "{Prompt}"'
+CONTINUE_ARGS_TEMPLATE='-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --readonly -p "{Prompt}"'
 MODEL_ARGS_TEMPLATE=""
 TIMEOUT_SECONDS=600
 PRELOAD_TIMEOUT_SECONDS=900
@@ -97,6 +97,24 @@ initialize_disposable_git_baseline() {
 mkdir -p "$(dirname "$OUTPUT_PATH")"
 initialize_disposable_git_baseline "$TARGET_REPO"
 
+run_structured_continue() {
+  local model_arguments="$1" continue_arguments="$2"
+  python3 - "$TARGET_REPO" "$TIMEOUT_SECONDS" "$CONTINUE_COMMAND" "$model_arguments" "$continue_arguments" <<'PY'
+import shlex, subprocess, sys
+cwd, timeout, executable, model_text, argument_text = sys.argv[1:]
+argv = [executable, *shlex.split(model_text), *shlex.split(argument_text)]
+try:
+    completed = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, timeout=int(timeout), shell=False)
+except subprocess.TimeoutExpired as error:
+    if error.stdout: sys.stdout.write(error.stdout if isinstance(error.stdout, str) else error.stdout.decode(errors="replace"))
+    if error.stderr: sys.stderr.write(error.stderr if isinstance(error.stderr, str) else error.stderr.decode(errors="replace"))
+    raise SystemExit(124)
+sys.stdout.write(completed.stdout)
+sys.stderr.write(completed.stderr)
+raise SystemExit(completed.returncode)
+PY
+}
+
 printf '[1/7] Preparing Continue CLI model test run...\n' >&2
 printf '[2/7] Target repository: generated sample %s\n' "$(basename "$TARGET_REPO")" >&2
 printf '[3/7] Candidate models: %s\n' "${MODELS[*]}" >&2
@@ -114,13 +132,13 @@ for model in "${MODELS[@]}"; do
   prompt="$read_prompt"
   args="${CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
   model_args="${MODEL_ARGS_TEMPLATE//\{Model\}/$model}"
-  if [ "$DRY_RUN" = true ]; then output='DRY_RUN README.md pyproject.toml app/main.py'; exit_code=0; else set +e; output=$(cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CONTINUE_COMMAND $model_args $args" 2>&1); exit_code=$?; set -e; fi
+  if [ "$DRY_RUN" = true ]; then output='DRY_RUN README.md pyproject.toml app/main.py'; exit_code=0; else set +e; output=$(run_structured_continue "$model_args" "$args" 2>&1); exit_code=$?; set -e; fi
   if [ "$exit_code" -eq 0 ] && printf '%s' "$output" | grep -q 'README.md' && printf '%s' "$output" | grep -q 'pyproject.toml'; then read_status='read-only-cli-validated'; else failures='READ_VALIDATION_FAILED'; fi
   if [ "$INCLUDE_WRITE_SMOKE" = true ]; then
     if [ "$DRY_RUN" = true ]; then write_status='write-smoke-validated'; else
       prompt="$write_prompt"
       args="${CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
-      set +e; (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$CONTINUE_COMMAND $model_args $args" >/tmp/continue-cli-write.out 2>&1); write_exit=$?; set -e
+      set +e; run_structured_continue "$model_args" "$args" >/tmp/continue-cli-write.out 2>&1; write_exit=$?; set -e
       changed_files="$(cd "$TARGET_REPO" && git diff --name-only)"
       if [ "$write_exit" -eq 0 ] && [ "$changed_files" = 'README.md' ] && (cd "$TARGET_REPO" && git diff --check >/dev/null) && tail -n 1 "$TARGET_REPO/README.md" | grep -qx 'Continue CLI approved-write smoke test passed.'; then write_status='write-smoke-validated'; else failures='WRITE_VALIDATION_FAILED'; fi
       (cd "$TARGET_REPO" && git restore README.md >/dev/null 2>&1 || true)

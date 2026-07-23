@@ -38,7 +38,7 @@ Recommended setup:
 - Avoid loading the same rules from both a global Continue config and the project-local `.continue` folder.
 - Record the editor name, Continue extension version, operating system, and model when debugging behavior.
 - Validate Agent mode and tool execution separately in VS Code and VSCodium when a workflow depends on tools.
-- Keep `npx @continuedev/cli --config .continue/config.yaml` as a fallback when editor behavior is unclear.
+- Keep `npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml` as the exact validated fallback when editor behavior is unclear; do not execute a moving package identity.
 
 Known risk:
 

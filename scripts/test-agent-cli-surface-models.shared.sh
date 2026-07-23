@@ -193,6 +193,24 @@ initialize_disposable_git_baseline() {
 mkdir -p "$(dirname "$OUTPUT_PATH")"
 initialize_disposable_git_baseline "$TARGET_REPO"
 
+run_structured_agent() {
+  local model_arguments="$1" agent_arguments="$2"
+  python3 - "$TARGET_REPO" "$TIMEOUT_SECONDS" "$AGENT_COMMAND" "$model_arguments" "$agent_arguments" <<'PY'
+import shlex, subprocess, sys
+cwd, timeout, executable, model_text, argument_text = sys.argv[1:]
+argv = [executable, *shlex.split(model_text), *shlex.split(argument_text)]
+try:
+    completed = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, timeout=int(timeout), shell=False)
+except subprocess.TimeoutExpired as error:
+    if error.stdout: sys.stdout.write(error.stdout if isinstance(error.stdout, str) else error.stdout.decode(errors="replace"))
+    if error.stderr: sys.stderr.write(error.stderr if isinstance(error.stderr, str) else error.stderr.decode(errors="replace"))
+    raise SystemExit(124)
+sys.stdout.write(completed.stdout)
+sys.stderr.write(completed.stderr)
+raise SystemExit(completed.returncode)
+PY
+}
+
 printf '[1/7] Preparing %s model test run...\n' "$SURFACE_NAME" >&2
 printf '[2/7] Target repository: generated sample %s\n' "$(basename "$TARGET_REPO")" >&2
 printf '[3/7] Candidate models: %s\n' "${MODELS[*]}" >&2
@@ -229,7 +247,7 @@ for model in "${MODELS[@]}"; do
     exit_code=0
   else
     set +e
-    output=$(cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" 2>&1)
+    output=$(run_structured_agent "$model_args" "$args" 2>&1)
     exit_code=$?
     set -e
   fi
@@ -250,7 +268,7 @@ for model in "${MODELS[@]}"; do
       write_status='write-smoke-validated'
     else
       set +e
-      (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-write.out 2>&1)
+      run_structured_agent "$model_args" "$args" >/tmp/agent-cli-write.out 2>&1
       write_exit=$?
       set -e
       changed_files="$(cd "$TARGET_REPO" && git diff --name-only)"
@@ -277,7 +295,7 @@ for model in "${MODELS[@]}"; do
         scoped_edit_status='scoped-edit-validated'
       else
         set +e
-        (cd "$TARGET_REPO" && timeout "$TIMEOUT_SECONDS" sh -c "$AGENT_COMMAND $model_args $args" >/tmp/agent-cli-scoped-edit.out 2>&1)
+        run_structured_agent "$model_args" "$args" >/tmp/agent-cli-scoped-edit.out 2>&1
         scoped_exit=$?
         set -e
         changed_files="$(cd "$TARGET_REPO" && git diff --name-only | sort)"

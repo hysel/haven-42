@@ -74,7 +74,7 @@ After checking the result, the script restores the generated sample `README.md` 
 The default command is `npx` with this command-template:
 
 ```text
--y @continuedev/cli --config "{ConfigPath}" --readonly -p "{Prompt}"
+-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --readonly -p "{Prompt}"
 ```
 
 Use `-ContinueCommand` and `-ContinueArgumentsTemplate` when your Continue CLI command differs. Use `-ModelArgumentTemplate` only when your CLI supports a model flag.

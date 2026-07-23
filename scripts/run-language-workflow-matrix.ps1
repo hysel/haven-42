@@ -99,7 +99,7 @@ function Invoke-Continue {
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
     $arguments = if ($ContinueCommand -eq "npx") {
-        @("-y", "@continuedev/cli")
+        @("-y", "@continuedev/cli@1.5.47")
     }
     else {
         @()
@@ -208,7 +208,7 @@ $surfaceVersion = if ($DryRun) {
 }
 else {
     if ($ContinueCommand -eq "npx") {
-        ((& $resolvedContinueCommand @continueCommandPrefixArguments -y @continuedev/cli --version 2>$null | Out-String).Trim())
+        ((& $resolvedContinueCommand @continueCommandPrefixArguments -y @continuedev/cli@1.5.47 --version 2>$null | Out-String).Trim())
     }
     else {
         ((& $resolvedContinueCommand @continueCommandPrefixArguments --version 2>$null | Out-String).Trim())

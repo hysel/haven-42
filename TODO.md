@@ -483,3 +483,13 @@
 - [ ] Validate Windows NVIDIA, Windows Intel, and Apple Silicon paths independently, keeping physical Mac testing last; Windows Intel remains parked until representative Intel GPU hardware is available.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
+
+## Security architecture remediation
+
+- [x] Add SECURITY.md, CODEOWNERS, and a security-focused pull request checklist.
+- [x] Pin GitHub Actions by immutable commit, disable persisted checkout credentials, and bound CI concurrency and duration.
+- [x] Add pinned CodeQL Python analysis.
+- [x] Block mutable third-party installation and macOS curl-to-shell bootstrap paths.
+- [x] Enforce explicit provider endpoint trust scopes, redirect denial, bounded responses, private prompt channels, and exclusive no-follow artifact creation.
+- [ ] Require pull requests and successful checks on `main`, enable dependency security updates, and verify private vulnerability reporting in GitHub settings.
+- [ ] Add signed release tags and artifact provenance before admitting the automatic updater or native installers.
