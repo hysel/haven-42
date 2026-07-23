@@ -24,7 +24,7 @@ The install/configure/test parity view is tracked separately in `config/agent-su
 
 ## Milestone 14 Positioning Completion Basis
 
-Milestone 14 is complete for positioning and support-boundary documentation because the pack now presents itself as a local-first engineering agent pack rather than a Continue-only or enterprise-only bundle. Continue is the first supported surface, while every other surface stays evidence-gated through the compatibility matrix, `docs/agent-surface-promotion-gates.md`, `docs/surface-specific-config-bundles.md`, and `config/agent-surface-capabilities.json`.
+Milestone 14 is complete for positioning and support-boundary documentation because Haven 42 serves a broader local-first AI audience rather than presenting itself as a Continue-only or enterprise-only bundle. Continue is the first supported surface, while every other surface stays evidence-gated through the compatibility matrix, `docs/agent-surface-promotion-gates.md`, `docs/surface-specific-config-bundles.md`, and `config/agent-surface-capabilities.json`.
 
 Milestone 14 is complete for its portability and audience scope. It defines the support boundary, records comparable status visibility for tracked surfaces, and keeps non-Continue support evidence-gated. Full live validation parity belongs to Milestone 17, and full install/configure/test implementation parity belongs to Milestone 19.
 

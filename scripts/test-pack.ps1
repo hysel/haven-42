@@ -3992,7 +3992,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($readme -match "Your private, local AI station") -Message "README should use the Haven 42 tagline."
     Assert-True -Condition ($project -match "(?ms)## Name\s+Haven 42") -Message "Project identity should use Haven 42."
     Assert-True -Condition ($continueConfig -match "(?m)^name: Haven 42\r?$") -Message "Continue config should use Haven 42."
-    Assert-True -Condition ($branding -match "Clean-Rename Policy") -Message "Branding policy should record the clean rename."
+    Assert-True -Condition ($branding -match "Product Identity Policy") -Message "Branding policy should define the Haven 42-only identity standard."
     Assert-True -Condition ($branding -match 'Canonical repository: `hysel/haven-42`') -Message "Branding policy should record the canonical repository."
     Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot "docs/haven-42-menu.md")) -Message "Haven 42 menu doc should exist."
     Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $repoRoot "docs/agent-pack-menu.md"))) -Message "Old agent-pack menu doc should be removed."
@@ -4001,6 +4001,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/build-release-package.ps1") -Raw) -match 'haven-42-\$packVersion') -Message "Release artifacts should use the Haven 42 prefix."
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/install-continue-pack.shared.sh") -Raw) -match "haven-42/assets") -Message "Shared asset defaults should use Haven 42."
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/bootstrap-macos-agent-host.sh") -Raw) -match "\.haven-42-mlx") -Message "Managed MLX path should use Haven 42."
+    $legacyIdentity = @(& git -C $repoRoot grep -n -I -i -E 'engineering[ -]+agent[ -]+pack|local[ _-]+engineering[ _-]+agent[ _-]+pack' 2>$null)
+    Assert-Equal -Actual $legacyIdentity.Count -Expected 0 -Message "Tracked files must not retain the former product identity or slug."
     foreach ($marker in @("local-first AI workbench", "Continue, Aider, and OpenCode", "general.chat", "content.write", "content.summarize", "media.image.create", "pass-before-ship", "Milestone 22: Unified Product UI And Task Composition", "Milestone 23: Native Local Image Generation", "Milestone 24: Local Music And Audio Generation", "Milestone 25: Local Video Generation")) {
         Assert-True -Condition ($readme -match [regex]::Escape($marker)) -Message "README should reflect current product position: $marker"
     }

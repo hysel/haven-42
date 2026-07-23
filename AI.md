@@ -4,7 +4,7 @@
 
 This file defines how AI assistants and human contributors should work in this repository.
 
-The repository is a local-first engineering agent pack. Continue is the first supported runtime surface, but most value lives in structured guidance, validation, and reusable workflow assets rather than executable code.
+Haven 42 is a local-first AI workbench. Continue is the first supported runtime surface, but most value lives in structured guidance, validation, and reusable workflow assets rather than executable code.
 
 ## Required Workflow
 

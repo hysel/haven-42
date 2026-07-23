@@ -6,8 +6,6 @@ Haven 42 is an evidence-gated, local-first AI workbench for software engineering
 
 The project began as a reusable pack for coding agents. It now provides a provider-neutral core for discovering capabilities, selecting safe workflows, running supported local agent surfaces, and producing typed artifacts without making a cloud service the default. The planned product experience is a Tauri desktop application with a bundled local web UI that asks what the user wants to accomplish and routes the request through these tested contracts.
 
-Haven 42 was previously named Local Engineering Agent Pack. Because the project had no external users at the time of the rebrand, product-specific paths, workflow IDs, scripts, and release artifacts adopt the new identity without a legacy compatibility layer; see [`BRANDING.md`](BRANDING.md).
-
 ## What Works Today
 
 | Area | Current position |

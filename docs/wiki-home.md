@@ -2,7 +2,7 @@
 
 **Your private, local AI station.**
 
-Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. It was previously named Local Engineering Agent Pack. Because the project had no external users at rebrand time, product-specific paths and commands use the Haven 42 identity without a legacy compatibility layer.
+Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. Product-specific paths, commands, packages, and documentation use the Haven 42 identity consistently.
 
 Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. Repository-optional local chat, writing, and summarization have validated Ollama and exact-profile Linux NVIDIA/CUDA llama.cpp adapters, and local image generation has a validated Linux ComfyUI/SDXL path. The local web UI is planned, native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only. Quantization contracts, sanitized profiling, trusted-artifact selection, an offline updater policy, and a 46-case sidecar policy suite are implemented without admitting a desktop runtime. OpenHands is documentation-only while its isolated validation boundary remains unimplemented.
 
