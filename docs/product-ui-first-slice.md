@@ -28,6 +28,12 @@ Home: What do you want to do?
 Any executable action
   Compose -> Availability -> Disclosure -> Approval, if required
           -> Progress -> Typed result or typed error
+
+Any configurable capability
+  Set it up for me -----------\
+                                -> Standard or advanced settings -> Derived state
+  Connect existing setup -----/
+  Not now ---------------------> Honest unavailable/configuration-required state
 ```
 
 The persistent navigation is Home, Chat, Software, Images, Models, and System.
@@ -68,6 +74,35 @@ Task progress and results are contextual screens rather than primary sections.
 
 Skipping readiness does not mark providers available. It leads to the Home
 screen with honest configuration-required states and remediation actions.
+
+## Shared Setup Wireframe
+
+Every configurable area uses the same progressive pattern from
+`config/progressive-onboarding-contract.json`. Labels may say provider, agent,
+engine, model, or storage, but the choices and evidence rules do not fork.
+
+```text
++----------------------------------------------------------------+
+| Set up: Image generation                 State: Not configured  |
+|----------------------------------------------------------------|
+| ( ) Set it up for me                                           |
+|     Use a validated profile and recommended settings.          |
+|     [Customize advanced settings]                              |
+|                                                                |
+| ( ) Connect or use my existing setup                           |
+|     Discover or reference software I already manage.           |
+|     [Customize advanced settings]                              |
+|                                                                |
+| ( ) Not now                                                    |
+|                                                                |
+| Advanced changes show effect and evidence impact before save.  |
+|                                                [Back] [Review]  |
++----------------------------------------------------------------+
+```
+
+The engine derives `validated`, `customized`, `unverified`, or `blocked`.
+The renderer cannot select or promote that state. Advanced controls are
+collapsed by default and never expose arbitrary command or flag entry.
 
 ## Home Wireframe
 
@@ -137,7 +172,8 @@ authority. Workflow safety levels and policy determine disclosure and approval.
 | [ Describe the image...                                   ]    |
 | Output: application-owned artifacts                             |
 |                                                                |
-| [Review setup]                         [Review and generate]     |
+| [Set it up for me] [Use existing provider] [Not now]            |
+| [Customize advanced settings]          [Review and generate]    |
 +----------------------------------------------------------------+
 ```
 
@@ -174,6 +210,8 @@ allowed to reinterpret evidence states or bypass the desktop policy.
 ## Acceptance Criteria
 
 - First run works without a repository, provider, download, or network probe.
+- Guided setup, existing setup, and not-now use one shared contract across capabilities.
+- Guided and existing paths both expose structured advanced settings and state-impact review.
 - Deterministic navigation is always available without an LLM.
 - Every home action resolves to a registered capability or UI-ready workflow.
 - Provider discovery may reduce or improve availability but cannot promote an

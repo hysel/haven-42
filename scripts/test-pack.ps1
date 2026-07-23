@@ -4747,14 +4747,22 @@ Invoke-PackTest "provider performance evidence and capacity preflight fail close
 
 Invoke-PackTest "product UI first slice is registry-backed and fail closed" {
     $uiPath = Join-Path $repoRoot "config/ui-navigation-contract.json"
+    $onboardingPath = Join-Path $repoRoot "config/progressive-onboarding-contract.json"
     $builderPath = Join-Path $repoRoot "scripts/build-ui-view-model.py"
     $docPath = Join-Path $repoRoot "docs/product-ui-first-slice.md"
     $ui = Get-Content -LiteralPath $uiPath -Raw | ConvertFrom-Json
+    $onboarding = Get-Content -LiteralPath $onboardingPath -Raw | ConvertFrom-Json
     $capabilities = Get-Content -LiteralPath (Join-Path $repoRoot "config/capabilities.json") -Raw | ConvertFrom-Json
     $workflows = Get-Content -LiteralPath (Join-Path $repoRoot "config/workflows.json") -Raw | ConvertFrom-Json
     Assert-Equal -Actual $ui.schemaVersion -Expected 1 -Message "UI navigation should be schema v1."
     Assert-True -Condition (-not $ui.runtimeAdmitted -and -not $ui.principles.rendererIsExecutionAuthority -and -not $ui.principles.remoteContentAllowed) -Message "The UI contract must not claim runtime admission or renderer authority."
     Assert-True -Condition (-not $ui.firstRun.networkProbeByDefault -and -not $ui.firstRun.installsSoftwareByDefault -and -not $ui.firstRun.downloadsModelsByDefault) -Message "First run must be offline and non-installing by default."
+    Assert-Equal -Actual $onboarding.schemaVersion -Expected 1 -Message "Progressive onboarding should be schema v1."
+    Assert-True -Condition (-not $onboarding.runtimeAdmitted -and -not $onboarding.stateDerivation.rendererMaySelectState) -Message "Onboarding must not admit runtime or renderer-selected evidence state."
+    Assert-True -Condition ((@($onboarding.choices.id) -join ',') -eq 'guided-setup,existing-setup,not-now') -Message "Every configurable capability should expose guided, existing, and not-now choices."
+    Assert-True -Condition ($onboarding.choices[0].advancedSettingsAvailable -and $onboarding.choices[1].advancedSettingsAvailable -and -not $onboarding.choices[2].advancedSettingsAvailable) -Message "Both active setup paths should expose advanced settings while not-now remains effect-free."
+    Assert-True -Condition ((@($onboarding.configurationStates.id) -join ',') -eq 'validated,customized,unverified,blocked') -Message "Onboarding should expose the agreed evidence states."
+    Assert-True -Condition (-not $onboarding.advancedSettings.rawArbitraryCommandOrFlagEntryAllowed) -Message "Advanced setup cannot expose arbitrary commands or flags."
     Assert-True -Condition (-not $ui.approvalReview.rememberApprovalAllowed -and -not $ui.approvalReview.approvalTokenVisibleToRenderer) -Message "UI approvals must be nonpersistent and opaque."
     $capabilityIds = @($capabilities.capabilities.id)
     $workflowById = @{}
@@ -4771,14 +4779,16 @@ Invoke-PackTest "product UI first slice is registry-backed and fail closed" {
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for UI view-model validation."
     $selfTest = @(& $python.Source $builderPath --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "UI view-model self-test should pass."
-    Assert-True -Condition (($selfTest -join "`n") -match "3 cases") -Message "UI view-model should exercise all fail-closed cases."
+    Assert-True -Condition (($selfTest -join "`n") -match "4 cases") -Message "UI view-model should exercise all fail-closed cases."
     $modelText = @(& $python.Source $builderPath --platform windows 2>&1) -join "`n"
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "UI view model should build without network or runtime dependencies."
     $model = $modelText | ConvertFrom-Json
     Assert-Equal -Actual $model.initialRouteId -Expected "welcome" -Message "Incomplete first run should begin at Welcome."
     Assert-True -Condition (-not $model.executionEnabled -and -not $model.runtimeAdmitted) -Message "The nonvisual skeleton must not enable execution."
+    Assert-True -Condition ((@($model.onboarding.choices.id) -join ',') -eq 'guided-setup,existing-setup,not-now') -Message "Renderer-safe state should expose the shared onboarding choices."
     Assert-True -Condition ($modelText -notmatch 'entryPoints|127\.0\.0\.1|192\.168\.|approvalTokenId') -Message "Renderer-safe UI state must exclude executable paths, endpoints, and approval tokens."
     Assert-True -Condition ((Get-Content -LiteralPath $docPath -Raw) -match "What do you want to do\?") -Message "The first-slice guide should document the agreed home experience."
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "docs/progressive-onboarding.md") -Raw) -match "Advanced mode is control, not a bypass") -Message "Progressive onboarding docs should preserve advanced-mode safety."
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match "docs/product-ui-first-slice\.md") -Message "The product UI guide should be mapped to the wiki."
 }
 

@@ -413,6 +413,7 @@
 - [ ] Add compatibility preflight, atomic activation, post-update health checks, automatic rollback, retained-version cleanup, offline behavior, and a disabled-update mode.
 - [ ] Implement the unified UI over the Milestone 20 workflow foundation and Milestone 21 capability registry.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.
+- [x] Define one product-wide progressive onboarding pattern with guided setup, existing-setup connection, not-now, advanced controls on both active paths, and engine-derived validated/customized/unverified/blocked states.
 - [ ] Add first-run intent navigation, capability availability, evidence states, and policy disclosures.
   - The framework-neutral contract and view-model foundation are complete; native renderer and runtime integration remain open.
 - [ ] Render typed artifacts plus versioned progress, warning, result, and error envelopes.

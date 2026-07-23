@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "contractId": "progressive-capability-onboarding",
+  "description": "Product-wide progressive onboarding for ordinary and advanced Haven 42 users without duplicating provider or workflow business logic in the renderer.",
+  "implementationStatus": "contract-and-view-model-only",
+  "runtimeAdmitted": false,
+  "defaultChoiceId": "guided-setup",
+  "choices": [
+    {
+      "id": "guided-setup",
+      "title": "Set it up for me",
+      "purpose": "Use an exact validated profile and safe recommended defaults when one is available.",
+      "advancedSettingsAvailable": true,
+      "mayInstallOrDownloadWithoutApproval": false,
+      "candidateOrFailedProfilesMayBeOfferedAsReady": false
+    },
+    {
+      "id": "existing-setup",
+      "title": "Connect or use my existing setup",
+      "purpose": "Discover or reference user-managed software, providers, models, servers, storage, or configuration without silently changing them.",
+      "advancedSettingsAvailable": true,
+      "mayModifyExistingSetupWithoutApproval": false,
+      "unsupportedSetupMayBeLabeledValidated": false
+    },
+    {
+      "id": "not-now",
+      "title": "Not now",
+      "purpose": "Continue without configuring the capability and preserve an honest configuration-required or unavailable state.",
+      "advancedSettingsAvailable": false,
+      "createsMachineEffects": false,
+      "blocksUnrelatedCapabilities": false
+    }
+  ],
+  "advancedSettings": {
+    "collapsedByDefault": true,
+    "recommendedValuesVisible": true,
+    "resetToRecommendedAvailable": true,
+    "effectAndEvidenceImpactPreviewRequired": true,
+    "categories": [
+      "provider-or-surface-selection",
+      "model-or-artifact-selection",
+      "hardware-and-performance",
+      "storage-and-retention",
+      "network-and-trust",
+      "timeouts-concurrency-and-lifecycle",
+      "updates-rollback-and-cleanup",
+      "capability-specific-defaults"
+    ],
+    "rawArbitraryCommandOrFlagEntryAllowed": false,
+    "secretValuesReturnedToRenderer": false
+  },
+  "appliesTo": [
+    "chat-writing-and-summarization",
+    "engineering-agent-surfaces",
+    "image-generation",
+    "audio-and-music-generation",
+    "video-generation",
+    "model-discovery-and-quantization",
+    "inference-engines",
+    "local-and-remote-provider-connections",
+    "storage-retention-updates-and-cleanup"
+  ],
+  "configurationStates": [
+    {
+      "id": "validated",
+      "meaning": "The exact software, platform, hardware, provider, model, operation, and bounded settings match passed evidence.",
+      "executionAllowed": true
+    },
+    {
+      "id": "customized",
+      "meaning": "A validated base profile has user changes that remain inside its explicitly tested setting bounds.",
+      "executionAllowed": true
+    },
+    {
+      "id": "unverified",
+      "meaning": "The setup or advanced values exceed exact passed evidence and must not be represented as validated.",
+      "executionAllowed": false
+    },
+    {
+      "id": "blocked",
+      "meaning": "The combination is unsafe, incompatible, failed, incomplete, or prohibited by policy.",
+      "executionAllowed": false
+    }
+  ],
+  "stateDerivation": {
+    "derivedByEnginePolicy": true,
+    "rendererMaySelectState": false,
+    "advancedChangeMustReevaluateState": true,
+    "crossProfileEvidenceInheritanceAllowed": false,
+    "unknownCombinationDecision": "unverified"
+  },
+  "existingSetupRules": {
+    "localDiscoveryIsReadOnlyByDefault": true,
+    "remoteConnectionRequiresSeparateTrustAndPrivacyReview": true,
+    "credentialsUseNativeSecretReferences": true,
+    "plaintextCredentialPersistenceAllowed": false,
+    "userManagedFilesMayBeOverwrittenSilently": false,
+    "customNodesPluginsOrExtensionsEnabledAutomatically": false
+  },
+  "nonOverridableGuardrails": [
+    "effect-bound consent before downloads network use or writes",
+    "immutable identity and checksum verification for managed downloads",
+    "no silent CPU or provider fallback",
+    "no accidental public network binding",
+    "no plaintext credential persistence",
+    "no automatic custom node plugin or external API enablement",
+    "no evidence promotion from renderer input",
+    "no deletion of preexisting user models artifacts or configuration"
+  ],
+  "presentation": {
+    "showChoiceBeforeCapabilitySpecificSettings": true,
+    "showConfigurationStateAndReason": true,
+    "showExecutionLocation": true,
+    "showManagedVersusUserManagedOwnership": true,
+    "showDownloadsWritesRetentionAndCleanupBeforeApproval": true,
+    "allowChangingChoiceLaterWithoutLosingUserOwnedData": true
+  }
+}

@@ -29,6 +29,7 @@ The approved first product slice, navigation map, interaction flow, and low-fide
 | Request and result contract | `config/workflow-envelope-contract.json` and `docs/workflow-envelope-contract.md` |
 | Evidence dashboard | `scripts/generate-evidence-dashboard.*`, `config/evidence-catalog.tsv`, `config/agent-surface-capabilities.json`, `config/agent-surface-solutions.json` |
 | Beginner setup | `scripts/get-beginner-setup-plan.*`, `docs/beginner-setup-mode.md` |
+| Progressive onboarding | `config/progressive-onboarding-contract.json`, `docs/progressive-onboarding.md` |
 | Model choice | `scripts/recommend-local-agent-config.*`, `docs/hardware-aware-recommendations.md` |
 | Install/configure/test by surface | `config/agent-surface-solutions.json`, `docs/agent-surface-solutions.md` |
 | Script appendix | `docs/script-reference-appendix.md` |
@@ -46,6 +47,12 @@ Every model, workflow, agent surface, and installer profile shown in the UI must
 | `failed` | Evidence records deterministic failures such as `EMPTY_MODEL_OUTPUT` or `FILENAME_NOT_IN_CONTEXT`. | Block promotion; allow rerun or remediation only. |
 | `recommended-only` | Recommendation exists but validation has not passed. | Do not show as ready for edits. |
 | `blocked` | Missing input, command shape, validation target, or safety boundary. | Show required input and link TODO item. |
+
+## Progressive Onboarding Pattern
+
+Every configurable product area offers **Set it up for me**, **Connect or use my existing setup**, and **Not now**. The first two paths both expose collapsed **Customize advanced settings** controls. This applies to text providers, engineering agent surfaces, images, audio, video, models, quantization, inference engines, local or remote connections, storage, retention, updates, rollback, and cleanup.
+
+The engine derives the user-facing configuration state: `validated`, `customized`, `unverified`, or `blocked`. Advanced settings can narrow or remove validation but cannot create it, and the renderer cannot select the state. Advanced mode never bypasses consent, checksum verification, credential protection, network exposure, exact hardware/provider admission, or preservation of existing user data. See `docs/progressive-onboarding.md`.
 
 ## Safety Model
 
@@ -98,6 +105,7 @@ A hosted production service is out of scope because Haven 42 is local-first and 
 - Use native directory selection, then scope repository and artifact access to the explicitly selected roots.
 - Validate external documentation URLs against an allowlist before opening the system browser.
 - Keep provider downloads, model pulls, network probes, writes, and approved-write workflows behind their existing disclosure and approval gates.
+- Keep guided setup and existing-setup configuration on the shared progressive-onboarding contract; do not duplicate capability-specific state machines in React or Tauri.
 - Preserve the schema-v1 workflow envelope as the initial IPC contract rather than introducing UI-only business logic.
 - Package Node.js, Rust, and Python as build-time or application-private components; do not install them globally for end users.
 

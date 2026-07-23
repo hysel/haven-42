@@ -2194,13 +2194,14 @@ PY
 }
 
 test_product_ui_first_slice() {
-  python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --self-test | grep -q "3 cases" || return 1
+  python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --self-test | grep -q "4 cases" || return 1
   model="$(python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --platform linux)" || return 1
   python3 - "$REPO_ROOT" "$model" <<'PY' || return 1
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 model = json.loads(sys.argv[2])
 ui = json.loads((root / "config/ui-navigation-contract.json").read_text(encoding="utf-8"))
+onboarding = json.loads((root / "config/progressive-onboarding-contract.json").read_text(encoding="utf-8"))
 capabilities = json.loads((root / "config/capabilities.json").read_text(encoding="utf-8"))
 workflows = json.loads((root / "config/workflows.json").read_text(encoding="utf-8"))
 assert ui["schemaVersion"] == 1 and ui["runtimeAdmitted"] is False
@@ -2209,6 +2210,14 @@ assert ui["principles"]["remoteContentAllowed"] is False
 assert ui["firstRun"]["networkProbeByDefault"] is False
 assert ui["firstRun"]["installsSoftwareByDefault"] is False
 assert ui["firstRun"]["downloadsModelsByDefault"] is False
+assert onboarding["schemaVersion"] == 1 and onboarding["runtimeAdmitted"] is False
+assert [item["id"] for item in onboarding["choices"]] == ["guided-setup", "existing-setup", "not-now"]
+assert onboarding["choices"][0]["advancedSettingsAvailable"] is True
+assert onboarding["choices"][1]["advancedSettingsAvailable"] is True
+assert onboarding["choices"][2]["advancedSettingsAvailable"] is False
+assert [item["id"] for item in onboarding["configurationStates"]] == ["validated", "customized", "unverified", "blocked"]
+assert onboarding["stateDerivation"]["rendererMaySelectState"] is False
+assert onboarding["advancedSettings"]["rawArbitraryCommandOrFlagEntryAllowed"] is False
 assert ui["approvalReview"]["rememberApprovalAllowed"] is False
 assert ui["approvalReview"]["approvalTokenVisibleToRenderer"] is False
 capability_ids = {item["id"] for item in capabilities["capabilities"]}
@@ -2220,11 +2229,13 @@ for action in ui["homeActions"]:
         assert workflow_by_id[action["operationId"]]["uiReady"] is True
 assert model["initialRouteId"] == "welcome"
 assert model["executionEnabled"] is False and model["runtimeAdmitted"] is False
+assert [item["id"] for item in model["onboarding"]["choices"]] == ["guided-setup", "existing-setup", "not-now"]
 rendered = json.dumps(model)
 for forbidden in ("entryPoints", "127.0.0.1", "192.168.", "approvalTokenId"):
     assert forbidden not in rendered
 assert "What do you want to do?" in (root / "docs/product-ui-first-slice.md").read_text(encoding="utf-8")
 assert "docs/product-ui-first-slice.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
+assert "Advanced mode is control, not a bypass" in (root / "docs/progressive-onboarding.md").read_text(encoding="utf-8")
 PY
 }
 

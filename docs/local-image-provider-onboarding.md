@@ -2,6 +2,16 @@
 
 `config/local-image-onboarding-contract.json` defines consumer-local image setup without requiring an external server. It is a planning and admission contract, not an installer and not evidence that untested native profiles work.
 
+## Setup Choices
+
+Image generation follows the product-wide `config/progressive-onboarding-contract.json` pattern:
+
+1. **Set it up for me** selects only an exact promoted native profile and offers structured advanced controls for storage, checkpoint, quality/VRAM preset, generation defaults, concurrency, idle shutdown, retention, and admitted update behavior.
+2. **Connect or use my existing setup** validates a user-managed local or explicitly trusted remote provider and offers advanced endpoint, credential-reference, timeout, model-mapping, workflow, cleanup, TLS, and generation-default controls without silently changing that provider.
+3. **Not now** keeps image generation honestly unavailable without blocking chat, software, or other capabilities.
+
+Both active paths show whether the resulting setup is `validated`, `customized`, `unverified`, or `blocked`. Advanced changes trigger state reevaluation and cannot enable arbitrary commands, custom nodes, external API nodes, public binding, or silent fallback.
+
 ## Discovery And Selection
 
 Discovery remains local and reports the operating system, architecture, system memory, available storage, accelerator vendor and model, usable dedicated or unified memory, and installed driver or runtime versions. Missing accelerator or memory evidence makes a profile unavailable; it must never silently select CPU execution.

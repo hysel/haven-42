@@ -46,7 +46,27 @@ def availability_overrides(report: dict[str, Any] | None) -> dict[str, str]:
     return result
 
 
-def validate_contracts(ui: dict[str, Any], capabilities: dict[str, Any], workflows: dict[str, Any]) -> None:
+def validate_onboarding(onboarding: dict[str, Any]) -> None:
+    if onboarding.get("schemaVersion") != 1 or onboarding.get("runtimeAdmitted") is not False:
+        raise UiModelError("Progressive onboarding must be schema v1 and runtime-admission false.")
+    choices = {item.get("id"): item for item in onboarding.get("choices", [])}
+    if set(choices) != {"guided-setup", "existing-setup", "not-now"}:
+        raise UiModelError("Progressive onboarding must define the three product-wide choices.")
+    if choices["guided-setup"].get("advancedSettingsAvailable") is not True or choices["existing-setup"].get("advancedSettingsAvailable") is not True:
+        raise UiModelError("Guided and existing-setup paths must both expose advanced settings.")
+    if choices["not-now"].get("advancedSettingsAvailable") is not False or choices["not-now"].get("createsMachineEffects") is not False:
+        raise UiModelError("Not-now must be effect-free and must not expose advanced settings.")
+    states = {item.get("id") for item in onboarding.get("configurationStates", [])}
+    if states != {"validated", "customized", "unverified", "blocked"}:
+        raise UiModelError("Progressive onboarding configuration states are incomplete.")
+    derivation = onboarding.get("stateDerivation", {})
+    if derivation.get("derivedByEnginePolicy") is not True or derivation.get("rendererMaySelectState") is not False:
+        raise UiModelError("Configuration evidence state must be derived outside the renderer.")
+    if onboarding.get("advancedSettings", {}).get("rawArbitraryCommandOrFlagEntryAllowed") is not False:
+        raise UiModelError("Advanced onboarding cannot expose arbitrary commands or flags.")
+
+
+def validate_contracts(ui: dict[str, Any], onboarding: dict[str, Any], capabilities: dict[str, Any], workflows: dict[str, Any]) -> None:
     if ui.get("schemaVersion") != 1 or ui.get("runtimeAdmitted") is not False:
         raise UiModelError("UI contract must be schema v1 and runtime-admission false.")
     capability_ids = {item["id"] for item in capabilities.get("capabilities", [])}
@@ -58,6 +78,14 @@ def validate_contracts(ui: dict[str, Any], capabilities: dict[str, Any], workflo
         raise UiModelError("First run cannot probe the network by default.")
     if ui.get("principles", {}).get("rendererIsExecutionAuthority") is not False:
         raise UiModelError("Renderer cannot be execution authority.")
+    validate_onboarding(onboarding)
+    experience = ui.get("onboardingExperience", {})
+    if experience.get("choiceIds") != ["guided-setup", "existing-setup", "not-now"]:
+        raise UiModelError("UI onboarding choices must preserve the shared contract order.")
+    if experience.get("advancedSettingsChoiceIds") != ["guided-setup", "existing-setup"]:
+        raise UiModelError("UI advanced settings must be available on both active setup paths.")
+    if experience.get("rendererMayDeriveConfigurationState") is not False:
+        raise UiModelError("Renderer cannot derive onboarding configuration state.")
     for action in ui.get("homeActions", []):
         if action.get("routeId") not in route_ids:
             raise UiModelError(f"Home action references unknown route: {action.get('routeId')}")
@@ -81,10 +109,11 @@ def build(platform: str, first_run_complete: bool, availability: dict[str, Any] 
     if platform not in PLATFORMS:
         raise UiModelError(f"Unsupported platform: {platform}")
     ui = load_json(ROOT / "config/ui-navigation-contract.json")
+    onboarding = load_json(ROOT / "config/progressive-onboarding-contract.json")
     capabilities = load_json(ROOT / "config/capabilities.json")
     workflows = load_json(ROOT / "config/workflows.json")
     providers = load_json(ROOT / "config/providers.json")
-    validate_contracts(ui, capabilities, workflows)
+    validate_contracts(ui, onboarding, capabilities, workflows)
 
     capability_by_id = {item["id"]: item for item in capabilities["capabilities"]}
     workflow_by_id = {item["id"]: item for item in workflows["workflows"]}
@@ -147,6 +176,12 @@ def build(platform: str, first_run_complete: bool, availability: dict[str, Any] 
         "executionEnabled": False,
         "navigation": ui["shell"]["primaryNavigation"] if first_run_complete else ["welcome", "privacy", "readiness"],
         "routes": ui["routes"],
+        "onboarding": {
+            "choices": onboarding["choices"],
+            "advancedSettings": onboarding["advancedSettings"],
+            "configurationStates": onboarding["configurationStates"],
+            "presentation": onboarding["presentation"],
+        },
         "homeActions": actions,
         "routeWorkflows": route_workflows,
         "taskStateMachine": ui["taskStateMachine"],
@@ -166,6 +201,7 @@ def self_test() -> None:
     model = build("windows", False)
     assert model["initialRouteId"] == "welcome"
     assert model["executionEnabled"] is False
+    assert [item["id"] for item in model["onboarding"]["choices"]] == ["guided-setup", "existing-setup", "not-now"]
     assert all("entryPoints" not in json.dumps(item) for item in model["homeActions"])
     ready = build("linux", True, {
         "SchemaVersion": 1,
@@ -178,12 +214,20 @@ def self_test() -> None:
     hostile = json.loads(json.dumps(load_json(ROOT / "config/ui-navigation-contract.json")))
     hostile["homeActions"][0]["operationId"] = "arbitrary.command"
     try:
-        validate_contracts(hostile, load_json(ROOT / "config/capabilities.json"), load_json(ROOT / "config/workflows.json"))
+        validate_contracts(hostile, load_json(ROOT / "config/progressive-onboarding-contract.json"), load_json(ROOT / "config/capabilities.json"), load_json(ROOT / "config/workflows.json"))
     except UiModelError:
         pass
     else:
         raise AssertionError("Unknown operations must fail closed.")
-    print("UI view-model self-test passed: 3 cases")
+    hostile_onboarding = json.loads(json.dumps(load_json(ROOT / "config/progressive-onboarding-contract.json")))
+    hostile_onboarding["stateDerivation"]["rendererMaySelectState"] = True
+    try:
+        validate_onboarding(hostile_onboarding)
+    except UiModelError:
+        pass
+    else:
+        raise AssertionError("Renderer-selected evidence state must fail closed.")
+    print("UI view-model self-test passed: 4 cases")
 
 
 def main() -> int:

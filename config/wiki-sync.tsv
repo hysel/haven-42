@@ -78,6 +78,7 @@ docs/macos-agent-host-bootstrap.md	macOS-Agent-Host-Bootstrap.md	macOS Agent Hos
 examples/hardware-aware-recommendation-validation.md	Hardware-Aware-Recommendation-Validation.md	Hardware-Aware Recommendation Validation
 docs/script-consolidation-plan.md	Script-Consolidation.md	Script Consolidation
 docs/unified-starter-toolkit-ui.md	Unified-Starter-Toolkit-UI.md	Unified Starter Toolkit UI
+docs/progressive-onboarding.md	Progressive-Onboarding.md	Progressive Onboarding
 docs/desktop-runtime-dependency-evaluation.md	Desktop-Runtime-Dependency-Evaluation.md	Desktop Runtime Dependency Evaluation
 docs/desktop-dependency-resolution-evidence.md	Desktop-Dependency-Resolution-Evidence.md	Desktop Dependency Resolution Evidence
 docs/desktop-ipc-contract.md	Desktop-IPC-Contract.md	Desktop IPC Contract

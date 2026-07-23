@@ -11,7 +11,8 @@
     "remoteContentAllowed": false,
     "providerAvailabilityMustBeDiscovered": true,
     "effectsMustBeDisclosedBeforeApproval": true,
-    "blockedCapabilitiesMayBeDisplayedButNotExecuted": true
+    "blockedCapabilitiesMayBeDisplayedButNotExecuted": true,
+    "progressiveOnboardingUsesSharedContract": true
   },
   "shell": {
     "regions": ["primary-navigation", "page-header", "main-content", "task-status", "privacy-status"],
@@ -28,6 +29,7 @@
     { "id": "images", "path": "/images", "title": "Create an image", "kind": "capability", "requiresFirstRunComplete": true },
     { "id": "models", "path": "/models", "title": "Models and providers", "kind": "management", "requiresFirstRunComplete": true },
     { "id": "system", "path": "/system", "title": "System readiness", "kind": "management", "requiresFirstRunComplete": true },
+    { "id": "setup", "path": "/setup/:capabilityId", "title": "Set up capability", "kind": "onboarding", "requiresFirstRunComplete": true },
     { "id": "review", "path": "/review", "title": "Review action", "kind": "approval", "requiresFirstRunComplete": true },
     { "id": "task", "path": "/tasks/:requestId", "title": "Task progress", "kind": "execution", "requiresFirstRunComplete": true },
     { "id": "result", "path": "/tasks/:requestId/result", "title": "Result", "kind": "result", "requiresFirstRunComplete": true }
@@ -39,6 +41,15 @@
     "downloadsModelsByDefault": false,
     "requiresRepository": false,
     "completionStoredAsUserState": true
+  },
+  "onboardingExperience": {
+    "contract": "config/progressive-onboarding-contract.json",
+    "choiceIds": ["guided-setup", "existing-setup", "not-now"],
+    "advancedSettingsChoiceIds": ["guided-setup", "existing-setup"],
+    "configurationStateIds": ["validated", "customized", "unverified", "blocked"],
+    "rendererMayDeriveConfigurationState": false,
+    "notNowPreservesHonestAvailability": true,
+    "setupRouteId": "setup"
   },
   "homeActions": [
     {
@@ -126,6 +137,7 @@
     "workflows": "config/workflows.json",
     "desktopIpc": "config/desktop-ipc-contract.json",
     "desktopAuthority": "config/desktop-capability-policy.json",
+    "progressiveOnboarding": "config/progressive-onboarding-contract.json",
     "typedArtifacts": "config/typed-artifact-contract.json"
   }
 }

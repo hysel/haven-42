@@ -3,6 +3,13 @@
   "description": "Fail-closed hardware discovery and consent contract for consumer-local image-provider onboarding.",
   "executionDefault": "dry-run",
   "externalServerRequired": false,
+  "sharedOnboarding": {
+    "contract": "config/progressive-onboarding-contract.json",
+    "choiceIds": ["guided-setup", "existing-setup", "not-now"],
+    "advancedSettingsChoiceIds": ["guided-setup", "existing-setup"],
+    "configurationStateIds": ["validated", "customized", "unverified", "blocked"],
+    "existingProviderMayInheritManagedProfileEvidence": false
+  },
   "discovery": {
     "requiredFields": [
       "operatingSystem",
@@ -63,6 +70,30 @@
     "candidateProfilesMayInstall": false,
     "unsupportedDecision": "unavailable",
     "cpuFallbackRequiresSeparatelyPromotedProfile": true
+  },
+  "advancedSettings": {
+    "guidedSetup": [
+      "runtime storage location",
+      "model storage location",
+      "validated checkpoint selection",
+      "quality speed and VRAM preset",
+      "default dimensions steps sampler CFG and seed behavior",
+      "concurrent job limit and idle shutdown",
+      "artifact and provider-copy retention",
+      "manual or admitted automatic update preference"
+    ],
+    "existingSetup": [
+      "local or explicitly trusted remote endpoint",
+      "native credential reference",
+      "connection generation and cancellation timeouts",
+      "model-to-capability mapping",
+      "validated workflow template selection",
+      "health check history and provider-output cleanup",
+      "TLS certificate validation for remote providers",
+      "default generation parameters"
+    ],
+    "changingSettingsReevaluatesConfigurationState": true,
+    "arbitraryCommandOrFlagEntryAllowed": false
   },
   "consentBeforeNetworkOrWrite": {
     "requiredDisclosures": [
