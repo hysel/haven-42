@@ -439,7 +439,7 @@
 - [ ] Validate a pinned Windows NVIDIA CUDA image-provider profile before shipping its local installer or runtime files.
 - [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
 - [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
-  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, and uninstall checks; cancellation, forced recovery, update/rollback, repeated-run stability, and consumer onboarding remain open.
+  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. Update/rollback remains open because v0.28.0 is still the latest immutable AMD release, and consumer onboarding/installer behavior remains unadmitted.
 - [ ] Validate a pinned Apple Silicon MPS image-provider profile on a physical Mac as the last native hardware gate before shipping its local installer or runtime files.
 - [x] Keep custom nodes and external API nodes disabled unless each exact extension independently passes promotion.
 - [ ] Add native installer and provider lifecycle files only after the exact profile passes; failed profiles leave documentation only.
