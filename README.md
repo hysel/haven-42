@@ -8,16 +8,38 @@ The project began as a reusable pack for coding agents. It now provides a provid
 
 ## What Works Today
 
-| Area | Current position |
-| --- | --- |
-| Engineering agents | Continue, Aider, and OpenCode are the maintained surfaces, with OS-aware setup and validation paths. |
-| Engineering workflows | Repository discovery, planning, review, scoped changes, language-aware guidance, workflow dispatch, and evidence reporting are implemented. |
-| General local text | `general.chat`, `content.write`, and `content.summarize` use one provider-neutral, session-bound adapter. Ollama is live-validated, including an exact Linux Laguna XS 2.1 conformance cell. llama.cpp is live-validated on its exact Linux NVIDIA/CUDA profile and remains engine-evidence-only on Windows AMD/HIP; every selection fails closed outside admitted profiles. |
-| Local images | `media.image.create` has a live-validated Linux ComfyUI/SDXL provider and typed PNG artifacts. A native Windows AMD/RX 7800 XT cell now passes repeated generation, active cancellation, forced recovery, retention cleanup, and uninstall, but remains partial because no newer immutable AMD release exists for the update/rollback gate and consumer onboarding/installer behavior is not yet admitted. Windows NVIDIA, Intel GPU/XPU, and Apple Silicon remain candidates. |
-| Product UI | The Milestone 22A local-web application runs on Windows, Linux, and macOS with no new dependencies. It shows sanitized system status, connects to a user-selected loopback or trusted-LAN Ollama endpoint, discovers installed models, provides chat, writing, and summarization, and unloads the selected model after every response or failure. Tauri packaging and broader UI capabilities remain separately gated. |
-| Music and video | The documentation-only candidate inventories remain the shipping boundary. ACE-Step has a partial exact-profile Linux CUDA instrumental pass; video remains documentation-only. No provider scripts, adapters, harnesses, workflows, or configuration ship before full promotion gates pass. |
-| Model quantization | Versioned contracts, sanitized profiling, and trusted-artifact selection are implemented; exact Linux NVIDIA and Windows AMD Ollama comparisons passed, while every other hardware/runtime cell remains evidence-gated. |
-| Inference engines | Provider, engine, backend, and model layers are separated. llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD; Vulkan failed the patch gate, Intel work is parked pending hardware, IPEX-LLM is retired, and LM Studio is optional API-only software. |
+| Capability | Status | What that means |
+| --- | --- | --- |
+| Local browser assistant | **Available** | Connect Ollama, select an installed model, and use private chat, writing, or summarization. The model unloads after every request. |
+| Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
+| Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
+| Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
+| Music and video | **Not shipped** | Candidate research is recorded in documentation-only candidate inventories, but no runtime integration ships until the full security, quality, cleanup, and packaging gates pass. |
+| Hardware-adaptive quantization | **Experimental** | Planning and comparison contracts exist for validated Linux NVIDIA and Windows AMD cells; automatic conversion and activation are not yet shipped. |
+
+See the [evidence catalog](docs/evidence-catalog.md) for exact tested versions and hardware, or the [roadmap](ROADMAP.md) for planned work.
+
+## Which Path Should I Use?
+
+Choose the path that matches what you want to accomplish today.
+
+| Your goal | Start here | What you get |
+| --- | --- | --- |
+| Chat, write, or summarize locally | [Run the local web app](#run-the-local-web-app) | A private browser interface backed by your Ollama server. |
+| Add local AI to a software project | [Quick Start](#quick-start) | A guided Continue setup with safe read-only and approved-write workflows. |
+| Connect or tune an existing setup | [Setup Paths](docs/setup-paths.md) | Beginner and advanced paths for models, hardware, providers, and agent surfaces. |
+| Develop, validate, or release Haven 42 | [Validation](#validation) | Test tiers, evidence rules, security boundaries, and release guidance. |
+
+### Common destinations
+
+- **VS Code or VSCodium:** [Continue setup guide](docs/vscode-continue-setup.md)
+- **Aider or OpenCode:** [Agent installation and health paths](docs/agent-surface-solutions.md)
+- **Generate a hardware-aware model/config recommendation:** [Hardware-aware recommendations](docs/hardware-aware-recommendations.md) and the [local model guide](docs/local-model-selection.md)
+- **Image generation:** [Validated ComfyUI setup](docs/comfyui-image-provider-setup.md) and [provider support boundaries](docs/local-image-provider-onboarding.md)
+- **Security and privacy:** [Security threat model](docs/security-threat-model.md), [data lifecycle](docs/local-data-lifecycle.md), and [security policy](SECURITY.md)
+- **Project status:** [Roadmap](ROADMAP.md), [current tasks](TODO.md), and [solution architecture review](docs/solution-architecture-review.md)
+
+For the complete command and document catalog, see [Workflow Docs](#workflow-docs) and the [script reference appendix](docs/script-reference-appendix.md).
 
 ## Product Direction
 
@@ -87,87 +109,10 @@ Haven 42 opens a browser on `http://127.0.0.1:4242`. Connect the default same-ma
 
 See [`docs/local-web-mvp.md`](docs/local-web-mvp.md) for connection, security, advanced settings, and current-scope details.
 
-
-| If you want to... | Start here |
-## Which Path Should I Use?
-
-| --- | --- |
-| Launch local Haven 42 chat | `docs/local-web-mvp.md` |
-| Install the pack in a project | `Quick Start` |
-| Set up Continue in VS Code or VSCodium | `docs/vscode-continue-setup.md` |
-| Choose beginner or team setup path | `docs/setup-paths.md` |
-| Review guided, existing, and advanced product onboarding | `docs/progressive-onboarding.md` |
-| Review advanced onboarding security and state derivation | `docs/onboarding-setting-security.md` |
-| Pick the right local model | `docs/local-model-selection.md` |
-| Generate a hardware-aware model/config recommendation | `docs/hardware-aware-recommendations.md` |
-| Profile hardware or plan trusted model quantization | `docs/hardware-adaptive-quantization.md` |
-| Understand inference engine and backend selection | `docs/inference-engine-architecture.md` |
-| Review local image onboarding gates | `docs/local-image-provider-onboarding.md` |
-| Review documentation-only audio/video candidates | `docs/local-audio-provider-candidates.md` and `docs/local-video-provider-candidates.md` |
-| Understand config generation choices | `docs/config-generation-strategy.md` |
-| Review stable workflow entry points | `docs/workflow-registry.md` |
-| Integrate automation with the versioned workflow envelope | `docs/workflow-envelope-contract.md` |
-| Review timeout, cancellation, retries, and resume behavior | `docs/workflow-reliability.md` |
-| Review security boundaries and local data retention | `docs/security-threat-model.md` and `docs/local-data-lifecycle.md` |
-| Compare all workflow commands and safety levels | `docs/workflow-chooser.md` |
-| Understand script consolidation boundaries | `docs/script-consolidation-plan.md` |
-| Review milestone solution completeness | `docs/solution-architecture-review.md` |
-| See maintainer tasks that can proceed without extra prompts | `docs/autonomous-maintainer-queue.md` |
-| Choose from a short guided menu | `docs/haven-42-menu.md` |
-| Review the product UI architecture | `docs/unified-starter-toolkit-ui.md` |
-| Review the agreed first product slice and wireframes | `docs/product-ui-first-slice.md` |
-| Review the desktop runtime, packaging, and signing boundary | `docs/unified-starter-toolkit-ui.md`, `docs/desktop-runtime-dependency-evaluation.md`, and `DECISIONS.md` |
-| Integrate with the private desktop bridge contract | `docs/desktop-ipc-contract.md`, `config/desktop-ipc-contract.json`, and `config/desktop-capability-policy.json` |
-| Review the first Windows desktop dependency resolution | `docs/desktop-dependency-resolution-evidence.md` |
-| Generate a beginner setup plan | `docs/beginner-setup-mode.md` |
-| Look up individual script details | `docs/script-reference-appendix.md` |
-| Plan shared assets for multiple projects | `docs/shared-asset-installation.md` |
-| Profile a remote LLM machine | `docs/remote-hardware-profile.md` |
-| Bootstrap a native macOS model host | `docs/macos-agent-host-bootstrap.md` |
-| Validate MLX models on Apple Silicon | `docs/macos-agent-host-bootstrap.md` and `docs/local-model-selection.md` |
-| Evaluate newer model candidates | `docs/online-model-discovery.md` |
-| Validate whether a model can use tools | `docs/model-tool-use-validation.md` |
-| Automate local model preflight tests | `docs/local-agent-model-testing.md` |
-| Test VS Code or VSCodium setup | `docs/editor-compatibility.md` |
-| Let Continue edit files | `docs/tool-use-modes.md` and `docs/scoped-edits.md` |
-| Use MCP tools | `docs/mcp-setup.md` and `docs/mcp-examples.md` |
-| Validate this pack across repository types | `docs/multi-repository-validation.md` |
-| Verify runtime model output | `docs/runtime-output-verification.md` |
-| Compare other open-source agent surfaces | `docs/agent-surface-options.md` |
-| Review the pass-to-ship policy for new agents | `docs/agent-integration-admission-policy.md` |
-| Keep the GitHub wiki synchronized | `docs/wiki-maintenance.md` |
-| Understand general-purpose capabilities and intent routing | `docs/capability-registry.md`, `docs/deterministic-intent-routing.md`, `docs/capability-availability-and-engineering-routing.md`, and `docs/optional-llm-intent-routing.md` |
-| Generate repository-free local images | `docs/local-image-capability.md` and `examples/local-image-capability-validation.md` |
-| Install the validated local image provider | `docs/comfyui-image-provider-setup.md` |
-| Start a repository-optional general AI session | `docs/general-ai-session-workspace.md` |
-| Use local chat, writing, and summarization providers | `docs/local-text-capabilities.md` |
-| Compare install/configure/test by agent | `docs/agent-surface-solutions.md` |
-| Check non-Continue promotion gates | `docs/agent-surface-promotion-gates.md` |
-| Understand future surface-specific config bundles | `docs/surface-specific-config-bundles.md` |
-| Automate shared agent CLI model tests | `docs/agent-cli-surface-model-testing.md` |
-| Automate Aider CLI model tests | `docs/aider-cli-model-testing.md` |
-| Install, configure, or health-check Aider | `docs/agent-surface-solutions.md` |
-| Automate Continue CLI model tests | `docs/continue-cli-model-testing.md` |
-| Track multi-language support | `docs/language-support.md` |
-| Use optional language rule packs | `docs/language-rule-packs.md` |
-| Review the representative language workflow matrix | `docs/language-workflow-validation-matrix.md` |
-| Select a validated model lane for a detected language and workflow | `docs/language-aware-model-lanes.md` |
-| Review language rule-pack evidence | `examples/language-rule-pack-validation.md` |
-| Review multi-language workflow evidence | `examples/multi-language-workflow-validation.md` |
-| Detect project type before giving advice | `docs/project-detection.md` |
-| Generate and inspect the activated project profile | `docs/project-profile-classification.md` |
-| Generate local sample repositories | `docs/sample-repository-factory.md` |
-| Validate this pack | `Quick Validation` |
-| Build release artifacts | `docs/release.md` |
-| Review validation evidence | `docs/evidence-catalog.md`, `config/capability-evidence-contract.json`, and `config/evidence-catalog.tsv` |
-| Generate evidence and setup summaries | `docs/evidence-dashboard.md` and `docs/beginner-setup-mode.md` |
-| Use scenario packs for common coding tasks | `docs/sample-scenario-packs.md` |
-| Fix setup problems | `Common Problems` and `docs/troubleshooting.md` |
-
 ## Quick Start
 
-**Using VS Code or VSCodium for the first time?** Start with
-`docs/vscode-continue-setup.md`. It uses the installer to generate the global
+**Using VS Code or VSCodium for the first time?** Start with the
+[Continue setup guide](docs/vscode-continue-setup.md). It uses the installer to generate the global
 Continue config, includes native Windows and macOS commands, avoids
 duplicate-rule warnings, and ends with safe read and write checks.
 
@@ -988,31 +933,15 @@ Runtime status:
 
 ## Workflow Docs
 
-- `docs/shared-asset-installation.md`
-- `docs/sonarqube-review.md`
-- `docs/sonarqube-integration-options.md`
-- `docs/mcp-options.md`
-- `docs/mcp-setup.md`
-- `docs/mcp-examples.md`
-- `docs/compatibility.md`
-- `docs/validation-checklists.md`
-- `docs/troubleshooting.md`
-- `docs/tool-use-modes.md`
-- `docs/approved-tool-backed-changes.md`
-- `docs/scoped-edits.md`
-- `docs/local-config-safety.md`
-- `docs/local-model-selection.md`
-- `docs/remote-hardware-profile.md`
-- `docs/online-model-discovery.md`
-- `docs/multi-repository-validation.md`
-- `docs/runtime-output-verification.md`
-- `docs/agent-surface-options.md`
-- `docs/model-tool-use-validation.md`
-- `docs/local-model-reliability.md`
-- `docs/banned-output-patterns.md`
-- `docs/release.md`
-- `docs/runtime-validation.md`
-- `docs/prompt-quality.md`
+The path chooser above covers normal use. This grouped index is for advanced users and contributors.
+
+- **Setup and configuration:** [shared assets](docs/shared-asset-installation.md), [configuration strategy](docs/config-generation-strategy.md), [surface-specific bundles](docs/surface-specific-config-bundles.md), and [local configuration safety](docs/local-config-safety.md)
+- **Agents and model testing:** [agent options](docs/agent-surface-options.md), [promotion gates](docs/agent-surface-promotion-gates.md), [shared CLI tests](docs/agent-cli-surface-model-testing.md), and [Continue CLI tests](docs/continue-cli-model-testing.md)
+- **Models, languages, and fixtures:** [local model selection](docs/local-model-selection.md), [remote profiling](docs/remote-hardware-profile.md), [online discovery](docs/online-model-discovery.md), [language support](docs/language-support.md), [optional rule packs](docs/language-rule-packs.md), [rule-pack evidence](examples/language-rule-pack-validation.md), [project detection](docs/project-detection.md), and [sample repository generation](docs/sample-repository-factory.md)
+- **Workflows and safe changes:** [workflow registry](docs/workflow-registry.md), [workflow chooser](docs/workflow-chooser.md), [scenario packs](docs/sample-scenario-packs.md), [tool-use modes](docs/tool-use-modes.md), [approved changes](docs/approved-tool-backed-changes.md), and [scoped edits](docs/scoped-edits.md)
+- **Integrations:** [MCP setup](docs/mcp-setup.md), [MCP examples](docs/mcp-examples.md), [SonarQube review](docs/sonarqube-review.md), [SonarQube options](docs/sonarqube-integration-options.md), and [platform compatibility](docs/compatibility.md)
+- **Validation and release:** [validation checklists](docs/validation-checklists.md), [multi-repository validation](docs/multi-repository-validation.md), [runtime output verification](docs/runtime-output-verification.md), [model reliability](docs/local-model-reliability.md), [banned output patterns](docs/banned-output-patterns.md), [runtime validation](docs/runtime-validation.md), [prompt quality](docs/prompt-quality.md), and [release process](docs/release.md)
+- **Product and maintenance:** [unified UI design](docs/unified-starter-toolkit-ui.md), [solution architecture review](docs/solution-architecture-review.md), [script consolidation](docs/script-consolidation-plan.md), [script reference](docs/script-reference-appendix.md), [autonomous maintainer queue](docs/autonomous-maintainer-queue.md), and [troubleshooting](docs/troubleshooting.md)
 
 ## Validation
 
