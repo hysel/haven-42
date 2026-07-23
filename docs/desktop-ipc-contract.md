@@ -89,3 +89,9 @@ These contract checks are necessary but not sufficient. Native Windows, Linux, a
 `scripts/desktop-ipc-policy.py` implements the engine-side, standard-library admission boundary and a 46-case offline hostile self-test. It rejects malformed and oversized frames, invalid UTF-8, extra or forbidden nested command/path/URL fields, wrong schemas and field types, duplicate active requests, unknown or non-UI operations, unavailable execution, invalid or duplicated grants, missing/replayed/expired/mismatched approvals, cross-session cancellation, inactive cancellation, and invalid event bindings, sequences, or terminal events.
 
 This is sidecar policy evidence only. It is not a listening service, accepts no production message-processing CLI mode, starts no process, and grants no filesystem or network authority. The future native Rust bridge must independently enforce the same rules plus canonical path, symlink/reparse, protected-directory, WebView, process lifecycle, and privilege tests against the admitted runtime. No native bridge test is marked complete until that code exists and passes on each promoted platform.
+
+## Native Authority Policy Reference
+
+`config/native-bridge-boundary-contract.json` and `scripts/native-bridge-boundary-policy.py` add 55 offline cases for authority that the future native layer must own: path-grant issuance, protected roots, external links, approval binding/replay, sidecar startup and lifecycle, environment filtering, cancellation ownership, and privilege rejection. The evidence and explicit limitations are recorded in `docs/native-bridge-boundary-evidence.md`.
+
+The model opens no link, accesses no selected path, starts no sidecar, and mints no production approval. Passing it cannot promote a Tauri runtime. Actual Rust command registration, operating-system canonicalization and race handling, WebView policy, process groups, packages, and platform behavior remain required.

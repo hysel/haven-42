@@ -18,7 +18,7 @@ Continue, Aider, and OpenCode are the maintained engineering surfaces. General t
 
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22 is
 in progress with Tauri 2, private typed sidecar IPC, cross-platform storage contracts,
-a non-activating offline updater policy, and an agreed first product slice with a registry-backed nonvisual view model selected for the local web UI and task composition. Execution remains disabled until runtime admission. Milestone 23 owns native
+a non-activating offline updater policy, an agreed first product slice, and executable engine/native-boundary policy models with 101 total hostile cases selected for the local web UI and task composition. Execution remains disabled until actual native runtime admission. Milestone 23 owns native
 local image profiles and now has consumer-local discovery and consent contracts.
 Milestones 24 and 25 retain documentation-only audio/video candidate inventories and
 shared media-consent policy. Milestone 26 now has quantization plan/artifact contracts,

@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Rechecked the official Tauri release, crates.io, and npm registries; the reviewed `urlpattern 0.6` fix remains unpublished, so runtime admission stays blocked. Added a 55-case native-authority policy model for path grants, external links, approvals, sidecar lifecycle, cancellation, environment filtering, and privilege rejection without adding Tauri or runtime files.
 - Defined the first Haven 42 product UI slice with first-run, Home, Chat, Software, Images, Models, System, approval, progress, and result wireframes; added a fail-closed registry-backed view-model builder that exposes no commands, endpoints, tokens, or execution authority while desktop runtime admission remains blocked.
 - Promoted the llama.cpp local-text adapter to live-validated for its exact Linux NVIDIA/CUDA profile after pinned-server discovery, exact-profile admission, OpenAI-compatible invocation, exact-output, sanitization, GPU-use, timing, shutdown, and disposable-environment cleanup passed; Windows AMD/HIP remains engine-evidence-only.
 - Added a cross-platform offline core-update policy with strict immutable-release, compatibility, host-asset, approved-host, byte-size, and SHA-256 validation. It explicitly cannot use the network, write, download, stage, attest, activate, or touch user data.

@@ -3958,7 +3958,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "21: General-Purpose AI Assistant And Intent Routing \| Complete \| Complete for the promoted provider set") -Message "Solution audit should keep completed Milestone 21 aligned with the roadmap."
-    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress \| First slice complete; runtime dependency-gated") -Message "Solution audit should keep Milestone 22 first-slice complete, in progress, and runtime dependency-gated."
+    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress \| First slice and policy boundary complete; native runtime dependency-gated") -Message "Solution audit should keep Milestone 22 first-slice and policy-boundary complete while native runtime remains gated."
     Assert-True -Condition ($doc -notmatch "21: General-Purpose AI Assistant And Intent Routing \| Planned" -and $doc -notmatch "22: Unified Product UI And Task Composition \| Planned") -Message "Solution audit must not retain stale Milestone 21 or 22 status."
     Assert-True -Condition ($roadmap -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should align with the architecture audit for Milestones 21 and 22."
     Assert-True -Condition ($readme -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $readme -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "README should align with the architecture audit for Milestones 21 and 22."
@@ -4651,6 +4651,34 @@ Invoke-PackTest "desktop sidecar IPC policy rejects hostile messages" {
     }
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Desktop IPC policy hostile self-test should pass."
     Assert-True -Condition (($output -join "`n") -match "passed: 46 cases") -Message "Desktop IPC policy should execute every hostile regression case."
+}
+
+Invoke-PackTest "native bridge authority model rejects hostile boundaries" {
+    $contractPath = Join-Path $repoRoot "config/native-bridge-boundary-contract.json"
+    $scriptPath = Join-Path $repoRoot "scripts/native-bridge-boundary-policy.py"
+    $evidencePath = Join-Path $repoRoot "docs/native-bridge-boundary-evidence.md"
+    $contract = Get-Content -LiteralPath $contractPath -Raw | ConvertFrom-Json
+    Assert-Equal -Actual $contract.schemaVersion -Expected 1 -Message "Native bridge boundary should be schema v1."
+    Assert-True -Condition (-not $contract.runtimeAdmitted -and $contract.defaultDecision -eq "deny") -Message "Native boundary model must remain default-deny and unadmitted."
+    Assert-True -Condition (-not $contract.pathGrants.rawRendererPathAccepted -and -not $contract.pathGrants.networkPathAllowed -and -not $contract.pathGrants.symlinkOrReparseEscapeAllowed) -Message "Path grants must reject renderer paths, network roots, and escapes."
+    Assert-True -Condition (-not $contract.approvalTokens.rememberApprovalAllowed -and $contract.approvalTokens.singleUse -and $contract.approvalTokens.nativeMemoryOnly) -Message "Approvals must be ephemeral and single use."
+    Assert-True -Condition (-not $contract.sidecarLifecycle.rendererMaySelectBinary -and -not $contract.sidecarLifecycle.rendererMaySupplyArguments -and -not $contract.sidecarLifecycle.elevationAllowed) -Message "Renderer and elevation cannot control sidecar startup."
+    Assert-True -Condition (-not $contract.sidecarLifecycle.listeningSocketAllowed -and -not $contract.sidecarLifecycle.unrelatedProcessTerminationAllowed) -Message "Sidecar must remain private and process-owned."
+    Assert-True -Condition (-not $contract.privilegeBoundary.installService -and -not $contract.privilegeBoundary.modifyFirewall -and -not $contract.privilegeBoundary.modifyDrivers) -Message "Native model must reject privileged machine changes."
+    Assert-True -Condition (-not $contract.promotion.policyModelPassesAsNativeEvidence -and $contract.promotion.requiresActualNativeBridgeTests) -Message "Policy evidence must not promote native runtime code."
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for native-boundary policy validation."
+    $output = @(& $python.Source $scriptPath --self-test 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Native bridge boundary policy self-test should pass."
+    Assert-True -Condition (($output -join "`n") -match "passed: 55 cases") -Message "Native bridge boundary policy should execute all 55 cases."
+    $evidence = Get-Content -LiteralPath $evidencePath -Raw
+    Assert-True -Condition ($evidence -match "policy model passed; native runtime remains blocked and unadmitted") -Message "Evidence must preserve the non-admission decision."
+    Assert-True -Condition ($evidence -match "does not prove Tauri command registration") -Message "Evidence must distinguish policy from native implementation."
+    Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match "docs/native-bridge-boundary-evidence\.md") -Message "Native boundary evidence should be mapped to the wiki."
+    foreach ($runtimeFile in @("package.json", "package-lock.json", "Cargo.toml", "Cargo.lock", "tauri.conf.json")) {
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $repoRoot $runtimeFile))) -Message "Blocked desktop runtime file must remain absent: $runtimeFile"
+    }
 }
 
 Invoke-PackTest "core update policy fails closed before cryptographic admission" {

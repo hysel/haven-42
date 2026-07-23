@@ -126,6 +126,7 @@ Tauri and its package assets remain architecture-only until the implementation i
 
 1. Dependency, license, and supply-chain review for Tauri, Rust crates, frontend packages, WebView2, WKWebView, WebKitGTK, and the packaging toolchain.
 2. Typed IPC tests proving unknown operations, malformed envelopes, arbitrary commands, unauthorized paths, and remote navigation are rejected.
+   The preparatory boundary now includes 46 engine-side and 55 native-authority policy cases; these do not replace actual Rust/Tauri and platform tests.
 3. Windows, Linux, and macOS build, install, launch, workflow dispatch, shutdown, uninstall, and user-data-preservation tests.
 4. Updater checksum, attestation or signature, compatibility, atomic activation, health-check, rollback, offline, and retained-version tests.
 5. Platform signing and verification gates for public release candidates, plus the final physical-Mac Gatekeeper and Finder flow.

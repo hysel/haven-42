@@ -81,6 +81,7 @@ docs/unified-starter-toolkit-ui.md	Unified-Starter-Toolkit-UI.md	Unified Starter
 docs/desktop-runtime-dependency-evaluation.md	Desktop-Runtime-Dependency-Evaluation.md	Desktop Runtime Dependency Evaluation
 docs/desktop-dependency-resolution-evidence.md	Desktop-Dependency-Resolution-Evidence.md	Desktop Dependency Resolution Evidence
 docs/desktop-ipc-contract.md	Desktop-IPC-Contract.md	Desktop IPC Contract
+docs/native-bridge-boundary-evidence.md	Native-Bridge-Boundary-Evidence.md	Native Bridge Boundary Evidence
 docs/desktop-storage-and-updates.md	Desktop-Storage-And-Updates.md	Desktop Storage And Updates
 docs/workflow-reliability.md	Workflow-Reliability.md	Workflow Reliability
 docs/security-threat-model.md	Security-Threat-Model.md	Security Threat Model
