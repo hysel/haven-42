@@ -19,6 +19,7 @@
   "providerConnections": {
     "configuredInMemoryOnly": true,
     "allowedTrustScopes": ["loopback", "trusted-lan"],
+    "trustScopeSelection": "server-inferred-from-ip-literal",
     "ipLiteralRequired": true,
     "credentialsInUrlAllowed": false,
     "redirectsAllowed": false,
@@ -35,8 +36,13 @@
     "maximumRequestBytes": 65536,
     "maximumMessageBytes": 32768,
     "maximumConversationMessages": 20,
-    "modelResidency": "unload-after-response",
+    "modelSelection": "per-capability-in-browser-memory",
+    "modelResidency": "bounded-idle-timeout",
+    "defaultIdleUnloadSeconds": 300,
+    "allowedIdleUnloadSeconds": [0, 300, 900, 1800],
     "unloadOnFailure": true,
+    "unloadOnNewTask": true,
+    "unloadOnModelOrProviderChange": true,
     "unloadOnShutdown": true,
     "maximumResponseBytes": 1048576
   }

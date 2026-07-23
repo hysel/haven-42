@@ -2299,7 +2299,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "41 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "59 security and behavior checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2311,8 +2311,9 @@ assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["telemetryAllowed"] is False
 assert policy["browser"]["csrfTokenRequiredForEffects"] is True
 assert policy["text"]["capabilityIds"] == ["general.chat", "content.write", "content.summarize"]
-assert policy["text"]["modelResidency"] == "unload-after-response"
-assert policy["text"]["unloadOnFailure"] is True and policy["text"]["unloadOnShutdown"] is True
+assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
+assert policy["text"]["defaultIdleUnloadSeconds"] == 300
+assert policy["text"]["unloadOnFailure"] is True and policy["text"]["unloadOnShutdown"] is True and policy["text"]["unloadOnNewTask"] is True
 assets = (root / "web/static/index.html").read_text(encoding="utf-8") + (root / "web/static/app.js").read_text(encoding="utf-8")
 lowered = assets.lower()
 for forbidden in ('src="http://', "src='http://", 'href="http://', "href='http://", 'src="https://', "src='https://", 'href="https://', "href='https://", 'fetch("http://', "fetch('http://", 'fetch("https://', "fetch('https://"):

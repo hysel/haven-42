@@ -4,7 +4,7 @@
 
 Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. Product-specific paths, commands, packages, and documentation use the Haven 42 identity consistently.
 
-Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. The runnable local web application provides sanitized system status, explicit Ollama connection, installed-model selection, private chat, writing, summarization, and verified model unload on Windows, Linux, and macOS. Local image generation has a validated Linux ComfyUI/SDXL path but is not yet admitted to the web UI. Native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only.
+Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. The runnable local web application provides sanitized system status, automatically classified local/LAN Ollama connection, separate chat/writing/summarization model choices, and bounded idle/lifecycle cleanup on Windows, Linux, and macOS. Local image generation has a validated Linux ComfyUI/SDXL path but is not yet admitted to the web UI. Native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only.
 
 Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries. Fixture-backed cross-platform contracts do not broaden native runtime or hardware claims.
 

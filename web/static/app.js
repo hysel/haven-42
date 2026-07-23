@@ -9,6 +9,7 @@ const CAPABILITIES = {
     busy: "Model is thinking locally…",
     welcome: "Ask a question and continue the conversation. Context stays in memory until you start a new task or close Haven 42.",
     resultLabel: "Haven 42",
+    modelLabel: "Chat model",
   },
   "content.write": {
     eyebrow: "03 · WRITING",
@@ -18,6 +19,7 @@ const CAPABILITIES = {
     busy: "Drafting locally…",
     welcome: "Describe the audience, purpose, tone, and key points. Haven 42 returns a Markdown draft without writing files.",
     resultLabel: "Draft",
+    modelLabel: "Writing model",
   },
   "content.summarize": {
     eyebrow: "03 · SUMMARY",
@@ -27,6 +29,7 @@ const CAPABILITIES = {
     busy: "Summarizing locally…",
     welcome: "Paste source material below. The model is instructed to summarize only what you provide and preserve uncertainty.",
     resultLabel: "Summary",
+    modelLabel: "Summarization model",
   },
 };
 
@@ -35,6 +38,7 @@ const state = {
   connected: false,
   capabilityId: "general.chat",
   messages: [],
+  modelSelections: {},
 };
 
 const byId = (id) => document.getElementById(id);
@@ -121,11 +125,18 @@ function resetTask() {
 
 function selectCapability(capabilityId) {
   if (!Object.hasOwn(CAPABILITIES, capabilityId)) return;
+  if (state.connected && byId("model").value) {
+    state.modelSelections[state.capabilityId] = byId("model").value;
+  }
   state.capabilityId = capabilityId;
   const capability = CAPABILITIES[capabilityId];
   byId("capability-eyebrow").textContent = capability.eyebrow;
   byId("capability-title").textContent = capability.title;
   byId("prompt-label").textContent = capability.promptLabel;
+  byId("model-label").textContent = capability.modelLabel;
+  if (state.connected && state.modelSelections[capabilityId]) {
+    byId("model").value = state.modelSelections[capabilityId];
+  }
   if (state.connected) byId("prompt").placeholder = capability.placeholder;
   document.querySelectorAll(".mode-tab").forEach((button) => {
     const active = button.dataset.capability === capabilityId;
@@ -163,8 +174,8 @@ byId("connection-form").addEventListener("submit", async (event) => {
   try {
     const result = await api("/api/connect", {
       endpoint: byId("endpoint").value.trim(),
-      trustScope: byId("trust-scope").value,
       timeoutSeconds: Number(byId("timeout").value),
+      idleUnloadSeconds: Number(byId("idle-unload").value),
     });
     state.connected = true;
     const select = byId("model");
@@ -184,16 +195,26 @@ byId("connection-form").addEventListener("submit", async (event) => {
         option.textContent = model;
         select.append(option);
       }
+      for (const capabilityId of Object.keys(CAPABILITIES)) {
+        if (!result.models.includes(state.modelSelections[capabilityId])) {
+          state.modelSelections[capabilityId] = result.models[0];
+        }
+      }
+      select.value = state.modelSelections[state.capabilityId];
       select.disabled = false;
       byId("prompt").disabled = false;
       byId("prompt").placeholder = CAPABILITIES[state.capabilityId].placeholder;
       byId("send-button").disabled = false;
     }
     const badge = byId("connection-badge");
-    badge.textContent = `Connected · Ollama ${result.version}`;
+    const location = result.trustScope === "loopback" ? "this computer" : "private network";
+    badge.textContent = `Connected · ${location} · Ollama ${result.version}`;
     badge.classList.add("good");
     resetTask();
     byId("text-status").textContent = `${result.models.length} installed model${result.models.length === 1 ? "" : "s"} found`;
+    byId("cleanup-status").textContent = result.idleUnloadSeconds === 0
+      ? "Unload after every response"
+      : `Unload after ${result.idleUnloadSeconds / 60} minutes idle`;
   } catch (error) {
     if (error.message === "ollama-connection-failed") {
       state.connected = false;
@@ -232,9 +253,10 @@ byId("text-form").addEventListener("submit", async (event) => {
   addMessage("user", content, capabilityId === "content.summarize" ? "Source" : "You");
   byId("text-status").textContent = capability.busy;
   try {
+    const selectedModel = state.modelSelections[capabilityId] || byId("model").value;
     const result = await api("/api/text", {
       capabilityId,
-      model: byId("model").value,
+      model: selectedModel,
       messages: requestMessages,
     });
     if (capabilityId === "general.chat") {
@@ -243,7 +265,7 @@ byId("text-form").addEventListener("submit", async (event) => {
     addMessage("assistant", result.content, capability.resultLabel);
     byId("text-status").textContent = result.modelUnloaded
       ? `${result.model} · response complete · model unloaded`
-      : `${result.model} · response complete · cleanup needs attention`;
+      : `${result.model} · response complete · kept warm until idle timeout`;
   } catch (error) {
     showError(humanError(error));
     byId("text-status").textContent = "Text request failed";
@@ -261,7 +283,27 @@ document.querySelectorAll("[data-capability]").forEach((button) => {
     byId("text-panel").scrollIntoView({ behavior: "smooth" });
   });
 });
-byId("new-task-button").addEventListener("click", resetTask);
+byId("model").addEventListener("change", () => {
+  state.modelSelections[state.capabilityId] = byId("model").value;
+});
+byId("new-task-button").addEventListener("click", async () => {
+  setTaskControlsDisabled(true);
+  let cleanupStatus = "";
+  try {
+    if (state.connected) {
+      const result = await api("/api/unload", {});
+      cleanupStatus = result.modelUnloaded
+        ? "New task · active model unloaded"
+        : "New task · model cleanup needs attention";
+    }
+  } catch (error) {
+    showError(humanError(error));
+  } finally {
+    resetTask();
+    if (cleanupStatus) byId("text-status").textContent = cleanupStatus;
+    setTaskControlsDisabled(false);
+  }
+});
 byId("home-nav").addEventListener("click", () => {
   document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
   byId("home-nav").classList.add("active");

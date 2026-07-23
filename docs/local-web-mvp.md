@@ -28,15 +28,9 @@ The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-op
 
 ## Connect Ollama
 
-For Ollama on the same computer, keep the default loopback endpoint and **This computer** scope.
+For Ollama on the same computer, keep the default loopback endpoint. For an Ollama server on your trusted home or work network, enter its literal private IP endpoint, such as `http://<trusted-lan-ip>:11434`, and select **Connect**. Haven 42 classifies loopback versus private-LAN scope on the server; users do not need to select a connection scope.
 
-For an Ollama server on your trusted home or work network:
-
-1. Enter its literal IP endpoint, such as `http://<trusted-lan-ip>:11434`.
-2. Open **Advanced connection settings**.
-3. Select **Trusted local network**.
-4. Select **Connect**.
-5. Choose one of the installed models returned by Ollama.
+After discovery, Haven 42 remembers a separate in-memory model choice for Chat, Writing, and Summarization. Changing a capability restores its last selected installed model. No selection is persisted after Haven 42 closes.
 
 Hostnames, credentials in URLs, paths, query strings, redirects, link-local addresses, public addresses under the trusted-LAN scope, and unsafe address classes are rejected. Connection settings remain in memory and are lost when Haven 42 closes.
 
@@ -50,7 +44,7 @@ Use the task selector above the input area or the left navigation:
 
 Changing modes or selecting **New task** clears the visible in-memory task. These capabilities use the registered `ollama.local-text` provider. They do not read a repository, write files, download models, or persist the endpoint, input, conversation, or response.
 
-Every text request sends `keep_alive: 0`. Haven 42 then makes an explicit unload request and verifies that the selected model left Ollama's process list. The same cleanup runs after a provider failure and again when the local web process closes.
+The balanced default sends a bounded five-minute `keep_alive`, avoiding a costly reload between nearby prompts. Advanced connection settings offer immediate cleanup, 15 minutes, or 30 minutes. Haven 42 keeps at most one model active for its browser session: choosing a different model unloads and verifies the previous one before invoking the next. **New task**, provider changes, request failures, the idle timer, and application shutdown also trigger explicit unload and process-list verification.
 
 ## Security Boundary
 

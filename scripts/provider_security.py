@@ -70,6 +70,16 @@ def validate_base_url(value: str, trust_scope: str) -> dict[str, Any]:
     }
 
 
+def validate_local_base_url(value: str) -> dict[str, Any]:
+    """Validate and classify a loopback or private-LAN provider URL."""
+    try:
+        return validate_base_url(value, "loopback")
+    except ProviderSecurityError as error:
+        if str(error) != "loopback-provider-required":
+            raise
+    return validate_base_url(value, "trusted-lan")
+
+
 def read_bounded(request: urllib.request.Request | str, timeout: int, maximum_bytes: int) -> bytes:
     if timeout < 1 or timeout > 3600 or maximum_bytes < 1:
         raise ProviderSecurityError("invalid-provider-io-bound")

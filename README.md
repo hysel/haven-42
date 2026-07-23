@@ -10,7 +10,7 @@ The project began as a reusable pack for coding agents. It now provides a provid
 
 | Capability | Status | What that means |
 | --- | --- | --- |
-| Local browser assistant | **Available** | Connect Ollama, select an installed model, and use private chat, writing, or summarization. The model unloads after every request. |
+| Local browser assistant | **Available** | Enter an Ollama address, then choose separate models for private chat, writing, or summarization. The balanced default keeps the active model warm for five idle minutes. |
 | Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
 | Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
@@ -105,7 +105,7 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Haven 42 opens a browser on `http://127.0.0.1:4242`. Connect the default same-machine Ollama endpoint or choose **Trusted local network** for an explicitly selected private IP server. Configuration and messages are not persisted, models are never downloaded, and the selected model is unloaded after every response, provider failure, and application shutdown.
+Haven 42 opens a browser on `http://127.0.0.1:4242`. Enter a same-machine or private-network Ollama IP address; Haven 42 infers the safe connection scope without a separate selector. Configuration and messages are not persisted and models are never downloaded. The balanced default keeps the active model warm for five idle minutes; advanced settings offer immediate, 15-minute, and 30-minute cleanup. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
 
 See [`docs/local-web-mvp.md`](docs/local-web-mvp.md) for connection, security, advanced settings, and current-scope details.
 

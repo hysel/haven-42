@@ -31,7 +31,7 @@ from provider_security import (  # noqa: E402
     MAX_JSON_RESPONSE_BYTES,
     ProviderSecurityError,
     read_json,
-    validate_base_url,
+    validate_local_base_url,
 )
 
 
@@ -40,6 +40,7 @@ MAX_REQUEST_BYTES = 64 * 1024
 MAX_MESSAGE_BYTES = 32 * 1024
 MAX_CHAT_RESPONSE_BYTES = 1024 * 1024
 MAX_CONVERSATION_MESSAGES = 20
+ALLOWED_IDLE_UNLOAD_SECONDS = {0, 300, 900, 1800}
 CAPABILITY_PROMPTS = {
     "general.chat": (
         "Answer the user's general question clearly. Do not claim repository access "
@@ -93,9 +94,14 @@ class HavenState:
         self.base_url: str | None = None
         self.trust_scope: str | None = None
         self.timeout_seconds = 120
+        self.idle_unload_seconds = 300
         self.models: tuple[str, ...] = ()
         self.ollama_version: str | None = None
         self.used_models: set[tuple[str, str, int]] = set()
+        self.active_model: tuple[str, str, int] | None = None
+        self.idle_timer: threading.Timer | None = None
+        self.lifecycle_generation = 0
+        self.operation_lock = threading.Lock()
 
     def public_status(self) -> dict[str, Any]:
         with self.lock:
@@ -122,28 +128,34 @@ class HavenState:
                     "messagesPersisted": False,
                     "telemetryEnabled": False,
                     "remoteAssetsAllowed": False,
-                    "modelResidency": "unload-after-response",
+                    "modelResidency": "idle-timeout",
+                    "idleUnloadSeconds": self.idle_unload_seconds,
                 },
             }
 
-    def connect(self, endpoint: str, trust_scope: str, timeout_seconds: int) -> dict[str, Any]:
+    def connect(self, endpoint: str, timeout_seconds: int, idle_unload_seconds: int) -> dict[str, Any]:
         try:
-            policy = validate_base_url(endpoint, trust_scope)
+            policy = validate_local_base_url(endpoint)
         except ProviderSecurityError as error:
             raise WebRequestError(str(error)) from error
         if timeout_seconds < 5 or timeout_seconds > 300:
             raise WebRequestError("invalid-provider-timeout")
+        if idle_unload_seconds not in ALLOWED_IDLE_UNLOAD_SECONDS:
+            raise WebRequestError("invalid-idle-unload-timeout")
         base_url = policy["baseUrl"]
-        with self.lock:
-            self.base_url = None
-            self.trust_scope = None
-            self.models = ()
-            self.ollama_version = None
-        try:
-            version = _provider_json(base_url, "/api/version", timeout_seconds)
-            tags = _provider_json(base_url, "/api/tags", timeout_seconds)
-        except (OSError, ProviderSecurityError) as error:
-            raise WebRequestError("ollama-connection-failed", HTTPStatus.BAD_GATEWAY) from error
+        with self.operation_lock:
+            if not self.unload_active_model():
+                raise WebRequestError("previous-model-unload-failed", HTTPStatus.BAD_GATEWAY)
+            with self.lock:
+                self.base_url = None
+                self.trust_scope = None
+                self.models = ()
+                self.ollama_version = None
+            try:
+                version = _provider_json(base_url, "/api/version", timeout_seconds)
+                tags = _provider_json(base_url, "/api/tags", timeout_seconds)
+            except (OSError, ProviderSecurityError) as error:
+                raise WebRequestError("ollama-connection-failed", HTTPStatus.BAD_GATEWAY) from error
         records = tags.get("models", [])
         if not isinstance(records, list):
             raise WebRequestError("invalid-ollama-model-list", HTTPStatus.BAD_GATEWAY)
@@ -158,6 +170,7 @@ class HavenState:
             self.base_url = base_url
             self.trust_scope = policy["trustScope"]
             self.timeout_seconds = timeout_seconds
+            self.idle_unload_seconds = idle_unload_seconds
             self.models = tuple(models)
             self.ollama_version = str(version.get("version", "unknown"))[:64]
         return {
@@ -168,29 +181,76 @@ class HavenState:
             "version": self.ollama_version,
             "models": models,
             "configurationPersisted": False,
+            "idleUnloadSeconds": idle_unload_seconds,
         }
 
     def _unload(self, model: str, base_url: str, timeout_seconds: int) -> bool:
-        try:
-            _provider_json(
-                base_url,
-                "/api/generate",
-                timeout_seconds,
-                {"model": model, "prompt": "", "keep_alive": 0, "stream": False},
-            )
-            for _ in range(3):
-                processes = _provider_json(base_url, "/api/ps", min(timeout_seconds, 15))
-                loaded = {
-                    str(item.get("name") or item.get("model", ""))
-                    for item in processes.get("models", [])
-                    if isinstance(item, dict)
-                }
-                if model not in loaded:
-                    return True
-                time.sleep(0.1)
-        except (OSError, ProviderSecurityError):
-            return False
+        cleanup_timeout = min(timeout_seconds, 15)
+        for attempt in range(2):
+            try:
+                _provider_json(
+                    base_url,
+                    "/api/generate",
+                    cleanup_timeout,
+                    {"model": model, "prompt": "", "keep_alive": 0, "stream": False},
+                )
+                for _ in range(3):
+                    processes = _provider_json(base_url, "/api/ps", cleanup_timeout)
+                    loaded = {
+                        str(item.get("name") or item.get("model", ""))
+                        for item in processes.get("models", [])
+                        if isinstance(item, dict)
+                    }
+                    if model not in loaded:
+                        return True
+                    time.sleep(0.1)
+            except (OSError, ProviderSecurityError):
+                if attempt == 0:
+                    time.sleep(0.1)
         return False
+
+    def _cancel_idle_timer(self) -> None:
+        with self.lock:
+            timer = self.idle_timer
+            self.idle_timer = None
+            self.lifecycle_generation += 1
+        if timer is not None:
+            timer.cancel()
+
+    def _idle_unload(self, target: tuple[str, str, int], generation: int) -> None:
+        with self.operation_lock:
+            with self.lock:
+                if generation != self.lifecycle_generation or self.active_model != target:
+                    return
+            base_url, model, timeout_seconds = target
+            unloaded = self._unload(model, base_url, timeout_seconds)
+            with self.lock:
+                if unloaded and self.active_model == target:
+                    self.active_model = None
+                self.idle_timer = None
+
+    def _schedule_idle_unload(self, target: tuple[str, str, int], seconds: float) -> None:
+        self._cancel_idle_timer()
+        with self.lock:
+            generation = self.lifecycle_generation
+        timer = threading.Timer(seconds, self._idle_unload, args=(target, generation))
+        timer.daemon = True
+        with self.lock:
+            self.idle_timer = timer
+        timer.start()
+
+    def unload_active_model(self) -> bool:
+        self._cancel_idle_timer()
+        with self.lock:
+            target = self.active_model
+        if target is None:
+            return True
+        base_url, model, timeout_seconds = target
+        unloaded = self._unload(model, base_url, timeout_seconds)
+        with self.lock:
+            if unloaded and self.active_model == target:
+                self.active_model = None
+        return unloaded
 
     def run_text_capability(
         self,
@@ -233,19 +293,28 @@ class HavenState:
         ):
             raise WebRequestError("single-input-required")
 
-        with self.lock:
-            self.used_models.add((base_url, model, timeout_seconds))
-        response: dict[str, Any] | None = None
-        provider_error: Exception | None = None
-        try:
-            response = _provider_json(
+        with self.operation_lock:
+            self._cancel_idle_timer()
+            with self.lock:
+                previous = self.active_model
+                idle_unload_seconds = self.idle_unload_seconds
+            target = (base_url, model, timeout_seconds)
+            if previous is not None and previous != target:
+                previous_base, previous_model, previous_timeout = previous
+                if not self._unload(previous_model, previous_base, previous_timeout):
+                    raise WebRequestError("previous-model-unload-failed", HTTPStatus.BAD_GATEWAY)
+            with self.lock:
+                self.used_models.add(target)
+                self.active_model = target
+            try:
+                response = _provider_json(
                 base_url,
                 "/api/chat",
                 timeout_seconds,
                 {
                     "model": model,
                     "stream": False,
-                    "keep_alive": 0,
+                    "keep_alive": 0 if idle_unload_seconds == 0 else f"{idle_unload_seconds}s",
                     "options": {"temperature": 0.2},
                     "messages": [
                         {"role": "system", "content": CAPABILITY_PROMPTS[capability_id]},
@@ -253,16 +322,21 @@ class HavenState:
                     ],
                 },
                 maximum_bytes=MAX_CHAT_RESPONSE_BYTES,
-            )
-        except (OSError, ProviderSecurityError) as error:
-            provider_error = error
-        finally:
-            unloaded = self._unload(model, base_url, timeout_seconds)
-        if provider_error is not None:
-            raise WebRequestError("ollama-chat-failed", HTTPStatus.BAD_GATEWAY) from provider_error
-        content = str((response or {}).get("message", {}).get("content", ""))
-        if not content.strip():
-            raise WebRequestError("empty-model-response", HTTPStatus.BAD_GATEWAY)
+                )
+            except (OSError, ProviderSecurityError) as error:
+                self.unload_active_model()
+                raise WebRequestError("ollama-chat-failed", HTTPStatus.BAD_GATEWAY) from error
+            content = str((response or {}).get("message", {}).get("content", ""))
+            if not content.strip():
+                self.unload_active_model()
+                raise WebRequestError("empty-model-response", HTTPStatus.BAD_GATEWAY)
+            if idle_unload_seconds == 0:
+                unloaded = self.unload_active_model()
+                residency = "unloaded"
+            else:
+                unloaded = False
+                residency = f"warm-for-{idle_unload_seconds}-seconds"
+                self._schedule_idle_unload(target, idle_unload_seconds)
         artifact_kind = "chat-message" if capability_id == "general.chat" else "markdown-document"
         return {
             "schemaVersion": 1,
@@ -280,14 +354,21 @@ class HavenState:
             "model": model,
             "providerId": "ollama.local-text",
             "modelUnloaded": unloaded,
+            "modelResidency": residency,
             "promptPersisted": False,
             "endpointPersisted": False,
         }
 
     def unload_used_models(self) -> bool:
+        self._cancel_idle_timer()
         with self.lock:
             models = tuple(self.used_models)
-        return all(self._unload(model, base_url, timeout) for base_url, model, timeout in models)
+        results = [self._unload(model, base_url, timeout) for base_url, model, timeout in models]
+        result = all(results)
+        with self.lock:
+            if result:
+                self.active_model = None
+        return result
 
 
 class HavenWebServer(ThreadingHTTPServer):
@@ -405,14 +486,24 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
             self._require_post_authority()
             body = self._read_body()
             if self.path == "/api/connect":
-                if set(body) != {"endpoint", "trustScope", "timeoutSeconds"}:
+                if set(body) != {"endpoint", "timeoutSeconds", "idleUnloadSeconds"}:
                     raise WebRequestError("invalid-connect-fields")
                 result = self.server.state.connect(
                     str(body["endpoint"]),
-                    str(body["trustScope"]),
                     int(body["timeoutSeconds"]),
+                    int(body["idleUnloadSeconds"]),
                 )
                 self._send_json(HTTPStatus.OK, result)
+                return
+            if self.path == "/api/unload":
+                if body:
+                    raise WebRequestError("invalid-unload-fields")
+                with self.server.state.operation_lock:
+                    unloaded = self.server.state.unload_active_model()
+                self._send_json(HTTPStatus.OK, {
+                    "modelUnloaded": unloaded,
+                    "modelResidency": "unloaded" if unloaded else "cleanup-failed",
+                })
                 return
             if self.path == "/api/text":
                 if (
