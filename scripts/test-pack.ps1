@@ -286,9 +286,9 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     $actionSources = (Get-Content -LiteralPath $workflowPath -Raw) + "`n" + (($generatorPaths | ForEach-Object { Get-Content -LiteralPath $_ -Raw }) -join "`n")
     $dependabot = Get-Content -LiteralPath $dependabotPath -Raw
 
-    $checkoutSha = "d23441a48e516b6c34aea4fa41551a30e30af803"
+    $checkoutSha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
     Assert-True -Condition ($actionSources -notmatch "actions/checkout@(v\d+|main|master)\b") -Message "Checkout references must not use mutable tags or branches."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 6 -Message "All live and generated workflows should pin the reviewed checkout v6 commit."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 6 -Message "All live and generated workflows should pin the reviewed checkout v7.0.1 commit."
     Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 6 -Message "Every checkout should disable persisted credentials."
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
     Assert-True -Condition ($workflow -match "(?m)^concurrency:" -and $workflow -match "timeout-minutes:") -Message "Validation workflow should bound concurrency and job duration."

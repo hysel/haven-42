@@ -550,6 +550,7 @@ This project follows a simple changelog format:
 - Added local-only Continue config generation from hardware-aware recommendation JSON.
 - Initial repository structure for a Continue-based enterprise engineering pack.
 
+- Upgraded every live and generated `actions/checkout` reference to reviewed v7.0.1 commit `3d3c42e5aac5ba805825da76410c181273ba90b1` while retaining disabled credential persistence.
 - Separated opened, reopened, and synchronize Actions concurrency groups so PR retriggers cannot wedge each other while repeated pushes still cancel stale work.
 - Changed quantization planning to require an exclusive new JSON output file instead of printing potentially sensitive local plan metadata to the console.
 - Hardened the repository with a security policy, ownership/review templates, immutable GitHub Action pins, bounded CI, pinned CodeQL analysis, blocked mutable installers, explicit provider endpoint trust scopes, redirect denial, response-size limits, prompt stdin/file support, exclusive artifact writes, and shell-free CLI harness execution.

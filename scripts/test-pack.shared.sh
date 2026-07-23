@@ -251,7 +251,7 @@ test_github_actions_dependencies() {
     "$REPO_ROOT/.github/workflows/validate-pack.yml" \
     "$REPO_ROOT/scripts/generate-sample-repositories.ps1" \
     "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh")"
-  checkout_sha='d23441a48e516b6c34aea4fa41551a30e30af803'
+  checkout_sha='3d3c42e5aac5ba805825da76410c181273ba90b1'
   checkout_count="$(printf '%s' "$action_sources" | grep -Ec "actions/checkout@${checkout_sha}([^0-9a-f]|$)")"
   credential_count="$(printf '%s' "$action_sources" | grep -Ec 'persist-credentials:[[:space:]]*false')"
 
