@@ -10,7 +10,7 @@ The project began as a reusable pack for coding agents. It now provides a provid
 
 | Capability | Status | What that means |
 | --- | --- | --- |
-| Local browser assistant | **Available** | Chat is the primary workspace, with sticky navigation and compact provider/system setup on the side. Chat, writing, and summarization remember separate models, and the balanced default keeps one active model warm for five idle minutes. |
+| Local browser assistant | **Available** | A first-run wizard connects Ollama, explains privacy boundaries, and selects the best currently validated installed model separately for chat, writing, and summarization. Chat remains the primary workspace, with advanced manual overrides and five-minute balanced model residency. |
 | Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
 | Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
@@ -105,7 +105,9 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Haven 42 opens a browser on `http://127.0.0.1:4242`. Enter a same-machine or private-network Ollama IP address; Haven 42 infers the safe connection scope without a separate selector. Configuration and messages are not persisted and models are never downloaded. The balanced default keeps the active model warm for five idle minutes; advanced settings offer immediate, 15-minute, and 30-minute cleanup. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
+Haven 42 opens a browser on `http://127.0.0.1:4242`. Its first-run wizard explains the local security boundary, accepts a same-machine or private-network Ollama IP address, and reports capability-specific model readiness. Haven 42 automatically selects only an installed model name with matching committed capability evidence. Unknown installed models remain visibly `unverified` and are available only as an advanced manual choice; a missing recommendation is guidance, never an automatic download.
+
+Configuration and messages are not persisted. The balanced default keeps the active model warm for five idle minutes; advanced settings offer immediate, 15-minute, and 30-minute cleanup. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
 
 See [`docs/local-web-mvp.md`](docs/local-web-mvp.md) for connection, security, advanced settings, and current-scope details.
 
@@ -195,7 +197,9 @@ manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
 ## Model Selection
 
-The current qwen3.5:9b writing evidence validates the adapter contract, not comparative writing quality. Gemma 3, Mistral Small 3.2, and Granite 4 are unpromoted candidates for a controlled, capability-specific evaluation; see docs/writing-model-evaluation.md. Haven 42 must not call a candidate the best writing model or make it an automatic default before its exact artifact, license, execution-host fit, performance, and blind quality evidence pass.
+The local web app derives automatic selections from `config/text-capability-model-recommendations.json`; the renderer cannot promote a model. The current matching capability evidence makes `qwen3.5:9b` the only eligible installed automatic choice for chat, writing, and summarization. This means “best currently validated by Haven 42,” not “best model available online,” and hardware fit remains unknown until the Ollama execution host is profiled.
+
+The current qwen3.5:9b writing evidence validates the adapter contract for that model tag, not comparative writing quality or an immutable model digest. Gemma 3, Mistral Small 3.2, and Granite 4 are unpromoted candidates for a controlled, capability-specific evaluation; see docs/writing-model-evaluation.md. Haven 42 must not call a candidate the best writing model or promote it over the baseline before its exact artifact, license, execution-host fit, performance, and blind quality evidence pass.
 
 If you are unsure which model fits your machine, run the hardware profile script. If your LLM runs on another machine, use `docs/remote-hardware-profile.md` to collect that machine's profile over SSH:
 

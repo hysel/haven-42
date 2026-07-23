@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "haven42.text-capability-model-recommendations",
+  "selectionPolicy": {
+    "automaticRequiresExactCapabilityEvidence": true,
+    "unknownInstalledModelsAre": "unverified",
+    "downloadsAllowed": false,
+    "hardwareFitSource": "execution-host-profile-required"
+  },
+  "capabilities": {
+    "general.chat": [
+      {
+        "model": "qwen3.5:9b",
+        "priority": 100,
+        "evidenceId": "general-chat-qwen35-9b-ollama",
+        "evidenceStatus": "passed",
+        "evidenceOperation": "general-chat",
+        "evidence": "examples/local-text-capability-validation.md"
+      }
+    ],
+    "content.write": [
+      {
+        "model": "qwen3.5:9b",
+        "priority": 100,
+        "evidenceId": "general-writing-qwen35-9b-ollama",
+        "evidenceStatus": "passed",
+        "evidenceOperation": "general-writing",
+        "evidence": "examples/local-text-capability-validation.md"
+      }
+    ],
+    "content.summarize": [
+      {
+        "model": "qwen3.5:9b",
+        "priority": 100,
+        "evidenceId": "general-summarization-qwen35-9b-ollama",
+        "evidenceStatus": "passed",
+        "evidenceOperation": "general-summarization",
+        "evidence": "examples/local-text-capability-validation.md"
+      }
+    ]
+  }
+}

@@ -643,7 +643,7 @@ Scope:
 - Keep hardened loopback/browser operation as a separately tested option for headless Linux, SSH-tunneled use, development, and diagnostics.
 - Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
 - Keep chat as the primary interaction surface with compact sticky navigation and provider/system configuration. Done for the local web slice; responsive contract and visual regression coverage remain part of each UI change.
-- Evaluate text models independently for chat, writing, and summarization before automatic defaults. The first writing matrix tracks Qwen 3.5 9B as the adapter control plus Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H as unpromoted candidates.
+- Evaluate text models independently for chat, writing, and summarization. The engine now automatically selects only an installed model name with matching passed capability evidence; Qwen 3.5 9B is the current adapter baseline, while immutable-digest binding and the Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H writing-quality candidates remain promotion work.
 - Present deterministic first-run choices for chat, writing, summarization, image creation, software work, and local-AI setup.
 - Present beginner recommendations and advanced model controls from one engine-derived catalog decision that combines exact artifact identity, license, hardware fit, provenance, and evidence without allowing the renderer to promote a model.
 - Support repository-optional sessions and clearly identify every artifact location before a write.
@@ -678,7 +678,7 @@ Exit criteria:
 3. Validate pinned dependency and license choices, then scaffold the smallest Windows, Linux, and macOS package slice. Direct candidates are reviewed; disposable Windows npm and PyInstaller graphs passed, while five Windows-reachable unmaintained Rust crates, unaudited native build prerequisites, and separate Linux findings block admission.
 4. Implement first-run navigation and capability availability views over the Milestone 21 registry. The framework-neutral navigation contract, product-wide progressive onboarding contract, eight capability-setting schemas, effect-free policy evaluator, wireframes, and deterministic view-model builder are done; the native renderer remains gated.
 5. Assemble the model-selection view data without visual UI work. Done with a versioned read-only catalog, fail-closed per-artifact license policy, hardware-fit labels, revision-bound evidence, shared beginner/advanced decisions, hostile-input tests, and OS-aware wrappers.
-6. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20.
+6. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20. The local-web first-run provider wizard and engine-derived text recommendations are done; engineering workflows and broader evidence views remain.
 7. Add repository-free text and image flows only for providers promoted in Milestone 21 or Milestone 23.
 8. Implement the GitHub release updater with explicit channels, network disclosure, immutable asset selection, checksum and signature or attestation verification, compatibility preflight, atomic activation, post-update health checks, rollback, and retained-version cleanup.
 9. Add cross-platform UI contract, updater, rollback, packaging, signing, and uninstall tests.

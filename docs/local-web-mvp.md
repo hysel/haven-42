@@ -4,6 +4,20 @@ Haven 42 has a runnable local product experience for Windows, Linux, and macOS. 
 
 This is a local application, not a hosted website. It does not require Node.js, Rust, Tauri, a cloud account, executable signing, or a public deployment.
 
+## First-Run Wizard
+
+Each launch begins with a three-step, memory-only wizard:
+
+1. review the local-session, no-telemetry, no-automatic-download boundary;
+2. enter a loopback or private-network Ollama IP address, with timeout and model-idle cleanup under Advanced;
+3. review separate Chat, Writing, and Summarization readiness decisions before opening chat.
+
+The wizard is intentionally not marked complete on disk because the endpoint and setup state are not persisted. A fresh launch therefore cannot silently reconnect to a previously entered server.
+
+The engine, not browser JavaScript, owns the recommendation catalog. An installed model name with matching passed capability evidence is `recommended` and can be selected automatically. This first slice does not claim immutable-digest binding; that remains an explicit promotion task. A model evidenced for another text capability is `compatible`, an unknown installed model is `unverified`, and an evidence-backed candidate that is not installed is `missing`. Compatible and unverified models remain explicit advanced choices and gain no filesystem, repository, tool, network, or download authority.
+
+If the recommended model is missing, the wizard names it but disables completion. Haven 42 does not issue an Ollama pull. The user installs a disclosed model separately and checks the connection again.
+
 ## Start Haven 42
 
 Windows PowerShell:
@@ -36,7 +50,7 @@ This layout change does not broaden browser authority: configuration, messages, 
 
 For Ollama on the same computer, keep the default loopback endpoint. For an Ollama server on your trusted home or work network, enter its literal private IP endpoint, such as `http://<trusted-lan-ip>:11434`, and select **Connect**. Haven 42 classifies loopback versus private-LAN scope on the server; users do not need to select a connection scope.
 
-After discovery, Haven 42 remembers a separate in-memory model choice for Chat, Writing, and Summarization. Changing a capability restores its last selected installed model. No selection is persisted after Haven 42 closes.
+After discovery, Haven 42 remembers a separate in-memory automatic or advanced manual model choice for Chat, Writing, and Summarization. Changing a capability restores its last selection, and **Use automatic** returns an override to the engine recommendation. No selection is persisted after Haven 42 closes.
 
 Hostnames, credentials in URLs, paths, query strings, redirects, link-local addresses, public addresses under the trusted-LAN scope, and unsafe address classes are rejected. Connection settings remain in memory and are lost when Haven 42 closes.
 
@@ -67,7 +81,7 @@ The MVP:
 
 The renderer never receives a shell, executable, arbitrary process, filesystem, model-download, or repository-access surface.
 
-The machine-readable boundary is `config/local-web-runtime-policy.json`. The offline integration suite is `scripts/test-haven42-web.py`.
+The machine-readable boundary is `config/local-web-runtime-policy.json`, and the evidence-gated text recommendation input is `config/text-capability-model-recommendations.json`. The offline integration suite is `scripts/test-haven42-web.py`.
 
 ## Current Runtime Boundary
 

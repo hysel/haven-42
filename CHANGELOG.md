@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a security-first, memory-only first-run web wizard that connects a loopback or trusted-LAN Ollama server, exposes advanced timeout and residency controls, reports separate Chat/Writing/Summarization readiness, and hands a validated setup into chat without persisting configuration or downloading models.
+- Replaced first-provider-result defaults with a fail-closed engine-owned text recommendation catalog, automatic exact-evidence selections, Recommended/Compatible/Unverified/Missing states, advanced per-capability overrides, reset-to-automatic, and non-downloading missing-model guidance.
 - Changed the local web layout so chat is the primary desktop workspace, the oversized hero is compact, navigation remains pinned, and provider plus system configuration stay in a bounded sticky right column with a chat-first responsive fallback.
 - Added an evidence-gated writing-model evaluation plan: Qwen 3.5 9B remains the adapter control while Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H remain unpromoted candidates pending exact license, hardware, performance, and blind quality evidence.
 - Changed the local web provider and model experience: connection scope is inferred from a validated loopback/private-LAN IP, each text capability remembers its own model, and the balanced default keeps one active model warm for five idle minutes while preserving explicit cleanup on New task, model/provider changes, failures, and shutdown.

@@ -9,6 +9,7 @@ text content stay in memory and are never written by this server.
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import platform
 import secrets
@@ -55,6 +56,8 @@ CAPABILITY_PROMPTS = {
         "do not invent missing facts. Return clean Markdown."
     ),
 }
+MODEL_RECOMMENDATIONS_PATH = ROOT / "config" / "text-capability-model-recommendations.json"
+EVIDENCE_CATALOG_PATH = ROOT / "config" / "evidence-catalog.tsv"
 
 
 class WebRequestError(ValueError):
@@ -62,6 +65,126 @@ class WebRequestError(ValueError):
         super().__init__(code)
         self.code = code
         self.status = status
+
+
+def load_model_recommendations(
+    path: Path = MODEL_RECOMMENDATIONS_PATH,
+    evidence_path: Path = EVIDENCE_CATALOG_PATH,
+) -> dict[str, tuple[dict[str, Any], ...]]:
+    """Load the exact, evidence-gated text catalog; fail closed on malformed data."""
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        with evidence_path.open(encoding="utf-8", newline="") as stream:
+            evidence_records = tuple(csv.DictReader(stream, delimiter="\t"))
+        if (
+            not isinstance(value, dict)
+            or value.get("schemaVersion") != 1
+            or not isinstance(value.get("capabilities"), dict)
+        ):
+            return {}
+        result: dict[str, tuple[dict[str, Any], ...]] = {}
+        for capability_id, records in value["capabilities"].items():
+            if capability_id not in CAPABILITY_PROMPTS or not isinstance(records, list):
+                return {}
+            admitted: list[dict[str, Any]] = []
+            for record in records:
+                if (
+                    not isinstance(record, dict)
+                    or set(record) != {
+                        "model", "priority", "evidenceId", "evidenceStatus",
+                        "evidenceOperation", "evidence",
+                    }
+                    or not isinstance(record["model"], str)
+                    or not record["model"].strip()
+                    or len(record["model"]) > 256
+                    or not isinstance(record["priority"], int)
+                    or record["evidenceStatus"] != "passed"
+                    or not isinstance(record["evidenceId"], str)
+                    or not record["evidenceId"].strip()
+                    or not isinstance(record["evidenceOperation"], str)
+                    or not isinstance(record["evidence"], str)
+                    or not any(
+                        evidence.get("area") == "general-capability"
+                        and evidence.get("provider") == "Ollama"
+                        and evidence.get("model") == record["model"]
+                        and evidence.get("operation") == record["evidenceOperation"]
+                        and evidence.get("status") == "validated-by-tests"
+                        and evidence.get("evidence") == record["evidence"]
+                        for evidence in evidence_records
+                    )
+                ):
+                    return {}
+                admitted.append({
+                    "model": record["model"],
+                    "priority": record["priority"],
+                    "evidenceId": record["evidenceId"],
+                })
+            result[capability_id] = tuple(sorted(
+                admitted,
+                key=lambda item: (-item["priority"], item["model"]),
+            ))
+        return result
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError, csv.Error):
+        return {}
+
+
+def build_model_decisions(
+    installed_models: list[str],
+    catalog: dict[str, tuple[dict[str, Any], ...]],
+) -> dict[str, Any]:
+    installed = set(installed_models)
+    evidenced_anywhere = {
+        record["model"]
+        for records in catalog.values()
+        for record in records
+    }
+    recommendations: dict[str, dict[str, Any]] = {}
+    for capability_id in CAPABILITY_PROMPTS:
+        candidates = catalog.get(capability_id, ())
+        chosen = next((record for record in candidates if record["model"] in installed), None)
+        if chosen is not None:
+            recommendations[capability_id] = {
+                "status": "recommended",
+                "model": chosen["model"],
+                "evidenceId": chosen["evidenceId"],
+                "hardwareFit": "unknown",
+                "automatic": True,
+            }
+        elif candidates:
+            recommendations[capability_id] = {
+                "status": "missing",
+                "model": candidates[0]["model"],
+                "evidenceId": candidates[0]["evidenceId"],
+                "hardwareFit": "unknown",
+                "automatic": False,
+            }
+        else:
+            recommendations[capability_id] = {
+                "status": "missing",
+                "model": None,
+                "evidenceId": None,
+                "hardwareFit": "unknown",
+                "automatic": False,
+            }
+    options = []
+    for model in installed_models:
+        capability_status = {}
+        for capability_id in CAPABILITY_PROMPTS:
+            exact = any(record["model"] == model for record in catalog.get(capability_id, ()))
+            capability_status[capability_id] = (
+                "recommended"
+                if exact
+                else "compatible"
+                if model in evidenced_anywhere
+                else "unverified"
+            )
+        options.append({"name": model, "capabilityStatus": capability_status})
+    return {
+        "catalogStatus": "ready" if catalog else "unavailable",
+        "recommendations": recommendations,
+        "modelOptions": options,
+        "downloadsPerformed": False,
+    }
 
 
 def _provider_json(
@@ -88,7 +211,7 @@ def _provider_json(
 
 
 class HavenState:
-    def __init__(self) -> None:
+    def __init__(self, recommendation_path: Path = MODEL_RECOMMENDATIONS_PATH) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
         self.base_url: str | None = None
@@ -102,6 +225,7 @@ class HavenState:
         self.idle_timer: threading.Timer | None = None
         self.lifecycle_generation = 0
         self.operation_lock = threading.Lock()
+        self.model_recommendations = load_model_recommendations(recommendation_path)
 
     def public_status(self) -> dict[str, Any]:
         with self.lock:
@@ -173,7 +297,7 @@ class HavenState:
             self.idle_unload_seconds = idle_unload_seconds
             self.models = tuple(models)
             self.ollama_version = str(version.get("version", "unknown"))[:64]
-        return {
+        result = {
             "connected": True,
             "providerId": "ollama.local-text",
             "trustScope": policy["trustScope"],
@@ -183,6 +307,8 @@ class HavenState:
             "configurationPersisted": False,
             "idleUnloadSeconds": idle_unload_seconds,
         }
+        result.update(build_model_decisions(models, self.model_recommendations))
+        return result
 
     def _unload(self, model: str, base_url: str, timeout_seconds: int) -> bool:
         cleanup_timeout = min(timeout_seconds, 15)

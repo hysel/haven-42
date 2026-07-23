@@ -18,6 +18,70 @@
     <div class="privacy-pill"><span class="status-dot"></span> Local session · no telemetry</div>
   </header>
 
+  <section class="wizard-backdrop" id="setup-wizard" role="dialog" aria-modal="true" aria-labelledby="wizard-title">
+    <div class="wizard-card">
+      <div class="wizard-progress" aria-label="Setup progress">
+        <span class="active" data-wizard-progress="welcome">1</span>
+        <span data-wizard-progress="provider">2</span>
+        <span data-wizard-progress="ready">3</span>
+      </div>
+      <section class="wizard-step" data-wizard-step="welcome">
+        <p class="eyebrow">FIRST-RUN SETUP</p>
+        <h1 id="wizard-title">Welcome to Haven 42</h1>
+        <p>Connect a local Ollama provider and Haven 42 will choose the best capability-specific model supported by its validation evidence.</p>
+        <ul class="wizard-promises">
+          <li>Haven 42 listens only on this computer.</li>
+          <li>Your endpoint, prompts, and responses stay in memory.</li>
+          <li>No model is downloaded or trusted automatically.</li>
+        </ul>
+        <button class="button primary wizard-button" id="wizard-start" type="button">Set up Ollama</button>
+      </section>
+      <section class="wizard-step hidden" data-wizard-step="provider">
+        <p class="eyebrow">STEP 2 · PROVIDER</p>
+        <h1>Where is Ollama running?</h1>
+        <p>Use a loopback or private-network IP address. Hostnames, public addresses, credentials, and redirects are blocked.</p>
+        <form id="wizard-connection-form">
+          <label for="wizard-endpoint">Ollama server</label>
+          <div class="field-row">
+            <input id="wizard-endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off">
+            <button class="button primary" id="wizard-connect" type="submit">Check connection</button>
+          </div>
+          <details>
+            <summary>Advanced connection settings</summary>
+            <div class="advanced-grid">
+              <label>Request timeout
+                <select id="wizard-timeout">
+                  <option value="60">60 seconds</option>
+                  <option value="120" selected>120 seconds</option>
+                  <option value="300">5 minutes</option>
+                </select>
+              </label>
+              <label>Unload model after
+                <select id="wizard-idle-unload">
+                  <option value="0">Every response</option>
+                  <option value="300" selected>5 minutes idle</option>
+                  <option value="900">15 minutes idle</option>
+                  <option value="1800">30 minutes idle</option>
+                </select>
+              </label>
+            </div>
+          </details>
+        </form>
+        <div class="notice hidden" id="wizard-error" role="alert"></div>
+      </section>
+      <section class="wizard-step hidden" data-wizard-step="ready">
+        <p class="eyebrow">STEP 3 · MODELS</p>
+        <h1 id="wizard-ready-title">Review model readiness</h1>
+        <p id="wizard-ready-summary">Haven 42 evaluates installed models separately for each capability.</p>
+        <div class="wizard-readiness" id="wizard-readiness"></div>
+        <div class="wizard-actions">
+          <button class="button secondary" id="wizard-back" type="button">Change server</button>
+          <button class="button primary wizard-button" id="wizard-finish" type="button">Open chat</button>
+        </div>
+      </section>
+    </div>
+  </section>
+
   <main class="shell">
     <aside class="rail" aria-label="Primary navigation">
       <button class="nav-item active" id="home-nav" type="button"><span>⌂</span>Home</button>
@@ -56,7 +120,9 @@
                 <select id="model" disabled>
                   <option>Connect Ollama first</option>
                 </select>
+                <small id="model-state">Automatic selection unavailable</small>
               </label>
+              <button class="button text-button hidden" id="reset-model-button" type="button">Use automatic</button>
             </div>
           </div>
 

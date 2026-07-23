@@ -2,7 +2,7 @@
 
 Haven 42 has validated the bounded `content.write` adapter contract with `qwen3.5:9b`, but it has not run a comparative writing-quality evaluation. Adapter success proves local execution, typed Markdown output, privacy, and cleanup. It does not prove that the model is the best writer.
 
-No candidate in this document is a product default or an admitted writing recommendation. Promotion requires an exact model artifact, digest, quantization, provider version, operating system, execution-host hardware profile, license decision, repeated performance evidence, and blind human quality review.
+No candidate under comparative evaluation in this document is a product default or promoted writing-quality recommendation. The local web app may select the installed `qwen3.5:9b` tag automatically because it is the only model name with matching passed bounded writing-adapter evidence; that is an eligible adapter baseline, not immutable-artifact proof or a claim that it produces the best prose. Replacing that baseline requires an exact model artifact, digest, quantization, provider version, operating system, execution-host hardware profile, license decision, repeated performance evidence, and blind human quality review.
 
 ## Initial Candidate Matrix
 
@@ -46,6 +46,6 @@ Also record time to first token, generation throughput, total latency, accelerat
 - Rank models independently for Chat, Writing, and Summarization.
 - Never inherit writing evidence from coding, tool-use, or generic chat tests.
 - Never inherit evidence across a different artifact digest, quantization, provider, operating system, or execution-host hardware profile.
-- A missing recommended model may be offered for explicit, disclosed installation; Haven 42 must not download it automatically.
+- A missing recommended model may be named with explicit installation guidance; Haven 42 must not download it automatically.
 - An installed unknown model remains `unverified`. It may be user-selected for bounded text generation, but it cannot become the automatic default or gain tools, filesystem access, repository writes, or external network authority.
 - Promote a default only after its license and exact evidence pass. If no installed model qualifies, show `No validated model installed` instead of silently selecting the first provider result.

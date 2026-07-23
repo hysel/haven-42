@@ -4,13 +4,14 @@
 
 Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS. Product-specific paths, commands, packages, and documentation use the Haven 42 identity consistently.
 
-Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. The runnable local web application uses a chat-first layout with pinned navigation, compact provider/system setup, sanitized system status, automatically classified local/LAN Ollama connection, separate chat/writing/summarization model choices, and bounded idle/lifecycle cleanup on Windows, Linux, and macOS. Local image generation has a validated Linux ComfyUI/SDXL path but is not yet admitted to the web UI. Native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only.
+Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. The runnable local web application begins with a security-first provider wizard, then uses a chat-first layout with pinned navigation, compact provider/system setup, sanitized system status, automatically classified local/LAN Ollama connection, evidence-gated automatic model choices for chat/writing/summarization, advanced manual overrides, and bounded idle/lifecycle cleanup on Windows, Linux, and macOS. Unknown installed models remain unverified, and missing recommendations never trigger an automatic download. Local image generation has a validated Linux ComfyUI/SDXL path but is not yet admitted to the web UI. Native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only.
 
 Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries. Fixture-backed cross-platform contracts do not broaden native runtime or hardware claims.
 
 ## Start Here
 
 - New users: [[Quick Start|Quick-Start]]
+- Run the local browser assistant and first-run wizard: [[Local Web MVP|Local-Web-MVP]]
 - Choose a workflow: [[Haven 42 Menu|Haven-42-Menu]]
 - Select a local model: [[Local Model Selection|Local-Model-Selection]]
 - Review writing-model candidates and promotion gates: [[Writing Model Evaluation|Writing-Model-Evaluation]]

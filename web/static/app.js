@@ -39,6 +39,8 @@ const state = {
   capabilityId: "general.chat",
   messages: [],
   modelSelections: {},
+  recommendations: {},
+  modelOptions: [],
 };
 
 const byId = (id) => document.getElementById(id);
@@ -86,7 +88,7 @@ async function api(path, body) {
 function humanError(error) {
   const messages = {
     "provider-host-must-be-ip-literal": "Enter a literal IP address; hostnames are not accepted.",
-    "loopback-provider-required": "Choose Trusted local network for a server on another machine.",
+    "loopback-provider-required": "Enter the loopback address of an Ollama server on this computer.",
     "trusted-lan-provider-required": "The selected address is not a private local-network address.",
     "ollama-connection-failed": "Haven 42 could not reach Ollama at that address.",
     "ollama-chat-failed": "Ollama did not complete the text request.",
@@ -94,6 +96,122 @@ function humanError(error) {
     "capability-not-admitted": "That capability is not available in this Haven 42 release.",
   };
   return messages[error.message] || `Request blocked: ${error.message}`;
+}
+
+function showWizardStep(step) {
+  document.querySelectorAll("[data-wizard-step]").forEach((panel) => {
+    panel.classList.toggle("hidden", panel.dataset.wizardStep !== step);
+  });
+  document.querySelectorAll("[data-wizard-progress]").forEach((marker) => {
+    marker.classList.toggle("active", marker.dataset.wizardProgress === step);
+  });
+}
+
+function selectedModel(capabilityId) {
+  const selection = state.modelSelections[capabilityId];
+  if (!selection) return "";
+  if (selection.mode === "automatic") {
+    const recommendation = state.recommendations[capabilityId];
+    return recommendation?.automatic ? recommendation.model : "";
+  }
+  return state.modelOptions.some((item) => item.name === selection.model)
+    ? selection.model
+    : "";
+}
+
+function renderModelSelect() {
+  const select = byId("model");
+  const capabilityId = state.capabilityId;
+  const recommendation = state.recommendations[capabilityId];
+  let selection = state.modelSelections[capabilityId];
+  if (!selection || (
+    selection.mode === "manual"
+    && !state.modelOptions.some((item) => item.name === selection.model)
+  )) {
+    selection = { mode: recommendation?.automatic ? "automatic" : "none", model: null };
+    state.modelSelections[capabilityId] = selection;
+  }
+
+  select.replaceChildren();
+  const automatic = document.createElement("option");
+  automatic.value = "automatic";
+  automatic.textContent = recommendation?.automatic
+    ? `Automatic — ${recommendation.model} (Recommended)`
+    : "Automatic — no validated model installed";
+  automatic.disabled = !recommendation?.automatic;
+  select.append(automatic);
+
+  if (state.modelOptions.length > 0) {
+    const advanced = document.createElement("optgroup");
+    advanced.label = "Advanced manual selection";
+    for (const item of state.modelOptions) {
+      const option = document.createElement("option");
+      const status = item.capabilityStatus[capabilityId] || "unverified";
+      option.value = `manual:${item.name}`;
+      option.textContent = `${item.name} — ${status}`;
+      advanced.append(option);
+    }
+    select.append(advanced);
+  }
+
+  if (selection.mode === "automatic" && recommendation?.automatic) {
+    select.value = "automatic";
+  } else if (selection.mode === "manual") {
+    select.value = `manual:${selection.model}`;
+  } else {
+    select.selectedIndex = recommendation?.automatic ? 0 : -1;
+  }
+  const model = selectedModel(capabilityId);
+  const status = selection.mode === "manual"
+    ? state.modelOptions.find((item) => item.name === model)?.capabilityStatus[capabilityId]
+    : recommendation?.status;
+  byId("model-state").textContent = model
+    ? `${status || "unverified"} · hardware fit not yet measured`
+    : `Missing · install ${recommendation?.model || "a validated model"} manually, then reconnect`;
+  byId("reset-model-button").classList.toggle(
+    "hidden",
+    selection.mode !== "manual" || !recommendation?.automatic,
+  );
+  const ready = state.connected && Boolean(model);
+  select.disabled = !state.connected || state.modelOptions.length === 0;
+  byId("prompt").disabled = !ready;
+  byId("send-button").disabled = !ready;
+  byId("prompt").placeholder = ready
+    ? CAPABILITIES[capabilityId].placeholder
+    : "Choose an installed model in Advanced to continue…";
+}
+
+function renderWizardReadiness() {
+  const container = byId("wizard-readiness");
+  container.replaceChildren();
+  let automaticCount = 0;
+  for (const [capabilityId, capability] of Object.entries(CAPABILITIES)) {
+    const recommendation = state.recommendations[capabilityId] || {
+      status: "missing",
+      model: null,
+      automatic: false,
+    };
+    if (recommendation.automatic) automaticCount += 1;
+    const row = document.createElement("div");
+    row.className = "readiness-row";
+    const detail = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = capability.modelLabel;
+    const model = document.createElement("span");
+    model.textContent = recommendation.model || "No validated candidate";
+    detail.append(title, model);
+    const status = document.createElement("span");
+    status.className = `readiness-state ${recommendation.status}`;
+    status.textContent = recommendation.status;
+    row.append(detail, status);
+    container.append(row);
+  }
+  const usable = automaticCount > 0;
+  byId("wizard-ready-title").textContent = usable ? "Your local AI is ready" : "A model is still needed";
+  byId("wizard-ready-summary").textContent = usable
+    ? `${automaticCount} capability-specific automatic selection${automaticCount === 1 ? " is" : "s are"} ready. Advanced users can override each model after setup.`
+    : "No validated model is installed. Haven 42 did not download anything; install the listed model with Ollama, then check again. Installed unknown models remain available as explicit advanced choices.";
+  byId("wizard-finish").disabled = !usable;
 }
 
 function addMessage(role, content, label) {
@@ -125,19 +243,13 @@ function resetTask() {
 
 function selectCapability(capabilityId) {
   if (!Object.hasOwn(CAPABILITIES, capabilityId)) return;
-  if (state.connected && byId("model").value) {
-    state.modelSelections[state.capabilityId] = byId("model").value;
-  }
   state.capabilityId = capabilityId;
   const capability = CAPABILITIES[capabilityId];
   byId("capability-eyebrow").textContent = capability.eyebrow;
   byId("capability-title").textContent = capability.title;
   byId("prompt-label").textContent = capability.promptLabel;
   byId("model-label").textContent = capability.modelLabel;
-  if (state.connected && state.modelSelections[capabilityId]) {
-    byId("model").value = state.modelSelections[capabilityId];
-  }
-  if (state.connected) byId("prompt").placeholder = capability.placeholder;
+  if (state.connected) renderModelSelect();
   document.querySelectorAll(".mode-tab").forEach((button) => {
     const active = button.dataset.capability === capabilityId;
     button.classList.toggle("active", active);
@@ -148,6 +260,42 @@ function selectCapability(capabilityId) {
   });
   byId("home-nav").classList.remove("active");
   resetTask();
+}
+
+async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
+  const result = await api("/api/connect", { endpoint, timeoutSeconds, idleUnloadSeconds });
+  state.connected = true;
+  state.recommendations = result.recommendations || {};
+  state.modelOptions = result.modelOptions || [];
+  for (const capabilityId of Object.keys(CAPABILITIES)) {
+    const selection = state.modelSelections[capabilityId];
+    if (!selection || (
+      selection.mode === "manual"
+      && !state.modelOptions.some((item) => item.name === selection.model)
+    )) {
+      state.modelSelections[capabilityId] = {
+        mode: state.recommendations[capabilityId]?.automatic ? "automatic" : "none",
+        model: null,
+      };
+    }
+  }
+  renderModelSelect();
+  const badge = byId("connection-badge");
+  const location = result.trustScope === "loopback" ? "this computer" : "private network";
+  badge.textContent = `Connected · ${location} · Ollama ${result.version}`;
+  badge.classList.add("good");
+  byId("endpoint").value = endpoint;
+  byId("wizard-endpoint").value = endpoint;
+  byId("timeout").value = String(timeoutSeconds);
+  byId("wizard-timeout").value = String(timeoutSeconds);
+  byId("idle-unload").value = String(idleUnloadSeconds);
+  byId("wizard-idle-unload").value = String(idleUnloadSeconds);
+  resetTask();
+  byId("text-status").textContent = `${result.models.length} installed model${result.models.length === 1 ? "" : "s"} found`;
+  byId("cleanup-status").textContent = result.idleUnloadSeconds === 0
+    ? "Unload after every response"
+    : `Unload after ${result.idleUnloadSeconds / 60} minutes idle`;
+  return result;
 }
 
 async function bootstrap() {
@@ -172,49 +320,11 @@ byId("connection-form").addEventListener("submit", async (event) => {
   setProviderReady(false);
   button.textContent = "Checking…";
   try {
-    const result = await api("/api/connect", {
-      endpoint: byId("endpoint").value.trim(),
-      timeoutSeconds: Number(byId("timeout").value),
-      idleUnloadSeconds: Number(byId("idle-unload").value),
-    });
-    state.connected = true;
-    const select = byId("model");
-    select.replaceChildren();
-    if (result.models.length === 0) {
-      const option = document.createElement("option");
-      option.textContent = "No installed models found";
-      select.append(option);
-      select.disabled = true;
-      byId("prompt").disabled = true;
-      byId("prompt").placeholder = "Install an Ollama model to begin…";
-      byId("send-button").disabled = true;
-    } else {
-      for (const model of result.models) {
-        const option = document.createElement("option");
-        option.value = model;
-        option.textContent = model;
-        select.append(option);
-      }
-      for (const capabilityId of Object.keys(CAPABILITIES)) {
-        if (!result.models.includes(state.modelSelections[capabilityId])) {
-          state.modelSelections[capabilityId] = result.models[0];
-        }
-      }
-      select.value = state.modelSelections[state.capabilityId];
-      select.disabled = false;
-      byId("prompt").disabled = false;
-      byId("prompt").placeholder = CAPABILITIES[state.capabilityId].placeholder;
-      byId("send-button").disabled = false;
-    }
-    const badge = byId("connection-badge");
-    const location = result.trustScope === "loopback" ? "this computer" : "private network";
-    badge.textContent = `Connected · ${location} · Ollama ${result.version}`;
-    badge.classList.add("good");
-    resetTask();
-    byId("text-status").textContent = `${result.models.length} installed model${result.models.length === 1 ? "" : "s"} found`;
-    byId("cleanup-status").textContent = result.idleUnloadSeconds === 0
-      ? "Unload after every response"
-      : `Unload after ${result.idleUnloadSeconds / 60} minutes idle`;
+    await connectProvider(
+      byId("endpoint").value.trim(),
+      Number(byId("timeout").value),
+      Number(byId("idle-unload").value),
+    );
   } catch (error) {
     if (error.message === "ollama-connection-failed") {
       state.connected = false;
@@ -253,10 +363,11 @@ byId("text-form").addEventListener("submit", async (event) => {
   addMessage("user", content, capabilityId === "content.summarize" ? "Source" : "You");
   byId("text-status").textContent = capability.busy;
   try {
-    const selectedModel = state.modelSelections[capabilityId] || byId("model").value;
+    const model = selectedModel(capabilityId);
+    if (!model) throw new Error("no-model-selected");
     const result = await api("/api/text", {
       capabilityId,
-      model: selectedModel,
+      model,
       messages: requestMessages,
     });
     if (capabilityId === "general.chat") {
@@ -284,7 +395,15 @@ document.querySelectorAll("[data-capability]").forEach((button) => {
   });
 });
 byId("model").addEventListener("change", () => {
-  state.modelSelections[state.capabilityId] = byId("model").value;
+  const value = byId("model").value;
+  state.modelSelections[state.capabilityId] = value === "automatic"
+    ? { mode: "automatic", model: null }
+    : { mode: "manual", model: value.slice("manual:".length) };
+  renderModelSelect();
+});
+byId("reset-model-button").addEventListener("click", () => {
+  state.modelSelections[state.capabilityId] = { mode: "automatic", model: null };
+  renderModelSelect();
 });
 byId("new-task-button").addEventListener("click", async () => {
   setTaskControlsDisabled(true);
@@ -314,6 +433,41 @@ byId("models-nav").addEventListener("click", () => {
 });
 byId("system-nav").addEventListener("click", () => {
   byId("status-panel").scrollIntoView({ behavior: "smooth" });
+});
+
+byId("wizard-start").addEventListener("click", () => {
+  showWizardStep("provider");
+  byId("wizard-endpoint").focus();
+});
+byId("wizard-connection-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const errorBox = byId("wizard-error");
+  errorBox.classList.add("hidden");
+  const button = byId("wizard-connect");
+  button.disabled = true;
+  button.textContent = "Checking…";
+  try {
+    await connectProvider(
+      byId("wizard-endpoint").value.trim(),
+      Number(byId("wizard-timeout").value),
+      Number(byId("wizard-idle-unload").value),
+    );
+    renderWizardReadiness();
+    showWizardStep("ready");
+  } catch (error) {
+    state.connected = false;
+    setProviderReady(false);
+    errorBox.textContent = humanError(error);
+    errorBox.classList.remove("hidden");
+  } finally {
+    button.disabled = false;
+    button.textContent = "Check connection";
+  }
+});
+byId("wizard-back").addEventListener("click", () => showWizardStep("provider"));
+byId("wizard-finish").addEventListener("click", () => {
+  byId("setup-wizard").classList.add("hidden");
+  byId("prompt").focus();
 });
 
 bootstrap();

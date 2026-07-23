@@ -4,8 +4,10 @@
 /config/desktop-*.json @hysel
 /config/*update*.json @hysel
 /config/*security*.json @hysel
+/config/*recommendation*.json @hysel
 /config/providers.json @hysel
 /config/workflows.json @hysel
+/web/ @hysel
 /scripts/*install* @hysel
 /scripts/*update* @hysel
 /scripts/*provider* @hysel

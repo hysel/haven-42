@@ -2299,7 +2299,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "63 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "80 security and behavior checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2314,6 +2314,10 @@ assert policy["text"]["capabilityIds"] == ["general.chat", "content.write", "con
 assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
 assert policy["text"]["defaultIdleUnloadSeconds"] == 300
 assert policy["text"]["unloadOnFailure"] is True and policy["text"]["unloadOnShutdown"] is True and policy["text"]["unloadOnNewTask"] is True
+assert policy["text"]["recommendationAuthority"] == "server-owned-static-catalog"
+assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
+assert policy["text"]["missingModelDownloadsAllowed"] is False
+assert (root / "config/text-capability-model-recommendations.json").is_file()
 html = (root / "web/static/index.html").read_text(encoding="utf-8")
 styles = (root / "web/static/styles.css").read_text(encoding="utf-8")
 assets = html + (root / "web/static/app.js").read_text(encoding="utf-8")
@@ -2326,7 +2330,7 @@ assert "innerHTML" not in assets
 assert html.index('id="text-panel"') < html.index('id="connection-panel"')
 assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
 assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles
-assert all(marker in writing_doc for marker in ("qwen3.5:9b", "gemma3:12b", "mistral-small3.2", "granite4:7b-a1b-h", "No candidate in this document is a product default"))
+assert all(marker in writing_doc for marker in ("qwen3.5:9b", "gemma3:12b", "mistral-small3.2", "granite4:7b-a1b-h", "No candidate under comparative evaluation in this document is a product default"))
 assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md" in wiki_map
 PY
 }

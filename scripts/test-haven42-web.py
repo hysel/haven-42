@@ -171,7 +171,44 @@ def main() -> int:
         assert connected["models"] == ["qwen3.5:9b", "writer-model:latest"]
         assert connected["trustScope"] == "loopback" and connected["idleUnloadSeconds"] == 300
         assert connected["configurationPersisted"] is False
-        checks += 3
+        assert connected["catalogStatus"] == "ready" and connected["downloadsPerformed"] is False
+        assert connected["recommendations"]["general.chat"] == {
+            "status": "recommended",
+            "model": "qwen3.5:9b",
+            "evidenceId": "general-chat-qwen35-9b-ollama",
+            "hardwareFit": "unknown",
+            "automatic": True,
+        }
+        writer_option = next(item for item in connected["modelOptions"] if item["name"] == "writer-model:latest")
+        assert set(writer_option["capabilityStatus"].values()) == {"unverified"}
+        checks += 6
+
+        cross_capability = WEB.build_model_decisions(
+            ["chat-only:1b"],
+            {
+                "general.chat": ({"model": "chat-only:1b", "priority": 1, "evidenceId": "chat"},),
+                "content.write": (),
+                "content.summarize": (),
+            },
+        )
+        assert cross_capability["modelOptions"][0]["capabilityStatus"] == {
+            "general.chat": "recommended",
+            "content.write": "compatible",
+            "content.summarize": "compatible",
+        }
+        unavailable_catalog = WEB.HavenState(ROOT / "config/does-not-exist.json")
+        unavailable_decisions = WEB.build_model_decisions(
+            ["unknown:latest"],
+            unavailable_catalog.model_recommendations,
+        )
+        assert unavailable_decisions["catalogStatus"] == "unavailable"
+        assert unavailable_decisions["recommendations"]["general.chat"]["status"] == "missing"
+        assert unavailable_decisions["modelOptions"][0]["capabilityStatus"]["general.chat"] == "unverified"
+        assert WEB.load_model_recommendations(
+            ROOT / "config/text-capability-model-recommendations.json",
+            ROOT / "config/does-not-exist.tsv",
+        ) == {}
+        checks += 5
 
         status, error, _ = request_json(
             origin + "/api/text",
@@ -371,6 +408,24 @@ def main() -> int:
         assert state.public_status()["provider"]["connected"] is False
         checks += 3
 
+        FakeState.fail_connect = False
+        FakeState.models = []
+        status, no_models, _ = request_json(
+            origin + "/api/connect",
+            "POST",
+            {"endpoint": fake_url, "timeoutSeconds": 30, "idleUnloadSeconds": 300},
+            token,
+            origin,
+        )
+        assert status == 200 and no_models["models"] == [] and no_models["modelOptions"] == []
+        assert all(
+            decision["status"] == "missing" and decision["automatic"] is False
+            for decision in no_models["recommendations"].values()
+        )
+        assert no_models["downloadsPerformed"] is False
+        FakeState.models = ["qwen3.5:9b", "writer-model:latest"]
+        checks += 3
+
         try:
             WEB.HavenWebServer(("0.0.0.0", 0), WEB.HavenState())
         except ValueError:
@@ -386,6 +441,8 @@ def main() -> int:
         assert policy["text"]["capabilityIds"] == [
             "general.chat", "content.write", "content.summarize"
         ]
+        assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
+        assert policy["text"]["missingModelDownloadsAllowed"] is False
         assert policy["browser"]["remoteAssetsAllowed"] is False
         javascript = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
         html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
@@ -393,11 +450,15 @@ def main() -> int:
         assert "innerHTML" not in javascript and "X-Haven-Token" in javascript
         assert "/api/text" in javascript and "content.summarize" in javascript
         assert "trust-scope" not in javascript and "modelSelections" in javascript
+        assert "Automatic — no validated model installed" in javascript
+        assert "Advanced manual selection" in javascript and "downloadsPerformed" not in javascript
         assert html.count('id="connection-panel"') == 1 and html.count('id="status-panel"') == 1
+        assert html.count('id="setup-wizard"') == 1 and 'id="wizard-connection-form"' in html
         assert html.index('id="text-panel"') < html.index('id="connection-panel"')
         assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
         assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
-        checks += 13
+        assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
+        checks += 19
     finally:
         app.shutdown()
         app.server_close()
