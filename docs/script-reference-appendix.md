@@ -21,6 +21,7 @@ Use `docs/workflow-chooser.md` for a generated complete workflow list before dro
 | Workflow | Intent | Safety | UI | Windows entry point | Reference |
 | --- | --- | --- | --- | --- | --- |
 | `apply-agent-config` | Write local-only agent configuration from a recommendation result with dry-run support. | `approved-write` | yes | `scripts/apply-recommended-agent-config.ps1` | `docs/hardware-aware-recommendations.md` |
+| `build-model-catalog` | Assemble license-aware, hardware-aware, evidence-bound model records without downloading or promoting models. | `controlled-write` | yes | `scripts/build-model-catalog.ps1` | `docs/model-catalog.md` |
 | `build-release-package` | Create release archives, checksums, and release artifacts after validation passes. | `controlled-write` | no | `scripts/build-release-package.ps1` | `docs/release.md` |
 | `cleanup-local-agent-artifacts` | Safely remove ignored local validation output, generated samples, backup folders, and failed diagnostic artifacts after dry-run review. | `controlled-write` | yes | `scripts/cleanup-local-agent-artifacts.ps1` | `docs/workflow-registry.md` |
 | `classify-project` | Inspect repository filenames without reading file contents, emit a sanitized project profile, and identify evidence-backed optional rule packs. | `read-only` | yes | `scripts/get-project-profile.ps1` | `docs/project-profile-classification.md` |

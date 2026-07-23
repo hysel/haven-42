@@ -76,6 +76,7 @@ run_test() {
     "agent surface adapters plan installs configure and report health safely"|\
     "workflow envelope contract is versioned private by default and cross-platform"|\
     "wiki synchronization is deterministic and hosted"|\
+    "model catalog assembly is license hardware evidence and input safe"|\
     "online model discovery normalizes Ollama and Hugging Face fixtures") category="integration" ;;
   esac
   if { [ "$TEST_TIER" = "fast" ] && [ "$category" = "integration" ]; } ||
@@ -712,6 +713,71 @@ PY
   result=$?
   rm -rf "$temp_root"
   return "$result"
+}
+
+test_model_catalog_assembly() {
+  temp_root="$(mktemp -d)"
+  discovery_path="$temp_root/discovery.json"
+  catalog_path="$temp_root/catalog.json"
+  malicious_path="$temp_root/malicious.json"
+  malicious_output="$temp_root/malicious-output.json"
+
+  "$REPO_ROOT/scripts/discover-online-model-candidates.shared.sh" \
+    --sources huggingface \
+    --families "tool calling" \
+    --hugging-face-json-path "$REPO_ROOT/examples/fixtures/huggingface-model-search-response.json" \
+    --available-vram-gb 64 \
+    --output-path "$discovery_path" >/tmp/model-catalog-discovery.out 2>&1 || { rm -rf "$temp_root"; return 1; }
+
+  python3 - "$discovery_path" <<'PY' || { rm -rf "$temp_root"; return 1; }
+import json, sys
+path = sys.argv[1]
+report = json.load(open(path, encoding="utf-8"))
+report["Candidates"][0]["Model"] = "qwen3.5:9b"
+report["Candidates"][0]["ArtifactId"] = "qwen3.5:9b"
+json.dump(report, open(path, "w", encoding="utf-8"))
+PY
+  "$REPO_ROOT/scripts/build-model-catalog.shared.sh" \
+    --discovery-report "$discovery_path" \
+    --output-path "$catalog_path" >/tmp/model-catalog-build.out 2>&1 || { rm -rf "$temp_root"; return 1; }
+
+  python3 - "$catalog_path" "$discovery_path" "$malicious_path" <<'PY' || { rm -rf "$temp_root"; return 1; }
+import json, sys
+catalog = json.load(open(sys.argv[1], encoding="utf-8"))
+assert catalog["schemaVersion"] == 1
+assert catalog["summary"]["entryCount"] == 2
+recommended = next(item for item in catalog["entries"] if item["displayName"] == "qwen3.5:9b")
+gated = next(item for item in catalog["entries"] if item["displayName"] == "example-security/antares-fixture")
+assert recommended["beginner"]["recommendedForThisComputer"] is False
+assert recommended["readiness"]["records"] and recommended["readiness"]["exactArtifactRevisionBound"] is False
+assert "evidence-revision-unbound" in recommended["security"]["blockers"]
+assert recommended["hardwareFit"]["label"] == "excellent"
+assert gated["state"] == "blocked" and "artifact-access-gated" in gated["security"]["blockers"]
+assert catalog["effects"] == {
+    "pullsModels": False,
+    "writesRuntimeConfig": False,
+    "executesRemoteCode": False,
+    "sendsHardwareProfile": False,
+}
+discovery = json.load(open(sys.argv[2], encoding="utf-8"))
+discovery["Candidates"][0]["ArtifactId"] = "../escape"
+discovery["Candidates"][0]["License"] = "CC-BY-NC-4.0"
+json.dump(discovery, open(sys.argv[3], "w", encoding="utf-8"))
+PY
+
+  if "$REPO_ROOT/scripts/build-model-catalog.shared.sh" --discovery-report "$discovery_path" --output-path "$catalog_path" >/tmp/model-catalog-overwrite.out 2>&1; then
+    rm -rf "$temp_root"; return 1
+  fi
+  grep -q "MODEL_CATALOG_REJECTED" /tmp/model-catalog-overwrite.out || { rm -rf "$temp_root"; return 1; }
+
+  if "$REPO_ROOT/scripts/build-model-catalog.shared.sh" --discovery-report "$malicious_path" --output-path "$malicious_output" >/tmp/model-catalog-hostile.out 2>&1; then
+    rm -rf "$temp_root"; return 1
+  fi
+  grep -q "MODEL_CATALOG_REJECTED" /tmp/model-catalog-hostile.out || { rm -rf "$temp_root"; return 1; }
+  [ ! -e "$malicious_output" ] || { rm -rf "$temp_root"; return 1; }
+  grep -q "Two Product Views, One Policy Decision" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q '"id": "build-model-catalog"' "$REPO_ROOT/config/workflows.json" || { rm -rf "$temp_root"; return 1; }
+  rm -rf "$temp_root"
 }
 
 test_multi_repository_validation_doc() {
@@ -2296,6 +2362,7 @@ run_test "editor compatibility docs cover config and tool validation" test_edito
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
 run_test "online model discovery normalizes Ollama and Hugging Face fixtures" test_multi_source_model_discovery
+run_test "model catalog assembly is license hardware evidence and input safe" test_model_catalog_assembly
 run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
 run_test "sample repository factory validation evidence is sanitized" test_sample_repository_factory_validation_evidence
 run_test "sample repository factory docs define generated fixtures" test_sample_repository_factory_doc

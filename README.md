@@ -213,6 +213,12 @@ arbitrary search terms rather than a fixed family allowlist. Every result stays
 candidate-only until its exact artifact, license, hardware, runtime, surface,
 and operation pass local validation.
 
+The read-only [security-aware model catalog](docs/model-catalog.md) combines
+those discovery records with local hardware-fit estimates, exact artifact
+identity, license policy, and committed evidence. It produces the same
+fail-closed decision for a beginner recommendation and advanced controls;
+neither view downloads a model or bypasses an admission blocker.
+
 To pull and preflight Agent model candidates through the Ollama API before
 manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 

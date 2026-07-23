@@ -48,6 +48,21 @@
       }
     },
     {
+      "id": "build-model-catalog",
+      "name": "Build Security-Aware Model Catalog",
+      "purpose": "Combine candidate metadata, exact artifact identity, license policy, hardware fit, and validation evidence without downloading or promoting models.",
+      "category": "model-selection",
+      "safetyLevel": "controlled-write",
+      "uiReady": true,
+      "inputs": ["discoveryReportPath", "outputPath"],
+      "outputs": ["modelCatalogJson"],
+      "entryPoints": {
+        "windows": "scripts/build-model-catalog.ps1",
+        "linux": "scripts/build-model-catalog.linux.sh",
+        "macos": "scripts/build-model-catalog.macos.sh"
+      }
+    },
+    {
       "id": "generate-model-scorecard",
       "name": "Generate Model Scorecard",
       "purpose": "Summarize model readiness by model, surface, status, and evidence from the committed evidence catalog.",
