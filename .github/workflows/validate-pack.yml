@@ -7,7 +7,7 @@ on:
       - main
 
 concurrency:
-  group: validate-pack-${{ github.workflow }}-${{ github.ref }}
+  group: validate-pack-${{ github.workflow }}-${{ github.ref }}-${{ github.event.action || 'push' }}
   cancel-in-progress: true
 
 permissions:

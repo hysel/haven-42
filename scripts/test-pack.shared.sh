@@ -2187,6 +2187,9 @@ for doc in (
     assert doc in wiki
     assert not private_ip.search((root / doc).read_text(encoding="utf-8"))
 PY
+  grep -q 'plan_parser.add_argument("--output", required=True' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
+  grep -q 'write_new_file(output_path' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
+  ! grep -q 'print(json.dumps(create_plan' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   python3 "$REPO_ROOT/scripts/quantization-planner.py" --self-test | grep -q "3 cases" || return 1
   profile="$(python3 "$REPO_ROOT/scripts/quantization-planner.py" profile --storage-root "$REPO_ROOT" --context-tokens 16384 --concurrency 1 --workload-lane tool-use)" || return 1
   python3 - "$profile" <<'PY'

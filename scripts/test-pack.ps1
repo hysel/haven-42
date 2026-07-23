@@ -4825,6 +4825,8 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $engineRegistryPath = Join-Path $repoRoot "config/inference-engine-registry.json"
     $engineDocPath = Join-Path $repoRoot "docs/inference-engine-architecture.md"
     $engineEvidencePath = Join-Path $repoRoot "examples/inference-engine-validation.md"
+    $plannerSource = Get-Content -LiteralPath $plannerPath -Raw
+    Assert-True -Condition ($plannerSource -match 'plan_parser\.add_argument\("--output", required=True' -and $plannerSource -match "write_new_file\(output_path" -and $plannerSource -notmatch 'print\(json\.dumps\(create_plan') -Message "Quantization plans must use an exclusive output file and never log the plan."
 
     foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath, $engineRegistryPath, $engineDocPath, $engineEvidencePath)) {
         Assert-True -Condition (Test-Path -LiteralPath $path) -Message "Roadmap foundation file should exist: $path"

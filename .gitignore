@@ -3,3 +3,6 @@
 config/model-runtime-policy.local.json
 runtime-validation-output/
 dist/
+
+__pycache__/
+*.py[cod]

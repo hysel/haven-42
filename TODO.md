@@ -488,7 +488,8 @@
 
 - [x] Add SECURITY.md, CODEOWNERS, and a security-focused pull request checklist.
 - [x] Pin GitHub Actions by immutable commit, disable persisted checkout credentials, and bound CI concurrency and duration.
-- [x] Add pinned CodeQL Python analysis.
+- [x] Add pinned CodeQL Python analysis and remediate findings without suppressions.
+- [x] Prevent quantization request metadata from being logged by requiring an exclusive local plan output file.
 - [x] Block mutable third-party installation and macOS curl-to-shell bootstrap paths.
 - [x] Enforce explicit provider endpoint trust scopes, redirect denial, bounded responses, private prompt channels, and exclusive no-follow artifact creation.
 - [ ] Require pull requests and successful checks on `main`, enable dependency security updates, and verify private vulnerability reporting in GitHub settings.

@@ -16,6 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from provider_security import ProviderSecurityError, write_new_file
+
 
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 FULL_SHA = re.compile(r"^[0-9a-f]{40,64}$")
@@ -453,6 +455,7 @@ def main() -> int:
     profile_parser.add_argument("--workload-lane", choices=LANES, default="tool-use")
     plan_parser = subparsers.add_parser("plan", help="Evaluate a local dry-run request without downloads or writes.")
     plan_parser.add_argument("--request", required=True)
+    plan_parser.add_argument("--output", required=True, help="New local JSON file; existing files are never overwritten.")
     plan_parser.add_argument(
         "--support-matrix",
         default=str(Path(__file__).resolve().parent.parent / "config" / "quantization-support-matrix.json"),
@@ -468,7 +471,15 @@ def main() -> int:
         print(json.dumps(build_profile(args), indent=2))
         return 0
     if args.command == "plan":
-        print(json.dumps(create_plan(load_json(args.request), load_json(args.support_matrix)), indent=2))
+        output_path = Path(args.output).absolute()
+        if output_path.suffix.lower() != ".json" or output_path.parent.is_symlink():
+            parser.error("output must be a JSON file in a non-symlink directory")
+        try:
+            payload = (json.dumps(create_plan(load_json(args.request), load_json(args.support_matrix)), indent=2) + "\n").encode("utf-8")
+            write_new_file(output_path, payload)
+        except (OSError, ProviderSecurityError) as error:
+            parser.error(f"secure plan write failed: {error}")
+        print("Quantization plan written securely.")
         return 0
     parser.print_help()
     return 2
