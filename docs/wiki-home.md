@@ -14,6 +14,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Choose a workflow: [[Haven 42 Menu|Haven-42-Menu]]
 - Select a local model: [[Local Model Selection|Local-Model-Selection]]
 - Discover candidates across Ollama and Hugging Face: [[Online Model Discovery|Online-Model-Discovery]]
+- Assemble security-aware beginner and advanced model choices: [[Security-Aware Model Catalog|Security-Aware-Model-Catalog]]
 - Compare supported agents: [[Agent Surface Options|Agent-Surface-Options]]
 - Understand the pass-before-ship rule: [[Agent Integration Admission Policy|Agent-Integration-Admission-Policy]]
 - Review current plans: [[Roadmap|Roadmap]]

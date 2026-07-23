@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "description": "Read-only, fail-closed catalog contract that combines discovery claims, exact artifact identity, license policy, hardware fit, and committed validation evidence without downloading or promoting a model.",
+  "limits": {
+    "maxInputBytes": 5242880,
+    "maxCandidates": 1000,
+    "maxStringLength": 512,
+    "maxListItems": 64
+  },
+  "requiredCandidateFields": [
+    "Model",
+    "ArtifactId",
+    "SourceId",
+    "SourceType",
+    "Revision",
+    "License",
+    "Formats",
+    "RuntimeCandidates",
+    "ProvenanceStatus",
+    "ValidationStatus",
+    "VramRecommendation"
+  ],
+  "safeArtifactFormats": [
+    "gguf",
+    "safetensors",
+    "mlx",
+    "ollama-manifest"
+  ],
+  "permissiveLicenseIds": [
+    "0BSD",
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "MIT"
+  ],
+  "blockedLicenseSignals": [
+    "CC-BY-NC",
+    "CC-BY-NC-4.0",
+    "non-commercial",
+    "noncommercial",
+    "proprietary"
+  ],
+  "readinessStates": [
+    "tested-passed",
+    "tested-partial",
+    "recommended-only",
+    "blocked"
+  ],
+  "hardwareFitLabels": [
+    "excellent",
+    "usable",
+    "slow-or-oversized",
+    "unknown"
+  ],
+  "rules": {
+    "pullsModels": false,
+    "writesRuntimeConfig": false,
+    "executesRemoteCode": false,
+    "sourceClaimsDoNotPromote": true,
+    "missingLicenseBlocksAutomaticPromotion": true,
+    "customLicenseRequiresReview": true,
+    "nonCommercialLicenseBlocksDefaultCatalog": true,
+    "missingImmutableRevisionBlocksAutomaticPromotion": true,
+    "gatedArtifactBlocksAutomaticPromotion": true,
+    "unsafeOrUnknownFormatBlocksAutomaticPromotion": true,
+    "hardwareFitDoesNotGrantReadiness": true,
+    "validationEvidenceIsExactArtifactAndOperationScoped": true
+  }
+}

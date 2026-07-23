@@ -30,7 +30,7 @@ The approved first product slice, navigation map, interaction flow, and low-fide
 | Evidence dashboard | `scripts/generate-evidence-dashboard.*`, `config/evidence-catalog.tsv`, `config/agent-surface-capabilities.json`, `config/agent-surface-solutions.json` |
 | Beginner setup | `scripts/get-beginner-setup-plan.*`, `docs/beginner-setup-mode.md` |
 | Progressive onboarding | `config/progressive-onboarding-contract.json`, `config/onboarding-setting-schemas.json`, `docs/progressive-onboarding.md`, `docs/onboarding-setting-security.md` |
-| Model choice | `scripts/recommend-local-agent-config.*`, `docs/hardware-aware-recommendations.md` |
+| Model choice | `scripts/build-model-catalog.*`, `config/model-catalog-contract.json`, `scripts/recommend-local-agent-config.*`, `docs/model-catalog.md`, `docs/hardware-aware-recommendations.md` |
 | Install/configure/test by surface | `config/agent-surface-solutions.json`, `docs/agent-surface-solutions.md` |
 | Script appendix | `docs/script-reference-appendix.md` |
 

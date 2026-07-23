@@ -44,6 +44,7 @@ $integrationTests = @(
     "online model discovery parses a local fixture without network",
     "online model discovery supports local VRAM annotation without leaking profiles",
     "online model discovery normalizes Ollama and Hugging Face fixtures",
+    "model catalog assembly is license hardware evidence and input safe",
     "hardware-aware recommendation scripts emit sanitized model lanes",
     "capability evidence v2 blocks cross-surface inheritance and aggregates conservatively",
     "lane-specific scoring keeps write conservative and prefers fitting capacity for plan and review",
@@ -2644,6 +2645,75 @@ Invoke-PackTest "online model discovery normalizes Ollama and Hugging Face fixtu
         Assert-True -Condition ($null -ne $gated -and $gated.ValidationStatus -eq "candidate-only") -Message "Gated Hub models should remain candidate-only."
         Assert-True -Condition (@($report.Candidates | Where-Object { $_.ValidationStatus -ne "candidate-only" }).Count -eq 0) -Message "Discovery must never promote candidates."
         Assert-True -Condition ($report.PullsModels -eq $false -and $report.RewritesContinueConfig -eq $false) -Message "Multi-source discovery must remain read-only."
+    }
+    finally {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+    }
+}
+
+Invoke-PackTest "model catalog assembly is license hardware evidence and input safe" {
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "model-catalog-test-$([guid]::NewGuid())"
+    try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
+        $discoveryPath = Join-Path $tempRoot "discovery.json"
+        $catalogPath = Join-Path $tempRoot "catalog.json"
+        $maliciousPath = Join-Path $tempRoot "malicious.json"
+        $maliciousOutput = Join-Path $tempRoot "malicious-output.json"
+
+        $discovery = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/discover-online-model-candidates.ps1") `
+            -Arguments @(
+                "-Sources", "huggingface",
+                "-Families", "tool calling",
+                "-HuggingFaceJsonPath", (Join-Path $repoRoot "examples/fixtures/huggingface-model-search-response.json"),
+                "-AvailableVramGb", "64",
+                "-OutputPath", $discoveryPath
+            )
+        Assert-Equal -Actual $discovery.ExitCode -Expected 0 -Message "Offline discovery fixture should succeed."
+
+        $fixture = Get-Content -LiteralPath $discoveryPath -Raw | ConvertFrom-Json
+        $fixture.Candidates[0].Model = "qwen3.5:9b"
+        $fixture.Candidates[0].ArtifactId = "qwen3.5:9b"
+        $fixture | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $discoveryPath -Encoding utf8
+
+        $build = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/build-model-catalog.ps1") `
+            -Arguments @("-DiscoveryReportPath", $discoveryPath, "-OutputPath", $catalogPath)
+        Assert-Equal -Actual $build.ExitCode -Expected 0 -Message "Catalog assembly should succeed."
+        $catalog = Get-Content -LiteralPath $catalogPath -Raw | ConvertFrom-Json
+        $recommended = @($catalog.entries | Where-Object { $_.displayName -eq "qwen3.5:9b" }) | Select-Object -First 1
+        $gated = @($catalog.entries | Where-Object { $_.displayName -eq "example-security/antares-fixture" }) | Select-Object -First 1
+
+        Assert-Equal -Actual $catalog.schemaVersion -Expected 1 -Message "Catalog should use contract v1."
+        Assert-Equal -Actual $catalog.summary.entryCount -Expected 2 -Message "Catalog should retain both exact candidates."
+        Assert-True -Condition ($recommended.beginner.recommendedForThisComputer -eq $false) -Message "Model-tag evidence must not promote a newly discovered revision."
+        Assert-True -Condition ($recommended.readiness.records.Count -gt 0 -and $recommended.readiness.exactArtifactRevisionBound -eq $false) -Message "Existing model-tag evidence should remain visible but revision-unbound."
+        Assert-True -Condition ($recommended.security.blockers -contains "evidence-revision-unbound") -Message "Revision-unbound evidence should be an explicit blocker."
+        Assert-True -Condition ($recommended.hardwareFit.label -eq "excellent") -Message "64 GB should include fitting headroom for the 33B fixture estimate."
+        Assert-True -Condition ($gated.state -eq "blocked" -and $gated.security.blockers -contains "artifact-access-gated") -Message "Gated candidates should remain blocked."
+        Assert-True -Condition ($catalog.effects.pullsModels -eq $false -and $catalog.effects.executesRemoteCode -eq $false) -Message "Catalog assembly must have no model or remote-code effects."
+
+        $overwrite = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/build-model-catalog.ps1") `
+            -Arguments @("-DiscoveryReportPath", $discoveryPath, "-OutputPath", $catalogPath)
+        Assert-True -Condition ($overwrite.ExitCode -ne 0 -and $overwrite.Output -match "MODEL_CATALOG_REJECTED") -Message "Catalog output should be exclusive and refuse overwrite."
+
+        $hostile = Get-Content -LiteralPath $discoveryPath -Raw | ConvertFrom-Json
+        $hostile.Candidates[0].ArtifactId = "../escape"
+        $hostile.Candidates[0].License = "CC-BY-NC-4.0"
+        $hostile | ConvertTo-Json -Depth 30 | Set-Content -LiteralPath $maliciousPath -Encoding utf8
+        $rejected = Invoke-CommandCapture `
+            -FilePath (Join-Path $repoRoot "scripts/build-model-catalog.ps1") `
+            -Arguments @("-DiscoveryReportPath", $maliciousPath, "-OutputPath", $maliciousOutput)
+        Assert-True -Condition ($rejected.ExitCode -ne 0 -and $rejected.Output -match "MODEL_CATALOG_REJECTED") -Message "Unsafe artifact identifiers should be rejected."
+        Assert-True -Condition (-not (Test-Path -LiteralPath $maliciousOutput)) -Message "Rejected input must not create output."
+
+        $contract = Get-Content -LiteralPath (Join-Path $repoRoot "config/model-catalog-contract.json") -Raw | ConvertFrom-Json
+        $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/model-catalog.md") -Raw
+        $workflows = Get-Content -LiteralPath (Join-Path $repoRoot "config/workflows.json") -Raw | ConvertFrom-Json
+        Assert-True -Condition ($contract.rules.missingLicenseBlocksAutomaticPromotion -eq $true -and $contract.rules.executesRemoteCode -eq $false) -Message "Contract should fail closed on license and remote code."
+        Assert-True -Condition ($doc -match "Two Product Views, One Policy Decision" -and $doc -match "Advanced controls cannot bypass") -Message "Catalog docs should define beginner and advanced views over one policy."
+        Assert-True -Condition (@($workflows.workflows | Where-Object { $_.id -eq "build-model-catalog" }).Count -eq 1) -Message "Workflow registry should expose catalog assembly."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
