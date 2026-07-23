@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Changed the local web layout so chat is the primary desktop workspace, the oversized hero is compact, navigation remains pinned, and provider plus system configuration stay in a bounded sticky right column with a chat-first responsive fallback.
+- Added an evidence-gated writing-model evaluation plan: Qwen 3.5 9B remains the adapter control while Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H remain unpromoted candidates pending exact license, hardware, performance, and blind quality evidence.
 - Changed the local web provider and model experience: connection scope is inferred from a validated loopback/private-LAN IP, each text capability remembers its own model, and the balanced default keeps one active model warm for five idle minutes while preserving explicit cleanup on New task, model/provider changes, failures, and shutdown.
 - Added repository-free Writing and Summarization modes to the loopback-only web application. All three text modes use exact admitted capability IDs, bounded in-memory inputs, typed chat or Markdown results, and verified model unload without filesystem or repository access.
 - Added the first runnable Haven 42 product slice: a zero-new-dependency, loopback-only local web application with sanitized system status, explicit loopback/trusted-LAN Ollama validation, installed-model selection, bounded private chat, cross-origin defenses, session-only state, and verified unload after success, failure, and shutdown.

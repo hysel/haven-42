@@ -414,6 +414,9 @@
 - [x] Implement Milestone 22A as a zero-new-dependency, loopback-only local web MVP over the Milestone 21 `general.chat` capability: sanitized system status, explicit Ollama endpoint validation, installed-model discovery, model selection, bounded chat, and verified unload after success, failure, and shutdown.
 - [x] Expand Milestone 22A with repository-free `content.write` and `content.summarize` modes, typed chat/Markdown results, in-memory task reset, and the same bounded provider and unload policy.
 - [x] Infer loopback versus private-LAN connection scope from the validated IP literal, remember separate chat/writing/summarization model choices, and replace response-by-response unload with a five-minute balanced idle policy plus advanced cleanup choices.
+- [x] Make chat the primary local-web interaction, reduce the oversized hero, keep desktop navigation and provider/system setup visible while scrolling, and preserve responsive one-column behavior.
+- [ ] Run the controlled writing-quality matrix for exact Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H artifacts before enabling evidence-driven automatic writing defaults.
+- [ ] Replace first-provider-result model defaults with capability-specific engine recommendations, explicit missing-model installation consent, and visibly unverified handling for unknown installed models.
 - [ ] Expand the local web UI over the Milestone 20 workflow foundation and remaining evidence-gated Milestone 21 capabilities without duplicating business logic.
 - [ ] Keep Tauri as optional Milestone 22B native packaging after its published dependency, bridge, signing, package, and platform gates pass; the local web product must not wait on it.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.

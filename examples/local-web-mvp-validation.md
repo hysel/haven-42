@@ -35,7 +35,7 @@ The provider address, machine identity, prompt response, and hardware details we
 | Application-reported model unload | Pass |
 | Independent process-list cleanup after explicit/final cleanup | Pass; empty |
 
-The offline integration suite separately passed 59 security and behavior checks covering Host, Origin, token, automatic local/LAN classification, public/unsafe endpoint rejection, remote assets, per-capability model selection, model-switch cleanup, immediate and idle cleanup modes, stale-timer rejection, explicit cleanup, all three admitted text capabilities, typed response kinds, single-input enforcement, unsupported-capability rejection, failed-reconnect authority clearing, provider/empty-response cleanup, and loopback-binding boundaries.
+The offline integration suite separately passed 63 security and behavior checks covering Host, Origin, token, automatic local/LAN classification, public/unsafe endpoint rejection, remote assets, per-capability model selection, model-switch cleanup, immediate and idle cleanup modes, stale-timer rejection, explicit cleanup, all three admitted text capabilities, typed response kinds, single-input enforcement, unsupported-capability rejection, failed-reconnect authority clearing, provider/empty-response cleanup, and loopback-binding boundaries.
 
 ## Evidence Boundary
 
