@@ -41,14 +41,14 @@ The macOS wrapper has the same arguments. The profile contains useful hardware v
 Create a local request JSON containing `source`, `target`, `hardwareProfile`, optional `trustedArtifacts`, `storageEstimate`, and disclosures, then evaluate it without effects:
 
 ```powershell
-.\scripts\plan-model-quantization.ps1 -RequestPath quantization-request.local.json
+.\scripts\plan-model-quantization.ps1 -RequestPath quantization-request.local.json -OutputPath quantization-plan.local.json
 ```
 
 ```bash
-./scripts/plan-model-quantization.linux.sh --request quantization-request.local.json
+./scripts/plan-model-quantization.linux.sh --request quantization-request.local.json --output quantization-plan.local.json
 ```
 
-The result always reports `network`, `downloads`, `writes`, `conversion`, and `activation` as false. A `local-derivative` result is only a proposal for a later approved and independently validated workflow.
+The new output file is created exclusively and is never overwritten; the plan is not printed to the console because it may contain local hardware and model metadata. The result always reports `network`, `downloads`, `writes`, `conversion`, and `activation` as false. A `local-derivative` result is only a proposal for a later approved and independently validated workflow.
 
 ## Validated Linux NVIDIA Cell
 
