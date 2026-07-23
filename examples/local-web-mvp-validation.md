@@ -22,6 +22,7 @@ The provider address, machine identity, prompt response, and hardware details we
 | Bundled browser page rendered in headless Chromium | Pass |
 | Session bootstrap and request token | Pass |
 | Trusted-LAN endpoint validation | Pass |
+| Connection scope inferred without a user selector | Pass; private LAN |
 | Ollama connection and version discovery | Pass |
 | Installed-model discovery | Pass |
 | Explicit model selection | Pass |
@@ -29,10 +30,12 @@ The provider address, machine identity, prompt response, and hardware details we
 | Bounded writing returned a typed Markdown document | Pass |
 | Bounded summarization returned a typed Markdown document | Pass |
 | All response content excluded from validation output | Pass |
+| Balanced model remained warm across active text capabilities | Pass |
+| Explicit New task model cleanup | Pass |
 | Application-reported model unload | Pass |
-| Independent process-list cleanup after every capability | Pass; empty |
+| Independent process-list cleanup after explicit/final cleanup | Pass; empty |
 
-The offline integration suite separately passed 41 security and behavior checks covering Host, Origin, token, endpoint, remote-asset, model-selection, all three admitted text capabilities, typed response kinds, single-input enforcement, unsupported-capability rejection, failed-reconnect authority clearing, failure cleanup, and loopback-binding boundaries.
+The offline integration suite separately passed 59 security and behavior checks covering Host, Origin, token, automatic local/LAN classification, public/unsafe endpoint rejection, remote assets, per-capability model selection, model-switch cleanup, immediate and idle cleanup modes, stale-timer rejection, explicit cleanup, all three admitted text capabilities, typed response kinds, single-input enforcement, unsupported-capability rejection, failed-reconnect authority clearing, provider/empty-response cleanup, and loopback-binding boundaries.
 
 ## Evidence Boundary
 

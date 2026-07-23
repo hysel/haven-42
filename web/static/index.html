@@ -58,21 +58,23 @@
               <input id="endpoint" name="endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off">
               <button class="button primary" id="connect-button" type="submit">Connect</button>
             </div>
-            <p class="field-help">Use an IP address only. Nothing is saved after Haven 42 closes.</p>
+            <p class="field-help">Enter a same-machine or private-network IP address. Haven 42 detects the connection scope automatically and saves nothing.</p>
             <details>
               <summary>Advanced connection settings</summary>
               <div class="advanced-grid">
-                <label>Connection scope
-                  <select id="trust-scope">
-                    <option value="loopback">This computer</option>
-                    <option value="trusted-lan">Trusted local network</option>
-                  </select>
-                </label>
                 <label>Request timeout
                   <select id="timeout">
                     <option value="60">60 seconds</option>
                     <option value="120" selected>120 seconds</option>
                     <option value="300">5 minutes</option>
+                  </select>
+                </label>
+                <label>Unload model after
+                  <select id="idle-unload">
+                    <option value="0">Every response · energy saver</option>
+                    <option value="300" selected>5 minutes idle · balanced</option>
+                    <option value="900">15 minutes idle</option>
+                    <option value="1800">30 minutes idle · performance</option>
                   </select>
                 </label>
               </div>
@@ -93,7 +95,7 @@
             <div><dt>Haven 42</dt><dd id="app-version">Checking…</dd></div>
             <div><dt>Host</dt><dd id="host-status">Checking…</dd></div>
             <div><dt>Privacy</dt><dd>Memory only</dd></div>
-            <div><dt>Model cleanup</dt><dd class="accent">Unload after every response</dd></div>
+            <div><dt>Model cleanup</dt><dd class="accent" id="cleanup-status">Unload after 5 minutes idle</dd></div>
           </dl>
         </section>
       </div>
@@ -106,7 +108,7 @@
           </div>
           <div class="text-actions">
             <button class="button secondary" id="new-task-button" type="button">New task</button>
-            <label class="model-select">Model
+            <label class="model-select"><span id="model-label">Chat model</span>
               <select id="model" disabled>
                 <option>Connect Ollama first</option>
               </select>

@@ -413,6 +413,7 @@
 - [ ] Add compatibility preflight, atomic activation, post-update health checks, automatic rollback, retained-version cleanup, offline behavior, and a disabled-update mode.
 - [x] Implement Milestone 22A as a zero-new-dependency, loopback-only local web MVP over the Milestone 21 `general.chat` capability: sanitized system status, explicit Ollama endpoint validation, installed-model discovery, model selection, bounded chat, and verified unload after success, failure, and shutdown.
 - [x] Expand Milestone 22A with repository-free `content.write` and `content.summarize` modes, typed chat/Markdown results, in-memory task reset, and the same bounded provider and unload policy.
+- [x] Infer loopback versus private-LAN connection scope from the validated IP literal, remember separate chat/writing/summarization model choices, and replace response-by-response unload with a five-minute balanced idle policy plus advanced cleanup choices.
 - [ ] Expand the local web UI over the Milestone 20 workflow foundation and remaining evidence-gated Milestone 21 capabilities without duplicating business logic.
 - [ ] Keep Tauri as optional Milestone 22B native packaging after its published dependency, bridge, signing, package, and platform gates pass; the local web product must not wait on it.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.

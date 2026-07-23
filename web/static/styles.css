@@ -103,7 +103,7 @@ body::before {
 }
 .nav-item span { display: inline-block; width: 25px; color: var(--accent); }
 .nav-item small { float: right; color: #60716f; }
-.nav-item:hover, .nav-item.active { color: var(--ink); background: rgba(98, 230, 198, 0.08); }
+.nav-item:hover:not(:disabled), .nav-item.active { color: var(--ink); background: rgba(98, 230, 198, 0.08); }
 .nav-item.muted { cursor: default; opacity: 0.55; }
 .rail-note {
   margin-top: auto;

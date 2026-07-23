@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import threading
+import time
 import urllib.error
 import urllib.request
 from http import HTTPStatus
@@ -21,11 +22,12 @@ SPEC.loader.exec_module(WEB)
 
 
 class FakeState:
-    models = ["qwen3.5:9b"]
+    models = ["qwen3.5:9b", "writer-model:latest"]
     loaded: set[str] = set()
     requests: list[tuple[str, dict]] = []
     fail_chat = False
     fail_connect = False
+    empty_chat = False
 
 
 class FakeOllama(BaseHTTPRequestHandler):
@@ -61,6 +63,8 @@ class FakeOllama(BaseHTTPRequestHandler):
             FakeState.loaded.add(model)
             if FakeState.fail_chat:
                 self._json(500, {"error": "forced-chat-failure"})
+            elif FakeState.empty_chat:
+                self._json(200, {"message": {"role": "assistant", "content": ""}})
             else:
                 self._json(200, {"message": {"role": "assistant", "content": "LOCAL_WEB_OK"}})
         elif self.path == "/api/generate" and body.get("keep_alive") == 0:
@@ -93,6 +97,15 @@ def request_json(
         return error.code, json.loads(error.read()), dict(error.headers)
 
 
+def wait_until(predicate, timeout_seconds: float = 2.0) -> bool:
+    deadline = time.monotonic() + timeout_seconds
+    while time.monotonic() < deadline:
+        if predicate():
+            return True
+        time.sleep(0.02)
+    return predicate()
+
+
 def main() -> int:
     checks = 0
     fake = ThreadingHTTPServer(("127.0.0.1", 0), FakeOllama)
@@ -106,7 +119,8 @@ def main() -> int:
     try:
         status, bootstrap, headers = request_json(origin + "/api/bootstrap")
         assert status == 200 and bootstrap["runtime"]["bindScope"] == "loopback-only"
-        assert bootstrap["privacy"]["modelResidency"] == "unload-after-response"
+        assert bootstrap["privacy"]["modelResidency"] == "idle-timeout"
+        assert bootstrap["privacy"]["idleUnloadSeconds"] == 300
         assert headers["X-Frame-Options"] == "DENY"
         assert "default-src 'self'" in headers["Content-Security-Policy"]
         token = bootstrap["sessionToken"]
@@ -115,29 +129,30 @@ def main() -> int:
         status, error, _ = request_json(
             origin + "/api/connect",
             "POST",
-            {"endpoint": "http://127.0.0.1:11434", "trustScope": "loopback", "timeoutSeconds": 30},
+            {"endpoint": "http://127.0.0.1:11434", "timeoutSeconds": 30, "idleUnloadSeconds": 300},
             token,
         )
         assert status == 403 and error["error"] == "invalid-origin"
         status, error, _ = request_json(
             origin + "/api/connect",
             "POST",
-            {"endpoint": "http://127.0.0.1:11434", "trustScope": "loopback", "timeoutSeconds": 30},
+            {"endpoint": "http://127.0.0.1:11434", "timeoutSeconds": 30, "idleUnloadSeconds": 300},
             "wrong-token",
             origin,
         )
         assert status == 403 and error["error"] == "invalid-session-token"
         checks += 2
 
-        for endpoint, scope, expected in (
-            ("http://169.254.169.254", "trusted-lan", "unsafe-provider-address"),
-            ("http://example.com", "trusted-lan", "provider-host-must-be-ip-literal"),
-            ("http://user:secret@127.0.0.1", "loopback", "invalid-provider-url"),
+        for endpoint, expected in (
+            ("http://169.254.169.254", "unsafe-provider-address"),
+            ("http://example.com", "provider-host-must-be-ip-literal"),
+            ("http://user:secret@127.0.0.1", "invalid-provider-url"),
+            ("https://8.8.8.8", "trusted-lan-provider-required"),
         ):
             status, error, _ = request_json(
                 origin + "/api/connect",
                 "POST",
-                {"endpoint": endpoint, "trustScope": scope, "timeoutSeconds": 30},
+                {"endpoint": endpoint, "timeoutSeconds": 30, "idleUnloadSeconds": 300},
                 token,
                 origin,
             )
@@ -148,12 +163,13 @@ def main() -> int:
         status, connected, _ = request_json(
             origin + "/api/connect",
             "POST",
-            {"endpoint": fake_url, "trustScope": "loopback", "timeoutSeconds": 30},
+            {"endpoint": fake_url, "timeoutSeconds": 30, "idleUnloadSeconds": 300},
             token,
             origin,
         )
         assert status == 200
-        assert connected["models"] == ["qwen3.5:9b"]
+        assert connected["models"] == ["qwen3.5:9b", "writer-model:latest"]
+        assert connected["trustScope"] == "loopback" and connected["idleUnloadSeconds"] == 300
         assert connected["configurationPersisted"] is False
         checks += 3
 
@@ -184,11 +200,11 @@ def main() -> int:
         )
         assert status == 200 and reply["content"] == "LOCAL_WEB_OK"
         assert reply["capabilityId"] == "general.chat" and reply["kind"] == "chat-message"
-        assert reply["modelUnloaded"] is True and not FakeState.loaded
+        assert reply["modelUnloaded"] is False and FakeState.loaded == {"qwen3.5:9b"}
         chat_payload = next(body for path, body in FakeState.requests if path == "/api/chat")
-        assert chat_payload["keep_alive"] == 0 and chat_payload["stream"] is False
+        assert chat_payload["keep_alive"] == "300s" and chat_payload["stream"] is False
         assert chat_payload["messages"][0]["role"] == "system"
-        assert any(path == "/api/generate" and body["keep_alive"] == 0 for path, body in FakeState.requests)
+        assert not any(path == "/api/generate" for path, _body in FakeState.requests)
         checks += 6
 
         for capability_id, expected_title, prompt_fragment in (
@@ -210,8 +226,64 @@ def main() -> int:
             assert reply["capabilityId"] == capability_id and reply["title"] == expected_title
             matching_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
             assert prompt_fragment in matching_payload["messages"][0]["content"]
-            assert reply["modelUnloaded"] is True and not FakeState.loaded
+            assert reply["modelUnloaded"] is False and FakeState.loaded == {"qwen3.5:9b"}
             checks += 4
+
+        status, switched, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "content.write",
+                "model": "writer-model:latest",
+                "messages": [{"role": "user", "content": "use the writing model"}],
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and switched["model"] == "writer-model:latest"
+        assert FakeState.loaded == {"writer-model:latest"}
+        assert any(path == "/api/generate" and body["model"] == "qwen3.5:9b" for path, body in FakeState.requests)
+        checks += 3
+
+        status, unloaded, _ = request_json(origin + "/api/unload", "POST", {}, token, origin)
+        assert status == 200 and unloaded["modelUnloaded"] is True and not FakeState.loaded
+        checks += 2
+
+        status, connected, _ = request_json(
+            origin + "/api/connect",
+            "POST",
+            {"endpoint": fake_url, "timeoutSeconds": 30, "idleUnloadSeconds": 0},
+            token,
+            origin,
+        )
+        assert status == 200 and connected["idleUnloadSeconds"] == 0
+        status, immediate, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {"capabilityId": "general.chat", "model": "qwen3.5:9b", "messages": [{"role": "user", "content": "energy saver"}]},
+            token,
+            origin,
+        )
+        assert status == 200 and immediate["modelUnloaded"] is True and not FakeState.loaded
+        checks += 3
+
+        state.idle_unload_seconds = 0.05
+        status, warm, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {"capabilityId": "general.chat", "model": "qwen3.5:9b", "messages": [{"role": "user", "content": "idle cleanup"}]},
+            token,
+            origin,
+        )
+        assert status == 200 and warm["modelUnloaded"] is False
+        with state.lock:
+            active_target = state.active_model
+            stale_generation = state.lifecycle_generation - 1
+        assert active_target is not None
+        state._idle_unload(active_target, stale_generation)
+        assert FakeState.loaded == {"qwen3.5:9b"}
+        assert wait_until(lambda: not FakeState.loaded), "idle cleanup did not finish within two seconds"
+        checks += 4
 
         status, error, _ = request_json(
             origin + "/api/text",
@@ -262,11 +334,24 @@ def main() -> int:
         checks += 2
 
         FakeState.fail_chat = False
+        FakeState.empty_chat = True
+        status, error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {"capabilityId": "general.chat", "model": "qwen3.5:9b", "messages": [{"role": "user", "content": "empty"}]},
+            token,
+            origin,
+        )
+        assert status == 502 and error["error"] == "empty-model-response"
+        assert not FakeState.loaded
+        checks += 2
+
+        FakeState.empty_chat = False
         FakeState.fail_connect = True
         status, error, _ = request_json(
             origin + "/api/connect",
             "POST",
-            {"endpoint": fake_url, "trustScope": "loopback", "timeoutSeconds": 30},
+            {"endpoint": fake_url, "timeoutSeconds": 30, "idleUnloadSeconds": 300},
             token,
             origin,
         )
@@ -295,7 +380,9 @@ def main() -> int:
 
         policy = json.loads((ROOT / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
         assert policy["bind"]["remoteBindAllowed"] is False
-        assert policy["text"]["modelResidency"] == "unload-after-response"
+        assert policy["providerConnections"]["trustScopeSelection"] == "server-inferred-from-ip-literal"
+        assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
+        assert policy["text"]["defaultIdleUnloadSeconds"] == 300
         assert policy["text"]["capabilityIds"] == [
             "general.chat", "content.write", "content.summarize"
         ]
@@ -303,7 +390,8 @@ def main() -> int:
         javascript = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
         assert "innerHTML" not in javascript and "X-Haven-Token" in javascript
         assert "/api/text" in javascript and "content.summarize" in javascript
-        checks += 6
+        assert "trust-scope" not in javascript and "modelSelections" in javascript
+        checks += 9
     finally:
         app.shutdown()
         app.server_close()
