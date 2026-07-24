@@ -47,9 +47,10 @@ def verify_static(policy: dict) -> None:
         raise PolicyError("unsafe-merge-policy")
     protection = policy["branchProtection"]
     checks = protection.get("requiredChecks")
-    if not isinstance(checks, list) or len(checks) != len(set(checks)) or len(checks) != 8:
+    if not isinstance(checks, list) or len(checks) != len(set(checks)) or len(checks) != 9:
         raise PolicyError("invalid-required-checks")
     expected_checks = {
+        "Public repository privacy",
         "Wiki synchronization",
         "Windows PowerShell validation",
         "Linux script smoke tests",

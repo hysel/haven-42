@@ -8,8 +8,8 @@ host identity, raw prompts, response text, and machine paths are intentionally
 omitted. The committed harness uses only embedded synthetic material and
 persists neither prompts nor raw output.
 
-This run is not a comparative writing-quality promotion. Blind human review,
-repeated sampling, long-form coherence, multilingual coverage, license review,
+This evidence is not a comparative writing-quality promotion. Blind human review,
+broader repeated sampling, long-form coherence, multilingual coverage, license review,
 and exact hardware utilization evidence remain open.
 
 ## Exact artifacts
@@ -32,10 +32,25 @@ bound, and `keep_alive: 0`. The harness called the unload API and checked
 `/api/ps` after every case. All twelve per-case checks and the final independent
 residency check reported no loaded evaluation model.
 
+## Repeatability check
+
+A second complete run on 2026-07-24 used the same provider version, exact model
+digests, synthetic prompts, and bounds. Qwen, Gemma, and Mistral again passed
+all three cases. Granite again passed the email and fact-preserving rewrite but
+omitted the required `no safety conclusion` uncertainty phrase in the
+structured brief. Average generation rates were 75.86, 54.25, 41.20, and
+127.64 tokens per second respectively; these host-specific measurements are
+diagnostic only.
+
+Every per-case unload and every final model unload passed. A separate final
+`/api/ps` request confirmed that the provider had no loaded models. No model
+was downloaded, no response text was retained, and the local endpoint remains
+excluded from this evidence.
+
 ## Limits and promotion boundary
 
 - Automated marker checks measure constraint retention, not prose quality.
-- One sample per case is insufficient for a stable comparative ranking.
+- Two samples per case are still insufficient for a stable comparative ranking.
 - Provider timing includes model-load effects and does not transfer to another
   host, provider version, digest, quantization, context, or concurrency.
 - Human reviewers have not scored instruction compliance, organization, tone,

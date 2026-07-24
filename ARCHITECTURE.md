@@ -61,6 +61,8 @@ The initial native distribution path freezes that same process and UI into a PyI
 
 The portable supply-chain boundary has two layers. Build inputs are exact-version and wheel-hash locked, while evidence collection admits only the expected platform-specific tool set. Build outputs bind the complete one-folder tree to a file inventory and archive checksums, then independently validate safe member names, regular-file shape, SBOM/runtime identity, notices, and exact source/environment provenance. This provenance makes no signature or attestation claim.
 
+The first composition boundary is deliberately non-executable. A strict engine-owned contract admits at most six registry-backed `read-only` workflow references, rejects renderer arguments and graph cycles, orders dependencies deterministically, and emits metadata-only intermediate plan references. Cancellation ends before plan artifacts are emitted. The result always denies process, filesystem, network, approval-grant, and machine-modification authority; executable composition is a separate future admission.
+
 The update boundary remains outside the portable runtime. Strict offline
 policies validate immutable release metadata, manifest and package identity,
 then separately simulate compatibility, staged/post health, interrupted

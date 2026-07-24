@@ -6,6 +6,7 @@
 
 `main` requires a current branch and these uniquely named checks:
 
+- Public repository privacy
 - Wiki synchronization
 - Windows PowerShell validation
 - Linux script smoke tests
@@ -33,7 +34,7 @@ Actions receive read-only default workflow permission and cannot approve pull re
 2. Stage every intended repository file; leave no unstaged or untracked files.
 3. Run Full without `-NoReceipt`. Schema-v3 records the exact staged index tree.
 4. Commit without editing that content. Pre-push sees the identical `HEAD` tree and skips a duplicate Full run.
-5. Push, open the PR, and monitor the eight required checks.
+5. Push, open the PR, and monitor the nine required checks.
 6. Fix only evidence-backed failures. A new content tree requires a new Full receipt and hosted run.
 
 Wiki CI retries a bounded number of times and fast-forwards its disposable clone between attempts. This absorbs short cross-repository propagation races; it does not permit persistent wiki drift.

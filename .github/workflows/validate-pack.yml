@@ -16,6 +16,21 @@ permissions:
   contents: read
 
 jobs:
+  privacy:
+    name: Public repository privacy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout complete public history without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Reject reachable local setup and private identity data
+        run: python scripts/verify-public-repository-privacy.py
+
   wiki:
     name: Wiki synchronization
     runs-on: ubuntu-latest

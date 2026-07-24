@@ -20,6 +20,10 @@ Unsigned portable development builds preserve this boundary. They verify their a
 
 Portable build dependencies are exact-version and SHA-256 locked for the admitted hosted runner platforms. Evidence generation uses a reviewed platform allowlist rather than enumerating the caller environment. Native hostile tests reject altered, missing, unexpected, and traversal-manifest resources; shutdown authority failures; unsafe archive members; incomplete checksums/notices; malformed SBOM/provenance; and archive/file-inventory divergence. Provenance is informational and explicitly unsigned/unattested.
 
+Public-history privacy is enforced before push and in a least-privilege GitHub Actions job. The versioned policy scans reachable commits, commit messages, author and committer identities, and unique historical blobs for private-network endpoints, machine-specific user paths and SSH command targets, key material, fingerprints, credential-bearing URLs, and likely secrets. GitHub noreply identities and narrowly enumerated hostile-test pattern sources are admitted; ignored recovery evidence and unreachable Git objects remain local and must never be tracked.
+
+Task composition is simulation-only. It accepts only registered UI-ready read-only workflows, bounded acyclic dependencies, and exact fields. It accepts no renderer arguments or approval grants and cannot create a process, access a filesystem or network, execute a workflow, or modify a machine.
+
 ## Reporting A Vulnerability
 
 Do not open a public issue for a suspected vulnerability. Use GitHub's private vulnerability reporting for `hysel/haven-42` so reports, proof-of-concept details, credentials, private endpoints, and affected artifacts remain private.

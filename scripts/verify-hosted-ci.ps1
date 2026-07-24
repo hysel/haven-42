@@ -10,6 +10,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $requiredJobs = @(
+    "Public repository privacy",
     "Wiki synchronization",
     "Windows PowerShell validation",
     "Linux script smoke tests",

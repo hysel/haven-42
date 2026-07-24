@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.task-composition.plan-only",
+  "mode": "simulation-only",
+  "executionAllowed": false,
+  "maximumSteps": 6,
+  "maximumDependenciesPerStep": 5,
+  "allowedSafetyLevels": [
+    "read-only"
+  ],
+  "request": {
+    "requiredFields": [
+      "schemaVersion",
+      "compositionId",
+      "steps",
+      "cancelRequested"
+    ],
+    "stepFields": [
+      "stepId",
+      "workflowId",
+      "dependsOn"
+    ],
+    "argumentsAllowed": false,
+    "approvalGrantsAccepted": false
+  },
+  "result": {
+    "states": [
+      "planned",
+      "cancelled",
+      "rejected"
+    ],
+    "executionFieldsAllowed": false,
+    "intermediateArtifacts": "metadata-only",
+    "events": [
+      "accepted",
+      "step-planned",
+      "cancelled",
+      "result",
+      "error"
+    ]
+  },
+  "security": {
+    "registryBackedWorkflowsOnly": true,
+    "uiReadyWorkflowsOnly": true,
+    "cycleRejectionRequired": true,
+    "unknownFieldRejectionRequired": true,
+    "processCreationAllowed": false,
+    "filesystemAccessAllowed": false,
+    "networkAccessAllowed": false,
+    "machineModificationAllowed": false
+  }
+}

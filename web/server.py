@@ -148,6 +148,8 @@ def verify_packaged_resources(path: Path = INTEGRITY_MANIFEST_PATH) -> dict[str,
                 raise ValueError("unsafe-record")
             seen.add(relative.as_posix())
             target = ROOT / relative
+            if target.is_symlink() or any(parent.is_symlink() for parent in target.parents if parent != ROOT):
+                raise ValueError("symbolic-link-resource")
             data = target.read_bytes()
             if len(data) != record["sizeBytes"]:
                 raise ValueError("size-mismatch")

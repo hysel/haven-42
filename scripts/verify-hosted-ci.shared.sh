@@ -102,7 +102,8 @@ failed=0
 [ "$run_status" = "completed" ] || failed=1
 [ "$run_conclusion" = "success" ] || failed=1
 
-required_jobs='Wiki synchronization
+required_jobs='Public repository privacy
+Wiki synchronization
 Windows PowerShell validation
 Linux script smoke tests
 macOS script smoke tests

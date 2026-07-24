@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import os
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -37,15 +38,23 @@ def request(url: str, method: str = "GET", token: str = "", body: bytes | None =
     )
 
 
-def launch(command: list[str]) -> tuple[subprocess.Popen[str], str]:
+def launch(
+    command: list[str],
+    cwd: Path = ROOT,
+    environment: dict[str, str] | None = None,
+) -> tuple[subprocess.Popen[str], str]:
     process = subprocess.Popen(
         command + ["--port", "0", "--no-open"],
-        cwd=ROOT,
+        cwd=cwd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
         bufsize=1,
-        env={**os.environ, "PYTHONUNBUFFERED": "1"},
+        env={
+            **os.environ,
+            "PYTHONUNBUFFERED": "1",
+            **(environment or {}),
+        },
     )
     deadline = time.monotonic() + 15
     while time.monotonic() < deadline:
@@ -78,8 +87,13 @@ def expect_http_error(
     raise AssertionError(f"request unexpectedly succeeded: {expected_code}")
 
 
-def probe(command: list[str], packaged: bool) -> dict:
-    process, origin = launch(command)
+def probe(
+    command: list[str],
+    packaged: bool,
+    cwd: Path = ROOT,
+    environment: dict[str, str] | None = None,
+) -> dict:
+    process, origin = launch(command, cwd, environment)
     try:
         with request(origin + "/api/bootstrap") as response:
             bootstrap = json.load(response)
@@ -192,6 +206,75 @@ def test_hostile_packages(executable: Path) -> None:
 
     assert_integrity_failure(executable, traversal)
 
+    def duplicate(root: Path) -> None:
+        path = root / "package/resource-integrity.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        value["resources"].append(dict(value["resources"][0]))
+        path.write_text(json.dumps(value), encoding="utf-8")
+
+    assert_integrity_failure(executable, duplicate)
+
+    def absolute(root: Path) -> None:
+        path = root / "package/resource-integrity.json"
+        value = json.loads(path.read_text(encoding="utf-8"))
+        value["resources"][0]["path"] = str((root / "web/static/app.js").resolve())
+        path.write_text(json.dumps(value), encoding="utf-8")
+
+    assert_integrity_failure(executable, absolute)
+
+    if hasattr(os, "symlink"):
+        def symlink(root: Path) -> None:
+            target = root / "web/static/app.js"
+            outside = root.parent / "external-app.js"
+            outside.write_bytes(target.read_bytes())
+            target.unlink()
+            target.symlink_to(outside)
+
+        try:
+            assert_integrity_failure(executable, symlink)
+        except OSError:
+            # Unprivileged Windows runners may not permit symlink creation.
+            pass
+
+
+def test_relocation_and_hostile_environment(executable: Path, expected: dict) -> None:
+    with tempfile.TemporaryDirectory(prefix="haven42-relocated-package-") as temporary:
+        relocated = Path(temporary) / "directory with spaces" / "haven42"
+        shutil.copytree(executable.parent, relocated)
+        relocated_executable = relocated / executable.name
+        actual = probe(
+            [str(relocated_executable)],
+            True,
+            cwd=Path(temporary),
+            environment={
+                "PYTHONPATH": str(Path(temporary) / "untrusted-python"),
+                "HTTP_PROXY": "http://127.0.0.1:1",
+                "HTTPS_PROXY": "http://127.0.0.1:1",
+                "NO_PROXY": "",
+                "BROWSER": "untrusted-browser-command",
+            },
+        )
+        assert actual == expected
+
+
+def test_port_collision(command: list[str]) -> None:
+    listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener.bind(("127.0.0.1", 0))
+    listener.listen(1)
+    port = listener.getsockname()[1]
+    try:
+        result = subprocess.run(
+            command + ["--port", str(port), "--no-open"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        assert result.returncode != 0
+        assert "Could not start Haven 42 local web server" in (result.stdout + result.stderr)
+    finally:
+        listener.close()
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -201,8 +284,14 @@ def main() -> int:
     executable = Path(args.executable).resolve()
     packaged = probe([str(executable)], True)
     assert source == packaged, "source and packaged behavior diverged"
+    assert probe([str(executable)], True) == packaged
+    test_relocation_and_hostile_environment(executable, packaged)
+    test_port_collision([str(executable)])
     test_hostile_packages(executable)
-    print("Portable package parity, shutdown authority, and hostile integrity tests passed.")
+    print(
+        "Portable package parity, relocation, repeated lifecycle, port collision, "
+        "shutdown authority, hostile environment, and integrity tests passed."
+    )
     return 0
 
 

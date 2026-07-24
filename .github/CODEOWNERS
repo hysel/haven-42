@@ -4,6 +4,8 @@
 /config/desktop-*.json @hysel
 /config/*update*.json @hysel
 /config/*security*.json @hysel
+/config/*privacy*.json @hysel
+/config/*composition*.json @hysel
 /config/*recommendation*.json @hysel
 /config/providers.json @hysel
 /config/workflows.json @hysel
@@ -11,6 +13,8 @@
 /scripts/*install* @hysel
 /scripts/*update* @hysel
 /scripts/*provider* @hysel
+/scripts/*privacy* @hysel
+/scripts/*composition* @hysel
 /scripts/invoke-* @hysel
 /scripts/build-release-package* @hysel
 /scripts/test-release-readiness* @hysel

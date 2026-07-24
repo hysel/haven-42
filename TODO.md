@@ -458,7 +458,8 @@
   disclosure, history cleanup, and user-triggered download.
 - [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
 - [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, hostile catalog tests, and a dependency-free headless Chromium wizard/chat flow on Windows; native packaging and full cross-platform browser recovery coverage remain open under the parent task.
-- [ ] Add bounded multi-step composition with explicit intermediate artifacts and approvals.
+- [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, metadata-only intermediate artifacts, cancellation-before-execution, and hostile tests; it remains simulation-only.
+- [ ] Admit executable multi-step composition only after effect-specific opaque approvals, runtime cancellation/retry/recovery, typed intermediate validation, and native cross-platform evidence pass.
 
 ## Solution Architecture Review Backlog
 

@@ -297,8 +297,8 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
 
     $checkoutSha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
     Assert-True -Condition ($actionSources -notmatch "actions/checkout@(v\d+|main|master)\b") -Message "Checkout references must not use mutable tags or branches."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 7 -Message "All live and generated workflows should pin the reviewed checkout v7.0.1 commit."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 7 -Message "Every checkout should disable persisted credentials."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 8 -Message "All live and generated workflows should pin the reviewed checkout v7.0.1 commit."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 8 -Message "Every checkout should disable persisted credentials."
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
     Assert-True -Condition ($workflow -match "(?m)^concurrency:" -and $workflow -match "timeout-minutes:") -Message "Validation workflow should bound concurrency and job duration."
     Assert-True -Condition ($dependabot -match "package-ecosystem:\s*github-actions") -Message "Dependabot should monitor GitHub Actions dependencies."
@@ -4973,6 +4973,19 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."
     Assert-True -Condition ($writingDoc -match 'qwen3\.5:9b' -and $writingDoc -match 'gemma3:12b' -and $writingDoc -match 'mistral-small3\.2' -and $writingDoc -match 'granite4:7b-a1b-h' -and $writingDoc -match 'No candidate.*product default') -Message "Writing-model candidates must remain evidence-gated and unpromoted."
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
+}
+
+Invoke-PackTest "task composition and repository privacy foundations fail closed" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for composition and privacy validation."
+    $compositionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-task-composition.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Task composition hostile tests should pass."
+    Assert-True -Condition (($compositionOutput -join "`n") -match "10 bounded, effect-free checks") -Message "Task composition coverage should remain complete."
+    $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
+    $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-composition-contract.json") | ConvertFrom-Json
+    Assert-True -Condition ($contract.mode -eq "simulation-only" -and -not $contract.executionAllowed -and -not $contract.security.processCreationAllowed -and -not $contract.security.filesystemAccessAllowed -and -not $contract.security.networkAccessAllowed -and -not $contract.security.machineModificationAllowed) -Message "Composition must remain effect-free and plan-only."
 }
 
 Invoke-PackTest "system readiness and setup planning remain effect free" {

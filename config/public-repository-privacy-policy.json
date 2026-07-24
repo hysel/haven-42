@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "policyId": "haven42.public-repository-privacy",
+  "scope": {
+    "trackedFiles": true,
+    "reachableCommitTrees": true,
+    "commitMessages": true,
+    "authorAndCommitterIdentity": true,
+    "localIgnoredFiles": false,
+    "gitInternalObjectsWithoutRefs": false
+  },
+  "historyRefs": [
+    "HEAD",
+    "--branches",
+    "--tags",
+    "--remotes=origin"
+  ],
+  "identity": {
+    "allowedEmailPatterns": [
+      "^[0-9]+\\+[A-Za-z0-9-]+@users\\.noreply\\.github\\.com$",
+      "^[A-Za-z0-9-]+@users\\.noreply\\.github\\.com$",
+      "^noreply@github\\.com$"
+    ],
+    "personalMailboxDomainsAllowed": false
+  },
+  "content": {
+    "rfc1918AddressesAllowed": false,
+    "credentialsInUrlsAllowed": false,
+    "privateKeyMaterialAllowed": false,
+    "sshPublicKeyMaterialAllowed": false,
+    "sshFingerprintsAllowed": false,
+    "likelySecretsAllowed": false,
+    "machineSpecificUserPathsAllowed": false,
+    "machineSpecificSshTargetsAllowed": false
+  },
+  "genericPathIdentities": [
+    "name",
+    "user",
+    "username",
+    "your-user",
+    "haven42-comfyui"
+  ],
+  "contentRulePathAllowlist": {
+    "credential-bearing URL": [
+      "scripts/native-bridge-boundary-policy.py",
+      "scripts/provider_security.py",
+      "scripts/test-haven42-web.py",
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "private key material": [
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "SSH public key material": [
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "SSH fingerprint": [
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "likely secret": [
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "Windows user path": [
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "POSIX user path": [
+      "scripts/system_readiness.py",
+      "scripts/validate-model-performance-evidence.py",
+      "scripts/verify-public-repository-privacy.py"
+    ],
+    "RFC1918 address": [
+      "scripts/verify-public-repository-privacy.py"
+    ]
+  },
+  "notes": [
+    "The scanner contains only generic patterns and documentation placeholders.",
+    "Ignored local evidence and recovery bundles are intentionally outside policy scope and must never be tracked.",
+    "A complete-history scan prevents an old clone from reintroducing reachable sensitive objects."
+  ]
+}

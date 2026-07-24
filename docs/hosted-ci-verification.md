@@ -24,6 +24,7 @@ Do not describe a push as successful while the state is only `Pushed` or
 
 The `Validate Pack` workflow must complete these jobs successfully:
 
+- `Public repository privacy`
 - `Wiki synchronization`
 - `Windows PowerShell validation`
 - `Linux script smoke tests`

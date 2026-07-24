@@ -37,7 +37,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 
 ## Current Roadmap
 
-- Milestone 22 — local text, provider metrics, software planning, promoted Linux images, and portable development packages are runnable; workflow execution, composition, activated updates, and optional Tauri packaging remain independently gated.
+- Milestone 22 — local text, provider metrics, software planning, bounded effect-free composition plans, promoted Linux images, and portable development packages are runnable; workflow execution, executable composition, activated updates, and optional Tauri packaging remain independently gated.
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.

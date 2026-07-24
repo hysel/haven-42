@@ -290,8 +290,8 @@ test_github_actions_dependencies() {
   credential_count="$(printf '%s' "$action_sources" | grep -Ec 'persist-credentials:[[:space:]]*false')"
 
   ! printf '%s' "$action_sources" | grep -Eq 'actions/checkout@(v[0-9]+|main|master)([^0-9]|$)' &&
-    [ "$checkout_count" -eq 7 ] &&
-    [ "$credential_count" -eq 7 ] &&
+    [ "$checkout_count" -eq 8 ] &&
+    [ "$credential_count" -eq 8 ] &&
     grep -Eq '^concurrency:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -q 'timeout-minutes:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -Eq 'package-ecosystem:[[:space:]]*github-actions' "$REPO_ROOT/.github/dependabot.yml" &&
@@ -2398,6 +2398,26 @@ assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md
 PY
 }
 
+test_task_composition_and_repository_privacy() {
+  python3 "$REPO_ROOT/scripts/test-task-composition.py" | grep -q "10 bounded, effect-free checks" || return 1
+  python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
+  python3 - "$REPO_ROOT" <<'PY'
+import json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+contract = json.loads((root / "config/task-composition-contract.json").read_text(encoding="utf-8"))
+assert contract["mode"] == "simulation-only"
+assert contract["executionAllowed"] is False
+assert contract["maximumSteps"] == 6
+assert contract["allowedSafetyLevels"] == ["read-only"]
+assert all(contract["security"][field] is False for field in (
+    "processCreationAllowed",
+    "filesystemAccessAllowed",
+    "networkAccessAllowed",
+    "machineModificationAllowed",
+))
+PY
+}
+
 test_product_ui_first_slice() {
   python3 "$REPO_ROOT/scripts/build-ui-view-model.py" --self-test | grep -q "5 cases" || return 1
   python3 "$REPO_ROOT/scripts/evaluate-onboarding-configuration.py" --self-test | grep -q "11 cases" || return 1
@@ -2530,6 +2550,7 @@ run_test "core update policy fails closed before cryptographic admission" test_c
 run_test "workflow reliability threat model and data lifecycle fail closed" test_workflow_reliability_and_data_lifecycle
 run_test "provider performance evidence and capacity preflight fail closed" test_provider_evidence_and_capacity
 run_test "local web MVP is loopback-only and unloads models" test_local_web_mvp
+run_test "task composition and repository privacy foundations fail closed" test_task_composition_and_repository_privacy
 run_test "product UI first slice is registry-backed and fail closed" test_product_ui_first_slice
 run_test "media onboarding and quantization foundations fail closed" test_media_onboarding_and_quantization_foundations
 
