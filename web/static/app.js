@@ -47,6 +47,8 @@ const state = {
   capabilities: [],
   readinessSnapshot: null,
   setupPlan: null,
+  workflows: [],
+  imageConnected: false,
   lastFocusBeforeWizard: null,
 };
 
@@ -99,6 +101,78 @@ function renderCapabilities() {
     row.append(detail, status);
     container.append(row);
   }
+}
+
+function validateWorkflowCatalog(result) {
+  if (
+    !result
+    || typeof result !== "object"
+    || Array.isArray(result)
+    || Object.keys(result).sort().join(",") !== [
+      "arbitraryCommandsAllowed", "executionMode", "kind",
+      "rendererArgumentsAllowed", "schemaVersion", "workflows",
+    ].sort().join(",")
+    || result.schemaVersion !== 1
+    || result.kind !== "workflow-catalog"
+    || result.executionMode !== "plan-only"
+    || result.arbitraryCommandsAllowed !== false
+    || result.rendererArgumentsAllowed !== false
+    || !Array.isArray(result.workflows)
+  ) throw new Error("invalid-workflow-catalog");
+  const ids = new Set();
+  result.workflows.forEach((workflow) => {
+    if (
+      !workflow
+      || typeof workflow !== "object"
+      || Array.isArray(workflow)
+      || Object.keys(workflow).sort().join(",") !== [
+        "category", "executionMode", "id", "name", "purpose",
+        "rendererArgumentsAllowed", "safetyLevel",
+      ].sort().join(",")
+      || !/^[a-z][a-z0-9-]{0,127}$/.test(workflow.id)
+      || ids.has(workflow.id)
+      || typeof workflow.name !== "string"
+      || typeof workflow.purpose !== "string"
+      || workflow.safetyLevel !== "read-only"
+      || workflow.executionMode !== "plan-only"
+      || workflow.rendererArgumentsAllowed !== false
+    ) throw new Error("invalid-workflow-catalog");
+    ids.add(workflow.id);
+  });
+  return result.workflows;
+}
+
+async function loadWorkflows() {
+  const result = await api("/api/workflows", {});
+  state.workflows = validateWorkflowCatalog(result);
+  const select = byId("workflow-select");
+  select.replaceChildren();
+  state.workflows.forEach((workflow) => {
+    const option = document.createElement("option");
+    option.value = workflow.id;
+    option.textContent = `${workflow.name} · ${workflow.category}`;
+    select.append(option);
+  });
+  select.disabled = state.workflows.length === 0;
+  byId("workflow-plan-button").disabled = state.workflows.length === 0;
+}
+
+function openSoftware() {
+  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
+  byId("software-nav").classList.add("active");
+  byId("text-panel").classList.add("hidden");
+  byId("image-panel").classList.add("hidden");
+  byId("software-panel").classList.remove("hidden");
+  byId("software-panel").scrollIntoView({ behavior: "smooth" });
+}
+
+function openImages() {
+  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
+  byId("image-nav").classList.add("active");
+  byId("text-panel").classList.add("hidden");
+  byId("software-panel").classList.add("hidden");
+  byId("image-panel").classList.remove("hidden");
+  byId("image-panel").scrollIntoView({ behavior: "smooth" });
 }
 
 function setTaskControlsDisabled(disabled) {
@@ -397,6 +471,59 @@ function validateRecovery(recovery) {
   return recovery;
 }
 
+function validateFailureDetails(error, expectedKind) {
+  const details = error?.details;
+  if (
+    !details
+    || details.schemaVersion !== 1
+    || details.kind !== `${expectedKind}-execution-error`
+    || details.status !== "failed"
+  ) throw new Error("invalid-server-response");
+  validateExecutionEvents(details.events, "error");
+  return validateRecovery(details.recovery);
+}
+
+function renderRunDetails(details) {
+  const panel = byId("run-details");
+  const list = byId("run-details-list");
+  panel.classList.add("hidden");
+  panel.open = false;
+  list.replaceChildren();
+  const expected = [
+    "generationDurationMs", "inputTokens", "loadDurationMs", "outputTokens",
+    "promptDurationMs", "providerReported", "tokensPerSecond", "totalDurationMs", "totalTokens",
+  ];
+  if (
+    !details
+    || typeof details !== "object"
+    || Array.isArray(details)
+    || Object.keys(details).sort().join(",") !== expected.sort().join(",")
+    || details.providerReported !== true
+  ) throw new Error("invalid-run-details");
+  const numericFields = expected.filter((key) => key !== "providerReported");
+  if (numericFields.some((key) => (
+    details[key] !== null
+    && (typeof details[key] !== "number" || !Number.isFinite(details[key]) || details[key] < 0)
+  ))) throw new Error("invalid-run-details");
+  const rows = [
+    ["Input tokens", details.inputTokens],
+    ["Output tokens", details.outputTokens],
+    ["Total tokens", details.totalTokens],
+    ["Generation speed", details.tokensPerSecond == null ? null : `${details.tokensPerSecond} tokens/s`],
+    ["Elapsed", details.totalDurationMs == null ? null : `${details.totalDurationMs} ms`],
+  ];
+  rows.forEach(([label, value]) => {
+    const row = document.createElement("div");
+    const term = document.createElement("dt");
+    const description = document.createElement("dd");
+    term.textContent = label;
+    description.textContent = value == null ? "Not reported" : String(value);
+    row.append(term, description);
+    list.append(row);
+  });
+  panel.classList.remove("hidden");
+}
+
 function renderTypedResult(result, capability) {
   if (
     !result.artifact
@@ -413,6 +540,7 @@ function renderTypedResult(result, capability) {
     || result.artifact.policy?.networkAccess !== false
     || result.artifact.policy?.modelDownload !== false
     || result.artifact.policy?.externalProvider !== false
+    || typeof result.modelDigestVerified !== "boolean"
     || !Array.isArray(result.events)
   ) {
     throw new Error("invalid-typed-artifact");
@@ -424,6 +552,7 @@ function renderTypedResult(result, capability) {
   } else {
     setTaskEvent(summary, "result");
   }
+  renderRunDetails(result.runDetails);
   addMessage("assistant", result.artifact.content.text, capability.resultLabel);
 }
 
@@ -452,12 +581,17 @@ function resetTask() {
   messages.replaceChildren();
   addMessage("assistant", capability.welcome, "Haven 42");
   byId("prompt").value = "";
+  byId("run-details").classList.add("hidden");
+  byId("run-details-list").replaceChildren();
   byId("text-status").textContent = state.connected ? "Ready · nothing saved" : "Provider not connected";
 }
 
 function selectCapability(capabilityId) {
   if (!Object.hasOwn(CAPABILITIES, capabilityId)) return;
   state.capabilityId = capabilityId;
+  byId("software-panel").classList.add("hidden");
+  byId("image-panel").classList.add("hidden");
+  byId("text-panel").classList.remove("hidden");
   const capability = CAPABILITIES[capabilityId];
   byId("capability-eyebrow").textContent = capability.eyebrow;
   byId("capability-title").textContent = capability.title;
@@ -537,6 +671,7 @@ async function bootstrap() {
     byId("host-status").textContent = `${result.runtime.platform} · ${result.runtime.architecture}`;
     state.capabilities = result.capabilities || [];
     renderCapabilities();
+    await loadWorkflows();
     byId("update-status").textContent = result.updates?.mode === "disabled"
       ? "Disabled · no network"
       : "Unknown";
@@ -683,6 +818,138 @@ byId("home-nav").addEventListener("click", () => {
   document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
   byId("home-nav").classList.add("active");
   window.scrollTo({ top: 0, behavior: "smooth" });
+});
+byId("software-nav").addEventListener("click", openSoftware);
+byId("image-nav").addEventListener("click", openImages);
+byId("workflow-plan-button").addEventListener("click", async () => {
+  clearError();
+  const button = byId("workflow-plan-button");
+  button.disabled = true;
+  try {
+    const workflowId = byId("workflow-select").value;
+    const result = await api("/api/workflow-plan", { workflowId });
+    if (
+      result.schemaVersion !== 1
+      || result.kind !== "workflow-execution"
+      || result.status !== "planned"
+      || result.workflow?.id !== workflowId
+      || result.workflow?.safetyLevel !== "read-only"
+      || result.result?.invoked !== false
+      || result.result?.processStarted !== false
+      || result.result?.argumentsAccepted !== false
+      || result.artifact?.artifactType !== "engineering-report"
+      || result.artifact?.status !== "planned"
+      || result.artifact?.policy?.repositoryRead !== false
+      || result.artifact?.policy?.fileWrite !== false
+      || result.artifact?.policy?.networkAccess !== false
+    ) throw new Error("invalid-workflow-plan");
+    validateExecutionEvents(result.events, "result");
+    byId("workflow-result-title").textContent = result.artifact.content.title;
+    byId("workflow-result-summary").textContent = result.artifact.content.summary;
+    byId("workflow-result-policy").textContent = "No process started · no arguments · no repository read · no file write · no network";
+    byId("workflow-result").classList.remove("hidden");
+  } catch (error) {
+    let displayedError = error;
+    try {
+      validateFailureDetails(error, "workflow");
+    } catch {
+      displayedError = new Error("invalid-server-response");
+    }
+    showError(humanError(displayedError));
+  } finally {
+    button.disabled = state.workflows.length === 0;
+  }
+});
+byId("image-connect-button").addEventListener("click", async () => {
+  clearError();
+  const button = byId("image-connect-button");
+  button.disabled = true;
+  try {
+    const result = await api("/api/image/connect", {
+      endpoint: byId("image-endpoint").value.trim(),
+      timeoutSeconds: 300,
+    });
+    if (
+      result.schemaVersion !== 1
+      || result.kind !== "image-provider-connection"
+      || result.connected !== true
+      || result.providerId !== "comfyui.local-image"
+      || result.trustScope !== "loopback"
+      || result.profile !== "linux-comfyui-sdxl-promoted"
+      || result.configurationPersisted !== false
+      || result.customNodesAllowed !== false
+      || result.externalApiNodesAllowed !== false
+      || result.providerRetainsOutput !== true
+    ) throw new Error("invalid-image-provider-connection");
+    state.imageConnected = true;
+    ["image-prompt", "image-size", "image-steps", "image-run-button"].forEach((id) => {
+      byId(id).disabled = false;
+    });
+    byId("image-provider-badge").textContent = "Connected · loopback";
+    byId("image-provider-badge").classList.add("good");
+    state.capabilities = state.capabilities.map((capability) => (
+      capability.id === "media.image.create"
+        ? { ...capability, state: "available", execution: "local" }
+        : capability
+    ));
+    renderCapabilities();
+  } catch (error) {
+    state.imageConnected = false;
+    showError(humanError(error));
+  } finally {
+    button.disabled = false;
+  }
+});
+byId("image-run-button").addEventListener("click", async () => {
+  clearError();
+  const button = byId("image-run-button");
+  const prompt = byId("image-prompt").value.trim();
+  if (!state.imageConnected || !prompt) return;
+  button.disabled = true;
+  button.textContent = "Generating locally…";
+  try {
+    const size = Number(byId("image-size").value);
+    const result = await api("/api/image/run", {
+      prompt,
+      width: size,
+      height: size,
+      steps: Number(byId("image-steps").value),
+      seed: 424242,
+    });
+    if (
+      result.schemaVersion !== 1
+      || result.kind !== "image"
+      || result.capabilityId !== "media.image.create"
+      || result.status !== "succeeded"
+      || result.promptPersisted !== false
+      || result.endpointPersisted !== false
+      || typeof result.imageBase64 !== "string"
+      || !/^[A-Za-z0-9+/]+={0,2}$/.test(result.imageBase64)
+      || result.artifact?.artifactType !== "image"
+      || result.artifact?.status !== "succeeded"
+      || result.artifact?.content?.delivery !== "browser-memory"
+      || result.artifact?.policy?.fileWrite !== false
+      || result.artifact?.policy?.repositoryRead !== false
+      || result.artifact?.policy?.providerRetainedOutput !== true
+    ) throw new Error("invalid-image-result");
+    validateExecutionEvents(result.events, "result");
+    const source = `data:image/png;base64,${result.imageBase64}`;
+    byId("image-preview").src = source;
+    byId("image-download").href = source;
+    byId("image-result-summary").textContent = `${result.artifact.content.width} × ${result.artifact.content.height} PNG · browser memory only · provider copy retained`;
+    byId("image-result").classList.remove("hidden");
+  } catch (error) {
+    let displayedError = error;
+    try {
+      validateFailureDetails(error, "image");
+    } catch {
+      displayedError = new Error("invalid-server-response");
+    }
+    showError(humanError(displayedError));
+  } finally {
+    button.disabled = !state.imageConnected;
+    button.textContent = "Generate with disclosed retention";
+  }
 });
 byId("models-nav").addEventListener("click", () => {
   byId("connection-panel").scrollIntoView({ behavior: "smooth" });

@@ -424,9 +424,18 @@
 - [x] Make chat the primary local-web interaction, reduce the oversized hero, keep desktop navigation and provider/system setup visible while scrolling, and preserve responsive one-column behavior.
 - [x] Add a security-first, memory-only first-run web wizard for provider connection, advanced timeout/residency settings, capability-specific readiness, and a working-chat handoff.
 - [ ] Run the controlled writing-quality matrix for exact Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H artifacts before promoting a comparative writing-quality default over the validated adapter baseline.
+  - [x] Run the initial exact-digest automated constraint matrix with synthetic
+    inputs, provider token/timing metrics, no raw-output persistence, and
+    verified per-case and final unloads. Blind human scoring and repeated
+    quality samples remain open before comparative promotion.
 - [x] Replace first-provider-result model defaults with capability-specific engine recommendations, non-downloading missing-model guidance, advanced per-capability overrides, reset-to-automatic, and visibly unverified handling for unknown installed models.
-- [ ] Bind local-web automatic recommendations to an immutable provider artifact digest after the exact tested digest is captured in validation evidence; until then, describe the Qwen selection as model-name/evidence matching rather than immutable-artifact proof.
-- [ ] Expand the local web UI over the Milestone 20 workflow foundation and remaining evidence-gated Milestone 21 capabilities without duplicating business logic.
+- [x] Bind local-web automatic recommendations to the exact tested Qwen
+  provider digest and capability evidence; a matching model name with a
+  different or missing digest remains an explicit unverified choice.
+- [x] Expand the local web UI over the stable registries with exact-digest text
+  selection, plan-only registered read-only software workflows, and the
+  promoted Linux ComfyUI/SDXL image capability without duplicating provider
+  or workflow admission logic.
 - [ ] Keep Tauri as optional Milestone 22B native packaging after its published dependency, bridge, signing, package, and platform gates pass; the local web product must not wait on it.
 - [x] Add unsigned PyInstaller one-folder development packages for Windows, Linux, and macOS using the shared browser UI, embedded resource-integrity verification, source/package parity, native smoke tests, least-privilege CI, checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence.
 - [x] Harden portable development packaging with cross-platform wheel hashes, platform-allowlisted evidence, hostile resource/shutdown/archive tests, exact checksum coverage, full package inventory, and explicit unsigned build provenance.
@@ -437,12 +446,16 @@
 - [x] Add a versioned, read-only model catalog assembler that combines discovery, exact artifact identity, per-artifact license policy, hardware fit, and revision-bound evidence into one fail-closed beginner/advanced decision.
 - [x] Add first-run intent navigation, capability availability, evidence states, and policy disclosures to the admitted local-web slice.
   - Chat, Writing, and Summarization become available only after provider validation; Software remains not admitted and Images remains provider-profile-required. Native renderer integration remains separately gated.
-- [ ] Render typed artifacts plus versioned progress, warning, result, and error envelopes across all admitted workflows.
+- [x] Render strict typed artifacts and ordered progress, warning, result, and
+  error envelopes across admitted text, workflow-plan, and image operations.
 - [x] Render local-web typed chat-message/Markdown artifacts with strict accepted/progress/warning/result/error ordering, visible unverified-model warnings, typed failure recovery, no automatic retry, and no file writes; broader workflow rendering remains open under the parent task.
 - [ ] Connect setup, health, model choice, software workflows, validation, cleanup, and evidence views without duplicating business logic.
 - [x] Connect local-web setup, provider health, model choice, cleanup status, evidence boundary, and disabled-update state; software workflow execution and broader validation evidence remain open under the parent task.
 - [x] Add repository-free text flows only for evidence-gated Milestone 21 providers.
-- [ ] Add a repository-free image flow only for the promoted Linux ComfyUI/SDXL profile, with explicit availability and artifact controls.
+- [x] Add a repository-free browser-memory image flow only for the promoted
+  Linux ComfyUI/SDXL profile, with loopback-only discovery, fixed checkpoint
+  and workflow authority, bounded PNG validation, explicit retention
+  disclosure, history cleanup, and user-triggered download.
 - [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
 - [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, hostile catalog tests, and a dependency-free headless Chromium wizard/chat flow on Windows; native packaging and full cross-platform browser recovery coverage remain open under the parent task.
 - [ ] Add bounded multi-step composition with explicit intermediate artifacts and approvals.

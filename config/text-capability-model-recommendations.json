@@ -11,6 +11,7 @@
     "general.chat": [
       {
         "model": "qwen3.5:9b",
+        "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
         "priority": 100,
         "evidenceId": "general-chat-qwen35-9b-ollama",
         "evidenceStatus": "passed",
@@ -21,6 +22,7 @@
     "content.write": [
       {
         "model": "qwen3.5:9b",
+        "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
         "priority": 100,
         "evidenceId": "general-writing-qwen35-9b-ollama",
         "evidenceStatus": "passed",
@@ -31,6 +33,7 @@
     "content.summarize": [
       {
         "model": "qwen3.5:9b",
+        "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
         "priority": 100,
         "evidenceId": "general-summarization-qwen35-9b-ollama",
         "evidenceStatus": "passed",

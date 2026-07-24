@@ -3,33 +3,38 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "0154e09190ab058da5014ab93e581c03d41cb88e13c7399851d919a82ddb9301",
-      "sizeBytes": 14372
+      "sha256": "dbfbc886bb4b667e4a6351c825a16399dd07189ebb9628777e9d666479c63333",
+      "sizeBytes": 18343
     },
     {
       "path": "web/static/app.js",
-      "sha256": "1065250cea7fba36e4f809da81e611dc9db82161e0911c0a045ea35fcd83bb80",
-      "sizeBytes": 27680
+      "sha256": "0439736506894db131ed5a256866586f6c4ca255ec10873daa62960d71fbe989",
+      "sizeBytes": 41761
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "07b4fd56bcfb803ad326d846025aa166a9ac75bca43a26c9b69ea7193f39b523",
-      "sizeBytes": 15695
+      "sha256": "b5506d7a371ea7adce9662f4c4ea0f93243bf9d41512cee100fb10f0101cbc22",
+      "sizeBytes": 16485
     },
     {
       "path": "config/text-capability-model-recommendations.json",
-      "sha256": "536978945527e46a7b3aa2eba0a560d097a603a42f754e1b330f2b06fa469193",
-      "sizeBytes": 1316
+      "sha256": "17879d432ae0c40f7318c85307799af79a65cc583f22cfadd5538f8898f55133",
+      "sizeBytes": 1565
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "3b77e0f7fbe80eeb24170e0f3a9737d9379c2deee53e792e13f9d0e083f22466",
-      "sizeBytes": 24756
+      "sha256": "e05fd00c1ccf62379095fad2d7f428bc79be867704801f17ec3cdaee518107cd",
+      "sizeBytes": 26314
     },
     {
       "path": "config/install-component-registry.json",
       "sha256": "320828ed102c368e41673f35ea9b35f78a3182152415f30bd23fa63fd657e582",
       "sizeBytes": 4068
+    },
+    {
+      "path": "config/workflows.json",
+      "sha256": "cbeb8f153243a63558d4b4d2aa1a71d01b42d122b88cd5cbf24694805609d26b",
+      "sizeBytes": 20683
     }
   ],
   "schemaVersion": 1

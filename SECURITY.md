@@ -4,7 +4,17 @@
 
 Haven 42 is pre-1.0. Only the latest tagged release and the current `main` branch receive security fixes. Contracts marked `runtimeAdmitted: false`, documentation-only candidates, and failed or partial provider profiles are not supported runtime surfaces.
 
-The local-web readiness scan is explicit, loopback-only, CSRF-protected, bounded, shell-free, network-free, and read-only. It returns sanitized capability facts rather than identity or raw command output, stores its snapshot only in memory, and builds setup plans only from the exact current server-owned snapshot. Text event envelopes are fail-closed: sequences must be contiguous and monotonic, contain exactly one result or error terminal, and stop at that terminal. An unverified manual model is visibly warned, failures do not retry automatically, and restored input remains browser-memory-only for a new request. The installation broker is simulation-only and not runtime-admitted; no browser request can authorize a download, command, write, elevation, service change, driver change, or installation.
+The local-web readiness scan is explicit, loopback-only, CSRF-protected, bounded, shell-free, network-free, and read-only. It returns sanitized capability facts rather than identity or raw command output, stores its snapshot only in memory, and builds setup plans only from the exact current server-owned snapshot. Automatic text recommendations require an exact provider digest and capability evidence; name-only matches remain unverified. Provider token and timing values are diagnostic, memory-only, and never represented as billing or remaining context. Event envelopes are fail-closed: sequences must be contiguous and monotonic, contain exactly one result or error terminal, and stop at that terminal. An unverified manual model is visibly warned, failures do not retry automatically, and restored input remains browser-memory-only for a new request.
+
+The Software view admits only registry-backed `uiReady`, `read-only` plans and
+cannot pass arguments or start a process. The Images view is separately limited
+to the promoted Linux ComfyUI/SDXL profile through an IP-literal loopback
+endpoint. The model and node graph are engine-owned, response size and PNG shape
+are bounded, API history is cleared, client delivery stays in browser memory,
+and provider-side retention is disclosed before execution. No browser request
+can authorize arbitrary download, command, client file write, repository read,
+elevation, service change, driver change, or installation. The installation
+broker remains simulation-only and not runtime-admitted.
 
 Unsigned portable development builds preserve this boundary. They verify their allowlisted browser/data resources at startup, bind only to IPv4 loopback, construct only a loopback browser URL, expose no arbitrary process control, and require same-origin session authority plus verified model cleanup for HTTP shutdown. Package archives include SHA-256 checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence. They are not signed, notarized, installer-backed, published releases, or production-ready. The offline installer and updater policy foundations cannot modify a machine or activate an update. The lifecycle simulator rejects raw paths, URLs, commands, arguments, and environment input; models healthy, failed-health, interrupted, rollback, retention, and disabled paths; and always reports network, writes, download, staging, activation, rollback, cleanup, installation, elevation, service, driver, firewall, process, and user-data effects as false.
 

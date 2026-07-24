@@ -105,8 +105,8 @@
       <button class="nav-item capability-nav" data-capability="general.chat" type="button"><span>✦</span>Chat</button>
       <button class="nav-item capability-nav" data-capability="content.write" type="button"><span>✎</span>Writing</button>
       <button class="nav-item capability-nav" data-capability="content.summarize" type="button"><span>≡</span>Summarize</button>
-      <button class="nav-item availability-nav" type="button"><span>⌘</span>Software <small>Unavailable</small></button>
-      <button class="nav-item availability-nav" type="button"><span>◫</span>Images <small>Setup needed</small></button>
+      <button class="nav-item" id="software-nav" type="button"><span>⌘</span>Software <small>Plan only</small></button>
+      <button class="nav-item" id="image-nav" type="button"><span>◫</span>Images <small>Setup needed</small></button>
       <button class="nav-item" id="models-nav" type="button"><span>◉</span>Models</button>
       <button class="nav-item" id="system-nav" type="button"><span>◇</span>System</button>
       <div class="rail-note">
@@ -159,6 +159,11 @@
             </article>
           </div>
           <div class="task-event hidden" id="task-event" role="status" aria-live="polite"></div>
+          <details class="run-details hidden" id="run-details">
+            <summary>Run details · provider reported</summary>
+            <dl class="status-list" id="run-details-list"></dl>
+            <p>Diagnostic values only—not billing data or remaining context.</p>
+          </details>
 
           <form class="composer" id="text-form">
             <label class="sr-only" id="prompt-label" for="prompt">Message</label>
@@ -168,6 +173,71 @@
           <div class="chat-footer">
             <span id="text-status">Provider not connected</span>
             <span>Inputs and responses are not written to disk</span>
+          </div>
+        </section>
+
+        <section class="panel chat-panel hidden" id="software-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">SOFTWARE · REGISTERED WORKFLOWS</p>
+              <h2>Review a trusted workflow</h2>
+            </div>
+            <span class="badge good">Plan only</span>
+          </div>
+          <div class="workflow-planner">
+            <p>Only registry-backed, read-only workflows are shown. Planning starts no process, accepts no arguments, and grants no repository or filesystem authority.</p>
+            <label for="workflow-select">Workflow</label>
+            <select id="workflow-select" disabled><option>Loading trusted workflows…</option></select>
+            <button class="button primary" id="workflow-plan-button" type="button" disabled>Review workflow plan</button>
+            <article class="workflow-result hidden" id="workflow-result" aria-live="polite">
+              <strong id="workflow-result-title"></strong>
+              <p id="workflow-result-summary"></p>
+              <small id="workflow-result-policy"></small>
+            </article>
+          </div>
+        </section>
+
+        <section class="panel chat-panel hidden" id="image-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">IMAGES · PROMOTED LINUX PROFILE</p>
+              <h2>Create an image locally</h2>
+            </div>
+            <span class="badge" id="image-provider-badge">Not connected</span>
+          </div>
+          <div class="workflow-planner">
+            <p>Connect only a loopback ComfyUI endpoint, such as an explicitly managed SSH tunnel. Haven 42 admits the validated SDXL checkpoint only; custom and external API nodes remain disabled.</p>
+            <div class="field-row">
+              <label class="grow">ComfyUI endpoint
+                <input id="image-endpoint" value="http://127.0.0.1:8188" spellcheck="false" autocomplete="off">
+              </label>
+              <button class="button secondary" id="image-connect-button" type="button">Connect</button>
+            </div>
+            <label for="image-prompt">Image description</label>
+            <textarea id="image-prompt" rows="3" maxlength="8192" disabled></textarea>
+            <div class="advanced-grid">
+              <label>Size
+                <select id="image-size" disabled>
+                  <option value="512">512 × 512</option>
+                  <option value="768">768 × 768</option>
+                  <option value="1024" selected>1024 × 1024</option>
+                </select>
+              </label>
+              <label>Steps
+                <select id="image-steps" disabled>
+                  <option value="10">10 · preview</option>
+                  <option value="20" selected>20 · balanced</option>
+                  <option value="30">30 · detailed</option>
+                </select>
+              </label>
+            </div>
+            <p class="notice">Generation writes an output on the provider host. Haven 42 clears API history but cannot remove that provider-retained copy. The returned PNG stays in browser memory until you explicitly download it.</p>
+            <button class="button primary" id="image-run-button" type="button" disabled>Generate with disclosed retention</button>
+            <article class="workflow-result hidden" id="image-result" aria-live="polite">
+              <img id="image-preview" alt="Generated Haven 42 result">
+              <p id="image-result-summary"></p>
+              <a class="button secondary" id="image-download" download="haven42-generated-image.png">Download PNG</a>
+            </article>
           </div>
         </section>
 

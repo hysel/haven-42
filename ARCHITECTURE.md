@@ -38,12 +38,24 @@ Host + Origin + session-token enforcement
         |
 Python standard-library local server
         |
-shared endpoint security -> Ollama discovery and general.chat
+shared endpoint security -> exact-digest Ollama text + loopback ComfyUI image
+        |
+workflow registry -> read-only plan artifacts (no process or arguments)
         |
 unload and process-list verification after every response
 ```
 
-The process persists no endpoint or messages, exposes no repository or filesystem API, permits no remote UI assets, and cannot bind to a LAN interface. Text execution uses the shared schema-v1 event vocabulary. The browser rejects malformed, non-monotonic, multiple-terminal, or post-terminal event streams before rendering an artifact. Unverified manual models add a warning event; provider failures return a typed error and memory-only recovery declaration. No automatic retry occurs, and a retry is always a new request. Its admitted machine-readable boundary is `config/local-web-runtime-policy.json`.
+The process persists no endpoint, prompt, response, or provider run detail; exposes no repository, generic filesystem, shell, or arbitrary process API; permits no remote UI assets; and cannot bind to a LAN interface. Automatic text selection requires the exact installed Ollama digest and matching capability evidence. Text, workflow-plan, and image execution use the shared schema-v1 event vocabulary. The browser rejects malformed, non-monotonic, multiple-terminal, or post-terminal event streams before rendering an artifact. Unverified manual models add a warning event; provider failures return typed errors and memory-only recovery declarations. No automatic retry occurs, and a retry is always a new request.
+
+The Software view is registry-derived but plan-only: it admits only `uiReady`,
+`read-only` records, accepts no renderer arguments, and starts no process. The
+Images view is a separate authority boundary for the promoted Linux
+ComfyUI/SDXL profile. It requires a loopback endpoint, discovers the exact
+checkpoint, submits a fixed built-in workflow, caps and validates the PNG,
+clears API history, and returns a browser-memory artifact for a user-triggered
+download. Provider-side image retention is disclosed and is not confused with
+a Haven 42 client write. The admitted machine-readable boundary is
+`config/local-web-runtime-policy.json`.
 
 The initial native distribution path freezes that same process and UI into a PyInstaller one-folder package. PyInstaller supplies only a local launcher/runtime boundary: it does not add browser authority, an installer, privileged service, global dependency, or native UI framework. Frozen startup verifies a strict embedded path/size/SHA-256 resource manifest before serving. Native package tests compare source and frozen behavior and require token-protected model-cleanup-first shutdown. `config/portable-development-package-contract.json` is the machine-readable boundary; Tauri/Rust remains unadmitted.
 

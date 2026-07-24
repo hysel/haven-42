@@ -11,9 +11,12 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
-- Added truthful local-web capability, provider-health, evidence-boundary, and disabled-update views; Chat, Writing, and Summarization become available only after provider validation while Software and Images remain visibly gated.
+- Added exact-digest local-web text recommendations, provider-reported token/timing details, a reusable sanitized four-model writing matrix, and initial exact-artifact evidence with verified unloads. Comparative prose-quality promotion remains blocked on repeated and blind human review.
+- Added a fail-closed Software view over registry-backed `uiReady`, `read-only` workflow plans. Renderer arguments, arbitrary commands, process starts, repository reads, file writes, and workflow network effects remain denied.
+- Added the promoted Linux ComfyUI/SDXL image flow to the local web UI through an IP-literal loopback endpoint, fixed checkpoint and built-in workflow authority, bounded PNG validation, API-history cleanup, browser-memory delivery, explicit provider-retention disclosure, offline hostile tests, and a live SSH-tunneled smoke test.
+- Added truthful local-web capability, provider-health, evidence-boundary, and disabled-update views; Chat, Writing, and Summarization become available only after exact provider validation, Software is plan-only, and Images require the promoted provider profile.
 - Added schema-validated typed local-web artifacts and progress/result/error rendering, plus keyboard focus management, ARIA step/status semantics, a skip link, visible focus treatment, and reduced-motion coverage.
-- Added a dependency-free headless Chromium test that completes first-run setup, validates readiness and focus trapping, handles an unverified installed model, opens chat, and renders a typed result against an isolated fake provider.
+- Expanded the dependency-free headless Chromium test across first-run setup, exact-digest readiness, provider run details, registered workflow planning, promoted image generation, hostile events, and failure recovery against isolated fake providers.
 - Hardened the server-owned recommendation catalog against unsafe/duplicate model names, forged capability/operation evidence, duplicate evidence IDs, traversal-like paths, and unknown schema fields.
 - Added an offline-only GitHub Release candidate contract and hostile-input fixture tests that cannot use the network, download, write, or activate an update.
 - Changed local Full-test receipts to schema v2 content-tree authority so a metadata-only commit over already-tested content does not repeat the suite; hosted CI remains independent.

@@ -21,6 +21,15 @@ This sanitized record covers ComfyUI `v0.28.2`, PyTorch `2.11.0+cu126`, SDXL Bas
 
 The adapter generated a valid 1024×1024 PNG through a temporary SSH tunnel, wrote only inside an approved disposable session, omitted prompt and endpoint values, and removed the local session and tunnel afterward. ComfyUI retains generated provider output, which the adapter reports explicitly.
 
+On 2026-07-24, the local-web image boundary passed an additional live smoke
+through a temporary pinned SSH tunnel and the existing non-root `comfyadmin`
+account. The engine discovered the exact promoted checkpoint, generated one
+bounded 512×512 PNG with a fixed one-step smoke profile, returned a typed
+browser-memory image artifact, emitted accepted/progress/retention-warning/result
+events, persisted neither prompt nor endpoint, wrote no client file, cleared
+API history, authenticated shutdown, and closed the tunnel. The provider-side
+output remains retained and was not destructively removed.
+
 ## Limits
 
 - Evidence applies to this provider version, model, Linux runtime, GPU family, built-in workflow, and operation only.

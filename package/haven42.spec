@@ -9,6 +9,7 @@ resources = [
     ("config/text-capability-model-recommendations.json", "config"),
     ("config/evidence-catalog.tsv", "config"),
     ("config/install-component-registry.json", "config"),
+    ("config/workflows.json", "config"),
     ("package/resource-integrity.json", "package"),
 ]
 

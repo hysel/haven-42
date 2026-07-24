@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "runtimeId": "haven42.local-web",
-  "implementationStatus": "text-tools-admitted",
+  "implementationStatus": "text-tools-workflow-planning-and-promoted-image-admitted",
   "bind": {
     "allowedAddresses": ["127.0.0.1"],
     "defaultPort": 4242,
@@ -45,7 +45,7 @@
     "maximumRequestBytes": 65536,
     "maximumMessageBytes": 32768,
     "maximumConversationMessages": 20,
-    "modelSelection": "evidence-gated-automatic-with-advanced-per-capability-browser-memory-override",
+    "modelSelection": "immutable-digest-and-capability-evidence-gated-automatic-with-advanced-per-capability-browser-memory-override",
     "recommendationAuthority": "server-owned-static-catalog",
     "unknownInstalledModelState": "unverified",
     "automaticUnknownModelSelectionAllowed": false,
@@ -59,6 +59,36 @@
     "unloadOnModelOrProviderChange": true,
     "unloadOnShutdown": true,
     "maximumResponseBytes": 1048576
+  },
+  "runDetails": {
+    "providerReportedOnly": true,
+    "fields": ["inputTokens", "outputTokens", "totalTokens", "tokensPerSecond", "totalDurationMs", "loadDurationMs", "promptDurationMs", "generationDurationMs"],
+    "billingClaimAllowed": false,
+    "remainingContextClaimAllowed": false,
+    "persistenceAllowed": false
+  },
+  "softwareWorkflows": {
+    "registry": "config/workflows.json",
+    "admittedSafetyLevel": "read-only",
+    "uiReadyRequired": true,
+    "executionMode": "plan-only",
+    "rendererArgumentsAllowed": false,
+    "arbitraryCommandsAllowed": false,
+    "processStartAllowed": false
+  },
+  "images": {
+    "capabilityId": "media.image.create",
+    "providerId": "comfyui.local-image",
+    "admittedProfile": "linux-comfyui-sdxl-promoted",
+    "model": "sd_xl_base_1.0.safetensors",
+    "endpointTrustScope": "loopback",
+    "customNodesAllowed": false,
+    "externalApiNodesAllowed": false,
+    "localFileWritesAllowed": false,
+    "delivery": "browser-memory-user-triggered-download",
+    "providerRetentionDisclosureRequired": true,
+    "historyCleanupRequired": true,
+    "maximumImageBytes": 16777216
   },
   "executionEvents": {
     "contract": "config/workflow-envelope-contract.json",

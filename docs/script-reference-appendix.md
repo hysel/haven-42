@@ -64,7 +64,14 @@ Maintainers can exercise the preparatory offline update boundary directly with `
 
 Use the platform-specific entry points when you need exact script behavior or script-specific arguments. The registry lists Windows, Linux, and macOS entry points for every workflow.
 
-The runnable local product entry point is `scripts/start-haven42-web.ps1` on Windows or `scripts/start-haven42-web.linux.sh` / `scripts/start-haven42-web.macos.sh` on Unix. It starts the loopback-only status, Ollama discovery, chat, writing, and summarization application; see `docs/local-web-mvp.md`.
+The runnable local product entry point is `scripts/start-haven42-web.ps1` on Windows or `scripts/start-haven42-web.linux.sh` / `scripts/start-haven42-web.macos.sh` on Unix. It starts the loopback-only status, exact-digest Ollama text, registered software-planning, and promoted ComfyUI image application; see `docs/local-web-mvp.md`.
+
+Maintainers can run the controlled writing candidate screen directly with
+`scripts/run-writing-model-matrix.py`. It requires explicit model names and a
+validated local or trusted-LAN Ollama endpoint, uses synthetic prompts only,
+persists no raw output, records provider-reported metrics, and verifies unload
+after every case. It downloads no model and grants no recommendation authority;
+see `docs/writing-model-evaluation.md`.
 
 ## Candidate-Foundation Utilities
 

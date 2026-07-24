@@ -250,6 +250,16 @@ summary { cursor: pointer; font-size: 12px; }
 .task-event { margin: 0 24px 10px; padding: 9px 11px; border-left: 3px solid var(--accent); color: var(--muted); background: rgba(98, 230, 198, 0.06); font-size: 11px; }
 .task-event.error { border-left-color: var(--danger); color: var(--danger); }
 .task-event[data-kind="warning"] { border-left-color: #f3cf79; color: #f3cf79; }
+.run-details { margin: 0 24px 12px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; }
+.run-details summary { cursor: pointer; color: var(--text); }
+.run-details .status-list { margin-top: 8px; }
+.run-details p { margin: 8px 0 0; }
+.workflow-planner { padding: 24px; display: grid; gap: 12px; }
+.workflow-planner select { width: 100%; }
+.workflow-result { padding: 14px; border: 1px solid var(--border); border-radius: 8px; background: rgba(98, 230, 198, 0.05); }
+.workflow-result p { white-space: pre-wrap; }
+.workflow-result img { display: block; max-width: 100%; max-height: 520px; margin: 0 auto 12px; border-radius: 6px; }
+.grow { flex: 1; }
 
 .status-list { margin: 0; }
 .status-list div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid rgba(132, 190, 180, 0.09); }

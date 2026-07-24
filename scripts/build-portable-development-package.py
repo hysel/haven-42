@@ -28,6 +28,7 @@ RESOURCE_PATHS = (
     "config/text-capability-model-recommendations.json",
     "config/evidence-catalog.tsv",
     "config/install-component-registry.json",
+    "config/workflows.json",
 )
 ALLOWED_PACKAGE_ENTRIES = {"haven42", "haven42.exe", "_internal", "DEVELOPMENT-BUILD.txt"}
 COMMON_BUILD_DISTRIBUTIONS = {
