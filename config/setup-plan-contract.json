@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.setup-plan",
+  "operationId": "system.setup.plan",
+  "allowedIntents": ["guided-setup", "existing-setup", "explore"],
+  "requiredRequestFields": ["snapshotId", "intent"],
+  "requestPolicy": {
+    "unknownFieldsAllowed": false,
+    "rendererHardwareFactsAccepted": false,
+    "rendererEvidenceAccepted": false,
+    "snapshotMustMatchCurrentSession": true,
+    "expiredSnapshotAllowed": false
+  },
+  "effects": {
+    "networkAllowed": false,
+    "downloadsAllowed": false,
+    "writesAllowed": false,
+    "installationAllowed": false,
+    "elevationAllowed": false,
+    "serviceChangesAllowed": false,
+    "driverChangesAllowed": false
+  },
+  "requiredPlanFields": [
+    "schemaVersion",
+    "kind",
+    "snapshotId",
+    "intent",
+    "summary",
+    "hardwareAssessment",
+    "actions",
+    "effects",
+    "installationAllowed"
+  ],
+  "actionFields": [
+    "componentId",
+    "reason",
+    "state",
+    "required",
+    "promotionStatus",
+    "installControl",
+    "missingGate"
+  ]
+}

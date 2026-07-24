@@ -112,7 +112,44 @@ def main() -> int:
     fake = ThreadingHTTPServer(("127.0.0.1", 0), FakeOllama)
     fake_thread = threading.Thread(target=fake.serve_forever, daemon=True)
     fake_thread.start()
-    state = WEB.HavenState()
+    readiness_snapshot = {
+        "schemaVersion": 1,
+        "kind": "system-readiness",
+        "snapshotId": "browser-test-snapshot-0001",
+        "platform": {
+            "operatingSystem": "windows",
+            "architecture": "amd64",
+            "logicalProcessors": 16,
+            "systemMemoryGiB": 32.0,
+            "availableStorageGiB": 512.0,
+        },
+        "accelerators": [{
+            "vendor": "AMD", "model": "Test GPU", "memoryGiB": 16.0,
+            "memoryType": "dedicated", "state": "detected",
+            "source": "fixture", "confidence": "high",
+        }],
+        "software": [
+            {
+                "componentId": "python", "state": "validated", "version": "3.13",
+                "source": "fixture", "confidence": "high",
+            },
+            {
+                "componentId": "ollama", "state": "not-detected", "version": None,
+                "source": "fixture", "confidence": "high",
+            },
+        ],
+        "installedModels": [],
+        "warnings": [],
+        "effects": {
+            "networkUsed": False, "filesWritten": False, "installationPerformed": False,
+            "elevationRequested": False, "servicesChanged": False, "driversChanged": False,
+        },
+        "privacy": {
+            "persisted": False, "rawProbeOutputReturned": False,
+            "hostIdentityIncluded": False, "privatePathsIncluded": False,
+        },
+    }
+    state = WEB.HavenState(readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)))
     app = WEB.HavenWebServer(("127.0.0.1", 0), state)
     app_thread = threading.Thread(target=app.serve_forever, daemon=True)
     app_thread.start()
@@ -145,6 +182,43 @@ def main() -> int:
         assert "default-src 'self'" in headers["Content-Security-Policy"]
         token = bootstrap["sessionToken"]
         checks += 6
+
+        status, error, _ = request_json(
+            origin + "/api/readiness", "POST", {"force": True}, token,
+        )
+        assert status == 403 and error["error"] == "invalid-origin"
+        status, snapshot, _ = request_json(
+            origin + "/api/readiness", "POST", {"force": True}, token, origin,
+        )
+        assert status == 200 and snapshot["snapshotId"] == readiness_snapshot["snapshotId"]
+        assert all(value is False for value in snapshot["effects"].values())
+        status, cached, _ = request_json(
+            origin + "/api/readiness", "POST", {"force": False}, token, origin,
+        )
+        assert status == 200 and cached["snapshotId"] == snapshot["snapshotId"]
+        status, error, _ = request_json(
+            origin + "/api/readiness", "POST", {"force": False, "command": "whoami"}, token, origin,
+        )
+        assert status == 400 and error["error"] == "invalid-readiness-fields"
+        status, error, _ = request_json(
+            origin + "/api/setup-plan", "POST",
+            {"snapshotId": "wrong-snapshot-id", "intent": "guided-setup"}, token, origin,
+        )
+        assert status == 409 and error["error"] == "readiness-snapshot-mismatch"
+        status, plan, _ = request_json(
+            origin + "/api/setup-plan", "POST",
+            {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
+        )
+        assert status == 200 and plan["installationAllowed"] is False
+        assert all(action["installControl"] == "disabled" for action in plan["actions"])
+        assert all(value is False for value in plan["effects"].values())
+        status, error, _ = request_json(
+            origin + "/api/setup-plan", "POST",
+            {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup", "hardware": {"ram": 999}},
+            token, origin,
+        )
+        assert status == 400 and error["error"] == "invalid-setup-plan-fields"
+        checks += 9
 
         status, error, _ = request_json(
             origin + "/api/connect",
@@ -504,12 +578,17 @@ def main() -> int:
         assert "innerHTML" not in javascript and "insertAdjacentHTML" not in javascript
         assert html.count('id="connection-panel"') == 1 and html.count('id="status-panel"') == 1
         assert html.count('id="setup-wizard"') == 1 and 'id="wizard-connection-form"' in html
+        assert all(
+            marker in html
+            for marker in ('id="wizard-guided"', 'id="wizard-existing"', 'id="wizard-explore"')
+        )
         assert 'class="skip-link"' in html and 'aria-modal="true"' in html
         assert 'id="capability-panel"' in html and 'id="evidence-panel"' in html
         assert html.index('id="text-panel"') < html.index('id="connection-panel"')
         assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
         assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
         assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
+        assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
         checks += 25
     finally:
         app.shutdown()

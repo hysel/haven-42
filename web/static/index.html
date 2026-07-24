@@ -23,22 +23,38 @@
     <div class="wizard-card" tabindex="-1">
       <div class="wizard-progress" aria-label="Setup progress">
         <span class="active" data-wizard-progress="welcome" aria-label="Welcome" aria-current="step">1</span>
-        <span data-wizard-progress="provider" aria-label="Provider">2</span>
-        <span data-wizard-progress="ready" aria-label="Readiness">3</span>
+        <span data-wizard-progress="readiness" aria-label="System readiness">2</span>
+        <span data-wizard-progress="provider" aria-label="Provider">3</span>
+        <span data-wizard-progress="ready" aria-label="Models">4</span>
       </div>
       <section class="wizard-step" data-wizard-step="welcome">
         <p class="eyebrow">FIRST-RUN SETUP</p>
         <h1 id="wizard-title">Welcome to Haven 42</h1>
-        <p id="wizard-description">Connect a local Ollama provider and Haven 42 will choose the best capability-specific model supported by its validation evidence.</p>
+        <p id="wizard-description">Haven 42 is a private control station for local AI. Start with a guided system check, connect software you already manage, or explore without changing this computer.</p>
         <ul class="wizard-promises">
-          <li>Haven 42 listens only on this computer.</li>
-          <li>Your endpoint, prompts, and responses stay in memory.</li>
-          <li>No model is downloaded or trusted automatically.</li>
+          <li>The browser service listens only on this computer and loads no remote assets.</li>
+          <li>Readiness facts, endpoints, prompts, and responses stay in memory.</li>
+          <li>Scanning is read-only. Installation and model downloads are not enabled.</li>
         </ul>
-        <button class="button primary wizard-button" id="wizard-start" type="button">Set up Ollama</button>
+        <div class="wizard-choices">
+          <button class="setup-choice primary-choice" id="wizard-guided" type="button"><strong>Guided setup</strong><span>Inspect this device and build a safe, review-only setup plan.</span></button>
+          <button class="setup-choice" id="wizard-existing" type="button"><strong>Connect existing setup</strong><span>Use an Ollama server you already installed and manage.</span></button>
+          <button class="setup-choice" id="wizard-explore" type="button"><strong>Explore Haven 42</strong><span>Open the workspace without a provider or system scan.</span></button>
+        </div>
+      </section>
+      <section class="wizard-step hidden" data-wizard-step="readiness">
+        <p class="eyebrow">STEP 2 · READINESS</p>
+        <h1>Review this device</h1>
+        <p id="wizard-scan-status" role="status">Haven 42 is checking a bounded set of system facts.</p>
+        <div class="readiness-dashboard" id="wizard-system-readiness" aria-live="polite"></div>
+        <div class="setup-plan" id="wizard-setup-plan"></div>
+        <div class="wizard-actions">
+          <button class="button secondary" id="wizard-readiness-back" type="button">Back</button>
+          <button class="button primary" id="wizard-readiness-next" type="button" disabled>Connect Ollama</button>
+        </div>
       </section>
       <section class="wizard-step hidden" data-wizard-step="provider">
-        <p class="eyebrow">STEP 2 · PROVIDER</p>
+        <p class="eyebrow">STEP 3 · PROVIDER</p>
         <h1>Where is Ollama running?</h1>
         <p>Use a loopback or private-network IP address. Hostnames, public addresses, credentials, and redirects are blocked.</p>
         <form id="wizard-connection-form">
@@ -71,7 +87,7 @@
         <div class="notice hidden" id="wizard-error" role="alert"></div>
       </section>
       <section class="wizard-step hidden" data-wizard-step="ready">
-        <p class="eyebrow">STEP 3 · MODELS</p>
+        <p class="eyebrow">STEP 4 · MODELS</p>
         <h1 id="wizard-ready-title">Review model readiness</h1>
         <p id="wizard-ready-summary">Haven 42 evaluates installed models separately for each capability.</p>
         <div class="wizard-readiness" id="wizard-readiness"></div>
@@ -209,6 +225,8 @@
               <div><dt>Privacy</dt><dd>Memory only</dd></div>
               <div><dt>Model cleanup</dt><dd class="accent" id="cleanup-status">Unload after 5 minutes idle</dd></div>
             </dl>
+            <button class="button secondary full-width" id="scan-system-button" type="button">Scan system readiness</button>
+            <div class="readiness-dashboard compact hidden" id="system-readiness" aria-live="polite"></div>
           </section>
 
           <section class="panel status-panel" id="capability-panel">

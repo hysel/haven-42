@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "registryId": "haven42.install-components",
+  "defaultDecision": "not-admitted",
+  "rendererMayAddComponents": false,
+  "components": [
+    {
+      "id": "python",
+      "label": "Python 3",
+      "category": "core-prerequisite",
+      "detectionProbeId": "python",
+      "promotionStatus": "externally-managed-prerequisite",
+      "managedInstallationAllowed": false,
+      "missingGate": "Haven 42 currently requires Python before its browser service can start."
+    },
+    {
+      "id": "ollama",
+      "label": "Ollama",
+      "category": "text-provider",
+      "detectionProbeId": "ollama",
+      "promotionStatus": "installation-validation-required",
+      "managedInstallationAllowed": false,
+      "missingGate": "Pinned per-OS install, upgrade, rollback, uninstall, signature, and license evidence is required."
+    },
+    {
+      "id": "ollama-model-qwen35-9b",
+      "label": "Qwen 3.5 9B for Ollama",
+      "category": "model",
+      "detectionProbeId": "ollama-models",
+      "promotionStatus": "validated-cli-workflow-not-admitted-in-web",
+      "managedInstallationAllowed": false,
+      "missingGate": "The validated model workflow is not yet admitted through the browser installation broker."
+    },
+    {
+      "id": "continue",
+      "label": "Continue",
+      "category": "engineering-agent",
+      "detectionProbeId": "continue",
+      "promotionStatus": "supported-external-software",
+      "managedInstallationAllowed": false,
+      "missingGate": "Browser-managed installation and editor-extension lifecycle evidence is required."
+    },
+    {
+      "id": "aider",
+      "label": "Aider",
+      "category": "engineering-agent",
+      "detectionProbeId": "aider",
+      "promotionStatus": "supported-adapter-browser-install-not-admitted",
+      "managedInstallationAllowed": false,
+      "missingGate": "The supported adapter does not grant browser installation authority."
+    },
+    {
+      "id": "opencode",
+      "label": "OpenCode",
+      "category": "engineering-agent",
+      "detectionProbeId": "opencode",
+      "promotionStatus": "supported-adapter-browser-install-not-admitted",
+      "managedInstallationAllowed": false,
+      "missingGate": "The supported adapter does not grant browser installation authority."
+    },
+    {
+      "id": "comfyui",
+      "label": "ComfyUI",
+      "category": "image-provider",
+      "detectionProbeId": "comfyui",
+      "promotionStatus": "exact-profile-required",
+      "managedInstallationAllowed": false,
+      "missingGate": "No consumer-local OS/GPU installer profile has passed every promotion gate."
+    },
+    {
+      "id": "nvidia-runtime",
+      "label": "NVIDIA runtime",
+      "category": "accelerator-runtime",
+      "detectionProbeId": "nvidia-runtime",
+      "promotionStatus": "user-managed-driver",
+      "managedInstallationAllowed": false,
+      "missingGate": "GPU drivers and system runtimes remain user-managed."
+    },
+    {
+      "id": "amd-runtime",
+      "label": "AMD runtime",
+      "category": "accelerator-runtime",
+      "detectionProbeId": "amd-runtime",
+      "promotionStatus": "user-managed-driver",
+      "managedInstallationAllowed": false,
+      "missingGate": "GPU drivers and system runtimes remain user-managed."
+    },
+    {
+      "id": "intel-runtime",
+      "label": "Intel runtime",
+      "category": "accelerator-runtime",
+      "detectionProbeId": "intel-runtime",
+      "promotionStatus": "parked-hardware-required",
+      "managedInstallationAllowed": false,
+      "missingGate": "Representative Intel GPU validation and lifecycle evidence is required."
+    },
+    {
+      "id": "apple-mlx",
+      "label": "Apple MLX",
+      "category": "accelerator-runtime",
+      "detectionProbeId": "apple-mlx",
+      "promotionStatus": "external-runtime-detection-only",
+      "managedInstallationAllowed": false,
+      "missingGate": "Physical-Mac packaging and lifecycle validation remains a final platform gate."
+    }
+  ]
+}

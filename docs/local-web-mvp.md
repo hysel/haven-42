@@ -6,13 +6,17 @@ This is a local application, not a hosted website. It does not require Node.js, 
 
 ## First-Run Wizard
 
-Each launch begins with a three-step, memory-only wizard:
+Each launch begins with a memory-only wizard that first offers:
 
-1. review the local-session, no-telemetry, no-automatic-download boundary;
-2. enter a loopback or private-network Ollama IP address, with timeout and model-idle cleanup under Advanced;
-3. review separate Chat, Writing, and Summarization readiness decisions before opening chat.
+- **Guided setup:** explicitly scan a registered, bounded, read-only set of local facts, review a zero-effect setup plan, then connect Ollama;
+- **Connect existing setup:** skip the local scan and enter a user-managed loopback or private-network Ollama IP address;
+- **Explore Haven 42:** open the interface without scanning or connecting a provider.
 
-The wizard is intentionally not marked complete on disk because the endpoint and setup state are not persisted. A fresh launch therefore cannot silently reconnect to a previously entered server.
+The Guided path reports operating system, architecture, logical processors, system memory, available storage, sanitized accelerator facts, and registered software presence/version. It does not query the Ollama daemon or discover installed models because readiness scanning is network-free; model discovery begins only after the user explicitly connects a policy-approved provider endpoint. The scan does not return hostname, username, hardware serials, device IDs, private paths, environment variables, credentials, process command lines, or network addresses. Probes use fixed engine-owned executable/argument pairs without a shell, network access, writes, installation, elevation, service changes, or driver changes.
+
+The resulting plan is bound to the exact current in-memory snapshot. Browser code cannot submit hardware evidence, component IDs outside the strict registry, commands, URLs, paths, arguments, environment, or approval decisions. Every plan action says that installation is disabled. The separate installation broker is simulation-only and is not exposed by the web runtime.
+
+The wizard is intentionally not marked complete on disk because the endpoint, readiness snapshot, and setup state are not persisted. A fresh launch therefore cannot silently reconnect to a previously entered server or reuse stale hardware facts.
 
 The engine, not browser JavaScript, owns the recommendation catalog. An installed model name with matching passed capability evidence is `recommended` and can be selected automatically. This first slice does not claim immutable-digest binding; that remains an explicit promotion task. A model evidenced for another text capability is `compatible`, an unknown installed model is `unverified`, and an evidence-backed candidate that is not installed is `missing`. Compatible and unverified models remain explicit advanced choices and gain no filesystem, repository, tool, network, or download authority.
 
@@ -46,7 +50,7 @@ The wizard is a labeled modal with an announced description and current-step sta
 
 The capability view is read-only and engine-derived. Chat, Writing, and Summarization change from `configuration-required` to `available` only after a successful provider check. Software stays `not-admitted-in-web`; Images stays `provider-profile-required`. Clicking either unavailable navigation item explains its state and never invokes an operation.
 
-The System view reports sanitized provider health, catalog evidence matching, the current lack of immutable artifact-digest binding, and a disabled/no-network update state. These labels disclose evidence boundaries; they do not promote a provider, model, or capability.
+The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, catalog evidence matching, the current lack of immutable artifact-digest binding, and a disabled/no-network update state. These labels disclose evidence boundaries; they do not promote a provider, model, or capability.
 
 ## Chat-First Layout
 
@@ -87,15 +91,15 @@ The MVP:
 - uses the shared provider-security module for endpoint classification, no-redirect requests, and bounded JSON;
 - returns sanitized error codes instead of provider responses or local exception details.
 
-The renderer never receives a shell, executable, arbitrary process, filesystem, model-download, or repository-access surface.
+The renderer never receives a shell, executable, arbitrary process, filesystem, model-download, installation, elevation, or repository-access surface. Readiness scanning is a CSRF-protected POST because even read-only subprocess work consumes local resources.
 
 Text responses include a schema-v1 typed artifact and ordered accepted/result events. Browser JavaScript validates the capability, artifact type, source capability, terminal status, and event sequence before rendering content. The UI reports typed progress/result/error state and explicitly says that no file was written. Workflow warning/retry/recovery envelopes remain future integration work.
 
-The machine-readable boundary is `config/local-web-runtime-policy.json`, and the evidence-gated text recommendation input is `config/text-capability-model-recommendations.json`. The offline security/integration suite is `scripts/test-haven42-web.py`; the dependency-free real-browser wizard/chat flow is `scripts/test-haven42-web-browser.mjs`.
+The machine-readable boundaries are `config/local-web-runtime-policy.json`, `config/system-readiness-contract.json`, `config/setup-plan-contract.json`, and `config/installation-broker-contract.json`. The strict component inventory is `config/install-component-registry.json`, and the evidence-gated text recommendation input is `config/text-capability-model-recommendations.json`. Offline security coverage lives in `scripts/test-system-readiness.py` and `scripts/test-haven42-web.py`; the dependency-free real-browser wizard/chat flow is `scripts/test-haven42-web-browser.mjs`.
 
 ## Current Runtime Boundary
 
-The admitted application includes system status, read-only capability/health/evidence views, Ollama connection, installed-model selection, chat, writing, and summarization. Software workflows, images, model management, persistence, multi-user access, remote browser access, automatic updates, and native packaging remain unavailable until their separate runtime and security gates pass.
+The admitted application includes explicit read-only system scanning, zero-effect setup planning, system status, read-only capability/health/evidence views, Ollama connection, installed-model selection, chat, writing, and summarization. Software installation, drivers, services, model downloads, software workflows, images, model management, persistence, multi-user access, remote browser access, automatic updates, and native packaging remain unavailable until their separate runtime and security gates pass.
 
 Tauri remains an optional later packaging path. It is not required to run or validate this local-web slice.
 

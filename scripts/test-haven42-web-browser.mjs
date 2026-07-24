@@ -11,6 +11,9 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 let models = ["qwen3.5:9b", "unknown-model:latest"];
 const loaded = new Set();
 const requests = [];
+const trace = (message) => {
+  if (process.env.HAVEN42_BROWSER_TEST_TRACE === "1") process.stderr.write(`[browser-test] ${message}\n`);
+};
 
 function json(response, status, value) {
   const body = Buffer.from(JSON.stringify(value));
@@ -106,14 +109,29 @@ class Cdp {
   async open() {
     if (this.socket.readyState === WebSocket.OPEN) return;
     await new Promise((accept, reject) => {
-      this.socket.onopen = accept;
-      this.socket.onerror = reject;
+      const timer = setTimeout(() => reject(new Error("cdp-open-timeout")), 15000);
+      this.socket.onopen = () => {
+        clearTimeout(timer);
+        accept();
+      };
+      this.socket.onerror = (error) => {
+        clearTimeout(timer);
+        reject(error);
+      };
     });
   }
   call(method, params = {}) {
     const id = this.nextId++;
     return new Promise((accept, reject) => {
-      this.pending.set(id, { accept, reject });
+      const timer = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`cdp-call-timeout:${method}`));
+      }, 15000);
+      this.pending.set(id, {
+        accept: (value) => { clearTimeout(timer); accept(value); },
+        reject: (error) => { clearTimeout(timer); reject(error); },
+      });
+      trace(`cdp-send:${method}`);
       this.socket.send(JSON.stringify({ id, method, params }));
     });
   }
@@ -139,6 +157,7 @@ let checks = 0;
 let browserLaunchError;
 
 try {
+  trace("launching-local-web");
   haven = spawn(python.command, [...python.prefix, "-u", join(ROOT, "web", "server.py"), "--port", "0", "--no-open"], {
     cwd: ROOT,
     windowsHide: true,
@@ -147,10 +166,12 @@ try {
   let output = "";
   haven.stdout.on("data", (chunk) => { output += chunk.toString(); });
   const origin = await waitFor(() => output.match(/http:\/\/127\.0\.0\.1:\d+/)?.[0]);
+  trace("local-web-ready");
   browser = spawn(browserPath, [
     "--headless=new",
     "--disable-gpu",
     "--no-first-run",
+    "--remote-allow-origins=*",
     `--remote-debugging-port=${debugPort}`,
     `--user-data-dir=${profile}`,
     origin,
@@ -163,10 +184,14 @@ try {
     const value = await response.json();
     return value.find((item) => item.type === "page" && item.url.startsWith(origin)) ? value : null;
   });
+  trace("browser-ready");
   const page = pages.find((item) => item.type === "page" && item.url.startsWith(origin));
   cdp = new Cdp(page.webSocketDebuggerUrl);
+  trace("opening-cdp");
   await cdp.open();
+  trace("cdp-open");
   await cdp.call("Runtime.enable");
+  trace("runtime-enabled");
   await waitFor(() => cdp.evaluate("document.readyState === 'complete' && Boolean(document.querySelector('.wizard-card'))"));
   await waitFor(() => cdp.evaluate("document.activeElement.classList.contains('wizard-card')"));
 
@@ -178,14 +203,37 @@ try {
   })`);
   if (initial.modal !== "true" || initial.current !== "welcome" || !initial.focused || !initial.skip) throw new Error("initial-accessibility-state");
   checks += 4;
+  trace("welcome-verified");
 
-  await cdp.evaluate("document.querySelector('#wizard-start').click()");
+  await cdp.evaluate("document.querySelector('#wizard-guided').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#wizard-readiness-next').disabled"));
+  const guided = await cdp.evaluate(`({
+    current: document.querySelector('[aria-current="step"]').dataset.wizardProgress,
+    facts: document.querySelectorAll('#wizard-system-readiness .readiness-fact').length,
+    planActions: document.querySelectorAll('#wizard-setup-plan .plan-action').length,
+    planText: document.querySelector('#wizard-setup-plan').textContent,
+    status: document.querySelector('#wizard-scan-status').textContent
+  })`);
+  if (
+    guided.current !== "readiness"
+    || guided.facts !== 4
+    || guided.planActions < 2
+    || !guided.planText.includes("installation disabled")
+    || !guided.status.includes("Nothing was installed")
+  ) throw new Error(`guided-readiness:${JSON.stringify(guided)}`);
+  checks += 4;
+  await cdp.evaluate("document.querySelector('#wizard-readiness-back').click()");
+  await waitFor(() => cdp.evaluate("document.querySelector('[aria-current=\"step\"]').dataset.wizardProgress === 'welcome'"));
+  trace("guided-readiness-verified");
+
+  await cdp.evaluate("document.querySelector('#wizard-existing').click()");
   const provider = await cdp.evaluate(`({
     visible: !document.querySelector('[data-wizard-step="provider"]').classList.contains('hidden'),
     focused: document.activeElement.id
   })`);
   if (!provider.visible || provider.focused !== "wizard-endpoint") throw new Error("provider-step-focus");
   checks += 2;
+  trace("provider-step-verified");
 
   await cdp.evaluate(`(() => {
     const input = document.querySelector('#wizard-endpoint');
@@ -202,6 +250,7 @@ try {
   })`);
   if (ready.rows !== 3 || ready.recommended !== 3 || ready.finishDisabled || ready.capabilities !== 5 || !ready.health.includes("healthy")) throw new Error("ready-step");
   checks += 5;
+  trace("model-readiness-verified");
 
   await cdp.evaluate(`(() => {
     const first = document.querySelector('#wizard-back');
@@ -220,6 +269,7 @@ try {
   })`);
   if (!opened.hidden || !opened.promptEnabled || opened.model !== "automatic") throw new Error("chat-handoff");
   checks += 3;
+  trace("chat-handoff-verified");
 
   models = ["unknown-model:latest"];
   await cdp.evaluate(`document.querySelector('#connection-form').requestSubmit()`);
@@ -239,6 +289,7 @@ try {
   })()`);
   if (!unknown.state.includes("unverified") || !unknown.promptEnabled) throw new Error("unknown-model-advanced-only");
   checks += 2;
+  trace("advanced-model-verified");
 
   await cdp.evaluate(`(() => {
     document.querySelector('#prompt').value = 'browser flow';
@@ -271,12 +322,15 @@ try {
     throw new Error(`typed-result-rendering:${JSON.stringify(result)}`);
   }
   checks += 2;
+  trace("typed-result-verified");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
 } finally {
+  trace("cleanup-started");
   cdp?.close();
   await terminate(browser);
   await terminate(haven);
   fake.closeAllConnections();
   await new Promise((accept) => fake.close(accept));
   rmSync(profile, { recursive: true, force: true, maxRetries: 20, retryDelay: 100 });
+  trace("cleanup-complete");
 }

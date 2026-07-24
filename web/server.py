@@ -23,7 +23,7 @@ import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -35,6 +35,12 @@ from provider_security import (  # noqa: E402
     ProviderSecurityError,
     read_json,
     validate_local_base_url,
+)
+from system_readiness import (  # noqa: E402
+    ReadinessError,
+    build_setup_plan,
+    inspect_system,
+    validate_snapshot,
 )
 
 
@@ -262,7 +268,11 @@ def _provider_json(
 
 
 class HavenState:
-    def __init__(self, recommendation_path: Path = MODEL_RECOMMENDATIONS_PATH) -> None:
+    def __init__(
+        self,
+        recommendation_path: Path = MODEL_RECOMMENDATIONS_PATH,
+        readiness_provider: Callable[[], dict[str, Any]] = inspect_system,
+    ) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
         self.base_url: str | None = None
@@ -276,6 +286,10 @@ class HavenState:
         self.idle_timer: threading.Timer | None = None
         self.lifecycle_generation = 0
         self.operation_lock = threading.Lock()
+        self.readiness_lock = threading.Lock()
+        self.readiness_provider = readiness_provider
+        self.readiness_snapshot: dict[str, Any] | None = None
+        self.readiness_created = 0.0
         self.model_recommendations = load_model_recommendations(recommendation_path)
 
     def public_status(self) -> dict[str, Any]:
@@ -316,6 +330,12 @@ class HavenState:
                     "downloadAllowed": False,
                     "activationAllowed": False,
                 },
+                "readiness": {
+                    "scanAvailable": True,
+                    "scanPerformed": self.readiness_snapshot is not None,
+                    "installationAvailable": False,
+                    "snapshotPersisted": False,
+                },
                 "privacy": {
                     "configurationPersisted": False,
                     "messagesPersisted": False,
@@ -325,6 +345,39 @@ class HavenState:
                     "idleUnloadSeconds": self.idle_unload_seconds,
                 },
             }
+
+    def inspect_readiness(self, force: bool) -> dict[str, Any]:
+        with self.lock:
+            cached = self.readiness_snapshot
+            age = time.monotonic() - self.readiness_created
+        if not force and cached is not None and age <= 30:
+            return cached
+        if not self.readiness_lock.acquire(blocking=False):
+            raise WebRequestError("readiness-scan-in-progress", HTTPStatus.CONFLICT)
+        try:
+            snapshot = self.readiness_provider()
+            validate_snapshot(snapshot)
+            with self.lock:
+                self.readiness_snapshot = snapshot
+                self.readiness_created = time.monotonic()
+            return snapshot
+        except ReadinessError as error:
+            raise WebRequestError(str(error), HTTPStatus.INTERNAL_SERVER_ERROR) from error
+        finally:
+            self.readiness_lock.release()
+
+    def setup_plan(self, snapshot_id: str, intent: str) -> dict[str, Any]:
+        with self.lock:
+            snapshot = self.readiness_snapshot
+            age = time.monotonic() - self.readiness_created
+        if snapshot is None or age > 300:
+            raise WebRequestError("readiness-snapshot-expired", HTTPStatus.CONFLICT)
+        if not secrets.compare_digest(str(snapshot.get("snapshotId", "")), snapshot_id):
+            raise WebRequestError("readiness-snapshot-mismatch", HTTPStatus.CONFLICT)
+        try:
+            return build_setup_plan(snapshot, intent)
+        except ReadinessError as error:
+            raise WebRequestError(str(error)) from error
 
     def connect(self, endpoint: str, timeout_seconds: int, idle_unload_seconds: int) -> dict[str, Any]:
         try:
@@ -727,6 +780,19 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
         try:
             self._require_post_authority()
             body = self._read_body()
+            if self.path == "/api/readiness":
+                if set(body) != {"force"} or not isinstance(body["force"], bool):
+                    raise WebRequestError("invalid-readiness-fields")
+                self._send_json(HTTPStatus.OK, self.server.state.inspect_readiness(body["force"]))
+                return
+            if self.path == "/api/setup-plan":
+                if set(body) != {"snapshotId", "intent"}:
+                    raise WebRequestError("invalid-setup-plan-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.setup_plan(str(body["snapshotId"]), str(body["intent"])),
+                )
+                return
             if self.path == "/api/connect":
                 if set(body) != {"endpoint", "timeoutSeconds", "idleUnloadSeconds"}:
                     raise WebRequestError("invalid-connect-fields")

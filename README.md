@@ -10,7 +10,7 @@ The project began as a reusable pack for coding agents. It now provides a provid
 
 | Capability | Status | What that means |
 | --- | --- | --- |
-| Local browser assistant | **Available** | An accessible first-run wizard connects Ollama, explains privacy boundaries, and selects the best currently validated installed model separately for chat, writing, and summarization. Chat remains the primary workspace, with advanced manual overrides, typed results, read-only health/evidence status, and five-minute balanced model residency. |
+| Local browser assistant | **Available** | An accessible first-run wizard offers Guided setup, Connect existing setup, and Explore. Guided setup performs an explicit read-only hardware/software scan and builds a review-only plan; installation remains disabled. Existing users can connect Ollama and use capability-specific model selection for chat, writing, and summarization. |
 | Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
 | Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
@@ -85,7 +85,7 @@ For software work, the pack supplies repeatable discovery, implementation planni
 
 ## Run The Local Web App
 
-The first Haven 42 product slice needs only Python 3 and an Ollama server with at least one installed model.
+The first Haven 42 product slice needs Python 3. Ollama and an installed model are required only when you want to run chat, writing, or summarization; Explore and the read-only readiness scan do not require Ollama.
 
 Windows:
 
@@ -105,7 +105,9 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Haven 42 opens a browser on `http://127.0.0.1:4242`. Its keyboard-accessible first-run wizard explains the local security boundary, accepts a same-machine or private-network Ollama IP address, and reports capability-specific model readiness. Haven 42 automatically selects only an installed model name with matching committed capability evidence. Unknown installed models remain visibly `unverified` and are available only as an advanced manual choice; a missing recommendation is guidance, never an automatic download.
+Haven 42 opens a browser on `http://127.0.0.1:4242`. Its keyboard-accessible first-run wizard provides three paths: **Guided setup** scans a registered, bounded, read-only set of system facts and produces a disabled installation plan; **Connect existing setup** accepts a same-machine or private-network Ollama IP address; and **Explore** opens the product without a provider or scan. The scan excludes host identity, usernames, private paths, environment variables, credentials, and network addresses. Its snapshot stays in memory.
+
+After Ollama connects, Haven 42 reports capability-specific model readiness and automatically selects only an installed model name with matching committed capability evidence. Unknown installed models remain visibly `unverified` and are available only as an advanced manual choice; a missing recommendation is guidance, never an automatic download.
 
 Configuration and messages are not persisted. Results are rendered from typed chat-message or Markdown-document artifacts with explicit progress/error state and a no-file-written policy. The System view reports provider health, evidence matching, digest-binding limits, and the disabled/no-network update state. The balanced default keeps the active model warm for five idle minutes; advanced settings offer immediate, 15-minute, and 30-minute cleanup. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
 
