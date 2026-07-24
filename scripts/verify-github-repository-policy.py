@@ -101,6 +101,11 @@ def verify_static(policy: dict) -> None:
             continue
         if not re.fullmatch(r"[^@\s]+@[0-9a-f]{40}", reference):
             raise PolicyError(f"action-not-sha-pinned:{reference}")
+    upload_artifact = (
+        "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
+    )
+    if workflow_text.count(upload_artifact) != 1:
+        raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
     if (ROOT / ".github/workflows/package-development.yml").exists():
         raise PolicyError("duplicate-package-workflow")
 
