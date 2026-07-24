@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.system-readiness",
+  "operationId": "system.readiness.inspect",
+  "execution": {
+    "localOnly": true,
+    "explicitUserActionRequired": true,
+    "csrfAuthorityRequired": true,
+    "maximumScanSeconds": 15,
+    "maximumProbeSeconds": 3,
+    "maximumProbeOutputBytes": 65536,
+    "cacheSeconds": 30,
+    "concurrentScansAllowed": false
+  },
+  "states": [
+    "detected",
+    "not-detected",
+    "unknown",
+    "installed-unverified",
+    "validated",
+    "unsupported",
+    "permission-required"
+  ],
+  "allowedFacts": [
+    "operating-system",
+    "architecture",
+    "logical-processors",
+    "system-memory-gib",
+    "available-storage-gib",
+    "accelerator-vendor",
+    "accelerator-model",
+    "accelerator-memory-gib",
+    "software-presence",
+    "sanitized-software-version"
+  ],
+  "prohibitedFacts": [
+    "hostname",
+    "username",
+    "serial-number",
+    "device-uuid",
+    "mac-address",
+    "private-filesystem-path",
+    "environment-variable",
+    "credential",
+    "process-command-line",
+    "raw-registry-data",
+    "network-interface-address"
+  ],
+  "probePolicy": {
+    "registeredProbesOnly": true,
+    "shellAllowed": false,
+    "rendererMaySupplyExecutable": false,
+    "rendererMaySupplyArguments": false,
+    "rendererMaySupplyEnvironment": false,
+    "boundedOutputRequired": true,
+    "boundedTimeoutRequired": true,
+    "sanitizedErrorsOnly": true,
+    "writesAllowed": false,
+    "networkAllowed": false,
+    "installationAllowed": false,
+    "elevationAllowed": false
+  },
+  "persistence": {
+    "automaticPersistenceAllowed": false,
+    "snapshotMemoryOnly": true,
+    "rawProbeOutputReturned": false
+  }
+}

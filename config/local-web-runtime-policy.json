@@ -25,6 +25,15 @@
     "redirectsAllowed": false,
     "modelDiscoveryRequiredBeforeUse": true
   },
+  "readiness": {
+    "explicitUserActionRequired": true,
+    "csrfTokenRequired": true,
+    "registeredReadOnlyProbesOnly": true,
+    "snapshotPersistenceAllowed": false,
+    "rendererHardwareFactsAccepted": false,
+    "setupPlansMayInstall": false,
+    "installationBrokerStatus": "simulation-only-not-runtime-admitted"
+  },
   "text": {
     "capabilityIds": ["general.chat", "content.write", "content.summarize"],
     "providerId": "ollama.local-text",

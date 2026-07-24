@@ -57,6 +57,7 @@ $integrationTests = @(
     "general AI sessions are repository optional and dry-run first",
     "local text capabilities are session bound and typed",
     "local web MVP is loopback-only and unloads models",
+    "system readiness and setup planning remain effect free",
     "local web setup wizard completes in a headless browser",
     "provider discovery and engineering routing preserve policy boundaries",
     "optional LLM routing is advisory and registry gated",
@@ -4910,13 +4911,14 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "99 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "108 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $policy.runtimeId -Expected "haven42.local-web" -Message "Local-web runtime identity should be stable."
     Assert-True -Condition ($policy.implementationStatus -eq "text-tools-admitted" -and -not $policy.bind.remoteBindAllowed) -Message "Only the loopback text-tool runtime should be admitted."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects) -Message "Browser security should remain local and default-deny."
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
+    Assert-True -Condition ($policy.readiness.explicitUserActionRequired -and $policy.readiness.registeredReadOnlyProbesOnly -and -not $policy.readiness.rendererHardwareFactsAccepted -and -not $policy.readiness.setupPlansMayInstall) -Message "Readiness scanning and setup planning must remain explicit, engine-owned, and effect free."
     Assert-Equal -Actual (($policy.text.capabilityIds | Sort-Object) -join ",") -Expected "content.summarize,content.write,general.chat" -Message "Only the three admitted local text capabilities should be exposed."
     foreach ($wrapper in @("scripts/start-haven42-web.ps1", "scripts/start-haven42-web.linux.sh", "scripts/start-haven42-web.macos.sh", "scripts/start-haven42-web.shared.sh")) {
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $wrapper) -PathType Leaf) -Message "Cross-platform local-web launcher should exist: $wrapper"
@@ -4937,6 +4939,32 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
 }
 
+Invoke-PackTest "system readiness and setup planning remain effect free" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for readiness validation."
+    $paths = @(
+        "scripts/system_readiness.py",
+        "scripts/test-system-readiness.py",
+        "scripts/simulate-install-broker.py",
+        "config/system-readiness-contract.json",
+        "config/setup-plan-contract.json",
+        "config/install-component-registry.json",
+        "config/installation-broker-contract.json",
+        "examples/fixtures/installation-simulation-request.json"
+    )
+    foreach ($path in $paths) {
+        Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $path) -PathType Leaf) -Message "Readiness foundation file should exist: $path"
+    }
+    $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-system-readiness.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Readiness security tests should pass. Output: $($output -join ' ')"
+    Assert-True -Condition (($output -join "`n") -match "34") -Message "Readiness test coverage should remain complete."
+    $readiness = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/system-readiness-contract.json") | ConvertFrom-Json
+    $broker = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/installation-broker-contract.json") | ConvertFrom-Json
+    Assert-True -Condition (-not $readiness.probePolicy.shellAllowed -and -not $readiness.probePolicy.networkAllowed -and -not $readiness.probePolicy.installationAllowed) -Message "Readiness probes must remain shell-free and effect-free."
+    Assert-True -Condition (-not $broker.runtimeAdmitted -and $broker.implementationStatus -eq "simulation-only") -Message "Installation broker must remain simulation-only."
+}
+
 if ($IsWindows) {
     Invoke-PackTest "local web setup wizard completes in a headless browser" {
         $node = Get-Command node -ErrorAction SilentlyContinue
@@ -4945,7 +4973,7 @@ if ($IsWindows) {
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 19 checks") -Message "The headless browser flow should exercise all 19 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 23 checks") -Message "The headless browser flow should exercise all 23 checks."
     }
 }
 

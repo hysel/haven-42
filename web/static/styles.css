@@ -111,6 +111,25 @@ body::before {
 .wizard-step > p:not(.eyebrow) { color: var(--muted); line-height: 1.6; }
 .wizard-promises { display: grid; gap: 9px; margin: 24px 0; padding-left: 22px; color: #c7d6d4; font-size: 13px; }
 .wizard-button { min-height: 44px; padding: 0 20px; }
+.wizard-choices { display: grid; gap: 10px; margin-top: 20px; }
+.setup-choice {
+  display: grid; gap: 4px; width: 100%; padding: 14px 16px; color: var(--text);
+  text-align: left; border: 1px solid var(--line); border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035); cursor: pointer;
+}
+.setup-choice:hover, .setup-choice:focus-visible {
+  border-color: var(--accent); background: rgba(95, 224, 194, 0.08);
+}
+.setup-choice span { color: var(--muted); font-size: 13px; }
+.primary-choice { border-color: rgba(95, 224, 194, 0.55); }
+.readiness-dashboard, .setup-plan { display: grid; gap: 8px; margin-top: 14px; }
+.readiness-fact, .plan-action {
+  display: flex; justify-content: space-between; gap: 16px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 10px; background: rgba(255, 255, 255, 0.025);
+}
+.readiness-fact span, .plan-action span { color: var(--muted); text-align: right; }
+.readiness-dashboard.compact { margin-top: 12px; font-size: 12px; }
+.full-width { width: 100%; margin-top: 14px; }
 .wizard-readiness { display: grid; gap: 9px; margin: 22px 0; }
 .readiness-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 11px; background: rgba(4, 12, 13, 0.38); }
 .readiness-row span { color: var(--muted); font-size: 12px; }

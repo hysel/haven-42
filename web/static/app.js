@@ -42,6 +42,8 @@ const state = {
   recommendations: {},
   modelOptions: [],
   capabilities: [],
+  readinessSnapshot: null,
+  setupPlan: null,
   lastFocusBeforeWizard: null,
 };
 
@@ -151,6 +153,87 @@ function showWizardStep(step) {
   const panel = document.querySelector(`[data-wizard-step="${step}"]`);
   const focusTarget = panel.querySelector("input, button, select, summary, [tabindex]");
   (focusTarget || byId("setup-wizard").querySelector(".wizard-card")).focus();
+}
+
+function readinessFacts(snapshot) {
+  const memory = snapshot.platform.systemMemoryGiB == null
+    ? "Unknown"
+    : `${snapshot.platform.systemMemoryGiB} GiB`;
+  const accelerator = snapshot.accelerators.length
+    ? snapshot.accelerators.map((item) => `${item.vendor} ${item.model}${item.memoryGiB ? ` · ${item.memoryGiB} GiB` : ""}`).join(", ")
+    : "Not detected or permission limited";
+  const software = snapshot.software
+    .filter((item) => ["python", "ollama"].includes(item.componentId))
+    .map((item) => `${item.componentId === "python" ? "Python" : "Ollama"}: ${item.state}`)
+    .join(" · ");
+  return [
+    ["Platform", `${snapshot.platform.operatingSystem} · ${snapshot.platform.architecture}`],
+    ["Memory", memory],
+    ["Accelerator", accelerator],
+    ["Core software", software || "Unknown"],
+  ];
+}
+
+function renderSystemReadiness(containerId, snapshot) {
+  const container = byId(containerId);
+  container.replaceChildren();
+  container.classList.remove("hidden");
+  for (const [label, value] of readinessFacts(snapshot)) {
+    const row = document.createElement("div");
+    row.className = "readiness-fact";
+    const title = document.createElement("strong");
+    title.textContent = label;
+    const detail = document.createElement("span");
+    detail.textContent = value;
+    row.append(title, detail);
+    container.append(row);
+  }
+}
+
+function renderSetupPlan(plan) {
+  const container = byId("wizard-setup-plan");
+  container.replaceChildren();
+  const heading = document.createElement("strong");
+  heading.textContent = "Review-only setup plan";
+  const summary = document.createElement("p");
+  summary.textContent = plan.summary;
+  const fit = document.createElement("p");
+  fit.textContent = plan.hardwareAssessment.candidateModel
+    ? `Hardware guidance: evaluate ${plan.hardwareAssessment.candidateModel} · planning confidence ${plan.hardwareAssessment.confidence}`
+    : "Hardware guidance: no safe automatic model recommendation from the known capacity.";
+  container.append(heading, summary, fit);
+  for (const action of plan.actions) {
+    const row = document.createElement("div");
+    row.className = "plan-action";
+    const label = document.createElement("strong");
+    label.textContent = action.componentId;
+    const stateLabel = document.createElement("span");
+    stateLabel.textContent = `${action.state} · installation disabled`;
+    row.append(label, stateLabel);
+    container.append(row);
+  }
+}
+
+async function runReadiness() {
+  showWizardStep("readiness");
+  byId("wizard-scan-status").textContent = "Scanning registered read-only facts…";
+  byId("wizard-readiness-next").disabled = true;
+  try {
+    const snapshot = await api("/api/readiness", { force: true });
+    state.readinessSnapshot = snapshot;
+    renderSystemReadiness("wizard-system-readiness", snapshot);
+    renderSystemReadiness("system-readiness", snapshot);
+    const plan = await api("/api/setup-plan", {
+      snapshotId: snapshot.snapshotId,
+      intent: "guided-setup",
+    });
+    state.setupPlan = plan;
+    renderSetupPlan(plan);
+    byId("wizard-scan-status").textContent = "Read-only scan complete. Nothing was installed, downloaded, or saved.";
+    byId("wizard-readiness-next").disabled = false;
+  } catch (error) {
+    byId("wizard-scan-status").textContent = humanError(error);
+  }
 }
 
 function selectedModel(capabilityId) {
@@ -528,9 +611,33 @@ document.querySelectorAll(".availability-nav").forEach((button) => {
   });
 });
 
-byId("wizard-start").addEventListener("click", () => {
+byId("wizard-guided").addEventListener("click", runReadiness);
+byId("wizard-existing").addEventListener("click", () => {
   showWizardStep("provider");
   byId("wizard-endpoint").focus();
+});
+byId("wizard-explore").addEventListener("click", () => {
+  byId("setup-wizard").classList.add("hidden");
+  byId("welcome-message").textContent = "Explore Chat, Writing, Summarization, Models, and System. Connect an existing Ollama provider whenever you are ready.";
+  byId("connection-panel").scrollIntoView({ behavior: "smooth" });
+});
+byId("wizard-readiness-back").addEventListener("click", () => showWizardStep("welcome"));
+byId("wizard-readiness-next").addEventListener("click", () => showWizardStep("provider"));
+byId("scan-system-button").addEventListener("click", async () => {
+  const button = byId("scan-system-button");
+  button.disabled = true;
+  button.textContent = "Scanning…";
+  try {
+    const snapshot = await api("/api/readiness", { force: true });
+    state.readinessSnapshot = snapshot;
+    renderSystemReadiness("system-readiness", snapshot);
+    button.textContent = "Scan again";
+  } catch (error) {
+    showError(humanError(error));
+    button.textContent = "Scan system readiness";
+  } finally {
+    button.disabled = false;
+  }
 });
 byId("wizard-connection-form").addEventListener("submit", async (event) => {
   event.preventDefault();

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.installation-broker",
+  "implementationStatus": "simulation-only",
+  "runtimeAdmitted": false,
+  "requiredRequestFields": ["schemaVersion", "componentId", "platformProfileId", "approvalToken"],
+  "requestPolicy": {
+    "unknownFieldsAllowed": false,
+    "registeredComponentIdsOnly": true,
+    "immutableVersionRequiredForRealInstall": true,
+    "rawUrlAllowed": false,
+    "rawCommandAllowed": false,
+    "rawPathAllowed": false,
+    "argumentsAllowed": false,
+    "environmentAllowed": false,
+    "rendererEvidenceAllowed": false,
+    "rendererApprovalDecisionAllowed": false
+  },
+  "approval": {
+    "opaque": true,
+    "singleUse": true,
+    "sessionBound": true,
+    "componentVersionPlatformAndEffectsBound": true,
+    "rememberApprovalAllowed": false
+  },
+  "events": [
+    "accepted",
+    "inspecting",
+    "planning",
+    "approval-required",
+    "downloading",
+    "verifying",
+    "installing",
+    "validating",
+    "rolling-back",
+    "completed",
+    "failed"
+  ],
+  "simulationEffects": {
+    "networkUsed": false,
+    "filesWritten": false,
+    "installationPerformed": false,
+    "elevationRequested": false,
+    "servicesChanged": false,
+    "driversChanged": false
+  },
+  "realInstallPromotionRequires": [
+    "immutable package identity",
+    "license review",
+    "publisher signature or attestation verification",
+    "checksum verification",
+    "exact OS and architecture evidence",
+    "install and health validation",
+    "upgrade and rollback validation",
+    "uninstall and cleanup validation",
+    "OS-controlled elevation",
+    "hosted cross-platform checks"
+  ]
+}
