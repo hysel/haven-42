@@ -4776,7 +4776,7 @@ Invoke-PackTest "core update policy fails closed before cryptographic admission"
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for updater hostile tests."
     $hostileOutput = @(& $python.Source (Join-Path $repoRoot "scripts/core-update-policy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Core updater hostile self-test should pass."
-    Assert-True -Condition (($hostileOutput -join "`n") -match "passed: 26 cases") -Message "Core updater should execute every hostile manifest and offline release-metadata regression case."
+    Assert-True -Condition (($hostileOutput -join "`n") -match "passed: 28 cases") -Message "Core updater should execute every hostile manifest and offline release-metadata regression case."
 
     $releaseMetadataPath = Join-Path $repoRoot "examples/fixtures/github-release-candidate.json"
     $releaseContractPath = Join-Path $repoRoot "config/core-update-check-contract.json"
@@ -4958,7 +4958,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     }
     $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-system-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Readiness security tests should pass. Output: $($output -join ' ')"
-    Assert-True -Condition (($output -join "`n") -match "34") -Message "Readiness test coverage should remain complete."
+    Assert-True -Condition (($output -join "`n") -match "36") -Message "Readiness test coverage should remain complete."
     $readiness = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/system-readiness-contract.json") | ConvertFrom-Json
     $broker = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/installation-broker-contract.json") | ConvertFrom-Json
     Assert-True -Condition (-not $readiness.probePolicy.shellAllowed -and -not $readiness.probePolicy.networkAllowed -and -not $readiness.probePolicy.installationAllowed) -Message "Readiness probes must remain shell-free and effect-free."

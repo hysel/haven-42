@@ -37,13 +37,18 @@ jobs:
           persist-credentials: false
 
       - name: Install pinned build dependency
-        run: python -m pip install --disable-pip-version-check -r package/requirements-build.txt
+        run: python -m pip install --disable-pip-version-check --require-hashes -r package/requirements-build.txt
 
       - name: Build unsigned one-folder package and evidence
+        env:
+          HAVEN42_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python scripts/build-portable-development-package.py
 
       - name: Run source/package parity and native smoke test
         run: python scripts/test-portable-package.py --executable "${{ matrix.executable }}"
+
+      - name: Verify archive, checksums, SBOM, notices, and provenance
+        run: python scripts/verify-portable-development-artifacts.py --artifact-directory dist/portable/artifacts --self-test
 
       - name: Upload unsigned development artifacts
         uses: actions/upload-artifact@65462800fd760344b1a7b4382951275a0abb4808 # v4.3.3

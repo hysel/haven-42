@@ -47,6 +47,8 @@ The process persists no endpoint or messages, exposes no repository or filesyste
 
 The initial native distribution path freezes that same process and UI into a PyInstaller one-folder package. PyInstaller supplies only a local launcher/runtime boundary: it does not add browser authority, an installer, privileged service, global dependency, or native UI framework. Frozen startup verifies a strict embedded path/size/SHA-256 resource manifest before serving. Native package tests compare source and frozen behavior and require token-protected model-cleanup-first shutdown. `config/portable-development-package-contract.json` is the machine-readable boundary; Tauri/Rust remains unadmitted.
 
+The portable supply-chain boundary has two layers. Build inputs are exact-version and wheel-hash locked, while evidence collection admits only the expected platform-specific tool set. Build outputs bind the complete one-folder tree to a file inventory and archive checksums, then independently validate safe member names, regular-file shape, SBOM/runtime identity, notices, and exact source/environment provenance. This provenance makes no signature or attestation claim.
+
 The optional Milestone 22B desktop architecture adds a Tauri 2 shell without replacing these contracts:
 
 ```text

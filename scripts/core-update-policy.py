@@ -9,6 +9,7 @@ import hashlib
 import json
 import re
 import sys
+import tempfile
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -227,6 +228,14 @@ def run_self_tests() -> int:
     deny(lambda value: value["compatibility"].update(desktopIpcSchemaVersions=[2]), "schema-incompatible")
     deny(lambda value: value["assets"][0].update(targetTriple="x86_64-unknown-linux-gnu"), "exactly-one-host-asset-required")
     deny(lambda value: value["assets"][0].update(sha256="0" * 64), "package-hash-mismatch", package=package_path)
+    with tempfile.TemporaryDirectory(prefix="haven42-corrupt-update-") as directory:
+        original = package_path.read_bytes()
+        same_size = Path(directory) / "same-size-corrupt.bin"
+        same_size.write_bytes(bytes([original[0] ^ 0xFF]) + original[1:])
+        deny(lambda value: None, "package-hash-mismatch", package=same_size)
+        truncated = Path(directory) / "truncated.bin"
+        truncated.write_bytes(original[:-1])
+        deny(lambda value: None, "package-size-mismatch", package=truncated)
     for mutator, expected in (
         (lambda value: value.update(draft=True), "release-not-immutable-stable"),
         (lambda value: value.update(immutable=False), "release-not-immutable-stable"),

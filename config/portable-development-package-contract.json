@@ -14,8 +14,13 @@
     "tauriOrRustAdmitted": false
   },
   "security": {
+    "buildDependenciesRequireExactVersionsAndHashes": true,
+    "buildDependencyInventoryAllowlistedByPlatform": true,
     "strictBundledResourceAllowlist": true,
     "resourceDigestAlgorithm": "sha256",
+    "wholePackageFileInventoryRequired": true,
+    "archiveTraversalAndLinkRejectionRequired": true,
+    "checksumCoverageMustBeExact": true,
     "unexpectedRequestPathsRejected": true,
     "browserUrlIsEngineConstructedLoopbackOnly": true,
     "arbitraryProcessLaunchAllowed": false,
@@ -24,7 +29,9 @@
   },
   "supplyChainEvidence": [
     "SHA256SUMS",
+    "build-provenance.json",
     "dependency-inventory.json",
+    "package-file-inventory.json",
     "THIRD-PARTY-NOTICES.txt",
     "haven42.cdx.json"
   ],
@@ -33,6 +40,11 @@
     "notarized": false,
     "githubReleasePublicationAllowed": false,
     "productionReadinessClaimAllowed": false
+  },
+  "provenance": {
+    "exactSourceCommitRequired": true,
+    "operatingSystemArchitecturePythonAndPyInstallerRecorded": true,
+    "artifactAttestationProduced": false
   },
   "installerFoundation": {
     "mode": "simulation-only",

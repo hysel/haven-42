@@ -2174,7 +2174,7 @@ assert value["FilesWritten"] is False and value["UserDataTouched"] is False
 PY
   ! "$policy" --manifest-path "$manifest" --host-os linux --host-architecture x64 --target-triple x86_64-unknown-linux-gnu --current-version 0.3.0 --updater-version 0.3.0 --json >/dev/null 2>&1 || return 1
   hostile_output="$(python3 "$REPO_ROOT/scripts/core-update-policy.py" --self-test 2>&1)" || return 1
-  printf ''%s\n'' "$hostile_output" | grep -q "passed: 26 cases" || return 1
+  printf ''%s\n'' "$hostile_output" | grep -q "passed: 28 cases" || return 1
   release_output="$(python3 "$REPO_ROOT/scripts/core-update-policy.py" \
     --manifest-path "$manifest" \
     --release-metadata-path "$REPO_ROOT/examples/fixtures/github-release-candidate.json" \

@@ -144,6 +144,15 @@ def verify_packaged_resources(path: Path = INTEGRITY_MANIFEST_PATH) -> dict[str,
                 raise ValueError("digest-mismatch")
         if not seen:
             raise ValueError("empty-manifest")
+        actual = {
+            target.relative_to(ROOT).as_posix()
+            for parent in (ROOT / "web" / "static", ROOT / "config")
+            if parent.is_dir()
+            for target in parent.rglob("*")
+            if target.is_file()
+        }
+        if actual != seen:
+            raise ValueError("resource-allowlist-mismatch")
         return {"required": True, "verified": True, "resourceCount": len(seen)}
     except (OSError, UnicodeDecodeError, json.JSONDecodeError, ValueError) as error:
         raise RuntimeError("Packaged resource integrity verification failed.") from error

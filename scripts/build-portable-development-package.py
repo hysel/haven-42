@@ -10,14 +10,17 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import zipfile
 
 
 ROOT = Path(__file__).resolve().parent.parent
+APP_VERSION = "0.3.0"
 RESOURCE_PATHS = (
     "web/static/index.html",
     "web/static/app.js",
@@ -27,6 +30,21 @@ RESOURCE_PATHS = (
     "config/install-component-registry.json",
 )
 ALLOWED_PACKAGE_ENTRIES = {"haven42", "haven42.exe", "_internal", "DEVELOPMENT-BUILD.txt"}
+COMMON_BUILD_DISTRIBUTIONS = {
+    "altgraph": ("0.17.5", "MIT"),
+    "packaging": ("26.2", "Apache-2.0 OR BSD-2-Clause"),
+    "pyinstaller": ("6.21.0", "GPL-2.0-or-later WITH Bootloader-exception"),
+    "pyinstaller-hooks-contrib": ("2026.6", "GPL-2.0-or-later WITH Bootloader-exception"),
+    "setuptools": ("83.0.0", "MIT"),
+}
+PLATFORM_BUILD_DISTRIBUTIONS = {
+    "Windows": {
+        "pefile": ("2024.8.26", "MIT"),
+        "pywin32-ctypes": ("0.2.3", "BSD-3-Clause"),
+    },
+    "Darwin": {"macholib": ("1.16.3", "MIT")},
+    "Linux": {},
+}
 
 
 def sha256(path: Path) -> str:
@@ -59,16 +77,59 @@ def build_resource_manifest() -> None:
 
 
 def dependency_records() -> list[dict[str, str]]:
+    expected = {
+        **COMMON_BUILD_DISTRIBUTIONS,
+        **PLATFORM_BUILD_DISTRIBUTIONS.get(platform.system(), {}),
+    }
     records = []
-    for distribution in importlib.metadata.distributions():
-        name = distribution.metadata.get("Name")
-        if name:
-            records.append({
-                "name": name,
-                "version": distribution.version,
-                "license": distribution.metadata.get("License") or "NOASSERTION",
-            })
+    for name, (version, reviewed_license) in sorted(expected.items()):
+        try:
+            distribution = importlib.metadata.distribution(name)
+        except importlib.metadata.PackageNotFoundError as error:
+            raise SystemExit(f"Required build distribution is missing: {name}") from error
+        if distribution.version != version:
+            raise SystemExit(
+                f"Build distribution version mismatch for {name}: "
+                f"expected {version}, received {distribution.version}"
+            )
+        records.append({
+            "name": name,
+            "version": version,
+            "license": reviewed_license,
+        })
     return sorted(records, key=lambda item: item["name"].lower())
+
+
+def commit_identity() -> str:
+    value = os.environ.get("HAVEN42_SOURCE_COMMIT", "")
+    if re.fullmatch(r"[0-9a-f]{40}", value):
+        return value
+    value = os.environ.get("GITHUB_SHA", "")
+    if re.fullmatch(r"[0-9a-f]{40}", value):
+        return value
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    value = result.stdout.strip()
+    if not re.fullmatch(r"[0-9a-f]{40}", value):
+        raise SystemExit("Could not resolve an exact build commit.")
+    return value
+
+
+def package_file_records(package_dir: Path) -> list[dict[str, object]]:
+    return [
+        {
+            "path": path.relative_to(package_dir).as_posix(),
+            "sha256": sha256(path),
+            "sizeBytes": path.stat().st_size,
+        }
+        for path in sorted(package_dir.rglob("*"))
+        if path.is_file()
+    ]
 
 
 def create_archive(package_dir: Path, artifact_dir: Path, target: str) -> Path:
@@ -81,7 +142,9 @@ def create_archive(package_dir: Path, artifact_dir: Path, target: str) -> Path:
                     output.write(path, Path("haven42") / path.relative_to(package_dir))
         return archive
     archive = artifact_dir / f"haven42-{target}-unsigned-development.tar.gz"
-    with tarfile.open(archive, "w:gz") as output:
+    # PyInstaller uses platform-native symlinks on macOS. Portable archives
+    # materialize their targets so extraction never creates archive-owned links.
+    with tarfile.open(archive, "w:gz", dereference=True) as output:
         output.add(package_dir, arcname="haven42", recursive=True)
     return archive
 
@@ -118,37 +181,108 @@ def main() -> int:
     dependencies = dependency_records()
     evidence = output / "evidence"
     write_json(evidence / "dependency-inventory.json", {
-        "schemaVersion": 1, "target": target, "dependencies": dependencies,
+        "schemaVersion": 2,
+        "target": target,
+        "runtimeComponents": [{
+            "name": "CPython",
+            "version": platform.python_version(),
+            "scope": "embedded-runtime",
+        }],
+        "buildDependencies": dependencies,
+    })
+    archive_staging = tempfile.TemporaryDirectory(
+        prefix="haven42-archive-staging-",
+        dir=output,
+    )
+    staged_package_dir = Path(archive_staging.name) / "haven42"
+    shutil.copytree(package_dir, staged_package_dir, symlinks=False)
+    package_files = package_file_records(staged_package_dir)
+    write_json(evidence / "package-file-inventory.json", {
+        "schemaVersion": 1,
+        "algorithm": "sha256",
+        "packageRoot": "haven42",
+        "files": package_files,
+    })
+    write_json(evidence / "build-provenance.json", {
+        "schemaVersion": 1,
+        "artifactKind": "unsigned-development",
+        "application": {"name": "Haven 42", "version": APP_VERSION},
+        "source": {
+            "repository": "https://github.com/hysel/haven-42",
+            "commit": commit_identity(),
+        },
+        "builder": {
+            "kind": "github-actions" if os.environ.get("GITHUB_ACTIONS") == "true" else "local",
+            "workflow": os.environ.get("GITHUB_WORKFLOW", "local"),
+            "runId": os.environ.get("GITHUB_RUN_ID", "local"),
+        },
+        "environment": {
+            "operatingSystem": platform.system().lower(),
+            "architecture": platform.machine().lower(),
+            "pythonImplementation": platform.python_implementation(),
+            "pythonVersion": platform.python_version(),
+            "pyinstallerVersion": importlib.metadata.version("pyinstaller"),
+        },
+        "security": {
+            "dependencyHashesRequired": True,
+            "resourceIntegrityManifestEmbedded": True,
+            "signed": False,
+            "notarized": False,
+            "attested": False,
+            "releasePublished": False,
+        },
     })
     write_json(evidence / "haven42.cdx.json", {
         "bomFormat": "CycloneDX",
         "specVersion": "1.5",
         "version": 1,
-        "metadata": {"component": {"type": "application", "name": "Haven 42", "version": "0.3.0"}},
+        "metadata": {
+            "component": {"type": "application", "name": "Haven 42", "version": APP_VERSION},
+            "tools": {
+                "components": [
+                    {"type": "application", "name": item["name"], "version": item["version"]}
+                    for item in dependencies
+                ]
+            },
+            "properties": [
+                {"name": "haven42:artifact-kind", "value": "unsigned-development"},
+                {"name": "haven42:target", "value": target},
+            ],
+        },
         "components": [
-            {"type": "library", "name": item["name"], "version": item["version"],
-             "licenses": [{"license": {"name": item["license"]}}]}
-            for item in dependencies
+            {
+                "type": "framework",
+                "name": "CPython",
+                "version": platform.python_version(),
+                "scope": "required",
+            }
         ],
     })
     notices = [
         "THIRD-PARTY NOTICES — unsigned development package",
         "",
-        "This inventory is generated from build-environment package metadata.",
-        "NOASSERTION means the installed metadata did not provide a license expression.",
+        "Build-tool versions and license expressions are an explicit reviewed allowlist.",
+        "These tools influence the generated package but are not imported application dependencies.",
         "",
     ]
     notices.extend(f"{item['name']} {item['version']} — {item['license']}" for item in dependencies)
     (evidence / "THIRD-PARTY-NOTICES.txt").write_text("\n".join(notices) + "\n", encoding="utf-8")
-    archive = create_archive(package_dir, artifact_dir, target)
-    checksum_targets = [archive, *sorted(evidence.iterdir())]
+    archive = create_archive(staged_package_dir, artifact_dir, target)
+    archive_staging.cleanup()
+    for path in sorted(evidence.iterdir()):
+        shutil.copy2(path, artifact_dir)
+    checksum_targets = [
+        archive,
+        *sorted(
+            path
+            for path in artifact_dir.iterdir()
+            if path.name not in {"SHA256SUMS", archive.name}
+        ),
+    ]
     (artifact_dir / "SHA256SUMS").write_text(
         "".join(f"{sha256(path)}  {path.name}\n" for path in checksum_targets),
         encoding="utf-8",
     )
-    shutil.copy2(evidence / "dependency-inventory.json", artifact_dir)
-    shutil.copy2(evidence / "haven42.cdx.json", artifact_dir)
-    shutil.copy2(evidence / "THIRD-PARTY-NOTICES.txt", artifact_dir)
     print(artifact_dir)
     return 0
 

@@ -125,7 +125,11 @@ def main() -> int:
     expect_error("unknown-install-component", READINESS.simulate_install_request, hostile, registry)
     hostile = dict(request, approvalToken="renderer-approved")
     expect_error("simulation-does-not-accept-approval", READINESS.simulate_install_request, hostile, registry)
-    checks += 6
+    hostile = dict(request, packagePath="C:/untrusted/package.exe")
+    expect_error("invalid-install-request-shape", READINESS.simulate_install_request, hostile, registry)
+    hostile = dict(request, packageSha256="0" * 64)
+    expect_error("invalid-install-request-shape", READINESS.simulate_install_request, hostile, registry)
+    checks += 8
 
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "registry.json"

@@ -105,7 +105,7 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for security boundaries, smoke/parity tests, checksums, dependency inventory, notices, SBOM evidence, and the unsigned-development limitation.
+Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, hostile integrity/shutdown/archive tests, checksums, full file inventory, dependency inventory, notices, SBOM and provenance evidence, and the unsigned-development limitation.
 
 Haven 42 opens a browser on `http://127.0.0.1:4242`. Its keyboard-accessible first-run wizard provides three paths: **Guided setup** scans a registered, bounded, read-only set of system facts and produces a disabled installation plan; **Connect existing setup** accepts a same-machine or private-network Ollama IP address; and **Explore** opens the product without a provider or scan. The scan excludes host identity, usernames, private paths, environment variables, credentials, and network addresses. Its snapshot stays in memory.
 
