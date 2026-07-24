@@ -201,7 +201,10 @@ def main() -> int:
             "executionAllowed": False,
         }, separators=(",", ":")), file=sys.stderr)
         return 2
-    print(json.dumps(result, separators=(",", ":")))
+    # Plan details may include user-selected workflow and step identifiers. The
+    # CLI validates them in memory but never writes or logs request-derived data.
+    assert result["executionAllowed"] is False
+    print("Task composition request accepted in simulation-only mode.")
     return 0
 
 
