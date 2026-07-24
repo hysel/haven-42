@@ -47,10 +47,23 @@ Every per-case unload and every final model unload passed. A separate final
 was downloaded, no response text was retained, and the local endpoint remains
 excluded from this evidence.
 
+A bounded three-repetition run on the same date then produced nine samples per
+candidate. Gemma and Mistral passed all 9/9 constraint and unload checks.
+Granite passed 6/9; each structured-brief repetition omitted the same required
+uncertainty phrase. The first Qwen cell was invalidated because a concurrent
+diagnostic temporarily made two per-sample residency checks non-empty, although
+its content constraints passed. That cell was discarded and rerun alone: Qwen
+passed all 9/9 constraint and unload checks. Average generation rates in the
+valid cells were 76.26, 53.98, 41.18, and 127.12 tokens per second for Qwen,
+Gemma, Mistral, and Granite respectively. Final independent `/api/ps` audits
+were empty. This additional automation still does not replace blind human
+quality review.
+
 ## Limits and promotion boundary
 
 - Automated marker checks measure constraint retention, not prose quality.
-- Two samples per case are still insufficient for a stable comparative ranking.
+- Three deterministic samples per case are still insufficient for a stable
+  comparative writing-quality ranking.
 - Provider timing includes model-load effects and does not transfer to another
   host, provider version, digest, quantization, context, or concurrency.
 - Human reviewers have not scored instruction compliance, organization, tone,

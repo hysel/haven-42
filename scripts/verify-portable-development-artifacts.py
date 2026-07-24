@@ -22,17 +22,30 @@ REQUIRED_EVIDENCE = {
     "package-file-inventory.json",
 }
 EXPECTED_COMMON_BUILD_DEPENDENCIES = {
-    "altgraph",
-    "packaging",
-    "pyinstaller",
-    "pyinstaller-hooks-contrib",
-    "setuptools",
+    "altgraph": ("0.17.5", "MIT"),
+    "packaging": ("26.2", "Apache-2.0 OR BSD-2-Clause"),
+    "pyinstaller": ("6.21.0", "GPL-2.0-or-later WITH Bootloader-exception"),
+    "pyinstaller-hooks-contrib": (
+        "2026.6", "GPL-2.0-or-later WITH Bootloader-exception",
+    ),
+    "setuptools": ("83.0.0", "MIT"),
 }
 EXPECTED_PLATFORM_BUILD_DEPENDENCIES = {
-    "windows": {"pefile", "pywin32-ctypes"},
-    "darwin": {"macholib"},
-    "linux": set(),
+    "windows": {
+        "pefile": ("2024.8.26", "MIT"),
+        "pywin32-ctypes": ("0.2.3", "BSD-3-Clause"),
+    },
+    "darwin": {"macholib": ("1.16.3", "MIT")},
+    "linux": {},
 }
+ALLOWED_ARCHITECTURES = {
+    "windows": {"amd64", "arm64", "x86_64"},
+    "linux": {"aarch64", "arm64", "x86_64"},
+    "darwin": {"arm64", "x86_64"},
+}
+MAX_ARCHIVE_FILES = 10_000
+MAX_ARCHIVE_MEMBER_BYTES = 128 * 1024 * 1024
+MAX_ARCHIVE_TOTAL_BYTES = 512 * 1024 * 1024
 
 
 class ArtifactVerificationError(ValueError):
@@ -64,8 +77,17 @@ def safe_member_name(value: str) -> str:
 
 def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
     files: dict[str, tuple[int, str]] = {}
+    total_bytes = 0
 
     def add(name: str, data: bytes) -> None:
+        nonlocal total_bytes
+        if len(files) >= MAX_ARCHIVE_FILES:
+            raise ArtifactVerificationError("archive-file-count-exceeded")
+        if len(data) > MAX_ARCHIVE_MEMBER_BYTES:
+            raise ArtifactVerificationError("archive-member-size-exceeded")
+        total_bytes += len(data)
+        if total_bytes > MAX_ARCHIVE_TOTAL_BYTES:
+            raise ArtifactVerificationError("archive-total-size-exceeded")
         safe = safe_member_name(name)
         relative = PurePosixPath(safe).relative_to("haven42").as_posix()
         if not relative or relative.casefold() in {item.casefold() for item in files}:
@@ -76,6 +98,11 @@ def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
         try:
             with zipfile.ZipFile(path) as archive:
                 for member in archive.infolist():
+                    unix_mode = (member.external_attr >> 16) & 0o170000
+                    if member.flag_bits & 0x1:
+                        raise ArtifactVerificationError("encrypted-archive-member")
+                    if unix_mode == 0o120000:
+                        raise ArtifactVerificationError("non-regular-archive-member")
                     if member.is_dir():
                         safe_member_name(member.filename.rstrip("/"))
                         continue
@@ -125,6 +152,7 @@ def expected_package_files(path: Path) -> dict[str, tuple[int, str]]:
     ):
         raise ArtifactVerificationError("invalid-package-file-inventory")
     result: dict[str, tuple[int, str]] = {}
+    folded_names: set[str] = set()
     for record in value["files"]:
         if not isinstance(record, dict) or set(record) != {"path", "sha256", "sizeBytes"}:
             raise ArtifactVerificationError("invalid-package-file-record")
@@ -134,6 +162,7 @@ def expected_package_files(path: Path) -> dict[str, tuple[int, str]]:
         size = record["sizeBytes"]
         if (
             name in result
+            or name.casefold() in folded_names
             or not SHA256.fullmatch(digest)
             or isinstance(size, bool)
             or not isinstance(size, int)
@@ -141,6 +170,7 @@ def expected_package_files(path: Path) -> dict[str, tuple[int, str]]:
         ):
             raise ArtifactVerificationError("invalid-package-file-record")
         result[name] = (size, digest)
+        folded_names.add(name.casefold())
     if not result:
         raise ArtifactVerificationError("empty-package-file-inventory")
     return result
@@ -160,7 +190,12 @@ def verify_checksums(directory: Path) -> None:
             raise ArtifactVerificationError("invalid-checksum-record")
         digest, name = match.groups()
         target = directory / name
-        if name not in expected_names or not target.is_file() or sha256_file(target) != digest:
+        if (
+            name not in expected_names
+            or not target.is_file()
+            or target.is_symlink()
+            or sha256_file(target) != digest
+        ):
             raise ArtifactVerificationError("checksum-mismatch")
         seen.add(name)
     if seen != expected_names:
@@ -170,8 +205,18 @@ def verify_checksums(directory: Path) -> None:
 def verify_evidence(directory: Path) -> None:
     inventory = load_json(directory / "dependency-inventory.json")
     provenance = load_json(directory / "build-provenance.json")
+    environment = provenance.get("environment", {})
+    application = provenance.get("application", {})
+    source = provenance.get("source", {})
+    builder = provenance.get("builder", {})
+    operating_system = environment.get("operatingSystem")
+    architecture = environment.get("architecture")
+    target = inventory.get("target")
     if (
         inventory.get("schemaVersion") != 2
+        or set(inventory) != {
+            "schemaVersion", "target", "runtimeComponents", "buildDependencies",
+        }
         or not isinstance(inventory.get("runtimeComponents"), list)
         or not isinstance(inventory.get("buildDependencies"), list)
         or inventory["runtimeComponents"] != [{
@@ -179,13 +224,36 @@ def verify_evidence(directory: Path) -> None:
             "scope": "embedded-runtime",
             "version": provenance.get("environment", {}).get("pythonVersion"),
         }]
+        or operating_system not in EXPECTED_PLATFORM_BUILD_DEPENDENCIES
+        or architecture not in ALLOWED_ARCHITECTURES.get(str(operating_system), set())
+        or target != f"{operating_system}-{architecture}"
     ):
         raise ArtifactVerificationError("invalid-dependency-inventory")
     commit = provenance.get("source", {}).get("commit", "")
     security = provenance.get("security", {})
     if (
-        provenance.get("schemaVersion") != 1
+        set(provenance) != {
+            "schemaVersion", "artifactKind", "application", "source",
+            "builder", "environment", "security",
+        }
+        or provenance.get("schemaVersion") != 1
         or provenance.get("artifactKind") != "unsigned-development"
+        or application != {"name": "Haven 42", "version": "0.3.0"}
+        or source.get("repository") != "https://github.com/hysel/haven-42"
+        or set(source) != {"repository", "commit"}
+        or set(builder) != {"kind", "workflow", "runId"}
+        or builder.get("kind") not in {"github-actions", "local"}
+        or not all(isinstance(builder.get(field), str) and builder[field] for field in ("workflow", "runId"))
+        or set(environment) != {
+            "operatingSystem", "architecture", "pythonImplementation",
+            "pythonVersion", "pyinstallerVersion",
+        }
+        or environment.get("pythonImplementation") != "CPython"
+        or environment.get("pyinstallerVersion") != "6.21.0"
+        or not all(
+            isinstance(environment.get(field), str) and environment[field]
+            for field in environment
+        )
         or not re.fullmatch(r"[0-9a-f]{40}", str(commit))
         or security != {
             "attested": False,
@@ -197,11 +265,10 @@ def verify_evidence(directory: Path) -> None:
         }
     ):
         raise ArtifactVerificationError("invalid-build-provenance")
-    operating_system = provenance.get("environment", {}).get("operatingSystem")
-    expected_build_names = (
-        EXPECTED_COMMON_BUILD_DEPENDENCIES
-        | EXPECTED_PLATFORM_BUILD_DEPENDENCIES.get(str(operating_system), {"invalid-platform"})
-    )
+    expected_build_dependencies = {
+        **EXPECTED_COMMON_BUILD_DEPENDENCIES,
+        **EXPECTED_PLATFORM_BUILD_DEPENDENCIES[str(operating_system)],
+    }
     build_names: set[str] = set()
     for record in inventory["buildDependencies"]:
         if (
@@ -209,16 +276,34 @@ def verify_evidence(directory: Path) -> None:
             or set(record) != {"license", "name", "version"}
             or not all(isinstance(record[field], str) and record[field] for field in record)
             or record["name"] in build_names
+            or expected_build_dependencies.get(record["name"]) != (
+                record["version"], record["license"],
+            )
         ):
             raise ArtifactVerificationError("invalid-build-dependency-record")
         build_names.add(record["name"])
-    if build_names != expected_build_names:
+    if build_names != set(expected_build_dependencies):
         raise ArtifactVerificationError("build-dependency-allowlist-mismatch")
     sbom = load_json(directory / "haven42.cdx.json")
+    expected_tools = [
+        {"name": record["name"], "type": "application", "version": record["version"]}
+        for record in inventory["buildDependencies"]
+    ]
     if (
+        set(sbom) != {"bomFormat", "specVersion", "version", "metadata", "components"}
+        or
         sbom.get("bomFormat") != "CycloneDX"
         or sbom.get("specVersion") != "1.5"
+        or sbom.get("version") != 1
         or sbom.get("metadata", {}).get("component", {}).get("name") != "Haven 42"
+        or sbom.get("metadata", {}).get("component") != {
+            "type": "application", "name": "Haven 42", "version": "0.3.0",
+        }
+        or sbom.get("metadata", {}).get("tools", {}).get("components") != expected_tools
+        or sbom.get("metadata", {}).get("properties") != [
+            {"name": "haven42:artifact-kind", "value": "unsigned-development"},
+            {"name": "haven42:target", "value": target},
+        ]
         or sbom.get("components") != [{
             "name": "CPython",
             "scope": "required",
@@ -239,6 +324,8 @@ def verify_evidence(directory: Path) -> None:
 def verify(directory: Path) -> None:
     if not directory.is_dir():
         raise ArtifactVerificationError("artifact-directory-not-found")
+    if any(path.is_symlink() for path in directory.iterdir()):
+        raise ArtifactVerificationError("artifact-symlink-rejected")
     archives = [
         path for path in directory.iterdir()
         if path.is_file() and (path.name.endswith(".zip") or path.name.endswith(".tar.gz"))
@@ -251,6 +338,17 @@ def verify(directory: Path) -> None:
         raise ArtifactVerificationError("required-evidence-missing")
     verify_checksums(directory)
     verify_evidence(directory)
+    provenance = load_json(directory / "build-provenance.json")
+    target = (
+        f"{provenance['environment']['operatingSystem']}-"
+        f"{provenance['environment']['architecture']}"
+    )
+    if archives[0].name != (
+        f"haven42-{target}-unsigned-development.zip"
+        if target.startswith("windows-")
+        else f"haven42-{target}-unsigned-development.tar.gz"
+    ):
+        raise ArtifactVerificationError("archive-target-name-mismatch")
     actual = read_archive_files(archives[0])
     expected = expected_package_files(directory / "package-file-inventory.json")
     if actual != expected:

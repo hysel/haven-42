@@ -65,6 +65,41 @@ def plan_composition(
         raise CompositionError("invalid-composition-id")
     if not isinstance(request.get("cancelRequested"), bool):
         raise CompositionError("invalid-cancellation-state")
+    lifecycle = request.get("lifecycle")
+    lifecycle_fields = set(request_contract.get("lifecycleFields", []))
+    if not isinstance(lifecycle, dict) or set(lifecycle) != lifecycle_fields:
+        raise CompositionError("invalid-lifecycle-fields")
+    attempt = lifecycle.get("attempt")
+    retry_of = lifecycle.get("retryOf")
+    lifecycle_mode = lifecycle.get("mode")
+    maximum_attempts = request_contract.get("maximumAttempts")
+    if (
+        isinstance(attempt, bool)
+        or not isinstance(attempt, int)
+        or attempt < 0
+        or isinstance(maximum_attempts, bool)
+        or not isinstance(maximum_attempts, int)
+        or attempt > maximum_attempts
+    ):
+        raise CompositionError("invalid-lifecycle-attempt")
+    if lifecycle_mode not in request_contract.get("lifecycleModes", []):
+        raise CompositionError("invalid-lifecycle-mode")
+    if lifecycle_mode == "fresh" and (attempt != 0 or retry_of is not None):
+        raise CompositionError("invalid-fresh-lifecycle")
+    if lifecycle_mode == "retry" and (
+        attempt < 1
+        or not isinstance(retry_of, str)
+        or not IDENTIFIER.fullmatch(retry_of)
+        or retry_of == composition_id
+    ):
+        raise CompositionError("invalid-retry-identity")
+    if lifecycle_mode == "cancel" and (
+        not request["cancelRequested"]
+        or retry_of is not None
+    ):
+        raise CompositionError("invalid-cancel-lifecycle")
+    if request["cancelRequested"] != (lifecycle_mode == "cancel"):
+        raise CompositionError("cancellation-lifecycle-mismatch")
     steps = request.get("steps")
     maximum = contract.get("maximumSteps")
     if (
@@ -129,7 +164,7 @@ def plan_composition(
         "type": "accepted",
         "code": "COMPOSITION_PLAN_ACCEPTED",
     }]
-    if request["cancelRequested"]:
+    if lifecycle_mode == "cancel":
         events.append({
             "sequence": 2,
             "type": "cancelled",
@@ -139,16 +174,39 @@ def plan_composition(
         planned_steps: list[dict[str, Any]] = []
     else:
         planned_steps = []
+        if lifecycle_mode == "retry":
+            events.append({
+                "sequence": len(events) + 1,
+                "type": "retry-planned",
+                "code": "COMPOSITION_RETRY_REQUIRES_NEW_EXECUTION_REQUEST",
+                "attempt": attempt,
+            })
         for step in ordered:
             workflow = trusted[step["workflowId"]]
+            consumers = sorted(
+                candidate["stepId"]
+                for candidate in ordered
+                if step["stepId"] in candidate["dependsOn"]
+            )
             planned_steps.append({
                 "stepId": step["stepId"],
                 "workflowId": step["workflowId"],
                 "dependsOn": list(step["dependsOn"]),
                 "artifact": {
+                    "schemaVersion": 1,
                     "artifactType": "workflow-plan-reference",
                     "status": "planned",
                     "workflowName": workflow["name"],
+                    "sourceStepId": step["stepId"],
+                    "consumerStepIds": consumers,
+                    "classification": "metadata-only",
+                    "contentIncluded": False,
+                    "validationStatus": "contract-validated",
+                },
+                "approval": {
+                    "required": False,
+                    "authority": "engine-owned",
+                    "rendererGrantAccepted": False,
                 },
             })
             events.append({
@@ -168,6 +226,8 @@ def plan_composition(
         "schemaVersion": 1,
         "kind": "task-composition-plan",
         "compositionId": composition_id,
+        "attempt": attempt,
+        "retryOf": retry_of,
         "state": state,
         "executionAllowed": False,
         "steps": planned_steps,

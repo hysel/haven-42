@@ -30,8 +30,11 @@ Qwen, Gemma, and Mistral passed all three synthetic constraint-retention cases;
 Granite passed two and omitted one required uncertainty phrase. All per-case and
 final unload checks passed, raw output was not persisted, and `/api/ps` was
 empty afterward. Exact digests and sanitized metrics are recorded in
-`examples/writing-model-matrix-validation.md`. Human quality review and repeated
-sampling remain open, so no comparative default changed.
+`examples/writing-model-matrix-validation.md`. The reusable harness accepts one
+through five bounded repetitions per exact artifact, unloads after each sample,
+and retains only marker results, hashes, lengths, and provider metrics. Human
+quality review and broader repeated sampling remain open, so no comparative
+default changed.
 
 Use the same source material, prompts, provider settings, context limit, warm/cold policy, and output bounds for every exact candidate. Record the prompt-set revision and never use private user documents in committed fixtures.
 

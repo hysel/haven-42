@@ -206,10 +206,14 @@ def main() -> int:
     parser.add_argument("--ollama-base-url", required=True)
     parser.add_argument("--model", action="append", required=True)
     parser.add_argument("--timeout-seconds", type=int, default=300)
+    parser.add_argument("--repetitions", type=int, default=1)
     parser.add_argument("--output")
+    parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
     if args.timeout_seconds < 30 or args.timeout_seconds > 900:
         parser.error("--timeout-seconds must be from 30 through 900")
+    if args.repetitions < 1 or args.repetitions > 5:
+        parser.error("--repetitions must be from 1 through 5")
     if len(args.model) < 1 or len(args.model) > 8 or any(
         not MODEL_NAME.fullmatch(model) for model in args.model
     ):
@@ -243,10 +247,12 @@ def main() -> int:
     records = []
     try:
         for model in args.model:
-            cases = [
-                run_case(base_url, model, case, args.timeout_seconds)
-                for case in CASES
-            ]
+            cases = []
+            for repetition in range(1, args.repetitions + 1):
+                for case in CASES:
+                    result = run_case(base_url, model, case, args.timeout_seconds)
+                    result["repetition"] = repetition
+                    cases.append(result)
             records.append({
                 "model": model,
                 "digest": artifacts[model],
@@ -271,6 +277,8 @@ def main() -> int:
         "promptSet": {
             "id": "haven42-writing-matrix-v1",
             "caseCount": len(CASES),
+            "repetitions": args.repetitions,
+            "sampleCountPerModel": len(CASES) * args.repetitions,
             "syntheticOnly": True,
             "rawInputsPersisted": False,
         },
@@ -285,7 +293,8 @@ def main() -> int:
         output_path = Path(args.output).resolve()
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(serialized, encoding="utf-8")
-    print(serialized, end="")
+    if not args.quiet:
+        print(serialized, end="")
     return 0 if all(final_unloads.values()) else 1
 
 

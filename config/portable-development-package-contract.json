@@ -20,12 +20,26 @@
     "resourceDigestAlgorithm": "sha256",
     "wholePackageFileInventoryRequired": true,
     "archiveTraversalAndLinkRejectionRequired": true,
+    "archiveCaseCollisionRejectionRequired": true,
+    "archiveMemberCountLimit": 10000,
+    "archiveMemberSizeLimitBytes": 134217728,
+    "archiveTotalSizeLimitBytes": 536870912,
     "checksumCoverageMustBeExact": true,
     "unexpectedRequestPathsRejected": true,
     "browserUrlIsEngineConstructedLoopbackOnly": true,
     "arbitraryProcessLaunchAllowed": false,
     "shutdownRequiresOriginAndSessionToken": true,
     "modelCleanupRequiredBeforeShutdown": true
+  },
+  "nativeSmokeTests": {
+    "sourcePackagedParityRequired": true,
+    "relocationRequired": true,
+    "readOnlyPackageStartupRequired": true,
+    "abruptExitRecoveryRequired": true,
+    "repeatedLifecycleRequired": true,
+    "occupiedPortFailureRequired": true,
+    "hostileEnvironmentRequired": true,
+    "resourceTamperRejectionRequired": true
   },
   "supplyChainEvidence": [
     "SHA256SUMS",

@@ -176,11 +176,11 @@
           </div>
         </section>
 
-        <section class="panel chat-panel hidden" id="software-panel">
+        <section class="panel chat-panel hidden" id="software-panel" aria-labelledby="software-title">
           <div class="panel-heading">
             <div>
               <p class="eyebrow">SOFTWARE · REGISTERED WORKFLOWS</p>
-              <h2>Review a trusted workflow</h2>
+              <h2 id="software-title" tabindex="-1">Review a trusted workflow</h2>
             </div>
             <span class="badge good">Plan only</span>
           </div>
@@ -189,19 +189,19 @@
             <label for="workflow-select">Workflow</label>
             <select id="workflow-select" disabled><option>Loading trusted workflows…</option></select>
             <button class="button primary" id="workflow-plan-button" type="button" disabled>Review workflow plan</button>
-            <article class="workflow-result hidden" id="workflow-result" aria-live="polite">
-              <strong id="workflow-result-title"></strong>
+            <article class="workflow-result hidden" id="workflow-result" role="status" aria-live="polite">
+              <strong id="workflow-result-title" tabindex="-1"></strong>
               <p id="workflow-result-summary"></p>
               <small id="workflow-result-policy"></small>
             </article>
           </div>
         </section>
 
-        <section class="panel chat-panel hidden" id="image-panel">
+        <section class="panel chat-panel hidden" id="image-panel" aria-labelledby="image-title">
           <div class="panel-heading">
             <div>
               <p class="eyebrow">IMAGES · PROMOTED LINUX PROFILE</p>
-              <h2>Create an image locally</h2>
+              <h2 id="image-title" tabindex="-1">Create an image locally</h2>
             </div>
             <span class="badge" id="image-provider-badge">Not connected</span>
           </div>
@@ -233,8 +233,8 @@
             </div>
             <p class="notice">Generation writes an output on the provider host. Haven 42 clears API history but cannot remove that provider-retained copy. The returned PNG stays in browser memory until you explicitly download it.</p>
             <button class="button primary" id="image-run-button" type="button" disabled>Generate with disclosed retention</button>
-            <article class="workflow-result hidden" id="image-result" aria-live="polite">
-              <img id="image-preview" alt="Generated Haven 42 result">
+            <article class="workflow-result hidden" id="image-result" role="status" aria-live="polite">
+              <img id="image-preview" tabindex="-1" alt="Generated Haven 42 result">
               <p id="image-result-summary"></p>
               <a class="button secondary" id="image-download" download="haven42-generated-image.png">Download PNG</a>
             </article>
@@ -246,7 +246,7 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">SETUP · PROVIDER</p>
-                <h2>Connect Ollama</h2>
+                <h2 id="models-title" tabindex="-1">Connect Ollama</h2>
               </div>
               <span class="badge" id="connection-badge" aria-live="polite">Not connected</span>
             </div>
@@ -285,7 +285,7 @@
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">SETUP · SYSTEM</p>
-                <h2>Readiness</h2>
+                <h2 id="system-title" tabindex="-1">Readiness</h2>
               </div>
               <span class="badge good">Loopback only</span>
             </div>

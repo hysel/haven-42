@@ -1824,7 +1824,7 @@ test_solution_architecture_review_doc() {
     grep -q "25: Local Video Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "26: Hardware-Adaptive Model Quantization" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "21: General-Purpose AI Assistant And Intent Routing | Complete | Complete for the promoted provider set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "22: Unified Product UI And Task Composition | In progress; local tools runnable | Local web text tools, registered software planning, promoted Linux image flow, portable development packaging, and offline update-lifecycle simulation implemented" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "22: Unified Product UI And Task Composition | In progress; local tools runnable | Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, and offline installer/update simulation implemented" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "21: General-Purpose AI Assistant And Intent Routing | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "22: Unified Product UI And Task Composition | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "automated status-consistency checks" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -2223,7 +2223,7 @@ for field in (
     assert value[field] is False
 PY
   lifecycle_hostile_output="$(python3 "$REPO_ROOT/scripts/core-update-lifecycle.py" --self-test 2>&1)" || return 1
-  printf '%s\n' "$lifecycle_hostile_output" | grep -q "passed: 41 cases"
+  printf '%s\n' "$lifecycle_hostile_output" | grep -q "passed: 45 cases"
 }
 
 test_workflow_reliability_and_data_lifecycle() {
@@ -2399,7 +2399,7 @@ PY
 }
 
 test_task_composition_and_repository_privacy() {
-  python3 "$REPO_ROOT/scripts/test-task-composition.py" | grep -q "10 bounded, effect-free checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-task-composition.py" | grep -q "19 bounded, effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys

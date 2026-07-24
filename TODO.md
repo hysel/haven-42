@@ -413,8 +413,9 @@
 - [x] Keep engine binaries separate from user configuration, workspaces, models, provider data, generated artifacts, and evidence in the versioned storage and update contracts.
 - [ ] Add compatibility preflight, atomic activation, post-update health checks, automatic rollback, retained-version cleanup, offline behavior, and a disabled-update mode.
   - [x] Add a cross-platform effect-free lifecycle simulator for healthy,
-    failed-health, interrupted, rollback, retention, and disabled paths with 41
-    hostile cases and every machine-effect flag denied.
+    failed-health, phase-specific interrupted recovery, replay defense, rollback,
+    retention, and disabled paths with 45 hostile cases and every machine-effect
+    flag denied.
   - [ ] Implement those lifecycle operations only after trusted cryptographic,
     native-path, packaging, privilege, and platform evidence permits real
     machine effects.
@@ -427,7 +428,9 @@
   - [x] Run the initial exact-digest automated constraint matrix with synthetic
     inputs, provider token/timing metrics, no raw-output persistence, and
     verified per-case and final unloads. Blind human scoring and repeated
-    quality samples remain open before comparative promotion.
+    quality samples remain open before comparative promotion. A three-repetition
+    exact-artifact run passed Qwen, Gemma, and Mistral 9/9; Granite passed 6/9.
+    The reusable harness supports one through five bounded repetitions.
 - [x] Replace first-provider-result model defaults with capability-specific engine recommendations, non-downloading missing-model guidance, advanced per-capability overrides, reset-to-automatic, and visibly unverified handling for unknown installed models.
 - [x] Bind local-web automatic recommendations to the exact tested Qwen
   provider digest and capability evidence; a matching model name with a
@@ -439,6 +442,7 @@
 - [ ] Keep Tauri as optional Milestone 22B native packaging after its published dependency, bridge, signing, package, and platform gates pass; the local web product must not wait on it.
 - [x] Add unsigned PyInstaller one-folder development packages for Windows, Linux, and macOS using the shared browser UI, embedded resource-integrity verification, source/package parity, native smoke tests, least-privilege CI, checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence.
 - [x] Harden portable development packaging with cross-platform wheel hashes, platform-allowlisted evidence, hostile resource/shutdown/archive tests, exact checksum coverage, full package inventory, and explicit unsigned build provenance.
+- [x] Add native read-only-package startup and abrupt-exit recovery tests, exact build dependency/license verification, archive count/size bounds, encrypted/evidence-link rejection, and target-name validation.
 - [ ] Promote packaging beyond development only after signing/notarization, installer/uninstall, provenance, platform lifecycle, and production release gates pass. Keep online updater activation and machine modification disabled until separately approved and validated.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.
 - [x] Define one product-wide progressive onboarding pattern with guided setup, existing-setup connection, not-now, advanced controls on both active paths, and engine-derived validated/customized/unverified/blocked states.
@@ -457,8 +461,9 @@
   and workflow authority, bounded PNG validation, explicit retention
   disclosure, history cleanup, and user-triggered download.
 - [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
-- [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, hostile catalog tests, and a dependency-free headless Chromium wizard/chat flow on Windows; native packaging and full cross-platform browser recovery coverage remain open under the parent task.
-- [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, metadata-only intermediate artifacts, cancellation-before-execution, and hostile tests; it remains simulation-only.
+- [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, focused error recovery, busy-state/result focus, hostile catalog tests, and a dependency-free 59-check headless Chromium wizard/chat flow on Windows; native packaging covers all three platforms while full browser automation on every platform remains open under the parent task.
+- [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, exact metadata-only intermediate artifacts, fresh/retry/cancel identity, one bounded retry, cancellation-before-execution, renderer-approval rejection, and 19 hostile/healthy checks; it remains simulation-only.
+- [x] Expand the simulation-only installation broker to exact install/upgrade/uninstall state and promotion-evidence contracts with 48 hostile/healthy checks and every authority/effect denied.
 - [ ] Admit executable multi-step composition only after effect-specific opaque approvals, runtime cancellation/retry/recovery, typed intermediate validation, and native cross-platform evidence pass.
 
 ## Solution Architecture Review Backlog

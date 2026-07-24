@@ -3,7 +3,24 @@
   "contractId": "haven42.installation-broker",
   "implementationStatus": "simulation-only",
   "runtimeAdmitted": false,
-  "requiredRequestFields": ["schemaVersion", "componentId", "platformProfileId", "approvalToken"],
+  "requiredRequestFields": [
+    "schemaVersion",
+    "operation",
+    "componentId",
+    "platformProfileId",
+    "currentState",
+    "promotionEvidence",
+    "approvalToken"
+  ],
+  "operations": ["plan-install", "plan-upgrade", "plan-uninstall"],
+  "currentStates": ["absent", "present", "unknown"],
+  "promotionEvidenceFields": [
+    "immutableIdentityAvailable",
+    "checksumAvailable",
+    "signatureOrAttestationAvailable",
+    "licenseReviewed",
+    "platformLifecycleEvidenceAvailable"
+  ],
   "requestPolicy": {
     "unknownFieldsAllowed": false,
     "registeredComponentIdsOnly": true,
@@ -14,6 +31,7 @@
     "argumentsAllowed": false,
     "environmentAllowed": false,
     "rendererEvidenceAllowed": false,
+    "scenarioEvidenceIsAuthority": false,
     "rendererApprovalDecisionAllowed": false
   },
   "approval": {
@@ -22,6 +40,14 @@
     "sessionBound": true,
     "componentVersionPlatformAndEffectsBound": true,
     "rememberApprovalAllowed": false
+  },
+  "lifecyclePolicy": {
+    "installRequiresAbsentState": true,
+    "upgradeAndUninstallRequirePresentState": true,
+    "unknownStateDecision": "deny",
+    "replayAllowed": false,
+    "downgradeAllowed": false,
+    "simulationMayPromoteComponent": false
   },
   "events": [
     "accepted",

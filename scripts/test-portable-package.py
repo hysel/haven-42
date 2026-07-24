@@ -10,6 +10,7 @@ import re
 import os
 import shutil
 import socket
+import stat
 import subprocess
 import sys
 import tempfile
@@ -257,6 +258,46 @@ def test_relocation_and_hostile_environment(executable: Path, expected: dict) ->
         assert actual == expected
 
 
+def restore_writable(root: Path) -> None:
+    for path in [root, *root.rglob("*")]:
+        try:
+            path.chmod(path.stat().st_mode | stat.S_IWUSR)
+        except OSError:
+            pass
+
+
+def test_read_only_package(executable: Path, expected: dict) -> None:
+    with tempfile.TemporaryDirectory(prefix="haven42-read-only-package-") as temporary:
+        copied = Path(temporary) / "haven42"
+        shutil.copytree(executable.parent, copied)
+        copied_executable = copied / executable.name
+        try:
+            for path in copied.rglob("*"):
+                mode = path.stat().st_mode
+                if path.is_dir():
+                    path.chmod(mode & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
+                else:
+                    path.chmod(mode & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
+            copied.chmod(copied.stat().st_mode & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
+            assert probe([str(copied_executable)], True, cwd=copied) == expected
+        finally:
+            restore_writable(copied)
+
+
+def test_abrupt_exit_recovery(executable: Path, expected: dict) -> None:
+    process, origin = launch([str(executable)], executable.parent)
+    try:
+        with request(origin + "/api/bootstrap") as response:
+            assert json.load(response)["package"]["verified"] is True
+        process.kill()
+        process.wait(timeout=10)
+        assert process.returncode != 0
+    finally:
+        if process.poll() is None:
+            process.kill()
+    assert probe([str(executable)], True, cwd=executable.parent) == expected
+
+
 def test_port_collision(command: list[str]) -> None:
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listener.bind(("127.0.0.1", 0))
@@ -286,11 +327,14 @@ def main() -> int:
     assert source == packaged, "source and packaged behavior diverged"
     assert probe([str(executable)], True) == packaged
     test_relocation_and_hostile_environment(executable, packaged)
+    test_read_only_package(executable, packaged)
+    test_abrupt_exit_recovery(executable, packaged)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
     print(
-        "Portable package parity, relocation, repeated lifecycle, port collision, "
-        "shutdown authority, hostile environment, and integrity tests passed."
+        "Portable package parity, relocation, read-only startup, abrupt-exit recovery, "
+        "repeated lifecycle, port collision, shutdown authority, hostile environment, "
+        "and integrity tests passed."
     )
     return 0
 

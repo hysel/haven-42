@@ -3,28 +3,28 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "dbfbc886bb4b667e4a6351c825a16399dd07189ebb9628777e9d666479c63333",
-      "sizeBytes": 18343
+      "sha256": "7fa19d3de63e8286a8fd02603b45f2f37721cd4a8e6095a952b8f7c7e04ef579",
+      "sizeBytes": 18661
     },
     {
       "path": "web/static/app.js",
-      "sha256": "0439736506894db131ed5a256866586f6c4ca255ec10873daa62960d71fbe989",
-      "sizeBytes": 41761
+      "sha256": "69b7b01af2bce754a166339e3cc4d61aa307c384f3b706eb35a70e7b69d86192",
+      "sizeBytes": 42801
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "b5506d7a371ea7adce9662f4c4ea0f93243bf9d41512cee100fb10f0101cbc22",
-      "sizeBytes": 16485
+      "sha256": "8d6a0433020cbed605decae915adfb2601cf8765baf50f38b8ec58ae0fcdad6a",
+      "sizeBytes": 16496
     },
     {
       "path": "config/text-capability-model-recommendations.json",
-      "sha256": "17879d432ae0c40f7318c85307799af79a65cc583f22cfadd5538f8898f55133",
-      "sizeBytes": 1565
+      "sha256": "2e73ec2c32bacafd8343db7e4c826cf94fd1ec4dd48c9b2eab2643a0f9c5009e",
+      "sizeBytes": 1577
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "e05fd00c1ccf62379095fad2d7f428bc79be867704801f17ec3cdaee518107cd",
-      "sizeBytes": 26314
+      "sha256": "d3597f7816cddb65d5512012a0abc049d1a13d7dbf090805f05e8538572e4db2",
+      "sizeBytes": 26394
     },
     {
       "path": "config/install-component-registry.json",
