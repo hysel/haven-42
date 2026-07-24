@@ -8,6 +8,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const QWEN_DIGEST = "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7";
+const TEST_PNG = Buffer.from("89504e470d0a1a0a0000000d494844520000020000000200", "hex");
 let models = ["qwen3.5:9b", "unknown-model:latest"];
 const loaded = new Set();
 const requests = [];
@@ -24,8 +26,27 @@ function json(response, status, value) {
 const fake = createServer((request, response) => {
   requests.push(`${request.method} ${request.url}`);
   if (request.method === "GET" && request.url === "/api/version") return json(response, 200, { version: "browser-test" });
-  if (request.method === "GET" && request.url === "/api/tags") return json(response, 200, { models: models.map((name) => ({ name })) });
+  if (request.method === "GET" && request.url === "/api/tags") return json(response, 200, {
+    models: models.map((name) => ({
+      name,
+      digest: name === "qwen3.5:9b" ? QWEN_DIGEST : "1".repeat(64),
+    })),
+  });
   if (request.method === "GET" && request.url === "/api/ps") return json(response, 200, { models: [...loaded].map((name) => ({ name })) });
+  if (request.method === "GET" && request.url === "/object_info/CheckpointLoaderSimple") return json(response, 200, {
+    CheckpointLoaderSimple: { input: { required: { ckpt_name: [["sd_xl_base_1.0.safetensors"], {}] } } },
+  });
+  if (request.method === "GET" && request.url === "/history/browser-test-image") return json(response, 200, {
+    "browser-test-image": {
+      status: { status_str: "success" },
+      outputs: { 9: { images: [{ filename: "test.png", subfolder: "haven-42", type: "output" }] } },
+    },
+  });
+  if (request.method === "GET" && request.url.startsWith("/view?")) {
+    response.writeHead(200, { "Content-Type": "image/png", "Content-Length": TEST_PNG.length });
+    response.end(TEST_PNG);
+    return;
+  }
   let body = "";
   request.on("data", (chunk) => { body += chunk; });
   request.on("end", () => {
@@ -35,12 +56,22 @@ const fake = createServer((request, response) => {
       if (payload.messages?.at(-1)?.content === "force browser failure") {
         return json(response, 502, { error: "forced-browser-provider-failure" });
       }
-      return json(response, 200, { message: { role: "assistant", content: "LOCAL_BROWSER_OK" } });
+      return json(response, 200, {
+        message: { role: "assistant", content: "LOCAL_BROWSER_OK" },
+        prompt_eval_count: 30,
+        eval_count: 10,
+        total_duration: 7_500_000_000,
+        load_duration: 500_000_000,
+        prompt_eval_duration: 1_000_000_000,
+        eval_duration: 5_000_000_000,
+      });
     }
     if (request.url === "/api/generate" && payload.keep_alive === 0) {
       loaded.delete(payload.model);
       return json(response, 200, { done: true });
     }
+    if (request.url === "/prompt") return json(response, 200, { prompt_id: "browser-test-image" });
+    if (request.url === "/history" && payload.clear === true) return json(response, 200, { status: "cleared" });
     return json(response, 404, { error: "not-found" });
   });
 });
@@ -128,7 +159,7 @@ class Cdp {
     return new Promise((accept, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error(`cdp-call-timeout:${method}`));
+        reject(new Error(`cdp-call-timeout:${method}:ready-state-${this.socket.readyState}`));
       }, 15000);
       this.pending.set(id, {
         accept: (value) => { clearTimeout(timer); accept(value); },
@@ -170,7 +201,7 @@ try {
   haven.stdout.on("data", (chunk) => { output += chunk.toString(); });
   const origin = await waitFor(() => output.match(/http:\/\/127\.0\.0\.1:\d+/)?.[0]);
   trace("local-web-ready");
-  browser = spawn(browserPath, [
+  const browserArguments = [
     "--headless=new",
     "--disable-gpu",
     "--no-first-run",
@@ -178,7 +209,16 @@ try {
     `--remote-debugging-port=${debugPort}`,
     `--user-data-dir=${profile}`,
     origin,
-  ], { windowsHide: true, stdio: "ignore" });
+  ];
+  browser = spawn(browserPath, browserArguments, {
+    windowsHide: true,
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+  browser.stderr.on("data", (chunk) => {
+    if (process.env.HAVEN42_BROWSER_TEST_TRACE === "1") {
+      trace(`browser-stderr:${chunk.toString().trim().slice(0, 500)}`);
+    }
+  });
   browser.once("error", (error) => { browserLaunchError = error; });
   const pages = await waitFor(async () => {
     if (browserLaunchError) throw browserLaunchError;
@@ -320,18 +360,70 @@ try {
     typed: document.querySelector('#task-event').textContent,
     kind: document.querySelector('#task-event').dataset.kind,
     status: document.querySelector('#text-status').textContent,
-    error: document.querySelector('#connection-error').textContent
+    error: document.querySelector('#connection-error').textContent,
+    runDetailsVisible: !document.querySelector('#run-details').classList.contains('hidden'),
+    runDetails: document.querySelector('#run-details-list').textContent
   })`);
   if (
     !result.output
     || !result.typed.includes("no file written")
     || !result.typed.includes("model evidence is unverified")
     || result.kind !== "warning"
+    || !result.runDetailsVisible
+    || !result.runDetails.includes("40")
+    || !result.runDetails.includes("2 tokens/s")
   ) {
     throw new Error(`typed-result-rendering:${JSON.stringify(result)}`);
   }
-  checks += 4;
+  checks += 7;
   trace("typed-result-verified");
+
+  await cdp.evaluate("document.querySelector('#software-nav').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#workflow-select').disabled"));
+  await cdp.evaluate("document.querySelector('#workflow-plan-button').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#workflow-result').classList.contains('hidden')"));
+  const workflow = await cdp.evaluate(`({
+    title: document.querySelector('#workflow-result-title').textContent,
+    policy: document.querySelector('#workflow-result-policy').textContent,
+    textHidden: document.querySelector('#text-panel').classList.contains('hidden')
+  })`);
+  if (
+    !workflow.title
+    || !workflow.policy.includes("No process started")
+    || !workflow.policy.includes("no file write")
+    || !workflow.textHidden
+  ) throw new Error(`workflow-plan-rendering:${JSON.stringify(workflow)}`);
+  checks += 4;
+  trace("workflow-plan-verified");
+
+  await cdp.evaluate("document.querySelector('#image-nav').click()");
+  await cdp.evaluate(`(() => {
+    document.querySelector('#image-endpoint').value = 'http://127.0.0.1:${fakePort}';
+    document.querySelector('#image-connect-button').click();
+  })()`);
+  await waitFor(() => cdp.evaluate("!document.querySelector('#image-run-button').disabled"));
+  await cdp.evaluate(`(() => {
+    document.querySelector('#image-prompt').value = 'synthetic browser image';
+    document.querySelector('#image-size').value = '512';
+    document.querySelector('#image-steps').value = '10';
+    document.querySelector('#image-run-button').click();
+  })()`);
+  await waitFor(() => cdp.evaluate("!document.querySelector('#image-result').classList.contains('hidden')"));
+  const imageResult = await cdp.evaluate(`({
+    badge: document.querySelector('#image-provider-badge').textContent,
+    summary: document.querySelector('#image-result-summary').textContent,
+    source: document.querySelector('#image-preview').src,
+    download: document.querySelector('#image-download').getAttribute('download')
+  })`);
+  if (
+    !imageResult.badge.includes("loopback")
+    || !imageResult.summary.includes("512 × 512")
+    || !imageResult.summary.includes("provider copy retained")
+    || !imageResult.source.startsWith("data:image/png;base64,")
+    || imageResult.download !== "haven42-generated-image.png"
+  ) throw new Error(`image-result-rendering:${JSON.stringify(imageResult)}`);
+  checks += 5;
+  trace("image-flow-verified");
 
   const hostileEvents = await cdp.evaluate(`(() => {
     const cases = [

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import struct
 import tempfile
 import threading
 import time
@@ -16,6 +17,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parent.parent
+QWEN_DIGEST = "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+WRITER_DIGEST = "1" * 64
 SPEC = importlib.util.spec_from_file_location("haven42_web_server", ROOT / "web/server.py")
 assert SPEC and SPEC.loader
 WEB = importlib.util.module_from_spec(SPEC)
@@ -43,6 +46,13 @@ class FakeOllama(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _bytes(self, status: int, data: bytes, content_type: str):
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
     def do_GET(self):  # noqa: N802
         if self.path == "/api/version":
             if FakeState.fail_connect:
@@ -50,9 +60,53 @@ class FakeOllama(BaseHTTPRequestHandler):
             else:
                 self._json(200, {"version": "test-1.0"})
         elif self.path == "/api/tags":
-            self._json(200, {"models": [{"name": name} for name in FakeState.models]})
+            self._json(200, {"models": [
+                {
+                    "name": name,
+                    "digest": (
+                        QWEN_DIGEST
+                        if name == "qwen3.5:9b"
+                        else WRITER_DIGEST
+                        if name == "writer-model:latest"
+                        else "invalid"
+                    ),
+                }
+                for name in FakeState.models
+            ]})
         elif self.path == "/api/ps":
             self._json(200, {"models": [{"name": name} for name in sorted(FakeState.loaded)]})
+        elif self.path == "/object_info/CheckpointLoaderSimple":
+            self._json(200, {
+                "CheckpointLoaderSimple": {
+                    "input": {
+                        "required": {
+                            "ckpt_name": [[WEB.PROMOTED_IMAGE_MODEL], {}],
+                        },
+                    },
+                },
+            })
+        elif self.path == "/history/browser-test-image":
+            self._json(200, {
+                "browser-test-image": {
+                    "status": {"status_str": "success"},
+                    "outputs": {
+                        "9": {
+                            "images": [{
+                                "filename": "test.png",
+                                "subfolder": "haven-42",
+                                "type": "output",
+                            }],
+                        },
+                    },
+                },
+            })
+        elif self.path.startswith("/view?"):
+            png_header = (
+                b"\x89PNG\r\n\x1a\n"
+                + b"\x00\x00\x00\rIHDR"
+                + struct.pack(">II", 512, 512)
+            )
+            self._bytes(200, png_header, "image/png")
         else:
             self._json(404, {"error": "not-found"})
 
@@ -67,10 +121,22 @@ class FakeOllama(BaseHTTPRequestHandler):
             elif FakeState.empty_chat:
                 self._json(200, {"message": {"role": "assistant", "content": ""}})
             else:
-                self._json(200, {"message": {"role": "assistant", "content": "LOCAL_WEB_OK"}})
+                self._json(200, {
+                    "message": {"role": "assistant", "content": "LOCAL_WEB_OK"},
+                    "prompt_eval_count": 30,
+                    "eval_count": 10,
+                    "total_duration": 7_500_000_000,
+                    "load_duration": 500_000_000,
+                    "prompt_eval_duration": 1_000_000_000,
+                    "eval_duration": 5_000_000_000,
+                })
         elif self.path == "/api/generate" and body.get("keep_alive") == 0:
             FakeState.loaded.discard(model)
             self._json(200, {"done": True})
+        elif self.path == "/prompt":
+            self._json(200, {"prompt_id": "browser-test-image"})
+        elif self.path == "/history" and body == {"clear": True}:
+            self._json(200, {"status": "cleared"})
         else:
             self._json(404, {"error": "not-found"})
 
@@ -170,7 +236,8 @@ def main() -> int:
         ]
         software_status = next(item for item in bootstrap["capabilities"] if item["id"] == "software")
         assert software_status["operationKind"] == "workflow-group"
-        assert software_status["operationId"] is None
+        assert software_status["operationId"] == "engineering.software-work"
+        assert software_status["state"] == "available"
         registry = json.loads((ROOT / "config/capabilities.json").read_text(encoding="utf-8"))
         registered_capabilities = {item["id"] for item in registry["capabilities"]}
         assert all(
@@ -182,6 +249,124 @@ def main() -> int:
         assert "default-src 'self'" in headers["Content-Security-Policy"]
         token = bootstrap["sessionToken"]
         checks += 6
+
+        status, workflow_catalog, _ = request_json(
+            origin + "/api/workflows", "POST", {}, token, origin,
+        )
+        assert status == 200 and workflow_catalog["kind"] == "workflow-catalog"
+        assert workflow_catalog["executionMode"] == "plan-only"
+        assert workflow_catalog["arbitraryCommandsAllowed"] is False
+        assert workflow_catalog["rendererArgumentsAllowed"] is False
+        assert workflow_catalog["workflows"]
+        assert all(
+            workflow["safetyLevel"] == "read-only"
+            and workflow["executionMode"] == "plan-only"
+            and workflow["rendererArgumentsAllowed"] is False
+            for workflow in workflow_catalog["workflows"]
+        )
+        workflow_id = workflow_catalog["workflows"][0]["id"]
+        status, workflow_plan, _ = request_json(
+            origin + "/api/workflow-plan",
+            "POST",
+            {"workflowId": workflow_id},
+            token,
+            origin,
+        )
+        assert status == 200 and workflow_plan["status"] == "planned"
+        assert workflow_plan["workflow"]["id"] == workflow_id
+        assert workflow_plan["result"] == {
+            "invoked": False,
+            "dryRun": True,
+            "processStarted": False,
+            "argumentsAccepted": False,
+        }
+        assert [event["type"] for event in workflow_plan["events"]] == [
+            "accepted", "warning", "result",
+        ]
+        assert workflow_plan["artifact"]["artifactType"] == "engineering-report"
+        assert workflow_plan["artifact"]["policy"]["repositoryRead"] is False
+        assert workflow_plan["artifact"]["policy"]["fileWrite"] is False
+        status, error, _ = request_json(
+            origin + "/api/workflow-plan",
+            "POST",
+            {"workflowId": "test-pack"},
+            token,
+            origin,
+        )
+        assert status == 400 and error["error"] == "workflow-not-admitted"
+        assert error["kind"] == "workflow-execution-error"
+        assert error["events"][-1]["type"] == "error"
+        assert error["recovery"]["automaticRetryAttempted"] is False
+        status, error, _ = request_json(
+            origin + "/api/workflow-plan",
+            "POST",
+            {"workflowId": workflow_id, "arguments": ["--apply"]},
+            token,
+            origin,
+        )
+        assert status == 400 and error["error"] == "invalid-workflow-plan-fields"
+        checks += 14
+
+        fake_url = f"http://127.0.0.1:{fake.server_port}"
+        status, image_connection, _ = request_json(
+            origin + "/api/image/connect",
+            "POST",
+            {"endpoint": fake_url, "timeoutSeconds": 300},
+            token,
+            origin,
+        )
+        assert status == 200 and image_connection["connected"] is True
+        assert image_connection["trustScope"] == "loopback"
+        assert image_connection["model"] == WEB.PROMOTED_IMAGE_MODEL
+        assert image_connection["customNodesAllowed"] is False
+        assert image_connection["externalApiNodesAllowed"] is False
+        assert image_connection["providerRetainsOutput"] is True
+        status, image_result, _ = request_json(
+            origin + "/api/image/run",
+            "POST",
+            {
+                "prompt": "synthetic image prompt",
+                "width": 512,
+                "height": 512,
+                "steps": 10,
+                "seed": 424242,
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and image_result["kind"] == "image"
+        assert image_result["promptPersisted"] is False
+        assert image_result["endpointPersisted"] is False
+        assert image_result["artifact"]["content"]["delivery"] == "browser-memory"
+        assert image_result["artifact"]["content"]["width"] == 512
+        assert image_result["artifact"]["policy"]["fileWrite"] is False
+        assert image_result["artifact"]["policy"]["providerRetainedOutput"] is True
+        assert [event["type"] for event in image_result["events"]] == [
+            "accepted", "progress", "warning", "result",
+        ]
+        assert any(
+            path == "/history" and body == {"clear": True}
+            for path, body in FakeState.requests
+        )
+        status, error, _ = request_json(
+            origin + "/api/image/run",
+            "POST",
+            {
+                "prompt": "escape",
+                "width": 512,
+                "height": 512,
+                "steps": 10,
+                "seed": 1,
+                "model": "untrusted.safetensors",
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and error["error"] == "invalid-image-run-fields"
+        assert error["kind"] == "image-execution-error"
+        assert error["events"][-1]["type"] == "error"
+        assert error["recovery"]["automaticRetryAttempted"] is False
+        checks += 23
 
         status, error, _ = request_json(
             origin + "/api/readiness", "POST", {"force": True}, token,
@@ -253,7 +438,6 @@ def main() -> int:
             assert status == 400 and error["error"] == expected
             checks += 1
 
-        fake_url = f"http://127.0.0.1:{fake.server_port}"
         status, connected, _ = request_json(
             origin + "/api/connect",
             "POST",
@@ -266,13 +450,14 @@ def main() -> int:
         assert connected["trustScope"] == "loopback" and connected["idleUnloadSeconds"] == 300
         assert connected["configurationPersisted"] is False
         assert connected["providerHealth"]["status"] == "healthy"
-        assert connected["evidenceBoundary"]["immutableDigestBound"] is False
+        assert connected["evidenceBoundary"]["immutableDigestBound"] is True
         assert connected["evidenceBoundary"]["unknownModelsGainAuthority"] is False
         assert connected["catalogStatus"] == "ready" and connected["downloadsPerformed"] is False
         assert connected["recommendations"]["general.chat"] == {
             "status": "recommended",
             "model": "qwen3.5:9b",
             "evidenceId": "general-chat-qwen35-9b-ollama",
+            "digestVerified": True,
             "hardwareFit": "unknown",
             "automatic": True,
         }
@@ -283,10 +468,16 @@ def main() -> int:
         cross_capability = WEB.build_model_decisions(
             ["chat-only:1b"],
             {
-                "general.chat": ({"model": "chat-only:1b", "priority": 1, "evidenceId": "chat"},),
+                "general.chat": ({
+                    "model": "chat-only:1b",
+                    "digest": "2" * 64,
+                    "priority": 1,
+                    "evidenceId": "chat",
+                },),
                 "content.write": (),
                 "content.summarize": (),
             },
+            {"chat-only:1b": "2" * 64},
         )
         assert cross_capability["modelOptions"][0]["capabilityStatus"] == {
             "general.chat": "recommended",
@@ -361,10 +552,23 @@ def main() -> int:
         assert reply["artifact"]["sourceCapabilityId"] == "general.chat"
         assert reply["artifact"]["policy"]["fileWrite"] is False
         assert reply["artifact"]["policy"]["networkAccess"] is False
+        assert reply["modelDigestVerified"] is True
+        assert reply["runDetails"] == {
+            "providerReported": True,
+            "inputTokens": 30,
+            "outputTokens": 10,
+            "totalTokens": 40,
+            "tokensPerSecond": 2.0,
+            "totalDurationMs": 7500.0,
+            "loadDurationMs": 500.0,
+            "promptDurationMs": 1000.0,
+            "generationDurationMs": 5000.0,
+        }
         assert [event["type"] for event in reply["events"]] == ["accepted", "progress", "result"]
         assert [event["sequence"] for event in reply["events"]] == [1, 2, 3]
         chat_payload = next(body for path, body in FakeState.requests if path == "/api/chat")
         assert chat_payload["keep_alive"] == "300s" and chat_payload["stream"] is False
+        assert chat_payload["think"] is False
         assert chat_payload["messages"][0]["role"] == "system"
         assert not any(path == "/api/generate" for path, _body in FakeState.requests)
         checks += 11

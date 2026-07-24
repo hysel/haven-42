@@ -4,7 +4,7 @@
 
 Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS.
 
-The project began as a reusable pack for coding agents. It now provides a provider-neutral core for discovering capabilities, selecting safe workflows, running supported local agent surfaces, and producing typed artifacts without making a cloud service the default. Its runnable cross-platform local web application provides system status, Ollama discovery, installed-model selection, private chat, writing, and summarization. Native Tauri packaging remains optional later work.
+The project began as a reusable pack for coding agents. It now provides a provider-neutral core for discovering capabilities, selecting safe workflows, running supported local agent surfaces, and producing typed artifacts without making a cloud service the default. Its runnable cross-platform local web application provides system status, exact-digest Ollama discovery, private chat, writing, summarization, plan-only registered software workflows, and a promoted Linux ComfyUI/SDXL image flow. Native Tauri packaging remains optional later work.
 
 ## What Works Today
 
@@ -25,7 +25,7 @@ Choose the path that matches what you want to accomplish today.
 
 | Your goal | Start here | What you get |
 | --- | --- | --- |
-| Chat, write, or summarize locally | [Run the local web app](#run-the-local-web-app) | A private browser interface backed by your Ollama server. |
+| Chat, write, summarize, review software workflows, or create an admitted image | [Run the local web app](#run-the-local-web-app) | A private browser interface backed by user-managed Ollama and optional loopback ComfyUI providers. |
 | Add local AI to a software project | [Quick Start](#quick-start) | A guided Continue setup with safe read-only and approved-write workflows. |
 | Connect or tune an existing setup | [Setup Paths](docs/setup-paths.md) | Beginner and advanced paths for models, hardware, providers, and agent surfaces. |
 | Develop, validate, or release Haven 42 | [Validation](#validation) | Test tiers, evidence rules, security boundaries, and release guidance. |
@@ -70,7 +70,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, provider-neutral local text, local images, capability discovery, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress; runnable 22A text tools and portable development packaging | Local web system status, Ollama connection/model discovery, chat, writing, summarization, verified unload, hardened PyInstaller packages, and effect-free update-lifecycle simulation are implemented; software workflows, images, composition, real update effects, and optional Tauri packaging remain open. |
+| Milestone 22: Unified Product UI And Task Composition | In progress; runnable local tools and portable development packaging | Local web system status, immutable-digest Ollama recommendations, chat, writing, summarization, provider run metrics, plan-only registered software workflows, the promoted Linux ComfyUI image flow, verified unload, hardened PyInstaller packages, and effect-free update-lifecycle simulation are implemented; workflow execution, composition, real update effects, and optional Tauri packaging remain open. |
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; Windows AMD has a partial native pass, while remaining consumer-local gates stay open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
@@ -112,7 +112,9 @@ Haven 42 opens a browser on `http://127.0.0.1:4242`. Its keyboard-accessible fir
 
 After Ollama connects, Haven 42 reports capability-specific model readiness and automatically selects only an installed model name with matching committed capability evidence. Unknown installed models remain visibly `unverified` and are available only as an advanced manual choice; a missing recommendation is guidance, never an automatic download.
 
-Configuration and messages are not persisted. Results are rendered from typed chat-message or Markdown-document artifacts over strictly ordered accepted/progress/warning/result envelopes with exactly one terminal event and a no-file-written policy. An advanced model without exact capability evidence produces a visible warning. Failed text requests never retry automatically: the browser removes the failed conversation entry, restores the input in memory for review, and requires a new request. The System view reports provider health, evidence matching, digest-binding limits, and the disabled/no-network update state. The balanced default keeps the active model warm for five idle minutes; advanced settings offer immediate, 15-minute, and 30-minute cleanup. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
+Configuration and messages are not persisted. Text results are rendered from typed chat-message or Markdown-document artifacts over strictly ordered accepted/progress/warning/result envelopes with exactly one terminal event and a no-file-written policy. An advanced model without exact digest and capability evidence produces a visible warning. Provider-reported input, output, total-token, timing, and throughput details are available in a memory-only diagnostic disclosure and are not presented as billing or remaining-context values. Failed text requests never retry automatically: the browser removes the failed conversation entry, restores the input in memory for review, and requires a new request. The System view reports provider health, evidence matching, immutable digest binding, and the disabled/no-network update state. The balanced default keeps the active model warm for five idle minutes; advanced settings offer immediate, 15-minute, and 30-minute cleanup. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
+
+Software exposes only `uiReady`, registry-backed `read-only` workflows as typed plans. The browser cannot pass arguments, start a child process, read a repository, write a file, or make a workflow network call. The image view connects only to a loopback endpoint for the promoted Linux ComfyUI/SDXL profile, uses the exact admitted checkpoint and built-in workflow, clears API history, returns the bounded PNG in browser memory, and requires the user to trigger any download. ComfyUI retains a provider-side output; the UI discloses that effect before generation.
 
 See [`docs/local-web-mvp.md`](docs/local-web-mvp.md) for connection, security, advanced settings, and current-scope details.
 
@@ -210,9 +212,9 @@ manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
 ## Model Selection
 
-The local web app derives automatic selections from `config/text-capability-model-recommendations.json`; the renderer cannot promote a model. The current matching capability evidence makes `qwen3.5:9b` the only eligible installed automatic choice for chat, writing, and summarization. This means “best currently validated by Haven 42,” not “best model available online,” and hardware fit remains unknown until the Ollama execution host is profiled.
+The local web app derives automatic selections from `config/text-capability-model-recommendations.json`; the renderer cannot promote a model. The current matching capability evidence and exact Ollama digest make `qwen3.5:9b` the only eligible installed automatic choice for chat, writing, and summarization. A matching name with a missing or different digest remains an explicit unverified advanced choice. This means “exact adapter artifact currently validated by Haven 42,” not “best model available online,” and hardware fit remains profile-specific.
 
-The current qwen3.5:9b writing evidence validates the adapter contract for that model tag, not comparative writing quality or an immutable model digest. Gemma 3, Mistral Small 3.2, and Granite 4 are unpromoted candidates for a controlled, capability-specific evaluation; see docs/writing-model-evaluation.md. Haven 42 must not call a candidate the best writing model or promote it over the baseline before its exact artifact, license, execution-host fit, performance, and blind quality evidence pass.
+The initial exact-digest writing matrix ran on Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H. Qwen, Gemma, and Mistral passed all three automated synthetic constraint cases; Granite passed two. Every model was unloaded and independently confirmed absent afterward. This is not comparative prose-quality evidence: repeated sampling, license review, hardware utilization evidence, and blind human scoring remain required before any candidate can replace the Qwen adapter baseline. See `docs/writing-model-evaluation.md` and `examples/writing-model-matrix-validation.md`.
 
 If you are unsure which model fits your machine, run the hardware profile script. If your LLM runs on another machine, use `docs/remote-hardware-profile.md` to collect that machine's profile over SSH:
 
@@ -733,7 +735,7 @@ Use `docs/local-config-safety.md` before adding local endpoints, model experimen
 - Documentation and product-management assistant roles
 - Reusable templates for architecture, AI, security, and performance artifacts
 - Optional MCP integration points for richer repository and tool context
-- A runnable local web application for status, Ollama model discovery, private chat, writing, and summarization over the same versioned capability contracts
+- A runnable local web application for status, exact-digest Ollama selection, private text tools, plan-only registered software workflows, and the promoted loopback ComfyUI/SDXL image flow over versioned typed contracts
 
 ## Repository Layout
 

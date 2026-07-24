@@ -18,7 +18,7 @@ The resulting plan is bound to the exact current in-memory snapshot. Browser cod
 
 The wizard is intentionally not marked complete on disk because the endpoint, readiness snapshot, and setup state are not persisted. A fresh launch therefore cannot silently reconnect to a previously entered server or reuse stale hardware facts.
 
-The engine, not browser JavaScript, owns the recommendation catalog. An installed model name with matching passed capability evidence is `recommended` and can be selected automatically. This first slice does not claim immutable-digest binding; that remains an explicit promotion task. A model evidenced for another text capability is `compatible`, an unknown installed model is `unverified`, and an evidence-backed candidate that is not installed is `missing`. Compatible and unverified models remain explicit advanced choices and gain no filesystem, repository, tool, network, or download authority.
+The engine, not browser JavaScript, owns the recommendation catalog. An installed model is `recommended` and can be selected automatically only when its name, immutable Ollama digest, and passed capability evidence all match. A missing or different digest makes even a matching tag `unverified`. A model evidenced for another text capability is `compatible`, an unknown installed model is `unverified`, and an evidence-backed candidate that is not installed is `missing`. Compatible and unverified models remain explicit advanced choices and gain no filesystem, repository, tool, network, or download authority.
 
 If the recommended model is missing, the wizard names it but disables completion. Haven 42 does not issue an Ollama pull. The user installs a disclosed model separately and checks the connection again.
 
@@ -50,7 +50,39 @@ The wizard is a labeled modal with an announced description and current-step sta
 
 The capability view is read-only and engine-derived. Chat, Writing, and Summarization change from `configuration-required` to `available` only after a successful provider check. Software stays `not-admitted-in-web`; Images stays `provider-profile-required`. Clicking either unavailable navigation item explains its state and never invokes an operation.
 
-The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, catalog evidence matching, the current lack of immutable artifact-digest binding, and a disabled/no-network update state. These labels disclose evidence boundaries; they do not promote a provider, model, or capability.
+The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, exact artifact-digest and catalog evidence matching, and a disabled/no-network update state. These labels disclose evidence boundaries; they do not promote a provider, model, or capability.
+
+## Provider-reported run details
+
+Each successful text result may expose provider-reported input, output, and total
+tokens; generation throughput; and load, prompt, generation, and total timing.
+The renderer validates a strict nullable numeric schema and shows a compact
+memory-only disclosure. These values are diagnostics, not billing data,
+remaining-context calculations, or independently measured performance claims.
+
+## Registered software plans
+
+The Software view reads `config/workflows.json` through the engine. Only unique
+`uiReady` workflows whose registry safety level is exactly `read-only` are
+visible. The current admitted mode is plan-only: renderer arguments, arbitrary
+commands, child processes, repository reads, writes, and workflow network calls
+are all denied. The result is a typed planned `engineering-report` with ordered
+accepted/warning/result events.
+
+## Promoted image flow
+
+The Images view admits only `comfyui.local-image` using the promoted Linux
+ComfyUI/SDXL profile and exact `sd_xl_base_1.0.safetensors` checkpoint. The
+endpoint must be an IPv4 loopback literal, normally an explicitly managed SSH
+tunnel. Checkpoint discovery precedes admission; the renderer cannot choose a
+model, custom node, external API node, filename, provider path, or workflow
+graph.
+
+Generation uses fixed bounded dimensions, steps, CFG, sampler, negative prompt,
+and a built-in node graph. The server validates and caps the PNG, clears ComfyUI
+API history, and returns the image in browser memory. No client file is written
+until the user activates the browser download. ComfyUI retains its provider-side
+output, and the UI discloses that material effect before execution.
 
 ## Chat-First Layout
 

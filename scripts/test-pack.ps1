@@ -4045,7 +4045,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "21: General-Purpose AI Assistant And Intent Routing \| Complete \| Complete for the promoted provider set") -Message "Solution audit should keep completed Milestone 21 aligned with the roadmap."
-    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; 22A text tools runnable \| Local web chat, writing, summarization, portable development packaging, and offline update-lifecycle simulation implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening real update or optional desktop runtime claims."
+    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; local tools runnable \| Local web text tools, registered software planning, promoted Linux image flow, portable development packaging, and offline update-lifecycle simulation implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening workflow execution, real update, or optional desktop runtime claims."
     Assert-True -Condition ($doc -notmatch "21: General-Purpose AI Assistant And Intent Routing \| Planned" -and $doc -notmatch "22: Unified Product UI And Task Composition \| Planned") -Message "Solution audit must not retain stale Milestone 21 or 22 status."
     Assert-True -Condition ($roadmap -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should align with the architecture audit for Milestones 21 and 22."
     Assert-True -Condition ($readme -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $readme -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "README should align with the architecture audit for Milestones 21 and 22."
@@ -4945,10 +4945,12 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "126 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "163 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $policy.runtimeId -Expected "haven42.local-web" -Message "Local-web runtime identity should be stable."
-    Assert-True -Condition ($policy.implementationStatus -eq "text-tools-admitted" -and -not $policy.bind.remoteBindAllowed) -Message "Only the loopback text-tool runtime should be admitted."
+    Assert-True -Condition ($policy.implementationStatus -eq "text-tools-workflow-planning-and-promoted-image-admitted" -and -not $policy.bind.remoteBindAllowed) -Message "The admitted text, plan-only workflow, and promoted-image runtime must remain loopback-bound."
+    Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
+    Assert-True -Condition ($policy.images.admittedProfile -eq "linux-comfyui-sdxl-promoted" -and $policy.images.endpointTrustScope -eq "loopback" -and -not $policy.images.customNodesAllowed -and -not $policy.images.localFileWritesAllowed) -Message "The promoted image flow must remain the exact loopback, built-in, browser-memory profile."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects) -Message "Browser security should remain local and default-deny."
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
@@ -5007,7 +5009,7 @@ if ($IsWindows) {
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 35 checks") -Message "The headless browser flow should exercise all 35 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 47 checks") -Message "The headless browser flow should exercise all 47 checks."
     }
 }
 

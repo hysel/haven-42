@@ -1824,7 +1824,7 @@ test_solution_architecture_review_doc() {
     grep -q "25: Local Video Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "26: Hardware-Adaptive Model Quantization" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "21: General-Purpose AI Assistant And Intent Routing | Complete | Complete for the promoted provider set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "22: Unified Product UI And Task Composition | In progress; 22A text tools runnable | Local web chat, writing, summarization, portable development packaging, and offline update-lifecycle simulation implemented" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "22: Unified Product UI And Task Composition | In progress; local tools runnable | Local web text tools, registered software planning, promoted Linux image flow, portable development packaging, and offline update-lifecycle simulation implemented" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "21: General-Purpose AI Assistant And Intent Routing | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "22: Unified Product UI And Task Composition | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "automated status-consistency checks" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -2349,7 +2349,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "126 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "163 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "Resolve-Python3Command" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "sys.version_info.major" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
@@ -2361,7 +2361,7 @@ import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 policy = json.loads((root / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
 assert policy["runtimeId"] == "haven42.local-web"
-assert policy["implementationStatus"] == "text-tools-admitted"
+assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promoted-image-admitted"
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["telemetryAllowed"] is False
@@ -2373,6 +2373,13 @@ assert policy["text"]["unloadOnFailure"] is True and policy["text"]["unloadOnShu
 assert policy["text"]["recommendationAuthority"] == "server-owned-static-catalog"
 assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
 assert policy["text"]["missingModelDownloadsAllowed"] is False
+assert policy["softwareWorkflows"]["executionMode"] == "plan-only"
+assert policy["softwareWorkflows"]["rendererArgumentsAllowed"] is False
+assert policy["softwareWorkflows"]["processStartAllowed"] is False
+assert policy["images"]["admittedProfile"] == "linux-comfyui-sdxl-promoted"
+assert policy["images"]["endpointTrustScope"] == "loopback"
+assert policy["images"]["customNodesAllowed"] is False
+assert policy["images"]["localFileWritesAllowed"] is False
 assert (root / "config/text-capability-model-recommendations.json").is_file()
 html = (root / "web/static/index.html").read_text(encoding="utf-8")
 styles = (root / "web/static/styles.css").read_text(encoding="utf-8")

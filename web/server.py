@@ -9,6 +9,7 @@ text content stay in memory and are never written by this server.
 from __future__ import annotations
 
 import argparse
+import base64
 import csv
 from datetime import datetime, timezone
 import hashlib
@@ -16,10 +17,13 @@ import json
 import platform
 import re
 import secrets
+import struct
 import sys
 import threading
 import time
 import urllib.request
+import urllib.parse
+import uuid
 import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -35,7 +39,9 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from provider_security import (  # noqa: E402
     MAX_JSON_RESPONSE_BYTES,
     ProviderSecurityError,
+    read_bounded,
     read_json,
+    validate_base_url,
     validate_local_base_url,
 )
 from system_readiness import (  # noqa: E402
@@ -51,6 +57,8 @@ INTEGRITY_MANIFEST_PATH = ROOT / "package" / "resource-integrity.json"
 MAX_REQUEST_BYTES = 64 * 1024
 MAX_MESSAGE_BYTES = 32 * 1024
 MAX_CHAT_RESPONSE_BYTES = 1024 * 1024
+MAX_WEB_IMAGE_BYTES = 16 * 1024 * 1024
+MAX_IMAGE_PROMPT_BYTES = 8 * 1024
 MAX_CONVERSATION_MESSAGES = 20
 ALLOWED_IDLE_UNLOAD_SECONDS = {0, 300, 900, 1800}
 CAPABILITY_PROMPTS = {
@@ -69,7 +77,10 @@ CAPABILITY_PROMPTS = {
 }
 MODEL_RECOMMENDATIONS_PATH = ROOT / "config" / "text-capability-model-recommendations.json"
 EVIDENCE_CATALOG_PATH = ROOT / "config" / "evidence-catalog.tsv"
+WORKFLOW_REGISTRY_PATH = ROOT / "config" / "workflows.json"
+PROMOTED_IMAGE_MODEL = "sd_xl_base_1.0.safetensors"
 MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$")
+MODEL_DIGEST = re.compile(r"^[0-9a-f]{64}$")
 CAPABILITY_OPERATION = {
     "general.chat": "general-chat",
     "content.write": "general-writing",
@@ -90,7 +101,7 @@ CAPABILITY_SUMMARY = (
     },
     {
         "id": "software", "label": "Software", "operationKind": "workflow-group",
-        "operationId": None, "state": "not-admitted-in-web", "execution": "unavailable",
+        "operationId": "engineering.software-work", "state": "available", "execution": "local",
     },
     {
         "id": "media.image.create", "label": "Images", "operationKind": "capability",
@@ -193,11 +204,13 @@ def load_model_recommendations(
                 if (
                     not isinstance(record, dict)
                     or set(record) != {
-                        "model", "priority", "evidenceId", "evidenceStatus",
+                        "model", "digest", "priority", "evidenceId", "evidenceStatus",
                         "evidenceOperation", "evidence",
                     }
                     or not isinstance(record["model"], str)
                     or not MODEL_NAME.fullmatch(record["model"])
+                    or not isinstance(record["digest"], str)
+                    or not MODEL_DIGEST.fullmatch(record["digest"])
                     or record["model"] in seen_models
                     or isinstance(record["priority"], bool)
                     or not isinstance(record["priority"], int)
@@ -228,6 +241,7 @@ def load_model_recommendations(
                 evidence_ids.add(record["evidenceId"])
                 admitted.append({
                     "model": record["model"],
+                    "digest": record["digest"],
                     "priority": record["priority"],
                     "evidenceId": record["evidenceId"],
                 })
@@ -243,8 +257,10 @@ def load_model_recommendations(
 def build_model_decisions(
     installed_models: list[str],
     catalog: dict[str, tuple[dict[str, Any], ...]],
+    installed_digests: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     installed = set(installed_models)
+    digests = installed_digests or {}
     evidenced_anywhere = {
         record["model"]
         for records in catalog.values()
@@ -253,12 +269,21 @@ def build_model_decisions(
     recommendations: dict[str, dict[str, Any]] = {}
     for capability_id in CAPABILITY_PROMPTS:
         candidates = catalog.get(capability_id, ())
-        chosen = next((record for record in candidates if record["model"] in installed), None)
+        chosen = next((
+            record
+            for record in candidates
+            if record["model"] in installed
+            and secrets.compare_digest(
+                record.get("digest", ""),
+                digests.get(record["model"], ""),
+            )
+        ), None)
         if chosen is not None:
             recommendations[capability_id] = {
                 "status": "recommended",
                 "model": chosen["model"],
                 "evidenceId": chosen["evidenceId"],
+                "digestVerified": True,
                 "hardwareFit": "unknown",
                 "automatic": True,
             }
@@ -267,6 +292,7 @@ def build_model_decisions(
                 "status": "missing",
                 "model": candidates[0]["model"],
                 "evidenceId": candidates[0]["evidenceId"],
+                "digestVerified": False,
                 "hardwareFit": "unknown",
                 "automatic": False,
             }
@@ -275,6 +301,7 @@ def build_model_decisions(
                 "status": "missing",
                 "model": None,
                 "evidenceId": None,
+                "digestVerified": False,
                 "hardwareFit": "unknown",
                 "automatic": False,
             }
@@ -282,7 +309,11 @@ def build_model_decisions(
     for model in installed_models:
         capability_status = {}
         for capability_id in CAPABILITY_PROMPTS:
-            exact = any(record["model"] == model for record in catalog.get(capability_id, ()))
+            exact = any(
+                record["model"] == model
+                and secrets.compare_digest(record.get("digest", ""), digests.get(model, ""))
+                for record in catalog.get(capability_id, ())
+            )
             capability_status[capability_id] = (
                 "recommended"
                 if exact
@@ -290,13 +321,65 @@ def build_model_decisions(
                 if model in evidenced_anywhere
                 else "unverified"
             )
-        options.append({"name": model, "capabilityStatus": capability_status})
+        options.append({
+            "name": model,
+            "digestVerified": any(
+                record["model"] == model
+                and secrets.compare_digest(record.get("digest", ""), digests.get(model, ""))
+                for records in catalog.values()
+                for record in records
+            ),
+            "capabilityStatus": capability_status,
+        })
     return {
         "catalogStatus": "ready" if catalog else "unavailable",
         "recommendations": recommendations,
         "modelOptions": options,
         "downloadsPerformed": False,
     }
+
+
+def load_read_only_workflows(path: Path = WORKFLOW_REGISTRY_PATH) -> dict[str, dict[str, Any]]:
+    """Load the renderer-visible no-argument planning surface; fail closed."""
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(value, dict)
+            or set(value) != {"schemaVersion", "description", "workflows"}
+            or value.get("schemaVersion") != 1
+            or not isinstance(value.get("workflows"), list)
+        ):
+            return {}
+        result: dict[str, dict[str, Any]] = {}
+        for record in value["workflows"]:
+            if not isinstance(record, dict):
+                return {}
+            workflow_id = record.get("id")
+            if (
+                not isinstance(workflow_id, str)
+                or not re.fullmatch(r"[a-z][a-z0-9-]{0,127}", workflow_id)
+                or workflow_id in result
+            ):
+                return {}
+            if record.get("uiReady") is not True or record.get("safetyLevel") != "read-only":
+                continue
+            if not all(
+                isinstance(record.get(field), str) and record[field].strip()
+                for field in ("name", "purpose", "category")
+            ):
+                return {}
+            result[workflow_id] = {
+                "id": workflow_id,
+                "name": record["name"][:160],
+                "purpose": record["purpose"][:1000],
+                "category": record["category"][:80],
+                "safetyLevel": "read-only",
+                "executionMode": "plan-only",
+                "rendererArgumentsAllowed": False,
+            }
+        return result
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {}
 
 
 def _provider_json(
@@ -322,6 +405,15 @@ def _provider_json(
     return read_json(request, timeout, maximum_bytes)
 
 
+def png_dimensions(data: bytes) -> tuple[int, int]:
+    if len(data) < 24 or data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
+        raise WebRequestError("invalid-image-provider-png", HTTPStatus.BAD_GATEWAY)
+    width, height = struct.unpack(">II", data[16:24])
+    if width < 64 or height < 64 or width > 2048 or height > 2048:
+        raise WebRequestError("invalid-image-dimensions", HTTPStatus.BAD_GATEWAY)
+    return width, height
+
+
 class HavenState:
     def __init__(
         self,
@@ -335,6 +427,7 @@ class HavenState:
         self.timeout_seconds = 120
         self.idle_unload_seconds = 300
         self.models: tuple[str, ...] = ()
+        self.model_digests: dict[str, str] = {}
         self.ollama_version: str | None = None
         self.used_models: set[tuple[str, str, int]] = set()
         self.active_model: tuple[str, str, int] | None = None
@@ -342,10 +435,14 @@ class HavenState:
         self.lifecycle_generation = 0
         self.operation_lock = threading.Lock()
         self.readiness_lock = threading.Lock()
+        self.image_lock = threading.Lock()
+        self.image_base_url: str | None = None
+        self.image_timeout_seconds = 300
         self.readiness_provider = readiness_provider
         self.readiness_snapshot: dict[str, Any] | None = None
         self.readiness_created = 0.0
         self.model_recommendations = load_model_recommendations(recommendation_path)
+        self.read_only_workflows = load_read_only_workflows()
         self.package_integrity = verify_packaged_resources()
 
     def public_status(self) -> dict[str, Any]:
@@ -403,6 +500,260 @@ class HavenState:
                 },
             }
 
+    def list_workflows(self) -> dict[str, Any]:
+        workflows = [
+            self.read_only_workflows[key]
+            for key in sorted(self.read_only_workflows)
+        ]
+        return {
+            "schemaVersion": 1,
+            "kind": "workflow-catalog",
+            "executionMode": "plan-only",
+            "workflows": workflows,
+            "arbitraryCommandsAllowed": False,
+            "rendererArgumentsAllowed": False,
+        }
+
+    def plan_workflow(self, workflow_id: str) -> dict[str, Any]:
+        workflow = self.read_only_workflows.get(workflow_id)
+        if workflow is None:
+            raise WebRequestError("workflow-not-admitted")
+        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+        return {
+            "schemaVersion": 1,
+            "kind": "workflow-execution",
+            "status": "planned",
+            "workflow": workflow,
+            "events": [
+                {"sequence": 1, "type": "accepted", "code": "WORKFLOW_REQUEST_ACCEPTED"},
+                {"sequence": 2, "type": "warning", "code": "PLAN_ONLY_NO_PROCESS_STARTED"},
+                {"sequence": 3, "type": "result", "code": "WORKFLOW_PLAN_READY"},
+            ],
+            "result": {
+                "invoked": False,
+                "dryRun": True,
+                "processStarted": False,
+                "argumentsAccepted": False,
+            },
+            "artifact": {
+                "schemaVersion": 1,
+                "artifactType": "engineering-report",
+                "status": "planned",
+                "createdAtUtc": now,
+                "sourceCapabilityId": "engineering.software-work",
+                "content": {
+                    "workflowId": workflow["id"],
+                    "title": workflow["name"],
+                    "summary": workflow["purpose"],
+                    "executionMode": "plan-only",
+                },
+                "policy": {
+                    "localExecution": True,
+                    "externalProvider": False,
+                    "repositoryRead": False,
+                    "fileWrite": False,
+                    "networkAccess": False,
+                    "modelDownload": False,
+                    "approvalRequired": False,
+                },
+            },
+        }
+
+    def connect_image_provider(self, endpoint: str, timeout_seconds: int) -> dict[str, Any]:
+        try:
+            policy = validate_base_url(endpoint, "loopback")
+        except ProviderSecurityError as error:
+            raise WebRequestError(str(error)) from error
+        if timeout_seconds < 30 or timeout_seconds > 600:
+            raise WebRequestError("invalid-image-timeout")
+        try:
+            object_info = _provider_json(
+                policy["baseUrl"],
+                "/object_info/CheckpointLoaderSimple",
+                timeout_seconds,
+            )
+        except (OSError, ProviderSecurityError) as error:
+            raise WebRequestError("comfyui-connection-failed", HTTPStatus.BAD_GATEWAY) from error
+        try:
+            checkpoints = object_info["CheckpointLoaderSimple"]["input"]["required"]["ckpt_name"][0]
+        except (KeyError, IndexError, TypeError) as error:
+            raise WebRequestError("invalid-comfyui-checkpoint-discovery", HTTPStatus.BAD_GATEWAY) from error
+        if (
+            not isinstance(checkpoints, list)
+            or PROMOTED_IMAGE_MODEL not in checkpoints
+            or any(not isinstance(item, str) or len(item) > 256 for item in checkpoints)
+        ):
+            raise WebRequestError("promoted-image-checkpoint-not-available", HTTPStatus.CONFLICT)
+        with self.lock:
+            self.image_base_url = policy["baseUrl"]
+            self.image_timeout_seconds = timeout_seconds
+        return {
+            "schemaVersion": 1,
+            "kind": "image-provider-connection",
+            "connected": True,
+            "providerId": "comfyui.local-image",
+            "trustScope": "loopback",
+            "model": PROMOTED_IMAGE_MODEL,
+            "profile": "linux-comfyui-sdxl-promoted",
+            "configurationPersisted": False,
+            "customNodesAllowed": False,
+            "externalApiNodesAllowed": False,
+            "providerRetainsOutput": True,
+        }
+
+    def run_image_capability(
+        self,
+        prompt: str,
+        width: int,
+        height: int,
+        steps: int,
+        seed: int,
+    ) -> dict[str, Any]:
+        with self.lock:
+            base_url = self.image_base_url
+            timeout_seconds = self.image_timeout_seconds
+        if base_url is None:
+            raise WebRequestError("image-provider-not-connected", HTTPStatus.CONFLICT)
+        if not isinstance(prompt, str) or not prompt.strip():
+            raise WebRequestError("invalid-image-prompt")
+        if len(prompt.encode("utf-8")) > MAX_IMAGE_PROMPT_BYTES:
+            raise WebRequestError("image-prompt-too-large", HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
+        if width not in {512, 768, 1024} or height not in {512, 768, 1024}:
+            raise WebRequestError("invalid-image-dimensions")
+        if isinstance(steps, bool) or not isinstance(steps, int) or steps < 1 or steps > 30:
+            raise WebRequestError("invalid-image-steps")
+        if isinstance(seed, bool) or not isinstance(seed, int) or seed < 0 or seed > 2**63 - 1:
+            raise WebRequestError("invalid-image-seed")
+        if not self.image_lock.acquire(blocking=False):
+            raise WebRequestError("image-generation-in-progress", HTTPStatus.CONFLICT)
+        prompt_id = ""
+        try:
+            node_prefix = "haven-42/" + uuid.uuid4().hex
+            workflow = {
+                "3": {"class_type": "KSampler", "inputs": {
+                    "seed": seed, "steps": steps, "cfg": 7.0, "sampler_name": "euler",
+                    "scheduler": "normal", "denoise": 1.0, "model": ["4", 0],
+                    "positive": ["6", 0], "negative": ["7", 0], "latent_image": ["5", 0],
+                }},
+                "4": {"class_type": "CheckpointLoaderSimple", "inputs": {
+                    "ckpt_name": PROMOTED_IMAGE_MODEL,
+                }},
+                "5": {"class_type": "EmptyLatentImage", "inputs": {
+                    "width": width, "height": height, "batch_size": 1,
+                }},
+                "6": {"class_type": "CLIPTextEncode", "inputs": {
+                    "text": prompt, "clip": ["4", 1],
+                }},
+                "7": {"class_type": "CLIPTextEncode", "inputs": {
+                    "text": "text, watermark, logo, blurry, distorted", "clip": ["4", 1],
+                }},
+                "8": {"class_type": "VAEDecode", "inputs": {
+                    "samples": ["3", 0], "vae": ["4", 2],
+                }},
+                "9": {"class_type": "SaveImage", "inputs": {
+                    "filename_prefix": node_prefix, "images": ["8", 0],
+                }},
+            }
+            submitted = _provider_json(
+                base_url,
+                "/prompt",
+                timeout_seconds,
+                {"prompt": workflow, "client_id": "haven-42-local-web"},
+            )
+            prompt_id = str(submitted.get("prompt_id", ""))
+            if not re.fullmatch(r"[A-Za-z0-9-]{1,128}", prompt_id):
+                raise WebRequestError("invalid-image-prompt-id", HTTPStatus.BAD_GATEWAY)
+            deadline = time.monotonic() + timeout_seconds
+            image_info: dict[str, Any] | None = None
+            while time.monotonic() < deadline:
+                history = _provider_json(
+                    base_url,
+                    "/history/" + urllib.parse.quote(prompt_id, safe=""),
+                    timeout_seconds,
+                )
+                job = history.get(prompt_id)
+                if isinstance(job, dict) and job.get("outputs"):
+                    if job.get("status", {}).get("status_str") != "success":
+                        raise WebRequestError("comfyui-image-job-failed", HTTPStatus.BAD_GATEWAY)
+                    image_info = job["outputs"]["9"]["images"][0]
+                    break
+                time.sleep(0.5)
+            if not isinstance(image_info, dict):
+                raise WebRequestError("image-generation-timeout", HTTPStatus.GATEWAY_TIMEOUT)
+            filename = image_info.get("filename")
+            subfolder = image_info.get("subfolder", "")
+            image_type = image_info.get("type")
+            if (
+                not isinstance(filename, str) or not filename or len(filename) > 256
+                or not isinstance(subfolder, str) or len(subfolder) > 256
+                or image_type not in {"output", "temp"}
+            ):
+                raise WebRequestError("invalid-image-provider-result", HTTPStatus.BAD_GATEWAY)
+            query = urllib.parse.urlencode({
+                "filename": filename,
+                "subfolder": subfolder,
+                "type": image_type,
+            })
+            image_bytes = read_bounded(
+                base_url + "/view?" + query,
+                timeout_seconds,
+                MAX_WEB_IMAGE_BYTES,
+            )
+            actual_width, actual_height = png_dimensions(image_bytes)
+        except WebRequestError:
+            raise
+        except (OSError, ProviderSecurityError, KeyError, IndexError, TypeError) as error:
+            raise WebRequestError("comfyui-image-request-failed", HTTPStatus.BAD_GATEWAY) from error
+        finally:
+            try:
+                _provider_json(base_url, "/history", min(timeout_seconds, 30), {"clear": True})
+            except (OSError, ProviderSecurityError):
+                pass
+            self.image_lock.release()
+        artifact = {
+            "schemaVersion": 1,
+            "artifactType": "image",
+            "status": "succeeded",
+            "createdAtUtc": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+            "sourceCapabilityId": "media.image.create",
+            "content": {
+                "delivery": "browser-memory",
+                "mediaType": "image/png",
+                "width": actual_width,
+                "height": actual_height,
+                "seed": seed,
+                "downloadName": "haven42-generated-image.png",
+            },
+            "policy": {
+                "localExecution": True,
+                "externalProvider": False,
+                "repositoryRead": False,
+                "fileWrite": False,
+                "networkAccess": True,
+                "modelDownload": False,
+                "approvalRequired": True,
+                "providerRetainedOutput": True,
+            },
+        }
+        return {
+            "schemaVersion": 1,
+            "kind": "image",
+            "capabilityId": "media.image.create",
+            "status": "succeeded",
+            "providerId": "comfyui.local-image",
+            "model": PROMOTED_IMAGE_MODEL,
+            "imageBase64": base64.b64encode(image_bytes).decode("ascii"),
+            "promptPersisted": False,
+            "endpointPersisted": False,
+            "events": [
+                {"sequence": 1, "type": "accepted", "code": "IMAGE_REQUEST_ACCEPTED"},
+                {"sequence": 2, "type": "progress", "code": "IMAGE_PROVIDER_COMPLETED"},
+                {"sequence": 3, "type": "warning", "code": "PROVIDER_RETAINS_OUTPUT"},
+                {"sequence": 4, "type": "result", "code": "IMAGE_ARTIFACT_READY"},
+            ],
+            "artifact": artifact,
+        }
+
     def inspect_readiness(self, force: bool) -> dict[str, Any]:
         with self.lock:
             cached = self.readiness_snapshot
@@ -453,6 +804,7 @@ class HavenState:
                 self.base_url = None
                 self.trust_scope = None
                 self.models = ()
+                self.model_digests = {}
                 self.ollama_version = None
             try:
                 version = _provider_json(base_url, "/api/version", timeout_seconds)
@@ -462,18 +814,22 @@ class HavenState:
         records = tags.get("models", [])
         if not isinstance(records, list):
             raise WebRequestError("invalid-ollama-model-list", HTTPStatus.BAD_GATEWAY)
-        models = sorted({
-            str(item.get("name") or item.get("model", "")).strip()
-            for item in records
-            if isinstance(item, dict)
-            and MODEL_NAME.fullmatch(str(item.get("name") or item.get("model", "")).strip())
-        })
+        model_digests: dict[str, str] = {}
+        for item in records:
+            if not isinstance(item, dict):
+                continue
+            name = str(item.get("name") or item.get("model", "")).strip()
+            digest = str(item.get("digest", "")).strip().lower()
+            if MODEL_NAME.fullmatch(name):
+                model_digests[name] = digest if MODEL_DIGEST.fullmatch(digest) else ""
+        models = sorted(model_digests)
         with self.lock:
             self.base_url = base_url
             self.trust_scope = policy["trustScope"]
             self.timeout_seconds = timeout_seconds
             self.idle_unload_seconds = idle_unload_seconds
             self.models = tuple(models)
+            self.model_digests = model_digests
             self.ollama_version = str(version.get("version", "unknown"))[:64]
         result = {
             "connected": True,
@@ -485,7 +841,7 @@ class HavenState:
             "configurationPersisted": False,
             "idleUnloadSeconds": idle_unload_seconds,
         }
-        result.update(build_model_decisions(models, self.model_recommendations))
+        result.update(build_model_decisions(models, self.model_recommendations, model_digests))
         result["providerHealth"] = {
             "status": "healthy",
             "providerId": "ollama.local-text",
@@ -496,8 +852,12 @@ class HavenState:
         }
         result["evidenceBoundary"] = {
             "catalogStatus": result["catalogStatus"],
-            "recommendationBinding": "model-name-and-capability-evidence",
-            "immutableDigestBound": False,
+            "recommendationBinding": "model-name-digest-and-capability-evidence",
+            "immutableDigestBound": any(
+                decision.get("automatic") is True
+                and decision.get("digestVerified") is True
+                for decision in result["recommendations"].values()
+            ),
             "hardwareFitMeasured": False,
             "unknownModelsGainAuthority": False,
         }
@@ -581,6 +941,7 @@ class HavenState:
             base_url = self.base_url
             timeout_seconds = self.timeout_seconds
             allowed_models = self.models
+            model_digests = dict(self.model_digests)
         if base_url is None:
             raise WebRequestError("ollama-not-connected", HTTPStatus.CONFLICT)
         if capability_id not in CAPABILITY_PROMPTS:
@@ -633,6 +994,7 @@ class HavenState:
                 {
                     "model": model,
                     "stream": False,
+                    "think": False,
                     "keep_alive": 0 if idle_unload_seconds == 0 else f"{idle_unload_seconds}s",
                     "options": {"temperature": 0.2},
                     "messages": [
@@ -659,8 +1021,54 @@ class HavenState:
         artifact_kind = "chat-message" if capability_id == "general.chat" else "markdown-document"
         model_is_evidenced = any(
             record["model"] == model
+            and secrets.compare_digest(
+                record.get("digest", ""),
+                model_digests.get(model, ""),
+            )
             for record in self.model_recommendations.get(capability_id, ())
         )
+        def bounded_provider_integer(name: str) -> int | None:
+            value = response.get(name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0 or value > 10**18:
+                return None
+            return value
+
+        input_tokens = bounded_provider_integer("prompt_eval_count")
+        output_tokens = bounded_provider_integer("eval_count")
+        total_duration = bounded_provider_integer("total_duration")
+        generation_duration = bounded_provider_integer("eval_duration")
+        tokens_per_second = (
+            round(output_tokens / (generation_duration / 1_000_000_000), 2)
+            if output_tokens is not None and generation_duration
+            else None
+        )
+        run_details = {
+            "providerReported": True,
+            "inputTokens": input_tokens,
+            "outputTokens": output_tokens,
+            "totalTokens": (
+                input_tokens + output_tokens
+                if input_tokens is not None and output_tokens is not None
+                else None
+            ),
+            "tokensPerSecond": tokens_per_second,
+            "totalDurationMs": round(total_duration / 1_000_000, 2) if total_duration is not None else None,
+            "loadDurationMs": (
+                round(value / 1_000_000, 2)
+                if (value := bounded_provider_integer("load_duration")) is not None
+                else None
+            ),
+            "promptDurationMs": (
+                round(value / 1_000_000, 2)
+                if (value := bounded_provider_integer("prompt_eval_duration")) is not None
+                else None
+            ),
+            "generationDurationMs": (
+                round(generation_duration / 1_000_000, 2)
+                if generation_duration is not None
+                else None
+            ),
+        }
         now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         artifact = {
             "schemaVersion": 1,
@@ -719,6 +1127,8 @@ class HavenState:
             ),
             "model": model,
             "providerId": "ollama.local-text",
+            "modelDigestVerified": model_is_evidenced,
+            "runDetails": run_details,
             "modelUnloaded": unloaded,
             "modelResidency": residency,
             "promptPersisted": False,
@@ -789,19 +1199,35 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
 
     def _send_error_json(self, error: WebRequestError) -> None:
         value: dict[str, Any] = {"error": error.code}
-        if self.path == "/api/text":
+        if self.path in {"/api/text", "/api/image/run", "/api/workflow-plan"}:
+            kind_prefix = (
+                "text"
+                if self.path == "/api/text"
+                else "image"
+                if self.path == "/api/image/run"
+                else "workflow"
+            )
             retryable = error.code in {"ollama-chat-failed", "empty-model-response"}
+            if self.path == "/api/image/run":
+                retryable = error.code in {
+                    "comfyui-image-request-failed",
+                    "comfyui-image-job-failed",
+                    "image-generation-timeout",
+                }
             accepted = error.code in {
                 "ollama-chat-failed",
                 "empty-model-response",
                 "previous-model-unload-failed",
+                "comfyui-image-request-failed",
+                "comfyui-image-job-failed",
+                "image-generation-timeout",
             }
             events = []
             if accepted:
                 events.append({
                     "sequence": 1,
                     "type": "accepted",
-                    "code": "TEXT_REQUEST_ACCEPTED",
+                    "code": f"{kind_prefix.upper()}_REQUEST_ACCEPTED",
                 })
             events.append({
                 "sequence": len(events) + 1,
@@ -810,7 +1236,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
             })
             value.update({
                 "schemaVersion": 1,
-                "kind": "text-execution-error",
+                "kind": f"{kind_prefix}-execution-error",
                 "status": "failed",
                 "events": events,
                 "recovery": {
@@ -889,6 +1315,44 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if set(body) != {"force"} or not isinstance(body["force"], bool):
                     raise WebRequestError("invalid-readiness-fields")
                 self._send_json(HTTPStatus.OK, self.server.state.inspect_readiness(body["force"]))
+                return
+            if self.path == "/api/workflows":
+                if body:
+                    raise WebRequestError("invalid-workflow-catalog-fields")
+                self._send_json(HTTPStatus.OK, self.server.state.list_workflows())
+                return
+            if self.path == "/api/workflow-plan":
+                if set(body) != {"workflowId"} or not isinstance(body["workflowId"], str):
+                    raise WebRequestError("invalid-workflow-plan-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.plan_workflow(body["workflowId"]),
+                )
+                return
+            if self.path == "/api/image/connect":
+                if set(body) != {"endpoint", "timeoutSeconds"}:
+                    raise WebRequestError("invalid-image-connect-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.connect_image_provider(
+                        str(body["endpoint"]),
+                        int(body["timeoutSeconds"]),
+                    ),
+                )
+                return
+            if self.path == "/api/image/run":
+                if set(body) != {"prompt", "width", "height", "steps", "seed"}:
+                    raise WebRequestError("invalid-image-run-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.run_image_capability(
+                        body["prompt"],
+                        body["width"],
+                        body["height"],
+                        body["steps"],
+                        body["seed"],
+                    ),
+                )
                 return
             if self.path == "/api/setup-plan":
                 if set(body) != {"snapshotId", "intent"}:

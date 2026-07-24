@@ -1,8 +1,8 @@
 # Writing Model Evaluation
 
-Haven 42 has validated the bounded `content.write` adapter contract with `qwen3.5:9b`, but it has not run a comparative writing-quality evaluation. Adapter success proves local execution, typed Markdown output, privacy, and cleanup. It does not prove that the model is the best writer.
+Haven 42 has validated the bounded `content.write` adapter contract with the exact recorded `qwen3.5:9b` Ollama digest and has run an initial exact-digest automated constraint matrix across all four candidates. It has not completed comparative writing-quality evaluation. Adapter and marker-check success prove bounded execution, constraint retention, privacy, metrics, and cleanup; they do not prove that any model is the best writer.
 
-No candidate under comparative evaluation in this document is a product default or promoted writing-quality recommendation. The local web app may select the installed `qwen3.5:9b` tag automatically because it is the only model name with matching passed bounded writing-adapter evidence; that is an eligible adapter baseline, not immutable-artifact proof or a claim that it produces the best prose. Replacing that baseline requires an exact model artifact, digest, quantization, provider version, operating system, execution-host hardware profile, license decision, repeated performance evidence, and blind human quality review.
+No candidate under comparative evaluation in this document is a product default or promoted writing-quality recommendation. The local web app may select `qwen3.5:9b` automatically only when the installed name and digest match the passed bounded writing-adapter evidence; that is an exact adapter baseline, not a claim that it produces the best prose. Replacing that baseline requires an exact model artifact, quantization, provider version, operating system, execution-host hardware profile, license decision, repeated performance evidence, and blind human quality review.
 
 ## Initial Candidate Matrix
 
@@ -24,6 +24,14 @@ Official research starting points:
 - Ollama Granite 4 artifacts and IBM references: <https://ollama.com/library/granite4>
 
 ## Controlled Evaluation
+
+The first automated run completed on 2026-07-24 with Ollama `0.32.1`.
+Qwen, Gemma, and Mistral passed all three synthetic constraint-retention cases;
+Granite passed two and omitted one required uncertainty phrase. All per-case and
+final unload checks passed, raw output was not persisted, and `/api/ps` was
+empty afterward. Exact digests and sanitized metrics are recorded in
+`examples/writing-model-matrix-validation.md`. Human quality review and repeated
+sampling remain open, so no comparative default changed.
 
 Use the same source material, prompts, provider settings, context limit, warm/cold policy, and output bounds for every exact candidate. Record the prompt-set revision and never use private user documents in committed fixtures.
 
