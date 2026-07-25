@@ -22,6 +22,22 @@ The engine, not browser JavaScript, owns the recommendation catalog. An installe
 
 If the recommended model is missing, the wizard names it but disables completion. Haven 42 does not issue an Ollama pull. The user installs a disclosed model separately and checks the connection again.
 
+## Find A Model
+
+Expand **Find another model** in the Models panel. Typing filters the connected
+provider's installed inventory locally and makes no network request. To search
+the public Ollama catalog, enter a 1–64 character phrase, select **Use the
+internet for this search**, and activate **Search catalog**. Only that phrase is
+sent; endpoints, hardware facts, repository content, paths, and prompts are not.
+
+Public results are research candidates, not recommendations. Haven 42 reports
+their evidence as unverified, hardware fit as unknown, and license as requiring
+review. Selecting an uninstalled result records a desired model in browser
+memory and keeps its execution disabled. The displayed `ollama pull` command is
+constructed from a strict model name and can be copied, but Haven 42 never runs
+it or calls the Ollama pull API. Install through your separately managed Ollama
+environment, check disk capacity and trust metadata there, then reconnect.
+
 ## Start Haven 42
 
 Windows PowerShell:
@@ -121,6 +137,7 @@ The MVP:
 - serves only committed local HTML, CSS, and JavaScript;
 - sends a restrictive Content Security Policy and denies framing, MIME sniffing, referrer leakage, caching, remote assets, and telemetry;
 - uses the shared provider-security module for endpoint classification, no-redirect requests, and bounded JSON;
+- limits public catalog discovery to an explicit bounded query, fixed Ollama HTTPS origin, no redirects, capped HTML, strict names, and candidate-only results;
 - returns sanitized error codes instead of provider responses or local exception details.
 
 The renderer never receives a shell, executable, arbitrary process, filesystem, model-download, installation, elevation, or repository-access surface. Readiness scanning is a CSRF-protected POST because even read-only subprocess work consumes local resources.
@@ -133,7 +150,7 @@ The machine-readable boundaries are `config/local-web-runtime-policy.json`, `con
 
 ## Current Runtime Boundary
 
-The admitted application includes explicit read-only system scanning, zero-effect setup planning, system status, read-only capability/health/evidence views, Ollama connection, installed-model selection, chat, writing, summarization, and unsigned one-folder development packaging. Software installation, drivers, services, model downloads, software workflows, images, model management, persistence, multi-user access, remote browser access, automatic updates, signed/notarized distribution, installers, and production release publication remain unavailable until their separate runtime and security gates pass.
+The admitted application includes explicit read-only system scanning, zero-effect setup planning, system status, read-only capability/health/evidence views, Ollama connection, installed-model selection, candidate-only public catalog search, chat, writing, summarization, and unsigned one-folder development packaging. Software installation, drivers, services, model downloads, software workflows, images, model management, persistence, multi-user access, remote browser access, automatic updates, signed/notarized distribution, installers, and production release publication remain unavailable until their separate runtime and security gates pass.
 
 Tauri remains an optional later packaging path. It is not required to run or validate this local-web slice.
 

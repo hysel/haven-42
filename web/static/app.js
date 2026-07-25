@@ -44,6 +44,8 @@ const state = {
   modelSelections: {},
   recommendations: {},
   modelOptions: [],
+  modelSearchResults: [],
+  desiredModel: null,
   capabilities: [],
   readinessSnapshot: null,
   setupPlan: null,
@@ -228,8 +230,127 @@ function humanError(error) {
     "ollama-chat-failed": "Ollama did not complete the text request.",
     "empty-model-response": "The model returned an empty response.",
     "capability-not-admitted": "That capability is not available in this Haven 42 release.",
+    "explicit-online-search-consent-required": "Select the internet-search checkbox before searching the public catalog.",
+    "invalid-model-search-query": "Use 1–64 letters, numbers, spaces, or model-name punctuation.",
+    "model-catalog-search-failed": "The public Ollama catalog could not be reached.",
+    "invalid-model-catalog-response": "The public catalog returned an invalid response, so Haven 42 rejected it.",
   };
   return messages[error.message] || `Request blocked: ${error.message}`;
+}
+
+function modelMatchesQuery(name, query) {
+  return query && name.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+}
+
+function validateModelSearch(result) {
+  const expected = [
+    "configurationChanged", "downloadsPerformed", "hardwareProfileSent", "kind",
+    "networkUsed", "query", "queryPersisted", "repositoryContentSent", "results",
+    "schemaVersion", "source",
+  ];
+  if (
+    !result
+    || typeof result !== "object"
+    || Array.isArray(result)
+    || Object.keys(result).sort().join(",") !== expected.sort().join(",")
+    || result.schemaVersion !== 1
+    || result.kind !== "model-catalog-search"
+    || result.source !== "ollama-public-catalog"
+    || result.networkUsed !== true
+    || result.downloadsPerformed !== false
+    || result.configurationChanged !== false
+    || result.queryPersisted !== false
+    || result.repositoryContentSent !== false
+    || result.hardwareProfileSent !== false
+    || !Array.isArray(result.results)
+    || result.results.length > 20
+  ) throw new Error("invalid-model-catalog-response");
+  const names = new Set();
+  result.results.forEach((item) => {
+    const installed = item?.status === "installed";
+    if (
+      !item
+      || typeof item !== "object"
+      || Array.isArray(item)
+      || Object.keys(item).sort().join(",") !== [
+        "capabilityEvidence", "executionAllowed", "hardwareFit", "installCommand",
+        "licenseStatus", "name", "source", "status", "validationStatus",
+      ].sort().join(",")
+      || !/^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$/.test(item.name)
+      || names.has(item.name)
+      || item.source !== "ollama-public-catalog"
+      || !["installed", "not-installed"].includes(item.status)
+      || item.validationStatus !== "candidate-only"
+      || item.capabilityEvidence !== "unverified"
+      || item.hardwareFit !== "unknown"
+      || item.licenseStatus !== "review-required"
+      || item.executionAllowed !== installed
+      || item.installCommand !== (installed ? null : `ollama pull ${item.name}`)
+    ) throw new Error("invalid-model-catalog-response");
+    names.add(item.name);
+  });
+  return result;
+}
+
+function chooseDiscoveredModel(item) {
+  if (item.status === "installed") {
+    state.modelSelections[state.capabilityId] = { mode: "manual", model: item.name };
+    state.desiredModel = null;
+    renderModelSelect();
+  } else {
+    state.desiredModel = item;
+  }
+  renderModelDiscovery();
+}
+
+function renderModelDiscovery() {
+  const query = byId("model-search-query").value.trim();
+  const installed = state.modelOptions
+    .filter((item) => modelMatchesQuery(item.name, query))
+    .map((item) => ({
+      name: item.name,
+      status: "installed",
+      validationStatus: item.capabilityStatus[state.capabilityId] || "unverified",
+      installCommand: null,
+    }));
+  const merged = new Map(installed.map((item) => [item.name, item]));
+  state.modelSearchResults.forEach((item) => {
+    if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) merged.set(item.name, item);
+  });
+  const results = [...merged.values()];
+  const container = byId("model-search-results");
+  container.replaceChildren();
+  results.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "model-search-result";
+    const detail = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = item.name;
+    const status = document.createElement("small");
+    status.textContent = item.status === "installed"
+      ? `Installed · ${item.validationStatus}`
+      : "Not installed · candidate only · evidence unverified · hardware fit unknown · license review required";
+    detail.append(name, status);
+    const choose = document.createElement("button");
+    choose.className = "button secondary";
+    choose.type = "button";
+    choose.textContent = item.status === "installed" ? "Use for this task" : "Select";
+    choose.addEventListener("click", () => chooseDiscoveredModel(item));
+    row.append(detail, choose);
+    container.append(row);
+  });
+  if (query && results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
+    byId("model-search-status").textContent = "No installed or catalog matches yet.";
+  } else if (query && installed.length > 0) {
+    byId("model-search-status").textContent = `${installed.length} installed match${installed.length === 1 ? "" : "es"} found locally.`;
+  }
+  const desired = byId("desired-model");
+  desired.classList.toggle("hidden", !state.desiredModel);
+  if (state.desiredModel) {
+    byId("desired-model-name").textContent = state.desiredModel.name;
+    byId("desired-model-state").textContent = "Desired model · not installed · execution disabled";
+    byId("desired-model-command").textContent = state.desiredModel.installCommand;
+  }
 }
 
 function showWizardStep(step) {
@@ -627,6 +748,9 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   state.connected = true;
   state.recommendations = result.recommendations || {};
   state.modelOptions = result.modelOptions || [];
+  if (state.desiredModel && state.modelOptions.some((item) => item.name === state.desiredModel.name)) {
+    state.desiredModel = null;
+  }
   state.capabilities = state.capabilities.map((capability) => (
     Object.hasOwn(CAPABILITIES, capability.id)
       ? { ...capability, state: "available" }
@@ -646,6 +770,7 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
     }
   }
   renderModelSelect();
+  renderModelDiscovery();
   const badge = byId("connection-badge");
   const location = result.trustScope === "loopback" ? "this computer" : "private network";
   badge.textContent = `Connected · ${location} · Ollama ${result.version}`;
@@ -723,6 +848,49 @@ byId("connection-form").addEventListener("submit", async (event) => {
   } finally {
     button.disabled = false;
     button.textContent = state.connected ? "Reconnect" : "Connect";
+  }
+});
+
+byId("model-search-query").addEventListener("input", () => {
+  state.modelSearchResults = [];
+  byId("model-search-status").textContent = "Filtering installed models locally.";
+  renderModelDiscovery();
+});
+
+byId("model-search-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearError();
+  const button = byId("model-search-button");
+  const query = byId("model-search-query").value.trim();
+  if (!byId("model-search-consent").checked) {
+    showError(humanError(new Error("explicit-online-search-consent-required")));
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Searching…";
+  byId("model-search-status").textContent = "Searching the public Ollama catalog…";
+  try {
+    const result = validateModelSearch(await api("/api/model-search", { query, online: true }));
+    state.modelSearchResults = result.results;
+    byId("model-search-status").textContent = `${result.results.length} candidate${result.results.length === 1 ? "" : "s"} found. Nothing was downloaded.`;
+    renderModelDiscovery();
+  } catch (error) {
+    state.modelSearchResults = [];
+    byId("model-search-status").textContent = "Search stopped safely.";
+    showError(humanError(error));
+  } finally {
+    button.disabled = false;
+    button.textContent = "Search catalog";
+  }
+});
+
+byId("copy-model-command").addEventListener("click", async () => {
+  if (!state.desiredModel?.installCommand) return;
+  try {
+    await navigator.clipboard.writeText(state.desiredModel.installCommand);
+    byId("copy-model-command").textContent = "Copied";
+  } catch {
+    byId("copy-model-command").textContent = "Select and copy the command above";
   }
 });
 

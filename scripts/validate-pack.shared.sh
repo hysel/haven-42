@@ -174,6 +174,7 @@ REQUIRED_FILES=(
   "config/core-update-check-contract.json"
   "examples/fixtures/github-release-candidate.json"
   "scripts/test-haven42-web-browser.mjs"
+  "scripts/model_catalog_search.py"
   ".github/workflows/codeql.yml"
   "docs/provider-endpoint-security.md"
   "scripts/provider_security.py"

@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added explicit public Ollama catalog search to the local web Models panel. Installed filtering stays offline; online search sends only a bounded phrase to a fixed HTTPS origin, returns candidate-only names, keeps desired uninstalled choices in browser memory, disables their execution, and exposes a copyable command without downloading or executing anything.
 - Added exact-digest local-web text recommendations, provider-reported token/timing details, a reusable sanitized four-model writing matrix, and initial exact-artifact evidence with verified unloads. Comparative prose-quality promotion remains blocked on repeated and blind human review.
 - Added a fail-closed Software view over registry-backed `uiReady`, `read-only` workflow plans. Renderer arguments, arbitrary commands, process starts, repository reads, file writes, and workflow network effects remain denied.
 - Added the promoted Linux ComfyUI/SDXL image flow to the local web UI through an IP-literal loopback endpoint, fixed checkpoint and built-in workflow authority, bounded PNG validation, API-history cleanup, browser-memory delivery, explicit provider-retention disclosure, offline hostile tests, and a live SSH-tunneled smoke test.

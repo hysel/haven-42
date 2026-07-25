@@ -278,6 +278,30 @@
                 </div>
               </details>
             </form>
+            <details class="model-discovery" id="model-discovery">
+              <summary>Find another model</summary>
+              <p class="field-help">Installed models are filtered locally. Public catalog search sends only your search phrase to Ollama after you opt in.</p>
+              <form id="model-search-form">
+                <label for="model-search-query">Model name or capability</label>
+                <div class="field-row">
+                  <input id="model-search-query" maxlength="64" autocomplete="off" spellcheck="false" placeholder="For example: qwen or writing">
+                  <button class="button secondary" id="model-search-button" type="submit">Search catalog</button>
+                </div>
+                <label class="consent-row">
+                  <input id="model-search-consent" type="checkbox">
+                  Use the internet for this search
+                </label>
+              </form>
+              <div class="model-search-status" id="model-search-status" role="status" aria-live="polite">Enter text to filter installed models.</div>
+              <div class="model-search-results" id="model-search-results"></div>
+              <article class="desired-model hidden" id="desired-model" aria-live="polite">
+                <strong id="desired-model-name"></strong>
+                <span id="desired-model-state"></span>
+                <code id="desired-model-command"></code>
+                <button class="button secondary" id="copy-model-command" type="button">Copy installation command</button>
+                <small>Haven 42 will not run this command. Install outside Haven 42, then reconnect so the engine can verify the model name and digest.</small>
+              </article>
+            </details>
             <div class="notice hidden" id="connection-error" role="alert"></div>
           </section>
 

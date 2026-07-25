@@ -10,6 +10,7 @@ Haven 42 protects user repositories, local files, prompts, responses, models, cr
 - A malicious web page targets a predictable localhost port through cross-site forms, fetches, DNS rebinding, framing, or browser-content injection.
 - A malicious or compromised renderer repeatedly triggers expensive readiness scans, supplies executable/argument/environment input, forges hardware facts or a snapshot ID, or causes raw probe output, identity, private paths, credentials, or network addresses to cross the engine boundary.
 - A setup screen turns a recommendation into installation authority, injects an unregistered component, URL, command, or path, or claims that renderer consent is an OS-level approval.
+- A public model search leaks local context, follows a redirect, accepts a hostile model name or command, treats catalog claims as evidence, or turns desired selection into download or execution authority.
 - A local-web request attempts server-side request forgery through public, link-local, credential-bearing, redirected, hostname-based, or path-bearing provider endpoints.
 - A completed, failed, cancelled, switched, or idle text task leaves a model resident beyond the configured bounded warm period and consumes accelerator power after Haven 42 stops using it.
 - A compromised renderer sends malformed frames, replays approval tokens, crosses sessions, cancels another request, or binds events to the wrong request.
@@ -27,6 +28,13 @@ Policy selects registered operations; prompts never grant authority. IPC is type
 
 Onboarding settings are schema-bounded and default-deny. The renderer cannot supply state, evidence, approval, commands, raw endpoints, raw paths, or plaintext credentials. It receives and submits opaque references only; the evaluator never resolves or returns them. Existing setups require independent validation, cross-domain admission is rejected, public binding is absent, and settings outside exact passed evidence become unverified rather than inheriting trust.
 The admitted local-web application binds only to `127.0.0.1`; validates the exact Host and Origin; requires a random in-memory request token; rejects cross-site fetch metadata; serves bundled assets under a restrictive Content Security Policy; accepts only bounded JSON; and classifies IP-literal provider endpoints through the shared no-redirect policy. It exposes no repository, generic filesystem, shell, arbitrary process, download, update, or arbitrary provider surface. Recommendation catalog loading rejects unknown fields, unsafe or duplicate model names, invalid or mismatched digests, forged capability/operation bindings, duplicate evidence IDs, traversal-like evidence paths, and evidence rows that do not exactly match committed records. Automatic text selection requires exact name, digest, and capability evidence. Provider-reported metrics use a strict nullable numeric shape and are memory-only.
+
+Public model search is a separately disclosed outbound boundary. It accepts
+only a bounded phrase after explicit opt-in, targets one fixed HTTPS origin,
+rejects redirects and oversized or malformed HTML, and emits at most 20 strict
+model names. The renderer revalidates the exact response shape and reconstructed
+copy command. Candidate selection stays in browser memory and cannot reach text
+execution until the provider's installed inventory contains that exact name.
 
 The text server accepts only `general.chat`, `content.write`, and
 `content.summarize`; non-chat modes accept exactly one user input. Software

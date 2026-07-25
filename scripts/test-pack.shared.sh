@@ -2349,7 +2349,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "163 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "180 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "Resolve-Python3Command" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "sys.version_info.major" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
@@ -2373,6 +2373,11 @@ assert policy["text"]["unloadOnFailure"] is True and policy["text"]["unloadOnShu
 assert policy["text"]["recommendationAuthority"] == "server-owned-static-catalog"
 assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
 assert policy["text"]["missingModelDownloadsAllowed"] is False
+assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
+assert policy["modelDiscovery"]["redirectsAllowed"] is False
+assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
+assert policy["modelDiscovery"]["pullApiAllowed"] is False
+assert policy["modelDiscovery"]["commandExecutionAllowed"] is False
 assert policy["softwareWorkflows"]["executionMode"] == "plan-only"
 assert policy["softwareWorkflows"]["rendererArgumentsAllowed"] is False
 assert policy["softwareWorkflows"]["processStartAllowed"] is False
@@ -2381,6 +2386,7 @@ assert policy["images"]["endpointTrustScope"] == "loopback"
 assert policy["images"]["customNodesAllowed"] is False
 assert policy["images"]["localFileWritesAllowed"] is False
 assert (root / "config/text-capability-model-recommendations.json").is_file()
+assert (root / "scripts/model_catalog_search.py").is_file()
 html = (root / "web/static/index.html").read_text(encoding="utf-8")
 styles = (root / "web/static/styles.css").read_text(encoding="utf-8")
 assets = html + (root / "web/static/app.js").read_text(encoding="utf-8")

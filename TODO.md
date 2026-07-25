@@ -439,6 +439,11 @@
 - [x] Bind local-web automatic recommendations to the exact tested Qwen
   provider digest and capability evidence; a matching model name with a
   different or missing digest remains an explicit unverified choice.
+- [x] Add local installed-model filtering and explicit public Ollama catalog
+  search with a fixed origin, bounded query/response, candidate-only results,
+  browser-memory desired selection, disabled execution until reconnect
+  verifies installation, and copy-only installation guidance with no pull API
+  or command execution.
 - [x] Expand the local web UI over the stable registries with exact-digest text
   selection, plan-only registered read-only software workflows, and the
   promoted Linux ComfyUI/SDXL image capability without duplicating provider

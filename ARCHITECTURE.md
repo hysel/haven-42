@@ -47,6 +47,8 @@ unload and process-list verification after every response
 
 The process persists no endpoint, prompt, response, or provider run detail; exposes no repository, generic filesystem, shell, or arbitrary process API; permits no remote UI assets; and cannot bind to a LAN interface. Automatic text selection requires the exact installed Ollama digest and matching capability evidence. Text, workflow-plan, and image execution use the shared schema-v1 event vocabulary. The browser rejects malformed, non-monotonic, multiple-terminal, or post-terminal event streams before rendering an artifact. Unverified manual models add a warning event; provider failures return typed errors and memory-only recovery declarations. No automatic retry occurs, and a retry is always a new request.
 
+Model discovery is separate from model installation. Installed-model filtering is browser-local. An explicit online action crosses the engine boundary with only a bounded query, which can reach only the fixed `https://ollama.com/search` origin with redirects disabled and a capped HTML response. The engine normalizes strict model names and returns at most 20 candidate-only records. An uninstalled choice is browser-memory intent, not execution authority; its command is constructed from the validated name, copied only on request, and never executed. Text execution still requires the model to appear in the connected provider's installed inventory.
+
 The Software view is registry-derived but plan-only: it admits only `uiReady`,
 `read-only` records, accepts no renderer arguments, and starts no process. The
 Images view is a separate authority boundary for the promoted Linux

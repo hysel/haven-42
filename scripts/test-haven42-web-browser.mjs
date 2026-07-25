@@ -342,6 +342,94 @@ try {
   trace("advanced-model-verified");
 
   await cdp.evaluate(`(() => {
+    const original = window.fetch;
+    window.__havenOriginalFetch = original;
+    window.fetch = (input, init) => input === "/api/model-search"
+      ? Promise.resolve(new Response(JSON.stringify({
+          schemaVersion: 1,
+          kind: "model-catalog-search",
+          query: "writing",
+          source: "ollama-public-catalog",
+          networkUsed: true,
+          queryPersisted: false,
+          repositoryContentSent: false,
+          hardwareProfileSent: false,
+          downloadsPerformed: false,
+          configurationChanged: false,
+          results: [{
+            name: "candidate-writing:7b",
+            source: "ollama-public-catalog",
+            status: "not-installed",
+            validationStatus: "candidate-only",
+            capabilityEvidence: "unverified",
+            hardwareFit: "unknown",
+            licenseStatus: "review-required",
+            executionAllowed: false,
+            installCommand: "ollama pull candidate-writing:7b"
+          }]
+        }), {status: 200, headers: {"Content-Type": "application/json"}}))
+      : original(input, init);
+    const query = document.querySelector('#model-search-query');
+    query.value = "writing";
+    query.dispatchEvent(new Event('input', {bubbles: true}));
+    document.querySelector('#model-search-consent').checked = true;
+    document.querySelector('#model-search-form').requestSubmit();
+  })()`);
+  await waitFor(() => cdp.evaluate("document.querySelectorAll('#model-search-results .model-search-result').length === 1"));
+  await cdp.evaluate("document.querySelector('#model-search-results button').click()");
+  const discovery = await cdp.evaluate(`({
+    desired: document.querySelector('#desired-model-name').textContent,
+    state: document.querySelector('#desired-model-state').textContent,
+    command: document.querySelector('#desired-model-command').textContent,
+    hidden: document.querySelector('#desired-model').classList.contains('hidden'),
+    searchStatus: document.querySelector('#model-search-status').textContent,
+    currentModel: document.querySelector('#model').value
+  })`);
+  if (
+    discovery.desired !== "candidate-writing:7b"
+    || !discovery.state.includes("execution disabled")
+    || discovery.command !== "ollama pull candidate-writing:7b"
+    || discovery.hidden
+    || !discovery.searchStatus.includes("Nothing was downloaded")
+    || discovery.currentModel !== "manual:unknown-model:latest"
+  ) throw new Error("candidate-only-model-discovery");
+  checks += 6;
+  const hostileCatalogRejected = await cdp.evaluate(`(() => {
+    try {
+      validateModelSearch({
+        schemaVersion: 1,
+        kind: "model-catalog-search",
+        query: "safe",
+        source: "ollama-public-catalog",
+        networkUsed: true,
+        queryPersisted: false,
+        repositoryContentSent: false,
+        hardwareProfileSent: false,
+        downloadsPerformed: false,
+        configurationChanged: false,
+        results: [{
+          name: "safe:7b",
+          source: "ollama-public-catalog",
+          status: "not-installed",
+          validationStatus: "candidate-only",
+          capabilityEvidence: "unverified",
+          hardwareFit: "unknown",
+          licenseStatus: "review-required",
+          executionAllowed: false,
+          installCommand: "ollama pull safe:7b && hostile"
+        }]
+      });
+      return false;
+    } catch {
+      return true;
+    }
+  })()`);
+  if (!hostileCatalogRejected) throw new Error("hostile-catalog-command-accepted");
+  checks += 1;
+  await cdp.evaluate("window.fetch = window.__havenOriginalFetch");
+  trace("candidate-model-discovery-verified");
+
+  await cdp.evaluate(`(() => {
     document.querySelector('#prompt').value = 'browser flow';
     document.querySelector('#text-form').requestSubmit();
   })()`);
