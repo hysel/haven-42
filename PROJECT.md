@@ -22,7 +22,11 @@ selection beside explicit candidate search, labels installed versus uninstalled
 results, resets and re-ranks discovery when the target capability changes,
 exposes all bounded cleanup policies in System, keeps provider inputs and
 selectors visually consistent across the wizard and workspace, and supports
-Enter-to-send with Shift+Enter for multiline input.
+Enter-to-send with Shift+Enter for multiline input. Assistant chat and
+Markdown-document results now render a safe DOM-built Markdown allowlist and
+Unicode emoji while keeping raw HTML inert. Prompt recall uses Up/Down with
+multiline-safe boundaries, defaults to 20 entries, offers 50 or 100 in System,
+and remains task-bound browser memory.
 
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system
@@ -31,7 +35,13 @@ local image profiles and now has consumer-local discovery and consent contracts.
 Milestones 24 and 25 retain documentation-only audio/video candidate inventories and
 shared media-consent policy. Milestone 26 now has quantization plan/artifact contracts,
 OS-aware sanitized profiling, explicit support boundaries, and a no-effect dry-run
-selector; live model recipes and activation remain unpromoted. Broader surface and provider parity remains
+selector; live model recipes and activation remain unpromoted. Milestone 27 now
+defines a proposed explicit-selection, memory-only local-document context and
+retrieval boundary; no file-ingestion runtime, automatic scan, directory access,
+embedding index, or persistence is admitted. Milestone 28 defines proposed
+controlled web research with explicit reviewed queries, engine-owned adapters,
+trusted citations, SSRF controls, and memory-only cleanup; no model or renderer
+internet tool is admitted. Broader surface and provider parity remains
 evidence-gated.
 
 Capability Evidence Contract v2 now prevents model readiness from being

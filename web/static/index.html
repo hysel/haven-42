@@ -171,7 +171,7 @@
             <textarea id="prompt" rows="2" maxlength="32768" placeholder="Connect Ollama to begin…" disabled></textarea>
             <button class="button send" id="send-button" type="submit" disabled aria-label="Run task">↑</button>
           </form>
-          <p class="composer-help">Enter to send · Shift+Enter for a new line</p>
+          <p class="composer-help">Enter to send · Shift+Enter for a new line · ↑/↓ recall prompts</p>
           <div class="chat-footer">
             <span id="text-status">Provider not connected</span>
             <span>Inputs and responses are not written to disk</span>
@@ -320,7 +320,7 @@
                 <input id="endpoint" name="endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off">
                 <button class="button primary" id="connect-button" type="submit">Connect</button>
               </div>
-              <p class="field-help">Enter a same-machine or private-network IP address. Haven 42 detects the connection scope automatically and saves nothing.</p>
+              <p class="field-help">Enter a same-machine or private-network IP address. Once connected, edit this address or an advanced setting to enable Apply changes. Applying changes starts a new task.</p>
               <details>
                 <summary>Advanced connection settings</summary>
                 <div class="advanced-grid">
@@ -368,10 +368,19 @@
                   <option value="900">15 minutes idle</option>
                   <option value="1800">30 minutes idle · performance</option>
                 </select>
-                <button class="button secondary" id="apply-cleanup-policy" type="submit">Apply</button>
+                <button class="button secondary" id="apply-cleanup-policy" type="submit" disabled>Selected</button>
               </div>
-              <p class="field-help">Applying while connected safely reconnects the text provider with the selected memory policy.</p>
+              <p class="field-help">Choose a different policy to enable Apply changes. Applying while connected starts a new task through the validated provider boundary.</p>
             </form>
+            <div class="system-setting">
+              <label for="prompt-history-limit">Prompt recall history</label>
+              <select id="prompt-history-limit">
+                <option value="20" selected>20 prompts · default</option>
+                <option value="50">50 prompts</option>
+                <option value="100">100 prompts</option>
+              </select>
+              <p class="field-help" id="prompt-history-status">Up to 20 prompts · memory only · cleared with New task</p>
+            </div>
             <button class="button secondary full-width" id="scan-system-button" type="button">Scan system readiness</button>
             <div class="readiness-dashboard compact hidden" id="system-readiness" aria-live="polite"></div>
           </section>

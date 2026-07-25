@@ -58,7 +58,7 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-open` on Linux and macOS to start without opening the default browser. Use `-Port` or `--port` to select another loopback port. Every launcher probes candidate commands and accepts only a working Python 3 interpreter; a stale Windows `py` command or store alias is skipped rather than failing later with a misleading server error.
+The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-open` on Linux and macOS to start without opening the default browser. Use `-Port` or `--port` to select another loopback port. Automatic opening accepts only the engine-generated IPv4-loopback HTTP origin. Windows uses the registered URL association, macOS uses fixed `/usr/bin/open`, and Linux uses fixed allowlisted `/usr/bin/gio` or `/usr/bin/xdg-open` commands without a shell. Unix launch passes a minimal environment that excludes `BROWSER`; if no admitted desktop opener is available, Haven 42 remains running and prints the URL for manual use. Every source launcher probes candidate commands and accepts only a working Python 3 interpreter; a stale Windows `py` command or store alias is skipped rather than failing later with a misleading server error.
 
 ## Accessibility And Capability Status
 
@@ -66,7 +66,7 @@ The wizard is a labeled modal with an announced description and current-step sta
 
 The capability view is read-only and engine-derived. Chat, Writing, and Summarization change from `configuration-required` to `available` only after a successful provider check. Software stays `not-admitted-in-web`; Images stays `provider-profile-required`. Clicking either unavailable navigation item explains its state and never invokes an operation.
 
-The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, exact artifact-digest and catalog evidence matching, and a disabled/no-network update state. A visible cleanup selector offers immediate, 5-minute, 15-minute, and 30-minute model residency. Apply is explicit; while connected it uses the same validated endpoint and reconnect boundary, and while disconnected it only updates the in-memory choice for the next connection. These controls grant no installation or process authority.
+The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, exact artifact-digest and catalog evidence matching, and a disabled/no-network update state. A visible cleanup selector offers immediate, 5-minute, 15-minute, and 30-minute model residency. After connection, unchanged provider values show disabled `Connected` and the active System policy shows disabled `Applied`; even a programmatic unchanged submission makes no provider request and cannot reset the task. Editing the endpoint, timeout, or cleanup policy enables `Apply changes` and discloses that a successful changed connection starts a new task. While disconnected, selecting a cleanup policy only updates the in-memory choice for the next connection. These controls grant no installation or process authority.
 
 ## Provider-reported run details
 
@@ -135,6 +135,13 @@ Use the task selector above the input area or the left navigation:
 Press Enter to submit a text task. Use Shift+Enter for a new line. Input-method
 composition is not submitted until composition has ended.
 
+Up and Down recall older and newer submitted prompts when the caret is on the
+first or last textarea line respectively, so ordinary multiline cursor movement
+is preserved. Entering history retains the unfinished draft and moving past the
+newest entry restores it. Consecutive duplicates are stored once. System offers
+20 (default), 50, or 100 entries; the setting and prompt text remain in browser
+memory, and the list clears on New task, capability/provider change, or shutdown.
+
 Changing modes or selecting **New task** clears the visible in-memory task. These capabilities use the registered `ollama.local-text` provider. They do not read a repository, write files, download models, or persist the endpoint, input, conversation, or response.
 
 The balanced default sends a bounded five-minute `keep_alive`, avoiding a costly reload between nearby prompts. Advanced connection settings and the System panel offer immediate cleanup, 5 minutes, 15 minutes, or 30 minutes. Haven 42 keeps at most one model active for its browser session: choosing a different model unloads and verifies the previous one before invoking the next. **New task**, provider changes, request failures, the idle timer, and application shutdown also trigger explicit unload and process-list verification.
@@ -155,7 +162,7 @@ The MVP:
 
 The renderer never receives a shell, executable, arbitrary process, filesystem, model-download, installation, elevation, or repository-access surface. Readiness scanning is a CSRF-protected POST because even read-only subprocess work consumes local resources.
 
-Text responses include a schema-v1 typed artifact and ordered accepted/progress/warning/result events. Browser JavaScript validates the capability, artifact type, source capability, terminal status, strict event shape, contiguous sequence, exactly one terminal event, and absence of post-terminal events before rendering content. An advanced manual model without exact evidence for the selected capability adds a visible warning without granting that model more authority.
+Text responses include a schema-v1 typed artifact and ordered accepted/progress/warning/result events. Browser JavaScript validates the capability, artifact type, source capability, terminal status, strict event shape, contiguous sequence, exactly one terminal event, and absence of post-terminal events before rendering content. Assistant chat and Markdown-document text render headings, paragraphs, ordered and unordered lists, bold, italics, inline and fenced code, quotes, rules, and Unicode emoji through a small dependency-free allowlist. The renderer uses `createElement` and `textContent`, never model-supplied HTML; raw tags remain visible inert text and cannot create links, images, scripts, or event handlers. An advanced manual model without exact evidence for the selected capability adds a visible warning without granting that model more authority.
 
 Text failures return a typed error envelope and an explicit recovery declaration. Haven 42 never retries automatically. When safe browser-memory restoration is declared, the failed input is restored to the composer, removed from chat history, and can be edited or submitted as a new request. Nothing is persisted and no approval or request identity is reused. Broader dispatcher workflow rendering remains future integration work.
 

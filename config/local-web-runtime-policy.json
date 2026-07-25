@@ -12,6 +12,9 @@
     "remoteAssetsAllowed": false,
     "telemetryAllowed": false,
     "crossOriginRequestsAllowed": false,
+    "automaticLaunchUrlScope": "ipv4-loopback-http-origin-only",
+    "environmentOverrideAllowed": false,
+    "shellLaunchAllowed": false,
     "hostHeaderValidationRequired": true,
     "csrfTokenRequiredForEffects": true,
     "contentSecurityPolicyRequired": true

@@ -175,6 +175,109 @@ def wait_until(predicate, timeout_seconds: float = 2.0) -> bool:
 
 def main() -> int:
     checks = 0
+    safe_url = "http://127.0.0.1:4242"
+    assert WEB._validated_browser_url(safe_url)
+    checks += 1
+    assert all(
+        not WEB._validated_browser_url(candidate)
+        for candidate in (
+            "https://127.0.0.1:4242",
+            "http://localhost:4242",
+            "http://127.0.0.1:4242/path",
+            "http://127.0.0.1:4242?query=1",
+            "http://user@127.0.0.1:4242",
+            "http://127.0.0.1:0",
+        )
+    )
+    checks += 1
+    safe_environment = WEB._browser_environment({
+        "BROWSER": "hostile-browser-command",
+        "LD_PRELOAD": "/tmp/hostile.so",
+        "PYTHONPATH": "/tmp/hostile-python",
+        "HOME": "/home/tester",
+        "DISPLAY": ":0",
+        "PATH": "/tmp/hostile-bin",
+    })
+    assert safe_environment == {
+        "HOME": "/home/tester",
+        "DISPLAY": ":0",
+        "PATH": "/usr/bin:/bin",
+    }
+    checks += 1
+
+    windows_urls: list[str] = []
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="win32",
+        windows_launcher=windows_urls.append,
+    )
+    assert windows_urls == [safe_url]
+    checks += 1
+
+    launches: list[tuple[list[str], dict]] = []
+
+    def record_launch(command, **kwargs):
+        launches.append((command, kwargs))
+
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="darwin",
+        executable_exists=lambda path: path == "/usr/bin/open",
+        process_launcher=record_launch,
+        environment={"BROWSER": "hostile", "HOME": "/Users/tester"},
+    )
+    assert launches[-1][0] == ["/usr/bin/open", safe_url]
+    checks += 1
+    assert (
+        launches[-1][1]["shell"] is False
+        and launches[-1][1]["close_fds"] is True
+        and launches[-1][1]["start_new_session"] is True
+        and "BROWSER" not in launches[-1][1]["env"]
+    )
+    checks += 1
+
+    launches.clear()
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda path: path in {"/usr/bin/gio", "/usr/bin/xdg-open"},
+        process_launcher=record_launch,
+        environment={"BROWSER": "hostile", "DISPLAY": ":1"},
+    )
+    assert launches[-1][0] == ["/usr/bin/gio", "open", safe_url]
+    checks += 1
+    launches.clear()
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda path: path == "/usr/bin/xdg-open",
+        process_launcher=record_launch,
+    )
+    assert launches[-1][0] == ["/usr/bin/xdg-open", safe_url]
+    checks += 1
+    launches.clear()
+    assert not WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda _path: False,
+        process_launcher=record_launch,
+    )
+    assert launches == []
+    checks += 1
+
+    def fail_launch(_command, **_kwargs):
+        raise OSError("forced-launch-failure")
+
+    assert not WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda _path: True,
+        process_launcher=fail_launch,
+    )
+    checks += 1
+    assert not WEB.open_default_browser(safe_url, platform_name="unsupported")
+    checks += 1
+
     fake = ThreadingHTTPServer(("127.0.0.1", 0), FakeOllama)
     fake_thread = threading.Thread(target=fake.serve_forever, daemon=True)
     fake_thread.start()
@@ -889,13 +992,29 @@ def main() -> int:
         assert html.count('class="field-row compact-control-row"') == 3
         assert ".compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
         assert ".advanced-grid select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
+        assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
+        assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
+        assert "selectedSeconds === state.idleUnloadSeconds" in javascript
+        assert 'id="apply-cleanup-policy" type="submit" disabled>Selected</button>' in html
+        assert "Applying changes starts a new task" in html
         assert 'id="about-panel"' in html and 'id="about-nav"' in html
         assert "03 · WRITING" not in javascript and "03 · SUMMARY" not in javascript
         assert "local or self-hosted AI providers" in html
         assert 'event.key !== "Enter"' in javascript and "event.shiftKey" in javascript
         assert "Enter to send · Shift+Enter for a new line" in html
+        assert "↑/↓ recall prompts" in html and 'id="prompt-history-limit"' in html
+        assert 'value="20" selected' in html and 'value="50"' in html and 'value="100"' in html
+        assert "recordPromptHistory" in javascript and "recallPrompt" in javascript
+        assert "clearPromptHistory" in javascript and "state.promptHistory.slice(-selectedLimit)" in javascript
+        assert javascript.count("clearPromptHistory();") >= 3
+        assert "localStorage" not in javascript and "sessionStorage" not in javascript and "indexedDB" not in javascript
+        assert ".system-setting select { height: 36px;" in styles
         assert ".hidden { display: none !important; }" in styles
         assert ".chat-panel > .panel-heading" in styles and "overflow-y: auto" in styles
+        assert "appendInlineMarkdown" in javascript and "appendMarkdown" in javascript
+        assert "markdownBlockKind" in javascript and 'text.className = "message-content"' in javascript
+        assert ".message-content h3" in styles and ".message-content ul" in styles
+        assert ".message-content pre" in styles and '"Segoe UI Emoji"' in styles
         assert "renderTypedResult" in javascript and "renderCapabilities" in javascript
         assert "validateExecutionEvents" in javascript and "event-after-terminal" in javascript
         assert "validateRecovery" in javascript and "invalid-recovery-envelope" in javascript
@@ -916,7 +1035,8 @@ def main() -> int:
         assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
         assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
         assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
-        checks += 53
+        assert "webbrowser" not in (ROOT / "web/server.py").read_text(encoding="utf-8")
+        checks += 70
     finally:
         app.shutdown()
         app.server_close()

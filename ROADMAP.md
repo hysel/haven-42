@@ -694,7 +694,7 @@ Exit criteria:
 3. Validate pinned dependency and license choices, then scaffold the smallest Windows, Linux, and macOS package slice. Direct candidates are reviewed; disposable Windows npm and PyInstaller graphs passed, while five Windows-reachable unmaintained Rust crates, unaudited native build prerequisites, and separate Linux findings block admission.
 4. Implement first-run navigation and capability availability views over the Milestone 21 registry. The local-web renderer now provides keyboard-accessible Guided, Existing, and Explore paths, explicit read-only readiness scanning, a disabled setup plan, five engine-derived capability states, and policy disclosures; the framework-neutral contracts remain the source of truth and the native renderer remains gated.
 5. Assemble the model-selection view data without visual UI work. Done with a versioned read-only catalog, fail-closed per-artifact license policy, hardware-fit labels, revision-bound evidence, shared beginner/advanced decisions, hostile-input tests, and OS-aware wrappers.
-6. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20. Readiness inspection, zero-effect setup planning, the provider wizard, exact-digest text recommendations, provider metrics, typed text results, provider health, evidence boundary, disabled-update status, and registered read-only workflow planning are done; real installation, workflow execution, and broader validation/evidence views remain.
+6. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20. Readiness inspection, zero-effect setup planning, the provider wizard, exact-digest text recommendations, provider metrics, typed text results with safe DOM-built Markdown and Unicode emoji, configurable task-bound prompt recall, provider health, evidence boundary, disabled-update status, and registered read-only workflow planning are done; real installation, workflow execution, and broader validation/evidence views remain.
 7. Add repository-free text and image flows only for providers promoted in Milestone 21 or Milestone 23. Done for admitted text tools and the promoted Linux ComfyUI/SDXL profile; other image profiles remain independently gated.
 8. Implement the GitHub release updater with explicit channels, network disclosure, immutable asset selection, checksum and signature or attestation verification, compatibility preflight, atomic activation, post-update health checks, rollback, and retained-version cleanup. The offline candidate and lifecycle policies now validate strict release fixtures and model healthy, failed-health, interrupted, rollback, retention, and disabled paths while denying network, download, writes, staging, activation, cleanup, and every other machine effect. Actual acquisition, trusted cryptographic verification, staging, activation, and rollback remain unadmitted.
 9. Add cross-platform UI contract, updater, rollback, packaging, signing, and uninstall tests.
@@ -846,6 +846,85 @@ Exit criteria:
 6. Add Windows NVIDIA, Windows Intel, Windows AMD, and Apple Silicon paths only when an exact runtime and format have credible native support; keep physical Mac validation last. Windows AMD is done for Ollama 0.32.1, its packaged ROCm 7.1 backend, an RX 7800 XT 16 GB profile, Qwen 3.5 9B Q4_K_M versus Q8_0, a 4,096-token context, and concurrency one. Windows NVIDIA and Apple Silicon remain open; Windows Intel is explicitly parked until representative Intel GPU hardware is available.
 7. Separate capability, provider contract, inference engine, hardware backend, and model artifact selection. Done with a fail-closed registry. llama.cpp `b10088` CUDA passed bounded engine checks on the exact Linux NVIDIA RTX 5000 profile, and HIP passed on the exact Windows AMD profile; Vulkan failed the Windows AMD Git-applicable-patch gate and remains documentation-only. OpenVINO GenAI and llama.cpp SYCL are parked pending Intel hardware; IPEX-LLM is retired; LM Studio is optional user-installed API-only software. The Linux CUDA source build is evidence, not yet a consumer installation path.
 8. Add conversion, activation, rollback, cleanup, and UI integration only for exact profiles that pass all promotion gates.
+
+## Milestone 27: Local Knowledge Context And Retrieval
+
+Goal: Let an end user explicitly add selected local documents to a text task without granting Haven 42 general filesystem authority, silently scanning the machine, or obscuring when document content crosses to a private-network provider.
+
+Current status: Proposed and security-scoped. No file-ingestion, folder-scan, retrieval-index, persistence, or document-parser runtime is admitted yet.
+
+Scope:
+
+- Begin with an explicit multi-file browser picker. Do not add automatic discovery, background indexing, file watching, operating-system search, arbitrary path entry, or whole-machine scanning.
+- Let the browser transfer only user-selected bytes to the loopback service. Strip path metadata, reject traversal-like names, and never expose a generic read-path API to the renderer or model.
+- Admit a minimal initial format allowlist: UTF-8 plain text, Markdown, CSV, JSON, and separately reviewed source-code extensions. Reject binaries, archives, PDF, Office documents, images, OCR, malformed encodings, and unsupported formats until each parser boundary passes independent review.
+- Enforce strict per-file, total-byte, file-count, extracted-text, chunk-count, request-context, and processing-time limits. Parsing and deterministic chunking remain local and memory-only.
+- Start with exact-content attachment for small inputs and deterministic lexical retrieval for larger admitted text. Local embeddings, an additional embedding model, and semantic indexing remain separate evidence gates.
+- Show every admitted, partially admitted, or rejected file; extracted-text preview; size; estimated token cost; truncation; selected chunks; and removal controls before execution.
+- Treat document content as untrusted data. Document instructions cannot choose tools, commands, providers, models, approvals, paths, network destinations, or product policy.
+- Disclose the execution destination. Loopback providers receive an ordinary explicit attachment confirmation; private-network providers require a prominent per-provider confirmation that selected content will leave the current machine. Public provider destinations remain blocked.
+- Keep source bytes, extracted text, chunk indexes, document identifiers, and retrieval results in process/browser memory only. New task, provider change, model change, explicit removal, and shutdown clear them.
+- Defer any persistent knowledge library until encrypted storage, key handling, migration, corruption recovery, deletion, export, backup, multi-user, and uninstall semantics pass separate approval and native evidence.
+
+Exit criteria:
+
+- Only files explicitly selected by the user can enter context, and neither a renderer nor model can supply a filesystem path or expand the grant.
+- The UI previews admitted content and discloses the exact provider trust scope before any selected content is transmitted.
+- Unsupported, oversized, malformed, traversal-like, binary, archive, and parser-hostile inputs fail closed without residual temporary files or unsanitized logs.
+- Context budgeting deterministically bounds transmitted chunks and clearly reports partial admission or truncation.
+- Prompt injection inside a document cannot add filesystem, process, network, model-management, approval, or persistence authority.
+- New task, provider/model changes, removal, failure, and shutdown clear all document state; tests verify no cache, browser storage, log, package-tree, or temporary-file residue.
+- Source-versus-packaged parity and native Windows, Linux, and macOS package smoke tests cover selection, validation, retrieval, disclosure, cleanup, and hostile inputs before promotion.
+
+### Recommended Implementation Order
+
+1. Define the versioned document-ingestion, context-budget, provider-disclosure, and memory-lifecycle contracts with all effects denied by default.
+2. Add offline hostile fixtures for filenames, encodings, oversized input, duplicate content, prompt injection, truncation, cleanup, and exact provider payloads.
+3. Implement explicit memory-only multi-file attachment for the minimal text allowlist without directory selection or persistence.
+4. Add deterministic in-memory lexical retrieval and per-response source/chunk disclosure.
+5. Evaluate explicit folder selection only after canonicalization, exclusions, symlink/reparse handling, preview, cancellation, and bounded traversal tests pass on every platform.
+6. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
+7. Consider an optional persistent library only as a separately approved storage product with encryption, deletion, migration, export, rollback, and uninstall evidence.
+
+## Milestone 28: Controlled Web Research
+
+Goal: Let an end user explicitly research current public information with a local model while keeping all network authority in a narrow engine-owned search and retrieval broker rather than granting the model, renderer, or browser unrestricted internet access.
+
+Current status: Proposed and security-scoped. Text models have no web-search tool, arbitrary URL fetch, browser automation, page-execution, credential, cookie, download, or autonomous research authority. The existing fixed-origin Ollama model-catalog search remains a separate candidate-discovery feature.
+
+Scope:
+
+- Begin with a dedicated **Search web** action for one text request. Never infer consent from an ordinary prompt or enable search by default.
+- Generate or accept one bounded proposed query, show exactly what will leave the local environment, and let the user edit or cancel it before the first network request.
+- Use one engine-configured search adapter at a time. Renderer and model input cannot choose a host, raw URL, credential, header, proxy, executable, command, or environment.
+- Send only the approved bounded query. Do not automatically include conversation history, local documents, provider endpoints, hardware facts, repository content, usernames, paths, or model metadata.
+- Return a strict bounded result shape containing title, excerpt, public source URL, domain, and retrieval time. Treat every field as untrusted and never treat search ranking or page claims as product evidence.
+- Render citations through a trusted component, not model Markdown. External navigation must disclose the destination and require an explicit user action; remote images, scripts, styles, frames, downloads, cookies, and tracking remain blocked.
+- Add page retrieval only after separate approval. Re-resolve DNS, reject loopback/private/link-local/reserved/credential-bearing destinations, constrain redirects to independently validated public HTTPS targets, cap response bytes and time, allowlist textual content types, and perform no JavaScript execution.
+- Strip active markup and extract bounded text locally. Search results and page content are untrusted prompt context and cannot grant tools, follow-up searches, approvals, filesystem access, provider changes, or policy changes.
+- Require explicit approval for each additional query and page retrieval initially. Bounded multi-query research remains a later gate with visible budgets, cancellation, and source accounting.
+- Keep queries, results, extracted content, citations, and research state in memory only. New task, provider/model change, explicit clear, failure, and shutdown discard them.
+- Support an independently reviewed self-hosted search adapter later without weakening the same query, SSRF, content, disclosure, and cleanup controls.
+
+Exit criteria:
+
+- No text model or renderer can open a socket, choose a network destination, fetch an arbitrary URL, execute page code, or silently trigger a search.
+- The user sees and approves the exact bounded query and search provider before data leaves the local environment.
+- Search and retrieval reject DNS rebinding, redirects to unsafe address classes, credentials, oversized or non-text responses, decompression abuse, malformed encodings, and hostile result shapes.
+- Retrieved instructions cannot add authority or trigger another query, page, tool, process, file, model, approval, or network action.
+- Every grounded answer distinguishes retrieved claims from model knowledge and binds citations to engine-validated sources and retrieval times.
+- Cancellation, failure, New task, provider/model change, and shutdown leave no query, page, cookie, cache, browser-storage, log, download, or temporary-file residue.
+- Offline fixtures, hostile local servers, source/package parity, and native Windows, Linux, and macOS smoke tests pass before any adapter is promoted.
+
+### Recommended Implementation Order
+
+1. Define versioned search-query, result, citation, provider-disclosure, research-budget, and memory-lifecycle contracts with network and follow-up effects denied by default.
+2. Add offline hostile tests for destination confusion, DNS/IP classes, redirects, credentials, malformed responses, oversized content, prompt injection, citation forgery, cancellation, and cleanup.
+3. Implement one explicit query-only search adapter returning bounded titles, excerpts, domains, public HTTPS URLs, and retrieval times.
+4. Add trusted citation rendering and per-query disclosure without model-supplied links.
+5. Add explicit user-selected page retrieval with SSRF revalidation, strict content limits, inert text extraction, and no page execution.
+6. Add cited model synthesis from only the approved result/page set, with exact source accounting and no autonomous follow-up.
+7. Evaluate a self-hosted adapter and bounded multi-query research independently after the single-query path passes native evidence.
 
 ## Security hardening baseline (implemented)
 

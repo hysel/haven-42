@@ -11,6 +11,10 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added task-local Up/Down prompt recall with draft restoration, multiline-safe navigation, a 20-entry default, configurable 50/100-entry limits, duplicate suppression, and memory-only cleanup at task boundaries.
+- Added a safe DOM-built Markdown and Unicode emoji renderer for assistant output; raw HTML, model-supplied links, images, scripts, and handlers remain inert or unsupported.
+- Changed connected provider and cleanup controls to reject unchanged submissions, preventing misleading reconnects and unintended task resets; hardened packaged browser launch to fixed platform mechanisms and engine-generated loopback URLs.
+- Added proposed, unadmitted roadmap boundaries for explicit memory-only local document context and controlled web research; neither arbitrary filesystem scanning nor general model internet access is enabled.
 - Fixed local-web primary-panel hiding so Software and Images no longer overlap or crop headings; added dedicated Models and About views, capability-specific installed-model selection, provider-neutral home copy, and Enter-to-send with Shift+Enter for a new line.
 - Added explicit public Ollama catalog search to the local web Models panel. Installed filtering stays offline; online search sends only a bounded phrase to a fixed HTTPS origin, returns candidate-only names, keeps desired uninstalled choices in browser memory, disables their execution, and exposes a copyable command without downloading or executing anything.
 - Added exact-digest local-web text recommendations, provider-reported token/timing details, a reusable sanitized four-model writing matrix, and initial exact-artifact evidence with verified unloads. Comparative prose-quality promotion remains blocked on repeated and blind human review.

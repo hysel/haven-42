@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, mkdtempSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
@@ -55,6 +55,33 @@ const fake = createServer((request, response) => {
       loaded.add(payload.model);
       if (payload.messages?.at(-1)?.content === "force browser failure") {
         return json(response, 502, { error: "forced-browser-provider-failure" });
+      }
+      if (payload.messages?.at(-1)?.content === "markdown showcase") {
+        return json(response, 200, {
+          message: {
+            role: "assistant",
+            content: [
+              "### Clear answer 😀",
+              "",
+              "- **Strong point** with *emphasis*",
+              "- Safe `inline code`",
+              "",
+              "> A useful note",
+              "",
+              "```js",
+              "const value = '<img src=x onerror=alert(1)>';",
+              "```",
+              "",
+              "<script>window.hostile = true</script>",
+            ].join("\n"),
+          },
+          prompt_eval_count: 30,
+          eval_count: 10,
+          total_duration: 7_500_000_000,
+          load_duration: 500_000_000,
+          prompt_eval_duration: 1_000_000_000,
+          eval_duration: 5_000_000_000,
+        });
       }
       return json(response, 200, {
         message: { role: "assistant", content: "LOCAL_BROWSER_OK" },
@@ -187,12 +214,17 @@ async function connectPageCdp(debugPort, origin, browser, browserLaunchError) {
     if (browser.exitCode !== null) throw new Error(`browser-exited-${browser.exitCode}`);
     const response = await fetch(`http://127.0.0.1:${debugPort}/json`);
     const pages = (await response.json())
-      .filter((item) => item.type === "page" && item.url.startsWith(origin));
+      .filter((item) => item.type === "page")
+      .sort((left, right) => Number(right.url.startsWith(origin)) - Number(left.url.startsWith(origin)));
     for (const page of pages) {
       const candidate = new Cdp(page.webSocketDebuggerUrl);
       try {
         await candidate.open();
         await candidate.call("Runtime.enable");
+        if (!page.url.startsWith(origin)) {
+          await candidate.call("Page.enable");
+          await candidate.call("Page.navigate", { url: origin });
+        }
         return candidate;
       } catch {
         candidate.close();
@@ -203,9 +235,6 @@ async function connectPageCdp(debugPort, origin, browser, browserLaunchError) {
 }
 
 const fakePort = await listen(fake);
-const debugProbe = createServer();
-const debugPort = await listen(debugProbe);
-await new Promise((accept) => debugProbe.close(accept));
 const python = resolvePython();
 const browserPath = resolveBrowser();
 const profile = mkdtempSync(join(tmpdir(), "haven42-browser-"));
@@ -229,18 +258,20 @@ try {
   const browserArguments = [
     "--headless=new",
     "--disable-gpu",
+    "--disable-gpu-sandbox",
     "--disable-background-networking",
     "--host-resolver-rules=MAP * 0.0.0.0, EXCLUDE 127.0.0.1",
     "--no-first-run",
     "--remote-allow-origins=*",
-    `--remote-debugging-port=${debugPort}`,
+    "--remote-debugging-port=0",
     `--user-data-dir=${profile}`,
     origin,
   ];
-  if (process.env.HAVEN42_BROWSER_TEST_NO_SANDBOX === "1") {
-    // Some locked-down Windows hosts deny Chromium's disposable test sandbox.
-    // This opt-in is limited to synthetic loopback content and is never set in CI.
-    browserArguments.splice(2, 0, "--disable-gpu-sandbox", "--no-sandbox");
+  if (process.platform === "win32" || process.env.HAVEN42_BROWSER_TEST_NO_SANDBOX === "1") {
+    // Managed Windows hosts can deny Chromium's disposable test sandbox. This
+    // isolated profile resolves every non-loopback host to 0.0.0.0 and serves
+    // synthetic content only; Haven 42 never adds this flag to a user's browser.
+    browserArguments.splice(2, 0, "--no-sandbox");
   }
   browser = spawn(browserPath, browserArguments, {
     windowsHide: true,
@@ -252,6 +283,14 @@ try {
     }
   });
   browser.once("error", (error) => { browserLaunchError = error; });
+  const debugPort = await waitFor(() => {
+    if (browserLaunchError) throw browserLaunchError;
+    if (browser.exitCode !== null) throw new Error(`browser-exited-${browser.exitCode}`);
+    const activePortPath = join(profile, "DevToolsActivePort");
+    if (!existsSync(activePortPath)) return null;
+    const port = Number(readFileSync(activePortPath, "utf8").split(/\r?\n/, 1)[0]);
+    return Number.isInteger(port) && port > 0 && port <= 65535 ? port : null;
+  }, 30000);
   trace("opening-cdp");
   cdp = await connectPageCdp(debugPort, origin, browser, () => browserLaunchError);
   trace("browser-ready");
@@ -334,6 +373,26 @@ try {
   checks += 5;
   trace("model-readiness-verified");
 
+  const requestsBeforeWizardContinue = requests.length;
+  const wizardConnectedState = await cdp.evaluate(`(() => {
+    document.querySelector('#wizard-back').click();
+    const state = {
+      providerVisible: !document.querySelector('[data-wizard-step="provider"]').classList.contains('hidden'),
+      text: document.querySelector('#wizard-connect').textContent,
+      enabled: !document.querySelector('#wizard-connect').disabled
+    };
+    document.querySelector('#wizard-connection-form').requestSubmit();
+    return state;
+  })()`);
+  await waitFor(() => cdp.evaluate("!document.querySelector('[data-wizard-step=\"ready\"]').classList.contains('hidden')"));
+  if (
+    !wizardConnectedState.providerVisible
+    || wizardConnectedState.text !== "Continue"
+    || !wizardConnectedState.enabled
+    || requests.length !== requestsBeforeWizardContinue
+  ) throw new Error(`wizard-connected-state:${JSON.stringify(wizardConnectedState)}`);
+  checks += 4;
+
   await cdp.evaluate(`(() => {
     const first = document.querySelector('#wizard-back');
     const last = document.querySelector('#wizard-finish');
@@ -373,10 +432,39 @@ try {
   ) throw new Error(`compact-provider-controls:${JSON.stringify(compactControls)}`);
   checks += 7;
 
+  const connectedControls = await cdp.evaluate(`({
+    connectionText: document.querySelector('#connect-button').textContent,
+    connectionDisabled: document.querySelector('#connect-button').disabled,
+    cleanupText: document.querySelector('#apply-cleanup-policy').textContent,
+    cleanupDisabled: document.querySelector('#apply-cleanup-policy').disabled
+  })`);
+  if (
+    connectedControls.connectionText !== "Connected"
+    || !connectedControls.connectionDisabled
+    || connectedControls.cleanupText !== "Applied"
+    || !connectedControls.cleanupDisabled
+  ) throw new Error(`connected-controls:${JSON.stringify(connectedControls)}`);
+  checks += 4;
+
   models = ["unknown-model:latest"];
-  await cdp.evaluate(`document.querySelector('#connection-form').requestSubmit()`);
+  const dirtyConnection = await cdp.evaluate(`(() => {
+    const timeout = document.querySelector('#timeout');
+    timeout.value = '60';
+    timeout.dispatchEvent(new Event('change', {bubbles: true}));
+    const state = {
+      text: document.querySelector('#connect-button').textContent,
+      enabled: !document.querySelector('#connect-button').disabled
+    };
+    document.querySelector('#connection-form').requestSubmit();
+    return state;
+  })()`);
+  if (dirtyConnection.text !== "Apply changes" || !dirtyConnection.enabled) {
+    throw new Error(`dirty-connection:${JSON.stringify(dirtyConnection)}`);
+  }
+  checks += 2;
   await waitFor(() => cdp.evaluate(`(
-    !document.querySelector('#connect-button').disabled
+    document.querySelector('#connect-button').disabled
+    && document.querySelector('#connect-button').textContent === 'Connected'
     && document.querySelector('#text-status').textContent.includes('1 installed model found')
     && document.querySelector('#model option[value="manual:unknown-model:latest"]') !== null
   )`));
@@ -394,11 +482,22 @@ try {
   trace("advanced-model-verified");
 
   models = ["qwen3.5:9b", "unknown-model:latest"];
-  await cdp.evaluate(`document.querySelector('#connection-form').requestSubmit()`);
+  await cdp.evaluate(`(() => {
+    const timeout = document.querySelector('#timeout');
+    timeout.value = '120';
+    timeout.dispatchEvent(new Event('change', {bubbles: true}));
+    document.querySelector('#connection-form').requestSubmit();
+  })()`);
   await waitFor(() => cdp.evaluate(`(
-    !document.querySelector('#connect-button').disabled
+    document.querySelector('#connect-button').disabled
+    && document.querySelector('#connect-button').textContent === 'Connected'
     && document.querySelector('#text-status').textContent.includes('2 installed models found')
   )`));
+  const requestsBeforeUnchangedSubmit = requests.length;
+  await cdp.evaluate("document.querySelector('#connection-form').requestSubmit()");
+  await delay(150);
+  if (requests.length !== requestsBeforeUnchangedSubmit) throw new Error("unchanged-provider-reconnected");
+  checks += 1;
 
   const modelsView = await cdp.evaluate(`(() => {
     document.querySelector('#models-nav').click();
@@ -532,18 +631,32 @@ try {
   await cdp.evaluate("window.fetch = window.__havenOriginalFetch");
   trace("candidate-model-discovery-verified");
 
-  await cdp.evaluate(`(() => {
+  const dirtyCleanup = await cdp.evaluate(`(() => {
     const policy = document.querySelector('#system-idle-unload');
     policy.value = '900';
+    policy.dispatchEvent(new Event('change', {bubbles: true}));
+    const state = {
+      text: document.querySelector('#apply-cleanup-policy').textContent,
+      enabled: !document.querySelector('#apply-cleanup-policy').disabled
+    };
     document.querySelector('#cleanup-policy-form').requestSubmit();
+    return state;
   })()`);
-  await waitFor(() => cdp.evaluate("!document.querySelector('#apply-cleanup-policy').disabled"));
+  if (dirtyCleanup.text !== "Apply changes" || !dirtyCleanup.enabled) {
+    throw new Error(`dirty-cleanup:${JSON.stringify(dirtyCleanup)}`);
+  }
+  checks += 2;
+  await waitFor(() => cdp.evaluate(`(
+    document.querySelector('#apply-cleanup-policy').disabled
+    && document.querySelector('#apply-cleanup-policy').textContent === 'Applied'
+  )`));
   const cleanupPolicy = await cdp.evaluate(`({
     status: document.querySelector('#cleanup-status').textContent,
     systemValue: document.querySelector('#system-idle-unload').value,
     advancedValue: document.querySelector('#idle-unload').value,
     wizardValue: document.querySelector('#wizard-idle-unload').value,
     buttonText: document.querySelector('#apply-cleanup-policy').textContent,
+    buttonDisabled: document.querySelector('#apply-cleanup-policy').disabled,
     errorHidden: document.querySelector('#connection-error').classList.contains('hidden')
   })`);
   if (
@@ -551,10 +664,16 @@ try {
     || cleanupPolicy.systemValue !== "900"
     || cleanupPolicy.advancedValue !== "900"
     || cleanupPolicy.wizardValue !== "900"
-    || cleanupPolicy.buttonText !== "Apply"
+    || cleanupPolicy.buttonText !== "Applied"
+    || !cleanupPolicy.buttonDisabled
     || !cleanupPolicy.errorHidden
   ) throw new Error(`cleanup-policy:${JSON.stringify(cleanupPolicy)}`);
-  checks += 6;
+  checks += 7;
+  const requestsBeforeUnchangedCleanup = requests.length;
+  await cdp.evaluate("document.querySelector('#cleanup-policy-form').requestSubmit()");
+  await delay(150);
+  if (requests.length !== requestsBeforeUnchangedCleanup) throw new Error("unchanged-cleanup-reconnected");
+  checks += 1;
   trace("cleanup-policy-verified");
 
   const keyboardSubmit = await cdp.evaluate(`(() => {
@@ -611,6 +730,142 @@ try {
   }
   checks += 7;
   trace("typed-result-verified");
+
+  await cdp.evaluate(`(() => {
+    document.querySelector('#prompt').value = 'markdown showcase';
+    document.querySelector('#text-form').requestSubmit();
+  })()`);
+  await waitFor(() => cdp.evaluate(
+    "document.querySelector('.message:last-child .message-content h5')?.textContent.includes('Clear answer')",
+  ));
+  const markdown = await cdp.evaluate(`(() => {
+    const content = document.querySelector('.message:last-child .message-content');
+    return {
+      heading: content.querySelector('h5')?.textContent || '',
+      listItems: content.querySelectorAll('ul > li').length,
+      strong: content.querySelector('strong')?.textContent || '',
+      emphasis: content.querySelector('em')?.textContent || '',
+      inlineCode: content.querySelector(':not(pre) > code')?.textContent || '',
+      blockCode: content.querySelector('pre > code')?.textContent || '',
+      language: content.querySelector('pre > code')?.dataset.language || '',
+      quote: content.querySelector('blockquote')?.textContent || '',
+      scripts: content.querySelectorAll('script, img').length,
+      rawHtmlVisible: content.textContent.includes('<script>window.hostile = true</script>')
+    };
+  })()`);
+  if (
+    !markdown.heading.includes("😀")
+    || markdown.listItems !== 2
+    || markdown.strong !== "Strong point"
+    || markdown.emphasis !== "emphasis"
+    || markdown.inlineCode !== "inline code"
+    || !markdown.blockCode.includes("<img src=x onerror=alert(1)>")
+    || markdown.language !== "js"
+    || markdown.quote !== "A useful note"
+    || markdown.scripts !== 0
+    || !markdown.rawHtmlVisible
+  ) throw new Error(`safe-markdown-rendering:${JSON.stringify(markdown)}`);
+  checks += 10;
+  await cdp.call("Emulation.setDeviceMetricsOverride", {
+    width: 540,
+    height: 900,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  const responsiveMarkdown = await cdp.evaluate(`(() => {
+    const content = document.querySelector('.message:last-child .message-content');
+    const pre = content.querySelector('pre');
+    return {
+      contentWithinViewport: content.getBoundingClientRect().right <= window.innerWidth,
+      codeWithinContent: pre.getBoundingClientRect().width <= content.getBoundingClientRect().width,
+      codeOverflow: getComputedStyle(pre).overflowX
+    };
+  })()`);
+  if (
+    !responsiveMarkdown.contentWithinViewport
+    || !responsiveMarkdown.codeWithinContent
+    || responsiveMarkdown.codeOverflow !== "auto"
+  ) throw new Error(`responsive-markdown:${JSON.stringify(responsiveMarkdown)}`);
+  checks += 3;
+  await cdp.call("Emulation.clearDeviceMetricsOverride");
+  trace("safe-markdown-verified");
+
+  const promptRecall = await cdp.evaluate(`(() => {
+    const prompt = document.querySelector('#prompt');
+    const key = (value) => prompt.dispatchEvent(
+      new KeyboardEvent('keydown', {key: value, bubbles: true, cancelable: true})
+    );
+    prompt.value = 'unfinished draft';
+    prompt.dispatchEvent(new Event('input', {bubbles: true}));
+    prompt.setSelectionRange(0, 0);
+    const firstUpPrevented = !key('ArrowUp');
+    const first = prompt.value;
+    const secondUpPrevented = !key('ArrowUp');
+    const second = prompt.value;
+    const firstDownPrevented = !key('ArrowDown');
+    const newer = prompt.value;
+    const secondDownPrevented = !key('ArrowDown');
+    const draft = prompt.value;
+    prompt.value = 'first line\\nsecond line';
+    prompt.dispatchEvent(new Event('input', {bubbles: true}));
+    prompt.setSelectionRange(prompt.value.length, prompt.value.length);
+    const multilineUpNotPrevented = key('ArrowUp');
+    const multiline = prompt.value;
+    return {
+      firstUpPrevented, first, secondUpPrevented, second,
+      firstDownPrevented, newer, secondDownPrevented, draft,
+      multilineUpNotPrevented, multiline
+    };
+  })()`);
+  if (
+    !promptRecall.firstUpPrevented
+    || promptRecall.first !== "markdown showcase"
+    || !promptRecall.secondUpPrevented
+    || promptRecall.second !== "browser flow"
+    || !promptRecall.firstDownPrevented
+    || promptRecall.newer !== "markdown showcase"
+    || !promptRecall.secondDownPrevented
+    || promptRecall.draft !== "unfinished draft"
+    || !promptRecall.multilineUpNotPrevented
+    || promptRecall.multiline !== "first line\nsecond line"
+  ) throw new Error(`prompt-recall:${JSON.stringify(promptRecall)}`);
+  checks += 10;
+
+  const configurableHistory = await cdp.evaluate(`(() => {
+    const select = document.querySelector('#prompt-history-limit');
+    const defaultValue = select.value;
+    select.value = '50';
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    for (let index = 0; index < 55; index += 1) recordPromptHistory('bulk-' + index);
+    const retained = state.promptHistory.length;
+    const oldest = state.promptHistory[0];
+    const newest = state.promptHistory.at(-1);
+    const model = document.querySelector('#model');
+    model.value = 'automatic';
+    model.dispatchEvent(new Event('change', {bubbles: true}));
+    return {
+      defaultValue,
+      configured: select.value,
+      retained,
+      oldest,
+      newest,
+      cleared: state.promptHistory.length,
+      limitRetained: state.promptHistoryLimit,
+      status: document.querySelector('#prompt-history-status').textContent
+    };
+  })()`);
+  if (
+    configurableHistory.defaultValue !== "20"
+    || configurableHistory.configured !== "50"
+    || configurableHistory.retained !== 50
+    || configurableHistory.oldest !== "bulk-5"
+    || configurableHistory.newest !== "bulk-54"
+    || configurableHistory.cleared !== 0
+    || configurableHistory.limitRetained !== 50
+    || !configurableHistory.status.includes("0 of 50 prompts retained")
+  ) throw new Error(`configurable-prompt-history:${JSON.stringify(configurableHistory)}`);
+  checks += 8;
+  trace("prompt-history-verified");
 
   await cdp.evaluate("document.querySelector('#software-nav').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#workflow-select').disabled"));

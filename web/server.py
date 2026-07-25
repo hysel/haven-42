@@ -14,17 +14,18 @@ import csv
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 import platform
 import re
 import secrets
 import struct
+import subprocess
 import sys
 import threading
 import time
 import urllib.request
 import urllib.parse
 import uuid
-import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -66,6 +67,24 @@ MAX_WEB_IMAGE_BYTES = 16 * 1024 * 1024
 MAX_IMAGE_PROMPT_BYTES = 8 * 1024
 MAX_CONVERSATION_MESSAGES = 20
 ALLOWED_IDLE_UNLOAD_SECONDS = {0, 300, 900, 1800}
+SAFE_BROWSER_ENVIRONMENT_KEYS = {
+    "DBUS_SESSION_BUS_ADDRESS",
+    "DESKTOP_SESSION",
+    "DISPLAY",
+    "HOME",
+    "LANG",
+    "LC_ALL",
+    "LC_CTYPE",
+    "TMPDIR",
+    "WAYLAND_DISPLAY",
+    "XAUTHORITY",
+    "XDG_CURRENT_DESKTOP",
+    "XDG_RUNTIME_DIR",
+}
+LINUX_BROWSER_LAUNCHERS = (
+    ("/usr/bin/gio", ("open",)),
+    ("/usr/bin/xdg-open", ()),
+)
 CAPABILITY_PROMPTS = {
     "general.chat": (
         "Answer the user's general question clearly. Do not claim repository access "
@@ -1492,6 +1511,100 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def _validated_browser_url(url: str) -> bool:
+    try:
+        parsed = urllib.parse.urlsplit(url)
+        port = parsed.port
+    except ValueError:
+        return False
+    return (
+        parsed.scheme == "http"
+        and parsed.hostname == "127.0.0.1"
+        and port is not None
+        and 1 <= port <= 65535
+        and parsed.username is None
+        and parsed.password is None
+        and parsed.path in {"", "/"}
+        and not parsed.query
+        and not parsed.fragment
+    )
+
+
+def _browser_environment(source: dict[str, str] | None = None) -> dict[str, str]:
+    environment = os.environ if source is None else source
+    result = {
+        key: environment[key]
+        for key in SAFE_BROWSER_ENVIRONMENT_KEYS
+        if key in environment
+    }
+    result["PATH"] = "/usr/bin:/bin"
+    return result
+
+
+def open_default_browser(
+    url: str,
+    *,
+    platform_name: str | None = None,
+    executable_exists: Callable[[str], bool] = os.path.isfile,
+    process_launcher: Callable[..., Any] = subprocess.Popen,
+    windows_launcher: Callable[[str], Any] | None = None,
+    environment: dict[str, str] | None = None,
+) -> bool:
+    """Open one engine-generated loopback URL without a shell or BROWSER override."""
+    if not _validated_browser_url(url):
+        return False
+    current_platform = sys.platform if platform_name is None else platform_name
+    try:
+        if current_platform == "win32":
+            launcher = windows_launcher or getattr(os, "startfile", None)
+            if launcher is None:
+                return False
+            launcher(url)
+            return True
+        if current_platform == "darwin":
+            command = "/usr/bin/open"
+            if not executable_exists(command):
+                return False
+            process_launcher(
+                [command, url],
+                shell=False,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                close_fds=True,
+                start_new_session=True,
+                env=_browser_environment(environment),
+            )
+            return True
+        if current_platform.startswith("linux"):
+            for command, fixed_arguments in LINUX_BROWSER_LAUNCHERS:
+                if not executable_exists(command):
+                    continue
+                process_launcher(
+                    [command, *fixed_arguments, url],
+                    shell=False,
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    close_fds=True,
+                    start_new_session=True,
+                    env=_browser_environment(environment),
+                )
+                return True
+    except OSError:
+        return False
+    return False
+
+
+def open_browser_or_report(url: str) -> None:
+    if not open_default_browser(url):
+        print(
+            f"Haven 42 could not open the default browser. Open {url} manually.",
+            file=sys.stderr,
+            flush=True,
+        )
+
+
 def main() -> int:
     args = build_parser().parse_args()
     if args.host != "127.0.0.1":
@@ -1513,7 +1626,7 @@ def main() -> int:
         flush=True,
     )
     if not args.no_open:
-        threading.Timer(0.4, lambda: webbrowser.open_new_tab(url)).start()
+        threading.Timer(0.4, open_browser_or_report, args=(url,)).start()
     try:
         server.serve_forever(poll_interval=0.2)
     except KeyboardInterrupt:

@@ -41,12 +41,17 @@ const state = {
   connected: false,
   capabilityId: "general.chat",
   messages: [],
+  promptHistory: [],
+  promptHistoryLimit: 20,
+  promptHistoryIndex: 0,
+  promptHistoryDraft: "",
   modelSelections: {},
   recommendations: {},
   modelOptions: [],
   modelSearchResults: [],
   desiredModel: null,
   idleUnloadSeconds: 300,
+  providerConfig: null,
   capabilities: [],
   readinessSnapshot: null,
   setupPlan: null,
@@ -259,6 +264,52 @@ function cleanupPolicyLabel(seconds) {
   return seconds === 0
     ? "Unload after every response"
     : `Unload after ${seconds / 60} minutes idle`;
+}
+
+function providerFormConfig(prefix = "") {
+  return {
+    endpoint: byId(`${prefix}endpoint`).value.trim(),
+    timeoutSeconds: Number(byId(`${prefix}timeout`).value),
+    idleUnloadSeconds: Number(byId(`${prefix}idle-unload`).value),
+  };
+}
+
+function providerConfigChanged(config) {
+  return !state.providerConfig
+    || config.endpoint !== state.providerConfig.endpoint
+    || config.timeoutSeconds !== state.providerConfig.timeoutSeconds
+    || config.idleUnloadSeconds !== state.providerConfig.idleUnloadSeconds;
+}
+
+function updateProviderConnectionControl() {
+  const button = byId("connect-button");
+  if (!state.connected) {
+    button.disabled = false;
+    button.textContent = "Connect";
+    return;
+  }
+  const changed = providerConfigChanged(providerFormConfig());
+  button.disabled = !changed;
+  button.textContent = changed ? "Apply changes" : "Connected";
+}
+
+function updateWizardConnectionControl() {
+  const button = byId("wizard-connect");
+  if (!state.connected) {
+    button.disabled = false;
+    button.textContent = "Check connection";
+    return;
+  }
+  const changed = providerConfigChanged(providerFormConfig("wizard-"));
+  button.disabled = false;
+  button.textContent = changed ? "Apply changes" : "Continue";
+}
+
+function updateCleanupPolicyControl() {
+  const button = byId("apply-cleanup-policy");
+  const changed = Number(byId("system-idle-unload").value) !== state.idleUnloadSeconds;
+  button.disabled = !changed;
+  button.textContent = changed ? "Apply changes" : (state.connected ? "Applied" : "Selected");
 }
 
 function validateModelSearch(result) {
@@ -740,6 +791,138 @@ function renderTypedResult(result, capability) {
   addMessage("assistant", result.artifact.content.text, capability.resultLabel);
 }
 
+function appendInlineMarkdown(container, source) {
+  let buffer = "";
+  const flush = () => {
+    if (!buffer) return;
+    container.append(document.createTextNode(buffer));
+    buffer = "";
+  };
+  const markers = [
+    { marker: "**", tag: "strong" },
+    { marker: "__", tag: "strong" },
+    { marker: "`", tag: "code" },
+    { marker: "*", tag: "em" },
+  ];
+  for (let index = 0; index < source.length;) {
+    if (source[index] === "\\" && index + 1 < source.length) {
+      buffer += source[index + 1];
+      index += 2;
+      continue;
+    }
+    const match = markers.find(({ marker }) => source.startsWith(marker, index));
+    if (!match) {
+      buffer += source[index];
+      index += 1;
+      continue;
+    }
+    const end = source.indexOf(match.marker, index + match.marker.length);
+    if (end <= index + match.marker.length) {
+      buffer += match.marker;
+      index += match.marker.length;
+      continue;
+    }
+    flush();
+    const element = document.createElement(match.tag);
+    element.textContent = source.slice(index + match.marker.length, end);
+    container.append(element);
+    index = end + match.marker.length;
+  }
+  flush();
+}
+
+function markdownBlockKind(line) {
+  if (/^```[A-Za-z0-9_+-]{0,32}\s*$/.test(line)) return "fence";
+  if (/^#{1,4}\s+/.test(line)) return "heading";
+  if (/^\s{0,3}[-*+]\s+/.test(line)) return "unordered";
+  if (/^\s{0,3}\d{1,3}[.)]\s+/.test(line)) return "ordered";
+  if (/^\s{0,3}>\s?/.test(line)) return "quote";
+  if (/^\s{0,3}([-*_])(?:\s*\1){2,}\s*$/.test(line)) return "rule";
+  return "";
+}
+
+function appendMarkdown(container, source) {
+  const lines = source.replace(/\r\n?/g, "\n").split("\n");
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index];
+    if (!line.trim()) {
+      index += 1;
+      continue;
+    }
+    const kind = markdownBlockKind(line);
+    if (kind === "fence") {
+      const language = line.slice(3).trim();
+      const codeLines = [];
+      index += 1;
+      while (index < lines.length && lines[index].trim() !== "```") {
+        codeLines.push(lines[index]);
+        index += 1;
+      }
+      if (index < lines.length) index += 1;
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
+      if (language) code.dataset.language = language;
+      code.textContent = codeLines.join("\n");
+      pre.append(code);
+      container.append(pre);
+      continue;
+    }
+    if (kind === "heading") {
+      const match = line.match(/^(#{1,4})\s+(.+)$/);
+      const heading = document.createElement(`h${Math.min(5, match[1].length + 2)}`);
+      appendInlineMarkdown(heading, match[2]);
+      container.append(heading);
+      index += 1;
+      continue;
+    }
+    if (kind === "unordered" || kind === "ordered") {
+      const list = document.createElement(kind === "unordered" ? "ul" : "ol");
+      const pattern = kind === "unordered"
+        ? /^\s{0,3}[-*+]\s+(.+)$/
+        : /^\s{0,3}\d{1,3}[.)]\s+(.+)$/;
+      while (index < lines.length) {
+        const match = lines[index].match(pattern);
+        if (!match) break;
+        const item = document.createElement("li");
+        appendInlineMarkdown(item, match[1]);
+        list.append(item);
+        index += 1;
+      }
+      container.append(list);
+      continue;
+    }
+    if (kind === "quote") {
+      const quoteLines = [];
+      while (index < lines.length && markdownBlockKind(lines[index]) === "quote") {
+        quoteLines.push(lines[index].replace(/^\s{0,3}>\s?/, ""));
+        index += 1;
+      }
+      const quote = document.createElement("blockquote");
+      appendInlineMarkdown(quote, quoteLines.join(" "));
+      container.append(quote);
+      continue;
+    }
+    if (kind === "rule") {
+      container.append(document.createElement("hr"));
+      index += 1;
+      continue;
+    }
+    const paragraphLines = [line.trim()];
+    index += 1;
+    while (
+      index < lines.length
+      && lines[index].trim()
+      && !markdownBlockKind(lines[index])
+    ) {
+      paragraphLines.push(lines[index].trim());
+      index += 1;
+    }
+    const paragraph = document.createElement("p");
+    appendInlineMarkdown(paragraph, paragraphLines.join(" "));
+    container.append(paragraph);
+  }
+}
+
 function addMessage(role, content, label) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
@@ -749,8 +932,15 @@ function addMessage(role, content, label) {
   const body = document.createElement("div");
   const heading = document.createElement("strong");
   heading.textContent = label || (role === "assistant" ? "Haven 42" : "You");
-  const text = document.createElement("p");
-  text.textContent = content;
+  const text = document.createElement("div");
+  text.className = "message-content";
+  if (role === "assistant") {
+    appendMarkdown(text, content);
+  } else {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = content;
+    text.append(paragraph);
+  }
   body.append(heading, text);
   article.append(avatar, body);
   byId("messages").append(article);
@@ -758,8 +948,61 @@ function addMessage(role, content, label) {
   return article;
 }
 
+function updatePromptHistoryStatus() {
+  const count = state.promptHistory.length;
+  byId("prompt-history-status").textContent = `${count} of ${state.promptHistoryLimit} prompt${count === 1 ? "" : "s"} retained · memory only · cleared with New task`;
+}
+
+function clearPromptHistory() {
+  state.promptHistory = [];
+  state.promptHistoryIndex = 0;
+  state.promptHistoryDraft = "";
+  updatePromptHistoryStatus();
+}
+
+function recordPromptHistory(content) {
+  if (state.promptHistory.at(-1) !== content) {
+    state.promptHistory.push(content);
+    if (state.promptHistory.length > state.promptHistoryLimit) {
+      state.promptHistory = state.promptHistory.slice(-state.promptHistoryLimit);
+    }
+  }
+  state.promptHistoryIndex = state.promptHistory.length;
+  state.promptHistoryDraft = "";
+  updatePromptHistoryStatus();
+}
+
+function recallPrompt(direction) {
+  const prompt = byId("prompt");
+  if (
+    state.promptHistory.length === 0
+    || prompt.selectionStart !== prompt.selectionEnd
+  ) return false;
+  const onFirstLine = !prompt.value.slice(0, prompt.selectionStart).includes("\n");
+  const onLastLine = !prompt.value.slice(prompt.selectionEnd).includes("\n");
+  if ((direction < 0 && !onFirstLine) || (direction > 0 && !onLastLine)) return false;
+  if (direction < 0) {
+    if (state.promptHistoryIndex === state.promptHistory.length) {
+      state.promptHistoryDraft = prompt.value;
+    }
+    state.promptHistoryIndex = Math.max(0, state.promptHistoryIndex - 1);
+    prompt.value = state.promptHistory[state.promptHistoryIndex];
+    prompt.setSelectionRange(0, 0);
+    return true;
+  }
+  if (state.promptHistoryIndex >= state.promptHistory.length) return false;
+  state.promptHistoryIndex += 1;
+  prompt.value = state.promptHistoryIndex === state.promptHistory.length
+    ? state.promptHistoryDraft
+    : state.promptHistory[state.promptHistoryIndex];
+  const end = prompt.value.length;
+  prompt.setSelectionRange(end, end);
+  return true;
+}
+
 function resetTask() {
   state.messages = [];
+  clearPromptHistory();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");
   messages.replaceChildren();
@@ -835,6 +1078,10 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   byId("wizard-idle-unload").value = String(idleUnloadSeconds);
   byId("system-idle-unload").value = String(idleUnloadSeconds);
   state.idleUnloadSeconds = idleUnloadSeconds;
+  state.providerConfig = { endpoint, timeoutSeconds, idleUnloadSeconds };
+  updateProviderConnectionControl();
+  updateWizardConnectionControl();
+  updateCleanupPolicyControl();
   resetTask();
   byId("text-status").textContent = `${result.models.length} installed model${result.models.length === 1 ? "" : "s"} found`;
   byId("cleanup-status").textContent = cleanupPolicyLabel(result.idleUnloadSeconds);
@@ -877,31 +1124,42 @@ byId("connection-form").addEventListener("submit", async (event) => {
   clearError();
   const button = byId("connect-button");
   const wasConnected = state.connected;
+  const requestedConfig = providerFormConfig();
+  if (wasConnected && !providerConfigChanged(requestedConfig)) {
+    updateProviderConnectionControl();
+    return;
+  }
   button.disabled = true;
   setProviderReady(false);
   button.textContent = "Checking…";
   try {
     await connectProvider(
-      byId("endpoint").value.trim(),
-      Number(byId("timeout").value),
-      Number(byId("idle-unload").value),
+      requestedConfig.endpoint,
+      requestedConfig.timeoutSeconds,
+      requestedConfig.idleUnloadSeconds,
     );
   } catch (error) {
-    if (error.message === "ollama-connection-failed") {
+    state.connected = wasConnected;
+    setProviderReady(wasConnected);
+    if (!wasConnected && error.message === "ollama-connection-failed") {
       state.connected = false;
       byId("connection-badge").textContent = "Not connected";
       byId("connection-badge").classList.remove("good");
       byId("prompt").placeholder = "Reconnect Ollama to begin…";
       byId("text-status").textContent = "Provider not connected";
-    } else {
-      state.connected = wasConnected;
-      setProviderReady(wasConnected);
     }
     showError(humanError(error));
   } finally {
-    button.disabled = false;
-    button.textContent = state.connected ? "Reconnect" : "Connect";
+    updateProviderConnectionControl();
   }
+});
+
+["endpoint", "timeout", "idle-unload"].forEach((id) => {
+  byId(id).addEventListener(id === "endpoint" ? "input" : "change", updateProviderConnectionControl);
+});
+
+["wizard-endpoint", "wizard-timeout", "wizard-idle-unload"].forEach((id) => {
+  byId(id).addEventListener(id === "wizard-endpoint" ? "input" : "change", updateWizardConnectionControl);
 });
 
 byId("model-search-query").addEventListener("input", () => {
@@ -949,11 +1207,18 @@ byId("cleanup-policy-form").addEventListener("submit", async (event) => {
   const button = byId("apply-cleanup-policy");
   const selectedSeconds = Number(byId("system-idle-unload").value);
   const previousSeconds = state.idleUnloadSeconds;
+  if (selectedSeconds === state.idleUnloadSeconds) {
+    updateCleanupPolicyControl();
+    return;
+  }
   byId("idle-unload").value = String(selectedSeconds);
   byId("wizard-idle-unload").value = String(selectedSeconds);
   if (!state.connected) {
     state.idleUnloadSeconds = selectedSeconds;
     byId("cleanup-status").textContent = `${cleanupPolicyLabel(selectedSeconds)} on next connection`;
+    updateProviderConnectionControl();
+    updateWizardConnectionControl();
+    updateCleanupPolicyControl();
     return;
   }
   button.disabled = true;
@@ -973,9 +1238,23 @@ byId("cleanup-policy-form").addEventListener("submit", async (event) => {
     setProviderReady(true);
     showError(humanError(error));
   } finally {
-    button.disabled = false;
-    button.textContent = "Apply";
+    updateCleanupPolicyControl();
   }
+});
+
+byId("system-idle-unload").addEventListener("change", updateCleanupPolicyControl);
+
+byId("prompt-history-limit").addEventListener("change", () => {
+  const selectedLimit = Number(byId("prompt-history-limit").value);
+  if (![20, 50, 100].includes(selectedLimit)) {
+    byId("prompt-history-limit").value = String(state.promptHistoryLimit);
+    return;
+  }
+  state.promptHistoryLimit = selectedLimit;
+  state.promptHistory = state.promptHistory.slice(-selectedLimit);
+  state.promptHistoryIndex = state.promptHistory.length;
+  state.promptHistoryDraft = "";
+  updatePromptHistoryStatus();
 });
 
 byId("copy-model-command").addEventListener("click", async () => {
@@ -1006,6 +1285,7 @@ byId("text-form").addEventListener("submit", async (event) => {
     : [{ role: "user", content }];
   const previousMessages = [...state.messages];
   let focusPrompt = true;
+  recordPromptHistory(content);
   if (capabilityId === "general.chat") state.messages = requestMessages;
   const userMessage = addMessage("user", content, capabilityId === "content.summarize" ? "Source" : "You");
   byId("text-status").textContent = capability.busy;
@@ -1056,6 +1336,18 @@ byId("text-form").addEventListener("submit", async (event) => {
 
 byId("prompt").addEventListener("keydown", (event) => {
   if (
+    (event.key === "ArrowUp" || event.key === "ArrowDown")
+    && !event.altKey
+    && !event.ctrlKey
+    && !event.metaKey
+    && !event.shiftKey
+    && !event.isComposing
+    && recallPrompt(event.key === "ArrowUp" ? -1 : 1)
+  ) {
+    event.preventDefault();
+    return;
+  }
+  if (
     event.key !== "Enter"
     || event.shiftKey
     || event.isComposing
@@ -1063,6 +1355,11 @@ byId("prompt").addEventListener("keydown", (event) => {
   ) return;
   event.preventDefault();
   byId("text-form").requestSubmit();
+});
+
+byId("prompt").addEventListener("input", () => {
+  state.promptHistoryIndex = state.promptHistory.length;
+  state.promptHistoryDraft = "";
 });
 
 document.querySelectorAll("[data-capability]").forEach((button) => {
@@ -1076,10 +1373,12 @@ byId("model").addEventListener("change", () => {
   state.modelSelections[state.capabilityId] = value === "automatic"
     ? { mode: "automatic", model: null }
     : { mode: "manual", model: value.slice("manual:".length) };
+  clearPromptHistory();
   renderModelSelect();
 });
 byId("reset-model-button").addEventListener("click", () => {
   state.modelSelections[state.capabilityId] = { mode: "automatic", model: null };
+  clearPromptHistory();
   renderModelSelect();
 });
 byId("new-task-button").addEventListener("click", async () => {
@@ -1287,27 +1586,37 @@ byId("wizard-connection-form").addEventListener("submit", async (event) => {
   const errorBox = byId("wizard-error");
   errorBox.classList.add("hidden");
   const button = byId("wizard-connect");
+  const wasConnected = state.connected;
+  const requestedConfig = providerFormConfig("wizard-");
+  if (wasConnected && !providerConfigChanged(requestedConfig)) {
+    updateWizardConnectionControl();
+    renderWizardReadiness();
+    showWizardStep("ready");
+    return;
+  }
   button.disabled = true;
   button.textContent = "Checking…";
   try {
     await connectProvider(
-      byId("wizard-endpoint").value.trim(),
-      Number(byId("wizard-timeout").value),
-      Number(byId("wizard-idle-unload").value),
+      requestedConfig.endpoint,
+      requestedConfig.timeoutSeconds,
+      requestedConfig.idleUnloadSeconds,
     );
     renderWizardReadiness();
     showWizardStep("ready");
   } catch (error) {
-    state.connected = false;
-    setProviderReady(false);
+    state.connected = wasConnected;
+    setProviderReady(wasConnected);
     errorBox.textContent = humanError(error);
     errorBox.classList.remove("hidden");
   } finally {
-    button.disabled = false;
-    button.textContent = "Check connection";
+    updateWizardConnectionControl();
   }
 });
-byId("wizard-back").addEventListener("click", () => showWizardStep("provider"));
+byId("wizard-back").addEventListener("click", () => {
+  updateWizardConnectionControl();
+  showWizardStep("provider");
+});
 byId("wizard-finish").addEventListener("click", () => {
   byId("setup-wizard").classList.add("hidden");
   byId("prompt").focus();

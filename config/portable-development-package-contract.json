@@ -27,6 +27,14 @@
     "checksumCoverageMustBeExact": true,
     "unexpectedRequestPathsRejected": true,
     "browserUrlIsEngineConstructedLoopbackOnly": true,
+    "browserEnvironmentOverrideAllowed": false,
+    "browserLaunchShellAllowed": false,
+    "browserLaunchExecutables": {
+      "windows": ["registered-url-association"],
+      "linux": ["/usr/bin/gio", "/usr/bin/xdg-open"],
+      "macos": ["/usr/bin/open"]
+    },
+    "browserLaunchFailureMode": "print-loopback-url-and-continue",
     "arbitraryProcessLaunchAllowed": false,
     "shutdownRequiresOriginAndSessionToken": true,
     "modelCleanupRequiredBeforeShutdown": true

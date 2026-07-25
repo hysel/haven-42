@@ -2349,7 +2349,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "197 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "225 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "Resolve-Python3Command" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "sys.version_info.major" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
@@ -2360,12 +2360,21 @@ test_local_web_mvp() {
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 policy = json.loads((root / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
+portable = json.loads((root / "config/portable-development-package-contract.json").read_text(encoding="utf-8"))
 assert policy["runtimeId"] == "haven42.local-web"
 assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promoted-image-admitted"
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["telemetryAllowed"] is False
 assert policy["browser"]["csrfTokenRequiredForEffects"] is True
+assert policy["browser"]["automaticLaunchUrlScope"] == "ipv4-loopback-http-origin-only"
+assert policy["browser"]["environmentOverrideAllowed"] is False
+assert policy["browser"]["shellLaunchAllowed"] is False
+assert portable["security"]["browserUrlIsEngineConstructedLoopbackOnly"] is True
+assert portable["security"]["browserEnvironmentOverrideAllowed"] is False
+assert portable["security"]["browserLaunchShellAllowed"] is False
+assert portable["security"]["browserLaunchExecutables"]["linux"] == ["/usr/bin/gio", "/usr/bin/xdg-open"]
+assert portable["security"]["browserLaunchFailureMode"] == "print-loopback-url-and-continue"
 assert policy["text"]["capabilityIds"] == ["general.chat", "content.write", "content.summarize"]
 assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
 assert policy["text"]["defaultIdleUnloadSeconds"] == 300

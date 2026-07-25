@@ -453,6 +453,9 @@
   cleanup policy in the System panel.
 - [x] Align Ollama endpoint, timeout, and cleanup controls across the first-run
   wizard and main workspace with compact tested sizing and typography.
+- [x] Prevent unchanged provider, wizard, and System cleanup submissions from reconnecting or resetting the task; expose disabled connected/applied states and enable Apply changes only after an actual edit.
+- [x] Render assistant chat and Markdown-document results with a dependency-free DOM allowlist for headings, lists, emphasis, code, quotes, rules, and Unicode emoji while keeping raw HTML inert.
+- [x] Add multiline-safe Up/Down prompt recall with draft restoration, consecutive-duplicate suppression, a 20-entry default, 50/100-entry System choices, and task-bound memory-only cleanup.
 - [x] Expand the local web UI over the stable registries with exact-digest text
   selection, plan-only registered read-only software workflows, and the
   promoted Linux ComfyUI/SDXL image capability without duplicating provider
@@ -544,6 +547,29 @@
 - [ ] Validate Windows NVIDIA, Windows Intel, and Apple Silicon paths independently, keeping physical Mac testing last; Windows Intel remains parked until representative Intel GPU hardware is available.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
+
+## Milestone 27: Local Knowledge Context And Retrieval
+
+- [x] Define the staged roadmap boundary: explicit user selection, no automatic machine scanning, no arbitrary path API, memory-only initial operation, and private-network provider disclosure.
+- [ ] Define versioned document-ingestion, context-budget, provider-disclosure, and memory-lifecycle contracts with default-deny effects.
+- [ ] Add hostile offline fixtures for names, encodings, size/count limits, duplicate content, prompt injection, truncation, exact provider payloads, and residue-free cleanup.
+- [ ] Implement explicit multi-file attachment for a minimal UTF-8 text allowlist; keep directories, archives, PDF, Office documents, OCR, embeddings, and persistence unadmitted.
+- [ ] Add deterministic memory-only lexical retrieval with extracted-text preview, token estimates, per-response chunk disclosure, removal, and clear-all controls.
+- [ ] Require a new explicit confirmation before selected content is sent to a private-network provider; continue blocking public provider destinations.
+- [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promoting the capability.
+- [ ] Evaluate folder selection, semantic embeddings, and persistent encrypted libraries only as separate later security and product gates.
+
+## Milestone 28: Controlled Web Research
+
+- [x] Define the staged roadmap boundary: explicit per-query approval, engine-owned fixed adapters, no unrestricted model/renderer network access, trusted citations, SSRF controls, and memory-only cleanup.
+- [ ] Define versioned search-query, result, citation, provider-disclosure, research-budget, and lifecycle contracts with follow-up effects denied by default.
+- [ ] Add hostile offline fixtures for destination confusion, DNS/IP classes, redirects, credentials, malformed/oversized content, prompt injection, citation forgery, cancellation, and cleanup.
+- [ ] Implement one explicit query-only adapter that sends only the reviewed bounded query and returns strict result metadata.
+- [ ] Add trusted citation rendering with destination disclosure and no model-supplied active links.
+- [ ] Add explicit selected-page retrieval only after DNS/IP revalidation, redirect controls, textual content allowlisting, byte/time limits, inert extraction, and no page execution pass.
+- [ ] Add cited model synthesis and exact source accounting without autonomous follow-up searches.
+- [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promotion.
+- [ ] Evaluate self-hosted search and bounded multi-query research only as later independent gates.
 
 ## Security architecture remediation
 

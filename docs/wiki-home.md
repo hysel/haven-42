@@ -18,10 +18,16 @@ candidate-only uninstalled choices that remain non-executable. Haven 42 never
 runs their displayed pull instruction. System visibly offers immediate,
 5-minute, 15-minute, and 30-minute text-model cleanup policies. Ollama endpoint,
 timeout, and cleanup controls use the same compact sizing and typography in the
-first-run wizard and main workspace.
+first-run wizard and main workspace. Unchanged connected settings are disabled
+and cannot issue another provider request or reset the task; an actual edit
+enables Apply changes and starts a new task only after successful validation.
 Models and About now open as dedicated primary views; only one primary panel is
 visible at a time. Text tasks support Enter to send and Shift+Enter for a new
-line.
+line. Assistant chat and Markdown-document results render safe headings, lists,
+emphasis, code, quotes, rules, and Unicode emoji without accepting model HTML,
+links, images, scripts, or event handlers. Up/Down recalls task-local prompts
+with multiline-safe boundaries and draft restoration; System offers a 20-entry
+default plus 50/100-entry memory-only choices.
 
 - New users: [[Quick Start|Quick-Start]]
 - Run the local browser assistant and first-run wizard: [[Local Web MVP|Local-Web-MVP]]
@@ -56,6 +62,8 @@ line.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.
 - Milestone 26 — exact Linux NVIDIA and Windows AMD Ollama comparisons passed; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD, Vulkan failed the patch gate, Intel is parked pending hardware, and broader cells remain open.
+- Milestone 27 — explicit local-document selection, bounded memory-only ingestion, private-network disclosure, retrieval, and cleanup are proposed and security-scoped; no automatic scanning, arbitrary path access, or persistent index ships.
+- Milestone 28 — controlled web research is proposed with reviewed per-query consent, engine-owned adapters, trusted citations, SSRF controls, hostile-content isolation, and memory-only cleanup; models have no unrestricted internet access.
 
 ## Support Model
 
