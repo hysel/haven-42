@@ -101,10 +101,7 @@
 
   <main class="shell">
     <aside class="rail" aria-label="Primary navigation">
-      <button class="nav-item active" id="home-nav" type="button"><span>⌂</span>Home</button>
-      <button class="nav-item capability-nav" data-capability="general.chat" type="button"><span>✦</span>Chat</button>
-      <button class="nav-item capability-nav" data-capability="content.write" type="button"><span>✎</span>Writing</button>
-      <button class="nav-item capability-nav" data-capability="content.summarize" type="button"><span>≡</span>Summarize</button>
+      <button class="nav-item active" id="home-nav" type="button"><span>✦</span>Chat</button>
       <button class="nav-item" id="software-nav" type="button"><span>⌘</span>Software <small>Plan only</small></button>
       <button class="nav-item" id="image-nav" type="button"><span>◫</span>Images <small>Setup needed</small></button>
       <button class="nav-item" id="models-nav" type="button"><span>◉</span>Models</button>
@@ -122,19 +119,19 @@
       <div class="hero">
         <p class="eyebrow">PRIVATE LOCAL AI</p>
         <h1>Your AI, ready when you are.</h1>
-        <p>Connect your local or self-hosted AI providers, then chat, write, summarize, plan software work, or create images from one private-first workspace.</p>
+        <p>Ask questions, draft content, and summarize material in one continuous private conversation. Haven 42 can suggest a better installed model before a request, but never switches it without asking.</p>
       </div>
 
       <div class="interaction-grid">
         <section class="panel chat-panel" id="text-panel">
           <div class="panel-heading chat-heading">
             <div>
-              <p class="eyebrow" id="capability-eyebrow">CHAT</p>
+              <p class="eyebrow" id="capability-eyebrow">CONVERSATION</p>
               <h2 id="capability-title" tabindex="-1">Private conversation</h2>
             </div>
             <div class="text-actions">
               <button class="button secondary" id="new-task-button" type="button">New task</button>
-              <label class="model-select"><span id="model-label">Chat model</span>
+              <label class="model-select"><span id="model-label">Conversation model</span>
                 <select id="model" disabled>
                   <option>Connect Ollama first</option>
                 </select>
@@ -142,12 +139,6 @@
               </label>
               <button class="button text-button hidden" id="reset-model-button" type="button">Use automatic</button>
             </div>
-          </div>
-
-          <div class="mode-tabs" role="tablist" aria-label="Text task">
-            <button class="mode-tab active" data-capability="general.chat" type="button" role="tab" aria-selected="true">Chat</button>
-            <button class="mode-tab" data-capability="content.write" type="button" role="tab" aria-selected="false">Write</button>
-            <button class="mode-tab" data-capability="content.summarize" type="button" role="tab" aria-selected="false">Summarize</button>
           </div>
 
           <div class="messages" id="messages" aria-live="polite">
@@ -165,6 +156,17 @@
             <dl class="status-list" id="run-details-list"></dl>
             <p>Diagnostic values only—not billing data or remaining context.</p>
           </details>
+
+          <section class="model-switch-prompt hidden" id="model-switch-prompt" role="dialog" aria-labelledby="model-switch-title" aria-describedby="model-switch-description">
+            <div>
+              <strong id="model-switch-title">A task-specific model is available</strong>
+              <p id="model-switch-description"></p>
+            </div>
+            <div class="model-switch-actions">
+              <button class="button secondary" id="keep-current-model" type="button">Keep current model</button>
+              <button class="button primary" id="use-recommended-model" type="button">Switch model</button>
+            </div>
+          </section>
 
           <section class="context-panel" aria-labelledby="context-title">
             <div class="context-heading">

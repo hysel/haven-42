@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Unified browser text work into one continuous conversation: explicit writing and summarization requests retain prior bounded messages, capability-specific safety prompts remain enforced, and any different configured model requires a visible keep-or-switch decision before submission.
+
 - Added explicit memory-only UTF-8 `.txt`/`.md` and browsed-or-pasted PNG context attachments for text tasks through one type-restricted file picker, with path-free selection, safe previews and removal, strict text/image count/size/dimension limits, PNG structural revalidation, warned submit-confirmed private-network transfer without a separate checkbox, untrusted inert-data isolation, no attachment-driven tool/process/filesystem/model-output execution path, visible unverified image-input status, and no temporary files or persistent index.
 - Fixed the attachment picker lifecycle so it becomes available after a successful provider connection, locks while a task is active, and no longer presents a prohibited cursor while connected.
 - Fixed the chat flex layout so bounded attachment previews scroll within their own compact region instead of pushing the message composer outside the visible panel.

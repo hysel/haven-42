@@ -11,7 +11,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 ## Start Here
 
 The Models panel labels and filters installed models offline. Changing the
-Chat, Writing, or Summarization target clears stale discovery state and ranks
+Chat, Writing, or Summarization evidence target clears stale discovery state and ranks
 installed options for that capability. **Search public catalog** is the explicit
 online action; it sends only the bounded phrase, downloads nothing, and returns
 candidate-only uninstalled choices that remain non-executable. Haven 42 never
@@ -22,8 +22,11 @@ first-run wizard and main workspace. Unchanged connected settings are disabled
 and cannot issue another provider request or reset the task; an actual edit
 enables Apply changes and starts a new task only after successful validation.
 Models and About now open as dedicated primary views; only one primary panel is
-visible at a time. Text tasks support Enter to send and Shift+Enter for a new
-line. Assistant chat and Markdown-document results render safe headings, lists,
+visible at a time. Chat, Writing, and Summarization now share one continuous
+conversation. A narrow browser-memory hint selects only an already admitted
+text prompt, and a different configured model requires an explicit keep-or-switch
+decision before anything is sent. Text tasks support Enter to send and
+Shift+Enter for a new line. Assistant chat and Markdown-document results render safe headings, lists,
 emphasis, code, quotes, rules, and Unicode emoji without accepting model HTML,
 links, images, scripts, or event handlers. Up/Down recalls task-local prompts
 with multiline-safe boundaries and draft restoration; System offers a 20-entry

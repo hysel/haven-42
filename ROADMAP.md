@@ -653,6 +653,11 @@ Scope:
 - Keep hardened loopback/browser operation as a separately tested option for headless Linux, SSH-tunneled use, development, and diagnostics.
 - Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
 - Keep chat as the primary interaction surface with compact sticky navigation and provider/system configuration. Done for the local web slice; responsive contract and visual regression coverage remain part of each UI change.
+- Present Chat, Writing, and Summarization through one continuous conversation
+  instead of destructive mode tabs. Done with narrow browser-memory intent
+  hints, capability-specific server prompts and evidence, preserved bounded
+  messages, and an explicit keep-or-switch decision before a different model
+  can be used.
 - Keep exactly one primary content panel visible, provide dedicated Models and About views, and support conventional Enter-to-send with Shift+Enter for multiline input. Done with headless-browser visibility, focus, heading-boundary, selection, and keyboard regressions.
 - Evaluate text models independently for chat, writing, and summarization. The engine now automatically selects only an installed model name and immutable digest with matching passed capability evidence. Qwen 3.5 9B is the exact adapter baseline. The initial exact-digest Qwen, Gemma, Mistral, and Granite automated constraint matrix passed 3/3, 3/3, 3/3, and 2/3 cases respectively with verified unloads; repeated sampling and blind human quality review remain promotion work.
 - Present deterministic first-run choices for chat, writing, summarization, image creation, software work, and local-AI setup. Done for Guided setup, Connect existing setup, and Explore in the admitted local-web slice; broader capability-specific onboarding remains open.

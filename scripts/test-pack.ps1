@@ -4950,7 +4950,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "276 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "279 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     $portablePolicy = Get-Content -LiteralPath $portablePolicyPath -Raw | ConvertFrom-Json
     $lexicalContract = Get-Content -LiteralPath $lexicalContractPath -Raw | ConvertFrom-Json
@@ -5040,7 +5040,7 @@ if ($IsWindows) {
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 213 checks") -Message "The headless browser flow should exercise all 213 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 237 checks") -Message "The headless browser flow should exercise all 237 checks."
     }
 }
 

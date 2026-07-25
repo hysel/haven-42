@@ -163,7 +163,9 @@ The conversation workspace is the primary desktop interaction. The left navigati
 
 Chat, Software, Images, Models, and About are mutually exclusive primary
 panels, preventing hidden content from overlapping or clipping the active view.
-Models opens a dedicated workspace with a Chat/Writing/Summarization selector,
+Chat is one continuous conversation rather than separate Chat, Writing, and
+Summarization tabs. Models opens a dedicated workspace with a
+Chat/Writing/Summarization evidence selector,
 installed models visible by default, and candidate search beside selection.
 Results label whether a model is already installed on the connected Ollama
 server. Changing the target capability clears the query, online candidates, and
@@ -177,17 +179,22 @@ This layout change does not broaden browser authority: configuration, messages, 
 
 For Ollama on the same computer, keep the default loopback endpoint. For an Ollama server on your trusted home or work network, enter its literal private IP endpoint, such as `http://<trusted-lan-ip>:11434`, and select **Connect**. Haven 42 classifies loopback versus private-LAN scope on the server; users do not need to select a connection scope.
 
-After discovery, Haven 42 remembers a separate in-memory automatic or advanced manual model choice for Chat, Writing, and Summarization. Changing a capability restores its last selection, and **Use automatic** returns an override to the engine recommendation. No selection is persisted after Haven 42 closes.
+After discovery, Haven 42 remembers separate in-memory automatic or advanced manual model guidance for Chat, Writing, and Summarization. The visible conversation model remains active across task intents. If an explicit write/draft/compose or summarize/condense request has a different configured installed model, a browser-memory-only prompt appears before submission. The user can switch or keep the current model; no request or automatic switch occurs while the prompt is open. **Use automatic** returns an override to the engine recommendation. No selection is persisted after Haven 42 closes.
 
 Hostnames, credentials in URLs, paths, query strings, redirects, link-local addresses, public addresses under the trusted-LAN scope, and unsafe address classes are rejected. Connection settings remain in memory and are lost when Haven 42 closes.
 
 ## Chat, Writing, Summarization, And Model Cleanup
 
-Use the task selector above the input area or the left navigation:
+Use the single Chat composer for all admitted text tasks:
 
-- **Chat** uses `general.chat` and keeps up to 20 bounded messages in browser memory for follow-up questions.
-- **Write** uses `content.write` and sends one bounded writing request. It returns a Markdown-document result in the page.
-- **Summarize** uses `content.summarize` and sends one bounded source input. Its system instruction permits only source-grounded summarization and requires uncertainty to be preserved.
+- Ordinary questions use `general.chat`.
+- Explicit write, draft, compose, or rewrite requests use the bounded `content.write` prompt and return a Markdown-document response inside the same conversation.
+- Explicit summarize, summarise, condense, summary, or TL;DR requests use `content.summarize`; its system instruction permits only source-grounded summarization and requires uncertainty to be preserved.
+
+All three paths retain the same bounded conversation in browser memory. The
+local intent hint is advisory routing among already admitted text capabilities;
+it cannot grant tools, filesystem access, repository access, model downloads,
+or network authority.
 
 Press Enter to submit a text task. Use Shift+Enter for a new line. Input-method
 composition is not submitted until composition has ended.
@@ -197,9 +204,9 @@ first or last textarea line respectively, so ordinary multiline cursor movement
 is preserved. Entering history retains the unfinished draft and moving past the
 newest entry restores it. Consecutive duplicates are stored once. System offers
 20 (default), 50, or 100 entries; the setting and prompt text remain in browser
-memory, and the list clears on New task, capability/provider change, or shutdown.
+memory, and the list clears on New task, a direct model/provider change, or shutdown.
 
-Changing modes or selecting **New task** clears the visible in-memory task. These capabilities use the registered `ollama.local-text` provider. They do not read a repository, write files, download models, or persist the endpoint, input, conversation, or response.
+Only selecting **New task**, applying a changed provider configuration, or closing Haven 42 clears the visible in-memory conversation. Changing from a question to writing or summarization does not. These capabilities use the registered `ollama.local-text` provider. They do not read a repository, write files, download models, or persist the endpoint, input, conversation, or response.
 
 The balanced default sends a bounded five-minute `keep_alive`, avoiding a costly reload between nearby prompts. Advanced connection settings and the System panel offer immediate cleanup, 5 minutes, 15 minutes, or 30 minutes. Haven 42 keeps at most one model active for its browser session: choosing a different model unloads and verifies the previous one before invoking the next. **New task**, provider changes, request failures, the idle timer, and application shutdown also trigger explicit unload and process-list verification.
 

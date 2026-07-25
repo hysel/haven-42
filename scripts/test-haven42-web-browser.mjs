@@ -426,7 +426,12 @@ try {
     browseCursor: getComputedStyle(document.querySelector('.context-picker')).cursor,
     browseControlCount: document.querySelectorAll('.context-picker').length,
     browseTag: document.querySelector('.context-picker').tagName,
-    browseFocusable: document.querySelector('.context-picker').tabIndex === 0
+    browseFocusable: document.querySelector('.context-picker').tabIndex === 0,
+    chatNavigationLabel: document.querySelector('#home-nav').textContent,
+    legacyTextNavigationCount: document.querySelectorAll('.capability-nav').length,
+    modeTabCount: document.querySelectorAll('.mode-tab').length,
+    conversationHeading: document.querySelector('#capability-eyebrow').textContent,
+    conversationModelLabel: document.querySelector('#model-label').textContent
   })`);
   if (
     !opened.hidden
@@ -437,6 +442,11 @@ try {
     || opened.browseControlCount !== 1
     || opened.browseTag !== "BUTTON"
     || !opened.browseFocusable
+    || !opened.chatNavigationLabel.includes("Chat")
+    || opened.legacyTextNavigationCount !== 0
+    || opened.modeTabCount !== 0
+    || opened.conversationHeading !== "CONVERSATION"
+    || opened.conversationModelLabel !== "Conversation model"
   ) throw new Error(`chat-handoff:${JSON.stringify(opened)}`);
   const browseActivation = await cdp.evaluate(`(() => {
     const input = document.querySelector('#context-files');
@@ -448,7 +458,7 @@ try {
     return activations;
   })()`);
   if (browseActivation !== 1) throw new Error("browse-button-did-not-activate-picker");
-  checks += 9;
+  checks += 14;
   trace("chat-handoff-verified");
 
   const compactControls = await cdp.evaluate(`({
@@ -716,7 +726,7 @@ try {
   trace("cleanup-policy-verified");
 
   const keyboardSubmit = await cdp.evaluate(`(() => {
-    document.querySelector('.capability-nav[data-capability="general.chat"]').click();
+    document.querySelector('#home-nav').click();
     document.querySelector('#prompt').value = 'browser flow';
     const shiftNotPrevented = document.querySelector('#prompt').dispatchEvent(
       new KeyboardEvent('keydown', {key: 'Enter', shiftKey: true, bubbles: true, cancelable: true})
@@ -905,6 +915,92 @@ try {
   ) throw new Error(`configurable-prompt-history:${JSON.stringify(configurableHistory)}`);
   checks += 8;
   trace("prompt-history-verified");
+
+  const writingRequestsBefore = chatPayloads.length;
+  const writingSuggestion = await cdp.evaluate(`(() => {
+    state.modelSelections['content.write'] = {mode: 'manual', model: 'unknown-model:latest'};
+    const conversationBefore = state.messages.length;
+    const visibleMessagesBefore = document.querySelectorAll('#messages .message').length;
+    document.querySelector('#prompt').value = 'Write a short welcome note.';
+    document.querySelector('#text-form').requestSubmit();
+    return {
+      conversationBefore,
+      visibleMessagesBefore,
+      promptVisible: !document.querySelector('#model-switch-prompt').classList.contains('hidden'),
+      description: document.querySelector('#model-switch-description').textContent,
+      focused: document.activeElement.id,
+      requestsUnchanged: ${writingRequestsBefore} === ${writingRequestsBefore}
+    };
+  })()`);
+  await delay(100);
+  if (
+    !writingSuggestion.promptVisible
+    || !writingSuggestion.description.includes("unknown-model:latest")
+    || !writingSuggestion.description.includes("Nothing has been sent")
+    || writingSuggestion.focused !== "use-recommended-model"
+    || chatPayloads.length !== writingRequestsBefore
+  ) throw new Error(`writing-model-suggestion:${JSON.stringify(writingSuggestion)}`);
+  await cdp.evaluate("document.querySelector('#keep-current-model').click()");
+  await waitFor(() => chatPayloads.length === writingRequestsBefore + 1);
+  await waitFor(() => cdp.evaluate(
+    "document.querySelector('#text-status').textContent.includes('response complete')",
+  ));
+  const writingPayload = chatPayloads.at(-1);
+  const writingContinuity = await cdp.evaluate(`({
+    conversationAfter: state.messages.length,
+    visibleMessagesAfter: document.querySelectorAll('#messages .message').length,
+    suggestionHidden: document.querySelector('#model-switch-prompt').classList.contains('hidden'),
+    currentModel: document.querySelector('#model').value
+  })`);
+  if (
+    writingPayload.model !== "qwen3.5:9b"
+    || !writingPayload.messages[0].content.includes("Create the requested general-purpose content")
+    || writingPayload.messages.length < writingSuggestion.conversationBefore + 2
+    || writingContinuity.conversationAfter !== writingSuggestion.conversationBefore + 2
+    || writingContinuity.visibleMessagesAfter !== writingSuggestion.visibleMessagesBefore + 2
+    || !writingContinuity.suggestionHidden
+    || writingContinuity.currentModel !== "automatic"
+  ) throw new Error(`writing-conversation-continuity:${JSON.stringify(writingContinuity)}`);
+  checks += 11;
+
+  const summaryRequestsBefore = chatPayloads.length;
+  await cdp.evaluate(`(() => {
+    state.modelSelections['content.summarize'] = {mode: 'manual', model: 'unknown-model:latest'};
+    document.querySelector('#prompt').value = 'Summarize the discussion so far.';
+    document.querySelector('#text-form').requestSubmit();
+  })()`);
+  await delay(100);
+  const summarySuggestion = await cdp.evaluate(`({
+    visible: !document.querySelector('#model-switch-prompt').classList.contains('hidden'),
+    conversationBefore: state.messages.length,
+    visibleMessagesBefore: document.querySelectorAll('#messages .message').length
+  })`);
+  if (!summarySuggestion.visible || chatPayloads.length !== summaryRequestsBefore) {
+    throw new Error(`summary-model-suggestion:${JSON.stringify(summarySuggestion)}`);
+  }
+  await cdp.evaluate("document.querySelector('#use-recommended-model').click()");
+  await waitFor(() => chatPayloads.length === summaryRequestsBefore + 1);
+  await waitFor(() => cdp.evaluate(
+    "document.querySelector('#text-status').textContent.includes('response complete')",
+  ));
+  const summaryPayload = chatPayloads.at(-1);
+  const summaryContinuity = await cdp.evaluate(`({
+    conversationAfter: state.messages.length,
+    visibleMessagesAfter: document.querySelectorAll('#messages .message').length,
+    currentModel: document.querySelector('#model').value,
+    suggestionHidden: document.querySelector('#model-switch-prompt').classList.contains('hidden')
+  })`);
+  if (
+    summaryPayload.model !== "unknown-model:latest"
+    || !summaryPayload.messages[0].content.includes("Summarize only the material supplied")
+    || summaryPayload.messages.length < summarySuggestion.conversationBefore + 2
+    || summaryContinuity.conversationAfter !== summarySuggestion.conversationBefore + 2
+    || summaryContinuity.visibleMessagesAfter !== summarySuggestion.visibleMessagesBefore + 2
+    || summaryContinuity.currentModel !== "manual:unknown-model:latest"
+    || !summaryContinuity.suggestionHidden
+  ) throw new Error(`summary-conversation-continuity:${JSON.stringify(summaryContinuity)}`);
+  checks += 8;
+  trace("unified-text-conversation-verified");
 
   const contextSelection = await cdp.evaluate(`(async () => {
     await addContextFiles([

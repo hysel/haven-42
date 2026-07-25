@@ -40,7 +40,12 @@ copy command. Candidate selection stays in browser memory and cannot reach text
 execution until the provider's installed inventory contains that exact name.
 
 The text server accepts only `general.chat`, `content.write`, and
-`content.summarize`; non-chat modes accept exactly one user input. Software
+`content.summarize`, each with the same bounded 20-message conversation limit.
+The unified browser surface uses a narrow, local-only prefix hint to select a
+writing or summarization prompt; the hint grants no authority and no text is
+sent while a different-model confirmation is visible. A model change requires
+an explicit user action, while keeping the current model remains available.
+Software
 admits only unique `uiReady`, `read-only` registry records and emits plan
 artifacts without arguments or process execution. Images admit only a loopback
 ComfyUI endpoint, the promoted SDXL checkpoint, a fixed built-in workflow,
@@ -57,7 +62,7 @@ links, images, HTML, scripts, or handlers. Hostile tags remain visible text.
 Prompt recall is a bounded task-local browser-memory ring with a 20-entry
 default and fixed 50/100-entry options. It stores only submitted user text,
 suppresses consecutive duplicates, preserves multiline cursor behavior, and
-clears on New task, capability/provider change, and shutdown without browser
+clears on New task, a direct model/provider change, and shutdown without browser
 storage or server persistence.
 Advanced unverified model use emits a warning. Provider failures emit typed
 errors, never retry automatically, and may restore failed text input only in

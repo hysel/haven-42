@@ -155,8 +155,9 @@ LINUX_BROWSER_LAUNCHERS = (
 )
 CAPABILITY_PROMPTS = {
     "general.chat": (
-        "Answer the user's general question clearly. Do not claim repository access "
-        "or actions you did not perform."
+        "Answer the user clearly in the ongoing conversation. The user may ask questions, "
+        "request writing, or ask for a summary. Do not claim repository access, external "
+        "verification, or actions you did not perform."
     ),
     "content.write": (
         "Create the requested general-purpose content as clean Markdown. Do not claim "
@@ -1126,10 +1127,6 @@ class HavenState:
             raise WebRequestError("conversation-too-large", HTTPStatus.REQUEST_ENTITY_TOO_LARGE)
         if clean_messages[-1]["role"] != "user":
             raise WebRequestError("last-message-must-be-user")
-        if capability_id != "general.chat" and (
-            len(clean_messages) != 1 or clean_messages[0]["role"] != "user"
-        ):
-            raise WebRequestError("single-input-required")
         if not isinstance(attachments, list) or len(attachments) > MAX_CONTEXT_FILES:
             raise WebRequestError("invalid-context-file-count")
         if not isinstance(context_consent, bool):

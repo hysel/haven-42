@@ -2,14 +2,14 @@
 
 const CAPABILITIES = {
   "general.chat": {
-    eyebrow: "CHAT",
+    eyebrow: "CONVERSATION",
     title: "Private conversation",
     promptLabel: "Message",
     placeholder: "Ask anything…",
     busy: "Model is thinking locally…",
-    welcome: "Ask a question and continue the conversation. Context stays in memory until you start a new task or close Haven 42.",
+    welcome: "Ask a question, draft content, or summarize material here. The conversation stays in memory until you start a new task or close Haven 42.",
     resultLabel: "Haven 42",
-    modelLabel: "Chat model",
+    modelLabel: "Conversation model",
     artifactType: "chat-message",
   },
   "content.write": {
@@ -62,6 +62,8 @@ const state = {
   workflows: [],
   imageConnected: false,
   lastFocusBeforeWizard: null,
+  pendingTextRequest: null,
+  approvedTextRequest: null,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -212,10 +214,9 @@ function openAbout() {
 }
 
 function setTaskControlsDisabled(disabled) {
-  document.querySelectorAll(".mode-tab, .capability-nav").forEach((button) => {
-    button.disabled = disabled;
-  });
   byId("new-task-button").disabled = disabled;
+  byId("keep-current-model").disabled = disabled;
+  byId("use-recommended-model").disabled = disabled;
   byId("context-files").disabled = disabled || !state.connected;
   byId("browse-context").disabled = disabled || !state.connected;
   byId("clear-context").disabled = disabled;
@@ -591,6 +592,32 @@ function selectedModel(capabilityId) {
     : "";
 }
 
+function suggestedCapability(content) {
+  const normalized = content.trimStart().toLocaleLowerCase();
+  if (/^(?:please\s+)?(?:summari[sz]e|condense|give me (?:a )?summary|tl;dr)\b/.test(normalized)) {
+    return "content.summarize";
+  }
+  if (/^(?:please\s+)?(?:write|draft|compose|rewrite)\b/.test(normalized)) {
+    return "content.write";
+  }
+  return "general.chat";
+}
+
+function hideModelSwitchPrompt() {
+  state.pendingTextRequest = null;
+  byId("model-switch-prompt").classList.add("hidden");
+}
+
+function showModelSwitchPrompt(request) {
+  state.pendingTextRequest = request;
+  const taskLabel = request.capabilityId === "content.write" ? "writing" : "summarization";
+  byId("model-switch-description").textContent =
+    `${request.recommendedModel} is the configured model for ${taskLabel}. ` +
+    `Nothing has been sent. Choose whether to use it for this request or continue with ${request.currentModel}.`;
+  byId("model-switch-prompt").classList.remove("hidden");
+  byId("use-recommended-model").focus({ preventScroll: true });
+}
+
 function renderModelSelect() {
   const select = byId("model");
   const capabilityId = state.capabilityId;
@@ -790,15 +817,15 @@ function renderRunDetails(details) {
   panel.classList.remove("hidden");
 }
 
-function renderTypedResult(result, capability) {
+function renderTypedResult(result, capability, capabilityId) {
   if (
     !result.artifact
     || result.artifact.schemaVersion !== 1
-    || result.artifact.sourceCapabilityId !== state.capabilityId
+    || result.artifact.sourceCapabilityId !== capabilityId
     || result.artifact.status !== "succeeded"
     || result.artifact.artifactType !== capability.artifactType
     || result.kind !== capability.artifactType
-    || result.capabilityId !== state.capabilityId
+    || result.capabilityId !== capabilityId
     || typeof result.artifact.content?.text !== "string"
     || !result.artifact.content.text.trim()
     || result.artifact.policy?.fileWrite !== false
@@ -1280,6 +1307,8 @@ function recallPrompt(direction) {
 
 function resetTask() {
   state.messages = [];
+  state.approvedTextRequest = null;
+  hideModelSwitchPrompt();
   clearPromptHistory();
   clearContextFiles();
   const capability = CAPABILITIES[state.capabilityId];
@@ -1290,31 +1319,6 @@ function resetTask() {
   byId("run-details").classList.add("hidden");
   byId("run-details-list").replaceChildren();
   byId("text-status").textContent = state.connected ? "Ready · nothing saved" : "Provider not connected";
-}
-
-function selectCapability(capabilityId) {
-  if (!Object.hasOwn(CAPABILITIES, capabilityId)) return;
-  state.capabilityId = capabilityId;
-  ["software-panel", "image-panel", "models-panel", "about-panel"].forEach((id) => {
-    byId(id).classList.add("hidden");
-  });
-  byId("text-panel").classList.remove("hidden");
-  const capability = CAPABILITIES[capabilityId];
-  byId("capability-eyebrow").textContent = capability.eyebrow;
-  byId("capability-title").textContent = capability.title;
-  byId("prompt-label").textContent = capability.promptLabel;
-  byId("model-label").textContent = capability.modelLabel;
-  if (state.connected) renderModelSelect();
-  document.querySelectorAll(".mode-tab").forEach((button) => {
-    const active = button.dataset.capability === capabilityId;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-selected", String(active));
-  });
-  document.querySelectorAll(".capability-nav").forEach((button) => {
-    button.classList.toggle("active", button.dataset.capability === capabilityId);
-  });
-  byId("home-nav").classList.remove("active");
-  resetTask();
 }
 
 async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
@@ -1586,26 +1590,45 @@ byId("text-form").addEventListener("submit", async (event) => {
   const prompt = byId("prompt");
   const content = prompt.value.trim();
   if (!content || !state.connected) return;
+  const capabilityId = suggestedCapability(content);
+  const capability = CAPABILITIES[capabilityId];
+  const currentModel = selectedModel("general.chat");
+  let model = currentModel;
+  if (
+    state.approvedTextRequest
+    && state.approvedTextRequest.content === content
+    && state.approvedTextRequest.capabilityId === capabilityId
+  ) {
+    model = state.approvedTextRequest.model;
+    state.approvedTextRequest = null;
+  } else {
+    const recommendedModel = selectedModel(capabilityId);
+    if (
+      capabilityId !== "general.chat"
+      && currentModel
+      && recommendedModel
+      && recommendedModel !== currentModel
+    ) {
+      showModelSwitchPrompt({ capabilityId, content, currentModel, recommendedModel });
+      return;
+    }
+  }
+  hideModelSwitchPrompt();
   const hasContext = Boolean(state.contextFiles.length || state.contextImages.length);
-  const capability = CAPABILITIES[state.capabilityId];
-  const capabilityId = state.capabilityId;
   const send = byId("send-button");
   send.disabled = true;
   prompt.disabled = true;
   setTaskControlsDisabled(true);
   prompt.value = "";
-  const requestMessages = capabilityId === "general.chat"
-    ? [...state.messages, { role: "user", content }].slice(-20)
-    : [{ role: "user", content }];
+  const requestMessages = [...state.messages, { role: "user", content }].slice(-20);
   const previousMessages = [...state.messages];
   let focusPrompt = true;
   recordPromptHistory(content);
-  if (capabilityId === "general.chat") state.messages = requestMessages;
-  const userMessage = addMessage("user", content, capabilityId === "content.summarize" ? "Source" : "You");
+  state.messages = requestMessages;
+  const userMessage = addMessage("user", content, "You");
   byId("text-status").textContent = capability.busy;
   setTaskEvent("Accepted · bounded local request in progress");
   try {
-    const model = selectedModel(capabilityId);
     if (!model) throw new Error("no-model-selected");
     const result = await api("/api/text", {
       capabilityId,
@@ -1629,10 +1652,8 @@ byId("text-form").addEventListener("submit", async (event) => {
       || result.context.toolInvocationAllowed !== false
       || result.context.filesystemAccessAllowed !== false
     ) throw new Error("invalid-server-response");
-    if (capabilityId === "general.chat") {
-      state.messages.push({ role: "assistant", content: result.content });
-    }
-    renderTypedResult(result, capability);
+    state.messages.push({ role: "assistant", content: result.content });
+    renderTypedResult(result, capability, capabilityId);
     byId("text-status").textContent = result.modelUnloaded
       ? `${result.model} · response complete · model unloaded`
       : `${result.model} · response complete · kept warm until idle timeout`;
@@ -1647,7 +1668,7 @@ byId("text-form").addEventListener("submit", async (event) => {
         displayedError = new Error("invalid-server-response");
       }
     }
-    if (capabilityId === "general.chat") state.messages = previousMessages;
+    state.messages = previousMessages;
     userMessage.remove();
     prompt.value = content;
     clearContextFiles();
@@ -1692,13 +1713,37 @@ byId("prompt").addEventListener("keydown", (event) => {
 byId("prompt").addEventListener("input", () => {
   state.promptHistoryIndex = state.promptHistory.length;
   state.promptHistoryDraft = "";
+  state.approvedTextRequest = null;
+  hideModelSwitchPrompt();
 });
 
-document.querySelectorAll("[data-capability]").forEach((button) => {
-  button.addEventListener("click", () => {
-    selectCapability(button.dataset.capability);
-    byId("text-panel").scrollIntoView({ behavior: motionBehavior() });
-  });
+byId("keep-current-model").addEventListener("click", () => {
+  const request = state.pendingTextRequest;
+  if (!request) return;
+  state.approvedTextRequest = {
+    capabilityId: request.capabilityId,
+    content: request.content,
+    model: request.currentModel,
+  };
+  hideModelSwitchPrompt();
+  byId("text-form").requestSubmit();
+});
+
+byId("use-recommended-model").addEventListener("click", () => {
+  const request = state.pendingTextRequest;
+  if (!request) return;
+  state.modelSelections["general.chat"] = {
+    mode: "manual",
+    model: request.recommendedModel,
+  };
+  state.approvedTextRequest = {
+    capabilityId: request.capabilityId,
+    content: request.content,
+    model: request.recommendedModel,
+  };
+  hideModelSwitchPrompt();
+  renderModelSelect();
+  byId("text-form").requestSubmit();
 });
 byId("model").addEventListener("change", () => {
   const value = byId("model").value;

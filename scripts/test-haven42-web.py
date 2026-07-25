@@ -1181,7 +1181,7 @@ def main() -> int:
         assert status == 400 and error["error"] == "capability-not-admitted"
         checks += 1
 
-        status, error, _ = request_json(
+        status, continued_summary, _ = request_json(
             origin + "/api/text",
             "POST",
             {
@@ -1196,8 +1196,17 @@ def main() -> int:
             token,
             origin,
         )
-        assert status == 400 and error["error"] == "single-input-required"
-        checks += 1
+        assert status == 200
+        assert continued_summary["capabilityId"] == "content.summarize"
+        assert continued_summary["kind"] == "markdown-document"
+        summary_payload = next(
+            payload for path, payload in reversed(FakeState.requests)
+            if path == "/api/chat" and payload["messages"][-1]["content"] == "three"
+        )
+        assert [message["role"] for message in summary_payload["messages"][1:]] == [
+            "user", "assistant", "user"
+        ]
+        checks += 4
 
         FakeState.fail_chat = True
         status, error, _ = request_json(
@@ -1411,7 +1420,15 @@ def main() -> int:
         assert "Applying changes starts a new task" in html
         assert 'id="about-panel"' in html and 'id="about-nav"' in html
         assert "03 · WRITING" not in javascript and "03 · SUMMARY" not in javascript
-        assert "local or self-hosted AI providers" in html
+        assert "one continuous private conversation" in html
+        assert 'id="model-switch-prompt"' in html and 'id="use-recommended-model"' in html
+        assert "suggestedCapability" in javascript and "showModelSwitchPrompt" in javascript
+        assert 'document.querySelectorAll(".mode-tab").length' not in javascript
+        assert 'class="mode-tab' not in html and 'class="nav-item capability-nav' not in html
+        assert "requestMessages = [...state.messages" in javascript
+        assert "state.messages = requestMessages" in javascript
+        assert "renderTypedResult(result, capability, capabilityId)" in javascript
+        assert ".model-switch-prompt {" in styles and ".model-switch-actions {" in styles
         assert 'event.key !== "Enter"' in javascript and "event.shiftKey" in javascript
         assert "Enter to send · Shift+Enter for a new line" in html
         assert "↑/↓ recall prompts" in html and 'id="prompt-history-limit"' in html

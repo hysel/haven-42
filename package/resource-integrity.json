@@ -3,18 +3,18 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "9d61cbf3d29f250990b688ad1a82188561867cb6c68fc48270b7a52d8b81a787",
-      "sizeBytes": 26405
+      "sha256": "55b91679de5e5f9830ddc3457b33cd4f9117fbf3695bf48fe141405dfca00386",
+      "sizeBytes": 25845
     },
     {
       "path": "web/static/app.js",
-      "sha256": "219cd2776aed0f66689959d33bd5149ffaeb042eb755ac3158c4056ea64ce6ae",
-      "sizeBytes": 79475
+      "sha256": "5281eff4d7092ea3d4ad7ad52c304850deef8ca8008dcb7812b7197a8ccd294a",
+      "sizeBytes": 78990
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "1e794aa0979032ea64ea87730f180c84c7d0c611559dd3625a7a41a05984fe65",
-      "sizeBytes": 22940
+      "sha256": "fd552fe9c9a922b2b2acd8d5b900bb01915146dbecdbaa4dc84376bb580d82cc",
+      "sizeBytes": 22674
     },
     {
       "path": "config/text-capability-model-recommendations.json",
