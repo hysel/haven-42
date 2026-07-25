@@ -87,6 +87,13 @@
     "replayAllowed": false,
     "activeSelectionWriteAllowed": false
   },
+  "replayDefense": {
+    "candidateDigestMayEqualCurrentDigest": false,
+    "candidateVersionMayAlreadyBeRetained": false,
+    "activatingPhaseMustStillSelectCurrentVersion": true,
+    "postHealthAndRollbackPhasesMustSelectCandidateVersion": true,
+    "unknownOrRepeatedActivationIdentityDecision": "deny"
+  },
   "retainedVersion": {
     "required": [
       "version",

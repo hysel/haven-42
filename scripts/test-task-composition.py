@@ -20,12 +20,17 @@ CONTRACT = json.loads((ROOT / "config/task-composition-contract.json").read_text
 REGISTRY = json.loads((ROOT / "config/workflows.json").read_text())
 
 
-def request(steps, cancel=False):
+def request(steps, cancel=False, attempt=0, retry_of=None, mode=None):
     return {
         "schemaVersion": 1,
         "compositionId": "review-project",
         "steps": steps,
         "cancelRequested": cancel,
+        "lifecycle": {
+            "attempt": attempt,
+            "retryOf": retry_of,
+            "mode": mode or ("cancel" if cancel else "fresh"),
+        },
     }
 
 
@@ -50,11 +55,38 @@ def main() -> int:
     assert result["executionAllowed"] is False
     assert not any(result["effects"].values())
     assert all(item["artifact"]["status"] == "planned" for item in result["steps"])
+    assert result["steps"][0]["artifact"] == {
+        "schemaVersion": 1,
+        "artifactType": "workflow-plan-reference",
+        "status": "planned",
+        "workflowName": "Profile Local Hardware",
+        "sourceStepId": "profile",
+        "consumerStepIds": ["recommend"],
+        "classification": "metadata-only",
+        "contentIncluded": False,
+        "validationStatus": "contract-validated",
+    }
+    assert all(
+        item["approval"] == {
+            "required": False,
+            "authority": "engine-owned",
+            "rendererGrantAccepted": False,
+        }
+        for item in result["steps"]
+    )
 
     cancelled = MODULE.plan_composition(request(steps, True), CONTRACT, REGISTRY)
     assert cancelled["state"] == "cancelled" and cancelled["steps"] == []
+    retried = MODULE.plan_composition(
+        request(steps, attempt=1, retry_of="previous-review", mode="retry"),
+        CONTRACT,
+        REGISTRY,
+    )
+    assert retried["attempt"] == 1 and retried["retryOf"] == "previous-review"
+    assert [event["type"] for event in retried["events"]][1] == "retry-planned"
 
     rejected({**request(steps), "arguments": []}, "invalid-request-fields")
+    rejected({**request(steps), "approvalGrant": "renderer-value"}, "invalid-request-fields")
     rejected(request([]), "invalid-step-count")
     rejected(request(steps + steps + [steps[0]]), "invalid-step-count")
     rejected(request([
@@ -75,7 +107,16 @@ def main() -> int:
             "arguments": ["--hostile"],
         },
     ]), "invalid-step-fields")
-    print("Task composition planner passed 10 bounded, effect-free checks.")
+    rejected(request(steps, attempt=3, retry_of="older", mode="retry"), "invalid-lifecycle-attempt")
+    rejected(request(steps, attempt=1, mode="retry"), "invalid-retry-identity")
+    rejected(request(steps, attempt=1, retry_of="review-project", mode="retry"), "invalid-retry-identity")
+    rejected(request(steps, attempt=1, retry_of="older", mode="fresh"), "invalid-fresh-lifecycle")
+    rejected(request(steps, mode="cancel"), "invalid-cancel-lifecycle")
+    rejected(request(steps, cancel=True, mode="fresh"), "cancellation-lifecycle-mismatch")
+    hostile_lifecycle = request(steps)
+    hostile_lifecycle["lifecycle"]["resumeToken"] = "renderer-value"
+    rejected(hostile_lifecycle, "invalid-lifecycle-fields")
+    print("Task composition planner passed 19 bounded, effect-free checks.")
     return 0
 
 

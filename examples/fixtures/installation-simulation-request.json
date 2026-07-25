@@ -1,6 +1,15 @@
 {
   "schemaVersion": 1,
+  "operation": "plan-install",
   "componentId": "ollama",
   "platformProfileId": "windows-x64",
+  "currentState": "absent",
+  "promotionEvidence": {
+    "immutableIdentityAvailable": true,
+    "checksumAvailable": true,
+    "signatureOrAttestationAvailable": false,
+    "licenseReviewed": true,
+    "platformLifecycleEvidenceAvailable": false
+  },
   "approvalToken": null
 }

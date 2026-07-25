@@ -57,11 +57,27 @@ const byId = (id) => document.getElementById(id);
 function showError(message) {
   const box = byId("connection-error");
   box.textContent = message;
+  box.tabIndex = -1;
   box.classList.remove("hidden");
+  box.focus({ preventScroll: true });
 }
 
 function clearError() {
-  byId("connection-error").classList.add("hidden");
+  const box = byId("connection-error");
+  box.classList.add("hidden");
+  box.removeAttribute("tabindex");
+}
+
+function motionBehavior() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+}
+
+function activateNavigation(buttonId, targetId, focusId) {
+  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
+  byId(buttonId).classList.add("active");
+  const target = byId(targetId);
+  target.scrollIntoView({ behavior: motionBehavior(), block: "start" });
+  byId(focusId).focus({ preventScroll: true });
 }
 
 function setTaskEvent(message, kind = "progress") {
@@ -158,21 +174,17 @@ async function loadWorkflows() {
 }
 
 function openSoftware() {
-  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
-  byId("software-nav").classList.add("active");
   byId("text-panel").classList.add("hidden");
   byId("image-panel").classList.add("hidden");
   byId("software-panel").classList.remove("hidden");
-  byId("software-panel").scrollIntoView({ behavior: "smooth" });
+  activateNavigation("software-nav", "software-panel", "software-title");
 }
 
 function openImages() {
-  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
-  byId("image-nav").classList.add("active");
   byId("text-panel").classList.add("hidden");
   byId("software-panel").classList.add("hidden");
   byId("image-panel").classList.remove("hidden");
-  byId("image-panel").scrollIntoView({ behavior: "smooth" });
+  activateNavigation("image-nav", "image-panel", "image-title");
 }
 
 function setTaskControlsDisabled(disabled) {
@@ -570,7 +582,7 @@ function addMessage(role, content, label) {
   body.append(heading, text);
   article.append(avatar, body);
   byId("messages").append(article);
-  article.scrollIntoView({ behavior: "smooth", block: "end" });
+  article.scrollIntoView({ behavior: motionBehavior(), block: "end" });
   return article;
 }
 
@@ -731,6 +743,7 @@ byId("text-form").addEventListener("submit", async (event) => {
     ? [...state.messages, { role: "user", content }].slice(-20)
     : [{ role: "user", content }];
   const previousMessages = [...state.messages];
+  let focusPrompt = true;
   if (capabilityId === "general.chat") state.messages = requestMessages;
   const userMessage = addMessage("user", content, capabilityId === "content.summarize" ? "Source" : "You");
   byId("text-status").textContent = capability.busy;
@@ -765,6 +778,7 @@ byId("text-form").addEventListener("submit", async (event) => {
     userMessage.remove();
     prompt.value = content;
     showError(humanError(displayedError));
+    focusPrompt = false;
     const retry = recovery?.retryAllowed === true
       ? " · input restored; retry creates a new request"
       : " · input restored for review";
@@ -774,14 +788,14 @@ byId("text-form").addEventListener("submit", async (event) => {
     send.disabled = false;
     prompt.disabled = false;
     setTaskControlsDisabled(false);
-    prompt.focus();
+    if (focusPrompt) prompt.focus();
   }
 });
 
 document.querySelectorAll("[data-capability]").forEach((button) => {
   button.addEventListener("click", () => {
     selectCapability(button.dataset.capability);
-    byId("text-panel").scrollIntoView({ behavior: "smooth" });
+    byId("text-panel").scrollIntoView({ behavior: motionBehavior() });
   });
 });
 byId("model").addEventListener("change", () => {
@@ -817,7 +831,7 @@ byId("new-task-button").addEventListener("click", async () => {
 byId("home-nav").addEventListener("click", () => {
   document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
   byId("home-nav").classList.add("active");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  window.scrollTo({ top: 0, behavior: motionBehavior() });
 });
 byId("software-nav").addEventListener("click", openSoftware);
 byId("image-nav").addEventListener("click", openImages);
@@ -825,6 +839,7 @@ byId("workflow-plan-button").addEventListener("click", async () => {
   clearError();
   const button = byId("workflow-plan-button");
   button.disabled = true;
+  byId("software-panel").setAttribute("aria-busy", "true");
   try {
     const workflowId = byId("workflow-select").value;
     const result = await api("/api/workflow-plan", { workflowId });
@@ -848,6 +863,7 @@ byId("workflow-plan-button").addEventListener("click", async () => {
     byId("workflow-result-summary").textContent = result.artifact.content.summary;
     byId("workflow-result-policy").textContent = "No process started · no arguments · no repository read · no file write · no network";
     byId("workflow-result").classList.remove("hidden");
+    byId("workflow-result-title").focus({ preventScroll: true });
   } catch (error) {
     let displayedError = error;
     try {
@@ -857,6 +873,7 @@ byId("workflow-plan-button").addEventListener("click", async () => {
     }
     showError(humanError(displayedError));
   } finally {
+    byId("software-panel").setAttribute("aria-busy", "false");
     button.disabled = state.workflows.length === 0;
   }
 });
@@ -906,6 +923,7 @@ byId("image-run-button").addEventListener("click", async () => {
   const prompt = byId("image-prompt").value.trim();
   if (!state.imageConnected || !prompt) return;
   button.disabled = true;
+  byId("image-panel").setAttribute("aria-busy", "true");
   button.textContent = "Generating locally…";
   try {
     const size = Number(byId("image-size").value);
@@ -938,6 +956,7 @@ byId("image-run-button").addEventListener("click", async () => {
     byId("image-download").href = source;
     byId("image-result-summary").textContent = `${result.artifact.content.width} × ${result.artifact.content.height} PNG · browser memory only · provider copy retained`;
     byId("image-result").classList.remove("hidden");
+    byId("image-preview").focus?.({ preventScroll: true });
   } catch (error) {
     let displayedError = error;
     try {
@@ -947,19 +966,20 @@ byId("image-run-button").addEventListener("click", async () => {
     }
     showError(humanError(displayedError));
   } finally {
+    byId("image-panel").setAttribute("aria-busy", "false");
     button.disabled = !state.imageConnected;
     button.textContent = "Generate with disclosed retention";
   }
 });
 byId("models-nav").addEventListener("click", () => {
-  byId("connection-panel").scrollIntoView({ behavior: "smooth" });
+  activateNavigation("models-nav", "connection-panel", "models-title");
 });
 byId("system-nav").addEventListener("click", () => {
-  byId("status-panel").scrollIntoView({ behavior: "smooth" });
+  activateNavigation("system-nav", "status-panel", "system-title");
 });
 document.querySelectorAll(".availability-nav").forEach((button) => {
   button.addEventListener("click", () => {
-    byId("capability-panel").scrollIntoView({ behavior: "smooth" });
+    byId("capability-panel").scrollIntoView({ behavior: motionBehavior() });
   });
 });
 
@@ -971,7 +991,7 @@ byId("wizard-existing").addEventListener("click", () => {
 byId("wizard-explore").addEventListener("click", () => {
   byId("setup-wizard").classList.add("hidden");
   byId("welcome-message").textContent = "Explore Chat, Writing, Summarization, Models, and System. Connect an existing Ollama provider whenever you are ready.";
-  byId("connection-panel").scrollIntoView({ behavior: "smooth" });
+  byId("connection-panel").scrollIntoView({ behavior: motionBehavior() });
 });
 byId("wizard-readiness-back").addEventListener("click", () => showWizardStep("welcome"));
 byId("wizard-readiness-next").addEventListener("click", () => showWizardStep("provider"));

@@ -204,12 +204,19 @@ try {
   const browserArguments = [
     "--headless=new",
     "--disable-gpu",
+    "--disable-background-networking",
+    "--host-resolver-rules=MAP * 0.0.0.0, EXCLUDE 127.0.0.1",
     "--no-first-run",
     "--remote-allow-origins=*",
     `--remote-debugging-port=${debugPort}`,
     `--user-data-dir=${profile}`,
     origin,
   ];
+  if (process.env.HAVEN42_BROWSER_TEST_NO_SANDBOX === "1") {
+    // Some locked-down Windows hosts deny Chromium's disposable test sandbox.
+    // This opt-in is limited to synthetic loopback content and is never set in CI.
+    browserArguments.splice(2, 0, "--disable-gpu-sandbox", "--no-sandbox");
+  }
   browser = spawn(browserPath, browserArguments, {
     windowsHide: true,
     stdio: ["ignore", "ignore", "pipe"],
@@ -385,15 +392,21 @@ try {
   const workflow = await cdp.evaluate(`({
     title: document.querySelector('#workflow-result-title').textContent,
     policy: document.querySelector('#workflow-result-policy').textContent,
-    textHidden: document.querySelector('#text-panel').classList.contains('hidden')
+    textHidden: document.querySelector('#text-panel').classList.contains('hidden'),
+    active: document.querySelector('#software-nav').classList.contains('active'),
+    focused: document.activeElement.id,
+    busy: document.querySelector('#software-panel').getAttribute('aria-busy')
   })`);
   if (
     !workflow.title
     || !workflow.policy.includes("No process started")
     || !workflow.policy.includes("no file write")
     || !workflow.textHidden
+    || !workflow.active
+    || workflow.focused !== "workflow-result-title"
+    || workflow.busy !== "false"
   ) throw new Error(`workflow-plan-rendering:${JSON.stringify(workflow)}`);
-  checks += 4;
+  checks += 7;
   trace("workflow-plan-verified");
 
   await cdp.evaluate("document.querySelector('#image-nav').click()");
@@ -413,7 +426,10 @@ try {
     badge: document.querySelector('#image-provider-badge').textContent,
     summary: document.querySelector('#image-result-summary').textContent,
     source: document.querySelector('#image-preview').src,
-    download: document.querySelector('#image-download').getAttribute('download')
+    download: document.querySelector('#image-download').getAttribute('download'),
+    active: document.querySelector('#image-nav').classList.contains('active'),
+    focused: document.activeElement.id,
+    busy: document.querySelector('#image-panel').getAttribute('aria-busy')
   })`);
   if (
     !imageResult.badge.includes("loopback")
@@ -421,9 +437,40 @@ try {
     || !imageResult.summary.includes("provider copy retained")
     || !imageResult.source.startsWith("data:image/png;base64,")
     || imageResult.download !== "haven42-generated-image.png"
+    || !imageResult.active
+    || imageResult.focused !== "image-preview"
+    || imageResult.busy !== "false"
   ) throw new Error(`image-result-rendering:${JSON.stringify(imageResult)}`);
-  checks += 5;
+  checks += 8;
   trace("image-flow-verified");
+
+  await cdp.call("Emulation.setEmulatedMedia", {
+    media: "screen",
+    features: [{name: "prefers-reduced-motion", value: "reduce"}],
+  });
+  const navigation = await cdp.evaluate(`(() => {
+    const reducedMotion = motionBehavior();
+    document.querySelector('#models-nav').click();
+    const models = {
+      active: document.querySelector('#models-nav').classList.contains('active'),
+      focused: document.activeElement.id,
+    };
+    document.querySelector('#system-nav').click();
+    const system = {
+      active: document.querySelector('#system-nav').classList.contains('active'),
+      focused: document.activeElement.id,
+    };
+    return {reducedMotion, models, system};
+  })()`);
+  if (
+    navigation.reducedMotion !== "auto"
+    || !navigation.models.active
+    || navigation.models.focused !== "models-title"
+    || !navigation.system.active
+    || navigation.system.focused !== "system-title"
+  ) throw new Error(`accessible-navigation:${JSON.stringify(navigation)}`);
+  checks += 5;
+  trace("accessible-navigation-verified");
 
   const hostileEvents = await cdp.evaluate(`(() => {
     const cases = [
@@ -456,15 +503,17 @@ try {
     prompt: document.querySelector('#prompt').value,
     task: document.querySelector('#task-event').textContent,
     failedUserMessageVisible: [...document.querySelectorAll('.message.user p')]
-      .some((item) => item.textContent === 'force browser failure')
+      .some((item) => item.textContent === 'force browser failure'),
+    focused: document.activeElement.id
   })`);
   if (
     recovery.prompt !== "force browser failure"
     || !recovery.task.includes("retry creates a new request")
     || recovery.failedUserMessageVisible
+    || recovery.focused !== "connection-error"
     || loaded.size !== 0
   ) throw new Error(`failure-recovery:${JSON.stringify(recovery)}`);
-  checks += 4;
+  checks += 5;
   trace("failure-recovery-verified");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
 } finally {

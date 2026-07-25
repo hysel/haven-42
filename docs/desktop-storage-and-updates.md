@@ -97,9 +97,18 @@ All output is counterfactual: `WouldRetainVersions` and
 always denies activation and machine modification and reports network, writes,
 download, staging, activation, rollback, cleanup, installation, elevation,
 service, driver, firewall, process, and user-data effects as false. The hostile
-self-test covers 41 healthy, failed-health, interrupted, disabled, retention,
-replay, downgrade, malformed-state, missing-evidence, and renderer-authority
+self-test covers 45 healthy, failed-health, interrupted, disabled, retention,
+candidate-digest replay, retained-version collision, downgrade, phase-specific
+recovery, malformed-state, missing-evidence, and renderer-authority
 cases without accessing a machine update directory.
+
+The separate installation broker foundation accepts only `plan-install`,
+`plan-upgrade`, or `plan-uninstall` with compatible absent/present simulated
+state and exact boolean promotion-evidence fields. It rejects paths, commands,
+arguments, unknown state, renderer approval, and extra fields. Even a complete
+simulated evidence set remains `not-admitted`: authority, approval, execution,
+installation, removal, process control, privilege, service, driver, firewall,
+filesystem, and network effects are all false.
 
 ## Current Admission State
 

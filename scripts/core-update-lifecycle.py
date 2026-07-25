@@ -208,6 +208,8 @@ def evaluate(request: dict) -> dict:
         raise LifecyclePolicyError("invalid-activation-id")
 
     retained = _validate_retained(request, contract)
+    if request["candidateDigest"] == request["currentDigest"]:
+        raise LifecyclePolicyError("candidate-digest-replay")
     if journal["activeVersion"] not in {
         request["currentVersion"],
         request["candidateVersion"],
@@ -234,6 +236,16 @@ def evaluate(request: dict) -> dict:
             or journal["previousVersion"] != request["previousKnownGoodVersion"]
         ):
             raise LifecyclePolicyError("interrupted-journal-incomplete")
+        if (
+            journal["phase"] == "activating"
+            and journal["activeVersion"] != request["currentVersion"]
+        ):
+            raise LifecyclePolicyError("activating-journal-selected-candidate")
+        if (
+            journal["phase"] in {"post-health", "rollback-required"}
+            and journal["activeVersion"] != request["candidateVersion"]
+        ):
+            raise LifecyclePolicyError("recovery-journal-active-version-mismatch")
         would_retain, would_remove = _retention_plan(request, retained, False)
         return _result(
             contract,
@@ -269,6 +281,15 @@ def evaluate(request: dict) -> dict:
 
     if candidate_version <= current_version:
         raise LifecyclePolicyError("candidate-not-newer")
+    retained_candidate = next(
+        (
+            item for item in retained
+            if item["version"] == request["candidateVersion"]
+        ),
+        None,
+    )
+    if retained_candidate is not None:
+        raise LifecyclePolicyError("candidate-version-already-retained")
     if request["previousKnownGoodVersion"] != request["currentVersion"]:
         raise LifecyclePolicyError("previous-known-good-must-be-active")
     missing_evidence = [field for field, value in package.items() if value is not True]
@@ -404,6 +425,7 @@ def run_self_tests() -> int:
         (lambda v: v.update(candidateVersion="0.2.0"), "candidate-not-newer"),
         (lambda v: v.update(currentDigest="ABC"), "invalid-current-digest"),
         (lambda v: v.update(candidateDigest="ABC"), "invalid-candidate-digest"),
+        (lambda v: v.update(candidateDigest=v["currentDigest"]), "candidate-digest-replay"),
         (lambda v: v["packageEvidence"].update(bytesVerified=False), "package-evidence-missing:bytesVerified"),
         (lambda v: v["packageEvidence"].update(manifestSignatureVerified=False), "package-evidence-missing:manifestSignatureVerified"),
         (lambda v: v["packageEvidence"].update(assetAttestationVerified=False), "package-evidence-missing:assetAttestationVerified"),
@@ -418,6 +440,14 @@ def run_self_tests() -> int:
         (lambda v: v.update(previousKnownGoodVersion="0.2.0"), "previous-known-good-must-be-active"),
         (lambda v: v["retainedVersions"].clear(), "retained-version-required"),
         (lambda v: v["retainedVersions"].append(copy.deepcopy(v["retainedVersions"][0])), "duplicate-retained-version"),
+        (
+            lambda v: v["retainedVersions"].append({
+                "version": v["candidateVersion"],
+                "sha256": v["candidateDigest"],
+                "knownGood": False,
+            }),
+            "candidate-version-already-retained",
+        ),
         (lambda v: v["retainedVersions"][0].update(knownGood=False), "active-version-not-known-good"),
         (lambda v: v["retainedVersions"][0].update(sha256="3" * 64), "active-version-not-known-good"),
         (lambda v: v["activationJournal"].update(phase="activated"), "invalid-journal-phase"),
@@ -440,6 +470,17 @@ def run_self_tests() -> int:
         lambda value: value.update(operation="recover-interrupted"),
         "no-interrupted-activation",
     )
+    def activating_selected_candidate(value: dict) -> None:
+        interrupted(value)
+        value["activationJournal"]["phase"] = "activating"
+
+    deny(activating_selected_candidate, "activating-journal-selected-candidate")
+
+    def post_health_selected_current(value: dict) -> None:
+        interrupted(value)
+        value["activationJournal"]["activeVersion"] = value["currentVersion"]
+
+    deny(post_health_selected_current, "recovery-journal-active-version-mismatch")
     print(f"Core update lifecycle hostile self-test passed: {passed} cases.")
     return 0
 

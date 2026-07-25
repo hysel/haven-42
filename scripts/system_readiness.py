@@ -485,7 +485,10 @@ def build_setup_plan(snapshot: dict[str, Any], intent: str, registry: dict[str, 
 
 
 def simulate_install_request(request: dict[str, Any], registry: dict[str, dict[str, Any]] | None = None) -> dict[str, Any]:
-    required = {"schemaVersion", "componentId", "platformProfileId", "approvalToken"}
+    required = {
+        "schemaVersion", "operation", "componentId", "platformProfileId",
+        "currentState", "promotionEvidence", "approvalToken",
+    }
     if not isinstance(request, dict) or set(request) != required or request.get("schemaVersion") != 1:
         raise ReadinessError("invalid-install-request-shape")
     registry = registry or load_component_registry()
@@ -496,10 +499,38 @@ def simulate_install_request(request: dict[str, Any], registry: dict[str, dict[s
         raise ReadinessError("invalid-platform-profile")
     if request.get("approvalToken") is not None:
         raise ReadinessError("simulation-does-not-accept-approval")
+    operation = request.get("operation")
+    if operation not in {"plan-install", "plan-upgrade", "plan-uninstall"}:
+        raise ReadinessError("invalid-install-operation")
+    current_state = request.get("currentState")
+    if current_state not in {"absent", "present", "unknown"}:
+        raise ReadinessError("invalid-component-current-state")
+    if current_state == "unknown":
+        raise ReadinessError("unknown-component-state")
+    if operation == "plan-install" and current_state != "absent":
+        raise ReadinessError("install-requires-absent-state")
+    if operation in {"plan-upgrade", "plan-uninstall"} and current_state != "present":
+        raise ReadinessError("lifecycle-operation-requires-present-state")
+    evidence_fields = {
+        "immutableIdentityAvailable", "checksumAvailable",
+        "signatureOrAttestationAvailable", "licenseReviewed",
+        "platformLifecycleEvidenceAvailable",
+    }
+    promotion_evidence = request.get("promotionEvidence")
+    if (
+        not isinstance(promotion_evidence, dict)
+        or set(promotion_evidence) != evidence_fields
+        or any(type(value) is not bool for value in promotion_evidence.values())
+    ):
+        raise ReadinessError("invalid-promotion-evidence")
+    missing_evidence = sorted(
+        field for field, available in promotion_evidence.items() if not available
+    )
     return {
         "schemaVersion": 1,
         "kind": "installation-simulation",
         "status": "not-admitted",
+        "operation": operation,
         "componentId": component_id,
         "events": [
             {"sequence": 1, "type": "accepted", "code": "SIMULATION_ACCEPTED"},
@@ -507,6 +538,9 @@ def simulate_install_request(request: dict[str, Any], registry: dict[str, dict[s
             {"sequence": 3, "type": "failed", "code": "REAL_INSTALL_NOT_ADMITTED"},
         ],
         "missingGate": registry[component_id]["missingGate"],
+        "missingPromotionEvidence": missing_evidence,
+        "scenarioEvidenceAcceptedAsAuthority": False,
+        "approvalAccepted": False,
         "effects": {
             "networkUsed": False, "filesWritten": False, "installationPerformed": False,
             "elevationRequested": False, "servicesChanged": False, "driversChanged": False,
