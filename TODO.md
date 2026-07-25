@@ -431,6 +431,10 @@
     quality samples remain open before comparative promotion. A three-repetition
     exact-artifact run passed Qwen, Gemma, and Mistral 9/9; Granite passed 6/9.
     The reusable harness supports one through five bounded repetitions.
+  - [x] Complete the first independently randomized three-scenario blind packet
+    with one human reviewer, exact artifacts, local-only raw output, and verified
+    unload. Qwen led 9–8–7–6, but three candidates each won a scenario; broader
+    reviewers and criterion scores remain required before comparative promotion.
 - [x] Replace first-provider-result model defaults with capability-specific engine recommendations, non-downloading missing-model guidance, advanced per-capability overrides, reset-to-automatic, and visibly unverified handling for unknown installed models.
 - [x] Bind local-web automatic recommendations to the exact tested Qwen
   provider digest and capability evidence; a matching model name with a

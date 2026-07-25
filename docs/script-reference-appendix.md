@@ -74,6 +74,12 @@ persists no raw output, records provider-reported metrics, and verifies unload
 after every sample. It downloads no model and grants no recommendation authority;
 see `docs/writing-model-evaluation.md`.
 
+`scripts/run-blind-writing-review.py` creates a separately randomized
+human-review packet and answer key from synthetic prompts. Repository-local raw
+output is restricted to ignored `dist/`, existing packets are never
+overwritten, and every sample plus the final model set must unload. Commit only
+the sanitized ranking evidence, never the packet or answer key.
+
 ## Candidate-Foundation Utilities
 
 These read-only utilities intentionally remain outside `config/workflows.json` and the future UI until an exact quantization profile passes live promotion gates.

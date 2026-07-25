@@ -36,6 +36,15 @@ and retains only marker results, hashes, lengths, and provider metrics. Human
 quality review and broader repeated sampling remain open, so no comparative
 default changed.
 
+The first blind human packet is recorded in
+`examples/blind-writing-quality-review.md`. One reviewer ranked three
+independently randomized synthetic scenarios. Qwen led narrowly with nine
+points, followed by Granite with eight, Gemma with seven, and Mistral with six;
+Qwen, Granite, and Gemma each won one scenario. This bounded result keeps the
+existing Qwen adapter baseline but grants no comparative quality promotion.
+Additional independent reviewers, broader scenarios, and criterion-level
+scores remain required.
+
 Use the same source material, prompts, provider settings, context limit, warm/cold policy, and output bounds for every exact candidate. Record the prompt-set revision and never use private user documents in committed fixtures.
 
 The first suite should cover:

@@ -16,6 +16,7 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 - Select a local model: [[Local Model Selection|Local-Model-Selection]]
 - Review writing-model candidates and promotion gates: [[Writing Model Evaluation|Writing-Model-Evaluation]]
 - Review the initial exact-digest automated matrix: [[Writing Model Matrix Validation|Writing-Model-Matrix-Validation]]
+- Review the first bounded blind human packet: [[Blind Writing Quality Review|Blind-Writing-Quality-Review]]
 - Discover candidates across Ollama and Hugging Face: [[Online Model Discovery|Online-Model-Discovery]]
 - Assemble security-aware beginner and advanced model choices: [[Security-Aware Model Catalog|Security-Aware-Model-Catalog]]
 - Compare supported agents: [[Agent Surface Options|Agent-Surface-Options]]

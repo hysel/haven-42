@@ -2385,6 +2385,7 @@ html = (root / "web/static/index.html").read_text(encoding="utf-8")
 styles = (root / "web/static/styles.css").read_text(encoding="utf-8")
 assets = html + (root / "web/static/app.js").read_text(encoding="utf-8")
 writing_doc = (root / "docs/writing-model-evaluation.md").read_text(encoding="utf-8")
+blind_evidence = (root / "examples/blind-writing-quality-review.md").read_text(encoding="utf-8")
 wiki_map = (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 lowered = assets.lower()
 for forbidden in ('src="http://', "src='http://", 'href="http://', "href='http://", 'src="https://', "src='https://", 'href="https://', "href='https://", 'fetch("http://', "fetch('http://", 'fetch("https://', "fetch('https://"):
@@ -2394,8 +2395,12 @@ assert html.index('id="text-panel"') < html.index('id="connection-panel"')
 assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
 assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles
 assert all(marker in writing_doc for marker in ("qwen3.5:9b", "gemma3:12b", "mistral-small3.2", "granite4:7b-a1b-h", "No candidate under comparative evaluation in this document is a product default"))
+assert "No comparative writing-quality promotion is justified" in blind_evidence
+assert "raw model output" in blind_evidence and "intentionally excluded" in blind_evidence
 assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md" in wiki_map
+assert "examples/blind-writing-quality-review.md" in wiki_map
 PY
+  python3 "$REPO_ROOT/scripts/test-blind-writing-review.py" | grep -q "passed 7 offline safety checks" || return 1
 }
 
 test_task_composition_and_repository_privacy() {

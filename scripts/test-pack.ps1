@@ -4967,12 +4967,17 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $styles = Get-Content -LiteralPath (Join-Path $repoRoot "web/static/styles.css") -Raw
     $assets = $html + (Get-Content -LiteralPath (Join-Path $repoRoot "web/static/app.js") -Raw)
     $writingDoc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/writing-model-evaluation.md") -Raw
+    $blindEvidence = Get-Content -LiteralPath (Join-Path $repoRoot "examples/blind-writing-quality-review.md") -Raw
     $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
     Assert-True -Condition ($assets -notmatch '(?i)(src|href)\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
     Assert-True -Condition ($html.IndexOf('id="text-panel"') -lt $html.IndexOf('id="connection-panel"') -and $html -match 'interaction-grid' -and $html -match 'configuration-column') -Message "Chat should be the primary interaction before the compact configuration column."
     Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."
     Assert-True -Condition ($writingDoc -match 'qwen3\.5:9b' -and $writingDoc -match 'gemma3:12b' -and $writingDoc -match 'mistral-small3\.2' -and $writingDoc -match 'granite4:7b-a1b-h' -and $writingDoc -match 'No candidate.*product default') -Message "Writing-model candidates must remain evidence-gated and unpromoted."
-    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
+    Assert-True -Condition ($blindEvidence -match "No comparative writing-quality promotion is justified" -and $blindEvidence -match "raw model output" -and $blindEvidence -match "intentionally excluded") -Message "Blind review evidence must remain sanitized and non-promotional."
+    $blindTest = @(& $python.Source (Join-Path $repoRoot "scripts/test-blind-writing-review.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Blind writing review offline safety tests should pass."
+    Assert-True -Condition (($blindTest -join "`n") -match "passed 7 offline safety checks") -Message "Blind writing review coverage should remain complete."
+    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
 }
 
 Invoke-PackTest "task composition and repository privacy foundations fail closed" {
