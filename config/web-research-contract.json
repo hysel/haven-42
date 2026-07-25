@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.offline-foundation",
+  "status": "proposed-offline-fixtures-only",
+  "activation": {
+    "runtimeRouteAllowed": false,
+    "modelToolAllowed": false,
+    "networkAllowed": false,
+    "dnsResolutionAllowed": false,
+    "urlFetchAllowed": false,
+    "browserAutomationAllowed": false,
+    "pageExecutionAllowed": false,
+    "downloadAllowed": false
+  },
+  "query": {
+    "explicitUserActionRequired": true,
+    "maximumCharacters": 256,
+    "credentialsAllowed": false,
+    "cookiesAllowed": false,
+    "repositoryContentAllowed": false,
+    "attachmentContentAllowed": false,
+    "hardwareProfileAllowed": false,
+    "automaticFollowUpAllowed": false
+  },
+  "futureBrokerBoundary": {
+    "fixedProviderRegistryRequired": true,
+    "ipClassRevalidationRequired": true,
+    "redirectRevalidationRequired": true,
+    "publicHttpDestinationsOnly": true,
+    "loopbackDestinationsAllowed": false,
+    "privateNetworkDestinationsAllowed": false,
+    "linkLocalDestinationsAllowed": false,
+    "credentialedUrlsAllowed": false,
+    "responseTextOnly": true,
+    "remoteActiveContentAllowed": false
+  },
+  "citations": {
+    "trustedRendererRequired": true,
+    "modelSuppliedActiveLinksAllowed": false,
+    "destinationDisclosureRequired": true,
+    "explicitNavigationRequired": true,
+    "remoteImagesAllowed": false,
+    "trackingAllowed": false
+  },
+  "lifecycle": {
+    "memoryOnly": true,
+    "persistenceAllowed": false,
+    "temporaryFilesAllowed": false,
+    "telemetryAllowed": false,
+    "cleanupRequired": true
+  },
+  "hostileFixture": "examples/fixtures/web-research-hostile-cases.json"
+}

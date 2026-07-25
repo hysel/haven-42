@@ -4942,15 +4942,19 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $policyPath = Join-Path $repoRoot "config/local-web-runtime-policy.json"
     $portablePolicyPath = Join-Path $repoRoot "config/portable-development-package-contract.json"
     $recommendationPath = Join-Path $repoRoot "config/text-capability-model-recommendations.json"
+    $lexicalContractPath = Join-Path $repoRoot "config/lexical-retrieval-contract.json"
+    $researchContractPath = Join-Path $repoRoot "config/web-research-contract.json"
     $docPath = Join-Path $repoRoot "docs/local-web-mvp.md"
-    foreach ($path in @($testPath, $policyPath, $portablePolicyPath, $recommendationPath, $docPath, (Join-Path $repoRoot "scripts/model_catalog_search.py"), (Join-Path $repoRoot "web/server.py"), (Join-Path $repoRoot "web/static/index.html"), (Join-Path $repoRoot "web/static/app.js"), (Join-Path $repoRoot "web/static/styles.css"))) {
+    foreach ($path in @($testPath, $policyPath, $portablePolicyPath, $recommendationPath, $lexicalContractPath, $researchContractPath, $docPath, (Join-Path $repoRoot "scripts/model_catalog_search.py"), (Join-Path $repoRoot "web/server.py"), (Join-Path $repoRoot "web/static/index.html"), (Join-Path $repoRoot "web/static/app.js"), (Join-Path $repoRoot "web/static/styles.css"))) {
         Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Local-web MVP file should exist: $path"
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "225 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "276 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     $portablePolicy = Get-Content -LiteralPath $portablePolicyPath -Raw | ConvertFrom-Json
+    $lexicalContract = Get-Content -LiteralPath $lexicalContractPath -Raw | ConvertFrom-Json
+    $researchContract = Get-Content -LiteralPath $researchContractPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $policy.runtimeId -Expected "haven42.local-web" -Message "Local-web runtime identity should be stable."
     Assert-True -Condition ($policy.implementationStatus -eq "text-tools-workflow-planning-and-promoted-image-admitted" -and -not $policy.bind.remoteBindAllowed) -Message "The admitted text, plan-only workflow, and promoted-image runtime must remain loopback-bound."
     Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
@@ -4961,6 +4965,8 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
     Assert-True -Condition ($policy.modelDiscovery.explicitOnlineConsentRequired -and -not $policy.modelDiscovery.redirectsAllowed -and -not $policy.modelDiscovery.automaticDownloadsAllowed -and -not $policy.modelDiscovery.pullApiAllowed -and -not $policy.modelDiscovery.commandExecutionAllowed) -Message "Public model discovery must stay explicit, fixed-origin, candidate-only, and non-installing."
+    Assert-True -Condition ($lexicalContract.status -eq "simulation-only-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding foundation."
+    Assert-True -Condition ($researchContract.status -eq "proposed-offline-fixtures-only" -and -not $researchContract.activation.runtimeRouteAllowed -and -not $researchContract.activation.modelToolAllowed -and -not $researchContract.activation.networkAllowed -and -not $researchContract.activation.dnsResolutionAllowed -and -not $researchContract.activation.urlFetchAllowed -and -not $researchContract.activation.browserAutomationAllowed) -Message "Controlled web research must remain an offline contract with no route, model tool, or network authority."
     Assert-True -Condition ($policy.readiness.explicitUserActionRequired -and $policy.readiness.registeredReadOnlyProbesOnly -and -not $policy.readiness.rendererHardwareFactsAccepted -and -not $policy.readiness.setupPlansMayInstall) -Message "Readiness scanning and setup planning must remain explicit, engine-owned, and effect free."
     Assert-Equal -Actual (($policy.text.capabilityIds | Sort-Object) -join ",") -Expected "content.summarize,content.write,general.chat" -Message "Only the three admitted local text capabilities should be exposed."
     foreach ($wrapper in @("scripts/start-haven42-web.ps1", "scripts/start-haven42-web.linux.sh", "scripts/start-haven42-web.macos.sh", "scripts/start-haven42-web.shared.sh")) {
@@ -5034,7 +5040,7 @@ if ($IsWindows) {
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 157 checks") -Message "The headless browser flow should exercise all 157 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 213 checks") -Message "The headless browser flow should exercise all 213 checks."
     }
 }
 

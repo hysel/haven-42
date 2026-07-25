@@ -1,6 +1,6 @@
 # Local Web MVP
 
-Haven 42 has a runnable local product experience for Windows, Linux, and macOS. It opens a local browser page, reports sanitized host readiness, connects to an explicitly selected Ollama endpoint, discovers installed models, and provides repository-free chat, writing, and summarization.
+Haven 42 has a runnable local product experience for Windows, Linux, and macOS. It opens a local browser page, reports sanitized host readiness, connects to an explicitly selected Ollama endpoint, discovers installed models, and provides repository-free chat, writing, summarization, and bounded user-selected text context.
 
 This is a local application, not a hosted website. Source execution does not require Node.js, Rust, Tauri, a cloud account, executable signing, or a public deployment. Unsigned PyInstaller one-folder development packages also remove the global Python requirement; see `docs/portable-development-package.md`.
 
@@ -75,6 +75,63 @@ tokens; generation throughput; and load, prompt, generation, and total timing.
 The renderer validates a strict nullable numeric schema and shows a compact
 memory-only disclosure. These values are diagnostics, not billing data,
 remaining-context calculations, or independently measured performance claims.
+
+## Attach Text And Screenshot Context
+
+The text workspace can attach up to five explicitly selected UTF-8 `.txt` or
+`.md` files. Each file is limited to 64 KiB and the combined selection to
+128 KiB. The browser shows normalized filenames, sizes, approximate token
+costs, removal, and clear-all controls. It never sends a filesystem path,
+scans a directory, watches files, or creates a persistent library.
+
+A single keyboard-operable browser control accepts only `.txt`, `.md`, and
+`.png`; a PNG screenshot can also be pasted from the clipboard. The selection
+is atomic, so one rejected file leaves the previous selection unchanged. A
+screenshot copied to the Windows clipboard can be pasted directly into the
+page. The initial image boundary accepts PNG items only, up to two screenshots,
+4 MiB each, and 8 MiB total. Each dimension is capped at 4096
+pixels and total pixels at 16.7 million. The browser shows a memory-only
+thumbnail; the engine independently verifies base64, PNG signature and chunk
+structure, CRCs, exact size, dimensions, and pixel budget before adding
+canonical image data to the Ollama chat message. Broader image file upload and
+JPEG, WebP, GIF, SVG, PDF, OCR, or image conversion are not admitted.
+
+The loopback service independently validates the complete attachment shape,
+extension/media-type match, UTF-8 content, exact byte count, duplicate names,
+per-file budget, and total budget. It labels selected text as untrusted
+reference material before adding it to the bounded provider request. File
+content cannot select a tool, command, path, provider, model, approval, or
+network destination. The same untrusted-data instruction covers image content,
+including visible or encoded prompt injection. The runtime exposes no
+attachment-driven tool, shell, process, filesystem-write, archive-expansion,
+or model-output execution path. This is execution prevention, not an antivirus
+claim; attached data may still contain hostile text, but Haven 42 never runs
+it. A private-network Ollama connection shows a prominent warning that the
+selected contents will leave the current machine. Deliberate Send after that
+warning confirms the transfer without a separate checkbox. Public provider
+destinations remain blocked.
+
+Ollama's chat contract supports an optional base64 `images` list on a user
+message for multimodal models. Haven 42 uses that fixed field, but no installed
+model currently has admitted image-input evidence. The UI therefore warns that
+screenshot understanding is unverified for the selected model and that the
+request may fail; successful transport does not promote a model as vision
+capable.
+
+Selection and extracted text remain in browser/process memory. New task,
+capability, model, or provider changes and process shutdown clear the selection.
+No temporary file, browser storage, server-side upload, or log is created.
+Directories, archives, PDF, Office files, source trees, OCR, active lexical
+retrieval, embeddings, vision-model promotion, and persistent indexes remain
+outside this initial admission. The lexical-retrieval contract and hostile
+fixtures are simulation-only: there is no route, UI control, provider payload,
+path access, parser, network operation, embedding, temporary file, or index.
+
+Controlled web research is also inactive. Its offline contract and hostile
+fixtures deny runtime routes, model tools, DNS, URL fetching, browser
+automation, page execution, downloads, persistence, and follow-up queries.
+The admitted fixed-origin model-catalog search does not grant general research
+authority.
 
 ## Registered software plans
 

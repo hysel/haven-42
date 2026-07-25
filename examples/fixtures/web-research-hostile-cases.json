@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "web-research-offline-hostile-fixtures",
+  "networkUsed": false,
+  "cases": [
+    {"id": "credentialed-url", "class": "credentials", "input": "fixture:credential-bearing-url", "expected": "rejected"},
+    {"id": "loopback-destination", "class": "ip-scope", "input": "http://127.0.0.1/", "expected": "rejected"},
+    {"id": "private-destination", "class": "ip-scope", "input": "fixture:private-ipv4-destination", "expected": "rejected"},
+    {"id": "link-local-destination", "class": "ip-scope", "input": "http://169.254.1.1/", "expected": "rejected"},
+    {"id": "redirect-to-private", "class": "redirect", "input": "https://example.invalid/redirect-private", "expected": "rejected"},
+    {"id": "oversized-response", "class": "resource-budget", "input": "fixture:oversized-text", "expected": "rejected"},
+    {"id": "active-html", "class": "page-execution", "input": "fixture:script-and-iframe", "expected": "inert-rejected"},
+    {"id": "prompt-injection", "class": "untrusted-content", "input": "fixture:ignore-policy-instructions", "expected": "inert-data"},
+    {"id": "forged-citation", "class": "citation", "input": "fixture:model-supplied-link", "expected": "inactive-rejected"},
+    {"id": "cancelled-retrieval", "class": "lifecycle", "input": "fixture:cancel-before-result", "expected": "cleaned"}
+  ]
+}

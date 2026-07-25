@@ -35,9 +35,36 @@ The provider address, machine identity, prompt response, and hardware details we
 | Application-reported model unload | Pass |
 | Independent process-list cleanup after explicit/final cleanup | Pass; empty |
 
-The offline integration suite separately passes 197 security and behavior checks covering Host, Origin, token, automatic local/LAN classification, public/unsafe endpoint rejection, unsafe discovered-model filtering, hostile recommendation-catalog rejection, remote assets, five truthful capability states, read-only health/evidence status, CSRF-protected readiness scans, exact in-memory snapshot binding, forged-hardware rejection, disabled setup planning, installed/uninstalled model labeling, capability-specific reset and ranking, per-capability model selection, model-switch cleanup, visible immediate and idle cleanup policies, compact provider-control contracts, stale-timer rejection, explicit cleanup, all three admitted text capabilities, typed artifacts and events, single-input enforcement, unsupported-capability rejection, failed-reconnect authority clearing, provider/empty-response cleanup, accessibility contracts, and loopback-binding boundaries.
+The offline integration suite separately passes 276 security and behavior checks covering Host, Origin, token, automatic local/LAN classification, public/unsafe endpoint rejection, unsafe discovered-model filtering, hostile recommendation-catalog rejection, remote assets, five truthful capability states, read-only health/evidence status, CSRF-protected readiness scans, exact in-memory snapshot binding, forged-hardware rejection, disabled setup planning, installed/uninstalled model labeling, capability-specific reset and ranking, per-capability model selection, model-switch cleanup, visible immediate and idle cleanup policies, compact provider-control contracts, stale-timer rejection, explicit cleanup, all three admitted text capabilities, bounded inert text/PNG attachment validation and provider disclosure, typed artifacts and events, single-input enforcement, unsupported-capability rejection, failed-reconnect authority clearing, provider/empty-response cleanup, accessibility contracts, and loopback-binding boundaries.
 
-The dependency-free headless Chromium flow now contains 111 checks against an isolated loopback fake provider. It verifies dialog and step semantics, secure-bootstrap focus, the Guided read-only scan and disabled plan, return navigation, provider-step focus, exact wizard/workspace provider-control sizing and typography, capability-specific model readiness, visible-control focus trapping, chat handoff, advanced-only handling for an unknown installed model, installed/candidate labeling, capability reset and relevance ranking, visible cleanup-policy application, and typed no-file-written result rendering. It makes no request to a real model server and downloads no browser or test dependency. Hosted Windows completion is the authoritative result for the current expanded flow.
+The dependency-free headless Chromium flow now contains 213 checks against an isolated loopback fake provider. It verifies dialog and step semantics, secure-bootstrap focus, the Guided read-only scan and disabled plan, return navigation, provider-step focus, exact wizard/workspace provider-control sizing and typography, capability-specific model readiness, visible-control focus trapping, chat handoff, the native keyboard-operable attachment button, connected picker lifecycle and pointer state, task-time picker locking and restoration, advanced-only handling for an unknown installed model, installed/candidate labeling, capability reset and relevance ranking, visible cleanup-policy application, safe Markdown, prompt recall, bounded atomic mixed text/PNG selection through one type-restricted picker, count and duplicate rejection, compact scroll-contained attachment layout that keeps the composer inside the chat panel, synthetic clipboard-PNG paste, warned submit-confirmed private-network transfer, and typed no-file-written result rendering. It makes no request to a real model server and downloads no browser or test dependency. The same flow can target the native packaged executable in each packaging job.
+
+## Native Windows Clipboard Screenshot Cell
+
+| Field | Value |
+| --- | --- |
+| Date | 2026-07-25 |
+| Application host | Windows x64 workstation |
+| UI | Source local-web application in the user’s default browser |
+| Provider | User-controlled trusted-LAN Ollama |
+| Model | Installed `qwen3.5:9b`; Ollama declared `vision` capability |
+| Screenshot content retained | No |
+| Endpoint or machine identity retained | No |
+
+The user created a native Windows screenshot, pasted it into the Haven 42 page,
+and confirmed that the bounded screenshot preview appeared correctly. The user
+then sent the screenshot through the warned private-network flow and judged the
+model’s description acceptable. No model was downloaded or changed. After the
+review, an independent Ollama process-list check identified the tested model,
+an exact unload request was issued, and a second process-list check verified
+that `qwen3.5:9b` was no longer resident.
+
+This is one source-runtime Windows/default-browser/user-review cell. It does not
+claim packaged-executable parity, another Windows browser, Linux or macOS native
+clipboard behavior, broad vision quality, OCR accuracy, or promotion of a
+vision-model recommendation. The screenshot, response, private endpoint,
+browser identity, hardware identity, and machine-local paths are intentionally
+excluded.
 
 ## Evidence Boundary
 

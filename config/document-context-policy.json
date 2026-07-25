@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "status": "bounded-inert-attachment-admitted",
+  "selection": {
+    "explicitBrowserFileSelectionRequired": true,
+    "directorySelectionAllowed": false,
+    "backgroundScanningAllowed": false,
+    "arbitraryPathInputAllowed": false,
+    "pathSentToEngine": false
+  },
+  "formats": {
+    "allowedExtensions": [".txt", ".md"],
+    "allowedMediaTypes": ["text/plain", "text/markdown"],
+    "utf8Required": true,
+    "archivesAllowed": false,
+    "pdfAllowed": false,
+    "officeDocumentsAllowed": false,
+    "ocrAllowed": false,
+    "clipboardImages": {
+      "allowedMediaTypes": ["image/png"],
+      "filePickerAllowed": true,
+      "clipboardPasteAllowed": true,
+      "imageInputEvidence": "unverified-visible-warning"
+    }
+  },
+  "budgets": {
+    "maximumFiles": 5,
+    "maximumBytesPerFile": 65536,
+    "maximumTotalBytes": 131072,
+    "tokenEstimateDivisor": 4,
+    "maximumImages": 2,
+    "maximumBytesPerImage": 4194304,
+    "maximumImageTotalBytes": 8388608,
+    "maximumImageDimension": 4096,
+    "maximumImagePixels": 16777216
+  },
+  "providerDisclosure": {
+    "loopbackDisclosureRequired": true,
+    "privateNetworkConfirmationRequired": true,
+    "privateNetworkWarningRequired": true,
+    "confirmationMechanism": "deliberate-submit-after-visible-warning",
+    "separateConfirmationControlRequired": false,
+    "publicProviderAllowed": false
+  },
+  "executionIsolation": {
+    "attachmentContentTreatedAsData": true,
+    "executableFormatsAllowed": false,
+    "archiveExpansionAllowed": false,
+    "contentDrivenProcessLaunchAllowed": false,
+    "contentDrivenToolInvocationAllowed": false,
+    "contentDrivenFilesystemAccessAllowed": false,
+    "modelOutputExecutionAllowed": false,
+    "antivirusScanningClaimed": false
+  },
+  "lifecycle": {
+    "browserMemoryOnly": true,
+    "serverPersistenceAllowed": false,
+    "browserStorageAllowed": false,
+    "temporaryFilesAllowed": false,
+    "clearOnNewTask": true,
+    "clearOnCapabilityChange": true,
+    "clearOnModelChange": true,
+    "clearOnProviderChange": true,
+    "clearOnFailure": true,
+    "clearOnShutdown": true
+  },
+  "retrieval": {
+    "mode": "whole-selected-text-with-bounded-provider-payload",
+    "semanticIndexAllowed": false,
+    "persistentIndexAllowed": false
+  }
+}

@@ -19,7 +19,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 
-ROOT = Path(__file__).resolve().parent.parent
+SOURCE_ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 SAFE_VERSION = re.compile(r"^[\x20-\x7e]{1,160}$")
 SAFE_MODEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$")
 PROBE_TIMEOUT_SECONDS = 3

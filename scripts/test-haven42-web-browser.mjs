@@ -13,6 +13,7 @@ const TEST_PNG = Buffer.from("89504e470d0a1a0a0000000d494844520000020000000200",
 let models = ["qwen3.5:9b", "unknown-model:latest"];
 const loaded = new Set();
 const requests = [];
+const chatPayloads = [];
 const trace = (message) => {
   if (process.env.HAVEN42_BROWSER_TEST_TRACE === "1") process.stderr.write(`[browser-test] ${message}\n`);
 };
@@ -52,6 +53,7 @@ const fake = createServer((request, response) => {
   request.on("end", () => {
     const payload = body ? JSON.parse(body) : {};
     if (request.url === "/api/chat") {
+      chatPayloads.push(payload);
       loaded.add(payload.model);
       if (payload.messages?.at(-1)?.content === "force browser failure") {
         return json(response, 502, { error: "forced-browser-provider-failure" });
@@ -134,6 +136,12 @@ function resolveBrowser() {
     "C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe",
     "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+    "/usr/bin/google-chrome",
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "/Applications/Chromium.app/Contents/MacOS/Chromium",
   ].filter(Boolean);
   for (const candidate of candidates) {
     if (existsSync(candidate)) return candidate;
@@ -235,7 +243,10 @@ async function connectPageCdp(debugPort, origin, browser, browserLaunchError) {
 }
 
 const fakePort = await listen(fake);
-const python = resolvePython();
+const packagedExecutable = process.env.HAVEN42_TEST_EXECUTABLE
+  ? resolve(ROOT, process.env.HAVEN42_TEST_EXECUTABLE)
+  : "";
+const python = packagedExecutable ? null : resolvePython();
 const browserPath = resolveBrowser();
 const profile = mkdtempSync(join(tmpdir(), "haven42-browser-"));
 let haven;
@@ -246,8 +257,12 @@ let browserLaunchError;
 
 try {
   trace("launching-local-web");
-  haven = spawn(python.command, [...python.prefix, "-u", join(ROOT, "web", "server.py"), "--port", "0", "--no-open"], {
-    cwd: ROOT,
+  const havenCommand = packagedExecutable || python.command;
+  const havenArguments = packagedExecutable
+    ? ["--port", "0", "--no-open"]
+    : [...python.prefix, "-u", join(ROOT, "web", "server.py"), "--port", "0", "--no-open"];
+  haven = spawn(havenCommand, havenArguments, {
+    cwd: packagedExecutable ? dirname(packagedExecutable) : ROOT,
     windowsHide: true,
     stdio: ["ignore", "pipe", "pipe"],
   });
@@ -406,10 +421,34 @@ try {
   const opened = await cdp.evaluate(`({
     hidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
     promptEnabled: !document.querySelector('#prompt').disabled,
-    model: document.querySelector('#model').value
+    model: document.querySelector('#model').value,
+    browseEnabled: !document.querySelector('#context-files').disabled,
+    browseCursor: getComputedStyle(document.querySelector('.context-picker')).cursor,
+    browseControlCount: document.querySelectorAll('.context-picker').length,
+    browseTag: document.querySelector('.context-picker').tagName,
+    browseFocusable: document.querySelector('.context-picker').tabIndex === 0
   })`);
-  if (!opened.hidden || !opened.promptEnabled || opened.model !== "automatic") throw new Error("chat-handoff");
-  checks += 3;
+  if (
+    !opened.hidden
+    || !opened.promptEnabled
+    || opened.model !== "automatic"
+    || !opened.browseEnabled
+    || opened.browseCursor !== "pointer"
+    || opened.browseControlCount !== 1
+    || opened.browseTag !== "BUTTON"
+    || !opened.browseFocusable
+  ) throw new Error(`chat-handoff:${JSON.stringify(opened)}`);
+  const browseActivation = await cdp.evaluate(`(() => {
+    const input = document.querySelector('#context-files');
+    const original = input.click;
+    let activations = 0;
+    input.click = () => { activations += 1; };
+    document.querySelector('#browse-context').click();
+    input.click = original;
+    return activations;
+  })()`);
+  if (browseActivation !== 1) throw new Error("browse-button-did-not-activate-picker");
+  checks += 9;
   trace("chat-handoff-verified");
 
   const compactControls = await cdp.evaluate(`({
@@ -866,6 +905,300 @@ try {
   ) throw new Error(`configurable-prompt-history:${JSON.stringify(configurableHistory)}`);
   checks += 8;
   trace("prompt-history-verified");
+
+  const contextSelection = await cdp.evaluate(`(async () => {
+    await addContextFiles([
+      new File(
+        ['# Browser context\\nThe project codename is Meadow.\\n<img src=x onerror=alert(1)>'],
+        'notes.md',
+        {type: 'text/markdown'}
+      )
+    ]);
+    return {
+      count: state.contextFiles.length,
+      name: document.querySelector('.context-file-name')?.textContent || '',
+      status: document.querySelector('#context-status').textContent,
+      networkWarningHidden: document.querySelector('#context-network-warning').classList.contains('hidden'),
+      policy: document.querySelector('.context-policy').textContent,
+      preview: document.querySelector('.context-preview pre')?.textContent || '',
+      activePreviewElements: document.querySelectorAll('.context-preview img, .context-preview script').length
+    };
+  })()`).then((value) => value);
+  if (
+    contextSelection.count !== 1
+    || contextSelection.name !== "notes.md"
+    || !contextSelection.status.includes("1 text file")
+    || !contextSelection.status.includes("tokens")
+    || !contextSelection.networkWarningHidden
+    || !contextSelection.policy.includes("no paths")
+    || !contextSelection.preview.includes("<img src=x onerror=alert(1)>")
+    || contextSelection.activePreviewElements !== 0
+  ) throw new Error(`context-selection:${JSON.stringify(contextSelection)}`);
+  checks += 8;
+
+  const invalidContextBlocked = await cdp.evaluate(`(async () => {
+    try {
+      await addContextAttachments([new File(['pdf'], 'unsafe.pdf', {type: 'application/pdf'})]);
+      return false;
+    } catch (error) {
+      return error.message === 'invalid-context-file-type' && state.contextFiles.length === 1;
+    }
+  })()`);
+  if (!invalidContextBlocked) throw new Error("invalid-context-file-not-blocked");
+  const invalidUtf8Blocked = await cdp.evaluate(`(async () => {
+    try {
+      await addContextFiles([
+        new File([new Uint8Array([0xff, 0xfe, 0xff])], 'invalid.txt', {type: 'text/plain'})
+      ]);
+      return false;
+    } catch (error) {
+      return error.message === 'invalid-context-file-content' && state.contextFiles.length === 1;
+    }
+  })()`);
+  if (!invalidUtf8Blocked) throw new Error("invalid-context-utf8-not-blocked");
+  const atomicMixedSelectionBlocked = await cdp.evaluate(`(async () => {
+    const before = {
+      files: state.contextFiles.map((item) => item.name),
+      images: state.contextImages.map((item) => item.name)
+    };
+    try {
+      await addContextAttachments([
+        new File(['valid but must roll back'], 'rollback.md', {type: 'text/markdown'}),
+        new File(['not really png'], 'hostile.png', {type: 'image/jpeg'})
+      ]);
+      return false;
+    } catch (error) {
+      return error.message === 'invalid-context-image-type'
+        && JSON.stringify(before.files) === JSON.stringify(state.contextFiles.map((item) => item.name))
+        && JSON.stringify(before.images) === JSON.stringify(state.contextImages.map((item) => item.name));
+    }
+  })()`);
+  if (!atomicMixedSelectionBlocked) throw new Error("mixed-context-selection-not-atomic");
+  const textLimitBlocked = await cdp.evaluate(`(async () => {
+    const files = Array.from({length: 5}, (_, index) => (
+      new File(['bounded'], 'extra-' + index + '.txt', {type: 'text/plain'})
+    ));
+    try {
+      await addContextAttachments(files);
+      return false;
+    } catch (error) {
+      return error.message === 'invalid-context-file-count'
+        && state.contextFiles.length === 1
+        && state.contextImages.length === 0;
+    }
+  })()`);
+  if (!textLimitBlocked) throw new Error("unified-picker-text-limit-not-enforced");
+  const duplicateSelectionBlocked = await cdp.evaluate(`(async () => {
+    try {
+      await addContextAttachments([
+        new File(['duplicate'], state.contextFiles[0].name, {type: 'text/plain'})
+      ]);
+      return false;
+    } catch (error) {
+      return error.message === 'duplicate-context-file-name'
+        && state.contextFiles.length === 1
+        && state.contextImages.length === 0;
+    }
+  })()`);
+  if (!duplicateSelectionBlocked) throw new Error("unified-picker-duplicate-not-enforced");
+  checks += 5;
+
+  const chatRequestsBeforeDisclosure = chatPayloads.length;
+  const disclosureSubmit = await cdp.evaluate(`(() => {
+    state.providerTrustScope = 'trusted-lan';
+    renderContextFiles();
+    const result = {
+      warningVisible: !document.querySelector('#context-network-warning').classList.contains('hidden'),
+      warning: document.querySelector('#context-network-warning').textContent,
+      checkboxAbsent: document.querySelector('#context-consent') === null
+    };
+    document.querySelector('#prompt').value = 'Use the attached project notes.';
+    document.querySelector('#text-form').requestSubmit();
+    result.browseLockedDuringTask = document.querySelector('#context-files').disabled;
+    result.browseButtonLockedDuringTask = document.querySelector('#browse-context').disabled;
+    // The fixture provider is loopback; server-side trusted-LAN enforcement is
+    // covered by the source integration suite. The request has already captured
+    // submit-as-confirmation before this response-validation state is restored.
+    state.providerTrustScope = 'loopback';
+    return result;
+  })()`);
+  await waitFor(() => chatPayloads.length === chatRequestsBeforeDisclosure + 1);
+  await waitFor(() => cdp.evaluate(
+    "document.querySelector('#text-status').textContent.includes('response complete')",
+  ));
+  const browseRestoredAfterTask = await cdp.evaluate(
+    "!document.querySelector('#context-files').disabled && !document.querySelector('#browse-context').disabled",
+  );
+  if (
+    !disclosureSubmit.warningVisible
+    || !disclosureSubmit.warning.includes("Pressing Send")
+    || !disclosureSubmit.warning.includes("private-network Ollama server")
+    || !disclosureSubmit.checkboxAbsent
+    || !disclosureSubmit.browseLockedDuringTask
+    || !disclosureSubmit.browseButtonLockedDuringTask
+    || !browseRestoredAfterTask
+    || chatPayloads.length !== chatRequestsBeforeDisclosure + 1
+  ) throw new Error(`private-context-disclosure:${JSON.stringify(disclosureSubmit)}`);
+  checks += 8;
+  const contextPayload = chatPayloads.at(-1);
+  if (
+    !contextPayload.messages.at(-1).content.includes("untrusted reference material")
+    || !contextPayload.messages.at(-1).content.includes("project codename is Meadow")
+  ) throw new Error("context-provider-payload");
+  const contextAfterSend = await cdp.evaluate(`(() => {
+    const beforeRemove = state.contextFiles.length;
+    document.querySelector('.remove-context-file').click();
+    const afterRemove = state.contextFiles.length;
+    const status = document.querySelector('#context-status').textContent;
+    state.providerTrustScope = 'loopback';
+    renderContextFiles();
+    return {beforeRemove, afterRemove, status};
+  })()`);
+  if (
+    contextAfterSend.beforeRemove !== 1
+    || contextAfterSend.afterRemove !== 0
+    || !contextAfterSend.status.includes("No files or screenshots selected")
+  ) throw new Error(`context-cleanup:${JSON.stringify(contextAfterSend)}`);
+  checks += 3;
+
+  const screenshotPaste = await cdp.evaluate(`(() => {
+    const encoded = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    const bytes = Uint8Array.from(atob(encoded), (value) => value.charCodeAt(0));
+    const clipboard = new DataTransfer();
+    clipboard.items.add(new File([bytes], 'clipboard.png', {type: 'image/png'}));
+    const notPrevented = document.dispatchEvent(
+      new ClipboardEvent('paste', {clipboardData: clipboard, bubbles: true, cancelable: true})
+    );
+    return {notPrevented};
+  })()`);
+  await waitFor(() => cdp.evaluate("state.contextImages.length === 1"));
+  const screenshotUi = await cdp.evaluate(`({
+    count: state.contextImages.length,
+    name: document.querySelector('.context-image-meta strong')?.textContent || '',
+    thumbnail: document.querySelector('.context-image img')?.src || '',
+    alt: document.querySelector('.context-image img')?.alt || '',
+    status: document.querySelector('#context-status').textContent,
+    warning: document.querySelector('#context-image-warning').textContent,
+    warningVisible: !document.querySelector('#context-image-warning').classList.contains('hidden')
+  })`);
+  if (
+    screenshotPaste.notPrevented
+    || screenshotUi.count !== 1
+    || screenshotUi.name !== "clipboard-screenshot-1.png"
+    || !screenshotUi.thumbnail.startsWith("data:image/png;base64,")
+    || screenshotUi.alt !== "Screenshot 1: clipboard-screenshot-1.png"
+    || !screenshotUi.status.includes("1 screenshot")
+    || !screenshotUi.warningVisible
+    || !screenshotUi.warning.includes("unverified")
+  ) throw new Error(`screenshot-paste:${JSON.stringify({screenshotPaste, screenshotUi})}`);
+  const unsupportedScreenshotBlocked = await cdp.evaluate(`(async () => {
+    try {
+      await addContextImage(new Blob(['jpeg'], {type: 'image/jpeg'}));
+      return false;
+    } catch (error) {
+      return error.message === 'invalid-context-image-type' && state.contextImages.length === 1;
+    }
+  })()`);
+  if (!unsupportedScreenshotBlocked) throw new Error("unsupported-screenshot-not-blocked");
+  checks += 9;
+
+  const chatRequestsBeforeScreenshot = chatPayloads.length;
+  await cdp.evaluate(`(() => {
+    document.querySelector('#prompt').value = 'Describe the pasted screenshot.';
+    document.querySelector('#text-form').requestSubmit();
+  })()`);
+  await waitFor(() => chatPayloads.length === chatRequestsBeforeScreenshot + 1);
+  await waitFor(() => cdp.evaluate(
+    "document.querySelector('#task-event').textContent.includes('screenshot understanding is unverified')",
+  ));
+  const screenshotPayload = chatPayloads.at(-1);
+  if (
+    !Array.isArray(screenshotPayload.messages.at(-1).images)
+    || screenshotPayload.messages.at(-1).images.length !== 1
+    || !screenshotPayload.messages.at(-1).images[0].startsWith("iVBOR")
+  ) throw new Error("screenshot-provider-payload");
+  const screenshotCleanup = await cdp.evaluate(`(() => {
+    document.querySelector('.remove-context-image').click();
+    return {
+      count: state.contextImages.length,
+      thumbnailCount: document.querySelectorAll('.context-image img').length,
+      status: document.querySelector('#context-status').textContent
+    };
+  })()`);
+  if (
+    screenshotCleanup.count !== 0
+    || screenshotCleanup.thumbnailCount !== 0
+    || !screenshotCleanup.status.includes("No files or screenshots selected")
+  ) throw new Error(`screenshot-cleanup:${JSON.stringify(screenshotCleanup)}`);
+  checks += 4;
+
+  const screenshotBrowseControl = await cdp.evaluate(`(() => {
+    const encoded = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    const bytes = Uint8Array.from(atob(encoded), (value) => value.charCodeAt(0));
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['mixed context'], 'selected-notes.md', {type: 'text/markdown'}));
+    transfer.items.add(new File([bytes], 'selected-screen.png', {type: 'image/png'}));
+    const input = document.querySelector('#context-files');
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+    return {accept: input.accept, multiple: input.multiple};
+  })()`);
+  await waitFor(() => cdp.evaluate("state.contextFiles.length === 1 && state.contextImages.length === 1"));
+  const screenshotBrowse = await cdp.evaluate(`({
+    fileCount: state.contextFiles.length,
+    fileName: document.querySelector('.context-file-name')?.textContent || '',
+    count: state.contextImages.length,
+    name: document.querySelector('.context-image-meta strong')?.textContent || '',
+    alt: document.querySelector('.context-image img')?.alt || '',
+    thumbnail: document.querySelector('.context-image img')?.src || ''
+  })`);
+  if (
+    screenshotBrowseControl.accept !== ".txt,.md,.png,text/plain,text/markdown,image/png"
+    || !screenshotBrowseControl.multiple
+    || screenshotBrowse.fileCount !== 1
+    || screenshotBrowse.fileName !== "selected-notes.md"
+    || screenshotBrowse.count !== 1
+    || screenshotBrowse.name !== "selected-screen.png"
+    || screenshotBrowse.alt !== "Screenshot 1: selected-screen.png"
+    || !screenshotBrowse.thumbnail.startsWith("data:image/png;base64,")
+  ) throw new Error(`screenshot-browse:${JSON.stringify({screenshotBrowseControl, screenshotBrowse})}`);
+  await cdp.call("Emulation.setDeviceMetricsOverride", {
+    width: 1400,
+    height: 580,
+    deviceScaleFactor: 1,
+    mobile: false,
+  });
+  await delay(50);
+  const attachmentLayout = await cdp.evaluate(`(() => {
+    const panel = document.querySelector('#text-panel').getBoundingClientRect();
+    const context = document.querySelector('.context-panel');
+    const contextBox = context.getBoundingClientRect();
+    const composer = document.querySelector('#text-form').getBoundingClientRect();
+    return {
+      composerInsidePanel: composer.top >= panel.top && composer.bottom <= panel.bottom + 1,
+      contextHeight: contextBox.height,
+      contextScrollable: context.scrollHeight > context.clientHeight,
+      contextOverflow: getComputedStyle(context).overflowY,
+      messageMinHeight: getComputedStyle(document.querySelector('#messages')).minHeight
+    };
+  })()`);
+  await cdp.call("Emulation.clearDeviceMetricsOverride");
+  if (
+    !attachmentLayout.composerInsidePanel
+    || attachmentLayout.contextHeight > 191
+    || !attachmentLayout.contextScrollable
+    || attachmentLayout.contextOverflow !== "auto"
+    || attachmentLayout.messageMinHeight !== "0px"
+  ) throw new Error(`attachment-layout:${JSON.stringify(attachmentLayout)}`);
+  const documentContextBrowseCleanup = await cdp.evaluate(`(() => {
+    document.querySelector('#clear-context').click();
+    return {files: state.contextFiles.length, images: state.contextImages.length};
+  })()`);
+  if (documentContextBrowseCleanup.files !== 0 || documentContextBrowseCleanup.images !== 0) {
+    throw new Error("screenshot-browse-cleanup");
+  }
+  checks += 13;
+  trace("document-context-verified");
 
   await cdp.evaluate("document.querySelector('#software-nav').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#workflow-select').disabled"));

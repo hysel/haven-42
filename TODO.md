@@ -551,19 +551,22 @@
 ## Milestone 27: Local Knowledge Context And Retrieval
 
 - [x] Define the staged roadmap boundary: explicit user selection, no automatic machine scanning, no arbitrary path API, memory-only initial operation, and private-network provider disclosure.
-- [ ] Define versioned document-ingestion, context-budget, provider-disclosure, and memory-lifecycle contracts with default-deny effects.
-- [ ] Add hostile offline fixtures for names, encodings, size/count limits, duplicate content, prompt injection, truncation, exact provider payloads, and residue-free cleanup.
-- [ ] Implement explicit multi-file attachment for a minimal UTF-8 text allowlist; keep directories, archives, PDF, Office documents, OCR, embeddings, and persistence unadmitted.
+- [x] Define the initial versioned document-ingestion, context-budget, provider-disclosure, and memory-lifecycle contract with default-deny effects.
+- [x] Add hostile offline fixtures for initial names, encodings, size/count limits, duplicate names, prompt-injection isolation, exact provider payloads, and residue-free cleanup; retrieval truncation fixtures remain with retrieval.
+- [x] Implement explicit multi-file attachment for UTF-8 `.txt`/`.md` with five-file, 64-KiB-per-file, and 128-KiB-total limits; keep directories, archives, PDF, Office documents, OCR, embeddings, and persistence unadmitted.
+- [x] Add explicit PNG screenshot browsing and clipboard paste with safe thumbnails, two-image/4-MiB-per-image/8-MiB-total limits, strict PNG structure/CRC/dimension/pixel validation, warned submit-confirmed private-network transfer, and a visible unverified image-input warning; no vision model is promoted.
+- [x] Define a simulation-only deterministic lexical-retrieval contract and hostile offline fixtures with no runtime route, UI control, provider payload, path, parser, network, embedding, or persistence authority.
 - [ ] Add deterministic memory-only lexical retrieval with extracted-text preview, token estimates, per-response chunk disclosure, removal, and clear-all controls.
-- [ ] Require a new explicit confirmation before selected content is sent to a private-network provider; continue blocking public provider destinations.
+- [x] Show a prominent private-network transfer warning and treat deliberate Send as confirmation without a separate checkbox; continue blocking public provider destinations.
+- [x] Record one sanitized Windows source-runtime/default-browser native clipboard-PNG paste and user-reviewed `qwen3.5:9b` screenshot-description pass with independently verified model unload; packaged Windows, Linux, and macOS cells remain open.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promoting the capability.
 - [ ] Evaluate folder selection, semantic embeddings, and persistent encrypted libraries only as separate later security and product gates.
 
 ## Milestone 28: Controlled Web Research
 
 - [x] Define the staged roadmap boundary: explicit per-query approval, engine-owned fixed adapters, no unrestricted model/renderer network access, trusted citations, SSRF controls, and memory-only cleanup.
-- [ ] Define versioned search-query, result, citation, provider-disclosure, research-budget, and lifecycle contracts with follow-up effects denied by default.
-- [ ] Add hostile offline fixtures for destination confusion, DNS/IP classes, redirects, credentials, malformed/oversized content, prompt injection, citation forgery, cancellation, and cleanup.
+- [x] Define the offline-only versioned search-query, citation, provider-disclosure, and lifecycle foundation with runtime routes, model tools, network, DNS, URL fetching, browser automation, page execution, downloads, and follow-up effects denied by default.
+- [x] Add inert hostile offline fixtures for destination confusion, IP classes, redirects, credentials, oversized content, prompt injection, citation forgery, cancellation, and cleanup; executable broker tests remain with a future adapter.
 - [ ] Implement one explicit query-only adapter that sends only the reviewed bounded query and returns strict result metadata.
 - [ ] Add trusted citation rendering with destination disclosure and no model-supplied active links.
 - [ ] Add explicit selected-page retrieval only after DNS/IP revalidation, redirect controls, textual content allowlisting, byte/time limits, inert extraction, and no page execution pass.
