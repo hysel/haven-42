@@ -341,6 +341,27 @@ try {
   checks += 2;
   trace("advanced-model-verified");
 
+  const modelsView = await cdp.evaluate(`(() => {
+    document.querySelector('#models-nav').click();
+    return {
+      active: document.querySelector('#models-nav').classList.contains('active'),
+      visible: !document.querySelector('#models-panel').classList.contains('hidden'),
+      textHidden: document.querySelector('#text-panel').classList.contains('hidden'),
+      imageHidden: document.querySelector('#image-panel').classList.contains('hidden'),
+      focused: document.activeElement.id,
+      installed: document.querySelectorAll('#model-search-results .model-search-result').length
+    };
+  })()`);
+  if (
+    !modelsView.active
+    || !modelsView.visible
+    || !modelsView.textHidden
+    || !modelsView.imageHidden
+    || modelsView.focused !== "models-title"
+    || modelsView.installed !== 1
+  ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
+  checks += 6;
+
   await cdp.evaluate(`(() => {
     const original = window.fetch;
     window.__havenOriginalFetch = original;
@@ -429,10 +450,21 @@ try {
   await cdp.evaluate("window.fetch = window.__havenOriginalFetch");
   trace("candidate-model-discovery-verified");
 
-  await cdp.evaluate(`(() => {
+  const keyboardSubmit = await cdp.evaluate(`(() => {
+    document.querySelector('.capability-nav[data-capability="general.chat"]').click();
     document.querySelector('#prompt').value = 'browser flow';
-    document.querySelector('#text-form').requestSubmit();
+    const shiftNotPrevented = document.querySelector('#prompt').dispatchEvent(
+      new KeyboardEvent('keydown', {key: 'Enter', shiftKey: true, bubbles: true, cancelable: true})
+    );
+    const enterNotPrevented = document.querySelector('#prompt').dispatchEvent(
+      new KeyboardEvent('keydown', {key: 'Enter', bubbles: true, cancelable: true})
+    );
+    return {shiftNotPrevented, enterNotPrevented};
   })()`);
+  if (!keyboardSubmit.shiftNotPrevented || keyboardSubmit.enterNotPrevented) {
+    throw new Error(`enter-submit-contract:${JSON.stringify(keyboardSubmit)}`);
+  }
+  checks += 2;
   try {
     await waitFor(() => cdp.evaluate(`(
       [...document.querySelectorAll('.message p')].some((item) => item.textContent === 'LOCAL_BROWSER_OK')
@@ -483,7 +515,10 @@ try {
     textHidden: document.querySelector('#text-panel').classList.contains('hidden'),
     active: document.querySelector('#software-nav').classList.contains('active'),
     focused: document.activeElement.id,
-    busy: document.querySelector('#software-panel').getAttribute('aria-busy')
+    busy: document.querySelector('#software-panel').getAttribute('aria-busy'),
+    visiblePanels: [...document.querySelectorAll('.chat-panel')].filter((item) => getComputedStyle(item).display !== 'none').length,
+    headingInside: document.querySelector('#software-panel .panel-heading').getBoundingClientRect().top
+      >= document.querySelector('#software-panel').getBoundingClientRect().top
   })`);
   if (
     !workflow.title
@@ -493,8 +528,10 @@ try {
     || !workflow.active
     || workflow.focused !== "workflow-result-title"
     || workflow.busy !== "false"
+    || workflow.visiblePanels !== 1
+    || !workflow.headingInside
   ) throw new Error(`workflow-plan-rendering:${JSON.stringify(workflow)}`);
-  checks += 7;
+  checks += 9;
   trace("workflow-plan-verified");
 
   await cdp.evaluate("document.querySelector('#image-nav').click()");
@@ -517,7 +554,10 @@ try {
     download: document.querySelector('#image-download').getAttribute('download'),
     active: document.querySelector('#image-nav').classList.contains('active'),
     focused: document.activeElement.id,
-    busy: document.querySelector('#image-panel').getAttribute('aria-busy')
+    busy: document.querySelector('#image-panel').getAttribute('aria-busy'),
+    visiblePanels: [...document.querySelectorAll('.chat-panel')].filter((item) => getComputedStyle(item).display !== 'none').length,
+    headingInside: document.querySelector('#image-panel .panel-heading').getBoundingClientRect().top
+      >= document.querySelector('#image-panel').getBoundingClientRect().top
   })`);
   if (
     !imageResult.badge.includes("loopback")
@@ -528,8 +568,10 @@ try {
     || !imageResult.active
     || imageResult.focused !== "image-preview"
     || imageResult.busy !== "false"
+    || imageResult.visiblePanels !== 1
+    || !imageResult.headingInside
   ) throw new Error(`image-result-rendering:${JSON.stringify(imageResult)}`);
-  checks += 8;
+  checks += 10;
   trace("image-flow-verified");
 
   await cdp.call("Emulation.setEmulatedMedia", {
@@ -542,22 +584,41 @@ try {
     const models = {
       active: document.querySelector('#models-nav').classList.contains('active'),
       focused: document.activeElement.id,
+      visible: !document.querySelector('#models-panel').classList.contains('hidden'),
+      imageHidden: document.querySelector('#image-panel').classList.contains('hidden'),
+      installed: document.querySelectorAll('#model-search-results .model-search-result').length,
     };
     document.querySelector('#system-nav').click();
     const system = {
       active: document.querySelector('#system-nav').classList.contains('active'),
       focused: document.activeElement.id,
     };
-    return {reducedMotion, models, system};
+    document.querySelector('#about-nav').click();
+    const about = {
+      active: document.querySelector('#about-nav').classList.contains('active'),
+      visible: !document.querySelector('#about-panel').classList.contains('hidden'),
+      modelsHidden: document.querySelector('#models-panel').classList.contains('hidden'),
+      focused: document.activeElement.id,
+      version: document.querySelector('#about-version').textContent,
+    };
+    return {reducedMotion, models, system, about};
   })()`);
   if (
     navigation.reducedMotion !== "auto"
     || !navigation.models.active
     || navigation.models.focused !== "models-title"
+    || !navigation.models.visible
+    || !navigation.models.imageHidden
+    || navigation.models.installed !== 1
     || !navigation.system.active
     || navigation.system.focused !== "system-title"
+    || !navigation.about.active
+    || !navigation.about.visible
+    || !navigation.about.modelsHidden
+    || navigation.about.focused !== "about-title"
+    || !navigation.about.version.startsWith("v")
   ) throw new Error(`accessible-navigation:${JSON.stringify(navigation)}`);
-  checks += 5;
+  checks += 13;
   trace("accessible-navigation-verified");
 
   const hostileEvents = await cdp.evaluate(`(() => {

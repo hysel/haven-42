@@ -4882,6 +4882,7 @@ Invoke-PackTest "product UI first slice is registry-backed and fail closed" {
     Assert-Equal -Actual $ui.schemaVersion -Expected 1 -Message "UI navigation should be schema v1."
     Assert-True -Condition (-not $ui.runtimeAdmitted -and -not $ui.principles.rendererIsExecutionAuthority -and -not $ui.principles.remoteContentAllowed) -Message "The UI contract must not claim runtime admission or renderer authority."
     Assert-True -Condition (-not $ui.firstRun.networkProbeByDefault -and -not $ui.firstRun.installsSoftwareByDefault -and -not $ui.firstRun.downloadsModelsByDefault) -Message "First run must be offline and non-installing by default."
+    Assert-True -Condition ((@($ui.shell.primaryNavigation) -join ',') -eq 'home,chat,software,images,models,system,about' -and @($ui.routes | Where-Object { $_.id -eq 'about' -and $_.kind -eq 'information' }).Count -eq 1) -Message "Primary navigation should expose one non-executable About route."
     Assert-Equal -Actual $onboarding.schemaVersion -Expected 1 -Message "Progressive onboarding should be schema v1."
     Assert-True -Condition (-not $onboarding.runtimeAdmitted -and -not $onboarding.stateDerivation.rendererMaySelectState) -Message "Onboarding must not admit runtime or renderer-selected evidence state."
     Assert-True -Condition ((@($onboarding.choices.id) -join ',') -eq 'guided-setup,existing-setup,not-now') -Message "Every configurable capability should expose guided, existing, and not-now choices."
@@ -4945,7 +4946,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "180 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "188 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $policy.runtimeId -Expected "haven42.local-web" -Message "Local-web runtime identity should be stable."
     Assert-True -Condition ($policy.implementationStatus -eq "text-tools-workflow-planning-and-promoted-image-admitted" -and -not $policy.bind.remoteBindAllowed) -Message "The admitted text, plan-only workflow, and promoted-image runtime must remain loopback-bound."
@@ -5028,7 +5029,7 @@ if ($IsWindows) {
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 66 checks") -Message "The headless browser flow should exercise all 66 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 86 checks") -Message "The headless browser flow should exercise all 86 checks."
     }
 }
 

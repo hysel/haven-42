@@ -16,6 +16,11 @@ Continue, Aider, and OpenCode are the maintained engineering surfaces. General t
 
 ## Current Stage
 
+The admitted local web UI now enforces one visible primary panel, provides
+dedicated Models and About views, exposes capability-specific installed-model
+selection beside candidate search, and supports Enter-to-send with Shift+Enter
+for multiline input.
+
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system
 status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Milestone 22B retains executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native

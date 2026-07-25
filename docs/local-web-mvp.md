@@ -104,6 +104,13 @@ output, and the UI discloses that material effect before execution.
 
 The conversation workspace is the primary desktop interaction. The left navigation stays pinned below the local header, the headline is deliberately compact, and provider plus sanitized system configuration remain in a bounded sticky column on the right. On narrower windows the page collapses to one column with chat first and setup available through the Models or System navigation controls.
 
+Chat, Software, Images, Models, and About are mutually exclusive primary
+panels, preventing hidden content from overlapping or clipping the active view.
+Models opens a dedicated workspace with a Chat/Writing/Summarization selector,
+installed models visible by default, and candidate search beside selection.
+About reports the version, admitted provider boundaries, memory-only privacy,
+and unsigned development status without adding network or execution behavior.
+
 This layout change does not broaden browser authority: configuration, messages, and responses remain in memory, and the browser still has no shell, filesystem, repository, model-download, or arbitrary-network surface.
 
 ## Connect Ollama
@@ -121,6 +128,9 @@ Use the task selector above the input area or the left navigation:
 - **Chat** uses `general.chat` and keeps up to 20 bounded messages in browser memory for follow-up questions.
 - **Write** uses `content.write` and sends one bounded writing request. It returns a Markdown-document result in the page.
 - **Summarize** uses `content.summarize` and sends one bounded source input. Its system instruction permits only source-grounded summarization and requires uncertainty to be preserved.
+
+Press Enter to submit a text task. Use Shift+Enter for a new line. Input-method
+composition is not submitted until composition has ended.
 
 Changing modes or selecting **New task** clears the visible in-memory task. These capabilities use the registered `ollama.local-text` provider. They do not read a repository, write files, download models, or persist the endpoint, input, conversation, or response.
 

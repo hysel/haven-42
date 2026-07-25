@@ -2,7 +2,7 @@
 
 const CAPABILITIES = {
   "general.chat": {
-    eyebrow: "03 · CHAT",
+    eyebrow: "CHAT",
     title: "Private conversation",
     promptLabel: "Message",
     placeholder: "Ask anything…",
@@ -13,7 +13,7 @@ const CAPABILITIES = {
     artifactType: "chat-message",
   },
   "content.write": {
-    eyebrow: "03 · WRITING",
+    eyebrow: "WRITING",
     title: "Draft content",
     promptLabel: "Writing request",
     placeholder: "Describe what you want written…",
@@ -24,7 +24,7 @@ const CAPABILITIES = {
     artifactType: "markdown-document",
   },
   "content.summarize": {
-    eyebrow: "03 · SUMMARY",
+    eyebrow: "SUMMARY",
     title: "Summarize text",
     promptLabel: "Material to summarize",
     placeholder: "Paste the material you want summarized…",
@@ -175,18 +175,30 @@ async function loadWorkflows() {
   byId("workflow-plan-button").disabled = state.workflows.length === 0;
 }
 
+function showPrimaryPanel(panelId, navigationId, focusId) {
+  ["text-panel", "software-panel", "image-panel", "models-panel", "about-panel"].forEach((id) => {
+    byId(id).classList.toggle("hidden", id !== panelId);
+  });
+  activateNavigation(navigationId, panelId, focusId);
+}
+
 function openSoftware() {
-  byId("text-panel").classList.add("hidden");
-  byId("image-panel").classList.add("hidden");
-  byId("software-panel").classList.remove("hidden");
-  activateNavigation("software-nav", "software-panel", "software-title");
+  showPrimaryPanel("software-panel", "software-nav", "software-title");
 }
 
 function openImages() {
-  byId("text-panel").classList.add("hidden");
-  byId("software-panel").classList.add("hidden");
-  byId("image-panel").classList.remove("hidden");
-  activateNavigation("image-nav", "image-panel", "image-title");
+  showPrimaryPanel("image-panel", "image-nav", "image-title");
+}
+
+function openModels() {
+  byId("model-search-capability").value = state.capabilityId;
+  updateModelChoiceStatus();
+  renderModelDiscovery();
+  showPrimaryPanel("models-panel", "models-nav", "models-title");
+}
+
+function openAbout() {
+  showPrimaryPanel("about-panel", "about-nav", "about-title");
 }
 
 function setTaskControlsDisabled(disabled) {
@@ -239,7 +251,7 @@ function humanError(error) {
 }
 
 function modelMatchesQuery(name, query) {
-  return query && name.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+  return !query || name.toLocaleLowerCase().includes(query.toLocaleLowerCase());
 }
 
 function validateModelSearch(result) {
@@ -293,24 +305,38 @@ function validateModelSearch(result) {
 }
 
 function chooseDiscoveredModel(item) {
+  const capabilityId = byId("model-search-capability").value;
   if (item.status === "installed") {
-    state.modelSelections[state.capabilityId] = { mode: "manual", model: item.name };
+    state.modelSelections[capabilityId] = { mode: "manual", model: item.name };
     state.desiredModel = null;
-    renderModelSelect();
+    if (capabilityId === state.capabilityId) renderModelSelect();
+    byId("model-choice-status").textContent = `${item.name} selected for ${CAPABILITIES[capabilityId].modelLabel.toLocaleLowerCase()}.`;
   } else {
     state.desiredModel = item;
+    byId("model-choice-status").textContent = `${item.name} is not installed. Execution remains disabled.`;
   }
   renderModelDiscovery();
 }
 
+function updateModelChoiceStatus() {
+  const capabilityId = byId("model-search-capability").value;
+  const model = selectedModel(capabilityId);
+  byId("model-choice-status").textContent = model
+    ? `${model} is configured for ${CAPABILITIES[capabilityId].modelLabel.toLocaleLowerCase()}.`
+    : state.connected
+      ? `No model is selected for ${CAPABILITIES[capabilityId].modelLabel.toLocaleLowerCase()}.`
+      : "Connect Ollama to discover installed models.";
+}
+
 function renderModelDiscovery() {
   const query = byId("model-search-query").value.trim();
+  const capabilityId = byId("model-search-capability").value;
   const installed = state.modelOptions
     .filter((item) => modelMatchesQuery(item.name, query))
     .map((item) => ({
       name: item.name,
       status: "installed",
-      validationStatus: item.capabilityStatus[state.capabilityId] || "unverified",
+      validationStatus: item.capabilityStatus[capabilityId] || "unverified",
       installCommand: null,
     }));
   const merged = new Map(installed.map((item) => [item.name, item]));
@@ -327,21 +353,28 @@ function renderModelDiscovery() {
     const name = document.createElement("strong");
     name.textContent = item.name;
     const status = document.createElement("small");
+    const configured = item.status === "installed" && selectedModel(capabilityId) === item.name;
     status.textContent = item.status === "installed"
-      ? `Installed · ${item.validationStatus}`
+      ? `Installed · ${item.validationStatus}${configured ? " · selected" : ""}`
       : "Not installed · candidate only · evidence unverified · hardware fit unknown · license review required";
     detail.append(name, status);
     const choose = document.createElement("button");
     choose.className = "button secondary";
     choose.type = "button";
-    choose.textContent = item.status === "installed" ? "Use for this task" : "Select";
+    const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
+    choose.textContent = configured
+      ? "Selected"
+      : item.status === "installed"
+        ? `Use for ${capabilityLabel}`
+        : "Select candidate";
+    choose.disabled = configured;
     choose.addEventListener("click", () => chooseDiscoveredModel(item));
     row.append(detail, choose);
     container.append(row);
   });
-  if (query && results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
+  if (results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
     byId("model-search-status").textContent = "No installed or catalog matches yet.";
-  } else if (query && installed.length > 0) {
+  } else if (installed.length > 0) {
     byId("model-search-status").textContent = `${installed.length} installed match${installed.length === 1 ? "" : "es"} found locally.`;
   }
   const desired = byId("desired-model");
@@ -722,8 +755,9 @@ function resetTask() {
 function selectCapability(capabilityId) {
   if (!Object.hasOwn(CAPABILITIES, capabilityId)) return;
   state.capabilityId = capabilityId;
-  byId("software-panel").classList.add("hidden");
-  byId("image-panel").classList.add("hidden");
+  ["software-panel", "image-panel", "models-panel", "about-panel"].forEach((id) => {
+    byId(id).classList.add("hidden");
+  });
   byId("text-panel").classList.remove("hidden");
   const capability = CAPABILITIES[capabilityId];
   byId("capability-eyebrow").textContent = capability.eyebrow;
@@ -805,6 +839,7 @@ async function bootstrap() {
     const result = await response.json();
     state.token = result.sessionToken;
     byId("app-version").textContent = `v${result.version}`;
+    byId("about-version").textContent = `v${result.version}`;
     byId("host-status").textContent = `${result.runtime.platform} · ${result.runtime.architecture}`;
     state.capabilities = result.capabilities || [];
     renderCapabilities();
@@ -854,6 +889,11 @@ byId("connection-form").addEventListener("submit", async (event) => {
 byId("model-search-query").addEventListener("input", () => {
   state.modelSearchResults = [];
   byId("model-search-status").textContent = "Filtering installed models locally.";
+  renderModelDiscovery();
+});
+
+byId("model-search-capability").addEventListener("change", () => {
+  updateModelChoiceStatus();
   renderModelDiscovery();
 });
 
@@ -960,6 +1000,17 @@ byId("text-form").addEventListener("submit", async (event) => {
   }
 });
 
+byId("prompt").addEventListener("keydown", (event) => {
+  if (
+    event.key !== "Enter"
+    || event.shiftKey
+    || event.isComposing
+    || byId("send-button").disabled
+  ) return;
+  event.preventDefault();
+  byId("text-form").requestSubmit();
+});
+
 document.querySelectorAll("[data-capability]").forEach((button) => {
   button.addEventListener("click", () => {
     selectCapability(button.dataset.capability);
@@ -997,12 +1048,13 @@ byId("new-task-button").addEventListener("click", async () => {
   }
 });
 byId("home-nav").addEventListener("click", () => {
-  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
-  byId("home-nav").classList.add("active");
+  showPrimaryPanel("text-panel", "home-nav", "capability-title");
   window.scrollTo({ top: 0, behavior: motionBehavior() });
 });
 byId("software-nav").addEventListener("click", openSoftware);
 byId("image-nav").addEventListener("click", openImages);
+byId("models-nav").addEventListener("click", openModels);
+byId("about-nav").addEventListener("click", openAbout);
 byId("workflow-plan-button").addEventListener("click", async () => {
   clearError();
   const button = byId("workflow-plan-button");
@@ -1138,9 +1190,6 @@ byId("image-run-button").addEventListener("click", async () => {
     button.disabled = !state.imageConnected;
     button.textContent = "Generate with disclosed retention";
   }
-});
-byId("models-nav").addEventListener("click", () => {
-  activateNavigation("models-nav", "connection-panel", "models-title");
 });
 byId("system-nav").addEventListener("click", () => {
   activateNavigation("system-nav", "status-panel", "system-title");
