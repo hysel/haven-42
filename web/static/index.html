@@ -263,17 +263,13 @@
             <div class="model-choice-status" id="model-choice-status" role="status" aria-live="polite">Connect Ollama to discover installed models.</div>
             <div class="model-discovery" id="model-discovery">
               <h3>Find another model</h3>
-              <p class="field-help">Installed models are filtered locally. Public catalog search sends only your search phrase to Ollama's public catalog after you opt in.</p>
+              <p class="field-help">Installed models are filtered locally. Choosing “Search public catalog” sends only your search phrase to Ollama's public catalog. Nothing is downloaded.</p>
               <form id="model-search-form">
                 <label for="model-search-query">Model name or capability</label>
                 <div class="field-row">
                   <input id="model-search-query" maxlength="64" autocomplete="off" spellcheck="false" placeholder="For example: qwen or writing">
-                  <button class="button secondary" id="model-search-button" type="submit">Search catalog</button>
+                  <button class="button secondary" id="model-search-button" type="submit">Search public catalog</button>
                 </div>
-                <label class="consent-row">
-                  <input id="model-search-consent" type="checkbox">
-                  Use the internet for this search
-                </label>
               </form>
               <div class="model-search-status" id="model-search-status" role="status" aria-live="polite">Installed models will appear here after connection.</div>
               <div class="model-search-results" id="model-search-results"></div>
@@ -363,6 +359,19 @@
               <div><dt>Privacy</dt><dd>Memory only</dd></div>
               <div><dt>Model cleanup</dt><dd class="accent" id="cleanup-status">Unload after 5 minutes idle</dd></div>
             </dl>
+            <form id="cleanup-policy-form">
+              <label for="system-idle-unload">Unload text model after</label>
+              <div class="field-row">
+                <select id="system-idle-unload">
+                  <option value="0">Every response · energy saver</option>
+                  <option value="300" selected>5 minutes idle · balanced</option>
+                  <option value="900">15 minutes idle</option>
+                  <option value="1800">30 minutes idle · performance</option>
+                </select>
+                <button class="button secondary" id="apply-cleanup-policy" type="submit">Apply</button>
+              </div>
+              <p class="field-help">Applying while connected safely reconnects the text provider with the selected memory policy.</p>
+            </form>
             <button class="button secondary full-width" id="scan-system-button" type="button">Scan system readiness</button>
             <div class="readiness-dashboard compact hidden" id="system-readiness" aria-live="polite"></div>
           </section>
