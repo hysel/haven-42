@@ -880,6 +880,12 @@ def main() -> int:
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "Copy installation command" in html
         assert 'id="models-panel"' in html and 'id="model-search-capability"' in html
+        assert 'id="model-search-consent"' not in html and "Search public catalog" in html
+        assert "Already installed on connected Ollama server" in javascript
+        assert "Not installed on connected Ollama server" in javascript
+        assert 'id="cleanup-policy-form"' in html and 'id="system-idle-unload"' in html
+        assert 'byId("system-idle-unload").value = String(idleUnloadSeconds)' in javascript
+        assert 'state.desiredModel = null' in javascript and 'Showing installed models ranked for' in javascript
         assert 'id="about-panel"' in html and 'id="about-nav"' in html
         assert "03 · WRITING" not in javascript and "03 · SUMMARY" not in javascript
         assert "local or self-hosted AI providers" in html
@@ -907,7 +913,7 @@ def main() -> int:
         assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
         assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
         assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
-        checks += 44
+        checks += 50
     finally:
         app.shutdown()
         app.server_close()

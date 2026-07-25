@@ -10,9 +10,13 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 
 ## Start Here
 
-The Models panel now filters installed models offline and offers an explicitly
-consented, candidate-only public Ollama catalog search. Uninstalled choices
-remain non-executable and Haven 42 never runs their displayed pull instruction.
+The Models panel labels and filters installed models offline. Changing the
+Chat, Writing, or Summarization target clears stale discovery state and ranks
+installed options for that capability. **Search public catalog** is the explicit
+online action; it sends only the bounded phrase, downloads nothing, and returns
+candidate-only uninstalled choices that remain non-executable. Haven 42 never
+runs their displayed pull instruction. System visibly offers immediate,
+5-minute, 15-minute, and 30-minute text-model cleanup policies.
 Models and About now open as dedicated primary views; only one primary panel is
 visible at a time. Text tasks support Enter to send and Shift+Enter for a new
 line.

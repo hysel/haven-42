@@ -3,9 +3,13 @@
 ## Status
 
 Milestone 22A also includes explicit candidate-only public Ollama catalog
-search without installation authority: installed filtering stays offline,
-uninstalled choices stay in browser memory with execution disabled, and Haven
-42 never executes the displayed pull instruction.
+search without installation authority: the explicit submit action replaces a
+redundant checkbox, installed and uninstalled states are labeled, changing the
+target capability resets and re-ranks results, installed filtering stays
+offline, uninstalled choices stay in browser memory with execution disabled,
+and Haven 42 never executes the displayed pull instruction. System exposes all
+four bounded cleanup policies and applies changes through the existing validated
+provider connection.
 
 The repository has entered user-visible product implementation. Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now ships a runnable local-web application and security-hardened unsigned PyInstaller one-folder development packaging for sanitized system status, immutable-digest Ollama recommendations, accessible private chat, writing, summarization and recovery, provider run metrics, the first bounded one-reviewer blind writing packet, plan-only registered read-only software workflows, lifecycle-aware effect-free composition planning, the promoted Linux ComfyUI/SDXL image flow, and verified cleanup on Windows, Linux, and macOS. Build inputs are hash-locked and native hosted tests cover hostile resources, shutdown authority, relocation, read-only startup, abrupt-exit recovery, repeated lifecycle, occupied ports, hostile environments, bounded archive structure, checksums, exact inventories, notices, SBOM, and unsigned provenance. Offline installer and update foundations model install/upgrade/uninstall evidence, compatibility, staged/post health, phase-specific interrupted recovery, replay defense, rollback, retention, and disabled mode with every machine effect denied. Signing, notarization, real installers, activated online updates, production release publication, workflow execution, executable composition, and optional Tauri packaging remain separately gated. Milestone 23 has a promoted Linux image profile and partial Windows AMD evidence. Milestone 24 has partial Linux CUDA ACE-Step evidence, while Milestone 25 remains documentation-only. Milestone 26 has its foundation plus exact Linux/NVIDIA and Windows/AMD evidence.
 

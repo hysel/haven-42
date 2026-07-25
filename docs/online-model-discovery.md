@@ -12,8 +12,10 @@ license review, tool validation, or approved-write smoke tests.
 
 The local web Models panel provides a smaller interactive slice of this
 contract. Installed-name filtering is offline. A public Ollama catalog search
-requires an explicit per-search opt-in and sends only a bounded phrase to the
-fixed `https://ollama.com/search` origin. Redirects are rejected, HTML is
+requires activating the explicitly labeled **Search public catalog** action and
+sends only a bounded phrase to the fixed `https://ollama.com/search` origin.
+Changing the target capability or typing in the local filter does not make a
+network request. Redirects are rejected, HTML is
 capped, and at most 20 normalized names return. An uninstalled result remains
 candidate-only with unverified capability evidence, unknown hardware fit, and
 license review required. Selecting it records browser-memory intent only.

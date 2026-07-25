@@ -46,6 +46,7 @@ const state = {
   modelOptions: [],
   modelSearchResults: [],
   desiredModel: null,
+  idleUnloadSeconds: 300,
   capabilities: [],
   readinessSnapshot: null,
   setupPlan: null,
@@ -242,7 +243,7 @@ function humanError(error) {
     "ollama-chat-failed": "Ollama did not complete the text request.",
     "empty-model-response": "The model returned an empty response.",
     "capability-not-admitted": "That capability is not available in this Haven 42 release.",
-    "explicit-online-search-consent-required": "Select the internet-search checkbox before searching the public catalog.",
+    "explicit-online-search-consent-required": "Use “Search public catalog” to explicitly start an online search.",
     "invalid-model-search-query": "Use 1–64 letters, numbers, spaces, or model-name punctuation.",
     "model-catalog-search-failed": "The public Ollama catalog could not be reached.",
     "invalid-model-catalog-response": "The public catalog returned an invalid response, so Haven 42 rejected it.",
@@ -252,6 +253,12 @@ function humanError(error) {
 
 function modelMatchesQuery(name, query) {
   return !query || name.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+}
+
+function cleanupPolicyLabel(seconds) {
+  return seconds === 0
+    ? "Unload after every response"
+    : `Unload after ${seconds / 60} minutes idle`;
 }
 
 function validateModelSearch(result) {
@@ -343,7 +350,17 @@ function renderModelDiscovery() {
   state.modelSearchResults.forEach((item) => {
     if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) merged.set(item.name, item);
   });
-  const results = [...merged.values()];
+  const validationPriority = { recommended: 0, compatible: 1, unverified: 2 };
+  const configuredModel = selectedModel(capabilityId);
+  const results = [...merged.values()].sort((left, right) => {
+    const leftConfigured = left.status === "installed" && left.name === configuredModel;
+    const rightConfigured = right.status === "installed" && right.name === configuredModel;
+    if (leftConfigured !== rightConfigured) return leftConfigured ? -1 : 1;
+    if (left.status !== right.status) return left.status === "installed" ? -1 : 1;
+    const validationDifference = (validationPriority[left.validationStatus] ?? 3)
+      - (validationPriority[right.validationStatus] ?? 3);
+    return validationDifference || left.name.localeCompare(right.name);
+  });
   const container = byId("model-search-results");
   container.replaceChildren();
   results.forEach((item) => {
@@ -355,8 +372,8 @@ function renderModelDiscovery() {
     const status = document.createElement("small");
     const configured = item.status === "installed" && selectedModel(capabilityId) === item.name;
     status.textContent = item.status === "installed"
-      ? `Installed · ${item.validationStatus}${configured ? " · selected" : ""}`
-      : "Not installed · candidate only · evidence unverified · hardware fit unknown · license review required";
+      ? `Already installed on connected Ollama server · ${item.validationStatus}${configured ? " · selected" : ""}`
+      : "Not installed on connected Ollama server · candidate only · evidence unverified · hardware fit unknown · license review required";
     detail.append(name, status);
     const choose = document.createElement("button");
     choose.className = "button secondary";
@@ -375,7 +392,8 @@ function renderModelDiscovery() {
   if (results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
     byId("model-search-status").textContent = "No installed or catalog matches yet.";
   } else if (installed.length > 0) {
-    byId("model-search-status").textContent = `${installed.length} installed match${installed.length === 1 ? "" : "es"} found locally.`;
+    const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
+    byId("model-search-status").textContent = `${installed.length} installed match${installed.length === 1 ? "" : "es"} shown for ${capabilityLabel}, with the most relevant options first.`;
   }
   const desired = byId("desired-model");
   desired.classList.toggle("hidden", !state.desiredModel);
@@ -815,11 +833,11 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   byId("wizard-timeout").value = String(timeoutSeconds);
   byId("idle-unload").value = String(idleUnloadSeconds);
   byId("wizard-idle-unload").value = String(idleUnloadSeconds);
+  byId("system-idle-unload").value = String(idleUnloadSeconds);
+  state.idleUnloadSeconds = idleUnloadSeconds;
   resetTask();
   byId("text-status").textContent = `${result.models.length} installed model${result.models.length === 1 ? "" : "s"} found`;
-  byId("cleanup-status").textContent = result.idleUnloadSeconds === 0
-    ? "Unload after every response"
-    : `Unload after ${result.idleUnloadSeconds / 60} minutes idle`;
+  byId("cleanup-status").textContent = cleanupPolicyLabel(result.idleUnloadSeconds);
   byId("health-badge").textContent = "Healthy";
   byId("health-badge").classList.add("good");
   byId("provider-health").textContent = `${result.providerHealth.status} · ${result.providerHealth.trustScope}`;
@@ -893,7 +911,12 @@ byId("model-search-query").addEventListener("input", () => {
 });
 
 byId("model-search-capability").addEventListener("change", () => {
+  state.modelSearchResults = [];
+  state.desiredModel = null;
+  byId("model-search-query").value = "";
   updateModelChoiceStatus();
+  const capabilityLabel = CAPABILITIES[byId("model-search-capability").value].modelLabel.replace(" model", "");
+  byId("model-search-status").textContent = `Showing installed models ranked for ${capabilityLabel}.`;
   renderModelDiscovery();
 });
 
@@ -902,10 +925,6 @@ byId("model-search-form").addEventListener("submit", async (event) => {
   clearError();
   const button = byId("model-search-button");
   const query = byId("model-search-query").value.trim();
-  if (!byId("model-search-consent").checked) {
-    showError(humanError(new Error("explicit-online-search-consent-required")));
-    return;
-  }
   button.disabled = true;
   button.textContent = "Searching…";
   byId("model-search-status").textContent = "Searching the public Ollama catalog…";
@@ -920,7 +939,42 @@ byId("model-search-form").addEventListener("submit", async (event) => {
     showError(humanError(error));
   } finally {
     button.disabled = false;
-    button.textContent = "Search catalog";
+    button.textContent = "Search public catalog";
+  }
+});
+
+byId("cleanup-policy-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  clearError();
+  const button = byId("apply-cleanup-policy");
+  const selectedSeconds = Number(byId("system-idle-unload").value);
+  const previousSeconds = state.idleUnloadSeconds;
+  byId("idle-unload").value = String(selectedSeconds);
+  byId("wizard-idle-unload").value = String(selectedSeconds);
+  if (!state.connected) {
+    state.idleUnloadSeconds = selectedSeconds;
+    byId("cleanup-status").textContent = `${cleanupPolicyLabel(selectedSeconds)} on next connection`;
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Applying…";
+  setProviderReady(false);
+  try {
+    await connectProvider(
+      byId("endpoint").value.trim(),
+      Number(byId("timeout").value),
+      selectedSeconds,
+    );
+  } catch (error) {
+    state.idleUnloadSeconds = previousSeconds;
+    byId("idle-unload").value = String(previousSeconds);
+    byId("wizard-idle-unload").value = String(previousSeconds);
+    byId("system-idle-unload").value = String(previousSeconds);
+    setProviderReady(true);
+    showError(humanError(error));
+  } finally {
+    button.disabled = false;
+    button.textContent = "Apply";
   }
 });
 

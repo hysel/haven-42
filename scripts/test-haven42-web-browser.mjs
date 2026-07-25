@@ -139,6 +139,10 @@ class Cdp {
       if (message.error) reject(new Error(message.error.message));
       else accept(message.result);
     };
+    this.socket.onclose = () => {
+      for (const { reject } of this.pending.values()) reject(new Error("cdp-target-closed"));
+      this.pending.clear();
+    };
   }
   async open() {
     if (this.socket.readyState === WebSocket.OPEN) return;
@@ -175,6 +179,27 @@ class Cdp {
     return result.result.value;
   }
   close() { this.socket.close(); }
+}
+
+async function connectPageCdp(debugPort, origin, browser, browserLaunchError) {
+  return waitFor(async () => {
+    if (browserLaunchError()) throw browserLaunchError();
+    if (browser.exitCode !== null) throw new Error(`browser-exited-${browser.exitCode}`);
+    const response = await fetch(`http://127.0.0.1:${debugPort}/json`);
+    const pages = (await response.json())
+      .filter((item) => item.type === "page" && item.url.startsWith(origin));
+    for (const page of pages) {
+      const candidate = new Cdp(page.webSocketDebuggerUrl);
+      try {
+        await candidate.open();
+        await candidate.call("Runtime.enable");
+        return candidate;
+      } catch {
+        candidate.close();
+      }
+    }
+    return null;
+  }, 30000);
 }
 
 const fakePort = await listen(fake);
@@ -227,20 +252,9 @@ try {
     }
   });
   browser.once("error", (error) => { browserLaunchError = error; });
-  const pages = await waitFor(async () => {
-    if (browserLaunchError) throw browserLaunchError;
-    if (browser.exitCode !== null) throw new Error(`browser-exited-${browser.exitCode}`);
-    const response = await fetch(`http://127.0.0.1:${debugPort}/json`);
-    const value = await response.json();
-    return value.find((item) => item.type === "page" && item.url.startsWith(origin)) ? value : null;
-  });
-  trace("browser-ready");
-  const page = pages.find((item) => item.type === "page" && item.url.startsWith(origin));
-  cdp = new Cdp(page.webSocketDebuggerUrl);
   trace("opening-cdp");
-  await cdp.open();
-  trace("cdp-open");
-  await cdp.call("Runtime.enable");
+  cdp = await connectPageCdp(debugPort, origin, browser, () => browserLaunchError);
+  trace("browser-ready");
   trace("runtime-enabled");
   await waitFor(() => cdp.evaluate("document.readyState === 'complete' && Boolean(document.querySelector('.wizard-card'))"));
   await waitFor(() => cdp.evaluate("document.activeElement.classList.contains('wizard-card')"));
@@ -341,6 +355,13 @@ try {
   checks += 2;
   trace("advanced-model-verified");
 
+  models = ["qwen3.5:9b", "unknown-model:latest"];
+  await cdp.evaluate(`document.querySelector('#connection-form').requestSubmit()`);
+  await waitFor(() => cdp.evaluate(`(
+    !document.querySelector('#connect-button').disabled
+    && document.querySelector('#text-status').textContent.includes('2 installed models found')
+  )`));
+
   const modelsView = await cdp.evaluate(`(() => {
     document.querySelector('#models-nav').click();
     return {
@@ -349,7 +370,8 @@ try {
       textHidden: document.querySelector('#text-panel').classList.contains('hidden'),
       imageHidden: document.querySelector('#image-panel').classList.contains('hidden'),
       focused: document.activeElement.id,
-      installed: document.querySelectorAll('#model-search-results .model-search-result').length
+      installed: document.querySelectorAll('#model-search-results .model-search-result').length,
+      installedLabel: document.querySelector('#model-search-results small')?.textContent || ''
     };
   })()`);
   if (
@@ -358,9 +380,10 @@ try {
     || !modelsView.textHidden
     || !modelsView.imageHidden
     || modelsView.focused !== "models-title"
-    || modelsView.installed !== 1
+    || modelsView.installed !== 2
+    || !modelsView.installedLabel.includes("Already installed on connected Ollama server")
   ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
-  checks += 6;
+  checks += 7;
 
   await cdp.evaluate(`(() => {
     const original = window.fetch;
@@ -393,7 +416,6 @@ try {
     const query = document.querySelector('#model-search-query');
     query.value = "writing";
     query.dispatchEvent(new Event('input', {bubbles: true}));
-    document.querySelector('#model-search-consent').checked = true;
     document.querySelector('#model-search-form').requestSubmit();
   })()`);
   await waitFor(() => cdp.evaluate("document.querySelectorAll('#model-search-results .model-search-result').length === 1"));
@@ -415,6 +437,28 @@ try {
     || discovery.currentModel !== "manual:unknown-model:latest"
   ) throw new Error("candidate-only-model-discovery");
   checks += 6;
+
+  const capabilityReset = await cdp.evaluate(`(() => {
+    const capability = document.querySelector('#model-search-capability');
+    capability.value = 'content.write';
+    capability.dispatchEvent(new Event('change', {bubbles: true}));
+    return {
+      query: document.querySelector('#model-search-query').value,
+      resultCount: document.querySelectorAll('#model-search-results .model-search-result').length,
+      desiredHidden: document.querySelector('#desired-model').classList.contains('hidden'),
+      resultName: document.querySelector('#model-search-results strong')?.textContent || '',
+      status: document.querySelector('#model-search-status').textContent
+    };
+  })()`);
+  if (
+    capabilityReset.query !== ""
+    || capabilityReset.resultCount !== 2
+    || !capabilityReset.desiredHidden
+    || capabilityReset.resultName !== "qwen3.5:9b"
+    || !capabilityReset.status.includes("Writing")
+  ) throw new Error(`model-capability-reset:${JSON.stringify(capabilityReset)}`);
+  checks += 5;
+
   const hostileCatalogRejected = await cdp.evaluate(`(() => {
     try {
       validateModelSearch({
@@ -449,6 +493,31 @@ try {
   checks += 1;
   await cdp.evaluate("window.fetch = window.__havenOriginalFetch");
   trace("candidate-model-discovery-verified");
+
+  await cdp.evaluate(`(() => {
+    const policy = document.querySelector('#system-idle-unload');
+    policy.value = '900';
+    document.querySelector('#cleanup-policy-form').requestSubmit();
+  })()`);
+  await waitFor(() => cdp.evaluate("!document.querySelector('#apply-cleanup-policy').disabled"));
+  const cleanupPolicy = await cdp.evaluate(`({
+    status: document.querySelector('#cleanup-status').textContent,
+    systemValue: document.querySelector('#system-idle-unload').value,
+    advancedValue: document.querySelector('#idle-unload').value,
+    wizardValue: document.querySelector('#wizard-idle-unload').value,
+    buttonText: document.querySelector('#apply-cleanup-policy').textContent,
+    errorHidden: document.querySelector('#connection-error').classList.contains('hidden')
+  })`);
+  if (
+    cleanupPolicy.status !== "Unload after 15 minutes idle"
+    || cleanupPolicy.systemValue !== "900"
+    || cleanupPolicy.advancedValue !== "900"
+    || cleanupPolicy.wizardValue !== "900"
+    || cleanupPolicy.buttonText !== "Apply"
+    || !cleanupPolicy.errorHidden
+  ) throw new Error(`cleanup-policy:${JSON.stringify(cleanupPolicy)}`);
+  checks += 6;
+  trace("cleanup-policy-verified");
 
   const keyboardSubmit = await cdp.evaluate(`(() => {
     document.querySelector('.capability-nav[data-capability="general.chat"]').click();
@@ -609,7 +678,7 @@ try {
     || navigation.models.focused !== "models-title"
     || !navigation.models.visible
     || !navigation.models.imageHidden
-    || navigation.models.installed !== 1
+    || navigation.models.installed !== 2
     || !navigation.system.active
     || navigation.system.focused !== "system-title"
     || !navigation.about.active

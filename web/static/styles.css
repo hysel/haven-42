@@ -230,8 +230,6 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus { border-color: rgba(98, 230, 198, 0.65); box-shadow: 0 0 0 3px rgba(98, 230, 198, 0.08); }
 .field-help { color: #718481; margin: 7px 0 0; font-size: 11px; }
-.consent-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-.consent-row input { width: auto; }
 .model-search-status { margin: 12px 0 8px; color: var(--muted); font-size: 11px; }
 .model-search-results { display: grid; gap: 6px; }
 .model-search-result { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(132, 190, 180, 0.09); }

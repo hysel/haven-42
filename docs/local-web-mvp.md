@@ -26,8 +26,8 @@ If the recommended model is missing, the wizard names it but disables completion
 
 Expand **Find another model** in the Models panel. Typing filters the connected
 provider's installed inventory locally and makes no network request. To search
-the public Ollama catalog, enter a 1–64 character phrase, select **Use the
-internet for this search**, and activate **Search catalog**. Only that phrase is
+the public Ollama catalog, enter a 1–64 character phrase and activate **Search
+public catalog**. The button is the explicit online action. Only that phrase is
 sent; endpoints, hardware facts, repository content, paths, and prompts are not.
 
 Public results are research candidates, not recommendations. Haven 42 reports
@@ -66,7 +66,7 @@ The wizard is a labeled modal with an announced description and current-step sta
 
 The capability view is read-only and engine-derived. Chat, Writing, and Summarization change from `configuration-required` to `available` only after a successful provider check. Software stays `not-admitted-in-web`; Images stays `provider-profile-required`. Clicking either unavailable navigation item explains its state and never invokes an operation.
 
-The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, exact artifact-digest and catalog evidence matching, and a disabled/no-network update state. These labels disclose evidence boundaries; they do not promote a provider, model, or capability.
+The System view can repeat the explicit read-only readiness scan. It also reports sanitized provider health, exact artifact-digest and catalog evidence matching, and a disabled/no-network update state. A visible cleanup selector offers immediate, 5-minute, 15-minute, and 30-minute model residency. Apply is explicit; while connected it uses the same validated endpoint and reconnect boundary, and while disconnected it only updates the in-memory choice for the next connection. These controls grant no installation or process authority.
 
 ## Provider-reported run details
 
@@ -108,6 +108,9 @@ Chat, Software, Images, Models, and About are mutually exclusive primary
 panels, preventing hidden content from overlapping or clipping the active view.
 Models opens a dedicated workspace with a Chat/Writing/Summarization selector,
 installed models visible by default, and candidate search beside selection.
+Results label whether a model is already installed on the connected Ollama
+server. Changing the target capability clears the query, online candidates, and
+desired candidate before ranking installed options for the new capability.
 About reports the version, admitted provider boundaries, memory-only privacy,
 and unsigned development status without adding network or execution behavior.
 
@@ -134,7 +137,7 @@ composition is not submitted until composition has ended.
 
 Changing modes or selecting **New task** clears the visible in-memory task. These capabilities use the registered `ollama.local-text` provider. They do not read a repository, write files, download models, or persist the endpoint, input, conversation, or response.
 
-The balanced default sends a bounded five-minute `keep_alive`, avoiding a costly reload between nearby prompts. Advanced connection settings offer immediate cleanup, 15 minutes, or 30 minutes. Haven 42 keeps at most one model active for its browser session: choosing a different model unloads and verifies the previous one before invoking the next. **New task**, provider changes, request failures, the idle timer, and application shutdown also trigger explicit unload and process-list verification.
+The balanced default sends a bounded five-minute `keep_alive`, avoiding a costly reload between nearby prompts. Advanced connection settings and the System panel offer immediate cleanup, 5 minutes, 15 minutes, or 30 minutes. Haven 42 keeps at most one model active for its browser session: choosing a different model unloads and verifies the previous one before invoking the next. **New task**, provider changes, request failures, the idle timer, and application shutdown also trigger explicit unload and process-list verification.
 
 ## Security Boundary
 
