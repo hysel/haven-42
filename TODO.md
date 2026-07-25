@@ -451,6 +451,8 @@
   discovery when the target capability changes, use the explicit catalog-search
   submit action without a redundant checkbox, and expose every bounded text-model
   cleanup policy in the System panel.
+- [x] Align Ollama endpoint, timeout, and cleanup controls across the first-run
+  wizard and main workspace with compact tested sizing and typography.
 - [x] Expand the local web UI over the stable registries with exact-digest text
   selection, plan-only registered read-only software workflows, and the
   promoted Linux ComfyUI/SDXL image capability without duplicating provider
@@ -477,7 +479,7 @@
   and workflow authority, bounded PNG validation, explicit retention
   disclosure, history cleanup, and user-triggered download.
 - [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
-- [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, focused error recovery, busy-state/result focus, hostile catalog tests, and a dependency-free 98-check headless Chromium wizard/chat flow on Windows; native packaging covers all three platforms while full browser automation on every platform remains open under the parent task.
+- [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, focused error recovery, busy-state/result focus, hostile catalog tests, and a dependency-free 111-check headless Chromium wizard/chat flow on Windows; native packaging covers all three platforms while full browser automation on every platform remains open under the parent task.
 - [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, exact metadata-only intermediate artifacts, fresh/retry/cancel identity, one bounded retry, cancellation-before-execution, renderer-approval rejection, and 19 hostile/healthy checks; it remains simulation-only.
 - [x] Expand the simulation-only installation broker to exact install/upgrade/uninstall state and promotion-evidence contracts with 48 hostile/healthy checks and every authority/effect denied.
 - [ ] Admit executable multi-step composition only after effect-specific opaque approvals, runtime cancellation/retry/recovery, typed intermediate validation, and native cross-platform evidence pass.
