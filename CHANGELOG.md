@@ -16,6 +16,7 @@ This project follows a simple changelog format:
 - Fixed the chat flex layout so bounded attachment previews scroll within their own compact region instead of pushing the message composer outside the visible panel.
 - Added a cross-platform packaged-browser smoke lane for the full attachment/UI flow, and replaced the picker label with a native keyboard-operable button.
 - Fixed frozen readiness setup planning so the packaged runtime resolves its verified component registry from PyInstaller's resource root; native parity tests now exercise both scan and zero-effect plan generation.
+- Fixed cross-platform model-selector sizing at an explicit 36 pixels so Linux, Windows, and macOS preserve the reviewed compact control alignment.
 - Added inactive, offline-only lexical-retrieval and controlled-web-research contracts with hostile fixture sets; neither foundation exposes a runtime route, UI activation, provider payload, network effect, or persistence.
 - Added task-local Up/Down prompt recall with draft restoration, multiline-safe navigation, a 20-entry default, configurable 50/100-entry limits, duplicate suppression, and memory-only cleanup at task boundaries.
 - Added a safe DOM-built Markdown and Unicode emoji renderer for assistant output; raw HTML, model-supplied links, images, scripts, and handlers remain inert or unsupported.

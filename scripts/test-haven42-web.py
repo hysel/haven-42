@@ -1403,6 +1403,7 @@ def main() -> int:
         assert html.count('class="field-row compact-control-row"') == 3
         assert ".compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
         assert ".advanced-grid select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
+        assert ".model-select select { min-width: 190px; height: 36px;" in styles
         assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
         assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
         assert "selectedSeconds === state.idleUnloadSeconds" in javascript
