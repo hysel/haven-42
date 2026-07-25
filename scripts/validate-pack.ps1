@@ -204,6 +204,7 @@ $requiredFiles = @(
     "docs/desktop-storage-and-updates.md",
     "examples/fixtures/github-release-candidate.json",
     "scripts/test-haven42-web-browser.mjs",
+    "scripts/model_catalog_search.py",
     "scripts/system_readiness.py",
     "scripts/test-system-readiness.py",
     "scripts/simulate-install-broker.py",

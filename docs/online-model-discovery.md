@@ -10,6 +10,17 @@ Online discovery is optional. It records candidate metadata only. It does not
 replace local hardware profiling, local runtime inventory, provenance and
 license review, tool validation, or approved-write smoke tests.
 
+The local web Models panel provides a smaller interactive slice of this
+contract. Installed-name filtering is offline. A public Ollama catalog search
+requires an explicit per-search opt-in and sends only a bounded phrase to the
+fixed `https://ollama.com/search` origin. Redirects are rejected, HTML is
+capped, and at most 20 normalized names return. An uninstalled result remains
+candidate-only with unverified capability evidence, unknown hardware fit, and
+license review required. Selecting it records browser-memory intent only.
+Haven 42 may copy an engine-constructed `ollama pull <validated-name>` command,
+but it never executes that command, calls `/api/pull`, or changes configuration.
+After external installation, reconnect to verify provider inventory and digest.
+
 `config/model-discovery-contract.json` defines the normalized candidate record.
 `config/model-discovery-sources.json` defines source adapters and independent
 seed queries. The initial adapters are the Ollama library and Hugging Face Hub.

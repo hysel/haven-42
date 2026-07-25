@@ -215,7 +215,15 @@ def main() -> int:
             "hostIdentityIncluded": False, "privatePathsIncluded": False,
         },
     }
-    state = WEB.HavenState(readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)))
+    state = WEB.HavenState(
+        readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)),
+        model_catalog_provider=lambda query: [
+            "qwen3.5",
+            "community/example-writing:7b",
+            "unsafe model<script>",
+            "qwen3.5",
+        ] if query == "writing" else [],
+    )
     app = WEB.HavenWebServer(("127.0.0.1", 0), state)
     app_thread = threading.Thread(target=app.serve_forever, daemon=True)
     app_thread.start()
@@ -464,6 +472,74 @@ def main() -> int:
         writer_option = next(item for item in connected["modelOptions"] if item["name"] == "writer-model:latest")
         assert set(writer_option["capabilityStatus"].values()) == {"unverified"}
         checks += 9
+
+        status, error, _ = request_json(
+            origin + "/api/model-search", "POST",
+            {"query": "writing", "online": False}, token, origin,
+        )
+        assert status == 400 and error["error"] == "explicit-online-search-consent-required"
+        status, error, _ = request_json(
+            origin + "/api/model-search", "POST",
+            {"query": "bad?<script>", "online": True}, token, origin,
+        )
+        assert status == 400 and error["error"] == "invalid-model-search-query"
+        status, discovery, _ = request_json(
+            origin + "/api/model-search", "POST",
+            {"query": "writing", "online": True}, token, origin,
+        )
+        assert status == 200 and discovery["query"] == "writing"
+        assert discovery["downloadsPerformed"] is False
+        assert discovery["configurationChanged"] is False
+        assert discovery["repositoryContentSent"] is False
+        assert discovery["results"] == [
+            {
+                "name": "qwen3.5",
+                "source": "ollama-public-catalog",
+                "status": "not-installed",
+                "validationStatus": "candidate-only",
+                "capabilityEvidence": "unverified",
+                "hardwareFit": "unknown",
+                "licenseStatus": "review-required",
+                "executionAllowed": False,
+                "installCommand": "ollama pull qwen3.5",
+            },
+            {
+                "name": "community/example-writing:7b",
+                "source": "ollama-public-catalog",
+                "status": "not-installed",
+                "validationStatus": "candidate-only",
+                "capabilityEvidence": "unverified",
+                "hardwareFit": "unknown",
+                "licenseStatus": "review-required",
+                "executionAllowed": False,
+                "installCommand": "ollama pull community/example-writing:7b",
+            },
+        ]
+        fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
+        search_globals = WEB.search_ollama_catalog.__globals__
+        parsed = search_globals["parse_ollama_search_html"](fixture_html)
+        assert parsed == ["qwen3.5:9b", "qwen3.5:35b", "qwen3.5:9b-mlx"]
+        assert search_globals["validate_query"]("  agent   writing ") == "agent writing"
+        for hostile_query in ("", "x" * 65, "model?token=secret", "<script>"):
+            try:
+                search_globals["validate_query"](hostile_query)
+            except search_globals["ModelCatalogSearchError"]:
+                pass
+            else:
+                raise AssertionError("hostile model search query must be rejected")
+        hostile_html = "".join(
+            f'<a href="/library/model-{index}:7b">model</a>'
+            for index in range(25)
+        ) + '<a href="/library/model:cloud">cloud</a><a href="/library/bad%20model">bad</a>'
+        assert len(search_globals["parse_ollama_search_html"](hostile_html)) == 20
+        assert search_globals["_NoRedirect"]().redirect_request(None, None, 302, "", {}, "") is None
+        try:
+            WEB.search_ollama_catalog("safe", timeout_seconds=16)
+        except search_globals["ModelCatalogSearchError"] as error:
+            assert str(error) == "invalid-model-search-timeout"
+        else:
+            raise AssertionError("unsafe model search timeout must be rejected")
+        checks += 14
 
         cross_capability = WEB.build_model_decisions(
             ["chat-only:1b"],
@@ -786,6 +862,8 @@ def main() -> int:
         ]
         assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
         assert policy["text"]["missingModelDownloadsAllowed"] is False
+        assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
+        assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
         assert policy["executionEvents"]["automaticRetryAllowed"] is False
         assert policy["executionEvents"]["retryRequiresNewRequest"] is True
         assert policy["executionEvents"]["failedInputPersistenceAllowed"] is False
@@ -798,7 +876,9 @@ def main() -> int:
         assert "/api/text" in javascript and "content.summarize" in javascript
         assert "trust-scope" not in javascript and "modelSelections" in javascript
         assert "Automatic — no validated model installed" in javascript
-        assert "Advanced manual selection" in javascript and "downloadsPerformed" not in javascript
+        assert "Advanced manual selection" in javascript
+        assert "result.downloadsPerformed !== false" in javascript
+        assert "/api/model-search" in javascript and "Copy installation command" in html
         assert "renderTypedResult" in javascript and "renderCapabilities" in javascript
         assert "validateExecutionEvents" in javascript and "event-after-terminal" in javascript
         assert "validateRecovery" in javascript and "invalid-recovery-envelope" in javascript
@@ -819,7 +899,7 @@ def main() -> int:
         assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
         assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
         assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
-        checks += 33
+        checks += 36
     finally:
         app.shutdown()
         app.server_close()

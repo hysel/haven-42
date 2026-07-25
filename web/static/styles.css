@@ -230,6 +230,17 @@ input, select, textarea {
 }
 input:focus, select:focus, textarea:focus { border-color: rgba(98, 230, 198, 0.65); box-shadow: 0 0 0 3px rgba(98, 230, 198, 0.08); }
 .field-help { color: #718481; margin: 7px 0 0; font-size: 11px; }
+.consent-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.consent-row input { width: auto; }
+.model-search-status { margin: 12px 0 8px; color: var(--muted); font-size: 11px; }
+.model-search-results { display: grid; gap: 6px; }
+.model-search-result { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(132, 190, 180, 0.09); }
+.model-search-result strong, .model-search-result small { display: block; overflow-wrap: anywhere; }
+.model-search-result strong { font-size: 12px; }
+.model-search-result small { margin-top: 3px; color: var(--muted); font-size: 10px; }
+.desired-model { display: grid; gap: 8px; margin-top: 12px; padding: 11px; border: 1px solid rgba(243, 207, 121, 0.3); border-radius: 9px; background: rgba(243, 207, 121, 0.05); }
+.desired-model span, .desired-model small { color: var(--muted); font-size: 10px; }
+.desired-model code { overflow-wrap: anywhere; color: var(--accent); user-select: all; }
 .button {
   border: 0;
   border-radius: 10px;

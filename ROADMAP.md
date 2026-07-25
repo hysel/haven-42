@@ -2,6 +2,11 @@
 
 ## Status
 
+Milestone 22A also includes explicit candidate-only public Ollama catalog
+search without installation authority: installed filtering stays offline,
+uninstalled choices stay in browser memory with execution disabled, and Haven
+42 never executes the displayed pull instruction.
+
 The repository has entered user-visible product implementation. Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now ships a runnable local-web application and security-hardened unsigned PyInstaller one-folder development packaging for sanitized system status, immutable-digest Ollama recommendations, accessible private chat, writing, summarization and recovery, provider run metrics, the first bounded one-reviewer blind writing packet, plan-only registered read-only software workflows, lifecycle-aware effect-free composition planning, the promoted Linux ComfyUI/SDXL image flow, and verified cleanup on Windows, Linux, and macOS. Build inputs are hash-locked and native hosted tests cover hostile resources, shutdown authority, relocation, read-only startup, abrupt-exit recovery, repeated lifecycle, occupied ports, hostile environments, bounded archive structure, checksums, exact inventories, notices, SBOM, and unsigned provenance. Offline installer and update foundations model install/upgrade/uninstall evidence, compatibility, staged/post health, phase-specific interrupted recovery, replay defense, rollback, retention, and disabled mode with every machine effect denied. Signing, notarization, real installers, activated online updates, production release publication, workflow execution, executable composition, and optional Tauri packaging remain separately gated. Milestone 23 has a promoted Linux image profile and partial Windows AMD evidence. Milestone 24 has partial Linux CUDA ACE-Step evidence, while Milestone 25 remains documentation-only. Milestone 26 has its foundation plus exact Linux/NVIDIA and Windows/AMD evidence.
 
 ## Stage Status
@@ -649,6 +654,7 @@ Scope:
 - Build an engine-owned setup plan from the exact current readiness snapshot. Done as a zero-effect, disabled-installation plan; real downloading, verification, elevation, install, rollback, and uninstall remain unadmitted.
 - The admitted local-web slice exposes five truthful capability states: Chat, Writing, and Summarization require a validated exact provider artifact; Software admits registry-backed read-only plans without arguments or process execution; Images admit only the promoted Linux ComfyUI/SDXL profile through a loopback endpoint with browser-memory delivery and explicit provider-retention disclosure.
 - Present beginner recommendations and advanced model controls from one engine-derived catalog decision that combines exact artifact identity, license, hardware fit, provenance, and evidence without allowing the renderer to promote a model.
+- Let users filter installed models locally and explicitly search the fixed public Ollama catalog. Done with bounded query/response controls, candidate-only results, browser-memory desired selection, disabled execution until installed inventory verification, and a copyable command that Haven 42 never executes.
 - Support repository-optional sessions and clearly identify every artifact location before a write.
 - Show capability availability, evidence status, local versus external execution, network effects, repository access, and approval requirements before execution.
 - Reuse the Milestone 20 evidence dashboard, health, cleanup, recommendation, installation, validation, and release-readiness workflows.

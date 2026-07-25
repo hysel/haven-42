@@ -25,6 +25,22 @@
     "redirectsAllowed": false,
     "modelDiscoveryRequiredBeforeUse": true
   },
+  "modelDiscovery": {
+    "installedSearchNetworkAllowed": false,
+    "publicCatalogSource": "https://ollama.com/search",
+    "explicitOnlineConsentRequired": true,
+    "queryPersistenceAllowed": false,
+    "repositoryContentSent": false,
+    "hardwareProfileSent": false,
+    "maximumQueryCharacters": 64,
+    "maximumResults": 20,
+    "redirectsAllowed": false,
+    "candidateExecutionRequiresInstalledInventoryMatch": true,
+    "automaticDownloadsAllowed": false,
+    "pullApiAllowed": false,
+    "commandExecutionAllowed": false,
+    "copyableInstructionAllowed": true
+  },
   "readiness": {
     "explicitUserActionRequired": true,
     "csrfTokenRequired": true,

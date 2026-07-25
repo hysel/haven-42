@@ -44,6 +44,11 @@ from provider_security import (  # noqa: E402
     validate_base_url,
     validate_local_base_url,
 )
+from model_catalog_search import (  # noqa: E402
+    ModelCatalogSearchError,
+    search_ollama_catalog,
+    validate_query,
+)
 from system_readiness import (  # noqa: E402
     ReadinessError,
     build_setup_plan,
@@ -421,6 +426,7 @@ class HavenState:
         self,
         recommendation_path: Path = MODEL_RECOMMENDATIONS_PATH,
         readiness_provider: Callable[[], dict[str, Any]] = inspect_system,
+        model_catalog_provider: Callable[[str], list[str]] = search_ollama_catalog,
     ) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
@@ -441,11 +447,64 @@ class HavenState:
         self.image_base_url: str | None = None
         self.image_timeout_seconds = 300
         self.readiness_provider = readiness_provider
+        self.model_catalog_provider = model_catalog_provider
         self.readiness_snapshot: dict[str, Any] | None = None
         self.readiness_created = 0.0
         self.model_recommendations = load_model_recommendations(recommendation_path)
         self.read_only_workflows = load_read_only_workflows()
         self.package_integrity = verify_packaged_resources()
+
+    def search_models(self, query: object, online: object) -> dict[str, Any]:
+        try:
+            normalized_query = validate_query(query)
+        except ModelCatalogSearchError as error:
+            raise WebRequestError(str(error)) from error
+        if online is not True:
+            raise WebRequestError("explicit-online-search-consent-required")
+        try:
+            discovered = self.model_catalog_provider(normalized_query)
+        except ModelCatalogSearchError as error:
+            raise WebRequestError(str(error), HTTPStatus.BAD_GATEWAY) from error
+        if not isinstance(discovered, list):
+            raise WebRequestError("invalid-model-catalog-response", HTTPStatus.BAD_GATEWAY)
+        with self.lock:
+            installed = set(self.models)
+        results = []
+        seen: set[str] = set()
+        for value in discovered:
+            if (
+                not isinstance(value, str)
+                or not MODEL_NAME.fullmatch(value)
+                or value in seen
+                or len(results) >= 20
+            ):
+                continue
+            seen.add(value)
+            is_installed = value in installed
+            results.append({
+                "name": value,
+                "source": "ollama-public-catalog",
+                "status": "installed" if is_installed else "not-installed",
+                "validationStatus": "candidate-only",
+                "capabilityEvidence": "unverified",
+                "hardwareFit": "unknown",
+                "licenseStatus": "review-required",
+                "executionAllowed": is_installed,
+                "installCommand": None if is_installed else f"ollama pull {value}",
+            })
+        return {
+            "schemaVersion": 1,
+            "kind": "model-catalog-search",
+            "query": normalized_query,
+            "source": "ollama-public-catalog",
+            "networkUsed": True,
+            "queryPersisted": False,
+            "repositoryContentSent": False,
+            "hardwareProfileSent": False,
+            "downloadsPerformed": False,
+            "configurationChanged": False,
+            "results": results,
+        }
 
     def public_status(self) -> dict[str, Any]:
         with self.lock:
@@ -1322,6 +1381,14 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if body:
                     raise WebRequestError("invalid-workflow-catalog-fields")
                 self._send_json(HTTPStatus.OK, self.server.state.list_workflows())
+                return
+            if self.path == "/api/model-search":
+                if set(body) != {"query", "online"}:
+                    raise WebRequestError("invalid-model-search-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.search_models(body["query"], body["online"]),
+                )
                 return
             if self.path == "/api/workflow-plan":
                 if set(body) != {"workflowId"} or not isinstance(body["workflowId"], str):

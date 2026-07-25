@@ -45,6 +45,28 @@ Build unsigned packages during development. For public releases, use GitHub-host
 Consequences:
 Desktop users receive a single web-technology UI without a default listening port, while headless users retain a bounded browser option. Tauri, Rust, WebView2, WKWebView, WebKitGTK, sidecar packaging, installers, signing, notarization, updates, and rollback become independently tested supply-chain boundaries. Node.js, Rust, and Python remain build dependencies rather than global end-user prerequisites. A physical Mac is reserved for final end-user release validation rather than routine CI or signing.
 
+## 2026-07-25: Separate public model discovery from installation authority
+
+Status: Accepted
+
+Context:
+Users need to find a suitable model even when it is not installed on their
+connected Ollama provider. Catalog metadata is untrusted and an interactive
+search must not silently become model-download or command authority.
+
+Decision:
+Keep installed filtering offline. Permit a bounded, explicitly consented search
+of the fixed public Ollama HTTPS catalog and return normalized candidate-only
+names. An uninstalled selection is browser-memory intent with execution
+disabled. Haven 42 may construct a copyable `ollama pull` instruction from the
+validated name, but cannot execute it or call the provider pull API.
+
+Consequences:
+Users can discover and remember a desired model without broadening the local
+service. Installation, disk-capacity review, provenance, license review, and
+digest validation remain separate actions; reconnecting provider inventory is
+required before execution.
+
 ## 2026-07-21: Keep capability selection separate from execution authority
 
 Status: Accepted
