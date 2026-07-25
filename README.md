@@ -16,8 +16,8 @@ The project began as a reusable pack for coding agents. It now provides a provid
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
 | Music and video | **Not shipped** | Candidate research is recorded in documentation-only candidate inventories, but no runtime integration ships until the full security, quality, cleanup, and packaging gates pass. |
 | Hardware-adaptive quantization | **Experimental** | Planning and comparison contracts exist for validated Linux NVIDIA and Windows AMD cells; automatic conversion and activation are not yet shipped. |
-| Local document context | **Proposed; not shipped** | Milestone 27 defines explicit, memory-only file selection and retrieval with no automatic machine scanning, arbitrary path access, or persistence. |
-| Controlled web research | **Proposed; not shipped** | Milestone 28 defines explicit reviewed queries, engine-owned search adapters, trusted citations, SSRF defenses, and memory-only cleanup without unrestricted model internet access. |
+| Local document context | **Initial text and screenshot attachments available** | One keyboard-operable picker admits explicit UTF-8 `.txt`/`.md` files and PNG screenshots; clipboard PNG paste is also bounded, memory-only, and path-free. A visible warning discloses private-network transfer, and deliberate Send confirms that transfer without a separate checkbox. Attachments remain inert data: no attachment-driven tools, process launch, archive expansion, filesystem writes, or model-output execution are exposed. Screenshot understanding remains visibly unverified per model. Deterministic lexical retrieval has only an inactive default-deny contract and fixtures; directories, broader parsers, embeddings, and persistence remain unadmitted. |
+| Controlled web research | **Offline foundation only; not shipped** | Milestone 28 has a default-deny machine contract and hostile fixtures, but no route, model tool, network effect, browser automation, or UI activation. Future explicit reviewed queries, engine-owned adapters, trusted citations, SSRF defenses, and memory-only cleanup remain promotion gates. |
 
 See the [evidence catalog](docs/evidence-catalog.md) for exact tested versions and hardware, or the [roadmap](ROADMAP.md) for planned work.
 
@@ -77,7 +77,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD. Vulkan failed its patch gate, Intel is parked, and physical Mac remains last. |
-| Milestone 27: Local Knowledge Context And Retrieval | Proposed | Explicit file selection, bounded memory-only ingestion, private-network disclosure, retrieval, and cleanup are security-scoped; no runtime file access ships yet. |
+| Milestone 27: Local Knowledge Context And Retrieval | Initial attachment slice in progress | A unified bounded `.txt`/`.md`/PNG picker, clipboard PNG paste, previews, removal, compact scrolling, cleanup, and warned submit-confirmed private-network transfer are implemented. The inactive lexical-retrieval contract grants no runtime authority; vision-model evidence, retrieval implementation, and broader formats remain open. |
 | Milestone 28: Controlled Web Research | Proposed | Explicit per-query approval, fixed search adapters, trusted citations, hostile-content isolation, SSRF controls, and cleanup are defined; models have no internet tool today. |
 
 See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
@@ -110,7 +110,7 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, read-only and abrupt-exit lifecycle smoke tests, hostile integrity/shutdown/archive tests, bounded archives, checksums, full file inventory, exact dependency inventory, notices, SBOM and provenance evidence, and the unsigned-development limitation.
+Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, cross-platform packaged-browser UI/attachment smoke tests, read-only and abrupt-exit lifecycle tests, hostile integrity/shutdown/archive tests, bounded archives, checksums, full file inventory, exact dependency inventory, notices, SBOM and provenance evidence, and the unsigned-development limitation.
 
 The [bounded task composition](docs/task-composition.md) foundation can order up to six registry-backed read-only workflow plans, validate fresh/retry/cancel identity, and emit exactly typed metadata-only intermediate references. It is simulation-only and has no process, filesystem, network, approval, or machine-modification authority.
 

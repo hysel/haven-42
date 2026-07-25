@@ -45,6 +45,10 @@ const state = {
   promptHistoryLimit: 20,
   promptHistoryIndex: 0,
   promptHistoryDraft: "",
+  contextFiles: [],
+  contextImages: [],
+  contextImageSequence: 0,
+  providerTrustScope: null,
   modelSelections: {},
   recommendations: {},
   modelOptions: [],
@@ -212,12 +216,20 @@ function setTaskControlsDisabled(disabled) {
     button.disabled = disabled;
   });
   byId("new-task-button").disabled = disabled;
+  byId("context-files").disabled = disabled || !state.connected;
+  byId("browse-context").disabled = disabled || !state.connected;
+  byId("clear-context").disabled = disabled;
+  document.querySelectorAll(".remove-context-file, .remove-context-image").forEach((button) => {
+    button.disabled = disabled;
+  });
 }
 
 function setProviderReady(ready) {
   byId("model").disabled = !ready;
   byId("prompt").disabled = !ready;
   byId("send-button").disabled = !ready;
+  byId("context-files").disabled = !ready;
+  byId("browse-context").disabled = !ready;
 }
 
 async function api(path, body) {
@@ -252,6 +264,23 @@ function humanError(error) {
     "invalid-model-search-query": "Use 1–64 letters, numbers, spaces, or model-name punctuation.",
     "model-catalog-search-failed": "The public Ollama catalog could not be reached.",
     "invalid-model-catalog-response": "The public catalog returned an invalid response, so Haven 42 rejected it.",
+    "private-context-confirmation-required": "Confirm that the attached content may be sent to your private-network Ollama server.",
+    "invalid-context-file-count": "Attach no more than five text files.",
+    "invalid-context-file-name": "A selected filename is not supported.",
+    "invalid-context-file-type": "Only UTF-8 .txt and .md files are supported.",
+    "invalid-context-file-content": "A selected file is empty or is not supported text.",
+    "context-file-too-large": "Each attached file must be no larger than 64 KiB.",
+    "context-total-too-large": "Attached files must total no more than 128 KiB.",
+    "duplicate-context-file-name": "Remove the duplicate attached filename.",
+    "invalid-context-image-count": "Paste no more than two screenshots.",
+    "invalid-context-image": "The selected screenshot is not a valid PNG image.",
+    "invalid-context-image-name": "The screenshot name is not supported.",
+    "invalid-context-image-type": "Only PNG screenshots can be selected or pasted in this initial version.",
+    "context-image-too-large": "Each selected screenshot must be no larger than 4 MiB.",
+    "context-image-total-too-large": "Selected screenshots must total no more than 8 MiB.",
+    "context-image-dimensions-too-large": "Screenshots must be at most 4096×4096 and 16.7 million pixels.",
+    "invalid-context-image-dimensions": "The screenshot dimensions could not be verified.",
+    "duplicate-context-image-name": "Remove the duplicate screenshot filename.",
   };
   return messages[error.message] || `Request blocked: ${error.message}`;
 }
@@ -617,6 +646,8 @@ function renderModelSelect() {
   );
   const ready = state.connected && Boolean(model);
   select.disabled = !state.connected || state.modelOptions.length === 0;
+  byId("context-files").disabled = !state.connected;
+  byId("browse-context").disabled = !state.connected;
   byId("prompt").disabled = !ready;
   byId("send-button").disabled = !ready;
   byId("prompt").placeholder = ready
@@ -782,7 +813,9 @@ function renderTypedResult(result, capability) {
   }
   const warnings = validateExecutionEvents(result.events, "result");
   const summary = `${capability.resultLabel} ready · typed ${result.artifact.artifactType} · no file written`;
-  if (warnings.some((event) => event.code === "MODEL_SELECTION_UNVERIFIED_FOR_CAPABILITY")) {
+  if (warnings.some((event) => event.code === "MODEL_IMAGE_INPUT_UNVERIFIED")) {
+    setTaskEvent(`Warning · screenshot understanding is unverified for this model · ${summary}`, "warning");
+  } else if (warnings.some((event) => event.code === "MODEL_SELECTION_UNVERIFIED_FOR_CAPABILITY")) {
     setTaskEvent(`Warning · model evidence is unverified for this capability · ${summary}`, "warning");
   } else {
     setTaskEvent(summary, "result");
@@ -953,6 +986,251 @@ function updatePromptHistoryStatus() {
   byId("prompt-history-status").textContent = `${count} of ${state.promptHistoryLimit} prompt${count === 1 ? "" : "s"} retained · memory only · cleared with New task`;
 }
 
+function formatContextBytes(bytes) {
+  return bytes < 1024 ? `${bytes} B` : `${Math.ceil(bytes / 1024)} KiB`;
+}
+
+function renderContextFiles() {
+  const list = byId("context-file-list");
+  list.replaceChildren();
+  const totalBytes = state.contextFiles.reduce((sum, file) => sum + file.sizeBytes, 0);
+  state.contextFiles.forEach((file, index) => {
+    const item = document.createElement("li");
+    item.className = "context-file";
+    const name = document.createElement("span");
+    name.className = "context-file-name";
+    name.textContent = file.name;
+    const meta = document.createElement("span");
+    meta.className = "context-file-meta";
+    meta.textContent = `${formatContextBytes(file.sizeBytes)} · ~${Math.ceil(file.sizeBytes / 4)} tokens`;
+    const remove = document.createElement("button");
+    remove.className = "button text-button remove-context-file";
+    remove.type = "button";
+    remove.textContent = "Remove";
+    remove.setAttribute("aria-label", `Remove ${file.name}`);
+    remove.addEventListener("click", () => {
+      state.contextFiles.splice(index, 1);
+      renderContextFiles();
+    });
+    const preview = document.createElement("details");
+    preview.className = "context-preview";
+    const previewSummary = document.createElement("summary");
+    previewSummary.textContent = "Preview selected text";
+    const previewText = document.createElement("pre");
+    previewText.textContent = file.content.length > 1000
+      ? `${file.content.slice(0, 1000)}\n… preview limited to 1,000 characters`
+      : file.content;
+    preview.append(previewSummary, previewText);
+    item.append(name, meta, remove, preview);
+    list.append(item);
+  });
+  const count = state.contextFiles.length;
+  list.classList.toggle("hidden", count === 0);
+  renderContextImages();
+  const imageCount = state.contextImages.length;
+  const imageBytes = state.contextImages.reduce((sum, image) => sum + image.sizeBytes, 0);
+  const parts = [];
+  if (count) {
+    parts.push(`${count} text file${count === 1 ? "" : "s"} · ${formatContextBytes(totalBytes)} · ~${Math.ceil(totalBytes / 4)} tokens`);
+  }
+  if (imageCount) {
+    parts.push(`${imageCount} screenshot${imageCount === 1 ? "" : "s"} · ${formatContextBytes(imageBytes)}`);
+  }
+  byId("context-status").textContent = parts.length
+    ? `${parts.join(" · ")} · memory only`
+    : "No files or screenshots selected · memory only";
+  byId("clear-context").classList.toggle("hidden", count === 0 && imageCount === 0);
+  const showNetworkWarning = (count > 0 || imageCount > 0) && state.providerTrustScope === "trusted-lan";
+  byId("context-network-warning").classList.toggle("hidden", !showNetworkWarning);
+  byId("context-image-warning").classList.toggle("hidden", imageCount === 0);
+}
+
+function renderContextImages() {
+  const list = byId("context-image-list");
+  list.replaceChildren();
+  state.contextImages.forEach((image, index) => {
+    const item = document.createElement("li");
+    item.className = "context-image";
+    const thumbnail = document.createElement("img");
+    thumbnail.src = image.dataUrl;
+    thumbnail.alt = `Screenshot ${index + 1}: ${image.name}`;
+    const meta = document.createElement("div");
+    meta.className = "context-image-meta";
+    const name = document.createElement("strong");
+    name.textContent = image.name;
+    const detail = document.createElement("span");
+    detail.textContent = `${image.width}×${image.height} · ${formatContextBytes(image.sizeBytes)}`;
+    meta.append(name, detail);
+    const remove = document.createElement("button");
+    remove.className = "button text-button remove-context-image";
+    remove.type = "button";
+    remove.textContent = "Remove";
+    remove.setAttribute("aria-label", `Remove ${image.name}`);
+    remove.addEventListener("click", () => {
+      state.contextImages.splice(index, 1);
+      renderContextFiles();
+    });
+    item.append(thumbnail, meta, remove);
+    list.append(item);
+  });
+  list.classList.toggle("hidden", state.contextImages.length === 0);
+}
+
+function clearContextFiles() {
+  state.contextFiles = [];
+  state.contextImages = [];
+  byId("context-files").value = "";
+  renderContextFiles();
+}
+
+function inspectPngHeader(bytes) {
+  const signature = [137, 80, 78, 71, 13, 10, 26, 10];
+  if (
+    bytes.byteLength < 33
+    || signature.some((value, index) => bytes[index] !== value)
+    || String.fromCharCode(...bytes.slice(12, 16)) !== "IHDR"
+  ) throw new Error("invalid-context-image");
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const width = view.getUint32(16);
+  const height = view.getUint32(20);
+  if (
+    width < 1
+    || height < 1
+    || width > 4096
+    || height > 4096
+    || width * height > 16777216
+  ) throw new Error("context-image-dimensions-too-large");
+  return { width, height };
+}
+
+function blobDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener("load", () => resolve(String(reader.result)));
+    reader.addEventListener("error", () => reject(new Error("invalid-context-image")));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function addContextImages(fileList, source = "clipboard") {
+  const pending = [...fileList];
+  if (state.contextImages.length + pending.length > 2) {
+    throw new Error("invalid-context-image-count");
+  }
+  const existing = new Set(state.contextImages.map((image) => image.name.toLocaleLowerCase()));
+  const additions = [];
+  let totalBytes = state.contextImages.reduce((sum, image) => sum + image.sizeBytes, 0);
+  let nextSequence = state.contextImageSequence;
+  for (const blob of pending) {
+    if (blob.type !== "image/png") throw new Error("invalid-context-image-type");
+    if (blob.size > 4194304) throw new Error("context-image-too-large");
+    let name;
+    if (source === "picker") {
+      name = blob.name;
+      if (
+        typeof name !== "string"
+        || !/^[A-Za-z0-9][A-Za-z0-9._ ()-]{0,119}$/.test(name)
+        || !name.toLocaleLowerCase().endsWith(".png")
+      ) throw new Error("invalid-context-image-name");
+    } else {
+      do {
+        nextSequence += 1;
+        name = `clipboard-screenshot-${nextSequence}.png`;
+      } while (existing.has(name.toLocaleLowerCase()));
+    }
+    const foldedName = name.toLocaleLowerCase();
+    if (existing.has(foldedName)) throw new Error("duplicate-context-image-name");
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    const { width, height } = inspectPngHeader(bytes);
+    totalBytes += bytes.byteLength;
+    if (totalBytes > 8388608) throw new Error("context-image-total-too-large");
+    const dataUrl = await blobDataUrl(new Blob([bytes], { type: "image/png" }));
+    additions.push({
+      name,
+      mediaType: "image/png",
+      base64: dataUrl.slice(dataUrl.indexOf(",") + 1),
+      sizeBytes: bytes.byteLength,
+      width,
+      height,
+      dataUrl,
+    });
+    existing.add(foldedName);
+  }
+  state.contextImageSequence = nextSequence;
+  state.contextImages.push(...additions);
+  renderContextFiles();
+}
+
+async function addContextImage(blob) {
+  await addContextImages([blob]);
+}
+async function addContextFiles(fileList) {
+  const pending = [...fileList];
+  if (state.contextFiles.length + pending.length > 5) {
+    throw new Error("invalid-context-file-count");
+  }
+  const existing = new Set(state.contextFiles.map((file) => file.name.toLocaleLowerCase()));
+  const additions = [];
+  let totalBytes = state.contextFiles.reduce((sum, file) => sum + file.sizeBytes, 0);
+  for (const file of pending) {
+    if (!/^[A-Za-z0-9][A-Za-z0-9._ ()-]{0,119}$/.test(file.name)) {
+      throw new Error("invalid-context-file-name");
+    }
+    const suffix = file.name.slice(file.name.lastIndexOf(".")).toLocaleLowerCase();
+    const mediaType = suffix === ".txt" ? "text/plain" : suffix === ".md" ? "text/markdown" : "";
+    if (!mediaType) throw new Error("invalid-context-file-type");
+    const foldedName = file.name.toLocaleLowerCase();
+    if (existing.has(foldedName)) throw new Error("duplicate-context-file-name");
+    if (file.size > 65536) throw new Error("context-file-too-large");
+    let content;
+    try {
+      content = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
+    } catch {
+      throw new Error("invalid-context-file-content");
+    }
+    const sizeBytes = new TextEncoder().encode(content).byteLength;
+    if (!content || content.includes("\u0000")) throw new Error("invalid-context-file-content");
+    if (sizeBytes > 65536) throw new Error("context-file-too-large");
+    totalBytes += sizeBytes;
+    if (totalBytes > 131072) throw new Error("context-total-too-large");
+    existing.add(foldedName);
+    additions.push({ name: file.name, mediaType, content, sizeBytes });
+  }
+  state.contextFiles.push(...additions);
+  renderContextFiles();
+}
+
+async function addContextAttachments(fileList) {
+  const files = [...fileList];
+  const textFiles = [];
+  const imageFiles = [];
+  for (const file of files) {
+    const suffix = typeof file.name === "string"
+      ? file.name.slice(file.name.lastIndexOf(".")).toLocaleLowerCase()
+      : "";
+    if (suffix === ".txt" || suffix === ".md") {
+      textFiles.push(file);
+    } else if (suffix === ".png") {
+      imageFiles.push(file);
+    } else {
+      throw new Error("invalid-context-file-type");
+    }
+  }
+  const previousFiles = [...state.contextFiles];
+  const previousImages = [...state.contextImages];
+  const previousSequence = state.contextImageSequence;
+  try {
+    await addContextFiles(textFiles);
+    await addContextImages(imageFiles, "picker");
+  } catch (error) {
+    state.contextFiles = previousFiles;
+    state.contextImages = previousImages;
+    state.contextImageSequence = previousSequence;
+    renderContextFiles();
+    throw error;
+  }
+}
+
 function clearPromptHistory() {
   state.promptHistory = [];
   state.promptHistoryIndex = 0;
@@ -1003,6 +1281,7 @@ function recallPrompt(direction) {
 function resetTask() {
   state.messages = [];
   clearPromptHistory();
+  clearContextFiles();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");
   messages.replaceChildren();
@@ -1041,6 +1320,7 @@ function selectCapability(capabilityId) {
 async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   const result = await api("/api/connect", { endpoint, timeoutSeconds, idleUnloadSeconds });
   state.connected = true;
+  state.providerTrustScope = result.trustScope;
   state.recommendations = result.recommendations || {};
   state.modelOptions = result.modelOptions || [];
   if (state.desiredModel && state.modelOptions.some((item) => item.name === state.desiredModel.name)) {
@@ -1257,6 +1537,39 @@ byId("prompt-history-limit").addEventListener("change", () => {
   updatePromptHistoryStatus();
 });
 
+byId("context-files").addEventListener("change", async (event) => {
+  clearError();
+  try {
+    await addContextAttachments(event.target.files);
+  } catch (error) {
+    showError(humanError(error));
+  } finally {
+    event.target.value = "";
+  }
+});
+
+byId("browse-context").addEventListener("click", () => {
+  if (!byId("context-files").disabled) byId("context-files").click();
+});
+
+document.addEventListener("paste", async (event) => {
+  const imageItems = [...(event.clipboardData?.items || [])].filter((item) => (
+    item.kind === "file" && item.type.startsWith("image/")
+  ));
+  if (!imageItems.length) return;
+  event.preventDefault();
+  clearError();
+  try {
+    const blobs = imageItems.map((item) => item.getAsFile());
+    if (blobs.some((blob) => !blob)) throw new Error("invalid-context-image");
+    await addContextImages(blobs);
+  } catch (error) {
+    showError(humanError(error));
+  }
+});
+
+byId("clear-context").addEventListener("click", clearContextFiles);
+
 byId("copy-model-command").addEventListener("click", async () => {
   if (!state.desiredModel?.installCommand) return;
   try {
@@ -1273,6 +1586,7 @@ byId("text-form").addEventListener("submit", async (event) => {
   const prompt = byId("prompt");
   const content = prompt.value.trim();
   if (!content || !state.connected) return;
+  const hasContext = Boolean(state.contextFiles.length || state.contextImages.length);
   const capability = CAPABILITIES[state.capabilityId];
   const capabilityId = state.capabilityId;
   const send = byId("send-button");
@@ -1297,7 +1611,24 @@ byId("text-form").addEventListener("submit", async (event) => {
       capabilityId,
       model,
       messages: requestMessages,
+      attachments: state.contextFiles,
+      images: state.contextImages.map(({ dataUrl: _dataUrl, ...image }) => image),
+      contextConsent: hasContext && state.providerTrustScope === "trusted-lan",
     });
+    if (
+      !result.context
+      || result.context.fileCount !== state.contextFiles.length
+      || result.context.totalBytes !== state.contextFiles.reduce((sum, file) => sum + file.sizeBytes, 0)
+      || result.context.imageCount !== state.contextImages.length
+      || result.context.imageTotalBytes !== state.contextImages.reduce((sum, image) => sum + image.sizeBytes, 0)
+      || result.context.imageInputEvidence !== (state.contextImages.length ? "unverified" : "not-requested")
+      || result.context.providerTrustScope !== state.providerTrustScope
+      || result.context.persisted !== false
+      || result.context.temporaryFilesWritten !== false
+      || result.context.hostExecutionAllowed !== false
+      || result.context.toolInvocationAllowed !== false
+      || result.context.filesystemAccessAllowed !== false
+    ) throw new Error("invalid-server-response");
     if (capabilityId === "general.chat") {
       state.messages.push({ role: "assistant", content: result.content });
     }
@@ -1319,6 +1650,7 @@ byId("text-form").addEventListener("submit", async (event) => {
     if (capabilityId === "general.chat") state.messages = previousMessages;
     userMessage.remove();
     prompt.value = content;
+    clearContextFiles();
     showError(humanError(displayedError));
     focusPrompt = false;
     const retry = recovery?.retryAllowed === true
@@ -1374,11 +1706,13 @@ byId("model").addEventListener("change", () => {
     ? { mode: "automatic", model: null }
     : { mode: "manual", model: value.slice("manual:".length) };
   clearPromptHistory();
+  clearContextFiles();
   renderModelSelect();
 });
 byId("reset-model-button").addEventListener("click", () => {
   state.modelSelections[state.capabilityId] = { mode: "automatic", model: null };
   clearPromptHistory();
+  clearContextFiles();
   renderModelSelect();
 });
 byId("new-task-button").addEventListener("click", async () => {

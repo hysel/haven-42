@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.document-context.lexical-retrieval-foundation",
+  "status": "simulation-only-not-runtime-admitted",
+  "activation": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "providerPayloadAllowed": false,
+    "backgroundIndexingAllowed": false
+  },
+  "inputBoundary": {
+    "validatedMemoryAttachmentsOnly": true,
+    "filesystemPathsAllowed": false,
+    "directorySelectionAllowed": false,
+    "temporaryFilesAllowed": false,
+    "additionalParsersAllowed": false,
+    "networkAllowed": false
+  },
+  "determinism": {
+    "algorithm": "bounded-casefolded-term-frequency",
+    "semanticEmbeddingsAllowed": false,
+    "modelRankingAllowed": false,
+    "remoteRankingAllowed": false,
+    "stableTieBreak": "attachment-order-then-chunk-offset"
+  },
+  "budgets": {
+    "maximumQueryCharacters": 512,
+    "maximumAttachments": 5,
+    "maximumSourceBytes": 131072,
+    "maximumChunkCharacters": 2000,
+    "maximumChunksPerAttachment": 64,
+    "maximumSelectedChunks": 8,
+    "maximumSelectedCharacters": 12000
+  },
+  "resultBoundary": {
+    "sourceNameRequired": true,
+    "sourceOffsetRequired": true,
+    "tokenEstimateRequired": true,
+    "selectedChunkDisclosureRequired": true,
+    "contentTreatedAsUntrustedData": true,
+    "contentAuthorityAllowed": false
+  },
+  "lifecycle": {
+    "memoryOnly": true,
+    "persistentIndexAllowed": false,
+    "browserStorageAllowed": false,
+    "cleanupOnTaskBoundaryRequired": true,
+    "cleanupOnFailureRequired": true,
+    "cleanupOnShutdownRequired": true
+  },
+  "hostileFixture": "examples/fixtures/lexical-retrieval-hostile-cases.json"
+}

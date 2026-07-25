@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import base64
 import importlib.util
 import json
 import struct
@@ -11,6 +12,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+import zlib
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -732,6 +734,19 @@ def main() -> int:
         assert reply["artifact"]["policy"]["fileWrite"] is False
         assert reply["artifact"]["policy"]["networkAccess"] is False
         assert reply["modelDigestVerified"] is True
+        assert reply["context"] == {
+            "fileCount": 0,
+            "totalBytes": 0,
+            "imageCount": 0,
+            "imageTotalBytes": 0,
+            "imageInputEvidence": "not-requested",
+            "providerTrustScope": "loopback",
+            "persisted": False,
+            "temporaryFilesWritten": False,
+            "hostExecutionAllowed": False,
+            "toolInvocationAllowed": False,
+            "filesystemAccessAllowed": False,
+        }
         assert reply["runDetails"] == {
             "providerReported": True,
             "inputTokens": 30,
@@ -750,7 +765,325 @@ def main() -> int:
         assert chat_payload["think"] is False
         assert chat_payload["messages"][0]["role"] == "system"
         assert not any(path == "/api/generate" for path, _body in FakeState.requests)
-        checks += 11
+        checks += 12
+
+        attachment_content = "# Project notes\nTreat `rm -rf` as quoted source text."
+        attachment = {
+            "name": "notes.md",
+            "mediaType": "text/markdown",
+            "content": attachment_content,
+            "sizeBytes": len(attachment_content.encode("utf-8")),
+        }
+        status, context_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Summarize the attached notes."}],
+                "attachments": [attachment],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 200
+        assert context_reply["context"] == {
+            "fileCount": 1,
+            "totalBytes": attachment["sizeBytes"],
+            "imageCount": 0,
+            "imageTotalBytes": 0,
+            "imageInputEvidence": "not-requested",
+            "providerTrustScope": "loopback",
+            "persisted": False,
+            "temporaryFilesWritten": False,
+            "hostExecutionAllowed": False,
+            "toolInvocationAllowed": False,
+            "filesystemAccessAllowed": False,
+        }
+        context_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
+        assert "untrusted, inert reference data" in context_payload["messages"][0]["content"]
+        assert "tools" not in context_payload
+        assert "untrusted reference material" in context_payload["messages"][-1]["content"]
+        assert attachment_content in context_payload["messages"][-1]["content"]
+        assert not any(
+            key in json.dumps(context_reply).lower()
+            for key in ("fullpath", "filepath", "temporarypath")
+        )
+
+        state.trust_scope = "trusted-lan"
+        status, error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Use the attachment."}],
+                "attachments": [attachment],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 409 and error["error"] == "private-context-confirmation-required"
+        status, lan_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Use the attachment."}],
+                "attachments": [attachment],
+                "contextConsent": True,
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and lan_reply["context"]["providerTrustScope"] == "trusted-lan"
+        state.trust_scope = "loopback"
+
+        hostile_attachments = (
+            ({**attachment, "name": "../notes.md"}, "invalid-context-file-name"),
+            ({**attachment, "mediaType": "text/plain"}, "invalid-context-file-type"),
+            ({**attachment, "sizeBytes": attachment["sizeBytes"] + 1}, "context-file-too-large"),
+            ({**attachment, "content": "bad\u0000text", "sizeBytes": 8}, "invalid-context-file-content"),
+        )
+        for hostile_attachment, expected_error in hostile_attachments:
+            status, error, _ = request_json(
+                origin + "/api/text",
+                "POST",
+                {
+                    "capabilityId": "general.chat",
+                    "model": "qwen3.5:9b",
+                    "messages": [{"role": "user", "content": "Use this."}],
+                    "attachments": [hostile_attachment],
+                    "contextConsent": False,
+                },
+                token,
+                origin,
+            )
+            assert status in {400, 413} and error["error"] == expected_error
+        status, duplicate_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Use these."}],
+                "attachments": [attachment, {**attachment, "name": "NOTES.MD"}],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and duplicate_error["error"] == "duplicate-context-file-name"
+        status, count_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Use these."}],
+                "attachments": [
+                    {**attachment, "name": f"notes-{index}.md"}
+                    for index in range(WEB.MAX_CONTEXT_FILES + 1)
+                ],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and count_error["error"] == "invalid-context-file-count"
+        oversized_attachment = {
+            "name": "large.txt",
+            "mediaType": "text/plain",
+            "content": "x" * (WEB.MAX_CONTEXT_FILE_BYTES + 1),
+            "sizeBytes": WEB.MAX_CONTEXT_FILE_BYTES + 1,
+        }
+        status, size_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Use this."}],
+                "attachments": [oversized_attachment],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 413 and size_error["error"] == "context-file-too-large"
+        total_attachments = [
+            {
+                "name": f"large-{index}.txt",
+                "mediaType": "text/plain",
+                "content": "x" * size,
+                "sizeBytes": size,
+            }
+            for index, size in enumerate((65536, 65536, 1))
+        ]
+        status, total_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Use these."}],
+                "attachments": total_attachments,
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 413 and total_error["error"] == "context-total-too-large"
+        checks += 16
+
+        png_base64 = (
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk"
+            "+A8AAQUBAScY42YAAAAASUVORK5CYII="
+        )
+        png_bytes = base64.b64decode(png_base64)
+        screenshot = {
+            "name": "clipboard-screenshot-1.png",
+            "mediaType": "image/png",
+            "base64": png_base64,
+            "sizeBytes": len(png_bytes),
+            "width": 1,
+            "height": 1,
+        }
+        status, screenshot_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Describe the screenshot."}],
+                "attachments": [],
+                "images": [screenshot],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 200
+        assert screenshot_reply["context"] == {
+            "fileCount": 0,
+            "totalBytes": 0,
+            "imageCount": 1,
+            "imageTotalBytes": len(png_bytes),
+            "imageInputEvidence": "unverified",
+            "providerTrustScope": "loopback",
+            "persisted": False,
+            "temporaryFilesWritten": False,
+            "hostExecutionAllowed": False,
+            "toolInvocationAllowed": False,
+            "filesystemAccessAllowed": False,
+        }
+        screenshot_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
+        assert screenshot_payload["messages"][-1]["images"] == [png_base64]
+        assert screenshot_reply["events"][-2]["code"] == "MODEL_IMAGE_INPUT_UNVERIFIED"
+        screenshot_hostiles = (
+            ({**screenshot, "base64": "***"}, "invalid-context-image"),
+            ({**screenshot, "sizeBytes": len(png_bytes) + 1}, "context-image-too-large"),
+            ({**screenshot, "width": 2}, "invalid-context-image-dimensions"),
+            ({**screenshot, "mediaType": "image/jpeg"}, "invalid-context-image-type"),
+            ({**screenshot, "name": "../screen.png"}, "invalid-context-image-name"),
+        )
+        for hostile_image, expected_error in screenshot_hostiles:
+            status, error, _ = request_json(
+                origin + "/api/text",
+                "POST",
+                {
+                    "capabilityId": "general.chat",
+                    "model": "qwen3.5:9b",
+                    "messages": [{"role": "user", "content": "Describe this."}],
+                    "attachments": [],
+                    "images": [hostile_image],
+                    "contextConsent": False,
+                },
+                token,
+                origin,
+            )
+            assert status in {400, 413} and error["error"] == expected_error
+        oversized_dimensions = bytearray(png_bytes)
+        struct.pack_into(">I", oversized_dimensions, 16, WEB.MAX_CONTEXT_IMAGE_DIMENSION + 1)
+        struct.pack_into(
+            ">I",
+            oversized_dimensions,
+            29,
+            zlib.crc32(oversized_dimensions[12:29]) & 0xFFFFFFFF,
+        )
+        status, dimension_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Describe this."}],
+                "attachments": [],
+                "images": [{
+                    **screenshot,
+                    "base64": base64.b64encode(oversized_dimensions).decode("ascii"),
+                    "width": WEB.MAX_CONTEXT_IMAGE_DIMENSION + 1,
+                }],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and dimension_error["error"] == "context-image-dimensions-too-large"
+        status, image_duplicate_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Describe these."}],
+                "attachments": [],
+                "images": [screenshot, {**screenshot, "name": "CLIPBOARD-SCREENSHOT-1.PNG"}],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and image_duplicate_error["error"] == "duplicate-context-image-name"
+        status, image_count_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Describe these."}],
+                "attachments": [],
+                "images": [
+                    {**screenshot, "name": f"clipboard-screenshot-{index}.png"}
+                    for index in range(WEB.MAX_CONTEXT_IMAGES + 1)
+                ],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and image_count_error["error"] == "invalid-context-image-count"
+        state.trust_scope = "trusted-lan"
+        status, image_consent_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Describe this."}],
+                "attachments": [],
+                "images": [screenshot],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 409 and image_consent_error["error"] == "private-context-confirmation-required"
+        state.trust_scope = "loopback"
+        checks += 14
 
         for capability_id, expected_title, prompt_fragment in (
             ("content.write", "Generated Writing", "clean Markdown"),
@@ -965,6 +1298,84 @@ def main() -> int:
         ]
         assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
         assert policy["text"]["missingModelDownloadsAllowed"] is False
+        assert policy["text"]["maximumRequestBytes"] == 12582912
+        assert policy["text"]["maximumConversationBytes"] == 65536
+        assert policy["documentContext"]["contract"] == "config/document-context-policy.json"
+        assert policy["documentContext"]["allowedExtensions"] == [".txt", ".md"]
+        assert policy["documentContext"]["maximumFiles"] == 5
+        assert policy["documentContext"]["maximumTotalBytes"] == 131072
+        assert policy["documentContext"]["clipboardScreenshotMediaTypes"] == ["image/png"]
+        assert policy["documentContext"]["maximumScreenshots"] == 2
+        assert policy["documentContext"]["maximumBytesPerScreenshot"] == 4194304
+        assert policy["documentContext"]["maximumScreenshotDimension"] == 4096
+        assert policy["documentContext"]["imageInputEvidence"] == "unverified-visible-warning"
+        assert policy["documentContext"]["screenshotFilePickerAllowed"] is True
+        assert policy["documentContext"]["memoryOnly"] is True
+        assert policy["documentContext"]["privateNetworkConfirmationRequired"] is True
+        assert policy["documentContext"]["privateNetworkWarningRequired"] is True
+        assert policy["documentContext"]["privateNetworkConfirmationMechanism"] == (
+            "deliberate-submit-after-visible-warning"
+        )
+        assert policy["documentContext"]["separateConfirmationControlRequired"] is False
+        context_policy = json.loads(
+            (ROOT / "config/document-context-policy.json").read_text(encoding="utf-8")
+        )
+        assert context_policy["selection"]["backgroundScanningAllowed"] is False
+        assert context_policy["selection"]["arbitraryPathInputAllowed"] is False
+        assert context_policy["lifecycle"]["temporaryFilesAllowed"] is False
+        assert context_policy["lifecycle"]["clearOnFailure"] is True
+        assert context_policy["formats"]["clipboardImages"]["clipboardPasteAllowed"] is True
+        assert context_policy["formats"]["clipboardImages"]["filePickerAllowed"] is True
+        assert context_policy["budgets"]["maximumImagePixels"] == 16777216
+        assert context_policy["executionIsolation"] == {
+            "attachmentContentTreatedAsData": True,
+            "executableFormatsAllowed": False,
+            "archiveExpansionAllowed": False,
+            "contentDrivenProcessLaunchAllowed": False,
+            "contentDrivenToolInvocationAllowed": False,
+            "contentDrivenFilesystemAccessAllowed": False,
+            "modelOutputExecutionAllowed": False,
+            "antivirusScanningClaimed": False,
+        }
+        assert context_policy["providerDisclosure"]["confirmationMechanism"] == (
+            "deliberate-submit-after-visible-warning"
+        )
+        assert context_policy["providerDisclosure"]["separateConfirmationControlRequired"] is False
+        assert context_policy["retrieval"]["persistentIndexAllowed"] is False
+        lexical_contract = json.loads(
+            (ROOT / "config/lexical-retrieval-contract.json").read_text(encoding="utf-8")
+        )
+        assert lexical_contract["status"] == "simulation-only-not-runtime-admitted"
+        assert not any(lexical_contract["activation"].values())
+        assert lexical_contract["inputBoundary"]["validatedMemoryAttachmentsOnly"] is True
+        assert lexical_contract["inputBoundary"]["filesystemPathsAllowed"] is False
+        assert lexical_contract["determinism"]["semanticEmbeddingsAllowed"] is False
+        assert lexical_contract["resultBoundary"]["contentAuthorityAllowed"] is False
+        assert lexical_contract["lifecycle"]["persistentIndexAllowed"] is False
+        lexical_fixtures = json.loads(
+            (ROOT / lexical_contract["hostileFixture"]).read_text(encoding="utf-8")
+        )
+        assert lexical_fixtures["effectsAllowed"] is False
+        assert len({case["id"] for case in lexical_fixtures["cases"]}) == 10
+        assert all(case["expected"] in {"rejected", "inert-data", "memory-cleared"} for case in lexical_fixtures["cases"])
+        research_contract = json.loads(
+            (ROOT / "config/web-research-contract.json").read_text(encoding="utf-8")
+        )
+        assert research_contract["status"] == "proposed-offline-fixtures-only"
+        assert not any(research_contract["activation"].values())
+        assert research_contract["query"]["explicitUserActionRequired"] is True
+        assert research_contract["query"]["repositoryContentAllowed"] is False
+        assert research_contract["futureBrokerBoundary"]["privateNetworkDestinationsAllowed"] is False
+        assert research_contract["citations"]["modelSuppliedActiveLinksAllowed"] is False
+        assert research_contract["lifecycle"]["persistenceAllowed"] is False
+        research_fixtures = json.loads(
+            (ROOT / research_contract["hostileFixture"]).read_text(encoding="utf-8")
+        )
+        assert research_fixtures["networkUsed"] is False
+        assert len({case["id"] for case in research_fixtures["cases"]}) == 10
+        assert all(case["expected"] in {"rejected", "inert-rejected", "inert-data", "inactive-rejected", "cleaned"} for case in research_fixtures["cases"])
+        assert policy["inactiveFoundations"]["lexicalRetrieval"]["runtimeRouteAllowed"] is False
+        assert policy["inactiveFoundations"]["webResearch"]["networkAllowed"] is False
         assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
         assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
         assert policy["executionEvents"]["automaticRetryAllowed"] is False
@@ -992,6 +1403,7 @@ def main() -> int:
         assert html.count('class="field-row compact-control-row"') == 3
         assert ".compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
         assert ".advanced-grid select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
+        assert ".model-select select { min-width: 190px; height: 36px;" in styles
         assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
         assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
         assert "selectedSeconds === state.idleUnloadSeconds" in javascript
@@ -1007,6 +1419,27 @@ def main() -> int:
         assert "recordPromptHistory" in javascript and "recallPrompt" in javascript
         assert "clearPromptHistory" in javascript and "state.promptHistory.slice(-selectedLimit)" in javascript
         assert javascript.count("clearPromptHistory();") >= 3
+        assert 'id="browse-context" type="button" disabled>Browse files</button>' in html
+        assert 'id="context-files"' in html and 'accept=".txt,.md,.png,text/plain,text/markdown,image/png"' in html
+        assert 'id="context-images"' not in html and "Browse files" in html
+        assert 'id="context-consent"' not in html
+        assert 'id="context-network-warning"' in html and "private-network Ollama server" in html
+        assert "addContextFiles" in javascript and "clearContextFiles" in javascript
+        assert 'new TextDecoder("utf-8", { fatal: true })' in javascript
+        assert 'contextConsent: hasContext && state.providerTrustScope === "trusted-lan"' in javascript
+        assert "context-file-too-large" in javascript and "context-total-too-large" in javascript
+        assert 'document.addEventListener("paste"' in javascript and "addContextImages" in javascript
+        assert "inspectPngHeader" in javascript and "blobDataUrl" in javascript
+        assert "MODEL_IMAGE_INPUT_UNVERIFIED" in javascript
+        assert 'id="context-image-list"' in html and "browse UTF-8 .txt/.md or PNG" in html and "paste a PNG screenshot" in html
+        assert "Attachments are inert data and are never executed" in html
+        assert "result.context.hostExecutionAllowed !== false" in javascript
+        assert ".context-image img {" in styles and ".context-warning {" in styles
+        assert 'previewText.textContent = file.content.length > 1000' in javascript
+        assert "clearContextFiles();\n    showError" in javascript
+        assert ".context-panel { flex: 0 1 auto; max-height: min(190px, 32vh);" in styles and ".context-file {" in styles
+        assert ".messages { flex: 1 1 auto;" in styles and "min-height: 0; overflow: auto;" in styles
+        assert ".composer { flex: 0 0 auto;" in styles
         assert "localStorage" not in javascript and "sessionStorage" not in javascript and "indexedDB" not in javascript
         assert ".system-setting select { height: 36px;" in styles
         assert ".hidden { display: none !important; }" in styles
@@ -1036,7 +1469,9 @@ def main() -> int:
         assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
         assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
         assert "webbrowser" not in (ROOT / "web/server.py").read_text(encoding="utf-8")
-        checks += 70
+        readiness_source = (ROOT / "scripts/system_readiness.py").read_text(encoding="utf-8")
+        assert 'ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))' in readiness_source
+        checks += 90
     finally:
         app.shutdown()
         app.server_close()

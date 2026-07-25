@@ -61,7 +61,8 @@
     "messagePersistence": false,
     "endpointPersistence": false,
     "modelDownloads": false,
-    "maximumRequestBytes": 65536,
+    "maximumRequestBytes": 12582912,
+    "maximumConversationBytes": 65536,
     "maximumMessageBytes": 32768,
     "maximumConversationMessages": 20,
     "modelSelection": "immutable-digest-and-capability-evidence-gated-automatic-with-advanced-per-capability-browser-memory-override",
@@ -78,6 +79,52 @@
     "unloadOnModelOrProviderChange": true,
     "unloadOnShutdown": true,
     "maximumResponseBytes": 1048576
+  },
+  "documentContext": {
+    "contract": "config/document-context-policy.json",
+    "status": "bounded-inert-attachment-admitted",
+    "browserSelectionOnly": true,
+    "allowedExtensions": [".txt", ".md"],
+    "maximumFiles": 5,
+    "maximumBytesPerFile": 65536,
+    "maximumTotalBytes": 131072,
+    "clipboardScreenshotMediaTypes": ["image/png"],
+    "screenshotFilePickerAllowed": true,
+    "maximumScreenshots": 2,
+    "maximumBytesPerScreenshot": 4194304,
+    "maximumScreenshotTotalBytes": 8388608,
+    "maximumScreenshotDimension": 4096,
+    "maximumScreenshotPixels": 16777216,
+    "imageInputEvidence": "unverified-visible-warning",
+    "attachmentContentTreatedAsData": true,
+    "contentDrivenProcessLaunchAllowed": false,
+    "contentDrivenToolInvocationAllowed": false,
+    "contentDrivenFilesystemAccessAllowed": false,
+    "modelOutputExecutionAllowed": false,
+    "antivirusScanningClaimed": false,
+    "memoryOnly": true,
+    "temporaryFilesAllowed": false,
+    "privateNetworkConfirmationRequired": true,
+    "privateNetworkWarningRequired": true,
+    "privateNetworkConfirmationMechanism": "deliberate-submit-after-visible-warning",
+    "separateConfirmationControlRequired": false,
+    "publicProviderAllowed": false
+  },
+  "inactiveFoundations": {
+    "lexicalRetrieval": {
+      "contract": "config/lexical-retrieval-contract.json",
+      "status": "simulation-only-not-runtime-admitted",
+      "runtimeRouteAllowed": false,
+      "uiControlAllowed": false,
+      "providerPayloadAllowed": false
+    },
+    "webResearch": {
+      "contract": "config/web-research-contract.json",
+      "status": "proposed-offline-fixtures-only",
+      "runtimeRouteAllowed": false,
+      "modelToolAllowed": false,
+      "networkAllowed": false
+    }
   },
   "runDetails": {
     "providerReportedOnly": true,

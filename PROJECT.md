@@ -36,10 +36,15 @@ Milestones 24 and 25 retain documentation-only audio/video candidate inventories
 shared media-consent policy. Milestone 26 now has quantization plan/artifact contracts,
 OS-aware sanitized profiling, explicit support boundaries, and a no-effect dry-run
 selector; live model recipes and activation remain unpromoted. Milestone 27 now
-defines a proposed explicit-selection, memory-only local-document context and
-retrieval boundary; no file-ingestion runtime, automatic scan, directory access,
-embedding index, or persistence is admitted. Milestone 28 defines proposed
-controlled web research with explicit reviewed queries, engine-owned adapters,
+has an initial explicit-selection, memory-only unified `.txt`/`.md`/PNG picker plus clipboard-PNG
+attachment slice with strict atomic byte/count/dimension limits, path-free transfer,
+warned submit-confirmed private-network transfer, visible unverified image-input status, inert-data
+isolation with no attachment-driven execution or tools, and no temporary
+files. Automatic scan, directory access, broader parsers,
+lexical retrieval implementation, embedding indexes, and persistence remain unadmitted; the
+default-deny lexical contract and hostile fixtures expose no runtime route or provider payload.
+Milestone 28 defines proposed
+controlled web research with an inactive offline contract and hostile fixtures, followed later by explicit reviewed queries, engine-owned adapters,
 trusted citations, SSRF controls, and memory-only cleanup; no model or renderer
 internet tool is admitted. Broader surface and provider parity remains
 evidence-gated.

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "kind": "lexical-retrieval-offline-hostile-fixtures",
+  "effectsAllowed": false,
+  "cases": [
+    {"id": "path-bearing-source", "class": "path-authority", "expected": "rejected"},
+    {"id": "oversized-query", "class": "resource-budget", "expected": "rejected"},
+    {"id": "oversized-source-set", "class": "resource-budget", "expected": "rejected"},
+    {"id": "chunk-explosion", "class": "resource-budget", "expected": "rejected"},
+    {"id": "duplicate-source-name", "class": "ambiguity", "expected": "rejected"},
+    {"id": "embedded-command", "class": "content-authority", "expected": "inert-data"},
+    {"id": "embedded-tool-request", "class": "content-authority", "expected": "inert-data"},
+    {"id": "model-ranking-request", "class": "nondeterminism", "expected": "rejected"},
+    {"id": "failure-after-selection", "class": "lifecycle", "expected": "memory-cleared"},
+    {"id": "shutdown-with-index", "class": "lifecycle", "expected": "memory-cleared"}
+  ]
+}

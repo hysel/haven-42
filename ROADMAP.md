@@ -851,18 +851,26 @@ Exit criteria:
 
 Goal: Let an end user explicitly add selected local documents to a text task without granting Haven 42 general filesystem authority, silently scanning the machine, or obscuring when document content crosses to a private-network provider.
 
-Current status: Proposed and security-scoped. No file-ingestion, folder-scan, retrieval-index, persistence, or document-parser runtime is admitted yet.
+Current status: The initial explicit `.txt`/`.md` plus browsed-or-pasted PNG attachment slice is implemented with one type-restricted picker, strict atomic count/byte/type/dimension validation, safe previews, compact attachment scrolling that preserves the chat composer, removal, memory-only cleanup, warned submit-confirmed private-network transfer, and visible unverified image-input status. Sanitized Windows source and unsigned packaged/default-browser cells passed native screenshot paste, mixed file selection, user-reviewed `qwen3.5:9b` description, chat-layout review, and independently verified model unload. PNG is the only admitted screenshot file-picker and clipboard representation and the canonical provider payload; native Linux/macOS clipboard behavior remains unproven. A simulation-only deterministic lexical-retrieval contract and hostile fixtures now deny every runtime effect; no retrieval route, UI, provider payload, index, or implementation is admitted. Vision-model recommendation evidence, non-PNG clipboard conversion, broader image upload, folder scans, broader document parsers, active retrieval, embeddings, and persistence remain unadmitted.
 
 Scope:
 
 - Begin with an explicit multi-file browser picker. Do not add automatic discovery, background indexing, file watching, operating-system search, arbitrary path entry, or whole-machine scanning.
 - Let the browser transfer only user-selected bytes to the loopback service. Strip path metadata, reject traversal-like names, and never expose a generic read-path API to the renderer or model.
-- Admit a minimal initial format allowlist: UTF-8 plain text, Markdown, CSV, JSON, and separately reviewed source-code extensions. Reject binaries, archives, PDF, Office documents, images, OCR, malformed encodings, and unsupported formats until each parser boundary passes independent review.
+- Admit a minimal initial unified file-picker allowlist: UTF-8 plain text, Markdown, and bounded PNG screenshots, followed only after review by CSV, JSON, and separately reviewed source-code extensions. Clipboard PNG shares the same screenshot validation path. Reject other image file uploads, non-PNG clipboard representations, binaries, archives, PDF, Office documents, OCR, malformed encodings, and unsupported formats until each format and parser boundary passes independent review.
+- Treat clipboard MIME representation as browser- and platform-dependent. Detect and report the representation supplied by the browser without logging clipboard content or platform-private metadata. Do not claim native Windows, Linux, or macOS compatibility from synthetic browser events alone.
+- Keep PNG as the canonical screenshot representation. Evaluate JPEG and WebP clipboard input only through a separately reviewed, bounded browser-decoding and PNG-normalization path; reject TIFF and any representation the browser cannot safely normalize. Conversion must not add a native clipboard library, OS integration, filesystem write, remote codec, metadata leak, or new launcher authority.
 - Enforce strict per-file, total-byte, file-count, extracted-text, chunk-count, request-context, and processing-time limits. Parsing and deterministic chunking remain local and memory-only.
+- Treat every broader document parser as a separate dependency and attack boundary. Extraction must run in a restricted worker with no network, shell, child-process, arbitrary path, provider, model, or filesystem-write authority; use bounded input/output, memory, CPU, wall-clock, page/part/entry counts, compression ratios, recursion, and cancellation. A parser crash or timeout fails closed and leaves no temporary file or partial context.
+- Never open an attachment through Microsoft Office, LibreOffice, Preview, a PDF viewer, the OS shell, or another installed application. Never execute document JavaScript, actions, macros, formulas, links, embedded files, OLE objects, external relationships, or model-produced code.
+- For PDF, begin with text extraction from unencrypted, structurally valid documents only. Reject passwords/encryption, JavaScript, actions, launch instructions, embedded or associated files, external references, malformed cross-reference structures, excessive pages/objects, and decompression abuse. Scanned-image PDF and OCR remain a later independent gate.
+- For Office, begin with non-macro Open XML only and parse package parts without invoking Office. Reject macro-enabled formats (`.docm`, `.xlsm`, `.pptm`, macro-enabled templates/add-ins), legacy binary formats (`.doc`, `.xls`, `.ppt`), encrypted packages, external relationships, embedded/OLE objects, unsafe or duplicate ZIP member names, excessive compression/parts, and unsupported custom content. Review `.docx`, `.pptx`, and `.xlsx` independently because their extraction and presentation semantics differ.
+- Show extracted provenance appropriate to the format—filename plus page, slide, sheet, or bounded part—and let the user review extracted text, omissions, truncation, and rejection reasons before it can enter a provider request.
+- Pin and review every parser and codec dependency. Packaging promotion requires hashes, dependency inventory, license review, third-party notices, CycloneDX SBOM inclusion, known-vulnerability review, source-versus-packaged parity, and exact native evidence on each supported target.
 - Start with exact-content attachment for small inputs and deterministic lexical retrieval for larger admitted text. Local embeddings, an additional embedding model, and semantic indexing remain separate evidence gates.
 - Show every admitted, partially admitted, or rejected file; extracted-text preview; size; estimated token cost; truncation; selected chunks; and removal controls before execution.
 - Treat document content as untrusted data. Document instructions cannot choose tools, commands, providers, models, approvals, paths, network destinations, or product policy.
-- Disclose the execution destination. Loopback providers receive an ordinary explicit attachment confirmation; private-network providers require a prominent per-provider confirmation that selected content will leave the current machine. Public provider destinations remain blocked.
+- Disclose the execution destination. Private-network providers require a prominent warning that selected content will leave the current machine; deliberate Send after that warning is the confirmation, with no separate checkbox. Public provider destinations remain blocked.
 - Keep source bytes, extracted text, chunk indexes, document identifiers, and retrieval results in process/browser memory only. New task, provider change, model change, explicit removal, and shutdown clear them.
 - Defer any persistent knowledge library until encrypted storage, key handling, migration, corruption recovery, deletion, export, backup, multi-user, and uninstall semantics pass separate approval and native evidence.
 
@@ -871,6 +879,9 @@ Exit criteria:
 - Only files explicitly selected by the user can enter context, and neither a renderer nor model can supply a filesystem path or expand the grant.
 - The UI previews admitted content and discloses the exact provider trust scope before any selected content is transmitted.
 - Unsupported, oversized, malformed, traversal-like, binary, archive, and parser-hostile inputs fail closed without residual temporary files or unsanitized logs.
+- Native clipboard tests prove the exact browser-exposed representation and paste behavior on admitted Windows, Linux, and macOS targets. Unsupported representations receive a clear local warning and are not silently converted, uploaded, or discarded.
+- Screenshot normalization, if later admitted, produces a bounded metadata-free PNG whose decoded dimensions, pixel count, structure, and canonical bytes are revalidated by the loopback engine. Browser conversion alone is never trusted as validation.
+- PDF and Office promotion requires hostile fixtures for embedded content, active actions, macros, external relationships, encryption, malformed containers, duplicate/traversal members, decompression bombs, excessive objects/parts, parser crashes, timeouts, cancellation, and residue-free cleanup.
 - Context budgeting deterministically bounds transmitted chunks and clearly reports partial admission or truncation.
 - Prompt injection inside a document cannot add filesystem, process, network, model-management, approval, or persistence authority.
 - New task, provider/model changes, removal, failure, and shutdown clear all document state; tests verify no cache, browser storage, log, package-tree, or temporary-file residue.
@@ -878,19 +889,27 @@ Exit criteria:
 
 ### Recommended Implementation Order
 
-1. Define the versioned document-ingestion, context-budget, provider-disclosure, and memory-lifecycle contracts with all effects denied by default.
-2. Add offline hostile fixtures for filenames, encodings, oversized input, duplicate content, prompt injection, truncation, cleanup, and exact provider payloads.
-3. Implement explicit memory-only multi-file attachment for the minimal text allowlist without directory selection or persistence.
-4. Add deterministic in-memory lexical retrieval and per-response source/chunk disclosure.
-5. Evaluate explicit folder selection only after canonicalization, exclusions, symlink/reparse handling, preview, cancellation, and bounded traversal tests pass on every platform.
-6. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
-7. Consider an optional persistent library only as a separately approved storage product with encryption, deletion, migration, export, rollback, and uninstall evidence.
+1. Define the versioned document-ingestion, context-budget, provider-disclosure, execution-isolation, and memory-lifecycle contracts with all effects denied by default. Done for the initial `.txt`/`.md` and browsed-or-pasted PNG slice.
+2. Add offline hostile fixtures for filenames, encodings, oversized input, duplicate content, prompt injection, truncation, cleanup, exact provider payloads, PNG structure/CRC/dimensions, and inert execution boundaries. Done for the initial text and PNG slice; retrieval truncation and broader-parser fixtures remain open.
+3. Implement explicit memory-only multi-file attachment for the minimal text allowlist without directory selection or persistence. Done with five-file, 64-KiB-per-file, 128-KiB-total text limits and warned submit-confirmed private-network transfer; browsed or pasted PNG screenshots add separate two-image, 4-MiB-per-image, 8-MiB-total, dimension/pixel, and unverified-model-warning bounds.
+4. Run native clipboard-paste smoke tests on the admitted Windows, Linux, and macOS browser/package matrix and record the exact clipboard MIME representation. Sanitized Windows source and unsigned packaged/default-browser cells are done; native Linux/macOS cells remain open. Keep unsupported representations rejected with a clear warning.
+5. Evaluate bounded browser-side JPEG/WebP-to-PNG normalization only if native evidence shows it is needed. Keep TIFF, arbitrary image upload, native clipboard integration, metadata retention, and unbounded decoding unadmitted.
+6. Extend inert plain-text selection to CSV and JSON, then separately reviewed source-code extensions, with format-aware previews and the existing no-execution boundary.
+7. Introduce the restricted parser-worker contract and hostile parser harness before admitting any complex document parser.
+8. Add text-only PDF extraction for unencrypted, inactive documents after PDF-specific hostile, resource, dependency, packaging, and native gates pass. Keep embedded files, JavaScript/actions, external references, and OCR blocked.
+9. Add non-macro `.docx` extraction after independent Open XML package and relationship gates pass.
+10. Evaluate `.pptx` and `.xlsx` independently with slide/sheet provenance and format-specific bounds. Keep macro-enabled, legacy binary, encrypted, embedded-object, and unsupported Office formats blocked.
+11. Evaluate scanned-PDF and image OCR as a separate capability with pinned models/tools, capacity planning, quality evidence, cleanup, and no-network enforcement.
+12. Add deterministic in-memory lexical retrieval and per-response source/chunk disclosure. Its simulation-only default-deny contract and hostile fixture set are complete; runtime implementation remains open.
+13. Evaluate explicit folder selection only after canonicalization, exclusions, symlink/reparse handling, preview, cancellation, and bounded traversal tests pass on every platform.
+14. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
+15. Consider an optional persistent library only as a separately approved storage product with encryption, deletion, migration, export, rollback, and uninstall evidence.
 
 ## Milestone 28: Controlled Web Research
 
 Goal: Let an end user explicitly research current public information with a local model while keeping all network authority in a narrow engine-owned search and retrieval broker rather than granting the model, renderer, or browser unrestricted internet access.
 
-Current status: Proposed and security-scoped. Text models have no web-search tool, arbitrary URL fetch, browser automation, page-execution, credential, cookie, download, or autonomous research authority. The existing fixed-origin Ollama model-catalog search remains a separate candidate-discovery feature.
+Current status: Proposed, security-scoped, and offline-only. A machine-readable foundation plus ten inert hostile fixtures now deny runtime routes, model tools, network, DNS, URL fetching, browser automation, page execution, credentials, downloads, persistence, and autonomous follow-up. No search adapter or UI control exists. Text models retain no general research authority, and the existing fixed-origin Ollama model-catalog search remains a separate candidate-discovery feature.
 
 Scope:
 
@@ -918,8 +937,8 @@ Exit criteria:
 
 ### Recommended Implementation Order
 
-1. Define versioned search-query, result, citation, provider-disclosure, research-budget, and memory-lifecycle contracts with network and follow-up effects denied by default.
-2. Add offline hostile tests for destination confusion, DNS/IP classes, redirects, credentials, malformed responses, oversized content, prompt injection, citation forgery, cancellation, and cleanup.
+1. Define versioned search-query, result, citation, provider-disclosure, research-budget, and memory-lifecycle contracts with network and follow-up effects denied by default. Done for the inactive offline foundation; a future adapter result schema remains separately gated.
+2. Add offline hostile tests for destination confusion, DNS/IP classes, redirects, credentials, malformed responses, oversized content, prompt injection, citation forgery, cancellation, and cleanup. Ten inert contract fixtures are present; executable broker tests remain with a future adapter.
 3. Implement one explicit query-only search adapter returning bounded titles, excerpts, domains, public HTTPS URLs, and retrieval times.
 4. Add trusted citation rendering and per-query disclosure without model-supplied links.
 5. Add explicit user-selected page retrieval with SSRF revalidation, strict content limits, inert text extraction, and no page execution.

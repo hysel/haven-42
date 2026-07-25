@@ -166,6 +166,25 @@
             <p>Diagnostic values only—not billing data or remaining context.</p>
           </details>
 
+          <section class="context-panel" aria-labelledby="context-title">
+            <div class="context-heading">
+              <div>
+                <strong id="context-title">Attach context</strong>
+                <p id="context-status">No files or screenshots selected · memory only</p>
+              </div>
+              <div class="context-actions">
+                <button class="button secondary context-picker" id="browse-context" type="button" disabled>Browse files</button>
+                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.png,text/plain,text/markdown,image/png" multiple disabled>
+                <button class="button text-button hidden" id="clear-context" type="button">Clear all</button>
+              </div>
+            </div>
+            <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
+            <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
+            <p class="context-warning hidden" id="context-network-warning">Warning: Pressing Send will transfer the attached content to your private-network Ollama server for this task.</p>
+            <p class="context-policy">Attachments are inert data and are never executed · browse UTF-8 .txt/.md or PNG, or paste a PNG screenshot · up to 5 text files and 2 screenshots · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
+            <p class="context-warning hidden" id="context-image-warning">Screenshot understanding is unverified for the selected model. The request may fail if that model does not accept image input.</p>
+          </section>
+
           <form class="composer" id="text-form">
             <label class="sr-only" id="prompt-label" for="prompt">Message</label>
             <textarea id="prompt" rows="2" maxlength="32768" placeholder="Connect Ollama to begin…" disabled></textarea>
@@ -174,7 +193,7 @@
           <p class="composer-help">Enter to send · Shift+Enter for a new line · ↑/↓ recall prompts</p>
           <div class="chat-footer">
             <span id="text-status">Provider not connected</span>
-            <span>Inputs and responses are not written to disk</span>
+            <span>Inputs, attached context, and responses are not written to disk</span>
           </div>
         </section>
 

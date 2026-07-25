@@ -208,6 +208,11 @@ jobs:
       - name: Run source/package parity and native hostile tests
         run: python scripts/test-portable-package.py --executable "${{ matrix.executable }}"
 
+      - name: Run packaged browser attachment and UI smoke test
+        env:
+          HAVEN42_TEST_EXECUTABLE: ${{ matrix.executable }}
+        run: node scripts/test-haven42-web-browser.mjs
+
       - name: Verify archive, checksums, SBOM, notices, and provenance
         run: python scripts/verify-portable-development-artifacts.py --artifact-directory dist/portable/artifacts --self-test
 

@@ -117,6 +117,31 @@ def probe(
             "Content-Type": "application/json",
             "X-Haven-Token": token,
         }
+        with request(
+            origin + "/api/readiness", "POST", token, b'{"force":true}',
+        ) as response:
+            readiness = json.load(response)
+            assert readiness["kind"] == "system-readiness"
+            assert readiness["effects"] == {
+                "networkUsed": False,
+                "filesWritten": False,
+                "installationPerformed": False,
+                "elevationRequested": False,
+                "servicesChanged": False,
+                "driversChanged": False,
+            }
+        plan_body = json.dumps({
+            "snapshotId": readiness["snapshotId"],
+            "intent": "guided-setup",
+        }).encode("utf-8")
+        with request(
+            origin + "/api/setup-plan", "POST", token, plan_body,
+        ) as response:
+            plan = json.load(response)
+            assert plan["kind"] == "setup-plan"
+            assert len(plan["actions"]) >= 2
+            assert plan["installationAllowed"] is False
+            assert all(action["installControl"] == "disabled" for action in plan["actions"])
         expect_http_error(
             origin + "/api/shutdown",
             {"Origin": origin, "Content-Type": "application/json"},
