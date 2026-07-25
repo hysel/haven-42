@@ -2349,7 +2349,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "180 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "188 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "Resolve-Python3Command" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "sys.version_info.major" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
@@ -2453,6 +2453,8 @@ assert ui["principles"]["remoteContentAllowed"] is False
 assert ui["firstRun"]["networkProbeByDefault"] is False
 assert ui["firstRun"]["installsSoftwareByDefault"] is False
 assert ui["firstRun"]["downloadsModelsByDefault"] is False
+assert ui["shell"]["primaryNavigation"] == ["home", "chat", "software", "images", "models", "system", "about"]
+assert [item["kind"] for item in ui["routes"] if item["id"] == "about"] == ["information"]
 assert onboarding["schemaVersion"] == 1 and onboarding["runtimeAdmitted"] is False
 assert [item["id"] for item in onboarding["choices"]] == ["guided-setup", "existing-setup", "not-now"]
 assert onboarding["choices"][0]["advancedSettingsAvailable"] is True

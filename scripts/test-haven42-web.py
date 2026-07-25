@@ -879,6 +879,14 @@ def main() -> int:
         assert "Advanced manual selection" in javascript
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "Copy installation command" in html
+        assert 'id="models-panel"' in html and 'id="model-search-capability"' in html
+        assert 'id="about-panel"' in html and 'id="about-nav"' in html
+        assert "03 · WRITING" not in javascript and "03 · SUMMARY" not in javascript
+        assert "local or self-hosted AI providers" in html
+        assert 'event.key !== "Enter"' in javascript and "event.shiftKey" in javascript
+        assert "Enter to send · Shift+Enter for a new line" in html
+        assert ".hidden { display: none !important; }" in styles
+        assert ".chat-panel > .panel-heading" in styles and "overflow-y: auto" in styles
         assert "renderTypedResult" in javascript and "renderCapabilities" in javascript
         assert "validateExecutionEvents" in javascript and "event-after-terminal" in javascript
         assert "validateRecovery" in javascript and "invalid-recovery-envelope" in javascript
@@ -899,7 +907,7 @@ def main() -> int:
         assert ".rail {" in styles and ".configuration-column {" in styles and "position: sticky" in styles and "4.5rem" not in styles and "2.25rem" in styles
         assert ".wizard-backdrop {" in styles and ".wizard-readiness {" in styles
         assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
-        checks += 36
+        checks += 44
     finally:
         app.shutdown()
         app.server_close()

@@ -49,6 +49,8 @@ The process persists no endpoint, prompt, response, or provider run detail; expo
 
 Model discovery is separate from model installation. Installed-model filtering is browser-local. An explicit online action crosses the engine boundary with only a bounded query, which can reach only the fixed `https://ollama.com/search` origin with redirects disabled and a capped HTML response. The engine normalizes strict model names and returns at most 20 candidate-only records. An uninstalled choice is browser-memory intent, not execution authority; its command is constructed from the validated name, copied only on request, and never executed. Text execution still requires the model to appear in the connected provider's installed inventory.
 
+The renderer maintains a single-primary-panel invariant across Chat, Software, Images, Models, and About. Models owns capability-specific installed selection and candidate discovery; the provider connection remains a separate configuration surface. About is informational only. Keyboard submission maps Enter to the existing bounded text form and reserves Shift+Enter for multiline input, adding no endpoint or execution authority.
+
 The Software view is registry-derived but plan-only: it admits only `uiReady`,
 `read-only` records, accepts no renderer arguments, and starts no process. The
 Images view is a separate authority boundary for the promoted Linux

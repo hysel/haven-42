@@ -13,6 +13,9 @@ Failed or retired integrations do not ship scripts, harnesses, wrappers, configu
 The Models panel now filters installed models offline and offers an explicitly
 consented, candidate-only public Ollama catalog search. Uninstalled choices
 remain non-executable and Haven 42 never runs their displayed pull instruction.
+Models and About now open as dedicated primary views; only one primary panel is
+visible at a time. Text tasks support Enter to send and Shift+Enter for a new
+line.
 
 - New users: [[Quick Start|Quick-Start]]
 - Run the local browser assistant and first-run wizard: [[Local Web MVP|Local-Web-MVP]]

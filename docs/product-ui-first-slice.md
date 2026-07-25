@@ -38,7 +38,8 @@ Any configurable capability
   Not now ---------------------> Honest unavailable/configuration-required state
 ```
 
-The persistent navigation is Home, Chat, Software, Images, Models, and System.
+The persistent navigation is Home, Chat, Software, Images, Models, System, and
+About. About is informational and grants no execution authority.
 Task progress and results are contextual screens rather than primary sections.
 
 ## First-Run Wireframes
