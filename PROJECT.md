@@ -20,8 +20,9 @@ The admitted local web UI now enforces one visible primary panel, provides
 dedicated Models and About views, exposes capability-specific installed-model
 selection beside explicit candidate search, labels installed versus uninstalled
 results, resets and re-ranks discovery when the target capability changes,
-exposes all bounded cleanup policies in System, and supports Enter-to-send with
-Shift+Enter for multiline input.
+exposes all bounded cleanup policies in System, keeps provider inputs and
+selectors visually consistent across the wizard and workspace, and supports
+Enter-to-send with Shift+Enter for multiline input.
 
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system

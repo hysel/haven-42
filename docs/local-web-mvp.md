@@ -62,7 +62,7 @@ The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-op
 
 ## Accessibility And Capability Status
 
-The wizard is a labeled modal with an announced description and current-step state. Keyboard focus enters the wizard after secure-session bootstrap, moves to the active step, and remains trapped among visible controls until setup finishes. A skip link, visible focus styles, semantic status/alert regions, responsive layout, sufficient status contrast, and reduced-motion behavior support keyboard and assistive-technology use.
+The wizard is a labeled modal with an announced description and current-step state. Keyboard focus enters the wizard after secure-session bootstrap, moves to the active step, and remains trapped among visible controls until setup finishes. Provider endpoint, timeout, and cleanup controls share the main workspace's compact 36-pixel geometry and 13-pixel input typography. A skip link, visible focus styles, semantic status/alert regions, responsive layout, sufficient status contrast, and reduced-motion behavior support keyboard and assistive-technology use.
 
 The capability view is read-only and engine-derived. Chat, Writing, and Summarization change from `configuration-required` to `available` only after a successful provider check. Software stays `not-admitted-in-web`; Images stays `provider-profile-required`. Clicking either unavailable navigation item explains its state and never invokes an operation.
 

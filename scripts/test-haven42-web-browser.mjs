@@ -299,6 +299,24 @@ try {
   checks += 2;
   trace("provider-step-verified");
 
+  const wizardControlSizing = await cdp.evaluate(`({
+    endpoint: document.querySelector('#wizard-endpoint').getBoundingClientRect().height,
+    timeout: document.querySelector('#wizard-timeout').getBoundingClientRect().height,
+    cleanup: document.querySelector('#wizard-idle-unload').getBoundingClientRect().height,
+    endpointFont: getComputedStyle(document.querySelector('#wizard-endpoint')).fontSize,
+    timeoutFont: getComputedStyle(document.querySelector('#wizard-timeout')).fontSize,
+    cleanupFont: getComputedStyle(document.querySelector('#wizard-idle-unload')).fontSize
+  })`);
+  if (
+    wizardControlSizing.endpoint !== 36
+    || wizardControlSizing.timeout !== 36
+    || wizardControlSizing.cleanup !== 36
+    || wizardControlSizing.endpointFont !== "13px"
+    || wizardControlSizing.timeoutFont !== "13px"
+    || wizardControlSizing.cleanupFont !== "13px"
+  ) throw new Error(`compact-wizard-controls:${JSON.stringify(wizardControlSizing)}`);
+  checks += 6;
+
   await cdp.evaluate(`(() => {
     const input = document.querySelector('#wizard-endpoint');
     input.value = 'http://127.0.0.1:${fakePort}';
@@ -334,6 +352,26 @@ try {
   if (!opened.hidden || !opened.promptEnabled || opened.model !== "automatic") throw new Error("chat-handoff");
   checks += 3;
   trace("chat-handoff-verified");
+
+  const compactControls = await cdp.evaluate(`({
+    endpoint: document.querySelector('#endpoint').getBoundingClientRect().height,
+    cleanup: document.querySelector('#system-idle-unload').getBoundingClientRect().height,
+    model: document.querySelector('#model').getBoundingClientRect().height,
+    endpointFont: getComputedStyle(document.querySelector('#endpoint')).fontSize,
+    cleanupFont: getComputedStyle(document.querySelector('#system-idle-unload')).fontSize,
+    timeoutFont: getComputedStyle(document.querySelector('#timeout')).fontSize,
+    advancedCleanupFont: getComputedStyle(document.querySelector('#idle-unload')).fontSize
+  })`);
+  if (
+    Math.abs(compactControls.endpoint - compactControls.model) > 1
+    || Math.abs(compactControls.cleanup - compactControls.model) > 1
+    || compactControls.endpoint >= 44
+    || compactControls.endpointFont !== "13px"
+    || compactControls.cleanupFont !== "13px"
+    || compactControls.timeoutFont !== "13px"
+    || compactControls.advancedCleanupFont !== "13px"
+  ) throw new Error(`compact-provider-controls:${JSON.stringify(compactControls)}`);
+  checks += 7;
 
   models = ["unknown-model:latest"];
   await cdp.evaluate(`document.querySelector('#connection-form').requestSubmit()`);

@@ -16,7 +16,9 @@ installed options for that capability. **Search public catalog** is the explicit
 online action; it sends only the bounded phrase, downloads nothing, and returns
 candidate-only uninstalled choices that remain non-executable. Haven 42 never
 runs their displayed pull instruction. System visibly offers immediate,
-5-minute, 15-minute, and 30-minute text-model cleanup policies.
+5-minute, 15-minute, and 30-minute text-model cleanup policies. Ollama endpoint,
+timeout, and cleanup controls use the same compact sizing and typography in the
+first-run wizard and main workspace.
 Models and About now open as dedicated primary views; only one primary panel is
 visible at a time. Text tasks support Enter to send and Shift+Enter for a new
 line.
