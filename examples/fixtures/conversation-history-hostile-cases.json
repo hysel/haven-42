@@ -1,0 +1,260 @@
+{
+  "schemaVersion": 1,
+  "description": "Inert hostile requests for the simulation-only conversation-history foundation.",
+  "cases": [
+    {
+      "id": "renderer-supplied-sql",
+      "expectedError": "forbidden-request-authority",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "inspect-schema",
+        "requestId": "hostile-sql",
+        "payload": {"sql": "DROP TABLE messages"}
+      }
+    },
+    {
+      "id": "caller-database-path",
+      "expectedError": "forbidden-request-authority",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-backup",
+        "requestId": "hostile-path",
+        "payload": {
+          "recordCount": 1,
+          "includeAttachmentBytes": false,
+          "destinationGrant": false,
+          "databasePath": "../outside/history.db"
+        }
+      }
+    },
+    {
+      "id": "credential-injection",
+      "expectedError": "forbidden-request-authority",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-restore",
+        "requestId": "hostile-secret",
+        "payload": {
+          "recordCount": 1,
+          "sourceSchemaVersion": 1,
+          "integrityStatus": "verified",
+          "activeContentDetected": false,
+          "password": "not-a-real-secret"
+        }
+      }
+    },
+    {
+      "id": "unadmitted-operation",
+      "expectedError": "operation-not-admitted",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "execute-sql",
+        "requestId": "hostile-operation",
+        "payload": {}
+      }
+    },
+    {
+      "id": "schema-downgrade",
+      "expectedError": "schema-downgrade-refused",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-migration",
+        "requestId": "hostile-downgrade",
+        "payload": {
+          "currentVersion": 2,
+          "targetVersion": 1,
+          "condition": "clean"
+        }
+      }
+    },
+    {
+      "id": "unknown-migration-condition",
+      "expectedError": "invalid-migration-condition",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-migration",
+        "requestId": "hostile-migration",
+        "payload": {
+          "currentVersion": 0,
+          "targetVersion": 1,
+          "condition": "run-user-command"
+        }
+      }
+    },
+    {
+      "id": "future-retention-date",
+      "expectedError": "future-last-activity",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-retention",
+        "requestId": "hostile-time",
+        "payload": {
+          "conversationId": "conversation-one",
+          "retentionPolicy": "30-days",
+          "nowUtc": "2026-07-26T12:00:00Z",
+          "lastActivityUtc": "2026-07-27T12:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "cross-conversation-context",
+      "expectedError": "invalid-context-message",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-context",
+        "requestId": "hostile-cross-context",
+        "payload": {
+          "conversationId": "conversation-one",
+          "tokenBudget": 1024,
+          "messages": [
+            {
+              "messageId": "message-one",
+              "conversationId": "conversation-two",
+              "ordinal": 1,
+              "role": "user",
+              "characters": 10,
+              "estimatedTokens": 3
+            }
+          ],
+          "summary": null
+        }
+      }
+    },
+    {
+      "id": "model-role-injection",
+      "expectedError": "invalid-context-message",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-context",
+        "requestId": "hostile-role",
+        "payload": {
+          "conversationId": "conversation-one",
+          "tokenBudget": 1024,
+          "messages": [
+            {
+              "messageId": "message-one",
+              "conversationId": "conversation-one",
+              "ordinal": 1,
+              "role": "tool",
+              "characters": 10,
+              "estimatedTokens": 3
+            }
+          ],
+          "summary": null
+        }
+      }
+    },
+    {
+      "id": "out-of-order-messages",
+      "expectedError": "invalid-context-order",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-context",
+        "requestId": "hostile-order",
+        "payload": {
+          "conversationId": "conversation-one",
+          "tokenBudget": 1024,
+          "messages": [
+            {"messageId": "message-two", "conversationId": "conversation-one", "ordinal": 2, "role": "assistant", "characters": 10, "estimatedTokens": 3},
+            {"messageId": "message-one", "conversationId": "conversation-one", "ordinal": 1, "role": "user", "characters": 10, "estimatedTokens": 3}
+          ],
+          "summary": null
+        }
+      }
+    },
+    {
+      "id": "unvalidated-summary",
+      "expectedError": "invalid-context-summary",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-context",
+        "requestId": "hostile-summary",
+        "payload": {
+          "conversationId": "conversation-one",
+          "tokenBudget": 1024,
+          "messages": [],
+          "summary": {
+            "summaryId": "summary-one",
+            "conversationId": "conversation-one",
+            "throughOrdinal": 10,
+            "characters": 100,
+            "estimatedTokens": 25,
+            "validationStatus": "model-claimed"
+          }
+        }
+      }
+    },
+    {
+      "id": "clear-all-target-confusion",
+      "expectedError": "invalid-clear-all-target",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-deletion",
+        "requestId": "hostile-clear",
+        "payload": {
+          "scope": "clear-all",
+          "conversationId": "conversation-one",
+          "includeBackups": true
+        }
+      }
+    },
+    {
+      "id": "attachment-bytes-in-backup",
+      "expectedError": "attachment-bytes-not-admitted",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-backup",
+        "requestId": "hostile-attachment",
+        "payload": {
+          "recordCount": 1,
+          "includeAttachmentBytes": true,
+          "destinationGrant": false
+        }
+      }
+    },
+    {
+      "id": "unverified-restore",
+      "expectedError": "restore-integrity-not-verified",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-restore",
+        "requestId": "hostile-restore",
+        "payload": {
+          "recordCount": 1,
+          "sourceSchemaVersion": 1,
+          "integrityStatus": "unknown",
+          "activeContentDetected": false
+        }
+      }
+    },
+    {
+      "id": "active-content-restore",
+      "expectedError": "active-content-rejected",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-restore",
+        "requestId": "hostile-active-content",
+        "payload": {
+          "recordCount": 1,
+          "sourceSchemaVersion": 1,
+          "integrityStatus": "verified",
+          "activeContentDetected": true
+        }
+      }
+    },
+    {
+      "id": "oversized-backup-count",
+      "expectedError": "invalid-backup-record-count",
+      "request": {
+        "schemaVersion": 1,
+        "operation": "plan-backup",
+        "requestId": "hostile-count",
+        "payload": {
+          "recordCount": 100001,
+          "includeAttachmentBytes": false,
+          "destinationGrant": false
+        }
+      }
+    }
+  ]
+}

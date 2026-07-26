@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.conversation-history.foundation",
+  "status": "simulation-only-not-runtime-admitted",
+  "defaultMode": "private-session",
+  "activation": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "databaseOpenAllowed": false,
+    "databaseCreateAllowed": false,
+    "filesystemWriteAllowed": false,
+    "browserStorageAllowed": false,
+    "providerPayloadAllowed": false,
+    "networkAllowed": false,
+    "processCreationAllowed": false
+  },
+  "ownership": {
+    "trustedLoopbackServiceOnly": true,
+    "rendererDatabaseAuthorityAllowed": false,
+    "modelDatabaseAuthorityAllowed": false,
+    "rendererSqlAllowed": false,
+    "modelSqlAllowed": false,
+    "callerDatabasePathAllowed": false
+  },
+  "request": {
+    "requiredFields": ["schemaVersion", "operation", "requestId", "payload"],
+    "maximumSerializedBytes": 262144,
+    "maximumNestingDepth": 8,
+    "maximumContainerNodes": 2048,
+    "maximumIdentifierCharacters": 64,
+    "operations": [
+      "inspect-schema",
+      "plan-migration",
+      "plan-retention",
+      "plan-context",
+      "plan-deletion",
+      "plan-recovery",
+      "plan-backup",
+      "plan-restore"
+    ],
+    "forbiddenFieldNames": [
+      "sql",
+      "query",
+      "databasePath",
+      "path",
+      "filename",
+      "url",
+      "endpoint",
+      "credential",
+      "password",
+      "secret",
+      "command",
+      "executable",
+      "environment"
+    ]
+  },
+  "bounds": {
+    "maximumConversations": 10000,
+    "maximumMessagesPerConversation": 10000,
+    "maximumMessageCharacters": 200000,
+    "maximumContextMessages": 128,
+    "maximumContextTokens": 131072,
+    "maximumSummaryCharacters": 32000,
+    "maximumBackupRecords": 100000
+  },
+  "retentionPolicies": ["private-session", "30-days", "90-days", "forever"],
+  "context": {
+    "allowedRoles": ["system", "user", "assistant"],
+    "messageContentAcceptedByFoundationPlanner": false,
+    "recentMessagesFirst": true,
+    "stableOrder": "ordinal-ascending",
+    "unrelatedConversationAllowed": false,
+    "summaryRequiresSeparateValidation": true
+  },
+  "storedData": {
+    "attachmentBytesAllowed": false,
+    "credentialsAllowed": false,
+    "providerEndpointsAllowed": false,
+    "machinePathsAllowed": false,
+    "environmentValuesAllowed": false,
+    "rawSecurityLogsAllowed": false,
+    "modelGeneratedCommandsAllowed": false
+  },
+  "storage": {
+    "candidateEngine": "sqlite-compatible",
+    "runtimeDependencyAdmitted": false,
+    "databaseServerRequired": false,
+    "adminAccessRequired": false,
+    "systemServiceRequired": false,
+    "globalRuntimeRequired": false,
+    "encryptionAtRestAdmitted": false,
+    "sqlCipherEvaluationRequired": true,
+    "osCredentialStoreEvaluationRequired": true
+  },
+  "lifecycle": {
+    "privateSessionWriteFree": true,
+    "atomicTransactionsRequiredBeforeActivation": true,
+    "rollbackRequiredBeforeActivation": true,
+    "downgradeAllowed": false,
+    "secureShutdownRequiredBeforeActivation": true,
+    "deleteCoversWalJournalIndexesAndBackups": true,
+    "uninstallDeletionRequiresExplicitChoice": true
+  },
+  "effects": {
+    "databaseOpened": false,
+    "databaseCreated": false,
+    "databaseModified": false,
+    "filesystemRead": false,
+    "filesystemWrite": false,
+    "networkAccess": false,
+    "processCreation": false,
+    "machineModification": false,
+    "providerInvocation": false
+  },
+  "schema": "config/conversation-history-schema.json",
+  "hostileFixture": "examples/fixtures/conversation-history-hostile-cases.json"
+}

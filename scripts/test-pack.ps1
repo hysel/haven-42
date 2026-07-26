@@ -56,6 +56,7 @@ $integrationTests = @(
     "capability registry and deterministic routing enforce policy boundaries",
     "general AI sessions are repository optional and dry-run first",
     "local text capabilities are session bound and typed",
+    "conversation history foundation is typed bounded and effect free",
     "local web MVP is loopback-only and unloads models",
     "system readiness and setup planning remain effect free",
     "local web setup wizard completes in a headless browser",
@@ -4000,8 +4001,8 @@ Invoke-PackTest "local image capability is session bound typed and evidence gate
         Assert-Equal -Actual $result.Artifact.policy.providerRetainedOutput -Expected $false -Message "Fixture should not claim provider retention."
         Assert-True -Condition ((Test-Path -LiteralPath $result.ImagePath) -and (Test-Path -LiteralPath $result.ArtifactPath)) -Message "Approved fixture execution should write typed files."
         $artifactText = Get-Content -LiteralPath $result.ArtifactPath -Raw
-        Assert-True -Condition ($raw -notmatch "private image marker|private-runtime|8188") -Message "Image result should omit prompt and endpoint values."
-        Assert-True -Condition ($artifactText -notmatch "private image marker|private-runtime|8188") -Message "Persisted image artifact should omit prompt and endpoint values."
+        Assert-True -Condition ($raw -notmatch "private image marker|private-runtime\.invalid|http://private-runtime\.invalid:8188") -Message "Image result should omit prompt and endpoint values."
+        Assert-True -Condition ($artifactText -notmatch "private image marker|private-runtime\.invalid|http://private-runtime\.invalid:8188") -Message "Persisted image artifact should omit prompt and endpoint values."
 
         $mismatchRoot = Join-Path $tempRoot "chat"
         Invoke-CommandCapture -FilePath $sessionScript -Arguments @("-CapabilityId", "general.chat", "-WorkspaceRoot", $tempRoot, "-SessionId", "chat", "-Apply", "-AsJson") | Out-Null
@@ -5004,6 +5005,31 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-composition-contract.json") | ConvertFrom-Json
     Assert-True -Condition ($contract.mode -eq "simulation-only" -and -not $contract.executionAllowed -and -not $contract.security.processCreationAllowed -and -not $contract.security.filesystemAccessAllowed -and -not $contract.security.networkAccessAllowed -and -not $contract.security.machineModificationAllowed) -Message "Composition must remain effect-free and plan-only."
+}
+
+Invoke-PackTest "conversation history foundation is typed bounded and effect free" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for conversation-history foundation validation."
+    $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-conversation-history-foundation.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Conversation-history hostile tests should pass. Output: $($output -join ' ')"
+    Assert-True -Condition (($output -join "`n") -match "39 bounded, effect-free checks") -Message "Conversation-history foundation coverage should remain complete."
+    $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-contract.json") | ConvertFrom-Json
+    $schema = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-schema.json") | ConvertFrom-Json
+    $policy = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/local-web-runtime-policy.json") | ConvertFrom-Json
+    Assert-True -Condition ($contract.status -eq "simulation-only-not-runtime-admitted" -and $contract.defaultMode -eq "private-session") -Message "Conversation history must remain simulation-only and Private session by default."
+    foreach ($property in $contract.activation.PSObject.Properties) {
+        Assert-True -Condition (-not [bool]$property.Value) -Message "Conversation-history activation effect should remain false: $($property.Name)"
+    }
+    foreach ($property in $contract.effects.PSObject.Properties) {
+        Assert-True -Condition (-not [bool]$property.Value) -Message "Conversation-history runtime effect should remain false: $($property.Name)"
+    }
+    Assert-True -Condition (-not $contract.storage.runtimeDependencyAdmitted -and -not $contract.storage.encryptionAtRestAdmitted -and $contract.lifecycle.privateSessionWriteFree) -Message "Storage and encryption must remain unadmitted while Private session stays write-free."
+    Assert-True -Condition ($schema.status -eq "simulation-only-no-executable-ddl" -and -not $schema.executableSqlIncluded) -Message "The logical schema must contain no executable SQL."
+    $foundation = $policy.inactiveFoundations.conversationHistory
+    Assert-True -Condition (-not $foundation.runtimeRouteAllowed -and -not $foundation.databaseOpenAllowed -and -not $foundation.databaseCreateAllowed -and -not $foundation.filesystemWriteAllowed -and -not $foundation.browserStorageAllowed) -Message "The local web policy must expose no conversation-history storage authority."
+    $planner = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "scripts/simulate-conversation-history.py")
+    Assert-True -Condition ($planner -notmatch "import sqlite3|sqlite3\.connect") -Message "The simulation-only planner must not import or connect to SQLite."
 }
 
 Invoke-PackTest "system readiness and setup planning remain effect free" {

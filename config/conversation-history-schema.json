@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "schemaId": "haven42.conversation-history.schema",
+  "status": "simulation-only-no-executable-ddl",
+  "currentVersion": 1,
+  "minimumReadableVersion": 1,
+  "tables": [
+    {
+      "name": "conversations",
+      "primaryKey": ["conversationId"],
+      "fields": [
+        {"name": "conversationId", "type": "bounded-id", "nullable": false},
+        {"name": "title", "type": "bounded-text", "maximumCharacters": 200, "nullable": false},
+        {"name": "createdAtUtc", "type": "utc-timestamp", "nullable": false},
+        {"name": "updatedAtUtc", "type": "utc-timestamp", "nullable": false},
+        {"name": "retentionPolicy", "type": "retention-policy-id", "nullable": false},
+        {"name": "modelId", "type": "bounded-id", "nullable": true},
+        {"name": "capabilityId", "type": "bounded-id", "nullable": true}
+      ]
+    },
+    {
+      "name": "messages",
+      "primaryKey": ["messageId"],
+      "unique": [["conversationId", "ordinal"]],
+      "fields": [
+        {"name": "messageId", "type": "bounded-id", "nullable": false},
+        {"name": "conversationId", "type": "bounded-id", "nullable": false},
+        {"name": "ordinal", "type": "positive-integer", "nullable": false},
+        {"name": "role", "type": "message-role", "nullable": false},
+        {"name": "content", "type": "bounded-text", "maximumCharacters": 200000, "nullable": false},
+        {"name": "createdAtUtc", "type": "utc-timestamp", "nullable": false},
+        {"name": "inputTokens", "type": "nonnegative-integer", "nullable": true},
+        {"name": "outputTokens", "type": "nonnegative-integer", "nullable": true},
+        {"name": "totalDurationMs", "type": "nonnegative-integer", "nullable": true}
+      ]
+    },
+    {
+      "name": "contextSummaries",
+      "primaryKey": ["summaryId"],
+      "fields": [
+        {"name": "summaryId", "type": "bounded-id", "nullable": false},
+        {"name": "conversationId", "type": "bounded-id", "nullable": false},
+        {"name": "throughOrdinal", "type": "positive-integer", "nullable": false},
+        {"name": "content", "type": "bounded-text", "maximumCharacters": 32000, "nullable": false},
+        {"name": "modelId", "type": "bounded-id", "nullable": false},
+        {"name": "createdAtUtc", "type": "utc-timestamp", "nullable": false},
+        {"name": "validationStatus", "type": "summary-validation-state", "nullable": false}
+      ]
+    },
+    {
+      "name": "attachmentReferences",
+      "primaryKey": ["attachmentReferenceId"],
+      "fields": [
+        {"name": "attachmentReferenceId", "type": "bounded-id", "nullable": false},
+        {"name": "messageId", "type": "bounded-id", "nullable": false},
+        {"name": "displayName", "type": "bounded-text", "maximumCharacters": 255, "nullable": false},
+        {"name": "mediaType", "type": "allowlisted-media-type", "nullable": false},
+        {"name": "sizeBytes", "type": "nonnegative-integer", "nullable": false},
+        {"name": "contentStored", "type": "boolean-must-be-false", "nullable": false}
+      ]
+    }
+  ],
+  "forbiddenColumns": [
+    "providerEndpoint",
+    "credential",
+    "password",
+    "secret",
+    "machinePath",
+    "environment",
+    "rawSecurityLog",
+    "attachmentBytes"
+  ],
+  "migrationEdges": [
+    {
+      "fromVersion": 0,
+      "toVersion": 1,
+      "status": "simulation-only",
+      "atomicRequired": true,
+      "rollbackRequired": true
+    }
+  ],
+  "executableSqlIncluded": false
+}

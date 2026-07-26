@@ -130,6 +130,17 @@
       "runtimeRouteAllowed": false,
       "modelToolAllowed": false,
       "networkAllowed": false
+    },
+    "conversationHistory": {
+      "contract": "config/conversation-history-contract.json",
+      "schema": "config/conversation-history-schema.json",
+      "status": "simulation-only-not-runtime-admitted",
+      "runtimeRouteAllowed": false,
+      "uiControlAllowed": false,
+      "databaseOpenAllowed": false,
+      "databaseCreateAllowed": false,
+      "filesystemWriteAllowed": false,
+      "browserStorageAllowed": false
     }
   },
   "runDetails": {

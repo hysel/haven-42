@@ -41,8 +41,15 @@ attachment slice with strict atomic byte/count/dimension limits, path-free trans
 warned submit-confirmed private-network transfer, visible unverified image-input status, inert-data
 isolation with no attachment-driven execution or tools, and no temporary
 files. Automatic scan, directory access, broader parsers,
-lexical retrieval implementation, embedding indexes, and persistence remain unadmitted; the
+lexical retrieval implementation, embedding indexes, and runtime persistence remain unadmitted; the
 default-deny lexical contract and hostile fixtures expose no runtime route or provider payload.
+The optional conversation-history foundation now defines a non-executable
+logical SQLite-compatible schema plus pure migration, retention, context,
+deletion, recovery, backup, and restore planners. It imports no SQLite runtime,
+opens or creates no database, accepts no caller path or SQL, keeps every effect
+false, and preserves Private session as the write-free default. Encryption and
+key management, per-user storage, UI activation, and saved messages remain
+separate approval gates.
 Milestone 28 defines proposed
 controlled web research with an inactive offline contract and hostile fixtures, followed later by explicit reviewed queries, engine-owned adapters,
 trusted citations, SSRF controls, and memory-only cleanup; no model or renderer
