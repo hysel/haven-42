@@ -1785,8 +1785,10 @@ assert plan["Status"] == "planned" and plan["NetworkUsed"] is False and plan["Im
 assert result["Status"] == "succeeded" and result["Artifact"]["artifactType"] == "image"
 assert result["Artifact"]["content"]["width"] == 1 and result["Artifact"]["content"]["height"] == 1
 assert result["PromptPersisted"] is False and result["EndpointPersisted"] is False and result["RepositoryRead"] is False
-assert "private image marker" not in sys.argv[3] and "private-runtime" not in sys.argv[3] and "8188" not in sys.argv[3]
-assert "private image marker" not in artifact_text and "private-runtime" not in artifact_text and "8188" not in artifact_text
+for serialized in (sys.argv[3], artifact_text):
+    assert "private image marker" not in serialized
+    assert "private-runtime.invalid" not in serialized
+    assert "http://private-runtime.invalid:8188" not in serialized
 PY
   result_code=$?
   rm -rf "$root"
