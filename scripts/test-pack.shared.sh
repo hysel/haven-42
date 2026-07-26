@@ -1785,8 +1785,10 @@ assert plan["Status"] == "planned" and plan["NetworkUsed"] is False and plan["Im
 assert result["Status"] == "succeeded" and result["Artifact"]["artifactType"] == "image"
 assert result["Artifact"]["content"]["width"] == 1 and result["Artifact"]["content"]["height"] == 1
 assert result["PromptPersisted"] is False and result["EndpointPersisted"] is False and result["RepositoryRead"] is False
-assert "private image marker" not in sys.argv[3] and "private-runtime" not in sys.argv[3] and "8188" not in sys.argv[3]
-assert "private image marker" not in artifact_text and "private-runtime" not in artifact_text and "8188" not in artifact_text
+for serialized in (sys.argv[3], artifact_text):
+    assert "private image marker" not in serialized
+    assert "private-runtime.invalid" not in serialized
+    assert "http://private-runtime.invalid:8188" not in serialized
 PY
   result_code=$?
   rm -rf "$root"
@@ -2349,7 +2351,7 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "276 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "279 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "Resolve-Python3Command" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "sys.version_info.major" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1

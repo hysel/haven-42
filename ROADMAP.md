@@ -653,6 +653,11 @@ Scope:
 - Keep hardened loopback/browser operation as a separately tested option for headless Linux, SSH-tunneled use, development, and diagnostics.
 - Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
 - Keep chat as the primary interaction surface with compact sticky navigation and provider/system configuration. Done for the local web slice; responsive contract and visual regression coverage remain part of each UI change.
+- Present Chat, Writing, and Summarization through one continuous conversation
+  instead of destructive mode tabs. Done with narrow browser-memory intent
+  hints, capability-specific server prompts and evidence, preserved bounded
+  messages, and an explicit keep-or-switch decision before a different model
+  can be used.
 - Keep exactly one primary content panel visible, provide dedicated Models and About views, and support conventional Enter-to-send with Shift+Enter for multiline input. Done with headless-browser visibility, focus, heading-boundary, selection, and keyboard regressions.
 - Evaluate text models independently for chat, writing, and summarization. The engine now automatically selects only an installed model name and immutable digest with matching passed capability evidence. Qwen 3.5 9B is the exact adapter baseline. The initial exact-digest Qwen, Gemma, Mistral, and Granite automated constraint matrix passed 3/3, 3/3, 3/3, and 2/3 cases respectively with verified unloads; repeated sampling and blind human quality review remain promotion work.
 - Present deterministic first-run choices for chat, writing, summarization, image creation, software work, and local-AI setup. Done for Guided setup, Connect existing setup, and Explore in the admitted local-web slice; broader capability-specific onboarding remains open.
@@ -851,7 +856,7 @@ Exit criteria:
 
 Goal: Let an end user explicitly add selected local documents to a text task without granting Haven 42 general filesystem authority, silently scanning the machine, or obscuring when document content crosses to a private-network provider.
 
-Current status: The initial explicit `.txt`/`.md` plus browsed-or-pasted PNG attachment slice is implemented with one type-restricted picker, strict atomic count/byte/type/dimension validation, safe previews, compact attachment scrolling that preserves the chat composer, removal, memory-only cleanup, warned submit-confirmed private-network transfer, and visible unverified image-input status. Sanitized Windows source and unsigned packaged/default-browser cells passed native screenshot paste, mixed file selection, user-reviewed `qwen3.5:9b` description, chat-layout review, and independently verified model unload. PNG is the only admitted screenshot file-picker and clipboard representation and the canonical provider payload; native Linux/macOS clipboard behavior remains unproven. A simulation-only deterministic lexical-retrieval contract and hostile fixtures now deny every runtime effect; no retrieval route, UI, provider payload, index, or implementation is admitted. Vision-model recommendation evidence, non-PNG clipboard conversion, broader image upload, folder scans, broader document parsers, active retrieval, embeddings, and persistence remain unadmitted.
+Current status: The initial explicit `.txt`/`.md` plus browsed-or-pasted PNG attachment slice is implemented with one type-restricted picker, strict atomic count/byte/type/dimension validation, safe previews, compact attachment scrolling that preserves the chat composer, removal, memory-only cleanup, warned submit-confirmed private-network transfer, and visible unverified image-input status. Sanitized Windows source and unsigned packaged/default-browser cells passed native screenshot paste, mixed file selection, user-reviewed `qwen3.5:9b` description, chat-layout review, and independently verified model unload. PNG is the only admitted screenshot file-picker and clipboard representation and the canonical provider payload; native Linux/macOS clipboard behavior remains unproven. A simulation-only deterministic lexical-retrieval contract and hostile fixtures now deny every runtime effect; no retrieval route, UI, provider payload, index, or implementation is admitted. An optional local conversation-history database is now planned with SQLite as the initial storage-engine candidate, but no database route, schema activation, file creation, browser persistence, or saved message is admitted. Vision-model recommendation evidence, non-PNG clipboard conversion, broader image upload, folder scans, broader document parsers, active retrieval, embeddings, and persistence remain unadmitted.
 
 Scope:
 
@@ -874,6 +879,56 @@ Scope:
 - Keep source bytes, extracted text, chunk indexes, document identifiers, and retrieval results in process/browser memory only. New task, provider change, model change, explicit removal, and shutdown clear them.
 - Defer any persistent knowledge library until encrypted storage, key handling, migration, corruption recovery, deletion, export, backup, multi-user, and uninstall semantics pass separate approval and native evidence.
 
+### Optional Local Conversation History Database
+
+- Use an embedded SQLite-compatible database as the initial architecture
+  candidate; require no database server, administrator access, system service,
+  global runtime, or browser-owned database. The trusted loopback service owns
+  every database operation.
+- Keep conversation persistence disabled by default until separately promoted.
+  Preserve a clearly visible **Private session** mode that never creates or
+  updates a history record and retains the current memory-only behavior.
+- Expose only typed, parameterized, allowlisted operations such as create,
+  rename, list, load, append, retention update, delete, clear all, backup, and
+  restore. The renderer and model cannot submit SQL, database paths, filenames,
+  migration commands, or arbitrary filters.
+- Version a bounded schema for conversations, ordered messages, locally
+  generated context summaries, model/capability identity, sanitized token and
+  timing metadata, retention policy, and attachment references. Do not store
+  credentials, provider endpoints, usernames, machine paths, environment
+  values, model-generated commands, or raw security logs.
+- Keep attachment bytes out of history by default. Saving an attachment requires
+  a separate explicit choice, content/type/size validation, a disclosed storage
+  effect, and independent deletion semantics. A saved message must never expand
+  its original file-selection grant.
+- Provide per-conversation retention choices, permanent delete, clear all,
+  database-size limits, and predictable uninstall behavior. Deletion must cover
+  messages, summaries, attachment references, indexes, free-page handling,
+  backups, and temporary journal/WAL files under a documented threat model.
+- Use recent bounded messages directly and, only after separate validation, a
+  locally generated summary for older context. Show exactly which saved
+  messages or summary will be sent to the selected model; never silently send
+  unrelated conversations.
+- Treat standard SQLite as unencrypted at rest. Do not promote saved private
+  content as secure storage until a reviewed encryption design passes. Evaluate
+  SQLCipher or an equivalent maintained SQLite-compatible implementation,
+  operating-system credential storage for keys, key loss and rotation,
+  locked-device behavior, backup/restore, and cross-platform packaging.
+- Restrict database and key material to the current operating-system user.
+  Define Windows, Linux, and macOS data locations separately from immutable
+  application files, models, provider data, generated artifacts, and caches.
+- Require atomic transactions, schema migrations with rollback, busy/locked
+  handling, bounded queries, crash recovery, corruption detection, backup and
+  restore verification, downgrade refusal, disk-full behavior, secure shutdown,
+  and recovery from interrupted writes.
+- Keep export/import as an explicit sanitized portability and backup feature,
+  not the normal conversation workflow. Imported data is untrusted and must
+  pass schema, size, count, encoding, and active-content rejection before any
+  record is admitted.
+- Add no synchronization, cloud backup, multi-user sharing, remote database,
+  telemetry, or cross-device history until each becomes a separately approved
+  provider and security boundary.
+
 Exit criteria:
 
 - Only files explicitly selected by the user can enter context, and neither a renderer nor model can supply a filesystem path or expand the grant.
@@ -886,6 +941,15 @@ Exit criteria:
 - Prompt injection inside a document cannot add filesystem, process, network, model-management, approval, or persistence authority.
 - New task, provider/model changes, removal, failure, and shutdown clear all document state; tests verify no cache, browser storage, log, package-tree, or temporary-file residue.
 - Source-versus-packaged parity and native Windows, Linux, and macOS package smoke tests cover selection, validation, retrieval, disclosure, cleanup, and hostile inputs before promotion.
+- Private sessions remain provably write-free. When history is enabled, the UI
+  discloses the local storage effect and exact retained content, and neither a
+  model nor renderer can gain database, path, SQL, retention, or deletion
+  authority.
+- Conversation-history promotion requires encryption-at-rest and key-management
+  decisions, least-privilege file permissions, deterministic migrations,
+  crash/corruption/disk-full recovery, complete delete/clear/uninstall behavior,
+  bounded context reconstruction, source-versus-packaged parity, and native
+  Windows, Linux, and macOS evidence.
 
 ### Recommended Implementation Order
 
@@ -903,7 +967,25 @@ Exit criteria:
 12. Add deterministic in-memory lexical retrieval and per-response source/chunk disclosure. Its simulation-only default-deny contract and hostile fixture set are complete; runtime implementation remains open.
 13. Evaluate explicit folder selection only after canonicalization, exclusions, symlink/reparse handling, preview, cancellation, and bounded traversal tests pass on every platform.
 14. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
-15. Consider an optional persistent library only as a separately approved storage product with encryption, deletion, migration, export, rollback, and uninstall evidence.
+15. Define a versioned, default-deny conversation-history contract and hostile
+    fixtures with every database route, file write, migration, import, and
+    persistence effect disabled.
+16. Build a simulation-only SQLite schema, migration planner, retention planner,
+    context-reconstruction planner, and corruption/recovery fixtures without
+    creating a runtime database.
+17. Review the encryption and key-management architecture, including
+    SQLCipher-equivalent dependency, license, supply-chain, native packaging,
+    operating-system credential storage, key rotation/loss, and backup/restore.
+18. Admit an opt-in development history database only after explicit approval
+    and the storage, deletion, recovery, privacy, and cross-platform package
+    gates pass. Keep Private session as the default until a separate product
+    decision changes it.
+19. Add conversation list, rename, search, retention, delete, clear-all,
+    context-preview, backup, and restore UI only over typed engine operations;
+    add no renderer SQL or filesystem path authority.
+20. Consider an optional persistent document/knowledge library only as a
+    separately approved storage product with its own encryption, deletion,
+    migration, export, rollback, retrieval, and uninstall evidence.
 
 ## Milestone 28: Controlled Web Research
 

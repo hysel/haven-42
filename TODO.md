@@ -423,6 +423,9 @@
 - [x] Expand Milestone 22A with repository-free `content.write` and `content.summarize` modes, typed chat/Markdown results, in-memory task reset, and the same bounded provider and unload policy.
 - [x] Infer loopback versus private-LAN connection scope from the validated IP literal, remember separate chat/writing/summarization model choices, and replace response-by-response unload with a five-minute balanced idle policy plus advanced cleanup choices.
 - [x] Make chat the primary local-web interaction, reduce the oversized hero, keep desktop navigation and provider/system setup visible while scrolling, and preserve responsive one-column behavior.
+- [x] Merge Chat, Writing, and Summarization into one continuous visible
+  conversation, preserve bounded messages across task intents, and require an
+  explicit keep-or-switch decision before using a different configured model.
 - [x] Fix primary-panel overlap and heading clipping; add dedicated Models and
   About views, capability-specific model selection, provider-neutral home copy,
   and Enter-to-send with Shift+Enter for multiline text.
