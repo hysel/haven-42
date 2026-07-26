@@ -133,6 +133,13 @@ automation, page execution, downloads, persistence, and follow-up queries.
 The admitted fixed-origin model-catalog search does not grant general research
 authority.
 
+Conversation history is inactive as well. Its default-deny contract,
+non-executable logical SQLite-compatible schema, pure planners, and hostile
+fixtures do not import SQLite, open or create a database, write a file, use
+browser storage, expose a route or UI control, or persist a message. Private
+session remains the write-free default. See
+`docs/conversation-history-database.md`.
+
 ## Registered software plans
 
 The Software view reads `config/workflows.json` through the engine. Only unique

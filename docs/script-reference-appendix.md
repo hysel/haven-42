@@ -82,12 +82,15 @@ the sanitized ranking evidence, never the packet or answer key.
 
 ## Candidate-Foundation Utilities
 
-These read-only utilities intentionally remain outside `config/workflows.json` and the future UI until an exact quantization profile passes live promotion gates.
+These read-only or effect-free utilities intentionally remain outside
+`config/workflows.json` and the product UI until their separate promotion gates
+pass.
 
 | Utility | Effect boundary | Windows | Linux/macOS | Reference |
 | --- | --- | --- | --- | --- |
 | Quantization hardware profile | Reads local OS, architecture, memory, storage headroom, accelerator, driver/runtime, instruction, context, concurrency, and lane inputs; performs no model endpoint request. | `scripts/get-quantization-profile.ps1` | `scripts/get-quantization-profile.linux.sh`, `scripts/get-quantization-profile.macos.sh` | `docs/hardware-adaptive-quantization.md` |
 | Quantization dry-run planner | Reads a local request and committed support matrix; emits an existing-artifact, local-derivative proposal, or no-safe-recommendation with every effect false. | `scripts/plan-model-quantization.ps1` | `scripts/plan-model-quantization.linux.sh`, `scripts/plan-model-quantization.macos.sh` | `docs/hardware-adaptive-quantization.md` |
+| Conversation-history foundation planner | Validates typed schema, migration, retention, context, deletion, recovery, backup, and restore requests; opens no database and keeps every effect false. | `python scripts/simulate-conversation-history.py --request <fixture.json>` | Same dependency-free Python command | `docs/conversation-history-database.md` |
 
 ## macOS Host Bootstrap
 

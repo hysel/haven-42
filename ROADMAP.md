@@ -856,7 +856,7 @@ Exit criteria:
 
 Goal: Let an end user explicitly add selected local documents to a text task without granting Haven 42 general filesystem authority, silently scanning the machine, or obscuring when document content crosses to a private-network provider.
 
-Current status: The initial explicit `.txt`/`.md` plus browsed-or-pasted PNG attachment slice is implemented with one type-restricted picker, strict atomic count/byte/type/dimension validation, safe previews, compact attachment scrolling that preserves the chat composer, removal, memory-only cleanup, warned submit-confirmed private-network transfer, and visible unverified image-input status. Sanitized Windows source and unsigned packaged/default-browser cells passed native screenshot paste, mixed file selection, user-reviewed `qwen3.5:9b` description, chat-layout review, and independently verified model unload. PNG is the only admitted screenshot file-picker and clipboard representation and the canonical provider payload; native Linux/macOS clipboard behavior remains unproven. A simulation-only deterministic lexical-retrieval contract and hostile fixtures now deny every runtime effect; no retrieval route, UI, provider payload, index, or implementation is admitted. An optional local conversation-history database is now planned with SQLite as the initial storage-engine candidate, but no database route, schema activation, file creation, browser persistence, or saved message is admitted. Vision-model recommendation evidence, non-PNG clipboard conversion, broader image upload, folder scans, broader document parsers, active retrieval, embeddings, and persistence remain unadmitted.
+Current status: The initial explicit `.txt`/`.md` plus browsed-or-pasted PNG attachment slice is implemented with one type-restricted picker, strict atomic count/byte/type/dimension validation, safe previews, compact attachment scrolling that preserves the chat composer, removal, memory-only cleanup, warned submit-confirmed private-network transfer, and visible unverified image-input status. Sanitized Windows source and unsigned packaged/default-browser cells passed native screenshot paste, mixed file selection, user-reviewed `qwen3.5:9b` description, chat-layout review, and independently verified model unload. PNG is the only admitted screenshot file-picker and clipboard representation and the canonical provider payload; native Linux/macOS clipboard behavior remains unproven. A simulation-only deterministic lexical-retrieval contract and hostile fixtures deny every runtime effect; no retrieval route, UI, provider payload, index, or implementation is admitted. The optional conversation-history foundation now has a versioned default-deny contract, logical SQLite-compatible schema with no executable SQL, pure migration/retention/context/deletion/recovery/backup/restore planners, and 16 inert hostile fixtures. All database, file, browser-storage, network, process, provider, and machine effects remain false; no database is opened or created, and Private session remains the write-free default. Vision-model recommendation evidence, non-PNG clipboard conversion, broader image upload, folder scans, broader document parsers, active retrieval, embeddings, encrypted conversation storage, and runtime persistence remain unadmitted.
 
 Scope:
 
@@ -969,10 +969,13 @@ Exit criteria:
 14. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
 15. Define a versioned, default-deny conversation-history contract and hostile
     fixtures with every database route, file write, migration, import, and
-    persistence effect disabled.
+    persistence effect disabled. Done: the contract, logical schema boundary,
+    and 16 inert hostile requests grant no runtime or storage authority.
 16. Build a simulation-only SQLite schema, migration planner, retention planner,
     context-reconstruction planner, and corruption/recovery fixtures without
-    creating a runtime database.
+    creating a runtime database. Done for the effect-free foundation, including
+    deletion, backup, restore, busy/locked, interrupted-write, corruption, and
+    disk-full plans; no SQLite module is imported and no database is opened.
 17. Review the encryption and key-management architecture, including
     SQLCipher-equivalent dependency, license, supply-chain, native packaging,
     operating-system credential storage, key rotation/loss, and backup/restore.

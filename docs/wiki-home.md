@@ -57,6 +57,7 @@ default plus 50/100-entry memory-only choices.
 - Prepare a release: [[Release Guidance|Release-Guidance]]
 - Choose Fast, Integration, or Full validation: [[Test Tiers|Test-Tiers]]
 - Review desktop storage, update, and rollback boundaries: [[Desktop Storage And Updates|Desktop-Storage-And-Updates]]
+- Review the write-free optional history foundation: [[Conversation History Database Foundation|Conversation-History-Database]]
 
 ## Current Roadmap
 
@@ -65,7 +66,7 @@ default plus 50/100-entry memory-only choices.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.
 - Milestone 26 — exact Linux NVIDIA and Windows AMD Ollama comparisons passed; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD, Vulkan failed the patch gate, Intel is parked pending hardware, and broader cells remain open.
-- Milestone 27 — one keyboard-operable bounded UTF-8 `.txt`/`.md`/PNG picker plus clipboard PNG paste is implemented with safe previews, compact scrolling, explicit path-free selection, warned submit-confirmed private-network transfer, visible unverified image-input status, and memory-only cleanup. The inactive lexical-retrieval contract and hostile fixtures grant no runtime authority; vision promotion, automatic scanning, broader parsers, active retrieval, embeddings, and persistence remain unadmitted.
+- Milestone 27 — one keyboard-operable bounded UTF-8 `.txt`/`.md`/PNG picker plus clipboard PNG paste is implemented with safe previews, compact scrolling, explicit path-free selection, warned submit-confirmed private-network transfer, visible unverified image-input status, and memory-only cleanup. The inactive lexical-retrieval contract grants no runtime authority. The optional conversation-history foundation adds a default-deny contract, non-executable logical SQLite-compatible schema, pure lifecycle planners, and hostile fixtures without opening a database; Private session remains write-free. Vision promotion, automatic scanning, broader parsers, active retrieval, embeddings, encryption decisions, and runtime persistence remain unadmitted.
 - Milestone 28 — controlled web research has an offline default-deny contract and hostile fixtures but no route, model tool, network effect, or UI. Reviewed per-query consent, engine-owned adapters, trusted citations, SSRF controls, hostile-content isolation, and memory-only cleanup remain required; models have no unrestricted internet access.
 
 ## Support Model

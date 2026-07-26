@@ -13,6 +13,7 @@ Haven 42 protects user repositories, local files, prompts, responses, models, cr
 - A setup screen turns a recommendation into installation authority, injects an unregistered component, URL, command, or path, or claims that renderer consent is an OS-level approval.
 - A public model search leaks local context, follows a redirect, accepts a hostile model name or command, treats catalog claims as evidence, or turns desired selection into download or execution authority.
 - A future research search leaks conversation or file context, lets the model choose a destination, reaches a private service through SSRF or DNS rebinding, follows a hostile redirect, executes page content, forges citations, or turns retrieved prompt injection into additional authority.
+- A future history feature accepts renderer/model SQL or paths, stores secrets or attachment bytes, silently mixes conversations, weakens Private session, exposes unencrypted records, mishandles a migration or disk-full failure, incompletely deletes WAL/journal/backups, or restores hostile data.
 - A local-web request attempts server-side request forgery through public, link-local, credential-bearing, redirected, hostname-based, or path-bearing provider endpoints.
 - A completed, failed, cancelled, switched, or idle text task leaves a model resident beyond the configured bounded warm period and consumes accelerator power after Haven 42 stops using it.
 - A compromised renderer sends malformed frames, replays approval tokens, crosses sessions, cancels another request, or binds events to the wrong request.
@@ -78,6 +79,21 @@ Readiness inspection is an explicit CSRF-protected POST with a single concurrent
 Milestone 27 admits only explicit bounded UTF-8 `.txt`/`.md` attachment and browsed-or-pasted PNG screenshots. The browser exposes no arbitrary path or background scan authority; the loopback engine revalidates normalized names, exact media types and byte counts, text count/size budgets, PNG base64 and signature, chunk bounds and CRCs, screenshot count/size/dimension/pixel budgets, duplicates, NUL content, and provider consent. All attachment content, including visible image text, is labeled untrusted inert reference data and cannot add authority. The runtime exposes no attachment-driven tool invocation, shell, process launch, filesystem write, archive expansion, or model-output execution path, and makes no antivirus claim. Screenshot transport uses Ollama's documented message-image field, while model image understanding stays unverified and visibly warned until exact evidence passes. Private-network transfer shows a prominent warning and deliberate Send confirms it without a separate checkbox; the engine still rejects a forged request missing that confirmation. State remains memory-only, and no temporary file is allowed. PDF, Office, archive, OCR, directory, retrieval-index, embedding, and persistent-index support do not inherit approval from this slice.
 
 The lexical-retrieval contract is simulation-only. It grants no runtime route, UI, provider payload, filesystem path, parser, network, model-ranking, embedding, temporary-file, or persistent-index authority. Its hostile fixtures are inert data used to preserve the future boundary; they are not a retrieval engine.
+
+The conversation-history contract is also simulation-only. Its logical
+SQLite-compatible schema includes no executable SQL, and its planner does not
+import SQLite, open or create a database, read or write a file, invoke a
+provider, or expose a runtime route. Exact typed requests reject SQL, queries,
+paths, filenames, URLs, endpoints, credentials, commands, environment values,
+unknown fields, cross-conversation context, unvalidated summaries, schema
+downgrades, attachment bytes, and unverified or active-content restores. Pure
+plans model atomic upgrade/rollback, retention, bounded metadata-only context
+selection, complete deletion scope, busy/locked, interrupted-write, corruption,
+disk-full, backup, and restore behavior with every effect false. Private session
+remains the write-free default. Standard SQLite is treated as unencrypted at
+rest; runtime persistence stays blocked until encryption/key management,
+least-privilege per-user storage, deletion/recovery, and native package evidence
+pass separate approval.
 
 Milestone 28 controlled web research remains proposed and unadmitted. Its offline contract and hostile fixtures cannot open a socket, resolve DNS, fetch a URL, automate a browser, execute a page, download content, or expose a model tool. Its promotion gate requires explicit reviewed queries, engine-owned fixed adapters, no renderer/model destination control, DNS and resolved-IP revalidation, redirect and content limits, no page execution, trusted citation rendering, hostile-content prompt isolation, exact source accounting, and residue-free memory cleanup. The admitted fixed Ollama catalog search does not grant or imply general research-search authority.
 
