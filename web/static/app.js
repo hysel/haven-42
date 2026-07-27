@@ -60,6 +60,7 @@ const state = {
   readinessSnapshot: null,
   setupPlan: null,
   workflows: [],
+  assurance: null,
   imageConnected: false,
   lastFocusBeforeWizard: null,
   pendingTextRequest: null,
@@ -187,8 +188,150 @@ async function loadWorkflows() {
   byId("workflow-plan-button").disabled = state.workflows.length === 0;
 }
 
+function validateAssuranceSummary(result) {
+  const exactKeys = (value, fields) => (
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+    && Object.keys(value).sort().join(",") === [...fields].sort().join(",")
+  );
+  const effects = [
+    "filesystemWrite", "machineModification", "networkAccess",
+    "processCreation", "providerInvocation", "repositoryRead",
+  ];
+  if (
+    !exactKeys(result, [
+      "disclosures", "effects", "evidence", "kind", "schemaVersion",
+      "sources", "status", "surfaces",
+    ])
+    || result.schemaVersion !== 1
+    || result.kind !== "read-only-assurance-summary"
+    || result.status !== "ready"
+    || !exactKeys(result.sources, ["evidenceCatalog", "surfaceMatrix", "surfaceSolutions"])
+    || result.sources.evidenceCatalog !== "config/evidence-catalog.tsv"
+    || result.sources.surfaceMatrix !== "config/agent-surface-capabilities.json"
+    || result.sources.surfaceSolutions !== "config/agent-surface-solutions.json"
+    || !exactKeys(result.evidence, ["modelCount", "recordCount", "statusCounts"])
+    || !Number.isSafeInteger(result.evidence.recordCount)
+    || result.evidence.recordCount < 1
+    || result.evidence.recordCount > 10000
+    || !Number.isSafeInteger(result.evidence.modelCount)
+    || result.evidence.modelCount < 0
+    || result.evidence.modelCount > result.evidence.recordCount
+    || !Array.isArray(result.evidence.statusCounts)
+    || result.evidence.statusCounts.length > 32
+    || !Array.isArray(result.surfaces)
+    || result.surfaces.length > 16
+    || !exactKeys(result.effects, effects)
+    || effects.some((field) => result.effects[field] !== false)
+    || !exactKeys(result.disclosures, [
+      "committedSanitizedEvidenceOnly", "liveValidationPerformed",
+      "productionReadinessClaimed", "providerContacted",
+      "repositoryInspected",
+    ])
+    || result.disclosures.committedSanitizedEvidenceOnly !== true
+    || result.disclosures.liveValidationPerformed !== false
+    || result.disclosures.productionReadinessClaimed !== false
+    || result.disclosures.providerContacted !== false
+    || result.disclosures.repositoryInspected !== false
+  ) throw new Error("invalid-assurance-summary");
+  const statuses = new Set();
+  result.evidence.statusCounts.forEach((item) => {
+    if (
+      !exactKeys(item, ["count", "status"])
+      || !/^[a-z][a-z0-9-]{0,63}$/.test(item.status)
+      || statuses.has(item.status)
+      || !Number.isSafeInteger(item.count)
+      || item.count < 1
+      || item.count > result.evidence.recordCount
+    ) throw new Error("invalid-assurance-summary");
+    statuses.add(item.status);
+  });
+  const surfaceIds = new Set();
+  result.surfaces.forEach((surface) => {
+    if (
+      !exactKeys(surface, [
+        "blockedActivities", "configureStatus", "id", "installStatus", "name",
+        "supportTier", "supportedActivities", "testStatus", "validatedActivities",
+        "validationLevel",
+      ])
+      || !/^[a-z][a-z0-9-]{0,63}$/.test(surface.id)
+      || surfaceIds.has(surface.id)
+      || typeof surface.name !== "string"
+      || surface.name.length < 1
+      || surface.name.length > 80
+      || !["supported", "candidate"].includes(surface.supportTier)
+      || !/^[a-z][a-z0-9-]{0,63}$/.test(surface.validationLevel)
+      || !["supported", "validated", "planned", "scaffolded", "blocked", "retired"].includes(surface.installStatus)
+      || !["supported", "validated", "planned", "scaffolded", "blocked", "retired"].includes(surface.configureStatus)
+      || !["supported", "validated", "planned", "scaffolded", "blocked", "retired"].includes(surface.testStatus)
+      || ["supportedActivities", "validatedActivities", "blockedActivities"].some(
+        (field) => !Number.isSafeInteger(surface[field]) || surface[field] < 0 || surface[field] > 32,
+      )
+    ) throw new Error("invalid-assurance-summary");
+    surfaceIds.add(surface.id);
+  });
+  return result;
+}
+
+function renderAssuranceSummary(result) {
+  state.assurance = validateAssuranceSummary(result);
+  byId("assurance-badge").textContent = "Committed evidence";
+  byId("assurance-badge").classList.add("good");
+  byId("assurance-record-count").textContent = String(result.evidence.recordCount);
+  byId("assurance-model-count").textContent = String(result.evidence.modelCount);
+  byId("assurance-surface-count").textContent = String(result.surfaces.length);
+  byId("assurance-live-status").textContent = "Not run · read-only summary";
+  const statuses = byId("assurance-status-list");
+  statuses.replaceChildren();
+  result.evidence.statusCounts.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "assurance-status-item";
+    const label = document.createElement("span");
+    label.textContent = item.status.replaceAll("-", " ");
+    const count = document.createElement("strong");
+    count.textContent = String(item.count);
+    row.append(label, count);
+    statuses.append(row);
+  });
+  const container = byId("assurance-surface-list");
+  container.replaceChildren();
+  result.surfaces.forEach((surface) => {
+    const row = document.createElement("div");
+    row.className = "assurance-item";
+    const identity = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = surface.name;
+    const detail = document.createElement("small");
+    detail.textContent = `${surface.validationLevel} · ${surface.supportTier} · ${surface.supportedActivities} supported · ${surface.validatedActivities} validated · ${surface.blockedActivities} blocked`;
+    identity.append(title, detail);
+    const status = document.createElement("small");
+    status.className = `assurance-state${surface.supportTier === "candidate" ? " candidate" : ""}`;
+    status.textContent = `Install ${surface.installStatus} · Configure ${surface.configureStatus} · Test ${surface.testStatus}`;
+    row.append(identity, status);
+    container.append(row);
+  });
+}
+
+function renderAssuranceUnavailable() {
+  state.assurance = null;
+  byId("assurance-badge").textContent = "Unavailable";
+  byId("assurance-badge").classList.remove("good");
+  byId("assurance-record-count").textContent = "Unavailable";
+  byId("assurance-model-count").textContent = "Unavailable";
+  byId("assurance-surface-count").textContent = "Unavailable";
+  byId("assurance-live-status").textContent = "Not run";
+  byId("assurance-status-list").replaceChildren();
+  byId("assurance-surface-list").replaceChildren();
+}
+
+async function loadAssurance() {
+  const result = await api("/api/assurance", {});
+  renderAssuranceSummary(result);
+}
+
 function showPrimaryPanel(panelId, navigationId, focusId) {
-  ["text-panel", "software-panel", "image-panel", "models-panel", "about-panel"].forEach((id) => {
+  ["text-panel", "software-panel", "image-panel", "models-panel", "assurance-panel", "about-panel"].forEach((id) => {
     byId(id).classList.toggle("hidden", id !== panelId);
   });
   activateNavigation(navigationId, panelId, focusId);
@@ -211,6 +354,10 @@ function openModels() {
 
 function openAbout() {
   showPrimaryPanel("about-panel", "about-nav", "about-title");
+}
+
+function openAssurance() {
+  showPrimaryPanel("assurance-panel", "assurance-nav", "assurance-title");
 }
 
 function setTaskControlsDisabled(disabled) {
@@ -1393,6 +1540,11 @@ async function bootstrap() {
     state.capabilities = result.capabilities || [];
     renderCapabilities();
     await loadWorkflows();
+    try {
+      await loadAssurance();
+    } catch (_error) {
+      renderAssuranceUnavailable();
+    }
     byId("update-status").textContent = result.updates?.mode === "disabled"
       ? "Disabled · no network"
       : "Unknown";
@@ -1786,6 +1938,7 @@ byId("home-nav").addEventListener("click", () => {
 byId("software-nav").addEventListener("click", openSoftware);
 byId("image-nav").addEventListener("click", openImages);
 byId("models-nav").addEventListener("click", openModels);
+byId("assurance-nav").addEventListener("click", openAssurance);
 byId("about-nav").addEventListener("click", openAbout);
 byId("workflow-plan-button").addEventListener("click", async () => {
   clearError();

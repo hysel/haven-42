@@ -2352,8 +2352,45 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "279 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "305 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
+  if [ "$TEST_TIER" = "full" ]; then
+    command -v node >/dev/null 2>&1 || return 1
+    node "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" |
+      grep -q "passed: 260 checks" || return 1
+  fi
+  assurance_dashboard="$("$REPO_ROOT/scripts/generate-evidence-dashboard.shared.sh" --as-json)" || return 1
+  python3 - "$assurance_dashboard" <<'PY' || return 1
+import json
+import sys
+report = json.loads(sys.argv[1])
+assert report["SchemaVersion"] == 2
+assert report["EvidenceCount"] >= 20
+assert report["SurfaceCount"] >= 4
+assert any(
+    item["Id"] == "continue"
+    and item["InstallStatus"] == "supported"
+    and item["ConfigureStatus"] == "supported"
+    and item["TestStatus"] == "validated"
+    for item in report["SurfaceSolutionReadiness"]
+)
+PY
+  python3 - "$REPO_ROOT" "$assurance_dashboard" <<'PY' || return 1
+import json
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+report = json.loads(sys.argv[2])
+wiki = (root / "docs/evidence-dashboard.md").read_text(encoding="utf-8")
+assert f"| Evidence records | {report['EvidenceCount']} |" in wiki
+assert f"| Distinct model-field values | {report['ModelCount']} |" in wiki
+for item in report["StatusCounts"]:
+    assert f"| `{item['Status']}` | {item['Count']} |" in wiki
+for surface in report["SurfaceSolutionReadiness"]:
+    assert f"| {surface['Name']} |" in wiki
+assert "(Evidence-Catalog)" in wiki
+assert "(Capability-Evidence-Contract)" in wiki
+PY
   grep -q "Resolve-Python3Command" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "sys.version_info.major" "$REPO_ROOT/scripts/start-haven42-web.ps1" || return 1
   grep -q "python3 -c" "$REPO_ROOT/scripts/start-haven42-web.shared.sh" || return 1
@@ -2368,6 +2405,11 @@ assert policy["runtimeId"] == "haven42.local-web"
 assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promoted-image-admitted"
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
+assert policy["browser"]["fixedExternalNavigationUrls"] == [
+    "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"
+]
+assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
+assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
 assert policy["browser"]["telemetryAllowed"] is False
 assert policy["browser"]["csrfTokenRequiredForEffects"] is True
 assert policy["browser"]["automaticLaunchUrlScope"] == "ipv4-loopback-http-origin-only"

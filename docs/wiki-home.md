@@ -6,6 +6,16 @@ Haven 42 is an evidence-gated, local-first AI workbench for software engineering
 
 Today, the maintained engineering surfaces are Continue, Aider, and OpenCode. The runnable local web application begins with keyboard-accessible Guided setup, Connect existing setup, and Explore paths. Guided setup performs an explicit bounded read-only hardware/software scan and builds a disabled, zero-effect setup plan; it does not install software. The chat-first workspace then provides pinned navigation, compact provider/system setup, automatically classified local/LAN Ollama connection, exact-digest model choices for chat/writing/summarization, provider token/timing details, advanced manual overrides, strict typed progress/warning/result/error envelopes, focused memory-only failed-input recovery with no automatic retry, reduced-motion navigation, typed no-file-written results, read-only provider-health/evidence/update status, and bounded idle/lifecycle cleanup on Windows, Linux, and macOS. Unknown or digest-mismatched installed models remain unverified and visibly warned when used, and missing recommendations never trigger an automatic download. Software exposes only plan-only registered read-only workflows with no renderer arguments or process execution. Images admits only the promoted Linux ComfyUI/SDXL profile through a loopback endpoint, clears API history, returns a browser-memory PNG, and discloses provider retention before generation. Native desktop image profiles remain evidence-gated, and music/video candidates remain documentation-only.
 
+The dedicated advanced **Evidence** navigation section summarizes only bundled
+sanitized records and agent-surface status, keeping those metrics outside the
+everyday chat and setup flow. It performs no live validation, contacts no
+provider, reads no user repository, starts no process, and makes no
+production-readiness claim. It shows the committed outcome distribution and
+per-surface activity counts, then offers one fixed explicit-click link to the
+detailed Evidence Dashboard wiki; Haven 42 performs no background fetch. The
+same bounded view is covered in source and portable-package browser tests on
+Windows, Linux, and macOS.
+
 Failed or retired integrations do not ship scripts, harnesses, wrappers, configuration, workflows, or active catalog entries. Fixture-backed cross-platform contracts do not broaden native runtime or hardware claims.
 
 ## Start Here

@@ -478,14 +478,14 @@
   error envelopes across admitted text, workflow-plan, and image operations.
 - [x] Render local-web typed chat-message/Markdown artifacts with strict accepted/progress/warning/result/error ordering, visible unverified-model warnings, typed failure recovery, no automatic retry, and no file writes; broader workflow rendering remains open under the parent task.
 - [ ] Connect setup, health, model choice, software workflows, validation, cleanup, and evidence views without duplicating business logic.
-- [x] Connect local-web setup, provider health, model choice, cleanup status, evidence boundary, and disabled-update state; software workflow execution and broader validation evidence remain open under the parent task.
+- [x] Connect local-web setup, provider health, model choice, cleanup status, disabled-update state, and a bounded read-only committed-evidence view through one shared cross-platform evidence engine; software workflow execution and live validation remain open under the parent task.
 - [x] Add repository-free text flows only for evidence-gated Milestone 21 providers.
 - [x] Add a repository-free browser-memory image flow only for the promoted
   Linux ComfyUI/SDXL profile, with loopback-only discovery, fixed checkpoint
   and workflow authority, bounded PNG validation, explicit retention
   disclosure, history cleanup, and user-triggered download.
 - [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
-- [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, focused error recovery, busy-state/result focus, hostile catalog tests, and a dependency-free 111-check headless Chromium wizard/chat flow on Windows; native packaging covers all three platforms while full browser automation on every platform remains open under the parent task.
+- [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, focused error recovery, busy-state/result focus, hostile catalog tests, and a dependency-free headless Chromium wizard/chat/assurance flow. Full source validation and native packaged execution now run on Windows, Linux, and macOS; signing/notarization and real updater/rollback/uninstall lifecycle tests remain open under the parent task.
 - [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, exact metadata-only intermediate artifacts, fresh/retry/cancel identity, one bounded retry, cancellation-before-execution, renderer-approval rejection, and 19 hostile/healthy checks; it remains simulation-only.
 - [x] Expand the simulation-only installation broker to exact install/upgrade/uninstall state and promotion-evidence contracts with 48 hostile/healthy checks and every authority/effect denied.
 - [ ] Admit executable multi-step composition only after effect-specific opaque approvals, runtime cancellation/retry/recovery, typed intermediate validation, and native cross-platform evidence pass.

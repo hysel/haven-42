@@ -10,7 +10,7 @@ The project began as a reusable pack for coding agents. It now provides a provid
 
 | Capability | Status | What that means |
 | --- | --- | --- |
-| Local browser assistant | **Available; portable development builds available** | The shared browser UI runs from source or an unsigned PyInstaller one-folder package. Guided setup remains read-only, installation remains disabled, and chat, writing, and summarization use an explicitly connected Ollama endpoint. |
+| Local browser assistant | **Available; portable development builds available** | The shared browser UI runs from source or an unsigned PyInstaller one-folder package. Guided setup remains read-only and installation remains disabled. A dedicated advanced Evidence section shows committed outcome and surface-readiness details without running live tests, with one fixed explicit-click link to the repository wiki. |
 | Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
 | Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
@@ -59,7 +59,7 @@ Local providers and supported agent surfaces
 Typed artifacts, validation evidence, and recovery
 ```
 
-The current web process binds only to `127.0.0.1`, serves bundled assets, keeps configuration and text in memory, and admits the evidence-gated `general.chat`, `content.write`, and `content.summarize` Ollama capabilities. It also shows explicit read-only states for software work and image generation without granting either capability to the browser. The design keeps provider selection, evidence state, permissions, privacy disclosures, and write approval outside model prompts.
+The current web process binds only to `127.0.0.1`, serves bundled assets, keeps configuration and text in memory, and admits the evidence-gated `general.chat`, `content.write`, and `content.summarize` Ollama capabilities. Its validation panel summarizes only the committed sanitized evidence catalog and surface matrices: it starts no process, reads no user repository, contacts no provider, and makes no live-validation or production-readiness claim. The design keeps provider selection, evidence state, permissions, privacy disclosures, and write approval outside model prompts.
 
 ## Evidence Before Features
 
@@ -73,7 +73,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, provider-neutral local text, local images, capability discovery, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress; runnable local tools and portable development packaging | Local web system status, immutable-digest Ollama recommendations, accessible chat/writing/summarization recovery, provider run metrics, the first bounded blind human writing packet, plan-only registered software workflows, lifecycle-aware effect-free composition planning, the promoted Linux ComfyUI image flow, verified unload, hardened PyInstaller packages, and effect-free installer/update simulation are implemented; broader human review, workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain open. |
+| Milestone 22: Unified Product UI And Task Composition | In progress; runnable local tools and portable development packaging | Local web system status, immutable-digest Ollama recommendations, a read-only committed-evidence view, accessible chat/writing/summarization recovery, provider run metrics, plan-only registered software workflows, lifecycle-aware effect-free composition planning, the promoted Linux ComfyUI image flow, verified unload, and hardened PyInstaller packages are implemented. Source browser validation and native packaged browser/parity smoke tests run across Windows, Linux, and macOS; workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain open. |
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; Windows AMD has a partial native pass, while remaining consumer-local gates stay open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |

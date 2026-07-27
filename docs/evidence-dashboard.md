@@ -156,6 +156,11 @@ OpenHands remains candidate-only and excluded from default setup:
   mounts, a credential-free provider path, and deny-by-default network policy
   are implemented and validated.
 
+For the exact user-facing install, configuration, test solutions, evidence
+paths, and blocked reasons behind this summary, see
+[Agent Surface Solutions](Agent-Surface-Solutions)
+(`docs/agent-surface-solutions.md`).
+
 ## Evidence Records By Surface
 
 This table counts catalog records using each execution surface. Similar names
