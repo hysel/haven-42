@@ -5077,6 +5077,8 @@ if ($IsWindows) {
         Assert-True -Condition ($null -ne $node) -Message "Node.js is required for the dependency-free Windows browser test."
         $browserTest = Join-Path $repoRoot "scripts/test-haven42-web-browser.mjs"
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
+        $browserSource = Get-Content -LiteralPath $browserTest -Raw
+        Assert-True -Condition ($browserSource -match "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" -and $browserSource -match "local-web-exited-") -Message "The browser harness should tolerate cold native startup and report early server exits."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
         Assert-True -Condition (($browserOutput -join "`n") -match "passed: 260 checks") -Message "The headless browser flow should exercise all 260 checks."

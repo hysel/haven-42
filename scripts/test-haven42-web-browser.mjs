@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const QWEN_DIGEST = "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7";
 const TEST_PNG = Buffer.from("89504e470d0a1a0a0000000d494844520000020000000200", "hex");
+const LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000;
 let models = ["qwen3.5:9b", "unknown-model:latest"];
 const loaded = new Set();
 const requests = [];
@@ -267,8 +268,25 @@ try {
     stdio: ["ignore", "pipe", "pipe"],
   });
   let output = "";
+  let errorOutput = "";
+  let havenLaunchError;
   haven.stdout.on("data", (chunk) => { output += chunk.toString(); });
-  const origin = await waitFor(() => output.match(/http:\/\/127\.0\.0\.1:\d+/)?.[0]);
+  haven.stderr.on("data", (chunk) => {
+    errorOutput = `${errorOutput}${chunk.toString()}`.slice(-4000);
+  });
+  haven.once("error", (error) => { havenLaunchError = error; });
+  const startup = await waitFor(() => {
+    const origin = output.match(/http:\/\/127\.0\.0\.1:\d+/)?.[0];
+    if (origin) return { origin };
+    if (havenLaunchError) return { error: `local-web-launch-error:${havenLaunchError.message}` };
+    if (haven.exitCode !== null) {
+      const detail = errorOutput.trim().replace(/\s+/g, " ").slice(-1000) || "no-stderr";
+      return { error: `local-web-exited-${haven.exitCode}:${detail}` };
+    }
+    return null;
+  }, LOCAL_WEB_STARTUP_TIMEOUT_MS);
+  if (startup.error) throw new Error(startup.error);
+  const { origin } = startup;
   trace("local-web-ready");
   const browserArguments = [
     "--headless=new",

@@ -2354,6 +2354,8 @@ PY
 test_local_web_mvp() {
   python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "305 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
+  grep -q "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" || return 1
+  grep -q "local-web-exited-" "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" || return 1
   if [ "$TEST_TIER" = "full" ]; then
     command -v node >/dev/null 2>&1 || return 1
     node "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" |
