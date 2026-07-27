@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractId": "haven42.document-context.lexical-retrieval-foundation",
-  "status": "simulation-only-not-runtime-admitted",
+  "status": "offline-engine-implemented-not-runtime-admitted",
   "activation": {
     "runtimeRouteAllowed": false,
     "uiControlAllowed": false,
@@ -18,6 +18,9 @@
   },
   "determinism": {
     "algorithm": "bounded-casefolded-term-frequency",
+    "normalization": "unicode-casefold",
+    "tokenization": "unicode-alphanumeric-runs-without-underscore",
+    "chunking": "fixed-character-windows-no-overlap",
     "semanticEmbeddingsAllowed": false,
     "modelRankingAllowed": false,
     "remoteRankingAllowed": false,
@@ -47,6 +50,14 @@
     "cleanupOnTaskBoundaryRequired": true,
     "cleanupOnFailureRequired": true,
     "cleanupOnShutdownRequired": true
+  },
+  "implementation": {
+    "module": "scripts/memory_lexical_retrieval.py",
+    "test": "scripts/test-memory-lexical-retrieval.py",
+    "runtimeImported": false,
+    "filesystemApiUsed": false,
+    "networkApiUsed": false,
+    "providerApiUsed": false
   },
   "hostileFixture": "examples/fixtures/lexical-retrieval-hostile-cases.json"
 }

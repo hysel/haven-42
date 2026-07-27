@@ -438,7 +438,10 @@
   About views, capability-specific model selection, provider-neutral home copy,
   and Enter-to-send with Shift+Enter for multiline text.
 - [x] Add a security-first, memory-only first-run web wizard for provider connection, advanced timeout/residency settings, capability-specific readiness, and a working-chat handoff.
-- [ ] Run the controlled writing-quality matrix for exact Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H artifacts before promoting a comparative writing-quality default over the validated adapter baseline.
+- [x] Complete the controlled exact-artifact writing evaluation without
+  promoting a comparative default. The owner deferred further comparative
+  review unless end users report inconsistency; Qwen remains only the validated
+  adapter baseline, not a best-writer claim.
   - [x] Run the initial exact-digest automated constraint matrix with synthetic
     inputs, provider token/timing metrics, no raw-output persistence, and
     verified per-case and final unloads. Blind human scoring and repeated
@@ -449,6 +452,15 @@
     with one human reviewer, exact artifacts, local-only raw output, and verified
     unload. Qwen led 9–8–7–6, but three candidates each won a scenario; broader
     reviewers and criterion scores remain required before comparative promotion.
+  - [x] Complete a second independently randomized three-scenario packet with
+    the same reviewer covering long-form continuity, distractor resistance, and
+    exact fact-preserving editing. Granite led 9–8–7–6, but three candidates
+    again won a scenario. The conversational review captured forced ranks rather
+    than criterion-level scores; independent reviewers and scored rubrics remain
+    open before comparative promotion.
+  - [x] Record comparative promotion as owner-deferred in the fail-closed
+    Milestone 22 admission ledger. Deferral grants no model new evidence or
+    authority and does not block the unsigned development package.
 - [x] Replace first-provider-result model defaults with capability-specific engine recommendations, non-downloading missing-model guidance, advanced per-capability overrides, reset-to-automatic, and visibly unverified handling for unknown installed models.
 - [x] Bind local-web automatic recommendations to the exact tested Qwen
   provider digest and capability evidence; a matching model name with a
@@ -474,6 +486,39 @@
 - [ ] Keep Tauri as optional Milestone 22B native packaging after its published dependency, bridge, signing, package, and platform gates pass; the local web product must not wait on it.
 - [x] Add unsigned PyInstaller one-folder development packages for Windows, Linux, and macOS using the shared browser UI, embedded resource-integrity verification, source/package parity, native smoke tests, least-privilege CI, checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence.
 - [x] Harden portable development packaging with cross-platform wheel hashes, platform-allowlisted evidence, hostile resource/shutdown/archive tests, exact checksum coverage, full package inventory, and explicit unsigned build provenance.
+- [x] Prepare a least-privilege main-push-only GitHub build-provenance
+  attestation job for the three reverified unsigned development archives using
+  immutable GitHub-owned action SHAs. It publishes no Release, grants no
+  pull-request write authority, and makes no platform-signing, notarization,
+  updater-trust, or production claim. No attestation exists before an approved
+  push runs the job.
+- [x] Prepare public inactive code-signing and privacy policies, a fail-closed
+  SignPath eligibility audit, CODEOWNERS protection, deterministic Windows
+  executable metadata, build-time metadata verification, and offline
+  readiness checks. No application, certificate, signature, or publication is
+  active.
+- [x] Record the owner's 2026-07-27 confirmation that GitHub MFA is enabled,
+  without storing authentication proof or secrets.
+- [x] Add exact portable runtime-component evidence with complete file
+  coverage, unclassified-file rejection, upstream signing exclusion,
+  expanded SBOM rows, explicit unresolved license states, and hostile
+  cross-platform classifier fixtures.
+- [x] Pin native packaging to Python 3.14.6 through immutable
+  `setup-python` v6.2.0 and add hash-verified CPython bundled-license and
+  Apache 2.0 evidence.
+- [x] Pin native package runner versions and bind each official
+  `actions/python-versions` 3.14.6 archive name and SHA-256 into hosted build
+  provenance with hostile mismatch tests.
+- [x] Record the official Windows Python installer/SBOM, immutable CPython
+  source commit, exact OpenSSL 3.5.7 and libffi 3.4.4 source/binary dependency
+  commits, source archive hashes, and hash-verified libffi license evidence.
+- [ ] Complete the exact packaged dependency/license audit, obtain provider
+  eligibility review with signing-service MFA, and decide separately whether
+  to publish an unsigned development Release in the form proposed for signing.
+  A clean 31-file local rebuild proves the 39 banned host-derived JDK
+  UCRT/API-set files are absent and passes the native package gate. Remaining
+  work is clean hosted reproduction and review of the applicable Microsoft
+  terms for the two retained, origin-verified Visual C++ runtime DLLs.
 - [x] Add native read-only-package startup and abrupt-exit recovery tests, exact build dependency/license verification, archive count/size bounds, encrypted/evidence-link rejection, and target-name validation.
 - [ ] Promote packaging beyond development only after signing/notarization, installer/uninstall, provenance, platform lifecycle, and production release gates pass. Keep online updater activation and machine modification disabled until separately approved and validated.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.
@@ -485,14 +530,17 @@
 - [x] Render strict typed artifacts and ordered progress, warning, result, and
   error envelopes across admitted text, workflow-plan, and image operations.
 - [x] Render local-web typed chat-message/Markdown artifacts with strict accepted/progress/warning/result/error ordering, visible unverified-model warnings, typed failure recovery, no automatic retry, and no file writes; broader workflow rendering remains open under the parent task.
-- [ ] Connect setup, health, model choice, software workflows, validation, cleanup, and evidence views without duplicating business logic.
+- [x] Connect setup, health, model choice, plan-only software workflows,
+  read-only validation, cleanup, and evidence views without duplicating
+  business logic for the admitted unsigned development scope.
 - [x] Connect local-web setup, provider health, model choice, cleanup status, disabled-update state, and a bounded read-only committed-evidence view through one shared cross-platform evidence engine; software workflow execution and live validation remain open under the parent task.
 - [x] Add repository-free text flows only for evidence-gated Milestone 21 providers.
 - [x] Add a repository-free browser-memory image flow only for the promoted
   Linux ComfyUI/SDXL profile, with loopback-only discovery, fixed checkpoint
   and workflow authority, bounded PNG validation, explicit retention
   disclosure, history cleanup, and user-triggered download.
-- [ ] Add accessible cross-platform UI contract, failure, recovery, and packaging tests.
+- [x] Add accessible cross-platform UI contract, failure, recovery, and
+  packaging tests for the unsigned development scope.
 - [x] Add local-web keyboard/focus/ARIA/reduced-motion contracts, focused error recovery, busy-state/result focus, hostile catalog tests, and a dependency-free headless Chromium wizard/chat/assurance flow. Full source validation and native packaged execution now run on Windows, Linux, and macOS; signing/notarization and real updater/rollback/uninstall lifecycle tests remain open under the parent task.
 - [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, exact metadata-only intermediate artifacts, fresh/retry/cancel identity, one bounded retry, cancellation-before-execution, renderer-approval rejection, and 19 hostile/healthy checks; it remains simulation-only.
 - [x] Expand the simulation-only installation broker to exact install/upgrade/uninstall state and promotion-evidence contracts with 48 hostile/healthy checks and every authority/effect denied.
@@ -505,6 +553,10 @@
     admission and approval identifiers. It rejects forged completion,
     reordering, cross-admission reuse, unsafe retry, and uncertain recovery,
     but writes no journal and treats every event as a non-authoritative claim.
+- [x] Add one fail-closed offline Milestone 22 admission-readiness ledger and a
+  20-case hostile evaluator covering the development-admitted read-only scope,
+  owner deferral, Tauri policy block, and production package, installer,
+  updater, and executable-composition gates without granting authority.
 
 ## Solution Architecture Review Backlog
 
@@ -577,9 +629,9 @@
 - [x] Define a simulation-only deterministic lexical-retrieval contract and hostile offline fixtures with no runtime route, UI control, provider payload, path, parser, network, embedding, or persistence authority.
 - [x] Define the default-deny conversation-history contract, non-executable logical SQLite-compatible schema, and inert hostile fixtures; preserve Private session as the write-free default with every runtime and storage effect disabled.
 - [x] Implement pure migration/rollback, retention, bounded context, deletion, recovery, backup, and restore planners without importing SQLite, creating a database, accepting a path, or writing a file.
-- [ ] Review encryption-at-rest and key-management architecture, including a maintained SQLCipher-equivalent dependency, OS credential storage, key rotation/loss, supply-chain evidence, licensing, SBOM, and Windows/Linux/macOS packaging.
+- [x] Review encryption-at-rest and key-management architecture: keep SQLCipher-equivalent selection unadmitted, require user-scoped OS credential storage with no plaintext fallback, define rotation/loss/recovery behavior, and retain supply-chain, licensing, SBOM, binding, and native packaging as admission gates.
 - [ ] Seek separate approval before any opt-in development history database, runtime route, UI control, database file, backup/restore write, or saved message is activated.
-- [ ] Add deterministic memory-only lexical retrieval with extracted-text preview, token estimates, per-response chunk disclosure, removal, and clear-all controls.
+- [x] Add and hostile-test the deterministic memory-only lexical retrieval core with token estimates, per-result chunk disclosure, removal, clear-all, strict budgets, stable ranking, and failure cleanup; keep runtime route, UI, and provider integration unadmitted.
 - [x] Show a prominent private-network transfer warning and treat deliberate Send as confirmation without a separate checkbox; continue blocking public provider destinations.
 - [x] Record one sanitized Windows source-runtime/default-browser native clipboard-PNG paste and user-reviewed `qwen3.5:9b` screenshot-description pass with independently verified model unload; packaged Windows, Linux, and macOS cells remain open.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promoting the capability.

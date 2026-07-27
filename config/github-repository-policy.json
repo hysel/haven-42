@@ -39,5 +39,25 @@
     "shaPinningRequired": true,
     "defaultWorkflowPermissions": "read",
     "canApprovePullRequestReviews": false
+  },
+  "artifactAttestations": {
+    "enabled": true,
+    "trigger": "push-main-after-native-package-success",
+    "subjects": "unsigned-development-archives-only",
+    "action": "actions/attest",
+    "actionCommit": "f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6",
+    "actionRelease": "v4.2.0",
+    "requiredJobPermissions": [
+      "actions:read",
+      "artifact-metadata:write",
+      "attestations:write",
+      "contents:read",
+      "id-token:write"
+    ],
+    "pullRequestWriteAuthorityAllowed": false,
+    "releasePublicationAllowed": false,
+    "platformCodeSigningClaimAllowed": false,
+    "notarizationClaimAllowed": false,
+    "productionReadinessClaimAllowed": false
   }
 }

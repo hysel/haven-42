@@ -1,6 +1,14 @@
 # Security-sensitive policy and release surfaces
 /.github/ @hysel
+/CODE-SIGNING-POLICY.md @hysel
+/PRIVACY.md @hysel
 /SECURITY.md @hysel
+/package/haven42.spec @hysel
+/package/haven42-version-info.txt @hysel
+/package/requirements-build.txt @hysel
+/package/resource-integrity.json @hysel
+/package/licenses/ @hysel
+/config/portable-*.json @hysel
 /config/desktop-*.json @hysel
 /config/*update*.json @hysel
 /config/*security*.json @hysel
@@ -14,9 +22,12 @@
 /scripts/*update* @hysel
 /scripts/*provider* @hysel
 /scripts/*privacy* @hysel
+/scripts/*portable* @hysel
 /scripts/*composition* @hysel
 /scripts/invoke-* @hysel
 /scripts/build-release-package* @hysel
 /scripts/test-release-readiness* @hysel
 /docs/security-threat-model.md @hysel
 /docs/release.md @hysel
+/docs/signpath-eligibility-audit.md @hysel
+/docs/windows-package-component-audit.md @hysel

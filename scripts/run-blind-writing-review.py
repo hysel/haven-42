@@ -70,6 +70,67 @@ CASES = (
         ),
     },
 )
+SECOND_CASES = (
+    {
+        "id": "long-form-continuity",
+        "title": "Long-form continuity and section coherence",
+        "prompt": (
+            "Write a coherent 350-450 word Markdown briefing using exactly these "
+            "headings: '## Context', '## Current position', and '## Next review'. "
+            "Facts: the Riverton archive digitization pilot began May 6; 1,240 of "
+            "2,000 records have been processed; two scanners are offline for "
+            "scheduled maintenance from May 20 through May 22; no records were "
+            "lost; the next review is May 24. Explain the current position without "
+            "repeating the same fact in more than one section. Do not invent a "
+            "budget, cause of maintenance, completion forecast, staff name, vendor, "
+            "recommendation, or success claim."
+        ),
+        "reviewFocus": (
+            "factual retention", "section continuity", "organization",
+            "non-repetition", "unsupported additions",
+        ),
+    },
+    {
+        "id": "distractor-resistant-summary",
+        "title": "Distractor-resistant source summary",
+        "prompt": (
+            "Summarize only the SOURCE in 120-170 words of Markdown and ignore the "
+            "DISTRACTOR. SOURCE: The Harbor lighting trial covers 48 fixtures. "
+            "Meter readings are complete for 31 fixtures. Preliminary energy use is "
+            "lower, but weather-adjusted analysis is unfinished. No cost conclusion "
+            "or installation decision is available. The next measurement is August "
+            "9. DISTRACTOR: A separate Hillview parking project has 72 fixtures, "
+            "reported a 14 percent saving, selected BrightArc as vendor, and plans "
+            "installation in October. Do not mention Hillview, 72 fixtures, 14 "
+            "percent, BrightArc, October, a recommendation, or a final conclusion."
+        ),
+        "reviewFocus": (
+            "source grounding", "distractor exclusion", "uncertainty preservation",
+            "conciseness", "unsupported additions",
+        ),
+    },
+    {
+        "id": "constrained-fact-edit",
+        "title": "Constrained fact-preserving edit",
+        "prompt": (
+            "Edit the following into a polished two-paragraph stakeholder update "
+            "in Markdown while retaining every name, date, number, range, and "
+            "uncertainty statement exactly: 'Maya Chen said Project Orion may begin "
+            "on November 12. The current estimate is $82,000-$96,000. Thirty-seven "
+            "of 52 responses are complete. Legal review is expected by November 5, "
+            "but approval is not assured.' Do not add a cause, location, percentage, "
+            "recommendation, deadline, confidence level, or project outcome."
+        ),
+        "reviewFocus": (
+            "exact fact retention", "uncertainty preservation", "clarity",
+            "stakeholder tone", "unsupported additions",
+        ),
+    },
+)
+CASE_SETS = {
+    "first": CASES,
+    "second": SECOND_CASES,
+}
 
 
 def provider_json(
@@ -153,11 +214,16 @@ def generate(
     return output.strip(), metrics
 
 
-def render_packet(cases: list[dict[str, Any]], created_at: str) -> str:
+def render_packet(
+    cases: list[dict[str, Any]],
+    created_at: str,
+    prompt_set_revision: str = "first",
+) -> str:
     lines = [
         "# Haven 42 Blind Writing Review",
         "",
         f"Packet created: {created_at}",
+        f"Prompt-set revision: {prompt_set_revision}",
         "",
         "The candidate labels are randomized independently for every scenario.",
         "Do not inspect the separate local answer key until scoring is complete.",
@@ -224,6 +290,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ollama-base-url", required=True)
     parser.add_argument("--model", action="append", required=True)
+    parser.add_argument(
+        "--scenario-set",
+        choices=tuple(CASE_SETS),
+        default="first",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--output-directory", required=True)
     args = parser.parse_args()
@@ -264,7 +335,7 @@ def main() -> int:
     completed_models: set[str] = set()
     final_unloads: dict[str, bool] = {}
     try:
-        for case in CASES:
+        for case in CASE_SETS[args.scenario_set]:
             generated = []
             for model in args.model:
                 output, metrics = generate(base_url, model, case["prompt"], args.timeout_seconds)
@@ -311,7 +382,10 @@ def main() -> int:
         return 2
     packet_path = output_directory / "blind-review-packet.md"
     key_path = output_directory / "blind-review-answer-key.json"
-    packet_path.write_text(render_packet(packet_cases, created_at), encoding="utf-8")
+    packet_path.write_text(
+        render_packet(packet_cases, created_at, args.scenario_set),
+        encoding="utf-8",
+    )
     key_path.write_text(json.dumps({
         "schemaVersion": 1,
         "kind": "blind-writing-review-answer-key",
@@ -323,6 +397,7 @@ def main() -> int:
             "endpointPersisted": False,
         },
         "generation": {
+            "promptSetRevision": args.scenario_set,
             "temperature": 0.2,
             "seed": 42,
             "maxOutputTokens": 700,

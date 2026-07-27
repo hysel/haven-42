@@ -48,7 +48,13 @@ default plus 50/100-entry memory-only choices.
 - Select a local model: [[Local Model Selection|Local-Model-Selection]]
 - Review writing-model candidates and promotion gates: [[Writing Model Evaluation|Writing-Model-Evaluation]]
 - Review the initial exact-digest automated matrix: [[Writing Model Matrix Validation|Writing-Model-Matrix-Validation]]
-- Review the first bounded blind human packet: [[Blind Writing Quality Review|Blind-Writing-Quality-Review]]
+- Review both bounded blind human packets: [[Blind Writing Quality Reviews|Blind-Writing-Quality-Review]]
+- Review the remaining product admission gates: [[Milestone 22 Admission Readiness|Milestone-22-Admission-Readiness]]
+- Verify unsigned development build provenance: [[Unsigned Development Artifact Attestation|Artifact-Attestation]]
+- Review the inactive signing boundary: [[Code Signing Policy|Code-Signing-Policy]]
+- Review local-first data handling: [[Privacy Policy|Privacy-Policy]]
+- Review remaining provider eligibility gates: [[SignPath Foundation Eligibility Audit|SignPath-Eligibility-Audit]]
+- Review the exact Windows runtime/license gaps: [[Windows Package Component Audit|Windows-Package-Component-Audit]]
 - Discover candidates across Ollama and Hugging Face: [[Online Model Discovery|Online-Model-Discovery]]
 - Assemble security-aware beginner and advanced model choices: [[Security-Aware Model Catalog|Security-Aware-Model-Catalog]]
 - Compare supported agents: [[Agent Surface Options|Agent-Surface-Options]]
@@ -76,7 +82,7 @@ default plus 50/100-entry memory-only choices.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.
 - Milestone 26 — exact Linux NVIDIA and Windows AMD Ollama comparisons passed; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD, Vulkan failed the patch gate, Intel is parked pending hardware, and broader cells remain open.
-- Milestone 27 — one keyboard-operable bounded UTF-8 `.txt`/`.md`/PNG picker plus clipboard PNG paste is implemented with safe previews, compact scrolling, explicit path-free selection, warned submit-confirmed private-network transfer, visible unverified image-input status, and memory-only cleanup. The inactive lexical-retrieval contract grants no runtime authority. The optional conversation-history foundation adds a default-deny contract, non-executable logical SQLite-compatible schema, pure lifecycle planners, and hostile fixtures without opening a database; Private session remains write-free. Vision promotion, automatic scanning, broader parsers, active retrieval, embeddings, encryption decisions, and runtime persistence remain unadmitted.
+- Milestone 27 — one keyboard-operable bounded UTF-8 `.txt`/`.md`/PNG picker plus clipboard PNG paste is implemented with safe previews, compact scrolling, explicit path-free selection, warned submit-confirmed private-network transfer, visible unverified image-input status, and memory-only cleanup. The deterministic lexical core is implemented and hostile-tested offline but grants no runtime route, UI, provider, path, or persistence authority. The optional history foundation remains write-free and opens no database; its encryption/key architecture requires a current-user OS credential facility and fails closed without plaintext fallback. Native retrieval parity, dependency selection, vision promotion, automatic scanning, broader parsers, embeddings, and runtime persistence remain unadmitted.
 - Milestone 28 — controlled web research has an offline default-deny contract and hostile fixtures but no route, model tool, network effect, or UI. Reviewed per-query consent, engine-owned adapters, trusted citations, SSRF controls, hostile-content isolation, and memory-only cleanup remain required; models have no unrestricted internet access.
 
 ## Support Model

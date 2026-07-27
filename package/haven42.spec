@@ -1,7 +1,9 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
+import sys
 
 root = Path(SPECPATH).parent
+version_info = str(root / "package/haven42-version-info.txt") if sys.platform == "win32" else None
 resources = [
     ("web/static/index.html", "web/static"),
     ("web/static/app.js", "web/static"),
@@ -28,6 +30,19 @@ a = Analysis(
     noarchive=False,
     optimize=1,
 )
+if sys.platform == "win32":
+    # Windows 10+ supplies the UCRT and API-set contract DLLs. PyInstaller may
+    # otherwise resolve application-local copies from an unrelated host PATH
+    # entry, making the package host-dependent. Keep Python's exact VCRUNTIME
+    # files, but never collect these operating-system components.
+    a.binaries = [
+        entry
+        for entry in a.binaries
+        if not (
+            Path(entry[0]).name.casefold().startswith("api-ms-win-")
+            or Path(entry[0]).name.casefold() == "ucrtbase.dll"
+        )
+    ]
 pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
@@ -41,6 +56,7 @@ exe = EXE(
     upx=False,
     console=True,
     disable_windowed_traceback=False,
+    version=version_info,
 )
 coll = COLLECT(
     exe,

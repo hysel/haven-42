@@ -181,15 +181,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: windows-latest
+          - os: windows-2025
             label: Windows
             executable: dist/portable/bundle/haven42/haven42.exe
-          - os: ubuntu-latest
+            python_asset: python-3.14.6-win32-x64.zip
+            python_sha256: dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9
+          - os: ubuntu-24.04
             label: Linux
             executable: dist/portable/bundle/haven42/haven42
-          - os: macos-latest
+            python_asset: python-3.14.6-linux-24.04-x64.tar.gz
+            python_sha256: 29dc7f3887a430fe7a0005fee4732b00be1bbed5bf21aa1e43f8d947eb1b9f61
+          - os: macos-15
             label: macOS
             executable: dist/portable/bundle/haven42/haven42
+            python_asset: python-3.14.6-darwin-arm64.tar.gz
+            python_sha256: 7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c
 
     steps:
       - name: Checkout repository without credentials
@@ -197,12 +203,19 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Select exact package Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.14.6"
+
       - name: Install hash-locked build dependencies
         run: python -m pip install --disable-pip-version-check --require-hashes -r package/requirements-build.txt
 
       - name: Build unsigned one-folder package and evidence
         env:
           HAVEN42_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          HAVEN42_PYTHON_SOURCE_ASSET: ${{ matrix.python_asset }}
+          HAVEN42_PYTHON_SOURCE_SHA256: ${{ matrix.python_sha256 }}
         run: python scripts/build-portable-development-package.py
 
       - name: Run source/package parity and native hostile tests
@@ -223,3 +236,49 @@ jobs:
           path: dist/portable/artifacts/
           if-no-files-found: error
           retention-days: 7
+
+  attest-development:
+    name: Attest unsigned development artifacts
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      artifact-metadata: write
+      attestations: write
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout exact source without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Download same-run unsigned development artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: haven42-*-unsigned-development
+          path: dist/attestation-input
+
+      - name: Reverify every downloaded native artifact set
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t artifact_dirs < <(find dist/attestation-input -mindepth 1 -maxdepth 1 -type d -name 'haven42-*-unsigned-development' -print | sort)
+          if [ "${#artifact_dirs[@]}" -ne 3 ]; then
+            echo "Expected exactly three native artifact sets." >&2
+            exit 1
+          fi
+          for artifact_dir in "${artifact_dirs[@]}"; do
+            python scripts/verify-portable-development-artifacts.py --artifact-directory "$artifact_dir"
+          done
+
+      - name: Attest unsigned archive build provenance
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4.2.0
+        with:
+          subject-path: |
+            dist/attestation-input/**/haven42-*-unsigned-development.zip
+            dist/attestation-input/**/haven42-*-unsigned-development.tar.gz
+          show-summary: true

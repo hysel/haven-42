@@ -33,9 +33,22 @@ The `Validate Pack` workflow must complete these jobs successfully:
 - `Linux portable package`
 - `macOS portable package`
 
+The portable matrix selects the same exact Python 3.14.6 patch release through
+an immutable GitHub-owned `setup-python` v6.2.0 commit before installing the
+hash-locked build dependencies. It does not rely on each hosted image's
+changing default Python.
+
 The verifier rejects a successful-looking run if it belongs to another commit
 or omits one of these jobs. `CodeQL Python analysis` is separately required by
 branch protection.
+
+On a push to `main`, the same workflow also runs
+`Attest unsigned development artifacts` after all three package jobs. It is
+not a pull-request branch-protection check because pull-request code must not
+receive OIDC or attestation-write authority. A main-push attestation failure
+must be investigated before treating those hosted archives as provenance
+attested, but it does not retroactively turn an unsigned development package
+into a signed or production artifact.
 
 ## Prerequisites
 
@@ -94,3 +107,5 @@ Every push report must include:
   relevant failure signal.
 - Confirmation that branch protection also reports `CodeQL Python analysis`
   successful before merge.
+- For a post-merge `main` run, the attestation job result and its attestation
+  URL, or an explicit statement that no attestation was created.

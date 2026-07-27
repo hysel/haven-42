@@ -1,6 +1,6 @@
 # Writing Model Evaluation
 
-Haven 42 has validated the bounded `content.write` adapter contract with the exact recorded `qwen3.5:9b` Ollama digest and has run an initial exact-digest automated constraint matrix across all four candidates. It has not completed comparative writing-quality evaluation. Adapter and marker-check success prove bounded execution, constraint retention, privacy, metrics, and cleanup; they do not prove that any model is the best writer.
+Haven 42 has validated the bounded `content.write` adapter contract with the exact recorded `qwen3.5:9b` Ollama digest, run an exact-digest automated constraint matrix across all four candidates, and completed two bounded blind packets with one reviewer. It has not completed comparative writing-quality evaluation. Adapter, marker-check, and single-reviewer preference results prove neither that a model is the best writer nor that it should become an automatic default.
 
 No candidate under comparative evaluation in this document is a product default or promoted writing-quality recommendation. The local web app may select `qwen3.5:9b` automatically only when the installed name and digest match the passed bounded writing-adapter evidence; that is an exact adapter baseline, not a claim that it produces the best prose. Replacing that baseline requires an exact model artifact, quantization, provider version, operating system, execution-host hardware profile, license decision, repeated performance evidence, and blind human quality review.
 
@@ -44,6 +44,17 @@ Qwen, Granite, and Gemma each won one scenario. This bounded result keeps the
 existing Qwen adapter baseline but grants no comparative quality promotion.
 Additional independent reviewers, broader scenarios, and criterion-level
 scores remain required.
+
+The same reviewer completed a second independently randomized packet with
+long-form continuity, distractor resistance, and exact fact-preserving editing.
+Granite led that packet with nine points, followed by Mistral with eight, Gemma
+with seven, and Qwen with six; Granite, Mistral, and Gemma each won one
+scenario. Across both packets Granite has 17 preference points, Qwen 15, and
+Gemma and Mistral 14 each. This is descriptive single-reviewer evidence only.
+The second packet used Ollama `0.32.4` rather than `0.32.1` and collected forced
+ranks without criterion-level numeric scores. Granite's preference result does
+not override its repeated automated constraint failure, so no comparative
+default changed.
 
 Use the same source material, prompts, provider settings, context limit, warm/cold policy, and output bounds for every exact candidate. Record the prompt-set revision and never use private user documents in committed fixtures.
 

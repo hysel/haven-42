@@ -123,9 +123,11 @@ capability, model, or provider changes and process shutdown clear the selection.
 No temporary file, browser storage, server-side upload, or log is created.
 Directories, archives, PDF, Office files, source trees, OCR, active lexical
 retrieval, embeddings, vision-model promotion, and persistent indexes remain
-outside this initial admission. The lexical-retrieval contract and hostile
-fixtures are simulation-only: there is no route, UI control, provider payload,
-path access, parser, network operation, embedding, temporary file, or index.
+outside this initial admission. The deterministic memory-only lexical core is
+implemented and hostile-tested offline, including strict budgets, stable
+ranking, source/chunk disclosure, removal, and failure cleanup. It has no
+runtime route, UI control, provider payload, path access, parser, network
+operation, embedding, temporary file, or persistent index.
 
 Controlled web research is also inactive. Its offline contract and hostile
 fixtures deny runtime routes, model tools, DNS, URL fetching, browser
@@ -138,7 +140,8 @@ non-executable logical SQLite-compatible schema, pure planners, and hostile
 fixtures do not import SQLite, open or create a database, write a file, use
 browser storage, expose a route or UI control, or persist a message. Private
 session remains the write-free default. See
-`docs/conversation-history-database.md`.
+`docs/conversation-history-database.md` and
+`docs/conversation-history-encryption-review.md`.
 
 ## Registered software plans
 

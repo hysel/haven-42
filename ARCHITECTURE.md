@@ -63,15 +63,57 @@ a Haven 42 client write. The admitted machine-readable boundary is
 
 The initial native distribution path freezes that same process and UI into a PyInstaller one-folder package. PyInstaller supplies only a local launcher/runtime boundary: it does not add browser authority, an installer, privileged service, global dependency, or native UI framework. Frozen startup verifies a strict embedded path/size/SHA-256 resource manifest before serving. Browser launch accepts only the engine-generated IPv4-loopback HTTP origin: Windows uses the registered URL association, macOS uses fixed `/usr/bin/open`, and Linux uses fixed allowlisted `/usr/bin/gio` or `/usr/bin/xdg-open` commands. Unix launch uses no shell, strips `BROWSER` and other unneeded inherited environment authority, and falls back to a printed manual URL. Full validation runs the source browser flow on Windows, Linux, and macOS; each native packaging job repeats the flow against its frozen executable. Native package tests compare source and frozen capabilities, privacy, updates, assets, and assurance data and require read-only-package startup, abrupt-exit recovery, repeated lifecycle, and token-protected model-cleanup-first shutdown. `config/portable-development-package-contract.json` is the machine-readable boundary; Tauri/Rust remains unadmitted.
 
-The portable supply-chain boundary has two layers. Build inputs are exact-version and wheel-hash locked, while evidence collection admits only the exact reviewed platform-specific tool/version/license set. Build outputs bind the complete one-folder tree to a file inventory and archive checksums, then independently validate bounded archive size/count, safe and case-unique member names, regular unencrypted file shape, SBOM/runtime identity, notices, target naming, and exact source/environment provenance. This provenance makes no signature or attestation claim.
+The portable supply-chain boundary has two layers. Build inputs are exact-version and wheel-hash locked, while evidence collection admits only the exact reviewed platform-specific tool/version/license set. Windows PyInstaller execution removes Python override variables, disables user-site discovery, and uses only active-Python and Windows system directories for dependency search; the runtime classifier rejects application-local API-set/UCRT files and accepts only the exact Python.org Visual C++ runtime hashes. Build outputs bind the complete one-folder tree to a file inventory and archive checksums, then independently validate bounded archive size/count, safe and case-unique member names, regular unencrypted file shape, SBOM/runtime identity, notices, target naming, and exact source/environment provenance. This provenance makes no signature or attestation claim.
+
+A third evidence layer maps every packaged file to Haven 42 or an explicit
+CPython, OpenSSL, libffi, Microsoft, or unresolved platform-runtime component.
+The mapping carries exact path/digest/size coverage, rejects unknown files,
+marks upstream components signing-ineligible, and drives matching SBOM and
+notice rows. Coverage does not imply redistribution clearance: CPython and
+Apache 2.0 texts are hash-verified, while unresolved libffi/Microsoft evidence
+and platform provenance keep production promotion false.
+
+Hosted package provenance fixes the runner generation, Python 3.14.6,
+immutable `setup-python` action commit, and official
+`actions/python-versions` release archive digest per platform. Local builds
+cannot inherit that claim and are labeled `local-unverified`.
 
 The first composition boundary is deliberately non-executable. A strict engine-owned contract admits at most six registry-backed `read-only` workflow references, rejects renderer arguments and approvals, validates fresh/retry/cancel identity with one bounded retry, orders dependencies deterministically, and emits exactly typed metadata-only intermediate plan references. Cancellation ends before plan artifacts are emitted. A separate inactive execution-admission model validates future workflow effect disclosure, typed intermediate type/media/digest metadata, digest-bound engine approval scope, expiry/replay state, and fresh/retry/recover/cancel consistency. An effect-free digest-chain model binds later scenario records to that admission and rejects forged completion, reordering, cross-admission reuse, unsafe retry, and uncertain recovery. It writes no journal and treats every start, completion, failure, and cancellation record as a non-authoritative claim. These models accept no token secret, path, content, arguments, URL, or environment; all results deny approval acceptance, execution, process, filesystem, network, artifact, and machine-modification authority.
 
+The remaining Milestone 22 boundaries are normalized by
+`config/milestone22-admission-readiness-contract.json`. Its offline evaluator
+distinguishes the admitted read-only development scope from owner-deferred,
+policy-blocked, security-blocked, and external-blocked promotion gates. It
+validates only committed repository references and cannot grant runtime,
+machine-effect, network-update, signing, notarization, publication, Tauri/Rust,
+or production authority. This prevents a passed simulation, documentation
+claim, or future renderer value from silently promoting a blocked surface.
+
+The hosted provenance slice is narrower and separate from platform signing.
+After the Windows, Linux, and macOS package jobs succeed on an approved push to
+`main`, one isolated least-privilege job can reverify and attest only the three
+unsigned development archives. Pull-request builds receive no attestation
+write authority. The GitHub/Sigstore statement binds archive digests to the
+hosted build but does not sign executable code, notarize macOS software,
+publish a Release, or grant updater trust.
+
+The future Windows signing boundary is likewise defined but inactive.
+`CODE-SIGNING-POLICY.md` limits the proposed scope to the Haven 42-owned
+`haven42.exe`, requires immutable digest-bound manual approval, and excludes
+upstream runtime components. PyInstaller emits deterministic product and
+version metadata on Windows, and the package builder independently verifies
+those fields before producing evidence. `docs/signpath-eligibility-audit.md`
+keeps provider eligibility external-blocked: there is no published Release in
+the form to sign, exact dependency/license review and provider enrollment
+remain open, and no signing workflow or private key exists. Repository-account
+MFA was owner-confirmed on 2026-07-27; signing-service MFA remains required
+during any later enrollment.
+
 Milestone 27 adds a narrow document-context boundary. The initial admitted slice uses explicit browser selection for at most five UTF-8 `.txt`/`.md` files, 64 KiB each and 128 KiB total, plus explicit PNG file selection or clipboard PNG paste for at most two screenshots, 4 MiB each and 8 MiB total. PNG signature, chunk CRCs, exact size, dimensions, and a 4096×4096/16.7-million-pixel budget are revalidated before the loopback service passes canonical base64 through Ollama's message-image field. The browser transfers normalized names, media types, exact byte counts, and selected content; no filesystem path or generic read API crosses the boundary. All attachment content is labeled untrusted inert reference data. The runtime exposes no attachment-driven tools, process launch, archive expansion, filesystem writes, or model-output execution and makes no antivirus claim. Private-network transfer shows a prominent warning and deliberate Send confirms that transfer without a separate checkbox. Screenshot understanding is visibly unverified because no image-input model evidence is admitted. Selection state stays in memory and clears on New task, direct model/provider changes, request failure, or process shutdown. A confirmed task-specific model switch retains only the context already selected for that pending request; nothing is sent before confirmation. Directories, background scanning, file watching, general filesystem reads, temporary files, broader parsers, retrieval indexes, embeddings, and persistence remain unadmitted.
 
-Milestone 27 also defines an inactive deterministic lexical-retrieval foundation. It accepts only already validated memory attachments, fixes resource budgets and stable tie-breaking, and denies runtime routes, UI controls, provider payloads, paths, parsers, network, model ranking, embeddings, temporary files, and persistence. This contract and its hostile fixtures are evidence for a later implementation, not an admitted retrieval capability.
+Milestone 27 also implements an inactive deterministic lexical-retrieval core. It accepts only already validated memory attachments, applies fixed character chunks and bounded casefolded term-frequency ranking with stable attachment/offset tie-breaking, discloses selected chunks and token estimates, supports removal and clear-all, and clears memory on failure. Its contract still denies runtime routes, UI controls, provider payloads, paths, parsers, network, model ranking, embeddings, temporary files, and persistence. The offline implementation and hostile tests do not admit a retrieval capability into the application.
 
-The optional conversation-history boundary is likewise simulation-only. A versioned contract and non-executable logical SQLite-compatible schema describe engine-owned typed operations and bounded records without importing SQLite or accepting renderer/model SQL, paths, filenames, credentials, endpoints, commands, or arbitrary filters. Pure planners cover schema upgrade and rollback, retention, metadata-only context selection, scoped deletion, busy/locked and failure recovery, backup, and restore while declaring every database, file, browser-storage, network, process, provider, and machine effect false. Private session remains the default and never creates or updates a record. Runtime storage stays blocked until encryption/key management, per-user permissions, atomicity, deletion, recovery, native packaging, and explicit product approval pass.
+The optional conversation-history boundary is likewise simulation-only. A versioned contract and non-executable logical SQLite-compatible schema describe engine-owned typed operations and bounded records without importing SQLite or accepting renderer/model SQL, paths, filenames, credentials, endpoints, commands, or arbitrary filters. Pure planners cover schema upgrade and rollback, retention, metadata-only context selection, scoped deletion, busy/locked and failure recovery, backup, and restore while declaring every database, file, browser-storage, network, process, provider, and machine effect false. Private session remains the default and never creates or updates a record. The reviewed encryption architecture requires full-database encryption, a randomly generated key wrapped by a current-user OS credential facility, and fail-closed Private session when that facility is locked or unavailable; plaintext and beside-database key fallbacks are forbidden. Runtime storage stays blocked until a dependency and binding are admitted and per-user permissions, atomicity, deletion, recovery, native packaging, and explicit product approval pass.
 
 Milestone 28 proposes a separate controlled web-research boundary. Its current machine-readable contract and hostile fixtures are offline-only and expose no route or network effect. Future network authority stays in an engine-owned adapter; ordinary prompts cannot trigger it, and neither renderer nor model can choose a host, raw URL, credential, header, proxy, command, or environment. The initial path discloses and approves one bounded query, returns a strict inert result shape, and renders citations through trusted UI rather than model Markdown. Page retrieval, self-hosted adapters, and multi-query research remain separate gates with DNS/IP revalidation, SSRF and redirect controls, textual content limits, prompt-injection isolation, cancellation, and memory-only cleanup.
 

@@ -1,5 +1,11 @@
 # Release Guidance
 
+Haven 42 currently produces only unsigned development artifacts. Review the
+[Code signing policy](../CODE-SIGNING-POLICY.md) and
+[SignPath Foundation eligibility audit](signpath-eligibility-audit.md) before
+proposing any signing or public binary publication. Neither this guidance nor
+an artifact attestation grants signing or release authority.
+
 ## Purpose
 
 This document defines the release process for Haven 42.

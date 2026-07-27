@@ -20,8 +20,10 @@ an active storage feature.
   machine modification is allowed.
 - The renderer and model cannot supply SQL, a query, database path, filename,
   command, URL, endpoint, credential, or environment value.
-- Standard SQLite is explicitly treated as unencrypted at rest. Encryption and
-  key management are not admitted.
+- Standard SQLite is explicitly treated as unencrypted at rest. The
+  cross-platform encryption and key-management architecture has been reviewed,
+  but no dependency or storage activation is admitted. See
+  [Conversation History Encryption And Key-Management Review](conversation-history-encryption-review.md).
 
 `config/conversation-history-schema.json` describes a bounded logical schema
 for conversations, ordered messages, validated local summaries, sanitized
@@ -68,11 +70,12 @@ state.
 No development database may be activated until separately approved work
 completes all of these gates:
 
-1. Review a maintained SQLite-compatible encryption dependency such as
-   SQLCipher, including license, hashes, vulnerability posture, SBOM,
-   third-party notices, and native packaging.
-2. Design operating-system credential-store key handling for Windows, Linux,
-   and macOS, including lock state, key loss, rotation, recovery, and uninstall.
+1. Select and admit a maintained SQLite-compatible encryption dependency such
+   as SQLCipher, including exact binding, license, hashes, vulnerability
+   posture, SBOM, third-party notices, and native packaging.
+2. Implement and prove the reviewed fail-closed operating-system
+   credential-store key handling for Windows, Linux, and macOS, including lock
+   state, missing service, key loss, rotation, recovery, and uninstall.
 3. Prove least-privilege per-user locations and permissions without accepting a
    renderer/model path.
 4. Implement parameterized typed operations, atomic transactions, deterministic

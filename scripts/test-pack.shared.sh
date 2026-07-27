@@ -287,12 +287,18 @@ test_github_actions_dependencies() {
     "$REPO_ROOT/scripts/generate-sample-repositories.ps1" \
     "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh")"
   checkout_sha='3d3c42e5aac5ba805825da76410c181273ba90b1'
+  setup_python_sha='a309ff8b426b58ec0e2a45f0f869d46889d02405'
   checkout_count="$(printf '%s' "$action_sources" | grep -Ec "actions/checkout@${checkout_sha}([^0-9a-f]|$)")"
   credential_count="$(printf '%s' "$action_sources" | grep -Ec 'persist-credentials:[[:space:]]*false')"
 
   ! printf '%s' "$action_sources" | grep -Eq 'actions/checkout@(v[0-9]+|main|master)([^0-9]|$)' &&
-    [ "$checkout_count" -eq 8 ] &&
-    [ "$credential_count" -eq 8 ] &&
+    [ "$checkout_count" -eq 9 ] &&
+    [ "$credential_count" -eq 9 ] &&
+    [ "$(printf '%s' "$action_sources" | grep -Ec "actions/setup-python@${setup_python_sha}([^0-9a-f]|$)")" -eq 1 ] &&
+    grep -Eq 'python-version:[[:space:]]*"3\.14\.6"' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q -- '- os: windows-2025' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q -- '- os: ubuntu-24.04' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
+    grep -q -- '- os: macos-15' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -Eq '^concurrency:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -q 'timeout-minutes:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -Eq 'package-ecosystem:[[:space:]]*github-actions' "$REPO_ROOT/.github/dependabot.yml" &&
@@ -2446,6 +2452,16 @@ assert portable["security"]["browserEnvironmentOverrideAllowed"] is False
 assert portable["security"]["browserLaunchShellAllowed"] is False
 assert portable["security"]["browserLaunchExecutables"]["linux"] == ["/usr/bin/gio", "/usr/bin/xdg-open"]
 assert portable["security"]["browserLaunchFailureMode"] == "print-loopback-url-and-continue"
+assert portable["security"]["exactRuntimeComponentFileCoverageRequired"] is True
+assert portable["security"]["unknownRuntimeComponentFilesRejected"] is True
+assert portable["security"]["windowsApplicationLocalApiSetOrUcrtAllowed"] is False
+assert portable["security"]["windowsVisualCppRuntimeExactHashesRequired"] is True
+assert portable["security"]["pyinstallerHostPathInheritanceAllowed"] is False
+assert portable["security"]["runtimeRedistributionClearanceRequiredForProduction"] is True
+assert "runtime-component-inventory.json" in portable["supplyChainEvidence"]
+assert "CPYTHON-3.14.6-LICENSE.txt" in portable["supplyChainEvidence"]
+assert "APACHE-2.0.txt" in portable["supplyChainEvidence"]
+assert "LIBFFI-3.4.4-LICENSE.txt" in portable["supplyChainEvidence"]
 assert policy["text"]["capabilityIds"] == ["general.chat", "content.write", "content.summarize"]
 assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
 assert policy["text"]["defaultIdleUnloadSeconds"] == 300
@@ -2486,14 +2502,20 @@ assert "raw model output" in blind_evidence and "intentionally excluded" in blin
 assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md" in wiki_map
 assert "examples/blind-writing-quality-review.md" in wiki_map
 PY
-  python3 "$REPO_ROOT/scripts/test-blind-writing-review.py" | grep -q "passed 7 offline safety checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-blind-writing-review.py" | grep -q "passed 12 offline safety checks" || return 1
 }
 
 test_task_composition_and_repository_privacy() {
   python3 "$REPO_ROOT/scripts/test-task-composition.py" | grep -q "19 bounded, effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-task-execution-admission.py" | grep -q "49 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-task-effect-journal.py" | grep -q "46 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "20 effect-free checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "12 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "10 cases" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
+  python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" |
+    grep -q "tracked or untracked non-ignored working files" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2524,8 +2546,10 @@ PY
 }
 
 test_conversation_history_foundation() {
+  python3 "$REPO_ROOT/scripts/test-memory-lexical-retrieval.py" |
+    grep -q "34 deterministic, hostile, and lifecycle checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-foundation.py" |
-    grep -q "39 bounded, effect-free checks" || return 1
+    grep -q "45 bounded, effect-free checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2540,6 +2564,19 @@ assert not any(contract["effects"].values())
 assert contract["storage"]["candidateEngine"] == "sqlite-compatible"
 assert contract["storage"]["runtimeDependencyAdmitted"] is False
 assert contract["storage"]["encryptionAtRestAdmitted"] is False
+assert contract["storage"]["architectureReviewCompleted"] is True
+assert contract["storage"]["databaseKeyStoredBesideDatabaseAllowed"] is False
+assert contract["storage"]["plaintextKeyFallbackAllowed"] is False
+assert contract["storage"]["credentialStoreUnavailableBehavior"] == "fail-closed-private-session"
+assert contract["keyManagement"]["runtimeAdmitted"] is False
+assert contract["keyManagement"]["databaseKeyGenerationAllowed"] is False
+assert contract["keyManagement"]["databaseKeyWrapAllowed"] is False
+assert contract["keyManagement"]["automaticDatabaseResetOnKeyLossAllowed"] is False
+assert contract["keyManagement"]["platformCandidates"] == {
+    "windows": "dpapi-current-user",
+    "linux": "secret-service-user-session",
+    "macos": "keychain-services-current-user",
+}
 assert contract["lifecycle"]["privateSessionWriteFree"] is True
 assert schema["status"] == "simulation-only-no-executable-ddl"
 assert schema["executableSqlIncluded"] is False
@@ -2552,6 +2589,7 @@ planner = (root / "scripts/simulate-conversation-history.py").read_text(encoding
 assert "import sqlite3" not in planner
 assert "sqlite3.connect" not in planner
 assert "docs/conversation-history-database.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
+assert "docs/conversation-history-encryption-review.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 PY
 }
 
