@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.task-execution-admission",
+  "implementationStatus": "simulation-only",
+  "runtimeAdmitted": false,
+  "description": "Effect-free precondition model for future composition execution. It validates scope metadata but never issues or accepts an executable approval.",
+  "request": {
+    "required": [
+      "schemaVersion",
+      "admissionId",
+      "compositionId",
+      "stepId",
+      "workflowId",
+      "attempt",
+      "requestedEffects",
+      "approvalReceipt",
+      "intermediateArtifacts",
+      "lifecycle"
+    ],
+    "additionalProperties": false,
+    "rawArgumentsAllowed": false,
+    "rawContentAllowed": false,
+    "rawPathAllowed": false,
+    "rawUrlAllowed": false,
+    "environmentAllowed": false,
+    "maximumIntermediateArtifacts": 5,
+    "maximumAttempts": 2
+  },
+  "requestedEffects": {
+    "allowedForStructuralEvaluation": [
+      "filesystem-write",
+      "network-read",
+      "process-create"
+    ],
+    "alwaysProhibited": [
+      "machine-modification",
+      "service-change",
+      "driver-change",
+      "firewall-change",
+      "credential-access"
+    ]
+  },
+  "approvalReceipt": {
+    "required": [
+      "present",
+      "receiptId",
+      "scopeDigest",
+      "effectIds",
+      "issuer",
+      "audience",
+      "issuedAtUtc",
+      "expiresAtUtc",
+      "evaluationTimeUtc",
+      "used",
+      "revoked"
+    ],
+    "issuer": "haven42-engine",
+    "audience": "haven42-workflow-executor",
+    "opaqueSecretAcceptedBySimulation": false,
+    "rendererMayIssue": false,
+    "absentReceiptUsesNullMetadata": true,
+    "singleUseRequired": true,
+    "exactScopeRequired": true
+  },
+  "intermediateArtifact": {
+    "required": [
+      "schemaVersion",
+      "artifactId",
+      "artifactType",
+      "mediaType",
+      "sha256",
+      "byteCount",
+      "sourceStepId",
+      "validationStatus"
+    ],
+    "maximumByteCount": 67108864,
+    "validationStatus": "typed-contract-validated",
+    "contentAllowed": false,
+    "pathAllowed": false
+  },
+  "lifecycle": {
+    "required": [
+      "mode",
+      "retryOf",
+      "recoveryOf",
+      "cancelRequested",
+      "priorAttemptCompleted",
+      "priorSideEffectsPossible"
+    ],
+    "modes": [
+      "fresh",
+      "retry",
+      "recover",
+      "cancel"
+    ],
+    "resumeAfterPossibleEffectsAllowed": false
+  },
+  "result": {
+    "states": [
+      "preconditions-modeled",
+      "cancelled",
+      "recovery-blocked"
+    ],
+    "approvalScopeMayMatch": true,
+    "approvalAcceptedForExecution": false,
+    "executionAllowed": false
+  },
+  "effects": {
+    "processCreated": false,
+    "filesystemAccessed": false,
+    "networkUsed": false,
+    "machineModified": false,
+    "approvalIssued": false,
+    "approvalConsumed": false,
+    "artifactRead": false,
+    "artifactWritten": false
+  }
+}

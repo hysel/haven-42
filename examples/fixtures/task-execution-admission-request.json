@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "admissionId": "admission-0123456789abcdef",
+  "compositionId": "review-project",
+  "stepId": "apply-plan",
+  "workflowId": "apply-agent-config",
+  "attempt": 0,
+  "requestedEffects": [
+    "filesystem-write",
+    "process-create"
+  ],
+  "approvalReceipt": {
+    "present": true,
+    "receiptId": "approval-0123456789abcdef",
+    "scopeDigest": "8cb1716b0a55f0560e041f9c9e59b8d2deacaa843304d76a5065c36ec309942b",
+    "effectIds": [
+      "filesystem-write",
+      "process-create"
+    ],
+    "issuer": "haven42-engine",
+    "audience": "haven42-workflow-executor",
+    "issuedAtUtc": "2026-07-27T11:00:00Z",
+    "expiresAtUtc": "2026-07-27T13:00:00Z",
+    "evaluationTimeUtc": "2026-07-27T12:00:00Z",
+    "used": false,
+    "revoked": false
+  },
+  "intermediateArtifacts": [
+    {
+      "schemaVersion": 1,
+      "artifactId": "artifact-0123456789abcdef",
+      "artifactType": "configuration-plan",
+      "mediaType": "application/json",
+      "sha256": "5555555555555555555555555555555555555555555555555555555555555555",
+      "byteCount": 4096,
+      "sourceStepId": "plan",
+      "validationStatus": "typed-contract-validated"
+    }
+  ],
+  "lifecycle": {
+    "mode": "fresh",
+    "retryOf": null,
+    "recoveryOf": null,
+    "cancelRequested": false,
+    "priorAttemptCompleted": false,
+    "priorSideEffectsPossible": false
+  }
+}

@@ -73,7 +73,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, provider-neutral local text, local images, capability discovery, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress; runnable local tools and portable development packaging | Local web system status, immutable-digest Ollama recommendations, a read-only committed-evidence view, accessible chat/writing/summarization recovery, provider run metrics, plan-only registered software workflows, lifecycle-aware effect-free composition planning, the promoted Linux ComfyUI image flow, verified unload, and hardened PyInstaller packages are implemented. Source browser validation and native packaged browser/parity smoke tests run across Windows, Linux, and macOS; workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain open. |
+| Milestone 22: Unified Product UI And Task Composition | In progress; runnable local tools and portable development packaging | Local web system status, immutable-digest Ollama recommendations, a read-only committed-evidence view, accessible chat/writing/summarization recovery, provider run metrics, plan-only registered software workflows, lifecycle-aware effect-free composition planning, structural updater trust/transition and future execution/journal simulations, the promoted Linux ComfyUI image flow, verified unload, and hardened PyInstaller packages are implemented. Source browser validation and native packaged browser/parity smoke tests run across Windows, Linux, and macOS; real cryptographic verification, workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain open. |
 | Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated; Windows AMD has a partial native pass, while remaining consumer-local gates stay open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
@@ -113,7 +113,7 @@ macOS:
 
 Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, cross-platform packaged-browser UI/attachment smoke tests, read-only and abrupt-exit lifecycle tests, hostile integrity/shutdown/archive tests, bounded archives, checksums, full file inventory, exact dependency inventory, notices, SBOM and provenance evidence, and the unsigned-development limitation.
 
-The [bounded task composition](docs/task-composition.md) foundation can order up to six registry-backed read-only workflow plans, validate fresh/retry/cancel identity, and emit exactly typed metadata-only intermediate references. It is simulation-only and has no process, filesystem, network, approval, or machine-modification authority.
+The [bounded task composition](docs/task-composition.md) foundation can order up to six registry-backed read-only workflow plans, validate fresh/retry/cancel identity, and emit exactly typed metadata-only intermediate references. Separate inactive gates model future effect disclosure, digest-bound approval scope, typed intermediate validation, retry/cancel/recovery state, and a digest-chained journal of non-authoritative execution claims. They are simulation-only: no token is issued or accepted, no journal is written, and no process, filesystem, network, artifact, approval, or machine-modification authority exists.
 
 Haven 42 opens a browser on `http://127.0.0.1:4242`. Its keyboard-accessible first-run wizard provides three paths: **Guided setup** scans a registered, bounded, read-only set of system facts and produces a disabled installation plan; **Connect existing setup** accepts a same-machine or private-network Ollama IP address; and **Explore** opens the product without a provider or scan. The scan excludes host identity, usernames, private paths, environment variables, credentials, and network addresses. Its snapshot stays in memory.
 
@@ -134,7 +134,13 @@ Maintainers can exercise the effect-free update lifecycle with
 compatibility preflight, staged and post-activation health, interrupted
 activation recovery, rollback, retention cleanup, and disabled mode while
 keeping every network, filesystem, process, installation, activation, and
-machine-effect flag false. See
+machine-effect flag false. A separate structural trust handoff validates how a
+future native verifier receipt must bind verifier identity, release/asset
+digests, platform, lifetime, and replay state. It performs no cryptographic
+verification and never establishes trust or permits staging. An additional
+offline transition model checks consecutive registry versions, verifier/root
+continuity, validity overlap, threshold-claim shape, and replay state without
+accepting or applying a trust change. See
 [`docs/desktop-storage-and-updates.md`](docs/desktop-storage-and-updates.md).
 
 ## Quick Start

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.task-effect-journal",
+  "implementationStatus": "simulation-only",
+  "runtimeAdmitted": false,
+  "description": "Effect-free model for binding future execution observations to an exact admission scope. Journal claims never prove that an effect occurred or completed.",
+  "request": {
+    "required": [
+      "schemaVersion",
+      "evaluationTimeUtc",
+      "evaluationId",
+      "admissionBinding",
+      "lifecycle",
+      "records"
+    ],
+    "additionalProperties": false,
+    "rawArgumentsAllowed": false,
+    "rawContentAllowed": false,
+    "rawPathAllowed": false,
+    "rawUrlAllowed": false,
+    "environmentAllowed": false,
+    "maximumRecords": 16
+  },
+  "admissionBinding": {
+    "required": [
+      "admissionId",
+      "compositionId",
+      "stepId",
+      "workflowId",
+      "attempt",
+      "scopeDigest",
+      "approvalReceiptId",
+      "requestedEffects"
+    ],
+    "allowedEffects": [
+      "filesystem-write",
+      "network-read",
+      "process-create"
+    ],
+    "alwaysProhibited": [
+      "machine-modification",
+      "service-change",
+      "driver-change",
+      "firewall-change",
+      "credential-access"
+    ]
+  },
+  "lifecycle": {
+    "required": [
+      "mode",
+      "priorEvaluationId",
+      "cancelRequested",
+      "priorEffectsPossible"
+    ],
+    "modes": [
+      "fresh",
+      "cancel",
+      "retry",
+      "recover"
+    ],
+    "resumeAfterPossibleEffectsAllowed": false
+  },
+  "record": {
+    "required": [
+      "sequence",
+      "recordId",
+      "event",
+      "effectId",
+      "outcome",
+      "recordedAtUtc",
+      "previousRecordSha256",
+      "recordSha256"
+    ],
+    "events": [
+      "admission-bound",
+      "execution-started",
+      "effect-started",
+      "effect-completed",
+      "cancellation-requested",
+      "execution-failed",
+      "execution-completed"
+    ],
+    "scenarioClaimsAreAuthoritativeEvidence": false
+  },
+  "result": {
+    "states": [
+      "journal-modeled",
+      "cancelled-before-start",
+      "cancellation-review-blocked",
+      "retry-modeled",
+      "recovery-modeled",
+      "recovery-blocked",
+      "effect-claims-untrusted"
+    ],
+    "journalPersisted": false,
+    "effectCompletionProven": false,
+    "retryAuthorized": false,
+    "recoveryAuthorized": false,
+    "executionAllowed": false
+  },
+  "effects": {
+    "processCreated": false,
+    "filesystemAccessed": false,
+    "networkUsed": false,
+    "machineModified": false,
+    "approvalConsumed": false,
+    "journalWritten": false,
+    "artifactRead": false,
+    "artifactWritten": false
+  }
+}

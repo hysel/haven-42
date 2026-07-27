@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "evaluationTimeUtc": "2026-07-27T12:01:00Z",
+  "evaluationId": "evaluation-0123456789abcdef",
+  "admissionBinding": {
+    "admissionId": "admission-0123456789abcdef",
+    "compositionId": "review-project",
+    "stepId": "apply-plan",
+    "workflowId": "apply-agent-config",
+    "attempt": 0,
+    "scopeDigest": "8cb1716b0a55f0560e041f9c9e59b8d2deacaa843304d76a5065c36ec309942b",
+    "approvalReceiptId": "approval-0123456789abcdef",
+    "requestedEffects": [
+      "filesystem-write",
+      "process-create"
+    ]
+  },
+  "lifecycle": {
+    "mode": "fresh",
+    "priorEvaluationId": null,
+    "cancelRequested": false,
+    "priorEffectsPossible": false
+  },
+  "records": [
+    {
+      "sequence": 1,
+      "recordId": "record-0123456789abcdef",
+      "event": "admission-bound",
+      "effectId": null,
+      "outcome": "structurally-admitted",
+      "recordedAtUtc": "2026-07-27T12:00:00Z",
+      "previousRecordSha256": null,
+      "recordSha256": "1113ce78f66db2ae3f8bad10ec0f624b3eca2d5052899d0c09e3b6ed43c247c9"
+    }
+  ]
+}

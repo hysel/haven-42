@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "evaluationTimeUtc": "2026-07-27T12:00:00Z",
+  "transitionId": "transition-0123456789abcdef",
+  "currentRegistry": {
+    "registryVersion": 1,
+    "validFromUtc": "2026-01-01T00:00:00Z",
+    "validUntilUtc": "2027-01-01T00:00:00Z",
+    "entries": [
+      {
+        "profile": "sigstore-bundle-v1",
+        "verifierVersion": "1.0.0",
+        "binarySha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "trustRootId": "haven42-root-2026",
+        "status": "active"
+      }
+    ]
+  },
+  "candidateRegistry": {
+    "registryVersion": 2,
+    "validFromUtc": "2026-10-01T00:00:00Z",
+    "validUntilUtc": "2028-01-01T00:00:00Z",
+    "entries": [
+      {
+        "profile": "platform-signature-v1",
+        "verifierVersion": "1.0.0",
+        "binarySha256": "2222222222222222222222222222222222222222222222222222222222222222",
+        "trustRootId": "haven42-platform-root-2027",
+        "status": "active"
+      },
+      {
+        "profile": "sigstore-bundle-v1",
+        "verifierVersion": "1.0.0",
+        "binarySha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "trustRootId": "haven42-root-2026",
+        "status": "active"
+      }
+    ]
+  },
+  "authorization": {
+    "threshold": 1,
+    "signerTrustRootIds": [
+      "haven42-root-2026"
+    ],
+    "registryDigestVerified": true,
+    "transitionIdentityVerified": true,
+    "expiryVerified": true
+  },
+  "usedTransitionIds": []
+}

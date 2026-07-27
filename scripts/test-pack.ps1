@@ -4046,7 +4046,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "21: General-Purpose AI Assistant And Intent Routing \| Complete \| Complete for the promoted provider set") -Message "Solution audit should keep completed Milestone 21 aligned with the roadmap."
-    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; local tools runnable \| Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, and offline installer/update simulation implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening workflow execution, real machine effects, signing, or optional desktop runtime claims."
+    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; local tools runnable \| Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, structural trust/execution admission, and offline installer/update simulation implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening workflow execution, real machine effects, signing, or optional desktop runtime claims."
+    Assert-True -Condition ($doc -match "Real cryptographic verification, token issuance/acceptance, workflow execution, executable composition, persistence, real machine effects, remote UI access, signing, and optional Tauri packaging remain open") -Message "Solution audit should keep cryptographic trust, token acceptance, execution, machine effects, signing, and Tauri explicitly unadmitted."
     Assert-True -Condition ($doc -notmatch "21: General-Purpose AI Assistant And Intent Routing \| Planned" -and $doc -notmatch "22: Unified Product UI And Task Composition \| Planned") -Message "Solution audit must not retain stale Milestone 21 or 22 status."
     Assert-True -Condition ($roadmap -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should align with the architecture audit for Milestones 21 and 22."
     Assert-True -Condition ($readme -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $readme -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "README should align with the architecture audit for Milestones 21 and 22."
@@ -4788,6 +4789,12 @@ Invoke-PackTest "core update policy fails closed before cryptographic admission"
     $lifecycleScriptPath = Join-Path $repoRoot "scripts/core-update-lifecycle.ps1"
     $lifecycleFixturePath = Join-Path $repoRoot "examples/fixtures/core-update-lifecycle-request.json"
     $lifecycleContractPath = Join-Path $repoRoot "config/core-update-lifecycle-contract.json"
+    $trustContractPath = Join-Path $repoRoot "config/core-update-trust-handoff-contract.json"
+    $trustFixturePath = Join-Path $repoRoot "examples/fixtures/core-update-trust-receipt.json"
+    $trustScriptPath = Join-Path $repoRoot "scripts/core-update-trust-handoff.py"
+    $transitionContractPath = Join-Path $repoRoot "config/core-update-verifier-transition-contract.json"
+    $transitionFixturePath = Join-Path $repoRoot "examples/fixtures/core-update-verifier-transition.json"
+    $transitionScriptPath = Join-Path $repoRoot "scripts/core-update-verifier-transition.py"
     $lifecycleWrapperPaths = @(
         (Join-Path $repoRoot "scripts/core-update-lifecycle.shared.sh"),
         (Join-Path $repoRoot "scripts/core-update-lifecycle.linux.sh"),
@@ -4831,6 +4838,22 @@ Invoke-PackTest "core update policy fails closed before cryptographic admission"
     $lifecycleSelfTest = @(& $python.Source (Join-Path $repoRoot "scripts/core-update-lifecycle.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Core update lifecycle hostile self-test should pass."
     Assert-True -Condition (($lifecycleSelfTest -join "`n") -match "passed: 45 cases") -Message "Lifecycle policy should execute all healthy, rollback, recovery, retention, disabled-mode, replay-defense, and hostile cases."
+    foreach ($path in @($trustContractPath, $trustFixturePath, $trustScriptPath)) {
+        Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Update trust-handoff foundation should exist: $path"
+    }
+    $trustContract = Get-Content -LiteralPath $trustContractPath -Raw | ConvertFrom-Json
+    Assert-True -Condition (-not $trustContract.runtimeAdmitted -and $trustContract.implementationStatus -eq "structural-admission-only" -and -not $trustContract.verification.scenarioValuesAreAuthoritativeEvidence) -Message "Verifier receipts must remain structural, untrusted, and runtime-unadmitted."
+    $trustOutput = @(& $python.Source $trustScriptPath --self-test 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Core update trust-handoff hostile self-test should pass."
+    Assert-True -Condition (($trustOutput -join "`n") -match "passed: 30 cases") -Message "Trust handoff should execute every identity, digest, expiry, replay, raw-value, and false-claim case."
+    foreach ($path in @($transitionContractPath, $transitionFixturePath, $transitionScriptPath)) {
+        Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Verifier transition foundation should exist: $path"
+    }
+    $transitionContract = Get-Content -LiteralPath $transitionContractPath -Raw | ConvertFrom-Json
+    Assert-True -Condition (-not $transitionContract.runtimeAdmitted -and $transitionContract.implementationStatus -eq "structural-transition-only" -and -not $transitionContract.authorization.scenarioClaimsAreAuthoritativeEvidence) -Message "Verifier transitions must remain structural, untrusted, and runtime-unadmitted."
+    $transitionOutput = @(& $python.Source $transitionScriptPath --self-test 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Core update verifier-transition hostile self-test should pass."
+    Assert-True -Condition (($transitionOutput -join "`n") -match "passed: 33 cases") -Message "Verifier transitions should cover registry continuity, root rotation, expiry, authorization claims, replay, and raw-value rejection."
 }
 
 Invoke-PackTest "workflow reliability threat model and data lifecycle fail closed" {
@@ -5014,10 +5037,20 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     $compositionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-task-composition.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Task composition hostile tests should pass."
     Assert-True -Condition (($compositionOutput -join "`n") -match "19 bounded, effect-free checks") -Message "Task composition coverage should remain complete."
+    $admissionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-task-execution-admission.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Task execution-admission hostile tests should pass."
+    Assert-True -Condition (($admissionOutput -join "`n") -match "49 cases") -Message "Execution admission should cover effect scope, typed intermediates, approvals, retries, cancellation, and recovery."
+    $journalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-task-effect-journal.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Task effect-journal hostile tests should pass."
+    Assert-True -Condition (($journalOutput -join "`n") -match "46 cases") -Message "Effect journal should cover digest binding, bounded time, ordering, completion claims, cancellation, retry, and recovery without effects."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-composition-contract.json") | ConvertFrom-Json
     Assert-True -Condition ($contract.mode -eq "simulation-only" -and -not $contract.executionAllowed -and -not $contract.security.processCreationAllowed -and -not $contract.security.filesystemAccessAllowed -and -not $contract.security.networkAccessAllowed -and -not $contract.security.machineModificationAllowed) -Message "Composition must remain effect-free and plan-only."
+    $admission = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-execution-admission-contract.json") | ConvertFrom-Json
+    Assert-True -Condition (-not $admission.runtimeAdmitted -and -not $admission.approvalReceipt.opaqueSecretAcceptedBySimulation -and -not $admission.approvalReceipt.rendererMayIssue -and -not $admission.result.approvalAcceptedForExecution -and -not $admission.result.executionAllowed) -Message "Execution-admission simulation must issue no token and grant no execution authority."
+    $journal = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-effect-journal-contract.json") | ConvertFrom-Json
+    Assert-True -Condition (-not $journal.runtimeAdmitted -and -not $journal.record.scenarioClaimsAreAuthoritativeEvidence -and -not $journal.result.journalPersisted -and -not $journal.result.effectCompletionProven -and -not $journal.result.executionAllowed) -Message "Effect-journal simulation must persist nothing, prove no effect, and grant no execution authority."
 }
 
 Invoke-PackTest "conversation history foundation is typed bounded and effect free" {

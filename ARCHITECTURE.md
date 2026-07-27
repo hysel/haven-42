@@ -65,7 +65,7 @@ The initial native distribution path freezes that same process and UI into a PyI
 
 The portable supply-chain boundary has two layers. Build inputs are exact-version and wheel-hash locked, while evidence collection admits only the exact reviewed platform-specific tool/version/license set. Build outputs bind the complete one-folder tree to a file inventory and archive checksums, then independently validate bounded archive size/count, safe and case-unique member names, regular unencrypted file shape, SBOM/runtime identity, notices, target naming, and exact source/environment provenance. This provenance makes no signature or attestation claim.
 
-The first composition boundary is deliberately non-executable. A strict engine-owned contract admits at most six registry-backed `read-only` workflow references, rejects renderer arguments and approvals, validates fresh/retry/cancel identity with one bounded retry, orders dependencies deterministically, and emits exactly typed metadata-only intermediate plan references. Cancellation ends before plan artifacts are emitted. The result always denies process, filesystem, network, approval-grant, and machine-modification authority; executable composition is a separate future admission.
+The first composition boundary is deliberately non-executable. A strict engine-owned contract admits at most six registry-backed `read-only` workflow references, rejects renderer arguments and approvals, validates fresh/retry/cancel identity with one bounded retry, orders dependencies deterministically, and emits exactly typed metadata-only intermediate plan references. Cancellation ends before plan artifacts are emitted. A separate inactive execution-admission model validates future workflow effect disclosure, typed intermediate type/media/digest metadata, digest-bound engine approval scope, expiry/replay state, and fresh/retry/recover/cancel consistency. An effect-free digest-chain model binds later scenario records to that admission and rejects forged completion, reordering, cross-admission reuse, unsafe retry, and uncertain recovery. It writes no journal and treats every start, completion, failure, and cancellation record as a non-authoritative claim. These models accept no token secret, path, content, arguments, URL, or environment; all results deny approval acceptance, execution, process, filesystem, network, artifact, and machine-modification authority.
 
 Milestone 27 adds a narrow document-context boundary. The initial admitted slice uses explicit browser selection for at most five UTF-8 `.txt`/`.md` files, 64 KiB each and 128 KiB total, plus explicit PNG file selection or clipboard PNG paste for at most two screenshots, 4 MiB each and 8 MiB total. PNG signature, chunk CRCs, exact size, dimensions, and a 4096×4096/16.7-million-pixel budget are revalidated before the loopback service passes canonical base64 through Ollama's message-image field. The browser transfers normalized names, media types, exact byte counts, and selected content; no filesystem path or generic read API crosses the boundary. All attachment content is labeled untrusted inert reference data. The runtime exposes no attachment-driven tools, process launch, archive expansion, filesystem writes, or model-output execution and makes no antivirus claim. Private-network transfer shows a prominent warning and deliberate Send confirms that transfer without a separate checkbox. Screenshot understanding is visibly unverified because no image-input model evidence is admitted. Selection state stays in memory and clears on New task, direct model/provider changes, request failure, or process shutdown. A confirmed task-specific model switch retains only the context already selected for that pending request; nothing is sent before confirmation. Directories, background scanning, file watching, general filesystem reads, temporary files, broader parsers, retrieval indexes, embeddings, and persistence remain unadmitted.
 
@@ -83,7 +83,17 @@ schema accepts no raw path, URL, executable, argument, environment, approval,
 or renderer evidence. Its transitions are counterfactual review output and
 every network, filesystem, process, installation, activation, cleanup, and
 machine-effect flag remains false. No portable or browser route invokes these
-policies.
+policies. A structural trust-handoff model now binds a future verifier receipt
+to the exact repository, release, commit, manifest digest, asset digest, target
+platform, candidate verifier identity, bounded lifetime, and replay set. It
+accepts no raw cryptographic material and performs no cryptographic
+verification; trust, evidence promotion, staging, and activation remain false
+until a pinned native verifier and exact platform evidence are admitted. A
+separate transition model validates consecutive registry versions, validity
+overlap, exact verifier continuity anchors, active trust-root continuity,
+current-root threshold claims, and replay state. Its authorization booleans are
+also untrusted scenario input, so it cannot accept a transition, modify a
+registry or trust store, or change a runtime verifier.
 
 The optional Milestone 22B desktop architecture adds a Tauri 2 shell without replacing these contracts:
 

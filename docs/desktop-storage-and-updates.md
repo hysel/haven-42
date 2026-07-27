@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. `config/core-update-manifest-contract.json` defines the future immutable core-engine update boundary, `config/core-update-check-contract.json` defines the narrower offline GitHub Release candidate check, and `config/core-update-lifecycle-contract.json` defines an effect-free lifecycle simulation. The policy scripts can validate and model these inputs offline, but they are not network clients, downloaders, installers, activators, cleanup tools, or admitted desktop runtimes.
+`config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. `config/core-update-manifest-contract.json` defines the future immutable core-engine update boundary, `config/core-update-check-contract.json` defines the narrower offline GitHub Release candidate check, `config/core-update-trust-handoff-contract.json` defines a structural handoff from a future native cryptographic verifier, `config/core-update-verifier-transition-contract.json` defines structural verifier-registry and trust-root transitions, and `config/core-update-lifecycle-contract.json` defines an effect-free lifecycle simulation. The policy scripts can validate and model these inputs offline, but they are not network clients, cryptographic verifiers, trust-store managers, downloaders, installers, activators, cleanup tools, or admitted desktop runtimes.
 
 The central rule is simple: an application update may replace the versioned engine, but it must not own or silently change the user's configuration, repositories, generated artifacts, models, provider data, or credentials.
 
@@ -68,6 +68,47 @@ The result always reports manifest-signature verification, asset-attestation ver
 
 The separate offline release-candidate path consumes committed fixture data shaped like an official GitHub Release response. It accepts only the exact `hysel/haven-42` repository, a stable non-draft/non-prerelease release explicitly marked immutable, exact repository/tag-bound GitHub release and manifest URLs, a tag that matches the update manifest, a bounded asset list, and exactly one named manifest asset with a positive non-boolean size. Hostile source, tag, URL identity, immutability, and asset cases fail closed. Its output always sets network use, download, writes, and activation to false. Live GitHub querying remains unimplemented and requires explicit network consent plus a separately reviewed acquisition boundary.
 
+## Cryptographic Verifier Handoff
+
+`scripts/core-update-trust-handoff.py` validates the shape and binding of a
+future native verifier receipt. The receipt contains bounded identifiers,
+verifier profile/version and binary digest, trust-root identifier, exact
+repository/release/commit/manifest/asset digests, target platform identity,
+verification outcome booleans, timestamps, and replay history. It accepts no
+raw signature, certificate, transparency proof, URL, or filesystem path.
+Unknown fields, unknown verifier profiles, false verification claims, malformed
+digests, repository confusion, future-issued or expired receipts, and replayed
+receipt identifiers fail closed. The hostile self-test covers 30 cases.
+
+This is deliberately a structural handoff, not cryptographic verification.
+Receipt fields are untrusted scenario input; Haven 42 has no admitted verifier
+registry or trust root and does not parse or validate a real signature,
+certificate, Sigstore bundle, transparency proof, or platform signature. Even
+the valid fixture reports `CryptographicVerificationPerformed`,
+`TrustEstablished`, `PackageEvidencePromoted`, `StagingAllowed`, and
+`ActivationAllowed` as false. Network, download, writes, staging, activation,
+trust-store, credential, and user-data effects also remain false. A pinned,
+reviewed native verifier and real cross-platform evidence are still required.
+
+## Verifier Registry And Trust-Root Transitions
+
+`scripts/core-update-verifier-transition.py` models how a future verifier
+registry could move from one immutable version to the next. The candidate must
+use the exact next integer version, begin during the current registry's validity
+window, extend that window, retain at least one exact verifier continuity
+anchor, and retain at least one active current trust root. Authorization
+descriptions must use a sorted unique set of current active root identifiers,
+meet their stated threshold, contain only true bounded claim booleans, and use
+an unreplayed transition identifier.
+
+The 33-case hostile suite covers malformed or unsorted registries, unknown
+profiles, verifier and root substitution, invalid validity windows, version
+skips, backdating, missing overlap, missing continuity, non-current signers,
+threshold mismatch, false or malformed claims, replay, and raw cryptographic or
+path input. Claim booleans are deliberately non-authoritative: the model
+verifies no signature, accepts no transition, establishes no trust, and changes
+no registry, trust store, runtime verifier, package, credential, or file.
+
 ## Effect-Free Lifecycle Simulation
 
 `scripts/core-update-lifecycle.py` and the Windows, Linux, and macOS wrappers
@@ -112,4 +153,4 @@ filesystem, and network effects are all false.
 
 ## Current Admission State
 
-No updater, update service, Tauri plugin, manifest publisher, background task, runtime scaffold, or installer is admitted. The offline policies and lifecycle simulation are preparatory evidence only. Implementation still requires a trusted native signature/attestation verifier, native package evidence, actual canonical-path and privilege tests, real side-by-side staging, atomic activation, health execution, rollback execution, cleanup execution, and exact-SHA hosted CI before any machine effect can be considered.
+No updater, update service, Tauri plugin, manifest publisher, background task, runtime scaffold, or installer is admitted. The offline policies, structural verifier handoff and transition model, and lifecycle simulation are preparatory evidence only. Implementation still requires a pinned trusted native signature/attestation verifier, immutable authorized registry distribution, native package evidence, actual canonical-path and privilege tests, real side-by-side staging, atomic activation, health execution, rollback execution, cleanup execution, and exact-SHA hosted CI before any machine effect can be considered.

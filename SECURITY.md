@@ -36,11 +36,27 @@ policy.
 
 Unsigned portable development builds preserve this boundary. They verify their allowlisted browser/data resources at startup, bind only to IPv4 loopback, construct only a loopback browser URL, expose no arbitrary process control, and require same-origin session authority plus verified model cleanup for HTTP shutdown. Native smoke tests include read-only-package startup and recovery after abrupt test-owned process termination. Package archives include SHA-256 checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence. They are not signed, notarized, installer-backed, published releases, or production-ready. The offline installer and updater policy foundations cannot modify a machine or activate an update. The lifecycle simulator rejects raw paths, URLs, commands, arguments, and environment input; models healthy, failed-health, phase-specific interrupted recovery, replay defense, rollback, retention, and disabled paths; and always reports network, writes, download, staging, activation, rollback, cleanup, installation, elevation, service, driver, firewall, process, and user-data effects as false.
 
+The updater trust-handoff foundation does not verify cryptography. It only
+checks the strict shape, exact release/asset digest binding, bounded lifetime,
+candidate verifier identity, and replay state of a future native verifier
+receipt. Raw signatures, certificates, transparency proofs, URLs, and paths are
+not accepted. Scenario claims are never authoritative: structural admission
+keeps cryptographic verification, trust establishment, evidence promotion,
+staging, activation, network, filesystem, trust-store, credential, and
+user-data effects false.
+
+The verifier transition foundation similarly accepts no cryptographic material
+or authority. It requires consecutive registry versions, bounded validity
+overlap, exact verifier and active-root continuity, current-root threshold
+claims, and replay defense. Those claims remain non-authoritative; no
+authorization is verified and no registry, trust store, runtime verifier,
+package, credential, or filesystem state changes.
+
 Portable build dependencies are exact-version and SHA-256 locked for the admitted hosted runner platforms. Evidence generation and verification use an exact reviewed platform/version/license allowlist rather than trusting the caller environment. Native hostile tests reject altered, missing, unexpected, and traversal-manifest resources; shutdown authority failures; unsafe, linked, encrypted, oversized, excessive, duplicate, or case-colliding archive members; incomplete checksums/notices; evidence symlinks; unexpected targets; malformed SBOM/provenance; and archive/file-inventory divergence. Provenance is informational and explicitly unsigned/unattested.
 
 Public-history privacy is enforced before push and in a least-privilege GitHub Actions job. The versioned policy scans reachable commits, commit messages, author and committer identities, and unique historical blobs for private-network endpoints, machine-specific user paths and SSH command targets, key material, fingerprints, credential-bearing URLs, and likely secrets. GitHub noreply identities and narrowly enumerated hostile-test pattern sources are admitted; ignored recovery evidence and unreachable Git objects remain local and must never be tracked.
 
-Task composition is simulation-only. It accepts only registered UI-ready read-only workflows, bounded acyclic dependencies, exact fields, exact metadata-only intermediate records, and engine-consistent fresh/retry/cancel identity. It accepts no renderer arguments or approval grants and cannot create a process, access a filesystem or network, execute a workflow, or modify a machine.
+Task composition is simulation-only. Its admitted planner accepts only registered UI-ready read-only workflows, bounded acyclic dependencies, exact fields, exact metadata-only intermediate records, and engine-consistent fresh/retry/cancel identity. It accepts no renderer arguments or approval grants and cannot create a process, access a filesystem or network, execute a workflow, or modify a machine. A separate inactive execution-admission simulator can validate exact effect disclosure, typed intermediate metadata, digest-bound approval scope, expiry/replay state, and retry/recovery/cancellation consistency for future workflows. It accepts no token secret and never issues, consumes, or accepts an approval for execution. An additional digest-chain simulator binds non-authoritative execution, effect, completion, failure, and cancellation claims to the exact admission and approval identifiers. It rejects reordering, forged completion, cross-admission reuse, unsafe retry, and uncertain recovery but writes no journal and proves no effect. Possible prior effects block recovery; every runtime effect and `ExecutionAllowed` remain false.
 
 ## Reporting A Vulnerability
 

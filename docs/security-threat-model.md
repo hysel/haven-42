@@ -22,6 +22,10 @@ Haven 42 protects user repositories, local files, prompts, responses, models, cr
 - Model-supplied Markdown or HTML creates active markup, links, remote images, scripts, event handlers, misleading hidden content, or an accessibility-breaking document outline.
 - A malicious or stale update manifest or activation journal causes downgrade, target confusion, duplicate-asset ambiguity, checksum bypass, unsigned activation, approval replay, interrupted-state confusion, unsafe retention cleanup, or user-data replacement.
 - Forged GitHub release metadata points the update checker at a fork, draft, prerelease, mutable release, mismatched tag, duplicate manifest, credential-bearing URL, or unapproved asset host.
+- A renderer or compromised update component forges, replays, expires, or substitutes a verifier receipt; confuses a verifier profile, trust root, release, asset, platform, or digest; or treats a structural receipt as cryptographic proof.
+- A verifier-registry transition skips a version, removes every continuity anchor, backdates a candidate, uses a new or retired signer, forges a threshold claim, replays a transition, or treats rotation metadata as authorization to change the trust store.
+- A future composition request broadens an approval scope, reuses a token across attempts or lifecycles, substitutes typed intermediate artifacts, retries after possible effects, or treats cancellation and uncertain recovery as execution authority.
+- A future effect journal omits or reorders records, substitutes an admission binding, forges completion, records an unapproved effect, resumes after uncertain effects, or treats renderer/runtime claims as durable recovery evidence.
 - Retry, resume, timeout, or crash handling repeats a write or leaves an orphan process.
 - Cleanup deletes preexisting models, provider data, or user artifacts.
 - A renderer forges a validated state, approval, or evidence; supplies a raw endpoint, path, credential, command, or environment; requests public binding; or reuses evidence across capability domains.
@@ -29,6 +33,39 @@ Haven 42 protects user repositories, local files, prompts, responses, models, cr
 ## Controls
 
 Policy selects registered operations; prompts never grant authority. IPC is typed, size-bounded, schema-strict, session-bound, and default-deny. Filesystem access requires native canonicalization and narrow expiring grants. Writes require an approval bound to the exact operation and effects. Updates use immutable releases, exact target selection, hashes, provenance, side-by-side staging, health checks, and rollback; the current offline manifest, release-metadata, and lifecycle policies cannot use the network, download, write, stage, activate, roll back, clean, install, elevate, terminate processes, or touch user data. The lifecycle policy rejects raw paths and renderer authority, treats all evidence booleans as untrusted scenario inputs rather than proof, protects the active and previous known-good versions, and deterministically models failed health and interrupted-journal recovery. Reliability rules prevent silent write retries and unrelated process termination. Evidence is sanitized and local data deletion is explicit and ownership-aware.
+
+The structural update-trust handoff accepts only a schema-strict, short-lived,
+single-use receipt bound to an exact verifier profile and binary digest, trust
+root, repository, immutable release and commit, manifest, asset, and platform.
+It rejects raw signatures, certificates, transparency material, paths, URLs,
+unknown fields, mismatches, expiry, and replay. The current evaluator performs
+no cryptography, establishes no trust, promotes no evidence, and cannot stage or
+activate a package; scenario claim booleans remain non-authoritative.
+
+The verifier-transition simulator requires consecutive registry versions,
+validity overlap and extension, exact verifier continuity, active trust-root
+continuity, current-root threshold descriptions, and replay defense. It accepts
+no raw keys, signatures, certificates, proofs, paths, or URLs. Authorization
+claims remain non-authoritative, so no transition is accepted and no registry,
+trust store, runtime verifier, package, credential, or filesystem state changes.
+
+The future task-execution admission simulator binds a complete approval
+lifecycle to an exact admission, composition, step, registered workflow,
+attempt, sorted effect disclosure, and metadata-only typed artifact set. It
+rejects secrets in approval descriptions, raw token material, artifact content
+or paths, prohibited machine effects, cross-attempt reuse, cancellation with
+approval data, unsafe retries, and uncertain recovery after possible effects.
+Even a structurally valid request cannot accept an approval, execute a workflow,
+or produce filesystem, process, network, service, driver, firewall, credential,
+or machine effects.
+
+The effect-journal simulator chains strict scenario records to the exact
+admission scope and approval identifier. It rejects gaps, reordering, digest
+substitution, cross-admission reuse, forged or incomplete completion, effects
+outside scope, records after a terminal event, unsafe retry, and understated
+recovery risk. Start, completion, failure, and cancellation records remain
+untrusted claims: no journal is persisted, no effect is proven, and neither
+retry, recovery, approval consumption, nor execution is authorized.
 
 Onboarding settings are schema-bounded and default-deny. The renderer cannot supply state, evidence, approval, commands, raw endpoints, raw paths, or plaintext credentials. It receives and submits opaque references only; the evaluator never resolves or returns them. Existing setups require independent validation, cross-domain admission is rejected, public binding is absent, and settings outside exact passed evidence become unverified rather than inheriting trust.
 The admitted local-web application binds only to `127.0.0.1`; validates the exact Host and Origin; requires a random in-memory request token; rejects cross-site fetch metadata; serves bundled assets under a restrictive Content Security Policy; accepts only bounded JSON; and classifies IP-literal provider endpoints through the shared no-redirect policy. Automatic browser launch accepts only the engine-generated IPv4-loopback HTTP origin, uses fixed platform mechanisms without a shell, ignores `BROWSER`, strips unneeded inherited Unix environment authority, and safely falls back to a printed URL. It exposes no repository, generic filesystem, shell, arbitrary process, download, update, or arbitrary provider surface. Recommendation catalog loading rejects unknown fields, unsafe or duplicate model names, invalid or mismatched digests, forged capability/operation bindings, duplicate evidence IDs, traversal-like evidence paths, and evidence rows that do not exactly match committed records. Automatic text selection requires exact name, digest, and capability evidence. Provider-reported metrics use a strict nullable numeric shape and are memory-only.
