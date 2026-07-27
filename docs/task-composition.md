@@ -8,4 +8,60 @@ Haven 42 has a plan-only composition foundation for joining trusted read-only wo
 
 `scripts/test-task-composition.py` covers 19 ordered-planning, typed metadata-only artifact, fresh/retry/cancel lifecycle, cancellation, unknown-field, size-bound, write-workflow, cycle, missing-dependency, attempt-bound, retry-replay, renderer-approval, and renderer-argument cases.
 
-This foundation is intentionally narrower than executable composition. Future execution requires separately admitted workflow dispatch, typed intermediate artifact validation, per-effect approval authority outside the renderer, bounded retries, runtime cancellation, crash recovery, and cross-platform native evidence. None of those authorities are implied by a successful plan.
+## Future Execution Admission Simulation
+
+`config/task-execution-admission-contract.json` and
+`scripts/simulate-task-execution-admission.py` define the next effect-free
+boundary without connecting it to the planner or any dispatcher. The simulator
+requires a registered UI-ready workflow, exact sorted effect disclosure,
+bounded typed intermediate metadata, a digest-bound engine-issued approval
+receipt description, and consistent fresh/retry/recover/cancel lifecycle
+state. It accepts no arguments, content, path, URL, environment, token secret,
+renderer-issued approval, or prohibited machine/service/driver/firewall/
+credential effect.
+
+Intermediate records must match the shared typed-artifact contract by artifact
+type and media type and include only a bounded byte count, SHA-256, source step,
+and validation status. They contain no content or path and are never read. The
+approval scope digest binds the admission, composition, step, workflow,
+attempt, full lifecycle state, sorted effects, and every intermediate metadata record. Expired,
+revoked, used, wrong-issuer, wrong-audience, effect-mismatched, and replayed
+receipt descriptions fail closed. Cancellation and blocked recovery require an
+explicitly absent receipt with null metadata, preventing approval material from
+crossing a non-execution path. Retry requires a completed prior attempt
+with no possible effects. Recovery is visibly blocked whenever prior effects
+may have occurred, and cancellation ends before approval evaluation.
+
+The 49-case hostile suite verifies those boundaries. Even when every structural
+precondition matches, `ApprovalAcceptedForExecution` and `ExecutionAllowed`
+remain false; no approval is issued or consumed and no process, filesystem,
+network, artifact, or machine effect occurs.
+
+## Effect Journal Simulation
+
+`config/task-effect-journal-contract.json` and
+`scripts/simulate-task-effect-journal.py` model the next recovery boundary
+without creating a durable journal or connecting to an executor. Every request
+binds the exact admission, composition, step, workflow, attempt, scope digest,
+approval receipt identifier, and sorted effect set. Each scenario record is
+strictly shaped, timestamp ordered, sequence ordered, and chained by a SHA-256
+over the exact admission binding, record metadata, and previous record digest.
+
+The state model covers admission binding, claimed execution/effect starts,
+claimed effect completion, cancellation before start, cancellation after a
+claimed start, failure, completion, clean retry, and crash recovery. It rejects
+missing admission records, chain substitution, cross-admission reuse, duplicate
+or reordered events, effects outside the approved set, completion without every
+effect record, records after a terminal event, retry after possible effects,
+and recovery state that understates possible effects. Even a complete valid
+chain is only an untrusted scenario: it does not prove an effect, authorize
+retry or recovery, consume an approval, or permit execution. The 46-case suite
+also confirms that no journal, artifact, file, process, or network effect
+occurs.
+
+This foundation remains intentionally narrower than executable composition.
+Future execution still requires a separately admitted native opaque-token
+issuer, workflow dispatcher, typed artifact reader, durable atomic effect
+journal, bounded runtime cancellation/retry/recovery, rollback evidence, and
+cross-platform native validation. None of those authorities are implied by
+these simulators.

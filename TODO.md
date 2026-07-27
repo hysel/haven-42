@@ -410,6 +410,14 @@
 - [x] Add a strict offline GitHub Release candidate contract and fixture check that validates official source, stable/immutable status, tag/manifest binding, approved HTTPS asset URLs, and exactly one manifest asset while denying network, download, writes, and activation.
 - [ ] Add opt-in automatic stable-release checks, downloads, and installation without using unattended `git pull` or a moving branch.
 - [ ] Verify downloaded engine assets with checksums and a release signature or attestation before staging or activation.
+  - [x] Define and hostile-test a digest-bound structural receipt handoff for a
+    future native verifier. It accepts no raw cryptographic material, treats
+    scenario claims as non-authoritative, and never establishes trust or
+    permits staging/activation. Real verification remains open.
+  - [x] Add a 33-case structural verifier registry/root-transition model for
+    consecutive versions, validity overlap, continuity anchors, current-root
+    threshold claims, and replay. It verifies no authorization and applies no
+    registry, trust-store, or runtime change.
 - [x] Keep engine binaries separate from user configuration, workspaces, models, provider data, generated artifacts, and evidence in the versioned storage and update contracts.
 - [ ] Add compatibility preflight, atomic activation, post-update health checks, automatic rollback, retained-version cleanup, offline behavior, and a disabled-update mode.
   - [x] Add a cross-platform effect-free lifecycle simulator for healthy,
@@ -489,6 +497,14 @@
 - [x] Add the bounded, registry-backed, read-only composition planner with dependency ordering, exact metadata-only intermediate artifacts, fresh/retry/cancel identity, one bounded retry, cancellation-before-execution, renderer-approval rejection, and 19 hostile/healthy checks; it remains simulation-only.
 - [x] Expand the simulation-only installation broker to exact install/upgrade/uninstall state and promotion-evidence contracts with 48 hostile/healthy checks and every authority/effect denied.
 - [ ] Admit executable multi-step composition only after effect-specific opaque approvals, runtime cancellation/retry/recovery, typed intermediate validation, and native cross-platform evidence pass.
+  - [x] Add a 49-case effect-free execution-admission simulator for exact
+    workflow effect disclosure, typed intermediate metadata, digest-bound
+    approval scope, expiry/replay defense, retry, cancellation, and blocked
+    recovery. It accepts no token secret and never grants execution.
+  - [x] Add a 46-case digest-chained effect-journal simulator bound to the exact
+    admission and approval identifiers. It rejects forged completion,
+    reordering, cross-admission reuse, unsafe retry, and uncertain recovery,
+    but writes no journal and treats every event as a non-authoritative claim.
 
 ## Solution Architecture Review Backlog
 

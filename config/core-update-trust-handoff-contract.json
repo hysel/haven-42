@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.core-update-trust-handoff",
+  "implementationStatus": "structural-admission-only",
+  "runtimeAdmitted": false,
+  "description": "Offline validation boundary for a future native cryptographic verifier receipt. Structural admission never establishes trust or permits staging.",
+  "request": {
+    "required": [
+      "schemaVersion",
+      "evaluationTimeUtc",
+      "receiptId",
+      "verifier",
+      "subject",
+      "verification",
+      "issuedAtUtc",
+      "expiresAtUtc",
+      "usedReceiptIds"
+    ],
+    "additionalProperties": false,
+    "rawSignatureAllowed": false,
+    "rawCertificateAllowed": false,
+    "rawTransparencyProofAllowed": false,
+    "rawPathAllowed": false,
+    "rawUrlAllowed": false,
+    "maximumUsedReceiptIds": 32
+  },
+  "verifier": {
+    "required": [
+      "profile",
+      "version",
+      "binarySha256",
+      "trustRootId"
+    ],
+    "candidateProfiles": [
+      "sigstore-bundle-v1",
+      "platform-signature-v1"
+    ],
+    "trustedRegistryRequiredBeforeRuntimeAdmission": true
+  },
+  "subject": {
+    "required": [
+      "repository",
+      "releaseTag",
+      "releaseCommit",
+      "manifestSha256",
+      "assetId",
+      "assetSha256",
+      "operatingSystem",
+      "architecture",
+      "targetTriple"
+    ],
+    "repository": "hysel/haven-42",
+    "operatingSystems": [
+      "windows",
+      "linux",
+      "macos"
+    ],
+    "architectures": [
+      "x64",
+      "arm64",
+      "intel64"
+    ]
+  },
+  "verification": {
+    "required": [
+      "manifestSignatureVerified",
+      "assetAttestationVerified",
+      "provenanceVerified",
+      "identityVerified",
+      "transparencyLogVerified",
+      "offlineBundleVerified"
+    ],
+    "allMustBeTrue": true,
+    "scenarioValuesAreAuthoritativeEvidence": false
+  },
+  "replayDefense": {
+    "receiptIdMustBeUnique": true,
+    "receiptMustBeUnexpired": true,
+    "futureIssuedReceiptAllowed": false,
+    "releaseAndAssetDigestBindingRequired": true
+  },
+  "result": {
+    "structuralAdmissionMayBeTrue": true,
+    "cryptographicVerificationPerformed": false,
+    "trustEstablished": false,
+    "packageEvidenceMayBePromoted": false,
+    "stagingAllowed": false,
+    "activationAllowed": false
+  },
+  "effects": {
+    "networkUsed": false,
+    "filesWritten": false,
+    "downloadPerformed": false,
+    "stagingPerformed": false,
+    "activationPerformed": false,
+    "trustStoreChanged": false,
+    "credentialsRead": false,
+    "userDataTouched": false
+  }
+}

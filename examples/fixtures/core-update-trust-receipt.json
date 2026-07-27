@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "evaluationTimeUtc": "2026-07-27T12:00:00Z",
+  "receiptId": "receipt-0123456789abcdef",
+  "verifier": {
+    "profile": "sigstore-bundle-v1",
+    "version": "1.0.0",
+    "binarySha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "trustRootId": "haven42-release-root-v1"
+  },
+  "subject": {
+    "repository": "hysel/haven-42",
+    "releaseTag": "v0.4.0",
+    "releaseCommit": "2222222222222222222222222222222222222222",
+    "manifestSha256": "3333333333333333333333333333333333333333333333333333333333333333",
+    "assetId": "windows-x64-portable",
+    "assetSha256": "4444444444444444444444444444444444444444444444444444444444444444",
+    "operatingSystem": "windows",
+    "architecture": "x64",
+    "targetTriple": "x86_64-pc-windows-msvc"
+  },
+  "verification": {
+    "manifestSignatureVerified": true,
+    "assetAttestationVerified": true,
+    "provenanceVerified": true,
+    "identityVerified": true,
+    "transparencyLogVerified": true,
+    "offlineBundleVerified": true
+  },
+  "issuedAtUtc": "2026-07-27T11:00:00Z",
+  "expiresAtUtc": "2026-07-27T13:00:00Z",
+  "usedReceiptIds": []
+}

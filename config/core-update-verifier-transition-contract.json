@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.core-update-verifier-transition",
+  "implementationStatus": "structural-transition-only",
+  "runtimeAdmitted": false,
+  "description": "Offline structural model for a future verifier registry and trust-root rotation. It never verifies authorization or applies a registry change.",
+  "request": {
+    "required": [
+      "schemaVersion",
+      "evaluationTimeUtc",
+      "transitionId",
+      "currentRegistry",
+      "candidateRegistry",
+      "authorization",
+      "usedTransitionIds"
+    ],
+    "additionalProperties": false,
+    "rawSignatureAllowed": false,
+    "rawCertificateAllowed": false,
+    "rawTransparencyProofAllowed": false,
+    "rawKeyAllowed": false,
+    "rawPathAllowed": false,
+    "rawUrlAllowed": false,
+    "maximumEntries": 8,
+    "maximumUsedTransitionIds": 32
+  },
+  "registry": {
+    "required": [
+      "registryVersion",
+      "validFromUtc",
+      "validUntilUtc",
+      "entries"
+    ],
+    "entryRequired": [
+      "profile",
+      "verifierVersion",
+      "binarySha256",
+      "trustRootId",
+      "status"
+    ],
+    "candidateProfiles": [
+      "sigstore-bundle-v1",
+      "platform-signature-v1"
+    ],
+    "statuses": [
+      "active",
+      "retiring"
+    ],
+    "minimumContinuityAnchors": 1
+  },
+  "authorization": {
+    "required": [
+      "threshold",
+      "signerTrustRootIds",
+      "registryDigestVerified",
+      "transitionIdentityVerified",
+      "expiryVerified"
+    ],
+    "scenarioClaimsAreAuthoritativeEvidence": false,
+    "currentActiveRootsOnly": true
+  },
+  "result": {
+    "structuralTransitionMayBeTrue": true,
+    "authorizationCryptographicallyVerified": false,
+    "trustEstablished": false,
+    "transitionAccepted": false,
+    "registryModified": false,
+    "runtimeVerifierChanged": false
+  },
+  "effects": {
+    "networkUsed": false,
+    "filesWritten": false,
+    "trustStoreChanged": false,
+    "registryChanged": false,
+    "runtimeVerifierChanged": false,
+    "credentialsRead": false,
+    "packageStaged": false,
+    "packageActivated": false
+  }
+}

@@ -71,7 +71,7 @@ default plus 50/100-entry memory-only choices.
 
 ## Current Roadmap
 
-- Milestone 22 — accessible local text, provider metrics, software planning, lifecycle-aware effect-free composition plans, promoted Linux images, hardened portable development packages, and effect-free installer/updater simulations are runnable; workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain independently gated.
+- Milestone 22 — accessible local text, provider metrics, software planning, lifecycle-aware effect-free composition plans, structural updater trust/transition and future execution/journal simulations, promoted Linux images, hardened portable development packages, and effect-free installer/updater simulations are runnable; real cryptographic verification, workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain independently gated.
 - Milestone 23 — native local image generation in progress; Linux ComfyUI/SDXL validated.
 - Milestone 24 — immutable audio candidate inventory and consent policy complete; live evaluation open.
 - Milestone 25 — immutable video candidate inventory and consent policy complete; live evaluation open.

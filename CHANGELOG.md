@@ -11,6 +11,7 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added effect-free Milestone 22B security foundations for future updater and workflow execution boundaries: a strict verifier-receipt handoff, verifier registry/trust-root transition model, execution-admission model, and digest-chained effect-journal simulator. Their 158 hostile and lifecycle cases reject identity, digest, scope, replay, ordering, cancellation, retry, recovery, and raw-authority attacks while performing no cryptographic verification, accepting no executable approval, writing no journal, changing no trust, and granting no machine effect.
 - Added a default-deny, simulation-only conversation-history foundation with a non-executable logical SQLite-compatible schema, pure migration/retention/context/deletion/recovery/backup/restore planners, and hostile fixtures. It imports no SQLite runtime, opens or creates no database, exposes no route or UI, keeps Private session write-free, and leaves encryption/key management plus persistent storage unadmitted.
 - Unified browser text work into one continuous conversation: explicit writing and summarization requests retain prior bounded messages, capability-specific safety prompts remain enforced, and any different configured model requires a visible keep-or-switch decision before submission.
 
