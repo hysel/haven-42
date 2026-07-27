@@ -1,6 +1,8 @@
-# Blind Writing Quality Review
+# Blind Writing Quality Reviews
 
-## Scope
+## First packet
+
+### Scope
 
 One human reviewer ranked four anonymized exact Ollama artifacts across three
 synthetic writing scenarios on 2026-07-25. Candidate labels were randomized
@@ -12,7 +14,7 @@ This is bounded preference evidence, not a statistically stable comparative
 promotion. It does not replace automated constraint checks, broader reviewers,
 accessibility review, license decisions, or exact-platform evidence.
 
-## Exact artifacts
+### Exact artifacts
 
 | Candidate | Ollama digest |
 | --- | --- |
@@ -26,7 +28,7 @@ Generation used `think:false`, temperature `0.2`, seed `42`, and a 700-token
 bound. Every per-sample unload passed, and the final independent `/api/ps`
 audit reported zero loaded models.
 
-## Rankings
+### Rankings
 
 Four points were assigned to first place, three to second, two to third, and
 one to fourth.
@@ -44,7 +46,7 @@ one to fourth.
 | Gemma | 7 | 2.67 | 1 |
 | Mistral | 6 | 3.00 | 0 |
 
-## Decision
+### Decision
 
 No comparative writing-quality promotion is justified. Qwen retains the
 existing bounded adapter baseline and narrowly leads this one-reviewer sample,
@@ -58,3 +60,50 @@ reviewers and broader scenarios, collect criterion-level scores, reconcile
 preference with automated constraint failures, and repeat exact artifact and
 platform validation. The reusable local-only harness is
 `scripts/run-blind-writing-review.py`.
+
+## Second packet
+
+### Scope
+
+The same reviewer completed a second independently randomized packet on
+2026-07-27. It broadened the synthetic scenarios to long-form continuity,
+distractor-resistant summarization, and constrained fact-preserving editing.
+The reviewer supplied a forced best-to-worst rank for every scenario before
+the local answer key was opened. To keep the review manageable, the reviewer
+did not assign criterion-level numeric scores.
+
+The packet used the same four exact model artifacts and generation settings as
+the first review, with Ollama `0.32.4`. Every per-sample unload passed, and the
+final independent provider audit reported zero loaded models. The endpoint,
+raw responses, local paths, and randomized answer key remain intentionally
+excluded from committed evidence.
+
+### Rankings
+
+| Scenario | First | Second | Third | Fourth |
+| --- | --- | --- | --- | --- |
+| Long-form continuity and section coherence | Mistral | Granite | Qwen | Gemma |
+| Distractor-resistant source summary | Granite | Qwen | Gemma | Mistral |
+| Constrained fact-preserving edit | Gemma | Mistral | Granite | Qwen |
+
+| Candidate | Points | Average rank | First-place results |
+| --- | ---: | ---: | ---: |
+| Granite | 9 | 2.00 | 1 |
+| Mistral | 8 | 2.33 | 1 |
+| Gemma | 7 | 2.67 | 1 |
+| Qwen | 6 | 3.00 | 0 |
+
+### Combined interpretation
+
+Across the six scenarios in both packets, Granite received 17 preference
+points, Qwen 15, and Gemma and Mistral 14 each. Granite and Gemma each won two
+scenarios; Qwen and Mistral each won one. This aggregate is descriptive only:
+both packets used the same reviewer, the provider versions differed, and the
+second packet did not collect criterion-level scores.
+
+No comparative writing-quality promotion is justified. Granite's preference
+lead does not override its repeatable failure in the separate automated
+constraint matrix. Qwen remains the exact bounded adapter baseline, not a
+best-writer claim. A default change still requires independent reviewers,
+criterion-level scoring, repeated exact-platform evidence, license review, and
+agreement between subjective quality and deterministic instruction fidelity.

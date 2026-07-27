@@ -39,9 +39,44 @@ and native packaged browser/parity smoke tests cover Windows, Linux, and macOS.
 The page exposes outcome totals and per-surface activity counts directly, with
 one fixed explicit-click no-referrer link to the detailed repository wiki.
 
+A machine-readable Milestone 22 admission-readiness ledger now separates the
+admitted read-only development scope from owner-deferred model comparison and
+blocked native runtime, production package, installer, updater, and executable
+composition work. Its offline hostile-tested evaluator grants no authority and
+keeps the unsigned development package independent from future promotion
+decisions.
+
+A least-privilege GitHub build-provenance job is prepared locally for the
+unsigned Windows, Linux, and macOS development archives. It is main-push-only,
+depends on all native package jobs, reverifies every downloaded artifact set,
+and grants no pull-request write authority or Release publication. No
+attestation exists until an approved future push runs that job.
+
+Public code-signing and privacy policies plus a fail-closed SignPath
+eligibility audit are now prepared locally. The Windows package specification
+defines deterministic Haven 42 executable identity metadata, and the package
+builder verifies it before generating an archive. This is readiness evidence
+only: the project has no public binary Release in the form required for an
+application, exact packaged-dependency review and provider enrollment remain
+open, and no certificate, signing workflow, signature, or publication is
+active. The owner confirmed repository-account MFA on 2026-07-27;
+signing-service MFA remains a future enrollment requirement.
+
+Portable evidence now adds an exact runtime-component inventory alongside the
+whole-package inventory. Every file is bound by path, digest, and size to
+Haven 42 or an explicit upstream/runtime group; unclassified files fail, SBOM
+and notice rows must match, and upstream components cannot enter Haven 42's
+signing scope. Runtime redistribution and production promotion remain false
+until complete license texts and platform provenance pass review.
+
+The hosted package matrix now uses versioned Windows 2025, Ubuntu 24.04, and
+macOS 15 runners, one immutable `setup-python` action, and exact official
+Python 3.14.6 archive digests recorded in provenance. Local builds remain
+explicitly unverified for that hosted-source claim.
+
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system
-status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Milestone 22B now also has a 30-case structural updater-verifier receipt handoff, a 33-case verifier registry/root-transition model, a 49-case future execution-admission simulator, and a 46-case digest-chained effect-journal simulator. None establishes trust, issues or accepts an executable approval, writes a journal, stages an update, or grants runtime authority. Milestone 22B retains real cryptographic verification, executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native
+status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Windows dependency discovery is path-constrained and fails closed on host-derived API-set/UCRT files after a stale local build exposed unrelated JDK DLL contamination; a clean 31-file local rebuild and native package gate now pass, while hosted reproduction remains required. Milestone 22B now also has a 30-case structural updater-verifier receipt handoff, a 33-case verifier registry/root-transition model, a 49-case future execution-admission simulator, and a 46-case digest-chained effect-journal simulator. None establishes trust, issues or accepts an executable approval, writes a journal, stages an update, or grants runtime authority. Milestone 22B retains real cryptographic verification, executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native
 local image profiles and now has consumer-local discovery and consent contracts.
 Milestones 24 and 25 retain documentation-only audio/video candidate inventories and
 shared media-consent policy. Milestone 26 now has quantization plan/artifact contracts,
@@ -51,16 +86,20 @@ has an initial explicit-selection, memory-only unified `.txt`/`.md`/PNG picker p
 attachment slice with strict atomic byte/count/dimension limits, path-free transfer,
 warned submit-confirmed private-network transfer, visible unverified image-input status, inert-data
 isolation with no attachment-driven execution or tools, and no temporary
-files. Automatic scan, directory access, broader parsers,
-lexical retrieval implementation, embedding indexes, and runtime persistence remain unadmitted; the
-default-deny lexical contract and hostile fixtures expose no runtime route or provider payload.
+files. Automatic scan, directory access, broader parsers, embedding indexes,
+and runtime persistence remain unadmitted. The deterministic memory-only
+lexical core now has bounded offline hostile and lifecycle tests, but its
+default-deny contract still exposes no runtime route, UI control, or provider
+payload.
 The optional conversation-history foundation now defines a non-executable
 logical SQLite-compatible schema plus pure migration, retention, context,
 deletion, recovery, backup, and restore planners. It imports no SQLite runtime,
 opens or creates no database, accepts no caller path or SQL, keeps every effect
-false, and preserves Private session as the write-free default. Encryption and
-key management, per-user storage, UI activation, and saved messages remain
-separate approval gates.
+false, and preserves Private session as the write-free default. The encryption
+and key-management architecture review now requires user-scoped OS credential
+storage and fail-closed Private session with no plaintext fallback. Dependency
+selection, per-user storage implementation, UI activation, and saved messages
+remain separate approval gates.
 Milestone 28 defines proposed
 controlled web research with an inactive offline contract and hostile fixtures, followed later by explicit reviewed queries, engine-owned adapters,
 trusted citations, SSRF controls, and memory-only cleanup; no model or renderer

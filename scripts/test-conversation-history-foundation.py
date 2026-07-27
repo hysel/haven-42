@@ -210,9 +210,19 @@ def main() -> int:
     assert CONTRACT["activation"]["databaseOpenAllowed"] is False
     assert CONTRACT["activation"]["filesystemWriteAllowed"] is False
     assert CONTRACT["storage"]["encryptionAtRestAdmitted"] is False
+    assert CONTRACT["keyManagement"]["runtimeAdmitted"] is False
+    assert CONTRACT["keyManagement"]["databaseKeyGenerationAllowed"] is False
+    assert CONTRACT["keyManagement"]["databaseKeyWrapAllowed"] is False
+    assert CONTRACT["keyManagement"]["platformCandidates"] == {
+        "windows": "dpapi-current-user",
+        "linux": "secret-service-user-session",
+        "macos": "keychain-services-current-user",
+    }
+    assert CONTRACT["keyManagement"]["wrappedKeyContainsConversationDataAllowed"] is False
+    assert CONTRACT["keyManagement"]["automaticDatabaseResetOnKeyLossAllowed"] is False
     assert CONTRACT["lifecycle"]["privateSessionWriteFree"] is True
     assert SCHEMA["executableSqlIncluded"] is False
-    print("Conversation-history foundation passed 39 bounded, effect-free checks.")
+    print("Conversation-history foundation passed 45 bounded, effect-free checks.")
     return 0
 
 

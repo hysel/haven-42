@@ -26,7 +26,7 @@ def load_policy() -> dict:
         raise PolicyError("invalid-policy-json") from error
     required = {
         "schemaVersion", "repository", "defaultBranch", "mergePolicy",
-        "branchProtection", "actions",
+        "branchProtection", "actions", "artifactAttestations",
     }
     if not isinstance(value, dict) or set(value) != required or value["schemaVersion"] != 1:
         raise PolicyError("invalid-policy-shape")
@@ -84,11 +84,33 @@ def verify_static(policy: dict) -> None:
         "canApprovePullRequestReviews": False,
     }:
         raise PolicyError("unsafe-actions-policy")
+    if policy["artifactAttestations"] != {
+        "enabled": True,
+        "trigger": "push-main-after-native-package-success",
+        "subjects": "unsigned-development-archives-only",
+        "action": "actions/attest",
+        "actionCommit": "f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6",
+        "actionRelease": "v4.2.0",
+        "requiredJobPermissions": [
+            "actions:read",
+            "artifact-metadata:write",
+            "attestations:write",
+            "contents:read",
+            "id-token:write",
+        ],
+        "pullRequestWriteAuthorityAllowed": False,
+        "releasePublicationAllowed": False,
+        "platformCodeSigningClaimAllowed": False,
+        "notarizationClaimAllowed": False,
+        "productionReadinessClaimAllowed": False,
+    }:
+        raise PolicyError("unsafe-artifact-attestation-policy")
 
     workflow_text = "\n".join(
         path.read_text(encoding="utf-8")
         for path in sorted((ROOT / ".github/workflows").glob("*.yml"))
     )
+    validate_workflow = (ROOT / ".github/workflows/validate-pack.yml").read_text(encoding="utf-8")
     for check in expected_checks - {
         "Windows portable package", "Linux portable package", "macOS portable package"
     }:
@@ -107,6 +129,88 @@ def verify_static(policy: dict) -> None:
     )
     if workflow_text.count(upload_artifact) != 1:
         raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
+    setup_python = (
+        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405"
+    )
+    if workflow_text.count(setup_python) != 1:
+        raise PolicyError("reviewed-node24-setup-python-not-pinned")
+    package_section = workflow_text.split("  package:", 1)[1].split(
+        "  attest-development:", 1
+    )[0]
+    if (
+        setup_python not in package_section
+        or 'python-version: "3.14.6"' not in package_section
+        or package_section.index(setup_python)
+        > package_section.index("python -m pip install")
+    ):
+        raise PolicyError("portable-package-python-not-exact-or-ordered")
+    package_identity_markers = {
+        "windows-2025": (
+            "python-3.14.6-win32-x64.zip",
+            "dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9",
+        ),
+        "ubuntu-24.04": (
+            "python-3.14.6-linux-24.04-x64.tar.gz",
+            "29dc7f3887a430fe7a0005fee4732b00be1bbed5bf21aa1e43f8d947eb1b9f61",
+        ),
+        "macos-15": (
+            "python-3.14.6-darwin-arm64.tar.gz",
+            "7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c",
+        ),
+    }
+    for runner, (asset, digest) in package_identity_markers.items():
+        if (
+            package_section.count(f"- os: {runner}") != 1
+            or package_section.count(f"python_asset: {asset}") != 1
+            or package_section.count(f"python_sha256: {digest}") != 1
+        ):
+            raise PolicyError(f"portable-python-distribution-drift:{runner}")
+    if any(
+        marker in package_section
+        for marker in ("windows-latest", "ubuntu-latest", "macos-latest")
+    ):
+        raise PolicyError("portable-runner-label-must-be-versioned")
+    if (
+        "HAVEN42_PYTHON_SOURCE_ASSET: ${{ matrix.python_asset }}"
+        not in package_section
+        or "HAVEN42_PYTHON_SOURCE_SHA256: ${{ matrix.python_sha256 }}"
+        not in package_section
+    ):
+        raise PolicyError("portable-python-provenance-not-bound")
+    download_artifact = (
+        "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
+    )
+    if workflow_text.count(download_artifact) != 1:
+        raise PolicyError("reviewed-node24-download-artifact-not-pinned")
+    attest = "actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6"
+    if workflow_text.count(attest) != 1:
+        raise PolicyError("reviewed-attestation-action-not-pinned")
+    attestation_markers = {
+        "attest-development:",
+        "name: Attest unsigned development artifacts",
+        "if: github.event_name == 'push' && github.ref == 'refs/heads/main'",
+        "needs: package",
+        "actions: read",
+        "artifact-metadata: write",
+        "attestations: write",
+        "contents: read",
+        "id-token: write",
+        "pattern: haven42-*-unsigned-development",
+        "Expected exactly three native artifact sets.",
+        "subject-path:",
+        "haven42-*-unsigned-development.zip",
+        "haven42-*-unsigned-development.tar.gz",
+    }
+    if any(marker not in validate_workflow for marker in attestation_markers):
+        raise PolicyError("artifact-attestation-job-incomplete")
+    if any(marker in validate_workflow for marker in (
+        "pull_request_target:",
+        "push-to-registry:",
+        "contents: write",
+        "packages: write",
+        "releases: write",
+    )):
+        raise PolicyError("artifact-attestation-job-overprivileged")
     if (ROOT / ".github/workflows/package-development.yml").exists():
         raise PolicyError("duplicate-package-workflow")
 

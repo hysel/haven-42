@@ -1416,7 +1416,7 @@ def main() -> int:
         lexical_contract = json.loads(
             (ROOT / "config/lexical-retrieval-contract.json").read_text(encoding="utf-8")
         )
-        assert lexical_contract["status"] == "simulation-only-not-runtime-admitted"
+        assert lexical_contract["status"] == "offline-engine-implemented-not-runtime-admitted"
         assert not any(lexical_contract["activation"].values())
         assert lexical_contract["inputBoundary"]["validatedMemoryAttachmentsOnly"] is True
         assert lexical_contract["inputBoundary"]["filesystemPathsAllowed"] is False

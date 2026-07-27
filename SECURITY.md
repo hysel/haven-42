@@ -54,9 +54,67 @@ package, credential, or filesystem state changes.
 
 Portable build dependencies are exact-version and SHA-256 locked for the admitted hosted runner platforms. Evidence generation and verification use an exact reviewed platform/version/license allowlist rather than trusting the caller environment. Native hostile tests reject altered, missing, unexpected, and traversal-manifest resources; shutdown authority failures; unsafe, linked, encrypted, oversized, excessive, duplicate, or case-colliding archive members; incomplete checksums/notices; evidence symlinks; unexpected targets; malformed SBOM/provenance; and archive/file-inventory divergence. Provenance is informational and explicitly unsigned/unattested.
 
-Public-history privacy is enforced before push and in a least-privilege GitHub Actions job. The versioned policy scans reachable commits, commit messages, author and committer identities, and unique historical blobs for private-network endpoints, machine-specific user paths and SSH command targets, key material, fingerprints, credential-bearing URLs, and likely secrets. GitHub noreply identities and narrowly enumerated hostile-test pattern sources are admitted; ignored recovery evidence and unreachable Git objects remain local and must never be tracked.
+Public-history privacy is enforced before push and in a least-privilege GitHub Actions job. The versioned policy scans reachable commits, commit messages, author and committer identities, unique historical blobs, and every tracked or untracked non-ignored working-tree file for private-network endpoints, machine-specific user paths and SSH command targets, key material, fingerprints, credential-bearing URLs, and likely secrets. GitHub noreply identities and narrowly enumerated hostile-test pattern sources are admitted; ignored recovery evidence and unreachable Git objects remain local and must never be tracked.
 
 Task composition is simulation-only. Its admitted planner accepts only registered UI-ready read-only workflows, bounded acyclic dependencies, exact fields, exact metadata-only intermediate records, and engine-consistent fresh/retry/cancel identity. It accepts no renderer arguments or approval grants and cannot create a process, access a filesystem or network, execute a workflow, or modify a machine. A separate inactive execution-admission simulator can validate exact effect disclosure, typed intermediate metadata, digest-bound approval scope, expiry/replay state, and retry/recovery/cancellation consistency for future workflows. It accepts no token secret and never issues, consumes, or accepts an approval for execution. An additional digest-chain simulator binds non-authoritative execution, effect, completion, failure, and cancellation claims to the exact admission and approval identifiers. It rejects reordering, forged completion, cross-admission reuse, unsafe retry, and uncertain recovery but writes no journal and proves no effect. Possible prior effects block recovery; every runtime effect and `ExecutionAllowed` remain false.
+
+The Milestone 27 retrieval engine is offline, deterministic, and memory-only.
+It accepts only already validated text records, rejects paths and budget
+violations, treats embedded instructions as inert content, discloses selected
+source offsets, and clears state on removal, failure, and shutdown. It has no
+runtime route, UI control, provider payload, parser, network, process, or
+persistent-index authority. Conversation storage remains inactive. Its reviewed
+key architecture forbids plaintext, embedded, machine-derived, and
+beside-database key fallbacks; an unavailable or locked current-user OS
+credential facility must fail closed to write-free Private session.
+
+The Milestone 22 admission-readiness ledger is also non-authoritative for
+promotion. It records exact remaining blockers and validates repository-local
+evidence references, but every authority flag is fixed false. It rejects any
+attempt to admit Tauri/Rust, signing, notarization, publication, online update
+activation, production readiness, or machine effects. It also prevents future
+promotion work from blocking or weakening the existing unsigned development
+package.
+
+The prepared GitHub build-provenance job is isolated from pull-request builds
+and runs only after all three native package jobs succeed on a push to `main`.
+It revalidates exactly three same-run unsigned artifact sets and attests only
+the archive subjects. Its job-scoped OIDC, attestation, and artifact-metadata
+write permissions do not include contents, packages, releases, pull requests,
+or administration writes. An attestation is not Windows code signing, Apple
+Developer ID signing, notarization, updater authorization, or production
+readiness.
+
+The future Windows signing policy is public but inactive. It restricts any
+eventual request to the project-owned `haven42.exe` at one immutable digest,
+requires a fresh manual approval, excludes pull requests and upstream
+executables/libraries, and forbids exporting a signing key into GitHub,
+artifacts, or maintainer machines. Windows development builds now fail if
+their deterministic Haven 42 product/version metadata is absent or mismatched.
+The SignPath readiness audit remains blocked by the missing existing public
+Release, provider acceptance and signing-service MFA, and exact packaged
+dependency/license review. Repository-account MFA was owner-confirmed on
+2026-07-27. No certificate or signing workflow is active.
+
+Portable supply-chain evidence now classifies every archived file into an
+exact project or runtime component group. Unknown files, unsafe paths,
+duplicate records, invalid hashes, incomplete coverage, SBOM divergence, and
+missing runtime notice markers fail closed. Every upstream group is explicitly
+ineligible for Haven 42 signing, while runtime redistribution clearance and
+production promotion remain false. CPython 3.14.6, Apache 2.0, and exact
+libffi 3.4.4 license texts are hash-verified artifact evidence. Windows
+libffi/OpenSSL source and version provenance is recorded. The builder now
+constrains Windows dependency search paths and the classifier rejects
+host-derived API-set/UCRT files after a stale local build was found to contain
+39 DLLs from an unrelated JDK. The two retained Visual C++ runtime DLLs match
+the official Python.org distribution. A clean 31-file local rebuild passes
+artifact and native package verification; applicable Microsoft redistribution
+terms and clean hosted reproduction remain blocked.
+
+Hosted package jobs use versioned runner labels and accept only the exact
+reviewed Python 3.14.6 archive identity for their platform. A missing,
+cross-platform, or mutated archive name/digest fails before evidence
+generation. Local builds are never reported as hosted-source verified.
 
 ## Reporting A Vulnerability
 

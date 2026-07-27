@@ -297,9 +297,15 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     $dependabot = Get-Content -LiteralPath $dependabotPath -Raw
 
     $checkoutSha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
+    $setupPythonSha = "a309ff8b426b58ec0e2a45f0f869d46889d02405"
     Assert-True -Condition ($actionSources -notmatch "actions/checkout@(v\d+|main|master)\b") -Message "Checkout references must not use mutable tags or branches."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 8 -Message "All live and generated workflows should pin the reviewed checkout v7.0.1 commit."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 8 -Message "Every checkout should disable persisted credentials."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 9 -Message "All live and generated workflows should pin the reviewed checkout v7.0.1 commit."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 9 -Message "Every checkout should disable persisted credentials."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/setup-python@$setupPythonSha\b").Count) -Expected 1 -Message "The package matrix should pin setup-python v6.2.0 exactly once."
+    Assert-True -Condition ($actionSources -match 'python-version:\s*"3\.14\.6"') -Message "Portable packages should use one exact Python patch version on every native runner."
+    foreach ($runner in @("windows-2025", "ubuntu-24.04", "macos-15")) {
+        Assert-True -Condition ($actionSources -match [regex]::Escape("- os: $runner")) -Message "Portable runner labels should be versioned: $runner"
+    }
     $workflow = Get-Content -LiteralPath $workflowPath -Raw
     Assert-True -Condition ($workflow -match "(?m)^concurrency:" -and $workflow -match "timeout-minutes:") -Message "Validation workflow should bound concurrency and job duration."
     Assert-True -Condition ($dependabot -match "package-ecosystem:\s*github-actions") -Message "Dependabot should monitor GitHub Actions dependencies."
@@ -4996,11 +5002,17 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard" -Message "External navigation must remain fixed to the detailed evidence wiki."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL and fail safely."
+    Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction) -Message "Portable evidence must cover every runtime file, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
+    Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "runtime-component-inventory.json") -Message "Portable evidence must include the exact runtime component inventory."
+    Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "CPYTHON-3.14.6-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "APACHE-2.0.txt" -and $portablePolicy.supplyChainEvidence -contains "LIBFFI-3.4.4-LICENSE.txt") -Message "Portable evidence must include hash-verified CPython, Apache, and libffi license texts."
     Assert-Equal -Actual (($portablePolicy.security.browserLaunchExecutables.linux) -join ",") -Expected "/usr/bin/gio,/usr/bin/xdg-open" -Message "Linux browser launchers must remain fixed and allowlisted."
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
     Assert-True -Condition ($policy.modelDiscovery.explicitOnlineConsentRequired -and -not $policy.modelDiscovery.redirectsAllowed -and -not $policy.modelDiscovery.automaticDownloadsAllowed -and -not $policy.modelDiscovery.pullApiAllowed -and -not $policy.modelDiscovery.commandExecutionAllowed) -Message "Public model discovery must stay explicit, fixed-origin, candidate-only, and non-installing."
-    Assert-True -Condition ($lexicalContract.status -eq "simulation-only-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding foundation."
+    Assert-True -Condition ($lexicalContract.status -eq "offline-engine-implemented-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding engine."
+    $lexicalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-memory-lexical-retrieval.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Memory-only lexical retrieval hostile tests should pass. Output: $($lexicalOutput -join ' ')"
+    Assert-True -Condition (($lexicalOutput -join "`n") -match "34 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should remain complete."
     Assert-True -Condition ($researchContract.status -eq "proposed-offline-fixtures-only" -and -not $researchContract.activation.runtimeRouteAllowed -and -not $researchContract.activation.modelToolAllowed -and -not $researchContract.activation.networkAllowed -and -not $researchContract.activation.dnsResolutionAllowed -and -not $researchContract.activation.urlFetchAllowed -and -not $researchContract.activation.browserAutomationAllowed) -Message "Controlled web research must remain an offline contract with no route, model tool, or network authority."
     Assert-True -Condition ($policy.readiness.explicitUserActionRequired -and $policy.readiness.registeredReadOnlyProbesOnly -and -not $policy.readiness.rendererHardwareFactsAccepted -and -not $policy.readiness.setupPlansMayInstall) -Message "Readiness scanning and setup planning must remain explicit, engine-owned, and effect free."
     Assert-Equal -Actual (($policy.text.capabilityIds | Sort-Object) -join ",") -Expected "content.summarize,content.write,general.chat" -Message "Only the three admitted local text capabilities should be exposed."
@@ -5026,7 +5038,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($blindEvidence -match "No comparative writing-quality promotion is justified" -and $blindEvidence -match "raw model output" -and $blindEvidence -match "intentionally excluded") -Message "Blind review evidence must remain sanitized and non-promotional."
     $blindTest = @(& $python.Source (Join-Path $repoRoot "scripts/test-blind-writing-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Blind writing review offline safety tests should pass."
-    Assert-True -Condition (($blindTest -join "`n") -match "passed 7 offline safety checks") -Message "Blind writing review coverage should remain complete."
+    Assert-True -Condition (($blindTest -join "`n") -match "passed 12 offline safety checks") -Message "Blind writing review coverage should remain complete."
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
 }
 
@@ -5043,8 +5055,23 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     $journalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-task-effect-journal.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Task effect-journal hostile tests should pass."
     Assert-True -Condition (($journalOutput -join "`n") -match "46 cases") -Message "Effect journal should cover digest binding, bounded time, ordering, completion claims, cancellation, retry, and recovery without effects."
+    $milestone22Output = @(& $python.Source (Join-Path $repoRoot "scripts/test-milestone22-admission-readiness.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Milestone 22 admission-readiness hostile tests should pass."
+    Assert-True -Condition (($milestone22Output -join "`n") -match "20 cases") -Message "Milestone 22 admission readiness should keep deferred and blocked gates explicit without granting authority."
+    $signingOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-code-signing-readiness.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Code-signing readiness checks should pass."
+    Assert-True -Condition (($signingOutput -join "`n") -match "20 effect-free checks") -Message "Code-signing readiness must remain inactive and fail closed."
+    $runtimeComponentOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-runtime-components.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable runtime component hostile tests should pass."
+    Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "12 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
+    $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "10 cases") -Message "Hosted Python distribution provenance must accept only exact reviewed native assets."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
+    $privacyScan = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Reachable history and the complete non-ignored working tree must pass the public-repository privacy scan. Output: $($privacyScan -join ' ')"
+    Assert-True -Condition (($privacyScan -join "`n") -match "tracked or untracked non-ignored working files") -Message "Privacy validation must cover pending files before they can be committed."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-composition-contract.json") | ConvertFrom-Json
     Assert-True -Condition ($contract.mode -eq "simulation-only" -and -not $contract.executionAllowed -and -not $contract.security.processCreationAllowed -and -not $contract.security.filesystemAccessAllowed -and -not $contract.security.networkAccessAllowed -and -not $contract.security.machineModificationAllowed) -Message "Composition must remain effect-free and plan-only."
     $admission = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/task-execution-admission-contract.json") | ConvertFrom-Json
@@ -5059,7 +5086,7 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for conversation-history foundation validation."
     $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-conversation-history-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Conversation-history hostile tests should pass. Output: $($output -join ' ')"
-    Assert-True -Condition (($output -join "`n") -match "39 bounded, effect-free checks") -Message "Conversation-history foundation coverage should remain complete."
+    Assert-True -Condition (($output -join "`n") -match "45 bounded, effect-free checks") -Message "Conversation-history foundation coverage should remain complete."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-contract.json") | ConvertFrom-Json
     $schema = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-schema.json") | ConvertFrom-Json
     $policy = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/local-web-runtime-policy.json") | ConvertFrom-Json
@@ -5071,6 +5098,8 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
         Assert-True -Condition (-not [bool]$property.Value) -Message "Conversation-history runtime effect should remain false: $($property.Name)"
     }
     Assert-True -Condition (-not $contract.storage.runtimeDependencyAdmitted -and -not $contract.storage.encryptionAtRestAdmitted -and $contract.lifecycle.privateSessionWriteFree) -Message "Storage and encryption must remain unadmitted while Private session stays write-free."
+    Assert-True -Condition ($contract.storage.architectureReviewCompleted -and -not $contract.storage.databaseKeyStoredBesideDatabaseAllowed -and -not $contract.storage.plaintextKeyFallbackAllowed -and $contract.storage.credentialStoreUnavailableBehavior -eq "fail-closed-private-session") -Message "Reviewed key management must fail closed without plaintext or beside-database key fallback."
+    Assert-True -Condition (-not $contract.keyManagement.runtimeAdmitted -and -not $contract.keyManagement.databaseKeyGenerationAllowed -and -not $contract.keyManagement.databaseKeyWrapAllowed -and -not $contract.keyManagement.automaticDatabaseResetOnKeyLossAllowed -and $contract.keyManagement.platformCandidates.windows -eq "dpapi-current-user" -and $contract.keyManagement.platformCandidates.linux -eq "secret-service-user-session" -and $contract.keyManagement.platformCandidates.macos -eq "keychain-services-current-user") -Message "Cross-platform key candidates must stay inactive, user-scoped, and fail closed on key loss."
     Assert-True -Condition ($schema.status -eq "simulation-only-no-executable-ddl" -and -not $schema.executableSqlIncluded) -Message "The logical schema must contain no executable SQL."
     $foundation = $policy.inactiveFoundations.conversationHistory
     Assert-True -Condition (-not $foundation.runtimeRouteAllowed -and -not $foundation.databaseOpenAllowed -and -not $foundation.databaseCreateAllowed -and -not $foundation.filesystemWriteAllowed -and -not $foundation.browserStorageAllowed) -Message "The local web policy must expose no conversation-history storage authority."

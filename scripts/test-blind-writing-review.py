@@ -49,7 +49,25 @@ def main() -> int:
     assert "fidelity=__" in rendered
     assert "Overall rank, best to worst (A, B): __" in rendered
     assert "model" not in rendered.casefold()
-    print("Blind writing review harness passed 7 offline safety checks.")
+    second = MODULE.render_packet(
+        [{
+            "title": item["title"],
+            "prompt": item["prompt"],
+            "reviewFocus": item["reviewFocus"],
+            "candidates": [
+                {"alias": "A", "output": "First output"},
+                {"alias": "B", "output": "Second output"},
+            ],
+        } for item in MODULE.CASE_SETS["second"]],
+        "2026-07-27T00:00:00Z",
+        "second",
+    )
+    assert "Prompt-set revision: second" in second
+    assert "Long-form continuity and section coherence" in second
+    assert "Distractor-resistant source summary" in second
+    assert "Constrained fact-preserving edit" in second
+    assert "model" not in second.casefold()
+    print("Blind writing review harness passed 12 offline safety checks.")
     return 0
 
 

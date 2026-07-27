@@ -12,14 +12,25 @@ import tarfile
 import tempfile
 import zipfile
 
+from portable_runtime_components import ComponentClassificationError, classify
+
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 REQUIRED_EVIDENCE = {
+    "APACHE-2.0.txt",
+    "CPYTHON-3.14.6-LICENSE.txt",
+    "LIBFFI-3.4.4-LICENSE.txt",
     "THIRD-PARTY-NOTICES.txt",
     "build-provenance.json",
     "dependency-inventory.json",
     "haven42.cdx.json",
     "package-file-inventory.json",
+    "runtime-component-inventory.json",
+}
+EXPECTED_LICENSE_EVIDENCE = {
+    "APACHE-2.0.txt": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
+    "CPYTHON-3.14.6-LICENSE.txt": "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
+    "LIBFFI-3.4.4-LICENSE.txt": "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
 }
 EXPECTED_COMMON_BUILD_DEPENDENCIES = {
     "altgraph": ("0.17.5", "MIT"),
@@ -42,6 +53,32 @@ ALLOWED_ARCHITECTURES = {
     "windows": {"amd64", "arm64", "x86_64"},
     "linux": {"aarch64", "arm64", "x86_64"},
     "darwin": {"arm64", "x86_64"},
+}
+EXPECTED_PYTHON_DISTRIBUTIONS = {
+    "windows-amd64": {
+        "repository": "actions/python-versions",
+        "releaseTag": "3.14.6-27283001424",
+        "releaseCommit": "25a990ef82051ebb9cba2b6ed6b79e61148a5bfb",
+        "asset": "python-3.14.6-win32-x64.zip",
+        "sha256": "dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9",
+        "verification": "pinned-setup-python-release-metadata",
+    },
+    "linux-x86_64": {
+        "repository": "actions/python-versions",
+        "releaseTag": "3.14.6-27283001424",
+        "releaseCommit": "25a990ef82051ebb9cba2b6ed6b79e61148a5bfb",
+        "asset": "python-3.14.6-linux-24.04-x64.tar.gz",
+        "sha256": "29dc7f3887a430fe7a0005fee4732b00be1bbed5bf21aa1e43f8d947eb1b9f61",
+        "verification": "pinned-setup-python-release-metadata",
+    },
+    "darwin-arm64": {
+        "repository": "actions/python-versions",
+        "releaseTag": "3.14.6-27283001424",
+        "releaseCommit": "25a990ef82051ebb9cba2b6ed6b79e61148a5bfb",
+        "asset": "python-3.14.6-darwin-arm64.tar.gz",
+        "sha256": "7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c",
+        "verification": "pinned-setup-python-release-metadata",
+    },
 }
 MAX_ARCHIVE_FILES = 10_000
 MAX_ARCHIVE_MEMBER_BYTES = 128 * 1024 * 1024
@@ -203,6 +240,10 @@ def verify_checksums(directory: Path) -> None:
 
 
 def verify_evidence(directory: Path) -> None:
+    for name, expected_digest in EXPECTED_LICENSE_EVIDENCE.items():
+        path = directory / name
+        if not path.is_file() or path.is_symlink() or sha256_file(path) != expected_digest:
+            raise ArtifactVerificationError("license-evidence-mismatch")
     inventory = load_json(directory / "dependency-inventory.json")
     provenance = load_json(directory / "build-provenance.json")
     environment = provenance.get("environment", {})
@@ -213,17 +254,12 @@ def verify_evidence(directory: Path) -> None:
     architecture = environment.get("architecture")
     target = inventory.get("target")
     if (
-        inventory.get("schemaVersion") != 2
+        inventory.get("schemaVersion") != 3
         or set(inventory) != {
             "schemaVersion", "target", "runtimeComponents", "buildDependencies",
         }
         or not isinstance(inventory.get("runtimeComponents"), list)
         or not isinstance(inventory.get("buildDependencies"), list)
-        or inventory["runtimeComponents"] != [{
-            "name": "CPython",
-            "scope": "embedded-runtime",
-            "version": provenance.get("environment", {}).get("pythonVersion"),
-        }]
         or operating_system not in EXPECTED_PLATFORM_BUILD_DEPENDENCIES
         or architecture not in ALLOWED_ARCHITECTURES.get(str(operating_system), set())
         or target != f"{operating_system}-{architecture}"
@@ -231,6 +267,19 @@ def verify_evidence(directory: Path) -> None:
         raise ArtifactVerificationError("invalid-dependency-inventory")
     commit = provenance.get("source", {}).get("commit", "")
     security = provenance.get("security", {})
+    python_distribution = environment.get("pythonDistribution")
+    expected_python_distribution = (
+        EXPECTED_PYTHON_DISTRIBUTIONS.get(str(target))
+        if builder.get("kind") == "github-actions"
+        else {
+            "repository": "local-build-environment",
+            "releaseTag": "",
+            "releaseCommit": "",
+            "asset": "",
+            "sha256": "",
+            "verification": "local-unverified",
+        }
+    )
     if (
         set(provenance) != {
             "schemaVersion", "artifactKind", "application", "source",
@@ -246,13 +295,15 @@ def verify_evidence(directory: Path) -> None:
         or not all(isinstance(builder.get(field), str) and builder[field] for field in ("workflow", "runId"))
         or set(environment) != {
             "operatingSystem", "architecture", "pythonImplementation",
-            "pythonVersion", "pyinstallerVersion",
+            "pythonVersion", "pythonDistribution", "pyinstallerVersion",
         }
         or environment.get("pythonImplementation") != "CPython"
         or environment.get("pyinstallerVersion") != "6.21.0"
+        or python_distribution != expected_python_distribution
         or not all(
             isinstance(environment.get(field), str) and environment[field]
             for field in environment
+            if field != "pythonDistribution"
         )
         or not re.fullmatch(r"[0-9a-f]{40}", str(commit))
         or security != {
@@ -284,6 +335,46 @@ def verify_evidence(directory: Path) -> None:
         build_names.add(record["name"])
     if build_names != set(expected_build_dependencies):
         raise ArtifactVerificationError("build-dependency-allowlist-mismatch")
+    runtime_inventory = load_json(directory / "runtime-component-inventory.json")
+    package_inventory = load_json(directory / "package-file-inventory.json")
+    expected_package_files(directory / "package-file-inventory.json")
+    runtime_records = runtime_inventory.get("runtimeComponents")
+    if not isinstance(runtime_records, list):
+        raise ArtifactVerificationError("invalid-runtime-component-inventory")
+    openssl_records = [
+        item for item in runtime_records
+        if isinstance(item, dict) and item.get("id") == "openssl"
+    ]
+    openssl_version = (
+        str(openssl_records[0].get("version"))
+        if len(openssl_records) == 1
+        else "unresolved"
+    )
+    if not re.fullmatch(r"(?:unresolved|\d+\.\d+\.\d+)", openssl_version):
+        raise ArtifactVerificationError("invalid-runtime-component-version")
+    try:
+        expected_runtime_inventory = classify(
+            package_inventory.get("files"),
+            str(target),
+            str(environment.get("pythonVersion")),
+            openssl_version,
+        )
+    except (ComponentClassificationError, TypeError) as error:
+        raise ArtifactVerificationError("invalid-runtime-component-inventory") from error
+    if runtime_inventory != expected_runtime_inventory:
+        raise ArtifactVerificationError("runtime-component-inventory-mismatch")
+    expected_runtime_summaries = [
+        {
+            key: item[key]
+            for key in (
+                "id", "name", "version", "license", "reviewStatus",
+                "sourceProvenance", "fileCount",
+            )
+        }
+        for item in runtime_inventory["runtimeComponents"]
+    ]
+    if inventory["runtimeComponents"] != expected_runtime_summaries:
+        raise ArtifactVerificationError("dependency-runtime-component-mismatch")
     sbom = load_json(directory / "haven42.cdx.json")
     expected_tools = [
         {"name": record["name"], "type": "application", "version": record["version"]}
@@ -297,19 +388,32 @@ def verify_evidence(directory: Path) -> None:
         or sbom.get("version") != 1
         or sbom.get("metadata", {}).get("component", {}).get("name") != "Haven 42"
         or sbom.get("metadata", {}).get("component") != {
-            "type": "application", "name": "Haven 42", "version": "0.3.0",
+            "type": "application",
+            "name": "Haven 42",
+            "version": "0.3.0",
+            "licenses": [{"expression": "MIT"}],
         }
         or sbom.get("metadata", {}).get("tools", {}).get("components") != expected_tools
         or sbom.get("metadata", {}).get("properties") != [
             {"name": "haven42:artifact-kind", "value": "unsigned-development"},
             {"name": "haven42:target", "value": target},
         ]
-        or sbom.get("components") != [{
-            "name": "CPython",
-            "scope": "required",
-            "type": "framework",
-            "version": inventory["runtimeComponents"][0]["version"],
-        }]
+        or sbom.get("components") != [
+            {
+                "type": "framework" if item["id"] == "cpython" else "library",
+                "name": item["name"],
+                "version": item["version"],
+                "scope": "required",
+                "licenses": [{"expression": item["license"]}],
+                "properties": [
+                    {"name": "haven42:component-id", "value": item["id"]},
+                    {"name": "haven42:review-status", "value": item["reviewStatus"]},
+                    {"name": "haven42:file-count", "value": str(item["fileCount"])},
+                    {"name": "haven42:signing-eligible", "value": "false"},
+                ],
+            }
+            for item in runtime_inventory["runtimeComponents"]
+        ]
     ):
         raise ArtifactVerificationError("invalid-sbom")
     try:
@@ -319,6 +423,21 @@ def verify_evidence(directory: Path) -> None:
     for record in inventory["buildDependencies"]:
         if f"{record['name']} {record['version']} — {record['license']}" not in notices:
             raise ArtifactVerificationError("third-party-notice-coverage-mismatch")
+    if "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION." not in notices:
+        raise ArtifactVerificationError("runtime-clearance-warning-missing")
+    if (
+        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
+        "LIBFFI-3.4.4-LICENSE.txt are included as hash-verified license evidence."
+        not in notices
+    ):
+        raise ArtifactVerificationError("license-evidence-notice-missing")
+    for record in runtime_inventory["runtimeComponents"]:
+        marker = (
+            f"{record['name']} {record['version']} — {record['license']} — "
+            f"{record['reviewStatus']} — {record['fileCount']} files"
+        )
+        if marker not in notices:
+            raise ArtifactVerificationError("runtime-notice-coverage-mismatch")
 
 
 def verify(directory: Path) -> None:

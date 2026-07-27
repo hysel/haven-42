@@ -15,6 +15,13 @@ The native executable is under `dist/portable/bundle/haven42/`. It accepts `--po
 
 These outputs are unsigned development artifacts. They are not installers or production releases. Antivirus and operating-system reputation prompts are possible because signing and notarization are deliberately outside this batch.
 
+Windows builds also embed deterministic executable identity metadata:
+ProductName and FileDescription `Haven 42`, ProductVersion and FileVersion
+`0.3.0`, and OriginalFilename `haven42.exe`. The build reads this metadata
+from `package/haven42-version-info.txt` and independently parses the emitted PE
+resources before it can create the archive. This identity metadata is not a
+digital signature and conveys no publisher trust.
+
 ## Security Boundary
 
 The executable binds only to `127.0.0.1`. Automatic browser launch accepts only the server's internally constructed IPv4-loopback HTTP origin and numeric port. Windows delegates that URL to the registered operating-system association. macOS invokes fixed `/usr/bin/open`; Linux prefers fixed `/usr/bin/gio` and falls back to fixed `/usr/bin/xdg-open`. Unix launch uses argument arrays with `shell=False`, a minimal inherited environment, and a fixed `/usr/bin:/bin` search path; `BROWSER`, Python injection variables, dynamic-loader variables, and other unneeded caller values are not passed. If no admitted opener is available or launch fails, the server remains available and prints the exact URL for manual use. No user value becomes an executable, argument, or browser command.
@@ -35,9 +42,24 @@ The service starts no child process except the already constrained, fixed-comman
 
 `scripts/test-portable-package.py` starts both source and native packaged runtimes on operating-system-selected loopback ports. It compares capability, update, privacy, committed-assurance, and browser-asset results; checks security headers and Host rejection; rejects missing shutdown authority, foreign origins, wrong content types, and unexpected shutdown fields; verifies packaged integrity state; invokes protected shutdown; and requires a clean native exit. It also exercises relocation into a path with spaces, startup from a read-only copied package, recovery after abruptly terminating the test-owned native process, hostile inherited environment values, repeated startup/shutdown, and occupied-port failure. Full validation runs the dependency-free source Chromium flow on Windows, Linux, and macOS. Each native packaging job repeats it against the packaged executable, including the read-only assurance panel, unified attachment picker, hostile atomic selection, task locking, compact layout, provider disclosure, cleanup, and typed results. The local-web security suite separately injects each platform launcher dependency, proves strict loopback-URL rejection, verifies fixed macOS/Linux executable and argument selection, confirms `shell=False`, and proves that a hostile `BROWSER` or caller `PATH` is omitted without opening a real browser. Disposable copied packages must fail before serving when a resource is changed, missing, unexpected, replaced by duplicate/absolute/traversal manifest records, or redirected through a symbolic link.
 
-`scripts/verify-portable-development-artifacts.py` rejects unsafe archive paths, links, encrypted ZIP entries, duplicate or case-colliding members, unsupported archive shapes, excessive member count, oversized members or archives, checksum gaps, evidence symlinks, evidence gaps, unexpected platform/architecture/dependency records, malformed provenance/SBOM/inventory documents, notice omissions, target-name mismatch, and any mismatch between the archive and its full file inventory.
+`scripts/verify-portable-development-artifacts.py` rejects unsafe archive paths, links, encrypted ZIP entries, duplicate or case-colliding members, unsupported archive shapes, excessive member count, oversized members or archives, checksum gaps, evidence symlinks, evidence gaps, unexpected platform/architecture/dependency records, malformed provenance/SBOM/inventory documents, notice omissions, target-name mismatch, unclassified packaged files, runtime-component coverage differences, and any mismatch between the archive and its full file inventory.
 
-The GitHub Actions packaging matrix has read-only repository permission, does not persist checkout credentials, pins PyInstaller, builds independently on each native operating system, runs the parity/smoke test, and retains artifacts for seven days. It does not publish a GitHub Release.
+The GitHub Actions packaging matrix has read-only repository permission, does not persist checkout credentials, pins the official `setup-python` action by immutable commit, selects Python 3.14.6 on every runner, pins PyInstaller, builds independently on each native operating system, runs the parity/smoke test, and retains artifacts for seven days. It does not publish a GitHub Release.
+
+The native runner labels and Python source archives are also fixed:
+
+| Target | Runner | Official Python archive | SHA-256 |
+| --- | --- | --- | --- |
+| Windows x64 | `windows-2025` | `python-3.14.6-win32-x64.zip` | `dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9` |
+| Linux x64 | `ubuntu-24.04` | `python-3.14.6-linux-24.04-x64.tar.gz` | `29dc7f3887a430fe7a0005fee4732b00be1bbed5bf21aa1e43f8d947eb1b9f61` |
+| macOS arm64 | `macos-15` | `python-3.14.6-darwin-arm64.tar.gz` | `7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c` |
+
+The identities come from the official
+[`actions/python-versions` 3.14.6
+release](https://github.com/actions/python-versions/releases/tag/3.14.6-27283001424).
+Hosted builds reject missing or different matrix identities and record the
+selected release tag, archive, and digest in provenance. Local builds are
+explicitly recorded as `local-unverified`.
 
 Each artifact set contains:
 
@@ -47,9 +69,31 @@ Each artifact set contains:
 - generated third-party notices from installed distribution metadata;
 - a CycloneDX JSON SBOM;
 - a complete package file inventory;
-- unsigned build provenance binding the exact source commit, OS, architecture, Python, PyInstaller, workflow identity, and explicit absence of signing, notarization, attestation, and release publication.
+- an exact runtime-component inventory that binds every file to Haven 42 or an
+  explicit CPython, OpenSSL, libffi, Microsoft, or unresolved platform-runtime
+  group;
+- hash-verified CPython 3.14.6 bundled-license evidence, the Apache 2.0
+  license text used by OpenSSL 3.5.7, and the exact libffi 3.4.4 MIT license;
+- unsigned build provenance binding the exact source commit, OS, architecture, Python, PyInstaller, workflow identity, and explicit absence of platform signing, notarization, an in-build attestation, and release publication.
+
+The local build remains unattested. Separately, an approved future push to
+`main` can run the least-privilege hosted job documented in
+`docs/artifact-attestation.md`. That job reverifies all three native artifact
+sets and creates GitHub/Sigstore build provenance for only the unsigned archive
+digests. The external attestation does not alter the package, sign executable
+code, notarize macOS software, publish a Release, or authorize updater use.
 
 The build dependency file pins every admitted wheel by SHA-256 for the hosted Windows x64, Linux x64, and macOS universal runner paths. Evidence generation reads only the explicit platform allowlist, so unrelated caller-environment packages cannot enter the inventory or notices. The reviewed license expressions remain evidence for review, not a legal conclusion.
+
+The runtime-component inventory carries exact path, digest, size, and file
+count coverage. It marks every upstream component ineligible for Haven 42
+signing and drives matching SBOM and notice rows. On Windows it also records
+the official Python installer/SBOM and immutable CPython, OpenSSL, and libffi
+source provenance. Both
+`runtimeRedistributionCleared` and production promotion remain false. Exact
+applicable Microsoft redistribution terms and clean hosted reproduction of the
+locally verified 31-file package without host-derived API-set/UCRT files are
+still required before public binary promotion.
 
 ## Installer And Updater Foundations
 

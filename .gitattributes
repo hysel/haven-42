@@ -1,3 +1,4 @@
 *.sh text eol=lf
 .githooks/* text eol=lf
+package/licenses/* text eol=lf
 *.bin binary

@@ -1,0 +1,158 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.milestone22-admission-readiness",
+  "implementationStatus": "offline-readiness-only",
+  "description": "Authoritative fail-closed ledger for the remaining Milestone 22 promotion gates. It reports blockers but grants no runtime, signing, publication, network, installation, update, or execution authority.",
+  "permittedStatuses": [
+    "development-admitted",
+    "owner-deferred",
+    "policy-blocked",
+    "security-blocked",
+    "external-blocked"
+  ],
+  "authorityBoundary": {
+    "scenarioClaimsAreEvidence": false,
+    "rendererMayChangeGateState": false,
+    "runtimeAuthorityGranted": false,
+    "machineEffectsAllowed": false,
+    "networkActivationAllowed": false,
+    "platformCodeSigningAllowed": false,
+    "notarizationAllowed": false,
+    "publicationAllowed": false,
+    "tauriOrRustAdmitted": false,
+    "productionReadinessClaimAllowed": false
+  },
+  "gates": [
+    {
+      "id": "comparative-model-promotion",
+      "status": "owner-deferred",
+      "currentScope": "exact-adapter-baseline-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": false,
+      "requiresOwnerDecision": true,
+      "satisfiedEvidence": [
+        "examples/writing-model-matrix-validation.md",
+        "examples/blind-writing-quality-review.md"
+      ],
+      "remainingBlockers": [
+        "independent-reviewers",
+        "criterion-level-scoring",
+        "license-and-platform-reconciliation"
+      ]
+    },
+    {
+      "id": "read-only-validation-integration",
+      "status": "development-admitted",
+      "currentScope": "readiness-health-model-cleanup-and-committed-evidence-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": true,
+      "requiresOwnerDecision": false,
+      "satisfiedEvidence": [
+        "docs/local-web-mvp.md",
+        "examples/local-web-mvp-validation.md"
+      ],
+      "remainingBlockers": [
+        "software-workflow-execution-separately-gated",
+        "production-lifecycle-evidence-separately-gated"
+      ]
+    },
+    {
+      "id": "tauri-native-runtime",
+      "status": "policy-blocked",
+      "currentScope": "architecture-and-policy-model-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": false,
+      "requiresOwnerDecision": true,
+      "satisfiedEvidence": [
+        "docs/desktop-runtime-dependency-evaluation.md",
+        "docs/native-bridge-boundary-evidence.md"
+      ],
+      "remainingBlockers": [
+        "tauri-rust-remain-unadmitted",
+        "reviewed-published-dependency-resolution",
+        "actual-native-bridge-tests",
+        "exact-platform-package-tests"
+      ]
+    },
+    {
+      "id": "production-package-promotion",
+      "status": "external-blocked",
+      "currentScope": "unsigned-pyinstaller-one-folder-development-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": false,
+      "requiresOwnerDecision": true,
+      "satisfiedEvidence": [
+        "docs/portable-development-package.md",
+        "config/portable-development-package-contract.json",
+        "docs/artifact-attestation.md",
+        "CODE-SIGNING-POLICY.md",
+        "PRIVACY.md",
+        "docs/signpath-eligibility-audit.md",
+        "docs/windows-package-component-audit.md"
+      ],
+      "remainingBlockers": [
+        "existing-public-release-in-form-to-sign",
+        "provider-acceptance-and-signing-service-mfa",
+        "exact-packaged-dependency-license-review",
+        "signing-identity-and-managed-key-custody",
+        "macos-notarization-and-physical-mac",
+        "clean-install-upgrade-uninstall-evidence",
+        "production-support-policy"
+      ]
+    },
+    {
+      "id": "installer-runtime",
+      "status": "security-blocked",
+      "currentScope": "simulation-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": false,
+      "requiresOwnerDecision": true,
+      "satisfiedEvidence": [
+        "config/installation-broker-contract.json",
+        "scripts/simulate-install-broker.py"
+      ],
+      "remainingBlockers": [
+        "trusted-package-verification",
+        "canonical-user-scoped-paths",
+        "transactional-rollback",
+        "native-install-upgrade-uninstall-evidence"
+      ]
+    },
+    {
+      "id": "online-updater-activation",
+      "status": "security-blocked",
+      "currentScope": "offline-policy-and-simulation-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": false,
+      "requiresOwnerDecision": true,
+      "satisfiedEvidence": [
+        "config/core-update-lifecycle-contract.json",
+        "docs/desktop-storage-and-updates.md"
+      ],
+      "remainingBlockers": [
+        "real-signature-or-attestation-verifier",
+        "trusted-root-and-rotation-governance",
+        "canonical-staging-and-atomic-activation",
+        "native-interruption-rollback-and-retention-evidence"
+      ]
+    },
+    {
+      "id": "executable-composition",
+      "status": "security-blocked",
+      "currentScope": "planning-admission-and-journal-simulation-only",
+      "blocksUnsignedDevelopmentPackage": false,
+      "currentReadOnlyRuntimeAdmitted": false,
+      "requiresOwnerDecision": true,
+      "satisfiedEvidence": [
+        "config/task-execution-admission-contract.json",
+        "config/task-effect-journal-contract.json"
+      ],
+      "remainingBlockers": [
+        "engine-owned-opaque-approval-broker",
+        "authoritative-durable-effect-journal",
+        "canonical-resource-grants-and-process-allowlists",
+        "native-cancellation-recovery-and-cross-platform-evidence"
+      ]
+    }
+  ]
+}

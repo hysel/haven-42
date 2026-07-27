@@ -3,6 +3,7 @@
   "policyId": "haven42.public-repository-privacy",
   "scope": {
     "trackedFiles": true,
+    "untrackedNonIgnoredFiles": true,
     "reachableCommitTrees": true,
     "commitMessages": true,
     "authorAndCommitterIdentity": true,

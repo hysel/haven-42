@@ -19,6 +19,12 @@
     "strictBundledResourceAllowlist": true,
     "resourceDigestAlgorithm": "sha256",
     "wholePackageFileInventoryRequired": true,
+    "exactRuntimeComponentFileCoverageRequired": true,
+    "unknownRuntimeComponentFilesRejected": true,
+    "windowsApplicationLocalApiSetOrUcrtAllowed": false,
+    "windowsVisualCppRuntimeExactHashesRequired": true,
+    "pyinstallerHostPathInheritanceAllowed": false,
+    "runtimeRedistributionClearanceRequiredForProduction": true,
     "archiveTraversalAndLinkRejectionRequired": true,
     "archiveCaseCollisionRejectionRequired": true,
     "archiveMemberCountLimit": 10000,
@@ -50,10 +56,14 @@
     "resourceTamperRejectionRequired": true
   },
   "supplyChainEvidence": [
+    "APACHE-2.0.txt",
+    "CPYTHON-3.14.6-LICENSE.txt",
+    "LIBFFI-3.4.4-LICENSE.txt",
     "SHA256SUMS",
     "build-provenance.json",
     "dependency-inventory.json",
     "package-file-inventory.json",
+    "runtime-component-inventory.json",
     "THIRD-PARTY-NOTICES.txt",
     "haven42.cdx.json"
   ],

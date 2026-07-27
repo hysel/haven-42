@@ -5,8 +5,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 
@@ -227,7 +229,62 @@ def scan_identities(policy: dict, commits: list[str]) -> list[str]:
     return failures
 
 
-def run() -> tuple[int, int]:
+def working_tree_files() -> list[str]:
+    output = git(
+        "ls-files",
+        "-z",
+        "--cached",
+        "--others",
+        "--exclude-standard",
+    )
+    paths = [os.fsdecode(item) for item in output.split(b"\0") if item]
+    if any(
+        not path
+        or "\\" in path
+        or Path(path).is_absolute()
+        or any(part in {"", ".", ".."} for part in path.split("/"))
+        for path in paths
+    ):
+        raise PrivacyFailure("Working-tree file list contained an unsafe path.")
+    return list(dict.fromkeys(paths))
+
+
+def scan_working_tree(
+    policy: dict,
+    placeholders: set[bytes],
+    rule_allowlist: dict[str, set[str]],
+) -> tuple[int, list[str]]:
+    failures: list[str] = []
+    scanned = 0
+    for relative in working_tree_files():
+        path = ROOT.joinpath(*relative.split("/"))
+        try:
+            mode = path.lstat().st_mode
+        except FileNotFoundError:
+            # The historical blob for a deleted tracked file is still scanned.
+            continue
+        if not stat.S_ISREG(mode):
+            failures.append(f"non-regular working-tree path: {relative}")
+            continue
+        try:
+            content = path.read_bytes()
+        except OSError:
+            failures.append(f"unreadable working-tree path: {relative}")
+            continue
+        scanned += 1
+        failures.extend(
+            scan_content(
+                "working-tree",
+                relative,
+                content,
+                placeholders,
+                rule_allowlist,
+            )
+        )
+    return scanned, failures
+
+
+def run() -> tuple[int, int, int]:
     policy = load_policy()
     commits = reachable_commits(policy)
     paths = object_paths(commits)
@@ -251,6 +308,12 @@ def run() -> tuple[int, int]:
                 rule_allowlist,
             )
         )
+    working_count, working_failures = scan_working_tree(
+        policy,
+        placeholders,
+        rule_allowlist,
+    )
+    failures.extend(working_failures)
     if failures:
         unique = list(dict.fromkeys(failures))
         for failure in unique[:100]:
@@ -263,7 +326,7 @@ def run() -> tuple[int, int]:
         raise PrivacyFailure(
             f"Public repository privacy scan failed with {len(unique)} finding(s)."
         )
-    return len(commits), len(blobs)
+    return len(commits), len(blobs), working_count
 
 
 def self_test() -> None:
@@ -279,6 +342,9 @@ def self_test() -> None:
     assert SSH_FINGERPRINT.search(b"SHA256:" + b"A" * 40)
     assert URL_CREDENTIAL.search(b"https://user:password@example.test")
     assert PRIVATE_KEY.search(b"-----BEGIN OPENSSH PRIVATE KEY-----")
+    policy = load_policy()
+    assert policy["scope"]["trackedFiles"] is True
+    assert policy["scope"]["untrackedNonIgnoredFiles"] is True
 
 
 def main() -> int:
@@ -290,13 +356,14 @@ def main() -> int:
             self_test()
             print("Public repository privacy scanner self-test passed.")
             return 0
-        commits, blobs = run()
+        commits, blobs, working_files = run()
     except PrivacyFailure as error:
         print(str(error), file=sys.stderr)
         return 1
     print(
         "Public repository privacy scan passed: "
-        f"{commits} reachable commits and {blobs} unique blobs."
+        f"{commits} reachable commits, {blobs} unique blobs, and "
+        f"{working_files} tracked or untracked non-ignored working files."
     )
     return 0
 

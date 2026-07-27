@@ -1,5 +1,8 @@
 # Haven 42
 
+[Code signing policy](CODE-SIGNING-POLICY.md) ·
+[Privacy policy](PRIVACY.md)
+
 **Your private, local AI station.**
 
 Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS.
@@ -11,6 +14,8 @@ The project began as a reusable pack for coding agents. It now provides a provid
 | Capability | Status | What that means |
 | --- | --- | --- |
 | Local browser assistant | **Available; portable development builds available** | The shared browser UI runs from source or an unsigned PyInstaller one-folder package. Guided setup remains read-only and installation remains disabled. A dedicated advanced Evidence section shows committed outcome and surface-readiness details without running live tests, with one fixed explicit-click link to the repository wiki. |
+| Milestone 22 admission gates | **Explicit and fail-closed** | A repository-local offline ledger distinguishes the admitted read-only development scope from deferred or blocked Tauri, production package, installer, updater, and executable-composition gates without granting authority. |
+| Build provenance attestation | **Prepared locally; not yet executed** | A main-push-only least-privilege job will attest the three reverified unsigned development archives after native package success. It publishes no Release and makes no Windows-signing, macOS-notarization, updater-trust, or production claim. |
 | Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
 | Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
 | Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
@@ -78,7 +83,7 @@ Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recomm
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD. Vulkan failed its patch gate, Intel is parked, and physical Mac remains last. |
-| Milestone 27: Local Knowledge Context And Retrieval | Initial attachment slice and offline history foundation in progress | A unified bounded `.txt`/`.md`/PNG picker, clipboard PNG paste, previews, removal, compact scrolling, cleanup, and warned submit-confirmed private-network transfer are implemented. Lexical retrieval and conversation-history contracts grant no runtime authority; the history schema and lifecycle planners are simulation-only and create no database. Vision-model evidence, retrieval implementation, broader formats, encryption decisions, and persistent history remain open. |
+| Milestone 27: Local Knowledge Context And Retrieval | Initial attachment slice and offline history/retrieval foundations in progress | A unified bounded `.txt`/`.md`/PNG picker and clipboard PNG paste are implemented. The deterministic memory-only lexical core and history lifecycle planners are offline-tested but grant no runtime route, UI, provider, or storage authority. The encryption/key architecture is reviewed with fail-closed OS credential handling; dependency selection, native parity, vision evidence, broader formats, active retrieval, and persistent history remain open. |
 | Milestone 28: Controlled Web Research | Proposed | Explicit per-query approval, fixed search adapters, trusted citations, hostile-content isolation, SSRF controls, and cleanup are defined; models have no internet tool today. |
 
 See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
@@ -111,7 +116,7 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, cross-platform packaged-browser UI/attachment smoke tests, read-only and abrupt-exit lifecycle tests, hostile integrity/shutdown/archive tests, bounded archives, checksums, full file inventory, exact dependency inventory, notices, SBOM and provenance evidence, and the unsigned-development limitation.
+Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, cross-platform packaged-browser UI/attachment smoke tests, read-only and abrupt-exit lifecycle tests, hostile integrity/shutdown/archive tests, bounded archives, checksums, full file inventory, exact runtime-component coverage, dependency inventory, notices, expanded SBOM and provenance evidence, and the unsigned-development limitation.
 
 The [bounded task composition](docs/task-composition.md) foundation can order up to six registry-backed read-only workflow plans, validate fresh/retry/cancel identity, and emit exactly typed metadata-only intermediate references. Separate inactive gates model future effect disclosure, digest-bound approval scope, typed intermediate validation, retry/cancel/recovery state, and a digest-chained journal of non-authoritative execution claims. They are simulation-only: no token is issued or accepted, no journal is written, and no process, filesystem, network, artifact, approval, or machine-modification authority exists.
 
@@ -231,7 +236,7 @@ manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
 
 The local web app derives automatic selections from `config/text-capability-model-recommendations.json`; the renderer cannot promote a model. The current matching capability evidence and exact Ollama digest make `qwen3.5:9b` the only eligible installed automatic choice for chat, writing, and summarization. A matching name with a missing or different digest remains an explicit unverified advanced choice. This means “exact adapter artifact currently validated by Haven 42,” not “best model available online,” and hardware fit remains profile-specific.
 
-The exact-digest writing matrix ran twice on Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H. Qwen, Gemma, and Mistral passed all three automated synthetic constraint cases in both runs; Granite passed the same two cases in both runs. Every model was unloaded and independently confirmed absent afterward. This is not comparative prose-quality evidence: broader repeated sampling, license review, hardware utilization evidence, and blind human scoring remain required before any candidate can replace the Qwen adapter baseline. See `docs/writing-model-evaluation.md` and `examples/writing-model-matrix-validation.md`.
+The exact-digest writing matrix ran twice on Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H. Qwen, Gemma, and Mistral passed all three automated synthetic constraint cases in both runs; Granite passed the same two cases in both runs. Two randomized three-scenario packets also captured forced rankings from one reviewer: Qwen led the first and Granite the second. Every model was unloaded and independently confirmed absent afterward. This is not comparative prose-quality evidence: independent reviewers, criterion-level scoring, broader repeated sampling, license review, and hardware utilization evidence remain required before any candidate can replace the Qwen adapter baseline. See `docs/writing-model-evaluation.md`, `examples/writing-model-matrix-validation.md`, and `examples/blind-writing-quality-review.md`.
 
 If you are unsure which model fits your machine, run the hardware profile script. If your LLM runs on another machine, use `docs/remote-hardware-profile.md` to collect that machine's profile over SSH:
 

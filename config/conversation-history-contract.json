@@ -90,7 +90,27 @@
     "globalRuntimeRequired": false,
     "encryptionAtRestAdmitted": false,
     "sqlCipherEvaluationRequired": true,
-    "osCredentialStoreEvaluationRequired": true
+    "osCredentialStoreEvaluationRequired": true,
+    "architectureReviewCompleted": true,
+    "architectureReview": "docs/conversation-history-encryption-review.md",
+    "databaseKeyStoredBesideDatabaseAllowed": false,
+    "plaintextKeyFallbackAllowed": false,
+    "silentPasswordDerivationAllowed": false,
+    "credentialStoreUnavailableBehavior": "fail-closed-private-session"
+  },
+  "keyManagement": {
+    "runtimeAdmitted": false,
+    "databaseKeyGenerationAllowed": false,
+    "databaseKeyWrapAllowed": false,
+    "platformCandidates": {
+      "windows": "dpapi-current-user",
+      "linux": "secret-service-user-session",
+      "macos": "keychain-services-current-user"
+    },
+    "wrappedKeyContainsConversationDataAllowed": false,
+    "automaticDatabaseResetOnKeyLossAllowed": false,
+    "atomicRekeyAndVerificationRequiredBeforeRotation": true,
+    "unavailableOrLockedBehavior": "preserve-database-and-use-private-session"
   },
   "lifecycle": {
     "privateSessionWriteFree": true,

@@ -2,6 +2,11 @@
 
 `config/github-repository-policy.json` is the reviewable source of truth for Haven 42 repository governance. `scripts/verify-github-repository-policy.py` checks committed workflow structure offline; `--live` additionally compares the authoritative GitHub repository settings through GitHub CLI.
 
+The privacy gate scans reachable Git history plus every tracked or untracked
+non-ignored working-tree file. This catches pending evidence before staging or
+commit while preserving ignored local review/build directories outside the
+public-repository scope.
+
 ## Required Pull Request Gate
 
 `main` requires a current branch and these uniquely named checks:
@@ -16,7 +21,19 @@
 - macOS portable package
 - CodeQL Python analysis
 
+Portable jobs use one immutable GitHub-owned `setup-python` action commit and
+one exact Python 3.14.6 patch version across all three native runners. This
+keeps runtime, SBOM, notice, and component evidence from drifting with runner
+image defaults.
+
 The three package jobs live in `Validate Pack` beside repository validation so one exact-SHA workflow and the existing hosted verifier cover the complete cross-platform gate. CodeQL remains a separate least-privilege security workflow.
+
+`Attest unsigned development artifacts` is intentionally not a pull-request
+required check. It is skipped for pull requests and runs only on a push to
+`main` after all three package jobs succeed. This prevents untrusted
+pull-request code from receiving OIDC or attestation-write authority while
+still binding the resulting main-branch unsigned archives to their hosted
+build.
 
 ## Merge And Branch Rules
 
@@ -27,6 +44,14 @@ The repository currently has one eligible CODEOWNER. GitHub does not allow an au
 ## Actions Rules
 
 Actions receive read-only default workflow permission and cannot approve pull requests. Only GitHub-owned actions are admitted, and GitHub enforces full-length commit-SHA pinning. Workflows independently declare minimum permissions and disable persisted checkout credentials.
+
+The isolated attestation job adds only `actions: read`, `contents: read`,
+`id-token: write`, `attestations: write`, and `artifact-metadata: write`.
+Repository contents, packages, releases, pull requests, deployments, and
+administration remain non-writable. The static verifier rejects attestation on
+`pull_request_target`, moving action tags, registry publication, Release-like
+write permissions, incomplete native artifact coverage, or drift from
+`config/github-repository-policy.json`.
 
 ## Efficient Local-to-Hosted Flow
 

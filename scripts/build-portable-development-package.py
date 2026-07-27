@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import hashlib
 import importlib.metadata
 import json
@@ -12,11 +13,14 @@ from pathlib import Path
 import platform
 import re
 import shutil
+import ssl
 import subprocess
 import sys
 import tarfile
 import tempfile
 import zipfile
+
+from portable_runtime_components import classify
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -48,6 +52,25 @@ PLATFORM_BUILD_DISTRIBUTIONS = {
     "Darwin": {"macholib": ("1.16.3", "MIT")},
     "Linux": {},
 }
+LICENSE_EVIDENCE = {
+    "APACHE-2.0.txt": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
+    "CPYTHON-3.14.6-LICENSE.txt": "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
+    "LIBFFI-3.4.4-LICENSE.txt": "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
+}
+PYTHON_DISTRIBUTIONS = {
+    "windows-amd64": {
+        "asset": "python-3.14.6-win32-x64.zip",
+        "sha256": "dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9",
+    },
+    "linux-x86_64": {
+        "asset": "python-3.14.6-linux-24.04-x64.tar.gz",
+        "sha256": "29dc7f3887a430fe7a0005fee4732b00be1bbed5bf21aa1e43f8d947eb1b9f61",
+    },
+    "darwin-arm64": {
+        "asset": "python-3.14.6-darwin-arm64.tar.gz",
+        "sha256": "7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c",
+    },
+}
 
 
 def sha256(path: Path) -> str:
@@ -61,6 +84,36 @@ def sha256(path: Path) -> str:
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def windows_system_root() -> Path:
+    buffer = ctypes.create_unicode_buffer(32_768)
+    length = ctypes.windll.kernel32.GetWindowsDirectoryW(buffer, len(buffer))
+    if length <= 0 or length >= len(buffer):
+        raise SystemExit("Could not resolve the trusted Windows directory.")
+    return Path(buffer.value).resolve()
+
+
+def pyinstaller_environment() -> dict[str, str]:
+    environment = os.environ.copy()
+    environment.pop("PYTHONHOME", None)
+    environment.pop("PYTHONPATH", None)
+    environment["PYTHONNOUSERSITE"] = "1"
+    environment["PYTHONSAFEPATH"] = "1"
+    if platform.system() == "Windows":
+        system_root = windows_system_root()
+        admitted = (
+            Path(sys.executable).resolve().parent,
+            Path(sys.base_prefix).resolve(),
+            system_root / "System32",
+            system_root,
+        )
+        environment["PATH"] = os.pathsep.join(
+            str(path)
+            for index, path in enumerate(admitted)
+            if path.is_dir() and path not in admitted[:index]
+        )
+    return environment
 
 
 def build_resource_manifest() -> None:
@@ -77,6 +130,14 @@ def build_resource_manifest() -> None:
         "algorithm": "sha256",
         "resources": resources,
     })
+
+
+def copy_license_evidence(evidence: Path) -> None:
+    for name, expected_digest in sorted(LICENSE_EVIDENCE.items()):
+        source = ROOT / "package" / "licenses" / name
+        if not source.is_file() or sha256(source) != expected_digest:
+            raise SystemExit(f"License evidence mismatch: {name}")
+        shutil.copy2(source, evidence / name)
 
 
 def dependency_records() -> list[dict[str, str]]:
@@ -101,6 +162,52 @@ def dependency_records() -> list[dict[str, str]]:
             "license": reviewed_license,
         })
     return sorted(records, key=lambda item: item["name"].lower())
+
+
+def validate_windows_executable_metadata(package_dir: Path) -> None:
+    if platform.system() != "Windows":
+        return
+    try:
+        import pefile
+    except ImportError as error:
+        raise SystemExit("pefile is required to verify Windows executable metadata.") from error
+    executable = package_dir / "haven42.exe"
+    try:
+        pe = pefile.PE(str(executable), fast_load=True)
+        pe.parse_data_directories(
+            directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_RESOURCE"]]
+        )
+        metadata: dict[str, str] = {}
+        for file_info in getattr(pe, "FileInfo", []):
+            for entry in file_info:
+                if getattr(entry, "Key", b"") != b"StringFileInfo":
+                    continue
+                for table in entry.StringTable:
+                    metadata.update({
+                        key.decode("utf-8"): value.decode("utf-8")
+                        for key, value in table.entries.items()
+                    })
+    except (OSError, pefile.PEFormatError, UnicodeDecodeError) as error:
+        raise SystemExit("Could not verify Windows executable metadata.") from error
+    finally:
+        if "pe" in locals():
+            pe.close()
+    expected = {
+        "FileDescription": "Haven 42",
+        "FileVersion": APP_VERSION,
+        "OriginalFilename": "haven42.exe",
+        "ProductName": "Haven 42",
+        "ProductVersion": APP_VERSION,
+    }
+    if any(metadata.get(key) != value for key, value in expected.items()):
+        raise SystemExit(
+            "Windows executable metadata mismatch: "
+            + ", ".join(
+                f"{key}={metadata.get(key)!r} (expected {value!r})"
+                for key, value in expected.items()
+                if metadata.get(key) != value
+            )
+        )
 
 
 def commit_identity() -> str:
@@ -133,6 +240,38 @@ def package_file_records(package_dir: Path) -> list[dict[str, object]]:
         for path in sorted(package_dir.rglob("*"))
         if path.is_file()
     ]
+
+
+def openssl_runtime_version() -> str:
+    match = re.match(r"^OpenSSL\s+([0-9]+\.[0-9]+\.[0-9]+)", ssl.OPENSSL_VERSION)
+    return match.group(1) if match else "unresolved"
+
+
+def python_distribution_provenance(target: str) -> dict[str, str]:
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return {
+            "repository": "local-build-environment",
+            "releaseTag": "",
+            "releaseCommit": "",
+            "asset": "",
+            "sha256": "",
+            "verification": "local-unverified",
+        }
+    expected = PYTHON_DISTRIBUTIONS.get(target)
+    if expected is None:
+        raise SystemExit(f"No admitted Python distribution for target: {target}")
+    asset = os.environ.get("HAVEN42_PYTHON_SOURCE_ASSET", "")
+    digest = os.environ.get("HAVEN42_PYTHON_SOURCE_SHA256", "")
+    if asset != expected["asset"] or digest != expected["sha256"]:
+        raise SystemExit("GitHub Python distribution identity mismatch.")
+    return {
+        "repository": "actions/python-versions",
+        "releaseTag": "3.14.6-27283001424",
+        "releaseCommit": "25a990ef82051ebb9cba2b6ed6b79e61148a5bfb",
+        "asset": asset,
+        "sha256": digest,
+        "verification": "pinned-setup-python-release-metadata",
+    }
 
 
 def create_archive(package_dir: Path, artifact_dir: Path, target: str) -> Path:
@@ -169,10 +308,11 @@ def main() -> int:
             "--distpath", str(output / "bundle"),
             "--workpath", str(work),
             str(ROOT / "package/haven42.spec"),
-        ], cwd=ROOT, check=True)
+        ], cwd=ROOT, check=True, env=pyinstaller_environment())
     package_dir = output / "bundle" / "haven42"
     if not package_dir.is_dir():
         raise SystemExit("PyInstaller one-folder output was not found.")
+    validate_windows_executable_metadata(package_dir)
     unexpected = {path.name for path in package_dir.iterdir()} - ALLOWED_PACKAGE_ENTRIES
     if unexpected:
         raise SystemExit(f"Unexpected top-level package entries: {sorted(unexpected)}")
@@ -183,16 +323,6 @@ def main() -> int:
     )
     dependencies = dependency_records()
     evidence = output / "evidence"
-    write_json(evidence / "dependency-inventory.json", {
-        "schemaVersion": 2,
-        "target": target,
-        "runtimeComponents": [{
-            "name": "CPython",
-            "version": platform.python_version(),
-            "scope": "embedded-runtime",
-        }],
-        "buildDependencies": dependencies,
-    })
     archive_staging = tempfile.TemporaryDirectory(
         prefix="haven42-archive-staging-",
         dir=output,
@@ -200,11 +330,33 @@ def main() -> int:
     staged_package_dir = Path(archive_staging.name) / "haven42"
     shutil.copytree(package_dir, staged_package_dir, symlinks=False)
     package_files = package_file_records(staged_package_dir)
+    runtime_inventory = classify(
+        package_files,
+        target,
+        platform.python_version(),
+        openssl_runtime_version(),
+    )
     write_json(evidence / "package-file-inventory.json", {
         "schemaVersion": 1,
         "algorithm": "sha256",
         "packageRoot": "haven42",
         "files": package_files,
+    })
+    write_json(evidence / "runtime-component-inventory.json", runtime_inventory)
+    write_json(evidence / "dependency-inventory.json", {
+        "schemaVersion": 3,
+        "target": target,
+        "runtimeComponents": [
+            {
+                key: item[key]
+                for key in (
+                    "id", "name", "version", "license", "reviewStatus",
+                    "sourceProvenance", "fileCount",
+                )
+            }
+            for item in runtime_inventory["runtimeComponents"]
+        ],
+        "buildDependencies": dependencies,
     })
     write_json(evidence / "build-provenance.json", {
         "schemaVersion": 1,
@@ -224,6 +376,7 @@ def main() -> int:
             "architecture": platform.machine().lower(),
             "pythonImplementation": platform.python_implementation(),
             "pythonVersion": platform.python_version(),
+            "pythonDistribution": python_distribution_provenance(target),
             "pyinstallerVersion": importlib.metadata.version("pyinstaller"),
         },
         "security": {
@@ -240,7 +393,12 @@ def main() -> int:
         "specVersion": "1.5",
         "version": 1,
         "metadata": {
-            "component": {"type": "application", "name": "Haven 42", "version": APP_VERSION},
+            "component": {
+                "type": "application",
+                "name": "Haven 42",
+                "version": APP_VERSION,
+                "licenses": [{"expression": "MIT"}],
+            },
             "tools": {
                 "components": [
                     {"type": "application", "name": item["name"], "version": item["version"]}
@@ -254,11 +412,19 @@ def main() -> int:
         },
         "components": [
             {
-                "type": "framework",
-                "name": "CPython",
-                "version": platform.python_version(),
+                "type": "framework" if item["id"] == "cpython" else "library",
+                "name": item["name"],
+                "version": item["version"],
                 "scope": "required",
+                "licenses": [{"expression": item["license"]}],
+                "properties": [
+                    {"name": "haven42:component-id", "value": item["id"]},
+                    {"name": "haven42:review-status", "value": item["reviewStatus"]},
+                    {"name": "haven42:file-count", "value": str(item["fileCount"])},
+                    {"name": "haven42:signing-eligible", "value": "false"},
+                ],
             }
+            for item in runtime_inventory["runtimeComponents"]
         ],
     })
     notices = [
@@ -269,7 +435,22 @@ def main() -> int:
         "",
     ]
     notices.extend(f"{item['name']} {item['version']} — {item['license']}" for item in dependencies)
+    notices.extend([
+        "",
+        "Embedded runtime component inventory",
+        "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION.",
+        "Every runtime component below is excluded from Haven 42 signing scope.",
+        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
+        "LIBFFI-3.4.4-LICENSE.txt are included as hash-verified license evidence.",
+        "",
+    ])
+    notices.extend(
+        f"{item['name']} {item['version']} — {item['license']} — "
+        f"{item['reviewStatus']} — {item['fileCount']} files"
+        for item in runtime_inventory["runtimeComponents"]
+    )
     (evidence / "THIRD-PARTY-NOTICES.txt").write_text("\n".join(notices) + "\n", encoding="utf-8")
+    copy_license_evidence(evidence)
     archive = create_archive(staged_package_dir, artifact_dir, target)
     archive_staging.cleanup()
     for path in sorted(evidence.iterdir()):

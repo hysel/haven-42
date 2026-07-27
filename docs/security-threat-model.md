@@ -115,7 +115,12 @@ Readiness inspection is an explicit CSRF-protected POST with a single concurrent
 
 Milestone 27 admits only explicit bounded UTF-8 `.txt`/`.md` attachment and browsed-or-pasted PNG screenshots. The browser exposes no arbitrary path or background scan authority; the loopback engine revalidates normalized names, exact media types and byte counts, text count/size budgets, PNG base64 and signature, chunk bounds and CRCs, screenshot count/size/dimension/pixel budgets, duplicates, NUL content, and provider consent. All attachment content, including visible image text, is labeled untrusted inert reference data and cannot add authority. The runtime exposes no attachment-driven tool invocation, shell, process launch, filesystem write, archive expansion, or model-output execution path, and makes no antivirus claim. Screenshot transport uses Ollama's documented message-image field, while model image understanding stays unverified and visibly warned until exact evidence passes. Private-network transfer shows a prominent warning and deliberate Send confirms it without a separate checkbox; the engine still rejects a forged request missing that confirmation. State remains memory-only, and no temporary file is allowed. PDF, Office, archive, OCR, directory, retrieval-index, embedding, and persistent-index support do not inherit approval from this slice.
 
-The lexical-retrieval contract is simulation-only. It grants no runtime route, UI, provider payload, filesystem path, parser, network, model-ranking, embedding, temporary-file, or persistent-index authority. Its hostile fixtures are inert data used to preserve the future boundary; they are not a retrieval engine.
+The lexical-retrieval core is offline-only and memory-only. It deterministically
+chunks already validated text, ranks bounded casefolded terms, discloses every
+selected source and offset, and clears on removal, failure, or shutdown. Its
+contract grants no runtime route, UI, provider payload, filesystem path, parser,
+network, model-ranking, embedding, temporary-file, or persistent-index
+authority. Embedded commands and tool requests remain inert text.
 
 The conversation-history contract is also simulation-only. Its logical
 SQLite-compatible schema includes no executable SQL, and its planner does not
