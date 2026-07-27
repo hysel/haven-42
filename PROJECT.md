@@ -28,6 +28,17 @@ Unicode emoji while keeping raw HTML inert. Prompt recall uses Up/Down with
 multiline-safe boundaries, defaults to 20 entries, offers 50 or 100 in System,
 and remains task-bound browser memory.
 
+A dedicated advanced **Evidence** navigation section now exposes a bounded
+summary derived by one cross-platform standard-library engine from committed
+sanitized catalogs. Keeping it outside the everyday chat and setup flow avoids
+turning developer validation metrics into a primary user task. It displays
+evidence counts and supported/candidate agent-surface status without running
+tests, contacting a provider, reading a user repository, starting a process,
+writing a file, or claiming production readiness. Source browser validation
+and native packaged browser/parity smoke tests cover Windows, Linux, and macOS.
+The page exposes outcome totals and per-surface activity counts directly, with
+one fixed explicit-click no-referrer link to the detailed repository wiki.
+
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system
 status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Milestone 22B retains executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native

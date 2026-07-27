@@ -130,6 +130,20 @@ def probe(
                 "servicesChanged": False,
                 "driversChanged": False,
             }
+        with request(
+            origin + "/api/assurance", "POST", token, b"{}",
+        ) as response:
+            assurance = json.load(response)
+            assert assurance["kind"] == "read-only-assurance-summary"
+            assert assurance["status"] == "ready"
+            assert assurance["sources"] == {
+                "evidenceCatalog": "config/evidence-catalog.tsv",
+                "surfaceMatrix": "config/agent-surface-capabilities.json",
+                "surfaceSolutions": "config/agent-surface-solutions.json",
+            }
+            assert assurance["evidence"]["recordCount"] >= 1
+            assert assurance["surfaces"]
+            assert all(value is False for value in assurance["effects"].values())
         plan_body = json.dumps({
             "snapshotId": readiness["snapshotId"],
             "intent": "guided-setup",
@@ -185,6 +199,7 @@ def probe(
             "updates": bootstrap["updates"],
             "privacy": bootstrap["privacy"],
             "appDigest": app_digest,
+            "assurance": assurance,
         }
     finally:
         if process.poll() is None:

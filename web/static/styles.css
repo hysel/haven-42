@@ -285,6 +285,19 @@ summary { cursor: pointer; font-size: 12px; }
 .capability-item small { color: var(--muted); font-size: 10px; }
 .capability-state { color: var(--accent); text-align: right; }
 .capability-state.unavailable, .capability-state.required { color: var(--muted); }
+.assurance-list { display: grid; gap: 8px; margin-top: 13px; }
+.assurance-status-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin: 10px 0 20px; }
+.assurance-status-item { display: flex; justify-content: space-between; gap: 12px; padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; background: rgba(2, 12, 13, 0.34); }
+.assurance-status-item span { color: var(--muted); font-size: 11px; text-transform: capitalize; }
+.assurance-status-item strong { color: var(--accent); font-size: 12px; }
+.assurance-item { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid rgba(132, 190, 180, 0.09); }
+.assurance-item:last-child { border: 0; }
+.assurance-item strong, .assurance-item small { display: block; overflow-wrap: anywhere; }
+.assurance-item strong { font-size: 12px; }
+.assurance-item small { color: var(--muted); font-size: 10px; }
+.assurance-state { color: var(--accent) !important; text-align: right; }
+.assurance-state.candidate { color: #e8c57c !important; }
+.assurance-wiki-link { display: inline-flex; margin-top: 16px; }
 
 .chat-panel { height: calc(100vh - 186px); min-height: 560px; max-height: 880px; display: flex; flex-direction: column; }
 .chat-panel > .panel-heading { flex: 0 0 auto; padding: 24px 24px 0; }

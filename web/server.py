@@ -58,6 +58,10 @@ from system_readiness import (  # noqa: E402
     inspect_system,
     validate_snapshot,
 )
+from evidence_dashboard import (  # noqa: E402
+    EvidenceDashboardError,
+    build_public_assurance_summary,
+)
 
 
 APP_VERSION = "0.3.0"
@@ -176,6 +180,8 @@ ATTACHMENT_SAFETY_PROMPT = (
 )
 MODEL_RECOMMENDATIONS_PATH = ROOT / "config" / "text-capability-model-recommendations.json"
 EVIDENCE_CATALOG_PATH = ROOT / "config" / "evidence-catalog.tsv"
+SURFACE_MATRIX_PATH = ROOT / "config" / "agent-surface-capabilities.json"
+SURFACE_SOLUTIONS_PATH = ROOT / "config" / "agent-surface-solutions.json"
 WORKFLOW_REGISTRY_PATH = ROOT / "config" / "workflows.json"
 PROMOTED_IMAGE_MODEL = "sd_xl_base_1.0.safetensors"
 MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$")
@@ -521,6 +527,7 @@ class HavenState:
         recommendation_path: Path = MODEL_RECOMMENDATIONS_PATH,
         readiness_provider: Callable[[], dict[str, Any]] = inspect_system,
         model_catalog_provider: Callable[[str], list[str]] = search_ollama_catalog,
+        assurance_provider: Callable[[], dict[str, Any]] | None = None,
     ) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
@@ -542,11 +549,39 @@ class HavenState:
         self.image_timeout_seconds = 300
         self.readiness_provider = readiness_provider
         self.model_catalog_provider = model_catalog_provider
+        self.assurance_provider = assurance_provider or (
+            lambda: build_public_assurance_summary(
+                EVIDENCE_CATALOG_PATH,
+                SURFACE_MATRIX_PATH,
+                SURFACE_SOLUTIONS_PATH,
+            )
+        )
         self.readiness_snapshot: dict[str, Any] | None = None
         self.readiness_created = 0.0
         self.model_recommendations = load_model_recommendations(recommendation_path)
         self.read_only_workflows = load_read_only_workflows()
         self.package_integrity = verify_packaged_resources()
+
+    def assurance_summary(self) -> dict[str, Any]:
+        try:
+            result = self.assurance_provider()
+        except EvidenceDashboardError as error:
+            raise WebRequestError("assurance-evidence-unavailable", HTTPStatus.SERVICE_UNAVAILABLE) from error
+        if (
+            not isinstance(result, dict)
+            or result.get("kind") != "read-only-assurance-summary"
+            or result.get("status") != "ready"
+            or result.get("effects") != {
+                "networkAccess": False,
+                "processCreation": False,
+                "filesystemWrite": False,
+                "repositoryRead": False,
+                "providerInvocation": False,
+                "machineModification": False,
+            }
+        ):
+            raise WebRequestError("assurance-evidence-invalid", HTTPStatus.SERVICE_UNAVAILABLE)
+        return result
 
     def search_models(self, query: object, online: object) -> dict[str, Any]:
         try:
@@ -1634,6 +1669,11 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if body:
                     raise WebRequestError("invalid-workflow-catalog-fields")
                 self._send_json(HTTPStatus.OK, self.server.state.list_workflows())
+                return
+            if self.path == "/api/assurance":
+                if body:
+                    raise WebRequestError("invalid-assurance-fields")
+                self._send_json(HTTPStatus.OK, self.server.state.assurance_summary())
                 return
             if self.path == "/api/model-search":
                 if set(body) != {"query", "online"}:

@@ -329,6 +329,38 @@ def main() -> int:
             "qwen3.5",
         ] if query == "writing" else [],
     )
+    invalid_assurance_state = WEB.HavenState(
+        assurance_provider=lambda: {
+            "kind": "read-only-assurance-summary",
+            "status": "ready",
+            "effects": {
+                "networkAccess": True,
+                "processCreation": False,
+                "filesystemWrite": False,
+                "repositoryRead": False,
+                "providerInvocation": False,
+                "machineModification": False,
+            },
+        },
+    )
+    try:
+        invalid_assurance_state.assurance_summary()
+        raise AssertionError("unsafe assurance effects were accepted")
+    except WEB.WebRequestError as error:
+        assert error.code == "assurance-evidence-invalid"
+        assert error.status == HTTPStatus.SERVICE_UNAVAILABLE
+    unavailable_assurance_state = WEB.HavenState(
+        assurance_provider=lambda: (_ for _ in ()).throw(
+            WEB.EvidenceDashboardError("unavailable")
+        ),
+    )
+    try:
+        unavailable_assurance_state.assurance_summary()
+        raise AssertionError("unavailable assurance evidence was accepted")
+    except WEB.WebRequestError as error:
+        assert error.code == "assurance-evidence-unavailable"
+        assert error.status == HTTPStatus.SERVICE_UNAVAILABLE
+    checks += 2
     app = WEB.HavenWebServer(("127.0.0.1", 0), state)
     app_thread = threading.Thread(target=app.serve_forever, daemon=True)
     app_thread.start()
@@ -419,6 +451,36 @@ def main() -> int:
         )
         assert status == 400 and error["error"] == "invalid-workflow-plan-fields"
         checks += 14
+
+        status, assurance, _ = request_json(
+            origin + "/api/assurance", "POST", {}, token, origin,
+        )
+        assert status == 200 and assurance["kind"] == "read-only-assurance-summary"
+        assert assurance["status"] == "ready"
+        assert assurance["sources"] == {
+            "evidenceCatalog": "config/evidence-catalog.tsv",
+            "surfaceMatrix": "config/agent-surface-capabilities.json",
+            "surfaceSolutions": "config/agent-surface-solutions.json",
+        }
+        assert assurance["evidence"]["recordCount"] >= 1
+        assert assurance["evidence"]["modelCount"] >= 1
+        assert len(assurance["surfaces"]) == 4
+        assert all(value is False for value in assurance["effects"].values())
+        assert all(
+            set(surface) == {
+                "id", "name", "supportTier", "validationLevel",
+                "supportedActivities", "validatedActivities", "blockedActivities",
+                "installStatus", "configureStatus", "testStatus",
+            }
+            for surface in assurance["surfaces"]
+        )
+        serialized_assurance = json.dumps(assurance)
+        assert '"notes"' not in serialized_assurance and str(ROOT) not in serialized_assurance
+        status, error, _ = request_json(
+            origin + "/api/assurance", "POST", {"force": True}, token, origin,
+        )
+        assert status == 400 and error["error"] == "invalid-assurance-fields"
+        checks += 9
 
         fake_url = f"http://127.0.0.1:{fake.server_port}"
         status, image_connection, _ = request_json(
@@ -1392,6 +1454,11 @@ def main() -> int:
         assert policy["executionEvents"]["failedInputPersistenceAllowed"] is False
         assert policy["executionEvents"]["unverifiedModelWarningRequired"] is True
         assert policy["browser"]["remoteAssetsAllowed"] is False
+        assert policy["browser"]["fixedExternalNavigationUrls"] == [
+            "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"
+        ]
+        assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
+        assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
         javascript = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
         html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
         styles = (ROOT / "web/static/styles.css").read_text(encoding="utf-8")
@@ -1466,6 +1533,18 @@ def main() -> int:
         assert ".message-content h3" in styles and ".message-content ul" in styles
         assert ".message-content pre" in styles and '"Segoe UI Emoji"' in styles
         assert "renderTypedResult" in javascript and "renderCapabilities" in javascript
+        assert "/api/assurance" in javascript and 'id="assurance-panel"' in html
+        assert 'id="assurance-nav"' in html and 'class="panel chat-panel hidden" id="assurance-panel"' in html
+        assert html.index('id="assurance-panel"') < html.index('class="configuration-column"')
+        assert '"assurance-panel", "about-panel"' in javascript and "openAssurance" in javascript
+        assert 'id="assurance-surface-list"' in html and "renderAssuranceSummary" in javascript
+        assert 'id="assurance-status-list"' in html and "assurance-status-item" in javascript
+        assert "supportedActivities} supported" in javascript and "blockedActivities} blocked" in javascript
+        assert html.count('href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') == 1 and html.count('href="http') == 1
+        assert 'target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"' in html
+        assert "read-only-assurance-summary" in javascript and "providerInvocation" in javascript
+        assert "Bundled sanitized evidence only" in html
+        assert ".assurance-list {" in styles and ".assurance-item {" in styles
         assert "validateExecutionEvents" in javascript and "event-after-terminal" in javascript
         assert "validateRecovery" in javascript and "invalid-recovery-envelope" in javascript
         assert "missing-accepted-event" in javascript
@@ -1488,7 +1567,7 @@ def main() -> int:
         assert "webbrowser" not in (ROOT / "web/server.py").read_text(encoding="utf-8")
         readiness_source = (ROOT / "scripts/system_readiness.py").read_text(encoding="utf-8")
         assert 'ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))' in readiness_source
-        checks += 90
+        checks += 105
     finally:
         app.shutdown()
         app.server_close()

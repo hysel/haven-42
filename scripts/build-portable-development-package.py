@@ -27,6 +27,8 @@ RESOURCE_PATHS = (
     "web/static/styles.css",
     "config/text-capability-model-recommendations.json",
     "config/evidence-catalog.tsv",
+    "config/agent-surface-capabilities.json",
+    "config/agent-surface-solutions.json",
     "config/install-component-registry.json",
     "config/workflows.json",
 )

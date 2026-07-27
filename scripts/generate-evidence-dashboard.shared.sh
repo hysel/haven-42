@@ -43,13 +43,25 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-if command -v pwsh >/dev/null 2>&1; then
-  args=(-EvidenceCatalogPath "$EVIDENCE_CATALOG" -SurfaceMatrixPath "$SURFACE_MATRIX" -SurfaceSolutionPath "$SURFACE_SOLUTIONS")
-  [ -n "$OUTPUT_PATH" ] && args+=(-OutputPath "$OUTPUT_PATH")
-  [ -n "$MARKDOWN_OUTPUT_PATH" ] && args+=(-MarkdownOutputPath "$MARKDOWN_OUTPUT_PATH")
-  [ "$AS_JSON" -eq 1 ] && args+=(-AsJson)
-  exec pwsh -NoProfile -ExecutionPolicy Bypass -File "$SCRIPT_DIR/generate-evidence-dashboard.ps1" "${args[@]}"
+args=(
+  --evidence-catalog-path "$EVIDENCE_CATALOG"
+  --surface-matrix-path "$SURFACE_MATRIX"
+  --surface-solution-path "$SURFACE_SOLUTIONS"
+)
+[ -n "$OUTPUT_PATH" ] && args+=(--output-path "$OUTPUT_PATH")
+[ -n "$MARKDOWN_OUTPUT_PATH" ] && args+=(--markdown-output-path "$MARKDOWN_OUTPUT_PATH")
+[ "$AS_JSON" -eq 1 ] && args+=(--as-json)
+if command -v python3 >/dev/null 2>&1 &&
+   python3 -c 'import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
+  python_command=(python3)
+elif command -v python >/dev/null 2>&1 &&
+     python -c 'import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
+  python_command=(python)
+elif command -v py >/dev/null 2>&1 &&
+     py -3 -c 'import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)' >/dev/null 2>&1; then
+  python_command=(py -3)
+else
+  printf 'Python 3 is required to generate the evidence dashboard.\n' >&2
+  exit 1
 fi
-
-printf '# Evidence Dashboard\n\n'
-printf 'PowerShell is required for full dashboard generation on this platform.\n'
+exec "${python_command[@]}" "$SCRIPT_DIR/evidence_dashboard.py" "${args[@]}"

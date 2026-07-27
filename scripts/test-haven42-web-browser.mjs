@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const QWEN_DIGEST = "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7";
 const TEST_PNG = Buffer.from("89504e470d0a1a0a0000000d494844520000020000000200", "hex");
+const LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000;
 let models = ["qwen3.5:9b", "unknown-model:latest"];
 const loaded = new Set();
 const requests = [];
@@ -267,8 +268,25 @@ try {
     stdio: ["ignore", "pipe", "pipe"],
   });
   let output = "";
+  let errorOutput = "";
+  let havenLaunchError;
   haven.stdout.on("data", (chunk) => { output += chunk.toString(); });
-  const origin = await waitFor(() => output.match(/http:\/\/127\.0\.0\.1:\d+/)?.[0]);
+  haven.stderr.on("data", (chunk) => {
+    errorOutput = `${errorOutput}${chunk.toString()}`.slice(-4000);
+  });
+  haven.once("error", (error) => { havenLaunchError = error; });
+  const startup = await waitFor(() => {
+    const origin = output.match(/http:\/\/127\.0\.0\.1:\d+/)?.[0];
+    if (origin) return { origin };
+    if (havenLaunchError) return { error: `local-web-launch-error:${havenLaunchError.message}` };
+    if (haven.exitCode !== null) {
+      const detail = errorOutput.trim().replace(/\s+/g, " ").slice(-1000) || "no-stderr";
+      return { error: `local-web-exited-${haven.exitCode}:${detail}` };
+    }
+    return null;
+  }, LOCAL_WEB_STARTUP_TIMEOUT_MS);
+  if (startup.error) throw new Error(startup.error);
+  const { origin } = startup;
   trace("local-web-ready");
   const browserArguments = [
     "--headless=new",
@@ -322,6 +340,45 @@ try {
   if (initial.modal !== "true" || initial.current !== "welcome" || !initial.focused || !initial.skip) throw new Error("initial-accessibility-state");
   checks += 4;
   trace("welcome-verified");
+
+  await waitFor(() => cdp.evaluate("document.querySelector('#assurance-badge').textContent === 'Committed evidence'"));
+  const assurance = await cdp.evaluate(`({
+    badge: document.querySelector('#assurance-badge').textContent,
+    records: Number(document.querySelector('#assurance-record-count').textContent),
+    models: Number(document.querySelector('#assurance-model-count').textContent),
+    surfaces: Number(document.querySelector('#assurance-surface-count').textContent),
+    live: document.querySelector('#assurance-live-status').textContent,
+    statusRows: document.querySelectorAll('#assurance-status-list .assurance-status-item').length,
+    statusTotal: [...document.querySelectorAll('#assurance-status-list .assurance-status-item strong')].reduce((total, item) => total + Number(item.textContent), 0),
+    rows: document.querySelectorAll('#assurance-surface-list .assurance-item').length,
+    candidateRows: document.querySelectorAll('#assurance-surface-list .assurance-state.candidate').length,
+    activityDetails: [...document.querySelectorAll('#assurance-surface-list .assurance-item > div small')].every((item) => item.textContent.includes('supported') && item.textContent.includes('validated') && item.textContent.includes('blocked')),
+    wikiHref: document.querySelector('.assurance-wiki-link').href,
+    wikiTarget: document.querySelector('.assurance-wiki-link').target,
+    wikiRel: document.querySelector('.assurance-wiki-link').rel,
+    wikiReferrer: document.querySelector('.assurance-wiki-link').referrerPolicy,
+    disclosure: document.querySelector('#assurance-panel .field-help').textContent
+  })`);
+  if (
+    assurance.badge !== "Committed evidence"
+    || assurance.records < 1
+    || assurance.models < 1
+    || assurance.surfaces !== 4
+    || assurance.live !== "Not run · read-only summary"
+    || assurance.statusRows < 1
+    || assurance.statusTotal !== assurance.records
+    || assurance.rows !== assurance.surfaces
+    || assurance.candidateRows !== 1
+    || !assurance.activityDetails
+    || assurance.wikiHref !== "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"
+    || assurance.wikiTarget !== "_blank"
+    || !assurance.wikiRel.includes("noopener")
+    || !assurance.wikiRel.includes("noreferrer")
+    || assurance.wikiReferrer !== "no-referrer"
+    || !assurance.disclosure.includes("starts no process")
+  ) throw new Error(`assurance-view:${JSON.stringify(assurance)}`);
+  checks += 17;
+  trace("assurance-view-verified");
 
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#wizard-readiness-next').disabled"));
@@ -1384,15 +1441,24 @@ try {
       active: document.querySelector('#system-nav').classList.contains('active'),
       focused: document.activeElement.id,
     };
+    document.querySelector('#assurance-nav').click();
+    const assurance = {
+      active: document.querySelector('#assurance-nav').classList.contains('active'),
+      visible: !document.querySelector('#assurance-panel').classList.contains('hidden'),
+      modelsHidden: document.querySelector('#models-panel').classList.contains('hidden'),
+      focused: document.activeElement.id,
+      rows: document.querySelectorAll('#assurance-surface-list .assurance-item').length,
+    };
     document.querySelector('#about-nav').click();
     const about = {
       active: document.querySelector('#about-nav').classList.contains('active'),
       visible: !document.querySelector('#about-panel').classList.contains('hidden'),
       modelsHidden: document.querySelector('#models-panel').classList.contains('hidden'),
+      assuranceHidden: document.querySelector('#assurance-panel').classList.contains('hidden'),
       focused: document.activeElement.id,
       version: document.querySelector('#about-version').textContent,
     };
-    return {reducedMotion, models, system, about};
+    return {reducedMotion, models, system, assurance, about};
   })()`);
   if (
     navigation.reducedMotion !== "auto"
@@ -1403,13 +1469,19 @@ try {
     || navigation.models.installed !== 2
     || !navigation.system.active
     || navigation.system.focused !== "system-title"
+    || !navigation.assurance.active
+    || !navigation.assurance.visible
+    || !navigation.assurance.modelsHidden
+    || navigation.assurance.focused !== "assurance-title"
+    || navigation.assurance.rows !== 4
     || !navigation.about.active
     || !navigation.about.visible
     || !navigation.about.modelsHidden
+    || !navigation.about.assuranceHidden
     || navigation.about.focused !== "about-title"
     || !navigation.about.version.startsWith("v")
   ) throw new Error(`accessible-navigation:${JSON.stringify(navigation)}`);
-  checks += 13;
+  checks += 19;
   trace("accessible-navigation-verified");
 
   const hostileEvents = await cdp.evaluate(`(() => {

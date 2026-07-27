@@ -4303,6 +4303,15 @@ Invoke-PackTest "evidence dashboard summarizes catalog and surface status" {
         Assert-True -Condition ($markdown -match "Install Configure Test") -Message "Markdown dashboard should include install/configure/test status."
         Assert-True -Condition ($doc -match "agent-surface-capabilities\.json") -Message "Evidence dashboard doc should reference surface matrix."
         Assert-True -Condition ($doc -match "agent-surface-solutions\.json") -Message "Evidence dashboard doc should reference surface solution catalog."
+        Assert-True -Condition ($doc -match "\| Evidence records \| $($report.EvidenceCount) \|" -and $doc -match "\| Distinct model-field values \| $($report.ModelCount) \|") -Message "Evidence wiki snapshot totals should match the generated dashboard."
+        foreach ($status in $report.StatusCounts) {
+            Assert-True -Condition ($doc -match "\| ``$([regex]::Escape($status.Status))`` \| $($status.Count) \|") -Message "Evidence wiki should include the current $($status.Status) count."
+        }
+        foreach ($surface in $report.SurfaceSolutionReadiness) {
+            Assert-True -Condition ($doc -match [regex]::Escape("| $($surface.Name) |")) -Message "Evidence wiki should describe the tracked $($surface.Name) surface."
+        }
+        Assert-True -Condition ($doc -match "Generated sample \| $(@($report.ValidationModeCounts | Where-Object ValidationMode -eq 'generated-sample')[0].Count) \|" -and $doc -match "Local endpoint \| $(@($report.ValidationModeCounts | Where-Object ValidationMode -eq 'local-endpoint')[0].Count) \|") -Message "Evidence wiki validation-mode counts should match the generated dashboard."
+        Assert-True -Condition ($doc -match "Evidence-Catalog" -and $doc -match "Capability-Evidence-Contract") -Message "Evidence wiki should link to its exact contract and catalog pages."
 
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "generate-evidence-dashboard", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
         Assert-Equal -Actual $dispatch.ExitCode -Expected 0 -Message "Workflow dispatcher should resolve evidence dashboard."
@@ -4951,7 +4960,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "279 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "305 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     $portablePolicy = Get-Content -LiteralPath $portablePolicyPath -Raw | ConvertFrom-Json
     $lexicalContract = Get-Content -LiteralPath $lexicalContractPath -Raw | ConvertFrom-Json
@@ -4961,6 +4970,8 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
     Assert-True -Condition ($policy.images.admittedProfile -eq "linux-comfyui-sdxl-promoted" -and $policy.images.endpointTrustScope -eq "loopback" -and -not $policy.images.customNodesAllowed -and -not $policy.images.localFileWritesAllowed) -Message "The promoted image flow must remain the exact loopback, built-in, browser-memory profile."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects -and $policy.browser.automaticLaunchUrlScope -eq "ipv4-loopback-http-origin-only" -and -not $policy.browser.environmentOverrideAllowed -and -not $policy.browser.shellLaunchAllowed) -Message "Browser security and automatic launch should remain local and default-deny."
+    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard" -Message "External navigation must remain fixed to the detailed evidence wiki."
+    Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL and fail safely."
     Assert-Equal -Actual (($portablePolicy.security.browserLaunchExecutables.linux) -join ",") -Expected "/usr/bin/gio,/usr/bin/xdg-open" -Message "Linux browser launchers must remain fixed and allowlisted."
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
@@ -4983,7 +4994,9 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $writingDoc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/writing-model-evaluation.md") -Raw
     $blindEvidence = Get-Content -LiteralPath (Join-Path $repoRoot "examples/blind-writing-quality-review.md") -Raw
     $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
-    Assert-True -Condition ($assets -notmatch '(?i)(src|href)\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
+    $externalLinks = [regex]::Matches($assets, '(?i)href\s*=\s*["'']https?://[^"'']+["'']')
+    Assert-True -Condition ($assets -notmatch '(?i)src\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
+    Assert-True -Condition ($externalLinks.Count -eq 1 -and $externalLinks[0].Value -eq 'href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') -Message "The only remote navigation must be the fixed evidence wiki link."
     Assert-True -Condition ($html.IndexOf('id="text-panel"') -lt $html.IndexOf('id="connection-panel"') -and $html -match 'interaction-grid' -and $html -match 'configuration-column') -Message "Chat should be the primary interaction before the compact configuration column."
     Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."
     Assert-True -Condition ($writingDoc -match 'qwen3\.5:9b' -and $writingDoc -match 'gemma3:12b' -and $writingDoc -match 'mistral-small3\.2' -and $writingDoc -match 'granite4:7b-a1b-h' -and $writingDoc -match 'No candidate.*product default') -Message "Writing-model candidates must remain evidence-gated and unpromoted."
@@ -5064,9 +5077,11 @@ if ($IsWindows) {
         Assert-True -Condition ($null -ne $node) -Message "Node.js is required for the dependency-free Windows browser test."
         $browserTest = Join-Path $repoRoot "scripts/test-haven42-web-browser.mjs"
         Assert-True -Condition (Test-Path -LiteralPath $browserTest -PathType Leaf) -Message "Headless browser test should exist."
+        $browserSource = Get-Content -LiteralPath $browserTest -Raw
+        Assert-True -Condition ($browserSource -match "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" -and $browserSource -match "local-web-exited-") -Message "The browser harness should tolerate cold native startup and report early server exits."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 237 checks") -Message "The headless browser flow should exercise all 237 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 260 checks") -Message "The headless browser flow should exercise all 260 checks."
     }
 }
 

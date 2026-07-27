@@ -8,6 +8,8 @@ resources = [
     ("web/static/styles.css", "web/static"),
     ("config/text-capability-model-recommendations.json", "config"),
     ("config/evidence-catalog.tsv", "config"),
+    ("config/agent-surface-capabilities.json", "config"),
+    ("config/agent-surface-solutions.json", "config"),
     ("config/install-component-registry.json", "config"),
     ("config/workflows.json", "config"),
     ("package/resource-integrity.json", "package"),

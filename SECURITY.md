@@ -18,6 +18,22 @@ can authorize arbitrary download, command, client file write, repository read,
 elevation, service change, driver change, or installation. The installation
 broker remains simulation-only and not runtime-admitted.
 
+The Validation · Evidence view is read-only and fail-closed. A shared
+standard-library engine reads only the bundled sanitized evidence catalog and
+surface matrices. The browser receives a bounded schema that omits catalog
+notes, machine paths, provider endpoints, and raw validation output. Loading
+the view cannot access a network, create a process, read a user repository,
+write a file, invoke a provider, modify a machine, or claim that live
+validation or production readiness has occurred.
+
+The Evidence page renders committed outcome counts and agent-surface activity
+counts locally. Its only external navigation is the fixed
+`https://github.com/hysel/haven-42/wiki/Evidence-Dashboard` address. The
+renderer cannot supply or change that URL; Haven 42 does not fetch it in the
+background, and navigation requires an explicit user click. The link opens a
+separate browsing context with `noopener`, `noreferrer`, and a no-referrer
+policy.
+
 Unsigned portable development builds preserve this boundary. They verify their allowlisted browser/data resources at startup, bind only to IPv4 loopback, construct only a loopback browser URL, expose no arbitrary process control, and require same-origin session authority plus verified model cleanup for HTTP shutdown. Native smoke tests include read-only-package startup and recovery after abrupt test-owned process termination. Package archives include SHA-256 checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence. They are not signed, notarized, installer-backed, published releases, or production-ready. The offline installer and updater policy foundations cannot modify a machine or activate an update. The lifecycle simulator rejects raw paths, URLs, commands, arguments, and environment input; models healthy, failed-health, phase-specific interrupted recovery, replay defense, rollback, retention, and disabled paths; and always reports network, writes, download, staging, activation, rollback, cleanup, installation, elevation, service, driver, firewall, process, and user-data effects as false.
 
 Portable build dependencies are exact-version and SHA-256 locked for the admitted hosted runner platforms. Evidence generation and verification use an exact reviewed platform/version/license allowlist rather than trusting the caller environment. Native hostile tests reject altered, missing, unexpected, and traversal-manifest resources; shutdown authority failures; unsafe, linked, encrypted, oversized, excessive, duplicate, or case-colliding archive members; incomplete checksums/notices; evidence symlinks; unexpected targets; malformed SBOM/provenance; and archive/file-inventory divergence. Provenance is informational and explicitly unsigned/unattested.

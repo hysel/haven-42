@@ -106,6 +106,7 @@
       <button class="nav-item" id="image-nav" type="button"><span>◫</span>Images <small>Setup needed</small></button>
       <button class="nav-item" id="models-nav" type="button"><span>◉</span>Models</button>
       <button class="nav-item" id="system-nav" type="button"><span>◇</span>System</button>
+      <button class="nav-item" id="assurance-nav" type="button"><span>✓</span>Evidence</button>
       <button class="nav-item" id="about-nav" type="button"><span>ⓘ</span>About</button>
       <div class="rail-note">
         <span>Execution</span>
@@ -326,6 +327,31 @@
           </div>
         </section>
 
+        <section class="panel chat-panel hidden" id="assurance-panel" aria-labelledby="assurance-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">VALIDATION · EVIDENCE</p>
+              <h2 id="assurance-title" tabindex="-1">Committed evidence scope</h2>
+            </div>
+            <span class="badge" id="assurance-badge">Loading</span>
+          </div>
+          <div class="workflow-planner assurance-workspace">
+            <p>This advanced view summarizes bundled, sanitized validation records. It is separate from everyday chat and setup.</p>
+            <dl class="status-list">
+              <div><dt>Evidence records</dt><dd id="assurance-record-count">Checking…</dd></div>
+              <div><dt>Models represented</dt><dd id="assurance-model-count">Checking…</dd></div>
+              <div><dt>Agent surfaces</dt><dd id="assurance-surface-count">Checking…</dd></div>
+              <div><dt>Live validation</dt><dd id="assurance-live-status">Not run by this view</dd></div>
+            </dl>
+            <h3>Evidence outcomes</h3>
+            <div class="assurance-status-list" id="assurance-status-list" aria-live="polite"></div>
+            <h3>Agent surface readiness</h3>
+            <div class="assurance-list" id="assurance-surface-list" aria-live="polite"></div>
+            <p class="field-help">Bundled sanitized evidence only. This view starts no process, reads no user repository, contacts no provider, and makes no production-readiness claim.</p>
+            <a class="button secondary assurance-wiki-link" href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open detailed evidence wiki</a>
+          </div>
+        </section>
+
         <aside class="configuration-column" aria-label="Provider and system configuration">
           <section class="panel connection-panel" id="connection-panel">
             <div class="panel-heading">
@@ -432,6 +458,7 @@
               <div><dt>Update checks</dt><dd id="update-status">Disabled · no network</dd></div>
             </dl>
           </section>
+
         </aside>
       </div>
     </section>
