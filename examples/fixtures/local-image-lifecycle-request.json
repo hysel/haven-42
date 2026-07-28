@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "requestId": "image-lifecycle-foundation",
+  "operation": "plan-update",
+  "profileId": "comfyui-sdxl-linux-nvidia-v100",
+  "currentArtifact": {
+    "artifactId": "comfyui-sdxl-linux-v0282",
+    "version": "0.28.2",
+    "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "knownGood": true
+  },
+  "candidateArtifact": {
+    "artifactId": "comfyui-sdxl-linux-v0290",
+    "version": "0.29.0",
+    "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+    "knownGood": false
+  },
+  "evidence": {
+    "immutableIdentityVerified": true,
+    "checksumVerified": true,
+    "licenseRecorded": true,
+    "sbomPresent": true,
+    "noticesPresent": true,
+    "acceleratorConfirmed": true,
+    "loopbackBindingConfirmed": true,
+    "customNodesDisabled": true,
+    "externalApiNodesDisabled": true
+  },
+  "compatibility": {
+    "operatingSystemMatched": true,
+    "architectureMatched": true,
+    "acceleratorMatched": true,
+    "storageSufficient": true,
+    "schemaCompatible": true,
+    "rollbackCompatible": true
+  },
+  "health": {
+    "stagedPreflightPassed": true,
+    "postActivationPassed": true,
+    "rollbackHealthPassed": true
+  },
+  "journal": {
+    "phase": "idle",
+    "operationId": null,
+    "activeArtifactId": "comfyui-sdxl-linux-v0282",
+    "candidateArtifactId": null,
+    "previousArtifactId": null
+  },
+  "retention": {
+    "providerData": "preserve",
+    "generatedArtifacts": "preserve",
+    "previousRuntime": "retain-one-known-good"
+  }
+}

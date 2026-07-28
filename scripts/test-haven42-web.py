@@ -480,7 +480,7 @@ def main() -> int:
             origin + "/api/assurance", "POST", {"force": True}, token, origin,
         )
         assert status == 400 and error["error"] == "invalid-assurance-fields"
-        checks += 9
+        checks += 11
 
         fake_url = f"http://127.0.0.1:{fake.server_port}"
         status, image_connection, _ = request_json(
@@ -623,6 +623,8 @@ def main() -> int:
         assert status == 200
         assert connected["models"] == ["qwen3.5:9b", "writer-model:latest"]
         assert connected["trustScope"] == "loopback" and connected["idleUnloadSeconds"] == 300
+        assert connected["transportScheme"] == "http"
+        assert connected["transportEncrypted"] is False
         assert connected["configurationPersisted"] is False
         assert connected["providerHealth"]["status"] == "healthy"
         assert connected["evidenceBoundary"]["immutableDigestBound"] is True
@@ -999,7 +1001,76 @@ def main() -> int:
             origin,
         )
         assert status == 413 and total_error["error"] == "context-total-too-large"
-        checks += 16
+        structured_attachments = [
+            {
+                "name": "records.csv",
+                "mediaType": "text/csv",
+                "content": 'name,note\nalpha,"quoted, inert formula =CMD()"\n',
+                "sizeBytes": len(
+                    'name,note\nalpha,"quoted, inert formula =CMD()"\n'.encode("utf-8")
+                ),
+            },
+            {
+                "name": "settings.json",
+                "mediaType": "application/json",
+                "content": '{"enabled":false,"instruction":"rm -rf is inert text"}',
+                "sizeBytes": len(
+                    '{"enabled":false,"instruction":"rm -rf is inert text"}'.encode("utf-8")
+                ),
+            },
+        ]
+        status, structured_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Describe these records."}],
+                "attachments": structured_attachments,
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and structured_reply["context"]["fileCount"] == 2
+        structured_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
+        assert 'media-type="text/csv"' in structured_payload["messages"][-1]["content"]
+        assert 'media-type="application/json"' in structured_payload["messages"][-1]["content"]
+        for hostile_structured, expected_error in (
+            (
+                {
+                    "name": "broken.json",
+                    "mediaType": "application/json",
+                    "content": '{"open":',
+                    "sizeBytes": 8,
+                },
+                "invalid-context-json",
+            ),
+            (
+                {
+                    "name": "broken.csv",
+                    "mediaType": "text/csv",
+                    "content": 'header\n"unterminated',
+                    "sizeBytes": 20,
+                },
+                "invalid-context-csv",
+            ),
+        ):
+            status, error, _ = request_json(
+                origin + "/api/text",
+                "POST",
+                {
+                    "capabilityId": "general.chat",
+                    "model": "qwen3.5:9b",
+                    "messages": [{"role": "user", "content": "Use this."}],
+                    "attachments": [hostile_structured],
+                    "contextConsent": False,
+                },
+                token,
+                origin,
+            )
+            assert status == 400 and error["error"] == expected_error
+        checks += 22
 
         png_base64 = (
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk"
@@ -1372,7 +1443,11 @@ def main() -> int:
         assert policy["text"]["maximumRequestBytes"] == 12582912
         assert policy["text"]["maximumConversationBytes"] == 65536
         assert policy["documentContext"]["contract"] == "config/document-context-policy.json"
-        assert policy["documentContext"]["allowedExtensions"] == [".txt", ".md"]
+        assert policy["documentContext"]["allowedExtensions"] == [
+            ".txt", ".md", ".csv", ".json"
+        ]
+        assert policy["documentContext"]["structuredTextSyntaxValidationRequired"] is True
+        assert policy["documentContext"]["structuredTextFormulaEvaluationAllowed"] is False
         assert policy["documentContext"]["maximumFiles"] == 5
         assert policy["documentContext"]["maximumTotalBytes"] == 131072
         assert policy["documentContext"]["clipboardScreenshotMediaTypes"] == ["image/png"]
@@ -1397,6 +1472,10 @@ def main() -> int:
         assert context_policy["lifecycle"]["clearOnFailure"] is True
         assert context_policy["formats"]["clipboardImages"]["clipboardPasteAllowed"] is True
         assert context_policy["formats"]["clipboardImages"]["filePickerAllowed"] is True
+        assert context_policy["formats"]["allowedExtensions"] == [
+            ".txt", ".md", ".csv", ".json"
+        ]
+        assert context_policy["formats"]["structuredText"]["formulaEvaluationAllowed"] is False
         assert context_policy["budgets"]["maximumImagePixels"] == 16777216
         assert context_policy["executionIsolation"] == {
             "attachmentContentTreatedAsData": True,
@@ -1482,6 +1561,10 @@ def main() -> int:
         assert ".model-select select { min-width: 190px; height: 36px;" in styles
         assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
         assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
+        assert "renderProviderTransportWarning" in javascript
+        assert 'id="connection-transport-warning"' in html and 'id="wizard-transport-warning"' in html
+        assert "private-network Ollama connection uses unencrypted HTTP" in javascript
+        assert ".transport-warning {" in styles and ".transport-warning.loopback {" in styles
         assert "selectedSeconds === state.idleUnloadSeconds" in javascript
         assert 'id="apply-cleanup-policy" type="submit" disabled>Selected</button>' in html
         assert "Applying changes starts a new task" in html
@@ -1504,7 +1587,10 @@ def main() -> int:
         assert "clearPromptHistory" in javascript and "state.promptHistory.slice(-selectedLimit)" in javascript
         assert javascript.count("clearPromptHistory();") >= 3
         assert 'id="browse-context" type="button" disabled>Browse files</button>' in html
-        assert 'id="context-files"' in html and 'accept=".txt,.md,.png,text/plain,text/markdown,image/png"' in html
+        assert 'id="context-files"' in html and (
+            'accept=".txt,.md,.csv,.json,.png,text/plain,text/markdown,text/csv,application/json,image/png"'
+            in html
+        )
         assert 'id="context-images"' not in html and "Browse files" in html
         assert 'id="context-consent"' not in html
         assert 'id="context-network-warning"' in html and "private-network Ollama server" in html
@@ -1512,10 +1598,16 @@ def main() -> int:
         assert 'new TextDecoder("utf-8", { fatal: true })' in javascript
         assert 'contextConsent: hasContext && state.providerTrustScope === "trusted-lan"' in javascript
         assert "context-file-too-large" in javascript and "context-total-too-large" in javascript
+        assert "validateContextJson" in javascript and "validateContextCsv" in javascript
         assert 'document.addEventListener("paste"' in javascript and "addContextImages" in javascript
         assert "inspectPngHeader" in javascript and "blobDataUrl" in javascript
         assert "MODEL_IMAGE_INPUT_UNVERIFIED" in javascript
-        assert 'id="context-image-list"' in html and "browse UTF-8 .txt/.md or PNG" in html and "paste a PNG screenshot" in html
+        assert (
+            'id="context-image-list"' in html
+            and "browse UTF-8 .txt/.md/.csv/.json or PNG" in html
+            and "paste a PNG screenshot" in html
+            and "structured text is syntax-checked but never evaluated" in html
+        )
         assert "Attachments are inert data and are never executed" in html
         assert "result.context.hostExecutionAllowed !== false" in javascript
         assert ".context-image img {" in styles and ".context-warning {" in styles

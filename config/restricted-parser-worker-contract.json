@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-admission-foundation-no-parser-admitted",
+  "description": "Default-deny admission boundary for future complex-document parser workers.",
+  "runtimeRouteAllowed": false,
+  "workerProcessAllowed": false,
+  "parserDependenciesAdmitted": [],
+  "candidateFormats": {
+    "pdf": "application/pdf",
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  },
+  "operations": [
+    "inspect-candidate",
+    "plan-parse"
+  ],
+  "request": {
+    "requiredFields": [
+      "schemaVersion",
+      "requestId",
+      "operation",
+      "format",
+      "mediaType",
+      "sizeBytes",
+      "objectCount",
+      "nestingDepth",
+      "compressedBytes",
+      "expandedBytes",
+      "encrypted",
+      "activeContent",
+      "macros",
+      "externalRelationships",
+      "embeddedObjects",
+      "pathProvided",
+      "dependencyId",
+      "workerLimits"
+    ],
+    "maximumSerializedBytes": 16384,
+    "forbiddenFieldNames": [
+      "path",
+      "url",
+      "command",
+      "arguments",
+      "environment",
+      "credential",
+      "secret",
+      "token"
+    ]
+  },
+  "bounds": {
+    "maximumInputBytes": 16777216,
+    "maximumObjects": 10000,
+    "maximumNestingDepth": 32,
+    "maximumExpansionRatio": 20,
+    "maximumExpandedBytes": 67108864,
+    "maximumOutputCharacters": 1000000,
+    "maximumCpuSeconds": 10,
+    "maximumWallSeconds": 15,
+    "maximumMemoryBytes": 536870912
+  },
+  "requiredWorkerLimits": [
+    "cpuSeconds",
+    "wallSeconds",
+    "memoryBytes",
+    "outputCharacters",
+    "networkDenied",
+    "filesystemDenied",
+    "childProcessesDenied"
+  ],
+  "effects": {
+    "fileOpened": false,
+    "archiveExpanded": false,
+    "parserImported": false,
+    "workerStarted": false,
+    "networkUsed": false,
+    "filesystemReadPerformed": false,
+    "filesystemWritePerformed": false,
+    "temporaryFileWritten": false,
+    "childProcessStarted": false,
+    "contentExecuted": false,
+    "runtimeAdmissionGranted": false
+  }
+}

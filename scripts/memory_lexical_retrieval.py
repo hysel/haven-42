@@ -38,7 +38,7 @@ def _validate_source_name(value: object) -> str:
         raise RetrievalError("invalid-source-name")
     if value in {".", ".."} or "/" in value or "\\" in value or "\x00" in value:
         raise RetrievalError("path-bearing-source")
-    if not value.casefold().endswith((".txt", ".md")):
+    if not value.casefold().endswith((".txt", ".md", ".csv", ".json")):
         raise RetrievalError("unsupported-source-type")
     return value
 

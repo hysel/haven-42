@@ -78,15 +78,18 @@ remaining-context calculations, or independently measured performance claims.
 
 ## Attach Text And Screenshot Context
 
-The text workspace can attach up to five explicitly selected UTF-8 `.txt` or
-`.md` files. Each file is limited to 64 KiB and the combined selection to
-128 KiB. The browser shows normalized filenames, sizes, approximate token
-costs, removal, and clear-all controls. It never sends a filesystem path,
-scans a directory, watches files, or creates a persistent library.
+The text workspace can attach up to five explicitly selected UTF-8 `.txt`,
+`.md`, `.csv`, or `.json` files. Each file is limited to 64 KiB and the
+combined selection to 128 KiB. CSV and JSON are syntax- and resource-checked
+in both browser and engine; JSON is never evaluated and CSV formulas are never
+executed. The browser shows normalized filenames, format-aware inert previews,
+sizes, approximate token costs, removal, and clear-all controls. It never sends
+a filesystem path, scans a directory, watches files, or creates a persistent
+library.
 
-A single keyboard-operable browser control accepts only `.txt`, `.md`, and
-`.png`; a PNG screenshot can also be pasted from the clipboard. The selection
-is atomic, so one rejected file leaves the previous selection unchanged. A
+A single keyboard-operable browser control accepts only `.txt`, `.md`, `.csv`,
+`.json`, and `.png`; a PNG screenshot can also be pasted from the clipboard.
+The selection is atomic, so one rejected file leaves the previous selection unchanged. A
 screenshot copied to the Windows clipboard can be pasted directly into the
 page. The initial image boundary accepts PNG items only, up to two screenshots,
 4 MiB each, and 8 MiB total. Each dimension is capped at 4096
@@ -123,7 +126,10 @@ capability, model, or provider changes and process shutdown clear the selection.
 No temporary file, browser storage, server-side upload, or log is created.
 Directories, archives, PDF, Office files, source trees, OCR, active lexical
 retrieval, embeddings, vision-model promotion, and persistent indexes remain
-outside this initial admission. The deterministic memory-only lexical core is
+outside this admission. A restricted parser-worker contract and hostile
+metadata suite now reject unsafe PDF/Office candidate shapes but admit no
+parser dependency, worker, route, path, filesystem access, or temporary file.
+The deterministic memory-only lexical core is
 implemented and hostile-tested offline, including strict budgets, stable
 ranking, source/chunk disclosure, removal, and failure cleanup. It has no
 runtime route, UI control, provider payload, path access, parser, network

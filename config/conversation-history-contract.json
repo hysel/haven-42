@@ -74,6 +74,9 @@
   },
   "storedData": {
     "attachmentBytesAllowed": false,
+    "attachmentLiveFilesystemReferencesAllowed": false,
+    "attachmentPersistenceRequiresExplicitPerConversationOptIn": true,
+    "attachmentUnavailableMustFailClosed": true,
     "credentialsAllowed": false,
     "providerEndpointsAllowed": false,
     "machinePathsAllowed": false,

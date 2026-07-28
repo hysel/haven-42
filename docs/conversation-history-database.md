@@ -31,6 +31,22 @@ provider metrics, and attachment references. It contains no executable SQL.
 Attachment bytes, credentials, provider endpoints, machine paths, environment
 values, raw security logs, and model-generated commands are forbidden.
 
+Attachment persistence is deliberately a separate future admission. History
+must never retain a live filesystem path or silently reopen an original file.
+The safe candidate is an explicit per-conversation opt-in that creates an
+encrypted, conversation-owned snapshot of the exact admitted content. Each
+snapshot must bind a safe filename, media type, digest, byte count, validation
+version, message, retention policy, and deletion state. Text, CSV, and JSON can
+use normalized validated UTF-8 bytes; an image can only be restored as context
+when its exact admitted canonical bytes are retained. A thumbnail is a preview,
+not restorable model context.
+
+On reopen, the UI must distinguish available, deleted, unavailable, and
+integrity-failed snapshots, and show which ones will be sent before a provider
+request. Missing bytes fail closed: Haven 42 must not imply that the model saw
+them. Attachment rows, encrypted blobs, indexes, free pages, journals/WAL,
+temporary files, and backups all fall under retention and deletion behavior.
+
 ## Effect-free planner
 
 `scripts/simulate-conversation-history.py` validates typed requests and returns

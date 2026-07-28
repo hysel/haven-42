@@ -439,10 +439,22 @@ try {
     recommended: document.querySelectorAll('#wizard-readiness .readiness-state.recommended').length,
     finishDisabled: document.querySelector('#wizard-finish').disabled,
     capabilities: document.querySelectorAll('#capability-list .capability-item').length,
-    health: document.querySelector('#provider-health').textContent
+    health: document.querySelector('#provider-health').textContent,
+    transportWarningVisible: !document.querySelector('#wizard-transport-warning').classList.contains('hidden'),
+    transportWarningLoopback: document.querySelector('#wizard-transport-warning').classList.contains('loopback'),
+    transportWarning: document.querySelector('#wizard-transport-warning').textContent
   })`);
-  if (ready.rows !== 3 || ready.recommended !== 3 || ready.finishDisabled || ready.capabilities !== 5 || !ready.health.includes("healthy")) throw new Error("ready-step");
-  checks += 5;
+  if (
+    ready.rows !== 3
+    || ready.recommended !== 3
+    || ready.finishDisabled
+    || ready.capabilities !== 5
+    || !ready.health.includes("healthy")
+    || !ready.transportWarningVisible
+    || !ready.transportWarningLoopback
+    || !ready.transportWarning.includes("on this computer")
+  ) throw new Error(`ready-step:${JSON.stringify(ready)}`);
+  checks += 8;
   trace("model-readiness-verified");
 
   const requestsBeforeWizardContinue = requests.length;
@@ -551,6 +563,31 @@ try {
     || !connectedControls.cleanupDisabled
   ) throw new Error(`connected-controls:${JSON.stringify(connectedControls)}`);
   checks += 4;
+
+  const transportWarnings = await cdp.evaluate(`(() => {
+    renderProviderTransportWarning("trusted-lan", "http");
+    const privateHttp = {
+      mainVisible: !document.querySelector('#connection-transport-warning').classList.contains('hidden'),
+      wizardVisible: !document.querySelector('#wizard-transport-warning').classList.contains('hidden'),
+      loopbackStyle: document.querySelector('#connection-transport-warning').classList.contains('loopback'),
+      text: document.querySelector('#connection-transport-warning').textContent,
+    };
+    renderProviderTransportWarning("trusted-lan", "https");
+    const httpsHidden = (
+      document.querySelector('#connection-transport-warning').classList.contains('hidden')
+      && document.querySelector('#wizard-transport-warning').classList.contains('hidden')
+    );
+    renderProviderTransportWarning("loopback", "http");
+    return {privateHttp, httpsHidden};
+  })()`);
+  if (
+    !transportWarnings.privateHttp.mainVisible
+    || !transportWarnings.privateHttp.wizardVisible
+    || transportWarnings.privateHttp.loopbackStyle
+    || !transportWarnings.privateHttp.text.includes("could be read or changed")
+    || !transportWarnings.httpsHidden
+  ) throw new Error(`transport-warnings:${JSON.stringify(transportWarnings)}`);
+  checks += 5;
 
   models = ["unknown-model:latest"];
   const dirtyConnection = await cdp.evaluate(`(() => {
@@ -1098,6 +1135,64 @@ try {
     }
   })()`);
   if (!invalidContextBlocked) throw new Error("invalid-context-file-not-blocked");
+  const structuredContext = await cdp.evaluate(`(async () => {
+    await addContextAttachments([
+      new File(['name,note\\nalpha,"quoted, inert formula =CMD()"\\n'], 'records.csv', {type: 'text/csv'}),
+      new File(['{"enabled":false,"instruction":"rm -rf is inert text"}'], 'settings.json', {type: 'application/json'})
+    ]);
+    const result = {
+      count: state.contextFiles.length,
+      mediaTypes: state.contextFiles.map((item) => item.mediaType),
+      metadata: [...document.querySelectorAll('.context-file-meta')].map((item) => item.textContent),
+      summaries: [...document.querySelectorAll('.context-preview summary')].map((item) => item.textContent)
+    };
+    state.contextFiles.splice(-2, 2);
+    renderContextFiles();
+    result.remaining = state.contextFiles.length;
+    return result;
+  })()`);
+  if (
+    structuredContext.count !== 3
+    || structuredContext.remaining !== 1
+    || structuredContext.mediaTypes.at(-2) !== "text/csv"
+    || structuredContext.mediaTypes.at(-1) !== "application/json"
+    || !structuredContext.metadata.some((value) => value.startsWith("CSV ·"))
+    || !structuredContext.metadata.some((value) => value.startsWith("JSON ·"))
+    || !structuredContext.summaries.includes("Preview selected CSV")
+    || !structuredContext.summaries.includes("Preview selected JSON")
+  ) throw new Error(`structured-context:${JSON.stringify(structuredContext)}`);
+  const invalidStructuredBlocked = await cdp.evaluate(`(async () => {
+    const before = state.contextFiles.length;
+    const errors = [];
+    for (const file of [
+      new File(['{"open":'], 'broken.json', {type: 'application/json'}),
+      new File(['header\\n"unterminated'], 'broken.csv', {type: 'text/csv'})
+    ]) {
+      try {
+        await addContextAttachments([file]);
+      } catch (error) {
+        errors.push(error.message);
+      }
+    }
+    const friendly = [
+      "invalid-context-file-type",
+      "invalid-context-json",
+      "context-json-too-complex",
+      "invalid-context-csv",
+      "context-csv-too-complex",
+    ].map((code) => humanError(new Error(code)));
+    return {before, after: state.contextFiles.length, errors, friendly};
+  })()`);
+  if (
+    invalidStructuredBlocked.before !== invalidStructuredBlocked.after
+    || invalidStructuredBlocked.errors[0] !== "invalid-context-json"
+    || invalidStructuredBlocked.errors[1] !== "invalid-context-csv"
+    || invalidStructuredBlocked.friendly[0] !== "Only UTF-8 .txt, .md, .csv, and .json files are supported."
+    || invalidStructuredBlocked.friendly[1] !== "The selected JSON file is malformed."
+    || invalidStructuredBlocked.friendly[2] !== "The selected JSON file exceeds the supported depth or structure limit."
+    || invalidStructuredBlocked.friendly[3] !== "The selected CSV file is malformed."
+    || invalidStructuredBlocked.friendly[4] !== "The selected CSV file exceeds the supported row, column, or cell limit."
+  ) throw new Error(`invalid-structured-context:${JSON.stringify(invalidStructuredBlocked)}`);
   const invalidUtf8Blocked = await cdp.evaluate(`(async () => {
     try {
       await addContextFiles([
@@ -1154,7 +1249,7 @@ try {
     }
   })()`);
   if (!duplicateSelectionBlocked) throw new Error("unified-picker-duplicate-not-enforced");
-  checks += 5;
+  checks += 12;
 
   const chatRequestsBeforeDisclosure = chatPayloads.length;
   const disclosureSubmit = await cdp.evaluate(`(() => {
@@ -1306,7 +1401,7 @@ try {
     thumbnail: document.querySelector('.context-image img')?.src || ''
   })`);
   if (
-    screenshotBrowseControl.accept !== ".txt,.md,.png,text/plain,text/markdown,image/png"
+    screenshotBrowseControl.accept !== ".txt,.md,.csv,.json,.png,text/plain,text/markdown,text/csv,application/json,image/png"
     || !screenshotBrowseControl.multiple
     || screenshotBrowse.fileCount !== 1
     || screenshotBrowse.fileName !== "selected-notes.md"

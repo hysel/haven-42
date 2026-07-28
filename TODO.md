@@ -577,8 +577,10 @@
 - [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
 - [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
   - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. Update/rollback remains open because v0.28.0 is still the latest immutable AMD release, and consumer onboarding/installer behavior remains unadmitted.
-- [ ] Validate a pinned Apple Silicon MPS image-provider profile on a physical Mac as the last native hardware gate before shipping its local installer or runtime files.
+- [ ] Park the physical Apple Silicon MPS image-provider profile until suitable
+  Mac hardware is acquired; do not let it block Windows or Linux development.
 - [x] Keep custom nodes and external API nodes disabled unless each exact extension independently passes promotion.
+- [x] Add a simulation-only local image lifecycle planner for promoted exact profiles with hostile install, update, rollback, interruption, retention, and uninstall cases while every machine effect remains denied.
 - [ ] Add native installer and provider lifecycle files only after the exact profile passes; failed profiles leave documentation only.
 
 ## Milestone 24: Local Music And Audio Generation
@@ -588,7 +590,9 @@
 - [ ] Externally evaluate ACE-Step 1.5 on Linux CUDA for REST health, instrumental and vocal generation, typed WAV/FLAC artifact requirements, privacy, cancellation, recovery, cleanup, and uninstall behavior.
   - Commit `6d467e4b5081ccb0abf1ec1bf4fdf9051a2d34b0` passed a disposable deterministic instrumental REST/WAV structure and cleanup cell on a V100 32 GB profile. Vocal, signal/clipping, listening, cancellation, forced recovery, retention, and typed-adapter checks remain open.
 - [ ] Externally evaluate Stable Audio 3.0 Small and Medium for sound effects, instrumental music, editing, duration, licensing, and consumer hardware fit.
-- [ ] Validate Windows NVIDIA CUDA, Windows Intel XPU, Windows AMD ROCm, Apple Silicon MLX, and Linux CUDA independently; keep the physical Mac run last.
+- [ ] Validate Windows NVIDIA CUDA, Windows Intel XPU, Windows AMD ROCm, and
+  Linux CUDA independently; continue bounded work on the available Linux
+  machine and park physical Apple Silicon MLX until Mac hardware is acquired.
 - [x] Add reference-audio, voice-cloning, identifiable-voice, lyrics, artist-style, attribution, and commercial-use consent policy before provider promotion.
 - [ ] Define `audio.music.create`, typed audio artifacts, discovery, and a dry-run-first adapter only after an exact provider profile passes every external gate.
 - [x] Ship no music scripts, adapters, harnesses, templates, workflows, configuration, or registry entries for a failed or documentation-only candidate.
@@ -615,7 +619,9 @@
 - [x] Define comparative gates for load time, first-token latency, throughput, peak memory, disk use, context stability, accelerator use, general capability quality, tool calls, and engineering workflow reliability.
 - [x] Validate one disposable Linux NVIDIA GGUF/Ollama path first; the exact Qwen 3.5 9B Q4_K_M versus Q8_0 evidence and cleanup record are complete.
 - [x] Validate the exact Windows AMD/Ollama quantization comparison independently; the RX 7800 XT 16 GB profile passed and does not transfer to another platform or runtime.
-- [ ] Validate Windows NVIDIA, Windows Intel, and Apple Silicon paths independently, keeping physical Mac testing last; Windows Intel remains parked until representative Intel GPU hardware is available.
+- [ ] Validate Windows NVIDIA independently; keep Windows Intel parked until
+  representative Intel GPU hardware is available and physical Apple Silicon
+  parked until Mac hardware is acquired.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
 
@@ -625,6 +631,7 @@
 - [x] Define the initial versioned document-ingestion, context-budget, provider-disclosure, and memory-lifecycle contract with default-deny effects.
 - [x] Add hostile offline fixtures for initial names, encodings, size/count limits, duplicate names, prompt-injection isolation, exact provider payloads, and residue-free cleanup; retrieval truncation fixtures remain with retrieval.
 - [x] Implement explicit multi-file attachment for UTF-8 `.txt`/`.md` with five-file, 64-KiB-per-file, and 128-KiB-total limits; keep directories, archives, PDF, Office documents, OCR, embeddings, and persistence unadmitted.
+- [x] Extend the same inert bounded picker to UTF-8 `.csv` and `.json` with syntax/resource validation, format-aware previews, no JSON evaluation, and no CSV formula execution.
 - [x] Add explicit PNG screenshot browsing and clipboard paste with safe thumbnails, two-image/4-MiB-per-image/8-MiB-total limits, strict PNG structure/CRC/dimension/pixel validation, warned submit-confirmed private-network transfer, and a visible unverified image-input warning; no vision model is promoted.
 - [x] Define a simulation-only deterministic lexical-retrieval contract and hostile offline fixtures with no runtime route, UI control, provider payload, path, parser, network, embedding, or persistence authority.
 - [x] Define the default-deny conversation-history contract, non-executable logical SQLite-compatible schema, and inert hostile fixtures; preserve Private session as the write-free default with every runtime and storage effect disabled.
@@ -632,8 +639,13 @@
 - [x] Review encryption-at-rest and key-management architecture: keep SQLCipher-equivalent selection unadmitted, require user-scoped OS credential storage with no plaintext fallback, define rotation/loss/recovery behavior, and retain supply-chain, licensing, SBOM, binding, and native packaging as admission gates.
 - [ ] Seek separate approval before any opt-in development history database, runtime route, UI control, database file, backup/restore write, or saved message is activated.
 - [x] Add and hostile-test the deterministic memory-only lexical retrieval core with token estimates, per-result chunk disclosure, removal, clear-all, strict budgets, stable ranking, and failure cleanup; keep runtime route, UI, and provider integration unadmitted.
+- [x] Add the restricted parser-worker admission contract and 24-case metadata-only hostile suite before selecting any PDF or Office dependency; keep every parser, worker, route, filesystem, temporary-file, and execution effect unadmitted.
 - [x] Show a prominent private-network transfer warning and treat deliberate Send as confirmation without a separate checkbox; continue blocking public provider destinations.
-- [x] Record one sanitized Windows source-runtime/default-browser native clipboard-PNG paste and user-reviewed `qwen3.5:9b` screenshot-description pass with independently verified model unload; packaged Windows, Linux, and macOS cells remain open.
+- [x] Record one sanitized Windows source-runtime/default-browser native
+  clipboard-PNG paste and user-reviewed `qwen3.5:9b` screenshot-description pass
+  with independently verified model unload; packaged Windows remains open,
+  Linux is the next physical clipboard target if a real desktop session is
+  available, and physical macOS is owner-parked until hardware is acquired.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promoting the capability.
 - [ ] Evaluate folder selection, semantic embeddings, and persistent encrypted libraries only as separate later security and product gates.
 
