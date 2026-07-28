@@ -437,6 +437,10 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should keep future surface profile work in the architecture backlog."
     Assert-True -Condition ($todo -match "\[ \] Add future surface-specific profile generation after non-Continue validation") -Message "TODO should keep future surface-specific profile generation pending."
     Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains "dist/") -Message "dist output should be ignored."
+    Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains ".env") -Message "Default environment files should be ignored."
+    Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains ".env.*") -Message "Environment-file variants should be ignored."
+    Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains "!.env.example") -Message "A sanitized environment example should remain admissible."
+    Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains ".privacy-rewrite-backup/") -Message "Local privacy rewrite backups should be ignored repository-wide."
 }
 Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
@@ -4989,7 +4993,13 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "313 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    $localWebResult = $result -join "`n"
+    $localWebCoverage = [regex]::Match(
+        $localWebResult,
+        "local-web self-test passed: (?<count>\d+) security and behavior checks"
+    )
+    Assert-True -Condition $localWebCoverage.Success -Message "Local-web integration coverage should report its completed security and behavior checks."
+    Assert-True -Condition ([int]$localWebCoverage.Groups["count"].Value -ge 318) -Message "Local-web integration coverage must not fall below the admitted 318-check security baseline."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     $portablePolicy = Get-Content -LiteralPath $portablePolicyPath -Raw | ConvertFrom-Json
     $lexicalContract = Get-Content -LiteralPath $lexicalContractPath -Raw | ConvertFrom-Json
@@ -5001,11 +5011,13 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects -and $policy.browser.automaticLaunchUrlScope -eq "ipv4-loopback-http-origin-only" -and -not $policy.browser.environmentOverrideAllowed -and -not $policy.browser.shellLaunchAllowed) -Message "Browser security and automatic launch should remain local and default-deny."
     Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard" -Message "External navigation must remain fixed to the detailed evidence wiki."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
-    Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL and fail safely."
+    Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
     Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction) -Message "Portable evidence must cover every runtime file, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "runtime-component-inventory.json") -Message "Portable evidence must include the exact runtime component inventory."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "CPYTHON-3.14.6-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "APACHE-2.0.txt" -and $portablePolicy.supplyChainEvidence -contains "LIBFFI-3.4.4-LICENSE.txt") -Message "Portable evidence must include hash-verified CPython, Apache, and libffi license texts."
     Assert-Equal -Actual (($portablePolicy.security.browserLaunchExecutables.linux) -join ",") -Expected "/usr/bin/gio,/usr/bin/xdg-open" -Message "Linux browser launchers must remain fixed and allowlisted."
+    Assert-Equal -Actual (($portablePolicy.security.linuxBrowserApplicationDataDirectories) -join ",") -Expected "/var/lib/flatpak/exports/share,/usr/local/share,/usr/share" -Message "Linux browser application discovery must use only fixed system-owned data directories."
+    Assert-True -Condition (-not $portablePolicy.security.linuxBrowserApplicationDataDirectoriesInherited) -Message "Linux browser application discovery must not inherit caller-controlled XDG_DATA_DIRS."
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
     Assert-True -Condition ($policy.modelDiscovery.explicitOnlineConsentRequired -and -not $policy.modelDiscovery.redirectsAllowed -and -not $policy.modelDiscovery.automaticDownloadsAllowed -and -not $policy.modelDiscovery.pullApiAllowed -and -not $policy.modelDiscovery.commandExecutionAllowed) -Message "Public model discovery must stay explicit, fixed-origin, candidate-only, and non-installing."

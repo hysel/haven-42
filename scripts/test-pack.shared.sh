@@ -2451,6 +2451,7 @@ assert portable["security"]["browserUrlIsEngineConstructedLoopbackOnly"] is True
 assert portable["security"]["browserEnvironmentOverrideAllowed"] is False
 assert portable["security"]["browserLaunchShellAllowed"] is False
 assert portable["security"]["browserLaunchExecutables"]["linux"] == ["/usr/bin/gio", "/usr/bin/xdg-open"]
+assert portable["security"]["browserLaunchSuccessRequiresZeroExitOrRunningProcess"] is True
 assert portable["security"]["browserLaunchFailureMode"] == "print-loopback-url-and-continue"
 assert portable["security"]["exactRuntimeComponentFileCoverageRequired"] is True
 assert portable["security"]["unknownRuntimeComponentFilesRejected"] is True

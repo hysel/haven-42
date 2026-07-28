@@ -40,6 +40,13 @@
       "linux": ["/usr/bin/gio", "/usr/bin/xdg-open"],
       "macos": ["/usr/bin/open"]
     },
+    "linuxBrowserApplicationDataDirectories": [
+      "/var/lib/flatpak/exports/share",
+      "/usr/local/share",
+      "/usr/share"
+    ],
+    "linuxBrowserApplicationDataDirectoriesInherited": false,
+    "browserLaunchSuccessRequiresZeroExitOrRunningProcess": true,
     "browserLaunchFailureMode": "print-loopback-url-and-continue",
     "arbitraryProcessLaunchAllowed": false,
     "shutdownRequiresOriginAndSessionToken": true,
