@@ -90,6 +90,7 @@
         <p class="eyebrow">STEP 4 · MODELS</p>
         <h1 id="wizard-ready-title">Review model readiness</h1>
         <p id="wizard-ready-summary">Haven 42 evaluates installed models separately for each capability.</p>
+        <p class="transport-warning hidden" id="wizard-transport-warning" role="status"></p>
         <div class="wizard-readiness" id="wizard-readiness"></div>
         <div class="wizard-actions">
           <button class="button secondary" id="wizard-back" type="button">Change server</button>
@@ -177,14 +178,14 @@
               </div>
               <div class="context-actions">
                 <button class="button secondary context-picker" id="browse-context" type="button" disabled>Browse files</button>
-                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.png,text/plain,text/markdown,image/png" multiple disabled>
+                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.csv,.json,.png,text/plain,text/markdown,text/csv,application/json,image/png" multiple disabled>
                 <button class="button text-button hidden" id="clear-context" type="button">Clear all</button>
               </div>
             </div>
             <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
             <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
             <p class="context-warning hidden" id="context-network-warning">Warning: Pressing Send will transfer the attached content to your private-network Ollama server for this task.</p>
-            <p class="context-policy">Attachments are inert data and are never executed · browse UTF-8 .txt/.md or PNG, or paste a PNG screenshot · up to 5 text files and 2 screenshots · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
+            <p class="context-policy">Attachments are inert data and are never executed · browse UTF-8 .txt/.md/.csv/.json or PNG, or paste a PNG screenshot · structured text is syntax-checked but never evaluated · up to 5 text files and 2 screenshots · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
             <p class="context-warning hidden" id="context-image-warning">Screenshot understanding is unverified for the selected model. The request may fail if that model does not accept image input.</p>
           </section>
 
@@ -389,6 +390,7 @@
                 </div>
               </details>
             </form>
+            <div class="transport-warning hidden" id="connection-transport-warning" role="status"></div>
             <div class="notice hidden" id="connection-error" role="alert"></div>
           </section>
 

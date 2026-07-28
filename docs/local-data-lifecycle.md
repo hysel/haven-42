@@ -6,12 +6,14 @@ Raw prompts, raw responses, endpoints, and secrets are not persisted by default.
 The local-web application holds its readiness snapshot, zero-effect setup plan,
 provider endpoint, discovered model names, per-capability model guidance, active
 conversation model, request token, cleanup preference, prompt-recall limit,
-bounded prompt-recall entries, explicitly selected `.txt`/`.md` context,
+bounded prompt-recall entries, explicitly selected `.txt`/`.md`/`.csv`/`.json` context,
 browsed or pasted PNG screenshots, and one continuous text conversation in
 process and browser memory only. Prompt recall defaults to 20 entries and may
 be changed to 50 or 100 for the current process; consecutive duplicates are
 suppressed. One type-restricted picker accepts text and PNG together atomically.
-Attached text is capped at five files, 64 KiB each, and 128 KiB total.
+Attached text is capped at five files, 64 KiB each, and 128 KiB total. CSV and
+JSON receive bounded syntax/resource validation and inert format-aware previews;
+neither JSON values nor CSV formulas are evaluated.
 Screenshots are explicit file-picker or clipboard PNGs capped at two images,
 4 MiB each, 8 MiB total, 4096 pixels per dimension, and 16.7 million pixels.
 No path is sent and no temporary file is created. For a private-network
@@ -28,9 +30,10 @@ written automatically. Browser assets and API responses use
 `Cache-Control: no-store`; the application adds no service worker, local
 storage, session storage, IndexedDB, cookies, analytics, or crash upload.
 
-The offline lexical-retrieval engine, inactive web-research foundation, and
-conversation-history foundation retain no application runtime state because
-none exposes a route. Lexical test state is caller-owned memory and is cleared
+The offline lexical-retrieval engine, restricted parser-worker foundation,
+inactive web-research foundation, and conversation-history foundation retain
+no application runtime state because none exposes a route. The parser
+foundation opens no document and starts no worker. Lexical test state is caller-owned memory and is cleared
 on removal, failure, and shutdown; it has no persistence API. The history
 foundation contains a logical schema and pure planners only: it never imports
 SQLite, opens or creates a database, accepts a path, writes a backup, or

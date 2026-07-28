@@ -4989,7 +4989,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     }
     $result = @(& $python.Source $testPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    Assert-True -Condition (($result -join "`n") -match "305 security and behavior checks") -Message "Local-web integration coverage should remain complete."
+    Assert-True -Condition (($result -join "`n") -match "313 security and behavior checks") -Message "Local-web integration coverage should remain complete."
     $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
     $portablePolicy = Get-Content -LiteralPath $portablePolicyPath -Raw | ConvertFrom-Json
     $lexicalContract = Get-Content -LiteralPath $lexicalContractPath -Raw | ConvertFrom-Json
@@ -5012,7 +5012,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($lexicalContract.status -eq "offline-engine-implemented-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding engine."
     $lexicalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-memory-lexical-retrieval.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Memory-only lexical retrieval hostile tests should pass. Output: $($lexicalOutput -join ' ')"
-    Assert-True -Condition (($lexicalOutput -join "`n") -match "34 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should remain complete."
+    Assert-True -Condition (($lexicalOutput -join "`n") -match "39 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should remain complete."
     Assert-True -Condition ($researchContract.status -eq "proposed-offline-fixtures-only" -and -not $researchContract.activation.runtimeRouteAllowed -and -not $researchContract.activation.modelToolAllowed -and -not $researchContract.activation.networkAllowed -and -not $researchContract.activation.dnsResolutionAllowed -and -not $researchContract.activation.urlFetchAllowed -and -not $researchContract.activation.browserAutomationAllowed) -Message "Controlled web research must remain an offline contract with no route, model tool, or network authority."
     Assert-True -Condition ($policy.readiness.explicitUserActionRequired -and $policy.readiness.registeredReadOnlyProbesOnly -and -not $policy.readiness.rendererHardwareFactsAccepted -and -not $policy.readiness.setupPlansMayInstall) -Message "Readiness scanning and setup planning must remain explicit, engine-owned, and effect free."
     Assert-Equal -Actual (($policy.text.capabilityIds | Sort-Object) -join ",") -Expected "content.summarize,content.write,general.chat" -Message "Only the three admitted local text capabilities should be exposed."
@@ -5039,6 +5039,12 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $blindTest = @(& $python.Source (Join-Path $repoRoot "scripts/test-blind-writing-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Blind writing review offline safety tests should pass."
     Assert-True -Condition (($blindTest -join "`n") -match "passed 12 offline safety checks") -Message "Blind writing review coverage should remain complete."
+    $imageLifecycleOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-image-lifecycle-foundation.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-image lifecycle simulation tests should pass."
+    Assert-True -Condition (($imageLifecycleOutput -join "`n") -match "28 cases") -Message "Local-image lifecycle planning must cover install, update, rollback, recovery, retention, and uninstall without effects."
+    $parserOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-parser-worker-foundation.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Restricted parser-worker hostile tests should pass."
+    Assert-True -Condition (($parserOutput -join "`n") -match "24 cases") -Message "The parser-worker foundation must reject hostile containers and grant no parser authority."
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md") -Message "Local-web and writing-model guidance should be mapped to the wiki."
 }
 
@@ -5143,7 +5149,7 @@ if ($IsWindows) {
         Assert-True -Condition ($browserSource -match "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" -and $browserSource -match "local-web-exited-") -Message "The browser harness should tolerate cold native startup and report early server exits."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 260 checks") -Message "The headless browser flow should exercise all 260 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 275 checks") -Message "The headless browser flow should exercise all 275 checks."
     }
 }
 

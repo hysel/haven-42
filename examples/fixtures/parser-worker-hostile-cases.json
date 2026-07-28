@@ -1,0 +1,62 @@
+[
+  {
+    "id": "raw-path",
+    "mutation": {"path": "../secret.pdf"},
+    "expectedError": "forbidden-request-authority"
+  },
+  {
+    "id": "oversized-input",
+    "mutation": {"sizeBytes": 16777217},
+    "expectedError": "input-too-large"
+  },
+  {
+    "id": "too-many-objects",
+    "mutation": {"objectCount": 10001},
+    "expectedError": "object-budget-exceeded"
+  },
+  {
+    "id": "deep-container",
+    "mutation": {"nestingDepth": 33},
+    "expectedError": "nesting-budget-exceeded"
+  },
+  {
+    "id": "expansion-bomb",
+    "mutation": {"compressedBytes": 1024, "expandedBytes": 65536},
+    "expectedError": "expansion-ratio-exceeded"
+  },
+  {
+    "id": "expanded-size",
+    "mutation": {"expandedBytes": 67108865},
+    "expectedError": "expanded-size-exceeded"
+  },
+  {
+    "id": "encrypted",
+    "mutation": {"encrypted": true},
+    "expectedError": "encrypted-content-rejected"
+  },
+  {
+    "id": "active-content",
+    "mutation": {"activeContent": true},
+    "expectedError": "active-content-rejected"
+  },
+  {
+    "id": "macros",
+    "mutation": {"macros": true},
+    "expectedError": "macros-rejected"
+  },
+  {
+    "id": "external-relationship",
+    "mutation": {"externalRelationships": true},
+    "expectedError": "external-relationships-rejected"
+  },
+  {
+    "id": "embedded-object",
+    "mutation": {"embeddedObjects": true},
+    "expectedError": "embedded-objects-rejected"
+  },
+  {
+    "id": "renderer-path-claim",
+    "mutation": {"pathProvided": true},
+    "expectedError": "path-authority-rejected"
+  }
+]

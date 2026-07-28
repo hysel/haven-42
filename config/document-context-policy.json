@@ -9,9 +9,19 @@
     "pathSentToEngine": false
   },
   "formats": {
-    "allowedExtensions": [".txt", ".md"],
-    "allowedMediaTypes": ["text/plain", "text/markdown"],
+    "allowedExtensions": [".txt", ".md", ".csv", ".json"],
+    "allowedMediaTypes": ["text/plain", "text/markdown", "text/csv", "application/json"],
     "utf8Required": true,
+    "structuredText": {
+      "jsonSyntaxValidationRequired": true,
+      "maximumJsonDepth": 64,
+      "maximumJsonContainerNodes": 10000,
+      "csvSyntaxValidationRequired": true,
+      "maximumCsvRows": 2000,
+      "maximumCsvColumns": 256,
+      "maximumCsvCellCharacters": 8192,
+      "formulaEvaluationAllowed": false
+    },
     "archivesAllowed": false,
     "pdfAllowed": false,
     "officeDocumentsAllowed": false,

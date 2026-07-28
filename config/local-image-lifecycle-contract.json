@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "status": "simulation-only-not-runtime-admitted",
+  "description": "Effect-free consumer-local image-provider lifecycle planning. This contract grants no installer, updater, process, filesystem, or network authority.",
+  "runtimeAdmitted": false,
+  "scenarioEvidenceIsAuthoritative": false,
+  "operations": [
+    "inspect-eligibility",
+    "plan-install",
+    "plan-update",
+    "plan-rollback",
+    "plan-uninstall",
+    "recover-interrupted"
+  ],
+  "request": {
+    "requiredFields": [
+      "schemaVersion",
+      "requestId",
+      "operation",
+      "profileId",
+      "currentArtifact",
+      "candidateArtifact",
+      "evidence",
+      "compatibility",
+      "health",
+      "journal",
+      "retention"
+    ],
+    "maximumSerializedBytes": 32768,
+    "maximumNestingDepth": 8,
+    "maximumContainerNodes": 128,
+    "forbiddenFieldNames": [
+      "path",
+      "url",
+      "command",
+      "arguments",
+      "environment",
+      "token",
+      "credential",
+      "secret",
+      "approval"
+    ]
+  },
+  "artifactRequiredFields": [
+    "artifactId",
+    "version",
+    "sha256",
+    "knownGood"
+  ],
+  "evidenceRequiredFields": [
+    "immutableIdentityVerified",
+    "checksumVerified",
+    "licenseRecorded",
+    "sbomPresent",
+    "noticesPresent",
+    "acceleratorConfirmed",
+    "loopbackBindingConfirmed",
+    "customNodesDisabled",
+    "externalApiNodesDisabled"
+  ],
+  "compatibilityRequiredFields": [
+    "operatingSystemMatched",
+    "architectureMatched",
+    "acceleratorMatched",
+    "storageSufficient",
+    "schemaCompatible",
+    "rollbackCompatible"
+  ],
+  "healthRequiredFields": [
+    "stagedPreflightPassed",
+    "postActivationPassed",
+    "rollbackHealthPassed"
+  ],
+  "journal": {
+    "requiredFields": [
+      "phase",
+      "operationId",
+      "activeArtifactId",
+      "candidateArtifactId",
+      "previousArtifactId"
+    ],
+    "phases": [
+      "idle",
+      "staging",
+      "activating",
+      "post-health",
+      "rollback-required",
+      "uninstalling"
+    ]
+  },
+  "retention": {
+    "requiredFields": [
+      "providerData",
+      "generatedArtifacts",
+      "previousRuntime"
+    ],
+    "providerDataChoices": [
+      "preserve",
+      "explicit-delete"
+    ],
+    "generatedArtifactChoices": [
+      "preserve",
+      "explicit-delete"
+    ],
+    "previousRuntimeChoices": [
+      "retain-one-known-good",
+      "remove-after-verified-health"
+    ]
+  },
+  "effects": {
+    "networkUsed": false,
+    "downloadRequested": false,
+    "filesystemReadPerformed": false,
+    "filesystemWritePerformed": false,
+    "processStarted": false,
+    "processTerminated": false,
+    "providerStateChanged": false,
+    "runtimeActivated": false,
+    "rollbackPerformed": false,
+    "uninstallPerformed": false,
+    "userDataTouched": false,
+    "approvalIssuedOrAccepted": false
+  }
+}

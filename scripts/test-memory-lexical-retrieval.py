@@ -77,6 +77,19 @@ def main() -> int:
     assert result["providerPayloadAllowed"] is False
     assert all(chunk["contentAuthority"] is False for chunk in result["chunks"])
 
+    structured = MODULE.MemoryLexicalRetrieval(CONTRACT)
+    structured.load([
+        attachment("records.csv", "name,note\nalpha,needle"),
+        attachment("settings.json", '{"label":"needle","enabled":false}'),
+    ])
+    structured_result = structured.search("needle")
+    assert structured_result["selectedChunkCount"] == 2
+    assert [item["sourceName"] for item in structured_result["chunks"]] == [
+        "records.csv", "settings.json"
+    ]
+    assert all(item["contentAuthority"] is False for item in structured_result["chunks"])
+    assert not any(structured_result["effects"].values())
+
     tie = MODULE.MemoryLexicalRetrieval(CONTRACT)
     tie.load([
         attachment("first.txt", "same"),
@@ -165,7 +178,10 @@ def main() -> int:
     assert CONTRACT["implementation"]["filesystemApiUsed"] is False
     assert CONTRACT["implementation"]["networkApiUsed"] is False
     assert CONTRACT["implementation"]["providerApiUsed"] is False
-    print("Memory lexical retrieval passed 34 deterministic, hostile, and lifecycle checks.")
+    assert CONTRACT["inputBoundary"]["allowedExtensions"] == [
+        ".txt", ".md", ".csv", ".json"
+    ]
+    print("Memory lexical retrieval passed 39 deterministic, hostile, and lifecycle checks.")
     return 0
 
 

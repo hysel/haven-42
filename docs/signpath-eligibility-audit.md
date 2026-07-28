@@ -28,7 +28,8 @@ ProductName and FileDescription `Haven 42`, ProductVersion and FileVersion
 `haven42.exe`; the archive/evidence verifier and native portable parity,
 relocation, read-only, recovery, lifecycle, port-collision, shutdown,
 hostile-environment, and integrity tests passed. Hosted native evidence for
-the eventual immutable candidate remains required.
+the unsigned development form subsequently passed on all three hosted
+platforms; the eventual immutable release candidate must still repeat it.
 
 ## Eligibility Matrix
 
@@ -86,11 +87,14 @@ and libffi/OpenSSL source and binary dependency commits are recorded in the
 runtime inventory. The previous local package was then rejected because 39
 UCRT/API-set files came from an unrelated JDK on the host path. The classifier
 now bans those files. Both retained Visual C++ runtime DLLs match the
-hash-verified official Python.org embeddable distribution, but applicable
-Microsoft redistribution terms and clean hosted reproduction remain
-incomplete. The replacement 31-file local build passed independent artifact
-verification and the native package gate, but the promotion gate remains
-blocked rather than inferred from successful local packaging.
+hash-verified official Python.org embeddable distribution. GitHub Actions run
+`30297195387` reproduced and verified the unsigned development package on clean
+hosted Windows, Linux, and macOS runners at exact main commit
+`04baca39b26ec58c189a6ae21ea78b507444e9fa`; its main-only provenance job also
+reverified and attested the three unsigned archives. Applicable Microsoft
+redistribution terms and repetition for a later release candidate remain
+incomplete, so the promotion gate remains blocked rather than inferred from
+successful development packaging.
 
 Hosted Python input provenance is now exact for the three pinned native
 runners: the official `actions/python-versions` 3.14.6 release tag, archive

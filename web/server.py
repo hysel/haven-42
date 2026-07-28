@@ -14,6 +14,7 @@ import binascii
 import csv
 from datetime import datetime, timezone
 import hashlib
+import io
 import json
 import os
 import platform
@@ -84,11 +85,61 @@ MAX_CONTEXT_IMAGE_DIMENSION = 4096
 MAX_CONTEXT_IMAGE_PIXELS = 16_777_216
 CONTEXT_FILE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._ ()-]{0,119}")
 CONTEXT_MEDIA_TYPES = {
+    ".csv": "text/csv",
+    ".json": "application/json",
     ".md": "text/markdown",
     ".txt": "text/plain",
 }
+MAX_CONTEXT_JSON_DEPTH = 64
+MAX_CONTEXT_JSON_NODES = 10_000
+MAX_CONTEXT_CSV_ROWS = 2_000
+MAX_CONTEXT_CSV_COLUMNS = 256
+MAX_CONTEXT_CSV_CELL_CHARACTERS = 8_192
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 ALLOWED_IDLE_UNLOAD_SECONDS = {0, 300, 900, 1800}
+
+
+def validate_structured_context(content: str, suffix: str) -> None:
+    if suffix == ".json":
+        try:
+            parsed = json.loads(
+                content,
+                parse_constant=lambda _value: (_ for _ in ()).throw(ValueError()),
+            )
+        except (json.JSONDecodeError, ValueError) as error:
+            raise WebRequestError("invalid-context-json") from error
+        pending = [(parsed, 0)]
+        container_nodes = 0
+        while pending:
+            current, depth = pending.pop()
+            if depth > MAX_CONTEXT_JSON_DEPTH:
+                raise WebRequestError("context-json-too-complex")
+            if isinstance(current, dict):
+                container_nodes += 1
+                if container_nodes > MAX_CONTEXT_JSON_NODES:
+                    raise WebRequestError("context-json-too-complex")
+                pending.extend((value, depth + 1) for value in current.values())
+            elif isinstance(current, list):
+                container_nodes += 1
+                if container_nodes > MAX_CONTEXT_JSON_NODES:
+                    raise WebRequestError("context-json-too-complex")
+                pending.extend((value, depth + 1) for value in current)
+        return
+    if suffix != ".csv":
+        return
+    try:
+        rows = csv.reader(io.StringIO(content, newline=""), strict=True)
+        row_count = 0
+        for row in rows:
+            row_count += 1
+            if (
+                row_count > MAX_CONTEXT_CSV_ROWS
+                or len(row) > MAX_CONTEXT_CSV_COLUMNS
+                or any(len(cell) > MAX_CONTEXT_CSV_CELL_CHARACTERS for cell in row)
+            ):
+                raise WebRequestError("context-csv-too-complex")
+    except csv.Error as error:
+        raise WebRequestError("invalid-context-csv") from error
 
 
 def validate_context_png(data: bytes) -> tuple[int, int]:
@@ -1026,6 +1077,8 @@ class HavenState:
             "providerId": "ollama.local-text",
             "trustScope": policy["trustScope"],
             "executionLocation": policy["executionLocation"],
+            "transportScheme": urllib.parse.urlsplit(base_url).scheme,
+            "transportEncrypted": urllib.parse.urlsplit(base_url).scheme == "https",
             "version": self.ollama_version,
             "models": models,
             "configurationPersisted": False,
@@ -1191,6 +1244,7 @@ class HavenState:
                 raise WebRequestError("invalid-context-file-type")
             if not isinstance(content, str) or not content or "\x00" in content:
                 raise WebRequestError("invalid-context-file-content")
+            validate_structured_context(content, suffix)
             encoded_size = len(content.encode("utf-8"))
             if (
                 isinstance(claimed_size, bool)

@@ -2382,14 +2382,14 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "305 security and behavior checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "313 security and behavior checks" || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" || return 1
   grep -q "local-web-exited-" "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" || return 1
   if [ "$TEST_TIER" = "full" ]; then
     command -v node >/dev/null 2>&1 || return 1
     node "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" |
-      grep -q "passed: 260 checks" || return 1
+      grep -q "passed: 275 checks" || return 1
   fi
   assurance_dashboard="$("$REPO_ROOT/scripts/generate-evidence-dashboard.shared.sh" --as-json)" || return 1
   python3 - "$assurance_dashboard" <<'PY' || return 1
@@ -2503,6 +2503,10 @@ assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md
 assert "examples/blind-writing-quality-review.md" in wiki_map
 PY
   python3 "$REPO_ROOT/scripts/test-blind-writing-review.py" | grep -q "passed 12 offline safety checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-local-image-lifecycle-foundation.py" |
+    grep -q "28 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-parser-worker-foundation.py" |
+    grep -q "24 cases" || return 1
 }
 
 test_task_composition_and_repository_privacy() {
@@ -2547,7 +2551,7 @@ PY
 
 test_conversation_history_foundation() {
   python3 "$REPO_ROOT/scripts/test-memory-lexical-retrieval.py" |
-    grep -q "34 deterministic, hostile, and lifecycle checks" || return 1
+    grep -q "39 deterministic, hostile, and lifecycle checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-foundation.py" |
     grep -q "45 bounded, effect-free checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'

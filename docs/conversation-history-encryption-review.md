@@ -71,6 +71,13 @@ provider endpoints, credentials, paths, prompts, and telemetry do not belong in
 the credential store. Database filenames and locations remain engine-owned,
 per-user, and outside renderer/model authority.
 
+If attachment snapshots are later admitted, their exact validated bytes and
+metadata must be covered by the same encryption, per-user access, retention,
+backup, recovery, and deletion guarantees as messages. Original filesystem
+paths and live references are forbidden. An unavailable, deleted, or
+integrity-failed snapshot must fail closed and must not be reconstructed from
+the original file without a new user selection.
+
 ## Recovery and migration
 
 Wrong-key, tamper, corruption, locked-store, unavailable-store, disk-full, and

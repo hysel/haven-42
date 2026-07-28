@@ -49,6 +49,7 @@ const state = {
   contextImages: [],
   contextImageSequence: 0,
   providerTrustScope: null,
+  providerTransportScheme: null,
   modelSelections: {},
   recommendations: {},
   modelOptions: [],
@@ -81,6 +82,24 @@ function clearError() {
   const box = byId("connection-error");
   box.classList.add("hidden");
   box.removeAttribute("tabindex");
+}
+
+function renderProviderTransportWarning(trustScope, transportScheme) {
+  const boxes = [
+    byId("connection-transport-warning"),
+    byId("wizard-transport-warning"),
+  ];
+  const isHttp = transportScheme === "http";
+  const message = !isHttp
+    ? ""
+    : trustScope === "loopback"
+      ? "HTTP connection: traffic is not encrypted, but this Ollama endpoint is on this computer. Use HTTPS if your local threat model requires transport encryption."
+      : "Security warning: this private-network Ollama connection uses unencrypted HTTP. Chat messages and attachments could be read or changed by someone able to observe that network. Use a trusted HTTPS endpoint or a loopback tunnel.";
+  for (const box of boxes) {
+    box.textContent = message;
+    box.classList.toggle("hidden", !message);
+    box.classList.toggle("loopback", isHttp && trustScope === "loopback");
+  }
 }
 
 function motionBehavior() {
@@ -415,8 +434,12 @@ function humanError(error) {
     "private-context-confirmation-required": "Confirm that the attached content may be sent to your private-network Ollama server.",
     "invalid-context-file-count": "Attach no more than five text files.",
     "invalid-context-file-name": "A selected filename is not supported.",
-    "invalid-context-file-type": "Only UTF-8 .txt and .md files are supported.",
+    "invalid-context-file-type": "Only UTF-8 .txt, .md, .csv, and .json files are supported.",
     "invalid-context-file-content": "A selected file is empty or is not supported text.",
+    "invalid-context-json": "The selected JSON file is malformed.",
+    "context-json-too-complex": "The selected JSON file exceeds the supported depth or structure limit.",
+    "invalid-context-csv": "The selected CSV file is malformed.",
+    "context-csv-too-complex": "The selected CSV file exceeds the supported row, column, or cell limit.",
     "context-file-too-large": "Each attached file must be no larger than 64 KiB.",
     "context-total-too-large": "Attached files must total no more than 128 KiB.",
     "duplicate-context-file-name": "Remove the duplicate attached filename.",
@@ -1164,6 +1187,15 @@ function formatContextBytes(bytes) {
   return bytes < 1024 ? `${bytes} B` : `${Math.ceil(bytes / 1024)} KiB`;
 }
 
+function contextFormatLabel(mediaType) {
+  return ({
+    "application/json": "JSON",
+    "text/csv": "CSV",
+    "text/markdown": "Markdown",
+    "text/plain": "Text",
+  })[mediaType] || "Text";
+}
+
 function renderContextFiles() {
   const list = byId("context-file-list");
   list.replaceChildren();
@@ -1176,7 +1208,7 @@ function renderContextFiles() {
     name.textContent = file.name;
     const meta = document.createElement("span");
     meta.className = "context-file-meta";
-    meta.textContent = `${formatContextBytes(file.sizeBytes)} · ~${Math.ceil(file.sizeBytes / 4)} tokens`;
+    meta.textContent = `${contextFormatLabel(file.mediaType)} · ${formatContextBytes(file.sizeBytes)} · ~${Math.ceil(file.sizeBytes / 4)} tokens`;
     const remove = document.createElement("button");
     remove.className = "button text-button remove-context-file";
     remove.type = "button";
@@ -1189,7 +1221,7 @@ function renderContextFiles() {
     const preview = document.createElement("details");
     preview.className = "context-preview";
     const previewSummary = document.createElement("summary");
-    previewSummary.textContent = "Preview selected text";
+    previewSummary.textContent = `Preview selected ${contextFormatLabel(file.mediaType)}`;
     const previewText = document.createElement("pre");
     previewText.textContent = file.content.length > 1000
       ? `${file.content.slice(0, 1000)}\n… preview limited to 1,000 characters`
@@ -1338,6 +1370,63 @@ async function addContextImages(fileList, source = "clipboard") {
 async function addContextImage(blob) {
   await addContextImages([blob]);
 }
+
+function validateContextJson(content) {
+  let parsed;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new Error("invalid-context-json");
+  }
+  const pending = [[parsed, 0]];
+  let nodes = 0;
+  while (pending.length) {
+    const [current, depth] = pending.pop();
+    if (depth > 64) throw new Error("context-json-too-complex");
+    if (current && typeof current === "object") {
+      nodes += 1;
+      if (nodes > 10000) throw new Error("context-json-too-complex");
+      Object.values(current).forEach((value) => pending.push([value, depth + 1]));
+    }
+  }
+}
+
+function validateContextCsv(content) {
+  let quoted = false;
+  let rows = 1;
+  let columns = 1;
+  let maximumColumns = 1;
+  let cellCharacters = 0;
+  for (let index = 0; index < content.length; index += 1) {
+    const character = content[index];
+    if (character === "\"") {
+      if (quoted && content[index + 1] === "\"") {
+        cellCharacters += 1;
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (!quoted && character === ",") {
+      columns += 1;
+      maximumColumns = Math.max(maximumColumns, columns);
+      cellCharacters = 0;
+    } else if (!quoted && (character === "\n" || character === "\r")) {
+      if (character === "\r" && content[index + 1] === "\n") index += 1;
+      rows += 1;
+      columns = 1;
+      cellCharacters = 0;
+    } else {
+      cellCharacters += 1;
+    }
+    if (
+      rows > 2000
+      || maximumColumns > 256
+      || cellCharacters > 8192
+    ) throw new Error("context-csv-too-complex");
+  }
+  if (quoted) throw new Error("invalid-context-csv");
+}
+
 async function addContextFiles(fileList) {
   const pending = [...fileList];
   if (state.contextFiles.length + pending.length > 5) {
@@ -1351,7 +1440,12 @@ async function addContextFiles(fileList) {
       throw new Error("invalid-context-file-name");
     }
     const suffix = file.name.slice(file.name.lastIndexOf(".")).toLocaleLowerCase();
-    const mediaType = suffix === ".txt" ? "text/plain" : suffix === ".md" ? "text/markdown" : "";
+    const mediaType = ({
+      ".csv": "text/csv",
+      ".json": "application/json",
+      ".md": "text/markdown",
+      ".txt": "text/plain",
+    })[suffix] || "";
     if (!mediaType) throw new Error("invalid-context-file-type");
     const foldedName = file.name.toLocaleLowerCase();
     if (existing.has(foldedName)) throw new Error("duplicate-context-file-name");
@@ -1365,6 +1459,8 @@ async function addContextFiles(fileList) {
     const sizeBytes = new TextEncoder().encode(content).byteLength;
     if (!content || content.includes("\u0000")) throw new Error("invalid-context-file-content");
     if (sizeBytes > 65536) throw new Error("context-file-too-large");
+    if (suffix === ".json") validateContextJson(content);
+    if (suffix === ".csv") validateContextCsv(content);
     totalBytes += sizeBytes;
     if (totalBytes > 131072) throw new Error("context-total-too-large");
     existing.add(foldedName);
@@ -1382,7 +1478,7 @@ async function addContextAttachments(fileList) {
     const suffix = typeof file.name === "string"
       ? file.name.slice(file.name.lastIndexOf(".")).toLocaleLowerCase()
       : "";
-    if (suffix === ".txt" || suffix === ".md") {
+    if ([".txt", ".md", ".csv", ".json"].includes(suffix)) {
       textFiles.push(file);
     } else if (suffix === ".png") {
       imageFiles.push(file);
@@ -1472,6 +1568,8 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   const result = await api("/api/connect", { endpoint, timeoutSeconds, idleUnloadSeconds });
   state.connected = true;
   state.providerTrustScope = result.trustScope;
+  state.providerTransportScheme = result.transportScheme;
+  renderProviderTransportWarning(result.trustScope, result.transportScheme);
   state.recommendations = result.recommendations || {};
   state.modelOptions = result.modelOptions || [];
   if (state.desiredModel && state.modelOptions.some((item) => item.name === state.desiredModel.name)) {

@@ -28,4 +28,22 @@ A candidate-only profile produces an unavailable result and setup guidance. It c
 
 A passing provider must start on demand, bind to `127.0.0.1`, confirm the intended accelerator, stop after a bounded idle period, and keep provider state outside the replaceable Haven 42 engine. Installation, health, model checksum, generation, PNG validation, metadata, cancellation, recovery, cleanup, update, rollback, and uninstall all belong to the exact profile gate.
 
-Remaining native validation prioritizes Windows NVIDIA and Windows Intel XPU, completion of the Windows AMD gate, and finally Apple Silicon on a physical Mac. Failed or partial profiles leave evidence only and ship no runtime or installer assets.
+`config/local-image-lifecycle-contract.json` and
+`scripts/simulate-local-image-lifecycle.py` now provide an effect-free
+consumer lifecycle planner for those gates. It accepts only an exact
+`tested-passed` profile, strict artifact identities and digests, complete
+compatibility/evidence booleans, an idle or interrupted journal shape, and
+explicit retention choices. It rejects candidate-only profiles, including the
+partial Windows AMD cell, as well as raw paths, URLs, commands, arguments,
+environment values, credentials, secrets, approvals, artifact replay, unsafe
+health, and incomplete recovery state. Install, update, failed-health rollback,
+explicit rollback, interrupted recovery, retention, and uninstall outputs are
+plans only: every network, download, filesystem, process, activation, rollback,
+uninstall, user-data, and approval effect remains false. Synthetic artifacts
+are never counted as provider evidence.
+
+Remaining native validation prioritizes Windows NVIDIA and completion of the
+Windows AMD gate. Windows Intel XPU and physical Apple Silicon remain parked
+until suitable hardware is available and do not block continued Windows or
+Linux development. Failed or partial profiles leave evidence only and ship no
+runtime or installer assets.

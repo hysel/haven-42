@@ -29,7 +29,7 @@ The executable binds only to `127.0.0.1`. Automatic browser launch accepts only 
 Frozen resources are limited to three UI files and six server-owned data files. The data allowlist includes the model recommendations, evidence catalog, agent-surface capability and solution matrices, installation registry, and read-only workflow registry. A build-generated manifest binds every allowed resource by relative path, size, and SHA-256. Startup fails closed if the embedded manifest or any listed resource is malformed, missing, changed, or joined by an unexpected file in the protected resource roots. HTTP routing independently allowlists the three asset paths; no general filesystem serving exists.
 
 The packaged UI preserves the source attachment boundary: only explicitly
-selected UTF-8 `.txt`/`.md` content and browsed or clipboard-pasted PNG screenshots enter
+selected UTF-8 `.txt`/`.md`/`.csv`/`.json` content and browsed or clipboard-pasted PNG screenshots enter
 browser/process memory. The loopback service revalidates names, media types,
 exact byte counts, text limits, PNG structure and CRCs, screenshot dimensions
 and pixel budgets, and warned submit-confirmed private-network transfer. Image-input support remains
@@ -90,10 +90,13 @@ count coverage. It marks every upstream component ineligible for Haven 42
 signing and drives matching SBOM and notice rows. On Windows it also records
 the official Python installer/SBOM and immutable CPython, OpenSSL, and libffi
 source provenance. Both
-`runtimeRedistributionCleared` and production promotion remain false. Exact
-applicable Microsoft redistribution terms and clean hosted reproduction of the
-locally verified 31-file package without host-derived API-set/UCRT files are
-still required before public binary promotion.
+`runtimeRedistributionCleared` and production promotion remain false. GitHub
+Actions run `30297195387` reproduced and verified the unsigned development
+package on clean hosted Windows, Linux, and macOS runners at exact main commit
+`04baca39b26ec58c189a6ae21ea78b507444e9fa`, including the Windows component
+classifier that rejects host-derived API-set/UCRT files. Exact applicable
+Microsoft redistribution terms and repetition for any later immutable release
+candidate are still required before public binary promotion.
 
 ## Installer And Updater Foundations
 

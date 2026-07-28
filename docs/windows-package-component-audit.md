@@ -38,9 +38,12 @@ passed. The two retained Visual C++ runtime files match the official Python
 | Development marker | 1 | unsigned-development warning | Project-owned MIT evidence. |
 
 The 31-file total and every individual SHA-256 digest are recorded in the
-local artifact evidence. Hosted Windows must reproduce the same admitted shape
-before promotion. Hashes remain in generated evidence rather than this source
-document, so this page cannot be mistaken for evidence for a later binary.
+local artifact evidence. GitHub Actions run `30297195387` reproduced and
+verified the unsigned development package on a clean hosted Windows runner at
+exact main commit `04baca39b26ec58c189a6ae21ea78b507444e9fa`; the component
+classifier rejected the banned host-derived JDK/UCRT shape. Hashes remain in
+generated evidence rather than this source document, so this page cannot be
+mistaken for evidence for a later binary or redistribution clearance.
 
 ## Authoritative License References
 
@@ -132,14 +135,17 @@ Before a SignPath application or public binary Release:
 1. acquire every build input from an immutable, reviewed, authorized source;
 2. record the applicable Microsoft redistribution terms for the two retained
    Visual C++ runtime DLLs;
-3. reproduce the locally verified 31-file host-independent package shape on
-   the clean hosted Windows runner and confirm the banned JDK/UCRT files are
-   absent;
+3. repeat the clean hosted Windows reproduction for the exact immutable
+   release candidate and confirm the banned JDK/UCRT files remain absent
+   (passed for unsigned development commit
+   `04baca39b26ec58c189a6ae21ea78b507444e9fa`);
 4. include the applicable Microsoft license/notice text with the candidate
    (complete for CPython, OpenSSL, and libffi);
-5. repeat the component coverage and hostile verification for the
-   exact immutable candidate on hosted Windows;
-6. repeat the classifier on native Linux and macOS package outputs; and
+5. repeat the component coverage and hostile verification for the exact
+   immutable release candidate on hosted Windows (passed for the current
+   unsigned development form);
+6. repeat the classifier on native Linux and macOS release-candidate package
+   outputs (passed for the current unsigned development form); and
 7. have the final result reviewed for license compliance.
 
 Until all seven steps pass, the exact packaged dependency/license gate remains
