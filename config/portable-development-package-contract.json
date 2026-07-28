@@ -42,6 +42,7 @@
     },
     "linuxBrowserApplicationDataDirectories": [
       "/var/lib/flatpak/exports/share",
+      "/var/lib/snapd/desktop",
       "/usr/local/share",
       "/usr/share"
     ],

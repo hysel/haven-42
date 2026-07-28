@@ -237,7 +237,8 @@ def main() -> int:
         "DISPLAY": ":0",
         "PATH": "/usr/bin:/bin",
         "XDG_DATA_DIRS": (
-            "/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+            "/var/lib/flatpak/exports/share:/var/lib/snapd/desktop:"
+            "/usr/local/share:/usr/share"
         ),
     }
     checks += 1
@@ -299,7 +300,8 @@ def main() -> int:
     )
     assert launches[-1][0] == ["/usr/bin/gio", "open", safe_url]
     assert launches[-1][1]["env"]["XDG_DATA_DIRS"] == (
-        "/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+        "/var/lib/flatpak/exports/share:/var/lib/snapd/desktop:"
+        "/usr/local/share:/usr/share"
     )
     assert "BROWSER" not in launches[-1][1]["env"]
     checks += 1

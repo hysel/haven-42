@@ -209,7 +209,8 @@ LINUX_BROWSER_LAUNCHERS = (
     ("/usr/bin/xdg-open", ()),
 )
 LINUX_BROWSER_XDG_DATA_DIRS = (
-    "/var/lib/flatpak/exports/share:/usr/local/share:/usr/share"
+    "/var/lib/flatpak/exports/share:/var/lib/snapd/desktop:"
+    "/usr/local/share:/usr/share"
 )
 CAPABILITY_PROMPTS = {
     "general.chat": (

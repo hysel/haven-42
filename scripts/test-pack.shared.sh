@@ -2451,6 +2451,8 @@ assert portable["security"]["browserUrlIsEngineConstructedLoopbackOnly"] is True
 assert portable["security"]["browserEnvironmentOverrideAllowed"] is False
 assert portable["security"]["browserLaunchShellAllowed"] is False
 assert portable["security"]["browserLaunchExecutables"]["linux"] == ["/usr/bin/gio", "/usr/bin/xdg-open"]
+assert portable["security"]["linuxBrowserApplicationDataDirectories"] == ["/var/lib/flatpak/exports/share", "/var/lib/snapd/desktop", "/usr/local/share", "/usr/share"]
+assert portable["security"]["linuxBrowserApplicationDataDirectoriesInherited"] is False
 assert portable["security"]["browserLaunchSuccessRequiresZeroExitOrRunningProcess"] is True
 assert portable["security"]["browserLaunchFailureMode"] == "print-loopback-url-and-continue"
 assert portable["security"]["exactRuntimeComponentFileCoverageRequired"] is True
