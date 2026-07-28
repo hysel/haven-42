@@ -6,6 +6,7 @@ from __future__ import annotations
 import base64
 import importlib.util
 import json
+import subprocess
 import struct
 import tempfile
 import threading
@@ -27,6 +28,28 @@ WEB = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(WEB)
 
 
+def png_chunk(chunk_type: bytes, payload: bytes) -> bytes:
+    checksum = zlib.crc32(chunk_type)
+    checksum = zlib.crc32(payload, checksum) & 0xFFFFFFFF
+    return (
+        struct.pack(">I", len(payload))
+        + chunk_type
+        + payload
+        + struct.pack(">I", checksum)
+    )
+
+
+def test_png(width: int, height: int) -> bytes:
+    ihdr = struct.pack(">IIBBBBB", width, height, 8, 0, 0, 0, 0)
+    scanlines = b"".join(b"\x00" + (b"\x00" * width) for _ in range(height))
+    return (
+        WEB.PNG_SIGNATURE
+        + png_chunk(b"IHDR", ihdr)
+        + png_chunk(b"IDAT", zlib.compress(scanlines))
+        + png_chunk(b"IEND", b"")
+    )
+
+
 class FakeState:
     models = ["qwen3.5:9b", "writer-model:latest", "bad model<script>"]
     loaded: set[str] = set()
@@ -34,6 +57,7 @@ class FakeState:
     fail_chat = False
     fail_connect = False
     empty_chat = False
+    image_bytes = test_png(512, 512)
 
 
 class FakeOllama(BaseHTTPRequestHandler):
@@ -103,12 +127,7 @@ class FakeOllama(BaseHTTPRequestHandler):
                 },
             })
         elif self.path.startswith("/view?"):
-            png_header = (
-                b"\x89PNG\r\n\x1a\n"
-                + b"\x00\x00\x00\rIHDR"
-                + struct.pack(">II", 512, 512)
-            )
-            self._bytes(200, png_header, "image/png")
+            self._bytes(200, FakeState.image_bytes, "image/png")
         else:
             self._json(404, {"error": "not-found"})
 
@@ -199,11 +218,28 @@ def main() -> int:
         "HOME": "/home/tester",
         "DISPLAY": ":0",
         "PATH": "/tmp/hostile-bin",
+        "XDG_DATA_DIRS": "/tmp/hostile-applications",
     })
     assert safe_environment == {
         "HOME": "/home/tester",
         "DISPLAY": ":0",
         "PATH": "/usr/bin:/bin",
+    }
+    checks += 1
+    linux_environment = WEB._linux_browser_environment({
+        "BROWSER": "hostile-browser-command",
+        "HOME": "/home/tester",
+        "DISPLAY": ":0",
+        "XDG_DATA_DIRS": "/tmp/hostile-applications",
+    })
+    assert linux_environment == {
+        "HOME": "/home/tester",
+        "DISPLAY": ":0",
+        "PATH": "/usr/bin:/bin",
+        "XDG_DATA_DIRS": (
+            "/var/lib/flatpak/exports/share:/var/lib/snapd/desktop:"
+            "/usr/local/share:/usr/share"
+        ),
     }
     checks += 1
 
@@ -218,8 +254,20 @@ def main() -> int:
 
     launches: list[tuple[list[str], dict]] = []
 
+    class FakeProcess:
+        def __init__(self, exit_code=0, running=False):
+            self.exit_code = exit_code
+            self.running = running
+
+        def wait(self, timeout):
+            assert timeout == 1.0
+            if self.running:
+                raise subprocess.TimeoutExpired("browser", timeout)
+            return self.exit_code
+
     def record_launch(command, **kwargs):
         launches.append((command, kwargs))
+        return FakeProcess()
 
     assert WEB.open_default_browser(
         safe_url,
@@ -244,9 +292,18 @@ def main() -> int:
         platform_name="linux",
         executable_exists=lambda path: path in {"/usr/bin/gio", "/usr/bin/xdg-open"},
         process_launcher=record_launch,
-        environment={"BROWSER": "hostile", "DISPLAY": ":1"},
+        environment={
+            "BROWSER": "hostile",
+            "DISPLAY": ":1",
+            "XDG_DATA_DIRS": "/tmp/hostile-applications",
+        },
     )
     assert launches[-1][0] == ["/usr/bin/gio", "open", safe_url]
+    assert launches[-1][1]["env"]["XDG_DATA_DIRS"] == (
+        "/var/lib/flatpak/exports/share:/var/lib/snapd/desktop:"
+        "/usr/local/share:/usr/share"
+    )
+    assert "BROWSER" not in launches[-1][1]["env"]
     checks += 1
     launches.clear()
     assert WEB.open_default_browser(
@@ -256,6 +313,44 @@ def main() -> int:
         process_launcher=record_launch,
     )
     assert launches[-1][0] == ["/usr/bin/xdg-open", safe_url]
+    checks += 1
+    launches.clear()
+
+    def fail_gio_then_open(command, **kwargs):
+        launches.append((command, kwargs))
+        return FakeProcess(exit_code=1 if command[0] == "/usr/bin/gio" else 0)
+
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda path: path in {"/usr/bin/gio", "/usr/bin/xdg-open"},
+        process_launcher=fail_gio_then_open,
+    )
+    assert [launch[0][0] for launch in launches] == ["/usr/bin/gio", "/usr/bin/xdg-open"]
+    checks += 1
+    launches.clear()
+
+    def missing_gio_then_open(command, **kwargs):
+        launches.append((command, kwargs))
+        if command[0] == "/usr/bin/gio":
+            raise OSError("forced-gio-failure")
+        return FakeProcess()
+
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda path: path in {"/usr/bin/gio", "/usr/bin/xdg-open"},
+        process_launcher=missing_gio_then_open,
+    )
+    assert [launch[0][0] for launch in launches] == ["/usr/bin/gio", "/usr/bin/xdg-open"]
+    checks += 1
+    launches.clear()
+    assert WEB.open_default_browser(
+        safe_url,
+        platform_name="linux",
+        executable_exists=lambda path: path == "/usr/bin/gio",
+        process_launcher=lambda command, **kwargs: FakeProcess(running=True),
+    )
     checks += 1
     launches.clear()
     assert not WEB.open_default_browser(
@@ -523,6 +618,26 @@ def main() -> int:
             path == "/history" and body == {"clear": True}
             for path, body in FakeState.requests
         )
+        FakeState.image_bytes = WEB.PNG_SIGNATURE + b"invalid"
+        status, invalid_image_error, _ = request_json(
+            origin + "/api/image/run",
+            "POST",
+            {
+                "prompt": "invalid provider image",
+                "width": 512,
+                "height": 512,
+                "steps": 10,
+                "seed": 424243,
+            },
+            token,
+            origin,
+        )
+        assert (
+            status == 502
+            and invalid_image_error["error"] == "invalid-image-provider-png"
+        )
+        FakeState.image_bytes = test_png(512, 512)
+        checks += 1
         status, error, _ = request_json(
             origin + "/api/image/run",
             "POST",

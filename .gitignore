@@ -1,6 +1,10 @@
 .vscode/
 .continue/config.local*.yaml
 config/model-runtime-policy.local.json
+.env
+.env.*
+!.env.example
+.privacy-rewrite-backup/
 runtime-validation-output/
 dist/
 

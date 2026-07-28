@@ -58,7 +58,7 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-open` on Linux and macOS to start without opening the default browser. Use `-Port` or `--port` to select another loopback port. Automatic opening accepts only the engine-generated IPv4-loopback HTTP origin. Windows uses the registered URL association, macOS uses fixed `/usr/bin/open`, and Linux uses fixed allowlisted `/usr/bin/gio` or `/usr/bin/xdg-open` commands without a shell. Unix launch passes a minimal environment that excludes `BROWSER`; if no admitted desktop opener is available, Haven 42 remains running and prints the URL for manual use. Every source launcher probes candidate commands and accepts only a working Python 3 interpreter; a stale Windows `py` command or store alias is skipped rather than failing later with a misleading server error.
+The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-open` on Linux and macOS to start without opening the default browser. Use `-Port` or `--port` to select another loopback port. Automatic opening accepts only the engine-generated IPv4-loopback HTTP origin. Windows uses the registered URL association, macOS uses fixed `/usr/bin/open`, and Linux uses fixed allowlisted `/usr/bin/gio` or `/usr/bin/xdg-open` commands without a shell. Unix launch passes a minimal environment that excludes `BROWSER`. Linux uses only fixed system-owned application lookup roots for Flatpak, Ubuntu Snap, and base-system desktop registrations and never inherits caller-controlled `XDG_DATA_DIRS`. An immediate nonzero exit or process error advances to the next admitted Linux opener; only a zero exit or a still-running opener counts as success. If no admitted desktop opener is available, Haven 42 remains running and prints the URL for manual use. Every source launcher probes candidate commands and accepts only a working Python 3 interpreter; a stale Windows `py` command or store alias is skipped rather than failing later with a misleading server error.
 
 ## Accessibility And Capability Status
 
@@ -168,7 +168,9 @@ model, custom node, external API node, filename, provider path, or workflow
 graph.
 
 Generation uses fixed bounded dimensions, steps, CFG, sampler, negative prompt,
-and a built-in node graph. The server validates and caps the PNG, clears ComfyUI
+and a built-in node graph. The server reuses the attachment PNG parser to verify
+the complete chunk sequence, CRCs, terminal IEND, absence of trailing bytes, and
+bounded dimensions before accepting provider output, then clears ComfyUI
 API history, and returns the image in browser memory. No client file is written
 until the user activates the browser download. ComfyUI retains its provider-side
 output, and the UI discloses that material effect before execution.

@@ -3,18 +3,18 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "f9792e779609e1152d682f6b283cfe62e6b44fdfabcf7fcbb9a02e1c0058e97a",
-      "sizeBytes": 28500
+      "sha256": "86a77a6dd18538ee834ef5cfa9fd264d80d0e64ee4b63e2843567dace34a7d97",
+      "sizeBytes": 28509
     },
     {
       "path": "web/static/app.js",
-      "sha256": "2b49b4ef65312a65364c9980f8033b6317c55acd7f7c36f9950ed68f8fa193b2",
-      "sizeBytes": 91496
+      "sha256": "08787083f8384c212447cba12b6197883cee35e5c68a00896f1f2caf7793cbad",
+      "sizeBytes": 91622
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "5b06ed3f7e2a8ef35f9150c51197019cd06981062df6ae95bb665731057f74f8",
-      "sizeBytes": 24647
+      "sha256": "7731d9f25f626d5256edec3fb86538d24b8a72683240828986c4a8140349c8ef",
+      "sizeBytes": 24663
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -23,8 +23,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "199242e773f9856f80e45e8a879334e96c535d75599874d241497dc298982cd9",
-      "sizeBytes": 26514
+      "sha256": "c346ca707f9ac0f527845fd9a6b0d0676183a2eb5c0bbafa8fb8a8d4d3f1ade4",
+      "sizeBytes": 26515
     },
     {
       "path": "config/agent-surface-capabilities.json",

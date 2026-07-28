@@ -208,6 +208,10 @@ LINUX_BROWSER_LAUNCHERS = (
     ("/usr/bin/gio", ("open",)),
     ("/usr/bin/xdg-open", ()),
 )
+LINUX_BROWSER_XDG_DATA_DIRS = (
+    "/var/lib/flatpak/exports/share:/var/lib/snapd/desktop:"
+    "/usr/local/share:/usr/share"
+)
 CAPABILITY_PROMPTS = {
     "general.chat": (
         "Answer the user clearly in the ongoing conversation. The user may ask questions, "
@@ -564,9 +568,13 @@ def _provider_json(
 
 
 def png_dimensions(data: bytes) -> tuple[int, int]:
-    if len(data) < 24 or data[:8] != b"\x89PNG\r\n\x1a\n" or data[12:16] != b"IHDR":
-        raise WebRequestError("invalid-image-provider-png", HTTPStatus.BAD_GATEWAY)
-    width, height = struct.unpack(">II", data[16:24])
+    try:
+        width, height = validate_context_png(data)
+    except WebRequestError as error:
+        raise WebRequestError(
+            "invalid-image-provider-png",
+            HTTPStatus.BAD_GATEWAY,
+        ) from error
     if width < 64 or height < 64 or width > 2048 or height > 2048:
         raise WebRequestError("invalid-image-dimensions", HTTPStatus.BAD_GATEWAY)
     return width, height
@@ -1879,6 +1887,15 @@ def _browser_environment(source: dict[str, str] | None = None) -> dict[str, str]
     return result
 
 
+def _linux_browser_environment(source: dict[str, str] | None = None) -> dict[str, str]:
+    result = _browser_environment(source)
+    # Bazzite and other immutable desktops export system Flatpak browser
+    # launchers here. Keep the lookup path fixed instead of inheriting the
+    # caller-controlled XDG_DATA_DIRS value.
+    result["XDG_DATA_DIRS"] = LINUX_BROWSER_XDG_DATA_DIRS
+    return result
+
+
 def open_default_browser(
     url: str,
     *,
@@ -1903,7 +1920,7 @@ def open_default_browser(
             command = "/usr/bin/open"
             if not executable_exists(command):
                 return False
-            process_launcher(
+            process = process_launcher(
                 [command, url],
                 shell=False,
                 stdin=subprocess.DEVNULL,
@@ -1913,23 +1930,32 @@ def open_default_browser(
                 start_new_session=True,
                 env=_browser_environment(environment),
             )
-            return True
+            try:
+                return process.wait(timeout=1.0) == 0
+            except subprocess.TimeoutExpired:
+                return True
         if current_platform.startswith("linux"):
             for command, fixed_arguments in LINUX_BROWSER_LAUNCHERS:
                 if not executable_exists(command):
                     continue
-                process_launcher(
-                    [command, *fixed_arguments, url],
-                    shell=False,
-                    stdin=subprocess.DEVNULL,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                    close_fds=True,
-                    start_new_session=True,
-                    env=_browser_environment(environment),
-                )
-                return True
-    except OSError:
+                try:
+                    process = process_launcher(
+                        [command, *fixed_arguments, url],
+                        shell=False,
+                        stdin=subprocess.DEVNULL,
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        close_fds=True,
+                        start_new_session=True,
+                        env=_linux_browser_environment(environment),
+                    )
+                    if process.wait(timeout=1.0) == 0:
+                        return True
+                except subprocess.TimeoutExpired:
+                    return True
+                except (AttributeError, OSError):
+                    continue
+    except (AttributeError, OSError):
         return False
     return False
 
