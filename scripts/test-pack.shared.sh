@@ -2382,7 +2382,14 @@ PY
 }
 
 test_local_web_mvp() {
-  python3 "$REPO_ROOT/scripts/test-haven42-web.py" | grep -q "313 security and behavior checks" || return 1
+  local_web_output="$(python3 "$REPO_ROOT/scripts/test-haven42-web.py")" || return 1
+  local_web_count="$(
+    printf '%s\n' "$local_web_output" |
+      sed -n 's/.*local-web self-test passed: \([0-9][0-9]*\) security and behavior checks.*/\1/p' |
+      tail -n 1
+  )"
+  [ -n "$local_web_count" ] || return 1
+  [ "$local_web_count" -ge 318 ] || return 1
   [ -f "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" ] || return 1
   grep -q "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" || return 1
   grep -q "local-web-exited-" "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" || return 1
