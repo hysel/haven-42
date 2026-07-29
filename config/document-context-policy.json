@@ -38,11 +38,13 @@
     "maximumBytesPerFile": 65536,
     "maximumTotalBytes": 131072,
     "tokenEstimateDivisor": 4,
-    "maximumImages": 2,
+    "defaultMaximumImages": 2,
+    "maximumImages": 4,
     "maximumBytesPerImage": 4194304,
     "maximumImageTotalBytes": 8388608,
     "maximumImageDimension": 4096,
-    "maximumImagePixels": 16777216
+    "maximumImagePixels": 16777216,
+    "maximumImageTotalPixels": 33554432
   },
   "providerDisclosure": {
     "loopbackDisclosureRequired": true,

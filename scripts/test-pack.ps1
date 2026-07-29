@@ -5161,7 +5161,7 @@ if ($IsWindows) {
         Assert-True -Condition ($browserSource -match "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" -and $browserSource -match "local-web-exited-") -Message "The browser harness should tolerate cold native startup and report early server exits."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 275 checks") -Message "The headless browser flow should exercise all 275 checks."
+        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 286 checks") -Message "The headless browser flow should exercise all 286 checks."
     }
 }
 

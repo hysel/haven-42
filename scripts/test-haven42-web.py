@@ -1231,6 +1231,26 @@ def main() -> int:
         screenshot_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
         assert screenshot_payload["messages"][-1]["images"] == [png_base64]
         assert screenshot_reply["events"][-2]["code"] == "MODEL_IMAGE_INPUT_UNVERIFIED"
+        four_screenshots = [
+            {**screenshot, "name": f"clipboard-screenshot-{index}.png"}
+            for index in range(1, WEB.MAX_CONTEXT_IMAGES + 1)
+        ]
+        status, four_screenshot_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Compare these screenshots."}],
+                "attachments": [],
+                "images": four_screenshots,
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 200
+        assert four_screenshot_reply["context"]["imageCount"] == WEB.MAX_CONTEXT_IMAGES
         screenshot_hostiles = (
             ({**screenshot, "base64": "***"}, "invalid-context-image"),
             ({**screenshot, "sizeBytes": len(png_bytes) + 1}, "context-image-too-large"),
@@ -1314,6 +1334,43 @@ def main() -> int:
             origin,
         )
         assert status == 400 and image_count_error["error"] == "invalid-context-image-count"
+        maximum_pixel_png = bytearray(png_bytes)
+        struct.pack_into(">I", maximum_pixel_png, 16, WEB.MAX_CONTEXT_IMAGE_DIMENSION)
+        struct.pack_into(">I", maximum_pixel_png, 20, WEB.MAX_CONTEXT_IMAGE_DIMENSION)
+        struct.pack_into(
+            ">I",
+            maximum_pixel_png,
+            29,
+            zlib.crc32(maximum_pixel_png[12:29]) & 0xFFFFFFFF,
+        )
+        maximum_pixel_screenshot = {
+            **screenshot,
+            "base64": base64.b64encode(maximum_pixel_png).decode("ascii"),
+            "sizeBytes": len(maximum_pixel_png),
+            "width": WEB.MAX_CONTEXT_IMAGE_DIMENSION,
+            "height": WEB.MAX_CONTEXT_IMAGE_DIMENSION,
+        }
+        status, total_pixel_error, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Compare these screenshots."}],
+                "attachments": [],
+                "images": [
+                    {**maximum_pixel_screenshot, "name": f"maximum-pixels-{index}.png"}
+                    for index in range(3)
+                ],
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert (
+            status == 413
+            and total_pixel_error["error"] == "context-image-total-pixels-too-large"
+        )
         state.trust_scope = "trusted-lan"
         status, image_consent_error, _ = request_json(
             origin + "/api/text",
@@ -1331,7 +1388,7 @@ def main() -> int:
         )
         assert status == 409 and image_consent_error["error"] == "private-context-confirmation-required"
         state.trust_scope = "loopback"
-        checks += 14
+        checks += 17
 
         for capability_id, expected_title, prompt_fragment in (
             ("content.write", "Generated Writing", "clean Markdown"),
@@ -1566,8 +1623,10 @@ def main() -> int:
         assert policy["documentContext"]["maximumFiles"] == 5
         assert policy["documentContext"]["maximumTotalBytes"] == 131072
         assert policy["documentContext"]["clipboardScreenshotMediaTypes"] == ["image/png"]
-        assert policy["documentContext"]["maximumScreenshots"] == 2
+        assert policy["documentContext"]["defaultMaximumScreenshots"] == 2
+        assert policy["documentContext"]["maximumScreenshots"] == 4
         assert policy["documentContext"]["maximumBytesPerScreenshot"] == 4194304
+        assert policy["documentContext"]["maximumScreenshotTotalPixels"] == 33554432
         assert policy["documentContext"]["maximumScreenshotDimension"] == 4096
         assert policy["documentContext"]["imageInputEvidence"] == "unverified-visible-warning"
         assert policy["documentContext"]["screenshotFilePickerAllowed"] is True
@@ -1591,7 +1650,10 @@ def main() -> int:
             ".txt", ".md", ".csv", ".json"
         ]
         assert context_policy["formats"]["structuredText"]["formulaEvaluationAllowed"] is False
+        assert context_policy["budgets"]["defaultMaximumImages"] == 2
+        assert context_policy["budgets"]["maximumImages"] == 4
         assert context_policy["budgets"]["maximumImagePixels"] == 16777216
+        assert context_policy["budgets"]["maximumImageTotalPixels"] == 33554432
         assert context_policy["executionIsolation"] == {
             "attachmentContentTreatedAsData": True,
             "executableFormatsAllowed": False,
@@ -1732,7 +1794,10 @@ def main() -> int:
         assert ".messages { flex: 1 1 auto;" in styles and "min-height: 0; overflow: auto;" in styles
         assert ".composer { flex: 0 0 auto;" in styles
         assert "localStorage" not in javascript and "sessionStorage" not in javascript and "indexedDB" not in javascript
-        assert ".system-setting select { height: 36px;" in styles
+        assert (
+            ".system-setting select, .context-settings select { height: 36px;"
+            in styles
+        )
         assert ".hidden { display: none !important; }" in styles
         assert ".chat-panel > .panel-heading" in styles and "overflow-y: auto" in styles
         assert "appendInlineMarkdown" in javascript and "appendMarkdown" in javascript

@@ -36,6 +36,11 @@ const CAPABILITIES = {
   },
 };
 
+const DEFAULT_CONTEXT_IMAGE_LIMIT = 2;
+const MAX_CONTEXT_IMAGE_LIMIT = 4;
+const MAX_CONTEXT_IMAGE_TOTAL_BYTES = 8388608;
+const MAX_CONTEXT_IMAGE_TOTAL_PIXELS = 33554432;
+
 const state = {
   token: "",
   connected: false,
@@ -48,6 +53,7 @@ const state = {
   contextFiles: [],
   contextImages: [],
   contextImageSequence: 0,
+  contextImageLimit: DEFAULT_CONTEXT_IMAGE_LIMIT,
   providerTrustScope: null,
   providerTransportScheme: null,
   modelSelections: {},
@@ -386,6 +392,7 @@ function setTaskControlsDisabled(disabled) {
   byId("context-files").disabled = disabled || !state.connected;
   byId("browse-context").disabled = disabled || !state.connected;
   byId("clear-context").disabled = disabled;
+  byId("context-image-limit").disabled = disabled;
   document.querySelectorAll(".remove-context-file, .remove-context-image").forEach((button) => {
     button.disabled = disabled;
   });
@@ -443,12 +450,13 @@ function humanError(error) {
     "context-file-too-large": "Each attached file must be no larger than 64 KiB.",
     "context-total-too-large": "Attached files must total no more than 128 KiB.",
     "duplicate-context-file-name": "Remove the duplicate attached filename.",
-    "invalid-context-image-count": "Paste no more than two screenshots.",
+    "invalid-context-image-count": "The screenshot limit selected for this task has been reached.",
     "invalid-context-image": "The selected screenshot is not a valid PNG image.",
     "invalid-context-image-name": "The screenshot name is not supported.",
     "invalid-context-image-type": "Only PNG screenshots can be selected or pasted in this initial version.",
     "context-image-too-large": "Each selected screenshot must be no larger than 4 MiB.",
     "context-image-total-too-large": "Selected screenshots must total no more than 8 MiB.",
+    "context-image-total-pixels-too-large": "Selected screenshots must total no more than 33.5 million decoded pixels.",
     "context-image-dimensions-too-large": "Screenshots must be at most 4096×4096 and 16.7 million pixels.",
     "invalid-context-image-dimensions": "The screenshot dimensions could not be verified.",
     "duplicate-context-image-name": "Remove the duplicate screenshot filename.",
@@ -1289,6 +1297,19 @@ function clearContextFiles() {
   renderContextFiles();
 }
 
+function updateContextImageLimitStatus() {
+  byId("context-image-limit-status").textContent = (
+    `Up to ${state.contextImageLimit} screenshot${state.contextImageLimit === 1 ? "" : "s"}`
+    + " · 8 MiB and 33.5 million combined pixels remain the absolute limits"
+  );
+}
+
+function resetContextImageLimit() {
+  state.contextImageLimit = DEFAULT_CONTEXT_IMAGE_LIMIT;
+  byId("context-image-limit").value = String(DEFAULT_CONTEXT_IMAGE_LIMIT);
+  updateContextImageLimitStatus();
+}
+
 function inspectPngHeader(bytes) {
   const signature = [137, 80, 78, 71, 13, 10, 26, 10];
   if (
@@ -1320,12 +1341,16 @@ function blobDataUrl(blob) {
 
 async function addContextImages(fileList, source = "clipboard") {
   const pending = [...fileList];
-  if (state.contextImages.length + pending.length > 2) {
+  if (state.contextImages.length + pending.length > state.contextImageLimit) {
     throw new Error("invalid-context-image-count");
   }
   const existing = new Set(state.contextImages.map((image) => image.name.toLocaleLowerCase()));
   const additions = [];
   let totalBytes = state.contextImages.reduce((sum, image) => sum + image.sizeBytes, 0);
+  let totalPixels = state.contextImages.reduce(
+    (sum, image) => sum + (image.width * image.height),
+    0,
+  );
   let nextSequence = state.contextImageSequence;
   for (const blob of pending) {
     if (blob.type !== "image/png") throw new Error("invalid-context-image-type");
@@ -1349,7 +1374,13 @@ async function addContextImages(fileList, source = "clipboard") {
     const bytes = new Uint8Array(await blob.arrayBuffer());
     const { width, height } = inspectPngHeader(bytes);
     totalBytes += bytes.byteLength;
-    if (totalBytes > 8388608) throw new Error("context-image-total-too-large");
+    if (totalBytes > MAX_CONTEXT_IMAGE_TOTAL_BYTES) {
+      throw new Error("context-image-total-too-large");
+    }
+    totalPixels += width * height;
+    if (totalPixels > MAX_CONTEXT_IMAGE_TOTAL_PIXELS) {
+      throw new Error("context-image-total-pixels-too-large");
+    }
     const dataUrl = await blobDataUrl(new Blob([bytes], { type: "image/png" }));
     additions.push({
       name,
@@ -1554,6 +1585,7 @@ function resetTask() {
   hideModelSwitchPrompt();
   clearPromptHistory();
   clearContextFiles();
+  resetContextImageLimit();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");
   messages.replaceChildren();
@@ -1789,6 +1821,25 @@ byId("prompt-history-limit").addEventListener("change", () => {
   state.promptHistoryIndex = state.promptHistory.length;
   state.promptHistoryDraft = "";
   updatePromptHistoryStatus();
+});
+
+byId("context-image-limit").addEventListener("change", (event) => {
+  clearError();
+  const selectedLimit = Number(event.target.value);
+  if (
+    !Number.isInteger(selectedLimit)
+    || selectedLimit < 1
+    || selectedLimit > MAX_CONTEXT_IMAGE_LIMIT
+    || state.contextImages.length > selectedLimit
+  ) {
+    event.target.value = String(state.contextImageLimit);
+    if (state.contextImages.length > selectedLimit) {
+      showError("Remove screenshots before lowering the limit for this task.");
+    }
+    return;
+  }
+  state.contextImageLimit = selectedLimit;
+  updateContextImageLimitStatus();
 });
 
 byId("context-files").addEventListener("change", async (event) => {

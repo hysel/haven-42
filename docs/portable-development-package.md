@@ -30,9 +30,12 @@ Frozen resources are limited to three UI files and six server-owned data files. 
 
 The packaged UI preserves the source attachment boundary: only explicitly
 selected UTF-8 `.txt`/`.md`/`.csv`/`.json` content and browsed or clipboard-pasted PNG screenshots enter
-browser/process memory. The loopback service revalidates names, media types,
-exact byte counts, text limits, PNG structure and CRCs, screenshot dimensions
-and pixel budgets, and warned submit-confirmed private-network transfer. Image-input support remains
+browser/process memory. Screenshot selection defaults to two per task and may
+be set from one through four without changing the absolute 8-MiB combined and
+33.5-million decoded-pixel ceilings. The loopback service revalidates names,
+media types, exact byte counts, text limits, PNG structure and CRCs, screenshot
+count, dimensions and per-image/combined pixel budgets, and warned
+submit-confirmed private-network transfer. Image-input support remains
 visibly unverified per model. No path, directory scan, temporary file, browser
 storage, broader parser, or persistent index is added by packaging.
 

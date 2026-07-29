@@ -91,9 +91,11 @@ A single keyboard-operable browser control accepts only `.txt`, `.md`, `.csv`,
 `.json`, and `.png`; a PNG screenshot can also be pasted from the clipboard.
 The selection is atomic, so one rejected file leaves the previous selection unchanged. A
 screenshot copied to the Windows clipboard can be pasted directly into the
-page. The initial image boundary accepts PNG items only, up to two screenshots,
-4 MiB each, and 8 MiB total. Each dimension is capped at 4096
-pixels and total pixels at 16.7 million. The browser shows a memory-only
+page. The initial image boundary accepts PNG items only. Each task defaults to
+two screenshots and offers an advanced one-through-four choice. The engine
+retains an absolute four-image cap, 4 MiB per image, 8 MiB combined, 4096
+pixels per dimension, 16.7 million pixels per image, and 33.5 million combined
+decoded pixels. The browser shows a memory-only
 thumbnail; the engine independently verifies base64, PNG signature and chunk
 structure, CRCs, exact size, dimensions, and pixel budget before adding
 canonical image data to the Ollama chat message. Broader image file upload and
