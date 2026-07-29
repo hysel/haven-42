@@ -185,7 +185,18 @@
             <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
             <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
             <p class="context-warning hidden" id="context-network-warning">Warning: Pressing Send will transfer the attached content to your private-network Ollama server for this task.</p>
-            <p class="context-policy">Attachments are inert data and are never executed · browse UTF-8 .txt/.md/.csv/.json or PNG, or paste a PNG screenshot · structured text is syntax-checked but never evaluated · up to 5 text files and 2 screenshots · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
+            <p class="context-policy">Attachments are inert data and are never executed · browse UTF-8 .txt/.md/.csv/.json or PNG, or paste a PNG screenshot · structured text is syntax-checked but never evaluated · up to 5 text files and 2 screenshots by default · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
+            <details class="context-settings">
+              <summary>Advanced attachment settings</summary>
+              <label for="context-image-limit">Maximum screenshots for this task</label>
+              <select id="context-image-limit">
+                <option value="1">1 screenshot</option>
+                <option value="2" selected>2 screenshots · default</option>
+                <option value="3">3 screenshots</option>
+                <option value="4">4 screenshots · maximum</option>
+              </select>
+              <p class="field-help" id="context-image-limit-status">Up to 2 screenshots · 8 MiB and 33.5 million combined pixels remain the absolute limits</p>
+            </details>
             <p class="context-warning hidden" id="context-image-warning">Screenshot understanding is unverified for the selected model. The request may fail if that model does not accept image input.</p>
           </section>
 

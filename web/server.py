@@ -78,11 +78,12 @@ MAX_CONVERSATION_MESSAGES = 20
 MAX_CONTEXT_FILES = 5
 MAX_CONTEXT_FILE_BYTES = 64 * 1024
 MAX_CONTEXT_TOTAL_BYTES = 128 * 1024
-MAX_CONTEXT_IMAGES = 2
+MAX_CONTEXT_IMAGES = 4
 MAX_CONTEXT_IMAGE_BYTES = 4 * 1024 * 1024
 MAX_CONTEXT_IMAGE_TOTAL_BYTES = 8 * 1024 * 1024
 MAX_CONTEXT_IMAGE_DIMENSION = 4096
 MAX_CONTEXT_IMAGE_PIXELS = 16_777_216
+MAX_CONTEXT_IMAGE_TOTAL_PIXELS = 33_554_432
 CONTEXT_FILE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._ ()-]{0,119}")
 CONTEXT_MEDIA_TYPES = {
     ".csv": "text/csv",
@@ -1278,6 +1279,7 @@ class HavenState:
             raise WebRequestError("invalid-context-image-count")
         clean_images: list[dict[str, Any]] = []
         context_image_total_bytes = 0
+        context_image_total_pixels = 0
         seen_image_names: set[str] = set()
         for image in images:
             if not isinstance(image, dict) or set(image) != {
@@ -1314,6 +1316,12 @@ class HavenState:
             width, height = validate_context_png(image_bytes)
             if claimed_width != width or claimed_height != height:
                 raise WebRequestError("invalid-context-image-dimensions")
+            context_image_total_pixels += width * height
+            if context_image_total_pixels > MAX_CONTEXT_IMAGE_TOTAL_PIXELS:
+                raise WebRequestError(
+                    "context-image-total-pixels-too-large",
+                    HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
+                )
             folded_name = name.casefold()
             if folded_name in seen_image_names:
                 raise WebRequestError("duplicate-context-image-name")

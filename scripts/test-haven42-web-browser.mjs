@@ -1300,6 +1300,7 @@ try {
     document.querySelector('#text-form').requestSubmit();
     result.browseLockedDuringTask = document.querySelector('#context-files').disabled;
     result.browseButtonLockedDuringTask = document.querySelector('#browse-context').disabled;
+    result.screenshotLimitLockedDuringTask = document.querySelector('#context-image-limit').disabled;
     // The fixture provider is loopback; server-side trusted-LAN enforcement is
     // covered by the source integration suite. The request has already captured
     // submit-as-confirmation before this response-validation state is restored.
@@ -1310,9 +1311,11 @@ try {
   await waitFor(() => cdp.evaluate(
     "document.querySelector('#text-status').textContent.includes('response complete')",
   ));
-  const browseRestoredAfterTask = await cdp.evaluate(
-    "!document.querySelector('#context-files').disabled && !document.querySelector('#browse-context').disabled",
-  );
+  const browseRestoredAfterTask = await cdp.evaluate(`(
+    !document.querySelector('#context-files').disabled
+    && !document.querySelector('#browse-context').disabled
+    && !document.querySelector('#context-image-limit').disabled
+  )`);
   if (
     !disclosureSubmit.warningVisible
     || !disclosureSubmit.warning.includes("Pressing Send")
@@ -1320,10 +1323,11 @@ try {
     || !disclosureSubmit.checkboxAbsent
     || !disclosureSubmit.browseLockedDuringTask
     || !disclosureSubmit.browseButtonLockedDuringTask
+    || !disclosureSubmit.screenshotLimitLockedDuringTask
     || !browseRestoredAfterTask
     || chatPayloads.length !== chatRequestsBeforeDisclosure + 1
   ) throw new Error(`private-context-disclosure:${JSON.stringify(disclosureSubmit)}`);
-  checks += 8;
+  checks += 9;
   const contextPayload = chatPayloads.at(-1);
   if (
     !contextPayload.messages.at(-1).content.includes("untrusted reference material")
@@ -1375,6 +1379,71 @@ try {
     || !screenshotUi.warningVisible
     || !screenshotUi.warning.includes("unverified")
   ) throw new Error(`screenshot-paste:${JSON.stringify({screenshotPaste, screenshotUi})}`);
+  const advancedScreenshotLimit = await cdp.evaluate(`(async () => {
+    const select = document.querySelector('#context-image-limit');
+    const initial = {
+      selected: select.value,
+      stateLimit: state.contextImageLimit,
+      status: document.querySelector('#context-image-limit-status').textContent,
+      style: {
+        height: getComputedStyle(select).height,
+        fontSize: getComputedStyle(select).fontSize,
+        paddingLeft: getComputedStyle(select).paddingLeft,
+        paddingRight: getComputedStyle(select).paddingRight,
+      },
+      systemStyle: {
+        height: getComputedStyle(document.querySelector('#prompt-history-limit')).height,
+        fontSize: getComputedStyle(document.querySelector('#prompt-history-limit')).fontSize,
+        paddingLeft: getComputedStyle(document.querySelector('#prompt-history-limit')).paddingLeft,
+        paddingRight: getComputedStyle(document.querySelector('#prompt-history-limit')).paddingRight,
+      },
+    };
+    select.value = '4';
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    const encoded = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=';
+    const bytes = Uint8Array.from(atob(encoded), (value) => value.charCodeAt(0));
+    await addContextImages([
+      new Blob([bytes], {type: 'image/png'}),
+      new Blob([bytes], {type: 'image/png'}),
+      new Blob([bytes], {type: 'image/png'}),
+    ]);
+    let fifthBlocked = false;
+    try {
+      await addContextImage(new Blob([bytes], {type: 'image/png'}));
+    } catch (error) {
+      fifthBlocked = error.message === 'invalid-context-image-count';
+    }
+    select.value = '2';
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    const rejectedLowering = {
+      selected: select.value,
+      stateLimit: state.contextImageLimit,
+      error: document.querySelector('#connection-error').textContent,
+    };
+    state.contextImages.splice(1);
+    renderContextFiles();
+    return {
+      initial,
+      selected: select.value,
+      stateLimit: state.contextImageLimit,
+      count: state.contextImages.length,
+      fifthBlocked,
+      rejectedLowering,
+    };
+  })()`);
+  if (
+    advancedScreenshotLimit.initial.selected !== "2"
+    || advancedScreenshotLimit.initial.stateLimit !== 2
+    || !advancedScreenshotLimit.initial.status.includes("Up to 2 screenshots")
+    || JSON.stringify(advancedScreenshotLimit.initial.style) !== JSON.stringify(advancedScreenshotLimit.initial.systemStyle)
+    || advancedScreenshotLimit.selected !== "4"
+    || advancedScreenshotLimit.stateLimit !== 4
+    || advancedScreenshotLimit.count !== 1
+    || !advancedScreenshotLimit.fifthBlocked
+    || advancedScreenshotLimit.rejectedLowering.selected !== "4"
+    || advancedScreenshotLimit.rejectedLowering.stateLimit !== 4
+    || !advancedScreenshotLimit.rejectedLowering.error.includes("Remove screenshots")
+  ) throw new Error(`advanced-screenshot-limit:${JSON.stringify(advancedScreenshotLimit)}`);
   const unsupportedScreenshotBlocked = await cdp.evaluate(`(async () => {
     try {
       await addContextImage(new Blob(['jpeg'], {type: 'image/jpeg'}));
@@ -1384,7 +1453,7 @@ try {
     }
   })()`);
   if (!unsupportedScreenshotBlocked) throw new Error("unsupported-screenshot-not-blocked");
-  checks += 9;
+  checks += 19;
 
   const chatRequestsBeforeScreenshot = chatPayloads.length;
   await cdp.evaluate(`(() => {

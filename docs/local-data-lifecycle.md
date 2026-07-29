@@ -14,8 +14,10 @@ suppressed. One type-restricted picker accepts text and PNG together atomically.
 Attached text is capped at five files, 64 KiB each, and 128 KiB total. CSV and
 JSON receive bounded syntax/resource validation and inert format-aware previews;
 neither JSON values nor CSV formulas are evaluated.
-Screenshots are explicit file-picker or clipboard PNGs capped at two images,
-4 MiB each, 8 MiB total, 4096 pixels per dimension, and 16.7 million pixels.
+Screenshots are explicit file-picker or clipboard PNGs. The per-task browser
+choice defaults to two and may be set from one through four; the engine retains
+an absolute four-image cap, 4 MiB each, 8 MiB total, 4096 pixels per dimension,
+16.7 million pixels per image, and 33.5 million combined decoded pixels.
 No path is sent and no temporary file is created. For a private-network
 provider, a prominent warning states that attached content will leave the
 current machine; deliberate Send confirms that transfer without a separate

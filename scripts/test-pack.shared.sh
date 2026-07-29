@@ -2396,7 +2396,7 @@ test_local_web_mvp() {
   if [ "$TEST_TIER" = "full" ]; then
     command -v node >/dev/null 2>&1 || return 1
     node "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" |
-      grep -q "passed: 275 checks" || return 1
+      grep -q "passed: 286 checks" || return 1
   fi
   assurance_dashboard="$("$REPO_ROOT/scripts/generate-evidence-dashboard.shared.sh" --as-json)" || return 1
   python3 - "$assurance_dashboard" <<'PY' || return 1
