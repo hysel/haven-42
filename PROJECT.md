@@ -87,8 +87,13 @@ has an explicit-selection, memory-only unified `.txt`/`.md`/`.csv`/`.json`/PNG p
 attachment slice with strict atomic byte/count/dimension/structured-text limits, path-free transfer,
 warned submit-confirmed private-network transfer, visible unverified image-input status, inert-data
 isolation with no attachment-driven execution or tools, and no temporary
-files. A 24-case restricted parser-worker foundation rejects hostile PDF and
-Office metadata but admits no dependency, worker, route, or filesystem access.
+files. A 27-case restricted parser-worker foundation rejects hostile PDF,
+Office Open XML, and OpenDocument metadata but admits no dependency, worker,
+route, or filesystem access. The review-only complex-document layer now passes
+41 container checks and 57 semantic checks across 17 fixtures with Windows and
+Ubuntu source evidence; a separate 33-check parity contract keeps all package
+cells false. PDF production isolation also has a 32-check exact OS-control
+evidence gate that permits no fallback or runtime authority.
 Automatic scan, directory access, real complex parsers, embedding indexes,
 and runtime persistence remain unadmitted. The deterministic memory-only
 lexical core now has bounded offline hostile and lifecycle tests, but its
@@ -103,11 +108,18 @@ and key-management architecture review now requires user-scoped OS credential
 storage and fail-closed Private session with no plaintext fallback. Dependency
 selection, per-user storage implementation, UI activation, and saved messages
 remain separate approval gates.
-Milestone 28 defines proposed
-controlled web research with an inactive offline contract and hostile fixtures, followed later by explicit reviewed queries, engine-owned adapters,
-trusted citations, SSRF controls, and memory-only cleanup; no model or renderer
-internet tool is admitted. Broader surface and provider parity remains
-evidence-gated.
+Milestone 28 defines proposed controlled web research with inactive offline
+contracts and hostile fixtures. A 28-check caller-fixture boundary validates
+bounded queries, strict public-HTTPS result metadata, engine-derived inactive
+citations, and exact source accounting without importing a network stack or
+entering the runtime/package. A 26-check caller-bytes-only foundation converts
+bounded UTF-8 text or strict allowlisted HTML into inert untrusted segments
+without retaining attributes or remote references and without network,
+filesystem, runtime, package, UI, or model authority. Live transport, DNS,
+page retrieval, trusted UI
+navigation, SSRF enforcement against resolved destinations, and autonomous
+follow-up remain unadmitted; no model or renderer internet tool exists. Broader
+surface and provider parity remains evidence-gated.
 
 Capability Evidence Contract v2 now prevents model readiness from being
 inherited across surfaces, operating systems, or operations. Deterministic

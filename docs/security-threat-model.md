@@ -181,6 +181,21 @@ rest; runtime persistence stays blocked until encryption/key management,
 least-privilege per-user storage, deletion/recovery, and native package evidence
 pass separate approval.
 
-Milestone 28 controlled web research remains proposed and unadmitted. Its offline contract and hostile fixtures cannot open a socket, resolve DNS, fetch a URL, automate a browser, execute a page, download content, or expose a model tool. Its promotion gate requires explicit reviewed queries, engine-owned fixed adapters, no renderer/model destination control, DNS and resolved-IP revalidation, redirect and content limits, no page execution, trusted citation rendering, hostile-content prompt isolation, exact source accounting, and residue-free memory cleanup. The admitted fixed Ollama catalog search does not grant or imply general research-search authority.
+Milestone 28 controlled web research remains proposed and unadmitted. Its
+offline contracts, hostile fixtures, and caller-fixture validator cannot open a
+socket, resolve DNS, fetch a URL, automate a browser, execute a page, download
+content, persist state, or expose a model tool. The validator rejects
+credential-like queries, unsafe URLs and IP literals, active markup, malformed
+or oversized result shapes, forged citation identifiers, and incomplete source
+accounting while keeping every destination inactive. Its promotion gate still
+requires explicit reviewed queries, an engine-owned live adapter, DNS and
+resolved-IP revalidation, redirect and content limits, no page execution,
+trusted citation UI, hostile-content prompt isolation, exact source accounting,
+and residue-free memory cleanup. A separate caller-bytes-only extractor rejects
+non-allowlisted HTML, malformed nesting, doctypes, processing instructions,
+invalid UTF-8, NULs, and resource-budget violations while retaining no
+attributes or remote references. Its 26 offline checks do not add URL fetching,
+transport, filesystem, runtime, UI, package, or model authority. The admitted fixed Ollama catalog search does
+not grant or imply general research-search authority.
 
 The local-web admission applies to read-only readiness inspection, zero-effect setup planning, status, exact-digest Ollama discovery and text, plan-only registered read-only software workflows, and the exact promoted Linux ComfyUI/SDXL image profile through loopback. It does not admit workflow process execution, arbitrary provider profiles, client persistence, installation, elevation, service or driver changes, updates, remote UI access, or Tauri packaging. No optional desktop runtime ships until actual Windows, Linux, and macOS binaries pass renderer, IPC, canonical-path, lifecycle, update, rollback, packaging, uninstall, privilege, and security tests. Unsupported or failed provider cells remain documentation-only and leave no executable integration.

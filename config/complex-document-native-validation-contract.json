@@ -3,7 +3,7 @@
   "status": "review-only-native-validation-no-runtime-admission",
   "requiredChecks": {
     "containerSecurity": 41,
-    "semanticSecurity": 44
+    "semanticSecurity": 57
   },
   "limits": {
     "maximumCheckSeconds": 30,

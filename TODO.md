@@ -656,7 +656,7 @@
 - [x] Complete a 27-check production-isolation assessment that explicitly blocks admission on missing Windows restricted-token/AppContainer-equivalent, Linux namespace/seccomp/Landlock-equivalent, and macOS sandbox controls.
 - [x] Catalog three metadata-only public PDF corpus sources without selecting or downloading an artifact; add a 23-case offline intake verifier with public same-host HTTPS/revision binding and a 19-check non-acquisition gate.
 - [x] Define a 15-check PDF source/package parity contract with Windows and Ubuntu source true, macOS source and all package cells false, exact future component inventory requirements, and zero promotion authority.
-- [x] Add a standard-library review-only semantic prototype for DOCX/XLSX/PPTX/ODT/ODS/ODP with 12 deterministic fixtures, 44 formula/budget/security/exclusion checks, and sanitized Windows/Ubuntu source evidence; keep all dependencies, runtime routes, UI, provider payloads, and packages unadmitted.
+- [x] Expand the standard-library review-only semantic prototype for DOCX/XLSX/PPTX/ODT/ODS/ODP to 17 deterministic fixtures and 57 formula/tracked-change/shared-string/provenance/budget/security/exclusion checks, plus a 33-check source/package parity gate and sanitized Windows/Ubuntu source evidence; keep all dependencies, runtime routes, UI, provider payloads, user-document parsing, and packages unadmitted.
 - [x] Show a prominent private-network transfer warning and treat deliberate Send as confirmation without a separate checkbox; continue blocking public provider destinations.
 - [x] Record one sanitized Windows source-runtime/default-browser native
   clipboard-PNG paste and user-reviewed `qwen3.5:9b` screenshot-description pass
@@ -673,8 +673,11 @@
 - [x] Define the offline-only versioned search-query, citation, provider-disclosure, and lifecycle foundation with runtime routes, model tools, network, DNS, URL fetching, browser automation, page execution, downloads, and follow-up effects denied by default.
 - [x] Add inert hostile offline fixtures for destination confusion, IP classes, redirects, credentials, oversized content, prompt injection, citation forgery, cancellation, and cleanup; executable broker tests remain with a future adapter.
 - [ ] Implement one explicit query-only adapter that sends only the reviewed bounded query and returns strict result metadata.
+  - [x] Add a 28-check offline caller-fixture boundary for bounded query validation, strict public-HTTPS result metadata, engine-derived inactive citations, and exact source accounting with no network stack or runtime authority.
 - [ ] Add trusted citation rendering with destination disclosure and no model-supplied active links.
+  - [x] Define and hostile-test the trusted citation data shape and destination disclosure fields while keeping navigation inactive and adding no UI.
 - [ ] Add explicit selected-page retrieval only after DNS/IP revalidation, redirect controls, textual content allowlisting, byte/time limits, inert extraction, and no page execution pass.
+  - [x] Add a 26-check caller-bytes-only UTF-8 text/HTML extraction foundation with strict allowlists, structural and resource limits, no network imports, no file writes, and no runtime/package admission; live retrieval and transport binding remain blocked.
 - [ ] Add cited model synthesis and exact source accounting without autonomous follow-up searches.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promotion.
 - [ ] Evaluate self-hosted search and bounded multi-query research only as later independent gates.

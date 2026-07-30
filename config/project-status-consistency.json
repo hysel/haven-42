@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "authority": "ROADMAP.md",
+  "milestones": {
+    "20": "complete",
+    "21": "complete",
+    "22": "in-progress",
+    "23": "in-progress",
+    "24": "in-progress",
+    "25": "research",
+    "26": "evidence-expanded",
+    "27": "in-progress",
+    "28": "proposed"
+  },
+  "documents": {
+    "ROADMAP.md": {
+      "rowPrefix": "Milestone "
+    },
+    "README.md": {
+      "rowPrefix": "Milestone "
+    },
+    "docs/solution-architecture-review.md": {
+      "rowPrefix": ""
+    }
+  },
+  "classificationPatterns": {
+    "complete": "(?i)^complete$",
+    "in-progress": "(?i)\\bin progress\\b",
+    "research": "(?i)\\bresearch\\b",
+    "evidence-expanded": "(?i)\\bevidence expanded\\b",
+    "proposed": "(?i)\\bproposed\\b"
+  },
+  "requiredMarkers": {
+    "TODO.md": [
+      "## Milestone 22: Unified Product UI And Task Composition",
+      "## Milestone 23: Native Local Image Generation",
+      "## Milestone 24: Local Music And Audio Generation",
+      "## Milestone 25: Local Video Generation",
+      "## Milestone 26: Hardware-Adaptive Model Quantization",
+      "## Milestone 27: Local Knowledge Context And Retrieval",
+      "## Milestone 28: Controlled Web Research"
+    ],
+    "PROJECT.md": [
+      "Milestones 1 through 21 are complete for their defined scopes.",
+      "Milestone 22A now has",
+      "Milestone 23 owns native",
+      "Milestones 24 and 25 retain documentation-only",
+      "Milestone 26 now has",
+      "Milestone 27 now",
+      "Milestone 28 defines proposed"
+    ]
+  },
+  "effects": {
+    "writesFiles": false,
+    "networkAllowed": false,
+    "processLaunchAllowed": false,
+    "statusPromotionAllowed": false
+  }
+}

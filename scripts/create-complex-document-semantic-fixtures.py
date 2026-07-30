@@ -58,14 +58,25 @@ def many_text(tag: str, count: int) -> bytes:
     ).encode()
 
 
+def many_docx_paragraphs(count: int) -> bytes:
+    return (
+        "<w:document xmlns:w='urn:w'>"
+        + "".join(
+            f"<w:p><w:r><w:t>segment-{index}</w:t></w:r></w:p>"
+            for index in range(count)
+        )
+        + "</w:document>"
+    ).encode()
+
+
 def cases() -> dict[str, bytes]:
     safe_docx = opc(
-        [("word/document.xml", b"<w:document xmlns:w='urn:w'><w:t>Word review text</w:t></w:document>", DEFLATED)]
+        [("word/document.xml", b"<w:document xmlns:w='urn:w'><w:p><w:r><w:t>Word review text</w:t></w:r></w:p></w:document>", DEFLATED)]
     )
     safe_xlsx = opc(
         [
             ("xl/workbook.xml", b"<workbook/>", DEFLATED),
-            ("xl/worksheets/sheet1.xml", b"<worksheet><is><t>Sheet review text</t></is></worksheet>", DEFLATED),
+            ("xl/worksheets/sheet1.xml", b"<worksheet><c r='A1' t='inlineStr'><is><t>Sheet review text</t></is></c></worksheet>", DEFLATED),
         ]
     )
     safe_pptx = opc(
@@ -101,6 +112,80 @@ def cases() -> dict[str, bytes]:
         "safe.odt": safe_odt,
         "safe.ods": safe_ods,
         "safe.odp": safe_odp,
+        "rich.docx": opc(
+            [
+                (
+                    "word/document.xml",
+                    b"<w:document xmlns:w='urn:w'><w:p><w:r><w:t>Body text</w:t></w:r></w:p><w:tbl><w:tr><w:tc><w:p><w:r><w:t>Table cell</w:t></w:r></w:p></w:tc></w:tr></w:tbl></w:document>",
+                    DEFLATED,
+                ),
+                (
+                    "word/header1.xml",
+                    b"<w:hdr xmlns:w='urn:w'><w:p><w:r><w:t>Header text</w:t></w:r></w:p></w:hdr>",
+                    DEFLATED,
+                ),
+                (
+                    "word/footer1.xml",
+                    b"<w:ftr xmlns:w='urn:w'><w:p><w:r><w:t>Footer text</w:t></w:r></w:p></w:ftr>",
+                    DEFLATED,
+                ),
+                (
+                    "word/comments.xml",
+                    b"<w:comments xmlns:w='urn:w'><w:comment w:id='0'><w:p><w:r><w:t>Review comment</w:t></w:r></w:p></w:comment></w:comments>",
+                    DEFLATED,
+                ),
+            ]
+        ),
+        "rich.xlsx": opc(
+            [
+                ("xl/workbook.xml", b"<workbook/>", DEFLATED),
+                (
+                    "xl/sharedStrings.xml",
+                    b"<sst><si><t>Shared value</t></si></sst>",
+                    DEFLATED,
+                ),
+                (
+                    "xl/worksheets/sheet1.xml",
+                    b"<worksheet><c r='A1' t='s'><v>0</v></c><c r='B1'><v>42</v></c><c r='C1' t='inlineStr'><is><t>Inline value</t></is></c></worksheet>",
+                    DEFLATED,
+                ),
+            ]
+        ),
+        "rich.pptx": opc(
+            [
+                ("ppt/presentation.xml", b"<presentation/>", DEFLATED),
+                (
+                    "ppt/slides/slide1.xml",
+                    b"<p:sld xmlns:p='urn:p' xmlns:a='urn:a'><a:t>Slide body</a:t></p:sld>",
+                    DEFLATED,
+                ),
+                (
+                    "ppt/notesSlides/notesSlide1.xml",
+                    b"<p:notes xmlns:p='urn:p' xmlns:a='urn:a'><a:t>Speaker note</a:t></p:notes>",
+                    DEFLATED,
+                ),
+            ]
+        ),
+        "tracked.docx": opc(
+            [
+                (
+                    "word/document.xml",
+                    b"<w:document xmlns:w='urn:w'><w:ins><w:p><w:r><w:t>Inserted</w:t></w:r></w:p></w:ins></w:document>",
+                    DEFLATED,
+                )
+            ]
+        ),
+        "shared-index.xlsx": opc(
+            [
+                ("xl/workbook.xml", b"<workbook/>", DEFLATED),
+                ("xl/sharedStrings.xml", b"<sst><si><t>Only</t></si></sst>", DEFLATED),
+                (
+                    "xl/worksheets/sheet1.xml",
+                    b"<worksheet><c r='A1' t='s'><v>-1</v></c></worksheet>",
+                    DEFLATED,
+                ),
+            ]
+        ),
         "formula.xlsx": opc(
             [
                 ("xl/workbook.xml", b"<workbook/>", DEFLATED),
@@ -111,7 +196,9 @@ def cases() -> dict[str, bytes]:
             b"application/vnd.oasis.opendocument.spreadsheet",
             b"<office:document xmlns:office='urn:office' xmlns:table='urn:table' table:formula='of:=SUM([.A1:.A2])'/>",
         ),
-        "segments.docx": opc([("word/document.xml", many_text("w:t", 1001), DEFLATED)]),
+        "segments.docx": opc(
+            [("word/document.xml", many_docx_paragraphs(1001), DEFLATED)]
+        ),
         "segments.odt": odf(
             b"application/vnd.oasis.opendocument.text", many_text("text:p", 1001)
         ),

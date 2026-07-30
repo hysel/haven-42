@@ -46,6 +46,35 @@ HOSTILE = {
     "segments.odt": ("odt", "text-segment-budget-exceeded"),
     "parts.pptx": ("pptx", "selected-part-budget-exceeded"),
     "segments.odp": ("odp", "text-segment-budget-exceeded"),
+    "tracked.docx": ("docx", "tracked-change-rejected"),
+    "shared-index.xlsx": ("xlsx", "shared-string-index-invalid"),
+}
+RICH = {
+    "rich.docx": (
+        "docx",
+        [
+            ("paragraph-text", "Body text"),
+            ("table-cell-text", "Table cell"),
+            ("header-text", "Header text"),
+            ("footer-text", "Footer text"),
+            ("comment-text", "Review comment"),
+        ],
+    ),
+    "rich.xlsx": (
+        "xlsx",
+        [
+            ("shared-string", "Shared value"),
+            ("literal-cell-value", "42"),
+            ("inline-string", "Inline value"),
+        ],
+    ),
+    "rich.pptx": (
+        "pptx",
+        [
+            ("shape-text", "Slide body"),
+            ("speaker-note-text", "Speaker note"),
+        ],
+    ),
 }
 
 
@@ -70,7 +99,7 @@ def main() -> int:
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
         for path in GENERATOR.generate()
     }
-    assert first == second and len(first) == 12
+    assert first == second and len(first) == 17
     checks += 2
     for name, (format_id, expected) in SAFE.items():
         result = REVIEWER.extract((GENERATOR.OUTPUT / name).read_bytes(), format_id)
@@ -79,6 +108,14 @@ def main() -> int:
         assert result["runtimeAdmissionGranted"] is False
         assert result["providerPayloadAllowed"] is False
         checks += 4
+    for name, (format_id, expected) in RICH.items():
+        result = REVIEWER.extract((GENERATOR.OUTPUT / name).read_bytes(), format_id)
+        assert [
+            (value["kind"], value["text"]) for value in result["segments"]
+        ] == expected
+        assert len({value["source"] for value in result["segments"]}) == len(expected)
+        assert result["runtimeAdmissionGranted"] is False
+        checks += 3
     for name, (format_id, reason) in HOSTILE.items():
         try:
             REVIEWER.extract((GENERATOR.OUTPUT / name).read_bytes(), format_id)
@@ -96,9 +133,11 @@ def main() -> int:
     assert all(candidate["selected"] is False for candidate in contract["dependencyResearch"])
     assert contract["policy"]["containerInspectionMustPassFirst"] is True
     assert contract["policy"]["formulasAllowed"] is False
+    assert contract["policy"]["commentsExtracted"] is True
+    assert contract["policy"]["trackedChangesRejected"] is True
     assert contract["policy"]["archiveExtractionAllowed"] is False
     assert not any(contract["authority"].values())
-    checks += 6
+    checks += 8
     reviewer = ROOT / "scripts/review-complex-document-semantics.py"
     generator = ROOT / "scripts/create-complex-document-semantic-fixtures.py"
     assert imported_roots(reviewer).isdisjoint(
@@ -122,7 +161,7 @@ def main() -> int:
     assert "complex-document-semantic-review" not in package + resources
     checks += 3
     print(
-        f"Complex-document semantic review passed {checks} checks across 12 fixtures."
+        f"Complex-document semantic review passed {checks} checks across 17 fixtures."
     )
     return 0
 

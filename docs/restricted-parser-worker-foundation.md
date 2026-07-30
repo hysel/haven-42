@@ -161,11 +161,16 @@ AppContainer-equivalent capability boundary; Linux lacks admitted
 namespace/seccomp/Landlock-equivalent controls; macOS lacks physical evidence
 and an admitted sandbox. The source/package parity contract therefore records
 only Windows and Ubuntu Linux source cells as true and keeps macOS source and
-all packaged cells false.
+all packaged cells false. A 32-check pure OS-isolation evidence gate now
+requires five exact controls per platform, enforcement and hostile-escape
+tests, and exact parity without granting runtime authority or allowing a
+fallback.
 
 Office/OpenDocument semantic review remains behind the container gate and uses
-only the standard library. Twelve deterministic fixtures cover all six
-candidate formats plus formulas and part/text budget failures. Forty-four
-semantic checks passed on Windows and Ubuntu Linux, but no dependency, worker,
-route, provider payload, UI, package component, or unsupported fidelity claim
-is admitted.
+only the standard library. Seventeen deterministic fixtures cover all six
+candidate formats, richer DOCX/XLSX/PPTX provenance, formulas, tracked changes,
+invalid shared strings, and part/text budget failures. Fifty-seven semantic
+checks passed on Windows and Ubuntu Linux. A separate 33-check parity contract
+keeps every packaged cell false, so no dependency, worker, route, provider
+payload, UI, package component, user-document parsing, or unsupported fidelity
+claim is admitted.

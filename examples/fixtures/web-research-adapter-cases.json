@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "provider": "fixture-search",
+  "safe": {
+    "query": "bounded local AI security",
+    "results": [
+      {
+        "title": "Example security guidance",
+        "excerpt": "Caller-supplied inert fixture text for deterministic validation.",
+        "url": "https://docs.example.com/security",
+        "retrievedAt": "2026-07-30T00:00:00Z"
+      }
+    ]
+  },
+  "hostile": [
+    {"id": "unknown-provider", "field": "provider", "value": "renderer-chosen"},
+    {"id": "query-control", "field": "query", "value": "safe\u0000hidden"},
+    {"id": "query-credentials", "field": "query", "value": "token=secret"},
+    {"id": "http-url", "field": "url", "value": "http://example.com/"},
+    {"id": "credential-url", "field": "url", "value": "https://user@example.com/"},
+    {"id": "loopback-url", "field": "url", "value": "https://127.0.0.1/"},
+    {"id": "private-url", "field": "url", "value": "https://100.64.0.1/"},
+    {"id": "link-local-url", "field": "url", "value": "https://169.254.1.1/"},
+    {"id": "ipv6-loopback", "field": "url", "value": "https://[::1]/"},
+    {"id": "custom-port", "field": "url", "value": "https://example.com:8443/"},
+    {"id": "fragment", "field": "url", "value": "https://example.com/path#tracking"},
+    {"id": "active-title", "field": "title", "value": "<script>alert(1)</script>"},
+    {"id": "invalid-retrieval-time", "field": "retrievedAt", "value": "2026-99-30T00:00:00Z"},
+    {"id": "forged-citation", "field": "citationId", "value": "model-link-1"},
+    {"id": "oversized-results", "field": "resultCount", "value": 11}
+  ]
+}

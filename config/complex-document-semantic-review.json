@@ -3,16 +3,16 @@
   "status": "offline-semantic-review-no-runtime-admission",
   "formats": {
     "docx": {
-      "contentKinds": ["paragraph-text"],
-      "provenanceUnit": "document-body"
+      "contentKinds": ["paragraph-text", "table-cell-text", "header-text", "footer-text", "comment-text"],
+      "provenanceUnit": "document-part"
     },
     "xlsx": {
-      "contentKinds": ["inline-string"],
-      "provenanceUnit": "worksheet"
+      "contentKinds": ["inline-string", "shared-string", "literal-cell-value"],
+      "provenanceUnit": "worksheet-cell"
     },
     "pptx": {
-      "contentKinds": ["shape-text"],
-      "provenanceUnit": "slide"
+      "contentKinds": ["shape-text", "speaker-note-text"],
+      "provenanceUnit": "slide-or-note"
     },
     "odt": {
       "contentKinds": ["paragraph-text", "heading-text"],
@@ -73,8 +73,9 @@
     "embeddedObjectsAllowed": false,
     "imagesExtracted": false,
     "stylesExtracted": false,
-    "commentsExtracted": false,
+    "commentsExtracted": true,
     "trackedChangesInterpreted": false,
+    "trackedChangesRejected": true,
     "archiveExtractionAllowed": false
   },
   "authority": {

@@ -12,9 +12,12 @@ The standard-library prototype first requires the existing bounded ZIP/XML
 container inspection to pass. It never extracts an archive to disk. It then
 reads only fixed semantic XML parts from in-memory synthetic containers:
 
-- DOCX paragraph text with document-body provenance.
-- XLSX inline strings with worksheet provenance.
-- PPTX shape text with slide provenance.
+- DOCX body paragraphs, table cells, headers, footers, and comments with
+  part-specific provenance. Tracked changes are rejected rather than
+  interpreted.
+- XLSX inline strings, shared strings, and literal cell values with
+  worksheet/cell provenance.
+- PPTX shape text and speaker notes with slide-or-note provenance.
 - ODT/ODS/ODP paragraph or heading text with document-content provenance.
 
 Formulas and cached formula values are rejected. Macros, external
@@ -25,9 +28,10 @@ segment length, and total output all have fixed ceilings.
 
 ## Deterministic evidence
 
-- 12 semantic fixtures: six safe format examples and six hostile formula,
+- 17 semantic fixtures: six baseline examples, three richer provenance
+  examples, and eight hostile formula, tracked-change, shared-string,
   part-count, or segment-count cases.
-- 44 semantic security and exclusion checks.
+- 57 semantic security and exclusion checks.
 - Existing 16-container corpus and 41 container-security checks.
 - Windows x86_64/Python 3.14.6 source orchestration: passed.
 - Ubuntu Linux x86_64/Python 3.14.4 source orchestration: passed.
@@ -46,8 +50,10 @@ review. The current prototype uses no third-party complex-document dependency.
 
 ## Remaining gate
 
-The prototype is reachable only as a test library. Semantic fidelity for
-tables, shared strings, comments, tracked changes, notes, charts, headers,
-footers, and presentation ordering remains incomplete. Runtime admission
-requires a separately approved worker boundary, hostile non-synthetic evidence,
+The prototype is reachable only as a test library. Charts, drawings, style
+semantics, worksheet names/ordering, relationship-aware slide ordering, comment
+thread semantics, and change interpretation remain incomplete. A separate
+33-check parity contract proves that the current Windows and Ubuntu source
+evidence does not admit any package cell. Runtime admission requires a
+separately approved worker boundary, hostile non-synthetic evidence,
 source/package parity, and native packaged evidence on every supported OS.

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "required-controls-not-implemented-no-admission",
+  "platforms": {
+    "windows": {
+      "requiredControls": [
+        "restricted-primary-token",
+        "job-object-memory-cpu-process-limits",
+        "child-process-denial",
+        "network-capability-denial",
+        "temporary-filesystem-denial"
+      ]
+    },
+    "linux": {
+      "requiredControls": [
+        "user-mount-pid-network-namespaces",
+        "no-new-privileges",
+        "seccomp-system-call-allowlist",
+        "landlock-or-equivalent-filesystem-allowlist",
+        "cgroup-or-rlimit-resource-limits"
+      ]
+    },
+    "macos": {
+      "requiredControls": [
+        "sandbox-profile-or-equivalent",
+        "network-denial",
+        "filesystem-allowlist",
+        "child-process-denial",
+        "resource-limits"
+      ]
+    }
+  },
+  "evidenceRequirements": {
+    "availabilityRequired": true,
+    "implementationRequired": true,
+    "enforcementTestRequired": true,
+    "hostileEscapeTestRequired": true,
+    "sourcePackageParityRequired": true,
+    "exactPlatformBindingRequired": true
+  },
+  "fallbackAllowed": false,
+  "authority": {
+    "workerAdmissionAllowed": false,
+    "runtimeRouteAllowed": false,
+    "packageInclusionAllowed": false,
+    "userDocumentParsingAllowed": false
+  }
+}
