@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.offline-adapter-foundation",
+  "status": "offline-mock-only-no-network-authority",
+  "providers": {
+    "fixture-search": {
+      "enabled": true,
+      "transport": "caller-supplied-fixture",
+      "networkAuthority": false
+    }
+  },
+  "limits": {
+    "maximumQueryCharacters": 256,
+    "maximumResults": 10,
+    "maximumTitleCharacters": 200,
+    "maximumExcerptCharacters": 500,
+    "maximumUrlCharacters": 2048,
+    "maximumResponseCharacters": 10000
+  },
+  "resultPolicy": {
+    "httpsRequired": true,
+    "credentialsAllowed": false,
+    "customPortsAllowed": false,
+    "fragmentsAllowed": false,
+    "publicIpLiteralsOnly": true,
+    "htmlAllowed": false,
+    "remoteMediaAllowed": false,
+    "modelSuppliedCitationIdsAllowed": false,
+    "activeNavigationAllowed": false
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "modelToolAllowed": false,
+    "networkAllowed": false,
+    "dnsAllowed": false,
+    "urlFetchAllowed": false,
+    "pageRetrievalAllowed": false,
+    "browserAutomationAllowed": false,
+    "persistenceAllowed": false,
+    "temporaryFilesAllowed": false,
+    "automaticFollowUpAllowed": false
+  }
+}

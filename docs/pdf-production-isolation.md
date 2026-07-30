@@ -36,6 +36,16 @@ inventory and SHA-256 identity.
 No fallback may silently weaken these controls. If a required platform control
 is unavailable, PDF parsing must remain unavailable.
 
+`config/pdf-os-isolation-gate.json` and its pure evaluator define the exact
+evidence shape required to close these gaps. Five controls are required
+independently on Windows, Linux, and macOS. Every control must be available,
+implemented, enforcement-tested, and hostile-escape-tested, and exact
+source/package parity must pass. Thirty-two hostile checks reject missing,
+duplicate, unknown, non-boolean, cross-platform, or parity-free claims. Even a
+fully passing synthetic evidence object grants no runtime authority; it only
+proves that the future gate distinguishes complete evidence from incomplete
+evidence.
+
 ## Non-synthetic corpus boundary
 
 Metadata-only research considered the

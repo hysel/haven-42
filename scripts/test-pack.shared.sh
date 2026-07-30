@@ -2526,9 +2526,11 @@ PY
   python3 "$REPO_ROOT/scripts/test-complex-document-container-review.py" |
     grep -q "41 deterministic security checks across 16 fixtures" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-semantic-review.py" |
-    grep -q "44 checks across 12 fixtures" || return 1
+    grep -q "57 checks across 17 fixtures" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-native-foundation.py" |
     grep -q "12 offline checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-complex-document-source-package-parity.py" |
+    grep -q "33 exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-parser-candidate-review.py" |
     grep -q "39 fail-closed checks" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-parser-artifact-lock.py" |
@@ -2545,12 +2547,20 @@ PY
     grep -q "33 offline security and parity checks" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-production-isolation.py" |
     grep -q "27 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-os-isolation-gate.py" |
+    grep -q "32 checks" || return 1
   python3 "$REPO_ROOT/scripts/verify-pdf-corpus-intake.py" --self-test |
     grep -q "23 offline cases" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-corpus-research-foundation.py" |
     grep -q "19 non-acquisition checks" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-source-package-parity-foundation.py" |
     grep -q "15 exclusion checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-project-status-consistency.py" |
+    grep -q "10 checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-offline-web-research-boundary.py" |
+    grep -q "28 checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-offline-research-page-text.py" |
+    grep -q "26 checks" || return 1
 }
 
 test_task_composition_and_repository_privacy() {

@@ -33,7 +33,7 @@ def main() -> int:
     assert contract["status"] == "review-only-native-validation-no-runtime-admission"
     assert contract["requiredChecks"] == {
         "containerSecurity": 41,
-        "semanticSecurity": 44,
+        "semanticSecurity": 57,
     }
     assert contract["platformEvidence"] == {
         "windowsSource": True,

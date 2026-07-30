@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "status": "source-review-only-package-parity-blocked",
+  "matrix": {
+    "windowsSource": true,
+    "linuxSource": true,
+    "macosSource": false,
+    "windowsPackage": false,
+    "linuxPackage": false,
+    "macosPackage": false
+  },
+  "futurePackageRequirements": {
+    "exactComponentInventoryRequired": true,
+    "resourceIntegrityEntryRequired": true,
+    "thirdPartyDependencyExpected": false,
+    "sourcePackageFixtureDigestParityRequired": true,
+    "hostileContainerParityRequired": true,
+    "semanticProvenanceParityRequired": true,
+    "formulaAndTrackedChangeRejectionParityRequired": true,
+    "nativePackageSmokeRequired": true,
+    "residueFreeCleanupRequired": true
+  },
+  "currentExclusions": [
+    "scripts/inspect-complex-document-container.py",
+    "scripts/review-complex-document-semantics.py",
+    "scripts/create-complex-document-review-fixtures.py",
+    "scripts/create-complex-document-semantic-fixtures.py",
+    "config/complex-document-container-review.json",
+    "config/complex-document-semantic-review.json"
+  ],
+  "authority": {
+    "packageAdmissionAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "providerPayloadAllowed": false,
+    "userDocumentParsingAllowed": false
+  }
+}

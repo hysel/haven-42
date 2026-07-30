@@ -5065,10 +5065,13 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($complexContainerOutput -join "`n") -match "41 deterministic security checks across 16 fixtures") -Message "Complex-document review must reject hostile ZIP/XML structures and remain excluded from runtime and packages."
     $complexSemanticOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-semantic-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument semantic review should pass."
-    Assert-True -Condition (($complexSemanticOutput -join "`n") -match "44 checks across 12 fixtures") -Message "Complex-document semantic review must reject formulas and over-budget content while remaining excluded from runtime and packages."
+    Assert-True -Condition (($complexSemanticOutput -join "`n") -match "57 checks across 17 fixtures") -Message "Complex-document semantic review must cover bounded richer provenance while rejecting formulas, tracked changes, and over-budget content and remaining excluded from runtime and packages."
     $complexNativeOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-native-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument native review foundation should pass."
     Assert-True -Condition (($complexNativeOutput -join "`n") -match "12 offline checks") -Message "Complex-document native evidence must remain sanitized, source-only, and unadmitted."
+    $complexParityOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-source-package-parity.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument source/package parity exclusions should pass."
+    Assert-True -Condition (($complexParityOutput -join "`n") -match "33 exclusion checks") -Message "Complex-document source evidence must not imply package, runtime, UI, provider, or user-document admission."
     $pdfCandidateOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pdf-parser-candidate-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF parser candidate review tests should pass."
     Assert-True -Condition (($pdfCandidateOutput -join "`n") -match "39 fail-closed checks") -Message "The reviewed PDF candidate must remain uninstalled, unimported, and unadmitted."
@@ -5093,6 +5096,9 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $pdfIsolationOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pdf-production-isolation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF production-isolation assessment tests should pass."
     Assert-True -Condition (($pdfIsolationOutput -join "`n") -match "27 fail-closed checks") -Message "PDF production isolation gaps must remain explicit and block admission."
+    $pdfOsIsolationOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pdf-os-isolation-gate.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF operating-system isolation evidence-gate tests should pass."
+    Assert-True -Condition (($pdfOsIsolationOutput -join "`n") -match "32 checks") -Message "PDF OS isolation must require exact platform controls, hostile escape evidence, and parity while granting no runtime authority."
     $pdfIntakeOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-pdf-corpus-intake.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF corpus intake hostile tests should pass."
     Assert-True -Condition (($pdfIntakeOutput -join "`n") -match "23 offline cases") -Message "PDF corpus intake must reject unsafe provenance, destination, licensing, privacy, integrity, and retention records without network access."
@@ -5102,7 +5108,16 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $pdfParityOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pdf-source-package-parity-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF source/package parity foundation should pass."
     Assert-True -Condition (($pdfParityOutput -join "`n") -match "15 exclusion checks") -Message "PDF package parity must remain false while all candidate components are excluded."
-    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md") -Message "Local-web, writing-model, and restricted-parser guidance and evidence should be mapped to the wiki."
+    $statusConsistencyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-project-status-consistency.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Project status consistency hostile tests should pass."
+    Assert-True -Condition (($statusConsistencyOutput -join "`n") -match "10 checks") -Message "Roadmap, README, architecture, TODO, and project status must fail closed on drift."
+    $researchBoundaryOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-web-research-boundary.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline web-research boundary hostile tests should pass."
+    Assert-True -Condition (($researchBoundaryOutput -join "`n") -match "28 checks") -Message "Research query/result/citation validation must remain fixed-provider, inert, network-free, and runtime-unadmitted."
+    $researchPageOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-page-text.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research page-text hostile tests should pass."
+    Assert-True -Condition (($researchPageOutput -join "`n") -match "26 checks") -Message "Research page text must remain caller-bytes-only, structurally bounded, inert, network-free, and runtime-unadmitted."
+    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
 }
 
 Invoke-PackTest "task composition and repository privacy foundations fail closed" {

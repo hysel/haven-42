@@ -141,15 +141,21 @@ namespace/seccomp/Landlock-equivalent production sandbox. macOS has neither
 physical evidence nor an admitted sandbox design. A future worker must parse
 one byte-delivered document per disposable process with OS-enforced network,
 filesystem-write, privilege, child-process, and process-tree controls; absence
-of any required control keeps PDF unavailable.
+of any required control keeps PDF unavailable. A pure evidence evaluator now
+requires five exact controls per platform plus enforcement, hostile-escape, and
+source/package parity evidence. Its 32 hostile checks grant no runtime
+authority and permit no fallback.
 
 Complex-document semantics remain a review library behind the existing
 container inspector. It uses no third-party dependency, never extracts a ZIP,
-selects only fixed XML parts, rejects formulas, and bounds part count, XML
-depth, text segments, segment size, and total output. Its six-format synthetic
-evidence passed on Windows and Ubuntu Linux, but it has no runtime route,
-provider payload, UI, package component, or fidelity claim for unsupported
-document structures.
+selects only fixed XML parts, rejects formulas and tracked changes, and bounds
+part count, XML depth, text segments, segment size, and total output. The
+17-fixture, 57-check semantic layer distinguishes DOCX body/table/header/footer/
+comment text, XLSX shared/inline/literal cells, and PPTX slide/speaker-note text
+with bounded provenance. Its six-format synthetic evidence passed on Windows
+and Ubuntu Linux. A separate 33-check parity contract keeps every package cell
+false; there is no runtime route, provider payload, UI, package component, or
+fidelity claim for unsupported structures.
 
 Milestone 27 also implements an inactive deterministic lexical-retrieval core. It accepts only already validated memory attachments, applies fixed character chunks and bounded casefolded term-frequency ranking with stable attachment/offset tie-breaking, discloses selected chunks and token estimates, supports removal and clear-all, and clears memory on failure. Its contract still denies runtime routes, UI controls, provider payloads, paths, parsers, network, model ranking, embeddings, temporary files, and persistence. The offline implementation and hostile tests do not admit a retrieval capability into the application.
 
@@ -165,7 +171,23 @@ does not weaken the no-execution policy.
 
 The optional conversation-history boundary is likewise simulation-only. A versioned contract and non-executable logical SQLite-compatible schema describe engine-owned typed operations and bounded records without importing SQLite or accepting renderer/model SQL, paths, filenames, credentials, endpoints, commands, or arbitrary filters. Pure planners cover schema upgrade and rollback, retention, metadata-only context selection, scoped deletion, busy/locked and failure recovery, backup, and restore while declaring every database, file, browser-storage, network, process, provider, and machine effect false. Private session remains the default and never creates or updates a record. The reviewed encryption architecture requires full-database encryption, a randomly generated key wrapped by a current-user OS credential facility, and fail-closed Private session when that facility is locked or unavailable; plaintext and beside-database key fallbacks are forbidden. Runtime storage stays blocked until a dependency and binding are admitted and per-user permissions, atomicity, deletion, recovery, native packaging, and explicit product approval pass.
 
-Milestone 28 proposes a separate controlled web-research boundary. Its current machine-readable contract and hostile fixtures are offline-only and expose no route or network effect. Future network authority stays in an engine-owned adapter; ordinary prompts cannot trigger it, and neither renderer nor model can choose a host, raw URL, credential, header, proxy, command, or environment. The initial path discloses and approves one bounded query, returns a strict inert result shape, and renders citations through trusted UI rather than model Markdown. Page retrieval, self-hosted adapters, and multi-query research remain separate gates with DNS/IP revalidation, SSRF and redirect controls, textual content limits, prompt-injection isolation, cancellation, and memory-only cleanup.
+Milestone 28 proposes a separate controlled web-research boundary. Its
+machine-readable contracts and hostile fixtures are offline-only and expose no
+route or network effect. A caller-fixture adapter foundation now validates
+bounded queries, public-HTTPS result metadata, engine-derived inactive
+citations, and exact source accounting in 28 checks without a socket, DNS,
+HTTP, browser, process, persistence, runtime, UI, or model-tool authority.
+An independent 26-check caller-bytes page-text foundation accepts only bounded
+UTF-8 `text/plain` or strictly allowlisted `text/html`, strips all attributes
+and remote references, rejects malformed or active markup, and emits inert
+untrusted text without network, filesystem, runtime, UI, package, or model
+authority. It is an extraction boundary, not a page-retrieval implementation.
+Future network authority stays in an engine-owned adapter; ordinary prompts
+cannot trigger it, and neither renderer nor model can choose a host, raw URL,
+credential, header, proxy, command, or environment. Page retrieval, trusted UI
+navigation, transport-to-extractor binding, self-hosted adapters, and multi-query research remain separate
+gates with DNS/IP revalidation, SSRF and redirect controls, textual content
+limits, prompt-injection isolation, cancellation, and memory-only cleanup.
 
 The update boundary remains outside the portable runtime. Strict offline
 policies validate immutable release metadata, manifest and package identity,

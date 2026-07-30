@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-caller-bytes-only-page-retrieval-unadmitted",
+  "contentTypes": ["text/plain", "text/html"],
+  "limits": {
+    "maximumInputBytes": 262144,
+    "maximumOutputCharacters": 100000,
+    "maximumSegments": 500,
+    "maximumNestingDepth": 64
+  },
+  "html": {
+    "allowedTags": [
+      "a", "article", "blockquote", "br", "code", "div", "h1", "h2", "h3",
+      "h4", "h5", "h6", "li", "main", "ol", "p", "pre", "section", "span",
+      "strong", "em", "ul"
+    ],
+    "attributesRetained": [],
+    "doctypeAllowed": false,
+    "commentsRetained": false,
+    "remoteReferencesRetained": false
+  },
+  "authority": {
+    "networkAllowed": false,
+    "dnsAllowed": false,
+    "urlFetchAllowed": false,
+    "redirectAllowed": false,
+    "decompressionAllowed": false,
+    "pageExecutionAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "modelToolAllowed": false,
+    "persistenceAllowed": false,
+    "temporaryFilesAllowed": false
+  }
+}
