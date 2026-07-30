@@ -29,7 +29,9 @@ The executable binds only to `127.0.0.1`. Automatic browser launch accepts only 
 Frozen resources are limited to three UI files and six server-owned data files. The data allowlist includes the model recommendations, evidence catalog, agent-surface capability and solution matrices, installation registry, and read-only workflow registry. A build-generated manifest binds every allowed resource by relative path, size, and SHA-256. Startup fails closed if the embedded manifest or any listed resource is malformed, missing, changed, or joined by an unexpected file in the protected resource roots. HTTP routing independently allowlists the three asset paths; no general filesystem serving exists.
 
 The packaged UI preserves the source attachment boundary: only explicitly
-selected UTF-8 `.txt`/`.md`/`.csv`/`.json` content and browsed or clipboard-pasted PNG screenshots enter
+selected UTF-8 `.txt`/`.md`/`.csv`/`.json`, the admitted inert
+`.cs`/`.py`/`.js`/`.jsx`/`.ts`/`.tsx`/`.java`/`.go`/`.rs`/`.sql`/`.tf`
+source-text set, and browsed or clipboard-pasted PNG screenshots enter
 browser/process memory. Screenshot selection defaults to two per task and may
 be set from one through four without changing the absolute 8-MiB combined and
 33.5-million decoded-pixel ceilings. The loopback service revalidates names,
@@ -38,6 +40,17 @@ count, dimensions and per-image/combined pixel budgets, and warned
 submit-confirmed private-network transfer. Image-input support remains
 visibly unverified per model. No path, directory scan, temporary file, browser
 storage, broader parser, or persistent index is added by packaging.
+
+A sanitized physical Ubuntu x86_64 desktop/default-Firefox review of the exact
+post-merge `haven42-Linux-X64-unsigned-development` artifact from workflow run
+`30482923868` passed checksum and artifact verification, automatic browser
+launch, loopback serving, native clipboard PNG paste, mixed admitted-file
+selection, default and advanced screenshot limits, atomic rejection, cleanup,
+normal shutdown, and port release. No prompt or attachment was sent during
+that cell, and no selected content, endpoint, username, local path, or machine
+identifier was retained. This adds physical Linux development evidence; it
+does not replace the remaining physical macOS gate or promote signing,
+installation, updates, or production distribution.
 
 The service starts no child process except the already constrained, fixed-command readiness probes owned by the existing system-readiness registry. It exposes no arbitrary process, shell, filesystem, installer, or updater command. Shutdown is a same-origin JSON POST protected by the unpredictable in-memory session token. Models used by the session must be unloaded and verified before shutdown is accepted.
 

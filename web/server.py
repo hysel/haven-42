@@ -86,10 +86,21 @@ MAX_CONTEXT_IMAGE_PIXELS = 16_777_216
 MAX_CONTEXT_IMAGE_TOTAL_PIXELS = 33_554_432
 CONTEXT_FILE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._ ()-]{0,119}")
 CONTEXT_MEDIA_TYPES = {
+    ".cs": "text/plain",
     ".csv": "text/csv",
+    ".go": "text/plain",
+    ".java": "text/plain",
+    ".js": "text/plain",
+    ".jsx": "text/plain",
     ".json": "application/json",
     ".md": "text/markdown",
+    ".py": "text/plain",
+    ".rs": "text/plain",
+    ".sql": "text/plain",
+    ".tf": "text/plain",
     ".txt": "text/plain",
+    ".ts": "text/plain",
+    ".tsx": "text/plain",
 }
 MAX_CONTEXT_JSON_DEPTH = 64
 MAX_CONTEXT_JSON_NODES = 10_000
@@ -98,6 +109,50 @@ MAX_CONTEXT_CSV_COLUMNS = 256
 MAX_CONTEXT_CSV_CELL_CHARACTERS = 8_192
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 ALLOWED_IDLE_UNLOAD_SECONDS = {0, 300, 900, 1800}
+
+
+def validate_context_content_identity(content: str, suffix: str) -> None:
+    if any(ord(character) < 32 and character not in "\t\n\r\f" for character in content):
+        raise WebRequestError("context-file-content-type-mismatch")
+    sample = content.lstrip("\ufeff \t\r\n")[:8192]
+    lowered = sample.lower()
+    if (
+        sample.startswith("%PDF-")
+        or sample.startswith("PK\x03\x04")
+        or sample.startswith("\x7fELF")
+        or sample.startswith("SQLite format 3\x00")
+    ):
+        raise WebRequestError("context-file-content-type-mismatch")
+    first_line = sample.splitlines()[0] if sample else ""
+    shebang = first_line.lower()
+    if shebang.startswith("#!"):
+        if re.search(r"(?:^|[/\s])(?:pwsh|powershell|bash|dash|fish|ksh|sh|zsh)(?:\s|$)", shebang):
+            raise WebRequestError("context-file-content-type-mismatch")
+        if re.search(r"(?:^|[/\s])python(?:[0-9.]*)?(?:\s|$)", shebang) and suffix != ".py":
+            raise WebRequestError("context-file-content-type-mismatch")
+        if re.search(r"(?:^|[/\s])node(?:\s|$)", shebang) and suffix not in {".js", ".jsx", ".ts", ".tsx"}:
+            raise WebRequestError("context-file-content-type-mismatch")
+    if re.match(
+        r"(?i)^#requires\s+-(?:version|modules?|runasadministrator|psedition)\b",
+        first_line,
+    ):
+        raise WebRequestError("context-file-content-type-mismatch")
+    if re.match(r"(?i)^\[cmdletbinding(?:\([^\r\n]*\))?\]\s*(?:\r?\n|$)", sample):
+        raise WebRequestError("context-file-content-type-mismatch")
+    if re.match(r"(?i)^@echo\s+off(?:\s|$)", first_line):
+        raise WebRequestError("context-file-content-type-mismatch")
+    if (
+        re.match(r"(?i)^write-(?:host|output|error|warning|verbose|debug|information)\b", first_line)
+        or re.match(r"(?i)^set-strictmode\b", first_line)
+        or re.match(r"(?i)^\$erroractionpreference\s*=", first_line)
+    ):
+        raise WebRequestError("context-file-content-type-mismatch")
+    if re.match(r"(?i)^param\s*\(", first_line) and (
+        "set-strictmode" in lowered
+        or "$erroractionpreference" in lowered
+        or re.search(r"(?im)^\s*(?:write-host|write-output|get-|set-|invoke-|start-|stop-)[a-z]", sample)
+    ):
+        raise WebRequestError("context-file-content-type-mismatch")
 
 
 def validate_structured_context(content: str, suffix: str) -> None:
@@ -1253,6 +1308,7 @@ class HavenState:
                 raise WebRequestError("invalid-context-file-type")
             if not isinstance(content, str) or not content or "\x00" in content:
                 raise WebRequestError("invalid-context-file-content")
+            validate_context_content_identity(content, suffix)
             validate_structured_context(content, suffix)
             encoded_size = len(content.encode("utf-8"))
             if (

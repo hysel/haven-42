@@ -125,13 +125,19 @@
       </div>
 
       <div class="interaction-grid">
-        <section class="panel chat-panel" id="text-panel">
+        <section class="panel chat-panel" id="text-panel" data-chat-text-size="default">
           <div class="panel-heading chat-heading">
             <div>
               <p class="eyebrow" id="capability-eyebrow">CONVERSATION</p>
               <h2 id="capability-title" tabindex="-1">Private conversation</h2>
             </div>
             <div class="text-actions">
+              <div class="text-size-controls" role="group" aria-label="Chat text size">
+                <button class="button text-size-button" id="decrease-chat-text" type="button" aria-label="Make chat text smaller" aria-controls="messages prompt" title="Smaller chat text">A&minus;</button>
+                <output id="chat-text-size-value" aria-hidden="true">100%</output>
+                <button class="button text-size-button" id="increase-chat-text" type="button" aria-label="Make chat text larger" aria-controls="messages prompt" title="Larger chat text">A+</button>
+                <span class="sr-only" id="chat-text-size-status" role="status" aria-live="polite">Default chat text size · session only</span>
+              </div>
               <button class="button secondary" id="new-task-button" type="button">New task</button>
               <label class="model-select"><span id="model-label">Conversation model</span>
                 <select id="model" disabled>
@@ -170,42 +176,49 @@
             </div>
           </section>
 
-          <section class="context-panel" aria-labelledby="context-title">
-            <div class="context-heading">
-              <div>
-                <strong id="context-title">Attach context</strong>
+          <form class="composer-surface composer" id="text-form">
+            <section class="context-panel" aria-label="Attachments">
+              <div class="context-toolbar">
+                <button class="button secondary context-picker" id="browse-context" type="button" disabled>Attach files</button>
+                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.csv,.json,.cs,.py,.js,.jsx,.ts,.tsx,.java,.go,.rs,.sql,.tf,.png,text/plain,text/markdown,text/csv,application/json,image/png" multiple disabled>
                 <p id="context-status">No files or screenshots selected · memory only</p>
-              </div>
-              <div class="context-actions">
-                <button class="button secondary context-picker" id="browse-context" type="button" disabled>Browse files</button>
-                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.csv,.json,.png,text/plain,text/markdown,text/csv,application/json,image/png" multiple disabled>
                 <button class="button text-button hidden" id="clear-context" type="button">Clear all</button>
+                <details class="context-settings">
+                  <summary>Settings &amp; safety</summary>
+                  <p class="context-policy">Attachments are inert data and are never executed · browse admitted UTF-8 text, structured-text, source (.cs/.py/.js/.jsx/.ts/.tsx/.java/.go/.rs/.sql/.tf), or PNG files, or paste a PNG screenshot · structured text is syntax-checked but never evaluated · source code is displayed and sent only as text · up to 5 text files and 2 screenshots by default · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
+                  <label for="context-image-limit">Maximum screenshots for this task</label>
+                  <select id="context-image-limit">
+                    <option value="1">1 screenshot</option>
+                    <option value="2" selected>2 screenshots · default</option>
+                    <option value="3">3 screenshots</option>
+                    <option value="4">4 screenshots · maximum</option>
+                  </select>
+                  <p class="field-help" id="context-image-limit-status">Up to 2 screenshots · 8 MiB and 33.5 million combined pixels remain the absolute limits</p>
+                </details>
               </div>
-            </div>
-            <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
-            <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
-            <p class="context-warning hidden" id="context-network-warning">Warning: Pressing Send will transfer the attached content to your private-network Ollama server for this task.</p>
-            <p class="context-policy">Attachments are inert data and are never executed · browse UTF-8 .txt/.md/.csv/.json or PNG, or paste a PNG screenshot · structured text is syntax-checked but never evaluated · up to 5 text files and 2 screenshots by default · memory only · no paths, storage, archive extraction, tools, or background scanning</p>
-            <details class="context-settings">
-              <summary>Advanced attachment settings</summary>
-              <label for="context-image-limit">Maximum screenshots for this task</label>
-              <select id="context-image-limit">
-                <option value="1">1 screenshot</option>
-                <option value="2" selected>2 screenshots · default</option>
-                <option value="3">3 screenshots</option>
-                <option value="4">4 screenshots · maximum</option>
-              </select>
-              <p class="field-help" id="context-image-limit-status">Up to 2 screenshots · 8 MiB and 33.5 million combined pixels remain the absolute limits</p>
-            </details>
-            <p class="context-warning hidden" id="context-image-warning">Screenshot understanding is unverified for the selected model. The request may fail if that model does not accept image input.</p>
-          </section>
+              <div class="notice context-error hidden" id="context-error" role="alert" aria-atomic="true"></div>
+              <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
+              <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
+              <p class="context-warning hidden" id="context-network-warning">Warning: Pressing Send will transfer the attached content to your private-network Ollama server for this task.</p>
+              <p class="context-warning hidden" id="context-image-warning">Screenshot understanding is unverified for the selected model. The request may fail if that model does not accept image input.</p>
+            </section>
 
-          <form class="composer" id="text-form">
             <label class="sr-only" id="prompt-label" for="prompt">Message</label>
             <textarea id="prompt" rows="2" maxlength="32768" placeholder="Connect Ollama to begin…" disabled></textarea>
             <button class="button send" id="send-button" type="submit" disabled aria-label="Run task">↑</button>
+            <div class="composer-help">
+              <span>Enter to send · Shift+Enter for a new line · ↑/↓ recall</span>
+              <label class="recall-control" for="prompt-history-limit">Keep
+                <select id="prompt-history-limit" aria-describedby="prompt-history-status">
+                  <option value="20" selected>20 · default</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                </select>
+                prompts
+              </label>
+              <span class="sr-only" id="prompt-history-status">Up to 20 prompts · memory only · cleared with New task</span>
+            </div>
           </form>
-          <p class="composer-help">Enter to send · Shift+Enter for a new line · ↑/↓ recall prompts</p>
           <div class="chat-footer">
             <span id="text-status">Provider not connected</span>
             <span>Inputs, attached context, and responses are not written to disk</span>
@@ -432,15 +445,6 @@
               </div>
               <p class="field-help">Choose a different policy to enable Apply changes. Applying while connected starts a new task through the validated provider boundary.</p>
             </form>
-            <div class="system-setting">
-              <label for="prompt-history-limit">Prompt recall history</label>
-              <select id="prompt-history-limit">
-                <option value="20" selected>20 prompts · default</option>
-                <option value="50">50 prompts</option>
-                <option value="100">100 prompts</option>
-              </select>
-              <p class="field-help" id="prompt-history-status">Up to 20 prompts · memory only · cleared with New task</p>
-            </div>
             <button class="button secondary full-width" id="scan-system-button" type="button">Scan system readiness</button>
             <div class="readiness-dashboard compact hidden" id="system-readiness" aria-live="polite"></div>
           </section>

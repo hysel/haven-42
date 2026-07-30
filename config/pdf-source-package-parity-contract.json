@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "status": "parity-contract-defined-capability-not-admitted",
+  "capability": "text-only-inactive-pdf-context",
+  "requiredCells": {
+    "windowsSource": true,
+    "linuxSource": true,
+    "macosSource": false,
+    "windowsPackage": false,
+    "linuxPackage": false,
+    "macosPackage": false
+  },
+  "requiredPackagedComponentsAfterAdmission": [
+    "restricted-pdf-worker",
+    "exact-pypdf-wheel-content",
+    "worker-contract",
+    "artifact-lock",
+    "third-party-notices",
+    "dependency-inventory",
+    "cyclonedx-sbom-component"
+  ],
+  "requiredParityAssertions": [
+    "same-input-byte-bounds",
+    "same-content-rejections",
+    "same-resource-bounds",
+    "same-network-and-filesystem-denials",
+    "same-output-schema-and-bounds",
+    "same-model-provider-disclosure",
+    "same-cleanup-and-process-tree-termination"
+  ],
+  "packageIntegrity": {
+    "everyRuntimeFileInventoried": true,
+    "everyRuntimeFileHasSha256": true,
+    "unexpectedRuntimeFilesRejected": true,
+    "licenseDigestMatched": true,
+    "unsignedDevelopmentArtifactsOnly": true
+  },
+  "authority": {
+    "sourceRouteAllowed": false,
+    "packageRouteAllowed": false,
+    "dependencyAdmissionGranted": false,
+    "packageInclusionAllowed": false,
+    "promotionAllowed": false,
+    "releaseAllowed": false
+  }
+}

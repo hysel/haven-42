@@ -2396,7 +2396,7 @@ test_local_web_mvp() {
   if [ "$TEST_TIER" = "full" ]; then
     command -v node >/dev/null 2>&1 || return 1
     node "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" |
-      grep -q "passed: 286 checks" || return 1
+      grep -q "passed: 329 checks" || return 1
   fi
   assurance_dashboard="$("$REPO_ROOT/scripts/generate-evidence-dashboard.shared.sh" --as-json)" || return 1
   python3 - "$assurance_dashboard" <<'PY' || return 1
@@ -2511,12 +2511,46 @@ assert "No comparative writing-quality promotion is justified" in blind_evidence
 assert "raw model output" in blind_evidence and "intentionally excluded" in blind_evidence
 assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md" in wiki_map
 assert "examples/blind-writing-quality-review.md" in wiki_map
+assert "docs/restricted-parser-worker-foundation.md" in wiki_map
+assert "examples/restricted-pdf-worker-validation.md" in wiki_map
+assert "examples/complex-document-container-validation.md" in wiki_map
+assert "examples/complex-document-semantic-validation.md" in wiki_map
+assert "examples/restricted-pdf-native-validation.md" in wiki_map
+assert "docs/pdf-production-isolation.md" in wiki_map
 PY
   python3 "$REPO_ROOT/scripts/test-blind-writing-review.py" | grep -q "passed 12 offline safety checks" || return 1
   python3 "$REPO_ROOT/scripts/test-local-image-lifecycle-foundation.py" |
     grep -q "28 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-parser-worker-foundation.py" |
-    grep -q "24 cases" || return 1
+    grep -q "27 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-complex-document-container-review.py" |
+    grep -q "41 deterministic security checks across 16 fixtures" || return 1
+  python3 "$REPO_ROOT/scripts/test-complex-document-semantic-review.py" |
+    grep -q "44 checks across 12 fixtures" || return 1
+  python3 "$REPO_ROOT/scripts/test-complex-document-native-foundation.py" |
+    grep -q "12 offline checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-parser-candidate-review.py" |
+    grep -q "39 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-parser-artifact-lock.py" |
+    grep -q "33 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-parser-artifact-hostile.py" |
+    grep -q "10 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-parser-review-fixtures.py" |
+    grep -q "78 checks and created 14 inert files" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-worker-prototype-contract.py" |
+    grep -q "64 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-worker-review-boundary.py" |
+    grep -q "40 contract-parity and exclusion checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-native-validation-foundation.py" |
+    grep -q "33 offline security and parity checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-production-isolation.py" |
+    grep -q "27 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/verify-pdf-corpus-intake.py" --self-test |
+    grep -q "23 offline cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-corpus-research-foundation.py" |
+    grep -q "19 non-acquisition checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-pdf-source-package-parity-foundation.py" |
+    grep -q "15 exclusion checks" || return 1
 }
 
 test_task_composition_and_repository_privacy() {
@@ -2562,6 +2596,8 @@ PY
 test_conversation_history_foundation() {
   python3 "$REPO_ROOT/scripts/test-memory-lexical-retrieval.py" |
     grep -q "39 deterministic, hostile, and lifecycle checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-source-attachment-review-fixtures.py" |
+    grep -q "25 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-foundation.py" |
     grep -q "45 bounded, effect-free checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'

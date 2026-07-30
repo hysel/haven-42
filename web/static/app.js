@@ -40,6 +40,39 @@ const DEFAULT_CONTEXT_IMAGE_LIMIT = 2;
 const MAX_CONTEXT_IMAGE_LIMIT = 4;
 const MAX_CONTEXT_IMAGE_TOTAL_BYTES = 8388608;
 const MAX_CONTEXT_IMAGE_TOTAL_PIXELS = 33554432;
+const CONTEXT_TEXT_MEDIA_TYPES = Object.freeze({
+  ".cs": "text/plain",
+  ".csv": "text/csv",
+  ".go": "text/plain",
+  ".java": "text/plain",
+  ".js": "text/plain",
+  ".jsx": "text/plain",
+  ".json": "application/json",
+  ".md": "text/markdown",
+  ".py": "text/plain",
+  ".rs": "text/plain",
+  ".sql": "text/plain",
+  ".tf": "text/plain",
+  ".ts": "text/plain",
+  ".tsx": "text/plain",
+  ".txt": "text/plain",
+});
+const CONTEXT_SOURCE_EXTENSIONS = new Set([
+  ".cs", ".go", ".java", ".js", ".jsx", ".py", ".rs", ".sql", ".tf", ".ts", ".tsx",
+]);
+const CHAT_TEXT_SIZES = ["small", "default", "large", "extra-large"];
+const CHAT_TEXT_SIZE_LABELS = {
+  small: "Small",
+  default: "Default",
+  large: "Large",
+  "extra-large": "Extra large",
+};
+const CHAT_TEXT_SIZE_PERCENTAGES = {
+  small: "90%",
+  default: "100%",
+  large: "115%",
+  "extra-large": "130%",
+};
 
 const state = {
   token: "",
@@ -50,6 +83,7 @@ const state = {
   promptHistoryLimit: 20,
   promptHistoryIndex: 0,
   promptHistoryDraft: "",
+  chatTextSize: "default",
   contextFiles: [],
   contextImages: [],
   contextImageSequence: 0,
@@ -86,6 +120,21 @@ function showError(message) {
 
 function clearError() {
   const box = byId("connection-error");
+  box.classList.add("hidden");
+  box.removeAttribute("tabindex");
+}
+
+function showContextError(message) {
+  const box = byId("context-error");
+  box.textContent = message;
+  box.tabIndex = -1;
+  box.classList.remove("hidden");
+  box.focus({ preventScroll: true });
+}
+
+function clearContextError() {
+  const box = byId("context-error");
+  box.textContent = "";
   box.classList.add("hidden");
   box.removeAttribute("tabindex");
 }
@@ -441,8 +490,9 @@ function humanError(error) {
     "private-context-confirmation-required": "Confirm that the attached content may be sent to your private-network Ollama server.",
     "invalid-context-file-count": "Attach no more than five text files.",
     "invalid-context-file-name": "A selected filename is not supported.",
-    "invalid-context-file-type": "Only UTF-8 .txt, .md, .csv, and .json files are supported.",
+    "invalid-context-file-type": "That file type isn't supported yet. Choose a text, CSV, JSON, source code, or PNG file.",
     "invalid-context-file-content": "A selected file is empty or is not supported text.",
+    "context-file-content-type-mismatch": "This file's contents do not match its name. For safety, attach the original supported text, source-code, CSV, JSON, or PNG file.",
     "invalid-context-json": "The selected JSON file is malformed.",
     "context-json-too-complex": "The selected JSON file exceeds the supported depth or structure limit.",
     "invalid-context-csv": "The selected CSV file is malformed.",
@@ -472,6 +522,30 @@ function cleanupPolicyLabel(seconds) {
   return seconds === 0
     ? "Unload after every response"
     : `Unload after ${seconds / 60} minutes idle`;
+}
+
+function applyChatTextSize(size) {
+  if (!Object.hasOwn(CHAT_TEXT_SIZE_LABELS, size)) return false;
+  state.chatTextSize = size;
+  byId("text-panel").dataset.chatTextSize = size;
+  byId("chat-text-size-status").textContent = (
+    `${CHAT_TEXT_SIZE_LABELS[size]} chat text size · session only`
+  );
+  byId("chat-text-size-value").value = CHAT_TEXT_SIZE_PERCENTAGES[size];
+  byId("chat-text-size-value").textContent = CHAT_TEXT_SIZE_PERCENTAGES[size];
+  const index = CHAT_TEXT_SIZES.indexOf(size);
+  byId("decrease-chat-text").disabled = index === 0;
+  byId("increase-chat-text").disabled = index === CHAT_TEXT_SIZES.length - 1;
+  return true;
+}
+
+function adjustChatTextSize(direction) {
+  const index = CHAT_TEXT_SIZES.indexOf(state.chatTextSize);
+  const nextIndex = Math.min(
+    CHAT_TEXT_SIZES.length - 1,
+    Math.max(0, index + direction),
+  );
+  applyChatTextSize(CHAT_TEXT_SIZES[nextIndex]);
 }
 
 function providerFormConfig(prefix = "") {
@@ -1195,7 +1269,9 @@ function formatContextBytes(bytes) {
   return bytes < 1024 ? `${bytes} B` : `${Math.ceil(bytes / 1024)} KiB`;
 }
 
-function contextFormatLabel(mediaType) {
+function contextFormatLabel(mediaType, name = "") {
+  const suffix = name.slice(name.lastIndexOf(".")).toLocaleLowerCase();
+  if (CONTEXT_SOURCE_EXTENSIONS.has(suffix)) return "Source";
   return ({
     "application/json": "JSON",
     "text/csv": "CSV",
@@ -1216,20 +1292,25 @@ function renderContextFiles() {
     name.textContent = file.name;
     const meta = document.createElement("span");
     meta.className = "context-file-meta";
-    meta.textContent = `${contextFormatLabel(file.mediaType)} · ${formatContextBytes(file.sizeBytes)} · ~${Math.ceil(file.sizeBytes / 4)} tokens`;
+    meta.textContent = `${contextFormatLabel(file.mediaType, file.name)} · ${formatContextBytes(file.sizeBytes)} · ~${Math.ceil(file.sizeBytes / 4)} tokens`;
     const remove = document.createElement("button");
     remove.className = "button text-button remove-context-file";
     remove.type = "button";
     remove.textContent = "Remove";
     remove.setAttribute("aria-label", `Remove ${file.name}`);
     remove.addEventListener("click", () => {
+      clearContextError();
       state.contextFiles.splice(index, 1);
       renderContextFiles();
     });
     const preview = document.createElement("details");
     preview.className = "context-preview";
     const previewSummary = document.createElement("summary");
-    previewSummary.textContent = `Preview selected ${contextFormatLabel(file.mediaType)}`;
+    previewSummary.textContent = "Preview";
+    previewSummary.setAttribute(
+      "aria-label",
+      `Preview selected ${contextFormatLabel(file.mediaType, file.name)}`,
+    );
     const previewText = document.createElement("pre");
     previewText.textContent = file.content.length > 1000
       ? `${file.content.slice(0, 1000)}\n… preview limited to 1,000 characters`
@@ -1281,6 +1362,7 @@ function renderContextImages() {
     remove.textContent = "Remove";
     remove.setAttribute("aria-label", `Remove ${image.name}`);
     remove.addEventListener("click", () => {
+      clearContextError();
       state.contextImages.splice(index, 1);
       renderContextFiles();
     });
@@ -1291,6 +1373,7 @@ function renderContextImages() {
 }
 
 function clearContextFiles() {
+  clearContextError();
   state.contextFiles = [];
   state.contextImages = [];
   byId("context-files").value = "";
@@ -1458,6 +1541,90 @@ function validateContextCsv(content) {
   if (quoted) throw new Error("invalid-context-csv");
 }
 
+function bytesStartWith(bytes, signature) {
+  return signature.every((value, index) => bytes[index] === value);
+}
+
+function validateContextContentIdentity(bytes, content, suffix, browserMediaType = "") {
+  const blockedMediaTypes = new Set([
+    "application/pdf",
+    "application/zip",
+    "application/x-7z-compressed",
+    "application/x-rar-compressed",
+    "application/x-msdownload",
+    "application/x-powershell",
+    "text/x-powershell",
+    "text/x-shellscript",
+  ]);
+  if (blockedMediaTypes.has(browserMediaType.toLocaleLowerCase())) {
+    throw new Error("context-file-content-type-mismatch");
+  }
+  const signatures = [
+    [0x25, 0x50, 0x44, 0x46, 0x2d],
+    [0x50, 0x4b, 0x03, 0x04],
+    [0x7f, 0x45, 0x4c, 0x46],
+    [0x1f, 0x8b],
+    [0x52, 0x61, 0x72, 0x21, 0x1a, 0x07],
+    [0x37, 0x7a, 0xbc, 0xaf, 0x27, 0x1c],
+    [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1],
+  ];
+  if (signatures.some((signature) => bytesStartWith(bytes, signature))) {
+    throw new Error("context-file-content-type-mismatch");
+  }
+  if (
+    bytes.length >= 64
+    && bytes[0] === 0x4d
+    && bytes[1] === 0x5a
+  ) {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const peOffset = view.getUint32(0x3c, true);
+    if (
+      peOffset <= bytes.length - 4
+      && bytes[peOffset] === 0x50
+      && bytes[peOffset + 1] === 0x45
+      && bytes[peOffset + 2] === 0
+      && bytes[peOffset + 3] === 0
+    ) throw new Error("context-file-content-type-mismatch");
+  }
+  if ([...content].some((character) => {
+    const code = character.codePointAt(0);
+    return code < 32 && !["\t", "\n", "\r", "\f"].includes(character);
+  })) throw new Error("context-file-content-type-mismatch");
+  const sample = content.replace(/^[\ufeff \t\r\n]+/, "").slice(0, 8192);
+  const firstLine = sample.split(/\r?\n/, 1)[0] || "";
+  const shebang = firstLine.toLocaleLowerCase();
+  if (shebang.startsWith("#!")) {
+    if (/(?:^|[\/\s])(?:pwsh|powershell|bash|dash|fish|ksh|sh|zsh)(?:\s|$)/.test(shebang)) {
+      throw new Error("context-file-content-type-mismatch");
+    }
+    if (/(?:^|[\/\s])python(?:[0-9.]*)?(?:\s|$)/.test(shebang) && suffix !== ".py") {
+      throw new Error("context-file-content-type-mismatch");
+    }
+    if (/(?:^|[\/\s])node(?:\s|$)/.test(shebang) && ![".js", ".jsx", ".ts", ".tsx"].includes(suffix)) {
+      throw new Error("context-file-content-type-mismatch");
+    }
+  }
+  if (/^#requires\s+-(?:version|modules?|runasadministrator|psedition)\b/i.test(firstLine)) {
+    throw new Error("context-file-content-type-mismatch");
+  }
+  if (/^\[cmdletbinding(?:\([^\r\n]*\))?\]\s*(?:\r?\n|$)/i.test(sample)) {
+    throw new Error("context-file-content-type-mismatch");
+  }
+  if (/^@echo\s+off(?:\s|$)/i.test(firstLine)) {
+    throw new Error("context-file-content-type-mismatch");
+  }
+  if (
+    /^write-(?:host|output|error|warning|verbose|debug|information)\b/i.test(firstLine)
+    || /^set-strictmode\b/i.test(firstLine)
+    || /^\$erroractionpreference\s*=/i.test(firstLine)
+  ) throw new Error("context-file-content-type-mismatch");
+  if (/^param\s*\(/i.test(firstLine) && (
+    sample.toLocaleLowerCase().includes("set-strictmode")
+    || sample.toLocaleLowerCase().includes("$erroractionpreference")
+    || /^\s*(?:write-host|write-output|get-|set-|invoke-|start-|stop-)[a-z]/im.test(sample)
+  )) throw new Error("context-file-content-type-mismatch");
+}
+
 async function addContextFiles(fileList) {
   const pending = [...fileList];
   if (state.contextFiles.length + pending.length > 5) {
@@ -1471,25 +1638,22 @@ async function addContextFiles(fileList) {
       throw new Error("invalid-context-file-name");
     }
     const suffix = file.name.slice(file.name.lastIndexOf(".")).toLocaleLowerCase();
-    const mediaType = ({
-      ".csv": "text/csv",
-      ".json": "application/json",
-      ".md": "text/markdown",
-      ".txt": "text/plain",
-    })[suffix] || "";
+    const mediaType = CONTEXT_TEXT_MEDIA_TYPES[suffix] || "";
     if (!mediaType) throw new Error("invalid-context-file-type");
     const foldedName = file.name.toLocaleLowerCase();
     if (existing.has(foldedName)) throw new Error("duplicate-context-file-name");
     if (file.size > 65536) throw new Error("context-file-too-large");
+    const bytes = new Uint8Array(await file.arrayBuffer());
     let content;
     try {
-      content = new TextDecoder("utf-8", { fatal: true }).decode(await file.arrayBuffer());
+      content = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
     } catch {
       throw new Error("invalid-context-file-content");
     }
     const sizeBytes = new TextEncoder().encode(content).byteLength;
     if (!content || content.includes("\u0000")) throw new Error("invalid-context-file-content");
     if (sizeBytes > 65536) throw new Error("context-file-too-large");
+    validateContextContentIdentity(bytes, content, suffix, file.type || "");
     if (suffix === ".json") validateContextJson(content);
     if (suffix === ".csv") validateContextCsv(content);
     totalBytes += sizeBytes;
@@ -1509,7 +1673,7 @@ async function addContextAttachments(fileList) {
     const suffix = typeof file.name === "string"
       ? file.name.slice(file.name.lastIndexOf(".")).toLocaleLowerCase()
       : "";
-    if ([".txt", ".md", ".csv", ".json"].includes(suffix)) {
+    if (Object.hasOwn(CONTEXT_TEXT_MEDIA_TYPES, suffix)) {
       textFiles.push(file);
     } else if (suffix === ".png") {
       imageFiles.push(file);
@@ -1823,8 +1987,12 @@ byId("prompt-history-limit").addEventListener("change", () => {
   updatePromptHistoryStatus();
 });
 
+byId("decrease-chat-text").addEventListener("click", () => adjustChatTextSize(-1));
+byId("increase-chat-text").addEventListener("click", () => adjustChatTextSize(1));
+
 byId("context-image-limit").addEventListener("change", (event) => {
   clearError();
+  clearContextError();
   const selectedLimit = Number(event.target.value);
   if (
     !Number.isInteger(selectedLimit)
@@ -1834,7 +2002,7 @@ byId("context-image-limit").addEventListener("change", (event) => {
   ) {
     event.target.value = String(state.contextImageLimit);
     if (state.contextImages.length > selectedLimit) {
-      showError("Remove screenshots before lowering the limit for this task.");
+      showContextError("Remove screenshots before lowering the limit for this task.");
     }
     return;
   }
@@ -1844,10 +2012,11 @@ byId("context-image-limit").addEventListener("change", (event) => {
 
 byId("context-files").addEventListener("change", async (event) => {
   clearError();
+  clearContextError();
   try {
     await addContextAttachments(event.target.files);
   } catch (error) {
-    showError(humanError(error));
+    showContextError(humanError(error));
   } finally {
     event.target.value = "";
   }
@@ -1864,12 +2033,13 @@ document.addEventListener("paste", async (event) => {
   if (!imageItems.length) return;
   event.preventDefault();
   clearError();
+  clearContextError();
   try {
     const blobs = imageItems.map((item) => item.getAsFile());
     if (blobs.some((blob) => !blob)) throw new Error("invalid-context-image");
     await addContextImages(blobs);
   } catch (error) {
-    showError(humanError(error));
+    showContextError(humanError(error));
   }
 });
 

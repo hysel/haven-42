@@ -88,10 +88,16 @@ a filesystem path, scans a directory, watches files, or creates a persistent
 library.
 
 A single keyboard-operable browser control accepts only `.txt`, `.md`, `.csv`,
-`.json`, and `.png`; a PNG screenshot can also be pasted from the clipboard.
+`.json`, source-text `.cs`, `.py`, `.js`, `.jsx`, `.ts`, `.tsx`, `.java`,
+`.go`, `.rs`, `.sql`, `.tf`, and `.png`; a PNG screenshot can also be pasted
+from the clipboard. Source files are normalized to inert `text/plain`, receive
+no syntax-validation claim, and are never executed. Shell, PowerShell, batch,
+binary, project, archive, and configuration formats remain blocked.
 The selection is atomic, so one rejected file leaves the previous selection unchanged. A
-screenshot copied to the Windows clipboard can be pasted directly into the
-page. The initial image boundary accepts PNG items only. Each task defaults to
+screenshot copied to the Windows clipboard or through a real Ubuntu desktop
+clipboard session can be pasted directly into the page; both native cells
+entered through the admitted PNG path. Physical macOS clipboard behavior
+remains unverified. The initial image boundary accepts PNG items only. Each task defaults to
 two screenshots and offers an advanced one-through-four choice. The engine
 retains an absolute four-image cap, 4 MiB per image, 8 MiB combined, 4096
 pixels per dimension, 16.7 million pixels per image, and 33.5 million combined
@@ -103,7 +109,13 @@ JPEG, WebP, GIF, SVG, PDF, OCR, or image conversion are not admitted.
 
 The loopback service independently validates the complete attachment shape,
 extension/media-type match, UTF-8 content, exact byte count, duplicate names,
-per-file budget, and total budget. It labels selected text as untrusted
+per-file budget, and total budget. Filenames and browser MIME values are
+untrusted hints: byte preflight and server revalidation reject known
+binary/container signatures, forbidden control bytes, and high-confidence
+PowerShell, shell, or batch files renamed to an allowed extension. Correctly
+named admitted-language shebangs and ambiguous prose remain inert data. This is
+not a perfect language classifier or antivirus claim. The service labels
+selected text as untrusted
 reference material before adding it to the bounded provider request. File
 content cannot select a tool, command, path, provider, model, approval, or
 network destination. The same untrusted-data instruction covers image content,
@@ -194,6 +206,15 @@ About reports the version, admitted provider boundaries, memory-only privacy,
 and unsigned development status without adding network or execution behavior.
 
 This layout change does not broaden browser authority: configuration, messages, and responses remain in memory, and the browser still has no shell, filesystem, repository, model-download, or arbitrary-network surface.
+
+The Chat header includes session-only **A−** and **A+** controls that step
+through Small, Default, Large, and Extra large text. Accessible labels announce
+their purpose, the current scale is shown between them, and the unavailable
+direction is disabled at each bound. The composer footer keeps the bounded
+20/50/100 prompt-recall choice beside the Up/Down hint where that behavior is
+used. Both controls are browser-memory-only. They do not alter navigation,
+provider payloads, stored data, model context, or any engine decision, and
+return to their defaults when Haven 42 closes.
 
 ## Connect Ollama
 

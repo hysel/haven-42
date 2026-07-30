@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "status": "metadata-research-only-no-artifacts-selected",
+  "reviewDate": "2026-07-30",
+  "sources": [
+    {
+      "id": "pdf-association-corpora-index",
+      "project": "PDF Association PDF corpora index",
+      "sourcePage": "https://github.com/pdf-association/pdf-corpora",
+      "repositoryLicenseSpdx": "CC-BY-4.0",
+      "artifactLicenseScopeConfirmed": false,
+      "candidateUse": "discover standards and interoperability corpora",
+      "selectionDecision": "blocked-pending-per-artifact-rights-and-integrity"
+    },
+    {
+      "id": "mozilla-pdfjs-tests",
+      "project": "Mozilla PDF.js",
+      "sourcePage": "https://github.com/mozilla/pdf.js",
+      "repositoryLicenseSpdx": "Apache-2.0",
+      "artifactLicenseScopeConfirmed": false,
+      "candidateUse": "discover parser regression and malformed-structure cases",
+      "selectionDecision": "blocked-pending-per-artifact-origin-rights-and-integrity"
+    },
+    {
+      "id": "pypdf-tests",
+      "project": "pypdf",
+      "sourcePage": "https://github.com/py-pdf/pypdf",
+      "repositoryLicenseSpdx": "BSD-3-Clause",
+      "artifactLicenseScopeConfirmed": false,
+      "candidateUse": "discover parser-specific regression cases",
+      "selectionDecision": "blocked-pending-per-artifact-origin-rights-and-integrity"
+    }
+  ],
+  "selectedArtifacts": [],
+  "effects": {
+    "documentDownloaded": false,
+    "documentOpened": false,
+    "documentParsed": false,
+    "artifactRetained": false,
+    "networkAuthorityGranted": false,
+    "runtimeAdmissionGranted": false
+  }
+}

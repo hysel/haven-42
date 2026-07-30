@@ -179,7 +179,9 @@ def main() -> int:
     assert CONTRACT["implementation"]["networkApiUsed"] is False
     assert CONTRACT["implementation"]["providerApiUsed"] is False
     assert CONTRACT["inputBoundary"]["allowedExtensions"] == [
-        ".txt", ".md", ".csv", ".json"
+        ".txt", ".md", ".csv", ".json",
+        ".cs", ".py", ".js", ".jsx", ".ts", ".tsx",
+        ".java", ".go", ".rs", ".sql", ".tf",
     ]
     print("Memory lexical retrieval passed 39 deterministic, hostile, and lifecycle checks.")
     return 0

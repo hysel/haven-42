@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "prospective-evidence-dependency-not-admitted",
+  "component": {
+    "type": "library",
+    "name": "pypdf",
+    "version": "6.14.2",
+    "purl": "pkg:pypi/pypdf@6.14.2",
+    "license": "BSD-3-Clause",
+    "artifact": "pypdf-6.14.2-py3-none-any.whl",
+    "artifactSha256": "3f07891af76dc002657e04993ab9b4de81de29f9013b9761d0b7968bff12e946",
+    "licenseSha256": "a97ac230e5f33ef10a5367a850eb01f91f1a0b064e34742c7794d2294557f524"
+  },
+  "dependencyInventoryPlan": {
+    "runtimeScope": "candidate-only",
+    "packagingPython": "3.14.6",
+    "mandatoryDependencies": [],
+    "extrasSelected": [],
+    "runtimeFileInventoryRequiredBeforeAdmission": true
+  },
+  "thirdPartyNoticePlan": {
+    "heading": "pypdf 6.14.2 — BSD-3-Clause",
+    "copyrightNotices": [
+      "Copyright (c) 2006-2008, Mathieu Fenniak",
+      "Some contributions copyright (c) 2007, Ashish Kulkarni",
+      "Some contributions copyright (c) 2014, Steve Witham"
+    ],
+    "fullLicenseTextRequiredInPackage": true,
+    "licenseDigestVerificationRequired": true
+  },
+  "sbomPlan": {
+    "format": "CycloneDX",
+    "componentType": "library",
+    "scope": "required",
+    "hashAlgorithm": "SHA-256",
+    "reviewStatusProperty": "restricted-pdf-candidate",
+    "signingEligible": false
+  },
+  "generation": {
+    "inventoryGenerated": false,
+    "thirdPartyNoticesGenerated": false,
+    "sbomGenerated": false,
+    "packageBuilt": false,
+    "sourcePackageParityTested": false,
+    "nativeWindowsTested": false,
+    "nativeLinuxTested": false,
+    "nativeMacosTested": false
+  },
+  "authority": {
+    "packageInclusionAllowed": false,
+    "dependencyAdmissionGranted": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "releasePublicationAllowed": false
+  }
+}

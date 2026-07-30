@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "review-only-native-validation-no-runtime-admission",
+  "exactArtifactSha256": "3f07891af76dc002657e04993ab9b4de81de29f9013b9761d0b7968bff12e946",
+  "exactArtifactSizeBytes": 349514,
+  "validationLimits": {
+    "maximumCheckSeconds": 45,
+    "maximumStdoutBytes": 1048576,
+    "maximumStderrBytes": 65536
+  },
+  "validationCommand": {
+    "linux": "./scripts/validate-restricted-pdf-worker.linux.sh",
+    "direct": "python3 scripts/run-native-pdf-worker-validation.py --platform linux"
+  },
+  "requiredChecks": {
+    "artifactLock": 33,
+    "fixtureCorpus": 78,
+    "workerSecurity": 61,
+    "staticContract": 64,
+    "boundaryParityAndExclusion": 40,
+    "prospectiveEvidence": 10
+  },
+  "platformEvidence": {
+    "windowsSource": true,
+    "linuxSource": true,
+    "macosSource": false,
+    "windowsPackaged": false,
+    "linuxPackaged": false,
+    "macosPackaged": false
+  },
+  "parity": {
+    "sourceVersusPackageActivated": false,
+    "packageIncludesParser": false,
+    "packageIncludesWorker": false,
+    "packageExecutionAllowed": false,
+    "promotionAllowed": false
+  },
+  "evidence": {
+    "outputDirectory": "dist/local-review/pdf-native-validation",
+    "hostnameRecorded": false,
+    "usernameRecorded": false,
+    "networkAddressRecorded": false,
+    "absolutePathRecorded": false,
+    "rawDocumentContentRecorded": false
+  },
+  "effects": {
+    "exactIgnoredArtifactRead": true,
+    "syntheticFixtureFilesWritten": true,
+    "workerProcessesStarted": true,
+    "reviewEvidenceFileWritten": true,
+    "networkUsed": false,
+    "dependencyInstalled": false,
+    "packageModified": false,
+    "runtimeAdmissionGranted": false
+  }
+}

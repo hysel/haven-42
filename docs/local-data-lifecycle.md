@@ -6,7 +6,8 @@ Raw prompts, raw responses, endpoints, and secrets are not persisted by default.
 The local-web application holds its readiness snapshot, zero-effect setup plan,
 provider endpoint, discovered model names, per-capability model guidance, active
 conversation model, request token, cleanup preference, prompt-recall limit,
-bounded prompt-recall entries, explicitly selected `.txt`/`.md`/`.csv`/`.json` context,
+bounded prompt-recall entries, explicitly selected `.txt`/`.md`/`.csv`/`.json`
+or admitted source-text `.cs`/`.py`/`.js`/`.jsx`/`.ts`/`.tsx`/`.java`/`.go`/`.rs`/`.sql`/`.tf` context,
 browsed or pasted PNG screenshots, and one continuous text conversation in
 process and browser memory only. Prompt recall defaults to 20 entries and may
 be changed to 50 or 100 for the current process; consecutive duplicates are
@@ -14,6 +15,11 @@ suppressed. One type-restricted picker accepts text and PNG together atomically.
 Attached text is capped at five files, 64 KiB each, and 128 KiB total. CSV and
 JSON receive bounded syntax/resource validation and inert format-aware previews;
 neither JSON values nor CSV formulas are evaluated.
+Attachment names and browser MIME values are untrusted. Known binary/container
+signatures, forbidden control bytes, and high-confidence PowerShell, shell, or
+batch masquerading are rejected before content enters task memory and are
+revalidated by the loopback service. No scan result or rejected file is
+persisted.
 Screenshots are explicit file-picker or clipboard PNGs. The per-task browser
 choice defaults to two and may be set from one through four; the engine retains
 an absolute four-image cap, 4 MiB each, 8 MiB total, 4096 pixels per dimension,
@@ -42,6 +48,15 @@ SQLite, opens or creates a database, accepts a path, writes a backup, or
 restores data. Private session remains the default and write-free. See
 [Conversation History Database Foundation](conversation-history-database.md)
 and [Conversation History Encryption Review](conversation-history-encryption-review.md).
+
+Restricted PDF and complex-document review fixtures, candidate artifacts, and
+native evidence exist only beneath ignored `dist/local-review` during explicit
+development tests. They are not application data, are never searched or sent
+to a provider, and are excluded from packages and repository history. Native
+evidence contains only normalized platform, architecture, Python version,
+fixed check counts, and false admission fields; it records no hostname,
+username, endpoint, absolute path, or document content. External PDF corpus
+research retains metadata only and currently selects or downloads no document.
 
 
 Deletion is always previewed and scoped by data class. Cleanup after a test or failed operation may remove only data created by that run. Preexisting models and provider-owned data require explicit provider-specific confirmation. The result must say what was removed and whether recovery is possible.

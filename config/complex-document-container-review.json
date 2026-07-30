@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-container-review-not-runtime-admitted",
+  "formats": {
+    "docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "odt": "application/vnd.oasis.opendocument.text",
+    "ods": "application/vnd.oasis.opendocument.spreadsheet",
+    "odp": "application/vnd.oasis.opendocument.presentation"
+  },
+  "limits": {
+    "maximumInputBytes": 8388608,
+    "maximumEntries": 256,
+    "maximumMemberBytes": 2097152,
+    "maximumExpandedBytes": 8388608,
+    "maximumExpansionRatio": 20,
+    "maximumXmlBytes": 1048576
+  },
+  "policy": {
+    "encryptedAllowed": false,
+    "macrosAllowed": false,
+    "externalRelationshipsAllowed": false,
+    "embeddedObjectsAllowed": false,
+    "doctypeOrEntityAllowed": false,
+    "duplicateMembersAllowed": false,
+    "unsafeMemberNamesAllowed": false,
+    "unsupportedCompressionAllowed": false,
+    "formulaExecutionAllowed": false,
+    "archiveExtractionAllowed": false
+  },
+  "authority": {
+    "dependencyAdmitted": false,
+    "workerAdmitted": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "providerPayloadAllowed": false,
+    "packageInclusionAllowed": false
+  },
+  "effects": {
+    "networkUsed": false,
+    "filesystemPathAccepted": false,
+    "archiveExtracted": false,
+    "temporaryFileWritten": false,
+    "officeApplicationLaunched": false,
+    "contentExecuted": false,
+    "runtimeAdmissionGranted": false
+  }
+}
