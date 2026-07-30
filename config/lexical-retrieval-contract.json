@@ -10,7 +10,7 @@
   },
   "inputBoundary": {
     "validatedMemoryAttachmentsOnly": true,
-    "allowedExtensions": [".txt", ".md", ".csv", ".json"],
+    "allowedExtensions": [".txt", ".md", ".csv", ".json", ".cs", ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go", ".rs", ".sql", ".tf"],
     "filesystemPathsAllowed": false,
     "directorySelectionAllowed": false,
     "temporaryFilesAllowed": false,

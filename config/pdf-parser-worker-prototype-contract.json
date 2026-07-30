@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-security-prototype-not-runtime-admitted",
+  "description": "Review-only pypdf worker boundary for synthetic hostile fixtures.",
+  "artifact": {
+    "package": "pypdf",
+    "version": "6.14.2",
+    "filename": "pypdf-6.14.2-py3-none-any.whl",
+    "sha256": "3f07891af76dc002657e04993ab9b4de81de29f9013b9761d0b7968bff12e946",
+    "installed": false,
+    "retainedInRepository": false
+  },
+  "reviewAuthority": {
+    "exactArtifactReadAllowed": true,
+    "syntheticFixtureReadAllowed": true,
+    "parserImportForReviewAllowed": true,
+    "workerProcessForReviewAllowed": true,
+    "arbitraryDocumentPathAllowed": false,
+    "userDocumentAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "packageInclusionAllowed": false,
+    "dependencyAdmissionGranted": false
+  },
+  "transport": {
+    "documentInput": "bounded-base64-over-stdin",
+    "resultOutput": "bounded-json-over-stdout",
+    "pathInWorkerRequestAllowed": false,
+    "environmentValueInWorkerRequestAllowed": false,
+    "credentialInWorkerRequestAllowed": false
+  },
+  "limits": {
+    "maximumSerializedRequestBytes": 22371000,
+    "maximumInputBytes": 16777216,
+    "maximumPages": 500,
+    "maximumObjects": 10000,
+    "maximumNestingDepth": 32,
+    "maximumExpansionRatio": 20,
+    "maximumExpandedBytes": 67108864,
+    "maximumOutputCharacters": 1000000,
+    "maximumStdoutBytes": 2097152,
+    "maximumStderrBytes": 65536,
+    "maximumCpuSeconds": 10,
+    "maximumWallSeconds": 15,
+    "maximumMemoryBytes": 536870912
+  },
+  "contentPolicy": {
+    "strictPdfParsingRequired": true,
+    "rootObjectRecoveryLimit": 100,
+    "encryptionAllowed": false,
+    "activeContentAllowed": false,
+    "embeddedOrAssociatedFilesAllowed": false,
+    "externalReferencesAllowed": false,
+    "pdfRenderingAllowed": false,
+    "ocrAllowed": false,
+    "textOnlyOutput": true
+  },
+  "containment": {
+    "isolatedPythonFlags": ["-I", "-S"],
+    "sitePackagesAllowed": false,
+    "bytecodeWritesAllowed": false,
+    "networkPythonApisDenied": true,
+    "childProcessPythonApisDenied": true,
+    "filesystemApisDeniedAfterExactArtifactImport": true,
+    "temporaryFilesAllowed": false,
+    "posixCpuAndMemoryLimitsRequired": true,
+    "windowsJobCpuMemoryProcessLimitsRequired": true,
+    "windowsSuspendedAssignmentRequired": true,
+    "windowsOsMemoryLimitImplemented": true,
+    "parentWallTimeoutAndForcedTerminationRequired": true,
+    "parentStreamingOutputLimitsRequired": true,
+    "boundedDirectResidueSnapshotRequired": true,
+    "productionGradeIsolationClaimed": false
+  },
+  "reviewEffects": {
+    "exactArtifactRead": true,
+    "syntheticFixtureReadByParent": true,
+    "parserImportedInWorker": true,
+    "workerProcessStarted": true,
+    "syntheticDocumentParsedInWorker": true,
+    "networkUsed": false,
+    "temporaryFileWritten": false,
+    "childProcessStarted": false,
+    "runtimeAdmissionGranted": false,
+    "userDocumentRead": false
+  }
+}

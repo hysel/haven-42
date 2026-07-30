@@ -1030,7 +1030,9 @@ try {
       newest,
       cleared: state.promptHistory.length,
       limitRetained: state.promptHistoryLimit,
-      status: document.querySelector('#prompt-history-status').textContent
+      status: document.querySelector('#prompt-history-status').textContent,
+      inComposer: select.closest('#text-form') !== null,
+      outsideSystemSettings: select.closest('.system-setting') === null
     };
   })()`);
   if (
@@ -1042,9 +1044,75 @@ try {
     || configurableHistory.cleared !== 0
     || configurableHistory.limitRetained !== 50
     || !configurableHistory.status.includes("0 of 50 prompts retained")
+    || !configurableHistory.inComposer
+    || !configurableHistory.outsideSystemSettings
   ) throw new Error(`configurable-prompt-history:${JSON.stringify(configurableHistory)}`);
-  checks += 8;
+  checks += 10;
   trace("prompt-history-verified");
+
+  const chatTextSize = await cdp.evaluate(`(() => {
+    const panel = document.querySelector('#text-panel');
+    const message = document.querySelector('.message-content');
+    const prompt = document.querySelector('#prompt');
+    const smaller = document.querySelector('#decrease-chat-text');
+    const larger = document.querySelector('#increase-chat-text');
+    const result = {
+      defaultState: state.chatTextSize,
+      defaultDataset: panel.dataset.chatTextSize,
+      defaultMessageSize: getComputedStyle(message).fontSize,
+      defaultPromptSize: getComputedStyle(prompt).fontSize,
+      defaultScale: document.querySelector('#chat-text-size-value').textContent,
+      labels: [smaller.getAttribute('aria-label'), larger.getAttribute('aria-label')],
+      defaultBounds: [smaller.disabled, larger.disabled],
+    };
+    smaller.click();
+    result.smallState = state.chatTextSize;
+    result.smallBound = smaller.disabled;
+    result.smallScale = document.querySelector('#chat-text-size-value').textContent;
+    larger.click();
+    larger.click();
+    result.largeState = state.chatTextSize;
+    result.largeDataset = panel.dataset.chatTextSize;
+    result.largeMessageSize = getComputedStyle(message).fontSize;
+    result.largePromptSize = getComputedStyle(prompt).fontSize;
+    result.largeScale = document.querySelector('#chat-text-size-value').textContent;
+    larger.click();
+    result.maximumState = state.chatTextSize;
+    result.maximumBound = larger.disabled;
+    result.maximumScale = document.querySelector('#chat-text-size-value').textContent;
+    result.invalidRejected = applyChatTextSize('unsupported') === false
+      && state.chatTextSize === 'extra-large';
+    result.restored = applyChatTextSize('default')
+      && state.chatTextSize === 'default'
+      && panel.dataset.chatTextSize === 'default'
+      && !smaller.disabled
+      && !larger.disabled;
+    return result;
+  })()`);
+  if (
+    chatTextSize.defaultState !== "default"
+    || chatTextSize.defaultDataset !== "default"
+    || chatTextSize.defaultMessageSize !== "14px"
+    || chatTextSize.defaultPromptSize !== "16px"
+    || chatTextSize.defaultScale !== "100%"
+    || JSON.stringify(chatTextSize.labels) !== JSON.stringify(["Make chat text smaller", "Make chat text larger"])
+    || JSON.stringify(chatTextSize.defaultBounds) !== JSON.stringify([false, false])
+    || chatTextSize.smallState !== "small"
+    || !chatTextSize.smallBound
+    || chatTextSize.smallScale !== "90%"
+    || chatTextSize.largeState !== "large"
+    || chatTextSize.largeDataset !== "large"
+    || chatTextSize.largeMessageSize !== "16px"
+    || chatTextSize.largePromptSize !== "18px"
+    || chatTextSize.largeScale !== "115%"
+    || chatTextSize.maximumState !== "extra-large"
+    || !chatTextSize.maximumBound
+    || chatTextSize.maximumScale !== "130%"
+    || !chatTextSize.invalidRejected
+    || !chatTextSize.restored
+  ) throw new Error(`chat-text-size:${JSON.stringify(chatTextSize)}`);
+  checks += 16;
+  trace("chat-text-size-verified");
 
   const writingRequestsBefore = chatPayloads.length;
   const writingSuggestion = await cdp.evaluate(`(() => {
@@ -1171,6 +1239,35 @@ try {
     }
   })()`);
   if (!invalidContextBlocked) throw new Error("invalid-context-file-not-blocked");
+  const contextErrorRouting = await cdp.evaluate(`(async () => {
+    clearError();
+    clearContextError();
+    const input = document.querySelector('#context-files');
+    const transfer = new DataTransfer();
+    transfer.items.add(new File(['blocked fixture'], 'blocked.sh', {type: 'text/plain'}));
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', {bubbles: true}));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const box = document.querySelector('#context-error');
+    const result = {
+      visible: !box.classList.contains('hidden'),
+      message: box.textContent,
+      focused: document.activeElement?.id || '',
+      connectionErrorHidden: document.querySelector('#connection-error').classList.contains('hidden'),
+      fileCount: state.contextFiles.length,
+    };
+    clearContextError();
+    result.cleared = box.classList.contains('hidden') && box.textContent === '';
+    return result;
+  })()`);
+  if (
+    !contextErrorRouting.visible
+    || contextErrorRouting.message !== "That file type isn't supported yet. Choose a text, CSV, JSON, source code, or PNG file."
+    || contextErrorRouting.focused !== "context-error"
+    || !contextErrorRouting.connectionErrorHidden
+    || contextErrorRouting.fileCount !== 1
+    || !contextErrorRouting.cleared
+  ) throw new Error(`context-error-routing:${JSON.stringify(contextErrorRouting)}`);
   const structuredContext = await cdp.evaluate(`(async () => {
     await addContextAttachments([
       new File(['name,note\\nalpha,"quoted, inert formula =CMD()"\\n'], 'records.csv', {type: 'text/csv'}),
@@ -1180,7 +1277,8 @@ try {
       count: state.contextFiles.length,
       mediaTypes: state.contextFiles.map((item) => item.mediaType),
       metadata: [...document.querySelectorAll('.context-file-meta')].map((item) => item.textContent),
-      summaries: [...document.querySelectorAll('.context-preview summary')].map((item) => item.textContent)
+      summaries: [...document.querySelectorAll('.context-preview summary')].map((item) => item.textContent),
+      previewLabels: [...document.querySelectorAll('.context-preview summary')].map((item) => item.getAttribute('aria-label'))
     };
     state.contextFiles.splice(-2, 2);
     renderContextFiles();
@@ -1194,9 +1292,106 @@ try {
     || structuredContext.mediaTypes.at(-1) !== "application/json"
     || !structuredContext.metadata.some((value) => value.startsWith("CSV ·"))
     || !structuredContext.metadata.some((value) => value.startsWith("JSON ·"))
-    || !structuredContext.summaries.includes("Preview selected CSV")
-    || !structuredContext.summaries.includes("Preview selected JSON")
+    || structuredContext.summaries.filter((value) => value === "Preview").length < 2
+    || !structuredContext.previewLabels.includes("Preview selected CSV")
+    || !structuredContext.previewLabels.includes("Preview selected JSON")
   ) throw new Error(`structured-context:${JSON.stringify(structuredContext)}`);
+  const sourceContext = await cdp.evaluate(`(async () => {
+    await addContextAttachments([
+      new File(['import os\\nos.system("must remain inert")\\n'], 'worker.py', {type: 'text/x-python'}),
+      new File(['export const Panel = () => <script>{"inert"}</script>;\\n'], 'panel.tsx', {type: 'text/typescript'})
+    ]);
+    const result = {
+      count: state.contextFiles.length,
+      mediaTypes: state.contextFiles.map((item) => item.mediaType),
+      metadata: [...document.querySelectorAll('.context-file-meta')].map((item) => item.textContent),
+      summaries: [...document.querySelectorAll('.context-preview summary')].map((item) => item.textContent),
+      previewLabels: [...document.querySelectorAll('.context-preview summary')].map((item) => item.getAttribute('aria-label')),
+      previews: [...document.querySelectorAll('.context-preview pre')].map((item) => item.textContent),
+      activeElements: document.querySelectorAll('.context-preview script, .context-preview img').length
+    };
+    state.contextFiles.splice(-2, 2);
+    renderContextFiles();
+    result.remaining = state.contextFiles.length;
+    return result;
+  })()`);
+  if (
+    sourceContext.count !== 3
+    || sourceContext.remaining !== 1
+    || sourceContext.mediaTypes.at(-2) !== "text/plain"
+    || sourceContext.mediaTypes.at(-1) !== "text/plain"
+    || sourceContext.metadata.filter((value) => value.startsWith("Source ·")).length !== 2
+    || sourceContext.summaries.filter((value) => value === "Preview").length < 2
+    || sourceContext.previewLabels.filter((value) => value === "Preview selected Source").length !== 2
+    || !sourceContext.previews.some((value) => value.includes('os.system("must remain inert")'))
+    || !sourceContext.previews.some((value) => value.includes('<script>{"inert"}</script>'))
+    || sourceContext.activeElements !== 0
+  ) throw new Error(`source-context:${JSON.stringify(sourceContext)}`);
+  const hostileSourceBlocked = await cdp.evaluate(`(async () => {
+    const before = state.contextFiles.map((item) => item.name);
+    const errors = [];
+    for (const file of [
+      new File(['echo hostile'], 'script.sh', {type: 'text/plain'}),
+      new File(['Write-Host hostile'], 'script.ps1', {type: 'text/plain'})
+    ]) {
+      try {
+        await addContextAttachments([file]);
+      } catch (error) {
+        errors.push(error.message);
+      }
+    }
+    return {
+      before,
+      after: state.contextFiles.map((item) => item.name),
+      errors
+    };
+  })()`);
+  if (
+    JSON.stringify(hostileSourceBlocked.before) !== JSON.stringify(hostileSourceBlocked.after)
+    || hostileSourceBlocked.errors.length !== 2
+    || hostileSourceBlocked.errors.some((value) => value !== "invalid-context-file-type")
+  ) throw new Error(`hostile-source-context:${JSON.stringify(hostileSourceBlocked)}`);
+  const masqueradedContentBlocked = await cdp.evaluate(`(async () => {
+    const before = state.contextFiles.map((item) => item.name);
+    const errors = [];
+    const hostile = [
+      new File(['#Requires -Version 7.0\\nWrite-Host hostile\\n'], 'renamed-powershell.txt', {type: 'text/plain'}),
+      new File(['Write-Host hostile\\n'], 'renamed-simple-powershell.txt', {type: 'text/plain'}),
+      new File(['#!/usr/bin/env bash\\necho hostile\\n'], 'renamed-shell.md', {type: 'text/markdown'}),
+      new File(['@echo off\\necho hostile\\n'], 'renamed-batch.txt', {type: 'text/plain'}),
+      new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37])], 'renamed-pdf.txt', {type: 'text/plain'}),
+    ];
+    for (const file of hostile) {
+      try {
+        await addContextAttachments([file]);
+      } catch (error) {
+        errors.push(error.message);
+      }
+    }
+    const friendly = humanError(new Error("context-file-content-type-mismatch"));
+    await addContextAttachments([
+      new File(['PowerShell example for review only:\\nWrite-Host remains inert text.\\n'], 'benign-notes.txt', {type: 'text/plain'}),
+      new File(['#!/usr/bin/env python3\\nprint("inert")\\n'], 'valid-shebang.py', {type: 'text/x-python'}),
+    ]);
+    const accepted = state.contextFiles.slice(-2).map((item) => item.name);
+    state.contextFiles.splice(-2, 2);
+    renderContextFiles();
+    return {
+      before,
+      after: state.contextFiles.map((item) => item.name),
+      errors,
+      friendly,
+      accepted,
+    };
+  })()`);
+  if (
+    JSON.stringify(masqueradedContentBlocked.before) !== JSON.stringify(masqueradedContentBlocked.after)
+    || masqueradedContentBlocked.errors.length !== 5
+    || masqueradedContentBlocked.errors.some((value) => value !== "context-file-content-type-mismatch")
+    || masqueradedContentBlocked.friendly !== "This file's contents do not match its name. For safety, attach the original supported text, source-code, CSV, JSON, or PNG file."
+    || JSON.stringify(masqueradedContentBlocked.accepted) !== JSON.stringify(["benign-notes.txt", "valid-shebang.py"])
+  ) throw new Error(`masqueraded-context:${JSON.stringify(masqueradedContentBlocked)}`);
+  checks += 5;
   const invalidStructuredBlocked = await cdp.evaluate(`(async () => {
     const before = state.contextFiles.length;
     const errors = [];
@@ -1223,7 +1418,7 @@ try {
     invalidStructuredBlocked.before !== invalidStructuredBlocked.after
     || invalidStructuredBlocked.errors[0] !== "invalid-context-json"
     || invalidStructuredBlocked.errors[1] !== "invalid-context-csv"
-    || invalidStructuredBlocked.friendly[0] !== "Only UTF-8 .txt, .md, .csv, and .json files are supported."
+    || invalidStructuredBlocked.friendly[0] !== "That file type isn't supported yet. Choose a text, CSV, JSON, source code, or PNG file."
     || invalidStructuredBlocked.friendly[1] !== "The selected JSON file is malformed."
     || invalidStructuredBlocked.friendly[2] !== "The selected JSON file exceeds the supported depth or structure limit."
     || invalidStructuredBlocked.friendly[3] !== "The selected CSV file is malformed."
@@ -1285,7 +1480,7 @@ try {
     }
   })()`);
   if (!duplicateSelectionBlocked) throw new Error("unified-picker-duplicate-not-enforced");
-  checks += 12;
+  checks += 28;
 
   const chatRequestsBeforeDisclosure = chatPayloads.length;
   const disclosureSubmit = await cdp.evaluate(`(() => {
@@ -1391,12 +1586,6 @@ try {
         paddingLeft: getComputedStyle(select).paddingLeft,
         paddingRight: getComputedStyle(select).paddingRight,
       },
-      systemStyle: {
-        height: getComputedStyle(document.querySelector('#prompt-history-limit')).height,
-        fontSize: getComputedStyle(document.querySelector('#prompt-history-limit')).fontSize,
-        paddingLeft: getComputedStyle(document.querySelector('#prompt-history-limit')).paddingLeft,
-        paddingRight: getComputedStyle(document.querySelector('#prompt-history-limit')).paddingRight,
-      },
     };
     select.value = '4';
     select.dispatchEvent(new Event('change', {bubbles: true}));
@@ -1418,7 +1607,7 @@ try {
     const rejectedLowering = {
       selected: select.value,
       stateLimit: state.contextImageLimit,
-      error: document.querySelector('#connection-error').textContent,
+      error: document.querySelector('#context-error').textContent,
     };
     state.contextImages.splice(1);
     renderContextFiles();
@@ -1435,7 +1624,12 @@ try {
     advancedScreenshotLimit.initial.selected !== "2"
     || advancedScreenshotLimit.initial.stateLimit !== 2
     || !advancedScreenshotLimit.initial.status.includes("Up to 2 screenshots")
-    || JSON.stringify(advancedScreenshotLimit.initial.style) !== JSON.stringify(advancedScreenshotLimit.initial.systemStyle)
+    || JSON.stringify(advancedScreenshotLimit.initial.style) !== JSON.stringify({
+      height: "36px",
+      fontSize: "13px",
+      paddingLeft: "10px",
+      paddingRight: "34px",
+    })
     || advancedScreenshotLimit.selected !== "4"
     || advancedScreenshotLimit.stateLimit !== 4
     || advancedScreenshotLimit.count !== 1
@@ -1506,7 +1700,7 @@ try {
     thumbnail: document.querySelector('.context-image img')?.src || ''
   })`);
   if (
-    screenshotBrowseControl.accept !== ".txt,.md,.csv,.json,.png,text/plain,text/markdown,text/csv,application/json,image/png"
+    screenshotBrowseControl.accept !== ".txt,.md,.csv,.json,.cs,.py,.js,.jsx,.ts,.tsx,.java,.go,.rs,.sql,.tf,.png,text/plain,text/markdown,text/csv,application/json,image/png"
     || !screenshotBrowseControl.multiple
     || screenshotBrowse.fileCount !== 1
     || screenshotBrowse.fileName !== "selected-notes.md"
@@ -1524,33 +1718,51 @@ try {
   await delay(50);
   const attachmentLayout = await cdp.evaluate(`(() => {
     const panel = document.querySelector('#text-panel').getBoundingClientRect();
+    const surface = document.querySelector('.composer-surface');
+    const surfaceBox = surface.getBoundingClientRect();
     const context = document.querySelector('.context-panel');
     const contextBox = context.getBoundingClientRect();
     const composer = document.querySelector('#text-form').getBoundingClientRect();
     return {
+      surfaceInsidePanel: surfaceBox.top >= panel.top && surfaceBox.bottom <= panel.bottom + 1,
       composerInsidePanel: composer.top >= panel.top && composer.bottom <= panel.bottom + 1,
+      composerIntegrated: document.querySelector('#text-form') === surface,
+      contextIntegrated: context.parentElement === surface,
       contextHeight: contextBox.height,
       contextScrollable: context.scrollHeight > context.clientHeight,
       contextOverflow: getComputedStyle(context).overflowY,
-      messageMinHeight: getComputedStyle(document.querySelector('#messages')).minHeight
+      messageMinHeight: getComputedStyle(document.querySelector('#messages')).minHeight,
+      policyInsideSettings: document.querySelector('.context-settings').contains(document.querySelector('.context-policy'))
     };
   })()`);
   await cdp.call("Emulation.clearDeviceMetricsOverride");
   if (
-    !attachmentLayout.composerInsidePanel
-    || attachmentLayout.contextHeight > 191
+    !attachmentLayout.surfaceInsidePanel
+    || !attachmentLayout.composerInsidePanel
+    || !attachmentLayout.composerIntegrated
+    || !attachmentLayout.contextIntegrated
+    || attachmentLayout.contextHeight > 119
     || !attachmentLayout.contextScrollable
     || attachmentLayout.contextOverflow !== "auto"
     || attachmentLayout.messageMinHeight !== "0px"
+    || !attachmentLayout.policyInsideSettings
   ) throw new Error(`attachment-layout:${JSON.stringify(attachmentLayout)}`);
   const documentContextBrowseCleanup = await cdp.evaluate(`(() => {
     document.querySelector('#clear-context').click();
-    return {files: state.contextFiles.length, images: state.contextImages.length};
+    return {
+      files: state.contextFiles.length,
+      images: state.contextImages.length,
+      emptyContextHeight: document.querySelector('.context-panel').getBoundingClientRect().height,
+    };
   })()`);
-  if (documentContextBrowseCleanup.files !== 0 || documentContextBrowseCleanup.images !== 0) {
-    throw new Error("screenshot-browse-cleanup");
+  if (
+    documentContextBrowseCleanup.files !== 0
+    || documentContextBrowseCleanup.images !== 0
+    || documentContextBrowseCleanup.emptyContextHeight > 80
+  ) {
+    throw new Error(`screenshot-browse-cleanup:${JSON.stringify(documentContextBrowseCleanup)}`);
   }
-  checks += 13;
+  checks += 17;
   trace("document-context-verified");
 
   await cdp.evaluate("document.querySelector('#software-nav').click()");

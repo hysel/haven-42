@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "status": "intake-policy-no-external-corpus-admitted",
+  "purpose": "Review provenance, licensing, privacy, integrity, and hostile-content scope before retaining a non-synthetic PDF fixture.",
+  "requiredRecordFields": [
+    "id",
+    "sourceProject",
+    "sourcePage",
+    "artifactUrl",
+    "artifactSha256",
+    "licenseSpdx",
+    "redistributionAllowed",
+    "privacyReviewed",
+    "malwareReviewed",
+    "category",
+    "retentionDecision"
+  ],
+  "allowedCategories": [
+    "malformed-structure",
+    "encryption",
+    "active-content",
+    "embedded-content",
+    "external-reference",
+    "resource-exhaustion",
+    "parser-regression"
+  ],
+  "requirements": {
+    "httpsSourceRequired": true,
+    "immutableArtifactIdentityRequired": true,
+    "sha256RequiredBeforeOpen": true,
+    "explicitRedistributionPermissionRequired": true,
+    "personalOrPrivateContentAllowed": false,
+    "credentialOrSecretContentAllowed": false,
+    "knownLiveMalwareAllowed": false,
+    "automaticDownloadAllowed": false,
+    "automaticRepositoryRetentionAllowed": false,
+    "parserExecutionDuringIntakeAllowed": false,
+    "manualSecurityReviewRequired": true
+  },
+  "acceptedArtifacts": [],
+  "authority": {
+    "networkAllowed": false,
+    "downloadAllowed": false,
+    "artifactRetentionAllowed": false,
+    "parserExecutionAllowed": false,
+    "runtimeAdmissionGranted": false
+  }
+}

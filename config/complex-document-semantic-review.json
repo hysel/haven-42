@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-semantic-review-no-runtime-admission",
+  "formats": {
+    "docx": {
+      "contentKinds": ["paragraph-text"],
+      "provenanceUnit": "document-body"
+    },
+    "xlsx": {
+      "contentKinds": ["inline-string"],
+      "provenanceUnit": "worksheet"
+    },
+    "pptx": {
+      "contentKinds": ["shape-text"],
+      "provenanceUnit": "slide"
+    },
+    "odt": {
+      "contentKinds": ["paragraph-text", "heading-text"],
+      "provenanceUnit": "document-body"
+    },
+    "ods": {
+      "contentKinds": ["paragraph-text"],
+      "provenanceUnit": "spreadsheet-content"
+    },
+    "odp": {
+      "contentKinds": ["paragraph-text", "heading-text"],
+      "provenanceUnit": "presentation-content"
+    }
+  },
+  "dependencyResearch": [
+    {
+      "id": "python-docx",
+      "formats": ["docx"],
+      "licenseSpdx": "MIT",
+      "notedDependencies": ["lxml", "typing-extensions"],
+      "selected": false
+    },
+    {
+      "id": "openpyxl",
+      "formats": ["xlsx"],
+      "licenseSpdx": "MIT",
+      "notedDependencies": ["et-xmlfile"],
+      "selected": false
+    },
+    {
+      "id": "python-pptx",
+      "formats": ["pptx"],
+      "licenseSpdx": "MIT",
+      "notedDependencies": ["lxml", "Pillow", "XlsxWriter"],
+      "selected": false
+    },
+    {
+      "id": "odfpy",
+      "formats": ["odt", "ods", "odp"],
+      "licenseSpdx": "Apache-2.0/GPL-2.0-or-later/LGPL-2.1-or-later",
+      "notedDependencies": [],
+      "selected": false
+    }
+  ],
+  "limits": {
+    "maximumSelectedXmlParts": 64,
+    "maximumXmlNestingDepth": 64,
+    "maximumTextSegments": 1000,
+    "maximumSegmentCharacters": 4096,
+    "maximumOutputCharacters": 100000
+  },
+  "policy": {
+    "containerInspectionMustPassFirst": true,
+    "formulasAllowed": false,
+    "formulaValuesTrusted": false,
+    "externalRelationshipsAllowed": false,
+    "macrosAllowed": false,
+    "embeddedObjectsAllowed": false,
+    "imagesExtracted": false,
+    "stylesExtracted": false,
+    "commentsExtracted": false,
+    "trackedChangesInterpreted": false,
+    "archiveExtractionAllowed": false
+  },
+  "authority": {
+    "thirdPartyDependencyAdmitted": false,
+    "workerAdmitted": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "providerPayloadAllowed": false,
+    "packageInclusionAllowed": false
+  }
+}

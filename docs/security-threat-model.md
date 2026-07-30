@@ -114,7 +114,50 @@ Readiness inspection is an explicit CSRF-protected POST with a single concurrent
 
 ## Residual risk and promotion gates
 
-Milestone 27 admits only explicit bounded UTF-8 `.txt`/`.md`/`.csv`/`.json` attachment and browsed-or-pasted PNG screenshots. CSV and JSON receive browser and engine syntax/resource validation, but JSON is never evaluated and CSV formulas are never executed. The browser exposes no arbitrary path or background scan authority; the loopback engine revalidates normalized names, exact media types and byte counts, text count/size budgets, structured-text complexity, PNG base64 and signature, chunk bounds and CRCs, screenshot count/size/dimension/per-image and combined-pixel budgets, duplicates, NUL content, and provider consent. The browser-memory screenshot selector defaults to two and permits one through four, but cannot raise the engine's absolute four-image, 8-MiB combined, or 33.5-million combined decoded-pixel ceilings. It locks during requests and rejects lowering below the active selection without discarding data. All attachment content, including visible image text, is labeled untrusted inert reference data and cannot add authority. The runtime exposes no attachment-driven tool invocation, shell, process launch, filesystem write, archive expansion, or model-output execution path, and makes no antivirus claim. Screenshot transport uses Ollama's documented message-image field, while model image understanding stays unverified and visibly warned until exact evidence passes. Private-network transfer shows a prominent warning and deliberate Send confirms it without a separate checkbox; the engine still rejects a forged request missing that confirmation. State remains memory-only, and no temporary file is allowed. A 24-case restricted parser-worker admission foundation rejects hostile PDF/Office metadata and grants no dependency, worker, path, or runtime authority. PDF, Office, archive, OCR, directory, retrieval-index, embedding, and persistent-index support do not inherit approval from this slice.
+Milestone 27 admits only explicit bounded UTF-8 `.txt`/`.md`/`.csv`/`.json`, a narrow `.cs`/`.py`/`.js`/`.jsx`/`.ts`/`.tsx`/`.java`/`.go`/`.rs`/`.sql`/`.tf` source-text allowlist, and browsed-or-pasted PNG screenshots. Source files are normalized to `text/plain`, receive no syntax-validation claim, and are never executed; shell, PowerShell, batch, binary, project, archive, configuration, PDF, Office Open XML, and OpenDocument formats remain blocked. Filename and browser MIME metadata are untrusted: byte preflight and independent server revalidation reject known binary/container signatures, forbidden control bytes, language-shebang mismatches, and high-confidence PowerShell/shell/batch masquerading while preserving ambiguous prose only as inert data. CSV and JSON receive browser and engine syntax/resource validation, but JSON is never evaluated and CSV formulas are never executed. The browser exposes no arbitrary path or background scan authority; the loopback engine revalidates normalized names, media types, byte counts, text and structured-content budgets, PNG signature/chunks/CRCs/dimensions/pixels, duplicates, NUL content, and provider consent. The browser-memory screenshot selector defaults to two and permits one through four without raising the engine's absolute four-image, 8-MiB combined, or 33.5-million combined decoded-pixel ceilings. All attachment content remains untrusted inert reference data and cannot add authority. The runtime exposes no attachment-driven tool, shell, process, filesystem-write, archive-expansion, or model-output execution path and makes no antivirus or perfect language-classification claim. Private-network transfer remains warned and deliberate Send confirms it; state is memory-only and no temporary file is allowed.
+
+A 27-case metadata-only parser-worker foundation covers PDF, `.docx/.xlsx/.pptx`, and `.odt/.ods/.odp` identities while granting no dependency, worker, path, or runtime authority. A separate review-only prototype imports the exact ignored `pypdf` 6.14.2 wheel inside a bounded child and rejects 13 hostile synthetic PDFs while extracting one safe control. It accepts no document path, user document, network, child process, temporary file, runtime route, UI control, provider payload, or package authority. Windows creates the child suspended and assigns CPU, memory, one-process, and kill-on-close Job Object limits before resume; POSIX limits are required by contract. Parent streaming-output limits, wall timeout, forced termination, crash/output-flood handling, effect guards, and bounded non-traversing residue probes passed. The Windows review records 61 corpus security checks, 64 static contract checks, and 40 contract-parity/package-exclusion checks.
+
+Three dependency-inventory, notice, and CycloneDX files are generated deterministically only beneath ignored local review. They are explicitly not package evidence and do not change the committed false generation/admission flags. The wheel remains uninstalled, unpackaged, and absent from dependencies. Windows and Ubuntu Linux source orchestration passed; macOS source, non-synthetic hostile evidence, actual package compliance integration, source/package parity, and native package smoke remain mandatory before admission. The production-isolation assessment also requires a Windows restricted-token/AppContainer-equivalent boundary, Linux namespace/seccomp/Landlock-equivalent controls, and a physical macOS sandbox evaluation. Missing controls fail closed rather than silently weakening isolation. PDF, Office, OpenDocument, archive, rendering, OCR, directory, retrieval-index, embedding, and persistent-index support do not inherit approval from this prototype.
+
+The Office/OpenDocument container prototype adds no extraction authority. Its
+41-check synthetic suite rejects traversal and ambiguous member names,
+case-insensitive duplicates, ZIP symlinks, encryption, unsupported compression,
+member/total/ratio abuse, macros, ActiveX, embedded objects, malformed XML,
+DTD/entities, external relationships, and OpenDocument mimetype confusion
+before returning metadata-only review output. It never calls `extract` or
+`extractall`, accepts no path, launches no office application, executes no
+formula or content, and remains absent from the runtime and package manifests.
+ZIP/XML inspection alone does not establish safe semantic extraction.
+
+The semantic review prototype remains behind that container gate. It reads
+only fixed in-memory XML parts, uses no third-party parser, extracts no image or
+archive member to disk, rejects formulas and cached formula values, and bounds
+selected parts, XML depth, segments, segment length, and total output. Its
+44-check suite across 12 synthetic DOCX/XLSX/PPTX/ODT/ODS/ODP fixtures passed
+on Windows and Ubuntu Linux. Unsupported tables, shared strings, comments,
+tracked changes, notes, charts, headers, footers, and ordering cannot be
+silently treated as complete semantics. No route, provider payload, UI,
+dependency, worker, or package authority follows from the review.
+
+Native PDF evidence generation refuses platform mismatch and an absent,
+renamed, symlinked, or digest-mismatched ignored wheel. Linux/macOS additionally
+require the five configured POSIX resource-limit primitives before the worker
+suite starts. The runner executes only fixed repository tests with isolated
+Python, a minimal environment, no stdin, bounded time, and exact output markers.
+Its sanitized evidence omits machine identity, endpoints, paths, and content.
+`--describe` is a plan, not native evidence. The non-synthetic intake boundary
+allows no download, retention, or parse until immutable provenance, pre-open
+digest, redistribution, privacy, and malware review pass; its accepted list is
+empty.
+
+Metadata-only corpus research records source-project pages but no artifact
+selection. Repository-level licenses are not assumed to cover every linked
+PDF. The offline intake verifier rejects non-HTTPS or credential-bearing URLs,
+mutable revisions, malformed digests, unapproved redistribution, incomplete
+privacy or malware review, unknown categories, extra path fields, and
+repository-retention decisions. It contains no network client and cannot open,
+parse, download, or retain a candidate.
 
 The lexical-retrieval core is offline-only and memory-only. It deterministically
 chunks already validated text, ranks bounded casefolded terms, discloses every

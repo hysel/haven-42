@@ -9,7 +9,7 @@
     "pathSentToEngine": false
   },
   "formats": {
-    "allowedExtensions": [".txt", ".md", ".csv", ".json"],
+    "allowedExtensions": [".txt", ".md", ".csv", ".json", ".cs", ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go", ".rs", ".sql", ".tf"],
     "allowedMediaTypes": ["text/plain", "text/markdown", "text/csv", "application/json"],
     "utf8Required": true,
     "structuredText": {
@@ -21,6 +21,24 @@
       "maximumCsvColumns": 256,
       "maximumCsvCellCharacters": 8192,
       "formulaEvaluationAllowed": false
+    },
+    "sourceText": {
+      "allowedExtensions": [".cs", ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go", ".rs", ".sql", ".tf"],
+      "normalizedMediaType": "text/plain",
+      "syntaxValidationClaimed": false,
+      "executionAllowed": false
+    },
+    "contentIdentity": {
+      "fileNameTrusted": false,
+      "browserMediaTypeTrusted": false,
+      "browserPreflightRequired": true,
+      "serverRevalidationRequired": true,
+      "binaryAndContainerSignatureRejectionRequired": true,
+      "controlCharacterRejectionRequired": true,
+      "highConfidenceScriptMasqueradeRejectionRequired": true,
+      "ambiguousTextAllowedOnlyAsInertData": true,
+      "blockedScriptFamilies": ["powershell", "posix-shell", "windows-batch"],
+      "antivirusClaimed": false
     },
     "archivesAllowed": false,
     "pdfAllowed": false,

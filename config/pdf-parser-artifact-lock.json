@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "status": "artifact-verified-dependency-not-admitted",
+  "verifiedDate": "2026-07-30",
+  "package": "pypdf",
+  "version": "6.14.2",
+  "artifact": {
+    "filename": "pypdf-6.14.2-py3-none-any.whl",
+    "url": "https://files.pythonhosted.org/packages/49/e6/136aa8993a2ae7214e0b0ef2edaa0d2e08d1d4e4982635b08a835ff31ec8/pypdf-6.14.2-py3-none-any.whl",
+    "sha256": "3f07891af76dc002657e04993ab9b4de81de29f9013b9761d0b7968bff12e946",
+    "sizeBytes": 349514,
+    "wheelTag": "py3-none-any",
+    "uploadTimeUtc": "2026-06-23T14:18:28.867545Z",
+    "entryCount": 60,
+    "totalCompressedBytes": 341704,
+    "totalUncompressedBytes": 1500133,
+    "maximumEntryBytes": 447213,
+    "suspiciousEntryNames": 0,
+    "nativeBinaryEntries": 0
+  },
+  "metadata": {
+    "path": "pypdf-6.14.2.dist-info/METADATA",
+    "sha256": "975d36e73b040576d10f04b6f9042f722c3ff38100615f5bb27c1b65e2813d76",
+    "name": "pypdf",
+    "version": "6.14.2",
+    "requiresPython": ">=3.9",
+    "licenseExpression": "BSD-3-Clause"
+  },
+  "license": {
+    "path": "pypdf-6.14.2.dist-info/licenses/LICENSE",
+    "sha256": "a97ac230e5f33ef10a5367a850eb01f91f1a0b064e34742c7794d2294557f524",
+    "expression": "BSD-3-Clause"
+  },
+  "dependencyReview": {
+    "packagingPython": "3.14.6",
+    "mandatoryForPackagingPython": [],
+    "conditionalForPython39And310": [
+      "typing_extensions>=4.0"
+    ],
+    "extrasSelected": [],
+    "excludedOptionalFamilies": [
+      "crypto",
+      "cryptodome",
+      "dev",
+      "docs",
+      "fonts",
+      "full",
+      "image"
+    ]
+  },
+  "sources": [
+    "https://pypi.org/pypi/pypdf/6.14.2/json",
+    "https://pypi.org/project/pypdf/6.14.2/",
+    "https://github.com/py-pdf/pypdf/releases/tag/6.14.2"
+  ],
+  "admission": {
+    "wheelMayBeRetainedInRepository": false,
+    "dependencyAdmitted": false,
+    "installAllowed": false,
+    "importAllowed": false,
+    "workerAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiAllowed": false
+  },
+  "effects": {
+    "dependencyInstalled": false,
+    "parserImported": false,
+    "documentOpened": false,
+    "workerStarted": false,
+    "runtimeAdmissionGranted": false
+  }
+}

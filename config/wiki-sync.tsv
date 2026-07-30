@@ -112,3 +112,8 @@ PRIVACY.md	Privacy-Policy.md	Privacy Policy
 docs/signpath-eligibility-audit.md	SignPath-Eligibility-Audit.md	SignPath Foundation Eligibility Audit
 docs/windows-package-component-audit.md	Windows-Package-Component-Audit.md	Windows Package Component Audit
 docs/restricted-parser-worker-foundation.md	Restricted-Parser-Worker-Foundation.md	Restricted Parser-Worker Foundation
+examples/restricted-pdf-worker-validation.md	Restricted-PDF-Worker-Validation.md	Restricted PDF Worker Validation
+examples/complex-document-container-validation.md	Complex-Document-Container-Validation.md	Complex Document Container Validation
+examples/restricted-pdf-native-validation.md	Restricted-PDF-Native-Validation.md	Restricted PDF Native Validation
+docs/pdf-production-isolation.md	PDF-Production-Isolation.md	PDF Production Isolation Assessment
+examples/complex-document-semantic-validation.md	Complex-Document-Semantic-Validation.md	Complex Document Semantic Validation

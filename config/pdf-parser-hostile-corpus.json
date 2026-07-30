@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "status": "synthetic-inert-no-parser-executed",
+  "generator": "scripts/create-pdf-parser-review-fixtures.py",
+  "runtimeAdmissionGranted": false,
+  "parserImported": false,
+  "documentOpenedByHaven": false,
+  "cases": [
+    {
+      "filename": "associated-file.pdf",
+      "category": "embedded-content",
+      "expected": "reject-associated-file",
+      "sizeBytes": 820,
+      "sha256": "dcd8795f8e928bbfb32f7a94dcdb9f48e78c5d65cb782646e21021314abe168b",
+      "markers": ["/AF", "/Filespec", "/EmbeddedFile"]
+    },
+    {
+      "filename": "compressed-expansion.pdf",
+      "category": "resource-abuse",
+      "expected": "reject-expansion-budget",
+      "sizeBytes": 1565,
+      "sha256": "4d32140d0796528fc1ab94fc023cf88e30b15ae50aa3092c8e2f551ab6988993",
+      "markers": ["/FlateDecode", "/Length"]
+    },
+    {
+      "filename": "embedded-file.pdf",
+      "category": "embedded-content",
+      "expected": "reject-embedded-file",
+      "sizeBytes": 849,
+      "sha256": "db5614e34bb044776d21349febfd95456fb654976aaf49d56d35db0432305ab8",
+      "markers": ["/EmbeddedFiles", "/EmbeddedFile", "/Filespec"]
+    },
+    {
+      "filename": "encrypted-standard.pdf",
+      "category": "encryption",
+      "expected": "reject-encrypted",
+      "sizeBytes": 703,
+      "sha256": "9d97d064bbd3709f99c05151942322f5b0dbe7cb943b11852606ad91211c3c1c",
+      "markers": ["/Encrypt", "/Standard"]
+    },
+    {
+      "filename": "excessive-page-count.pdf",
+      "category": "resource-abuse",
+      "expected": "reject-page-budget",
+      "sizeBytes": 603,
+      "sha256": "c28170d35f07c32a58c34551ed70a77d7c3e1e12f5c4d92880318051f6823b85",
+      "markers": ["/Count 1000000"]
+    },
+    {
+      "filename": "external-uri.pdf",
+      "category": "external-reference",
+      "expected": "reject-external-reference",
+      "sizeBytes": 678,
+      "sha256": "7e223f244bbac8cac70703d3937b69e3c699919c7385eeb3241b720bbe94059f",
+      "markers": ["/URI", "https://invalid.example/"]
+    },
+    {
+      "filename": "javascript-name-tree.pdf",
+      "category": "active-content",
+      "expected": "reject-javascript",
+      "sizeBytes": 736,
+      "sha256": "e4766d1dd9dbce4eef11768c5ae4da20199af1b77aeb6872b82eb202791ab54c",
+      "markers": ["/JavaScript", "/JS"]
+    },
+    {
+      "filename": "launch-action.pdf",
+      "category": "active-content",
+      "expected": "reject-launch-action",
+      "sizeBytes": 688,
+      "sha256": "9cff25110e71cc4430b2d3f7b14c4aae47b222ee6a380bf0fcc0914b51329ad0",
+      "markers": ["/Launch", "/OpenAction"]
+    },
+    {
+      "filename": "malformed-xref.pdf",
+      "category": "malformed-structure",
+      "expected": "reject-malformed-xref",
+      "sizeBytes": 597,
+      "sha256": "d240546d0d4a0b3b69c49f4c337c20e47539ced1631ae79ca19a84873f1011d9",
+      "markers": ["xref", "9999999999"]
+    },
+    {
+      "filename": "open-action.pdf",
+      "category": "active-content",
+      "expected": "reject-open-action",
+      "sizeBytes": 681,
+      "sha256": "2c8f87109b1ddd8e4841936ac3ebf80149a950c4c4c03e95b5f0fb12f9404049",
+      "markers": ["/OpenAction", "/GoTo"]
+    },
+    {
+      "filename": "recursive-object.pdf",
+      "category": "resource-abuse",
+      "expected": "reject-recursion",
+      "sizeBytes": 665,
+      "sha256": "17d9fdc3cb5efdee5c545f8dd3baca5a5d86f13c42931e91d622777e4ecd025b",
+      "markers": ["/Next 6 0 R"]
+    },
+    {
+      "filename": "safe-text-only.pdf",
+      "category": "control",
+      "expected": "candidate-only",
+      "sizeBytes": 597,
+      "sha256": "eadb8a12a933aa770c0b9a405d954b766663ba0138d6cc5ce4e14f3ea7b8589a",
+      "markers": ["%PDF-1.7", "Haven 42 fixture"]
+    },
+    {
+      "filename": "submit-form-action.pdf",
+      "category": "active-content",
+      "expected": "reject-submit-form",
+      "sizeBytes": 701,
+      "sha256": "be91d39898bac5a1529d27ea7b45adbfdfa15f49076742b67b5f8900740d8e02",
+      "markers": ["/SubmitForm", "/OpenAction"]
+    },
+    {
+      "filename": "truncated-eof.pdf",
+      "category": "malformed-structure",
+      "expected": "reject-truncated",
+      "sizeBytes": 591,
+      "sha256": "6c0c384f30481ca9f7519604985559440fe6681c31adebceea824da6135f704a",
+      "markers": ["startxref"]
+    }
+  ]
+}

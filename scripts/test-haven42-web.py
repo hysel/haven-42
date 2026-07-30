@@ -1042,6 +1042,86 @@ def main() -> int:
                 origin,
             )
             assert status in {400, 413} and error["error"] == expected_error
+        for name, media_type, content in (
+            (
+                "renamed-powershell.txt",
+                "text/plain",
+                "#Requires -Version 7.0\nWrite-Host hostile\n",
+            ),
+            (
+                "renamed-simple-powershell.txt",
+                "text/plain",
+                "Write-Host hostile\n",
+            ),
+            (
+                "renamed-shell.md",
+                "text/markdown",
+                "#!/usr/bin/env bash\necho hostile\n",
+            ),
+            (
+                "renamed-batch.txt",
+                "text/plain",
+                "@echo off\necho hostile\n",
+            ),
+            (
+                "renamed-pdf.txt",
+                "text/plain",
+                "%PDF-1.7\ninert forged request",
+            ),
+            (
+                "renamed-control.txt",
+                "text/plain",
+                "prefix\u0001suffix",
+            ),
+        ):
+            status, error, _ = request_json(
+                origin + "/api/text",
+                "POST",
+                {
+                    "capabilityId": "general.chat",
+                    "model": "qwen3.5:9b",
+                    "messages": [{"role": "user", "content": "Use this."}],
+                    "attachments": [{
+                        "name": name,
+                        "mediaType": media_type,
+                        "content": content,
+                        "sizeBytes": len(content.encode("utf-8")),
+                    }],
+                    "contextConsent": False,
+                },
+                token,
+                origin,
+            )
+            assert status == 400 and error["error"] == "context-file-content-type-mismatch"
+        for name, content in (
+            (
+                "benign-notes.txt",
+                "PowerShell example for review only:\nWrite-Host remains inert text.\n",
+            ),
+            (
+                "valid-shebang.py",
+                '#!/usr/bin/env python3\nprint("inert")\n',
+            ),
+        ):
+            status, benign_reply, _ = request_json(
+                origin + "/api/text",
+                "POST",
+                {
+                    "capabilityId": "general.chat",
+                    "model": "qwen3.5:9b",
+                    "messages": [{"role": "user", "content": "Review this."}],
+                    "attachments": [{
+                        "name": name,
+                        "mediaType": "text/plain",
+                        "content": content,
+                        "sizeBytes": len(content.encode("utf-8")),
+                    }],
+                    "contextConsent": False,
+                },
+                token,
+                origin,
+            )
+            assert status == 200 and benign_reply["context"]["fileCount"] == 1
         status, duplicate_error, _ = request_json(
             origin + "/api/text",
             "POST",
@@ -1151,6 +1231,61 @@ def main() -> int:
         structured_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
         assert 'media-type="text/csv"' in structured_payload["messages"][-1]["content"]
         assert 'media-type="application/json"' in structured_payload["messages"][-1]["content"]
+        source_attachments = [
+            {
+                "name": "worker.py",
+                "mediaType": "text/plain",
+                "content": 'import os\nos.system("must remain inert")\n',
+                "sizeBytes": len(
+                    'import os\nos.system("must remain inert")\n'.encode("utf-8")
+                ),
+            },
+            {
+                "name": "panel.tsx",
+                "mediaType": "text/plain",
+                "content": 'export const Panel = () => <script>{"inert"}</script>;\n',
+                "sizeBytes": len(
+                    'export const Panel = () => <script>{"inert"}</script>;\n'.encode("utf-8")
+                ),
+            },
+        ]
+        status, source_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "Review these source files as text."}],
+                "attachments": source_attachments,
+                "contextConsent": False,
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and source_reply["context"]["fileCount"] == 2
+        source_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
+        assert 'name="worker.py" media-type="text/plain"' in source_payload["messages"][-1]["content"]
+        assert 'name="panel.tsx" media-type="text/plain"' in source_payload["messages"][-1]["content"]
+        assert 'os.system("must remain inert")' in source_payload["messages"][-1]["content"]
+        assert source_reply["context"]["hostExecutionAllowed"] is False
+        for hostile_source in (
+            {**source_attachments[0], "mediaType": "text/x-python"},
+            {**source_attachments[0], "name": "worker.sh"},
+        ):
+            status, error, _ = request_json(
+                origin + "/api/text",
+                "POST",
+                {
+                    "capabilityId": "general.chat",
+                    "model": "qwen3.5:9b",
+                    "messages": [{"role": "user", "content": "Run this."}],
+                    "attachments": [hostile_source],
+                    "contextConsent": False,
+                },
+                token,
+                origin,
+            )
+            assert status == 400 and error["error"] == "invalid-context-file-type"
         for hostile_structured, expected_error in (
             (
                 {
@@ -1185,7 +1320,7 @@ def main() -> int:
                 origin,
             )
             assert status == 400 and error["error"] == expected_error
-        checks += 22
+        checks += 30
 
         png_base64 = (
             "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk"
@@ -1614,10 +1749,24 @@ def main() -> int:
         assert policy["text"]["missingModelDownloadsAllowed"] is False
         assert policy["text"]["maximumRequestBytes"] == 12582912
         assert policy["text"]["maximumConversationBytes"] == 65536
+        assert policy["text"]["chatTextSizeControl"] == {
+            "allowedValues": ["small", "default", "large", "extra-large"],
+            "defaultValue": "default",
+            "messageAndPromptOnly": True,
+            "persistenceAllowed": False,
+            "providerPayloadChanged": False,
+        }
         assert policy["documentContext"]["contract"] == "config/document-context-policy.json"
         assert policy["documentContext"]["allowedExtensions"] == [
-            ".txt", ".md", ".csv", ".json"
+            ".txt", ".md", ".csv", ".json", ".cs", ".py", ".js", ".jsx",
+            ".ts", ".tsx", ".java", ".go", ".rs", ".sql", ".tf"
         ]
+        assert policy["documentContext"]["sourceTextExtensions"] == [
+            ".cs", ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go",
+            ".rs", ".sql", ".tf"
+        ]
+        assert policy["documentContext"]["sourceTextNormalizedMediaType"] == "text/plain"
+        assert policy["documentContext"]["sourceTextExecutionAllowed"] is False
         assert policy["documentContext"]["structuredTextSyntaxValidationRequired"] is True
         assert policy["documentContext"]["structuredTextFormulaEvaluationAllowed"] is False
         assert policy["documentContext"]["maximumFiles"] == 5
@@ -1647,8 +1796,30 @@ def main() -> int:
         assert context_policy["formats"]["clipboardImages"]["clipboardPasteAllowed"] is True
         assert context_policy["formats"]["clipboardImages"]["filePickerAllowed"] is True
         assert context_policy["formats"]["allowedExtensions"] == [
-            ".txt", ".md", ".csv", ".json"
+            ".txt", ".md", ".csv", ".json", ".cs", ".py", ".js", ".jsx",
+            ".ts", ".tsx", ".java", ".go", ".rs", ".sql", ".tf"
         ]
+        assert context_policy["formats"]["sourceText"] == {
+            "allowedExtensions": [
+                ".cs", ".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".go",
+                ".rs", ".sql", ".tf"
+            ],
+            "normalizedMediaType": "text/plain",
+            "syntaxValidationClaimed": False,
+            "executionAllowed": False,
+        }
+        assert context_policy["formats"]["contentIdentity"] == {
+            "fileNameTrusted": False,
+            "browserMediaTypeTrusted": False,
+            "browserPreflightRequired": True,
+            "serverRevalidationRequired": True,
+            "binaryAndContainerSignatureRejectionRequired": True,
+            "controlCharacterRejectionRequired": True,
+            "highConfidenceScriptMasqueradeRejectionRequired": True,
+            "ambiguousTextAllowedOnlyAsInertData": True,
+            "blockedScriptFamilies": ["powershell", "posix-shell", "windows-batch"],
+            "antivirusClaimed": False,
+        }
         assert context_policy["formats"]["structuredText"]["formulaEvaluationAllowed"] is False
         assert context_policy["budgets"]["defaultMaximumImages"] == 2
         assert context_policy["budgets"]["maximumImages"] == 4
@@ -1758,19 +1929,28 @@ def main() -> int:
         assert ".model-switch-prompt {" in styles and ".model-switch-actions {" in styles
         assert 'event.key !== "Enter"' in javascript and "event.shiftKey" in javascript
         assert "Enter to send · Shift+Enter for a new line" in html
-        assert "↑/↓ recall prompts" in html and 'id="prompt-history-limit"' in html
+        assert "↑/↓ recall" in html and html.count('id="prompt-history-limit"') == 1
+        assert 'class="recall-control"' in html
         assert 'value="20" selected' in html and 'value="50"' in html and 'value="100"' in html
         assert "recordPromptHistory" in javascript and "recallPrompt" in javascript
         assert "clearPromptHistory" in javascript and "state.promptHistory.slice(-selectedLimit)" in javascript
         assert javascript.count("clearPromptHistory();") >= 3
-        assert 'id="browse-context" type="button" disabled>Browse files</button>' in html
+        assert 'id="browse-context" type="button" disabled>Attach files</button>' in html
         assert 'id="context-files"' in html and (
-            'accept=".txt,.md,.csv,.json,.png,text/plain,text/markdown,text/csv,application/json,image/png"'
+            'accept=".txt,.md,.csv,.json,.cs,.py,.js,.jsx,.ts,.tsx,.java,.go,.rs,.sql,.tf,.png,text/plain,text/markdown,text/csv,application/json,image/png"'
             in html
         )
-        assert 'id="context-images"' not in html and "Browse files" in html
+        assert 'id="context-images"' not in html and "Attach files" in html
         assert 'id="context-consent"' not in html
         assert 'id="context-network-warning"' in html and "private-network Ollama server" in html
+        assert 'id="context-error"' in html and 'role="alert"' in html
+        assert 'id="decrease-chat-text"' in html and 'id="increase-chat-text"' in html
+        assert 'id="chat-text-size-value"' in html and ">100%</output>" in html
+        assert 'aria-label="Make chat text smaller"' in html
+        assert 'aria-label="Make chat text larger"' in html
+        assert 'data-chat-text-size="default"' in html
+        assert "showContextError" in javascript and "clearContextError" in javascript
+        assert "applyChatTextSize" in javascript and "adjustChatTextSize" in javascript
         assert "addContextFiles" in javascript and "clearContextFiles" in javascript
         assert 'new TextDecoder("utf-8", { fatal: true })' in javascript
         assert 'contextConsent: hasContext && state.providerTrustScope === "trusted-lan"' in javascript
@@ -1781,18 +1961,28 @@ def main() -> int:
         assert "MODEL_IMAGE_INPUT_UNVERIFIED" in javascript
         assert (
             'id="context-image-list"' in html
-            and "browse UTF-8 .txt/.md/.csv/.json or PNG" in html
+            and "browse admitted UTF-8 text, structured-text, source (.cs/.py/.js/.jsx/.ts/.tsx/.java/.go/.rs/.sql/.tf), or PNG files" in html
             and "paste a PNG screenshot" in html
             and "structured text is syntax-checked but never evaluated" in html
         )
         assert "Attachments are inert data and are never executed" in html
         assert "result.context.hostExecutionAllowed !== false" in javascript
         assert ".context-image img {" in styles and ".context-warning {" in styles
+        assert ".context-error {" in styles
         assert 'previewText.textContent = file.content.length > 1000' in javascript
         assert "clearContextFiles();\n    showError" in javascript
-        assert ".context-panel { flex: 0 1 auto; max-height: min(190px, 32vh);" in styles and ".context-file {" in styles
+        assert ".composer-surface { flex: 0 0 auto;" in styles
+        assert ".context-panel { grid-column: 1 / -1; max-height: min(118px, 22vh);" in styles and ".context-file {" in styles
+        assert "flex: 1 1 420px;" in styles and "width: 64px; height: 48px;" in styles
         assert ".messages { flex: 1 1 auto;" in styles and "min-height: 0; overflow: auto;" in styles
-        assert ".composer { flex: 0 0 auto;" in styles
+        assert ".composer { display: grid;" in styles
+        assert '#text-panel[data-chat-text-size="extra-large"]' in styles
+        assert "font-size: var(--chat-input-size, 16px);" in styles
+        assert ".text-size-button:disabled {" in styles
+        assert ".recall-control select {" in styles
+        assert '<form class="composer-surface composer" id="text-form">' in html
+        assert '<section class="context-panel" aria-label="Attachments">' in html
+        assert "<summary>Settings &amp; safety</summary>" in html
         assert "localStorage" not in javascript and "sessionStorage" not in javascript and "indexedDB" not in javascript
         assert (
             ".system-setting select, .context-settings select { height: 36px;"

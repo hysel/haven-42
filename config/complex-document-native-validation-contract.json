@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "status": "review-only-native-validation-no-runtime-admission",
+  "requiredChecks": {
+    "containerSecurity": 41,
+    "semanticSecurity": 44
+  },
+  "limits": {
+    "maximumCheckSeconds": 30,
+    "maximumStdoutBytes": 1048576,
+    "maximumStderrBytes": 65536
+  },
+  "platformEvidence": {
+    "windowsSource": true,
+    "linuxSource": true,
+    "macosSource": false,
+    "windowsPackaged": false,
+    "linuxPackaged": false,
+    "macosPackaged": false
+  },
+  "authority": {
+    "dependencyAdmitted": false,
+    "runtimeWorkerAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "providerPayloadAllowed": false,
+    "packageInclusionAllowed": false,
+    "promotionAllowed": false
+  }
+}

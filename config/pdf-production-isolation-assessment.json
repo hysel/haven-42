@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "status": "assessment-complete-production-isolation-not-satisfied",
+  "scope": "future-text-only-pdf-worker",
+  "commonRequirements": {
+    "separateProcessRequired": true,
+    "singleDocumentPerProcessRequired": true,
+    "boundedByteTransportRequired": true,
+    "documentPathTransportAllowed": false,
+    "networkNamespaceOrOsDenialRequired": true,
+    "filesystemReadAllowlistRequired": true,
+    "filesystemWriteAllowed": false,
+    "temporaryFilesAllowed": false,
+    "childProcessesAllowed": false,
+    "processTreeTerminationRequired": true,
+    "cpuMemoryWallAndOutputLimitsRequired": true,
+    "privilegeReductionRequired": true,
+    "packageComponentIntegrityRequired": true,
+    "crashResidueScanRequired": true
+  },
+  "platforms": {
+    "windows": {
+      "sourceEvidence": true,
+      "currentControls": [
+        "suspended-start-job-assignment",
+        "active-process-limit-one",
+        "cpu-memory-wall-output-limits",
+        "python-api-denials"
+      ],
+      "requiredBeforeProduction": [
+        "restricted-token-or-appcontainer-equivalent",
+        "os-enforced-network-denial",
+        "explicit-filesystem-capability-denial",
+        "packaged-process-tree-evidence"
+      ],
+      "productionIsolationSatisfied": false
+    },
+    "linux": {
+      "sourceEvidence": true,
+      "currentControls": [
+        "rlimit-cpu-address-space-files-output-processes",
+        "parent-wall-output-limits",
+        "python-api-denials"
+      ],
+      "requiredBeforeProduction": [
+        "user-mount-pid-network-namespaces-or-equivalent",
+        "seccomp-or-equivalent-system-call-policy",
+        "landlock-or-equivalent-filesystem-policy",
+        "no-new-privileges",
+        "packaged-cgroup-or-process-tree-evidence"
+      ],
+      "productionIsolationSatisfied": false
+    },
+    "macos": {
+      "sourceEvidence": false,
+      "currentControls": [],
+      "requiredBeforeProduction": [
+        "physical-native-source-evidence",
+        "seatbelt-or-equivalent-sandbox-policy",
+        "os-enforced-network-and-filesystem-denial",
+        "process-tree-and-resource-limit-evidence",
+        "packaged-native-evidence"
+      ],
+      "productionIsolationSatisfied": false
+    }
+  },
+  "admission": {
+    "dependencyAdmitted": false,
+    "runtimeWorkerAllowed": false,
+    "uiAllowed": false,
+    "packageInclusionAllowed": false,
+    "sourcePackageParitySatisfied": false,
+    "productionReadinessClaimed": false
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "status": "reviewed-candidate-not-admitted",
+  "reviewDate": "2026-07-30",
+  "scope": "Dependency, license, distribution, and security-history review for a future restricted text-only PDF worker.",
+  "preferredCandidate": {
+    "package": "pypdf",
+    "version": "6.14.2",
+    "license": "BSD-3-Clause",
+    "pythonRequires": ">=3.9",
+    "distribution": {
+      "purePython": true,
+      "universalWheel": true,
+      "nativeLibraries": false
+    },
+    "sources": [
+      "https://pypi.org/project/pypdf/6.14.2/",
+      "https://github.com/py-pdf/pypdf/releases/tag/6.14.2",
+      "https://pypdf.readthedocs.io/en/6.7.2/user/security.html"
+    ],
+    "rationale": "Best initial review fit because it is BSD-3-Clause, pure Python, distributed as a universal wheel, and documents bounded-reader security controls. This preference is not runtime admission.",
+    "artifactSha256": "3f07891af76dc002657e04993ab9b4de81de29f9013b9761d0b7968bff12e946",
+    "artifactVerified": true,
+    "licenseDigestPinned": true,
+    "dependencyAdmitted": false,
+    "importAllowed": false,
+    "workerAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiAllowed": false
+  },
+  "alternatives": [
+    {
+      "package": "PyMuPDF",
+      "observedVersion": "1.28.0",
+      "status": "not-preferred-not-admitted",
+      "sources": [
+        "https://pypi.org/project/PyMuPDF/1.28.0/"
+      ],
+      "reason": "AGPL-3.0-or-commercial licensing and bundled native MuPDF platform wheels add licensing, native supply-chain, and packaging complexity to the first gate."
+    },
+    {
+      "package": "pdfminer.six",
+      "observedVersion": "20260107",
+      "status": "not-preferred-not-admitted",
+      "sources": [
+        "https://pypi.org/project/pdfminer.six/20260107/",
+        "https://github.com/pdfminer/pdfminer.six/security/advisories/GHSA-f83h-ghpp-7wcc",
+        "https://github.com/pdfminer/pdfminer.six/releases/tag/20260107"
+      ],
+      "reason": "The current observed release is patched, but the recent unsafe pickle CMap loading advisory requires a higher security-review bar before reconsideration."
+    }
+  ],
+  "completedAdmissionPrerequisites": [
+    "download-exact-wheel-and-pin-sha256",
+    "pin-license-text-digest"
+  ],
+  "requiredAdmissionGates": [
+    "dependency-inventory-third-party-notices-and-sbom",
+    "review-transitive-and-optional-dependencies",
+    "real-hostile-pdf-corpus",
+    "reject-encryption-and-passwords",
+    "reject-javascript-actions-launch-and-submit",
+    "reject-embedded-and-associated-files",
+    "reject-external-references",
+    "bound-pages-objects-streams-output-and-recovery",
+    "isolated-worker-no-network-no-child-processes",
+    "worker-timeout-cancel-force-kill-and-no-residue",
+    "source-versus-package-parity",
+    "native-windows-linux-and-macos-package-smoke"
+  ],
+  "prohibitions": [
+    "no-package-install",
+    "no-parser-import",
+    "no-document-open",
+    "no-worker-start",
+    "no-runtime-route",
+    "no-ui-control",
+    "no-filesystem-path",
+    "no-temporary-file",
+    "no-network",
+    "no-ocr",
+    "no-pdf-rendering"
+  ],
+  "effects": {
+    "dependencyInstalled": false,
+    "artifactDownloaded": false,
+    "parserImported": false,
+    "documentOpened": false,
+    "workerStarted": false,
+    "networkUsed": false,
+    "filesystemReadPerformed": false,
+    "filesystemWritePerformed": false,
+    "temporaryFileWritten": false,
+    "childProcessStarted": false,
+    "runtimeAdmissionGranted": false
+  }
+}

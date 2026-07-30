@@ -111,9 +111,57 @@ remain open, and no signing workflow or private key exists. Repository-account
 MFA was owner-confirmed on 2026-07-27; signing-service MFA remains required
 during any later enrollment.
 
-Milestone 27 adds a narrow document-context boundary. The admitted slice uses explicit browser selection for at most five UTF-8 `.txt`/`.md`/`.csv`/`.json` files, 64 KiB each and 128 KiB total, plus explicit PNG file selection or clipboard PNG paste. Screenshots default to two per task; an advanced browser-memory control may select one through four, while the engine independently enforces the absolute four-image cap, 4 MiB per image, 8 MiB combined, 4096×4096 and 16.7 million pixels per image, and 33.5 million combined decoded pixels. CSV and JSON receive bounded browser and engine syntax/resource validation; JSON is never evaluated and CSV formulas are never executed. PNG signature, chunk CRCs, exact size, dimensions, and pixel budgets are revalidated before the loopback service passes canonical base64 through Ollama's message-image field. The browser transfers normalized names, media types, exact byte counts, and selected content; no filesystem path or generic read API crosses the boundary. All attachment content is labeled untrusted inert reference data. The runtime exposes no attachment-driven tools, process launch, archive expansion, filesystem writes, or model-output execution and makes no antivirus claim. Private-network transfer shows a prominent warning and deliberate Send confirms that transfer without a separate checkbox. Screenshot understanding is visibly unverified because no image-input model evidence is admitted. Selection state stays in memory and clears on New task, direct model/provider changes, request failure, or process shutdown. A confirmed task-specific model switch retains only the context already selected for that pending request; nothing is sent before confirmation. A separate restricted parser-worker admission contract and 24-case hostile metadata suite keep PDF and Office encrypted content, active content, macros, external relationships, embedded objects, expansion abuse, paths, parser dependencies, workers, and temporary files blocked. Directories, background scanning, file watching, general filesystem reads, real complex parsers, retrieval indexes, embeddings, and persistence remain unadmitted.
+Milestone 27 adds a narrow document-context boundary. The admitted slice uses explicit browser selection for at most five UTF-8 `.txt`/`.md`/`.csv`/`.json` files or source-text `.cs`/`.py`/`.js`/`.jsx`/`.ts`/`.tsx`/`.java`/`.go`/`.rs`/`.sql`/`.tf` files, 64 KiB each and 128 KiB total, plus explicit PNG file selection or clipboard PNG paste. Source extensions are normalized to `text/plain`, receive no syntax or safety claim, and are never executed; shell, PowerShell, batch, binary, project, archive, and configuration formats remain blocked. Screenshots default to two per task; an advanced browser-memory control may select one through four, while the engine independently enforces the absolute four-image cap, 4 MiB per image, 8 MiB combined, 4096×4096 and 16.7 million pixels per image, and 33.5 million combined decoded pixels. CSV and JSON receive bounded browser and engine syntax/resource validation; JSON is never evaluated and CSV formulas are never executed. PNG signature, chunk CRCs, exact size, dimensions, and pixel budgets are revalidated before the loopback service passes canonical base64 through Ollama's message-image field. The browser transfers normalized names, media types, exact byte counts, and selected content; no filesystem path or generic read API crosses the boundary. All attachment content is labeled untrusted inert reference data. The runtime exposes no attachment-driven tools, process launch, archive expansion, filesystem writes, or model-output execution and makes no antivirus claim. Private-network transfer shows a prominent warning and deliberate Send confirms that transfer without a separate checkbox. Screenshot understanding is visibly unverified because no image-input model evidence is admitted. Selection state stays in memory and clears on New task, direct model/provider changes, request failure, or process shutdown. A confirmed task-specific model switch retains only the context already selected for that pending request; nothing is sent before confirmation. A separate restricted parser-worker admission contract and 27-case hostile metadata suite keeps PDF, Office Open XML, and OpenDocument encrypted content, active content, macros, external relationships, embedded objects, expansion abuse, paths, parser dependencies, workers, and temporary files blocked. A review-only `pypdf` 6.14.2 prototype verifies the exact ignored wheel, accepts only parent-read bounded bytes, and exercises 14 synthetic PDFs in an isolated child. POSIX resource ceilings and Windows suspended-start Job Object CPU/memory/process limits are mandatory; the parent enforces wall time, streaming output limits, forced termination, and bounded non-traversing residue checks. Windows review passed 61 security checks, 64 static contract checks, and 40 contract-parity/package-exclusion checks. Three deterministic prospective compliance files are generated only under ignored local review. This is not package evidence, a production sandbox, or runtime admission: the wheel is uninstalled and absent from dependencies and packages; no user document, route, UI, or provider path can invoke it. Directories, background scanning, file watching, general filesystem reads, real complex parsers, retrieval indexes, embeddings, and persistence remain unadmitted.
+
+Office Open XML and OpenDocument now have an additional review-only container
+layer. It reads only harness-supplied bytes, validates ZIP metadata before any
+bounded XML member read, and never extracts. A 16-container deterministic corpus
+and 41-check suite cover format identity, required members, OpenDocument
+mimetype placement, traversal, duplicates, symlinks, encryption, compression
+and expansion, macros, ActiveX, embedded objects, malformed XML, DTD/entities,
+external relationships, and mimetype confusion. The inspector returns metadata
+only and is excluded from the web runtime, PyInstaller specification, and
+resource manifest. It is not a semantic document parser or worker admission.
+
+Native PDF review is orchestrated separately from the application. The runner
+uses the current interpreter by absolute identity, isolated Python flags, a
+minimal environment, fixed test scripts and markers, per-check timeouts, exact
+wheel verification, and POSIX resource-limit preflight. Evidence is written
+only beneath ignored local review and contains platform, normalized
+architecture, Python version, exact artifact digest, and check counts—never
+hostname, username, endpoint, absolute path, or document content. The contract
+records Windows and Linux source orchestration as passed and leaves macOS
+source and all packaged cells false. Its parity flags cannot become true merely because
+the current package correctly excludes the parser.
+
+Production PDF isolation is a separate unsatisfied boundary. The Windows
+source harness has suspended Job Object assignment but no restricted-token or
+AppContainer-equivalent capability boundary. Linux has POSIX ceilings but no
+namespace/seccomp/Landlock-equivalent production sandbox. macOS has neither
+physical evidence nor an admitted sandbox design. A future worker must parse
+one byte-delivered document per disposable process with OS-enforced network,
+filesystem-write, privilege, child-process, and process-tree controls; absence
+of any required control keeps PDF unavailable.
+
+Complex-document semantics remain a review library behind the existing
+container inspector. It uses no third-party dependency, never extracts a ZIP,
+selects only fixed XML parts, rejects formulas, and bounds part count, XML
+depth, text segments, segment size, and total output. Its six-format synthetic
+evidence passed on Windows and Ubuntu Linux, but it has no runtime route,
+provider payload, UI, package component, or fidelity claim for unsupported
+document structures.
 
 Milestone 27 also implements an inactive deterministic lexical-retrieval core. It accepts only already validated memory attachments, applies fixed character chunks and bounded casefolded term-frequency ranking with stable attachment/offset tie-breaking, discloses selected chunks and token estimates, supports removal and clear-all, and clears memory on failure. Its contract still denies runtime routes, UI controls, provider payloads, paths, parsers, network, model ranking, embeddings, temporary files, and persistence. The offline implementation and hostile tests do not admit a retrieval capability into the application.
+
+Attachment extension and browser MIME metadata are not trusted identities. The
+browser inspects the selected bytes before decoding, and the loopback service
+independently validates the resulting UTF-8 content. Both reject known
+binary/container signatures, disallowed control characters, and
+high-confidence PowerShell, POSIX-shell, or Windows-batch masquerading.
+Language shebangs must match an admitted source extension. Ambiguous prose is
+allowed only as inert data because heuristic classification cannot prove the
+language of arbitrary plain text. This boundary makes no antivirus claim and
+does not weaken the no-execution policy.
 
 The optional conversation-history boundary is likewise simulation-only. A versioned contract and non-executable logical SQLite-compatible schema describe engine-owned typed operations and bounded records without importing SQLite or accepting renderer/model SQL, paths, filenames, credentials, endpoints, commands, or arbitrary filters. Pure planners cover schema upgrade and rollback, retention, metadata-only context selection, scoped deletion, busy/locked and failure recovery, backup, and restore while declaring every database, file, browser-storage, network, process, provider, and machine effect false. Private session remains the default and never creates or updates a record. The reviewed encryption architecture requires full-database encryption, a randomly generated key wrapped by a current-user OS credential facility, and fail-closed Private session when that facility is locked or unavailable; plaintext and beside-database key fallbacks are forbidden. Runtime storage stays blocked until a dependency and binding are admitted and per-user permissions, atomicity, deletion, recovery, native packaging, and explicit product approval pass.
 
