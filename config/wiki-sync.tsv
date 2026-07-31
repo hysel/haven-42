@@ -9,7 +9,8 @@ docs/beginner-setup-mode.md	Beginner-Setup-Mode.md	Beginner Setup Mode
 docs/vscode-continue-setup.md	VS-Code-Continue-Setup.md	VS Code Continue Setup
 docs/setup-paths.md	Setup-Paths.md	Setup Paths
 docs/haven-42-menu.md	Haven-42-Menu.md	Haven 42 Menu
-docs/local-model-selection.md	Local-Model-Selection.md	Local Model Selection
+docs/wiki-model-selection.md	Local-Model-Selection.md	Choose a Model
+docs/local-model-selection.md	Engineering-Model-Selection.md	Engineering Model Selection
 docs/writing-model-evaluation.md	Writing-Model-Evaluation.md	Writing Model Evaluation
 examples/writing-model-matrix-validation.md	Writing-Model-Matrix-Validation.md	Writing Model Matrix Validation
 examples/blind-writing-quality-review.md	Blind-Writing-Quality-Review.md	Blind Writing Quality Review
@@ -21,7 +22,8 @@ docs/remote-hardware-profile.md	Remote-Hardware-Profile.md	Remote Hardware Profi
 docs/model-tool-use-validation.md	Model-Tool-Use-Validation.md	Model Tool Use Validation
 docs/evidence-catalog.md	Evidence-Catalog.md	Evidence Catalog
 docs/capability-evidence-contract.md	Capability-Evidence-Contract.md	Capability Evidence Contract
-docs/evidence-dashboard.md	Evidence-Dashboard.md	Evidence Dashboard
+docs/wiki-evidence-summary.md	Evidence-Dashboard.md	Evidence Dashboard
+docs/evidence-dashboard.md	Engineering-Evidence-Dashboard.md	Engineering Evidence Dashboard
 docs/solution-architecture-review.md	Solution-Architecture-Review.md	Solution Architecture Review
 docs/model-scorecard.md	Model-Scorecard.md	Model Scorecard
 docs/workflow-registry.md	Workflow-Registry.md	Workflow Registry
@@ -34,7 +36,8 @@ docs/optional-llm-intent-routing.md	Optional-LLM-Intent-Routing.md	Optional LLM 
 examples/optional-llm-routing-validation.md	Optional-LLM-Routing-Validation.md	Optional LLM Routing Validation
 docs/local-image-capability.md	Local-Image-Capability.md	Local Image Capability
 docs/comfyui-image-provider-setup.md	ComfyUI-Image-Provider-Setup.md	ComfyUI Image Provider Setup
-docs/local-image-provider-onboarding.md	Local-Image-Provider-Onboarding.md	Local Image Provider Onboarding
+docs/wiki-image-setup.md	Local-Image-Provider-Onboarding.md	Set Up Local Images
+docs/local-image-provider-onboarding.md	Image-Provider-Admission.md	Image Provider Admission
 docs/local-audio-provider-candidates.md	Local-Audio-Provider-Candidates.md	Local Audio Provider Candidates
 docs/local-video-provider-candidates.md	Local-Video-Provider-Candidates.md	Local Video Provider Candidates
 docs/generative-media-consent-policy.md	Generative-Media-Consent-Policy.md	Generative Media Consent Policy
@@ -78,7 +81,8 @@ docs/tool-use-modes.md	Tool-Use-Modes.md	Tool Use Modes
 docs/approved-tool-backed-changes.md	Approved-Tool-Backed-Changes.md	Approved Tool-Backed Changes
 docs/scoped-edits.md	Scoped-Edits.md	Scoped Edits
 docs/editor-compatibility.md	Editor-Compatibility.md	Editor Compatibility
-docs/troubleshooting.md	Troubleshooting.md	Troubleshooting
+docs/wiki-troubleshooting.md	Troubleshooting.md	Troubleshooting
+docs/troubleshooting.md	Engineering-Troubleshooting.md	Engineering Troubleshooting
 docs/runtime-validation.md	Runtime-Validation.md	Runtime Validation
 docs/runtime-output-verification.md	Runtime-Output-Verification.md	Runtime Output Verification
 docs/multi-repository-validation.md	Multi-Repository-Validation.md	Multi-Repository Validation
@@ -105,7 +109,8 @@ examples/laguna-xs-2.1-validation.md	Laguna-XS-2.1-Validation.md	Laguna XS 2.1 V
 examples/local-audio-provider-validation.md	Local-Audio-Provider-Validation.md	Local Audio Provider Validation
 examples/windows-amd-image-provider-validation.md	Windows-AMD-Image-Provider-Validation.md	Windows AMD Image Provider Validation
 docs/product-ui-first-slice.md	Product-UI-First-Slice.md	Product UI First Slice
-ROADMAP.md	Roadmap.md	Roadmap
+docs/wiki-roadmap.md	Roadmap.md	Roadmap
+ROADMAP.md	Engineering-Roadmap.md	Engineering Roadmap
 docs/provider-endpoint-security.md	Provider-Endpoint-Security.md	Provider Endpoint Security
 docs/model-catalog.md	Security-Aware-Model-Catalog.md	Security-Aware Model Catalog
 docs/local-web-mvp.md	Local-Web-MVP.md	Local Web MVP

@@ -1962,8 +1962,13 @@ test_wiki_synchronization() {
   navigation_links="$(awk -F '\t' 'NR > 1 && NF >= 3 { count++ } END { print count + 0 }' "$REPO_ROOT/config/wiki-navigation.tsv")"
   [ "$navigation_links" -ge 10 ] && [ "$navigation_links" -le 25 ] || { rm -rf "$wiki_temp"; return 1; }
   [ "$sidebar_links" -eq $((navigation_links + 1)) ] || { rm -rf "$wiki_temp"; return 1; }
-  grep -q '^### Get started$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
-  grep -q '^### Contributors$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q '^\*\*Get started\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q '^\*\*Contributors\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'exactly one level-one heading' "$sync" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'Broken wiki link' "$sync" || { rm -rf "$wiki_temp"; return 1; }
+  validation_line="$(grep -n 'Mapped wiki source must contain exactly one level-one heading' "$sync" | head -n 1 | cut -d: -f1)"
+  copy_line="$(grep -n 'cp \"\$REPO_ROOT/\$source\"' "$sync" | head -n 1 | cut -d: -f1)"
+  [ -n "$validation_line" ] && [ -n "$copy_line" ] && [ "$validation_line" -lt "$copy_line" ] || { rm -rf "$wiki_temp"; return 1; }
   "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
   printf 'stale' > "$wiki_temp/Home.md"
   if "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1; then

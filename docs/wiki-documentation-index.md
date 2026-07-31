@@ -1,6 +1,6 @@
 # Documentation Index
 
-> **Audience:** contributors, maintainers, security reviewers, and evaluators
+_For contributors, maintainers, security reviewers, and evaluators._
 
 This index keeps detailed engineering material available without placing more
 than one hundred development pages in the main end-user sidebar. GitHub's wiki
@@ -31,6 +31,8 @@ page list remains the complete alphabetical inventory.
 
 ## Models, providers, and media
 
+- [[Engineering Model Selection|Engineering-Model-Selection]]
+- [[Image Provider Admission|Image-Provider-Admission]]
 - [[Local Text Capabilities|Local-Text-Capabilities]]
 - [[Local Model Reliability|Local-Model-Reliability]]
 - [[Model Tool Use Validation|Model-Tool-Use-Validation]]
@@ -59,6 +61,7 @@ page list remains the complete alphabetical inventory.
 
 ## Packaging, testing, and release evidence
 
+- [[Engineering Evidence Dashboard|Engineering-Evidence-Dashboard]]
 - [[Evidence Catalog|Evidence-Catalog]]
 - [[Evidence Dashboard|Evidence-Dashboard]]
 - [[Capability Evidence Contract|Capability-Evidence-Contract]]
@@ -72,7 +75,8 @@ page list remains the complete alphabetical inventory.
 
 ## Project management and maintenance
 
-- [[Roadmap]]
+- [[Engineering Roadmap|Engineering-Roadmap]]
+- [[Engineering Troubleshooting|Engineering-Troubleshooting]]
 - [[Project Status Consistency|Project-Status-Consistency]]
 - [[GitHub Repository Policy|GitHub-Repository-Policy]]
 - [[Wiki Maintenance|Wiki-Maintenance]]

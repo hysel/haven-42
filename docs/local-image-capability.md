@@ -22,7 +22,7 @@ Successful PNG bytes remain in browser memory until the user activates the
 download link. ComfyUI retains its provider-side output, and the UI discloses
 that effect before generation.
 
-See [Local Image Capability Validation](../examples/local-image-capability-validation.md).
+See [Local Image Capability Validation](https://github.com/hysel/haven-42/wiki/Local-Image-Capability-Validation).
 
 ## Endpoint trust and bounded output
 

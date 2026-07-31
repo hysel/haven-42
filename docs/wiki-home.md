@@ -1,8 +1,7 @@
 # Haven 42
 
-> **Audience:** people evaluating or using Haven 42<br>
-> **Availability:** unsigned development software; not production-ready<br>
-> **Platforms:** Windows, Linux, and macOS development packages
+_For people evaluating or using Haven 42 on Windows, Linux, or macOS.
+Current packages are unsigned development software._
 
 **Your private, local AI station.**
 

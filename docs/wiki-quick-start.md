@@ -1,8 +1,7 @@
 # Quick Start
 
-> **Audience:** first-time Haven 42 users<br>
-> **Availability:** unsigned development software<br>
-> **Platforms:** Windows, Linux, and macOS
+_For first-time users on Windows, Linux, and macOS. Current packages are
+unsigned development software._
 
 This guide starts Haven 42 without installing a system service, changing a
 firewall, requiring administrator access, or enabling an updater.

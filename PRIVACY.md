@@ -69,9 +69,9 @@ credentials, prompts, model responses, local identities, and machine-specific
 details. Public-history privacy validation runs before push and in GitHub
 Actions.
 
-Report a suspected privacy or security issue using the private process in
-[SECURITY.md](SECURITY.md). Do not include credentials, private prompts, or
-personal files in a public issue.
+Report a suspected privacy or security issue using the private process in the
+[security policy](https://github.com/hysel/haven-42/security/policy). Do not
+include credentials, private prompts, or personal files in a public issue.
 
 ## Future Features
 
