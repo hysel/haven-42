@@ -1,7 +1,7 @@
 # Project Information
 
-> **Audience:** users, evaluators, and contributors<br>
-> **Status:** active development; no production-readiness claim
+_For users, evaluators, and contributors. Haven 42 remains active development
+software and makes no production-readiness claim._
 
 ## Current position
 

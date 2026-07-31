@@ -131,7 +131,7 @@ def main() -> int:
         "Repository home must link the public signing and privacy policies.",
     )
     require(
-        "[Code signing policy](../CODE-SIGNING-POLICY.md)" in release
+        "[Code signing policy](https://github.com/hysel/haven-42/wiki/Code-Signing-Policy)" in release
         and "unsigned development artifacts" in release,
         "Release guidance must link the policy without claiming signed output.",
     )

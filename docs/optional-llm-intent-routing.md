@@ -14,4 +14,4 @@ The result can be `suggested`, `needs-clarification`, `rejected`, or `planned`. 
 
 This router does not read a repository, invoke a capability, invoke an engineering workflow, write an artifact, or promote model evidence across domains.
 
-Bounded Windows live evidence and hostile-fixture coverage are recorded in [Optional LLM Routing Validation](../examples/optional-llm-routing-validation.md).
+Bounded Windows live evidence and hostile-fixture coverage are recorded in [Optional LLM Routing Validation](https://github.com/hysel/haven-42/wiki/Optional-LLM-Routing-Validation).

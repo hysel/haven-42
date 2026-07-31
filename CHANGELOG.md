@@ -11,6 +11,11 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Reworked the synchronized wiki into concise user-facing model, image,
+  troubleshooting, roadmap, and evidence pages while preserving the original
+  engineering records under explicit titles; compacted sidebar section labels,
+  repaired relative links, and added cross-platform heading, fence, HTML-break,
+  and internal-link validation.
 - Replaced the oversized repository README with a concise end-user landing page for capabilities, first run, security, maturity, and primary documentation; detailed engineering references remain available through a collapsed contributor index and the structured wiki.
 - Reorganized the synchronized GitHub wiki around a compact end-user-first Home, Quick Start, usage guide, advanced/project hubs, and a 14-link grouped sidebar while preserving detailed engineering pages through a contributor index; navigation is now a separate allowlist with duplicate, traversal, and unmapped-page checks.
 - Changed PowerShell validation fixtures to copy only current Git-tracked and non-ignored files into bounded temporary roots, excluding ignored build/lab/privacy data and rejecting path escapes or linked content; configuration-generation tests now use purpose-built fixtures instead of repository copies.

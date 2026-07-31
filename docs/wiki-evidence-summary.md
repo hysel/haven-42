@@ -1,0 +1,45 @@
+# Evidence Dashboard
+
+_A user-readable summary of committed, sanitized validation evidence._
+
+Evidence shows what was tested under a recorded configuration. It is not usage
+analytics, a quality ranking, or proof that every machine will behave the same.
+
+## Portable application
+
+- Source and packaged browser behavior are compared.
+- Native development packages are built and smoke-tested on Windows, Linux, and
+  macOS GitHub runners.
+- Packages are checked for loopback binding, safe browser launch, constrained
+  shutdown, hostile resources, relocation, archive integrity, checksums,
+  dependency inventory, notices, SBOM, and unsigned provenance.
+- Public-history privacy and CodeQL checks run in hosted automation.
+
+## Providers and hardware
+
+Committed evidence includes exact, scope-limited runs involving Ollama text,
+ComfyUI/SDXL images, and selected inference engines across NVIDIA, AMD, and Intel
+hardware. A hardware result applies only to its recorded operating system,
+driver, runtime, model revision, quantization, and operation.
+
+Unverified hardware and provider combinations remain selectable only where the
+product explicitly labels them as advanced or unavailable. Evidence never
+grants permission to install software or modify a machine.
+
+## Security and privacy
+
+- The browser server is IPv4 loopback-only.
+- Attachments are bounded, treated as inert data, and never executed.
+- Provider endpoints are allowlisted by scope and redirects are blocked.
+- Committed evidence excludes private endpoints, user paths, prompts, responses,
+  credentials, and local identities.
+- Signing, notarization, installers, production releases, and online updates
+  remain separate inactive gates.
+
+## Read the detailed records
+
+- [[Engineering Evidence Dashboard|Engineering-Evidence-Dashboard]]
+- [[Evidence Catalog|Evidence-Catalog]]
+- [[Capability Evidence Contract|Capability-Evidence-Contract]]
+- [[Test Tiers|Test-Tiers]]
+- [[Hosted CI Verification|Hosted-CI-Verification]]

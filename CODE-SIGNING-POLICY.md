@@ -94,7 +94,8 @@ moving branch reference.
 
 ## Privacy And System Effects
 
-Haven 42's runtime privacy behavior is documented in [PRIVACY.md](PRIVACY.md).
+Haven 42's runtime privacy behavior is documented in the repository
+[privacy policy](https://github.com/hysel/haven-42/blob/main/PRIVACY.md).
 The program does not transfer information to another networked system unless
 the user specifically requests or configures that operation. It contains no
 telemetry or advertising.
@@ -139,8 +140,9 @@ publish a security advisory when safe, and supersede affected artifacts with a
 new immutable version. Published tags and signed artifacts are never silently
 rewritten.
 
-Security reports follow [SECURITY.md](SECURITY.md) and must not be filed with
-secrets or private user data in a public issue.
+Security reports follow the repository
+[security policy](https://github.com/hysel/haven-42/security/policy) and must not
+be filed with secrets or private user data in a public issue.
 
 ## Policy Changes
 

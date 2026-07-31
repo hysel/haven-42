@@ -52,6 +52,48 @@ foreach ($entry in $entries) {
     if (-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)) {
         throw "Mapped wiki source does not exist: $($entry.source)"
     }
+}
+
+$mappedPageStems = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+foreach ($page in $mappedPages) {
+    [void]$mappedPageStems.Add([System.IO.Path]::GetFileNameWithoutExtension($page))
+}
+foreach ($entry in $entries) {
+    $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $entry.source))
+    $sourceText = [System.IO.File]::ReadAllText($sourcePath)
+    $h1Count = ([regex]::Matches($sourceText, '(?m)^# [^#\r\n]')).Count
+    if ($h1Count -ne 1) {
+        throw "Mapped wiki source must contain exactly one level-one heading: $($entry.source)"
+    }
+    $fenceCount = ([regex]::Matches($sourceText, '(?m)^```')).Count
+    if (($fenceCount % 2) -ne 0) {
+        throw "Mapped wiki source contains an unmatched code fence: $($entry.source)"
+    }
+    if ([System.IO.Path]::GetFileName($entry.source) -like 'wiki-*.md' -and $sourceText -match '<br\s*/?>') {
+        throw "User-facing wiki source contains an HTML line break: $($entry.source)"
+    }
+    foreach ($match in [regex]::Matches($sourceText, '\[\[(?:[^\]|]+\|)?([^\]#]+)(?:#[^\]]+)?\]\]')) {
+        $target = $match.Groups[1].Value.Trim()
+        if (-not $mappedPageStems.Contains($target)) {
+            throw "Broken wiki link in $($entry.source): $target"
+        }
+    }
+    foreach ($match in [regex]::Matches($sourceText, '(?<!\!)\[[^\]]+\]\(([^)#]+)(?:#[^)]*)?\)')) {
+        $target = $match.Groups[1].Value.Trim()
+        if ($target -match '^[a-z][a-z0-9+.-]*:') { continue }
+        if ($target -match '[/\\]') {
+            throw "Path-like relative Markdown link in $($entry.source): $target"
+        }
+        $targetStem = [System.IO.Path]::GetFileNameWithoutExtension($target)
+        if (-not $mappedPageStems.Contains($targetStem)) {
+            throw "Broken relative Markdown link in $($entry.source): $target"
+        }
+    }
+}
+
+foreach ($entry in $entries) {
+    $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $entry.source))
+    $destinationPath = [System.IO.Path]::GetFullPath((Join-Path $WikiPath $entry.page))
     $sourceBytes = [System.IO.File]::ReadAllBytes($sourcePath)
     $sourceText = ([System.IO.File]::ReadAllText($sourcePath) -replace "`r`n", "`n")
     $destinationText = if (Test-Path -LiteralPath $destinationPath -PathType Leaf) {
@@ -82,7 +124,7 @@ foreach ($entry in $navigationEntries) {
     }
     if ($entry.section -ne $currentSection) {
         $sidebarLines += ""
-        $sidebarLines += "### $($entry.section)"
+        $sidebarLines += "**$($entry.section)**"
         $currentSection = $entry.section
     }
     $sidebarLines += "- [$($entry.title)]($([System.IO.Path]::GetFileNameWithoutExtension($entry.page)))"

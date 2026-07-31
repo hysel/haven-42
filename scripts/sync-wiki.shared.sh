@@ -37,7 +37,8 @@ ENTRY_COUNT=0
 NAVIGATION_COUNT=0
 SIDEBAR_TEMP="$(mktemp)"
 MAPPED_TEMP="$(mktemp)"
-trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP"' EXIT
+LINKS_TEMP="$(mktemp)"
+trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$LINKS_TEMP"' EXIT
 printf '%s\n' '- [Home](Home)' > "$SIDEBAR_TEMP"
 
 while IFS=$'\t' read -r source page title; do
@@ -54,6 +55,39 @@ while IFS=$'\t' read -r source page title; do
   printf '%s\n' "$page" >> "$MAPPED_TEMP"
   ENTRY_COUNT=$((ENTRY_COUNT + 1))
   [ -f "$REPO_ROOT/$source" ] || { printf 'Mapped wiki source does not exist: %s\n' "$source" >&2; exit 1; }
+done < "$MAP_PATH"
+
+while IFS=$'\t' read -r source page title; do
+  source="${source%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
+  [ "$source" != "source" ] || continue
+  [ -n "$source" ] || continue
+  h1_count="$(grep -c '^# [^#]' "$REPO_ROOT/$source" || true)"
+  [ "$h1_count" -eq 1 ] || { printf 'Mapped wiki source must contain exactly one level-one heading: %s\n' "$source" >&2; exit 1; }
+  fence_count="$(grep -c '^```' "$REPO_ROOT/$source" || true)"
+  [ $((fence_count % 2)) -eq 0 ] || { printf 'Mapped wiki source contains an unmatched code fence: %s\n' "$source" >&2; exit 1; }
+  case "${source##*/}" in wiki-*.md) if grep -Eqi '<br[[:space:]]*/?>' "$REPO_ROOT/$source"; then printf 'User-facing wiki source contains an HTML line break: %s\n' "$source" >&2; exit 1; fi ;; esac
+
+  grep -oE '\[\[[^]]+\]\]' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
+  while IFS= read -r link; do
+    target="${link#'[['}"; target="${target%']]'}"; target="${target##*|}"; target="${target%%#*}"
+    grep -Fqxi -- "$target.md" "$MAPPED_TEMP" || { printf 'Broken wiki link in %s: %s\n' "$source" "$target" >&2; exit 1; }
+  done < "$LINKS_TEMP"
+
+  grep -oE '\]\([^)]+\)' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
+  while IFS= read -r link; do
+    target="${link#']('}"; target="${target%')'}"; target="${target%%#*}"
+    case "$target" in *:*) continue ;; esac
+    case "$target" in */*|*'\'*) printf 'Path-like relative Markdown link in %s: %s\n' "$source" "$target" >&2; exit 1 ;; esac
+    target="${target##*/}"
+    target="${target%.md}"
+    grep -Fqxi -- "$target.md" "$MAPPED_TEMP" || { printf 'Broken relative Markdown link in %s: %s\n' "$source" "$target" >&2; exit 1; }
+  done < "$LINKS_TEMP"
+done < "$MAP_PATH"
+
+while IFS=$'\t' read -r source page title; do
+  source="${source%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
+  [ "$source" != "source" ] || continue
+  [ -n "$source" ] || continue
   if ! cmp -s "$REPO_ROOT/$source" "$WIKI_PATH/$page"; then
     DIFFERENCES=1
     if [ "$CHECK" -eq 0 ]; then
@@ -65,7 +99,7 @@ done < "$MAP_PATH"
 
 CURRENT_SECTION=''
 NAVIGATION_PAGES_TEMP="$(mktemp)"
-trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$NAVIGATION_PAGES_TEMP"' EXIT
+trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$LINKS_TEMP" "$NAVIGATION_PAGES_TEMP"' EXIT
 while IFS=$'\t' read -r section page title; do
   section="${section%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
   [ "$section" != "section" ] || continue
@@ -78,7 +112,7 @@ while IFS=$'\t' read -r section page title; do
   fi
   printf '%s\n' "$page" >> "$NAVIGATION_PAGES_TEMP"
   if [ "$section" != "$CURRENT_SECTION" ]; then
-    printf '\n### %s\n' "$section" >> "$SIDEBAR_TEMP"
+    printf '\n**%s**\n' "$section" >> "$SIDEBAR_TEMP"
     CURRENT_SECTION="$section"
   fi
   printf -- '- [%s](%s)\n' "$title" "${page%.md}" >> "$SIDEBAR_TEMP"

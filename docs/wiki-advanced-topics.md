@@ -1,7 +1,7 @@
 # Advanced Topics
 
-> **Audience:** advanced users, evaluators, and contributors<br>
-> **Availability:** mixed; each linked page states its own evidence boundary
+_For advanced users, evaluators, and contributors. Each linked page states its
+own evidence boundary._
 
 The everyday browser workflow is documented in [[Using Haven 42|Using-Haven-42]].
 This page collects advanced setup and engineering paths without placing their

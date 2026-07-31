@@ -24,7 +24,7 @@ macOS:
 ./scripts/sync-wiki.macos.sh --wiki-path ../haven-42.wiki
 ```
 
-The scripts copy mapped pages byte-for-byte, regenerate `_Sidebar.md` from the explicit navigation allowlist, and remove explicitly retired pages. A navigation entry must reference a mapped page, and duplicate or path-like destination names fail closed. The scripts do not commit or push either repository.
+The scripts copy mapped pages byte-for-byte, regenerate `_Sidebar.md` from the explicit navigation allowlist, and remove explicitly retired pages. They require exactly one level-one heading, paired code fences, resolvable internal links, and HTML-free line spacing on the short user-facing pages. A navigation entry must reference a mapped page, and duplicate or path-like destination names fail closed. The scripts do not commit or push either repository.
 
 ## Check
 

@@ -1,7 +1,6 @@
 # Using Haven 42
 
-> **Audience:** Haven 42 users<br>
-> **Availability:** runnable development features, with limits noted below
+_For Haven 42 users. Development-stage limits are noted below._
 
 ## Conversation
 
