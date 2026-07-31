@@ -38,6 +38,8 @@ The full suite includes repository validation, so callers should not run `valida
 
 Each selected test reports elapsed time. The final summary records the selected tier, executed count, skipped count, and total duration. Use this output to move expensive tests into Integration or remove repeated process and fixture setup; do not weaken assertions merely to reduce time.
 
+PowerShell repository-validation fixtures are created in the operating system's temporary directory from the current Git-tracked and non-ignored working files. This includes pending publishable edits while excluding ignored build output, lab evidence, privacy backups, and other local-only data. Fixture assembly rejects rooted paths, paths outside the approved roots, symbolic links, and junctions while allowing ordinary OneDrive cloud-file metadata. Tests that need only generated configuration use a smaller purpose-built fixture instead of copying the repository.
+
 ## Exact Content-Tree Receipt
 
 A successful Full run with no unstaged or untracked files writes schema-v3 `haven-42-test-receipt-v1` inside the repository's private `.git` directory. The tested content may be the clean `HEAD` tree or the exact staged index tree. The receipt records the current commit for diagnostics, the authoritative tested tree, its `head` or `index` source, tier, and runner. It is not committed or included in release packages.

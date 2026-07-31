@@ -1,104 +1,53 @@
 # Haven 42
 
-[Code signing policy](CODE-SIGNING-POLICY.md) ·
-[Privacy policy](PRIVACY.md)
-
 **Your private, local AI station.**
 
-Haven 42 is an evidence-gated, local-first AI workbench for software engineering and general-purpose tasks on Windows, Linux, and macOS.
+[Quick start](#quick-start) · [What works](#what-works-today) ·
+[Roadmap](#roadmap-at-a-glance) · [Wiki](https://github.com/hysel/haven-42/wiki) ·
+[Code signing policy](CODE-SIGNING-POLICY.md) · [Privacy policy](PRIVACY.md)
 
-The project began as a reusable pack for coding agents. It now provides a provider-neutral core for discovering capabilities, selecting safe workflows, running supported local agent surfaces, and producing typed artifacts without making a cloud service the default. Its runnable cross-platform local web application provides system status, exact-digest Ollama discovery, private chat, writing, summarization, plan-only registered software workflows, and a promoted Linux ComfyUI/SDXL image flow. Native Tauri packaging remains optional later work.
+> **Development status:** Haven 42 is active, unsigned development software—not
+> a production-ready or publicly released application. It does not install a
+> system service, require administrator access, or enable automatic updates.
 
-## What Works Today
+Haven 42 is a local-first AI workbench for private chat, writing,
+summarization, selected-file context, model management, and carefully admitted
+local AI workflows. The browser interface runs on your device and connects only
+to a local or explicitly selected private-network provider.
 
-| Capability | Status | What that means |
-| --- | --- | --- |
-| Local browser assistant | **Available; portable development builds available** | The shared browser UI runs from source or an unsigned PyInstaller one-folder package. Guided setup remains read-only and installation remains disabled. A dedicated advanced Evidence section shows committed outcome and surface-readiness details without running live tests, with one fixed explicit-click link to the repository wiki. |
-| Milestone 22 admission gates | **Explicit and fail-closed** | A repository-local offline ledger distinguishes the admitted read-only development scope from deferred or blocked Tauri, production package, installer, updater, and executable-composition gates without granting authority. |
-| Build provenance attestation | **Prepared locally; not yet executed** | A main-push-only least-privilege job will attest the three reverified unsigned development archives after native package success. It publishes no Release and makes no Windows-signing, macOS-notarization, updater-trust, or production claim. |
-| Software engineering | **Available** | Continue, Aider, and OpenCode support guided setup, repository analysis, planning, review, and carefully scoped changes. |
-| Local image generation | **Limited** | `media.image.create` is available for one bounded profile: Linux ComfyUI/SDXL is validated. Other operating-system and GPU combinations remain gated. |
-| Model and inference selection | **Evidence-gated** | Hardware-aware recommendations are available. Ollama and specific llama.cpp CUDA/HIP profiles have passed; unsupported combinations fail closed. |
-| Music and video | **Not shipped** | Candidate research is recorded in documentation-only candidate inventories, but no runtime integration ships until the full security, quality, cleanup, and packaging gates pass. |
-| Hardware-adaptive quantization | **Experimental** | Planning and comparison contracts exist for validated Linux NVIDIA and Windows AMD cells; automatic conversion and activation are not yet shipped. |
-| Local document context | **Bounded text, structured-text, source-code, and screenshot attachments available** | One keyboard-operable picker admits explicit UTF-8 `.txt`/`.md`, syntax-checked inert `.csv`/`.json`, a narrow `.cs`/`.py`/`.js`/`.jsx`/`.ts`/`.tsx`/`.java`/`.go`/`.rs`/`.sql`/`.tf` source-text allowlist, and PNG screenshots; clipboard PNG paste is also bounded, memory-only, and path-free. Screenshots default to two per task with an advanced one-through-four choice, while fixed combined byte and decoded-pixel ceilings prevent the setting from expanding the existing worst-case resource exposure. A visible warning discloses private-network transfer, and deliberate Send confirms that transfer without a separate checkbox. Attachments remain inert data: source code is normalized to plain text and never executed, JSON is never evaluated, CSV formulas are never executed, and no attachment-driven tools, process launch, archive expansion, filesystem writes, or model-output execution are exposed. Shell, PowerShell, batch, binary, project, archive, and configuration formats remain blocked. Screenshot understanding remains visibly unverified per model. Deterministic lexical retrieval and the restricted PDF/Office parser-worker gate remain inactive foundations; directories, complex parsers, embeddings, and persistence remain unadmitted. |
-| Conversation history | **Offline foundation only; not shipped** | A default-deny contract, non-executable logical SQLite-compatible schema, pure lifecycle planners, and hostile fixtures exist. No database is opened or created, no history route or UI exists, standard SQLite is treated as unencrypted, and Private session remains the write-free default. |
-| Controlled web research | **Offline foundation only; not shipped** | Milestone 28 has default-deny contracts, hostile fixtures, a 28-check caller-fixture query/result/citation boundary, and a 26-check caller-bytes-only inert text/HTML extraction boundary, but no route, model tool, live adapter, DNS/network effect, page transport, browser automation, active citation navigation, or UI activation. |
+The primary experience is for everyday users. Deeper software-engineering tools
+for Continue, Aider, and OpenCode remain available to advanced users and
+contributors.
 
-See the [evidence catalog](docs/evidence-catalog.md) for exact tested versions and hardware, or the [roadmap](ROADMAP.md) for planned work.
+## What works today
 
-## Which Path Should I Use?
+| Capability | Current state |
+| --- | --- |
+| Local browser application | Runs from source or an unsigned PyInstaller one-folder development package on Windows, Linux, and macOS. |
+| Chat, writing, and summarization | One continuous, memory-only conversation through a user-managed Ollama provider. |
+| Models | Lists installed models, identifies exact evidence-backed choices, and provides explicit download-free public catalog search. |
+| Attachments | Accepts a bounded set of selected UTF-8 text, CSV, JSON, source-code, and PNG screenshot files. Clipboard PNG paste is supported. Attachments are never executed. |
+| Response display | Safely renders headings, lists, emphasis, code, quotations, and Unicode emoji without model-supplied active HTML or links. |
+| Run information | Shows provider-reported token counts, timing, and throughput details. |
+| Local images | Linux ComfyUI/SDXL is validated for one promoted loopback profile. Other platforms and providers remain independently gated. |
+| Software workflows | Shows registered read-only plans. The browser cannot start their processes, read a repository, or write files. |
+| Evidence and readiness | Displays bounded system readiness and bundled sanitized evidence without running background tests. |
 
-Choose the path that matches what you want to accomplish today.
+Music and video remain documentation-only candidate inventories. Persistent
+conversation history, PDF/Office/OpenDocument parsing, folder scanning,
+controlled web research, signing, notarization, installers, and active online
+updates are not shipped.
 
-| Your goal | Start here | What you get |
-| --- | --- | --- |
-| Chat, write, summarize, review software workflows, or create an admitted image | [Run the local web app](#run-the-local-web-app) | A private browser interface backed by user-managed Ollama and optional loopback ComfyUI providers. |
-| Add local AI to a software project | [Quick Start](#quick-start) | A guided Continue setup with safe read-only and approved-write workflows. |
-| Connect or tune an existing setup | [Setup Paths](docs/setup-paths.md) | Beginner and advanced paths for models, hardware, providers, and agent surfaces. |
-| Develop, validate, or release Haven 42 | [Validation](#validation) | Test tiers, evidence rules, security boundaries, and release guidance. |
+## Quick start
 
-### Common destinations
+### Run from source
 
-- **VS Code or VSCodium:** [Continue setup guide](docs/vscode-continue-setup.md)
-- **Aider or OpenCode:** [Agent installation and health paths](docs/agent-surface-solutions.md)
-- **Generate a hardware-aware model/config recommendation:** [Hardware-aware recommendations](docs/hardware-aware-recommendations.md) and the [local model guide](docs/local-model-selection.md)
-- **Image generation:** [Validated ComfyUI setup](docs/comfyui-image-provider-setup.md) and [provider support boundaries](docs/local-image-provider-onboarding.md)
-- **Security and privacy:** [Security threat model](docs/security-threat-model.md), [data lifecycle](docs/local-data-lifecycle.md), and [security policy](SECURITY.md)
-- **Repository and CI policy:** [GitHub repository policy](docs/github-repository-policy.md) and [hosted CI verification](docs/hosted-ci-verification.md)
-- **Project status:** [Roadmap](ROADMAP.md), [current tasks](TODO.md), and [solution architecture review](docs/solution-architecture-review.md)
+The source version requires Python 3. Ollama and an installed model are needed
+only for text generation; you can explore the interface without them.
 
-For the complete command and document catalog, see [Workflow Docs](#workflow-docs) and the [script reference appendix](docs/script-reference-appendix.md).
+From the repository root, run the command for your platform.
 
-## Product Direction
-
-```text
-Loopback-only local web application (available)
-        |
-Capability registry, provider policy, and Ollama adapter
-        |
-Workflow dispatcher and approval policy
-        |
-Local providers and supported agent surfaces
-        |
-Typed artifacts, validation evidence, and recovery
-```
-
-The current web process binds only to `127.0.0.1`, serves bundled assets, keeps configuration and text in memory, and admits the evidence-gated `general.chat`, `content.write`, and `content.summarize` Ollama capabilities. Its validation panel summarizes only the committed sanitized evidence catalog and surface matrices: it starts no process, reads no user repository, contacts no provider, and makes no live-validation or production-readiness claim. The design keeps provider selection, evidence state, permissions, privacy disclosures, and write approval outside model prompts.
-
-## Evidence Before Features
-
-Every integration follows a pass-before-ship rule. Exact software versions are evaluated on their claimed operating system, hardware, provider, and operation. Failed or incomplete candidates may be documented, but they do not leave scripts, adapters, harnesses, templates, configuration, workflows, or active catalog entries in the shipped solution.
-
-Evidence states distinguish `tested-passed`, `tested-partial`, `failed`, `recommended-only`, and `blocked` capabilities. A fixture contract proves portable behavior; it does not claim that untested native hardware or software works.
-
-## Roadmap At A Glance
-
-| Milestone | Status | Outcome |
-| --- | --- | --- |
-| Milestone 20: Hardware-Aware Model And Config Automation | Complete | Stable workflow, recommendation, dispatch, onboarding, and release foundation. |
-| Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, provider-neutral local text, local images, capability discovery, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress; runnable local tools and portable development packaging | Local web system status, immutable-digest Ollama recommendations, a read-only committed-evidence view, accessible chat/writing/summarization recovery, provider run metrics, plan-only registered software workflows, lifecycle-aware effect-free composition planning, structural updater trust/transition and future execution/journal simulations, the promoted Linux ComfyUI image flow, verified unload, and hardened PyInstaller packages are implemented. Source browser validation and native packaged browser/parity smoke tests run across Windows, Linux, and macOS; real cryptographic verification, workflow execution, executable composition, real machine effects, signing, and optional Tauri packaging remain open. |
-| Milestone 23: Native Local Image Generation | In progress | Linux ComfyUI/SDXL is validated and an effect-free lifecycle planner covers the future consumer install/update/rollback/uninstall boundary; Windows AMD has a partial native pass, while real lifecycle and remaining native gates stay open. |
-| Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; no audio provider is promoted. |
-| Milestone 25: Local Video Generation | Research in progress | HunyuanVideo, Wan2.2, and LTX-2.3 are recorded without executable integration. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model corpus now passes the b10088 operational, full-offload, bounded-exit, and cleanup baseline on AMD/HIP and NVIDIA/CUDA with matching exact-output outcomes. Physical Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI, but neither is promoted because upstream/OS/quality/package gates remain open. Vulkan failed its patch gate, and physical Mac validation is owner-parked until hardware is acquired. |
-| Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | A unified bounded text/CSV/JSON/source-code/PNG picker and clipboard PNG paste are implemented with structured-text syntax/resource checks and no evaluation or source execution. Native Windows evidence and physical Ubuntu source/package clipboard and mixed-file evidence are recorded; physical macOS remains parked. The deterministic memory-only lexical core and history lifecycle planners are offline-tested. A review-only restricted `pypdf` 6.14.2 worker passed 61 Windows security checks across 14 synthetic PDFs plus 64 static and 40 contract-parity/package-exclusion checks. Its bounded native lane passed on Windows and Ubuntu Linux; macOS source and all packaged cells remain false. A production-isolation assessment and 32-check exact OS-control evidence gate keep sandbox gaps explicit, and metadata-only corpus research selected or downloaded no external PDF. A separate standard-library foundation now passes 41 ZIP/XML checks across 16 containers and 57 semantic checks across 17 DOCX/XLSX/PPTX/ODT/ODS/ODP fixtures, with richer provenance and Windows/Ubuntu source evidence. A 33-check parity contract keeps every package cell false. All complex formats and dependencies remain ignored or candidate-blocked, unpackaged, unavailable to the application, and not runtime-admitted. Production isolation, admitted non-synthetic evidence, package compliance integration, remaining semantic fidelity, native package parity, vision evidence, active retrieval, complex-document UI, and persistent history remain open. |
-| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Default-deny contracts, inert hostile fixtures, and a 28-check caller-fixture query/result/citation validator exist without network imports or authority. No live adapter, route, model tool, page retrieval, active citation navigation, or autonomous follow-up exists. |
-
-See [`ROADMAP.md`](ROADMAP.md) for milestone scope and [`docs/solution-architecture-review.md`](docs/solution-architecture-review.md) for the completeness standard.
-
-## Purpose
-
-The goal is to make useful local AI capabilities approachable without weakening engineering-grade safety. New users should eventually be able to describe a task in a single local interface; experienced users and automation can continue using the same versioned scripts, registries, and envelopes directly.
-
-For software work, the pack supplies repeatable discovery, implementation planning, code review, security review, architecture review, performance review, documentation, and product-management workflows. For general tasks, it supplies repository-optional sessions and explicit local capability boundaries for chat, writing, summarization, and image creation.
-
-## Run The Local Web App
-
-The source form needs Python 3. Unsigned one-folder development packages include their Python runtime and require no global Python installation, administrator access, installer, or system service. Ollama and an installed model are required only for chat, writing, or summarization; Explore and the read-only readiness scan do not require Ollama.
-
-Windows:
+Windows PowerShell:
 
 ```powershell
 .\scripts\start-haven42-web.ps1
@@ -116,981 +65,191 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Developers can build the native portable package with `python scripts/build-portable-development-package.py`. See [Portable Development Package](docs/portable-development-package.md) for hash-locked inputs, cross-platform packaged-browser UI/attachment smoke tests, read-only and abrupt-exit lifecycle tests, hostile integrity/shutdown/archive tests, bounded archives, checksums, full file inventory, exact runtime-component coverage, dependency inventory, notices, expanded SBOM and provenance evidence, and the unsigned-development limitation.
+Haven 42 starts on `http://127.0.0.1:4242` and asks the operating system to
+open its default browser. If that does not happen, copy the exact loopback URL
+printed in the terminal into your browser.
+
+### First-run choices
+
+- **Explore Haven 42** opens the interface without scanning or connecting.
+- **Connect existing setup** connects to an Ollama server you already manage.
+- **Guided setup** performs a bounded read-only readiness scan and produces a
+  disabled setup plan. It installs nothing.
+
+For same-machine Ollama, use `http://127.0.0.1:11434`. A private-network HTTP
+connection is unencrypted, so Haven 42 displays a warning. Use a trusted HTTPS
+endpoint or a loopback tunnel when sensitive traffic must cross another
+machine.
+
+Haven 42 never downloads a model automatically. Search results that are not
+installed remain inactive candidates until you install and review them in the
+Ollama environment you control.
+
+### Portable development package
+
+Unsigned one-folder packages include their own Python runtime and require no
+global Python installation, installer, administrator access, service, driver,
+firewall rule, or startup entry. Extract the complete archive, keep its files
+together, and verify the supplied checksum before running it.
+
+See [Portable Development Package](docs/portable-development-package.md) for
+the build, integrity, inventory, SBOM, and native smoke-test evidence. Haven 42
+does not publish a GitHub Release or claim production readiness from these
+artifacts.
+
+## Using Haven 42
+
+- Press **Enter** to send and **Shift+Enter** for a new line.
+- Use **Up** and **Down** at the appropriate text boundary to recall prompts.
+- Use **New task** to clear the current in-memory conversation.
+- Open **Models** to choose an installed model or explicitly search the public
+  catalog without downloading anything.
+- Use **Browse files** or paste a PNG screenshot to add bounded context.
+- Expand run details for provider-reported token and timing information.
+- Use **System** to choose immediate, 5-minute, 15-minute, or 30-minute idle
+  model cleanup.
+
+Current prompts, responses, selected attachments, provider settings, and image
+bytes are kept in process or browser memory. They are not stored as Haven 42
+history. A separately managed provider may have its own retention behavior.
+
+Start with the [wiki Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start),
+then use the [Using Haven 42 guide](https://github.com/hysel/haven-42/wiki/Using-Haven-42)
+or [Troubleshooting](docs/troubleshooting.md).
+
+## Security model
+
+- The application server binds only to IPv4 loopback.
+- Provider endpoints are restricted to same-machine or private-network scopes.
+- Credentials in provider URLs, public provider addresses, and unsafe redirects
+  are blocked.
+- Attachment names, extensions, and browser MIME values are untrusted hints;
+  browser and server checks reject disallowed or suspicious content.
+- Attached content is inert reference data and receives no command, tool,
+  filesystem, provider, or model-selection authority.
+- Models do not receive an unrestricted internet tool.
+- Features must pass their exact security and evidence gates before admission.
+
+Read the [privacy policy](PRIVACY.md), [security policy](SECURITY.md),
+[threat model](docs/security-threat-model.md), and
+[provider endpoint security](docs/provider-endpoint-security.md) before using
+sensitive material. Report vulnerabilities privately; do not place secrets,
+private prompts, or personal files in a public issue.
+
+## Roadmap at a glance
+
+The table is intentionally brief. [`ROADMAP.md`](ROADMAP.md) is authoritative
+for scope, evidence, blockers, and exit criteria.
+
+| Milestone | Status | Summary |
+| --- | --- | --- |
+| Milestone 20: Hardware-Aware Model And Config Automation | Complete | Recommendation, configuration, dispatch, health, cleanup, and evidence foundations. |
+| Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
+| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, and hardened unsigned portable packages; signing and machine effects remain gated. |
+| Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; remaining consumer-local platform profiles are open. |
+| Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial research evidence exists; no audio provider is promoted. |
+| Milestone 25: Local Video Generation | Research in progress | Candidate research only; no executable video integration ships. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel candidate evidence exists with platform-specific gaps. |
+| Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; retrieval, complex documents, and persistent history remain gated. |
+| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts exist without a live network adapter or model tool. |
+
+The project uses a pass-before-ship rule: evidence is specific to the exact
+artifact, model, provider, operating system, hardware, and operation tested.
+A fixture-backed contract does not establish general native support.
+
+## For software engineering
+
+The maintained agent surfaces are Continue, Aider, and OpenCode. Begin with
+read-only review and planning; approve narrow writes only after confirming the
+target and independently verifying the resulting diff.
+
+- [VS Code and Continue setup](docs/vscode-continue-setup.md)
+- [Agent surface options](docs/agent-surface-options.md)
+- [Agent surface solutions](docs/agent-surface-solutions.md)
+- [Setup paths](docs/setup-paths.md)
+- [Tool-use modes](docs/tool-use-modes.md)
+- [Approved tool-backed changes](docs/approved-tool-backed-changes.md)
 
-The [bounded task composition](docs/task-composition.md) foundation can order up to six registry-backed read-only workflow plans, validate fresh/retry/cancel identity, and emit exactly typed metadata-only intermediate references. Separate inactive gates model future effect disclosure, digest-bound approval scope, typed intermediate validation, retry/cancel/recovery state, and a digest-chained journal of non-authoritative execution claims. They are simulation-only: no token is issued or accepted, no journal is written, and no process, filesystem, network, artifact, approval, or machine-modification authority exists.
+These engineering tools operate outside the everyday browser flow and may have
+separate repository, software, or network effects.
 
-Haven 42 opens a browser on `http://127.0.0.1:4242`. Its keyboard-accessible first-run wizard provides three paths: **Guided setup** scans a registered, bounded, read-only set of system facts and produces a disabled installation plan; **Connect existing setup** accepts a same-machine or private-network Ollama IP address; and **Explore** opens the product without a provider or scan. The scan excludes host identity, usernames, private paths, environment variables, credentials, and network addresses. Its snapshot stays in memory.
+## Documentation
 
-When the provider uses HTTP, Haven 42 keeps an on-screen transport warning.
-Loopback HTTP is identified as unencrypted same-machine traffic;
-private-network HTTP receives a stronger warning because chat messages and
-attachments can be observed or altered in transit. Use a trusted HTTPS endpoint
-or a loopback tunnel when the provider is on another machine.
-
-After Ollama connects, Haven 42 reports capability-specific model readiness and automatically selects only an installed model name with matching committed capability evidence. Unknown installed models remain visibly `unverified` and are available only as an advanced manual choice; a missing recommendation is guidance, never an automatic download.
-
-The Models panel labels models already installed on the connected Ollama server and filters that inventory without network access. Changing the Chat, Writing, or Summarization evidence target clears stale search state and ranks installed choices for that capability. The visible text workspace is one continuous conversation: an explicit write/draft/compose or summarize/condense request selects the matching bounded server prompt without clearing prior messages. If that task has a different configured installed model, Haven 42 pauses before sending and asks whether to switch or keep the current conversation model. This narrow hint is evaluated only in browser memory, grants no authority, and never switches a model automatically. The explicit **Search public catalog** action sends only the bounded search phrase to Ollama's fixed HTTPS catalog; it is never automatic and downloads nothing. Uninstalled results may be retained in browser memory as a desired model, but remain candidate-only with unverified evidence, unknown hardware fit, required license review, and execution disabled. Haven 42 can display and copy an engine-constructed `ollama pull <validated-name>` instruction; it never runs that command or calls the Ollama pull API. Reconnect after an external installation so Haven 42 can verify the installed name and digest.
-
-Models and About are dedicated primary views. The Models view shows installed choices immediately, preserves capability-specific evidence and recommendations behind the unified conversation, and keeps catalog search beside selection. Only one primary Chat/Software/Images/Models/About panel is rendered at a time. Enter submits, Shift+Enter inserts a new line, and Up/Down recalls older/newer prompts without replacing normal multiline movement. Prompt recall defaults to 20 entries and offers 50 or 100 in System; conversation content stays in browser memory and clears only with New task, a provider change, or shutdown—not when the task intent changes.
-
-Attachment names and browser-reported MIME values are treated as untrusted hints. Browser preflight and independent loopback-service validation reject known binary/container signatures, disallowed control bytes, and high-confidence PowerShell, shell, or batch content renamed to an admitted extension. Correctly named Python/Node shebangs remain allowed, and prose that merely discusses commands remains inert text. This reduces extension-spoofing risk but is not an antivirus or perfect programming-language claim; accepted attachment content is still never executed.
-
-Configuration and messages are not persisted. Text results are rendered from typed chat-message or Markdown-document artifacts over strictly ordered accepted/progress/warning/result envelopes with exactly one terminal event and a no-file-written policy. Assistant text uses a dependency-free, DOM-built Markdown allowlist for headings, paragraphs, lists, emphasis, code, quotes, rules, and Unicode emoji. Raw HTML remains inert visible text; the renderer creates no model-supplied HTML, links, images, scripts, or event handlers. An advanced model without exact digest and capability evidence produces a visible warning. Provider-reported input, output, total-token, timing, and throughput details are available in a memory-only diagnostic disclosure and are not presented as billing or remaining-context values. Failed text requests never retry automatically: the browser removes the failed conversation entry, restores the input in memory for review, and requires a new request. The System view reports provider health, evidence matching, immutable digest binding, and the disabled/no-network update state. Wizard and workspace provider controls share compact 36-pixel geometry and 13-pixel input typography. An unchanged connected configuration is visibly disabled and cannot issue another provider request or reset the task; editing the endpoint, timeout, or cleanup policy explicitly enables **Apply changes** and discloses that a successful change starts a new task. System exposes immediate, 5-minute, 15-minute, and 30-minute cleanup choices. New task, model/provider changes, failures, and shutdown trigger explicit cleanup.
-
-Software exposes only `uiReady`, registry-backed `read-only` workflows as typed plans. The browser cannot pass arguments, start a child process, read a repository, write a file, or make a workflow network call. The image view connects only to a loopback endpoint for the promoted Linux ComfyUI/SDXL profile, uses the exact admitted checkpoint and built-in workflow, clears API history, returns the bounded PNG in browser memory, and requires the user to trigger any download. ComfyUI retains a provider-side output; the UI discloses that effect before generation.
-
-See [`docs/local-web-mvp.md`](docs/local-web-mvp.md) for connection, security, advanced settings, and current-scope details.
-
-Maintainers can exercise the effect-free update lifecycle with
-`scripts/core-update-lifecycle.ps1` or its Linux/macOS wrappers. It models
-compatibility preflight, staged and post-activation health, interrupted
-activation recovery, rollback, retention cleanup, and disabled mode while
-keeping every network, filesystem, process, installation, activation, and
-machine-effect flag false. A separate structural trust handoff validates how a
-future native verifier receipt must bind verifier identity, release/asset
-digests, platform, lifetime, and replay state. It performs no cryptographic
-verification and never establishes trust or permits staging. An additional
-offline transition model checks consecutive registry versions, verifier/root
-continuity, validity overlap, threshold-claim shape, and replay state without
-accepting or applying a trust change. See
-[`docs/desktop-storage-and-updates.md`](docs/desktop-storage-and-updates.md).
-
-## Quick Start
-
-**Using VS Code or VSCodium for the first time?** Start with the
-[Continue setup guide](docs/vscode-continue-setup.md). It uses the installer to generate the global
-Continue config, includes native Windows and macOS commands, avoids
-duplicate-rule warnings, and ends with safe read and write checks.
-
-Use this path if you are new to Continue, Ollama, or command-line tools. The steps work on Windows, Linux, and macOS.
-
-### 1. Install the basics
-
-Install:
-
-- Ollama: runs the local AI models.
-- Node.js: lets you run the Continue CLI with `npx`.
-- Continue for your editor: the extension you will use inside VS Code, VSCodium, or another supported editor.
-
-Then open a terminal and check the tools:
-
-Windows PowerShell:
-
-```powershell
-ollama --version
-node --version
-npx --version
-```
-
-Linux or macOS:
-
-```bash
-ollama --version
-node --version
-npx --version
-```
-
-### 2. Download example local models
-
-The model names below are examples, not permanent requirements. Local model availability changes over time, and the best model depends on your RAM, VRAM, installed Ollama models, and whether you need Agent tools.
-
-The committed config starts with a smaller sample model. If your machine can run a larger model, the hardware profile and install scripts can create a local-only config that selects a stronger installed model automatically.
-
-The starter config also uses responsive defaults for local machines: `contextLength: 16384` and `maxTokens: 2048`. Increase those values only after the model feels reliable and you need deeper context for larger repositories.
-
-Windows PowerShell:
-
-```powershell
-ollama pull qwen3.5:9b
-ollama pull nomic-embed-text
-```
-
-Linux or macOS:
-
-```bash
-ollama pull qwen3.5:9b
-ollama pull nomic-embed-text
-```
-
-Optional stronger models for high-resource machines after validation:
-
-```bash
-ollama pull devstral-small-2:24b
-ollama pull qwen3-coder:30b
-```
-
-The model helper scripts use `config/model-recommendations.tsv` as the curated model priority list. You usually do not need to edit it during setup. Update it only after validating a better local model for your hardware and workflow.
-
-Optional online model discovery is candidate research only. It should not
-change the offline default setup, pull models automatically, or mark a model as
-tool-safe without local validation. See `docs/online-model-discovery.md`.
-
-Discovery can query independent Ollama and Hugging Face source adapters using
-arbitrary search terms rather than a fixed family allowlist. Every result stays
-candidate-only until its exact artifact, license, hardware, runtime, surface,
-and operation pass local validation.
-
-The read-only [security-aware model catalog](docs/model-catalog.md) combines
-those discovery records with local hardware-fit estimates, exact artifact
-identity, license policy, and committed evidence. It produces the same
-fail-closed decision for a beginner recommendation and advanced controls;
-neither view downloads a model or bypasses an admission blocker.
-
-To pull and preflight Agent model candidates through the Ollama API before
-manual Continue Apply testing, use `docs/local-agent-model-testing.md`.
-
-## Model Selection
-
-The local web app derives automatic selections from `config/text-capability-model-recommendations.json`; the renderer cannot promote a model. The current matching capability evidence and exact Ollama digest make `qwen3.5:9b` the only eligible installed automatic choice for chat, writing, and summarization. A matching name with a missing or different digest remains an explicit unverified advanced choice. This means “exact adapter artifact currently validated by Haven 42,” not “best model available online,” and hardware fit remains profile-specific.
-
-The exact-digest writing matrix ran twice on Qwen 3.5 9B, Gemma 3 12B, Mistral Small 3.2 24B, and Granite 4 7B-A1B-H. Qwen, Gemma, and Mistral passed all three automated synthetic constraint cases in both runs; Granite passed the same two cases in both runs. Two randomized three-scenario packets also captured forced rankings from one reviewer: Qwen led the first and Granite the second. Every model was unloaded and independently confirmed absent afterward. This is not comparative prose-quality evidence: independent reviewers, criterion-level scoring, broader repeated sampling, license review, and hardware utilization evidence remain required before any candidate can replace the Qwen adapter baseline. See `docs/writing-model-evaluation.md`, `examples/writing-model-matrix-validation.md`, and `examples/blind-writing-quality-review.md`.
-
-If you are unsure which model fits your machine, run the hardware profile script. If your LLM runs on another machine, use `docs/remote-hardware-profile.md` to collect that machine's profile over SSH:
-
-Windows PowerShell:
-
-```powershell
-.\scripts\get-local-model-profile.windows.ps1
-```
-
-Linux:
-
-```bash
-./scripts/get-local-model-profile.linux.sh
-```
-
-macOS:
-
-```bash
-./scripts/get-local-model-profile.macos.sh
-```
-
-Then use `docs/local-model-selection.md` to choose the final model. For an offline recommendation JSON that uses your hardware profile, curated model and model-fit catalogs, context target, memory reserve, and validation evidence, run `scripts/recommend-local-agent-config.*`; to write the result to local-only Continue config, run `scripts/apply-recommended-agent-config.*`. See `docs/hardware-aware-recommendations.md`. Treat every recommendation as a starting point, not proof that the model is safe for approved edits. Use `docs/model-tool-use-validation.md` before trusting a model for Agent tools or approved write mode.
-
-To install this pack and create a local-only config using the recommended installed model, use `--auto-model-config` with the install script.
-
-### 3. Copy this pack into your project
-
-Copy the `.continue` folder from this repository into the project you want to review.
-
-Your project should then look like this:
-
-```text
-your-project/
-  .continue/
-    config.yaml
-    prompts/
-    rules/
-    agents/
-    templates/
-```
-
-If your project already has a `.continue` folder, back it up first or compare the files before replacing anything.
-
-### 4. Start Ollama
-
-Make sure Ollama is running. To check it, run:
-
-Windows PowerShell:
-
-```powershell
-ollama list
-```
-
-Linux or macOS:
-
-```bash
-ollama list
-```
-
-If the command shows your models, you are ready.
-
-### 5. Open your project in Continue
-
-Open the project you want to review, not this pack repository.
-
-Continue should use the config file that now lives inside that project:
-
-```text
-.continue/config.yaml
-```
-
-Use the project-local copy of `.continue/config.yaml`. Do not point Continue at the original pack folder after you copy the pack into your project.
-
-Quick checks:
-
-- The editor file explorer shows your project files.
-- Your project has `.continue/config.yaml`.
-- Continue shows the local Ollama model from that config.
-- Continue can see the prompts such as `repository-discovery` and `implementation-plan`.
-
-If Continue does not show a model or prompts, make the copied `.continue/config.yaml` your active Continue config. Some editor setups use a global/default Continue config; in that case, use the installer or hardware-aware apply script with `-GlobalConfig` or `--global-config` so the global file is generated with absolute prompt, rule, and doc references.
-
-Do not copy `.continue/config.local.yaml` into the global Continue config by hand. Local config files can contain `file://./...` references that only make sense inside the project `.continue` folder. When copied globally, they can make Continue look for prompts under the editor install folder.
-
-If you see duplicate rule warnings, you probably loaded the same rules from both the global Continue config and the project-local `.continue` folder. Regenerate the global config without the include-rules option; generated global configs omit rules by default.
-
-For VS Code, VSCodium, Agent mode, duplicate-rule, and CLI fallback checks, use `docs/editor-compatibility.md`.
-
-### 6. Run a read-only prompt first
-
-Start with one of these:
-
-- `repository-discovery`
-- `implementation-plan`
-- `code-review`
-- `documentation`
-- `release-readiness`
-
-Good first request:
-
-```text
-Run repository discovery for this project.
-Do not modify files.
-
-Identify:
-1. The project type
-2. The major files and folders
-3. The current architecture
-4. The main risks
-5. The suggested next steps
-```
-
-## Using The Pack Day To Day
-
-Use this flow after the pack is installed and Continue can see the model.
-
-1. Start with read-only discovery or planning.
-2. Review the response and check whether the assistant used real project evidence.
-3. Ask for an implementation plan before approving changes.
-4. Approve one small change at a time.
-5. Run the smallest useful validation after each change.
-6. Use `git status` to confirm exactly what changed.
-
-Good day-to-day prompts:
-
-```text
-Create an implementation plan for this change.
-Do not modify files yet.
-List affected files, risks, tests, rollback, and definition of done.
-```
-
-```text
-Review the current changes.
-Focus on bugs, regressions, missing tests, security risks, and maintainability.
-Do not modify files.
-```
-
-```text
-Use approved write mode for this task only.
-Edit only the files needed for the approved plan.
-After editing, explain the diff and tell me what validation you ran.
-```
-
-In approved write mode, Continue should use edit/apply tools. If the assistant says it cannot directly edit files, only explains what it would do, or asks you to create files manually, write tools are not validated yet. Use the smoke test in `docs/tool-use-modes.md`.
-
-For real code changes, also confirm the assistant can read file contents, not
-just list files. If it cannot read the files it wants to change, stop and fix
-tool access before approving implementation.
-
-After any approved write, verify the diff yourself. If the assistant says it
-changed a file but `git diff -- <file>` is empty, the write did not apply.
-
-Before approving write mode, read:
-
-- `docs/tool-use-modes.md`
-- `docs/scoped-edits.md`
-- `docs/approved-tool-backed-changes.md`
-- `docs/model-tool-use-validation.md`
-
-## Quick Validation
-
-Run the validation script from this repository after copying or editing the pack.
-
-To catch pack validation problems before they reach GitHub Actions, enable the
-tracked pre-push hook once per clone:
-
-```powershell
-.\scripts\install-git-hooks.ps1
-```
-
-The hook requires a Full pack test before `git push`, including the executable-bit
-check for Linux and macOS shell scripts. If the exact clean commit and tree just
-passed Full, a private `.git` receipt prevents an identical local rerun. GitHub
-still runs Full independently.
-
-After pushing, verify the exact commit on GitHub rather than assuming the push
-is complete because local tests passed:
-
-```powershell
-$sha = git rev-parse HEAD
-.\scripts\verify-hosted-ci.ps1 -CommitSha $sha
-```
-
-Linux and macOS use `verify-hosted-ci.linux.sh` and
-`verify-hosted-ci.macos.sh`. A push is complete only when the script reports
-`CI passed`. See `docs/hosted-ci-verification.md`.
-
-Windows PowerShell:
-
-```powershell
-.\scripts\test-pack.ps1 -Tier Fast
-.\scripts\test-pack.ps1 -Tier Full
-```
-
-Linux:
-
-```bash
-./scripts/test-pack.linux.sh --tier fast
-./scripts/test-pack.linux.sh --tier full
-```
-
-macOS:
-
-```bash
-./scripts/test-pack.macos.sh --tier fast
-./scripts/test-pack.macos.sh --tier full
-```
-
-Full includes static validation. Use the Integration tier when working on
-installers, generated artifacts, routing, or packaging. Each test reports its
-duration; see `docs/test-tiers.md`. The Linux and macOS test scripts are native
-Bash scripts and do not require PowerShell.
-
-## Install Or Update A Target Repository
-
-Use the installer to copy this pack into the repository you want to review.
-
-Windows PowerShell uses the parameter name `-TargetRepo`. Do not use
-`-TargetRepository`; that is not a valid installer parameter.
-
-Preview what would be copied:
-
-Windows PowerShell:
-
-```powershell
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -DryRun
-```
-
-Linux:
-
-```bash
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --dry-run
-```
-
-macOS:
-
-```bash
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --dry-run
-```
-
-Install or update the target repository:
-
-Windows PowerShell:
-
-```powershell
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project"
-```
-
-Choose an install profile when you know how the pack will be used:
-
-```powershell
-# Review and planning only; no edit/apply roles.
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -InstallProfile read-only
-
-# Approved-write workflow; creates scoped WRITE SAFE, PLAN ONLY, and DEEP REVIEW lanes.
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -InstallProfile approved-write
-```
-
-Create a local-only config with automatic model selection:
-
-```powershell
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -AutoModelConfig
-```
-
-Create a local-only config with safer model lanes directly when you prefer the older explicit flag:
-
-```powershell
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -ModelLanes
-```
-
-After a model passes local validation, install it into one local-only profile
-without changing committed shared config:
-
-```powershell
-.\scripts\install-validated-model.ps1 `
-  -TargetRepo "C:\path\to\your-project" `
-  -Model "devstral-small-2:24b" `
-  -Profile plan-only
-```
-
-If your editor uses the global Continue config instead of the project-local
-`.continue/config.yaml`, install the pack and update the global config with
-absolute references to the target repository's installed prompts and docs:
-
-```powershell
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -GlobalConfig
-```
-
-Generated global config omits `rules:` by default. This avoids duplicate rule
-warnings when the opened project also has `.continue/rules`. Use the default
-unless you are intentionally running from global config only.
-
-For a local-network Ollama server, keep the endpoint out of committed project
-files and pass it only when generating the global config:
-
-```powershell
-.\scripts\install-continue-pack.ps1 `
-  -TargetRepo "C:\path\to\your-project" `
-  -GlobalConfig `
-  -GlobalConfigApiBase "http://127.0.0.1:11434"
-```
-
-For a global config that uses model lanes and a local-network Ollama server:
-
-```powershell
-.\scripts\install-continue-pack.ps1 `
-  -TargetRepo "C:\path\to\your-project" `
-  -ModelLanes `
-  -GlobalConfig `
-  -GlobalConfigApiBase "http://127.0.0.1:11434"
-```
-
-Only include rules in the global config when the editor will not also load the
-project-local `.continue` folder:
-
-```powershell
-.\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -GlobalConfig -GlobalConfigIncludeRules
-```
-
-Linux:
-
-```bash
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project
-```
-
-Choose an install profile when you know how the pack will be used:
-
-```bash
-# Review and planning only; no edit/apply roles.
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --install-profile read-only
-
-# Approved-write workflow; creates scoped WRITE SAFE, PLAN ONLY, and DEEP REVIEW lanes.
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --install-profile approved-write
-```
-
-Create a local-only config with automatic model selection:
-
-```bash
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --auto-model-config
-```
-
-Create a local-only config with safer model lanes:
-
-```bash
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --model-lanes
-```
-
-After a model passes local validation, install it into one local-only profile
-without changing committed shared config:
-
-```bash
-./scripts/install-validated-model.linux.sh \
-  --target-repo /path/to/your-project \
-  --model devstral-small-2:24b \
-  --profile plan-only
-```
-
-Update the global Continue config when the editor does not load the project-local
-config:
-
-```bash
-./scripts/install-continue-pack.linux.sh --target-repo /path/to/your-project --global-config
-```
-
-Use shared assets for multiple repositories:
-
-```bash
-./scripts/install-continue-pack.linux.sh   --target-repo /path/to/your-project   --shared-assets   --global-config-api-base http://127.0.0.1:11434
-```
-
-macOS:
-
-```bash
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project
-```
-
-Choose an install profile when you know how the pack will be used:
-
-```bash
-# Review and planning only; no edit/apply roles.
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --install-profile read-only
-
-# Approved-write workflow; creates scoped WRITE SAFE, PLAN ONLY, and DEEP REVIEW lanes.
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --install-profile approved-write
-```
-
-Create a local-only config with automatic model selection:
-
-```bash
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --auto-model-config
-```
-
-Create a local-only config with safer model lanes:
-
-```bash
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --model-lanes
-```
-
-After a model passes local validation, install it into one local-only profile
-without changing committed shared config:
-
-```bash
-./scripts/install-validated-model.macos.sh \
-  --target-repo /path/to/your-project \
-  --model devstral-small-2:24b \
-  --profile plan-only
-```
-
-Update the global Continue config when the editor does not load the project-local
-config:
-
-```bash
-./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --global-config
-```
-
-For Apple Silicon MLX instead of Ollama, start a loopback-only MLX server and
-use the dedicated MLX config mode. It generates an OpenAI-compatible model
-configuration rather than placing an MLX model name in an Ollama config:
-
-```bash
-./scripts/install-continue-pack.macos.sh \
-  --target-repo /path/to/your-project \
-  --global-config \
-  --mlx-config \
-  --mlx-api-base http://127.0.0.1:8080/v1
-```
-
-See `docs/macos-agent-host-bootstrap.md` for the loopback-only MLX server and
-VSCodium validation steps.
-
-Use shared assets for multiple repositories:
-
-```bash
-./scripts/install-continue-pack.macos.sh   --target-repo /path/to/your-project   --shared-assets   --global-config-api-base http://127.0.0.1:11434
-```
-
-The installer:
-
-- Copies the pack's `.continue` files into the target repository.
-- Excludes local config overrides such as `.continue/config.local.yaml`.
-- Backs up an existing target `.continue` folder before replacing it.
-- Validates that copied config file references resolve.
-- Can create `.continue/config.local.yaml` with the model recommended by the hardware profile helper.
-- Supports install profiles: `default`, `read-only`, and `approved-write`.
-- Can create `.continue/config.local.yaml` with a read-only review profile that omits edit/apply roles.
-- Can create `.continue/config.local.yaml` with three Agent model profiles: WRITE SAFE, PLAN ONLY, and DEEP REVIEW. By default, all three use the simple-hardware starter model, plus the separate embedding model.
-- Can install a selected validated model into one local-only profile without changing committed shared config.
-- Can update the global Continue config, with a backup, when an editor does not load project-local config files.
-- Can install reusable shared assets into one local folder and point the global Continue config at that folder for multi-repository workflows.
-- Omits rules from generated global config by default to avoid duplicate rule warnings.
-- Writes Windows global config file references as `file://C:/path/...` for VSCodium compatibility.
-- Refuses to install into this pack repository itself.
-
-Linux and macOS installer wrappers are native Bash scripts and do not require PowerShell.
-
-## Common Problems
-
-Use the detailed guides in `docs/`, starting with `docs/troubleshooting.md`.
-
-| Problem | What to try first |
+| Need | Start here |
 | --- | --- |
-| Continue does not show a model | Confirm Continue is using `.continue/config.yaml`, then run `ollama list`. |
-| Ollama connection error | Start Ollama and confirm `ollama list` works in a terminal. |
-| The starter model is too slow or will not load | Run the hardware profile script and follow `docs/local-model-selection.md`. |
-| `cn` is not recognized | Use `npx @continuedev/cli --config .continue/config.yaml` or install the Continue CLI globally. |
-| The assistant prints raw JSON tool calls | Use a stronger tool-capable model or the runtime-context fallback in `docs/troubleshooting.md`. |
-| The assistant creates a file in the wrong folder | Stop, check `git status --short --untracked-files=all`, remove only the wrong test artifact, and use the `PATH_AMBIGUOUS` guidance in `docs/troubleshooting.md`. |
-| The Apply panel targets the wrong file | Do not click Apply; treat it as `APPLY_TARGET_MISMATCH` and use `docs/troubleshooting.md`. |
-| The assistant prints `edit_file` but nothing changes | Treat it as `WRITE_NOT_APPLIED`; tool-call text is not proof that the file changed. |
-| The assistant says it created and read back a file, but PowerShell or shell cannot find it | Treat it as `WRITE_NOT_APPLIED`; approved-write readiness requires external `git status` plus file existence/content checks. |
-| Two approval prompts duplicate the same line | For existing-file validation, temporarily set `create_new_file` to Excluded, pre-create `continue-agent-write-test.md`, and approve only one edit diff. |
-| The assistant says no file is open and asks for a path | Keep the repository folder open in the editor and use the `WORKSPACE_UNAVAILABLE` guidance in `docs/troubleshooting.md`. |
-| Linux or macOS validation script is not executable | Run `chmod +x scripts/*.sh`, then rerun the wrapper script. |
-| Duplicate rules appear in Continue | Regenerate the global config without `-GlobalConfigIncludeRules`; the default global config omits rules to avoid duplicates with project-local `.continue/rules`. |
-
-## Beginner Safety Rules
-
-- Start with review and planning prompts before asking for changes.
-- Do not commit private IP addresses, tokens, local paths, or raw company code into this pack.
-- Keep machine-specific settings in local files, not in `.continue/config.yaml`.
-- Use `docs/local-config-safety.md` before adding local endpoints, model experiments, or hardware details.
-- Treat AI output as a draft. Review it before changing code.
-- Use `git status` before and after AI-assisted work so you know what changed.
-- Use `docs/tool-use-modes.md` before asking the assistant to modify a reviewed project.
-- Use `docs/scoped-edits.md` to turn an approved plan into one small, reviewable change at a time.
-- When you name a file without a folder, the assistant should assume the currently opened repository folder first. If it creates a duplicate such as `src/README.md` instead of editing the existing `README.md`, treat that as a failed write test.
-- If no file is open, the assistant should still try to discover the opened workspace with tools before asking you for a path.
-- Before clicking Apply, confirm the Apply target is the same file the assistant read and said it would change.
-- For existing-file write tests, exclude `create_new_file` and pre-create the target file so the assistant must use one edit path. Two approvals for the same target can duplicate content.
-- Treat any validation answer that combines a failure signal with a successful status label as failed or limited; for example, `READ_TOOLS_UNAVAILABLE` cannot be `read-only tool validated`.
-
-## Do Not Commit These
-
-Keep these out of committed files:
-
-- `.continue/config.local.yaml`
-- Private IP addresses, internal hostnames, or local-network endpoints
-- API keys, GitHub tokens, SonarQube tokens, or other secrets
-- Usernames, home-directory paths, or machine-specific paths
-- Raw runtime validation output
-- Private repository names or customer names
-- Hardware profiles that include sensitive machine details
-
-Use `docs/local-config-safety.md` before adding local endpoints, model experiments, hardware details, or tool configuration.
-
-## Intended Capabilities
-
-- Local LLM support through maintained Continue, Aider, and OpenCode surfaces
-- Repository-optional local chat, writing, and summarization through Ollama
-- Repository-optional local image generation through the validated Linux ComfyUI/SDXL profile
-- Deterministic capability discovery, intent routing, workflow dispatch, and typed artifacts
-- Enterprise .NET and ASP.NET Core guidance
-- Clean Architecture review and implementation support
-- Repository discovery and system understanding workflows
-- Code review, bug investigation, and implementation planning prompts
-- Legacy .NET dependency migration planning for high-risk package-management changes
-- Security, performance, and SonarQube-oriented review guidance
-- Documentation and product-management assistant roles
-- Reusable templates for architecture, AI, security, and performance artifacts
-- Optional MCP integration points for richer repository and tool context
-- A runnable local web application for status, exact-digest Ollama selection, private text tools, plan-only registered software workflows, and the promoted loopback ComfyUI/SDXL image flow over versioned typed contracts
-
-## Repository Layout
-
-```text
-.continue/
-  config.yaml
-  agents/
-  prompts/
-  rules/
-  templates/
-
-docs/
-examples/
-scripts/
-AI.md
-ARCHITECTURE.md
-CHANGELOG.md
-CONTRIBUTING.md
-DECISIONS.md
-PROJECT.md
-README.md
-ROADMAP.md
-BRANDING.md
-STYLEGUIDE.md
-TODO.md
-```
-
-### `.continue/config.yaml`
-
-The Continue entry point. It defines local Ollama models, repository context providers, local rule files, local prompt files, and an empty MCP server list for future integrations.
-
-### `.continue/agents`
-
-Role-specific assistant definitions with a shared operating contract for permissions, tool use, untrusted repository content, failure reporting, and post-edit verification.
-
-### `.continue/prompts`
-
-Task-oriented, read-only review and planning workflows with explicit evidence, tool-use, filename-fidelity, and failure-reporting contracts.
-
-### `.continue/rules`
-
-Reusable engineering standards with evidence gates and file globs that keep ecosystem-specific guidance scoped to matching repositories.
-
-### `.continue/templates`
-
-Output templates for durable engineering artifacts with explicit evidence scope, confidence or finding status, validation, and open questions.
-
-### `examples`
-
-Representative outputs for major workflows. These examples show expected structure, tone, and level of detail for repository discovery, implementation planning, code review, architecture review, security review, performance review, and release readiness.
-
-### `docs`
-
-Workflow documentation for enterprise review practices, including MCP research, setup guidance, workflow examples, SonarQube integration options, compatibility notes, the manual SonarQube review workflow, validation checklists, and troubleshooting guidance.
-
-Use this folder for deeper instructions after the quick start. Important guides include local model selection, local Agent model testing, model tool-use validation, local model reliability, shared asset installation planning, tool-use modes, scoped edits, validation, runtime validation, MCP setup, MCP examples, and troubleshooting.
-
-### `scripts`
-
-Repository validation automation for release checks and portable configuration invariants.
-
-## Current Status
-
-The repository contains a mature workflow foundation and an early general-purpose capability layer:
-
-- `.continue/config.yaml` targets Continue `schema: v1`.
-- Local-first Ollama model defaults are defined.
-- Continue, Aider, and OpenCode are maintained; failed or retired surfaces are not shipped as partial integrations.
-- Core engineering rules, prompts, agents, templates, workflow registries, and dispatch envelopes are implemented.
-- Configured local rule and prompt file references have been statically checked.
-- Repository-optional chat, writing, summarization, and Linux image generation have live-validated local adapters.
-- Windows, Linux, and macOS contracts are covered in hosted CI; native provider claims remain specific to recorded evidence.
-- MCP and SonarQube support are documented as optional integration paths, not default wired integrations.
-
-Version `0.3.0` established evidence-gated cross-agent validation, hardware-aware model lanes, Apple Silicon MLX support, OS-aware command execution, model-residency controls, exact-SHA hosted CI verification, workflow registries and dispatch envelopes, guided onboarding, release automation, and the general-purpose AI capability foundation. Later work remains under `Unreleased` until the next deliberate release.
-
-## Standard Usage
-
-The standard workflow is:
-
-1. Install or copy this pack into a repository that uses Continue.
-2. Ensure Ollama is running with the configured models available.
-3. Point Continue at `.continue/config.yaml`.
-4. Use the included prompts for discovery, planning, review, security, architecture, performance, and documentation workflows.
-5. Keep project-specific decisions in the top-level documentation files.
-
-Starter local model assumptions:
-
-- Chat/edit/apply/tool workflows: `qwen3.5:9b` as the current WRITE SAFE starter candidate
-- Embeddings: `nomic-embed-text`
-- Ollama endpoint: default local Ollama endpoint
-
-For larger machines, higher-risk workflows, or Agent tool use, run the hardware profile helper and use `docs/local-model-selection.md` before changing models.
-
-For Agent tools or approved write mode, also run the local model preflight in
-`docs/local-agent-model-testing.md` and the read-only checklist in
-`docs/model-tool-use-validation.md`. A hardware recommendation is only a
-candidate until tool execution is validated in the editor or CLI surface you
-plan to use.
-
-For mixed-model workflows, use model profiles instead of giving every model
-`edit` and `apply` roles. The simple-hardware default points all three Agent
-profiles at `qwen3.5:9b`; only the `1 - WRITE SAFE` lane should have `chat`,
-`edit`, and `apply`. Planning and review lanes should stay `chat` only, even if
-you later upgrade them to heavier models.
-
-For private endpoints, local model experiments, or machine-specific settings, use `docs/local-config-safety.md` before editing committed config files.
-
-To collect a sanitized hardware profile for local model selection:
-
-Windows PowerShell:
-
-```powershell
-.\scripts\get-local-model-profile.windows.ps1
-```
-
-Linux:
-
-```bash
-./scripts/get-local-model-profile.linux.sh
-```
-
-macOS:
-
-```bash
-./scripts/get-local-model-profile.macos.sh
-```
-
-For detailed setup, script usage, model selection, troubleshooting, validation, evidence catalog, and tool-use safety instructions, start in the `docs/` folder.
-
-Example Ollama setup:
-
-Windows PowerShell:
-
-```powershell
-ollama pull qwen3.5:9b
-ollama pull nomic-embed-text
-```
-
-Linux or macOS:
-
-```bash
-ollama pull qwen3.5:9b
-ollama pull nomic-embed-text
-```
-
-Optional Continue CLI usage with `npx`:
-
-Windows PowerShell:
-
-```powershell
-npx @continuedev/cli --config .continue/config.yaml
-```
-
-Linux or macOS:
-
-```bash
-npx @continuedev/cli --config .continue/config.yaml
-```
-
-If the Continue CLI is installed globally, `cn` may also be available:
-
-Windows PowerShell:
-
-```powershell
-cn --config .continue/config.yaml
-```
-
-Linux or macOS:
-
-```bash
-cn --config .continue/config.yaml
-```
-
-If PowerShell reports that `cn` is not recognized, use the `npx` command above or install the CLI globally:
-
-Windows PowerShell:
-
-```powershell
-npm install -g @continuedev/cli
-```
-
-Linux or macOS:
-
-```bash
-npm install -g @continuedev/cli
-```
-
-Runtime status:
-
-- Continue CLI config loading was validated with `npx @continuedev/cli`.
-- Continue initialized the config, model, MCP, system-message, and file-index services.
-- Model-backed execution was validated using a local-network Ollama endpoint as a test-time override.
-- A prompt-file smoke test completed successfully.
-- Representative workflow examples are available in `examples/`.
-
-## Examples
-
-- `examples/repository-discovery.md`
-- `examples/implementation-plan.md`
-- `examples/code-review.md`
-- `examples/architecture-review.md`
-- `examples/security-review.md`
-- `examples/performance-review.md`
-- `examples/release-readiness.md`
-- `examples/sonarqube-review.md`
-- `examples/editor-surface-validation.md`
-- `examples/model-tool-use-validation.md`
-- `examples/multi-repository-validation.md`
-- `examples/sample-repository-factory-validation.md`
-- `examples/fixtures/repository-context.md`
-- `examples/fixtures/security-review-input.md`
-- `examples/fixtures/performance-review-input.md`
-- `examples/fixtures/release-readiness-input.md`
-- `examples/fixtures/sonarqube-findings.md`
-
-## Workflow Docs
-
-The path chooser above covers normal use. This grouped index is for advanced users and contributors.
-
-- **Setup and configuration:** [shared assets](docs/shared-asset-installation.md), [configuration strategy](docs/config-generation-strategy.md), [surface-specific bundles](docs/surface-specific-config-bundles.md), and [local configuration safety](docs/local-config-safety.md)
-- **Agents and model testing:** [agent options](docs/agent-surface-options.md), [promotion gates](docs/agent-surface-promotion-gates.md), [shared CLI tests](docs/agent-cli-surface-model-testing.md), and [Continue CLI tests](docs/continue-cli-model-testing.md)
-- **Models, languages, and fixtures:** [local model selection](docs/local-model-selection.md), [remote profiling](docs/remote-hardware-profile.md), [online discovery](docs/online-model-discovery.md), [language support](docs/language-support.md), [optional rule packs](docs/language-rule-packs.md), [rule-pack evidence](examples/language-rule-pack-validation.md), [project detection](docs/project-detection.md), and [sample repository generation](docs/sample-repository-factory.md)
-- **Workflows and safe changes:** [workflow registry](docs/workflow-registry.md), [workflow chooser](docs/workflow-chooser.md), [scenario packs](docs/sample-scenario-packs.md), [tool-use modes](docs/tool-use-modes.md), [approved changes](docs/approved-tool-backed-changes.md), and [scoped edits](docs/scoped-edits.md)
-- **Integrations:** [MCP setup](docs/mcp-setup.md), [MCP examples](docs/mcp-examples.md), [SonarQube review](docs/sonarqube-review.md), [SonarQube options](docs/sonarqube-integration-options.md), and [platform compatibility](docs/compatibility.md)
-- **Validation and release:** [validation checklists](docs/validation-checklists.md), [multi-repository validation](docs/multi-repository-validation.md), [runtime output verification](docs/runtime-output-verification.md), [model reliability](docs/local-model-reliability.md), [banned output patterns](docs/banned-output-patterns.md), [runtime validation](docs/runtime-validation.md), [prompt quality](docs/prompt-quality.md), and [release process](docs/release.md)
-- **Product and maintenance:** [unified UI design](docs/unified-starter-toolkit-ui.md), [solution architecture review](docs/solution-architecture-review.md), [script consolidation](docs/script-consolidation-plan.md), [script reference](docs/script-reference-appendix.md), [autonomous maintainer queue](docs/autonomous-maintainer-queue.md), and [troubleshooting](docs/troubleshooting.md)
-
-## Validation
-
-Run the Fast tier during editing:
+| End-user setup and operation | [Haven 42 wiki](https://github.com/hysel/haven-42/wiki) |
+| Current plans and blockers | [Roadmap](ROADMAP.md) and [project status](PROJECT.md) |
+| Security and privacy | [Security](SECURITY.md), [privacy](PRIVACY.md), and [threat model](docs/security-threat-model.md) |
+| Exact validation records | [Evidence catalog](docs/evidence-catalog.md) and [evidence dashboard](docs/evidence-dashboard.md) |
+| Architecture | [Architecture](ARCHITECTURE.md) and [solution review](docs/solution-architecture-review.md) |
+| Contribution workflow | [Contributing](CONTRIBUTING.md) and [test tiers](docs/test-tiers.md) |
+
+<details>
+<summary>Contributor and engineering documentation index</summary>
+
+This compact index keeps implementation material available without making it
+part of the main end-user reading path.
+
+- Models and hardware: [online discovery](docs/online-model-discovery.md),
+  [hardware-aware model/config recommendation](docs/hardware-aware-recommendations.md),
+  [remote hardware profile](docs/remote-hardware-profile.md), and
+  [configuration strategy](docs/config-generation-strategy.md).
+- Agent testing: [CLI surface testing](docs/agent-cli-surface-model-testing.md),
+  [Continue CLI testing](docs/continue-cli-model-testing.md), and
+  [promotion gates](docs/agent-surface-promotion-gates.md).
+- Languages and projects: [language support](docs/language-support.md),
+  [language rule packs](docs/language-rule-packs.md),
+  [rule-pack evidence](examples/language-rule-pack-validation.md), and
+  [project detection](docs/project-detection.md).
+- Repository validation: [multi-repository guidance](docs/multi-repository-validation.md),
+  [runtime output verification](docs/runtime-output-verification.md),
+  [evidence template](examples/multi-repository-validation.md),
+  [sample factory](docs/sample-repository-factory.md), and
+  [sample evidence](examples/sample-repository-factory-validation.md).
+- Workflow internals: [registry](docs/workflow-registry.md),
+  [chooser](docs/workflow-chooser.md),
+  [script consolidation](docs/script-consolidation-plan.md),
+  [script appendix](docs/script-reference-appendix.md), and
+  [maintainer queue](docs/autonomous-maintainer-queue.md).
+- Advanced configuration: [shared assets](docs/shared-asset-installation.md),
+  [surface bundles](docs/surface-specific-config-bundles.md), and
+  [scenario packs](docs/sample-scenario-packs.md).
+- Product architecture: [solution review](docs/solution-architecture-review.md)
+  and [unified UI design](docs/unified-starter-toolkit-ui.md).
+
+Capability identifiers used by the engineering contracts include
+`general.chat`, `content.write`, `content.summarize`, and `media.image.create`.
+
+</details>
+
+## Contributor validation
+
+Use the smallest appropriate local gate while developing:
 
 ```powershell
 .\scripts\test-pack.ps1 -Tier Fast
 ```
 
-Run the Full tier before push or release:
-
-```powershell
-.\scripts\test-pack.ps1 -Tier Full
-```
-
-On Linux:
-
 ```bash
 ./scripts/test-pack.linux.sh --tier fast
-./scripts/test-pack.linux.sh --tier full
 ```
 
-On macOS:
+Run Integration when a boundary changes and Full once near completion. See
+[Test Tiers](docs/test-tiers.md). Hosted GitHub checks remain independent and
+must pass for the exact proposed commit.
 
-```bash
-./scripts/test-pack.macos.sh --tier fast
-./scripts/test-pack.macos.sh --tier full
-```
+Advanced write behavior, troubleshooting signals, `ModelLanes`, and the
+`1 - WRITE SAFE` lane are documented in [Tool Use Modes](docs/tool-use-modes.md)
+and [Troubleshooting](docs/troubleshooting.md), rather than duplicated here.
+If write tools are not validated yet, first prove that the surface can read file contents. Resolve paths from the currently opened repository folder and verify
+approved changes with `git diff -- <file>`. `WORKSPACE_UNAVAILABLE`,
+`APPLY_TARGET_MISMATCH`, printed `edit_file` text, or a claim that a tool created and read back a file are not proof of a successful write. Exclude
+`create_new_file` when validating an existing-file edit. Two approval prompts
+for the same line can duplicate content. `READ_TOOLS_UNAVAILABLE` cannot be labeled `read-only tool validated`.
 
-The Full tier already includes pack validation. The Linux and macOS scripts are
-native Bash scripts and do not require PowerShell. See `docs/test-tiers.md`.
+## Version and license
 
-The script checks the configured version, required files, local `.continue` file references, default MCP posture, and obvious committed private endpoints or secrets.
+Version `0.3.0` is the current release line. Later work remains under
+`Unreleased` until deliberately versioned and verified.
 
-For runtime validation against a target repository, run the command for your operating system.
-
-Windows:
-
-```powershell
-$Pack = "C:\path\to\haven-42"
-& "$Pack\scripts\run-runtime-validation.ps1" -TargetRepo (Get-Location).Path
-```
-
-Linux:
-
-```bash
-PACK="/path/to/haven-42"
-"$PACK/scripts/run-runtime-validation.linux.sh" --target-repo "$PWD"
-```
-
-macOS:
-
-```bash
-PACK="/path/to/haven-42"
-"$PACK/scripts/run-runtime-validation.macos.sh" --target-repo "$PWD"
-```
-
-Raw runtime outputs are written to an ignored local folder and should be reviewed before any sanitized summary is committed.
-
-To generate a context file without relying on Continue tool execution, run the command for your operating system.
-
-Windows:
-
-```powershell
-$Pack = "C:\path\to\haven-42"
-& "$Pack\scripts\generate-runtime-context.ps1" -TargetRepo (Get-Location).Path -OutputPath .\runtime-context.md
-```
-
-Linux:
-
-```bash
-PACK="/path/to/haven-42"
-"$PACK/scripts/generate-runtime-context.linux.sh" --target-repo "$PWD" --output-path ./runtime-context.md
-```
-
-macOS:
-
-```bash
-PACK="/path/to/haven-42"
-"$PACK/scripts/generate-runtime-context.macos.sh" --target-repo "$PWD" --output-path ./runtime-context.md
-```
-
-## Design Principles
-
-- Prefer local-first operation for private enterprise codebases.
-- Make prompts repeatable, reviewable, and version-controlled.
-- Keep rules explicit enough to guide AI output without hiding engineering judgment.
-- Optimize for .NET, ASP.NET Core, Clean Architecture, secure APIs, and maintainable services.
-- Treat AI output as engineering assistance that still requires human review.
-
-## Roadmap
-
-See `ROADMAP.md`.
-
-## License
-
-MIT License. See `LICENSE`.
-
-### Security posture
-
-Security-sensitive operations fail closed. Provider endpoints use explicit `loopback`, `trusted-lan`, or HTTPS-only `external` trust scopes; redirects and oversized responses are rejected; prompt-file/stdin channels avoid child-process command-line exposure; and artifacts are created without silent overwrite or link following. Third-party automated installers are blocked until immutable reviewed dependency manifests and verified artifacts are admitted. See `SECURITY.md` for private reporting and `docs/provider-endpoint-security.md` for provider rules.
+Haven 42 is licensed under the [MIT License](LICENSE).
