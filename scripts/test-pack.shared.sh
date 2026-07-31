@@ -1958,6 +1958,12 @@ test_wiki_synchronization() {
   wiki_temp="$(mktemp -d)"
   sync="$REPO_ROOT/scripts/sync-wiki.shared.sh"
   "$sync" --wiki-path "$wiki_temp" >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
+  sidebar_links="$(grep -c '^- \[' "$wiki_temp/_Sidebar.md")"
+  navigation_links="$(awk -F '\t' 'NR > 1 && NF >= 3 { count++ } END { print count + 0 }' "$REPO_ROOT/config/wiki-navigation.tsv")"
+  [ "$navigation_links" -ge 10 ] && [ "$navigation_links" -le 25 ] || { rm -rf "$wiki_temp"; return 1; }
+  [ "$sidebar_links" -eq $((navigation_links + 1)) ] || { rm -rf "$wiki_temp"; return 1; }
+  grep -q '^### Get started$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q '^### Contributors$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
   "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
   printf 'stale' > "$wiki_temp/Home.md"
   if "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1; then

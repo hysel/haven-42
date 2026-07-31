@@ -11,6 +11,9 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Replaced the oversized repository README with a concise end-user landing page for capabilities, first run, security, maturity, and primary documentation; detailed engineering references remain available through a collapsed contributor index and the structured wiki.
+- Reorganized the synchronized GitHub wiki around a compact end-user-first Home, Quick Start, usage guide, advanced/project hubs, and a 14-link grouped sidebar while preserving detailed engineering pages through a contributor index; navigation is now a separate allowlist with duplicate, traversal, and unmapped-page checks.
+- Changed PowerShell validation fixtures to copy only current Git-tracked and non-ignored files into bounded temporary roots, excluding ignored build/lab/privacy data and rejecting path escapes or linked content; configuration-generation tests now use purpose-built fixtures instead of repository copies.
 - Added bounded inert UTF-8 `.csv` and `.json` context alongside `.txt`/`.md`, with client and engine syntax/resource validation, format-aware safe previews, no JSON evaluation, no CSV formula execution, and expanded browser/server hostile tests.
 - Added a 24-case restricted parser-worker admission foundation that rejects raw authority, resource abuse, encryption, active content, macros, external relationships, embedded objects, and non-exact worker limits while admitting no PDF/Office parser, worker, route, path, filesystem access, or temporary file.
 - Added a 28-case simulation-only local image lifecycle planner for promoted exact profiles. Install, update, failed-health recovery, rollback, interruption, retention, and uninstall remain counterfactual plans with every network, filesystem, process, activation, approval, and machine effect false.

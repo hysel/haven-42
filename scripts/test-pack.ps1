@@ -204,16 +204,100 @@ function Copy-RepositoryForTest {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "continue-pack-test-$([guid]::NewGuid())"
     New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
 
-    Get-ChildItem -LiteralPath $repoRoot -Force |
-        Where-Object {
-            $_.Name -notin @(".git", "runtime-validation-output") -and
-            $_.Name -ne ".vscode"
-        } |
-        ForEach-Object {
-            Copy-Item -LiteralPath $_.FullName -Destination $tempRoot -Recurse -Force
+    try {
+        $rawPaths = (& git -C $repoRoot ls-files --cached --others --exclude-standard -z) -join "`n"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not enumerate the Git-bounded repository fixture."
+        }
+        $rawDeletedPaths = (& git -C $repoRoot ls-files --deleted -z) -join "`n"
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not enumerate pending repository deletions."
         }
 
-    return $tempRoot
+        $relativePaths = @($rawPaths -split "`0" | Where-Object { $_ })
+        if ($relativePaths.Count -eq 0) {
+            throw "The Git-bounded repository fixture is empty."
+        }
+
+        $stringComparer = if ($IsWindows) {
+            [System.StringComparer]::OrdinalIgnoreCase
+        } else {
+            [System.StringComparer]::Ordinal
+        }
+        $comparison = if ($IsWindows) {
+            [System.StringComparison]::OrdinalIgnoreCase
+        } else {
+            [System.StringComparison]::Ordinal
+        }
+        $deletedPaths = [System.Collections.Generic.HashSet[string]]::new($stringComparer)
+        foreach ($deletedPath in @($rawDeletedPaths -split "`0" | Where-Object { $_ })) {
+            [void]$deletedPaths.Add($deletedPath)
+        }
+        $sourceRoot = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd(
+            [System.IO.Path]::DirectorySeparatorChar,
+            [System.IO.Path]::AltDirectorySeparatorChar
+        )
+        $destinationRoot = [System.IO.Path]::GetFullPath($tempRoot).TrimEnd(
+            [System.IO.Path]::DirectorySeparatorChar,
+            [System.IO.Path]::AltDirectorySeparatorChar
+        )
+        $sourcePrefix = $sourceRoot + [System.IO.Path]::DirectorySeparatorChar
+        $destinationPrefix = $destinationRoot + [System.IO.Path]::DirectorySeparatorChar
+        $checkedSourceDirectories = [System.Collections.Generic.HashSet[string]]::new($stringComparer)
+
+        foreach ($relativePath in $relativePaths) {
+            if ([System.IO.Path]::IsPathRooted($relativePath)) {
+                throw "Git returned an unsafe rooted fixture path."
+            }
+
+            $platformPath = $relativePath.Replace(
+                [System.IO.Path]::AltDirectorySeparatorChar,
+                [System.IO.Path]::DirectorySeparatorChar
+            )
+            $source = [System.IO.Path]::GetFullPath((Join-Path $sourceRoot $platformPath))
+            $destination = [System.IO.Path]::GetFullPath((Join-Path $destinationRoot $platformPath))
+            if (-not $source.StartsWith($sourcePrefix, $comparison) -or
+                -not $destination.StartsWith($destinationPrefix, $comparison)) {
+                throw "Git returned a fixture path outside an approved root."
+            }
+
+            if (-not (Test-Path -LiteralPath $source -PathType Leaf)) {
+                if ($deletedPaths.Contains($relativePath)) {
+                    # Preserve pending tracked deletions in the disposable fixture.
+                    continue
+                }
+                throw "A Git-enumerated repository fixture file is missing: $relativePath"
+            }
+            $sourceItem = Get-Item -LiteralPath $source -Force
+            if ($sourceItem.LinkType -in @("SymbolicLink", "Junction") -or $null -ne $sourceItem.Target) {
+                throw "Repository fixture files must not use symbolic links or junctions: $relativePath"
+            }
+
+            $sourceParent = Split-Path -Parent $source
+            while (-not $sourceParent.Equals($sourceRoot, $comparison)) {
+                if (-not $sourceParent.StartsWith($sourcePrefix, $comparison)) {
+                    throw "A repository fixture parent escaped the approved source root."
+                }
+                if ($checkedSourceDirectories.Add($sourceParent)) {
+                    $parentItem = Get-Item -LiteralPath $sourceParent -Force
+                    if ($parentItem.LinkType -in @("SymbolicLink", "Junction") -or $null -ne $parentItem.Target) {
+                        throw "Repository fixture directories must not use symbolic links or junctions."
+                    }
+                }
+                $sourceParent = Split-Path -Parent $sourceParent
+            }
+
+            $destinationParent = Split-Path -Parent $destination
+            New-Item -ItemType Directory -Force -Path $destinationParent | Out-Null
+            Copy-Item -LiteralPath $source -Destination $destination -Force
+        }
+
+        return $tempRoot
+    }
+    catch {
+        Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
+        throw
+    }
 }
 
 function Invoke-TempValidation {
@@ -242,6 +326,8 @@ Invoke-PackTest "validate-pack ignores local config overrides" {
     $tempRoot = Copy-RepositoryForTest
 
     try {
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRoot "dist"))) -Message "Disposable validation fixtures must exclude ignored build output."
+        Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $tempRoot ".privacy-rewrite-backup"))) -Message "Disposable validation fixtures must exclude ignored privacy backups."
         $privateEndpoint = "http://" + "192" + ".168.0.10:11434"
         $localConfigPath = Join-Path $tempRoot ".continue/config.local.test.yaml"
         "models:`n  - apiBase: $privateEndpoint" | Set-Content -LiteralPath $localConfigPath
@@ -324,6 +410,7 @@ Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     $workflow = Get-Content -LiteralPath (Join-Path $repoRoot ".github/workflows/validate-pack.yml") -Raw
     $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/test-tiers.md") -Raw
     Assert-True -Condition ($windowsRunner -match 'ValidateSet\("Fast", "Integration", "Full"\)' -and $windowsRunner -match "Stopwatch") -Message "Windows tests should expose timed Fast, Integration, and Full tiers."
+    Assert-True -Condition ($windowsRunner -match "ls-files --cached --others --exclude-standard -z" -and $windowsRunner -match 'LinkType -in @\("SymbolicLink", "Junction"\)') -Message "Windows disposable repository fixtures should include current non-ignored Git content and reject linked files."
     Assert-True -Condition ($sharedRunner -match 'fast\|integration\|full' -and $sharedRunner -match "RUN_STARTED_SECONDS") -Message "Native tests should expose timed Fast, Integration, and Full tiers."
     Assert-True -Condition ($windowsRunner -match "haven-42-test-receipt-v1" -and $sharedRunner -match "haven-42-test-receipt-v1") -Message "Both runners should write the same receipt contract."
     Assert-True -Condition ($hook -match "Exact content-tree full-test receipt found" -and $hook -match "HEAD\^\{tree\}" -and $hook -match "schema=3") -Message "Pre-push should require a schema-v3 exact content-tree receipt."
@@ -3071,10 +3158,11 @@ schema_version	area	subject	surface	surface_version	provider	os	model	operation	
 }
 
 Invoke-PackTest "recommended agent config generation writes local-only config" {
-    $tempRoot = Copy-RepositoryForTest
+    $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "recommended-config-fixture-$([guid]::NewGuid())"
     $targetRoot = Join-Path ([System.IO.Path]::GetTempPath()) "recommended-config-target-$([guid]::NewGuid())"
 
     try {
+        New-Item -ItemType Directory -Force -Path $tempRoot | Out-Null
         New-Item -ItemType Directory -Force -Path $targetRoot | Out-Null
         New-Item -ItemType Directory -Force -Path (Join-Path $targetRoot ".continue") | Out-Null
         Copy-Item -LiteralPath (Join-Path $repoRoot ".continue/config.yaml") -Destination (Join-Path $targetRoot ".continue/config.yaml") -Force
@@ -4517,6 +4605,7 @@ Invoke-PackTest "local agent cleanup workflow is dry-run first" {
 Invoke-PackTest "wiki synchronization is deterministic and hosted" {
     $syncPath = Join-Path $repoRoot "scripts/sync-wiki.ps1"
     $mapPath = Join-Path $repoRoot "config/wiki-sync.tsv"
+    $navigationPath = Join-Path $repoRoot "config/wiki-navigation.tsv"
     $retiredPath = Join-Path $repoRoot "config/wiki-retired-pages.txt"
     $workflowPath = Join-Path $repoRoot ".github/workflows/validate-pack.yml"
     $maintenancePath = Join-Path $repoRoot "docs/wiki-maintenance.md"
@@ -4524,8 +4613,14 @@ Invoke-PackTest "wiki synchronization is deterministic and hosted" {
     try {
         New-Item -ItemType Directory -Path $tempWiki | Out-Null
         $entries = @(Import-Csv -LiteralPath $mapPath -Delimiter "`t")
+        $navigationEntries = @(Import-Csv -LiteralPath $navigationPath -Delimiter "`t")
         Assert-True -Condition ($entries.Count -ge 40) -Message "Wiki map should cover the maintained documentation set."
         Assert-Equal -Actual @($entries.page | Sort-Object -Unique).Count -Expected $entries.Count -Message "Wiki destination pages should be unique."
+        Assert-True -Condition ($navigationEntries.Count -ge 10 -and $navigationEntries.Count -le 25) -Message "Primary wiki navigation should remain a compact 10-to-25-link allowlist."
+        Assert-Equal -Actual @($navigationEntries.page | Sort-Object -Unique).Count -Expected $navigationEntries.Count -Message "Wiki navigation destinations should be unique."
+        foreach ($navigationEntry in $navigationEntries) {
+            Assert-True -Condition ($entries.page -ccontains $navigationEntry.page) -Message "Wiki navigation should reference a mapped page: $($navigationEntry.page)"
+        }
         foreach ($entry in $entries) {
             Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $entry.source) -PathType Leaf) -Message "Mapped wiki source should exist: $($entry.source)"
         }
@@ -4533,6 +4628,9 @@ Invoke-PackTest "wiki synchronization is deterministic and hosted" {
 
         $syncResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki)
         Assert-Equal -Actual $syncResult.ExitCode -Expected 0 -Message "Wiki synchronization should populate an empty wiki directory."
+        $sidebar = Get-Content -LiteralPath (Join-Path $tempWiki "_Sidebar.md") -Raw
+        Assert-True -Condition ($sidebar -match "### Get started" -and $sidebar -match "### Contributors") -Message "Wiki sidebar should preserve grouped end-user-first navigation."
+        Assert-Equal -Actual ([regex]::Matches($sidebar, '(?m)^- \[').Count) -Expected ($navigationEntries.Count + 1) -Message "Wiki sidebar should expose only Home plus the navigation allowlist."
         $checkResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki, "-Check")
         Assert-Equal -Actual $checkResult.ExitCode -Expected 0 -Message "Wiki check should pass immediately after synchronization."
         Set-Content -LiteralPath (Join-Path $tempWiki "Home.md") -Value "stale" -NoNewline

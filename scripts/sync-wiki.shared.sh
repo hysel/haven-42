@@ -30,17 +30,28 @@ done
 
 [ -d "$WIKI_PATH" ] || { printf 'Wiki directory does not exist: %s\n' "$WIKI_PATH" >&2; exit 1; }
 MAP_PATH="$REPO_ROOT/config/wiki-sync.tsv"
+NAVIGATION_PATH="$REPO_ROOT/config/wiki-navigation.tsv"
 RETIRED_PATH="$REPO_ROOT/config/wiki-retired-pages.txt"
 DIFFERENCES=0
 ENTRY_COUNT=0
+NAVIGATION_COUNT=0
 SIDEBAR_TEMP="$(mktemp)"
-trap 'rm -f "$SIDEBAR_TEMP"' EXIT
+MAPPED_TEMP="$(mktemp)"
+trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP"' EXIT
 printf '%s\n' '- [Home](Home)' > "$SIDEBAR_TEMP"
 
 while IFS=$'\t' read -r source page title; do
   source="${source%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
   [ "$source" != "source" ] || continue
   [ -n "$source" ] || continue
+  case "$source" in /*|../*|*/../*|*'/..') printf 'Mapped wiki source escapes the repository: %s\n' "$source" >&2; exit 1 ;; esac
+  case "$page" in */*|*'\'*|.*|*[!A-Za-z0-9._-]*|*.md.md) printf 'Invalid mapped wiki page: %s\n' "$page" >&2; exit 1 ;; esac
+  case "$page" in *.md) ;; *) printf 'Mapped wiki page must be Markdown: %s\n' "$page" >&2; exit 1 ;; esac
+  if grep -Fqx "$page" "$MAPPED_TEMP"; then
+    printf 'Duplicate mapped wiki page: %s\n' "$page" >&2
+    exit 1
+  fi
+  printf '%s\n' "$page" >> "$MAPPED_TEMP"
   ENTRY_COUNT=$((ENTRY_COUNT + 1))
   [ -f "$REPO_ROOT/$source" ] || { printf 'Mapped wiki source does not exist: %s\n' "$source" >&2; exit 1; }
   if ! cmp -s "$REPO_ROOT/$source" "$WIKI_PATH/$page"; then
@@ -50,10 +61,30 @@ while IFS=$'\t' read -r source page title; do
       printf 'SYNC %s\n' "$page"
     fi
   fi
-  if [ "$page" != "Home.md" ]; then
-    printf -- '- [%s](%s)\n' "$title" "${page%.md}" >> "$SIDEBAR_TEMP"
-  fi
 done < "$MAP_PATH"
+
+CURRENT_SECTION=''
+NAVIGATION_PAGES_TEMP="$(mktemp)"
+trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$NAVIGATION_PAGES_TEMP"' EXIT
+while IFS=$'\t' read -r section page title; do
+  section="${section%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
+  [ "$section" != "section" ] || continue
+  [ -n "$section" ] && [ -n "$page" ] && [ -n "$title" ] || { printf 'Invalid empty wiki navigation entry.\n' >&2; exit 1; }
+  case "$section$title" in *'['*|*']'*|*'<'*|*'>'*|*'`'*|*'#'*|*'|'*) printf 'Wiki navigation text contains markup syntax.\n' >&2; exit 1 ;; esac
+  grep -Fqx "$page" "$MAPPED_TEMP" || { printf 'Navigation page is not mapped: %s\n' "$page" >&2; exit 1; }
+  if grep -Fqx "$page" "$NAVIGATION_PAGES_TEMP"; then
+    printf 'Duplicate wiki navigation page: %s\n' "$page" >&2
+    exit 1
+  fi
+  printf '%s\n' "$page" >> "$NAVIGATION_PAGES_TEMP"
+  if [ "$section" != "$CURRENT_SECTION" ]; then
+    printf '\n### %s\n' "$section" >> "$SIDEBAR_TEMP"
+    CURRENT_SECTION="$section"
+  fi
+  printf -- '- [%s](%s)\n' "$title" "${page%.md}" >> "$SIDEBAR_TEMP"
+  NAVIGATION_COUNT=$((NAVIGATION_COUNT + 1))
+done < "$NAVIGATION_PATH"
+[ "$NAVIGATION_COUNT" -ge 10 ] && [ "$NAVIGATION_COUNT" -le 25 ] || { printf 'Wiki navigation must contain between 10 and 25 primary links.\n' >&2; exit 1; }
 
 if ! cmp -s "$SIDEBAR_TEMP" "$WIKI_PATH/_Sidebar.md"; then
   DIFFERENCES=1
@@ -80,7 +111,7 @@ if [ "$CHECK" -eq 1 ] && [ "$DIFFERENCES" -ne 0 ]; then
   exit 1
 fi
 if [ "$CHECK" -eq 1 ]; then
-  printf 'Wiki synchronization check passed for %s mapped pages.\n' "$ENTRY_COUNT"
+  printf 'Wiki synchronization check passed for %s mapped pages and %s navigation links.\n' "$ENTRY_COUNT" "$NAVIGATION_COUNT"
 else
-  printf 'Wiki synchronization completed for %s mapped pages.\n' "$ENTRY_COUNT"
+  printf 'Wiki synchronization completed for %s mapped pages and %s navigation links.\n' "$ENTRY_COUNT" "$NAVIGATION_COUNT"
 fi
