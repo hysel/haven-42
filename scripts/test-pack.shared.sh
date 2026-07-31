@@ -1965,7 +1965,9 @@ test_wiki_synchronization() {
   grep -q '^\*\*Get started\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
   grep -q '^\*\*Contributors\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'exactly one level-one heading' "$sync" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'exactly one newline' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'Broken wiki link' "$sync" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'Wiki-style link inside a Markdown table' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   validation_line="$(grep -n 'Mapped wiki source must contain exactly one level-one heading' "$sync" | head -n 1 | cut -d: -f1)"
   copy_line="$(grep -n 'cp \"\$REPO_ROOT/\$source\"' "$sync" | head -n 1 | cut -d: -f1)"
   [ -n "$validation_line" ] && [ -n "$copy_line" ] && [ "$validation_line" -lt "$copy_line" ] || { rm -rf "$wiki_temp"; return 1; }

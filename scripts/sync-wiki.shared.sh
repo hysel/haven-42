@@ -65,7 +65,14 @@ while IFS=$'\t' read -r source page title; do
   [ "$h1_count" -eq 1 ] || { printf 'Mapped wiki source must contain exactly one level-one heading: %s\n' "$source" >&2; exit 1; }
   fence_count="$(grep -c '^```' "$REPO_ROOT/$source" || true)"
   [ $((fence_count % 2)) -eq 0 ] || { printf 'Mapped wiki source contains an unmatched code fence: %s\n' "$source" >&2; exit 1; }
-  case "${source##*/}" in wiki-*.md) if grep -Eqi '<br[[:space:]]*/?>' "$REPO_ROOT/$source"; then printf 'User-facing wiki source contains an HTML line break: %s\n' "$source" >&2; exit 1; fi ;; esac
+  case "${source##*/}" in
+    wiki-*.md)
+      last_byte="$(tail -c 1 "$REPO_ROOT/$source" | od -An -t u1 | tr -d '[:space:]')"
+      [ "$last_byte" = "10" ] && awk 'END { exit(NR == 0 || $0 == "") }' "$REPO_ROOT/$source" || { printf 'Mapped wiki source must end with exactly one newline: %s\n' "$source" >&2; exit 1; }
+      if grep -Eqi '<br[[:space:]]*/?>' "$REPO_ROOT/$source"; then printf 'User-facing wiki source contains an HTML line break: %s\n' "$source" >&2; exit 1; fi
+      ;;
+  esac
+  if grep -Eq '^\|.*\[\[' "$REPO_ROOT/$source"; then printf 'Wiki-style link inside a Markdown table must use standard Markdown syntax: %s\n' "$source" >&2; exit 1; fi
 
   grep -oE '\[\[[^]]+\]\]' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
   while IFS= read -r link; do
