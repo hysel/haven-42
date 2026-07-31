@@ -691,6 +691,40 @@ Invoke-PackTest "hardware profile scripts report CPU architecture" {
         Assert-True -Condition ($content -match "CpuArchitecture") -Message "$scriptName should include CpuArchitecture in JSON output."
         Assert-True -Condition ($content -match "Architecture:") -Message "$scriptName should include Architecture in text output."
     }
+
+    if ($IsWindows) {
+        $windowsProfilePath = Join-Path $repoRoot "scripts/get-local-model-profile.windows.ps1"
+        $profileOutput = @(& $windowsProfilePath -AsJson 2>&1)
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows hardware profile JSON should be generated successfully."
+        $profile = ($profileOutput -join "`n") | ConvertFrom-Json
+        foreach ($gpu in @($profile.Gpus)) {
+            Assert-True -Condition ($gpu.Name.Length -le 256) -Message "Windows GPU labels must remain bounded."
+            Assert-True -Condition ($gpu.Name -notmatch '[\u0000-\u001F\u007F\uFFFD]') -Message "Windows GPU labels must not expose registry control or invalid-decoding characters."
+        }
+    }
+}
+
+Invoke-PackTest "first-party text files end with exactly one newline" {
+    $editorConfigPath = Join-Path $repoRoot ".editorconfig"
+    Assert-True -Condition (Test-Path -LiteralPath $editorConfigPath -PathType Leaf) -Message ".editorconfig should define the final-newline contract."
+    $editorConfig = Get-Content -LiteralPath $editorConfigPath -Raw
+    Assert-True -Condition ($editorConfig -match '(?m)^insert_final_newline = true\r?$') -Message ".editorconfig should require a final newline."
+
+    $textExtensions = @(".cfg", ".css", ".html", ".ini", ".js", ".json", ".md", ".mjs", ".ps1", ".py", ".sh", ".toml", ".tsv", ".txt", ".yaml", ".yml")
+    $trackedFiles = @(& git -C $repoRoot ls-files)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Tracked-file discovery should succeed."
+    foreach ($relativePath in $trackedFiles) {
+        if ($relativePath -like "package/licenses/*") {
+            continue
+        }
+        if ($textExtensions -notcontains [System.IO.Path]::GetExtension($relativePath).ToLowerInvariant()) {
+            continue
+        }
+
+        $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot $relativePath))
+        Assert-True -Condition ($content.EndsWith("`n")) -Message "$relativePath should end with a newline."
+        Assert-True -Condition ($content -notmatch '(\r?\n){2}$') -Message "$relativePath should not contain trailing blank lines."
+    }
 }
 
 Invoke-PackTest "macOS hardware profile reports MLX separately from Ollama" {

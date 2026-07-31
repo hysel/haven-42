@@ -147,5 +147,3 @@ else
     "${TIMEOUT_CMD[@]}" ssh "${SSH_STREAM_ARGS[@]}" "$TARGET" 'bash -s -- --json' < "$PROFILE_SCRIPT"
   fi
 fi
-
-

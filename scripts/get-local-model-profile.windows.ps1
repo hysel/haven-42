@@ -272,15 +272,30 @@ function Get-RocmGpuProfiles {
 function Convert-RegistryString {
     param($Value)
 
+    $text = $null
     if ($Value -is [byte[]]) {
-        return ([System.Text.Encoding]::Unicode.GetString($Value)).Trim([char]0).Trim()
+        $text = [System.Text.Encoding]::Unicode.GetString($Value)
+    }
+    elseif ($Value) {
+        $text = [string]$Value
     }
 
-    if ($Value) {
-        return ([string]$Value).Trim()
+    if (-not $text) {
+        return $null
     }
 
-    return $null
+    # Registry-backed device labels are untrusted presentation data. Remove
+    # control characters and invalid-decoding replacement markers before they
+    # enter JSON, terminal output, evidence, or a future renderer boundary.
+    $text = ($text -replace '[\u0000-\u001F\u007F\uFFFD]', '').Trim()
+    if (-not $text) {
+        return $null
+    }
+
+    if ($text.Length -gt 256) {
+        $text = $text.Substring(0, 256).Trim()
+    }
+    return $text
 }
 
 function Get-WindowsRegistryGpuProfiles {

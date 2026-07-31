@@ -72,3 +72,27 @@ quality review.
   Gemma, Mistral, or Granite as an automatic default.
 
 The reusable harness is `scripts/run-writing-model-matrix.py`.
+
+## Expanded installed-model screen
+
+An additional bounded run on 2026-07-31 screened eight models that were already
+installed on the same private NVIDIA provider. The host reported Ollama
+`0.32.5` and approximately 250 GB free before the run. No model was downloaded,
+and neither prompts nor response text were retained.
+
+| Candidate | Ollama digest | Automated cases | Average generation rate | Final state |
+| --- | --- | ---: | ---: | --- |
+| `qwen3.5:0.8b` | `f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4` | 2/3 passed | 143.44 tokens/s | unloaded |
+| `qwen3.5:2b` | `324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df` | 0/3 passed | 122.61 tokens/s | unloaded |
+| `qwen3.5:4b` | `2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd` | 3/3 passed | 93.94 tokens/s | unloaded |
+| `qwen3.5:9b` | `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7` | 3/3 passed | 75.57 tokens/s | unloaded |
+| `gemma3:12b` | `f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a` | 3/3 passed | 53.09 tokens/s | unloaded |
+| `granite4:7b-a1b-h` | `566b725534ea0e9824f844abe6a78e1ab6f7357f1efb549be94908cb681513bb` | 2/3 passed | 129.75 tokens/s | unloaded |
+| `mistral-small3.2:24b-instruct-2506-q4_K_M` | `5a408ab55df5c1b5cf46533c368813b30bf9e4d8fc39263bf2a3338cfa3b895b` | 3/3 passed | 41.20 tokens/s | unloaded |
+| `devstral-small-2:24b` | `24277f07f62db8f9cb68e9dfc679ea1818a7fbac47a50eff0a701d3f645b63c8` | 3/3 passed | 39.64 tokens/s | unloaded |
+
+These exact-output constraint checks are diagnostic, not a quality ranking.
+The two smaller Qwen variants and Granite remain valid user-selectable models,
+but their misses grant no recommendation or promotion authority. Every case
+used bounded generation and immediate unload; a final independent residency
+check reported no loaded models.
