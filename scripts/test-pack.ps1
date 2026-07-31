@@ -4631,7 +4631,7 @@ Invoke-PackTest "wiki synchronization is deterministic and hosted" {
         $sidebar = Get-Content -LiteralPath (Join-Path $tempWiki "_Sidebar.md") -Raw
         Assert-True -Condition ($sidebar -match "\*\*Get started\*\*" -and $sidebar -match "\*\*Contributors\*\*") -Message "Wiki sidebar should preserve compact grouped end-user-first navigation."
         $syncSource = Get-Content -LiteralPath $syncPath -Raw
-        Assert-True -Condition ($syncSource -match "exactly one level-one heading" -and $syncSource -match "Broken wiki link") -Message "Wiki synchronization should validate page structure and internal links."
+        Assert-True -Condition ($syncSource -match "exactly one newline" -and $syncSource -match "exactly one level-one heading" -and $syncSource -match "Broken wiki link" -and $syncSource -match "Wiki-style link inside a Markdown table") -Message "Wiki synchronization should validate final newlines, page structure, table-compatible link syntax, and internal links."
         Assert-True -Condition ($syncSource.IndexOf("Mapped wiki source must contain exactly one level-one heading", [System.StringComparison]::Ordinal) -lt $syncSource.IndexOf("WriteAllBytes", [System.StringComparison]::Ordinal)) -Message "Wiki synchronization should validate every mapped source before writing a page."
         Assert-Equal -Actual ([regex]::Matches($sidebar, '(?m)^- \[').Count) -Expected ($navigationEntries.Count + 1) -Message "Wiki sidebar should expose only Home plus the navigation allowlist."
         $checkResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki, "-Check")

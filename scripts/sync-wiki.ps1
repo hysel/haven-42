@@ -61,6 +61,10 @@ foreach ($page in $mappedPages) {
 foreach ($entry in $entries) {
     $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $entry.source))
     $sourceText = [System.IO.File]::ReadAllText($sourcePath)
+    if ([System.IO.Path]::GetFileName($entry.source) -like 'wiki-*.md' -and
+        $sourceText -notmatch '(?s)[^\r\n](?:\r\n|\n)\z') {
+        throw "Mapped wiki source must end with exactly one newline: $($entry.source)"
+    }
     $h1Count = ([regex]::Matches($sourceText, '(?m)^# [^#\r\n]')).Count
     if ($h1Count -ne 1) {
         throw "Mapped wiki source must contain exactly one level-one heading: $($entry.source)"
@@ -71,6 +75,9 @@ foreach ($entry in $entries) {
     }
     if ([System.IO.Path]::GetFileName($entry.source) -like 'wiki-*.md' -and $sourceText -match '<br\s*/?>') {
         throw "User-facing wiki source contains an HTML line break: $($entry.source)"
+    }
+    if ($sourceText -match '(?m)^\|[^\r\n]*\[\[') {
+        throw "Wiki-style link inside a Markdown table must use standard Markdown syntax: $($entry.source)"
     }
     foreach ($match in [regex]::Matches($sourceText, '\[\[(?:[^\]|]+\|)?([^\]#]+)(?:#[^\]]+)?\]\]')) {
         $target = $match.Groups[1].Value.Trim()

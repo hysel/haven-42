@@ -45,15 +45,15 @@ modify system configuration.
 
 | I want to… | Read… |
 | --- | --- |
-| Run Haven 42 for the first time | [[Quick Start|Quick-Start]] |
-| Understand the main interface | [[Using Haven 42|Using-Haven-42]] |
-| Choose or find a model | [[Choose a Model|Local-Model-Selection]] |
-| Configure local image generation | [[Set Up Local Images|Local-Image-Provider-Onboarding]] |
-| Understand what stays in memory | [[Privacy|Privacy-Policy]] |
-| Secure a local or private-network provider | [[Connection Security|Provider-Endpoint-Security]] |
-| Fix a problem | [[Troubleshooting]] |
-| Use engineering and contributor features | [[Advanced Topics|Advanced-Topics]] |
-| See maturity and future work | [[Project Information|Project-Information]] |
+| Run Haven 42 for the first time | [Quick Start](Quick-Start) |
+| Understand the main interface | [Using Haven 42](Using-Haven-42) |
+| Choose or find a model | [Choose a Model](Local-Model-Selection) |
+| Configure local image generation | [Set Up Local Images](Local-Image-Provider-Onboarding) |
+| Understand what stays in memory | [Privacy](Privacy-Policy) |
+| Secure a local or private-network provider | [Connection Security](Provider-Endpoint-Security) |
+| Fix a problem | [Troubleshooting](Troubleshooting) |
+| Use engineering and contributor features | [Advanced Topics](Advanced-Topics) |
+| See maturity and future work | [Project Information](Project-Information) |
 
 ## Privacy and security
 
