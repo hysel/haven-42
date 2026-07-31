@@ -72,7 +72,7 @@ class MatrixRunnerTests(unittest.TestCase):
 
     def test_resolve_beneath_rejects_symlink(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve(strict=True)
             target = root / "target"
             target.write_bytes(b"safe")
             link = root / "link"
@@ -87,7 +87,7 @@ class MatrixRunnerTests(unittest.TestCase):
 
     def test_verify_artifact_checks_size_and_hash(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve(strict=True)
             artifact = root / "model.gguf"
             artifact.write_bytes(b"controlled")
             good = {
@@ -174,7 +174,7 @@ class MatrixRunnerTests(unittest.TestCase):
 
     def test_child_environment_excludes_home_and_user_profile(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve(strict=True)
             environment = MODULE.safe_environment(root, "hip", "0", [])
         self.assertNotIn("HOME", environment)
         self.assertNotIn("USERPROFILE", environment)
@@ -182,7 +182,7 @@ class MatrixRunnerTests(unittest.TestCase):
 
     def test_summary_refuses_predictable_temporary_collision(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve(strict=True)
             output = root / "result.json"
             collision = root / f".{output.name}.{MODULE.os.getpid()}.tmp"
             collision.write_text("do not overwrite", encoding="utf-8")
