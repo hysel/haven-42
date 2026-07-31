@@ -11,6 +11,18 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Hardened the browser smoke against overlapping task submissions by waiting
+  for both the terminal response and restored composer controls; added bounded
+  timeout diagnostics and revalidated the 329-check flow on Windows and Linux.
+- Sanitized Windows registry-derived GPU labels before JSON or terminal output,
+  including control-character removal and a 256-character bound, with a native
+  regression test.
+- Added a repository-wide exactly-one-final-newline contract for first-party
+  text while preserving verbatim third-party license files.
+- Repeated the exact 11-model AMD/HIP matrix and a bounded Intel B580 SYCL
+  inference cell, and expanded the installed-model Ollama writing screen with
+  digest-bound, cleanup-verified evidence. These development results change no
+  runtime admission or production claim.
 - Reworked the synchronized wiki into concise user-facing model, image,
   troubleshooting, roadmap, and evidence pages while preserving the original
   engineering records under explicit titles; compacted sidebar section labels,

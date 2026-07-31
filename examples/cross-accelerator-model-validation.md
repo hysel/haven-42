@@ -72,6 +72,15 @@ performance guarantee. Patch, tool-call, context-pressure, repeated lifecycle,
 and vision tests listed in the manifest remain separate follow-on cells and
 must not be inferred from the benchmark.
 
+A complete Windows AMD repeat on 2026-07-31 reverified all 11 artifact hashes,
+the exact b10088 runtime commit, ROCm backend identity, full model-layer
+offload, bounded exit, and cleanup. All 11 operational checks passed, and the
+same four exact-output cells passed while the same seven missed. No artifact
+was downloaded and no raw prompt, response, endpoint, username, hostname, or
+local path was retained. Repeat throughput varied within the expected
+host-specific diagnostic range and does not replace the original paired
+AMD/NVIDIA comparison.
+
 ## Linux NVIDIA/CUDA Result
 
 The Linux x86_64 NVIDIA cell completed on one explicitly isolated Tesla V100

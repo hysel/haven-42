@@ -887,8 +887,12 @@ try {
   checks += 2;
   try {
     await waitFor(() => cdp.evaluate(`(
-      [...document.querySelectorAll('.message p')].some((item) => item.textContent === 'LOCAL_BROWSER_OK')
-      || document.querySelector('#task-event').dataset.kind === 'error'
+      (
+        [...document.querySelectorAll('.message p')].some((item) => item.textContent === 'LOCAL_BROWSER_OK')
+        || document.querySelector('#task-event').dataset.kind === 'error'
+      )
+      && !document.querySelector('#prompt').disabled
+      && !document.querySelector('#send-button').disabled
     )`));
   } catch (error) {
     const diagnostic = await cdp.evaluate(`({
@@ -929,9 +933,22 @@ try {
     document.querySelector('#prompt').value = 'markdown showcase';
     document.querySelector('#text-form').requestSubmit();
   })()`);
-  await waitFor(() => cdp.evaluate(
-    "document.querySelector('.message:last-child .message-content h5')?.textContent.includes('Clear answer')",
-  ));
+  try {
+    await waitFor(() => cdp.evaluate(
+      "document.querySelector('.message:last-child .message-content h5')?.textContent.includes('Clear answer')",
+    ));
+  } catch (error) {
+    const diagnostic = await cdp.evaluate(`({
+      taskEvent: document.querySelector('#task-event').textContent,
+      taskKind: document.querySelector('#task-event').dataset.kind || '',
+      status: document.querySelector('#text-status').textContent,
+      error: document.querySelector('#connection-error').textContent,
+      promptDisabled: document.querySelector('#prompt').disabled,
+      sendDisabled: document.querySelector('#send-button').disabled,
+      lastMessage: document.querySelector('.message:last-child')?.textContent || ''
+    })`);
+    throw new Error(`markdown-response-timeout:${JSON.stringify({ diagnostic, requests })}`, { cause: error });
+  }
   const markdown = await cdp.evaluate(`(() => {
     const content = document.querySelector('.message:last-child .message-content');
     return {

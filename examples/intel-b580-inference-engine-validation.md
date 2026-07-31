@@ -40,6 +40,13 @@ tool call, hostile-Origin handling, closed-port verification, and cleanup.
 Haven 42's existing provider discovery and invocation entry points passed
 against a temporary lab-only profile; no endpoint or model path was persisted.
 
+On 2026-07-31, the retained exact Qwen 3.5 0.8B Q4 artifact and the same
+hash-identified SYCL build completed another bounded full-offload inference
+cell. Prompt processing was approximately 3,307 tokens per second and
+generation approximately 236 tokens per second. The model process and listener
+were absent after cleanup. These host-specific rates are diagnostic only; no
+new artifact was downloaded and no raw response was committed.
+
 The exact Qwen 3.5 9B Q4_K_M artifact fully offloaded and generated about
 57 tokens per second. Its first reasoning-disabled patch attempt failed.
 A bounded reasoning retry with an exact hunk-count instruction produced a

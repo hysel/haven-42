@@ -194,5 +194,3 @@ if ($OutputPath) {
 } else {
     $output.TrimEnd()
 }
-
-

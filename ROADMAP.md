@@ -44,7 +44,7 @@ The repository has entered user-visible product implementation. Milestones 1 thr
 | Milestone 23: Native Local Image Generation | In progress | The Linux ComfyUI/SDXL profile is live-validated and promoted; a 28-case effect-free lifecycle planner now covers install, update, failed-health recovery, rollback, retention, interruption, and uninstall without granting machine authority. Windows AMD/RX 7800 XT passes cancellation, forced recovery, repeated generation, retention cleanup, and uninstall, while a real update/rollback candidate plus consumer onboarding/installer behavior remain gated. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; vocal, signal-quality, cancellation, recovery, and adapter gates remain open. |
 | Milestone 25: Local Video Generation | Research in progress | Exact HunyuanVideo, Wan2.2, and LTX-2.3 candidate records plus identity/media consent policy are complete; no live provider is promoted. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus now passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Physical Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI without promoting either engine; Vulkan failed the patch gate. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus now passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes; a complete 2026-07-31 AMD repeat preserved all outcomes. Physical Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI, plus a cleanup-verified retained-artifact SYCL repeat, without promoting either engine; Vulkan failed the patch gate. |
 | Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | Explicit bounded text, structured-text, source-code, and PNG attachments are admitted. Retrieval, history, PDF, Office, OpenDocument, folder scanning, embeddings, OCR, persistence, and complex-document UI remain independently gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Default-deny contracts and inert hostile fixtures exist, but no model tool, renderer route, DNS, network, page retrieval, active citation, or autonomous follow-up authority is admitted. |
 
@@ -1047,34 +1047,34 @@ Exit criteria:
 8. Add text-only PDF extraction for unencrypted, inactive documents after PDF-specific hostile, resource, dependency, packaging, and native gates pass. Candidate comparison, exact universal-wheel/metadata/license digest verification, and a deterministic 14-file synthetic hostile corpus are complete for `pypdf` 6.14.2. A review-only worker opened those synthetic bytes and passed 61 Windows security, 64 static contract, and 40 contract-parity/package-exclusion checks. A 33-check bounded native-validation foundation passed source orchestration on Windows and Ubuntu Linux. The 27-check production-isolation assessment records missing Windows restricted-token/AppContainer-equivalent, Linux namespaces/seccomp/Landlock-equivalent, and macOS sandbox controls; no fallback is allowed. Metadata-only research cataloged three public corpus sources but selected, downloaded, opened, parsed, or retained no document because per-artifact origin, rights, privacy, malware, revision, and digest evidence remain unresolved. A 23-case offline intake verifier binds public same-host HTTPS artifact paths to immutable revisions and rejects private destinations; the 15-check source/package parity contract also fails closed. Prospective inventory/notices/SBOM remain ignored local evidence. The wheel remains ignored, uninstalled, absent from dependencies and packages, and unreachable from the application; macOS execution, production isolation, admitted non-synthetic hostile evidence, package integration, native package parity, and explicit admission remain open. Keep embedded files, JavaScript/actions, external references, PDF rendering, and OCR blocked.
 9. Add non-macro `.docx`/`.xlsx`/`.pptx` extraction only after independent Open XML package, relationship, formula, presentation-semantics, dependency, and native gates pass. The shared candidate-only ZIP/XML inspection foundation passes 41 checks across 16 deterministic containers. The standard-library semantic prototype now passes 57 checks across 17 six-format fixtures, distinguishes DOCX body/table/header/footer/comment provenance, XLSX shared/inline/literal cells, and PPTX slide/speaker-note text, and rejects formulas, tracked changes, invalid shared-string indexes, and over-budget parts/text. Windows and Ubuntu Linux source orchestration pass without archive extraction or third-party dependencies. A separate 33-check parity contract keeps every package cell false. Charts, drawings, relationship-aware ordering, richer comment/change semantics, non-synthetic evidence, production isolation, native package parity, and runtime admission remain open.
 10. Add `.odt`/`.ods`/`.odp` extraction only after an independent OpenDocument ZIP/XML parser review and equivalent relationship, embedded-content, formula, expansion, dependency, packaging, and native gates pass. Candidate identity, first stored mimetype, hostile external-link/embedded-object/DTD/entity/mimetype-confusion rejection, runtime/package exclusion, bounded paragraph/heading review, formula rejection, and Windows/Ubuntu source evidence are covered by the shared foundations; no OpenDocument dependency, worker, provider payload, package, UI, or runtime route is admitted.
-10. Evaluate `.pptx` and `.xlsx` independently with slide/sheet provenance and format-specific bounds. Keep macro-enabled, legacy binary, encrypted, embedded-object, and unsupported Office formats blocked.
-11. Evaluate scanned-PDF and image OCR as a separate capability with pinned models/tools, capacity planning, quality evidence, cleanup, and no-network enforcement.
-12. Add deterministic in-memory lexical retrieval and per-response source/chunk disclosure. Done offline with strict budgets, stable ranking, hostile-input isolation, removal, clear-all, and failure cleanup; runtime route, UI, and provider integration remain unadmitted.
-13. Evaluate explicit folder selection only after canonicalization, exclusions, symlink/reparse handling, preview, cancellation, and bounded traversal tests pass on every platform.
-14. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
-15. Define a versioned, default-deny conversation-history contract and hostile
+11. Evaluate `.pptx` and `.xlsx` independently with slide/sheet provenance and format-specific bounds. Keep macro-enabled, legacy binary, encrypted, embedded-object, and unsupported Office formats blocked.
+12. Evaluate scanned-PDF and image OCR as a separate capability with pinned models/tools, capacity planning, quality evidence, cleanup, and no-network enforcement.
+13. Add deterministic in-memory lexical retrieval and per-response source/chunk disclosure. Done offline with strict budgets, stable ranking, hostile-input isolation, removal, clear-all, and failure cleanup; runtime route, UI, and provider integration remain unadmitted.
+14. Evaluate explicit folder selection only after canonicalization, exclusions, symlink/reparse handling, preview, cancellation, and bounded traversal tests pass on every platform.
+15. Evaluate optional local embeddings independently, including model identity, download consent, capacity, quality, cleanup, and provider separation.
+16. Define a versioned, default-deny conversation-history contract and hostile
     fixtures with every database route, file write, migration, import, and
     persistence effect disabled. Done: the contract, logical schema boundary,
     and 16 inert hostile requests grant no runtime or storage authority.
-16. Build a simulation-only SQLite schema, migration planner, retention planner,
+17. Build a simulation-only SQLite schema, migration planner, retention planner,
     context-reconstruction planner, and corruption/recovery fixtures without
     creating a runtime database. Done for the effect-free foundation, including
     deletion, backup, restore, busy/locked, interrupted-write, corruption, and
     disk-full plans; no SQLite module is imported and no database is opened.
-17. Review the encryption and key-management architecture, including
+18. Review the encryption and key-management architecture, including
     SQLCipher-equivalent dependency, license, supply-chain, native packaging,
     operating-system credential storage, key rotation/loss, and backup/restore.
     Done at the architecture boundary: dependency selection and implementation
     remain separately gated, and unavailable credential storage fails closed to
     Private session without a plaintext key fallback.
-18. Admit an opt-in development history database only after explicit approval
+19. Admit an opt-in development history database only after explicit approval
     and the storage, deletion, recovery, privacy, and cross-platform package
     gates pass. Keep Private session as the default until a separate product
     decision changes it.
-19. Add conversation list, rename, search, retention, delete, clear-all,
+20. Add conversation list, rename, search, retention, delete, clear-all,
     context-preview, backup, and restore UI only over typed engine operations;
     add no renderer SQL or filesystem path authority.
-20. Consider an optional persistent document/knowledge library only as a
+21. Consider an optional persistent document/knowledge library only as a
     separately approved storage product with its own encryption, deletion,
     migration, export, rollback, retrieval, and uninstall evidence.
 
