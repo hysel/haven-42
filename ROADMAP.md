@@ -44,7 +44,7 @@ The repository has entered user-visible product implementation. Milestones 1 thr
 | Milestone 23: Native Local Image Generation | In progress | The Linux ComfyUI/SDXL profile is live-validated and promoted; a 28-case effect-free lifecycle planner now covers install, update, failed-health recovery, rollback, retention, interruption, and uninstall without granting machine authority. Windows AMD/RX 7800 XT passes cancellation, forced recovery, repeated generation, retention cleanup, and uninstall, while a real update/rollback candidate plus consumer onboarding/installer behavior remain gated. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; vocal, signal-quality, cancellation, recovery, and adapter gates remain open. |
 | Milestone 25: Local Video Generation | Research in progress | Exact HunyuanVideo, Wan2.2, and LTX-2.3 candidate records plus identity/media consent policy are complete; no live provider is promoted. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA passed on Linux NVIDIA and HIP passed on Windows AMD, while Vulkan failed the patch gate and Intel remains parked. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus now passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Physical Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI without promoting either engine; Vulkan failed the patch gate. |
 | Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | Explicit bounded text, structured-text, source-code, and PNG attachments are admitted. Retrieval, history, PDF, Office, OpenDocument, folder scanning, embeddings, OCR, persistence, and complex-document UI remain independently gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Default-deny contracts and inert hostile fixtures exist, but no model tool, renderer route, DNS, network, page retrieval, active citation, or autonomous follow-up authority is admitted. |
 
@@ -650,9 +650,15 @@ Goal: Provide one local-first product surface over the completed engineering wor
 
 Scope:
 
-- Use Tauri 2 with a React and TypeScript UI built by Vite for ordinary desktop operation. Load bundled local assets only and communicate with a packaged Haven 42 engine sidecar through versioned typed stdin/stdout IPC.
-- Permit only registered capability and workflow IDs through narrowly scoped Tauri permissions; ship no arbitrary shell bridge, unrestricted filesystem API, remote UI code, or default listening port.
-- Keep hardened loopback/browser operation as a separately tested option for headless Linux, SSH-tunneled use, development, and diagnostics.
+- Continue using the shared browser UI and the minimum trusted PyInstaller
+  launcher/service for ordinary desktop operation. Keep Tauri/Rust unadmitted
+  unless a future owner decision explicitly reopens its independent security
+  and dependency gates.
+- Permit only registered capability and workflow IDs through the loopback
+  service's narrow typed routes; ship no arbitrary shell bridge, unrestricted
+  filesystem API, remote UI code, or non-loopback listening port.
+- Keep hardened loopback/browser operation as the common tested Windows,
+  Linux, and macOS product surface.
 - Implement the unified web UI over stable workflow IDs, capability IDs, typed artifacts, and versioned request/result envelopes.
 - Keep chat as the primary interaction surface with compact sticky navigation and provider/system configuration. Done for the local web slice; responsive contract and visual regression coverage remain part of each UI change.
 - Present Chat, Writing, and Summarization through one continuous conversation
@@ -719,8 +725,15 @@ Exit criteria:
 
 ### Recommended Implementation Order
 
-1. Select the local UI runtime and package boundary without introducing a hosted-service dependency. Done with Tauri 2, bundled React/TypeScript/Vite assets, a packaged engine sidecar, and private typed stdin/stdout IPC.
-2. Define and statically validate the Tauri capability allowlist, IPC schema, native path-selection boundary, local-only content policy, and headless loopback separation. Done for the versioned contracts, 46 engine-side hostile cases, and 55 native-authority policy cases; actual native bridge enforcement and adversarial runtime tests remain promotion gates.
+1. Select the local UI runtime and package boundary without introducing a
+   hosted-service dependency. Done with the shared browser UI and unsigned
+   PyInstaller one-folder development launcher/service on Windows, Linux, and
+   macOS. Tauri/Rust remains unadmitted.
+2. Define and validate the loopback route/resource allowlists, request
+   contracts, path-free browser selection boundary, local-only content policy,
+   lifecycle authority, and package integrity. Done for the admitted
+   development surface; any future native bridge remains an independent
+   promotion decision.
 3. Validate pinned dependency and license choices, then scaffold the smallest Windows, Linux, and macOS package slice. Direct candidates are reviewed; disposable Windows npm and PyInstaller graphs passed, while five Windows-reachable unmaintained Rust crates, unaudited native build prerequisites, and separate Linux findings block admission.
 4. Implement first-run navigation and capability availability views over the Milestone 21 registry. The local-web renderer now provides keyboard-accessible Guided, Existing, and Explore paths, explicit read-only readiness scanning, a disabled setup plan, five engine-derived capability states, and policy disclosures; the framework-neutral contracts remain the source of truth and the native renderer remains gated.
 5. Assemble the model-selection view data without visual UI work. Done with a versioned read-only catalog, fail-closed per-artifact license policy, hardware-fit labels, revision-bound evidence, shared beginner/advanced decisions, hostile-input tests, and OS-aware wrappers.
@@ -885,10 +898,22 @@ Exit criteria:
    when an exact runtime and format have credible native support. Windows AMD is
    done for Ollama 0.32.1, its packaged ROCm 7.1 backend, an RX 7800 XT 16 GB
    profile, Qwen 3.5 9B Q4_K_M versus Q8_0, a 4,096-token context, and
-   concurrency one. Windows NVIDIA remains open; Windows Intel is parked until
-   representative Intel GPU hardware is available, and physical Apple Silicon
+   concurrency one. Windows NVIDIA remains open. A physical Linux Intel Arc
+   B580 now supplies candidate-only llama.cpp SYCL and OpenVINO GenAI evidence;
+   Windows Intel remains a separate untested cell, and physical Apple Silicon
    is owner-parked until hardware is acquired.
-7. Separate capability, provider contract, inference engine, hardware backend, and model artifact selection. Done with a fail-closed registry. llama.cpp `b10088` CUDA passed bounded engine checks on the exact Linux NVIDIA RTX 5000 profile, and HIP passed on the exact Windows AMD profile; Vulkan failed the Windows AMD Git-applicable-patch gate and remains documentation-only. OpenVINO GenAI and llama.cpp SYCL are parked pending Intel hardware; IPEX-LLM is retired; LM Studio is optional user-installed API-only software. The Linux CUDA source build is evidence, not yet a consumer installation path.
+7. Separate capability, provider contract, inference engine, hardware backend,
+   and model artifact selection. Done with a fail-closed registry. llama.cpp
+   CUDA passed bounded engine checks on the exact Linux NVIDIA RTX 5000
+   profile, and HIP passed on the exact Windows AMD profile; Vulkan failed the
+   Windows AMD Git-applicable-patch gate and remains documentation-only.
+   Physical Linux Intel Arc B580 tests remove the hardware blocker for
+   llama.cpp SYCL and OpenVINO GenAI, but both remain candidate-only:
+   llama.cpp passed 50 of 53 upstream tests, while OpenVINO ran outside its
+   documented OS baseline and its small control model missed strict output
+   constraints. IPEX-LLM is retired; LM Studio is optional user-installed
+   API-only software. No source-built engine is yet a consumer installation
+   path.
 8. Add conversion, activation, rollback, cleanup, and UI integration only for exact profiles that pass all promotion gates.
 
 ## Milestone 27: Local Knowledge Context And Retrieval

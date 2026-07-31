@@ -116,20 +116,52 @@ def pyinstaller_environment() -> dict[str, str]:
     return environment
 
 
-def build_resource_manifest() -> None:
+def expected_resource_manifest(root: Path = ROOT) -> dict[str, object]:
     resources = []
     for relative in RESOURCE_PATHS:
-        path = ROOT / relative
+        path = root / relative
+        if not path.is_file() or path.is_symlink():
+            raise SystemExit(f"Protected package resource is missing or unsafe: {relative}")
+        content = path.read_bytes()
+        if b"\r" in content:
+            raise SystemExit(
+                f"Protected package resource must use repository-enforced LF "
+                f"bytes: {relative}"
+            )
         resources.append({
             "path": relative,
-            "sha256": sha256(path),
-            "sizeBytes": path.stat().st_size,
+            "sha256": hashlib.sha256(content).hexdigest(),
+            "sizeBytes": len(content),
         })
-    write_json(ROOT / "package/resource-integrity.json", {
+    return {
         "schemaVersion": 1,
         "algorithm": "sha256",
         "resources": resources,
-    })
+    }
+
+
+def update_resource_manifest(root: Path = ROOT) -> None:
+    write_json(
+        root / "package/resource-integrity.json",
+        expected_resource_manifest(root),
+    )
+
+
+def verify_resource_manifest(root: Path = ROOT) -> None:
+    manifest_path = root / "package/resource-integrity.json"
+    try:
+        committed = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise SystemExit(
+            f"Committed resource integrity manifest is unreadable: {error}"
+        ) from error
+    if committed != expected_resource_manifest(root):
+        raise SystemExit(
+            "Committed resource integrity manifest does not match the protected "
+            "package resources. Review the resource changes, then run "
+            "'python scripts/build-portable-development-package.py "
+            "--update-resource-integrity' explicitly."
+        )
 
 
 def copy_license_evidence(evidence: Path) -> None:
@@ -295,12 +327,26 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", default=str(ROOT / "dist" / "portable"))
     parser.add_argument("--skip-pyinstaller", action="store_true")
+    parser.add_argument(
+        "--update-resource-integrity",
+        action="store_true",
+        help="Update only the tracked protected-resource manifest for review.",
+    )
     args = parser.parse_args()
+    if args.update_resource_integrity:
+        if args.skip_pyinstaller:
+            parser.error(
+                "--update-resource-integrity cannot be combined with "
+                "--skip-pyinstaller."
+            )
+        update_resource_manifest()
+        print(ROOT / "package/resource-integrity.json")
+        return 0
     output = Path(args.output).resolve()
     work = output / "work"
     artifact_dir = output / "artifacts"
     target = f"{platform.system().lower()}-{platform.machine().lower()}"
-    build_resource_manifest()
+    verify_resource_manifest()
     if not args.skip_pyinstaller:
         subprocess.run([
             sys.executable, "-m", "PyInstaller",

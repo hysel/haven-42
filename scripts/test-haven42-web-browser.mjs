@@ -2,7 +2,7 @@
 import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
@@ -186,6 +186,18 @@ function resolveBrowser() {
   throw new Error("supported-chromium-browser-not-found");
 }
 
+function resolveBrowserProfileRoot(browserPath) {
+  if (
+    process.platform === "linux"
+    && ["/usr/bin/chromium-browser", "/snap/bin/chromium"].includes(browserPath)
+    && existsSync("/snap/bin/chromium")
+  ) {
+    const snapCommon = join(homedir(), "snap", "chromium", "common");
+    if (existsSync(snapCommon)) return snapCommon;
+  }
+  return tmpdir();
+}
+
 async function waitFor(getter, timeoutMs = 15000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -285,7 +297,10 @@ const packagedExecutable = process.env.HAVEN42_TEST_EXECUTABLE
   : "";
 const python = packagedExecutable ? null : resolvePython();
 const browserPath = resolveBrowser();
-const profile = mkdtempSync(join(tmpdir(), "haven42-browser-"));
+// Strictly confined Snap Chromium sees a private /tmp. Keep its disposable
+// profile in Snap's user-owned common directory so the host test process can
+// read DevToolsActivePort, then remove the profile in the normal cleanup path.
+const profile = mkdtempSync(join(resolveBrowserProfileRoot(browserPath), "haven42-browser-"));
 let haven;
 let browser;
 let cdp;

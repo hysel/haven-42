@@ -3,28 +3,28 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "de7270dc2535342b9edab1b76dc3a75833ef4994cda0de476b5161b0d88f70c5",
-      "sizeBytes": 30202
+      "sha256": "c1bd445efaebe4a6c673e1d473eb6c30219a8dff71bee067d901900621a21dd0",
+      "sizeBytes": 29771
     },
     {
       "path": "web/static/app.js",
-      "sha256": "f9a080d5f7ea19a8f7c8913646834ad3b80c0daa895d713f82c0fffd4f3012df",
-      "sizeBytes": 99803
+      "sha256": "2fd973dadd4c851bccf9218f3e738f4b275a7c1434254704b500a34130af815d",
+      "sizeBytes": 97558
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "46f4e036c09ef1762d892e845556ef456eec32a0922a111930287f100eeac51f",
-      "sizeBytes": 27032
+      "sha256": "00644febf6afdea82ebc21f74fc545e5ebf87da419a5dd736a05aa5abc15e6e6",
+      "sizeBytes": 26644
     },
     {
       "path": "config/text-capability-model-recommendations.json",
-      "sha256": "2e73ec2c32bacafd8343db7e4c826cf94fd1ec4dd48c9b2eab2643a0f9c5009e",
-      "sizeBytes": 1577
+      "sha256": "ce0f11fa519f36e3df3fe068a062a30d0bb9e3b44bada64dcf63b36e1729e099",
+      "sizeBytes": 1532
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "c346ca707f9ac0f527845fd9a6b0d0676183a2eb5c0bbafa8fb8a8d4d3f1ade4",
-      "sizeBytes": 26515
+      "sha256": "919676968904c3a174348047055061aac81242bf5ecd35d7e5b55c256ca1e963",
+      "sizeBytes": 28089
     },
     {
       "path": "config/agent-surface-capabilities.json",
@@ -33,18 +33,18 @@
     },
     {
       "path": "config/agent-surface-solutions.json",
-      "sha256": "1b22cf357c9fbfc60ff92c95835b606e68e9b473d5ccc136cf8d10cfacc26b0f",
-      "sizeBytes": 9827
+      "sha256": "cd6cd26b79943127f0cd41f7e27d39d73e7cb2ac02b0c6357d2119845182f3c0",
+      "sizeBytes": 9713
     },
     {
       "path": "config/install-component-registry.json",
-      "sha256": "320828ed102c368e41673f35ea9b35f78a3182152415f30bd23fa63fd657e582",
-      "sizeBytes": 4068
+      "sha256": "3dc60b659c7b9d9e15e6b2120a0e34db1788b4d601d9d1f86ee9798ac2626830",
+      "sizeBytes": 3961
     },
     {
       "path": "config/workflows.json",
-      "sha256": "cbeb8f153243a63558d4b4d2aa1a71d01b42d122b88cd5cbf24694805609d26b",
-      "sizeBytes": 20683
+      "sha256": "12a01739b7f9170ed0984fd0963a9de5c3431975d399c95ecbf4b9fd81595418",
+      "sizeBytes": 20227
     }
   ],
   "schemaVersion": 1

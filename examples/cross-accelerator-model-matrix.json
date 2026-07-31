@@ -1,0 +1,179 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Development-only comparison of identical portable GGUF bytes across NVIDIA CUDA and AMD HIP. This manifest does not authorize downloads, installation, model redistribution, or production admission.",
+  "runtime": {
+    "project": "ggml-org/llama.cpp",
+    "buildTag": "b10088",
+    "commit": "67b9b0e7f6ce45d929a4411907d3c48ec719e81c",
+    "expectedBuildNumber": 10088
+  },
+  "execution": {
+    "contextTokens": 4096,
+    "gpuLayers": 99,
+    "promptTokens": 128,
+    "generatedTokens": 64,
+    "benchmarkRepetitions": 3,
+    "timeoutSeconds": 300,
+    "minimumFreeBytesBeforeStaging": 42949672960
+  },
+  "security": {
+    "networkUseDuringInference": false,
+    "listenersAllowed": false,
+    "shellExecutionAllowed": false,
+    "rawPromptsOrResponsesInSummary": false,
+    "absoluteOrParentRelativeArtifactPathsAllowed": false,
+    "symlinkedArtifactsAllowed": false,
+    "hashVerificationRequired": true,
+    "fullGpuOffloadRequired": true
+  },
+  "models": [
+    {
+      "id": "qwen3-0.6b-q4",
+      "family": "Qwen3",
+      "license": "Apache-2.0",
+      "repository": "ggml-org/Qwen3-0.6B-GGUF",
+      "revision": "b5f37287796e5be0ea3dab2e7430873fb3f73e49",
+      "artifact": {
+        "path": "ggml-org/Qwen3-0.6B-GGUF/b5f37287796e5be0ea3dab2e7430873fb3f73e49/Qwen3-0.6B-Q4_0.gguf",
+        "sizeBytes": 428970080,
+        "sha256": "da2572f16c06133561ce56accaa822216f2391ef4d37fba427801cd6736417d4"
+      },
+      "tests": ["benchmark", "bounded-exact-output"]
+    },
+    {
+      "id": "qwen3.5-0.8b-q4",
+      "family": "Qwen3.5",
+      "license": "Apache-2.0",
+      "repository": "ggml-org/Qwen3.5-0.8B-GGUF",
+      "revision": "8fea620810c4afa23dd6443f999a48574c1611a3",
+      "artifact": {
+        "path": "ggml-org/Qwen3.5-0.8B-GGUF/8fea620810c4afa23dd6443f999a48574c1611a3/Qwen3.5-0.8B-Q4_0.gguf",
+        "sizeBytes": 563036064,
+        "sha256": "57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf"
+      },
+      "tests": ["benchmark", "bounded-exact-output"]
+    },
+    {
+      "id": "qwen3.5-0.8b-q8",
+      "family": "Qwen3.5",
+      "license": "Apache-2.0",
+      "repository": "ggml-org/Qwen3.5-0.8B-GGUF",
+      "revision": "8fea620810c4afa23dd6443f999a48574c1611a3",
+      "artifact": {
+        "path": "ggml-org/Qwen3.5-0.8B-GGUF/8fea620810c4afa23dd6443f999a48574c1611a3/Qwen3.5-0.8B-Q8_0.gguf",
+        "sizeBytes": 833592096,
+        "sha256": "37ae482d336108d23516fa35e8e0c4126688d81018b87178a18d752a1357814f"
+      },
+      "tests": ["benchmark", "bounded-exact-output"]
+    },
+    {
+      "id": "gemma3-1b-q4km",
+      "family": "Gemma3",
+      "license": "Gemma Terms",
+      "repository": "ggml-org/gemma-3-1b-it-GGUF",
+      "revision": "f9c28bcd85737ffc5aef028638d3341d49869c27",
+      "artifact": {
+        "path": "ggml-org/gemma-3-1b-it-GGUF/f9c28bcd85737ffc5aef028638d3341d49869c27/gemma-3-1b-it-Q4_K_M.gguf",
+        "sizeBytes": 806058240,
+        "sha256": "8ccc5cd1f1b3602548715ae25a66ed73fd5dc68a210412eea643eb20eb75a135"
+      },
+      "tests": ["benchmark", "bounded-exact-output"]
+    },
+    {
+      "id": "smollm3-3b-q4km",
+      "family": "SmolLM3",
+      "license": "Apache-2.0",
+      "repository": "ggml-org/SmolLM3-3B-GGUF",
+      "revision": "4965cb60b150737b68a0408c36aeefb65078f894",
+      "artifact": {
+        "path": "ggml-org/SmolLM3-3B-GGUF/4965cb60b150737b68a0408c36aeefb65078f894/SmolLM3-Q4_K_M.gguf",
+        "sizeBytes": 1915305312,
+        "sha256": "8334b850b7bd46238c16b0c550df2138f0889bf433809008cc17a8b05761863e"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "patch"]
+    },
+    {
+      "id": "granite4.1-3b-q4km",
+      "family": "Granite4.1",
+      "license": "Apache-2.0",
+      "repository": "ibm-granite/granite-4.1-3b-GGUF",
+      "revision": "ab4701481089b58a082ef63cc1cee738887293ff",
+      "artifact": {
+        "path": "ibm-granite/granite-4.1-3b-GGUF/ab4701481089b58a082ef63cc1cee738887293ff/granite-4.1-3b-Q4_K_M.gguf",
+        "sizeBytes": 2099501664,
+        "sha256": "662b0626cd58f443baea23559b469df6576a81d349649c59413b36a9fb32eb29"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "patch"]
+    },
+    {
+      "id": "phi3-mini-4k-q4",
+      "family": "Phi3",
+      "license": "MIT",
+      "repository": "microsoft/Phi-3-mini-4k-instruct-gguf",
+      "revision": "a64113399c2f6b8ad3e11c394733a2ddadaa7f33",
+      "artifact": {
+        "path": "microsoft/Phi-3-mini-4k-instruct-gguf/a64113399c2f6b8ad3e11c394733a2ddadaa7f33/Phi-3-mini-4k-instruct-q4.gguf",
+        "sizeBytes": 2393231072,
+        "sha256": "8a83c7fb9049a9b2e92266fa7ad04933bb53aa1e85136b7b30f1b8000ff2edef"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "patch"]
+    },
+    {
+      "id": "gemma3-4b-q4km",
+      "family": "Gemma3",
+      "license": "Gemma Terms",
+      "repository": "ggml-org/gemma-3-4b-it-GGUF",
+      "revision": "d0976223747697cb51e056d85c532013931fe52e",
+      "artifact": {
+        "path": "ggml-org/gemma-3-4b-it-GGUF/d0976223747697cb51e056d85c532013931fe52e/gemma-3-4b-it-Q4_K_M.gguf",
+        "sizeBytes": 2489757856,
+        "sha256": "882e8d2db44dc554fb0ea5077cb7e4bc49e7342a1f0da57901c0802ea21a0863"
+      },
+      "projector": {
+        "path": "ggml-org/gemma-3-4b-it-GGUF/d0976223747697cb51e056d85c532013931fe52e/mmproj-model-f16.gguf",
+        "sizeBytes": 851251104,
+        "sha256": "8c0fb064b019a6972856aaae2c7e4792858af3ca4561be2dbf649123ba6c40cb"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "patch", "vision"]
+    },
+    {
+      "id": "qwen3-4b-q4km",
+      "family": "Qwen3",
+      "license": "Apache-2.0",
+      "repository": "ggml-org/Qwen3-4B-GGUF",
+      "revision": "2f3b082b1356a6123f7ed71e65aea340da25d53c",
+      "artifact": {
+        "path": "ggml-org/Qwen3-4B-GGUF/2f3b082b1356a6123f7ed71e65aea340da25d53c/Qwen3-4B-Q4_K_M.gguf",
+        "sizeBytes": 2497280640,
+        "sha256": "ab27b9bfa375a178d6cba48f3ad892b94b7739659dcc7aae8058ce0ffed6b328"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "patch"]
+    },
+    {
+      "id": "qwen3.5-9b-q4km",
+      "family": "Qwen3.5",
+      "license": "Apache-2.0",
+      "repository": "unsloth/Qwen3.5-9B-GGUF",
+      "revision": "3885219b6810b007914f3a7950a8d1b469d598a5",
+      "artifact": {
+        "path": "unsloth/Qwen3.5-9B-GGUF/3885219b6810b007914f3a7950a8d1b469d598a5/Qwen3.5-9B-Q4_K_M.gguf",
+        "sizeBytes": 5680522464,
+        "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "tool-call", "patch"]
+    },
+    {
+      "id": "qwen3-8b-q8",
+      "family": "Qwen3",
+      "license": "Apache-2.0",
+      "repository": "ggml-org/Qwen3-8B-GGUF",
+      "revision": "bbd9eb5efae3fd6d45dd620650916346d7cecc67",
+      "artifact": {
+        "path": "ggml-org/Qwen3-8B-GGUF/bbd9eb5efae3fd6d45dd620650916346d7cecc67/Qwen3-8B-Q8_0.gguf",
+        "sizeBytes": 8709518656,
+        "sha256": "2f98cff159bcdf01431829406d43363ccacb76ed6b76d18bd9d6ab20976792c0"
+      },
+      "tests": ["benchmark", "bounded-exact-output", "context-4k", "context-8k", "patch"]
+    }
+  ]
+}

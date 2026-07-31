@@ -91,7 +91,13 @@ The UI should call only stable workflow IDs from `config/workflows.json` through
 
 Milestone 22A is a runnable local web application implemented with the Python standard library and bundled HTML, CSS, and JavaScript. It binds only to `127.0.0.1`, requires Host, Origin, and in-memory request-token checks, stores no configuration or text, infers safe local/LAN scope from the entered IP, and admits sanitized system status plus the Ollama-backed `general.chat`, `content.write`, and `content.summarize` slices. Those text slices share one visible continuous conversation while retaining separate engine prompts, evidence, and model guidance. A narrow local hint may propose a task-specific installed model, but the renderer sends nothing and never switches until the user explicitly decides. See `docs/local-web-mvp.md`.
 
-The optional Milestone 22B desktop runtime remains Tauri 2 with bundled React and TypeScript UI built by Vite. The production window would load only bundled local assets. Tauri would start one packaged, platform-specific Haven 42 engine sidecar and exchange versioned typed JSON over private stdin/stdout IPC. The bridge accepts only registered capability IDs, workflow IDs, and schema-valid arguments. It must not expose arbitrary shell execution, unrestricted filesystem access, raw process spawning, remote UI code, or a generic command method.
+The active Milestone 22 desktop development runtime is the shared browser UI
+with a minimum trusted PyInstaller launcher/service. It binds only to loopback,
+serves bundled allowlisted resources, and accepts only registered typed routes.
+It must not expose arbitrary shell execution, unrestricted filesystem access,
+raw process spawning, remote UI code, or a generic command method. Tauri 2 remains unadmitted.
+React/Vite, Rust, and private sidecar IPC remain historical architecture
+research only.
 
 The desktop application does not listen on a TCP port. A separately hardened loopback server may be evaluated for headless Linux, SSH-tunneled access, development, and diagnostics, but it is not the ordinary Windows, Linux desktop, or macOS runtime and cannot inherit desktop promotion evidence.
 

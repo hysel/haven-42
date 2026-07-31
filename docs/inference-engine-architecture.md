@@ -8,21 +8,27 @@ The capability registry can request text generation without assuming Ollama, lla
 
 The machine-readable source is `config/inference-engine-registry.json`. Unknown combinations fail closed, silent CPU fallback is prohibited, and failed candidates leave documentation only.
 
-The shared local-text discovery and invocation entry points implement this boundary for `ollama.local-text` and `llamacpp.local-text`. They normalize Ollama and OpenAI-compatible response shapes without treating protocol compatibility as evidence inheritance. Ollama passed a fresh live adapter probe and chat call. llama.cpp passed its first direct server discovery and invocation on the exact Linux NVIDIA/CUDA profile; Windows AMD/HIP retains bounded engine evidence only, and every selection still requires an exact admitted profile.
+The shared local-text discovery and invocation entry points implement this boundary for `ollama.local-text` and `llamacpp.local-text`. They normalize Ollama and OpenAI-compatible response shapes without treating protocol compatibility as evidence inheritance. Ollama passed a fresh live adapter probe and chat call. llama.cpp passed direct server discovery and invocation on the exact Linux NVIDIA/CUDA profile. A temporary lab-only Intel SYCL profile also passed discovery and invocation, but it is not committed as admitted because the pinned upstream suite was not fully green. Windows AMD/HIP retains bounded engine evidence only, and every selection still requires an exact admitted profile.
 
 ## Current Decisions
 
 | Engine | Decision | Boundary |
 | --- | --- | --- |
 | Ollama | Validated exact profiles | Existing Linux NVIDIA/CUDA and Windows AMD/ROCm evidence only. |
-| llama.cpp | CUDA and HIP validated; Vulkan failed | Linux NVIDIA CUDA and Windows AMD HIP passed their exact bounded engine cells. Vulkan failed the Windows AMD applicable-patch gate and remains documentation-only. |
-| OpenVINO GenAI | Parked | Wait for representative Intel GPU hardware; ship no integration assets meanwhile. |
-| llama.cpp SYCL | Parked | Wait for representative Intel GPU hardware. Current upstream SYCL scope is Intel hardware. |
+| llama.cpp | CUDA and HIP validated; Vulkan failed | Linux NVIDIA CUDA and Windows AMD HIP passed their exact bounded engine cells. The same hash-pinned 11-model corpus passes the b10088 baseline on AMD/HIP and NVIDIA/CUDA without changing admission. Vulkan failed the Windows AMD applicable-patch gate and remains documentation-only. |
+| OpenVINO GenAI | Candidate | Exact Linux B580 GPU execution and cleanup passed, but the host OS is outside the documented support baseline, strict output behavior failed, and provider/package gates are absent. |
+| llama.cpp SYCL | Candidate | Exact Linux B580 functional, vision, pressure, adapter, and cleanup cells passed; 3 of 53 upstream tests failed, so the backend remains unselectable and unpackaged. |
 | LM Studio | Optional external API | The end user installs it. Haven 42 may call its published loopback API but does not embed or redistribute it. |
 | IPEX-LLM | Retired | Upstream was archived on 2026-01-28. Keep a documentation record only. |
 | llama.cpp Metal | Parked | Physical-Mac validation remains the last hardware step. |
 
-`oneAPI` is a compiler/runtime toolkit rather than a standalone inference engine. It may become a dependency of an admitted Intel backend, but it is not presented as a provider. OpenVINO GenAI remains a separate Intel-focused engine candidate.
+`oneAPI` is a compiler/runtime toolkit rather than a standalone inference engine. It may become a dependency of an admitted Intel backend, but it is not presented as a provider. OpenVINO GenAI remains a separate Intel-focused engine candidate. See `examples/intel-b580-inference-engine-validation.md` for the sanitized exact-host evidence and blockers.
+
+The development-only cross-accelerator manifest and sanitized completed baseline
+are documented in `examples/cross-accelerator-model-validation.md`. Its runner
+is offline during inference, listener-free, shell-free, hash-gated, and
+full-offload-gated. Test artifacts and raw results remain outside the
+repository. A completed cell never transfers evidence to another accelerator.
 
 ## Admission Rules
 

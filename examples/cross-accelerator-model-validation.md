@@ -1,0 +1,127 @@
+# Cross-Accelerator Portable Model Validation
+
+## Scope
+
+This development-only batch compares identical, hash-pinned GGUF bytes through
+the same llama.cpp build on Windows AMD/HIP and Linux NVIDIA/CUDA. It does not
+compare an Ollama blob with a llama.cpp artifact, transfer evidence between
+accelerators, admit a provider route, authorize model redistribution, or claim
+production support.
+
+The public manifest is
+`examples/cross-accelerator-model-matrix.json`. It pins llama.cpp build
+`b10088` at commit `67b9b0e7f6ce45d929a4411907d3c48ec719e81c`,
+11 text-model artifacts, and one Gemma multimodal projector. The projector is
+verified separately and is reserved for a later vision cell; it is not counted
+as a text model.
+
+The runner:
+
+- performs no download and opens no listener;
+- passes the runtime's explicit offline option and strips home-directory
+  variables from the child environment;
+- rejects absolute paths, parent traversal, symlinks, size drift, and SHA-256
+  drift before execution;
+- rejects relaxed security policy, unknown test names, unbounded execution
+  values, and insufficient free space;
+- invokes exact binaries without a shell;
+- uses an explicit accelerator index and fails on a backend mismatch;
+- requires every model layer to be reported as GPU-offloaded;
+- runs one model at a time with bounded process time;
+- checkpoints only sanitized metrics through an exclusive, no-follow atomic
+  temporary file and never stores raw prompts, responses, endpoints,
+  hostnames, usernames, or local paths; and
+- treats functional quality separately from engine execution.
+
+OpenVINO's Qwen3 0.6B INT4 IR files are Intel-engine-specific and cannot be
+executed by llama.cpp CUDA or HIP. The portable comparison therefore uses the
+revision-pinned Qwen3 0.6B Q4_0 GGUF counterpart. This is a related model, not
+byte-equivalent evidence for the OpenVINO artifact.
+
+## Windows AMD/HIP Result
+
+The Windows x86_64 AMD cell completed on an RX 7800 XT 16 GB using the
+hash-verified official b10088 HIP archive. All 11 artifacts matched their
+manifest size and SHA-256, identified the ROCm backend and expected GPU,
+completed the fixed 128-token prompt and 64-token generation benchmark,
+reported full model-layer offload, exited within the per-process limit, and
+left no llama.cpp process or listener.
+
+| Artifact | Prompt tokens/s | Generation tokens/s | Exact 48-token response |
+| --- | ---: | ---: | --- |
+| Qwen3 0.6B Q4_0 | 7,147.02 | 272.20 | Miss |
+| Qwen3.5 0.8B Q4_0 | 7,438.82 | 225.62 | Miss |
+| Qwen3.5 0.8B Q8_0 | 7,434.84 | 205.60 | Miss |
+| Gemma 3 1B Q4_K_M | 5,911.08 | 178.61 | Pass |
+| SmolLM3 3B Q4_K_M | 2,749.30 | 139.06 | Miss |
+| Granite 4.1 3B Q4_K_M | 2,505.14 | 128.05 | Pass |
+| Phi-3 Mini 4K Q4 | 2,819.63 | 118.14 | Pass |
+| Gemma 3 4B Q4_K_M | 2,677.37 | 111.06 | Pass |
+| Qwen3 4B Q4_K_M | 2,186.77 | 116.78 | Miss |
+| Qwen3.5 9B Q4_K_M | 1,285.95 | 69.27 | Miss |
+| Qwen3 8B Q8_0 | 1,511.90 | 60.44 | Miss |
+
+The exact-output gate gives each model only 48 generated tokens. The Qwen
+reasoning models remained inside their reasoning phase at that boundary; this
+is a bounded-task miss, not an engine or offload failure. Four unrelated model
+artifacts returned the exact marker after the llama-cli conversation wrapper
+was removed by a tested parser. SmolLM3 also missed the exact-output gate.
+
+These throughput values are one controlled development run, not a general
+performance guarantee. Patch, tool-call, context-pressure, repeated lifecycle,
+and vision tests listed in the manifest remain separate follow-on cells and
+must not be inferred from the benchmark.
+
+## Linux NVIDIA/CUDA Result
+
+The Linux x86_64 NVIDIA cell completed on one explicitly isolated Tesla V100
+SXM2 32 GB. The runtime was built from the pinned b10088 source commit for
+compute capability 7.0 with its build number explicitly bound to 10088. It
+contained no downloaded or embedded server UI. A dedicated, restricted
+non-root lab identity staged the already verified corpus; host-specific
+connection details and credentials remain outside the repository.
+
+All 11 artifacts independently matched the same manifest sizes and SHA-256
+values used by the AMD cell. Every model identified CUDA and the expected GPU,
+completed the fixed benchmark, reported full model-layer offload, and exited
+within its bound. The selected GPU was idle before the run and returned to zero
+memory use afterward. No llama.cpp process or test listener remained.
+
+| Artifact | Prompt tokens/s | Generation tokens/s | Exact 48-token response |
+| --- | ---: | ---: | --- |
+| Qwen3 0.6B Q4_0 | 6,997.26 | 407.78 | Miss |
+| Qwen3.5 0.8B Q4_0 | 5,807.23 | 311.79 | Miss |
+| Qwen3.5 0.8B Q8_0 | 7,307.49 | 283.08 | Miss |
+| Gemma 3 1B Q4_K_M | 5,979.65 | 261.43 | Pass |
+| SmolLM3 3B Q4_K_M | 2,375.61 | 197.65 | Miss |
+| Granite 4.1 3B Q4_K_M | 1,998.84 | 166.10 | Pass |
+| Phi-3 Mini 4K Q4 | 1,921.38 | 189.57 | Pass |
+| Gemma 3 4B Q4_K_M | 1,864.81 | 145.80 | Pass |
+| Qwen3 4B Q4_K_M | 1,757.30 | 156.77 | Miss |
+| Qwen3.5 9B Q4_K_M | 1,045.86 | 97.01 | Miss |
+| Qwen3 8B Q8_0 | 1,398.57 | 80.43 | Miss |
+
+## Cross-Accelerator Comparison
+
+The artifact hash, build number, source commit, full-offload result,
+operational result, and exact-output result agree for every AMD/NVIDIA row.
+The same four artifacts passed the strict exact marker on both accelerators;
+the same seven missed. This consistency supports the conclusion that those
+literal-output misses reflect the fixed task/model behavior rather than an
+AMD- or NVIDIA-specific engine fault.
+
+Generation throughput was higher on the V100 in every row in this single
+controlled run. Prompt throughput varied: the RX 7800 XT was faster in nine
+rows, while the V100 was slightly faster for both Gemma 3 1B and Qwen3.5 0.8B
+Q8. These measurements are hardware-profile evidence, not a ranking promise
+for other drivers, runtimes, models, quantizations, prompts, or devices.
+
+## Current Decision
+
+The shared HIP/CUDA baseline is complete for these exact development profiles.
+It does not replace the previously admitted Qwen3.5 9B HIP cell, widen
+automatic selection, or inherit to another CUDA/HIP device, SYCL, Vulkan,
+Ollama, or OpenVINO. It also does not admit either direct llama.cpp runtime as
+a product route. Patch, tool-call, context-pressure, repeated lifecycle, and
+vision rows remain separate follow-on evidence and are not implied by this
+baseline.

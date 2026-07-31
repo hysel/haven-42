@@ -94,4 +94,33 @@ Quantization compatibility is also engine-specific. A separate Windows AMD test 
 
 The same revision-pinned Q4_K_M artifact then passed an independent Linux NVIDIA llama.cpp CUDA cell on a Quadro RTX 5000 16 GB. The source-built `b10088` runtime used a pinned non-root CUDA 12.4 toolchain, explicit PCI-bus device ordering, an `sm_75` single-GPU build, a 4,096-token context, and concurrency one. It used 5,285 MiB loaded GPU memory, generated 63.33 tokens per second in the fixed benchmark, and passed bounded text, required tool calling, a Git-applicable patch, and cleanup. This evidence does not transfer to the earlier Ollama comparison or another CUDA profile.
 
-See `config/inference-engine-registry.json`, `docs/inference-engine-architecture.md`, and `examples/inference-engine-validation.md`. Intel SYCL and OpenVINO GenAI are parked until representative Intel GPU hardware is available; they have no shipped executable integration assets.
+An independent physical Linux Intel Arc B580 12 GB evaluation removed the
+hardware blocker without promoting either engine. A pinned, isolated
+llama.cpp SYCL build fully offloaded nine representative text artifacts,
+passed 4K/8K prompt pressure, repeated cleanup, a hardened loopback adapter
+cell, a model-and-mode-specific Git-applicable patch, and a Gemma 3 vision
+control. Its upstream suite passed only 50 of 53 tests, so the backend remains
+candidate-only. OpenVINO GenAI 2026.2.1 also executed and repeatedly cleaned up
+an immutable Intel Qwen3 0.6B INT4 artifact on the B580, but Ubuntu 26.04 is
+outside the documented support baseline and the small model missed strict
+output constraints. It remains candidate-only with no provider contract.
+
+See `config/inference-engine-registry.json`,
+`docs/inference-engine-architecture.md`,
+`examples/inference-engine-validation.md`, and
+`examples/intel-b580-inference-engine-validation.md`. Neither Intel candidate
+has shipped executable integration assets, an installer, automatic model
+download, active catalog entry, or package admission.
+
+An expanded development-only matrix now pins 11 portable GGUF artifacts to
+llama.cpp b10088 for identical-byte AMD/HIP and NVIDIA/CUDA comparison. The
+Windows RX 7800 XT cell verified every hash, completed fixed prompt/generation
+benchmarks, proved full GPU offload, and cleaned up all 11 models. Four models
+passed a strict 48-token exact-output gate; bounded reasoning models that
+remained inside their reasoning phase were recorded as task misses without
+invalidating engine execution. The matching Linux NVIDIA/CUDA V100 cell now
+passes the same hash, b10088 identity, benchmark, full-offload, bounded-exit,
+and cleanup gates. Artifact and exact-output outcomes match across all 11
+rows. This is exact-profile comparison evidence, not wider runtime admission
+or a performance promise for other hardware. See
+`examples/cross-accelerator-model-validation.md`.

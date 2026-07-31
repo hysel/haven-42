@@ -11,6 +11,18 @@ python -m pip install --require-hashes -r package/requirements-build.txt
 python scripts/build-portable-development-package.py
 ```
 
+The ordinary build verifies the committed protected-resource manifest and
+fails closed instead of regenerating trust metadata. After reviewing an
+intentional change to an allowlisted UI or data resource, update only that
+manifest explicitly and review its diff before building:
+
+```text
+python scripts/build-portable-development-package.py --update-resource-integrity
+```
+
+Protected resources and the manifest use repository-enforced LF bytes so
+caller Git line-ending settings cannot silently change packaged identities.
+
 The native executable is under `dist/portable/bundle/haven42/`. It accepts `--port` and `--no-open`. Port `0` asks the operating system for an unused loopback port. The build also creates a platform archive and evidence in `dist/portable/artifacts/`.
 
 These outputs are unsigned development artifacts. They are not installers or production releases. Antivirus and operating-system reputation prompts are possible because signing and notarization are deliberately outside this batch.
@@ -57,6 +69,10 @@ The service starts no child process except the already constrained, fixed-comman
 ## Validation And Evidence
 
 `scripts/test-portable-package.py` starts both source and native packaged runtimes on operating-system-selected loopback ports. It compares capability, update, privacy, committed-assurance, and browser-asset results; checks security headers and Host rejection; rejects missing shutdown authority, foreign origins, wrong content types, and unexpected shutdown fields; verifies packaged integrity state; invokes protected shutdown; and requires a clean native exit. It also exercises relocation into a path with spaces, startup from a read-only copied package, recovery after abruptly terminating the test-owned native process, hostile inherited environment values, repeated startup/shutdown, and occupied-port failure. Full validation runs the dependency-free source Chromium flow on Windows, Linux, and macOS. Each native packaging job repeats it against the packaged executable, including the read-only assurance panel, unified attachment picker, hostile atomic selection, task locking, compact layout, provider disclosure, cleanup, and typed results. The local-web security suite separately injects each platform launcher dependency, proves strict loopback-URL rejection, verifies fixed macOS/Linux executable and argument selection, confirms `shell=False`, and proves that a hostile `BROWSER` or caller `PATH` is omitted without opening a real browser. Disposable copied packages must fail before serving when a resource is changed, missing, unexpected, replaced by duplicate/absolute/traversal manifest records, or redirected through a symbolic link.
+On Ubuntu hosts where Chromium is strictly confined as a Snap, the browser
+test places only its disposable profile under Chromium's user-owned Snap
+common directory so both processes can observe `DevToolsActivePort`; the
+profile is removed during the same bounded cleanup path.
 
 `scripts/verify-portable-development-artifacts.py` rejects unsafe archive paths, links, encrypted ZIP entries, duplicate or case-colliding members, unsupported archive shapes, excessive member count, oversized members or archives, checksum gaps, evidence symlinks, evidence gaps, unexpected platform/architecture/dependency records, malformed provenance/SBOM/inventory documents, notice omissions, target-name mismatch, unclassified packaged files, runtime-component coverage differences, and any mismatch between the archive and its full file inventory.
 
