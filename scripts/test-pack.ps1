@@ -708,7 +708,7 @@ Invoke-PackTest "first-party text files end with exactly one newline" {
     $editorConfigPath = Join-Path $repoRoot ".editorconfig"
     Assert-True -Condition (Test-Path -LiteralPath $editorConfigPath -PathType Leaf) -Message ".editorconfig should define the final-newline contract."
     $editorConfig = Get-Content -LiteralPath $editorConfigPath -Raw
-    Assert-True -Condition ($editorConfig -match '(?m)^insert_final_newline = true$') -Message ".editorconfig should require a final newline."
+    Assert-True -Condition ($editorConfig -match '(?m)^insert_final_newline = true\r?$') -Message ".editorconfig should require a final newline."
 
     $textExtensions = @(".cfg", ".css", ".html", ".ini", ".js", ".json", ".md", ".mjs", ".ps1", ".py", ".sh", ".toml", ".tsv", ".txt", ".yaml", ".yml")
     $trackedFiles = @(& git -C $repoRoot ls-files)
