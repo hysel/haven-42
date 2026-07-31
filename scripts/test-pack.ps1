@@ -4077,14 +4077,14 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($uiDoc -match "config/workflows\.json") -Message "Unified UI design should use workflow registry as source of truth."
     Assert-True -Condition ($uiDoc -match "scripts/invoke-workflow") -Message "Unified UI design should use workflow dispatcher boundary."
     Assert-True -Condition ($uiDoc -match "local-first") -Message "Unified UI design should preserve local-first boundary."
-    Assert-True -Condition ($uiDoc -match "Tauri 2") -Message "Unified UI design should record the accepted Tauri runtime."
-    Assert-True -Condition ($uiDoc -match "typed JSON over private stdin/stdout IPC") -Message "Unified UI design should require private typed sidecar IPC."
+    Assert-True -Condition ($uiDoc -match "minimum trusted PyInstaller launcher/service") -Message "Unified UI design should record the active browser/PyInstaller boundary."
+    Assert-True -Condition ($uiDoc -match "Tauri 2.*unadmitted") -Message "Unified UI design should keep Tauri/Rust unadmitted."
     Assert-True -Condition ($uiDoc -match "must not expose arbitrary shell execution") -Message "Unified UI design should reject an arbitrary shell bridge."
     Assert-True -Condition ($uiDoc -match "headless Linux") -Message "Unified UI design should keep headless loopback mode separately scoped."
     Assert-True -Condition ($uiDoc -match "Microsoft Store MSIX signing or the SignPath Foundation") -Message "Unified UI design should prefer the agreed low-cost Windows signing paths."
     Assert-True -Condition ($uiDoc -match "Defer Apple Developer Program enrollment") -Message "Unified UI design should defer Apple enrollment until the public beta gate."
     Assert-True -Condition ($roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should mark the architecture-selected UI milestone in progress."
-    Assert-True -Condition ($todo -match "\[x\] Select and document Tauri 2") -Message "TODO should mark the UI runtime selection complete."
+    Assert-True -Condition ($todo -match "\[x\] Select and document the shared browser UI") -Message "TODO should mark the browser/PyInstaller runtime selection complete."
     Assert-True -Condition ($readme -match "docs/solution-architecture-review\.md") -Message "README should link solution architecture review."
     Assert-True -Condition ($readme -match "docs/unified-starter-toolkit-ui\.md") -Message "README should link unified UI design."
     Assert-True -Condition ($readme -match "(?m)^# Haven 42\r?$") -Message "README should use the Haven 42 product name."
@@ -5144,7 +5144,7 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "12 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
-    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "10 cases") -Message "Hosted Python distribution provenance must accept only exact reviewed native assets."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "16 cases") -Message "Hosted Python distribution provenance and protected-resource trust updates must remain explicit and fail closed."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $privacyScan = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") 2>&1)
@@ -5234,10 +5234,13 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $engineRegistryPath = Join-Path $repoRoot "config/inference-engine-registry.json"
     $engineDocPath = Join-Path $repoRoot "docs/inference-engine-architecture.md"
     $engineEvidencePath = Join-Path $repoRoot "examples/inference-engine-validation.md"
+    $crossMatrixPath = Join-Path $repoRoot "examples/cross-accelerator-model-matrix.json"
+    $crossRunnerPath = Join-Path $repoRoot "scripts/run-cross-accelerator-model-matrix.py"
+    $crossRunnerTestsPath = Join-Path $repoRoot "scripts/test-cross-accelerator-model-matrix.py"
     $plannerSource = Get-Content -LiteralPath $plannerPath -Raw
     Assert-True -Condition ($plannerSource -match 'plan_parser\.add_argument\("--output", required=True' -and $plannerSource -match "write_new_file\(output_path" -and $plannerSource -notmatch 'print\(json\.dumps\(create_plan') -Message "Quantization plans must use an exclusive output file and never log the plan."
 
-    foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath, $engineRegistryPath, $engineDocPath, $engineEvidencePath)) {
+    foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath, $engineRegistryPath, $engineDocPath, $engineEvidencePath, $crossMatrixPath, $crossRunnerPath, $crossRunnerTestsPath)) {
         Assert-True -Condition (Test-Path -LiteralPath $path) -Message "Roadmap foundation file should exist: $path"
     }
 
@@ -5246,6 +5249,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $artifact = Get-Content -LiteralPath $artifactContractPath -Raw | ConvertFrom-Json
     $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
     $engines = Get-Content -LiteralPath $engineRegistryPath -Raw | ConvertFrom-Json
+    $crossMatrix = Get-Content -LiteralPath $crossMatrixPath -Raw | ConvertFrom-Json
     Assert-Equal -Actual $image.schemaVersion -Expected 1 -Message "Image onboarding contract should be schema v1."
     Assert-True -Condition (-not $image.externalServerRequired -and $image.executionDefault -eq "dry-run") -Message "Consumer image onboarding should be local and dry-run first."
     Assert-True -Condition (-not $image.discovery.silentCpuFallbackAllowed) -Message "Image onboarding should reject silent CPU fallback."
@@ -5260,17 +5264,27 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-Equal -Actual $engines.schemaVersion -Expected 1 -Message "Inference engine registry should be schema v1."
     Assert-Equal -Actual ($engines.layers -join ",") -Expected "capability,provider-contract,inference-engine,hardware-backend,model-artifact" -Message "Inference engine registry should preserve layer separation."
     Assert-True -Condition (-not $engines.selection.silentCpuFallbackAllowed -and -not $engines.selection.evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed) -Message "Engine selection should reject silent fallback and cross-profile evidence inheritance."
+    Assert-Equal -Actual $crossMatrix.schemaVersion -Expected 1 -Message "Cross-accelerator matrix should be schema v1."
+    Assert-Equal -Actual $crossMatrix.runtime.commit -Expected "67b9b0e7f6ce45d929a4411907d3c48ec719e81c" -Message "Cross-accelerator comparisons must remain pinned to the reviewed llama.cpp commit."
+    Assert-Equal -Actual @($crossMatrix.models).Count -Expected 11 -Message "The portable cross-accelerator corpus should retain all eleven reviewed model artifacts."
+    Assert-Equal -Actual @($crossMatrix.models | Select-Object -ExpandProperty id -Unique).Count -Expected 11 -Message "Cross-accelerator model ids must be unique."
+    Assert-True -Condition (-not $crossMatrix.security.networkUseDuringInference -and -not $crossMatrix.security.listenersAllowed -and -not $crossMatrix.security.shellExecutionAllowed -and $crossMatrix.security.hashVerificationRequired -and $crossMatrix.security.fullGpuOffloadRequired) -Message "Cross-accelerator inference must stay offline, listener-free, shell-free, hash-pinned, and fully offloaded."
+    $crossRunnerSource = Get-Content -LiteralPath $crossRunnerPath -Raw
+    Assert-True -Condition ($crossRunnerSource -match "shell=False" -and $crossRunnerSource -match "--single-turn" -and $crossRunnerSource -notmatch "requests|urllib|http\.client|import socket") -Message "The lab runner must remain noninteractive, shell-free, and network-incapable."
     $llama = @($engines.engines | Where-Object { $_.id -eq "llama.cpp" })[0]
     $cuda = @($llama.backends | Where-Object { $_.id -eq "cuda" })[0]
     Assert-Equal -Actual $cuda.status -Expected "validated-exact-profile" -Message "Only the exact llama.cpp CUDA profile should be validated."
     Assert-Equal -Actual ($cuda.profiles -join ",") -Expected "linux-x64-nvidia-rtx5000-16gb" -Message "llama.cpp CUDA evidence should remain bound to the tested RTX 5000 profile."
     Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "hip" })[0].status) -Expected "validated-exact-profile" -Message "Only the exact llama.cpp HIP profile should be validated."
     Assert-Equal -Actual @($llama.backends | Where-Object { $_.id -eq "vulkan" }).Count -Expected 0 -Message "Failed Vulkan backend must remain documentation-only and absent from the active registry."
-    Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "sycl" })[0].status) -Expected "parked-hardware-required" -Message "Intel SYCL should remain parked pending hardware."
+    $sycl = @($llama.backends | Where-Object { $_.id -eq "sycl" })[0]
+    Assert-Equal -Actual $sycl.status -Expected "candidate" -Message "Intel SYCL should remain candidate-only after partial exact-profile evidence."
+    Assert-Equal -Actual ($sycl.profiles -join ",") -Expected "linux-x64-intel-arc-b580-12gb" -Message "Intel SYCL evidence should remain bound to the tested B580 profile."
     $openvino = @($engines.engines | Where-Object { $_.id -eq "openvino-genai" })[0]
     $ipex = @($engines.engines | Where-Object { $_.id -eq "ipex-llm" })[0]
     $lmStudio = @($engines.engines | Where-Object { $_.id -eq "lm-studio" })[0]
-    Assert-Equal -Actual $openvino.status -Expected "parked-hardware-required" -Message "OpenVINO GenAI should remain parked pending Intel hardware."
+    Assert-Equal -Actual $openvino.status -Expected "candidate" -Message "OpenVINO GenAI should remain candidate-only after bounded B580 evidence."
+    Assert-Equal -Actual ($openvino.backends[0].profiles -join ",") -Expected "linux-x64-intel-arc-b580-12gb" -Message "OpenVINO evidence should remain bound to the tested B580 profile."
     Assert-Equal -Actual $ipex.status -Expected "retired" -Message "Archived IPEX-LLM should be retired."
     Assert-True -Condition ($lmStudio.status -eq "optional-external-api" -and -not $lmStudio.redistributionAllowedByHaven42 -and -not $lmStudio.embeddingAllowedByHaven42) -Message "LM Studio must remain optional, API-only, and unbundled."
     $candidateScriptNames = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "scripts") -File -Recurse | Select-Object -ExpandProperty Name)
@@ -5290,6 +5304,9 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $selfTest = @(& $python.Source $plannerPath --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Quantization planner self-test should pass."
     Assert-True -Condition (($selfTest -join "`n") -match "3 cases") -Message "Quantization planner should exercise all selection decisions."
+    $crossRunnerTests = @(& $python.Source $crossRunnerTestsPath 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator runner security and parser tests should pass. Output: $($crossRunnerTests -join ' ')"
+    Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 15 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
     $profileText = @(& $python.Source $plannerPath profile --storage-root $repoRoot --context-tokens 16384 --concurrency 1 --workload-lane tool-use 2>&1) -join "`n"
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "OS-aware quantization profile should run."
     $profile = $profileText | ConvertFrom-Json
@@ -5301,7 +5318,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $wrapper)) -Message "OS-aware quantization wrapper should exist: $wrapper"
     }
 
-    foreach ($doc in @("docs/local-image-provider-onboarding.md", "docs/local-audio-provider-candidates.md", "docs/local-video-provider-candidates.md", "docs/generative-media-consent-policy.md", "docs/hardware-adaptive-quantization.md", "docs/inference-engine-architecture.md", "examples/inference-engine-validation.md")) {
+    foreach ($doc in @("docs/local-image-provider-onboarding.md", "docs/local-audio-provider-candidates.md", "docs/local-video-provider-candidates.md", "docs/generative-media-consent-policy.md", "docs/hardware-adaptive-quantization.md", "docs/inference-engine-architecture.md", "examples/inference-engine-validation.md", "examples/cross-accelerator-model-validation.md")) {
         $content = Get-Content -LiteralPath (Join-Path $repoRoot $doc) -Raw
         Assert-True -Condition ($content -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "Roadmap evidence should not contain private endpoints: $doc"
         Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match [regex]::Escape($doc)) -Message "Roadmap foundation doc should be mapped to the wiki: $doc"

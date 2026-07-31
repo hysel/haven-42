@@ -27,7 +27,16 @@ The model is an Apache-2.0 quantization of `Qwen/Qwen3.5-9B`. The llama.cpp rele
 
 The HIP patch changed only `False` to `True` in the supplied two-line function and passed `git apply --check`. Vulkan repeatedly produced a malformed hunk or an extraneous separator; the captured candidate failed `git apply --check` with a corrupt-patch result. Faster inference did not override the functional gate.
 
-Decision for the Windows AMD comparison: admit llama.cpp HIP only for this exact backend evidence cell. Do not infer agent-surface approved-write readiness. Keep Vulkan documentation-only and ship no Vulkan installer, adapter, harness, runtime configuration, or active evidence-catalog entry. Intel SYCL and OpenVINO GenAI remain parked until representative Intel GPU hardware is available. Metal remains physical-Mac-last.
+Decision for the Windows AMD comparison: admit llama.cpp HIP only for this exact backend evidence cell. Do not infer agent-surface approved-write readiness. Keep Vulkan documentation-only and ship no Vulkan installer, adapter, harness, runtime configuration, or active evidence-catalog entry. Later physical Intel Arc B580 candidate results are recorded below and do not alter this AMD decision. Metal remains physical-Mac-last.
+
+A later development-only portable corpus ran 11 revision-pinned GGUF artifacts
+through the same b10088 HIP backend. Every artifact passed hash identity,
+backend identity, fixed benchmark, full GPU offload, bounded exit, and cleanup;
+four passed the strict 48-token exact-output gate. This expands exact-profile
+AMD engine evidence without changing admission. The matching NVIDIA cell is
+pending restored dedicated lab access, so no cross-accelerator performance or
+quality conclusion is claimed. See
+`examples/cross-accelerator-model-validation.md`.
 
 An initial attempt used the official Ollama Qwen 3.5 9B model blob pinned by digest. Upstream llama.cpp rejected it before inference because its Qwen 3.5 rope metadata had a different array layout. The blob was removed and is not treated as backend evidence; model-format compatibility must be proven per engine even when both engines use GGUF.
 
@@ -62,3 +71,14 @@ The loopback server and SSH tunnel were stopped. The model, pinned source, CUDA 
 The same pinned Linux CUDA environment was rebuilt without embedded or prebuilt UI assets and launched with `--no-ui` on loopback. Haven 42's production discovery and invocation scripts reached it through a verified SSH tunnel. `/v1/models` discovery, exact engine/backend/hardware admission, the `llamacpp.local-text` provider, OpenAI-compatible chat-completions mapping, and exact requested output all passed. The adapter request completed in 5.953 seconds; the server recorded 258.57 prompt tokens/s and 62.34 generated tokens/s, with 5,279 MiB loaded on the RTX 5000. No artifact or endpoint was persisted.
 
 This promotes the local-text adapter only for the exact Linux NVIDIA/CUDA evidence cell. Windows AMD/HIP retains engine-only evidence. The server, tunnel, model, source, toolchain, build output, caches, and logs were removed after the adapter run.
+
+## Linux Intel Arc B580 candidates
+
+Representative Intel hardware is no longer pending. Pinned llama.cpp SYCL and
+OpenVINO GenAI builds both executed directly on an Arc B580 12 GB and passed
+bounded cleanup checks. Neither is promoted: the llama.cpp upstream suite
+passed 50 of 53 tests, while the OpenVINO cell used an operating system outside
+the documented support baseline and its small control model missed strict
+output constraints. Exact inputs, functional results, security boundaries, and
+remaining gates are recorded in
+`examples/intel-b580-inference-engine-validation.md`.

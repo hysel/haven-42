@@ -1854,8 +1854,8 @@ test_solution_architecture_review_doc() {
     grep -q "config/workflows.json" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "scripts/invoke-workflow" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "local-first" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
-    grep -q "Tauri 2" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
-    grep -q "typed JSON over private stdin/stdout IPC" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -q "minimum trusted PyInstaller launcher/service" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
+    grep -Eq "Tauri 2.*unadmitted" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "must not expose arbitrary shell execution" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "headless Linux" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "Microsoft Store MSIX signing or the SignPath Foundation" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
@@ -1864,7 +1864,7 @@ test_solution_architecture_review_doc() {
     grep -q "Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete" "$REPO_ROOT/README.md" &&
     grep -q "Milestone 22: Unified Product UI And Task Composition | In progress" "$REPO_ROOT/README.md" &&
-    grep -q "\[x\] Select and document Tauri 2" "$REPO_ROOT/TODO.md" &&
+    grep -q "\[x\] Select and document the shared browser UI" "$REPO_ROOT/TODO.md" &&
     grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/README.md" &&
     grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/README.md" &&
     grep -q "local-first AI workbench" "$REPO_ROOT/README.md" &&
@@ -2314,6 +2314,7 @@ plan = json.loads((root / "config/quantization-plan-contract.json").read_text(en
 artifact = json.loads((root / "config/quantized-artifact-manifest-contract.json").read_text(encoding="utf-8"))
 matrix = json.loads((root / "config/quantization-support-matrix.json").read_text(encoding="utf-8"))
 engines = json.loads((root / "config/inference-engine-registry.json").read_text(encoding="utf-8"))
+cross = json.loads((root / "examples/cross-accelerator-model-matrix.json").read_text(encoding="utf-8"))
 assert image["schemaVersion"] == 1
 assert image["externalServerRequired"] is False
 assert image["executionDefault"] == "dry-run"
@@ -2330,14 +2331,29 @@ assert engines["schemaVersion"] == 1
 assert engines["layers"] == ["capability", "provider-contract", "inference-engine", "hardware-backend", "model-artifact"]
 assert engines["selection"]["silentCpuFallbackAllowed"] is False
 assert engines["selection"]["evidenceInheritanceAcrossEnginesBackendsOrHardwareAllowed"] is False
+assert cross["schemaVersion"] == 1
+assert cross["runtime"]["commit"] == "67b9b0e7f6ce45d929a4411907d3c48ec719e81c"
+assert len(cross["models"]) == 11
+assert len({item["id"] for item in cross["models"]}) == 11
+assert cross["security"]["networkUseDuringInference"] is False
+assert cross["security"]["listenersAllowed"] is False
+assert cross["security"]["shellExecutionAllowed"] is False
+assert cross["security"]["hashVerificationRequired"] is True
+assert cross["security"]["fullGpuOffloadRequired"] is True
+runner = (root / "scripts/run-cross-accelerator-model-matrix.py").read_text(encoding="utf-8")
+assert "shell=False" in runner and "--single-turn" in runner
+for forbidden in ("requests", "urllib", "http.client", "import socket"):
+    assert forbidden not in runner
 by_id = {item["id"]: item for item in engines["engines"]}
 llama_backends = {item["id"]: item for item in by_id["llama.cpp"]["backends"]}
 assert llama_backends["cuda"]["status"] == "validated-exact-profile"
 assert llama_backends["cuda"]["profiles"] == ["linux-x64-nvidia-rtx5000-16gb"]
 assert llama_backends["hip"]["status"] == "validated-exact-profile"
 assert "vulkan" not in llama_backends
-assert llama_backends["sycl"]["status"] == "parked-hardware-required"
-assert by_id["openvino-genai"]["status"] == "parked-hardware-required"
+assert llama_backends["sycl"]["status"] == "candidate"
+assert llama_backends["sycl"]["profiles"] == ["linux-x64-intel-arc-b580-12gb"]
+assert by_id["openvino-genai"]["status"] == "candidate"
+assert by_id["openvino-genai"]["backends"][0]["profiles"] == ["linux-x64-intel-arc-b580-12gb"]
 assert by_id["ipex-llm"]["status"] == "retired"
 assert by_id["lm-studio"]["status"] == "optional-external-api"
 assert by_id["lm-studio"]["redistributionAllowedByHaven42"] is False
@@ -2361,10 +2377,17 @@ for doc in (
     "docs/hardware-adaptive-quantization.md",
     "docs/inference-engine-architecture.md",
     "examples/inference-engine-validation.md",
+    "examples/cross-accelerator-model-validation.md",
 ):
     assert doc in wiki
     assert not private_ip.search((root / doc).read_text(encoding="utf-8"))
 PY
+  cross_test_output="$(python3 "$REPO_ROOT/scripts/test-cross-accelerator-model-matrix.py" 2>&1)" || {
+    printf '%s\n' "$cross_test_output" >&2
+    return 1
+  }
+  printf '%s\n' "$cross_test_output" | grep -q "Ran 15 tests" || return 1
+  ! printf '%s\n' "$cross_test_output" | grep -q "skipped=" || return 1
   grep -q 'plan_parser.add_argument("--output", required=True' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   grep -q 'write_new_file(output_path' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   ! grep -q 'print(json.dumps(create_plan' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
@@ -2570,7 +2593,7 @@ test_task_composition_and_repository_privacy() {
   python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "20 effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "12 cases" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "10 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "16 cases" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" |
     grep -q "tracked or untracked non-ignored working files" || return 1

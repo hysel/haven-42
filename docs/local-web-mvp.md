@@ -277,7 +277,9 @@ The machine-readable boundaries are `config/local-web-runtime-policy.json`, `con
 
 The admitted application includes explicit read-only system scanning, zero-effect setup planning, system status, read-only capability/health/evidence views, Ollama connection, installed-model selection, candidate-only public catalog search, chat, writing, summarization, and unsigned one-folder development packaging. Software installation, drivers, services, model downloads, software workflows, images, model management, persistence, multi-user access, remote browser access, automatic updates, signed/notarized distribution, installers, and production release publication remain unavailable until their separate runtime and security gates pass.
 
-Tauri remains an optional later packaging path. It is not required to run or validate this local-web slice.
+Tauri/Rust remains unadmitted. The shared browser UI and minimum trusted
+PyInstaller launcher/service are the active cross-platform development
+packaging path.
 
 ## Validation Evidence
 

@@ -211,6 +211,9 @@ jobs:
       - name: Install hash-locked build dependencies
         run: python -m pip install --disable-pip-version-check --require-hashes -r package/requirements-build.txt
 
+      - name: Verify protected-resource manifest policy
+        run: python scripts/test-portable-build-provenance.py
+
       - name: Build unsigned one-folder package and evidence
         env:
           HAVEN42_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}

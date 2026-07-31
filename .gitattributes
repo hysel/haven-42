@@ -1,4 +1,14 @@
 *.sh text eol=lf
 .githooks/* text eol=lf
 package/licenses/* text eol=lf
+web/static/index.html text eol=lf
+web/static/app.js text eol=lf
+web/static/styles.css text eol=lf
+config/text-capability-model-recommendations.json text eol=lf
+config/evidence-catalog.tsv text eol=lf
+config/agent-surface-capabilities.json text eol=lf
+config/agent-surface-solutions.json text eol=lf
+config/install-component-registry.json text eol=lf
+config/workflows.json text eol=lf
+package/resource-integrity.json text eol=lf
 *.bin binary

@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
+import tempfile
 from unittest.mock import patch
 
 
@@ -124,6 +126,62 @@ def main() -> int:
         "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388"
     )
     passed += 1
+
+    with tempfile.TemporaryDirectory(prefix="haven42-resource-manifest-") as temporary:
+        fixture_root = Path(temporary)
+        for index, relative in enumerate(MODULE.RESOURCE_PATHS):
+            path = fixture_root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(f"resource-{index}\n".encode("utf-8"))
+        MODULE.update_resource_manifest(fixture_root)
+        MODULE.verify_resource_manifest(fixture_root)
+        manifest_path = fixture_root / "package/resource-integrity.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        assert manifest == MODULE.expected_resource_manifest(fixture_root)
+        passed += 1
+
+        protected = fixture_root / MODULE.RESOURCE_PATHS[0]
+        protected.write_bytes(protected.read_bytes() + b"unreviewed-change\n")
+        try:
+            MODULE.verify_resource_manifest(fixture_root)
+        except SystemExit as error:
+            assert "does not match" in str(error)
+        else:
+            raise AssertionError("Unreviewed protected-resource change was accepted.")
+        passed += 1
+
+        MODULE.update_resource_manifest(fixture_root)
+        MODULE.verify_resource_manifest(fixture_root)
+        passed += 1
+
+        protected.write_bytes(b"resource\r\n")
+        try:
+            MODULE.update_resource_manifest(fixture_root)
+        except SystemExit as error:
+            assert "repository-enforced LF" in str(error)
+        else:
+            raise AssertionError("CRLF protected resource was accepted.")
+        protected.write_bytes(b"resource\n")
+        passed += 1
+
+        manifest["unexpected"] = True
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        try:
+            MODULE.verify_resource_manifest(fixture_root)
+        except SystemExit as error:
+            assert "does not match" in str(error)
+        else:
+            raise AssertionError("Unexpected manifest field was accepted.")
+        passed += 1
+
+        manifest_path.write_text("{", encoding="utf-8")
+        try:
+            MODULE.verify_resource_manifest(fixture_root)
+        except SystemExit as error:
+            assert "unreadable" in str(error)
+        else:
+            raise AssertionError("Malformed resource manifest was accepted.")
+        passed += 1
 
     print(f"Portable build provenance self-test passed: {passed} cases.")
     return 0

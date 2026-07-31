@@ -256,22 +256,52 @@ def dashboard_markdown(report: dict[str, Any]) -> str:
     lines = [
         "# Evidence Dashboard",
         "",
-        "Generated from `config/evidence-catalog.tsv`, `config/agent-surface-capabilities.json`, and `config/agent-surface-solutions.json`.",
+        "This committed, sanitized snapshot summarizes what Haven 42 has actually",
+        "validated. Counts are evidence inventory, not usage statistics, quality",
+        "rankings, or production-readiness claims.",
         "",
-        "## Summary",
+        "Generated from `config/evidence-catalog.tsv`,",
+        "`config/agent-surface-capabilities.json`, and",
+        "`config/agent-surface-solutions.json`.",
+        "",
+        "See [[Evidence Catalog|Evidence-Catalog]],",
+        "[[Capability Evidence Contract|Capability-Evidence-Contract]], and",
+        "`docs/agent-surface-solutions.md` for detailed evidence boundaries.",
+        "",
+        "## Current Snapshot",
         "",
         "| Metric | Count |",
         "| --- | ---: |",
-        f"| Evidence rows | {report['EvidenceCount']} |",
-        f"| Agent surfaces | {report['SurfaceCount']} |",
-        f"| Models with evidence | {report['ModelCount']} |",
+        f"| Evidence records | {report['EvidenceCount']} |",
+        f"| Distinct model-field values | {report['ModelCount']} |",
+        f"| Tracked agent surfaces | {report['SurfaceCount']} |",
         "",
-        "## Evidence Status",
+        "## Evidence Outcomes",
         "",
         "| Status | Count |",
         "| --- | ---: |",
     ]
-    lines.extend(f"| {item['Status']} | {item['Count']} |" for item in report["StatusCounts"])
+    lines.extend(f"| `{item['Status']}` | {item['Count']} |" for item in report["StatusCounts"])
+    mode_labels = {
+        "generated-sample": "Generated sample",
+        "local-endpoint": "Local endpoint",
+        "editor-agent": "Editor agent",
+        "automated-tests": "Automated tests",
+        "static": "Static",
+        "online-discovery": "Online discovery",
+    }
+    lines.extend([
+        "",
+        "## Validation Modes",
+        "",
+        "| Mode | Count |",
+        "| --- | ---: |",
+    ])
+    lines.extend(
+        f"| {mode_labels.get(item['ValidationMode'], item['ValidationMode'])} | "
+        f"{item['Count']} |"
+        for item in report["ValidationModeCounts"]
+    )
     lines.extend([
         "",
         "## Agent Surfaces",

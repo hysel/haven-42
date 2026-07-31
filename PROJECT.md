@@ -10,9 +10,9 @@ Tagline: Your private, local AI station.
 
 This repository defines an evidence-gated, local-first AI workbench for individual users, developers, teams, consultants, and enterprise groups. It combines repeatable software-engineering workflows with repository-optional chat, writing, summarization, and image capabilities under common routing, approval, privacy, and typed-artifact contracts.
 
-The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product now includes a runnable loopback-only local web experience over the same tested contracts; Tauri remains an optional later packaging path.
+The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product now includes a runnable loopback-only local web experience over the same tested contracts and an unsigned PyInstaller one-folder development package. Tauri/Rust remains unadmitted.
 
-Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence, and every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
+Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence. Linux Intel Arc B580 now has candidate-only llama.cpp SYCL and OpenVINO GenAI evidence; neither is selectable or packaged. Every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
 
 ## Current Stage
 
@@ -80,9 +80,16 @@ status, automatically classified local/LAN Ollama connection, installed-model di
 local image profiles and now has consumer-local discovery and consent contracts
 plus a 28-case effect-free lifecycle planner that admits no machine effects.
 Milestones 24 and 25 retain documentation-only audio/video candidate inventories and
-shared media-consent policy. Milestone 26 now has quantization plan/artifact contracts,
-OS-aware sanitized profiling, explicit support boundaries, and a no-effect dry-run
-selector; live model recipes and activation remain unpromoted. Milestone 27 now
+shared media-consent policy. Milestone 26 now has quantization plan/artifact
+contracts, OS-aware sanitized profiling, explicit support boundaries, a
+no-effect dry-run selector, exact Linux NVIDIA and Windows AMD evidence, and
+candidate-only physical Linux Intel Arc B580 llama.cpp SYCL/OpenVINO GenAI
+evidence. Intel upstream/OS/quality/provider/package blockers, live conversion
+recipes, and activation remain unpromoted. A new identical-byte llama.cpp
+b10088 matrix has completed matching 11-model Windows AMD/HIP and Linux
+NVIDIA/CUDA operational, exact-output, full-offload, and cleanup cells with
+identical artifact hashes; this comparison changes no runtime admission.
+Milestone 27 now
 has an explicit-selection, memory-only unified `.txt`/`.md`/`.csv`/`.json`/PNG picker plus clipboard-PNG
 attachment slice with strict atomic byte/count/dimension/structured-text limits, path-free transfer,
 warned submit-confirmed private-network transfer, visible unverified image-input status, inert-data

@@ -392,7 +392,9 @@
 
 ## Milestone 22: Unified Product UI And Task Composition
 
-- [x] Select and document Tauri 2 with bundled React/TypeScript/Vite assets, a packaged Haven 42 engine sidecar, private typed stdin/stdout IPC, and a separately promoted headless loopback mode.
+- [x] Select and document the shared browser UI plus minimum trusted PyInstaller
+  launcher/service as the active cross-platform development boundary; keep
+  Tauri/Rust unadmitted.
 - [x] Pin and review the direct Tauri, Rust, frontend, WebView, sidecar-packaging, installer, and license candidate set without scaffolding shippable runtime files.
 - [x] Define a versioned desktop IPC schema and Tauri capability allowlist that reject arbitrary commands, unknown workflow/capability IDs, malformed envelopes, unauthorized paths, and remote UI navigation.
 - [x] Resolve and audit the exact disposable Windows x64 npm, Cargo, and PyInstaller candidate graphs without admitting their manifests, locks, tools, or outputs.
@@ -619,9 +621,21 @@
 - [x] Define comparative gates for load time, first-token latency, throughput, peak memory, disk use, context stability, accelerator use, general capability quality, tool calls, and engineering workflow reliability.
 - [x] Validate one disposable Linux NVIDIA GGUF/Ollama path first; the exact Qwen 3.5 9B Q4_K_M versus Q8_0 evidence and cleanup record are complete.
 - [x] Validate the exact Windows AMD/Ollama quantization comparison independently; the RX 7800 XT 16 GB profile passed and does not transfer to another platform or runtime.
-- [ ] Validate Windows NVIDIA independently; keep Windows Intel parked until
-  representative Intel GPU hardware is available and physical Apple Silicon
+- [ ] Validate Windows NVIDIA and Windows Intel independently; physical Linux
+  Intel Arc B580 candidate evidence now covers llama.cpp SYCL and OpenVINO
+  GenAI but does not transfer to Windows, and physical Apple Silicon remains
   parked until Mac hardware is acquired.
+- [x] Run the first physical Linux Intel Arc B580 inference-engine evaluation:
+  pin and hash the toolchains and model inputs, prove GPU execution, exercise
+  text/vision/pressure/adapter/cleanup cells, record upstream failures, and
+  keep both llama.cpp SYCL and OpenVINO GenAI candidate-only.
+- [x] Complete the identical-artifact llama.cpp cross-accelerator baseline. The
+  same 11 artifacts now pass hash, b10088 identity, benchmark, full-offload,
+  bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA.
+  Exact-output results agree for every artifact.
+- [ ] Complete the manifest's separate patch, tool-call, context-pressure,
+  repeated-lifecycle, and vision follow-on cells. Do not infer them from the
+  completed baseline benchmark.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
 
