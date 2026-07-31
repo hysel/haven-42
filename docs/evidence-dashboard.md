@@ -8,8 +8,8 @@ Generated from `config/evidence-catalog.tsv`,
 `config/agent-surface-capabilities.json`, and
 `config/agent-surface-solutions.json`.
 
-See [[Evidence Catalog|Evidence-Catalog]],
-[[Capability Evidence Contract|Capability-Evidence-Contract]], and
+See [Evidence Catalog](Evidence-Catalog),
+[Capability Evidence Contract](Capability-Evidence-Contract), and
 `docs/agent-surface-solutions.md` for detailed evidence boundaries.
 
 ## Current Snapshot
