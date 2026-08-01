@@ -33,6 +33,7 @@ ALLOWED_TESTS = {
     "bounded-exact-output",
     "context-4k",
     "context-8k",
+    "lifecycle-repeat",
     "patch",
     "tool-call",
     "vision",

@@ -94,6 +94,19 @@ def cancellation_probe(base_url: str, model: str) -> bool:
         response.close()
 
 
+def best_effort_unload(base_url: str, model: str) -> bool:
+    try:
+        request_json(
+            base_url,
+            "/api/generate",
+            {"model": model, "keep_alive": 0},
+            timeout=30,
+        )
+        return True
+    except Exception:
+        return False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run bounded Ollama provider conformance.")
     parser.add_argument("--base-url", required=True)
@@ -236,6 +249,9 @@ def main() -> int:
     except Exception as error:
         print(json.dumps({"SchemaVersion": 1, "Kind": "provider-conformance", "Status": "failed", "Failure": type(error).__name__, "Checks": checks, "EndpointPersisted": False, "PromptPersisted": False, "RawResponsePersisted": False}, indent=2))
         return 4
+    finally:
+        if args.unload:
+            best_effort_unload(args.base_url, args.model)
 
 
 if __name__ == "__main__":

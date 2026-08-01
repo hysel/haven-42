@@ -124,3 +124,12 @@ and cleanup gates. Artifact and exact-output outcomes match across all 11
 rows. This is exact-profile comparison evidence, not wider runtime admission
 or a performance promise for other hardware. See
 `examples/cross-accelerator-model-validation.md`.
+
+The separate Windows NVIDIA/AMD follow-on batch reused only the required
+hash-pinned artifacts. Qwen 3.5 repeated lifecycle passed 3/3 on both profiles;
+its strict patch passed on Windows NVIDIA and failed on Windows AMD. Qwen 3 8B
+passed 3/3 operational lifecycle on both but failed 4K recall, 8K recall, and
+the strict patch on both. Gemma 3 4B vision passed on both with the generated
+image deleted and no temporary residue. Structured tool-call transport remains
+open, so the follow-ons grant no activation, catalog, UI, package, or provider
+authority.

@@ -16,8 +16,8 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 82 |
-| Distinct model-field values | 20 |
+| Evidence records | 83 |
+| Distinct model-field values | 21 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
@@ -25,7 +25,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | Status | Count |
 | --- | ---: |
 | `validated-by-tests` | 19 |
-| `partial-pass` | 17 |
+| `partial-pass` | 18 |
 | `write-smoke-validated` | 13 |
 | `read-only-tool-validated` | 11 |
 | `read-only-cli-validated` | 9 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | Mode | Count |
 | --- | ---: |
 | Generated sample | 38 |
-| Local endpoint | 24 |
+| Local endpoint | 25 |
 | Editor agent | 9 |
 | Automated tests | 7 |
 | Static | 3 |
@@ -88,4 +88,5 @@ See [Evidence Catalog](Evidence-Catalog),
 | qwen3.5:35b |
 | qwen3.5:9b |
 | revision-and-sha256-pinned-11-model-corpus |
+| revision-and-sha256-pinned-follow-on-artifacts |
 | unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
