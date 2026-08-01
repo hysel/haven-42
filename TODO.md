@@ -623,8 +623,12 @@
 - [x] Validate the exact Windows AMD/Ollama quantization comparison independently; the RX 7800 XT 16 GB profile passed and does not transfer to another platform or runtime.
 - [ ] Validate Windows NVIDIA and Windows Intel independently; physical Linux
   Intel Arc B580 candidate evidence now covers llama.cpp SYCL and OpenVINO
-  GenAI but does not transfer to Windows, and physical Apple Silicon remains
-  parked until Mac hardware is acquired.
+  GenAI but does not transfer to Windows. Windows NVIDIA b10088/CUDA candidate
+  evidence now covers exact runtime/artifact identity, full offload, baseline,
+  strict patch, repeated lifecycle, and vision; Qwen 3 8B context and patch
+  quality failed, structured tool transport remains open, and no runtime is
+  promoted. Physical Apple Silicon remains parked until Mac hardware is
+  acquired.
 - [x] Run the first physical Linux Intel Arc B580 inference-engine evaluation:
   pin and hash the toolchains and model inputs, prove GPU execution, exercise
   text/vision/pressure/adapter/cleanup cells, record upstream failures, and
@@ -636,6 +640,10 @@
 - [ ] Complete the manifest's separate patch, tool-call, context-pressure,
   repeated-lifecycle, and vision follow-on cells. Do not infer them from the
   completed baseline benchmark.
+  - Windows NVIDIA and Windows AMD now have explicit patch, context-pressure,
+    repeated-lifecycle, and vision outcomes for the declared artifacts.
+    Structured tool-call transport and Windows Intel remain open; failed
+    quality cells add no authority.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
 

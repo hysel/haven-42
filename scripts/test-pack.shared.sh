@@ -2303,6 +2303,11 @@ PY
 
 test_provider_evidence_and_capacity() {
   python3 "$REPO_ROOT/scripts/validate-model-performance-evidence.py" --evidence-path "$REPO_ROOT/examples/fixtures/model-performance-evidence.json" >/dev/null || return 1
+  provider_security_output="$(python3 "$REPO_ROOT/scripts/test-provider-conformance-security.py" 2>&1)" || {
+    printf '%s\n' "$provider_security_output" >&2
+    return 1
+  }
+  printf '%s\n' "$provider_security_output" | grep -q "Ran 3 tests" || return 1
   output="$("$REPO_ROOT/scripts/runtime-capacity-preflight.shared.sh" --profile-path "$REPO_ROOT/examples/fixtures/runtime-capacity-profile.json" --required-accelerator-mib 8000 --required-system-mib 8000 --required-disk-mib 8000 --reserve-mib 1000 --json)" || return 1
   python3 - "$output" <<'PY' || return 1
 import json, sys
@@ -2357,6 +2362,12 @@ runner = (root / "scripts/run-cross-accelerator-model-matrix.py").read_text(enco
 assert "shell=False" in runner and "--single-turn" in runner
 for forbidden in ("requests", "urllib", "http.client", "import socket"):
     assert forbidden not in runner
+follow_on = (root / "scripts/run-cross-accelerator-followons.py").read_text(encoding="utf-8")
+assert "BASELINE.run_process" in follow_on
+assert "patch_is_safe_and_exact" in follow_on
+assert "rawPromptOrResponsePersisted" in follow_on
+for forbidden in ("import subprocess", "requests", "urllib", "http.client", "import socket"):
+    assert forbidden not in follow_on
 by_id = {item["id"]: item for item in engines["engines"]}
 llama_backends = {item["id"]: item for item in by_id["llama.cpp"]["backends"]}
 assert llama_backends["cuda"]["status"] == "validated-exact-profile"
@@ -2401,6 +2412,12 @@ PY
   }
   printf '%s\n' "$cross_test_output" | grep -q "Ran 15 tests" || return 1
   ! printf '%s\n' "$cross_test_output" | grep -q "skipped=" || return 1
+  cross_follow_on_test_output="$(python3 "$REPO_ROOT/scripts/test-cross-accelerator-followons.py" 2>&1)" || {
+    printf '%s\n' "$cross_follow_on_test_output" >&2
+    return 1
+  }
+  printf '%s\n' "$cross_follow_on_test_output" | grep -q "Ran 8 tests" || return 1
+  ! printf '%s\n' "$cross_follow_on_test_output" | grep -q "skipped=" || return 1
   grep -q 'plan_parser.add_argument("--output", required=True' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   grep -q 'write_new_file(output_path' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   ! grep -q 'print(json.dumps(create_plan' "$REPO_ROOT/scripts/quantization-planner.py" || return 1

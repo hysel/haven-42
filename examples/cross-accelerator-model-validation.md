@@ -125,12 +125,56 @@ rows, while the V100 was slightly faster for both Gemma 3 1B and Qwen3.5 0.8B
 Q8. These measurements are hardware-profile evidence, not a ranking promise
 for other drivers, runtimes, models, quantizations, prompts, or devices.
 
+## Windows NVIDIA And Follow-On Results
+
+An independent Windows x86_64 NVIDIA cell used the same b10088 source commit,
+the official CUDA 12.4 runtime archives, and a Quadro RTX 5000 16 GB profile.
+Both runtime archives matched the SHA-256 digests published with the release.
+Only the three hash-pinned artifacts required by the declared follow-on cells
+were staged, preserving the 40 GiB free-space floor. No Ollama runtime,
+listener, service, global PATH entry, installer, or administrator access was
+used.
+
+Qwen 3.5 9B Q4_K_M passed build identity, CUDA device identity, full model-layer
+offload, bounded exit, and cleanup. Its fixed baseline generated 58.979 tokens
+per second and retained the known 48-token exact-output miss. The separate
+strict patch cell passed, and three independent lifecycle starts each loaded,
+generated the bounded marker, fully offloaded, exited, and left no process or
+listener.
+
+| Artifact and cell | Windows NVIDIA | Windows AMD | Decision |
+| --- | --- | --- | --- |
+| Qwen 3.5 9B repeated lifecycle | Pass, 3/3 | Pass, 3/3 | Operational evidence only |
+| Qwen 3.5 9B strict one-token patch | Pass | Fail | Do not inherit patch evidence across accelerators |
+| Qwen 3 8B 4K ordered-marker recall | Fail | Fail | No context-quality promotion |
+| Qwen 3 8B 8K ordered-marker recall | Fail | Fail | No context-quality promotion |
+| Qwen 3 8B repeated lifecycle | Pass, 3/3 | Pass, 3/3 | Operational evidence only |
+| Qwen 3 8B strict one-token patch | Fail | Fail | No patch promotion |
+| Gemma 3 4B synthetic PNG vision | Pass | Pass | Candidate vision evidence only |
+
+The vision fixture was generated inside a temporary directory, required the
+model to distinguish a red left half from a blue right half, and was deleted
+after each run. Both platforms reported full offload and zero temporary
+residue. Context validation required all three distant synthetic values,
+exactly once and in order, inside a bounded response; formatting was tracked
+separately and could not turn a recall failure into a pass.
+
+The reusable follow-on runner downloads nothing, opens no listener, invokes no
+shell, verifies every artifact before execution, uses only synthetic prompts,
+stores no raw prompt or response, writes atomic sanitized checkpoints, and
+deletes temporary prompt and image files. Structured tool-call transport
+remains unexecuted for Windows NVIDIA, Windows AMD was not rerun for that cell,
+and Windows Intel remains a separate hardware gap. These results add no
+provider route, automatic selection, model activation, package, or production
+authority.
+
 ## Current Decision
 
 The shared HIP/CUDA baseline is complete for these exact development profiles.
 It does not replace the previously admitted Qwen3.5 9B HIP cell, widen
 automatic selection, or inherit to another CUDA/HIP device, SYCL, Vulkan,
 Ollama, or OpenVINO. It also does not admit either direct llama.cpp runtime as
-a product route. Patch, tool-call, context-pressure, repeated lifecycle, and
-vision rows remain separate follow-on evidence and are not implied by this
-baseline.
+a product route. The declared Windows NVIDIA/AMD patch, context-pressure,
+repeated-lifecycle, and vision cells now have explicit pass/fail evidence.
+Structured tool-call transport remains open, and failed quality cells remain
+non-promoting.

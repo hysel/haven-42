@@ -160,7 +160,7 @@
         "sizeBytes": 5680522464,
         "sha256": "03b74727a860a56338e042c4420bb3f04b2fec5734175f4cb9fa853daf52b7e8"
       },
-      "tests": ["benchmark", "bounded-exact-output", "tool-call", "patch"]
+      "tests": ["benchmark", "bounded-exact-output", "tool-call", "patch", "lifecycle-repeat"]
     },
     {
       "id": "qwen3-8b-q8",
@@ -173,7 +173,7 @@
         "sizeBytes": 8709518656,
         "sha256": "2f98cff159bcdf01431829406d43363ccacb76ed6b76d18bd9d6ab20976792c0"
       },
-      "tests": ["benchmark", "bounded-exact-output", "context-4k", "context-8k", "patch"]
+      "tests": ["benchmark", "bounded-exact-output", "context-4k", "context-8k", "patch", "lifecycle-repeat"]
     }
   ]
 }

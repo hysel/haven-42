@@ -5033,8 +5033,9 @@ Invoke-PackTest "provider performance evidence and capacity preflight fail close
     $evidenceFixture = Join-Path $repoRoot "examples/fixtures/model-performance-evidence.json"
     $capacityScript = Join-Path $repoRoot "scripts/runtime-capacity-preflight.ps1"
     $capacityFixture = Join-Path $repoRoot "examples/fixtures/runtime-capacity-profile.json"
+    $providerConformanceSecurityTests = Join-Path $repoRoot "scripts/test-provider-conformance-security.py"
     $contractPaths = @("config/provider-conformance-contract.json", "config/model-performance-evidence-contract.json", "config/runtime-capacity-contract.json") | ForEach-Object { Join-Path $repoRoot $_ }
-    foreach ($path in @($evidenceValidator, $evidenceFixture, $capacityScript, $capacityFixture) + $contractPaths) {
+    foreach ($path in @($evidenceValidator, $evidenceFixture, $capacityScript, $capacityFixture, $providerConformanceSecurityTests) + $contractPaths) {
         Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Provider evidence foundation should exist: $path"
     }
     & $python.Source $evidenceValidator --evidence-path $evidenceFixture *> $null
@@ -5044,6 +5045,9 @@ Invoke-PackTest "provider performance evidence and capacity preflight fail close
     Assert-True -Condition (-not $ready.NetworkUsed -and -not $ready.FilesWritten -and -not $ready.ProcessesTerminated -and -not $ready.DriverOrServiceChanged) -Message "Capacity preflight should have no machine effects."
     $tooLarge = Invoke-CommandCapture -FilePath $capacityScript -Arguments @("-ProfilePath", $capacityFixture, "-RequiredAcceleratorMiB", "16000", "-RequiredSystemMiB", "8000", "-RequiredDiskMiB", "8000", "-ReserveMiB", "1000", "-AsJson")
     Assert-True -Condition ($tooLarge.ExitCode -ne 0 -and $tooLarge.Output -match 'insufficient-capacity') -Message "Insufficient accelerator headroom should fail closed."
+    $providerSecurityOutput = @(& $python.Source $providerConformanceSecurityTests 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Provider conformance cleanup security tests should pass. Output: $($providerSecurityOutput -join ' ')"
+    Assert-True -Condition (($providerSecurityOutput -join "`n") -match "Ran 3 tests") -Message "Provider cleanup security coverage should exercise all three cases."
 }
 
 Invoke-PackTest "product UI first slice is registry-backed and fail closed" {
@@ -5372,10 +5376,12 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $crossMatrixPath = Join-Path $repoRoot "examples/cross-accelerator-model-matrix.json"
     $crossRunnerPath = Join-Path $repoRoot "scripts/run-cross-accelerator-model-matrix.py"
     $crossRunnerTestsPath = Join-Path $repoRoot "scripts/test-cross-accelerator-model-matrix.py"
+    $crossFollowOnPath = Join-Path $repoRoot "scripts/run-cross-accelerator-followons.py"
+    $crossFollowOnTestsPath = Join-Path $repoRoot "scripts/test-cross-accelerator-followons.py"
     $plannerSource = Get-Content -LiteralPath $plannerPath -Raw
     Assert-True -Condition ($plannerSource -match 'plan_parser\.add_argument\("--output", required=True' -and $plannerSource -match "write_new_file\(output_path" -and $plannerSource -notmatch 'print\(json\.dumps\(create_plan') -Message "Quantization plans must use an exclusive output file and never log the plan."
 
-    foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath, $engineRegistryPath, $engineDocPath, $engineEvidencePath, $crossMatrixPath, $crossRunnerPath, $crossRunnerTestsPath)) {
+    foreach ($path in @($imageContractPath, $planContractPath, $artifactContractPath, $matrixPath, $plannerPath, $engineRegistryPath, $engineDocPath, $engineEvidencePath, $crossMatrixPath, $crossRunnerPath, $crossRunnerTestsPath, $crossFollowOnPath, $crossFollowOnTestsPath)) {
         Assert-True -Condition (Test-Path -LiteralPath $path) -Message "Roadmap foundation file should exist: $path"
     }
 
@@ -5406,6 +5412,9 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-True -Condition (-not $crossMatrix.security.networkUseDuringInference -and -not $crossMatrix.security.listenersAllowed -and -not $crossMatrix.security.shellExecutionAllowed -and $crossMatrix.security.hashVerificationRequired -and $crossMatrix.security.fullGpuOffloadRequired) -Message "Cross-accelerator inference must stay offline, listener-free, shell-free, hash-pinned, and fully offloaded."
     $crossRunnerSource = Get-Content -LiteralPath $crossRunnerPath -Raw
     Assert-True -Condition ($crossRunnerSource -match "shell=False" -and $crossRunnerSource -match "--single-turn" -and $crossRunnerSource -notmatch "requests|urllib|http\.client|import socket") -Message "The lab runner must remain noninteractive, shell-free, and network-incapable."
+    $crossFollowOnSource = Get-Content -LiteralPath $crossFollowOnPath -Raw
+    Assert-True -Condition ($crossFollowOnSource -match "BASELINE\.run_process" -and $crossFollowOnSource -notmatch "import subprocess|requests|urllib|http\.client|import socket") -Message "The follow-on runner must delegate process execution to the reviewed shell-free baseline and remain network-incapable."
+    Assert-True -Condition ($crossFollowOnSource -match "patch_is_safe_and_exact" -and $crossFollowOnSource -match "rawPromptOrResponsePersisted") -Message "Follow-on validation must retain strict patch parsing and explicit non-persistence evidence."
     $llama = @($engines.engines | Where-Object { $_.id -eq "llama.cpp" })[0]
     $cuda = @($llama.backends | Where-Object { $_.id -eq "cuda" })[0]
     Assert-Equal -Actual $cuda.status -Expected "validated-exact-profile" -Message "Only the exact llama.cpp CUDA profile should be validated."
@@ -5442,6 +5451,9 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $crossRunnerTests = @(& $python.Source $crossRunnerTestsPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator runner security and parser tests should pass. Output: $($crossRunnerTests -join ' ')"
     Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 15 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
+    $crossFollowOnTests = @(& $python.Source $crossFollowOnTestsPath 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator follow-on security tests should pass. Output: $($crossFollowOnTests -join ' ')"
+    Assert-True -Condition (($crossFollowOnTests -join "`n") -match "Ran 8 tests" -and ($crossFollowOnTests -join "`n") -notmatch "skipped=") -Message "Follow-on hostile coverage should remain complete and skip-free."
     $profileText = @(& $python.Source $plannerPath profile --storage-root $repoRoot --context-tokens 16384 --concurrency 1 --workload-lane tool-use 2>&1) -join "`n"
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "OS-aware quantization profile should run."
     $profile = $profileText | ConvertFrom-Json

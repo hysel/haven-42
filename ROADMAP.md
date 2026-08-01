@@ -44,7 +44,7 @@ The repository has entered user-visible product implementation. Milestones 1 thr
 | Milestone 23: Native Local Image Generation | In progress | The Linux ComfyUI/SDXL profile is live-validated and promoted; a 28-case effect-free lifecycle planner now covers install, update, failed-health recovery, rollback, retention, interruption, and uninstall without granting machine authority. Windows AMD/RX 7800 XT passes cancellation, forced recovery, repeated generation, retention cleanup, and uninstall, while a real update/rollback candidate plus consumer onboarding/installer behavior remain gated. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has a partial Linux CUDA instrumental pass; vocal, signal-quality, cancellation, recovery, and adapter gates remain open. |
 | Milestone 25: Local Video Generation | Research in progress | Exact HunyuanVideo, Wan2.2, and LTX-2.3 candidate records plus identity/media consent policy are complete; no live provider is promoted. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus now passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes; a complete 2026-07-31 AMD repeat preserved all outcomes. Physical Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI, plus a cleanup-verified retained-artifact SYCL repeat, without promoting either engine; Vulkan failed the patch gate. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Separate Windows NVIDIA and Windows AMD follow-ons now record patch, context, repeated-lifecycle, and vision outcomes without promoting failed quality cells; structured tool transport and Windows Intel remain open. Physical Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI without promoting either engine; Vulkan failed the patch gate. |
 | Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | Explicit bounded text, structured-text, source-code, and PNG attachments are admitted. Retrieval, history, PDF, Office, OpenDocument, folder scanning, embeddings, OCR, persistence, and complex-document UI remain independently gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Default-deny contracts and inert hostile fixtures exist, but no model tool, renderer route, DNS, network, page retrieval, active citation, or autonomous follow-up authority is admitted. |
 
@@ -898,7 +898,11 @@ Exit criteria:
    when an exact runtime and format have credible native support. Windows AMD is
    done for Ollama 0.32.1, its packaged ROCm 7.1 backend, an RX 7800 XT 16 GB
    profile, Qwen 3.5 9B Q4_K_M versus Q8_0, a 4,096-token context, and
-   concurrency one. Windows NVIDIA remains open. A physical Linux Intel Arc
+   concurrency one. Windows NVIDIA now has candidate-only b10088/CUDA evidence
+   for exact identity, full offload, baseline execution, strict patch,
+   repeated lifecycle, and Gemma vision. Qwen 3 8B failed both bounded context
+   recall cells and its strict patch cell, and structured tool transport plus
+   Windows Intel remain open. A physical Linux Intel Arc
    B580 now supplies candidate-only llama.cpp SYCL and OpenVINO GenAI evidence;
    Windows Intel remains a separate untested cell, and physical Apple Silicon
    is owner-parked until hardware is acquired.
