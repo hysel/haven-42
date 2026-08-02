@@ -410,6 +410,8 @@ Invoke-PackTest "Windows PowerShell 5.1 and PowerShell 7 compatibility is enforc
     $documentation = Get-Content -LiteralPath (Join-Path $repoRoot "docs/compatibility.md") -Raw
 
     Assert-True -Condition ($compatibility -match '\[version\]"5\.1"') -Message "Compatibility validation should preserve Windows PowerShell 5.1 as the minimum."
+    Assert-True -Condition ($compatibility -match 'misidentified the host platform') -Message "Compatibility validation should reject PowerShell 5.1 Windows platform misidentification."
+    Assert-True -Condition ($compatibility -match 'reported an unknown operating system') -Message "Compatibility validation should reject an unknown Windows operating system."
     Assert-True -Condition ($compatibility -match 'Language\.Parser\]::ParseFile') -Message "Compatibility validation should parse every PowerShell source file with the active engine."
     Assert-True -Condition ($compatibility -match 'get-local-model-profile\.windows\.ps1' -and $compatibility -match 'ConvertFrom-Json') -Message "Compatibility validation should run a read-only Windows profile smoke under each engine."
     Assert-True -Condition ($workflow -match 'Validate Windows PowerShell 5\.1 compatibility\s*\r?\n\s*shell: powershell') -Message "Hosted Windows validation should run the compatibility gate in Windows PowerShell 5.1."
@@ -708,6 +710,13 @@ Invoke-PackTest "hardware profile scripts report CPU architecture" {
 
     if ($IsWindows) {
         $windowsProfilePath = Join-Path $repoRoot "scripts/get-local-model-profile.windows.ps1"
+        $windowsProfileSource = Get-Content -LiteralPath $windowsProfilePath -Raw
+        Assert-True -Condition ($windowsProfileSource -match 'Windows display class registry') -Message "Windows GPU profiling should retain the bounded non-admin display-class fallback."
+        Assert-True -Condition ($windowsProfileSource -match 'remote display\|indirect display\|basic display') -Message "Windows GPU profiling should exclude virtual and generic display adapters from the fallback."
+        Assert-True -Condition ($windowsProfileSource -match 'Arc\\b\.\*\\b\[AB\]\\d\{3\}') -Message "Windows GPU profiling should distinguish discrete Intel Arc cards from integrated Intel graphics."
+        Assert-True -Condition ($windowsProfileSource -match '\$displayClassProfiles\s*=\s*@\(Get-WindowsDisplayClassGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single display-class GPU as a one-item collection."
+        Assert-True -Condition ($windowsProfileSource -match '\$nvidiaProfiles\s*=\s*@\(Get-NvidiaGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single NVIDIA GPU as a one-item collection."
+        Assert-True -Condition ($windowsProfileSource -match '\$rocmProfiles\s*=\s*@\(Get-RocmGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single AMD GPU as a one-item collection."
         $profileOutput = @(& $windowsProfilePath -AsJson 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows hardware profile JSON should be generated successfully."
         $profile = ($profileOutput -join "`n") | ConvertFrom-Json
@@ -5442,7 +5451,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $ipex = @($engines.engines | Where-Object { $_.id -eq "ipex-llm" })[0]
     $lmStudio = @($engines.engines | Where-Object { $_.id -eq "lm-studio" })[0]
     Assert-Equal -Actual $openvino.status -Expected "candidate" -Message "OpenVINO GenAI should remain candidate-only after bounded B580 evidence."
-    Assert-Equal -Actual ($openvino.backends[0].profiles -join ",") -Expected "linux-x64-intel-arc-b580-12gb" -Message "OpenVINO evidence should remain bound to the tested B580 profile."
+    Assert-Equal -Actual ($openvino.backends[0].profiles -join ",") -Expected "linux-x64-intel-arc-b580-12gb,windows-x64-intel-arc-b580-12gb" -Message "OpenVINO evidence should remain bound to the tested Linux and Windows B580 profiles."
     Assert-Equal -Actual $ipex.status -Expected "retired" -Message "Archived IPEX-LLM should be retired."
     Assert-True -Condition ($lmStudio.status -eq "optional-external-api" -and -not $lmStudio.redistributionAllowedByHaven42 -and -not $lmStudio.embeddingAllowedByHaven42) -Message "LM Studio must remain optional, API-only, and unbundled."
     $candidateScriptNames = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot "scripts") -File -Recurse | Select-Object -ExpandProperty Name)

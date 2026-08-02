@@ -72,13 +72,14 @@ The same pinned Linux CUDA environment was rebuilt without embedded or prebuilt 
 
 This promotes the local-text adapter only for the exact Linux NVIDIA/CUDA evidence cell. Windows AMD/HIP retains engine-only evidence. The server, tunnel, model, source, toolchain, build output, caches, and logs were removed after the adapter run.
 
-## Linux Intel Arc B580 candidates
+## Intel Arc B580 candidates
 
 Representative Intel hardware is no longer pending. Pinned llama.cpp SYCL and
-OpenVINO GenAI builds both executed directly on an Arc B580 12 GB and passed
-bounded cleanup checks. Neither is promoted: the llama.cpp upstream suite
-passed 50 of 53 tests, while the OpenVINO cell used an operating system outside
-the documented support baseline and its small control model missed strict
-output constraints. Exact inputs, functional results, security boundaries, and
-remaining gates are recorded in
+OpenVINO GenAI builds executed directly on an Arc B580 12 GB under Linux, and
+the OpenVINO GenAI portable runtime independently passed direct Windows GPU
+execution and cleanup. Neither is promoted: the llama.cpp upstream suite
+passed 50 of 53 tests, the Linux OpenVINO cell used an operating system outside
+the documented support baseline, and the small control model missed strict
+output constraints on both OpenVINO profiles. Exact inputs, functional results,
+security boundaries, and remaining gates are recorded in
 `examples/intel-b580-inference-engine-validation.md`.

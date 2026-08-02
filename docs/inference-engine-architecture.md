@@ -16,7 +16,7 @@ The shared local-text discovery and invocation entry points implement this bound
 | --- | --- | --- |
 | Ollama | Validated exact profiles | Existing Linux NVIDIA/CUDA and Windows AMD/ROCm evidence only. |
 | llama.cpp | CUDA and HIP validated; Vulkan failed | Linux NVIDIA CUDA and Windows AMD HIP passed their exact bounded engine cells. The same hash-pinned 11-model corpus passes the b10088 baseline on AMD/HIP and NVIDIA/CUDA without changing admission. Vulkan failed the Windows AMD applicable-patch gate and remains documentation-only. |
-| OpenVINO GenAI | Candidate | Exact Linux B580 GPU execution and cleanup passed, but the host OS is outside the documented support baseline, strict output behavior failed, and provider/package gates are absent. |
+| OpenVINO GenAI | Candidate | Exact Linux and Windows B580 GPU execution and cleanup passed. The Linux host is outside the documented support baseline, strict output behavior failed on both profiles, and provider/package gates are absent. |
 | llama.cpp SYCL | Candidate | Exact Linux B580 functional, vision, pressure, adapter, and cleanup cells passed; 3 of 53 upstream tests failed, so the backend remains unselectable and unpackaged. |
 | LM Studio | Optional external API | The end user installs it. Haven 42 may call its published loopback API but does not embed or redistribute it. |
 | IPEX-LLM | Retired | Upstream was archived on 2026-01-28. Keep a documentation record only. |

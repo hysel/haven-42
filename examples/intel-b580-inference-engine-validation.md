@@ -2,10 +2,11 @@
 
 ## Scope
 
-Validation ran on 2026-07-30 on a physical Linux x86_64 workstation with an
-Intel Arc B580 12 GB discrete GPU, the `xe` kernel driver, and a 16 GB
-Resizable BAR. The machine-specific hostname, address, username, GPU serial
-identity, local paths, and raw prompts are intentionally omitted.
+Validation ran on 2026-07-30 on a physical Linux x86_64 workstation and on
+2026-08-02 on the same physical Intel Arc B580 12 GB class under Windows x64.
+The Linux profile used the `xe` kernel driver and a 16 GB Resizable BAR. The
+machine-specific hostnames, addresses, usernames, GPU identities, local paths,
+and raw prompts are intentionally omitted.
 
 This is exact-host development evidence. It does not admit an installer,
 driver change, system package, bundled inference runtime, model redistribution,
@@ -96,6 +97,30 @@ engine/device execution and cleanup, not task quality, tool use, patch
 reliability, provider compatibility, or model admission. OpenVINO GenAI
 therefore remains a `candidate` with no Haven 42 provider contract.
 
+### Windows OpenVINO GenAI follow-on
+
+The Windows comparison used the official OpenVINO GenAI `2026.2.0` one-folder
+archive and the official CPython `3.13.12` embeddable distribution. Published
+hashes were verified before extraction, all 87 native OpenVINO files had valid
+Authenticode signatures, and the archive contained no executable program. An
+isolated, user-local Python path used exact hash-verified NumPy `2.4.6` and
+OpenVINO Telemetry `2025.2.0` wheels without an installer or global Python.
+OpenVINO imported with telemetry disabled and identified the B580 as the
+selected discrete `GPU` device.
+
+The same immutable Qwen3 model revision was downloaded from an exact file
+allowlist. All 16 files matched their declared sizes and SHA-256 or Git blob
+hashes before use. Three fresh pipeline load/generate/release cycles completed.
+The cold load took about 6.79 seconds; subsequent loads took about 2.58 seconds,
+and bounded generation took about 0.32 seconds in each run. No Python or
+OpenVINO process remained afterward.
+
+The response contained the requested exact marker on every run but wrapped it
+in empty Qwen reasoning tags. The strict-output cell therefore remains failed.
+This result proves direct Windows GPU execution, verified portable-runtime
+loading, and process cleanup only. It does not admit a provider, installer,
+automatic download, package component, task-quality claim, or runtime choice.
+
 ## Decision
 
 Representative Intel hardware is no longer a blocker for these two engine
@@ -103,8 +128,9 @@ families. Neither engine is promoted:
 
 - llama.cpp SYCL is blocked by upstream test failures and has no consumer
   installation or packaged parity evidence;
-- OpenVINO GenAI is blocked by the unsupported host-OS evidence cell, weak
-  candidate-model instruction behavior, and absent provider/package gates.
+- OpenVINO GenAI now has exact Linux and Windows B580 execution evidence, but
+  is blocked by strict-output behavior and absent provider/package gates. The
+  Linux host also remains outside its documented operating-system baseline.
 
 Both runtimes, their toolchains, models, caches, and raw logs remain outside the
 repository. No external Ollama server was contacted and no system package,

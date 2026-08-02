@@ -77,6 +77,14 @@ if ([string]::IsNullOrWhiteSpace([string]$profile.PowerShellVersion)) {
 if ([string]::IsNullOrWhiteSpace([string]$profile.OperatingSystem)) {
     throw "Windows hardware profile did not report its operating system."
 }
+if ($env:OS -eq "Windows_NT") {
+    if ($profile.Platform -ne "Windows") {
+        throw "Windows hardware profile misidentified the host platform as '$($profile.Platform)'."
+    }
+    if ($profile.OperatingSystem -eq "Unknown") {
+        throw "Windows hardware profile reported an unknown operating system."
+    }
+}
 
 Write-Host (
     "PowerShell compatibility passed: {0} files parsed and the Windows profile smoke passed under {1} {2}." -f

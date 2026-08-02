@@ -56,9 +56,9 @@
       "status": "candidate",
       "providerContracts": [],
       "backends": [
-        { "id": "intel-cpu-gpu-npu", "status": "candidate", "profiles": ["linux-x64-intel-arc-b580-12gb"] }
+        { "id": "intel-cpu-gpu-npu", "status": "candidate", "profiles": ["linux-x64-intel-arc-b580-12gb", "windows-x64-intel-arc-b580-12gb"] }
       ],
-      "notes": "OpenVINO GenAI 2026.2.1 executed a pinned INT4 model on the exact Linux B580 profile and passed repeated cleanup, but Ubuntu 26.04 is outside the documented OS baseline, the small model missed strict output constraints, and no provider/package gates exist. Candidate only; no executable integration assets ship."
+      "notes": "OpenVINO GenAI executed the same pinned INT4 model on exact Linux and Windows B580 profiles and passed repeated cleanup. The Linux host is outside the documented OS baseline, the small model missed strict output constraints on both profiles, and no provider/package gates exist. Candidate only; no executable integration assets ship."
     },
     {
       "id": "lm-studio",

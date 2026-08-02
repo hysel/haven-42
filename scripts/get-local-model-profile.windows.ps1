@@ -5,6 +5,25 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Windows PowerShell 5.1 does not define the PowerShell Core platform
+# variables. Resolve the host once without treating an absent automatic
+# variable as a false platform result.
+$script:IsWindowsHost = if (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) {
+    [bool]$IsWindows
+} else {
+    $env:OS -eq "Windows_NT"
+}
+$script:IsLinuxHost = if (Get-Variable -Name IsLinux -ErrorAction SilentlyContinue) {
+    [bool]$IsLinux
+} else {
+    $false
+}
+$script:IsMacOSHost = if (Get-Variable -Name IsMacOS -ErrorAction SilentlyContinue) {
+    [bool]$IsMacOS
+} else {
+    $false
+}
+
 function Get-CommandOutput {
     param(
         [string]$Command,
@@ -68,10 +87,14 @@ function Get-GpuVendor {
 function Get-GpuMemoryType {
     param(
         [string]$Vendor,
-        [Nullable[double]]$VramGb
+        [Nullable[double]]$VramGb,
+        [string]$Name
     )
 
     if ($Vendor -eq "Intel") {
+        if ($Name -match "(?i)\bIntel.*\bArc\b.*\b[AB]\d{3}\b" -and $null -ne $VramGb) {
+            return "dedicated"
+        }
         return "shared or integrated"
     }
 
@@ -87,15 +110,15 @@ function Get-GpuMemoryType {
 }
 
 function Get-PlatformName {
-    if ($IsWindows) {
+    if ($script:IsWindowsHost) {
         return "Windows"
     }
 
-    if ($IsLinux) {
+    if ($script:IsLinuxHost) {
         return "Linux"
     }
 
-    if ($IsMacOS) {
+    if ($script:IsMacOSHost) {
         return "macOS"
     }
 
@@ -107,21 +130,45 @@ function Get-OperatingSystemSummary {
         return $PSVersionTable.OS
     }
 
+    if ($script:IsWindowsHost) {
+        try {
+            $version = Get-ItemProperty -LiteralPath "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" -ErrorAction Stop
+            $productName = Convert-RegistryString -Value $version.ProductName
+            $displayVersion = Convert-RegistryString -Value $version.DisplayVersion
+            $build = Convert-RegistryString -Value $version.CurrentBuildNumber
+            $parts = @($productName, $displayVersion, $(if ($build) { "build $build" })) |
+                Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) }
+            if ($parts.Count -gt 0) {
+                return ($parts -join " ")
+            }
+        }
+        catch {
+            # The platform name remains a safe fallback when registry reads are unavailable.
+        }
+    }
+
     return (Get-PlatformName)
 }
 
 function Get-SystemRamGb {
-    if ($IsWindows) {
+    if ($script:IsWindowsHost) {
         try {
             $system = Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop
             return Convert-BytesToGb -Bytes ([double]$system.TotalPhysicalMemory)
         }
         catch {
-            return $null
+            try {
+                Add-Type -AssemblyName Microsoft.VisualBasic -ErrorAction Stop
+                $computerInfo = New-Object Microsoft.VisualBasic.Devices.ComputerInfo
+                return Convert-BytesToGb -Bytes ([double]$computerInfo.TotalPhysicalMemory)
+            }
+            catch {
+                return $null
+            }
         }
     }
 
-    if ($IsLinux -and (Test-Path -LiteralPath "/proc/meminfo")) {
+    if ($script:IsLinuxHost -and (Test-Path -LiteralPath "/proc/meminfo")) {
         $memInfo = Get-Content -LiteralPath "/proc/meminfo" -ErrorAction SilentlyContinue
         $memTotal = $memInfo | Where-Object { $_ -match "^MemTotal:\s+(\d+)\s+kB" } | Select-Object -First 1
         if ($memTotal -match "^MemTotal:\s+(\d+)\s+kB") {
@@ -129,7 +176,7 @@ function Get-SystemRamGb {
         }
     }
 
-    if ($IsMacOS) {
+    if ($script:IsMacOSHost) {
         $memBytes = Get-CommandOutput -Command "sysctl" -Arguments @("-n", "hw.memsize") | Select-Object -First 1
         if ($memBytes -match "^\d+$") {
             return Convert-BytesToGb -Bytes ([double]$memBytes)
@@ -140,7 +187,7 @@ function Get-SystemRamGb {
 }
 
 function Get-CpuSummary {
-    if ($IsWindows) {
+    if ($script:IsWindowsHost) {
         try {
             $cpu = Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop | Select-Object -First 1
             if ($cpu) {
@@ -148,11 +195,20 @@ function Get-CpuSummary {
             }
         }
         catch {
-            return "Unknown"
+            try {
+                $cpuKey = Get-ItemProperty -LiteralPath "HKLM:\HARDWARE\DESCRIPTION\System\CentralProcessor\0" -ErrorAction Stop
+                $cpuName = Convert-RegistryString -Value $cpuKey.ProcessorNameString
+                if ($cpuName) {
+                    return "$cpuName ($([Environment]::ProcessorCount) logical processors)"
+                }
+            }
+            catch {
+                return "Unknown"
+            }
         }
     }
 
-    if ($IsLinux) {
+    if ($script:IsLinuxHost) {
         $lscpu = Get-CommandOutput -Command "lscpu"
         $model = ($lscpu | Where-Object { $_ -match "^Model name:\s+(.+)$" } | Select-Object -First 1)
         $cpus = ($lscpu | Where-Object { $_ -match "^CPU\(s\):\s+(.+)$" } | Select-Object -First 1)
@@ -162,7 +218,7 @@ function Get-CpuSummary {
         return "$modelText ($cpuText logical processors)"
     }
 
-    if ($IsMacOS) {
+    if ($script:IsMacOSHost) {
         $brand = Get-CommandOutput -Command "sysctl" -Arguments @("-n", "machdep.cpu.brand_string") | Select-Object -First 1
         $logical = Get-CommandOutput -Command "sysctl" -Arguments @("-n", "hw.logicalcpu") | Select-Object -First 1
 
@@ -336,7 +392,7 @@ function Get-WindowsRegistryGpuProfiles {
                     VramGb = $vramGb
                     Source = "Windows display registry"
                     Vendor = $vendor
-                    MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vramGb
+                    MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vramGb -Name $name
                 })
                 $seen[$dedupeKey] = $true
             }
@@ -349,10 +405,57 @@ function Get-WindowsRegistryGpuProfiles {
     return $profiles
 }
 
+function Get-WindowsDisplayClassGpuProfiles {
+    $profiles = New-Object System.Collections.Generic.List[object]
+    $classRoot = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}"
+    if (-not (Test-Path -LiteralPath $classRoot)) {
+        return $profiles
+    }
+
+    $seen = @{}
+    $keys = Get-ChildItem -LiteralPath $classRoot -ErrorAction SilentlyContinue |
+        Where-Object { $_.PSChildName -match "^\d{4}$" }
+    foreach ($key in $keys) {
+        try {
+            $properties = Get-ItemProperty -LiteralPath $key.PSPath -ErrorAction Stop
+            $name = Convert-RegistryString -Value $properties.DriverDesc
+            if (-not $name -or $name -match "(?i)remote display|indirect display|basic display") {
+                continue
+            }
+
+            $memoryProperty = $properties.PSObject.Properties["HardwareInformation.qwMemorySize"]
+            if (-not $memoryProperty -or -not $memoryProperty.Value) {
+                continue
+            }
+
+            $vramGb = Convert-BytesToGb -Bytes ([double]$memoryProperty.Value)
+            $dedupeKey = "$name|$vramGb"
+            if ($seen.ContainsKey($dedupeKey)) {
+                continue
+            }
+
+            $vendor = Get-GpuVendor -Name $name
+            $profiles.Add([pscustomobject]@{
+                Name = $name
+                VramGb = $vramGb
+                Source = "Windows display class registry"
+                Vendor = $vendor
+                MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vramGb -Name $name
+            })
+            $seen[$dedupeKey] = $true
+        }
+        catch {
+            # Skip inaccessible or malformed adapter keys without broadening access.
+        }
+    }
+
+    return $profiles
+}
+
 function Get-DxDiagGpuProfiles {
     $profiles = New-Object System.Collections.Generic.List[object]
 
-    if (-not $IsWindows -or -not (Get-Command "dxdiag.exe" -ErrorAction SilentlyContinue)) {
+    if (-not $script:IsWindowsHost -or -not (Get-Command "dxdiag.exe" -ErrorAction SilentlyContinue)) {
         return $profiles
     }
 
@@ -405,7 +508,7 @@ function Get-DxDiagGpuProfiles {
                         VramGb = $vramGb
                         Source = "dxdiag"
                         Vendor = $vendor
-                        MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vramGb
+                        MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vramGb -Name $currentName
                     })
                     $seen[$dedupeKey] = $true
                 }
@@ -430,13 +533,18 @@ function Get-DxDiagGpuProfiles {
 function Get-PlatformGpuProfiles {
     $profiles = New-Object System.Collections.Generic.List[object]
 
-    if ($IsWindows) {
-        $registryProfiles = Get-WindowsRegistryGpuProfiles
+    if ($script:IsWindowsHost) {
+        $registryProfiles = @(Get-WindowsRegistryGpuProfiles)
         if ($registryProfiles.Count -gt 0) {
             return $registryProfiles
         }
 
-        $dxDiagProfiles = Get-DxDiagGpuProfiles
+        $displayClassProfiles = @(Get-WindowsDisplayClassGpuProfiles)
+        if ($displayClassProfiles.Count -gt 0) {
+            return $displayClassProfiles
+        }
+
+        $dxDiagProfiles = @(Get-DxDiagGpuProfiles)
         if ($dxDiagProfiles.Count -gt 0) {
             return $dxDiagProfiles
         }
@@ -459,7 +567,7 @@ function Get-PlatformGpuProfiles {
                     VramGb = $adapterRam
                     Source = "Win32_VideoController"
                     Vendor = $vendor
-                    MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $adapterRam
+                    MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $adapterRam -Name $controller.Name
                 })
             }
         }
@@ -468,7 +576,7 @@ function Get-PlatformGpuProfiles {
         }
     }
 
-    if ($IsLinux) {
+    if ($script:IsLinuxHost) {
         $gpuRows = Get-CommandOutput -Command "lspci" |
             Where-Object { $_ -match "(?i)(vga compatible controller|3d controller|display controller)" }
 
@@ -480,12 +588,12 @@ function Get-PlatformGpuProfiles {
                 VramGb = $null
                 Source = "lspci"
                 Vendor = $vendor
-                MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $null
+                MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $null -Name $name
             })
         }
     }
 
-    if ($IsMacOS) {
+    if ($script:IsMacOSHost) {
         $displayInfo = Get-CommandOutput -Command "system_profiler" -Arguments @("SPDisplaysDataType")
         $currentName = $null
 
@@ -510,7 +618,7 @@ function Get-PlatformGpuProfiles {
                     VramGb = $vram
                     Source = "system_profiler"
                     Vendor = $vendor
-                    MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vram
+                    MemoryType = Get-GpuMemoryType -Vendor $vendor -VramGb $vram -Name $currentName
                 })
 
                 $currentName = $null
@@ -522,12 +630,12 @@ function Get-PlatformGpuProfiles {
 }
 
 function Get-GpuProfiles {
-    $nvidiaProfiles = Get-NvidiaGpuProfiles
+    $nvidiaProfiles = @(Get-NvidiaGpuProfiles)
     if ($nvidiaProfiles.Count -gt 0) {
         return $nvidiaProfiles
     }
 
-    $rocmProfiles = Get-RocmGpuProfiles
+    $rocmProfiles = @(Get-RocmGpuProfiles)
     if ($rocmProfiles.Count -gt 0) {
         return $rocmProfiles
     }
