@@ -2377,7 +2377,10 @@ assert "vulkan" not in llama_backends
 assert llama_backends["sycl"]["status"] == "candidate"
 assert llama_backends["sycl"]["profiles"] == ["linux-x64-intel-arc-b580-12gb"]
 assert by_id["openvino-genai"]["status"] == "candidate"
-assert by_id["openvino-genai"]["backends"][0]["profiles"] == ["linux-x64-intel-arc-b580-12gb"]
+assert by_id["openvino-genai"]["backends"][0]["profiles"] == [
+    "linux-x64-intel-arc-b580-12gb",
+    "windows-x64-intel-arc-b580-12gb",
+]
 assert by_id["ipex-llm"]["status"] == "retired"
 assert by_id["lm-studio"]["status"] == "optional-external-api"
 assert by_id["lm-studio"]["redistributionAllowedByHaven42"] is False

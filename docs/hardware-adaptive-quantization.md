@@ -100,10 +100,12 @@ llama.cpp SYCL build fully offloaded nine representative text artifacts,
 passed 4K/8K prompt pressure, repeated cleanup, a hardened loopback adapter
 cell, a model-and-mode-specific Git-applicable patch, and a Gemma 3 vision
 control. Its upstream suite passed only 50 of 53 tests, so the backend remains
-candidate-only. OpenVINO GenAI 2026.2.1 also executed and repeatedly cleaned up
-an immutable Intel Qwen3 0.6B INT4 artifact on the B580, but Ubuntu 26.04 is
-outside the documented support baseline and the small model missed strict
-output constraints. It remains candidate-only with no provider contract.
+candidate-only. OpenVINO GenAI also executed and repeatedly cleaned up the same
+immutable Intel Qwen3 0.6B INT4 artifact on exact Linux and Windows B580
+profiles. Windows used a hash-verified portable runtime and isolated user-local
+Python environment. Ubuntu 26.04 remains outside the documented support
+baseline, and the small model missed strict output constraints on both
+profiles. OpenVINO remains candidate-only with no provider contract.
 
 See `config/inference-engine-registry.json`,
 `docs/inference-engine-architecture.md`,

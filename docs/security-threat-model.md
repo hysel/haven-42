@@ -183,16 +183,19 @@ pass separate approval.
 
 Milestone 26 Intel inference evidence grants no runtime admission. The physical
 Arc B580 review kept oneAPI, Level Zero development files, llama.cpp source and
-builds, OpenVINO wheels, models, caches, and raw logs outside the repository
-and application package. Inputs were immutable or exact-versioned and
+builds, OpenVINO wheels and portable archives, models, caches, and raw logs
+outside the repository and application package. Inputs were immutable or
+exact-versioned and
 SHA-256-inventoried; model snapshots were revision-pinned and rejected code,
 executables, native extensions, pickle files, and symlinks. The first mixed
 oneDNN/SYCL build crashed and was rejected. The isolated llama.cpp SYCL build
-still failed 3 of 53 upstream tests, and OpenVINO ran on an OS outside its
-documented support baseline while its small model missed strict output
-constraints. Both profiles therefore remain candidate-only with no installer,
-automatic download, active registry selection, provider route, package
-component, service, driver change, or silent CPU fallback. A functional GPU
+still failed 3 of 53 upstream tests. OpenVINO then passed exact Windows B580
+GPU execution from a hash-verified user-local portable runtime, but its small
+model missed strict output constraints on both operating systems and the Linux
+host remains outside the documented support baseline. Both engines therefore
+remain candidate-only with no installer, automatic download, active registry
+selection, provider route, package component, service, driver change, or
+silent CPU fallback. A functional GPU
 result cannot override a failed security, correctness, supply-chain, quality,
 cleanup, or package-parity gate.
 
