@@ -403,6 +403,20 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Committed workflow and GitHub repository policy should remain aligned: $($policyOutput -join [Environment]::NewLine)"
 }
 
+Invoke-PackTest "Windows PowerShell 5.1 and PowerShell 7 compatibility is enforced" {
+    $compatibilityPath = Join-Path $repoRoot "scripts/test-powershell-compatibility.ps1"
+    $compatibility = Get-Content -LiteralPath $compatibilityPath -Raw
+    $workflow = Get-Content -LiteralPath (Join-Path $repoRoot ".github/workflows/validate-pack.yml") -Raw
+    $documentation = Get-Content -LiteralPath (Join-Path $repoRoot "docs/compatibility.md") -Raw
+
+    Assert-True -Condition ($compatibility -match '\[version\]"5\.1"') -Message "Compatibility validation should preserve Windows PowerShell 5.1 as the minimum."
+    Assert-True -Condition ($compatibility -match 'Language\.Parser\]::ParseFile') -Message "Compatibility validation should parse every PowerShell source file with the active engine."
+    Assert-True -Condition ($compatibility -match 'get-local-model-profile\.windows\.ps1' -and $compatibility -match 'ConvertFrom-Json') -Message "Compatibility validation should run a read-only Windows profile smoke under each engine."
+    Assert-True -Condition ($workflow -match 'Validate Windows PowerShell 5\.1 compatibility\s*\r?\n\s*shell: powershell') -Message "Hosted Windows validation should run the compatibility gate in Windows PowerShell 5.1."
+    Assert-True -Condition ($workflow -match 'Validate PowerShell 7 compatibility\s*\r?\n\s*shell: pwsh') -Message "Hosted Windows validation should run the compatibility gate in PowerShell 7."
+    Assert-True -Condition ($documentation -match 'Windows PowerShell 5\.1' -and $documentation -match 'PowerShell 7') -Message "Compatibility documentation should state both supported Windows engines."
+}
+
 Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     $windowsRunner = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-pack.ps1") -Raw
     $sharedRunner = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-pack.shared.sh") -Raw

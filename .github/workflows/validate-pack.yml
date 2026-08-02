@@ -71,6 +71,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Validate Windows PowerShell 5.1 compatibility
+        shell: powershell
+        run: |
+          ./scripts/test-powershell-compatibility.ps1
+          ./scripts/validate-pack.ps1
+
+      - name: Validate PowerShell 7 compatibility
+        shell: pwsh
+        run: ./scripts/test-powershell-compatibility.ps1
+
       - name: Run full pack tests
         shell: pwsh
         run: ./scripts/test-pack.ps1 -Tier Full -NoReceipt

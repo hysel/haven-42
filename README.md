@@ -47,11 +47,15 @@ only for text generation; you can explore the interface without them.
 
 From the repository root, run the command for your platform.
 
-Windows PowerShell:
+Windows PowerShell 5.1 or PowerShell 7:
 
 ```powershell
 .\scripts\start-haven42-web.ps1
 ```
+
+PowerShell 7 is optional on Windows. Haven 42's committed PowerShell scripts
+are parser-checked and smoke-tested under both the built-in Windows PowerShell
+5.1 engine and PowerShell 7 in hosted Windows validation.
 
 Linux:
 
