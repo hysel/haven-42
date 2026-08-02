@@ -16,7 +16,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 83 |
+| Evidence records | 84 |
 | Distinct model-field values | 21 |
 | Tracked agent surfaces | 4 |
 
@@ -24,8 +24,8 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Status | Count |
 | --- | ---: |
+| `partial-pass` | 19 |
 | `validated-by-tests` | 19 |
-| `partial-pass` | 18 |
 | `write-smoke-validated` | 13 |
 | `read-only-tool-validated` | 11 |
 | `read-only-cli-validated` | 9 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | Mode | Count |
 | --- | ---: |
 | Generated sample | 38 |
-| Local endpoint | 25 |
+| Local endpoint | 26 |
 | Editor agent | 9 |
 | Automated tests | 7 |
 | Static | 3 |
