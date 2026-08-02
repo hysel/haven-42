@@ -387,6 +387,7 @@ $requiredFiles = @(
     "scripts/cleanup-local-agent-artifacts.macos.sh",
     "scripts/cleanup-local-agent-artifacts.shared.sh",
     "scripts/test-pack.ps1",
+    "scripts/test-powershell-compatibility.ps1",
     "scripts/setup-agent-surface.ps1",
     "scripts/setup-agent-surface.shared.sh",
     "scripts/setup-agent-surface.linux.sh",

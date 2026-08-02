@@ -4,6 +4,21 @@
 
 This document records compatibility expectations for Continue, local models, Ollama, MCP, and SonarQube-related workflows.
 
+## Windows PowerShell
+
+Haven 42 supports both the built-in Windows PowerShell 5.1 engine and
+PowerShell 7 for committed Windows scripts. PowerShell 7 is optional for normal
+Windows setup and operation; scripts must not require it unless a specific
+advanced workflow says so explicitly.
+
+Hosted Windows validation runs `scripts/test-powershell-compatibility.ps1`
+once with `shell: powershell` and once with `shell: pwsh`. Each engine parses
+every `.ps1` and `.psm1` file and executes the read-only Windows hardware
+profile smoke. Windows PowerShell 5.1 also runs the repository validator, while
+PowerShell 7 runs the complete Windows test suite. New scripts must avoid
+PowerShell 7-only syntax unless they are isolated behind a version check and a
+tested Windows PowerShell 5.1 fallback.
+
 ## Continue
 
 The pack targets Continue YAML configuration with:
