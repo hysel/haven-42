@@ -26,6 +26,16 @@ can authorize arbitrary download, command, client file write, repository read,
 elevation, service change, driver change, or installation. The installation
 broker remains simulation-only and not runtime-admitted.
 
+Separate Windows NVIDIA and AMD image-provider evidence is partial and does not
+broaden the Images view or provider registry. The Windows NVIDIA cell used an
+exact-digest user-local runtime and checkpoint, explicit IPv4 loopback binding,
+disabled browser launch, metadata, custom nodes, and external API nodes,
+bounded production-adapter I/O, isolated run directories, and exact-owned-
+process shutdown. Its generated files, logs, transferred source, harness, and
+raw report were removed. Update/rollback, onboarding, idle lifecycle,
+uninstall, package parity, and redistribution review remain required before any
+admission.
+
 The Validation · Evidence view is read-only and fail-closed. A shared
 standard-library engine reads only the bundled sanitized evidence catalog and
 surface matrices. The browser receives a bounded schema that omits catalog

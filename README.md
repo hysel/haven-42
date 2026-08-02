@@ -29,7 +29,7 @@ contributors.
 | Attachments | Accepts a bounded set of selected UTF-8 text, CSV, JSON, source-code, and PNG screenshot files. Clipboard PNG paste is supported. Attachments are never executed. |
 | Response display | Safely renders headings, lists, emphasis, code, quotations, and Unicode emoji without model-supplied active HTML or links. |
 | Run information | Shows provider-reported token counts, timing, and throughput details. |
-| Local images | Linux ComfyUI/SDXL is validated for one promoted loopback profile. Other platforms and providers remain independently gated. |
+| Local images | Linux ComfyUI/SDXL is validated for one promoted loopback profile. Windows NVIDIA and AMD have partial exact-profile evidence but remain unavailable; other platforms are independently gated. |
 | Software workflows | Shows registered read-only plans. The browser cannot start their processes, read a repository, or write files. |
 | Evidence and readiness | Displays bounded system readiness and bundled sanitized evidence without running background tests. |
 
@@ -146,7 +146,7 @@ for scope, evidence, blockers, and exit criteria.
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Recommendation, configuration, dispatch, health, cleanup, and evidence foundations. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
 | Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, and hardened unsigned portable packages; signing and machine effects remain gated. |
-| Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; remaining consumer-local platform profiles are open. |
+| Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial research evidence exists; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | Candidate research only; no executable video integration ships. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel candidate evidence exists with platform-specific gaps. |
