@@ -1,7 +1,26 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "authority": "ROADMAP.md",
   "milestones": {
+    "1": "complete",
+    "2": "complete",
+    "3": "complete",
+    "4": "complete",
+    "5": "complete",
+    "6": "complete",
+    "7": "complete",
+    "8": "complete",
+    "9": "complete",
+    "10": "complete",
+    "11": "complete",
+    "12": "complete",
+    "13": "complete",
+    "14": "complete",
+    "15": "complete",
+    "16": "complete",
+    "17": "complete",
+    "18": "complete",
+    "19": "complete",
     "20": "complete",
     "21": "complete",
     "22": "in-progress",
@@ -14,14 +33,29 @@
   },
   "documents": {
     "ROADMAP.md": {
-      "rowPrefix": "Milestone "
+      "rowPrefix": "Milestone ",
+      "firstMilestone": 1,
+      "lastMilestone": 28
     },
     "README.md": {
-      "rowPrefix": "Milestone "
+      "rowPrefix": "Milestone ",
+      "firstMilestone": 20,
+      "lastMilestone": 28
     },
     "docs/solution-architecture-review.md": {
-      "rowPrefix": ""
+      "rowPrefix": "",
+      "firstMilestone": 1,
+      "lastMilestone": 28
     }
+  },
+  "roadmapInventory": {
+    "firstMilestone": 1,
+    "lastMilestone": 28,
+    "summaryDocument": "ROADMAP.md",
+    "detailDocuments": [
+      "ROADMAP.md",
+      "TODO.md"
+    ]
   },
   "classificationPatterns": {
     "complete": "(?i)^complete$",

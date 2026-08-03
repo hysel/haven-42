@@ -88,9 +88,12 @@ without `-NoReceipt`:
 ```
 
 Use `docs/test-tiers.md` for Integration-only runs, timing output, and the
-schema-v3 staged-tree receipt used to avoid duplicate pre-push work. Commit
-without editing after Full; the pre-push hook then reuses the exact tested tree.
-GitHub Actions always runs Full independently.
+schema-v3 staged-tree receipt used to avoid duplicate pre-push work. Before the
+final stage, review every roadmap milestone for status, evidence, and boundary
+drift rather than checking only the milestone being changed. Commit without
+editing after Full; the pre-commit hook rejects an untested staged tree and the
+pre-push hook then reuses the exact tested tree. GitHub Actions always runs Full
+independently.
 
 When mapped documentation changes, synchronize and push the separate GitHub
 wiki before opening or pushing the main-repository PR. Follow
@@ -121,6 +124,7 @@ required hosted jobs report success. See `docs/hosted-ci-verification.md`.
 - [ ] New agent-specific assets have complete pass-to-ship evidence, or the change contains documentation only for a failed evaluation.
 - [ ] `CHANGELOG.md` records user-visible changes.
 - [ ] Validation has been run or skipped with a clear reason.
+- [ ] All roadmap milestones were reviewed for status, evidence, and boundary drift.
 
 ## Security changes
 

@@ -15,4 +15,5 @@ Describe the user-visible and security-boundary changes.
 - [ ] Focused tests passed.
 - [ ] Full cross-platform contract suite passed.
 - [ ] Mapped wiki content is synchronized.
+- [ ] All roadmap milestones were reviewed for status, evidence, and boundary drift.
 - [ ] Exact-SHA hosted jobs passed before merge.

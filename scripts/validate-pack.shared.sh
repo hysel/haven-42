@@ -470,6 +470,9 @@ REQUIRED_FILES=(
   ".github/CODEOWNERS"
   ".github/pull_request_template.md"
   ".githooks/pre-push"
+  ".githooks/pre-commit"
+  "scripts/verify-pre-commit-readiness.py"
+  "scripts/test-pre-commit-readiness.py"
 )
 
 for required in "${REQUIRED_FILES[@]}"; do

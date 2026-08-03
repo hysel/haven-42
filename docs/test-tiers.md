@@ -44,13 +44,29 @@ PowerShell repository-validation fixtures are created in the operating system's 
 
 A successful Full run with no unstaged or untracked files writes schema-v3 `haven-42-test-receipt-v1` inside the repository's private `.git` directory. The tested content may be the clean `HEAD` tree or the exact staged index tree. The receipt records the current commit for diagnostics, the authoritative tested tree, its `head` or `index` source, tier, and runner. It is not committed or included in release packages.
 
+The pre-commit hook rejects a commit unless:
+
+- the complete intended change is staged with no unstaged or untracked files;
+- the receipt schema and tier match;
+- the receipt tree exactly matches the staged index; and
+- when the sibling wiki clone is available, all mapped pages are synchronized
+  with the native PowerShell or POSIX checker for the host platform.
+
 The pre-push hook skips its duplicate local Full run only when:
 
 - the working tree is clean;
 - the receipt schema and tier match;
 - the receipt tree exactly matches `HEAD`.
 
-For the efficient safe path, stage the complete change, confirm there are no unstaged or untracked files, run Full without `-NoReceipt`, and then commit without editing the content. The resulting commit has the staged tree that was tested, so pre-push reuses the receipt. Any later content edit, partial staging, untracked file, missing receipt, partial tier, or failed test causes the pre-push hook to run Full. GitHub Actions always runs Full independently and never trusts a local receipt.
+For the efficient safe path, review all roadmap milestones for claim drift,
+synchronize mapped wiki pages, stage the complete change, confirm there are no
+unstaged or untracked files, run Full without `-NoReceipt`, and then commit
+without editing the content. The pre-commit hook proves the staged tree is the
+tested tree; the resulting commit has that same tree, so pre-push reuses the
+receipt. Any later content edit, partial staging, untracked file, missing
+receipt, partial tier, or failed test blocks commit or causes pre-push to run
+Full. GitHub Actions always runs Full independently and never trusts a local
+receipt.
 
 Use `-NoReceipt` or `--no-receipt` for ephemeral runners and hosted CI.
 
