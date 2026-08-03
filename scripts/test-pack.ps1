@@ -423,17 +423,25 @@ Invoke-PackTest "Windows PowerShell 5.1 and PowerShell 7 compatibility is enforc
 Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     $windowsRunner = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-pack.ps1") -Raw
     $sharedRunner = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-pack.shared.sh") -Raw
-    $hook = Get-Content -LiteralPath (Join-Path $repoRoot ".githooks/pre-push") -Raw
+    $pushHook = Get-Content -LiteralPath (Join-Path $repoRoot ".githooks/pre-push") -Raw
+    $commitHook = Get-Content -LiteralPath (Join-Path $repoRoot ".githooks/pre-commit") -Raw
     $workflow = Get-Content -LiteralPath (Join-Path $repoRoot ".github/workflows/validate-pack.yml") -Raw
     $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/test-tiers.md") -Raw
     Assert-True -Condition ($windowsRunner -match 'ValidateSet\("Fast", "Integration", "Full"\)' -and $windowsRunner -match "Stopwatch") -Message "Windows tests should expose timed Fast, Integration, and Full tiers."
     Assert-True -Condition ($windowsRunner -match "ls-files --cached --others --exclude-standard -z" -and $windowsRunner -match 'LinkType -in @\("SymbolicLink", "Junction"\)') -Message "Windows disposable repository fixtures should include current non-ignored Git content and reject linked files."
     Assert-True -Condition ($sharedRunner -match 'fast\|integration\|full' -and $sharedRunner -match "RUN_STARTED_SECONDS") -Message "Native tests should expose timed Fast, Integration, and Full tiers."
     Assert-True -Condition ($windowsRunner -match "haven-42-test-receipt-v1" -and $sharedRunner -match "haven-42-test-receipt-v1") -Message "Both runners should write the same receipt contract."
-    Assert-True -Condition ($hook -match "Exact content-tree full-test receipt found" -and $hook -match "HEAD\^\{tree\}" -and $hook -match "schema=3") -Message "Pre-push should require a schema-v3 exact content-tree receipt."
+    Assert-True -Condition ($pushHook -match "Exact content-tree full-test receipt found" -and $pushHook -match "HEAD\^\{tree\}" -and $pushHook -match "schema=3") -Message "Pre-push should require a schema-v3 exact content-tree receipt."
+    Assert-True -Condition ($commitHook -match "ensure-test-python3\.shared\.sh" -and $commitHook -match "verify-pre-commit-readiness\.py" -and $commitHook -match "sync-wiki\.ps1" -and $commitHook -match "sync-wiki\.shared\.sh") -Message "Pre-commit should use validated Python 3, require the exact staged-tree Full receipt, and check an available wiki clone with the native platform runner."
     Assert-True -Condition ($workflow -match "-Tier Full -NoReceipt" -and $workflow -match "--tier full --no-receipt") -Message "Hosted CI should always run Full without trusting local receipts."
     Assert-True -Condition (([regex]::Matches($workflow, "Run pack validation")).Count -eq 0) -Message "Hosted CI should not run validation separately when Full tests already include it."
     Assert-True -Condition ($doc -match "GitHub Actions always runs Full independently") -Message "Test-tier docs should preserve hosted CI authority."
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for pre-commit hostile tests."
+    $preCommitOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pre-commit-readiness.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Pre-commit readiness hostile tests should pass."
+    Assert-True -Condition (($preCommitOutput -join "`n") -match "Pre-commit readiness hostile tests passed") -Message "Pre-commit readiness must reject missing or stale receipts, partial staging, and untracked files."
 }
 
 Invoke-PackTest "commands and workflows resolve for the active operating system" {
@@ -2457,7 +2465,7 @@ Invoke-PackTest "install wrapper scripts exist and call shared Bash installer" {
 }
 
 Invoke-PackTest "shell wrapper scripts and hooks are executable in git" {
-    $modeRows = & git -C $repoRoot ls-files -s "scripts/*.sh" ".githooks/pre-push"
+    $modeRows = & git -C $repoRoot ls-files -s "scripts/*.sh" ".githooks/pre-push" ".githooks/pre-commit"
     Assert-True -Condition ($LASTEXITCODE -eq 0) -Message "git ls-files should succeed for shell scripts."
     Assert-True -Condition ($modeRows.Count -gt 0) -Message "Repository should include shell scripts and hooks."
 
@@ -5282,7 +5290,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($pdfParityOutput -join "`n") -match "15 exclusion checks") -Message "PDF package parity must remain false while all candidate components are excluded."
     $statusConsistencyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-project-status-consistency.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Project status consistency hostile tests should pass."
-    Assert-True -Condition (($statusConsistencyOutput -join "`n") -match "15 checks") -Message "Roadmap, README, architecture, TODO, and project status must fail closed on drift."
+    Assert-True -Condition (($statusConsistencyOutput -join "`n") -match "Project status consistency hostile tests passed") -Message "The complete roadmap, README, architecture, TODO, and project status must fail closed on drift without duplicating a mutable test count."
     $researchBoundaryOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-web-research-boundary.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline web-research boundary hostile tests should pass."
     Assert-True -Condition (($researchBoundaryOutput -join "`n") -match "28 checks") -Message "Research query/result/citation validation must remain fixed-provider, inert, network-free, and runtime-unadmitted."

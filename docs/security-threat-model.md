@@ -19,6 +19,7 @@ Haven 42 protects user repositories, local files, prompts, responses, models, cr
 - A compromised renderer sends malformed frames, replays approval tokens, crosses sessions, cancels another request, or binds events to the wrong request.
 - Path traversal, symlink or reparse-point swaps, and protected-directory writes escape an approved grant.
 - A provider response leaks repository data, endpoint details, process inventories, machine paths, or secrets into committed evidence.
+- A partial or untested staged tree is committed, duplicated platform assertions drift, mapped wiki pages lag behind their sources, or a narrow roadmap review leaves contradictory milestone claims.
 - Model-supplied Markdown or HTML creates active markup, links, remote images, scripts, event handlers, misleading hidden content, or an accessibility-breaking document outline.
 - A malicious or stale update manifest or activation journal causes downgrade, target confusion, duplicate-asset ambiguity, checksum bypass, unsigned activation, approval replay, interrupted-state confusion, unsafe retention cleanup, or user-data replacement.
 - Forged GitHub release metadata points the update checker at a fork, draft, prerelease, mutable release, mismatched tag, duplicate manifest, credential-bearing URL, or unapproved asset host.
@@ -33,6 +34,15 @@ Haven 42 protects user repositories, local files, prompts, responses, models, cr
 ## Controls
 
 Policy selects registered operations; prompts never grant authority. IPC is typed, size-bounded, schema-strict, session-bound, and default-deny. Filesystem access requires native canonicalization and narrow expiring grants. Writes require an approval bound to the exact operation and effects. Updates use immutable releases, exact target selection, hashes, provenance, side-by-side staging, health checks, and rollback; the current offline manifest, release-metadata, and lifecycle policies cannot use the network, download, write, stage, activate, roll back, clean, install, elevate, terminate processes, or touch user data. The lifecycle policy rejects raw paths and renderer authority, treats all evidence booleans as untrusted scenario inputs rather than proof, protects the active and previous known-good versions, and deterministically models failed health and interrupted-journal recovery. Reliability rules prevent silent write retries and unrelated process termination. Evidence is sanitized and local data deletion is explicit and ownership-aware.
+
+Repository changes use one platform-neutral project-status contract covering
+all 28 roadmap milestones. Hostile tests reject missing early or late
+milestones, mismatched classifications, stale claims, malformed schemas, and
+duplicate markers without granting promotion authority. The pre-commit hook
+requires a successful Full-test receipt for the exact staged tree, rejects
+unstaged or untracked files, and checks a locally available mapped wiki clone.
+Pre-push reuses only the matching committed-tree receipt, while GitHub Actions
+independently reruns every native gate and never trusts local receipt content.
 
 The structural update-trust handoff accepts only a schema-strict, short-lived,
 single-use receipt bound to an exact verifier profile and binary digest, trust

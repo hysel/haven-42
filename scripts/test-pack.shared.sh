@@ -255,7 +255,7 @@ test_shell_scripts_executable() {
   while IFS= read -r row; do
     mode="$(printf '%s' "$row" | awk '{ print $1 }')"
     [ "$mode" = "100755" ] || return 1
-  done < <(git -C "$REPO_ROOT" ls-files -s 'scripts/*.sh' '.githooks/pre-push')
+  done < <(git -C "$REPO_ROOT" ls-files -s 'scripts/*.sh' '.githooks/pre-push' '.githooks/pre-commit')
 }
 
 test_native_shell_python3_resolution() {
@@ -315,10 +315,16 @@ test_test_tier_contract() {
     grep -q 'haven-42-test-receipt-v1' "$REPO_ROOT/scripts/test-pack.shared.sh" &&
     grep -q 'Exact content-tree full-test receipt found' "$REPO_ROOT/.githooks/pre-push" &&
     grep -q 'schema=3' "$REPO_ROOT/.githooks/pre-push" &&
+    grep -q 'ensure-test-python3.shared.sh' "$REPO_ROOT/.githooks/pre-commit" &&
+    grep -q 'verify-pre-commit-readiness.py' "$REPO_ROOT/.githooks/pre-commit" &&
+    grep -q 'sync-wiki.ps1' "$REPO_ROOT/.githooks/pre-commit" &&
+    grep -q 'sync-wiki.shared.sh' "$REPO_ROOT/.githooks/pre-commit" &&
     grep -q -- '-Tier Full -NoReceipt' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -q -- '--tier full --no-receipt' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     ! grep -q 'Run pack validation' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
-    grep -q 'GitHub Actions always runs Full independently' "$REPO_ROOT/docs/test-tiers.md"
+    grep -q 'GitHub Actions always runs Full independently' "$REPO_ROOT/docs/test-tiers.md" &&
+    python3 "$REPO_ROOT/scripts/test-pre-commit-readiness.py" |
+      grep -q 'Pre-commit readiness hostile tests passed'
 }
 
 test_os_aware_command_contract() {
@@ -2621,7 +2627,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-pdf-source-package-parity-foundation.py" |
     grep -q "15 exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-project-status-consistency.py" |
-    grep -q "15 checks" || return 1
+    grep -q "Project status consistency hostile tests passed" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-web-research-boundary.py" |
     grep -q "28 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-page-text.py" |

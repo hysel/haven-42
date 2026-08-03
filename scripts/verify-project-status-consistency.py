@@ -26,6 +26,7 @@ def load_contract(path: Path = CONTRACT) -> dict:
         "authority",
         "milestones",
         "documents",
+        "roadmapInventory",
         "classificationPatterns",
         "requiredMarkers",
         "forbiddenMarkers",
@@ -33,7 +34,7 @@ def load_contract(path: Path = CONTRACT) -> dict:
     }
     if set(value) != expected_keys:
         raise StatusError("status contract keys do not match the closed schema")
-    if value.get("schemaVersion") != 2:
+    if value.get("schemaVersion") != 3:
         raise StatusError("unsupported status contract schema")
     effects = value.get("effects")
     if effects != {
@@ -56,10 +57,14 @@ def load_contract(path: Path = CONTRACT) -> dict:
             not isinstance(relative, str)
             or not relative
             or not isinstance(settings, dict)
-            or set(settings) != {"rowPrefix"}
+            or set(settings) != {"rowPrefix", "firstMilestone", "lastMilestone"}
             or not isinstance(settings["rowPrefix"], str)
+            or not isinstance(settings["firstMilestone"], int)
+            or not isinstance(settings["lastMilestone"], int)
+            or settings["firstMilestone"] < 1
+            or settings["lastMilestone"] < settings["firstMilestone"]
         ):
-            raise StatusError("status document entries must contain only rowPrefix")
+            raise StatusError("status document entries must contain a valid closed range")
     if not isinstance(milestones, dict) or not milestones:
         raise StatusError("milestones must be a non-empty object")
     if not isinstance(patterns, dict) or not patterns:
@@ -72,6 +77,35 @@ def load_contract(path: Path = CONTRACT) -> dict:
             or classification not in patterns
         ):
             raise StatusError("milestone classifications must reference known patterns")
+    expected_milestones = {str(number) for number in range(1, 29)}
+    if set(milestones) != expected_milestones:
+        raise StatusError("milestone classifications must cover exactly 1 through 28")
+    for settings in documents.values():
+        document_milestones = {
+            str(number)
+            for number in range(
+                settings["firstMilestone"], settings["lastMilestone"] + 1
+            )
+        }
+        if not document_milestones <= set(milestones):
+            raise StatusError("status document range escapes the milestone inventory")
+    inventory = value.get("roadmapInventory")
+    if (
+        not isinstance(inventory, dict)
+        or set(inventory)
+        != {"firstMilestone", "lastMilestone", "summaryDocument", "detailDocuments"}
+        or inventory["firstMilestone"] != 1
+        or inventory["lastMilestone"] != 28
+        or inventory["summaryDocument"] != authority
+        or not isinstance(inventory["detailDocuments"], list)
+        or len(inventory["detailDocuments"]) != 2
+        or any(
+            not isinstance(relative, str) or not relative
+            for relative in inventory["detailDocuments"]
+        )
+        or len(set(inventory["detailDocuments"])) != 2
+    ):
+        raise StatusError("roadmap inventory must cover 1 through 28 in two detail documents")
     for classification, pattern in patterns.items():
         if not isinstance(classification, str) or not isinstance(pattern, str):
             raise StatusError("classification patterns must be strings")
@@ -111,6 +145,17 @@ def table_statuses(text: str, row_prefix: str) -> dict[str, str]:
     return found
 
 
+def milestone_headings(text: str) -> dict[str, int]:
+    found: dict[str, int] = {}
+    row = re.compile(r"^## Milestone (\d+):")
+    for line in text.splitlines():
+        match = row.match(line)
+        if match:
+            milestone = match.group(1)
+            found[milestone] = found.get(milestone, 0) + 1
+    return found
+
+
 def verify(root: Path, contract: dict) -> list[str]:
     errors: list[str] = []
     milestones = contract["milestones"]
@@ -130,7 +175,19 @@ def verify(root: Path, contract: dict) -> list[str]:
         except StatusError as exc:
             errors.append(f"{relative}: {exc}")
             continue
-        for milestone, classification in milestones.items():
+        expected = {
+            str(number)
+            for number in range(
+                settings["firstMilestone"], settings["lastMilestone"] + 1
+            )
+        }
+        unexpected = sorted(set(statuses) - expected, key=int)
+        if unexpected:
+            errors.append(
+                f"{relative}: unexpected milestone status rows: {', '.join(unexpected)}"
+            )
+        for milestone in sorted(expected, key=int):
+            classification = milestones[milestone]
             status = statuses.get(milestone)
             if status is None:
                 errors.append(f"{relative}: missing milestone {milestone} status row")
@@ -140,6 +197,29 @@ def verify(root: Path, contract: dict) -> list[str]:
                     f"{relative}: milestone {milestone} status {status!r} "
                     f"does not classify as {classification!r}"
                 )
+    inventory = contract["roadmapInventory"]
+    expected_inventory = {
+        str(number)
+        for number in range(
+            inventory["firstMilestone"], inventory["lastMilestone"] + 1
+        )
+    }
+    for relative in inventory["detailDocuments"]:
+        path = root / relative
+        if not path.is_file():
+            errors.append(f"{relative}: missing roadmap inventory document")
+            continue
+        headings = milestone_headings(path.read_text(encoding="utf-8"))
+        for milestone in sorted(expected_inventory, key=int):
+            if headings.get(milestone) != 1:
+                errors.append(
+                    f"{relative}: milestone {milestone} heading must appear exactly once"
+                )
+        unexpected = sorted(set(headings) - expected_inventory, key=int)
+        if unexpected:
+            errors.append(
+                f"{relative}: unexpected milestone headings: {', '.join(unexpected)}"
+            )
     for relative, markers in contract["requiredMarkers"].items():
         path = root / relative
         if not path.is_file():
@@ -179,7 +259,10 @@ def main() -> int:
             print(f"ERROR {error}")
         print(f"Project status consistency failed with {len(errors)} error(s).")
         return 1
-    count = len(contract["milestones"]) * len(contract["documents"])
+    count = sum(
+        settings["lastMilestone"] - settings["firstMilestone"] + 1
+        for settings in contract["documents"].values()
+    )
     print(f"Project status consistency passed: {count} milestone/document cells.")
     return 0
 

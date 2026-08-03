@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+set -eu
+
+repo_root="$(git rev-parse --show-toplevel)"
+
+# shellcheck source=../scripts/ensure-test-python3.shared.sh
+. "$repo_root/scripts/ensure-test-python3.shared.sh"
+ensure_test_python3
+python3 "$repo_root/scripts/verify-pre-commit-readiness.py"
+
+wiki_path="${repo_root}.wiki"
+if [ -d "$wiki_path/.git" ]; then
+  case "$(uname -s 2>/dev/null || printf unknown)" in
+    MINGW*|MSYS*|CYGWIN*)
+      command -v pwsh >/dev/null 2>&1 || {
+        printf '%s\n' "Commit blocked: PowerShell 7 is required for the Windows wiki check." >&2
+        exit 1
+      }
+      wiki_native="$(cygpath -w "$wiki_path")"
+      pwsh -NoProfile -ExecutionPolicy Bypass -File \
+        "$repo_root/scripts/sync-wiki.ps1" -WikiPath "$wiki_native" -Check
+      ;;
+    *)
+      "$repo_root/scripts/sync-wiki.shared.sh" --wiki-path "$wiki_path" --check
+      ;;
+  esac
+fi
+
+printf '%s\n' "Exact staged-tree Full-test receipt and available wiki synchronization verified."
