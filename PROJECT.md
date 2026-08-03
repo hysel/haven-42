@@ -46,11 +46,14 @@ composition work. Its offline hostile-tested evaluator grants no authority and
 keeps the unsigned development package independent from future promotion
 decisions.
 
-A least-privilege GitHub build-provenance job is prepared locally for the
+A least-privilege GitHub build-provenance job is active for the
 unsigned Windows, Linux, and macOS development archives. It is main-push-only,
 depends on all native package jobs, reverifies every downloaded artifact set,
-and grants no pull-request write authority or Release publication. No
-attestation exists until an approved future push runs that job.
+and grants no pull-request write authority or Release publication. The job has
+produced GitHub attestations for qualifying unsigned development archives,
+including run `30826478326` at commit
+`28bba796876a398869034e4d3b8b0c1ab6fa3056`. This does not authorize signing,
+notarization, a GitHub Release, updater activation, or production use.
 
 Public code-signing and privacy policies plus a fail-closed SignPath
 eligibility audit are now prepared locally. The Windows package specification

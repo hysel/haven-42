@@ -23,7 +23,11 @@ def require(condition: bool, message: str) -> None:
 
 
 def copy_inputs(target: Path, contract: dict) -> None:
-    relatives = set(contract["documents"]) | set(contract["requiredMarkers"])
+    relatives = (
+        set(contract["documents"])
+        | set(contract["requiredMarkers"])
+        | set(contract["forbiddenMarkers"])
+    )
     for relative in relatives:
         source = ROOT / relative
         destination = target / relative
@@ -78,6 +82,17 @@ def main() -> int:
             require(MODULE.verify(case, contract), f"mutation {index} was accepted")
             checks += 1
 
+        case = base / "forbidden"
+        copy_inputs(case, contract)
+        path = case / "PROJECT.md"
+        text = path.read_text(encoding="utf-8")
+        path.write_text(
+            text + "\nNo attestation exists until an approved future push runs that job.\n",
+            encoding="utf-8",
+        )
+        require(MODULE.verify(case, contract), "stale attestation claim was accepted")
+        checks += 1
+
     malformed = json.loads(json.dumps(contract))
     malformed["effects"]["networkAllowed"] = True
     with tempfile.TemporaryDirectory(prefix="haven42-status-contract-") as raw:
@@ -89,6 +104,34 @@ def main() -> int:
             checks += 1
         else:
             raise AssertionError("effect-enabling contract was accepted")
+
+    malformed_contracts = []
+    missing_field = json.loads(json.dumps(contract))
+    del missing_field["forbiddenMarkers"]
+    malformed_contracts.append(missing_field)
+    unknown_field = json.loads(json.dumps(contract))
+    unknown_field["promotionAllowed"] = False
+    malformed_contracts.append(unknown_field)
+    invalid_pattern = json.loads(json.dumps(contract))
+    invalid_pattern["classificationPatterns"]["complete"] = "("
+    malformed_contracts.append(invalid_pattern)
+    duplicate_marker = json.loads(json.dumps(contract))
+    duplicate_marker["requiredMarkers"]["TODO.md"].append(
+        duplicate_marker["requiredMarkers"]["TODO.md"][0]
+    )
+    malformed_contracts.append(duplicate_marker)
+    for index, malformed_contract in enumerate(malformed_contracts):
+        with tempfile.TemporaryDirectory(
+            prefix="haven42-status-contract-hostile-"
+        ) as raw:
+            path = Path(raw) / "contract.json"
+            path.write_text(json.dumps(malformed_contract), encoding="utf-8")
+            try:
+                MODULE.load_contract(path)
+            except MODULE.StatusError:
+                checks += 1
+            else:
+                raise AssertionError(f"malformed contract {index} was accepted")
 
     duplicate = (
         "| Milestone 28: Controlled Web Research | Proposed | first |\n"

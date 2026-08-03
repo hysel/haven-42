@@ -211,9 +211,12 @@ separately and could not turn a recall failure into a pass.
 The reusable follow-on runner downloads nothing, opens no listener, invokes no
 shell, verifies every artifact before execution, uses only synthetic prompts,
 stores no raw prompt or response, writes atomic sanitized checkpoints, and
-deletes temporary prompt and image files. Structured tool-call transport
-remains unexecuted for Windows NVIDIA, Windows AMD was not rerun for that cell,
-and Windows Intel remains a separate hardware gap. These results add no
+deletes temporary prompt and image files. A separate bounded manual Ollama
+0.32.5 run passed provider-envelope transport for four tool-capable installed
+models and classified one model as unsupported, but it is not direct
+accelerator-specific llama.cpp evidence. Direct Windows NVIDIA and Windows AMD
+llama.cpp tool-call cells remain open, and Windows Intel remains a separate
+hardware gap. These results add no
 provider route, automatic selection, model activation, package, or production
 authority.
 
@@ -225,6 +228,7 @@ automatic selection, or inherit to another CUDA/HIP device, SYCL, Vulkan,
 Ollama, or OpenVINO. It also does not admit either direct llama.cpp runtime as
 a product route. The declared Windows NVIDIA/AMD patch, context-pressure,
 repeated-lifecycle, and vision cells now have explicit pass/fail evidence.
-Structured tool-call transport remains open, and failed quality cells remain
-non-promoting. The WSL2 AMD cell adds bounded candidate evidence only; native
+The bounded Ollama provider-envelope transport cell is complete, while direct
+accelerator-specific llama.cpp tool-call cells and runtime integration remain
+open; failed quality cells remain non-promoting. The WSL2 AMD cell adds bounded candidate evidence only; native
 Linux AMD validation remains open.

@@ -5282,7 +5282,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($pdfParityOutput -join "`n") -match "15 exclusion checks") -Message "PDF package parity must remain false while all candidate components are excluded."
     $statusConsistencyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-project-status-consistency.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Project status consistency hostile tests should pass."
-    Assert-True -Condition (($statusConsistencyOutput -join "`n") -match "10 checks") -Message "Roadmap, README, architecture, TODO, and project status must fail closed on drift."
+    Assert-True -Condition (($statusConsistencyOutput -join "`n") -match "15 checks") -Message "Roadmap, README, architecture, TODO, and project status must fail closed on drift."
     $researchBoundaryOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-web-research-boundary.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline web-research boundary hostile tests should pass."
     Assert-True -Condition (($researchBoundaryOutput -join "`n") -match "28 checks") -Message "Research query/result/citation validation must remain fixed-provider, inert, network-free, and runtime-unadmitted."

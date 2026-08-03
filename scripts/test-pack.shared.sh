@@ -2621,7 +2621,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-pdf-source-package-parity-foundation.py" |
     grep -q "15 exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-project-status-consistency.py" |
-    grep -q "10 checks" || return 1
+    grep -q "15 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-web-research-boundary.py" |
     grep -q "28 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-page-text.py" |
