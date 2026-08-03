@@ -2890,6 +2890,7 @@ Invoke-PackTest "model catalog assembly is license hardware evidence and input s
         $workflows = Get-Content -LiteralPath (Join-Path $repoRoot "config/workflows.json") -Raw | ConvertFrom-Json
         Assert-True -Condition ($contract.rules.missingLicenseBlocksAutomaticPromotion -eq $true -and $contract.rules.executesRemoteCode -eq $false) -Message "Contract should fail closed on license and remote code."
         Assert-True -Condition ($doc -match "Two Product Views, One Policy Decision" -and $doc -match "Advanced controls cannot bypass") -Message "Catalog docs should define beginner and advanced views over one policy."
+        Assert-True -Condition ($doc -match "Moonshot AI's Kimi family is documentation-only and untested" -and $doc -match "not active catalog entries" -and $doc -match "automatic downloads" -and $doc -match "installer options" -and $doc -match "supported providers" -and $doc -match "Community results remain experimental") -Message "Untested Kimi models must remain documentation-only and unable to bypass exact-profile promotion gates."
         Assert-True -Condition (@($workflows.workflows | Where-Object { $_.id -eq "build-model-catalog" }).Count -eq 1) -Message "Workflow registry should expose catalog assembly."
     }
     finally {
@@ -5297,6 +5298,9 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $researchPageOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-page-text.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research page-text hostile tests should pass."
     Assert-True -Condition (($researchPageOutput -join "`n") -match "26 checks") -Message "Research page text must remain caller-bytes-only, structurally bounded, inert, network-free, and runtime-unadmitted."
+    $researchSynthesisOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-cited-synthesis.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline cited-synthesis hostile tests should pass."
+    Assert-True -Condition (($researchSynthesisOutput -join "`n") -match "26 checks") -Message "Research synthesis must remain source-bound, exactly cited, link-free, effect-free, and runtime-unadmitted."
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
 }
 
@@ -5495,7 +5499,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-True -Condition (($selfTest -join "`n") -match "3 cases") -Message "Quantization planner should exercise all selection decisions."
     $crossRunnerTests = @(& $python.Source $crossRunnerTestsPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator runner security and parser tests should pass. Output: $($crossRunnerTests -join ' ')"
-    Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 18 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
+    Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 20 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
     $crossFollowOnTests = @(& $python.Source $crossFollowOnTestsPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator follow-on security tests should pass. Output: $($crossFollowOnTests -join ' ')"
     Assert-True -Condition (($crossFollowOnTests -join "`n") -match "Ran 8 tests" -and ($crossFollowOnTests -join "`n") -notmatch "skipped=") -Message "Follow-on hostile coverage should remain complete and skip-free."

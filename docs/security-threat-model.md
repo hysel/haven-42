@@ -225,6 +225,41 @@ silent CPU fallback. A functional GPU
 result cannot override a failed security, correctness, supply-chain, quality,
 cleanup, or package-parity gate.
 
+The native Windows Intel follow-on also remains denied. Its hash-verified
+official llama.cpp `b10088` SYCL archive and revision-pinned model passed
+least-privilege preflight, but the runtime reported zero free accelerator
+memory and failed tensor loading. A bounded OpenCL-allocation fallback
+fast-failed with Windows status `0xC0000409`. Review additionally found that
+the release's `llama-cli` initializes an internal HTTP server with permissive
+CORS defaults, which conflicts with the runner's declared no-listener policy.
+The shared runner now requires direct `llama-completion`, disables automatic
+fit and persistent SYCL caching, fixes sysman/Level Zero controls, and requires
+SYCL-specific backend evidence. No runtime/model execution is admitted until
+the upstream failure is resolved and the full gate passes again.
+
+Milestone 24 audio evidence grants no runtime admission. The ACE-Step native
+entry point registers an unauthenticated OpenRouter-shaped `/v1/models` route
+before its authenticated local-inventory route, so the public route shadows the
+protected one. Completed-task metadata can also name a default language model
+when inventory and execution logs show that planner loading was disabled. The
+external Quadro cell therefore used an ignored review-only launcher that placed
+constant-time bearer authentication above every route except health and queried
+the unambiguous inventory route. That mitigation is not shipped. Promotion is
+blocked until the production entry point has one authenticated route namespace,
+truthful model-use reporting, hostile route-order tests, package parity, and
+independent security review.
+
+Milestone 25 video candidates grant no download or runtime authority. Exact
+upstream preflight must reject a candidate before model acquisition when GPU
+memory, storage including a safety reserve, operating-system support, license,
+or dependency compatibility is insufficient. Optional prompt rewriting is a
+separate network capability and must default off unless a reviewed provider and
+explicit consent are admitted. The 16 GB Quadro cell was rejected for Wan2.2's
+published 24 GB minimum and for LTX-2.3's 32 GB/100 GB profile. HunyuanVideo 1.5
+meets its published 14 GB minimum only with offload, but its 33.3 GB reference
+transformer alone does not fit the host's available storage with a safe reserve;
+no video model, runtime, prompt, reference media, output, or service was created.
+
 Milestone 28 controlled web research remains proposed and unadmitted. Its
 offline contracts, hostile fixtures, and caller-fixture validator cannot open a
 socket, resolve DNS, fetch a URL, automate a browser, execute a page, download
@@ -239,7 +274,13 @@ and residue-free memory cleanup. A separate caller-bytes-only extractor rejects
 non-allowlisted HTML, malformed nesting, doctypes, processing instructions,
 invalid UTF-8, NULs, and resource-budget violations while retaining no
 attributes or remote references. Its 26 offline checks do not add URL fetching,
-transport, filesystem, runtime, UI, package, or model authority. The admitted fixed Ollama catalog search does
+transport, filesystem, runtime, UI, package, or model authority. A separate
+26-check cited-synthesis boundary includes no source URL in model context,
+requires one or more exact engine-derived citation IDs for every bounded
+candidate claim, reports used and unused sources, and rejects active links,
+markup, unknown pages, altered authority fields, or autonomous follow-up. It
+does not invoke a model or grant tool, network, file, package, UI, runtime, or
+execution authority. The admitted fixed Ollama catalog search does
 not grant or imply general research-search authority.
 
 The local-web admission applies to read-only readiness inspection, zero-effect setup planning, status, exact-digest Ollama discovery and text, plan-only registered read-only software workflows, and the exact promoted Linux ComfyUI/SDXL image profile through loopback. It does not admit workflow process execution, arbitrary provider profiles, client persistence, installation, elevation, service or driver changes, updates, remote UI access, or Tauri packaging. No optional desktop runtime ships until actual Windows, Linux, and macOS binaries pass renderer, IPC, canonical-path, lifecycle, update, rollback, packaging, uninstall, privilege, and security tests. Unsupported or failed provider cells remain documentation-only and leave no executable integration.

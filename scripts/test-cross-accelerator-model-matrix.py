@@ -136,6 +136,20 @@ class MatrixRunnerTests(unittest.TestCase):
         self.assertTrue(full["fullGpuOffload"])
         self.assertTrue(full["backendObserved"])
 
+    def test_sycl_backend_requires_intel_runtime_evidence(self) -> None:
+        full = MODULE.offload_result(
+            "SYCL0 offloaded 41/41 layers to GPU; Intel(R) Arc(TM) B580",
+            "sycl",
+        )
+        wrong = MODULE.offload_result(
+            "CUDA0 offloaded 41/41 layers to GPU; NVIDIA",
+            "sycl",
+        )
+        self.assertTrue(full["fullGpuOffload"])
+        self.assertTrue(full["backendObserved"])
+        self.assertTrue(wrong["fullGpuOffload"])
+        self.assertFalse(wrong["backendObserved"])
+
     def test_exact_output_removes_bounded_thinking_block_only(self) -> None:
         self.assertTrue(
             MODULE.exact_output_passed(
@@ -165,6 +179,8 @@ class MatrixRunnerTests(unittest.TestCase):
 
     def test_runner_forces_noninteractive_single_turn(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
+        self.assertIn('runtime_binary(runtime_root, "llama-completion")', source)
+        self.assertNotIn('runtime_binary(runtime_root, "llama-cli")', source)
         self.assertIn('"--single-turn"', source)
         self.assertIn('"--simple-io"', source)
         self.assertIn('"--no-warmup"', source)
@@ -179,6 +195,17 @@ class MatrixRunnerTests(unittest.TestCase):
         self.assertNotIn("HOME", environment)
         self.assertNotIn("USERPROFILE", environment)
         self.assertEqual(environment["HIP_VISIBLE_DEVICES"], "0")
+
+    def test_sycl_environment_disables_persistent_cache_and_scopes_device(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve(strict=True)
+            environment = MODULE.safe_environment(root, "sycl", "0", [])
+        self.assertEqual(environment["ONEAPI_DEVICE_SELECTOR"], "level_zero:gpu:0")
+        self.assertEqual(environment["SYCL_CACHE_PERSISTENT"], "0")
+        self.assertEqual(environment["ZES_ENABLE_SYSMAN"], "1")
+        self.assertEqual(environment["GGML_SYCL_ENABLE_LEVEL_ZERO"], "1")
+        self.assertNotIn("HOME", environment)
+        self.assertNotIn("USERPROFILE", environment)
 
     def test_wsl_dxg_environment_is_fixed_and_opt_in(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

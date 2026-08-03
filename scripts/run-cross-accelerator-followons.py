@@ -185,6 +185,8 @@ def cli_command(
         "--log-colors",
         "off",
         "--offline",
+        "-fit",
+        "off",
         "--reasoning-budget",
         "0",
         "-f",
@@ -225,7 +227,7 @@ def execute_test(
     execution = manifest["execution"]
     timeout = int(execution["timeoutSeconds"])
     model_path = BASELINE.verify_artifact(model_root, model["artifact"], f"{model['id']} artifact")
-    cli = BASELINE.runtime_binary(runtime_root, "llama-cli")
+    cli = BASELINE.runtime_binary(runtime_root, "llama-completion")
     environment = BASELINE.safe_environment(runtime_root, backend, device, library_paths)
     started = time.monotonic()
     with tempfile.TemporaryDirectory(prefix="haven42-followon-") as directory:

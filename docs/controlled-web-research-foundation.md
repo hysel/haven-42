@@ -32,6 +32,25 @@ It imports no network library, cannot fetch a URL, executes no page content,
 writes no file, and remains absent from the application and package. This
 tests extraction behavior without implementing selected-page retrieval.
 
+A separate 26-check cited-synthesis foundation accepts only the validated
+result bundle and optional inert page segments from those two boundaries. It
+builds a bounded, digest-accounted, URL-free source envelope and validates
+caller-supplied candidate claims only when every claim names one or more exact
+engine-derived citation identifiers. It rejects unknown or duplicate
+citations, uncited claims, active links, markup, control characters,
+unaccounted pages, altered trust or authority fields, oversized claims, and
+follow-up fields. Its output discloses used and unused sources while keeping
+model invocation, tool execution, network access, files, persistence, runtime,
+UI, and automatic follow-up authority false. It does not call a model or prove
+answer correctness.
+
+The 26-check suite passes from the same sanitized, SHA-256-verified source
+bundle on native Windows and Ubuntu Linux. The Ubuntu run first rejected an
+incomplete bundle at import because two required contracts were absent; a fresh
+self-contained bundle then passed. This establishes source-test parity only.
+The boundary remains deliberately absent from the product runtime and portable
+package, and macOS source evidence plus all native package smoke remain open.
+
 Future live work still requires a separately reviewed fixed provider, explicit
 per-query user action, DNS and resolved-IP revalidation, redirect revalidation,
 response content and time budgets, transport-to-extractor binding, cancellation,

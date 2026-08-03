@@ -82,8 +82,8 @@ def main() -> int:
         ),
         (
             "PROJECT.md",
-            "Milestones 24 and 25 retain documentation-only",
-            "Milestones XX retain documentation-only",
+            "Milestone 24 has partial external Linux CUDA audio evidence",
+            "Milestone XX has partial external Linux CUDA audio evidence",
         ),
     ]
     with tempfile.TemporaryDirectory(prefix="haven42-status-") as raw:

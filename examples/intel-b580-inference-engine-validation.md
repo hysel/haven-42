@@ -70,6 +70,39 @@ No GPU hang, reset, or kernel fault was observed. Because all security findings
 are treated as blockers and the upstream suite is not fully green, the SYCL
 profile remains `candidate`; it is not selectable or packaged.
 
+### Windows llama.cpp SYCL follow-on
+
+On 2026-08-03, the physical Windows x64 B580 profile used the official
+llama.cpp `b10088` SYCL one-folder archive and the same revision-pinned Qwen
+3.5 9B Q4_K_M artifact. The runtime archive matched its published SHA-256,
+passed a bounded archive-structure review before extraction, and contained the
+documented SYCL runtime dependencies. The model matched its declared
+5,680,522,464-byte size and SHA-256. A least-privilege, user-local preflight
+then passed artifact identity, binary presence, and storage-floor checks.
+
+The native execution gate did not pass. The official runtime and `sycl-ls`
+identified the B580 through Level Zero and OpenCL, but llama.cpp reported zero
+available device memory. Both `llama-bench` and the direct
+`llama-completion` tool failed while loading model tensors; the completion log
+ended with `invalid vector subscript`. Enabling the documented sysman query and
+disabling automatic fitting did not change the result. A single bounded
+OpenCL-allocation fallback fast-failed with Windows status `0xC0000409`, so no
+additional inference attempt was made.
+
+Review also found that this release's `llama-cli` initializes an internal HTTP
+server and permissive CORS defaults. That behavior conflicts with the shared
+runner's no-listener policy. The runner now requires `llama-completion` for
+direct generation, disables automatic fit and persistent SYCL caches, fixes
+the documented sysman and Level Zero controls, and treats SYCL as an explicit
+backend whose evidence cannot be satisfied by CUDA or HIP logs. Focused
+security and parser tests cover those controls.
+
+No process or listener survived the failed cells. No driver, service,
+firewall, global toolchain, installed software, or product configuration was
+changed. The portable runtime, model, transient diagnostics, and raw output
+remain outside the repository and package. This exact Windows llama.cpp SYCL
+profile is rejected pending an upstream/runtime fix and a fresh full gate.
+
 ## OpenVINO GenAI
 
 The OpenVINO comparison used exact CPython 3.14 Linux wheels for:

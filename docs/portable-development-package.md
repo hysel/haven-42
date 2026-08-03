@@ -69,6 +69,15 @@ The service starts no child process except the already constrained, fixed-comman
 ## Validation And Evidence
 
 `scripts/test-portable-package.py` starts both source and native packaged runtimes on operating-system-selected loopback ports. It compares capability, update, privacy, committed-assurance, and browser-asset results; checks security headers and Host rejection; rejects missing shutdown authority, foreign origins, wrong content types, and unexpected shutdown fields; verifies packaged integrity state; invokes protected shutdown; and requires a clean native exit. It also exercises relocation into a path with spaces, startup from a read-only copied package, recovery after abruptly terminating the test-owned native process, hostile inherited environment values, repeated startup/shutdown, and occupied-port failure. Full validation runs the dependency-free source Chromium flow on Windows, Linux, and macOS. Each native packaging job repeats it against the packaged executable, including the read-only assurance panel, unified attachment picker, hostile atomic selection, task locking, compact layout, provider disclosure, cleanup, and typed results. The local-web security suite separately injects each platform launcher dependency, proves strict loopback-URL rejection, verifies fixed macOS/Linux executable and argument selection, confirms `shell=False`, and proves that a hostile `BROWSER` or caller `PATH` is omitted without opening a real browser. Disposable copied packages must fail before serving when a resource is changed, missing, unexpected, replaced by duplicate/absolute/traversal manifest records, or redirected through a symbolic link.
+
+An additional 2026-08-03 physical Windows 11 x64 cell rebuilt the unsigned
+package with the locked Python 3.14.6/PyInstaller 6.21.0 toolchain, then ran
+that same parity, integrity, and lifecycle suite under a non-administrator
+PowerShell 5.1 account on an Intel Arc B580 machine. The bounded display-class
+registry fallback reported the Intel accelerator without elevation or raw
+registry output, and readiness declared every network, file, installation,
+elevation, service, and driver effect false. This is development evidence, not
+an Intel image-provider package admission or a production-readiness claim.
 On Ubuntu hosts where Chromium is strictly confined as a Snap, the browser
 test places only its disposable profile under Chromium's user-owned Snap
 common directory so both processes can observe `DevToolsActivePort`; the

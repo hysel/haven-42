@@ -1,0 +1,21 @@
+{
+  "safeCandidate": {
+    "claims": [
+      {
+        "text": "The supplied source reports a bounded public fact.",
+        "citationIds": ["SOURCE_ID"]
+      }
+    ]
+  },
+  "hostileCandidates": [
+    {"id": "empty-claims", "value": {"claims": []}, "reason": "claim-count"},
+    {"id": "extra-field", "value": {"claims": [], "followUpQuery": "more"}, "reason": "candidate-shape"},
+    {"id": "uncited", "value": {"claims": [{"text": "claim", "citationIds": []}]}, "reason": "claim-citation-count"},
+    {"id": "unknown-citation", "value": {"claims": [{"text": "claim", "citationIds": ["source-00000000000000000000"]}]}, "reason": "claim-citation-unknown"},
+    {"id": "active-url", "value": {"claims": [{"text": "Read https://example.com", "citationIds": ["SOURCE_ID"]}]}, "reason": "claim-active-link"},
+    {"id": "markdown-link", "value": {"claims": [{"text": "Read [source](https://example.com)", "citationIds": ["SOURCE_ID"]}]}, "reason": "claim-active-link"},
+    {"id": "markup", "value": {"claims": [{"text": "<script>alert(1)</script>", "citationIds": ["SOURCE_ID"]}]}, "reason": "claim-active-link"},
+    {"id": "duplicate-citation", "value": {"claims": [{"text": "claim", "citationIds": ["SOURCE_ID", "SOURCE_ID"]}]}, "reason": "claim-citation-duplicate"},
+    {"id": "claim-field", "value": {"claims": [{"text": "claim", "citationIds": ["SOURCE_ID"], "tool": "run"}]}, "reason": "claim-shape"}
+  ]
+}
