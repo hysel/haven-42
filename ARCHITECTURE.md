@@ -146,6 +146,14 @@ requires five exact controls per platform plus enforcement, hostile-escape, and
 source/package parity evidence. Its 32 hostile checks grant no runtime
 authority and permit no fallback.
 
+A read-only native Ubuntu capability probe now confirms that the evaluated KVM
+host exposes transient user/mount/PID/network namespaces through its existing
+system `bwrap`, `no_new_privileges`, seccomp capability, Landlock ABI 8, and
+cgroup-v2/rlimit primitives. This is host availability evidence only. None of
+those controls is integrated into the worker, hostile escape tests and package
+parity remain false, the portable package does not bundle `bwrap`, and the
+formal evaluator therefore continues to deny isolation and runtime admission.
+
 Complex-document semantics remain a review library behind the existing
 container inspector. It uses no third-party dependency, never extracts a ZIP,
 selects only fixed XML parts, rejects formulas and tracked changes, and bounds

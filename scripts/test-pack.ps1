@@ -5190,7 +5190,13 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($lexicalOutput -join "`n") -match "52 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should disclose each bounded-result truncation cause."
     $toolTransportOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-structured-tool-transport.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Structured tool-transport security tests should pass. Output: $($toolTransportOutput -join ' ')"
-    Assert-True -Condition (($toolTransportOutput -join "`n") -match "40 effect-free security checks") -Message "Structured tool transport must remain raw-JSON, allowlisted, effect free, package-excluded, and unable to grant runtime or execution authority."
+    Assert-True -Condition (($toolTransportOutput -join "`n") -match "62 effect-free security checks") -Message "Structured tool transport must validate the exact final Ollama envelope, remain raw-JSON, allowlisted, effect free, package-excluded, and unable to grant runtime or execution authority."
+    $toolLiveHarnessOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-structured-tool-live-validation.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Structured tool live-harness security tests should pass. Output: $($toolLiveHarnessOutput -join ' ')"
+    Assert-True -Condition (($toolLiveHarnessOutput -join "`n") -match "15 offline security checks") -Message "The live harness must require explicit activation, retain only sanitized evidence, avoid downloads, and unload tested models."
+    $linuxIsolationProbeOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-linux-parser-isolation-probe.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Linux parser-isolation probe security tests should pass. Output: $($linuxIsolationProbeOutput -join ' ')"
+    Assert-True -Condition (($linuxIsolationProbeOutput -join "`n") -match "19 offline security checks") -Message "The Linux probe must distinguish native Linux from WSL2 and never promote availability into implementation or admission."
     $sourceReviewOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-source-attachment-review-fixtures.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Source-attachment review fixtures should be generated safely. Output: $($sourceReviewOutput -join ' ')"
     Assert-True -Condition (($sourceReviewOutput -join "`n") -match "25 checks") -Message "Source-attachment review fixture coverage should remain complete."

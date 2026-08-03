@@ -167,13 +167,20 @@ contract grants no runtime route, UI, provider payload, filesystem path, parser,
 network, model-ranking, embedding, temporary-file, or persistent-index
 authority. Embedded commands and tool requests remain inert text.
 
-The structured tool-transport foundation is also offline-only. Exact Ollama and
-OpenAI-compatible candidate shapes may be normalized only when they contain one
+The structured tool-transport parser remains runtime-inactive. Its Ollama
+profile validates the exact complete 0.32.5 envelope, binds the response to the
+requested model, requires a normal stop, rejects thinking and extra fields,
+and bounds provider metrics, call identity, and function index. Exact Ollama
+and OpenAI-compatible candidate shapes may be normalized only when they contain one
 allowlisted call with bounded, schema-matched arguments and no mixed assistant
 content. Duplicate JSON keys, unknown tools or fields, parallel calls,
 prototype-related keys, non-finite values, cycles, and resource-limit failures
 are rejected. Successful normalization still grants no approval, execution,
 provider, package, or runtime authority; model output remains untrusted data.
+A separate explicit live harness uses only a fixed synthetic prompt, performs
+no download, retains no endpoint/prompt/response/argument content, and attempts
+model unload after every installed-model cell. Live transport success does not
+connect the parser to the product or authorize a tool.
 
 The conversation-history contract is also simulation-only. Its logical
 SQLite-compatible schema includes no executable SQL, and its planner does not

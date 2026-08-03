@@ -2672,7 +2672,11 @@ test_conversation_history_foundation() {
   python3 "$REPO_ROOT/scripts/test-memory-lexical-retrieval.py" |
     grep -q "52 deterministic, hostile, and lifecycle checks" || return 1
   python3 "$REPO_ROOT/scripts/test-structured-tool-transport.py" |
-    grep -q "40 effect-free security checks" || return 1
+    grep -q "62 effect-free security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-structured-tool-live-validation.py" |
+    grep -q "15 offline security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-linux-parser-isolation-probe.py" |
+    grep -q "19 offline security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-source-attachment-review-fixtures.py" |
     grep -q "25 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-foundation.py" |

@@ -13,7 +13,9 @@ before any future runtime integration is considered.
 
 The parser recognizes only two exact, review-only response shapes:
 
-- an Ollama assistant message containing one structured function call; and
+- a complete, non-streaming Ollama 0.32.5 response bound to the requested
+  model, a normal `stop`, bounded provider metrics, and one indexed function
+  call; and
 - an OpenAI-compatible assistant choice containing one identified function
   call whose arguments are strict JSON.
 
@@ -25,6 +27,9 @@ request is made by the parser or its tests.
 Every candidate call must satisfy all of these conditions:
 
 - exactly one call and no mixed assistant prose;
+- for Ollama, an exact final envelope, expected-model match, normal stop,
+  bounded nonnegative metrics, no thinking field, a bounded call ID, and
+  function index zero;
 - a bounded tool name present in a trusted caller-owned registry;
 - only known argument fields with all required fields present;
 - exact scalar types for the current minimal schema;
@@ -52,6 +57,17 @@ types, unknown or missing arguments, dangerous keys, oversized strings, cyclic
 objects, and unsupported transports. Static checks also keep the module out of
 the product runtime and restrict its imports to JSON and regular-expression
 processing.
+
+An explicit manual harness can exercise the exact Ollama profile with a fixed
+synthetic prompt and an installed-model list supplied by the operator. It
+requires `--live`, validates the endpoint through the shared IP-literal and
+no-redirect policy, never downloads a model, bounds every response, and
+attempts to unload each tested model in a `finally` path. Its ignored local
+evidence retains model identifiers and outcome categories only; it does not
+retain the endpoint, prompt, response, or tool arguments. Four installed
+tool-capable models passed the exact envelope and argument check against Ollama
+0.32.5; one installed model was correctly classified as not supporting tools.
+This is transport evidence, not application or execution admission.
 
 WSL2 may run this effect-free suite as preliminary cross-environment evidence,
 but WSL2 is not native Linux evidence and cannot satisfy a native package or
