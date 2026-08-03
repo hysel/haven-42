@@ -21,7 +21,7 @@ TESTS = (
     (
         "containerSecurity",
         "scripts/test-complex-document-container-review.py",
-        "41 deterministic security checks across 16 fixtures",
+        "49 deterministic security checks across 24 fixtures",
     ),
     (
         "semanticSecurity",

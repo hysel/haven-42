@@ -69,6 +69,10 @@ def main() -> int:
     ])
     result = engine.search("NEEDLE")
     assert result["selectedChunkCount"] == 2
+    assert result["matchingChunkCount"] == 2
+    assert result["omittedMatchingChunkCount"] == 0
+    assert result["selectionTruncated"] is False
+    assert result["truncationReasons"] == []
     assert result["chunks"][0]["sourceName"] == "beta.md"
     assert result["chunks"][0]["score"] == 2
     assert result["chunks"][1]["sourceName"] == "alpha.txt"
@@ -166,7 +170,25 @@ def main() -> int:
     assert bounded["selectedChunkCount"] <= 8
     assert bounded["selectedCharacters"] <= 12000
     assert bounded["tokenEstimate"] <= 3000
+    assert bounded["matchingChunkCount"] > bounded["selectedChunkCount"]
+    assert bounded["omittedMatchingChunkCount"] == (
+        bounded["matchingChunkCount"] - bounded["selectedChunkCount"]
+    )
+    assert bounded["selectionTruncated"] is True
+    assert bounded["truncationReasons"] == ["selected-character-limit"]
     truncated.clear()
+
+    chunk_limited = MODULE.MemoryLexicalRetrieval(CONTRACT)
+    chunk_limited.load([
+        attachment(f"bounded-{index}.txt", ("needle " * 300)[:2100])
+        for index in range(5)
+    ])
+    chunk_result = chunk_limited.search("needle")
+    assert chunk_result["selectedChunkCount"] == 8
+    assert chunk_result["matchingChunkCount"] == 10
+    assert chunk_result["omittedMatchingChunkCount"] == 2
+    assert chunk_result["truncationReasons"] == ["selected-chunk-limit"]
+    chunk_limited.clear()
 
     assert CONTRACT["activation"] == {
         "runtimeRouteAllowed": False,
@@ -183,7 +205,7 @@ def main() -> int:
         ".cs", ".py", ".js", ".jsx", ".ts", ".tsx",
         ".java", ".go", ".rs", ".sql", ".tf",
     ]
-    print("Memory lexical retrieval passed 39 deterministic, hostile, and lifecycle checks.")
+    print("Memory lexical retrieval passed 52 deterministic, hostile, and lifecycle checks.")
     return 0
 
 

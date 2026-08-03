@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.tools.structured-transport-foundation",
+  "status": "offline-parser-implemented-not-runtime-admitted",
+  "supportedTransports": ["ollama", "openai-compatible"],
+  "limits": {
+    "maximumResponseBytes": 32768,
+    "maximumToolCalls": 1,
+    "maximumArgumentBytes": 8192,
+    "maximumArgumentDepth": 6,
+    "maximumArgumentNodes": 128,
+    "maximumStringCharacters": 2048,
+    "maximumToolNameCharacters": 64,
+    "maximumCallIdCharacters": 128
+  },
+  "policy": {
+    "rawUtf8JsonRequired": true,
+    "trustedToolRegistryRequired": true,
+    "exactResponseShapesRequired": true,
+    "exactArgumentFieldsRequired": true,
+    "duplicateJsonKeysRejected": true,
+    "parallelCallsAllowed": false,
+    "mixedAssistantContentAllowed": false,
+    "dangerousObjectKeysRejected": ["__proto__", "constructor", "prototype"]
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "providerInvocationAllowed": false,
+    "toolExecutionAllowed": false,
+    "approvalGranted": false,
+    "packageInclusionAllowed": false
+  },
+  "implementation": {
+    "module": "scripts/evaluate-structured-tool-transport.py",
+    "test": "scripts/test-structured-tool-transport.py",
+    "runtimeImported": false
+  }
+}

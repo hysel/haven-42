@@ -1,8 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "status": "required-controls-not-implemented-no-admission",
   "platforms": {
     "windows": {
+      "allowedEnvironmentKinds": ["native"],
       "requiredControls": [
         "restricted-primary-token",
         "job-object-memory-cpu-process-limits",
@@ -12,6 +13,7 @@
       ]
     },
     "linux": {
+      "allowedEnvironmentKinds": ["native", "wsl2"],
       "requiredControls": [
         "user-mount-pid-network-namespaces",
         "no-new-privileges",
@@ -21,6 +23,7 @@
       ]
     },
     "macos": {
+      "allowedEnvironmentKinds": ["native"],
       "requiredControls": [
         "sandbox-profile-or-equivalent",
         "network-denial",
@@ -36,7 +39,8 @@
     "enforcementTestRequired": true,
     "hostileEscapeTestRequired": true,
     "sourcePackageParityRequired": true,
-    "exactPlatformBindingRequired": true
+    "exactPlatformBindingRequired": true,
+    "nativeEnvironmentRequired": true
   },
   "fallbackAllowed": false,
   "authority": {
