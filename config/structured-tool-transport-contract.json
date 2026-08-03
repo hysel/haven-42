@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "contractId": "haven42.tools.structured-transport-foundation",
-  "status": "offline-parser-implemented-not-runtime-admitted",
+  "status": "offline-real-envelope-parser-implemented-not-runtime-admitted",
   "supportedTransports": ["ollama", "openai-compatible"],
   "limits": {
     "maximumResponseBytes": 32768,
@@ -22,6 +22,30 @@
     "parallelCallsAllowed": false,
     "mixedAssistantContentAllowed": false,
     "dangerousObjectKeysRejected": ["__proto__", "constructor", "prototype"]
+  },
+  "ollamaProfile": {
+    "validatedVersion": "0.32.5",
+    "streamingAllowed": false,
+    "thinkingAllowed": false,
+    "finalResponseRequired": true,
+    "normalStopRequired": true,
+    "expectedModelBindingRequired": true,
+    "exactToolCallFields": ["id", "function"],
+    "exactFunctionFields": ["name", "arguments", "index"],
+    "onlyFunctionIndexAllowed": 0,
+    "allowedTopLevelFields": [
+      "model",
+      "created_at",
+      "message",
+      "done",
+      "done_reason",
+      "total_duration",
+      "load_duration",
+      "prompt_eval_count",
+      "prompt_eval_duration",
+      "eval_count",
+      "eval_duration"
+    ]
   },
   "authority": {
     "runtimeRouteAllowed": false,

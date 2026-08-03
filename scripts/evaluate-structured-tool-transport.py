@@ -5,16 +5,27 @@ from __future__ import annotations
 
 import json
 import re
+from datetime import datetime
 
 
 NAME = re.compile(r"^[A-Za-z][A-Za-z0-9_-]{0,63}$")
 CALL_ID = re.compile(r"^[A-Za-z0-9_-]{1,128}$")
+MODEL = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,254}$")
+RFC3339_UTC = re.compile(
+    r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$"
+)
 DANGEROUS_KEYS = {"__proto__", "constructor", "prototype"}
 MAX_ARGUMENT_BYTES = 8192
 MAX_RESPONSE_BYTES = 32768
 MAX_ARGUMENT_DEPTH = 6
 MAX_ARGUMENT_NODES = 128
 MAX_STRING_CHARACTERS = 2048
+MAX_METRIC_VALUE = 2**63 - 1
+OLLAMA_FIELDS = {
+    "model", "created_at", "message", "done", "done_reason", "total_duration",
+    "load_duration", "prompt_eval_count", "prompt_eval_duration", "eval_count",
+    "eval_duration",
+}
 
 
 class ToolTransportRejected(ValueError):
@@ -139,9 +150,54 @@ def _registry(value: object) -> dict[str, dict[str, object]]:
     return value
 
 
-def _ollama(response: object) -> tuple[str | None, str, dict[str, object]]:
-    if not isinstance(response, dict) or set(response) != {"message"}:
+def _nonnegative_metric(value: object) -> bool:
+    return (
+        isinstance(value, int)
+        and not isinstance(value, bool)
+        and 0 <= value <= MAX_METRIC_VALUE
+    )
+
+
+def _valid_model(value: object) -> bool:
+    return (
+        isinstance(value, str)
+        and MODEL.fullmatch(value) is not None
+        and ".." not in value
+        and "//" not in value
+    )
+
+
+def _valid_created_at(value: object) -> bool:
+    if not isinstance(value, str) or RFC3339_UTC.fullmatch(value) is None:
+        return False
+    try:
+        datetime.fromisoformat(value.removesuffix("Z") + "+00:00")
+    except ValueError:
+        return False
+    return True
+
+
+def _ollama(
+    response: object,
+    expected_model: object,
+) -> tuple[str | None, str, dict[str, object], dict[str, object]]:
+    if not _valid_model(expected_model):
+        raise ToolTransportRejected("expected-model")
+    if not isinstance(response, dict) or set(response) != OLLAMA_FIELDS:
         raise ToolTransportRejected("response-shape")
+    if response["model"] != expected_model:
+        raise ToolTransportRejected("model-mismatch")
+    if not _valid_created_at(response["created_at"]):
+        raise ToolTransportRejected("created-at")
+    if response["done"] is not True:
+        raise ToolTransportRejected("response-incomplete")
+    if response["done_reason"] != "stop":
+        raise ToolTransportRejected("stop-reason")
+    metric_names = OLLAMA_FIELDS - {
+        "model", "created_at", "message", "done", "done_reason"
+    }
+    if any(not _nonnegative_metric(response[name]) for name in metric_names):
+        raise ToolTransportRejected("response-metric")
     message = response["message"]
     if not isinstance(message, dict) or set(message) != {"role", "content", "tool_calls"}:
         raise ToolTransportRejected("message-shape")
@@ -151,14 +207,19 @@ def _ollama(response: object) -> tuple[str | None, str, dict[str, object]]:
     if not isinstance(calls, list) or len(calls) != 1:
         raise ToolTransportRejected("tool-call-count")
     call = calls[0]
-    if not isinstance(call, dict) or set(call) != {"function"}:
+    if not isinstance(call, dict) or set(call) != {"id", "function"}:
         raise ToolTransportRejected("tool-call-shape")
+    if not isinstance(call["id"], str) or CALL_ID.fullmatch(call["id"]) is None:
+        raise ToolTransportRejected("tool-call-identity")
     function = call["function"]
-    if not isinstance(function, dict) or set(function) != {"name", "arguments"}:
+    if not isinstance(function, dict) or set(function) != {"name", "arguments", "index"}:
         raise ToolTransportRejected("function-shape")
+    if function["index"] != 0 or isinstance(function["index"], bool):
+        raise ToolTransportRejected("function-index")
     if not isinstance(function["arguments"], dict):
         raise ToolTransportRejected("arguments-object")
-    return None, function["name"], function["arguments"]
+    metrics = {name: response[name] for name in sorted(metric_names)}
+    return call["id"], function["name"], function["arguments"], metrics
 
 
 def _openai(response: object) -> tuple[str, str, dict[str, object]]:
@@ -189,13 +250,19 @@ def _openai(response: object) -> tuple[str, str, dict[str, object]]:
     return call["id"], function["name"], _json_object(function["arguments"])
 
 
-def evaluate(response: object, transport: str, trusted_registry: object) -> dict[str, object]:
+def evaluate(
+    response: object,
+    transport: str,
+    trusted_registry: object,
+    expected_model: object = None,
+) -> dict[str, object]:
     registry = _registry(trusted_registry)
     parsed_response = _response_json(response)
     if transport == "ollama":
-        call_id, name, arguments = _ollama(parsed_response)
+        call_id, name, arguments, metrics = _ollama(parsed_response, expected_model)
     elif transport == "openai-compatible":
         call_id, name, arguments = _openai(parsed_response)
+        metrics = None
     else:
         raise ToolTransportRejected("transport-unsupported")
     if not isinstance(name, str) or NAME.fullmatch(name) is None or name not in registry:
@@ -225,6 +292,9 @@ def evaluate(response: object, transport: str, trusted_registry: object) -> dict
         "schemaVersion": 1,
         "kind": "structured-tool-call-candidate",
         "transport": transport,
+        "model": expected_model if transport == "ollama" else None,
+        "finalResponseValidated": transport == "ollama",
+        "providerMetrics": metrics,
         "callId": call_id,
         "toolName": name,
         "arguments": arguments,

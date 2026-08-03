@@ -167,6 +167,15 @@ enforcement and hostile-escape tests, and exact parity without granting runtime
 authority or allowing a fallback. WSL2 evidence is explicitly non-native and
 cannot pass the Linux isolation-admission result.
 
+A separate read-only native Linux probe records only normalized kernel,
+architecture, virtualization class, and boolean capability availability. On
+the evaluated Ubuntu KVM host, all five required primitive categories were
+available through the existing OS, including Landlock ABI 8. The probe never
+uses `sudo`, installs software, retains hostname/network/path identity, or
+turns availability into implementation. Every implementation, enforcement,
+hostile-escape, and package-parity field remains false, so admission remains
+denied. A system-installed `bwrap` is not a self-contained portable dependency.
+
 Office/OpenDocument semantic review remains behind the container gate and uses
 only the standard library. Seventeen deterministic fixtures cover all six
 candidate formats, richer DOCX/XLSX/PPTX provenance, formulas, tracked changes,
