@@ -20,6 +20,7 @@
     "allowedEmailPatterns": [
       "^[0-9]+\\+[A-Za-z0-9-]+@users\\.noreply\\.github\\.com$",
       "^[A-Za-z0-9-]+@users\\.noreply\\.github\\.com$",
+      "^49699333\\+dependabot\\[bot\\]@users\\.noreply\\.github\\.com$",
       "^noreply@github\\.com$"
     ],
     "personalMailboxDomainsAllowed": false

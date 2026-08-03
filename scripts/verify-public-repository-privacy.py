@@ -345,6 +345,27 @@ def self_test() -> None:
     policy = load_policy()
     assert policy["scope"]["trackedFiles"] is True
     assert policy["scope"]["untrackedNonIgnoredFiles"] is True
+    identity_patterns = [
+        re.compile(item)
+        for item in policy["identity"]["allowedEmailPatterns"]
+    ]
+    allowed_dependabot = (
+        "49699333+dependabot[bot]@users.noreply.github.com"
+    )
+    assert any(
+        pattern.fullmatch(allowed_dependabot)
+        for pattern in identity_patterns
+    )
+    for spoofed_identity in (
+        "dependabot[bot]@users.noreply.github.com",
+        "49699333+dependabot[bot]@example.test",
+        "49699333+other[bot]@users.noreply.github.com",
+        "12345+dependabot[bot]@users.noreply.github.com",
+    ):
+        assert not any(
+            pattern.fullmatch(spoofed_identity)
+            for pattern in identity_patterns
+        )
 
 
 def main() -> int:
