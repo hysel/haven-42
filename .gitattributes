@@ -1,5 +1,7 @@
 *.sh text eol=lf
+.gitattributes text eol=lf
 .githooks/* text eol=lf
+scripts/test-shims/* text eol=lf
 package/licenses/* text eol=lf
 web/static/index.html text eol=lf
 web/static/app.js text eol=lf

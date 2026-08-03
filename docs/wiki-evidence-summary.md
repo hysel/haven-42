@@ -22,6 +22,10 @@ ComfyUI/SDXL images, and selected inference engines across NVIDIA, AMD, and Inte
 hardware. A hardware result applies only to its recorded operating system,
 driver, runtime, model revision, quantization, and operation.
 
+WSL2 AMD/HIP evidence is tracked separately from native Linux AMD evidence.
+Passing through `/dev/dxg` confirms only the exact Windows-hosted WSL2 profile;
+it does not validate a native Linux driver, desktop, package, or lifecycle.
+
 Unverified hardware and provider combinations remain selectable only where the
 product explicitly labels them as advanced or unavailable. Evidence never
 grants permission to install software or modify a machine.

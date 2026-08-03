@@ -15,7 +15,7 @@ The shared local-text discovery and invocation entry points implement this bound
 | Engine | Decision | Boundary |
 | --- | --- | --- |
 | Ollama | Validated exact profiles | Existing Linux NVIDIA/CUDA and Windows AMD/ROCm evidence only. |
-| llama.cpp | CUDA and HIP validated; Vulkan failed | Linux NVIDIA CUDA and Windows AMD HIP passed their exact bounded engine cells. The same hash-pinned 11-model corpus passes the b10088 baseline on AMD/HIP and NVIDIA/CUDA without changing admission. Vulkan failed the Windows AMD applicable-patch gate and remains documentation-only. |
+| llama.cpp | CUDA and HIP validated; WSL2 DXG/HIP candidate; Vulkan failed | Linux NVIDIA CUDA and Windows AMD HIP passed their exact bounded engine cells. WSL2 Ubuntu 24.04 through `/dev/dxg` passed the same 11-model operational matrix on the exact RX 7800 XT profile, but remains candidate-only and does not establish native Linux AMD support. Vulkan failed the Windows AMD applicable-patch gate and remains documentation-only. |
 | OpenVINO GenAI | Candidate | Exact Linux and Windows B580 GPU execution and cleanup passed. The Linux host is outside the documented support baseline, strict output behavior failed on both profiles, and provider/package gates are absent. |
 | llama.cpp SYCL | Candidate | Exact Linux B580 functional, vision, pressure, adapter, and cleanup cells passed; 3 of 53 upstream tests failed, so the backend remains unselectable and unpackaged. |
 | LM Studio | Optional external API | The end user installs it. Haven 42 may call its published loopback API but does not embed or redistribute it. |
@@ -29,6 +29,10 @@ are documented in `examples/cross-accelerator-model-validation.md`. Its runner
 is offline during inference, listener-free, shell-free, hash-gated, and
 full-offload-gated. Test artifacts and raw results remain outside the
 repository. A completed cell never transfers evidence to another accelerator.
+The WSL2 HIP mode is explicit and fail-closed: it requires the HIP backend, a
+real non-symlink `/dev/dxg` character device, and a fixed child-process DXG
+detection flag. It cannot be selected implicitly from inherited environment
+state.
 
 ## Admission Rules
 

@@ -44,10 +44,11 @@
       "backends": [
         { "id": "cuda", "status": "validated-exact-profile", "profiles": ["linux-x64-nvidia-rtx5000-16gb"] },
         { "id": "hip", "status": "validated-exact-profile", "profiles": ["windows-x64-amd-rx7800xt-16gb"] },
+        { "id": "hip-wsl-dxg", "status": "candidate", "profiles": ["wsl2-ubuntu-24.04-x64-amd-rx7800xt-16gb"] },
         { "id": "sycl", "status": "candidate", "profiles": ["linux-x64-intel-arc-b580-12gb"] },
         { "id": "metal", "status": "parked-hardware-required", "profiles": [] }
       ],
-      "notes": "CUDA passed the exact Linux NVIDIA RTX 5000 profile and HIP passed the exact Windows AMD profile. Intel SYCL has exact B580 functional evidence but remains candidate-only because the pinned upstream suite passed 50 of 53 tests and consumer/package gates are absent. Metal remains physical-Mac-last."
+      "notes": "CUDA passed the exact Linux NVIDIA RTX 5000 profile and HIP passed the exact Windows AMD profile. WSL2 DXG/HIP has bounded RX 7800 XT evidence but remains candidate-only and does not establish native Linux support. Intel SYCL has exact B580 functional evidence but remains candidate-only because the pinned upstream suite passed 50 of 53 tests and consumer/package gates are absent. Metal remains physical-Mac-last."
     },
     {
       "id": "openvino-genai",

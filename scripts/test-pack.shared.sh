@@ -1810,9 +1810,9 @@ test_solution_architecture_review_doc() {
     [ -f "$REPO_ROOT/scripts/show-haven-42-menu.ps1" ] &&
     [ ! -e "$REPO_ROOT/docs/agent-pack-menu.md" ] &&
     [ ! -e "$REPO_ROOT/scripts/show-agent-pack-menu.ps1" ] &&
-    grep -q '^# Haven 42$' "$REPO_ROOT/README.md" &&
+    grep -q '^# Haven 42' "$REPO_ROOT/README.md" &&
     grep -q 'Your private, local AI station' "$REPO_ROOT/README.md" &&
-    grep -q '^name: Haven 42$' "$REPO_ROOT/.continue/config.yaml" &&
+    grep -q '^name: Haven 42' "$REPO_ROOT/.continue/config.yaml" &&
     grep -q 'Canonical repository: `hysel/haven-42`' "$REPO_ROOT/BRANDING.md" &&
     grep -q 'Product Identity Policy' "$REPO_ROOT/BRANDING.md" &&
     grep -q 'PACKAGE_NAME="haven-42-$PACK_VERSION"' "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
@@ -2374,6 +2374,8 @@ assert llama_backends["cuda"]["status"] == "validated-exact-profile"
 assert llama_backends["cuda"]["profiles"] == ["linux-x64-nvidia-rtx5000-16gb"]
 assert llama_backends["hip"]["status"] == "validated-exact-profile"
 assert "vulkan" not in llama_backends
+assert llama_backends["hip-wsl-dxg"]["status"] == "candidate"
+assert llama_backends["hip-wsl-dxg"]["profiles"] == ["wsl2-ubuntu-24.04-x64-amd-rx7800xt-16gb"]
 assert llama_backends["sycl"]["status"] == "candidate"
 assert llama_backends["sycl"]["profiles"] == ["linux-x64-intel-arc-b580-12gb"]
 assert by_id["openvino-genai"]["status"] == "candidate"
@@ -2413,7 +2415,12 @@ PY
     printf '%s\n' "$cross_test_output" >&2
     return 1
   }
-  printf '%s\n' "$cross_test_output" | grep -q "Ran 15 tests" || return 1
+  grep -q -- '--wsl-dxg' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
+  grep -q 'HSA_ENABLE_DXG_DETECTION.*=.*"1"' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
+  grep -q 'stat.S_ISCHR' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
+  grep -q 'verified WSL kernel' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
+  grep -q 'Path("/dev/dxg")' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
+  printf '%s\n' "$cross_test_output" | grep -q "Ran 18 tests" || return 1
   ! printf '%s\n' "$cross_test_output" | grep -q "skipped=" || return 1
   cross_follow_on_test_output="$(python3 "$REPO_ROOT/scripts/test-cross-accelerator-followons.py" 2>&1)" || {
     printf '%s\n' "$cross_follow_on_test_output" >&2

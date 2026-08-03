@@ -906,11 +906,16 @@ Exit criteria:
    remains open. A physical Intel Arc B580 supplies candidate-only Linux
    llama.cpp SYCL evidence plus Linux and Windows OpenVINO GenAI evidence.
    Windows llama.cpp SYCL remains untested, and physical Apple Silicon is
-   owner-parked until hardware is acquired.
+   owner-parked until hardware is acquired. WSL2 Ubuntu 24.04 now has
+   candidate-only llama.cpp HIP/DXG evidence on the RX 7800 XT: all 11 pinned
+   artifacts passed the bounded operational matrix with full model-layer
+   offload, while the same four passed the strict exact-output cell. This does
+   not establish native Linux AMD support.
 7. Separate capability, provider contract, inference engine, hardware backend,
    and model artifact selection. Done with a fail-closed registry. llama.cpp
    CUDA passed bounded engine checks on the exact Linux NVIDIA RTX 5000
-   profile, and HIP passed on the exact Windows AMD profile; Vulkan failed the
+   profile, and HIP passed on the exact Windows AMD profile. WSL2 DXG/HIP
+   remains a separate candidate profile; Vulkan failed the
    Windows AMD Git-applicable-patch gate and remains documentation-only.
    Physical Intel Arc B580 tests remove the hardware blocker for Linux
    llama.cpp SYCL and Linux/Windows OpenVINO GenAI, but both engines remain

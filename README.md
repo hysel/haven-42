@@ -153,7 +153,7 @@ for scope, evidence, blockers, and exit criteria.
 | Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial research evidence exists; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | Candidate research only; no executable video integration ships. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel candidate evidence exists with platform-specific gaps. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel evidence exists; WSL2 AMD is candidate-only and native/platform gaps remain. |
 | Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; retrieval, complex documents, and persistent history remain gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts exist without a live network adapter or model tool. |
 
