@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "authority": "ROADMAP.md",
   "milestones": {
     "20": "complete",
@@ -48,6 +48,18 @@
       "Milestone 26 now has",
       "Milestone 27 now",
       "Milestone 28 defines proposed"
+    ],
+    "ROADMAP.md": [
+      "The current admitted attachment slice passes source and native packaged browser smoke on Windows, Linux, and macOS.",
+      "bounded manual Ollama provider-envelope run is complete; direct accelerator-specific llama.cpp tool-call cells and runtime integration remain open."
+    ]
+  },
+  "forbiddenMarkers": {
+    "PROJECT.md": [
+      "No attestation exists until an approved future push runs that job."
+    ],
+    "TODO.md": [
+      "live provider/result transport remains open"
     ]
   },
   "effects": {

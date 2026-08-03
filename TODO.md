@@ -492,8 +492,9 @@
   attestation job for the three reverified unsigned development archives using
   immutable GitHub-owned action SHAs. It publishes no Release, grants no
   pull-request write authority, and makes no platform-signing, notarization,
-  updater-trust, or production claim. No attestation exists before an approved
-  push runs the job.
+  updater-trust, or production claim. Qualifying main pushes now produce
+  attestations for the unsigned development archives; this grants no signing,
+  Release-publication, updater, or production authority.
 - [x] Prepare public inactive code-signing and privacy policies, a fail-closed
   SignPath eligibility audit, CODEOWNERS protection, deterministic Windows
   executable metadata, build-time metadata verification, and offline
@@ -518,9 +519,12 @@
   eligibility review with signing-service MFA, and decide separately whether
   to publish an unsigned development Release in the form proposed for signing.
   A clean 31-file local rebuild proves the 39 banned host-derived JDK
-  UCRT/API-set files are absent and passes the native package gate. Remaining
-  work is clean hosted reproduction and review of the applicable Microsoft
-  terms for the two retained, origin-verified Visual C++ runtime DLLs.
+  UCRT/API-set files are absent and passes the native package gate. Clean
+  hosted reproduction and unsigned development-archive attestation are
+  complete. Remaining work is exact packaged dependency/license review,
+  including the applicable Microsoft terms for the two retained,
+  origin-verified Visual C++ runtime DLLs, plus the separately gated provider
+  eligibility and publication decisions.
 - [x] Add native read-only-package startup and abrupt-exit recovery tests, exact build dependency/license verification, archive count/size bounds, encrypted/evidence-link rejection, and target-name validation.
 - [ ] Promote packaging beyond development only after signing/notarization, installer/uninstall, provenance, platform lifecycle, and production release gates pass. Keep online updater activation and machine modification disabled until separately approved and validated.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.
@@ -628,7 +632,9 @@
   evidence now covers exact runtime/artifact identity, full offload, baseline,
   strict patch, repeated lifecycle, and vision; Qwen 3 8B context and patch
   quality failed. The effect-free structured tool-transport parser foundation
-  is complete, but live provider/result transport remains open and no runtime
+  and bounded manual Ollama 0.32.5 provider-envelope evidence are complete for
+  four tool-capable installed models, but direct accelerator-specific
+  llama.cpp tool-call cells and runtime integration remain open and no runtime
   is promoted. Physical Apple Silicon remains parked until Mac hardware is
   acquired.
 - [x] Run the first physical Linux Intel Arc B580 inference-engine evaluation:
@@ -644,8 +650,9 @@
   completed baseline benchmark.
   - Windows NVIDIA and Windows AMD now have explicit patch, context-pressure,
     repeated-lifecycle, and vision outcomes for the declared artifacts.
-    Structured tool-call transport and Windows Intel remain open; failed
-    quality cells add no authority.
+    Direct accelerator-specific llama.cpp tool-call cells and Windows Intel
+    remain open; the bounded Ollama provider-envelope result does not fill
+    those cells, and failed quality cells add no authority.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
 
@@ -688,7 +695,8 @@
   source-runtime and exact post-merge unsigned-package/default-Firefox native
   clipboard-PNG and mixed-file pass with no provider content request; physical
   macOS is owner-parked until hardware is acquired.
-- [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promoting the capability.
+- [x] Add source/package parity and native Windows, Linux, and macOS packaged-browser smoke tests for the currently admitted text, structured-text, source-code, and PNG attachment slice.
+- [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before admitting PDF, Office, or OpenDocument parsing; physical macOS clipboard evidence remains owner-parked.
 - [ ] Evaluate folder selection, semantic embeddings, and persistent encrypted libraries only as separate later security and product gates.
 
 ## Milestone 28: Controlled Web Research
