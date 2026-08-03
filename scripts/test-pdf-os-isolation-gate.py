@@ -34,6 +34,7 @@ def main() -> int:
         result = MODULE.evaluate(value)
         assert result["isolationAdmissionPassed"] is False
         assert result["runtimeAdmissionGranted"] is False
+        assert result["nativePlatformEvidence"] is True
         assert len(result["missingControls"]) == 5
         checks += 3
 
@@ -68,17 +69,35 @@ def main() -> int:
 
     rejects({}, "evidence-shape")
     wrong = MODULE.template("windows", "fixture")
-    wrong["schemaVersion"] = 2
+    wrong["schemaVersion"] = 1
     rejects(wrong, "evidence-schema")
     wrong = MODULE.template("windows", "fixture")
     wrong["platform"] = "other"
     rejects(wrong, "platform-unsupported")
-    checks += 3
+    wsl = MODULE.template("linux", "wsl2-fixture", "wsl2")
+    for control in wsl["controls"]:
+        for field in (
+            "available", "implemented", "enforcementTestPassed",
+            "hostileEscapeTestPassed",
+        ):
+            control[field] = True
+    wsl["sourcePackageParityPassed"] = True
+    wsl_result = MODULE.evaluate(wsl)
+    assert wsl_result["isolationAdmissionPassed"] is False
+    assert wsl_result["nativePlatformEvidence"] is False
+    assert wsl_result["environmentLimitations"] == [
+        "wsl2-is-not-native-linux-evidence"
+    ]
+    wrong_kind = MODULE.template("windows", "fixture")
+    wrong_kind["environmentKind"] = "wsl2"
+    rejects(wrong_kind, "environment-kind")
+    checks += 7
 
     contract = MODULE.CONTRACT
     assert contract["fallbackAllowed"] is False
     assert not any(contract["authority"].values())
-    checks += 2
+    assert contract["evidenceRequirements"]["nativeEnvironmentRequired"] is True
+    checks += 3
     print(f"PDF OS-isolation gate passed: {checks} checks.")
     return 0
 

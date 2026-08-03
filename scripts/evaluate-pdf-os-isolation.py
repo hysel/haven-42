@@ -23,11 +23,12 @@ def evaluate(evidence: object) -> dict[str, object]:
         "schemaVersion",
         "platform",
         "platformIdentity",
+        "environmentKind",
         "controls",
         "sourcePackageParityPassed",
     }:
         raise IsolationRejected("evidence-shape")
-    if evidence["schemaVersion"] != 1:
+    if evidence["schemaVersion"] != 2:
         raise IsolationRejected("evidence-schema")
     platform = evidence["platform"]
     if platform not in CONTRACT["platforms"]:
@@ -35,6 +36,9 @@ def evaluate(evidence: object) -> dict[str, object]:
     identity = evidence["platformIdentity"]
     if not isinstance(identity, str) or not identity or len(identity) > 160:
         raise IsolationRejected("platform-identity")
+    environment_kind = evidence["environmentKind"]
+    if environment_kind not in CONTRACT["platforms"][platform]["allowedEnvironmentKinds"]:
+        raise IsolationRejected("environment-kind")
     controls = evidence["controls"]
     if not isinstance(controls, list):
         raise IsolationRejected("controls-type")
@@ -85,11 +89,17 @@ def evaluate(evidence: object) -> dict[str, object]:
     parity = evidence["sourcePackageParityPassed"]
     if not isinstance(parity, bool):
         raise IsolationRejected("parity-boolean")
-    admitted = not missing and parity
+    native_environment = environment_kind == "native"
+    admitted = not missing and parity and native_environment
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "platform": platform,
         "platformIdentity": identity,
+        "environmentKind": environment_kind,
+        "nativePlatformEvidence": native_environment,
+        "environmentLimitations": (
+            [] if native_environment else ["wsl2-is-not-native-linux-evidence"]
+        ),
         "missingControls": missing,
         "sourcePackageParityPassed": parity,
         "isolationAdmissionPassed": admitted,
@@ -98,13 +108,18 @@ def evaluate(evidence: object) -> dict[str, object]:
     }
 
 
-def template(platform: str, identity: str) -> dict[str, object]:
+def template(
+    platform: str,
+    identity: str,
+    environment_kind: str = "native",
+) -> dict[str, object]:
     if platform not in CONTRACT["platforms"]:
         raise IsolationRejected("platform-unsupported")
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "platform": platform,
         "platformIdentity": identity,
+        "environmentKind": environment_kind,
         "controls": [
             {
                 "id": identifier,
@@ -123,8 +138,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--platform", choices=sorted(CONTRACT["platforms"]), required=True)
     parser.add_argument("--identity", required=True)
+    parser.add_argument("--environment-kind", choices=("native", "wsl2"), default="native")
     args = parser.parse_args()
-    print(json.dumps(evaluate(template(args.platform, args.identity)), sort_keys=True))
+    print(json.dumps(evaluate(template(args.platform, args.identity, args.environment_kind)), sort_keys=True))
     return 0
 
 

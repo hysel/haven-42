@@ -161,10 +161,11 @@ AppContainer-equivalent capability boundary; Linux lacks admitted
 namespace/seccomp/Landlock-equivalent controls; macOS lacks physical evidence
 and an admitted sandbox. The source/package parity contract therefore records
 only Windows and Ubuntu Linux source cells as true and keeps macOS source and
-all packaged cells false. A 32-check pure OS-isolation evidence gate now
-requires five exact controls per platform, enforcement and hostile-escape
-tests, and exact parity without granting runtime authority or allowing a
-fallback.
+all packaged cells false. A 37-check pure OS-isolation evidence gate now
+requires five exact controls per platform, native environment identity,
+enforcement and hostile-escape tests, and exact parity without granting runtime
+authority or allowing a fallback. WSL2 evidence is explicitly non-native and
+cannot pass the Linux isolation-admission result.
 
 Office/OpenDocument semantic review remains behind the container gate and uses
 only the standard library. Seventeen deterministic fixtures cover all six

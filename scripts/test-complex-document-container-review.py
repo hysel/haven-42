@@ -30,6 +30,11 @@ EXPECTED = {
     "duplicate.docx": "duplicate-member",
     "macro.docx": "macro-content",
     "external.docx": "external-relationship",
+    "disguised-external.docx": "external-relationship",
+    "relationship-traversal.docx": "external-relationship",
+    "encoded-traversal.docx": "external-relationship",
+    "spaced-external.docx": "external-relationship",
+    "empty-target.docx": "external-relationship",
     "embedded.docx": "embedded-object",
     "activex.docx": "embedded-object",
     "symlink.docx": "symlink-member",
@@ -38,6 +43,9 @@ EXPECTED = {
     "expansion.docx": "expansion-ratio-exceeded",
     "doctype.odt": "active-xml",
     "external.odt": "external-relationship",
+    "data-link.odt": "external-relationship",
+    "link-traversal.odt": "external-relationship",
+    "encoded-link.odt": "external-relationship",
     "embedded.odt": "embedded-object",
     "mimetype-confusion.odt": "format-identity-mismatch",
 }
@@ -58,7 +66,7 @@ def main() -> int:
     checks = 0
     first = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in GENERATOR.generate()}
     second = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in GENERATOR.generate()}
-    assert first == second and len(first) == 16
+    assert first == second and len(first) == 24
     checks += 2
     for name, format_id in (("safe.docx", "docx"), ("safe.odt", "odt")):
         result = INSPECTOR.inspect((GENERATOR.OUTPUT / name).read_bytes(), format_id)
@@ -117,7 +125,7 @@ def main() -> int:
     assert all(foundation["candidateFormats"][key] == value for key, value in contract["formats"].items())
     assert foundation["parserDependenciesAdmitted"] == [] and foundation["workerProcessAllowed"] is False
     checks += 2
-    print(f"Complex-document container review passed {checks} deterministic security checks across 16 fixtures.")
+    print(f"Complex-document container review passed {checks} deterministic security checks across 24 fixtures.")
     return 0
 
 

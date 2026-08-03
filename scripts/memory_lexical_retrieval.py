@@ -166,13 +166,17 @@ class MemoryLexicalRetrieval:
 
             selected = []
             selected_characters = 0
+            character_budget_omissions = 0
+            chunk_budget_reached = False
             for score, chunk in scored:
                 if len(selected) >= budgets["maximumSelectedChunks"]:
+                    chunk_budget_reached = True
                     break
                 if (
                     selected_characters + len(chunk.text)
                     > budgets["maximumSelectedCharacters"]
                 ):
+                    character_budget_omissions += 1
                     continue
                 selected.append({
                     "sourceName": chunk.source_name,
@@ -187,13 +191,24 @@ class MemoryLexicalRetrieval:
                 })
                 selected_characters += len(chunk.text)
 
+            omitted_matching_chunks = len(scored) - len(selected)
+            truncation_reasons = []
+            if chunk_budget_reached:
+                truncation_reasons.append("selected-chunk-limit")
+            if character_budget_omissions:
+                truncation_reasons.append("selected-character-limit")
+
             return {
                 "kind": "memory-lexical-retrieval-result",
                 "runtimeAdmitted": False,
                 "providerPayloadAllowed": False,
                 "algorithm": self._contract["determinism"]["algorithm"],
                 "queryTermCount": len(query_terms),
+                "matchingChunkCount": len(scored),
                 "selectedChunkCount": len(selected),
+                "omittedMatchingChunkCount": omitted_matching_chunks,
+                "selectionTruncated": omitted_matching_chunks > 0,
+                "truncationReasons": truncation_reasons,
                 "selectedCharacters": selected_characters,
                 "tokenEstimate": sum(item["tokenEstimate"] for item in selected),
                 "chunks": selected,

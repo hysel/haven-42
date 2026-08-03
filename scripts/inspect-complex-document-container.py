@@ -36,6 +36,29 @@ MAX_RATIO = 20
 MAX_XML = 1_048_576
 
 
+def local_name(value: str) -> str:
+    return value.rsplit("}", 1)[-1].casefold()
+
+
+def unsafe_reference(value: str, allow_fragment: bool) -> bool:
+    candidate = value.strip()
+    if not candidate:
+        return True
+    if any(ord(character) < 32 for character in candidate):
+        return True
+    if allow_fragment and candidate.startswith("#"):
+        return False
+    path = candidate.split("#", 1)[0].split("?", 1)[0]
+    return (
+        "%" in path
+        or "\\" in path
+        or path.startswith("/")
+        or path.startswith("//")
+        or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", path) is not None
+        or any(part == ".." for part in path.split("/"))
+    )
+
+
 def safe_name(name: str) -> str:
     parts = name.split("/")
     if (
@@ -118,15 +141,25 @@ def inspect(data: bytes, format_id: str) -> dict[str, object]:
             if b"VBAPROJECT" in upper or b"MACROENABLED" in upper:
                 raise ContainerRejected("macro-content")
             try:
-                ElementTree.fromstring(value)
+                root = ElementTree.fromstring(value)
             except ElementTree.ParseError as error:
                 raise ContainerRejected("malformed-xml") from error
-            if lowered.endswith(".rels") and re.search(rb"TargetMode\s*=\s*['\"]External['\"]", value, re.I):
-                raise ContainerRejected("external-relationship")
-            if format_id in ODF_TYPES and re.search(
-                rb"(?:xlink:)?href\s*=\s*['\"](?:https?|file|ftp):", value, re.I
-            ):
-                raise ContainerRejected("external-relationship")
+            if lowered.endswith(".rels"):
+                for element in root.iter():
+                    attributes = {
+                        local_name(key): item for key, item in element.attrib.items()
+                    }
+                    target = attributes.get("target")
+                    if (
+                        attributes.get("targetmode", "").strip().casefold() == "external"
+                        or target is not None and unsafe_reference(target, False)
+                    ):
+                        raise ContainerRejected("external-relationship")
+            if format_id in ODF_TYPES:
+                for element in root.iter():
+                    for key, target in element.attrib.items():
+                        if local_name(key) == "href" and unsafe_reference(target, True):
+                            raise ContainerRejected("external-relationship")
         return {
             "schemaVersion": 1,
             "status": "candidate-safe-metadata",

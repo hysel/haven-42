@@ -59,6 +59,11 @@ def encrypted_flag(data: bytes) -> bytes:
 
 def cases() -> dict[str, bytes]:
     rel = b"<Relationships><Relationship TargetMode='External' Target='https://example.invalid'/></Relationships>"
+    disguised_rel = b"<Relationships><Relationship Target='https://example.invalid'/></Relationships>"
+    traversal_rel = b"<Relationships><Relationship Target='../../escape.xml'/></Relationships>"
+    encoded_rel = b"<Relationships><Relationship Target='%2e%2e/escape.xml'/></Relationships>"
+    spaced_rel = b"<Relationships><Relationship TargetMode=' external ' Target='safe.xml'/></Relationships>"
+    empty_rel = b"<Relationships><Relationship Target=' '/></Relationships>"
     return {
         "safe.docx": docx(),
         "safe.odt": odt(),
@@ -66,6 +71,11 @@ def cases() -> dict[str, bytes]:
         "duplicate.docx": docx([("word/document.xml", b"duplicate", zipfile.ZIP_DEFLATED)]),
         "macro.docx": docx([("word/vbaProject.bin", b"macro", zipfile.ZIP_DEFLATED)]),
         "external.docx": docx([("word/_rels/document.xml.rels", rel, zipfile.ZIP_DEFLATED)]),
+        "disguised-external.docx": docx([("word/_rels/document.xml.rels", disguised_rel, zipfile.ZIP_DEFLATED)]),
+        "relationship-traversal.docx": docx([("word/_rels/document.xml.rels", traversal_rel, zipfile.ZIP_DEFLATED)]),
+        "encoded-traversal.docx": docx([("word/_rels/document.xml.rels", encoded_rel, zipfile.ZIP_DEFLATED)]),
+        "spaced-external.docx": docx([("word/_rels/document.xml.rels", spaced_rel, zipfile.ZIP_DEFLATED)]),
+        "empty-target.docx": docx([("word/_rels/document.xml.rels", empty_rel, zipfile.ZIP_DEFLATED)]),
         "embedded.docx": docx([("word/embeddings/object1.bin", b"object", zipfile.ZIP_DEFLATED)]),
         "activex.docx": docx([("word/activeX/activeX1.bin", b"control", zipfile.ZIP_DEFLATED)]),
         "symlink.docx": docx([("word/link.xml", b"target", zipfile.ZIP_STORED, 0o120777 << 16)]),
@@ -74,6 +84,9 @@ def cases() -> dict[str, bytes]:
         "expansion.docx": docx([("word/large.xml", b"A" * 200_000, zipfile.ZIP_DEFLATED)]),
         "doctype.odt": odt([("styles.xml", b"<!DOCTYPE x [<!ENTITY y 'z'>]><x>&y;</x>", zipfile.ZIP_DEFLATED)]),
         "external.odt": odt([("styles.xml", b"<x xmlns:xlink='urn:xlink' xlink:href='https://example.invalid'/>", zipfile.ZIP_DEFLATED)]),
+        "data-link.odt": odt([("styles.xml", b"<x xmlns:xlink='urn:xlink' xlink:href='data:text/plain,unsafe'/>", zipfile.ZIP_DEFLATED)]),
+        "link-traversal.odt": odt([("styles.xml", b"<x xmlns:xlink='urn:xlink' xlink:href='../escape.xml'/>", zipfile.ZIP_DEFLATED)]),
+        "encoded-link.odt": odt([("styles.xml", b"<x xmlns:xlink='urn:xlink' xlink:href='%2e%2e/escape.xml'/>", zipfile.ZIP_DEFLATED)]),
         "embedded.odt": odt([("Object 1/content.xml", b"<object/>", zipfile.ZIP_DEFLATED)]),
         "mimetype-confusion.odt": odt(mimetype=b"application/vnd.oasis.opendocument.spreadsheet"),
     }

@@ -100,10 +100,12 @@ isolation with no attachment-driven execution or tools, and no temporary
 files. A 27-case restricted parser-worker foundation rejects hostile PDF,
 Office Open XML, and OpenDocument metadata but admits no dependency, worker,
 route, or filesystem access. The review-only complex-document layer now passes
-41 container checks and 57 semantic checks across 17 fixtures with Windows and
-Ubuntu source evidence; a separate 33-check parity contract keeps all package
-cells false. PDF production isolation also has a 32-check exact OS-control
-evidence gate that permits no fallback or runtime authority.
+49 container checks across 24 fixtures and 57 semantic checks across 17
+fixtures with Windows and Ubuntu source evidence; a separate 33-check parity
+contract keeps all package
+cells false. PDF production isolation also has a 37-check native OS-control
+evidence gate that rejects WSL2 as native Linux and permits no fallback or
+runtime authority.
 Automatic scan, directory access, real complex parsers, embedding indexes,
 and runtime persistence remain unadmitted. The deterministic memory-only
 lexical core now has bounded offline hostile and lifecycle tests, but its

@@ -627,8 +627,9 @@
   GenAI but does not transfer to Windows. Windows NVIDIA b10088/CUDA candidate
   evidence now covers exact runtime/artifact identity, full offload, baseline,
   strict patch, repeated lifecycle, and vision; Qwen 3 8B context and patch
-  quality failed, structured tool transport remains open, and no runtime is
-  promoted. Physical Apple Silicon remains parked until Mac hardware is
+  quality failed. The effect-free structured tool-transport parser foundation
+  is complete, but live provider/result transport remains open and no runtime
+  is promoted. Physical Apple Silicon remains parked until Mac hardware is
   acquired.
 - [x] Run the first physical Linux Intel Arc B580 inference-engine evaluation:
   pin and hash the toolchains and model inputs, prove GPU execution, exercise

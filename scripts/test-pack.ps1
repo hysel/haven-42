@@ -5187,7 +5187,10 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($lexicalContract.status -eq "offline-engine-implemented-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding engine."
     $lexicalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-memory-lexical-retrieval.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Memory-only lexical retrieval hostile tests should pass. Output: $($lexicalOutput -join ' ')"
-    Assert-True -Condition (($lexicalOutput -join "`n") -match "39 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should remain complete."
+    Assert-True -Condition (($lexicalOutput -join "`n") -match "52 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should disclose each bounded-result truncation cause."
+    $toolTransportOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-structured-tool-transport.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Structured tool-transport security tests should pass. Output: $($toolTransportOutput -join ' ')"
+    Assert-True -Condition (($toolTransportOutput -join "`n") -match "40 effect-free security checks") -Message "Structured tool transport must remain raw-JSON, allowlisted, effect free, package-excluded, and unable to grant runtime or execution authority."
     $sourceReviewOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-source-attachment-review-fixtures.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Source-attachment review fixtures should be generated safely. Output: $($sourceReviewOutput -join ' ')"
     Assert-True -Condition (($sourceReviewOutput -join "`n") -match "25 checks") -Message "Source-attachment review fixture coverage should remain complete."
@@ -5225,7 +5228,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($parserOutput -join "`n") -match "27 cases") -Message "The parser-worker foundation must reject hostile PDF, Office Open XML, and OpenDocument containers and grant no parser authority."
     $complexContainerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-container-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument synthetic container review should pass."
-    Assert-True -Condition (($complexContainerOutput -join "`n") -match "41 deterministic security checks across 16 fixtures") -Message "Complex-document review must reject hostile ZIP/XML structures and remain excluded from runtime and packages."
+    Assert-True -Condition (($complexContainerOutput -join "`n") -match "49 deterministic security checks across 24 fixtures") -Message "Complex-document review must reject hostile ZIP/XML structures, empty, disguised, or encoded references, and traversal while remaining excluded from runtime and packages."
     $complexSemanticOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-semantic-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument semantic review should pass."
     Assert-True -Condition (($complexSemanticOutput -join "`n") -match "57 checks across 17 fixtures") -Message "Complex-document semantic review must cover bounded richer provenance while rejecting formulas, tracked changes, and over-budget content and remaining excluded from runtime and packages."
@@ -5261,7 +5264,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($pdfIsolationOutput -join "`n") -match "27 fail-closed checks") -Message "PDF production isolation gaps must remain explicit and block admission."
     $pdfOsIsolationOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pdf-os-isolation-gate.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF operating-system isolation evidence-gate tests should pass."
-    Assert-True -Condition (($pdfOsIsolationOutput -join "`n") -match "32 checks") -Message "PDF OS isolation must require exact platform controls, hostile escape evidence, and parity while granting no runtime authority."
+    Assert-True -Condition (($pdfOsIsolationOutput -join "`n") -match "37 checks") -Message "PDF OS isolation must require native exact-platform controls, reject WSL2 as native evidence, and grant no runtime authority."
     $pdfIntakeOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-pdf-corpus-intake.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "PDF corpus intake hostile tests should pass."
     Assert-True -Condition (($pdfIntakeOutput -join "`n") -match "23 offline cases") -Message "PDF corpus intake must reject unsafe provenance, destination, licensing, privacy, integrity, and retention records without network access."

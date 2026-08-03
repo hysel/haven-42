@@ -2589,7 +2589,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-parser-worker-foundation.py" |
     grep -q "27 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-container-review.py" |
-    grep -q "41 deterministic security checks across 16 fixtures" || return 1
+    grep -q "49 deterministic security checks across 24 fixtures" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-semantic-review.py" |
     grep -q "57 checks across 17 fixtures" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-native-foundation.py" |
@@ -2613,7 +2613,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-pdf-production-isolation.py" |
     grep -q "27 fail-closed checks" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-os-isolation-gate.py" |
-    grep -q "32 checks" || return 1
+    grep -q "37 checks" || return 1
   python3 "$REPO_ROOT/scripts/verify-pdf-corpus-intake.py" --self-test |
     grep -q "23 offline cases" || return 1
   python3 "$REPO_ROOT/scripts/test-pdf-corpus-research-foundation.py" |
@@ -2670,7 +2670,9 @@ PY
 
 test_conversation_history_foundation() {
   python3 "$REPO_ROOT/scripts/test-memory-lexical-retrieval.py" |
-    grep -q "39 deterministic, hostile, and lifecycle checks" || return 1
+    grep -q "52 deterministic, hostile, and lifecycle checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-structured-tool-transport.py" |
+    grep -q "40 effect-free security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-source-attachment-review-fixtures.py" |
     grep -q "25 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-foundation.py" |
