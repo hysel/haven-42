@@ -125,6 +125,55 @@ rows, while the V100 was slightly faster for both Gemma 3 1B and Qwen3.5 0.8B
 Q8. These measurements are hardware-profile evidence, not a ranking promise
 for other drivers, runtimes, models, quantizations, prompts, or devices.
 
+## WSL2 AMD/HIP Candidate Result
+
+A separate Windows-hosted WSL2 Ubuntu 24.04.4 cell exercised the same pinned
+llama.cpp b10088 commit and the same 11 hash-pinned artifacts on an RX 7800 XT
+16 GB. The clean source build used ROCm 7.2 with its server UI and prebuilt UI
+disabled, curl disabled, and no downloaded UI, `node_modules`, or UI build
+stamp. The runtime reported commit `67b9b0e` and build number `10088`.
+
+This is WSL2 candidate evidence, not native Linux evidence. GPU access used the
+Windows-hosted `/dev/dxg` bridge and ROCDXG 1.2.0 rather than a native Linux
+`amdgpu` device. It therefore cannot validate native Linux driver installation,
+desktop behavior, package lifecycle, or shutdown behavior.
+
+The runner requires an explicit `--wsl-dxg` switch for this path. It rejects a
+non-HIP backend, a Windows process, a non-WSL kernel, a missing device, a
+symlink, or anything other than the real `/dev/dxg` character device. The child
+receives a fixed `HSA_ENABLE_DXG_DETECTION=1`; inherited values are stripped
+and cannot enable the mode.
+
+All 11 artifacts passed SHA-256 and size verification, HIP/DXG device identity,
+the fixed benchmark, full model-layer offload, bounded exit, and cleanup in one
+coherent rerun. The same four artifacts passed the strict exact-output gate as
+on the native Windows AMD and Linux NVIDIA cells.
+
+| Artifact | Prompt tokens/s | Generation tokens/s | Exact 48-token response |
+| --- | ---: | ---: | --- |
+| Qwen3 0.6B Q4_0 | 7,387.72 | 255.57 | Miss |
+| Qwen3.5 0.8B Q4_0 | 6,216.54 | 201.39 | Miss |
+| Qwen3.5 0.8B Q8_0 | 1,866.58 | 198.83 | Miss |
+| Gemma 3 1B Q4_K_M | 2,582.64 | 190.72 | Pass |
+| SmolLM3 3B Q4_K_M | 2,983.81 | 149.50 | Miss |
+| Granite 4.1 3B Q4_K_M | 2,322.79 | 132.76 | Pass |
+| Phi-3 Mini 4K Q4 | 2,631.65 | 145.59 | Pass |
+| Gemma 3 4B Q4_K_M | 2,474.54 | 88.88 | Pass |
+| Qwen3 4B Q4_K_M | 2,292.34 | 123.87 | Miss |
+| Qwen3.5 9B Q4_K_M | 999.70 | 74.98 | Miss |
+| Qwen3 8B Q8_0 | 315.42 | 62.05 | Miss |
+
+The first full pass encountered a transient failure in the final Qwen3 8B Q8
+benchmark. The isolated cell and a complete coherent rerun both passed. This
+is retained as a stability observation and prevents promotion beyond candidate
+status. Throughput is diagnostic for this exact run and is not a platform
+ranking.
+
+An initial upstream-default build path attempted to install web-UI dependencies
+and reported dependency vulnerabilities. That path was rejected. Only the
+separate clean offline build described above was used for recorded inference
+evidence; no web UI or dependency tree is admitted or packaged.
+
 ## Windows NVIDIA And Follow-On Results
 
 An independent Windows x86_64 NVIDIA cell used the same b10088 source commit,
@@ -177,4 +226,5 @@ Ollama, or OpenVINO. It also does not admit either direct llama.cpp runtime as
 a product route. The declared Windows NVIDIA/AMD patch, context-pressure,
 repeated-lifecycle, and vision cells now have explicit pass/fail evidence.
 Structured tool-call transport remains open, and failed quality cells remain
-non-promoting.
+non-promoting. The WSL2 AMD cell adds bounded candidate evidence only; native
+Linux AMD validation remains open.

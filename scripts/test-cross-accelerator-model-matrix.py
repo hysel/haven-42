@@ -180,6 +180,45 @@ class MatrixRunnerTests(unittest.TestCase):
         self.assertNotIn("USERPROFILE", environment)
         self.assertEqual(environment["HIP_VISIBLE_DEVICES"], "0")
 
+    def test_wsl_dxg_environment_is_fixed_and_opt_in(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve(strict=True)
+            original = MODULE.os.environ.get("HSA_ENABLE_DXG_DETECTION")
+            MODULE.os.environ["HSA_ENABLE_DXG_DETECTION"] = "hostile"
+            try:
+                default = MODULE.safe_environment(root, "hip", None, [])
+                enabled = MODULE.safe_environment(
+                    root, "hip", None, [], wsl_dxg=True
+                )
+            finally:
+                if original is None:
+                    MODULE.os.environ.pop("HSA_ENABLE_DXG_DETECTION", None)
+                else:
+                    MODULE.os.environ["HSA_ENABLE_DXG_DETECTION"] = original
+        self.assertNotIn("HSA_ENABLE_DXG_DETECTION", default)
+        self.assertEqual(enabled["HSA_ENABLE_DXG_DETECTION"], "1")
+
+    def test_wsl_dxg_rejects_wrong_backend_and_non_device(self) -> None:
+        with self.assertRaisesRegex(MODULE.MatrixError, "HIP backend"):
+            MODULE.validate_wsl_dxg("cuda", True, platform_name="posix")
+        with tempfile.TemporaryDirectory() as temporary:
+            fake_device = Path(temporary) / "dxg"
+            fake_device.write_bytes(b"not a device")
+            with self.assertRaisesRegex(MODULE.MatrixError, "character device"):
+                MODULE.validate_wsl_dxg(
+                    "hip",
+                    True,
+                    dxg_path=fake_device,
+                    platform_name="posix",
+                    os_release="microsoft-standard-WSL2",
+                )
+
+    def test_wsl_dxg_rejects_non_wsl_kernel(self) -> None:
+        with self.assertRaisesRegex(MODULE.MatrixError, "verified WSL kernel"):
+            MODULE.validate_wsl_dxg(
+                "hip", True, platform_name="posix", os_release="generic-linux"
+            )
+
     def test_summary_refuses_predictable_temporary_collision(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve(strict=True)

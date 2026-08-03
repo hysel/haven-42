@@ -69,7 +69,9 @@ These should stay on `TODO.md` until the user or project owner provides input:
 - Tests requiring hardware or operating-system profiles not already validated,
   including the final physical-Mac release gates. Windows NVIDIA has partial
   image-provider evidence, and the Intel Arc B580 has candidate engine evidence
-  on Linux plus Windows OpenVINO; no result transfers to an untested engine.
+  on Linux plus Windows OpenVINO. WSL2 AMD/HIP has a bounded candidate matrix
+  but does not satisfy native Linux AMD validation; no result transfers to an
+  untested engine or operating-system boundary.
 
 ## Enhancement Recommendations
 

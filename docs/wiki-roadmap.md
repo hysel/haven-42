@@ -48,7 +48,7 @@ approval gates are complete. Haven 42 makes no production-readiness claim.
 | Browser product and portable packaging | Runnable development scope; continuing hardening |
 | Local images | Linux ComfyUI/SDXL path promoted; other profiles gated |
 | Audio and video | Research and evidence only |
-| Hardware-adaptive inference | Evidence expanding across NVIDIA, AMD, Intel, and future Apple hardware |
+| Hardware-adaptive inference | Evidence expanding across NVIDIA, AMD, Intel, and future Apple hardware; WSL2 AMD remains candidate-only |
 | Local knowledge and history | Bounded attachments admitted; parsing, retrieval, and persistence gated |
 | Controlled web research | Security contracts exist; runtime access unadmitted |
 

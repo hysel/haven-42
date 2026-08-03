@@ -14,6 +14,7 @@ import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import sys
 import time
@@ -229,6 +230,7 @@ def safe_environment(
     backend: str,
     device: str | None,
     library_paths: list[Path],
+    wsl_dxg: bool = False,
 ) -> dict[str, str]:
     allowed = ("SYSTEMROOT", "WINDIR", "TEMP", "TMP", "TMPDIR")
     environment = {key: os.environ[key] for key in allowed if key in os.environ}
@@ -256,7 +258,41 @@ def safe_environment(
         environment["CUDA_VISIBLE_DEVICES" if backend == "cuda" else "HIP_VISIBLE_DEVICES"] = device
     if backend == "cuda":
         environment["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    if wsl_dxg:
+        if backend != "hip":
+            raise MatrixError("WSL DXG detection is available only for the HIP backend.")
+        environment["HSA_ENABLE_DXG_DETECTION"] = "1"
     return environment
+
+
+def validate_wsl_dxg(
+    backend: str,
+    enabled: bool,
+    dxg_path: Path = Path("/dev/dxg"),
+    platform_name: str | None = None,
+    os_release: str | None = None,
+) -> None:
+    if not enabled:
+        return
+    if backend != "hip":
+        raise MatrixError("WSL DXG detection is available only for the HIP backend.")
+    if (platform_name or os.name) == "nt":
+        raise MatrixError("WSL DXG detection cannot be requested from a Windows process.")
+    if os_release is None:
+        try:
+            os_release = Path("/proc/sys/kernel/osrelease").read_text(
+                encoding="utf-8", errors="strict"
+            )
+        except OSError as exc:
+            raise MatrixError("WSL DXG detection requires a verified WSL kernel.") from exc
+    if "microsoft" not in os_release.lower() and "wsl" not in os_release.lower():
+        raise MatrixError("WSL DXG detection requires a verified WSL kernel.")
+    try:
+        metadata = dxg_path.lstat()
+    except OSError as exc:
+        raise MatrixError("WSL DXG detection requires the /dev/dxg device.") from exc
+    if stat.S_ISLNK(metadata.st_mode) or not stat.S_ISCHR(metadata.st_mode):
+        raise MatrixError("WSL DXG detection requires /dev/dxg to be a character device.")
 
 
 def parse_benchmark(stdout: str) -> dict[str, Any]:
@@ -362,13 +398,16 @@ def execute_model(
     backend: str,
     device: str | None,
     library_paths: list[Path],
+    wsl_dxg: bool,
 ) -> dict[str, Any]:
     execution = manifest["execution"]
     timeout = int(execution["timeoutSeconds"])
     model_path = verify_artifact(model_root, model["artifact"], f"{model['id']} artifact")
     bench = runtime_binary(runtime_root, "llama-bench")
     cli = runtime_binary(runtime_root, "llama-cli")
-    environment = safe_environment(runtime_root, backend, device, library_paths)
+    environment = safe_environment(
+        runtime_root, backend, device, library_paths, wsl_dxg=wsl_dxg
+    )
     benchmark = run_process(
         [
             str(bench),
@@ -492,6 +531,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model-id", action="append", default=[])
     parser.add_argument("--output", type=Path)
     parser.add_argument("--preflight-only", action="store_true")
+    parser.add_argument(
+        "--wsl-dxg",
+        action="store_true",
+        help="Enable the fixed ROCm DXG discovery flag after validating /dev/dxg.",
+    )
     return parser.parse_args()
 
 
@@ -500,6 +544,7 @@ def main() -> int:
     try:
         if not PROFILE_RE.fullmatch(args.hardware_profile):
             raise MatrixError("hardware-profile must be a short sanitized label.")
+        validate_wsl_dxg(args.backend, args.wsl_dxg)
         manifest = load_manifest(args.manifest.resolve(strict=True))
         model_root = args.model_root.resolve(strict=True)
         runtime_root = args.runtime_root.resolve(strict=True)
@@ -514,6 +559,7 @@ def main() -> int:
             "status": "preflight-pass",
             "hardwareProfile": args.hardware_profile,
             "backend": args.backend,
+            "wslDxg": args.wsl_dxg,
             "runtime": {
                 "project": manifest["runtime"]["project"],
                 "buildTag": manifest["runtime"]["buildTag"],
@@ -534,6 +580,7 @@ def main() -> int:
                         args.backend,
                         args.device,
                         args.library_path,
+                        args.wsl_dxg,
                     )
                 except MatrixError as exc:
                     result["status"] = "fail"

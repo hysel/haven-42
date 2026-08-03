@@ -5435,6 +5435,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-True -Condition (-not $crossMatrix.security.networkUseDuringInference -and -not $crossMatrix.security.listenersAllowed -and -not $crossMatrix.security.shellExecutionAllowed -and $crossMatrix.security.hashVerificationRequired -and $crossMatrix.security.fullGpuOffloadRequired) -Message "Cross-accelerator inference must stay offline, listener-free, shell-free, hash-pinned, and fully offloaded."
     $crossRunnerSource = Get-Content -LiteralPath $crossRunnerPath -Raw
     Assert-True -Condition ($crossRunnerSource -match "shell=False" -and $crossRunnerSource -match "--single-turn" -and $crossRunnerSource -notmatch "requests|urllib|http\.client|import socket") -Message "The lab runner must remain noninteractive, shell-free, and network-incapable."
+    Assert-True -Condition ($crossRunnerSource -match "--wsl-dxg" -and $crossRunnerSource -match 'HSA_ENABLE_DXG_DETECTION.*=.*"1"' -and $crossRunnerSource -match "stat\.S_ISCHR" -and $crossRunnerSource -match "verified WSL kernel" -and $crossRunnerSource -match 'Path\("/dev/dxg"\)') -Message "WSL2 HIP must remain explicit, use a fixed DXG flag, verify WSL, and require the real character device."
     $crossFollowOnSource = Get-Content -LiteralPath $crossFollowOnPath -Raw
     Assert-True -Condition ($crossFollowOnSource -match "BASELINE\.run_process" -and $crossFollowOnSource -notmatch "import subprocess|requests|urllib|http\.client|import socket") -Message "The follow-on runner must delegate process execution to the reviewed shell-free baseline and remain network-incapable."
     Assert-True -Condition ($crossFollowOnSource -match "patch_is_safe_and_exact" -and $crossFollowOnSource -match "rawPromptOrResponsePersisted") -Message "Follow-on validation must retain strict patch parsing and explicit non-persistence evidence."
@@ -5443,6 +5444,9 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-Equal -Actual $cuda.status -Expected "validated-exact-profile" -Message "Only the exact llama.cpp CUDA profile should be validated."
     Assert-Equal -Actual ($cuda.profiles -join ",") -Expected "linux-x64-nvidia-rtx5000-16gb" -Message "llama.cpp CUDA evidence should remain bound to the tested RTX 5000 profile."
     Assert-Equal -Actual (@($llama.backends | Where-Object { $_.id -eq "hip" })[0].status) -Expected "validated-exact-profile" -Message "Only the exact llama.cpp HIP profile should be validated."
+    $wslDxg = @($llama.backends | Where-Object { $_.id -eq "hip-wsl-dxg" })[0]
+    Assert-Equal -Actual $wslDxg.status -Expected "candidate" -Message "WSL2 DXG/HIP evidence must remain candidate-only."
+    Assert-Equal -Actual ($wslDxg.profiles -join ",") -Expected "wsl2-ubuntu-24.04-x64-amd-rx7800xt-16gb" -Message "WSL2 DXG/HIP evidence must remain bound to the tested profile."
     Assert-Equal -Actual @($llama.backends | Where-Object { $_.id -eq "vulkan" }).Count -Expected 0 -Message "Failed Vulkan backend must remain documentation-only and absent from the active registry."
     $sycl = @($llama.backends | Where-Object { $_.id -eq "sycl" })[0]
     Assert-Equal -Actual $sycl.status -Expected "candidate" -Message "Intel SYCL should remain candidate-only after partial exact-profile evidence."
@@ -5473,7 +5477,7 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-True -Condition (($selfTest -join "`n") -match "3 cases") -Message "Quantization planner should exercise all selection decisions."
     $crossRunnerTests = @(& $python.Source $crossRunnerTestsPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator runner security and parser tests should pass. Output: $($crossRunnerTests -join ' ')"
-    Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 15 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
+    Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 18 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
     $crossFollowOnTests = @(& $python.Source $crossFollowOnTestsPath 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator follow-on security tests should pass. Output: $($crossFollowOnTests -join ' ')"
     Assert-True -Condition (($crossFollowOnTests -join "`n") -match "Ran 8 tests" -and ($crossFollowOnTests -join "`n") -notmatch "skipped=") -Message "Follow-on hostile coverage should remain complete and skip-free."
