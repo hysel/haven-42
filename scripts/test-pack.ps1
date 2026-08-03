@@ -383,11 +383,11 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     $dependabot = Get-Content -LiteralPath $dependabotPath -Raw
 
     $checkoutSha = "3d3c42e5aac5ba805825da76410c181273ba90b1"
-    $setupPythonSha = "a309ff8b426b58ec0e2a45f0f869d46889d02405"
+    $setupPythonSha = "5fda3b95a4ea91299a34e894583c3862153e4b97"
     Assert-True -Condition ($actionSources -notmatch "actions/checkout@(v\d+|main|master)\b") -Message "Checkout references must not use mutable tags or branches."
     Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/checkout@$checkoutSha\b").Count) -Expected 9 -Message "All live and generated workflows should pin the reviewed checkout v7.0.1 commit."
     Assert-Equal -Actual ([regex]::Matches($actionSources, "persist-credentials:\s*false").Count) -Expected 9 -Message "Every checkout should disable persisted credentials."
-    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/setup-python@$setupPythonSha\b").Count) -Expected 1 -Message "The package matrix should pin setup-python v6.2.0 exactly once."
+    Assert-Equal -Actual ([regex]::Matches($actionSources, "actions/setup-python@$setupPythonSha\b").Count) -Expected 1 -Message "The package matrix should pin setup-python v7.0.0 exactly once."
     Assert-True -Condition ($actionSources -match 'python-version:\s*"3\.14\.6"') -Message "Portable packages should use one exact Python patch version on every native runner."
     foreach ($runner in @("windows-2025", "ubuntu-24.04", "macos-15")) {
         Assert-True -Condition ($actionSources -match [regex]::Escape("- os: $runner")) -Message "Portable runner labels should be versioned: $runner"
@@ -396,6 +396,7 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     Assert-True -Condition ($workflow -match "(?m)^concurrency:" -and $workflow -match "timeout-minutes:") -Message "Validation workflow should bound concurrency and job duration."
     Assert-True -Condition ($dependabot -match "package-ecosystem:\s*github-actions") -Message "Dependabot should monitor GitHub Actions dependencies."
     Assert-True -Condition ($dependabot -match "interval:\s*weekly") -Message "GitHub Actions dependency checks should run weekly."
+    Assert-True -Condition ($dependabot -match '(?s)groups:\s*codeql-action:\s*patterns:\s*-\s*"github/codeql-action/\*"') -Message "Dependabot should update CodeQL init and analyze as one group."
     $python = Get-Command python -ErrorAction SilentlyContinue
     if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
     Assert-True -Condition ($null -ne $python) -Message "Python 3 should be available for repository policy verification."

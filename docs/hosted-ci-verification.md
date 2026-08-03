@@ -34,7 +34,7 @@ The `Validate Pack` workflow must complete these jobs successfully:
 - `macOS portable package`
 
 The portable matrix selects the same exact Python 3.14.6 patch release through
-an immutable GitHub-owned `setup-python` v6.2.0 commit before installing the
+an immutable GitHub-owned `setup-python` v7.0.0 commit before installing the
 hash-locked build dependencies. It does not rely on each hosted image's
 changing default Python.
 

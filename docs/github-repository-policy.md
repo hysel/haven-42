@@ -45,6 +45,10 @@ The repository currently has one eligible CODEOWNER. GitHub does not allow an au
 
 Actions receive read-only default workflow permission and cannot approve pull requests. Only GitHub-owned actions are admitted, and GitHub enforces full-length commit-SHA pinning. Workflows independently declare minimum permissions and disable persisted checkout credentials.
 
+Dependabot checks GitHub Actions weekly. The CodeQL `init` and `analyze`
+sub-actions are grouped so they cannot propose incompatible scanner versions
+in separate pull requests.
+
 The isolated attestation job adds only `actions: read`, `contents: read`,
 `id-token: write`, `attestations: write`, and `artifact-metadata: write`.
 Repository contents, packages, releases, pull requests, deployments, and

@@ -51,7 +51,7 @@ SHA:
 - `actions/checkout` v7.0.1;
 - `actions/upload-artifact` v7.0.1;
 - `actions/download-artifact` v8.0.1; and
-- `actions/attest` v4.2.0.
+- `actions/attest` v4.2.1.
 
 The repository policy verifier rejects moving tags, missing pins,
 pull-request-target execution, overprivileged write permissions, release or

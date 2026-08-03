@@ -89,8 +89,8 @@ def verify_static(policy: dict) -> None:
         "trigger": "push-main-after-native-package-success",
         "subjects": "unsigned-development-archives-only",
         "action": "actions/attest",
-        "actionCommit": "f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6",
-        "actionRelease": "v4.2.0",
+        "actionCommit": "508db95dd578ae2727ebd6217d5ba78e4fbda05d",
+        "actionRelease": "v4.2.1",
         "requiredJobPermissions": [
             "actions:read",
             "artifact-metadata:write",
@@ -130,7 +130,7 @@ def verify_static(policy: dict) -> None:
     if workflow_text.count(upload_artifact) != 1:
         raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
     setup_python = (
-        "actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405"
+        "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97"
     )
     if workflow_text.count(setup_python) != 1:
         raise PolicyError("reviewed-node24-setup-python-not-pinned")
@@ -182,7 +182,13 @@ def verify_static(policy: dict) -> None:
     )
     if workflow_text.count(download_artifact) != 1:
         raise PolicyError("reviewed-node24-download-artifact-not-pinned")
-    attest = "actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6"
+    codeql_sha = "f205ea1c3313d32999d8d6a48b4f6530d4437b38"
+    if (
+        workflow_text.count(f"github/codeql-action/init@{codeql_sha}") != 1
+        or workflow_text.count(f"github/codeql-action/analyze@{codeql_sha}") != 1
+    ):
+        raise PolicyError("reviewed-codeql-action-pair-not-pinned")
+    attest = "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d"
     if workflow_text.count(attest) != 1:
         raise PolicyError("reviewed-attestation-action-not-pinned")
     attestation_markers = {

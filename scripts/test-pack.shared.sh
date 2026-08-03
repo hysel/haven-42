@@ -287,7 +287,7 @@ test_github_actions_dependencies() {
     "$REPO_ROOT/scripts/generate-sample-repositories.ps1" \
     "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh")"
   checkout_sha='3d3c42e5aac5ba805825da76410c181273ba90b1'
-  setup_python_sha='a309ff8b426b58ec0e2a45f0f869d46889d02405'
+  setup_python_sha='5fda3b95a4ea91299a34e894583c3862153e4b97'
   checkout_count="$(printf '%s' "$action_sources" | grep -Ec "actions/checkout@${checkout_sha}([^0-9a-f]|$)")"
   credential_count="$(printf '%s' "$action_sources" | grep -Ec 'persist-credentials:[[:space:]]*false')"
 
@@ -303,6 +303,8 @@ test_github_actions_dependencies() {
     grep -q 'timeout-minutes:' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -Eq 'package-ecosystem:[[:space:]]*github-actions' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Eq 'interval:[[:space:]]*weekly' "$REPO_ROOT/.github/dependabot.yml" &&
+    grep -Eq '^[[:space:]]+codeql-action:' "$REPO_ROOT/.github/dependabot.yml" &&
+    grep -Fq '"github/codeql-action/*"' "$REPO_ROOT/.github/dependabot.yml" &&
     python3 "$REPO_ROOT/scripts/verify-github-repository-policy.py"
 }
 
