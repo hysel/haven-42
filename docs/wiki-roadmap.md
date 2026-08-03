@@ -21,7 +21,9 @@ approval gates are complete. Haven 42 makes no production-readiness claim.
 - Advance optional encrypted conversation-history architecture without enabling
   persistence prematurely.
 - Expand image-provider evidence while keeping unverified profiles unavailable.
-- Continue hardware-aware model and inference-engine validation.
+- Continue hardware-aware model and inference-engine validation. Native Windows
+  Intel llama.cpp SYCL is currently blocked by a failed model-load gate; it is
+  not an admitted runtime.
 
 ## Planned, but not active
 
@@ -46,8 +48,8 @@ approval gates are complete. Haven 42 makes no production-readiness claim.
 | --- | --- |
 | Core pack and engineering workflows | Completed for their defined development scopes |
 | Browser product and portable packaging | Runnable development scope; continuing hardening |
-| Local images | Linux ComfyUI/SDXL path promoted; other profiles gated |
-| Audio and video | Research and evidence only |
+| Local images | Linux ComfyUI/SDXL promoted; Windows NVIDIA, Intel, and AMD profiles have partial native evidence but remain gated |
+| Audio and video | Partial Linux CUDA audio evidence; video candidates remain gated after a fail-closed Quadro hardware/storage preflight |
 | Hardware-adaptive inference | Evidence expanding across NVIDIA, AMD, Intel, and future Apple hardware; WSL2 AMD remains candidate-only |
 | Local knowledge and history | Bounded attachments admitted; parsing, retrieval, and persistence gated |
 | Controlled web research | Security contracts exist; runtime access unadmitted |

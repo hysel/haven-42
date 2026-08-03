@@ -55,4 +55,19 @@ Official sources: [system requirements](https://docs.ltx.io/open-source-model/ge
 
 HunyuanVideo 1.5 and Wan2.2 require separate Linux NVIDIA evaluations for text-to-video and image-to-video. LTX-2.3 remains deferred until suitable 32 GB-class VRAM and storage are available. Every run must verify accelerator use, duration, resolution, frame rate/count, codec/container decoding, non-empty frames, cancellation, timeout, restart, retained state, cleanup, rollback, and uninstall.
 
+An exact-profile preflight on 2026-08-03 evaluated an Ubuntu 26.04 host with a
+Quadro RTX 5000 (16,384 MiB VRAM, CUDA capability 7.5), 16 GB system memory,
+and 34,332,434,432 available filesystem bytes. Wan2.2 TI2V-5B was rejected
+before download because its official single-GPU path requires at least 24 GB
+VRAM and its 34,202,832,421-byte model set leaves no runtime, output, or safety
+reserve. LTX-2.3 remained rejected against its published 32 GB VRAM and 100 GB
+storage profile. HunyuanVideo 1.5 declares a 14 GB offloaded minimum, but its
+33,306,632,192-byte reference transformer alone would leave only
+1,025,802,240 bytes before the remaining checkpoint files, dependencies,
+runtime, caches, and output. Its source-code path also enables prompt rewriting
+by default and can use an external vLLM-compatible service, so any future cell
+must explicitly disable rewriting and prove zero unapproved network activity.
+No source tree, dependency, model, prompt, reference media, output, or service
+was created by this fail-closed preflight.
+
 Windows NVIDIA is a separate native profile. Windows Intel, Windows AMD, and Apple Silicon remain unavailable until a credible exact provider path passes. The identity, likeness, reference-media, generated-content, and commercial-use controls are defined in `docs/generative-media-consent-policy.md`.

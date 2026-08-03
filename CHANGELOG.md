@@ -11,6 +11,38 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Classified Moonshot AI's Kimi family as documentation-only experimental and
+  untested on the project's current hardware, with a sanitized community
+  evidence path that grants no catalog, recommendation, installer, provider,
+  or compatibility status before exact-profile review and promotion.
+- Added explicit SYCL support and listener-free completion enforcement to the
+  cross-accelerator runner, then recorded a fail-closed native Windows Intel
+  b10088 result: verified runtime/model preflight passed, but zero-free-memory
+  reporting, tensor-load failure, and an OpenCL fallback fast-fail prevented
+  inference and runtime promotion.
+- Rebuilt the unsigned Windows one-folder package with the locked toolchain and
+  recorded a least-privilege physical Intel Arc B580 parity cell covering
+  loopback serving, readiness, relocation, read-only startup, abrupt recovery,
+  repeated lifecycle, shutdown authority, hostile environment, occupied ports,
+  and resource-integrity rejection without granting production admission.
+- Recorded a fail-closed Linux NVIDIA video-provider preflight: exact upstream
+  requirements rejected Wan2.2 and LTX-2.3 for insufficient VRAM and rejected
+  HunyuanVideo 1.5 for insufficient safe storage before any runtime or model
+  download; its default external prompt-rewrite path is now an explicit network
+  admission gate.
+- Expanded exact Linux CUDA ACE-Step evidence across V100 and Quadro profiles
+  while keeping the provider unpromoted; the threat model now blocks its
+  unauthenticated shadow route and misleading planner metadata from production.
+- Added a 26-check offline cited-synthesis boundary that constructs bounded
+  URL-free source envelopes from already-validated research fixtures, requires
+  exact engine-derived citations for every candidate claim, reports used and
+  unused sources, and grants no model, tool, network, file, UI, package,
+  runtime, or follow-up authority. The same sanitized source bundle passes on
+  native Windows and Ubuntu Linux; macOS and package evidence remain open.
+- Recorded exact Windows NVIDIA/CUDA and Windows AMD/HIP direct llama.cpp
+  structured tool-call cells using identical Qwen 3.5 9B bytes and pinned
+  build b10088; both remained loopback-only, fully offloaded, non-executing,
+  content-free in retained evidence, and cleanly shut down.
 - Hardened the browser smoke against overlapping task submissions by waiting
   for both the terminal response and restored composer controls; added bounded
   timeout diagnostics and revalidated the 329-check flow on Windows and Linux.

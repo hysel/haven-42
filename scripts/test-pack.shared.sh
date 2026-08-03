@@ -826,6 +826,12 @@ PY
   grep -q "MODEL_CATALOG_REJECTED" /tmp/model-catalog-hostile.out || { rm -rf "$temp_root"; return 1; }
   [ ! -e "$malicious_output" ] || { rm -rf "$temp_root"; return 1; }
   grep -q "Two Product Views, One Policy Decision" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q "Moonshot AI's Kimi family is documentation-only and untested" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q "not active catalog entries" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q "automatic downloads" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q "installer options" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q "supported providers" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
+  grep -q "Community results remain experimental" "$REPO_ROOT/docs/model-catalog.md" || { rm -rf "$temp_root"; return 1; }
   grep -q '"id": "build-model-catalog"' "$REPO_ROOT/config/workflows.json" || { rm -rf "$temp_root"; return 1; }
   rm -rf "$temp_root"
 }
@@ -2428,7 +2434,7 @@ PY
   grep -q 'stat.S_ISCHR' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
   grep -q 'verified WSL kernel' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
   grep -q 'Path("/dev/dxg")' "$REPO_ROOT/scripts/run-cross-accelerator-model-matrix.py" || return 1
-  printf '%s\n' "$cross_test_output" | grep -q "Ran 18 tests" || return 1
+  printf '%s\n' "$cross_test_output" | grep -q "Ran 20 tests" || return 1
   ! printf '%s\n' "$cross_test_output" | grep -q "skipped=" || return 1
   cross_follow_on_test_output="$(python3 "$REPO_ROOT/scripts/test-cross-accelerator-followons.py" 2>&1)" || {
     printf '%s\n' "$cross_follow_on_test_output" >&2
@@ -2631,6 +2637,8 @@ PY
   python3 "$REPO_ROOT/scripts/test-offline-web-research-boundary.py" |
     grep -q "28 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-page-text.py" |
+    grep -q "26 checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-offline-research-cited-synthesis.py" |
     grep -q "26 checks" || return 1
 }
 

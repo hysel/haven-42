@@ -33,7 +33,10 @@ contributors.
 | Software workflows | Shows registered read-only plans. The browser cannot start their processes, read a repository, or write files. |
 | Evidence and readiness | Displays bounded system readiness and bundled sanitized evidence without running background tests. |
 
-Music and video remain documentation-only candidate inventories. Persistent
+Music and video are not available in the product. Audio has partial external
+Linux CUDA evidence, and video remains research-only after a fail-closed
+hardware/storage preflight. Unshipped media providers remain
+documentation-only candidate inventories. Persistent
 conversation history, PDF/Office/OpenDocument parsing, folder scanning,
 controlled web research, signing, notarization, installers, and active online
 updates are not shipped.
@@ -151,8 +154,8 @@ for scope, evidence, blockers, and exit criteria.
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
 | Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, and hardened unsigned portable packages; signing and machine effects remain gated. |
 | Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
-| Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial research evidence exists; no audio provider is promoted. |
-| Milestone 25: Local Video Generation | Research in progress | Candidate research only; no executable video integration ships. |
+| Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial Linux CUDA evidence exists; no audio provider is promoted. |
+| Milestone 25: Local Video Generation | Research in progress | Candidate research and a fail-closed Quadro hardware/storage preflight exist; no executable video integration ships. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel evidence plus bounded Ollama 0.32.5 tool-envelope validation exists; WSL2 AMD and every tool-execution path remain unadmitted. |
 | Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; retrieval, complex documents, and persistent history remain gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts exist without a live network adapter or model tool. |

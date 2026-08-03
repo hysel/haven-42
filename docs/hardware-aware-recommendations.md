@@ -81,6 +81,10 @@ Selection policy version 1 is evidence-gated and lane-specific:
 - Cloud tags are not considered local Ollama pull candidates.
 - MLX-tagged models are skipped unless the model host platform is macOS.
 - Oversized models are marked as not fitting the available VRAM estimate instead of being pulled.
+- Documentation-only experimental families, including Moonshot AI's untested
+  Kimi models, are not recommended or installed. Users with suitable hardware
+  may submit sanitized exact-artifact evidence for review, but a community
+  result does not bypass the normal promotion gates.
 
 Each candidate exposes `LaneScores` with `Eligible`, `Score`, `RequiredStatus`, `EvidenceStatus`, and `Rationale`. The report-level `SelectionPolicy` identifies the policy version and summarizes each lane's ranking rule.
 

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.offline-cited-synthesis-foundation",
+  "status": "offline-caller-fixture-only-no-model-authority",
+  "limits": {
+    "maximumSources": 10,
+    "maximumPageSegmentsPerSource": 100,
+    "maximumSegmentCharacters": 2000,
+    "maximumContextCharacters": 20000,
+    "maximumClaims": 20,
+    "maximumClaimCharacters": 1000,
+    "maximumCitationsPerClaim": 5,
+    "maximumAnswerCharacters": 10000
+  },
+  "policy": {
+    "everyClaimRequiresCitation": true,
+    "modelSuppliedLinksAllowed": false,
+    "modelSuppliedCitationIdsAllowed": false,
+    "sourceUrlsIncludedInModelContext": false,
+    "unapprovedSourcesAllowed": false,
+    "automaticFollowUpAllowed": false
+  },
+  "authority": {
+    "modelInvocationAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "networkAllowed": false,
+    "dnsAllowed": false,
+    "urlFetchAllowed": false,
+    "pageRetrievalAllowed": false,
+    "browserNavigationAllowed": false,
+    "toolExecutionAllowed": false,
+    "filesystemReadAllowed": false,
+    "filesystemWriteAllowed": false,
+    "persistenceAllowed": false,
+    "automaticFollowUpAllowed": false
+  }
+}

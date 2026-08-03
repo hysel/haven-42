@@ -28,6 +28,7 @@ OFFLOAD_RE = re.compile(r"offloaded\s+(\d+)/(\d+)\s+layers\s+to GPU", re.I)
 EXPECTED_BACKEND = {
     "cuda": re.compile(r"(?:CUDA|NVIDIA)", re.I),
     "hip": re.compile(r"(?:HIP|ROCm|AMD Radeon)", re.I),
+    "sycl": re.compile(r"(?:SYCL|oneAPI|Level[- ]Zero|Intel(?:\(R\))? Arc)", re.I),
 }
 ALLOWED_TESTS = {
     "benchmark",
@@ -255,9 +256,20 @@ def safe_environment(
     if device is not None:
         if not re.fullmatch(r"\d{1,3}", device):
             raise MatrixError("Device must be a numeric accelerator index.")
-        environment["CUDA_VISIBLE_DEVICES" if backend == "cuda" else "HIP_VISIBLE_DEVICES"] = device
+        if backend == "cuda":
+            environment["CUDA_VISIBLE_DEVICES"] = device
+        elif backend == "hip":
+            environment["HIP_VISIBLE_DEVICES"] = device
+        elif backend == "sycl":
+            environment["ONEAPI_DEVICE_SELECTOR"] = f"level_zero:gpu:{device}"
+        else:
+            raise MatrixError("Unsupported accelerator backend.")
     if backend == "cuda":
         environment["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+    if backend == "sycl":
+        environment["SYCL_CACHE_PERSISTENT"] = "0"
+        environment["ZES_ENABLE_SYSMAN"] = "1"
+        environment["GGML_SYCL_ENABLE_LEVEL_ZERO"] = "1"
     if wsl_dxg:
         if backend != "hip":
             raise MatrixError("WSL DXG detection is available only for the HIP backend.")
@@ -369,7 +381,7 @@ def preflight(
     runtime_root: Path,
     models: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    runtime_binary(runtime_root, "llama-cli")
+    runtime_binary(runtime_root, "llama-completion")
     runtime_binary(runtime_root, "llama-bench")
     verified = []
     for model in models:
@@ -404,7 +416,7 @@ def execute_model(
     timeout = int(execution["timeoutSeconds"])
     model_path = verify_artifact(model_root, model["artifact"], f"{model['id']} artifact")
     bench = runtime_binary(runtime_root, "llama-bench")
-    cli = runtime_binary(runtime_root, "llama-cli")
+    completion = runtime_binary(runtime_root, "llama-completion")
     environment = safe_environment(
         runtime_root, backend, device, library_paths, wsl_dxg=wsl_dxg
     )
@@ -440,7 +452,7 @@ def execute_model(
         raise MatrixError(f"{model['id']} benchmark did not identify the requested backend.")
     exact = run_process(
         [
-            str(cli),
+            str(completion),
             "-m",
             str(model_path),
             "-ngl",
@@ -461,6 +473,8 @@ def execute_model(
             "--log-colors",
             "off",
             "--offline",
+            "-fit",
+            "off",
             "-p",
             EXACT_PROMPT,
         ],

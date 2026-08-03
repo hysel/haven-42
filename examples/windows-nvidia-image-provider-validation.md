@@ -34,6 +34,50 @@ The queue and history were empty after cleanup. The exact provider process stopp
 - Committed evidence contains no endpoint, account name, host name, key, fingerprint, machine path, prompt, or raw report.
 - Runtime and model retention is explicit. Future cleanup must target only their reviewed user-local directory and requires a separate uninstall validation.
 
-Status remains `partial-pass`. A genuine immutable update/rollback transition, consumer onboarding, lifecycle integration, idle shutdown, uninstall, package parity, and redistribution/license review remain open. The UI and provider registry therefore remain unchanged, and no production readiness is claimed.
+After this initial run, status remained `partial-pass`: consumer onboarding,
+lifecycle integration, idle shutdown, uninstall, package parity,
+redistribution/license review, and a genuine immutable update/rollback
+transition were still open. The next section records the later transition
+test. The UI and provider registry remain unchanged, and no production
+readiness is claimed.
 
-Official sources: [ComfyUI v0.29.2](https://github.com/Comfy-Org/ComfyUI/releases/tag/v0.29.2), [ComfyUI portable guidance](https://docs.comfy.org/installation/comfyui_portable_windows), and [SDXL Base 1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/tree/f298da3c058bd8f1f1c62f3ecfa775244a243897).
+## Immutable side-by-side update and rollback pass
+
+On 2026-08-03, the official ComfyUI `v0.30.0` NVIDIA portable was evaluated
+as a side-by-side update candidate without modifying the retained `v0.29.2`
+known-good runtime. The GitHub release API reported the 2,110,797,220-byte
+asset with SHA-256
+`f4353d069dd7342e3bef421f07f003cca53ca84168102705cfc83f66449f5ae5`;
+the downloaded bytes matched exactly. Pre-extraction review accepted 61,896
+case-unique regular-file or directory members and rejected absolute, drive,
+traversal, alternate-stream, oversized-name, unsupported-type, and
+case-collision shapes. The extracted tree contained no reparse points.
+
+The candidate reported ComfyUI `0.30.0`, Python `3.13.14`, PyTorch
+`2.13.0+cu130`, CUDA 13.0, and exactly one Quadro RTX 5000. A non-administrator
+PowerShell 5.1 harness started only the exact run-owned process with an
+explicit `127.0.0.1:8188` listener, disabled browser launch, PNG metadata,
+custom nodes, and API nodes, isolated input/output/temp/user directories, and
+an in-memory database. Haven 42's unmodified production adapter generated a
+512x512 RGB PNG through the retained hash-verified SDXL checkpoint. The typed
+artifact policy passed, all image channels were nonconstant, the PNG contained
+zero metadata keys, provider history was empty after adapter cleanup, the
+provider remained healthy through a bounded idle interval, and exact-process
+shutdown closed the endpoint.
+
+Rollback then started the untouched `v0.29.2` runtime through the same
+least-privilege boundary and a fresh session. Production-adapter generation,
+typed artifact policy, image structure, metadata exclusion, history cleanup,
+idle stability, exact-process shutdown, and endpoint closure passed again.
+This is exact update/rollback evidence for these two immutable portable
+versions on this hardware; it does not admit automatic updating, an installer,
+uninstall authority, another version transition, or another platform.
+
+Status remains `partial-pass`. Update/rollback is no longer an open core cell,
+but consumer onboarding, automatic idle shutdown, uninstall, package parity,
+and redistribution/license review remain open. The side-by-side runtimes and
+review-owned sessions are retained locally pending separately approved cleanup;
+no binary, image, prompt, path, endpoint, account, host, PID, or raw log is
+committed.
+
+Official sources: [ComfyUI v0.29.2](https://github.com/Comfy-Org/ComfyUI/releases/tag/v0.29.2), [ComfyUI v0.30.0](https://github.com/Comfy-Org/ComfyUI/releases/tag/v0.30.0), [ComfyUI portable guidance](https://docs.comfy.org/installation/comfyui_portable_windows), and [SDXL Base 1.0](https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/tree/f298da3c058bd8f1f1c62f3ecfa775244a243897).

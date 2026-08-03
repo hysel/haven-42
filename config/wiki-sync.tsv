@@ -109,6 +109,7 @@ docs/conversation-history-encryption-review.md	Conversation-History-Encryption-R
 examples/laguna-xs-2.1-validation.md	Laguna-XS-2.1-Validation.md	Laguna XS 2.1 Validation
 examples/local-audio-provider-validation.md	Local-Audio-Provider-Validation.md	Local Audio Provider Validation
 examples/windows-amd-image-provider-validation.md	Windows-AMD-Image-Provider-Validation.md	Windows AMD Image Provider Validation
+examples/windows-intel-image-provider-validation.md	Windows-Intel-Image-Provider-Validation.md	Windows Intel Image Provider Validation
 examples/windows-nvidia-image-provider-validation.md	Windows-NVIDIA-Image-Provider-Validation.md	Windows NVIDIA Image Provider Validation
 docs/product-ui-first-slice.md	Product-UI-First-Slice.md	Product UI First Slice
 docs/wiki-roadmap.md	Roadmap.md	Roadmap

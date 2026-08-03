@@ -580,10 +580,11 @@
 - [x] Validate the pinned Linux ComfyUI/SDXL provider, typed PNG artifact, metadata exclusion, history cleanup, recovery, SSH tunnel, and visual result for its exact NVIDIA V100 scope.
 - [x] Define hardware discovery and consent-driven local image-provider onboarding that does not require an external server.
 - [ ] Validate a pinned Windows NVIDIA CUDA image-provider profile before shipping its local installer or runtime files.
-  - ComfyUI v0.29.2 NVIDIA portable on a Quadro RTX 5000 passed exact checksum, CUDA detection, loopback-only startup, production-adapter generation, metadata exclusion, repeated-run stability, invalid-workflow recovery, active cancellation, exact-process forced recovery, retention cleanup, and secure shutdown. Real update/rollback, consumer onboarding, idle lifecycle, uninstall, package parity, and redistribution review remain open, so the profile is not promoted.
+  - ComfyUI v0.29.2 NVIDIA portable on a Quadro RTX 5000 passed exact checksum, CUDA detection, loopback-only startup, production-adapter generation, metadata exclusion, repeated-run stability, invalid-workflow recovery, active cancellation, exact-process forced recovery, retention cleanup, and secure shutdown. An exact side-by-side v0.30.0 update and v0.29.2 rollback also passed archive safety, CUDA identity, production-adapter generation, metadata/history cleanup, bounded idle stability, and exact-process shutdown. Consumer onboarding, automatic idle shutdown, uninstall, package parity, and redistribution review remain open, so the profile is not promoted.
 - [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
+  - ComfyUI v0.30.0 Intel portable on an Arc B580 passed exact archive/checkpoint integrity, XPU detection in both runtime and service, loopback-only startup, production-adapter generation, metadata exclusion, three-run stability, distinct outputs, invalid-workflow recovery, active cancellation, exact-process forced recovery, history cleanup, bounded idle stability, and secure shutdown. An immutable v0.29.2 rollback and v0.30.0 forward-selection transition also passed. Automatic idle shutdown, complete session/runtime cleanup and uninstall, package parity, redistribution review, consumer onboarding, and promotion remain open.
 - [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
-  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. Update/rollback remains open because v0.28.0 is still the latest immutable AMD release, and consumer onboarding/installer behavior remains unadmitted.
+  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. An exact side-by-side v0.30.0 update and v0.28.0 rollback also passed archive integrity, HIP identity, production-adapter generation, metadata/history cleanup, idle stability, and exact-process shutdown. Consumer onboarding, automatic idle shutdown, package parity, redistribution review, and promotion remain open.
 - [ ] Park the physical Apple Silicon MPS image-provider profile until suitable
   Mac hardware is acquired; do not let it block Windows or Linux development.
 - [x] Keep custom nodes and external API nodes disabled unless each exact extension independently passes promotion.
@@ -595,7 +596,7 @@
 - [x] Record exact ACE-Step 1.5 and accessible Stable Audio 3.0 candidate versions, model cards, download sizes, checksums, licenses, supported operations, and claimed hardware paths without adding executable integration assets; retain gated Small Music metadata as an explicit open evidence gap.
   - ACE-Step 1.5, Stable Audio Small SFX, and Stable Audio Medium are recorded from official immutable sources; gated Stable Audio Small Music did not expose exact anonymous revision/file metadata and remains open.
 - [ ] Externally evaluate ACE-Step 1.5 on Linux CUDA for REST health, instrumental and vocal generation, typed WAV/FLAC artifact requirements, privacy, cancellation, recovery, cleanup, and uninstall behavior.
-  - Commit `6d467e4b5081ccb0abf1ec1bf4fdf9051a2d34b0` passed a disposable deterministic instrumental REST/WAV structure and cleanup cell on a V100 32 GB profile. Vocal, signal/clipping, listening, cancellation, forced recovery, retention, and typed-adapter checks remain open.
+  - Commit `6d467e4b5081ccb0abf1ec1bf4fdf9051a2d34b0` passed a disposable deterministic instrumental REST/WAV structure and cleanup cell on a V100 32 GB profile. A Quadro RTX 5000 16 GB follow-on passed pinned offline instrumental and vocal-request WAV structure, signal/clipping, review-only typed evidence, active exact-process cancellation, restart recovery, GPU-use, and exact-shutdown checks. Human listening, retention deletion, complete uninstall, a production typed adapter, and a production fix for the upstream unauthenticated shadowing `/v1/models` route remain open.
 - [ ] Externally evaluate Stable Audio 3.0 Small and Medium for sound effects, instrumental music, editing, duration, licensing, and consumer hardware fit.
 - [ ] Validate Windows NVIDIA CUDA, Windows Intel XPU, Windows AMD ROCm, and
   Linux CUDA independently; continue bounded work on the available Linux
@@ -609,6 +610,10 @@
 
 - [x] Record exact HunyuanVideo 1.5, Wan2.2 TI2V-5B, and LTX-2.3 candidate versions, model cards, licenses, sizes, supported operations, and claimed hardware without adding executable integration assets.
 - [ ] Externally evaluate HunyuanVideo 1.5 and Wan2.2 separately on compatible Linux NVIDIA hardware for text-to-video, image-to-video, typed video artifacts, privacy, consent, cancellation, recovery, cleanup, and uninstall behavior.
+  - A 2026-08-03 Quadro RTX 5000 preflight stopped before download: Wan2.2's
+    official 24 GB VRAM minimum exceeds the 16 GB card, while HunyuanVideo's
+    33.3 GB transformer alone leaves no safe storage reserve. Any future
+    Hunyuan cell must also disable its default external prompt-rewrite path.
 - [ ] Evaluate LTX-2.3 only on hardware meeting its documented 32 GB VRAM, storage, CUDA, and license constraints.
 - [x] Keep Windows Intel, Windows AMD, and Apple Silicon video profiles unavailable until an exact native provider path passes; test any Windows NVIDIA path independently from Linux.
 - [x] Add reference-media, identity, face-animation, likeness, voice, deepfake, artist-style, disclosure, and commercial-use consent policy before promotion.
@@ -627,15 +632,21 @@
 - [x] Validate one disposable Linux NVIDIA GGUF/Ollama path first; the exact Qwen 3.5 9B Q4_K_M versus Q8_0 evidence and cleanup record are complete.
 - [x] Validate the exact Windows AMD/Ollama quantization comparison independently; the RX 7800 XT 16 GB profile passed and does not transfer to another platform or runtime.
 - [ ] Validate Windows NVIDIA and Windows Intel independently; physical Linux
-  Intel Arc B580 candidate evidence now covers llama.cpp SYCL and OpenVINO
-  GenAI but does not transfer to Windows. Windows NVIDIA b10088/CUDA candidate
+  Intel Arc B580 candidate evidence covers llama.cpp SYCL and OpenVINO GenAI,
+  while Windows OpenVINO has separate candidate evidence. The first native
+  Windows llama.cpp b10088/SYCL attempt passed exact artifact preflight but
+  failed model loading after the runtime reported zero free device memory; its
+  bounded OpenCL fallback also fast-failed. Windows NVIDIA b10088/CUDA candidate
   evidence now covers exact runtime/artifact identity, full offload, baseline,
   strict patch, repeated lifecycle, and vision; Qwen 3 8B context and patch
   quality failed. The effect-free structured tool-transport parser foundation
   and bounded manual Ollama 0.32.5 provider-envelope evidence are complete for
-  four tool-capable installed models, but direct accelerator-specific
-  llama.cpp tool-call cells and runtime integration remain open and no runtime
-  is promoted. Physical Apple Silicon remains parked until Mac hardware is
+  four tool-capable installed models. Direct b10088 llama.cpp tool-call cells
+  now pass on the exact Windows NVIDIA/CUDA and Windows AMD/HIP profiles with
+  loopback-only authenticated transport, full offload, no tool execution, and
+  exact shutdown. Windows Intel llama.cpp remains rejected pending an upstream
+  fix and fresh gate; runtime integration and promotion remain open. Physical
+  Apple Silicon remains parked until Mac hardware is
   acquired.
 - [x] Run the first physical Linux Intel Arc B580 inference-engine evaluation:
   pin and hash the toolchains and model inputs, prove GPU execution, exercise
@@ -650,9 +661,10 @@
   completed baseline benchmark.
   - Windows NVIDIA and Windows AMD now have explicit patch, context-pressure,
     repeated-lifecycle, and vision outcomes for the declared artifacts.
-    Direct accelerator-specific llama.cpp tool-call cells and Windows Intel
-    remain open; the bounded Ollama provider-envelope result does not fill
-    those cells, and failed quality cells add no authority.
+    Direct llama.cpp tool-call cells now pass independently on the exact
+    Windows NVIDIA/CUDA and Windows AMD/HIP profiles. Windows Intel follow-ons
+    remain blocked by its failed native SYCL baseline, and failed cells add no
+    authority.
 - [ ] Add activation, previous-model rollback, cleanup, catalog admission, and UI integration only for exact model/recipe/runtime/hardware combinations that pass.
 - [x] Ship no conversion scripts, harnesses, runtime configuration, model artifacts, or active catalog entries for failed or incomplete candidates.
 
@@ -711,7 +723,11 @@
 - [ ] Add explicit selected-page retrieval only after DNS/IP revalidation, redirect controls, textual content allowlisting, byte/time limits, inert extraction, and no page execution pass.
   - [x] Add a 26-check caller-bytes-only UTF-8 text/HTML extraction foundation with strict allowlists, structural and resource limits, no network imports, no file writes, and no runtime/package admission; live retrieval and transport binding remain blocked.
 - [ ] Add cited model synthesis and exact source accounting without autonomous follow-up searches.
+  - [x] Add a 26-check offline caller-fixture foundation that creates bounded URL-free source envelopes, digests approved result/page context, requires exact engine-derived citations for every candidate claim, reports used and unused sources, and keeps model, tool, network, file, UI, package, runtime, and follow-up authority false.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before promotion.
+  - [x] Run the 26-check cited-synthesis source suite from the same sanitized,
+    digest-verified bundle on native Windows and Ubuntu Linux; macOS source and
+    every native package lane remain open.
 - [ ] Evaluate self-hosted search and bounded multi-query research only as later independent gates.
 
 ## Security architecture remediation

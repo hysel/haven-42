@@ -98,3 +98,21 @@ Discovery, catalog assembly, download, runtime validation, tool validation, and
 promotion remain separate stages. A catalog blocker can be remediated only by
 new exact evidence or an explicit policy review. It cannot be dismissed by the
 renderer or by selecting advanced mode.
+
+## Experimental Large-Model Families
+
+Moonshot AI's Kimi family is documentation-only and untested by Haven 42. The
+flagship Kimi checkpoints exceed the project's currently available validation
+hardware, so Haven 42 makes no compatibility, performance, quality, privacy, or
+resource-fit claim for them. They are not active catalog entries, recommended
+models, automatic downloads, installer options, or supported providers.
+
+A user with suitable hardware may evaluate an exact Kimi artifact outside the
+supported product flow and submit sanitized evidence. A useful report must name
+the exact model and immutable revision, artifact hashes, license, runtime and
+version, operating system, accelerator and memory class, quantization, context
+settings, observed resource use, bounded functional results, cleanup behavior,
+and any failure. It must omit prompts, outputs, endpoints, usernames, hostnames,
+credentials, and machine-specific paths. Community results remain experimental
+until independently reviewed and passed through the normal artifact, security,
+runtime, operation, and platform promotion gates.

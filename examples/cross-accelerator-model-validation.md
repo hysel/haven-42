@@ -214,9 +214,20 @@ stores no raw prompt or response, writes atomic sanitized checkpoints, and
 deletes temporary prompt and image files. A separate bounded manual Ollama
 0.32.5 run passed provider-envelope transport for four tool-capable installed
 models and classified one model as unsupported, but it is not direct
-accelerator-specific llama.cpp evidence. Direct Windows NVIDIA and Windows AMD
-llama.cpp tool-call cells remain open, and Windows Intel remains a separate
-hardware gap. These results add no
+accelerator-specific llama.cpp evidence.
+
+On 2026-08-03, a separate ignored development harness exercised the pinned
+`llama-server` OpenAI-compatible route directly on Windows NVIDIA/CUDA and
+Windows AMD/HIP. Both cells used the identical hash-verified Qwen 3.5 9B
+Q4_K_M artifact and exact b10088 runtime. Each reported its intended device,
+fully offloaded all model layers, bound an ephemeral authenticated endpoint to
+`127.0.0.1` only, returned one exact `inspect_file` call with the required
+synthetic path, passed the existing fail-closed untrusted-argument policy,
+executed no tool, retained no raw content, stopped its exact process, and
+closed its listener. This closes the declared direct tool-call cells only for
+these two Windows accelerator profiles. A later physical Windows Intel/SYCL
+baseline passed artifact preflight but failed native model loading, so its
+follow-on tool-call cell remains blocked. These results add no
 provider route, automatic selection, model activation, package, or production
 authority.
 
@@ -228,7 +239,10 @@ automatic selection, or inherit to another CUDA/HIP device, SYCL, Vulkan,
 Ollama, or OpenVINO. It also does not admit either direct llama.cpp runtime as
 a product route. The declared Windows NVIDIA/AMD patch, context-pressure,
 repeated-lifecycle, and vision cells now have explicit pass/fail evidence.
-The bounded Ollama provider-envelope transport cell is complete, while direct
-accelerator-specific llama.cpp tool-call cells and runtime integration remain
-open; failed quality cells remain non-promoting. The WSL2 AMD cell adds bounded candidate evidence only; native
-Linux AMD validation remains open.
+The bounded Ollama provider-envelope transport cell and the direct Windows
+NVIDIA/AMD llama.cpp tool-call cells are complete. Runtime integration remains
+open, and failed quality cells remain non-promoting. The WSL2 AMD cell adds
+bounded candidate evidence only; native Linux AMD validation remains open.
+The physical Windows Intel baseline is attempted rather than untested, but the
+official b10088 SYCL runtime's zero-free-memory report, tensor-load failure,
+and OpenCL fallback fast-fail prevent any operational or quality evidence.

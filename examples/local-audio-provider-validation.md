@@ -22,4 +22,59 @@ The cell exposed an onboarding risk: the 32 GB hardware tier automatically downl
 
 Status remains `partial-pass`. Vocal generation, audio non-silence and clipping analysis, listening/quality review, cancellation during diffusion, failure recovery, retention controls, and a provider-neutral typed artifact adapter remain open. No prompt, endpoint, task ID, raw response, server address, or output audio is committed.
 
+## Quadro RTX 5000 follow-on partial pass
+
+A second disposable Linux CUDA cell ran on 2026-08-03 using the same source
+commit and frozen package lock on Ubuntu 26.04, Python 3.12.13, PyTorch
+`2.10.0+cu128`, NVIDIA driver 595.84, and a Quadro RTX 5000 16 GB. The exact
+model revision remained `19671f406d603126926c1b7e2adc169acbcade22`.
+Only the turbo DiT, VAE, and required Qwen text encoder were downloaded, for
+6,336,680,772 selected bytes. Their large-file SHA-256 values were,
+respectively,
+`3f6e0797fad420a39bd33979eb6e840e30989e34a3794e843d23b60ec6e422d7`,
+`da17edb604c40deaf09e9b24974e590d1ca83a374070e5d0884cfa4bed9a99b0`,
+and
+`0437e45c94563b09e13cb7a64478fc406947a93cb34a7e05870fc8dcd48e23fd`.
+The 1.7B and 4B planners were not downloaded.
+
+An ignored review harness generated separate instrumental and lyric-bearing
+vocal requests with complete metadata and disabled thinking, formatting, CoT,
+random seed selection, reference audio, and planner initialization. Both
+outputs were decodable 10-second stereo 48 kHz WAV files. The instrumental
+artifact was 1,920,044 bytes with SHA-256
+`bf4e248e09f3aaf886388917b834eab5a688dc07ccf5c88851bb5a4dda10237f`;
+its RMS was 0.11778012, peak magnitude 0.89126587, near-silence fraction
+0.020703125, and clipping fraction zero. The vocal-request artifact was the
+same size with SHA-256
+`78f97a4eec093a04750dbb0a4a3f073455b51ac78361e239c00d2a54f9bf23b5`;
+its RMS was 0.1101364, peak magnitude 0.89126587, near-silence fraction
+0.0139458333, and clipping fraction zero. Structural success for a vocal
+request is not a listening-quality claim; both WAVs remain only in ignored
+local review storage for owner listening.
+
+The run used 7,624 MiB of GPU memory. A separate 600-second task reached 93%
+GPU utilization before the exact run-owned process group received `SIGTERM`.
+It stopped without a forced kill, emitted no WAV, and left no process or
+listener. The same pinned runtime then restarted, passed health, generated a
+fresh valid instrumental recovery artifact, and shut down exactly.
+
+The native entry point exposed two upstream admission defects. Its OpenRouter
+`/v1/models` route shadows the authenticated local inventory route and remains
+public even when an API key is configured. It also reports a default LM model
+name in completed-task metadata while inventory and execution logs prove the
+planner is disabled and unused. The live cell therefore used an ignored
+single-import launcher with constant-time top-level authentication on every
+route except health, and queried the unambiguous `/v1/model_inventory` route.
+This review-only mitigation is not shipped and does not promote the upstream
+entry point.
+
+Status remains `partial-pass`. Signal and clipping analysis, separate
+instrumental/vocal structural requests, active process cancellation, forced
+recovery, isolated artifact retention, and a review-only typed audio envelope
+now pass on this exact Quadro profile. Human listening, actual retention
+deletion, complete uninstall, a production authentication/route fix, a shipped
+provider-neutral adapter, package parity, and native non-Linux profiles remain
+open. No prompt, lyrics, endpoint, task ID, raw response, server address,
+account, local path, log, model, runtime, or output audio is committed.
+
 Official sources: [ACE-Step project](https://github.com/ace-step/ACE-Step-1.5), [installation guide](https://github.com/ace-step/ACE-Step-1.5/blob/main/docs/en/INSTALL.md), and [API guide](https://github.com/ace-step/ACE-Step-1.5/blob/main/docs/en/API.md).

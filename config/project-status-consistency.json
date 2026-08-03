@@ -78,14 +78,14 @@
       "Milestones 1 through 21 are complete for their defined scopes.",
       "Milestone 22A now has",
       "Milestone 23 owns native",
-      "Milestones 24 and 25 retain documentation-only",
+      "Milestone 24 has partial external Linux CUDA audio evidence",
       "Milestone 26 now has",
       "Milestone 27 now",
       "Milestone 28 defines proposed"
     ],
     "ROADMAP.md": [
       "The current admitted attachment slice passes source and native packaged browser smoke on Windows, Linux, and macOS.",
-      "bounded manual Ollama provider-envelope run is complete; direct accelerator-specific llama.cpp tool-call cells and runtime integration remain open."
+      "llama.cpp tool-call cells pass independently on the exact Windows"
     ]
   },
   "forbiddenMarkers": {

@@ -101,11 +101,15 @@ class FollowOnTests(unittest.TestCase):
         self.assertIn("--single-turn", command)
         self.assertIn("--simple-io", command)
         self.assertIn("--reasoning-budget", command)
+        self.assertIn("-fit", command)
+        self.assertIn("off", command)
         self.assertNotIn("--url", command)
 
     def test_source_has_no_listener_or_shell_execution(self) -> None:
         source = RUNNER.read_text(encoding="utf-8")
         self.assertNotIn("llama-server", source)
+        self.assertNotIn('runtime_binary(runtime_root, "llama-cli")', source)
+        self.assertIn('runtime_binary(runtime_root, "llama-completion")', source)
         self.assertNotIn("shell=True", source)
         self.assertNotIn("requests", source)
         self.assertNotIn("urllib", source)

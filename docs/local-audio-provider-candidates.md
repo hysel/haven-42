@@ -14,7 +14,7 @@ The current application release is `v0.1.8`, resolving to Git commit `dce621408b
 
 The project and model card declare MIT licensing and describe text-to-music, lyrics/vocals, instrumental generation, reference audio, cover, repaint, and related editing operations. Upstream currently claims Python 3.11–3.12 plus CUDA, ROCm, Intel XPU, Apple Silicon MLX/MPS, and CPU paths. These are claims, not Haven 42 evidence; every OS/accelerator/operation remains candidate-only.
 
-The first Linux CUDA REST cell ran at commit `6d467e4b5081ccb0abf1ec1bf4fdf9051a2d34b0`. A deterministic 10-second instrumental request produced a valid stereo 48 kHz WAV and the isolated runtime cleaned up successfully. Automatic selection of the 4B planner caused an undisclosed additional download even with `thinking=false`; exact pre-execution model disclosure is therefore a required product gate. Vocal generation, signal/clipping analysis, listening review, cancellation, and forced recovery remain open. See `examples/local-audio-provider-validation.md`.
+The first Linux CUDA REST cell ran at commit `6d467e4b5081ccb0abf1ec1bf4fdf9051a2d34b0`. A deterministic 10-second instrumental request produced a valid stereo 48 kHz WAV and the isolated runtime cleaned up successfully. Automatic selection of the 4B planner caused an undisclosed additional download even with `thinking=false`; exact pre-execution model disclosure is therefore a required product gate. A later Quadro RTX 5000 cell pinned only the turbo, VAE, and text-encoder files; separate instrumental and vocal-request WAV structure, signal/clipping analysis, cancellation, and forced recovery passed without planner execution. Human listening, destructive retention cleanup/uninstall, and a production fix for an unauthenticated shadowing `/v1/models` route remain open. See `examples/local-audio-provider-validation.md`.
 
 Official sources: [release](https://github.com/ace-step/ACE-Step-1.5/releases/tag/v0.1.8), [project](https://github.com/ace-step/ACE-Step-1.5), [model card](https://huggingface.co/ACE-Step/Ace-Step1.5), and [hardware guide](https://github.com/ace-step/ACE-Step-1.5/blob/main/docs/en/GPU_COMPATIBILITY.md).
 
@@ -35,4 +35,4 @@ Official sources: [Stable Audio 3 collection](https://huggingface.co/collections
 
 ## Admission Decision
 
-No audio provider is promoted. ACE-Step has a partial Linux CUDA instrumental feasibility pass but has not completed its external gate. Stable Audio remains gated by authenticated model acquisition plus exact license review. The shared consent boundary is defined in `docs/generative-media-consent-policy.md`.
+No audio provider is promoted. ACE-Step has broader partial Linux CUDA evidence but has not completed its external gate or resolved the native entry point's route-authentication defect. Stable Audio remains gated by authenticated model acquisition plus exact license review. The shared consent boundary is defined in `docs/generative-media-consent-policy.md`.

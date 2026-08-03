@@ -16,8 +16,8 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 86 |
-| Distinct model-field values | 21 |
+| Evidence records | 89 |
+| Distinct model-field values | 23 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
@@ -30,10 +30,10 @@ See [Evidence Catalog](Evidence-Catalog),
 | `read-only-tool-validated` | 11 |
 | `read-only-cli-validated` | 9 |
 | `approved-write-ready` | 4 |
-| `candidate-only` | 2 |
+| `candidate-only` | 4 |
+| `static-validated` | 3 |
 | `plan-review-candidate` | 2 |
 | `plan-validated` | 2 |
-| `static-validated` | 2 |
 | `review-validated` | 1 |
 
 ## Validation Modes
@@ -41,10 +41,12 @@ See [Evidence Catalog](Evidence-Catalog),
 | Mode | Count |
 | --- | ---: |
 | Generated sample | 38 |
-| Local endpoint | 28 |
+| Local endpoint | 29 |
 | Editor agent | 9 |
 | Automated tests | 7 |
 | Static | 3 |
+| offline-fixture | 1 |
+| offline-metadata | 1 |
 | Online discovery | 1 |
 
 ## Agent Surfaces
@@ -75,6 +77,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | acestep-v15-turbo |
 | devstral-small-2:24b |
 | devstral-small-2:latest |
+| exact-upstream-candidate-records |
 | gemma3:12b |
 | granite4:7b-a1b-h |
 | laguna-xs-2.1:q4_K_M |
@@ -89,4 +92,5 @@ See [Evidence Catalog](Evidence-Catalog),
 | qwen3.5:9b |
 | revision-and-sha256-pinned-11-model-corpus |
 | revision-and-sha256-pinned-follow-on-artifacts |
+| synthetic-bounded-source-envelope |
 | unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |

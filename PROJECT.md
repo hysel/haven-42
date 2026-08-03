@@ -12,7 +12,7 @@ This repository defines an evidence-gated, local-first AI workbench for individu
 
 The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product now includes a runnable loopback-only local web experience over the same tested contracts and an unsigned PyInstaller one-folder development package. Tauri/Rust remains unadmitted.
 
-Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence. Linux Intel Arc B580 now has candidate-only llama.cpp SYCL and OpenVINO GenAI evidence; neither is selectable or packaged. Every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
+Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence. Linux Intel Arc B580 has candidate-only llama.cpp SYCL and OpenVINO GenAI evidence, while Windows OpenVINO is separately candidate-only and native Windows llama.cpp SYCL failed its model-load gate; none is selectable or packaged. Every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
 
 ## Current Stage
 
@@ -85,12 +85,15 @@ plus a 28-case effect-free lifecycle planner that admits no machine effects.
 An exact Windows 11/Quadro RTX 5000 ComfyUI/SDXL cell now passes integrity,
 CUDA, generation, cancellation, forced recovery, cleanup, and shutdown, but it
 remains partial and adds no runtime or UI admission.
-Milestones 24 and 25 retain documentation-only audio/video candidate inventories and
-shared media-consent policy. Milestone 26 now has quantization plan/artifact
+Milestone 24 has partial external Linux CUDA audio evidence but no admitted
+provider, while Milestone 25 retains candidate research plus a fail-closed
+hardware/storage preflight. Both remain behind the shared media-consent policy.
+Milestone 26 now has quantization plan/artifact
 contracts, OS-aware sanitized profiling, explicit support boundaries, a
 no-effect dry-run selector, exact Linux NVIDIA and Windows AMD evidence, and
-candidate-only physical Linux Intel Arc B580 llama.cpp SYCL/OpenVINO GenAI
-evidence. Intel upstream/OS/quality/provider/package blockers, live conversion
+candidate-only physical Intel Arc B580 llama.cpp SYCL/OpenVINO GenAI evidence.
+The native Windows llama.cpp SYCL cell passed artifact preflight but failed
+model loading and was rejected. Intel upstream/runtime/OS/quality/provider/package blockers, live conversion
 recipes, and activation remain unpromoted. A new identical-byte llama.cpp
 b10088 matrix has completed matching 11-model Windows AMD/HIP and Linux
 NVIDIA/CUDA operational, exact-output, full-offload, and cleanup cells with
