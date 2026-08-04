@@ -481,6 +481,10 @@ function humanError(error) {
     "provider-host-must-be-ip-literal": "Enter a literal IP address; hostnames are not accepted.",
     "loopback-provider-required": "Enter the loopback address of an Ollama server on this computer.",
     "trusted-lan-provider-required": "The selected address is not a private local-network address.",
+    "invalid-provider-authentication-mode": "Choose one of the supported Ollama authentication methods.",
+    "invalid-provider-api-key": "Enter a valid API key without spaces, non-ASCII characters, or line breaks.",
+    "unexpected-provider-api-key": "Remove the API key or choose an authentication method.",
+    "authenticated-provider-requires-https": "API keys require an HTTPS Ollama address when connecting across a private network.",
     "ollama-connection-failed": "Haven 42 could not reach Ollama at that address.",
     "ollama-chat-failed": "Ollama did not complete the text request.",
     "empty-model-response": "The model returned an empty response.",
@@ -555,6 +559,8 @@ function providerFormConfig(prefix = "") {
     endpoint: byId(`${prefix}endpoint`).value.trim(),
     timeoutSeconds: Number(byId(`${prefix}timeout`).value),
     idleUnloadSeconds: Number(byId(`${prefix}idle-unload`).value),
+    authMode: byId(`${prefix}auth-mode`).value,
+    apiKey: byId(`${prefix}api-key`).value,
   };
 }
 
@@ -562,7 +568,26 @@ function providerConfigChanged(config) {
   return !state.providerConfig
     || config.endpoint !== state.providerConfig.endpoint
     || config.timeoutSeconds !== state.providerConfig.timeoutSeconds
-    || config.idleUnloadSeconds !== state.providerConfig.idleUnloadSeconds;
+    || config.idleUnloadSeconds !== state.providerConfig.idleUnloadSeconds
+    || config.authMode !== state.providerConfig.authMode
+    || config.apiKey.length > 0;
+}
+
+function updateProviderAuthenticationControl(prefix = "") {
+  const mode = byId(`${prefix}auth-mode`).value;
+  const key = byId(`${prefix}api-key`);
+  const endpoint = byId(`${prefix}endpoint`).value.trim();
+  const canReuse = state.connected
+    && state.providerConfig?.endpoint === endpoint
+    && state.providerConfig?.authMode === mode;
+  key.disabled = mode === "none";
+  key.required = mode !== "none" && !canReuse;
+  key.placeholder = mode === "none"
+    ? "Not used"
+    : canReuse
+      ? "Current session key retained"
+      : "Required";
+  if (mode === "none") key.value = "";
 }
 
 function updateProviderConnectionControl() {
@@ -1808,14 +1833,26 @@ function resetTask() {
   byId("text-status").textContent = state.connected ? "Ready · nothing saved" : "Provider not connected";
 }
 
-async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
-  const result = await api("/api/connect", { endpoint, timeoutSeconds, idleUnloadSeconds });
+async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds, authMode, apiKey) {
+  const result = await api("/api/connect", {
+    endpoint,
+    timeoutSeconds,
+    idleUnloadSeconds,
+    authentication: { mode: authMode, apiKey },
+  });
   if (
     !Array.isArray(result.models)
     || !Array.isArray(result.modelOptions)
     || result.models.length > MAX_DISCOVERED_MODELS
     || result.modelOptions.length > MAX_DISCOVERED_MODELS
   ) throw new Error("invalid-provider-model-catalog");
+  if (
+    !result.authentication
+    || Object.keys(result.authentication).sort().join(",") !== "configured,mode,persisted"
+    || !["none", "bearer", "x-api-key"].includes(result.authentication.mode)
+    || typeof result.authentication.configured !== "boolean"
+    || result.authentication.persisted !== false
+  ) throw new Error("invalid-provider-authentication-status");
   state.connected = true;
   state.providerTrustScope = result.trustScope;
   state.providerTransportScheme = result.transportScheme;
@@ -1847,7 +1884,8 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   renderModelDiscovery();
   const badge = byId("connection-badge");
   const location = result.trustScope === "loopback" ? "this computer" : "private network";
-  badge.textContent = `Connected · ${location} · Ollama ${result.version}`;
+  const authenticationLabel = result.authentication.configured ? " · authenticated" : "";
+  badge.textContent = `Connected · ${location}${authenticationLabel} · Ollama ${result.version}`;
   badge.classList.add("good");
   byId("endpoint").value = endpoint;
   byId("wizard-endpoint").value = endpoint;
@@ -1856,8 +1894,16 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   byId("idle-unload").value = String(idleUnloadSeconds);
   byId("wizard-idle-unload").value = String(idleUnloadSeconds);
   byId("system-idle-unload").value = String(idleUnloadSeconds);
+  byId("auth-mode").value = result.authentication.mode;
+  byId("wizard-auth-mode").value = result.authentication.mode;
+  byId("api-key").value = "";
+  byId("wizard-api-key").value = "";
   state.idleUnloadSeconds = idleUnloadSeconds;
-  state.providerConfig = { endpoint, timeoutSeconds, idleUnloadSeconds };
+  state.providerConfig = {
+    endpoint, timeoutSeconds, idleUnloadSeconds, authMode: result.authentication.mode,
+  };
+  updateProviderAuthenticationControl();
+  updateProviderAuthenticationControl("wizard-");
   updateProviderConnectionControl();
   updateWizardConnectionControl();
   updateCleanupPolicyControl();
@@ -1921,12 +1967,14 @@ byId("connection-form").addEventListener("submit", async (event) => {
       requestedConfig.endpoint,
       requestedConfig.timeoutSeconds,
       requestedConfig.idleUnloadSeconds,
+      requestedConfig.authMode,
+      requestedConfig.apiKey,
     );
   } catch (error) {
-    state.connected = wasConnected;
-    setProviderReady(wasConnected);
-    if (!wasConnected && error.message === "ollama-connection-failed") {
-      state.connected = false;
+    state.connected = false;
+    state.providerConfig = null;
+    setProviderReady(false);
+    if (error.message === "ollama-connection-failed") {
       byId("connection-badge").textContent = "Not connected";
       byId("connection-badge").classList.remove("good");
       byId("prompt").placeholder = "Reconnect Ollama to begin…";
@@ -1938,12 +1986,22 @@ byId("connection-form").addEventListener("submit", async (event) => {
   }
 });
 
-["endpoint", "timeout", "idle-unload"].forEach((id) => {
-  byId(id).addEventListener(id === "endpoint" ? "input" : "change", updateProviderConnectionControl);
+["endpoint", "timeout", "idle-unload", "auth-mode", "api-key"].forEach((id) => {
+  const eventName = ["endpoint", "api-key"].includes(id) ? "input" : "change";
+  byId(id).addEventListener(eventName, () => {
+    if (["endpoint", "auth-mode"].includes(id)) updateProviderAuthenticationControl();
+    updateProviderConnectionControl();
+  });
 });
 
-["wizard-endpoint", "wizard-timeout", "wizard-idle-unload"].forEach((id) => {
-  byId(id).addEventListener(id === "wizard-endpoint" ? "input" : "change", updateWizardConnectionControl);
+["wizard-endpoint", "wizard-timeout", "wizard-idle-unload", "wizard-auth-mode", "wizard-api-key"].forEach((id) => {
+  const eventName = ["wizard-endpoint", "wizard-api-key"].includes(id) ? "input" : "change";
+  byId(id).addEventListener(eventName, () => {
+    if (["wizard-endpoint", "wizard-auth-mode"].includes(id)) {
+      updateProviderAuthenticationControl("wizard-");
+    }
+    updateWizardConnectionControl();
+  });
 });
 
 byId("model-search-query").addEventListener("input", () => {
@@ -2013,6 +2071,8 @@ byId("cleanup-policy-form").addEventListener("submit", async (event) => {
       byId("endpoint").value.trim(),
       Number(byId("timeout").value),
       selectedSeconds,
+      state.providerConfig.authMode,
+      "",
     );
   } catch (error) {
     state.idleUnloadSeconds = previousSeconds;
@@ -2506,12 +2566,15 @@ byId("wizard-connection-form").addEventListener("submit", async (event) => {
       requestedConfig.endpoint,
       requestedConfig.timeoutSeconds,
       requestedConfig.idleUnloadSeconds,
+      requestedConfig.authMode,
+      requestedConfig.apiKey,
     );
     renderWizardReadiness();
     showWizardStep("ready");
   } catch (error) {
-    state.connected = wasConnected;
-    setProviderReady(wasConnected);
+    state.connected = false;
+    state.providerConfig = null;
+    setProviderReady(false);
     errorBox.textContent = humanError(error);
     errorBox.classList.remove("hidden");
   } finally {
@@ -2543,4 +2606,6 @@ byId("setup-wizard").addEventListener("keydown", (event) => {
   }
 });
 
+updateProviderAuthenticationControl();
+updateProviderAuthenticationControl("wizard-");
 bootstrap();

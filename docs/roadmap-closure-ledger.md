@@ -10,9 +10,11 @@ does not mark an item complete and grants no runtime, network, package,
 machine-change, signing, or release authority.
 
 The parent-roadmap ledger leaves no unchecked `TODO.md` item unclassified.
-That statement does not claim the finer-grained recovered conversation plan is
-complete. Its separate 374-task evidence audit is now in progress, and any
-`unverified` task remains unresolved until reconciled one to one.
+The finer-grained recovered conversation plan has now been reconciled one to
+one: 360 tasks are completed, seven are explicitly owner-deferred, and seven
+remain partial. None is unverified. This reconciliation is classification and
+evidence accounting, not a claim that deferred or partial product work is
+complete.
 
 The original blocker vocabulary maps to the parent ledger as follows:
 

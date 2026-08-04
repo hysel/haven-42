@@ -26,7 +26,7 @@ values cannot change gate state.
 | Read-only validation integration | Readiness, provider health, model evidence, cleanup, and committed evidence | Development-admitted | Software execution and production lifecycle validation remain separate gates. |
 | Tauri native runtime | Architecture and policy model only | Policy-blocked | Explicit owner reversal of the unadmitted decision, a reviewed published dependency resolution, actual native bridge tests, and exact-platform packages. |
 | Production package promotion | Unsigned PyInstaller one-folder package with an inactive signing policy, confirmed repository-account MFA, and deterministic Windows identity metadata | External-blocked | An existing public release in the form to sign, provider acceptance and signing-service MFA, exact packaged-dependency license review, managed signing identity/custody, macOS notarization and physical-Mac evidence, clean lifecycle tests, and a production support policy. |
-| Installer runtime | Simulation only | Security-blocked | Trusted package verification, canonical user-scoped paths, transactional rollback, and native install/upgrade/uninstall evidence. |
+| Installer runtime | Simulation only | Security-blocked | Trusted package verification, canonical user-scoped paths, transactional rollback, a separately acquired TLS gateway, certificate-lifecycle evidence, and native install/upgrade/uninstall evidence. |
 | Online updater activation | Offline policy and simulation only | Security-blocked | A real verifier and governed roots, canonical staging, atomic activation, and native interruption/rollback/retention evidence. |
 | Executable composition | Planning, admission, and journal simulation only | Security-blocked | An engine-owned approval broker, authoritative journal, canonical grants/process allowlists, and native cancellation/recovery evidence. |
 
@@ -64,6 +64,13 @@ crosses the current boundary:
 6. publishing or claiming production readiness.
 
 An approval for one gate does not transfer to another gate.
+
+The current owner decisions are recorded in
+`docs/roadmap-owner-decisions.md`. They defer comparative model promotion,
+external-runtime redistribution decisions, Tauri/Rust, signing,
+notarization, publication, and production claims. They keep installer,
+updater, and executable-workflow work simulation-only. The decisions grant no
+machine-effect, network-activation, signing, or release authority.
 
 ## Signing Readiness
 

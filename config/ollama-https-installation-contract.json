@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.ollama-https-installation",
+  "implementationStatus": "simulation-only-not-runtime-admitted",
+  "runtimeAdmitted": false,
+  "externalSoftwareBundled": false,
+  "officialCapabilityBasis": {
+    "ollamaListenerTransport": "http",
+    "documentedNetworkExposurePattern": "reverse-proxy",
+    "ollamaMustRemainLoopbackBound": true,
+    "sources": [
+      "https://docs.ollama.com/faq",
+      "https://github.com/ollama/ollama/blob/main/docs/faq.mdx"
+    ]
+  },
+  "profiles": {
+    "same-device": {
+      "ollamaBind": "127.0.0.1",
+      "havenTransport": "http-loopback",
+      "tlsGatewayRequired": false,
+      "certificateRequired": false
+    },
+    "private-network": {
+      "ollamaBind": "127.0.0.1",
+      "havenTransport": "https",
+      "tlsGatewayRequired": true,
+      "certificateRequired": true,
+      "authenticationRequired": true,
+      "publicExposureAllowed": false
+    }
+  },
+  "tlsGatewayPolicy": {
+    "separatelyAcquiredComponentRequired": true,
+    "immutableVersionRequired": true,
+    "licenseReviewRequired": true,
+    "publisherSignatureOrAttestationRequired": true,
+    "checksumRequired": true,
+    "defaultListenScope": "selected-private-interface-only",
+    "upstream": "http://127.0.0.1:11434",
+    "arbitraryUpstreamAllowed": false,
+    "allowedRoutes": {
+      "GET": ["/api/version", "/api/tags", "/api/ps"],
+      "POST": ["/api/chat", "/api/generate"]
+    },
+    "unlistedRoutesDefault": "deny",
+    "managementRoutesExposed": false,
+    "minimumTlsVersion": "1.2",
+    "tls13Preferred": true,
+    "clientAuthenticationModes": ["bearer", "x-api-key"],
+    "minimumGeneratedCredentialEntropyBits": 256,
+    "constantTimeCredentialComparisonRequired": true,
+    "credentialHeaderStrippedBeforeUpstream": true,
+    "authenticationFailureRateLimitRequired": true,
+    "requestBodyLoggingAllowed": false,
+    "authorizationHeaderLoggingAllowed": false
+  },
+  "certificatePolicy": {
+    "locallyGeneratedAllowed": true,
+    "preferredStructure": "self-signed-private-root-and-leaf",
+    "directSelfSignedLeafAllowed": true,
+    "endpointIpSanRequired": true,
+    "commonNameOnlyAllowed": false,
+    "minimumRsaBits": 3072,
+    "allowedEcdsaCurves": ["P-256", "P-384"],
+    "allowedSignatureHashes": ["SHA-256", "SHA-384"],
+    "maximumValidityDays": 397,
+    "privateKeyExportAllowed": false,
+    "privateKeyRepositoryStorageAllowed": false,
+    "privateKeyLoggingAllowed": false,
+    "privateKeyNetworkTransferAllowed": false,
+    "certificateFingerprintMustBeDisplayed": true
+  },
+  "clientTrustPolicy": {
+    "certificateVerificationRequired": true,
+    "hostnameOrIpVerificationRequired": true,
+    "trustOnFirstUseAllowed": false,
+    "globalVerificationDisableAllowed": false,
+    "explicitUserApprovalRequired": true,
+    "perUserTrustPreferred": true,
+    "systemTrustRequiresSeparateElevationApproval": true,
+    "removeOnlyTransactionOwnedTrustEntries": true
+  },
+  "requiredLifecycleEvidence": [
+    "clean-install",
+    "existing-ollama-preservation",
+    "certificate-generation",
+    "exact-ip-san-verification",
+    "trusted-client-handshake",
+    "untrusted-certificate-rejection",
+    "wrong-ip-rejection",
+    "unlisted-route-rejection",
+    "authentication-rate-limit",
+    "credential-header-upstream-stripping",
+    "expired-certificate-rejection",
+    "authenticated-inference",
+    "gateway-restart",
+    "certificate-rotation",
+    "upgrade-rollback",
+    "exact-uninstall",
+    "trust-entry-removal",
+    "private-key-cleanup"
+  ],
+  "currentMachineEffects": {
+    "downloadPerformed": false,
+    "certificateGenerated": false,
+    "privateKeyGenerated": false,
+    "trustStoreChanged": false,
+    "firewallChanged": false,
+    "serviceChanged": false,
+    "ollamaConfigurationChanged": false,
+    "tlsGatewayInstalled": false,
+    "elevationRequested": false
+  },
+  "promotionRequires": [
+    "separate owner approval",
+    "exact Windows Linux and macOS implementation review",
+    "least-privilege certificate and key storage review",
+    "native trust-store and rollback validation",
+    "gateway dependency and license admission",
+    "source-versus-packaged parity",
+    "negative TLS and authentication tests",
+    "security review with zero findings"
+  ]
+}

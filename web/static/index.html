@@ -81,7 +81,18 @@
                   <option value="1800">30 minutes idle</option>
                 </select>
               </label>
+              <label>Authentication · advanced
+                <select id="wizard-auth-mode">
+                  <option value="none" selected>Automatic (Recommended)</option>
+                  <option value="bearer">Bearer token · advanced</option>
+                  <option value="x-api-key">X-API-Key · advanced</option>
+                </select>
+              </label>
+              <label>API key · session only
+                <input id="wizard-api-key" type="password" maxlength="4096" autocomplete="new-password" autocapitalize="off" spellcheck="false" disabled>
+              </label>
             </div>
+            <p class="field-help">Keep the recommended automatic option unless your provider or gateway tells you to use an API key. Keys stay in memory, are never returned by the API, and require HTTPS when connecting across a private network. Leave the key blank after connecting to reuse it for this session.</p>
           </details>
         </form>
         <div class="notice hidden" id="wizard-error" role="alert"></div>
@@ -411,7 +422,18 @@
                       <option value="1800">30 minutes idle · performance</option>
                     </select>
                   </label>
+                  <label>Authentication · advanced
+                    <select id="auth-mode">
+                      <option value="none" selected>Automatic (Recommended)</option>
+                      <option value="bearer">Bearer token · advanced</option>
+                      <option value="x-api-key">X-API-Key · advanced</option>
+                    </select>
+                  </label>
+                  <label>API key · session only
+                    <input id="api-key" type="password" maxlength="4096" autocomplete="new-password" autocapitalize="off" spellcheck="false" disabled>
+                  </label>
                 </div>
+                <p class="field-help">Keep the recommended automatic option unless your provider or gateway tells you to use an API key. Keys stay in memory, are never returned by the API, and require HTTPS when connecting across a private network. Leave the key blank after connecting to reuse it for this session.</p>
               </details>
             </form>
             <div class="transport-warning hidden" id="connection-transport-warning" role="status"></div>

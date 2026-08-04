@@ -58,6 +58,8 @@ class FakeState:
     models = ["qwen3.5:9b", "writer-model:latest", "bad model<script>"]
     loaded: set[str] = set()
     requests: list[tuple[str, dict]] = []
+    request_authentication: list[tuple[str, str | None, str | None]] = []
+    required_authentication: tuple[str, str] | None = None
     fail_chat = False
     fail_connect = False
     empty_chat = False
@@ -83,7 +85,19 @@ class FakeOllama(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _authentication_allowed(self) -> bool:
+        authorization_header = self.headers.get("Authorization")
+        api_key_header = self.headers.get("X-API-Key")
+        FakeState.request_authentication.append((self.path, authorization_header, api_key_header))
+        required = FakeState.required_authentication
+        if required is not None and self.headers.get(required[0]) != required[1]:
+            self._json(401, {"error": "authentication-required"})
+            return False
+        return True
+
     def do_GET(self):  # noqa: N802
+        if not self._authentication_allowed():
+            return
         if self.path == "/api/version":
             if FakeState.fail_connect:
                 self._json(503, {"error": "forced-connect-failure"})
@@ -136,6 +150,8 @@ class FakeOllama(BaseHTTPRequestHandler):
             self._json(404, {"error": "not-found"})
 
     def do_POST(self):  # noqa: N802
+        if not self._authentication_allowed():
+            return
         body = json.loads(self.rfile.read(int(self.headers["Content-Length"])))
         FakeState.requests.append((self.path, body))
         model = str(body.get("model", ""))
@@ -917,6 +933,154 @@ def main() -> int:
         writer_option = next(item for item in connected["modelOptions"] if item["name"] == "writer-model:latest")
         assert set(writer_option["capabilityStatus"].values()) == {"unverified"}
         checks += 9
+
+        base_connection = {
+            "endpoint": fake_url,
+            "timeoutSeconds": 30,
+            "idleUnloadSeconds": 300,
+        }
+        hostile_authentication = (
+            ({"mode": "unknown", "apiKey": "synthetic-fixture-value"}, "invalid-provider-authentication-mode"),
+            ({"mode": "none", "apiKey": "synthetic-fixture-value"}, "unexpected-provider-api-key"),
+            ({"mode": "bearer", "apiKey": ""}, "invalid-provider-api-key"),
+            ({"mode": "bearer", "apiKey": " leading-space"}, "invalid-provider-api-key"),
+            ({"mode": "x-api-key", "apiKey": "line\nbreak"}, "invalid-provider-api-key"),
+            ({"mode": "bearer", "apiKey": "x" * 4097}, "invalid-provider-api-key"),
+        )
+        for authentication, expected_error in hostile_authentication:
+            status, error, _ = request_json(
+                origin + "/api/connect", "POST",
+                {**base_connection, "authentication": authentication}, token, origin,
+            )
+            assert status == 400 and error["error"] == expected_error
+            assert "synthetic-fixture-value" not in json.dumps(error)
+            checks += 1
+        status, error, _ = request_json(
+            origin + "/api/connect", "POST",
+            {
+                **base_connection,
+                "authentication": {"mode": "bearer", "apiKey": 42},
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and error["error"] == "invalid-connect-fields"
+        checks += 1
+        status, error, _ = request_json(
+            origin + "/api/connect", "POST",
+            {
+                "endpoint": "http://[fd00::1]:11434",
+                "timeoutSeconds": 30,
+                "idleUnloadSeconds": 300,
+                "authentication": {"mode": "bearer", "apiKey": "synthetic-fixture-value"},
+            },
+            token,
+            origin,
+        )
+        assert status == 400 and error["error"] == "authenticated-provider-requires-https"
+        checks += 1
+
+        bearer_secret = "synthetic-bearer-fixture-value"
+        FakeState.required_authentication = ("Authorization", f"Bearer {bearer_secret}")
+        status, error, _ = request_json(
+            origin + "/api/connect", "POST", base_connection, token, origin,
+        )
+        assert status == 502 and error["error"] == "ollama-connection-failed"
+        assert bearer_secret not in json.dumps(error)
+        authentication_start = len(FakeState.request_authentication)
+        status, authenticated, _ = request_json(
+            origin + "/api/connect", "POST",
+            {
+                **base_connection,
+                "authentication": {"mode": "bearer", "apiKey": bearer_secret},
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and authenticated["authentication"] == {
+            "mode": "bearer", "configured": True, "persisted": False,
+        }
+        assert bearer_secret not in json.dumps(authenticated)
+        assert all(
+            authorization == f"Bearer {bearer_secret}" and api_key is None
+            for path, authorization, api_key
+            in FakeState.request_authentication[authentication_start:]
+            if path in {"/api/version", "/api/tags"}
+        )
+        status, bootstrap_after_auth, _ = request_json(origin + "/api/bootstrap")
+        assert status == 200
+        assert bootstrap_after_auth["provider"]["authentication"] == {
+            "mode": "bearer", "configured": True, "persisted": False,
+        }
+        assert bearer_secret not in json.dumps(bootstrap_after_auth)
+        protected_request_start = len(FakeState.request_authentication)
+        status, protected_reply, _ = request_json(
+            origin + "/api/text",
+            "POST",
+            {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "messages": [{"role": "user", "content": "authenticated request"}],
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and protected_reply["content"] == "LOCAL_WEB_OK"
+        status, protected_unload, _ = request_json(
+            origin + "/api/unload", "POST", {}, token, origin,
+        )
+        assert status == 200 and protected_unload["modelUnloaded"] is True
+        protected_provider_requests = FakeState.request_authentication[protected_request_start:]
+        assert {path for path, _, _ in protected_provider_requests} >= {
+            "/api/chat", "/api/generate", "/api/ps",
+        }
+        assert all(
+            authorization == f"Bearer {bearer_secret}" and api_key is None
+            for _, authorization, api_key in protected_provider_requests
+        )
+        checks += 13
+
+        header_secret = "synthetic-header-fixture-value"
+        FakeState.required_authentication = ("X-API-Key", header_secret)
+        status, authenticated, _ = request_json(
+            origin + "/api/connect", "POST",
+            {
+                **base_connection,
+                "authentication": {"mode": "x-api-key", "apiKey": header_secret},
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and authenticated["authentication"]["mode"] == "x-api-key"
+        assert header_secret not in json.dumps(authenticated)
+        status, reused, _ = request_json(
+            origin + "/api/connect", "POST",
+            {
+                **base_connection,
+                "timeoutSeconds": 60,
+                "authentication": {"mode": "x-api-key", "apiKey": ""},
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and reused["authentication"]["configured"] is True
+        checks += 4
+
+        FakeState.required_authentication = None
+        status, connected, _ = request_json(
+            origin + "/api/connect", "POST",
+            {
+                **base_connection,
+                "authentication": {"mode": "none", "apiKey": ""},
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and connected["authentication"] == {
+            "mode": "none", "configured": False, "persisted": False,
+        }
+        FakeState.requests.clear()
+        checks += 1
 
         status, error, _ = request_json(
             origin + "/api/model-search", "POST",
@@ -1914,6 +2078,21 @@ def main() -> int:
         policy = json.loads((ROOT / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
         assert policy["bind"]["remoteBindAllowed"] is False
         assert policy["providerConnections"]["trustScopeSelection"] == "server-inferred-from-ip-literal"
+        assert policy["providerConnections"]["authentication"] == {
+            "allowedModes": ["none", "bearer", "x-api-key"],
+            "bearerHeader": "Authorization",
+            "apiKeyHeader": "X-API-Key",
+            "arbitraryHeaderNamesAllowed": False,
+            "maximumKeyBytes": 4096,
+            "keyCharacterSet": "visible-ascii-no-whitespace",
+            "privateNetworkHttpsRequired": True,
+            "loopbackHttpAllowed": True,
+            "memoryOnly": True,
+            "responseDisclosureAllowed": False,
+            "loggingAllowed": False,
+            "evidenceInclusionAllowed": False,
+            "blankReuseScope": "same-process-same-normalized-endpoint-and-mode",
+        }
         assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
         assert policy["text"]["defaultIdleUnloadSeconds"] == 300
         assert policy["text"]["capabilityIds"] == [
@@ -2079,9 +2258,20 @@ def main() -> int:
         assert 'state.desiredModel = null' in javascript and 'Showing installed models ranked for' in javascript
         assert html.count('class="field-row compact-control-row"') == 3
         assert ".compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
-        assert ".advanced-grid select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
+        assert ".advanced-grid select, .advanced-grid input { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
         assert ".model-select select { min-width: 190px; height: 36px;" in styles
         assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
+        assert html.count('type="password" maxlength="4096" autocomplete="new-password"') == 2
+        assert html.count('value="none" selected>Automatic (Recommended)</option>') == 2
+        assert html.count('value="bearer">Bearer token · advanced</option>') == 2
+        assert html.count('value="x-api-key">X-API-Key · advanced</option>') == 2
+        assert html.count("Keep the recommended automatic option unless your provider or gateway") == 2
+        assert "Keys stay in memory, are never returned by the API" in html
+        assert "authenticated-provider-requires-https" in javascript
+        assert "config.apiKey.length > 0" in javascript
+        assert 'byId("api-key").value = ""' in javascript
+        assert "apiKey" + ": result.authentication" not in javascript
+        assert "localStorage" not in javascript and "sessionStorage" not in javascript
         assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
         assert "renderProviderTransportWarning" in javascript
         assert 'id="connection-transport-warning"' in html and 'id="wizard-transport-warning"' in html
@@ -2202,6 +2392,10 @@ def main() -> int:
         assert ".wizard-choices {" in styles and ".readiness-dashboard" in styles
         assert "webbrowser" not in (ROOT / "web/server.py").read_text(encoding="utf-8")
         assert "ProxyHandler({})" in (ROOT / "scripts/provider_security.py").read_text(encoding="utf-8")
+        provider_security_source = (ROOT / "scripts/provider_security.py").read_text(encoding="utf-8")
+        assert "MAX_PROVIDER_API_KEY_BYTES = 4096" in provider_security_source
+        assert 'return f"ProviderAuthentication(mode={self.mode!r}, secret=<redacted>)"' in provider_security_source
+        assert "authenticated-provider-requires-https" in provider_security_source
         assert "ProxyHandler({})" in (ROOT / "scripts/model_catalog_search.py").read_text(encoding="utf-8")
         readiness_source = (ROOT / "scripts/system_readiness.py").read_text(encoding="utf-8")
         assert 'ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))' in readiness_source

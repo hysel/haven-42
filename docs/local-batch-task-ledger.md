@@ -27,9 +27,11 @@ allowed states, counts, and denied authority.
 - Classification grants no runtime, network, machine-change, packaging,
   signing, publication, or production authority.
 
-The initial import deliberately left tasks `unverified`. Reconciliation now
-advances only in phase order. Phases 0, 2, 3, and 4 are fully reconciled;
-Phase 1 retains seven exact licensing gaps and Phase 5 retains six exact
+The initial import deliberately left tasks `unverified`. Reconciliation is now
+complete in phase order. Phases 0, 2, 3, and 4 are fully reconciled. The owner
+deferred Phase 1's seven exact external-runtime licensing gaps on 2026-08-04
+because Haven will not bundle or redistribute that provider runtime; the gaps
+remain mandatory before any future redistribution. Phase 5 retains six exact
 cryptographic-verifier gaps. Phases 6 and 7 are locally reconciled while all
 image, audio, video, quantization, conversation-history, and folder-selection
 candidates remain unpromoted. Phases 8 through 16 are locally reconciled;
@@ -46,7 +48,8 @@ complete.
 Current reconciliation snapshot:
 
 - 360 completed;
-- 14 partial;
+- 7 deferred by explicit owner decision;
+- 7 partial;
 - zero unverified;
 - zero runtime, network, machine-change, package-promotion, release, or signing
   authority granted.
@@ -69,9 +72,10 @@ The recovered local batch is complete only when all of the following are true:
    machine effects.
 7. The work remains unpushed until owner review and explicit permission.
 
-The local preparation and validation criteria are now met. The fourteen
-partial records remain precise external-policy or prerequisite gaps; they do
-not grant runtime, signing, release, or production authority.
+The local preparation and validation criteria are now met. Seven owner-deferred
+external-runtime license records and seven partial prerequisite/review records
+remain explicit; they do not grant runtime, redistribution, signing, release,
+or production authority. See `docs/roadmap-owner-decisions.md`.
 
 ## Phase inventory
 

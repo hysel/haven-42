@@ -222,7 +222,7 @@ For Ollama on the same computer, keep the default loopback endpoint. For an Olla
 
 After discovery, Haven 42 remembers separate in-memory automatic or advanced manual model guidance for Chat, Writing, and Summarization. The visible conversation model remains active across task intents. If an explicit write/draft/compose or summarize/condense request has a different configured installed model, a browser-memory-only prompt appears before submission. The user can switch or keep the current model; no request or automatic switch occurs while the prompt is open. **Use automatic** returns an override to the engine recommendation. No selection is persisted after Haven 42 closes.
 
-Hostnames, credentials in URLs, paths, query strings, redirects, link-local addresses, public addresses under the trusted-LAN scope, and unsafe address classes are rejected. Connection settings remain in memory and are lost when Haven 42 closes.
+Hostnames, credentials in URLs, paths, query strings, redirects, link-local addresses, public addresses under the trusted-LAN scope, and unsafe address classes are rejected. Advanced settings optionally admit a fixed Bearer or X-API-Key header. Keys are bounded, memory-only, cleared from the visible field after connection, omitted from every response, and require HTTPS outside same-machine loopback. Connection settings and authentication are lost when Haven 42 closes.
 
 ## Chat, Writing, Summarization, And Model Cleanup
 
@@ -262,6 +262,7 @@ The MVP:
 - serves only committed local HTML, CSS, and JavaScript;
 - sends a restrictive Content Security Policy and denies framing, MIME sniffing, referrer leakage, caching, remote assets, and telemetry;
 - uses the shared provider-security module for endpoint classification, no-redirect requests, and bounded JSON;
+- sends only the selected fixed Bearer or X-API-Key header, requires HTTPS for authenticated private-network traffic, and never persists or returns the key;
 - limits public catalog discovery to an explicit bounded query, fixed Ollama HTTPS origin, no redirects, capped HTML, strict names, and candidate-only results;
 - returns sanitized error codes instead of provider responses or local exception details.
 

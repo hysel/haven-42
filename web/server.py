@@ -43,11 +43,14 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from provider_security import (  # noqa: E402
     MAX_JSON_RESPONSE_BYTES,
+    NO_PROVIDER_AUTHENTICATION,
+    ProviderAuthentication,
     ProviderSecurityError,
     read_bounded,
     read_json,
     validate_base_url,
     validate_local_base_url,
+    validate_provider_authentication,
 )
 from model_catalog_search import (  # noqa: E402
     ModelCatalogSearchError,
@@ -610,9 +613,10 @@ def _provider_json(
     timeout: int,
     payload: dict[str, Any] | None = None,
     maximum_bytes: int = MAX_JSON_RESPONSE_BYTES,
+    authentication: ProviderAuthentication = NO_PROVIDER_AUTHENTICATION,
 ) -> dict[str, Any]:
     data = None
-    headers: dict[str, str] = {}
+    headers = authentication.request_headers()
     method = "GET"
     if payload is not None:
         data = json.dumps(payload, separators=(",", ":")).encode("utf-8")
@@ -685,13 +689,14 @@ class HavenState:
         self.lock = threading.RLock()
         self.base_url: str | None = None
         self.trust_scope: str | None = None
+        self.authentication = NO_PROVIDER_AUTHENTICATION
         self.timeout_seconds = 120
         self.idle_unload_seconds = 300
         self.models: tuple[str, ...] = ()
         self.model_digests: dict[str, str] = {}
         self.ollama_version: str | None = None
-        self.used_models: set[tuple[str, str, int]] = set()
-        self.active_model: tuple[str, str, int] | None = None
+        self.used_models: set[tuple[str, str, int, ProviderAuthentication]] = set()
+        self.active_model: tuple[str, str, int, ProviderAuthentication] | None = None
         self.idle_timer: threading.Timer | None = None
         self.lifecycle_generation = 0
         self.operation_lock = threading.Lock()
@@ -807,6 +812,7 @@ class HavenState:
                     "trustScope": self.trust_scope,
                     "version": self.ollama_version,
                     "modelCount": len(self.models),
+                    "authentication": self.authentication.public_summary(),
                 },
                 "capabilities": [
                     {
@@ -1129,7 +1135,14 @@ class HavenState:
         except ReadinessError as error:
             raise WebRequestError(str(error)) from error
 
-    def connect(self, endpoint: str, timeout_seconds: int, idle_unload_seconds: int) -> dict[str, Any]:
+    def connect(
+        self,
+        endpoint: str,
+        timeout_seconds: int,
+        idle_unload_seconds: int,
+        authentication_mode: str,
+        api_key: str,
+    ) -> dict[str, Any]:
         try:
             policy = validate_local_base_url(endpoint)
         except ProviderSecurityError as error:
@@ -1139,6 +1152,25 @@ class HavenState:
         if idle_unload_seconds not in ALLOWED_IDLE_UNLOAD_SECONDS:
             raise WebRequestError("invalid-idle-unload-timeout")
         base_url = policy["baseUrl"]
+        with self.lock:
+            existing_base_url = self.base_url
+            existing_authentication = self.authentication
+        if (
+            authentication_mode != "none"
+            and api_key == ""
+            and existing_base_url == base_url
+            and existing_authentication.mode == authentication_mode
+        ):
+            authentication = existing_authentication
+        else:
+            try:
+                authentication = validate_provider_authentication(
+                    authentication_mode,
+                    api_key,
+                    policy,
+                )
+            except ProviderSecurityError as error:
+                raise WebRequestError(str(error)) from error
         with self.operation_lock:
             if not self.unload_active_model():
                 raise WebRequestError("previous-model-unload-failed", HTTPStatus.BAD_GATEWAY)
@@ -1148,9 +1180,16 @@ class HavenState:
                 self.models = ()
                 self.model_digests = {}
                 self.ollama_version = None
+                self.authentication = NO_PROVIDER_AUTHENTICATION
             try:
-                version = _provider_json(base_url, "/api/version", timeout_seconds)
-                tags = _provider_json(base_url, "/api/tags", timeout_seconds)
+                version = _provider_json(
+                    base_url, "/api/version", timeout_seconds,
+                    authentication=authentication,
+                )
+                tags = _provider_json(
+                    base_url, "/api/tags", timeout_seconds,
+                    authentication=authentication,
+                )
             except (OSError, ProviderSecurityError) as error:
                 raise WebRequestError("ollama-connection-failed", HTTPStatus.BAD_GATEWAY) from error
         records = tags.get("models", [])
@@ -1168,6 +1207,7 @@ class HavenState:
         with self.lock:
             self.base_url = base_url
             self.trust_scope = policy["trustScope"]
+            self.authentication = authentication
             self.timeout_seconds = timeout_seconds
             self.idle_unload_seconds = idle_unload_seconds
             self.models = tuple(models)
@@ -1183,6 +1223,7 @@ class HavenState:
             "version": self.ollama_version,
             "models": models,
             "configurationPersisted": False,
+            "authentication": authentication.public_summary(),
             "idleUnloadSeconds": idle_unload_seconds,
         }
         result.update(build_model_decisions(models, self.model_recommendations, model_digests))
@@ -1193,6 +1234,7 @@ class HavenState:
             "modelDiscovery": "complete",
             "modelCount": len(models),
             "configurationPersisted": False,
+            "authenticationConfigured": authentication.configured,
         }
         result["evidenceBoundary"] = {
             "catalogStatus": result["catalogStatus"],
@@ -1207,7 +1249,13 @@ class HavenState:
         }
         return result
 
-    def _unload(self, model: str, base_url: str, timeout_seconds: int) -> bool:
+    def _unload(
+        self,
+        model: str,
+        base_url: str,
+        timeout_seconds: int,
+        authentication: ProviderAuthentication,
+    ) -> bool:
         cleanup_timeout = min(timeout_seconds, 15)
         for attempt in range(2):
             try:
@@ -1216,9 +1264,13 @@ class HavenState:
                     "/api/generate",
                     cleanup_timeout,
                     {"model": model, "prompt": "", "keep_alive": 0, "stream": False},
+                    authentication=authentication,
                 )
                 for _ in range(3):
-                    processes = _provider_json(base_url, "/api/ps", cleanup_timeout)
+                    processes = _provider_json(
+                        base_url, "/api/ps", cleanup_timeout,
+                        authentication=authentication,
+                    )
                     loaded = {
                         str(item.get("name") or item.get("model", ""))
                         for item in processes.get("models", [])
@@ -1240,19 +1292,28 @@ class HavenState:
         if timer is not None:
             timer.cancel()
 
-    def _idle_unload(self, target: tuple[str, str, int], generation: int) -> None:
+    def _idle_unload(
+        self,
+        target: tuple[str, str, int, ProviderAuthentication],
+        generation: int,
+    ) -> None:
         with self.operation_lock:
             with self.lock:
                 if generation != self.lifecycle_generation or self.active_model != target:
                     return
-            base_url, model, timeout_seconds = target
-            unloaded = self._unload(model, base_url, timeout_seconds)
+            base_url, model, timeout_seconds, authentication = target
+            unloaded = self._unload(model, base_url, timeout_seconds, authentication)
             with self.lock:
                 if unloaded and self.active_model == target:
                     self.active_model = None
+                    self.used_models.discard(target)
                 self.idle_timer = None
 
-    def _schedule_idle_unload(self, target: tuple[str, str, int], seconds: float) -> None:
+    def _schedule_idle_unload(
+        self,
+        target: tuple[str, str, int, ProviderAuthentication],
+        seconds: float,
+    ) -> None:
         self._cancel_idle_timer()
         with self.lock:
             generation = self.lifecycle_generation
@@ -1268,11 +1329,12 @@ class HavenState:
             target = self.active_model
         if target is None:
             return True
-        base_url, model, timeout_seconds = target
-        unloaded = self._unload(model, base_url, timeout_seconds)
+        base_url, model, timeout_seconds, authentication = target
+        unloaded = self._unload(model, base_url, timeout_seconds, authentication)
         with self.lock:
             if unloaded and self.active_model == target:
                 self.active_model = None
+                self.used_models.discard(target)
         return unloaded
 
     def run_text_capability(
@@ -1288,6 +1350,7 @@ class HavenState:
             base_url = self.base_url
             trust_scope = self.trust_scope
             timeout_seconds = self.timeout_seconds
+            authentication = self.authentication
             allowed_models = self.models
             model_digests = dict(self.model_digests)
         if base_url is None:
@@ -1464,11 +1527,18 @@ class HavenState:
             with self.lock:
                 previous = self.active_model
                 idle_unload_seconds = self.idle_unload_seconds
-            target = (base_url, model, timeout_seconds)
+            target = (base_url, model, timeout_seconds, authentication)
             if previous is not None and previous != target:
-                previous_base, previous_model, previous_timeout = previous
-                if not self._unload(previous_model, previous_base, previous_timeout):
+                previous_base, previous_model, previous_timeout, previous_authentication = previous
+                if not self._unload(
+                    previous_model,
+                    previous_base,
+                    previous_timeout,
+                    previous_authentication,
+                ):
                     raise WebRequestError("previous-model-unload-failed", HTTPStatus.BAD_GATEWAY)
+                with self.lock:
+                    self.used_models.discard(previous)
             with self.lock:
                 self.used_models.add(target)
                 self.active_model = target
@@ -1489,6 +1559,7 @@ class HavenState:
                     ],
                 },
                 maximum_bytes=MAX_CHAT_RESPONSE_BYTES,
+                authentication=authentication,
                 )
             except (OSError, ProviderSecurityError) as error:
                 self.unload_active_model()
@@ -1647,11 +1718,15 @@ class HavenState:
         self._cancel_idle_timer()
         with self.lock:
             models = tuple(self.used_models)
-        results = [self._unload(model, base_url, timeout) for base_url, model, timeout in models]
+        results = [
+            self._unload(model, base_url, timeout, authentication)
+            for base_url, model, timeout, authentication in models
+        ]
         result = all(results)
         with self.lock:
             if result:
                 self.active_model = None
+                self.used_models.clear()
         return result
 
 
@@ -1931,17 +2006,25 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             if self.path == "/api/connect":
+                allowed_fields = {"endpoint", "timeoutSeconds", "idleUnloadSeconds"}
+                authentication = body.get("authentication", {"mode": "none", "apiKey": ""})
                 if (
-                    set(body) != {"endpoint", "timeoutSeconds", "idleUnloadSeconds"}
+                    set(body) not in (allowed_fields, allowed_fields | {"authentication"})
                     or not isinstance(body["endpoint"], str)
                     or type(body["timeoutSeconds"]) is not int
                     or type(body["idleUnloadSeconds"]) is not int
+                    or not isinstance(authentication, dict)
+                    or set(authentication) != {"mode", "apiKey"}
+                    or not isinstance(authentication["mode"], str)
+                    or not isinstance(authentication["apiKey"], str)
                 ):
                     raise WebRequestError("invalid-connect-fields")
                 result = self.server.state.connect(
                     body["endpoint"],
                     body["timeoutSeconds"],
                     body["idleUnloadSeconds"],
+                    authentication["mode"],
+                    authentication["apiKey"],
                 )
                 self._send_json(HTTPStatus.OK, result)
                 return

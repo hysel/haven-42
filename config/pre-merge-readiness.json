@@ -135,17 +135,21 @@
       "patterns": [
         "config/install-artifact-registry.json",
         "config/install-component-registry.json",
+        "config/ollama-https-installation-contract.json",
         "config/offline-installer-lifecycle-contract.json",
         "docs/offline-installer-lifecycle-foundation.md",
+        "docs/ollama-https-installation-foundation.md",
         "examples/fixtures/offline-installer-lifecycle-request.json",
         "scripts/simulate-offline-installer-lifecycle.py",
         "scripts/system_readiness.py",
         "scripts/test-offline-installer-lifecycle.py",
+        "scripts/test-ollama-https-installation-foundation.py",
         "scripts/test-system-readiness.py"
       ],
       "commands": [
         "python scripts/test-system-readiness.py",
-        "python scripts/test-offline-installer-lifecycle.py"
+        "python scripts/test-offline-installer-lifecycle.py",
+        "python scripts/test-ollama-https-installation-foundation.py"
       ]
     },
     {

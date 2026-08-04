@@ -22,6 +22,25 @@ recommends a trusted HTTPS endpoint or a loopback tunnel. HTTPS suppresses the
 HTTP warning but does not broaden the endpoint, redirect, or provider trust
 scope.
 
+Authenticated Ollama connections use only fixed `Authorization: Bearer` or
+`X-API-Key` modes. Secrets are bounded visible ASCII, remain in session memory,
+are redacted from object representations, and are never returned, logged, or
+persisted by Haven 42. Authenticated private-network endpoints require HTTPS;
+HTTP authentication is allowed only on same-machine loopback. Blank-key reuse
+is limited to the same normalized endpoint and authentication mode within the
+current process. Every discovery, chat, model-residency, and cleanup request
+uses the same engine-owned authentication object, while redirects, inherited
+proxies, arbitrary header names, URL credentials, and query credentials remain
+blocked.
+
+The inactive installer foundation does not claim native Ollama TLS. A future
+private-network managed profile must keep Ollama loopback-bound behind a
+separately acquired and admitted HTTPS gateway. A locally generated
+certificate is allowed only with an exact endpoint-IP SAN, explicit trust,
+protected non-exported key material, strict verification, negative TLS tests,
+rotation, rollback, and exact transaction-owned trust/key cleanup. Certificate
+or trust-store modification remains an unadmitted machine effect.
+
 Provider and public-catalog transports explicitly disable inherited OS and
 environment proxies, reject redirects, and use exact bounded response shapes.
 The loopback API requires exact JSON field types rather than coercing values,

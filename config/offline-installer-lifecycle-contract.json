@@ -98,6 +98,7 @@
       "resolve a canonical current-user application root with native APIs",
       "reject reparse points and junctions at every path segment",
       "prove ACL ownership and least-privilege write access",
+      "for private-network Ollama, validate an exact-IP certificate, explicit trust approval, private-key ACLs, rotation, and exact trust cleanup",
       "exercise interruption, rollback, exact-file uninstall, and retained user data"
     ],
     "linux": [
@@ -105,6 +106,7 @@
       "resolve a canonical user application root without crossing mount boundaries",
       "reject symbolic links at every path segment",
       "prove current-user ownership and mode access",
+      "for private-network Ollama, validate an exact-IP certificate, explicit trust approval, private-key modes, rotation, and exact trust cleanup",
       "exercise interruption, rollback, exact-file uninstall, and retained user data"
     ],
     "macos": [
@@ -112,6 +114,7 @@
       "resolve a canonical user-approved application root with native APIs",
       "reject symbolic links and volume escapes at every path segment",
       "prove current-user ownership and least-privilege write access",
+      "for private-network Ollama, validate an exact-IP certificate, explicit trust approval, Keychain or key-file controls, rotation, and exact trust cleanup",
       "exercise interruption, rollback, exact-file uninstall, and retained user data"
     ]
   }
