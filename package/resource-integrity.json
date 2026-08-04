@@ -8,8 +8,8 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "2fd973dadd4c851bccf9218f3e738f4b275a7c1434254704b500a34130af815d",
-      "sizeBytes": 97558
+      "sha256": "db0f2bb88dd24ec2e45a257dfded389ce4b95b54509971aa7aad3e95f280128e",
+      "sizeBytes": 99390
     },
     {
       "path": "web/static/styles.css",
@@ -23,8 +23,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "b2cae0207a40f9dfb16e808f4356e4e7363e7acbe7764382ef3783cb5af12b7c",
-      "sizeBytes": 31995
+      "sha256": "4916d8835b498c547ba0b89e879247c4b96aa521b22910dd09441970ed56cae9",
+      "sizeBytes": 34695
     },
     {
       "path": "config/agent-surface-capabilities.json",
@@ -38,8 +38,8 @@
     },
     {
       "path": "config/install-component-registry.json",
-      "sha256": "3dc60b659c7b9d9e15e6b2120a0e34db1788b4d601d9d1f86ee9798ac2626830",
-      "sizeBytes": 3961
+      "sha256": "28f1bd8a91da71a424d00c17c363467e0f064a05f9095f86dcc0843abe7cbd5a",
+      "sizeBytes": 4278
     },
     {
       "path": "config/workflows.json",

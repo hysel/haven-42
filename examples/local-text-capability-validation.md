@@ -18,7 +18,7 @@ A fresh provider-neutral regression run on 2026-07-22 used an already-installed 
 
 A separate direct llama.cpp run used pinned build `b10088` at commit `67b9b0e7f6ce45d929a4411907d3c48ec719e81c`, the exact Linux NVIDIA/CUDA RTX 5000 profile, and revision-pinned Qwen 3.5 9B Q4_K_M. Haven 42 discovery returned `available`, exact-profile admission passed, and the shared invocation adapter returned the exact requested content `HAVEN42_LLAMACPP_ADAPTER_OK` through the `openai-chat-completions` transport. The 5.953-second request included 50 prompt tokens at 258.57 tokens/s and 351 generation tokens at 62.34 tokens/s. Network use was disclosed, endpoint persistence and artifact writes remained false, the server used 5,279 MiB on the selected GPU, and the loopback server, SSH tunnel, model, source, toolchain, build, caches, and logs were removed afterward.
 
-A fresh 2026-08-01 Ollama 0.32.5 regression probe against the installed exact
+A fresh 2026-08-04 Ollama 0.32.5 regression probe against the installed exact
 `qwen3.5:9b` digest passed 15 of 16 bounded provider-conformance checks,
 including discovery, exact output, writing, summarization, structured tool
 calling, read-only engineering, planning, Git-applicable patch, timeout,
@@ -27,6 +27,10 @@ so this run is non-promoting and does not replace earlier exact-profile
 evidence. The selected model was independently confirmed absent from the
 running-model list afterward; no endpoint, prompt, raw response, or machine
 path was persisted.
+
+The sanitized run recorded a 9,785.808 ms cold load, 720.059 ms first token,
+272.554 prompt tokens/s, and 76.062 generation tokens/s. These exact-cell
+metrics are diagnostic only and do not change the non-promoting decision.
 
 ## Limits
 

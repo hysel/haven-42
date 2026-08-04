@@ -1,5 +1,12 @@
 # Controlled Web Research Foundation
 
+The candidate-only preparation also includes an effect-free transport guard
+and memory-only approval-state proof. They validate fixed HTTPS destinations,
+public DNS answers before and at connection, rebinding, redirect, encoding,
+content-type, byte, and time boundaries, plus exact single-use query/page
+approval and cancellation cleanup. Neither performs DNS resolution or network
+I/O, and neither is present in the runtime or package.
+
 Milestone 28 remains runtime-unadmitted. Haven 42 has no general internet model
 tool, research UI route, DNS authority, URL fetcher, browser automation, page
 renderer, download path, or autonomous follow-up search.

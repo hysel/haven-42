@@ -29,7 +29,7 @@ contributors.
 | Attachments | Accepts a bounded set of selected UTF-8 text, CSV, JSON, source-code, and PNG screenshot files. Clipboard PNG paste is supported. Attachments are never executed. |
 | Response display | Safely renders headings, lists, emphasis, code, quotations, and Unicode emoji without model-supplied active HTML or links. |
 | Run information | Shows provider-reported token counts, timing, and throughput details. |
-| Local images | Linux ComfyUI/SDXL is validated for one promoted loopback profile. Windows NVIDIA and AMD have partial exact-profile evidence but remain unavailable; other platforms are independently gated. |
+| Local images | Haven connects to separately acquired providers and never bundles their engines, models, drivers, or installers. Linux ComfyUI/SDXL is validated for one promoted loopback profile; Windows profiles remain independently gated. |
 | Software workflows | Shows registered read-only plans. The browser cannot start their processes, read a repository, or write files. |
 | Evidence and readiness | Displays bounded system readiness and bundled sanitized evidence without running background tests. |
 
@@ -42,9 +42,13 @@ controlled web research, signing, notarization, installers, and active online
 updates are not shipped.
 
 Contributor-only preparation now includes a residue-free synthetic temporary
-history database validator, a bounded content-free folder inspector, a disabled
-fixed-provider research query adapter, exact package dependency admission, and
-object-only inspection of immutable public repository candidates. None is a
+history database validator, a bounded content-free folder inspector, hardened
+memory-only lexical retrieval, unselected embedding and encrypted-library
+contracts, disabled research transport and approval guards, exact package
+dependency admission, and object-only inspection of immutable public
+repository candidates. It also includes an inactive cryptographic inventory
+and post-quantum agility contract; these select no algorithm, change no TLS
+policy, verify no signature, and grant no updater authority. None is a
 user-facing feature or a production-readiness claim.
 
 ## Quick start
@@ -158,13 +162,13 @@ for scope, evidence, blockers, and exit criteria.
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Recommendation, configuration, dispatch, health, cleanup, and evidence foundations. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, and hardened unsigned portable packages; signing and machine effects remain gated. |
+| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, hardened unsigned portable packages, and inactive post-quantum migration planning; signing, PQC activation, and machine effects remain gated. |
 | Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial Linux CUDA evidence exists; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | Candidate research and a fail-closed Quadro hardware/storage preflight exist; no executable video integration ships. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel evidence plus bounded Ollama 0.32.5 tool-envelope validation exists; WSL2 AMD and every tool-execution path remain unadmitted. |
-| Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; synthetic temporary database and explicit-folder inspection foundations exist, while runtime retrieval, complex documents, semantic embeddings, and persistent history remain gated. |
-| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts and a disabled fixed-provider fixture-transport adapter exist without live transport, UI, page retrieval, or a model tool. |
+| Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; lexical, temporary-database, explicit-folder, parser, embedding-evaluation, and encrypted-library foundations remain inactive or independently gated. |
+| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts, transport guards, exact approval state, and a disabled fixed-provider fixture adapter exist without live transport, UI, page retrieval, or a model tool. |
 
 The project uses a pass-before-ship rule: evidence is specific to the exact
 artifact, model, provider, operating system, hardware, and operation tested.

@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-only-unpromoted",
+  "runtimeAdmitted": false,
+  "packageInclusionAllowed": false,
+  "crossProfileEvidenceInheritanceAllowed": false,
+  "silentCpuFallbackAllowed": false,
+  "selectionRequiredFields": ["operatingSystem", "architecture", "accelerator.vendor", "accelerator.model", "accelerator.runtime", "accelerator.runtimeVersion", "accelerator.vramBytes", "driverIdentity"],
+  "requiredEndpoint": {
+    "scheme": "http",
+    "host": "127.0.0.1",
+    "port": 8188,
+    "redirectsAllowed": false,
+    "browserAutoLaunchAllowed": false
+  },
+  "requiredProcessIdentity": [
+    "profileId",
+    "artifactId",
+    "executableDigest",
+    "pid",
+    "processCreationIdentity",
+    "sessionNonce",
+    "loopbackEndpoint"
+  ],
+  "checkpoint": {
+    "id": "sdxl-base-1.0",
+    "revision": "f298da3c058bd8f1f1c62f3ecfa775244a243897",
+    "sha256": "31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b"
+  },
+  "profiles": [
+    {
+      "id": "comfyui-sdxl-windows-amd",
+      "status": "partial-pass-unpromoted",
+      "operatingSystem": "windows",
+      "architecture": "x86_64",
+      "accelerator": {"vendor": "AMD", "model": "Radeon RX 7800 XT", "vramBytes": 17179869184, "runtime": "HIP", "runtimeVersion": "7.2.53211-158bd99533"},
+      "driverIdentity": null,
+      "selectionAvailability": "blocked-missing-driver-identity",
+      "embeddedRuntime": {"python": "3.12.10", "pytorch": "2.9.1+rocm7.2.1"},
+      "artifacts": [
+        {"artifactId": "comfyui-amd-v0.28.0", "version": "0.28.0", "sizeBytes": 1762815561, "sha256": "824f70126a8733ce25cc5713d20dba91ddd9f27efd6ac04a6d4a57dbf09ecd3c", "role": "known-good"},
+        {"artifactId": "comfyui-amd-v0.30.0", "version": "0.30.0", "sizeBytes": 1781518314, "sha256": "0f3816fa1149e5a739e4d095d7733bc4ea28b02c8872fadeb8f73b933b141568", "role": "validated-candidate"}
+      ],
+      "minimumAvailableStorageBytes": null,
+      "storageFitStatus": "blocked-missing-checkpoint-size",
+      "evidence": "examples/windows-amd-image-provider-validation.md"
+    },
+    {
+      "id": "comfyui-sdxl-windows-nvidia",
+      "status": "partial-pass-unpromoted",
+      "operatingSystem": "windows",
+      "architecture": "x86_64",
+      "accelerator": {"vendor": "NVIDIA", "model": "Quadro RTX 5000", "vramBytes": 17179869184, "runtime": "CUDA", "runtimeVersion": "13.0"},
+      "driverIdentity": "582.70",
+      "selectionAvailability": "blocked-missing-known-good-archive-size",
+      "embeddedRuntime": {"python": "3.13.14", "pytorch": "2.13.0+cu130"},
+      "artifacts": [
+        {"artifactId": "comfyui-nvidia-v0.29.2", "version": "0.29.2", "sizeBytes": null, "sha256": "e7a39a817002d85b4fb2d4f6bd176c10d104a0d04031f99b9d8b7b1fd920c6fc", "role": "known-good"},
+        {"artifactId": "comfyui-nvidia-v0.30.0", "version": "0.30.0", "sizeBytes": 2110797220, "sha256": "f4353d069dd7342e3bef421f07f003cca53ca84168102705cfc83f66449f5ae5", "role": "validated-candidate"}
+      ],
+      "minimumAvailableStorageBytes": null,
+      "storageFitStatus": "blocked-incomplete-artifact-size",
+      "evidence": "examples/windows-nvidia-image-provider-validation.md"
+    },
+    {
+      "id": "comfyui-sdxl-windows-intel",
+      "status": "partial-pass-unpromoted",
+      "operatingSystem": "windows",
+      "architecture": "x86_64",
+      "accelerator": {"vendor": "Intel", "model": "Arc B580", "vramBytes": 12884901888, "runtime": "XPU", "runtimeVersion": "2.13.0+xpu"},
+      "driverIdentity": "32.0.101.8864",
+      "selectionAvailability": "blocked-missing-checkpoint-size",
+      "embeddedRuntime": {"python": "3.13.14", "pytorch": "2.13.0+xpu"},
+      "artifacts": [
+        {"artifactId": "comfyui-intel-v0.29.2", "version": "0.29.2", "sizeBytes": 1690682182, "sha256": "045e859a7a6d827373ae527628c63739a87d6269fe5127cb075854c84e40f124", "role": "known-good"},
+        {"artifactId": "comfyui-intel-v0.30.0", "version": "0.30.0", "sizeBytes": 1698493396, "sha256": "3fc6b62317c8aae50f43296762929a3808615ae891900587218d00234d366135", "role": "validated-candidate"}
+      ],
+      "minimumAvailableStorageBytes": null,
+      "storageFitStatus": "blocked-missing-checkpoint-size",
+      "evidence": "examples/windows-intel-image-provider-validation.md"
+    }
+  ],
+  "storageFormula": "sum(known-good,candidate,checkpoint)+max(candidate,temp-extraction)+536870912",
+  "storageUnknownDecision": "candidate-unavailable",
+  "consent": {
+    "singleUse": true,
+    "effectBound": true,
+    "disclosesNetworkWritesProcessesRetentionAndCleanup": true,
+    "unknownArtifactApprovalAllowed": false
+  },
+  "packageExclusions": [
+    "provider archives",
+    "provider runtime trees",
+    "model checkpoints",
+    "generated images",
+    "installer payloads"
+  ]
+}

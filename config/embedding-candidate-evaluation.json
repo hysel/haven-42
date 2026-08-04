@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-research-only-no-selection-or-download",
+  "reviewedAtUtc": "2026-08-04T00:00:00Z",
+  "candidates": [
+    {
+      "id": "all-minilm-l6-v2",
+      "upstream": "sentence-transformers/all-MiniLM-L6-v2",
+      "revision": "962c8cb905fce1ec0dc137846db4772f59a3c810",
+      "licenseSpdx": "Apache-2.0",
+      "parameters": 22700000,
+      "observedSafetensorsBytes": 90868376,
+      "embeddingDimensions": 384,
+      "maximumWordPieces": 256,
+      "prospectiveRuntimes": ["sentence-transformers", "transformers", "onnx-runtime"],
+      "hardwareFit": "requires-native-cpu-gpu-memory-and-quality-measurement",
+      "source": "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2"
+    },
+    {
+      "id": "bge-small-en-v1.5",
+      "upstream": "BAAI/bge-small-en-v1.5",
+      "revision": null,
+      "licenseSpdx": "MIT",
+      "parameters": 33400000,
+      "observedSafetensorsBytes": null,
+      "embeddingDimensions": 384,
+      "maximumWordPieces": 512,
+      "prospectiveRuntimes": ["sentence-transformers", "transformers", "onnx-runtime"],
+      "hardwareFit": "requires-immutable-artifact-and-native-cpu-gpu-memory-and-quality-measurement",
+      "source": "https://huggingface.co/BAAI/bge-small-en-v1.5"
+    },
+    {
+      "id": "nomic-embed-text-v1.5",
+      "upstream": "nomic-ai/nomic-embed-text-v1.5",
+      "revision": "541c5a6fadb4da793505a2bb4d3ee910de7f39ea",
+      "licenseSpdx": "Apache-2.0",
+      "parameters": 100000000,
+      "observedSafetensorsBytes": null,
+      "upstreamReportedSafetensorsDisplaySize": "547 MB",
+      "embeddingDimensions": null,
+      "maximumWordPieces": null,
+      "prospectiveRuntimes": ["sentence-transformers", "transformers", "onnx-runtime"],
+      "hardwareFit": "requires-exact-artifact-digest-and-native-cpu-gpu-memory-and-quality-measurement",
+      "source": "https://huggingface.co/nomic-ai/nomic-embed-text-v1.5"
+    }
+  ],
+  "admissionRequirements": {
+    "exactRevisionAndArtifactDigest": true,
+    "licenseAndNotices": true,
+    "dependencyAndSbomEvidence": true,
+    "explicitPerModelDownloadConsent": true,
+    "preflightDownloadAndInstalledStorage": true,
+    "separateFromGenerationModel": true,
+    "offlineAfterInstallation": true,
+    "nativeHardwareCapacityAndLatency": true,
+    "qualityAgainstLexicalBaseline": true,
+    "promptInjectionIsolation": true,
+    "versionedIndex": true,
+    "modelAndIndexCleanup": true,
+    "sourcePackageParity": true
+  },
+  "authority": {
+    "candidateSelected": false,
+    "downloadAllowed": false,
+    "runtimeInvocationAllowed": false,
+    "indexCreationAllowed": false,
+    "uiAllowed": false,
+    "packageAllowed": false
+  }
+}

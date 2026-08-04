@@ -305,7 +305,8 @@ test_github_actions_dependencies() {
     grep -Eq 'interval:[[:space:]]*weekly' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Eq '^[[:space:]]+codeql-action:' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Fq '"github/codeql-action/*"' "$REPO_ROOT/.github/dependabot.yml" &&
-    python3 "$REPO_ROOT/scripts/verify-github-repository-policy.py"
+    python3 "$REPO_ROOT/scripts/verify-github-repository-policy.py" --self-test |
+      grep -q 'with 7 hostile checks'
 }
 
 test_test_tier_contract() {
@@ -316,6 +317,7 @@ test_test_tier_contract() {
     grep -q 'Exact content-tree full-test receipt found' "$REPO_ROOT/.githooks/pre-push" &&
     grep -q 'schema=3' "$REPO_ROOT/.githooks/pre-push" &&
     grep -q 'ensure-test-python3.shared.sh' "$REPO_ROOT/.githooks/pre-commit" &&
+    grep -q 'security-review-gate.py' "$REPO_ROOT/.githooks/pre-commit" &&
     grep -q 'verify-pre-commit-readiness.py' "$REPO_ROOT/.githooks/pre-commit" &&
     grep -q 'sync-wiki.ps1' "$REPO_ROOT/.githooks/pre-commit" &&
     grep -q 'sync-wiki.shared.sh' "$REPO_ROOT/.githooks/pre-commit" &&
@@ -324,7 +326,14 @@ test_test_tier_contract() {
     ! grep -q 'Run pack validation' "$REPO_ROOT/.github/workflows/validate-pack.yml" &&
     grep -q 'GitHub Actions always runs Full independently' "$REPO_ROOT/docs/test-tiers.md" &&
     python3 "$REPO_ROOT/scripts/test-pre-commit-readiness.py" |
-      grep -q 'Pre-commit readiness hostile tests passed'
+      grep -q 'Pre-commit readiness hostile tests passed' &&
+    python3 "$REPO_ROOT/scripts/test-security-review-gate.py" |
+      grep -q 'Security review gate hostile tests passed: 13 checks' &&
+    python3 "$REPO_ROOT/scripts/test-pre-merge-readiness.py" |
+      grep -q 'Pre-merge readiness hostile tests passed: 12 checks' &&
+    grep -q 'wrong-origin-repository' "$REPO_ROOT/scripts/check-pre-merge-readiness.py" &&
+    grep -q 'relation in {"behind", "diverged"}' "$REPO_ROOT/scripts/check-pre-merge-readiness.py" &&
+    grep -q '"repository-core"' "$REPO_ROOT/config/pre-merge-readiness.json"
 }
 
 test_os_aware_command_contract() {
@@ -2350,6 +2359,16 @@ cross = json.loads((root / "examples/cross-accelerator-model-matrix.json").read_
 assert image["schemaVersion"] == 1
 assert image["externalServerRequired"] is False
 assert image["executionDefault"] == "dry-run"
+boundary = image["distributionBoundary"]
+assert not any(boundary[key] for key in (
+    "externalProviderSoftwareBundled",
+    "providerModelsBundled",
+    "acceleratorDriversOrRuntimesBundled",
+    "providerInstallersOrUpdaterPayloadsBundled",
+))
+assert boundary["existingProviderConnectionAllowed"] is True
+assert boundary["separateUserManagedAcquisitionRequired"] is True
+assert boundary["havenRuntimeDependenciesMayBeBundledOnlyWhenReviewed"] is True
 assert image["discovery"]["silentCpuFallbackAllowed"] is False
 assert image["selection"]["evidenceInheritanceAcrossProfilesAllowed"] is False
 assert image["promotion"]["failedProfileLeavesDocumentationOnly"] is True
@@ -2414,10 +2433,12 @@ wiki = (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 private_ip = re.compile(r"\b(?:10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b")
 for doc in (
     "docs/local-image-provider-onboarding.md",
+    "docs/local-image-native-validation-packet.md",
     "docs/local-audio-provider-candidates.md",
     "docs/local-video-provider-candidates.md",
     "docs/generative-media-consent-policy.md",
     "docs/hardware-adaptive-quantization.md",
+    "docs/quantized-artifact-native-validation-packet.md",
     "docs/inference-engine-architecture.md",
     "examples/inference-engine-validation.md",
     "examples/cross-accelerator-model-validation.md",
@@ -2446,6 +2467,11 @@ PY
   grep -q 'write_new_file(output_path' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   ! grep -q 'print(json.dumps(create_plan' "$REPO_ROOT/scripts/quantization-planner.py" || return 1
   python3 "$REPO_ROOT/scripts/quantization-planner.py" --self-test | grep -q "3 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-local-image-candidate-profiles.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-local-image-provider-process-lifecycle.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-local-image-package-boundary.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-generative-media-candidate-contract.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-quantized-artifact-lifecycle.py" || return 1
   profile="$(python3 "$REPO_ROOT/scripts/quantization-planner.py" profile --storage-root "$REPO_ROOT" --context-tokens 16384 --concurrency 1 --workload-lane tool-use)" || return 1
   python3 - "$profile" <<'PY'
 import json
@@ -2473,7 +2499,7 @@ test_local_web_mvp() {
   if [ "$TEST_TIER" = "full" ]; then
     command -v node >/dev/null 2>&1 || return 1
     node "$REPO_ROOT/scripts/test-haven42-web-browser.mjs" |
-      grep -q "passed: 329 checks" || return 1
+      awk '/passed: [0-9]+ checks/ { for (i = 1; i <= NF; i++) if ($i == "passed:") { count = $(i + 1) + 0; if (count >= 333) found = 1 } } END { exit(found ? 0 : 1) }' || return 1
   fi
   assurance_dashboard="$("$REPO_ROOT/scripts/generate-evidence-dashboard.shared.sh" --as-json)" || return 1
   python3 - "$assurance_dashboard" <<'PY' || return 1
@@ -2600,31 +2626,43 @@ PY
   python3 "$REPO_ROOT/scripts/test-local-image-lifecycle-foundation.py" |
     grep -q "28 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-audit-local-image-runtime.py" |
-    grep -q "9 fail-closed checks" || return 1
+    grep -q "24 fail-closed checks" || return 1
   python3 "$REPO_ROOT/scripts/test-build-local-image-runtime-review-evidence.py" |
-    grep -q "7 hostile checks" || return 1
+    grep -q "9 hostile checks" || return 1
   python3 "$REPO_ROOT/scripts/test-roadmap-closure-ledger.py" |
     grep -q "48 exact open-item classifications" || return 1
+  python3 "$REPO_ROOT/scripts/test-local-batch-task-ledger.py" |
+    grep -q "374 exact tasks across 18 phases" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" |
     grep -q "6 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-folder-selection-foundation.py" |
-    grep -q "8 security checks" || return 1
+    grep -q "16 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-query-adapter.py" |
     grep -q "15 security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-offline-research-transport-guard.py" |
+    grep -q "25 hostile and exclusion checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-offline-research-approval-state.py" |
+    grep -q "17 exact-lifecycle checks" || return 1
   python3 "$REPO_ROOT/scripts/test-package-dependency-admission.py" |
     grep -q "12 exact-lock and non-admission checks" || return 1
   python3 "$REPO_ROOT/scripts/test-non-continue-validation-profiles.py" |
     grep -q "15 candidate-only safety checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-agent-surface-candidate-plan.py" |
+    grep -q "20 dry-run and injection checks" || return 1
   python3 "$REPO_ROOT/scripts/test-public-repository-candidate.py" |
     grep -q "8 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-public-repository-structure-validation.py" |
+    grep -q "19 read-only boundary checks" || return 1
   python3 "$REPO_ROOT/scripts/test-future-expansion-contracts.py" |
     grep -q "26 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-post-quantum-readiness.py" |
+    grep -q "37 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-parser-worker-foundation.py" |
     grep -q "27 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-container-review.py" |
     grep -q "49 deterministic security checks across 24 fixtures" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-semantic-review.py" |
-    grep -q "57 checks across 17 fixtures" || return 1
+    grep -q "62 checks across 19 fixtures" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-native-foundation.py" |
     grep -q "12 offline checks" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-source-package-parity.py" |
@@ -2664,13 +2702,14 @@ PY
 }
 
 test_task_composition_and_repository_privacy() {
+  python3 "$REPO_ROOT/scripts/test-offline-installer-lifecycle.py" | grep -q "38 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-task-composition.py" | grep -q "19 bounded, effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-task-execution-admission.py" | grep -q "49 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-task-effect-journal.py" | grep -q "46 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "20 effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "12 cases" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "16 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "21 cases" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" |
     grep -q "tracked or untracked non-ignored working files" || return 1
@@ -2705,7 +2744,9 @@ PY
 
 test_conversation_history_foundation() {
   python3 "$REPO_ROOT/scripts/test-memory-lexical-retrieval.py" |
-    grep -q "52 deterministic, hostile, and lifecycle checks" || return 1
+    grep -q "62 deterministic, hostile, and lifecycle checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-retrieval-expansion-foundations.py" |
+    grep -q "27 inactive-boundary checks" || return 1
   python3 "$REPO_ROOT/scripts/test-structured-tool-transport.py" |
     grep -q "62 effect-free security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-structured-tool-live-validation.py" |
@@ -2716,6 +2757,8 @@ test_conversation_history_foundation() {
     grep -q "25 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-foundation.py" |
     grep -q "45 bounded, effect-free checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-store.py" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])

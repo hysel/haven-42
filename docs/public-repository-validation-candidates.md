@@ -7,3 +7,11 @@ Local inspection uses ignored bare clones only. It never checks out a working tr
 An initial ripgrep candidate was rejected without checkout because its tagged tree contains a symbolic link. The rule was not relaxed; serde_json replaced it in the passing candidate set.
 
 This static inspection does not satisfy Aider or OpenCode non-generated-repository promotion. A future live surface run still requires the explicit provider, surface version, model, operating system, read-only behavior, sanitized evidence, and external verification gates.
+
+An additional bare-object structure pass applies the committed project-profile
+rules to path metadata only. It generates a content-free runtime-context plan,
+selects read-only discovery/planning/review workflows and the matching language
+rule pack, and records no local path. It does not select scoped-write, execute
+target code, build, test, install, invoke a model, contact upstream, or promote
+an agent surface. Passing candidates produce no remediation template because no
+failure recurred.

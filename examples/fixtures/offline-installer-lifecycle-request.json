@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "operation": "update",
+  "transactionId": "txn-0123456789abcdef",
+  "platform": "windows",
+  "architecture": "x86_64",
+  "componentId": "haven42-portable-development",
+  "artifact": {
+    "fileName": "haven42-windows-x86_64-unsigned-development.zip",
+    "version": "0.3.0-development",
+    "platform": "windows",
+    "architecture": "x86_64",
+    "byteLength": 1048576,
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sourceType": "offline-user-supplied",
+    "licenseReviewed": true,
+    "integrityVerified": true
+  },
+  "storage": {
+    "destinationAvailableBytes": 83886080,
+    "temporaryAvailableBytes": 73400320
+  },
+  "destination": {
+    "rootKind": "update-state",
+    "relativeSegments": [
+      "versions",
+      "0.3.0-development"
+    ],
+    "ownedByCurrentUser": true,
+    "writable": true,
+    "trustedPermissions": true,
+    "pathProof": {
+      "canonical": true,
+      "withinApprovedRoot": true,
+      "symlink": false,
+      "junction": false,
+      "reparsePoint": false,
+      "mountEscape": false,
+      "overlapsApplicationRoot": false,
+      "overlapsRepositoryRoot": false,
+      "overlapsUserDataRoot": false
+    }
+  },
+  "currentState": {
+    "installedVersions": [
+      "0.2.0-development"
+    ],
+    "activeVersion": "0.2.0-development",
+    "partialTransactionId": null,
+    "completedTransactionIds": [],
+    "stateDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "interruption": null,
+  "userDataChoice": "preserve",
+  "uninstallFiles": [],
+  "journal": []
+}

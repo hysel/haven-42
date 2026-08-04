@@ -12,6 +12,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 $repoRoot = Split-Path -Parent $PSScriptRoot
+Import-Module (Join-Path $PSScriptRoot "PowerShellCompatibility.psm1") -Force
 if (-not $RulesPath) {
     $RulesPath = Join-Path $repoRoot "config/project-profile-rules.json"
 }
@@ -49,7 +50,7 @@ function Get-RepositoryFiles {
                     continue
                 }
 
-                $relative = [System.IO.Path]::GetRelativePath($Root, $entry.FullName).Replace("\", "/")
+                $relative = (Get-HavenRelativePath -BasePath $Root -TargetPath $entry.FullName).Replace("\", "/")
                 $files.Add([pscustomobject]@{
                     Name = $entry.Name
                     RelativePath = $relative

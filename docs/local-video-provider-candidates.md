@@ -1,12 +1,15 @@
 # Local Video Provider Candidates
 
-Recorded 2026-07-22 from official upstream repositories and model cards. These candidates are documentation-only. No video capability, adapter, harness, workflow, runtime configuration, model, or installer is admitted.
+Recorded 2026-07-22 from official upstream repositories and model cards, then rechecked against official upstream requirements and licenses on 2026-08-04. These candidates are documentation-only. No video capability, adapter, harness, workflow, runtime configuration, model, or installer is admitted.
 
 ## HunyuanVideo 1.5
 
 - Source code: Git commit `60783e704160023913bee78f0b47036d393d4dfa`; the project does not publish a GitHub release tag.
 - Model repository: `tencent/HunyuanVideo-1.5` revision `9b49404b3f5df2a8f0b31df27a0c7ab872e7b038`.
 - Declared license: Tencent Hunyuan Community License; legal review is required before redistribution or product promotion.
+- Territorial restriction: the official license excludes the European Union,
+  United Kingdom, and South Korea. This is a hard promotion blocker unless a
+  later legal and product-policy review establishes a compliant scope.
 - Claimed scope: 8.3B parameters, Linux/CUDA, text-to-video and image-to-video, 480p/720p paths, and consumer GPU operation with offloading.
 - Repository aggregate: 371,770,754,991 LFS bytes across multiple independent checkpoints; a validation profile must download only its exact allowlisted files.
 

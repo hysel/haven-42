@@ -4,6 +4,14 @@
 
 Haven 42 is pre-1.0. Only the latest tagged release and the current `main` branch receive security fixes. Contracts marked `runtimeAdmitted: false`, documentation-only candidates, and failed or partial provider profiles are not supported runtime surfaces.
 
+Security review is a standing repository gate. Every enhancement receives a
+security check, and large, binary, or security-sensitive staged changes require
+a zero-finding review bound to the exact Git index tree before commit. A finding
+of any severity stops commit, push, and merge work until the repository owner is
+notified, every finding is fixed, and the complete staged tree is reviewed
+again. `config/security-review-gate.json` defines the enforced classification;
+the pre-commit hook rejects missing or stale review evidence.
+
 The local-web readiness scan is explicit, loopback-only, CSRF-protected, bounded, shell-free, network-free, and read-only. It returns sanitized capability facts rather than identity or raw command output, stores its snapshot only in memory, and builds setup plans only from the exact current server-owned snapshot. Automatic text recommendations require an exact provider digest and capability evidence; name-only matches remain unverified. Provider token and timing values are diagnostic, memory-only, and never represented as billing or remaining context. Event envelopes are fail-closed: sequences must be contiguous and monotonic, contain exactly one result or error terminal, and stop at that terminal. An unverified manual model is visibly warned, failures do not retry automatically, and restored input remains browser-memory-only for a new request.
 
 The trusted loopback service validates and classifies the normalized provider
@@ -13,6 +21,14 @@ private-network HTTP receives a prominent interception/tampering warning that
 recommends a trusted HTTPS endpoint or a loopback tunnel. HTTPS suppresses the
 HTTP warning but does not broaden the endpoint, redirect, or provider trust
 scope.
+
+Provider and public-catalog transports explicitly disable inherited OS and
+environment proxies, reject redirects, and use exact bounded response shapes.
+The loopback API requires exact JSON field types rather than coercing values,
+limits provider discovery to 512 models, caps request handling at 32 workers,
+and times out stalled sockets after 15 seconds. Assistant Markdown uses only
+inert DOM construction and a 2,048-element rendering budget; excess content is
+preserved as plain preformatted text instead of expanding the DOM.
 
 Optional public model search requires the user to activate the explicitly labeled **Search public catalog** submit action; changing capability or typing locally never starts it. It sends only a 64-character bounded query to the fixed Ollama HTTPS catalog, rejects redirects and responses over 512 KiB, returns at most 20 strictly normalized names, and persists nothing. Every online result is visibly distinguished from models already installed on the connected Ollama server and remains candidate-only with evidence unverified, hardware fit unknown, and license review required. Selecting an uninstalled candidate cannot execute it: Haven 42 neither calls a pull API nor starts a command. The only installation aid is a copyable `ollama pull` instruction constructed from a validated model name.
 
@@ -69,6 +85,21 @@ overlap, exact verifier and active-root continuity, current-root threshold
 claims, and replay defense. Those claims remain non-authoritative; no
 authorization is verified and no registry, trust store, runtime verifier,
 package, credential, or filesystem state changes.
+
+The post-quantum readiness foundation is also inventory and policy only. It
+records current cryptographic boundaries and the standardized ML-KEM, ML-DSA,
+and SLH-DSA candidate roles without selecting a parameter set, adding a
+dependency, changing TLS policy, handling a key, or verifying a signature. A
+future TLS claim requires observation of the exact hybrid negotiation and
+certificate signature; HTTP never gains a security claim. Hybrid negotiation
+is preferred but not enforced: an observed secure classical fallback is
+allowed, must be reported as classical, and cannot receive a PQC claim. A future update
+transition must retain classical protection, reject unknown algorithms,
+missing signatures, and silent downgrade, and pass independent native and
+package review. PQC cannot replace bulk symmetric encryption, OS key
+protection, platform code signing, or notarization. All PQC runtime,
+cryptographic, trust, package, update, network, and machine-effect authority
+remains false.
 
 Portable build dependencies are exact-version and SHA-256 locked for the admitted hosted runner platforms. Evidence generation and verification use an exact reviewed platform/version/license allowlist rather than trusting the caller environment. Native hostile tests reject altered, missing, unexpected, and traversal-manifest resources; shutdown authority failures; unsafe, linked, encrypted, oversized, excessive, duplicate, or case-colliding archive members; incomplete checksums/notices; evidence symlinks; unexpected targets; malformed SBOM/provenance; and archive/file-inventory divergence. Provenance is informational and explicitly unsigned/unattested.
 
@@ -172,6 +203,12 @@ SHA-256 lock, license expression, and platform marker across the requirements
 file, builder inventory, contract, and least-privilege workflow. npm, Cargo,
 Tauri, installers, signing, updater activation, release publication, and
 production redistribution remain outside that development-only admission.
+
+External provider engines, models, accelerator runtimes, drivers, installers,
+and updater payloads are outside the Haven package trust boundary. Haven may
+connect only through an admitted endpoint contract to separately acquired
+software. Discovery, compatibility evidence, and license audits grant no
+download, installation, update, execution, or redistribution authority.
 
 ## Reporting A Vulnerability
 

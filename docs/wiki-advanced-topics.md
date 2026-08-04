@@ -33,6 +33,7 @@ do not make unevidenced hardware or production claims.
 
 - [[Portable Development Package|Portable-Development-Package]]
 - [[Desktop Storage and Updates|Desktop-Storage-And-Updates]]
+- [[Post-Quantum Cryptography Readiness|Post-Quantum-Cryptography-Readiness]]
 - [[Release Guidance|Release-Guidance]]
 - [[Test Tiers|Test-Tiers]]
 - [[macOS Agent Host Bootstrap|macOS-Agent-Host-Bootstrap]]

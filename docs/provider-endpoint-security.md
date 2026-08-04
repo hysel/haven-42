@@ -10,9 +10,18 @@ Haven 42 treats every model or media endpoint as a network trust boundary, even 
 
 For the private Ollama server used during project validation, add `-EndpointTrustScope trusted-lan` on PowerShell or `--endpoint-trust-scope trusted-lan` on Linux/macOS. Never commit its address.
 
+## Post-quantum readiness
+
+HTTPS is not currently labeled post-quantum secure. The exact client and
+server runtime, negotiated key-establishment group, and certificate signature
+must be observed before such a claim. The inactive PQC readiness contract lists
+hybrid `X25519MLKEM768` only as a candidate; it does not change TLS policy or
+permit silent downgrade. See
+[Post-quantum cryptography readiness](post-quantum-cryptography-readiness.md).
+
 ## Data and file controls
 
-Text JSON responses are limited to 8 MiB and image payloads to 64 MiB by default. Redirects are disabled. JSON roots and image signatures are validated before use. Artifacts use exclusive creation, refuse symlinks/reparse points, receive restrictive file permissions where supported, and are never silently overwritten.
+Text JSON responses are limited to 8 MiB and image payloads to 64 MiB by default. Redirects and inherited OS/environment proxies are disabled, so a user-approved IP-literal provider connection cannot be silently routed through an intermediary. JSON roots and image signatures are validated before use. Artifacts use exclusive creation, refuse symlinks/reparse points, receive restrictive file permissions where supported, and are never silently overwritten.
 
 Prompts should use standard input or a prompt file so private text does not appear in child-process command lines. The compatibility `--prompt` argument remains available for direct interactive use but should not be used for sensitive content.
 

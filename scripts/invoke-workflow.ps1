@@ -16,6 +16,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+Import-Module (Join-Path $PSScriptRoot "PowerShellCompatibility.psm1") -Force
 
 $envelopeEvents = [System.Collections.Generic.List[object]]::new()
 $requestId = $null
@@ -62,7 +63,7 @@ function ConvertTo-RepositoryPath {
         throw "Workflow entry point is empty."
     }
 
-    if ([System.IO.Path]::IsPathFullyQualified($Path) -or $Path -match "(^|/|\\)\.\.(/|\\|$)") {
+    if ((Test-HavenPathFullyQualified $Path) -or $Path -match "(^|/|\\)\.\.(/|\\|$)") {
         throw "Workflow entry point must be repository-relative: $Path"
     }
 

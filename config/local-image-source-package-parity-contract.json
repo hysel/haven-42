@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-test-contract-only",
+  "profiles": ["comfyui-sdxl-windows-amd", "comfyui-sdxl-windows-nvidia", "comfyui-sdxl-windows-intel"],
+  "requiredEquivalentChecks": ["candidate-profile-selection", "loopback-only-endpoint", "accelerator-identity", "no-silent-cpu-fallback", "typed-png-artifact", "metadata-exclusion", "cancellation", "exact-process-shutdown", "endpoint-closure"],
+  "sourceMayUseRepositoryFiles": true,
+  "packageMayReadRepository": false,
+  "packageMayContainProviderRuntime": false,
+  "packageMayContainCheckpoint": false,
+  "packageMayContainGeneratedArtifact": false,
+  "externalProviderSoftwareMustRemainSeparate": true,
+  "providerAcquisitionIsNotPackageAuthority": true,
+  "resultComparison": {
+    "exactPolicyFieldsRequired": true,
+    "generatedBytesMustMatch": false,
+    "nondeterministicImageContentAllowed": true,
+    "sanitizedEvidenceOnly": true
+  },
+  "nativeExecutionRequiredForCompletion": true
+}

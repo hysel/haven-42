@@ -42,7 +42,11 @@ The offline lexical-retrieval engine, restricted parser-worker foundation,
 inactive web-research foundation, and conversation-history foundation retain
 no application runtime state because none exposes a route. The parser
 foundation opens no document and starts no worker. Lexical test state is caller-owned memory and is cleared
-on removal, failure, and shutdown; it has no persistence API. The history
+on removal, failure, provider change, and shutdown; exact duplicate content is
+rejected and it has no persistence API. Embedding candidates remain unselected
+and download-free. The encrypted-library contract forbids plaintext fallback,
+shared/network storage, live file references, automatic reset, database/index
+creation, and package admission. The history
 foundation contains a logical schema and pure planners. A separate development
 validator opens only a fresh temporary SQLite database containing fixed
 synthetic records, verifies backup/restore and deletion, and removes every
@@ -59,6 +63,13 @@ archives, binary signatures, NULs, non-UTF-8 data, and files that change during
 the read, and returns only relative names, sizes, extensions, and digests. It
 stores no content or path and grants no browser, provider, watcher, index, or
 background authority.
+
+Controlled-research query, result, page, citation, and approval state also
+remain outside the application. The offline transport guard accepts only
+caller-supplied destination, DNS, timing, header, and body receipts; it performs
+no resolution or network I/O. Exact single-use approvals and registered results
+exist only in test memory and clear on cancellation, failure, provider change,
+and shutdown.
 
 Restricted PDF and complex-document review fixtures, candidate artifacts, and
 native evidence exist only beneath ignored `dist/local-review` during explicit

@@ -11,6 +11,13 @@ python -m pip install --require-hashes -r package/requirements-build.txt
 python scripts/build-portable-development-package.py
 ```
 
+A source export without `.git` must provide `HAVEN42_SOURCE_COMMIT` and
+`HAVEN42_SOURCE_TREE_STATE`. A modified export must additionally provide the
+SHA-256 of its exact source archive as `HAVEN42_SOURCE_SNAPSHOT_SHA256`.
+Provenance then records the base commit, `modified-uncommitted`, the snapshot
+digest, and `commitIsExactSource: false`; it must never present that artifact
+as an exact commit build.
+
 The ordinary build verifies the committed protected-resource manifest and
 fails closed instead of regenerating trust metadata. After reviewing an
 intentional change to an allowlisted UI or data resource, update only that
@@ -78,6 +85,20 @@ registry fallback reported the Intel accelerator without elevation or raw
 registry output, and readiness declared every network, file, installation,
 elevation, service, and driver effect false. This is development evidence, not
 an Intel image-provider package admission or a production-readiness claim.
+
+On 2026-08-04, a second unsigned Windows x64 build used the same locked
+Python 3.14.6/PyInstaller 6.21.0 inputs from a privacy-scanned modified-source
+snapshot. Provenance recorded the base commit, `modified-uncommitted`, exact
+snapshot SHA-256, and `commitIsExactSource: false`. Artifact, checksum,
+inventory, notice, SBOM, archive, source-versus-package parity, relocation,
+read-only-startup, hostile-environment, lifecycle, collision, integrity, and
+shutdown checks passed on the Windows NVIDIA build host. The exact verified
+archive bytes then passed an independent non-administrator Windows
+PowerShell 5.1 smoke on the physical Intel host, including loopback binding,
+security headers, package integrity, disabled update activation, authorized
+shutdown, model cleanup, and zero process exit. This remains unsigned local
+development evidence and does not grant release or production authority.
+
 On Ubuntu hosts where Chromium is strictly confined as a Snap, the browser
 test places only its disposable profile under Chromium's user-owned Snap
 common directory so both processes can observe `DevToolsActivePort`; the
@@ -115,7 +136,7 @@ Each artifact set contains:
   group;
 - hash-verified CPython 3.14.6 bundled-license evidence, the Apache 2.0
   license text used by OpenSSL 3.5.7, and the exact libffi 3.4.4 MIT license;
-- unsigned build provenance binding the exact source commit, OS, architecture, Python, PyInstaller, workflow identity, and explicit absence of platform signing, notarization, an in-build attestation, and release publication.
+- unsigned build provenance binding a clean build to its exact source commit or a modified development build to its base commit plus exact source-snapshot SHA-256, alongside OS, architecture, Python, PyInstaller, workflow identity, and explicit absence of platform signing, notarization, an in-build attestation, and release publication.
 
 The local build remains unattested. Separately, an approved future push to
 `main` can run the least-privilege hosted job documented in

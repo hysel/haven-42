@@ -1,10 +1,15 @@
 # Local Audio Provider Candidates
 
-Recorded 2026-07-22 from official upstream repositories, model cards, and one disposable Linux CUDA feasibility cell. The live cell is partial evidence only. It does not promote a provider or add `audio.music.create`, scripts, adapters, workflows, configuration, or installer assets.
+Recorded 2026-07-22 from official upstream repositories, model cards, and one disposable Linux CUDA feasibility cell, then rechecked against official upstream licensing and releases on 2026-08-04. The live cell is partial evidence only. It does not promote a provider or add `audio.music.create`, scripts, adapters, workflows, configuration, or installer assets.
 
 ## ACE-Step 1.5
 
 The current application release is `v0.1.8`, resolving to Git commit `dce621408bee8c31b4fcf4811682eb9359e1bc94`. The separately versioned official `ACE-Step/Ace-Step1.5` model repository was observed at revision `19671f406d603126926c1b7e2adc169acbcade22`, with 10,079,024,720 bytes of LFS-managed blobs.
+
+The 2026-08-04 recheck still identified `v0.1.8` as the latest official
+release and preserved its verified GitHub commit identity. This refresh does
+not resolve the unauthenticated catch-all route collision; the regression is
+captured in `examples/fixtures/ace-step-route-collision-cases.json`.
 
 | Baseline file | Bytes | Published SHA-256 |
 | --- | ---: | --- |
@@ -20,7 +25,7 @@ Official sources: [release](https://github.com/ace-step/ACE-Step-1.5/releases/ta
 
 ## Stable Audio 3
 
-Stable Audio 3 uses the Stability AI Community License and redistributes T5Gemma components under their own terms. Model access is gated and commercial use must be evaluated against the current Stability licensing program; this is a product-policy constraint, not merely attribution text.
+Stable Audio 3 uses the Stability AI Community License and redistributes T5Gemma components under their own terms. The official 2026-08-04 licensing page includes Stable Audio 3.0 in the free Community tier for individuals and organizations below USD 1 million annual revenue, while higher-revenue commercial use requires an Enterprise license. Model access is gated and eligibility must be evaluated against the current terms; this is a product-policy constraint, not merely attribution text.
 
 | Candidate | Model revision | LFS bytes | Primary weight SHA-256 | Intended evaluation |
 | --- | --- | ---: | --- | --- |

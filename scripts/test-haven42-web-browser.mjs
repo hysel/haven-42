@@ -977,6 +977,29 @@ try {
     || !markdown.rawHtmlVisible
   ) throw new Error(`safe-markdown-rendering:${JSON.stringify(markdown)}`);
   checks += 10;
+
+  const boundedMarkdown = await cdp.evaluate(`(() => {
+    const content = document.createElement('div');
+    appendMarkdown(
+      content,
+      Array.from({ length: 3000 }, (_, index) => '- **bounded-' + index + '**').join('\\n'),
+    );
+    const fallback = content.querySelector('.markdown-render-limit');
+    return {
+      elements: content.querySelectorAll('*').length,
+      fallbackPresent: Boolean(fallback),
+      finalContentPreserved: fallback?.textContent.includes('bounded-2999') || false,
+      scripts: content.querySelectorAll('script, img').length,
+    };
+  })()`);
+  if (
+    boundedMarkdown.elements > 2049
+    || !boundedMarkdown.fallbackPresent
+    || !boundedMarkdown.finalContentPreserved
+    || boundedMarkdown.scripts !== 0
+  ) throw new Error(`bounded-markdown-rendering:${JSON.stringify(boundedMarkdown)}`);
+  checks += 4;
+
   await cdp.call("Emulation.setDeviceMetricsOverride", {
     width: 540,
     height: 900,

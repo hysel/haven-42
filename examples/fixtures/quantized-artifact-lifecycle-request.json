@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "operation": "inspect",
+  "source": {"repository": "example/model", "revision": "1111111111111111111111111111111111111111", "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "license": "Apache-2.0", "derivativeAllowed": true},
+  "derivative": {"artifactId": "model-q4-k-m", "format": "gguf", "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", "sizeBytes": 4096, "license": "Apache-2.0", "provenanceComplete": true},
+  "recipe": {"tool": "llama-quantize", "toolVersion": "b10088", "method": "Q4_K_M", "bits": 4, "groupSize": 0, "calibrationDigest": null},
+  "compatibility": {"runtime": "llama.cpp", "runtimeVersion": "b10088", "operatingSystem": "windows", "architecture": "x86_64", "accelerator": "exact-test-device", "driver": "exact-test-driver", "contextTokens": 4096, "fullOffloadRequired": true},
+  "storage": {"availableBytes": 16384, "finalBytes": 4096, "temporaryBytes": 4096, "reserveBytes": 1024},
+  "validation": {"functionalPassed": true, "qualityPassed": true, "toolUsePassed": true, "cleanupPassed": true, "rollbackPassed": true, "silentFallbackObserved": false},
+  "state": {"phase": "idle", "activeArtifactId": "model-known-good", "previousArtifactId": null, "partialArtifactId": null}
+}

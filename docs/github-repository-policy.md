@@ -59,11 +59,23 @@ write permissions, incomplete native artifact coverage, or drift from
 
 ## Efficient Local-to-Hosted Flow
 
-1. Make the complete change and synchronize the wiki before opening the PR.
-2. Stage every intended repository file; leave no unstaged or untracked files.
-3. Run Full without `-NoReceipt`. Schema-v3 records the exact staged index tree.
-4. Commit without editing that content. Pre-push sees the identical `HEAD` tree and skips a duplicate Full run.
-5. Push, open the PR, and monitor the nine required checks.
-6. Fix only evidence-backed failures. A new content tree requires a new Full receipt and hosted run.
+1. Make the complete local change and synchronize the wiki before opening the PR.
+2. Run `python scripts/check-pre-merge-readiness.py --mode spot` and the focused commands it reports.
+3. Stage every intended repository file; leave no unstaged or untracked files.
+4. Review the complete staged diff for security. Any finding stops the flow:
+   notify the repository owner, fix every finding, and repeat the review.
+5. With zero findings, run `python scripts/security-review-gate.py --record-clean`.
+   Large, binary, and security-sensitive changes receive an exact staged-tree
+   receipt under `.git`; the pre-commit hook fails closed if it is missing or stale.
+6. Run Full without `-NoReceipt`. Schema-v3 records the exact staged index tree.
+7. Run the readiness command with `--mode commit`, then commit without editing that content. Pre-push sees the identical `HEAD` tree and skips a duplicate Full run.
+8. Push, open the PR, and monitor the nine required checks.
+9. Fix only evidence-backed failures. A new content tree requires new security-review and Full receipts and a new hosted run.
+
+The readiness command uses only the local Git object database and working tree;
+it does not fetch, push, contact GitHub, or trust a stale receipt. A branch that
+is behind or divergent from the locally recorded `origin/main` fails with an
+actionable state name. Fetch deliberately and rerun instead of allowing the
+check to make an undisclosed network change.
 
 Wiki CI retries a bounded number of times and fast-forwards its disposable clone between attempts. This absorbs short cross-repository propagation races; it does not permit persistent wiki drift.

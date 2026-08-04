@@ -83,7 +83,10 @@ def validate_local_base_url(value: str) -> dict[str, Any]:
 def read_bounded(request: urllib.request.Request | str, timeout: int, maximum_bytes: int) -> bytes:
     if timeout < 1 or timeout > 3600 or maximum_bytes < 1:
         raise ProviderSecurityError("invalid-provider-io-bound")
-    opener = urllib.request.build_opener(_NoRedirect())
+    # Provider traffic must go directly to the user-approved IP literal. Inheriting
+    # an OS or environment proxy could disclose private prompts and attachments to
+    # an unrelated intermediary.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
     try:
         with opener.open(request, timeout=timeout) as response:
             content_length = response.headers.get("Content-Length")

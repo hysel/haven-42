@@ -25,7 +25,7 @@ The project deliberately separates three states:
 - Local image generation and future media-provider evaluation.
 - Restricted document-parser research without runtime admission.
 - Optional encrypted conversation-history architecture without persistence.
-- Controlled web-research contracts without an active network adapter.
+- Controlled web-research transport/approval guards without an active network adapter.
 
 For milestone detail, open the [[Roadmap]]. For exact committed outcomes and
 limits, use the [[Evidence Dashboard|Evidence-Dashboard]].

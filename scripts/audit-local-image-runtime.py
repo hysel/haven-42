@@ -23,6 +23,9 @@ DEFAULT_CONTRACT = ROOT / "config" / "local-image-runtime-license-contract.json"
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 PROFILE_ID = re.compile(r"^[a-z0-9][a-z0-9.-]{2,79}$")
 SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._+ -]{0,199}$")
+WINDOWS_RESERVED_NAME = re.compile(
+    r"^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\..*)?$", re.IGNORECASE
+)
 LICENSE_OVERRIDE_ID = re.compile(
     r"^[a-z0-9][a-z0-9._+-]{0,199}@[A-Za-z0-9][A-Za-z0-9._+-]{0,99}$"
 )
@@ -44,9 +47,20 @@ class AuditError(ValueError):
     pass
 
 
+def reject_duplicate_object(pairs: list[tuple[str, object]]) -> dict:
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise AuditError("duplicate-contract-key")
+        value[key] = item
+    return value
+
+
 def load_json(path: Path) -> dict:
     try:
-        value = json.loads(path.read_text(encoding="utf-8"))
+        value = json.loads(
+            path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_object
+        )
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise AuditError("invalid-contract") from error
     if not isinstance(value, dict):
@@ -118,10 +132,31 @@ def normalized_name(value: str) -> str:
     return re.sub(r"[-_.]+", "-", value).lower()
 
 
+def safe_name(value: str) -> bool:
+    return bool(
+        SAFE_NAME.fullmatch(value)
+        and value not in {".", ".."}
+        and not value.endswith((".", " "))
+        and not WINDOWS_RESERVED_NAME.fullmatch(value)
+    )
+
+
 def is_link_or_reparse(path: Path, info: os.stat_result) -> bool:
     attributes = getattr(info, "st_file_attributes", 0)
     reparse_flag = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
     return path.is_symlink() or stat.S_ISLNK(info.st_mode) or bool(attributes & reparse_flag)
+
+
+def runtime_filesystem_root(path: Path) -> Path:
+    """Use Win32 extended-length syntax without changing the recorded path boundary."""
+    if os.name != "nt":
+        return path
+    value = str(path)
+    if value.startswith("\\\\?\\"):
+        return path
+    if value.startswith("\\\\"):
+        return Path("\\\\?\\UNC\\" + value[2:])
+    return Path("\\\\?\\" + value)
 
 
 def walk_regular_files(root: Path, limits: dict) -> tuple[list[Path], list[Path]]:
@@ -158,12 +193,32 @@ def walk_regular_files(root: Path, limits: dict) -> tuple[list[Path], list[Path]
 
 def safe_relative(path: Path, root: Path) -> str:
     relative = path.relative_to(root)
-    if len(relative.parts) > 24 or any(not SAFE_NAME.fullmatch(part) for part in relative.parts):
+    if len(relative.parts) > 24 or any(not safe_name(part) for part in relative.parts):
         return "redacted-unsafe-name/" + hashlib.sha256(str(relative).encode("utf-8")).hexdigest()
     value = relative.as_posix()
     if len(value) > 1000:
         return "redacted-long-name/" + hashlib.sha256(value.encode("utf-8")).hexdigest()
     return value
+
+
+def is_contracted_embedded_runtime_path(relative_parts: tuple[str, ...]) -> bool:
+    """Recognize only the two admitted extraction-root shapes for embedded CPython."""
+    if len(relative_parts) >= 2 and relative_parts[0] == "python_embeded":
+        return True
+    return (
+        len(relative_parts) >= 3
+        and relative_parts[:2] == ("ComfyUI_windows_portable", "python_embeded")
+    )
+
+
+def reject_case_collisions(paths: list[Path], root: Path) -> None:
+    casefold_paths: dict[str, str] = {}
+    for path in paths:
+        relative = path.relative_to(root).as_posix()
+        key = relative.casefold()
+        if key in casefold_paths and casefold_paths[key] != relative:
+            raise AuditError("case-collision-rejected")
+        casefold_paths[key] = relative
 
 
 def license_files(dist_info: Path, files_by_parent: dict[Path, list[Path]], contract: dict) -> list[dict]:
@@ -185,7 +240,7 @@ def license_files(dist_info: Path, files_by_parent: dict[Path, list[Path]], cont
         size = path.stat(follow_symlinks=False).st_size
         if size > limits["maxLicenseBytes"]:
             raise AuditError("maximum-license-size-exceeded")
-        name = path.name if SAFE_NAME.fullmatch(path.name) else "redacted-unsafe-name"
+        name = path.name if safe_name(path.name) else "redacted-unsafe-name"
         evidence.append({"name": name, "bytes": size, "sha256": digest_file(path)})
     return evidence
 
@@ -201,7 +256,7 @@ def distribution_scope(metadata_path: Path) -> str:
     if len(relative.parts) == 1:
         return "top-level"
     owner = relative.parts[0]
-    return f"vendored/{owner}" if SAFE_NAME.fullmatch(owner) else "vendored/redacted"
+    return f"vendored/{owner}" if safe_name(owner) else "vendored/redacted"
 
 
 def distribution_record(metadata_path: Path, evidence: list[dict], max_bytes: int) -> dict:
@@ -212,6 +267,9 @@ def distribution_record(metadata_path: Path, evidence: list[dict], max_bytes: in
         message = BytesParser(policy=compat32).parsebytes(metadata_path.read_bytes(), headersonly=True)
     except (OSError, ValueError) as error:
         raise AuditError("invalid-distribution-metadata") from error
+    for field in ("Name", "Version", "License-Expression", "License"):
+        if len(message.get_all(field, [])) > 1:
+            raise AuditError("ambiguous-distribution-metadata")
     name = clean_field(message.get("Name"))
     version = clean_field(message.get("Version"))
     if name is None or version is None:
@@ -242,12 +300,34 @@ def distribution_record(metadata_path: Path, evidence: list[dict], max_bytes: in
     }
 
 
+def record_path_parts(value: str, *, allow_windows_separators: bool) -> tuple[str, ...]:
+    if not value or "\x00" in value or any(ord(char) < 32 for char in value):
+        raise AuditError("invalid-record-row")
+    if allow_windows_separators and ":" in value:
+        raise AuditError("invalid-record-row")
+    if "\\" in value:
+        if (
+            not allow_windows_separators
+            or "/" in value
+            or value.startswith("\\")
+            or "\\\\" in value
+        ):
+            raise AuditError("invalid-record-row")
+        value = value.replace("\\", "/")
+        raw_parts = value.split("/")
+        if any(part in {"", ".", ".."} for part in raw_parts):
+            raise AuditError("invalid-record-row")
+    return PurePosixPath(value).parts
+
+
 def record_native_claims(
     dist_info: Path,
     distribution: dict,
     runtime_root: Path,
     native_suffixes: set[str],
     limits: dict,
+    *,
+    allow_windows_separators: bool,
 ) -> dict[Path, dict]:
     record = dist_info / "RECORD"
     if not record.is_file():
@@ -261,9 +341,12 @@ def record_native_claims(
             for index, row in enumerate(csv.reader(stream), 1):
                 if index > limits["maxRecordRowsPerDistribution"]:
                     raise AuditError("maximum-record-row-count-exceeded")
-                if len(row) != 3 or not row[0] or "\\" in row[0] or "\x00" in row[0]:
+                if len(row) != 3:
                     raise AuditError("invalid-record-row")
-                candidate = (dist_info.parent / Path(*PurePosixPath(row[0]).parts)).resolve(strict=False)
+                parts = record_path_parts(
+                    row[0], allow_windows_separators=allow_windows_separators
+                )
+                candidate = (dist_info.parent / Path(*parts)).resolve(strict=False)
                 try:
                     candidate.relative_to(runtime_root)
                 except ValueError as error:
@@ -302,15 +385,26 @@ def audit(args: argparse.Namespace) -> dict:
     if not SHA256.fullmatch(artifact_sha) or artifact_sha != profile.get("archiveSha256"):
         raise AuditError("artifact-digest-not-contracted")
 
-    root = args.runtime.resolve(strict=True)
+    resolved_root = args.runtime.resolve(strict=True)
     root_info = args.runtime.stat(follow_symlinks=False)
-    if not root.is_dir() or is_link_or_reparse(args.runtime, root_info):
+    if not resolved_root.is_dir() or is_link_or_reparse(args.runtime, root_info):
         raise AuditError("invalid-runtime-root")
+    root = runtime_filesystem_root(resolved_root)
     output = args.output.resolve(strict=False)
     if output.exists():
         raise AuditError("output-already-exists")
+    if not safe_name(args.output.name):
+        raise AuditError("invalid-output-name")
+    output_parent = args.output.parent
+    if not output_parent.is_dir():
+        raise AuditError("invalid-output-parent")
+    output_parent_info = output_parent.stat(follow_symlinks=False)
+    if is_link_or_reparse(output_parent, output_parent_info):
+        raise AuditError("output-parent-link-rejected")
+    if os.path.normcase(str(output_parent.resolve())) != os.path.normcase(str(output_parent.absolute())):
+        raise AuditError("output-parent-redirect-rejected")
     try:
-        output.relative_to(root)
+        output.relative_to(resolved_root)
     except ValueError:
         pass
     else:
@@ -327,6 +421,7 @@ def audit(args: argparse.Namespace) -> dict:
         archive_verified = True
 
     files, directories = walk_regular_files(root, contract["limits"])
+    reject_case_collisions(files + directories, root)
     by_parent: dict[Path, list[Path]] = {}
     for path in files:
         by_parent.setdefault(path.parent, []).append(path)
@@ -367,7 +462,7 @@ def audit(args: argparse.Namespace) -> dict:
 
     native_suffixes = {item.casefold() for item in contract["nativeSuffixes"]}
     native = [path for path in files if path.suffix.casefold() in native_suffixes]
-    native_names = sorted({path.name for path in native if SAFE_NAME.fullmatch(path.name)}, key=str.casefold)
+    native_names = sorted({path.name for path in native if safe_name(path.name)}, key=str.casefold)
     if len(native_names) > contract["limits"]["maxNativeBasenames"]:
         raise AuditError("maximum-native-basename-count-exceeded")
 
@@ -392,7 +487,12 @@ def audit(args: argparse.Namespace) -> dict:
     ownership: dict[Path, list[dict]] = {}
     for dist_info, distribution in zip(distribution_paths, distributions):
         for path, claim in record_native_claims(
-            dist_info, distribution, root, native_suffixes, contract["limits"]
+            dist_info,
+            distribution,
+            root,
+            native_suffixes,
+            contract["limits"],
+            allow_windows_separators=profile["operatingSystem"] == "windows",
         ).items():
             ownership.setdefault(path, []).append(claim)
 
@@ -415,8 +515,10 @@ def audit(args: argparse.Namespace) -> dict:
                 mismatched_record_hash = True
             owners.append({**claim, "recordSha256Matches": matches})
         relative_parts = path.relative_to(root).parts
-        if not owners and len(relative_parts) >= 3 and relative_parts[:2] == (
-            "ComfyUI_windows_portable", "python_embeded"
+        if (
+            not owners
+            and profile["operatingSystem"] == "windows"
+            and is_contracted_embedded_runtime_path(relative_parts)
         ):
             owners.append({
                 "distribution": profile["embeddedRuntime"],
@@ -480,7 +582,6 @@ def audit(args: argparse.Namespace) -> dict:
             "endpointsRecorded": False,
         },
     }
-    output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(report, stream, indent=2, sort_keys=True, ensure_ascii=True)
         stream.write("\n")

@@ -70,6 +70,11 @@ The separate offline release-candidate path consumes committed fixture data shap
 
 ## Cryptographic Verifier Handoff
 
+The candidate mechanism and dependency decision is recorded in
+`docs/core-update-cryptographic-verifier-review.md`. Native Windows and macOS
+verification plus a pinned offline Sigstore-bundle verifier are research
+candidates only. No cryptographic dependency or trusted identity is admitted.
+
 `scripts/core-update-trust-handoff.py` validates the shape and binding of a
 future native verifier receipt. The receipt contains bounded identifiers,
 verifier profile/version and binary digest, trust-root identifier, exact

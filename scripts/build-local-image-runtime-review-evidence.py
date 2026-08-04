@@ -27,13 +27,24 @@ class EvidenceError(ValueError):
     pass
 
 
+def reject_duplicate_object(pairs: list[tuple[str, object]]) -> dict:
+    value = {}
+    for key, item in pairs:
+        if key in value:
+            raise EvidenceError("duplicate-audit-report-key")
+        value[key] = item
+    return value
+
+
 def load_report(path: Path) -> dict:
     if not path.is_file() or path.is_symlink():
         raise EvidenceError("invalid-audit-report")
     if path.stat().st_size > 64 * 1024 * 1024:
         raise EvidenceError("audit-report-too-large")
     try:
-        report = json.loads(path.read_text(encoding="utf-8"))
+        report = json.loads(
+            path.read_text(encoding="utf-8"), object_pairs_hook=reject_duplicate_object
+        )
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise EvidenceError("invalid-audit-report") from error
     if not isinstance(report, dict) or report.get("schemaVersion") != 1:

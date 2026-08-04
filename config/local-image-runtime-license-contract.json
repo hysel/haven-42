@@ -10,7 +10,7 @@
     "maxRecordRowsPerDistribution": 250000,
     "maxLicenseBytes": 1048576,
     "maxGlobalLicenseBytes": 33554432,
-    "maxLicenseFilesPerDistribution": 24,
+    "maxLicenseFilesPerDistribution": 109,
     "maxGlobalLicenseFiles": 2048,
     "maxNativeBasenames": 4096
   },

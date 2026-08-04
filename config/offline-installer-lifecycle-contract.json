@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.offline-installer-lifecycle",
+  "implementationStatus": "simulation-only",
+  "runtimeAdmitted": false,
+  "artifactRegistry": "config/install-artifact-registry.json",
+  "operations": [
+    "install",
+    "update",
+    "rollback",
+    "cleanup",
+    "uninstall",
+    "recover"
+  ],
+  "transactionPhases": [
+    "preflight",
+    "staging",
+    "verifying",
+    "activating",
+    "health-check",
+    "committing",
+    "cleaning",
+    "complete"
+  ],
+  "approvedRootKinds": [
+    "user-application",
+    "update-state"
+  ],
+  "retainedVersionLimit": 2,
+  "artifactIdentityFields": [
+    "fileName",
+    "version",
+    "platform",
+    "architecture",
+    "byteLength",
+    "sha256",
+    "sourceType",
+    "licenseReviewed",
+    "integrityVerified"
+  ],
+  "artifactSourceTypes": [
+    "bundled-development-artifact",
+    "offline-user-supplied"
+  ],
+  "pathPolicy": {
+    "rawPathsAllowed": false,
+    "absoluteSegmentsAllowed": false,
+    "parentTraversalAllowed": false,
+    "symlinksAllowed": false,
+    "junctionsAllowed": false,
+    "reparsePointsAllowed": false,
+    "mountEscapesAllowed": false,
+    "applicationRootOverlapAllowed": false,
+    "repositoryRootOverlapAllowed": false,
+    "userDataRootOverlapAllowed": false,
+    "destinationMustBeCurrentUserOwned": true,
+    "destinationMustBeWritable": true,
+    "destinationPermissionsMustBeTrusted": true
+  },
+  "storagePolicy": {
+    "destinationMultiplier": 3,
+    "temporaryMultiplier": 2,
+    "fixedReserveBytes": 67108864
+  },
+  "uninstallPolicy": {
+    "exactRegisteredFilesOnly": true,
+    "broadDirectoryDeletionAllowed": false,
+    "maximumFileRecords": 256,
+    "userDataDefault": "preserve",
+    "userDataDeletionRequiresExplicitChoice": true
+  },
+  "journalPolicy": {
+    "canonicalJson": true,
+    "sha256DigestChain": true,
+    "strictlyIncreasingSequence": true,
+    "replayAllowed": false
+  },
+  "machineEffects": {
+    "networkUsed": false,
+    "filesWritten": false,
+    "directoriesCreated": false,
+    "processesStarted": false,
+    "installationPerformed": false,
+    "updatePerformed": false,
+    "rollbackPerformed": false,
+    "cleanupPerformed": false,
+    "uninstallPerformed": false,
+    "userDataDeleted": false,
+    "serviceChanged": false,
+    "scheduledTaskChanged": false,
+    "registryChanged": false,
+    "driverChanged": false,
+    "elevationRequested": false
+  },
+  "platformChecklists": {
+    "windows": [
+      "verify an exact signed or attested artifact identity",
+      "resolve a canonical current-user application root with native APIs",
+      "reject reparse points and junctions at every path segment",
+      "prove ACL ownership and least-privilege write access",
+      "exercise interruption, rollback, exact-file uninstall, and retained user data"
+    ],
+    "linux": [
+      "verify an exact signed or attested artifact identity",
+      "resolve a canonical user application root without crossing mount boundaries",
+      "reject symbolic links at every path segment",
+      "prove current-user ownership and mode access",
+      "exercise interruption, rollback, exact-file uninstall, and retained user data"
+    ],
+    "macos": [
+      "verify an exact signed or attested artifact identity",
+      "resolve a canonical user-approved application root with native APIs",
+      "reject symbolic links and volume escapes at every path segment",
+      "prove current-user ownership and least-privilege write access",
+      "exercise interruption, rollback, exact-file uninstall, and retained user data"
+    ]
+  }
+}

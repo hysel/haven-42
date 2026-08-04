@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -113,6 +114,36 @@ class EvidenceTests(unittest.TestCase):
         original = copy.deepcopy(value)
         MODULE.build(value)
         self.assertEqual(value, original)
+
+    def test_inventory_sbom_notice_and_checksum_parity(self):
+        files = MODULE.build(report())
+        summary = json.loads(files["review-summary.json"])
+        inventory = json.loads(files["dependency-license-inventory.json"])
+        native = json.loads(files["native-file-inventory.json"])
+        sbom = json.loads(files["image-runtime.cdx.json"])
+        checksummed = {item["name"]: item for item in summary["files"]}
+        self.assertEqual(set(checksummed), set(files) - {"review-summary.json"})
+        for name, item in checksummed.items():
+            self.assertEqual(item["bytes"], len(files[name]))
+            self.assertEqual(item["sha256"], hashlib.sha256(files[name]).hexdigest())
+        self.assertEqual(summary["distributionCount"], len(inventory["distributions"]))
+        self.assertEqual(summary["nativeFileCount"], len(native["artifacts"]))
+        self.assertEqual(
+            len(sbom["components"]),
+            summary["distributionCount"] + summary["nativeFileCount"],
+        )
+        notice = files["THIRD-PARTY-NOTICES-CANDIDATE.txt"].decode("utf-8")
+        self.assertIn(
+            f"Native files requiring exact origin/license review: {summary['nativeFileCount']}",
+            notice,
+        )
+
+    def test_duplicate_report_keys_are_rejected(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "report.json"
+            path.write_text('{"schemaVersion":1,"schemaVersion":1}', encoding="utf-8")
+            with self.assertRaisesRegex(MODULE.EvidenceError, "duplicate-audit-report-key"):
+                MODULE.load_report(path)
 
 
 if __name__ == "__main__":

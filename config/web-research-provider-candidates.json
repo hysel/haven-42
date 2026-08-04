@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-research-only-no-provider-selected",
+  "candidates": [
+    {
+      "id": "wikipedia-query",
+      "category": "public-encyclopedia-search",
+      "credentialRequired": false,
+      "fixedOriginCandidate": "https://en.wikipedia.org/w/api.php",
+      "capabilityScope": "encyclopedia-metadata-only",
+      "selected": false
+    },
+    {
+      "id": "brave-search-api",
+      "category": "general-web-search",
+      "credentialRequired": true,
+      "fixedOriginCandidate": null,
+      "capabilityScope": "unverified-until-current-terms-privacy-and-api-review",
+      "selected": false
+    },
+    {
+      "id": "self-hosted-search",
+      "category": "explicit-loopback-or-private-endpoint",
+      "credentialRequired": false,
+      "fixedOriginCandidate": null,
+      "capabilityScope": "separate-install-health-version-and-ssrf-evidence-required",
+      "selected": false
+    }
+  ],
+  "credentials": {
+    "configurationAllowed": false,
+    "storageAllowed": false,
+    "environmentReadAllowed": false
+  },
+  "authority": {
+    "providerSelected": false,
+    "networkAllowed": false,
+    "credentialAllowed": false,
+    "runtimeRouteAllowed": false,
+    "packageAllowed": false
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-08-04",
+  "status": "documentation-and-test-contract-only",
+  "runtimeAdmitted": false,
+  "activeRegistryEntriesAllowed": false,
+  "downloadsAllowed": false,
+  "audio": {
+    "formats": {
+      "wav": {"mediaTypes": ["audio/wav", "audio/x-wav"], "requiredMagicHex": "52494646", "requiredFormHex": "57415645"},
+      "flac": {"mediaTypes": ["audio/flac", "audio/x-flac"], "requiredMagicHex": "664c6143"}
+    },
+    "requiredGates": ["duration-bounded", "sample-rate-allowlisted", "channels-allowlisted", "decodable", "non-silent-signal", "finite-samples", "clipping-below-limit", "metadata-reviewed", "exact-byte-count"],
+    "retention": {"temporaryDeletedOnCompletion": true, "failedOutputDeleted": true, "providerHistoryCleared": true, "userArtifactPreservedByDefault": true, "explicitDeleteRequired": true}
+  },
+  "video": {
+    "formats": {
+      "mp4": {"mediaTypes": ["video/mp4"], "requiredBox": "ftyp", "browserExecutionAllowed": false},
+      "webm": {"mediaTypes": ["video/webm"], "requiredMagicHex": "1a45dfa3", "browserExecutionAllowed": false}
+    },
+    "requiredGates": ["duration-bounded", "dimensions-allowlisted", "frame-rate-bounded", "frame-count-consistent", "decodable", "non-empty-frames", "audio-track-declared", "metadata-reviewed", "exact-byte-count"],
+    "retention": {"temporaryFramesDeleted": true, "failedOutputDeleted": true, "providerHistoryCleared": true, "userArtifactPreservedByDefault": true, "explicitDeleteRequired": true}
+  },
+  "consent": {
+    "referenceMediaPurposeBound": true,
+    "identifiableVoiceRequiresRightsConfirmation": true,
+    "likenessRequiresRightsConfirmation": true,
+    "lyricsRequireRightsConfirmation": true,
+    "artistStyleMayNotClaimEndorsementOrAuthenticity": true,
+    "imageToVideoReferenceRequiresApproval": true,
+    "pathsAndIdentityInputsMayEnterEvidence": false
+  },
+  "candidates": [
+    {"id": "ace-step-1.5", "kind": "audio", "sourceRevision": "dce621408bee8c31b4fcf4811682eb9359e1bc94", "modelRevision": "19671f406d603126926c1b7e2adc169acbcade22", "license": "MIT", "status": "partial-pass-blocked-route-auth", "promotionBlocked": true},
+    {"id": "stable-audio-3-small-sfx", "kind": "audio", "modelRevision": "ae12755283df9d62ca39a9b050a39a0b607b8c20", "license": "Stability AI Community License", "status": "license-restricted-candidate", "promotionBlocked": true},
+    {"id": "stable-audio-3-medium", "kind": "audio", "modelRevision": "27b5a21b791b1b033d193a9e1e3ce78493f102f9", "license": "Stability AI Community License", "status": "license-restricted-candidate", "promotionBlocked": true},
+    {"id": "hunyuanvideo-1.5", "kind": "video", "sourceRevision": "60783e704160023913bee78f0b47036d393d4dfa", "modelRevision": "9b49404b3f5df2a8f0b31df27a0c7ab872e7b038", "minimumVramBytes": 15032385536, "minimumStorageBytes": null, "license": "Tencent Hunyuan Community License", "status": "territory-and-license-restricted-candidate", "promotionBlocked": true},
+    {"id": "wan2.2-ti2v-5b", "kind": "video", "sourceRevision": "42bf4cfaa384bc21833865abc2f9e6c0e67233dc", "modelRevision": "921dbaf3f1674a56f47e83fb80a34bac8a8f203e", "minimumVramBytes": 25769803776, "minimumStorageBytes": 34202832421, "license": "Apache-2.0", "status": "hardware-blocked-candidate", "promotionBlocked": true},
+    {"id": "ltx-2.3", "kind": "video", "sourceRevision": "9377758131b1ffde4b7f766804590a6617bf2ab9", "modelRevision": "4229404625088d21c4f112eb640fb04a0900ee25", "minimumVramBytes": 34359738368, "minimumStorageBytes": 107374182400, "license": "LTX-2 Community License Agreement", "status": "hardware-and-license-blocked-candidate", "promotionBlocked": true}
+  ],
+  "lifecycle": {"cancellationRequired": true, "boundedTimeoutRequired": true, "exactProcessShutdownRequired": true, "crashRecoveryRequired": true, "cleanupRequired": true},
+  "packageExclusions": ["audio provider runtime", "video provider runtime", "model weights", "reference media", "generated media", "validation harness"]
+}

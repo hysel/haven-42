@@ -155,6 +155,8 @@ $requiredFiles = @(
     "config/core-update-check-contract.json",
     "config/core-update-trust-handoff-contract.json",
     "config/core-update-verifier-transition-contract.json",
+    "config/cryptographic-inventory.json",
+    "config/post-quantum-cryptography-contract.json",
     "examples/fixtures/core-update-trust-receipt.json",
     "examples/fixtures/core-update-verifier-transition.json",
     "examples/fixtures/task-execution-admission-request.json",
@@ -166,6 +168,9 @@ $requiredFiles = @(
     ".github/workflows/codeql.yml",
     "docs/provider-endpoint-security.md",
     "scripts/provider_security.py",
+    "scripts/validate-post-quantum-readiness.py",
+    "scripts/test-post-quantum-readiness.py",
+    "docs/post-quantum-cryptography-readiness.md",
     "scripts/verify-public-repository-privacy.py",
     "scripts/simulate-task-composition.py",
     "scripts/test-task-composition.py",
@@ -545,7 +550,9 @@ foreach ($relativePath in @($rawTextPaths -split "`0" | Where-Object { $_ })) {
         continue
     }
     $item = Get-Item -LiteralPath $candidate -Force
-    if ($item.LinkType -in @("SymbolicLink", "Junction") -or $null -ne $item.Target) {
+    $linkTarget = [string]($item.Target -join "")
+    if ($item.LinkType -in @("SymbolicLink", "Junction") -or
+        -not [string]::IsNullOrEmpty($linkTarget)) {
         throw "Privacy validation refuses a symbolic-link or junction file: $relativePath"
     }
     $textFiles.Add($item)

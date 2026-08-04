@@ -79,11 +79,15 @@ For Continue-specific changes, also inspect:
 ## Validation
 
 Run the Fast tier while editing. For the final local gate, stage the complete
-change first, ensure there are no unstaged or untracked files, and run Full
-without `-NoReceipt`:
+change first and ensure there are no unstaged or untracked files. Review the
+entire staged diff for security. If any finding of any severity exists, stop,
+notify the repository owner, fix every finding, and repeat the review. When the
+review has zero findings, record its exact-tree receipt, then run Full without
+`-NoReceipt`:
 
 ```powershell
 .\scripts\test-pack.ps1 -Tier Fast
+python scripts/security-review-gate.py --record-clean
 .\scripts\test-pack.ps1 -Tier Full
 ```
 
@@ -92,8 +96,9 @@ schema-v3 staged-tree receipt used to avoid duplicate pre-push work. Before the
 final stage, review every roadmap milestone for status, evidence, and boundary
 drift rather than checking only the milestone being changed. Commit without
 editing after Full; the pre-commit hook rejects an untested staged tree and the
-pre-push hook then reuses the exact tested tree. GitHub Actions always runs Full
-independently.
+pre-commit hook also rejects a qualifying staged tree without its clean
+security-review receipt. The pre-push hook then reuses the exact tested tree.
+GitHub Actions always runs Full independently.
 
 When mapped documentation changes, synchronize and push the separate GitHub
 wiki before opening or pushing the main-repository PR. Follow
@@ -124,6 +129,7 @@ required hosted jobs report success. See `docs/hosted-ci-verification.md`.
 - [ ] New agent-specific assets have complete pass-to-ship evidence, or the change contains documentation only for a failed evaluation.
 - [ ] `CHANGELOG.md` records user-visible changes.
 - [ ] Validation has been run or skipped with a clear reason.
+- [ ] The complete staged diff has a zero-finding security review when required.
 - [ ] All roadmap milestones were reviewed for status, evidence, and boundary drift.
 
 ## Security changes

@@ -1,0 +1,19 @@
+{
+  "alwaysReviewPatterns": [
+    ".continue/**",
+    ".github/**",
+    ".githooks/**",
+    "config/**",
+    "package/**",
+    "requirements*.lock",
+    "scripts/**",
+    "web/**"
+  ],
+  "largeChange": {
+    "minimumChangedFiles": 10,
+    "minimumChangedLines": 500
+  },
+  "receiptName": "haven-42-security-review-v1",
+  "repository": "hysel/haven-42",
+  "schemaVersion": 1
+}

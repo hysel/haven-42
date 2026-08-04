@@ -73,6 +73,8 @@ const CHAT_TEXT_SIZE_PERCENTAGES = {
   large: "115%",
   "extra-large": "130%",
 };
+const MAX_DISCOVERED_MODELS = 512;
+const MAX_MARKDOWN_DOM_ELEMENTS = 2048;
 
 const state = {
   token: "",
@@ -1103,7 +1105,20 @@ function renderTypedResult(result, capability, capabilityId) {
   addMessage("assistant", result.artifact.content.text, capability.resultLabel);
 }
 
-function appendInlineMarkdown(container, source) {
+function reserveMarkdownElements(budget, count = 1) {
+  if (budget.remaining < count) return false;
+  budget.remaining -= count;
+  return true;
+}
+
+function appendMarkdownFallback(container, lines, index) {
+  const fallback = document.createElement("pre");
+  fallback.className = "markdown-render-limit";
+  fallback.textContent = lines.slice(index).join("\n");
+  container.append(fallback);
+}
+
+function appendInlineMarkdown(container, source, budget) {
   let buffer = "";
   const flush = () => {
     if (!buffer) return;
@@ -1134,6 +1149,10 @@ function appendInlineMarkdown(container, source) {
       index += match.marker.length;
       continue;
     }
+    if (!reserveMarkdownElements(budget)) {
+      buffer += source.slice(index);
+      break;
+    }
     flush();
     const element = document.createElement(match.tag);
     element.textContent = source.slice(index + match.marker.length, end);
@@ -1155,6 +1174,7 @@ function markdownBlockKind(line) {
 
 function appendMarkdown(container, source) {
   const lines = source.replace(/\r\n?/g, "\n").split("\n");
+  const budget = { remaining: MAX_MARKDOWN_DOM_ELEMENTS };
   for (let index = 0; index < lines.length;) {
     const line = lines[index];
     if (!line.trim()) {
@@ -1163,6 +1183,10 @@ function appendMarkdown(container, source) {
     }
     const kind = markdownBlockKind(line);
     if (kind === "fence") {
+      if (!reserveMarkdownElements(budget, 2)) {
+        appendMarkdownFallback(container, lines, index);
+        return;
+      }
       const language = line.slice(3).trim();
       const codeLines = [];
       index += 1;
@@ -1180,41 +1204,61 @@ function appendMarkdown(container, source) {
       continue;
     }
     if (kind === "heading") {
+      if (!reserveMarkdownElements(budget)) {
+        appendMarkdownFallback(container, lines, index);
+        return;
+      }
       const match = line.match(/^(#{1,4})\s+(.+)$/);
       const heading = document.createElement(`h${Math.min(5, match[1].length + 2)}`);
-      appendInlineMarkdown(heading, match[2]);
+      appendInlineMarkdown(heading, match[2], budget);
       container.append(heading);
       index += 1;
       continue;
     }
     if (kind === "unordered" || kind === "ordered") {
+      if (!reserveMarkdownElements(budget)) {
+        appendMarkdownFallback(container, lines, index);
+        return;
+      }
       const list = document.createElement(kind === "unordered" ? "ul" : "ol");
       const pattern = kind === "unordered"
         ? /^\s{0,3}[-*+]\s+(.+)$/
         : /^\s{0,3}\d{1,3}[.)]\s+(.+)$/;
+      container.append(list);
       while (index < lines.length) {
         const match = lines[index].match(pattern);
         if (!match) break;
+        if (!reserveMarkdownElements(budget)) {
+          appendMarkdownFallback(container, lines, index);
+          return;
+        }
         const item = document.createElement("li");
-        appendInlineMarkdown(item, match[1]);
+        appendInlineMarkdown(item, match[1], budget);
         list.append(item);
         index += 1;
       }
-      container.append(list);
       continue;
     }
     if (kind === "quote") {
+      if (!reserveMarkdownElements(budget)) {
+        appendMarkdownFallback(container, lines, index);
+        return;
+      }
       const quoteLines = [];
       while (index < lines.length && markdownBlockKind(lines[index]) === "quote") {
         quoteLines.push(lines[index].replace(/^\s{0,3}>\s?/, ""));
         index += 1;
       }
       const quote = document.createElement("blockquote");
-      appendInlineMarkdown(quote, quoteLines.join(" "));
+      appendInlineMarkdown(quote, quoteLines.join(" "), budget);
       container.append(quote);
       continue;
     }
     if (kind === "rule") {
+      if (!reserveMarkdownElements(budget)) {
+        appendMarkdownFallback(container, lines, index);
+        return;
+      }
       container.append(document.createElement("hr"));
       index += 1;
       continue;
@@ -1229,8 +1273,12 @@ function appendMarkdown(container, source) {
       paragraphLines.push(lines[index].trim());
       index += 1;
     }
+    if (!reserveMarkdownElements(budget)) {
+      appendMarkdownFallback(container, lines, index - paragraphLines.length);
+      return;
+    }
     const paragraph = document.createElement("p");
-    appendInlineMarkdown(paragraph, paragraphLines.join(" "));
+    appendInlineMarkdown(paragraph, paragraphLines.join(" "), budget);
     container.append(paragraph);
   }
 }
@@ -1762,6 +1810,12 @@ function resetTask() {
 
 async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds) {
   const result = await api("/api/connect", { endpoint, timeoutSeconds, idleUnloadSeconds });
+  if (
+    !Array.isArray(result.models)
+    || !Array.isArray(result.modelOptions)
+    || result.models.length > MAX_DISCOVERED_MODELS
+    || result.modelOptions.length > MAX_DISCOVERED_MODELS
+  ) throw new Error("invalid-provider-model-catalog");
   state.connected = true;
   state.providerTrustScope = result.trustScope;
   state.providerTransportScheme = result.transportScheme;

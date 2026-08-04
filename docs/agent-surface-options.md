@@ -41,6 +41,13 @@ Candidate means "worth testing", not "approved for edits".
 
 `config/non-continue-validation-profiles.json` now records read-only candidate
 profiles for Aider and OpenCode against public immutable repository evidence.
+
+The candidate lifecycle additionally pins the expected Aider and OpenCode
+versions, accepts only injected exact discovery facts, validates an explicit
+loopback/private Ollama endpoint and bounded model identifier, plans only a
+repository-local ignored config, and returns explicit rollback/cleanup steps.
+It is dry-run-only and grants no install, write, launch, provider, UI, package,
+or promotion authority.
 It contains no install command, executable command, endpoint, model selection,
 write permission, active menu entry, or runtime promotion. Live surface runs
 and externally verified changes remain required before either profile advances.

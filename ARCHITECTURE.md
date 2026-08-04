@@ -31,6 +31,13 @@ The long-term architecture should keep prompts, rules, templates, validation scr
 
 Milestone 22A adds a runnable local web slice without replacing these contracts:
 
+The loopback HTTP boundary accepts only exact-type JSON fields, applies a
+15-second request-socket timeout and 32-worker ceiling, and rejects provider
+inventories over 512 models. Provider and catalog requests use direct
+no-proxy, no-redirect transports. Attachment prompts receive an unpredictable
+collision-checked boundary with exact UTF-8 lengths, and assistant Markdown
+falls back to inert preformatted text after a 2,048-element DOM budget.
+
 ```text
 Bundled HTML/CSS/JavaScript on 127.0.0.1
         |
@@ -46,6 +53,12 @@ unload and process-list verification after every response
 ```
 
 The process persists no endpoint, prompt, response, or provider run detail; exposes no repository, generic filesystem, shell, or arbitrary process API; permits no remote UI assets; and cannot bind to a LAN interface. A shared standard-library evidence engine reads only the three bundled sanitized catalogs and produces the same dashboard schema for PowerShell, Linux, macOS, source web, and frozen web callers. The browser receives a smaller strict read-only summary that excludes paths, raw notes, and live provider data and declares every network, process, repository, write, provider, and machine effect false. Automatic text selection requires the exact installed Ollama digest and matching capability evidence. Text, workflow-plan, and image execution use the shared schema-v1 event vocabulary. The browser rejects malformed, non-monotonic, multiple-terminal, or post-terminal event streams before rendering an artifact. Assistant chat and Markdown-document text pass through a small dependency-free block/inline allowlist that creates nodes with `createElement` and `textContent`; raw HTML cannot become markup, links, images, scripts, or handlers. Unicode emoji remain ordinary text with cross-platform font fallbacks. Unverified manual models add a warning event; provider failures return typed errors and memory-only recovery declarations. No automatic retry occurs, and a retry is always a new request.
+
+External provider software is a separate distribution boundary. Haven packages
+may contain reviewed dependencies required to run Haven itself, but never
+provider engines, provider models or checkpoints, accelerator drivers or
+runtimes, provider installers, or updater payloads. Provider compatibility and
+license audits do not grant package or installation authority.
 
 Model discovery is separate from model installation. Installed-model filtering is browser-local, results explicitly distinguish the connected provider inventory from uninstalled candidates, and changing the target capability clears stale query/candidate state before ranking installed choices by selected and evidence status. The explicit **Search public catalog** submit action crosses the engine boundary with only a bounded query, which can reach only the fixed `https://ollama.com/search` origin with redirects disabled and a capped HTML response. The engine normalizes strict model names and returns at most 20 candidate-only records. An uninstalled choice is browser-memory intent, not execution authority; its command is constructed from the validated name, copied only on request, and never executed. Text execution still requires the model to appear in the connected provider's installed inventory.
 
@@ -430,6 +443,16 @@ The project domain is local-first engineering workflow guidance.
 - Trusted compatible pre-quantized artifacts should be preferred over local conversion; equal bit counts never imply format, kernel, runtime, or accelerator compatibility.
 - Quantization planning may inspect local hardware but must omit persistent identity fields, perform no network/download/conversion/activation effects, and keep profiles and model artifacts out of commits.
 - Future UI callers should use stable workflow IDs and the versioned envelope rather than invoking or parsing individual script families directly.
+- Cryptographic boundaries must expose versioned algorithm identifiers and
+  remain replaceable. The post-quantum foundation inventories current uses and
+  evaluates standardized ML-KEM, ML-DSA, and SLH-DSA roles without activating
+  them. The first TLS candidate is hybrid `X25519MLKEM768`; no claim is allowed
+  without observing the exact client/server negotiation and certificate
+  signature. Future update authorization must retain classical protection
+  during a dual-signature transition. PQC does not replace AES-class bulk
+  encryption, current-user OS key protection, platform signing, or
+  notarization. `config/post-quantum-cryptography-contract.json` grants no
+  runtime or machine authority.
 
 ## Open Questions
 

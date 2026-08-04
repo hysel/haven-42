@@ -25,9 +25,11 @@ page list remains the complete alphabetical inventory.
 - [[Onboarding Setting Security|Onboarding-Setting-Security]]
 - [[Conversation History Database Foundation|Conversation-History-Database]]
 - [[Conversation History Encryption Review|Conversation-History-Encryption-Review]]
+- [[Post-Quantum Cryptography Readiness|Post-Quantum-Cryptography-Readiness]]
 - [[Restricted Parser-Worker Foundation|Restricted-Parser-Worker-Foundation]]
 - [[PDF Production Isolation|PDF-Production-Isolation]]
 - [[Controlled Web Research Foundation|Controlled-Web-Research-Foundation]]
+- [[Retrieval Expansion Foundations|Retrieval-Expansion-Foundations]]
 
 ## Models, providers, and media
 
@@ -59,6 +61,7 @@ page list remains the complete alphabetical inventory.
 - [[Language Support|Language-Support]]
 - [[Project Detection|Project-Detection]]
 - [[Language Rule Packs|Language-Rule-Packs]]
+- [[Public Repository Validation Candidates|Public-Repository-Validation-Candidates]]
 
 ## Packaging, testing, and release evidence
 
@@ -79,6 +82,7 @@ page list remains the complete alphabetical inventory.
 - [[Engineering Roadmap|Engineering-Roadmap]]
 - [[Engineering Troubleshooting|Engineering-Troubleshooting]]
 - [[Project Status Consistency|Project-Status-Consistency]]
+- [[Local Batch Task Ledger|Local-Batch-Task-Ledger]]
 - [[GitHub Repository Policy|GitHub-Repository-Policy]]
 - [[Wiki Maintenance|Wiki-Maintenance]]
 
