@@ -2588,6 +2588,7 @@ assert "No comparative writing-quality promotion is justified" in blind_evidence
 assert "raw model output" in blind_evidence and "intentionally excluded" in blind_evidence
 assert "docs/local-web-mvp.md" in wiki_map and "docs/writing-model-evaluation.md" in wiki_map
 assert "examples/blind-writing-quality-review.md" in wiki_map
+assert "docs/local-image-runtime-license-review.md" in wiki_map
 assert "docs/restricted-parser-worker-foundation.md" in wiki_map
 assert "examples/restricted-pdf-worker-validation.md" in wiki_map
 assert "examples/complex-document-container-validation.md" in wiki_map
@@ -2598,6 +2599,26 @@ PY
   python3 "$REPO_ROOT/scripts/test-blind-writing-review.py" | grep -q "passed 12 offline safety checks" || return 1
   python3 "$REPO_ROOT/scripts/test-local-image-lifecycle-foundation.py" |
     grep -q "28 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-audit-local-image-runtime.py" |
+    grep -q "9 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-build-local-image-runtime-review-evidence.py" |
+    grep -q "7 hostile checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-roadmap-closure-ledger.py" |
+    grep -q "48 exact open-item classifications" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" |
+    grep -q "6 security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-folder-selection-foundation.py" |
+    grep -q "8 security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-web-research-query-adapter.py" |
+    grep -q "15 security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-package-dependency-admission.py" |
+    grep -q "12 exact-lock and non-admission checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-non-continue-validation-profiles.py" |
+    grep -q "15 candidate-only safety checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-public-repository-candidate.py" |
+    grep -q "8 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-future-expansion-contracts.py" |
+    grep -q "26 fail-closed checks" || return 1
   python3 "$REPO_ROOT/scripts/test-parser-worker-foundation.py" |
     grep -q "27 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-complex-document-container-review.py" |

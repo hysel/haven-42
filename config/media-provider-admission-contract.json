@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.media-provider.admission",
+  "status": "external-evidence-required-no-provider-admitted",
+  "artifactCandidates": {
+    "audio": {
+      "artifactType": "audio-candidate",
+      "mediaTypes": ["audio/wav", "audio/flac"],
+      "requiredMetadata": ["providerId", "providerVersion", "modelId", "modelDigest", "durationMs", "sampleRateHz", "channels", "sha256", "sizeBytes"],
+      "activeContentAllowed": false
+    },
+    "video": {
+      "artifactType": "video-candidate",
+      "mediaTypes": ["video/mp4", "video/webm"],
+      "requiredMetadata": ["providerId", "providerVersion", "modelId", "modelDigest", "durationMs", "width", "height", "frameRate", "sha256", "sizeBytes"],
+      "activeContentAllowed": false
+    }
+  },
+  "promotionGates": [
+    "exact-provider-profile",
+    "immutable-model-identity",
+    "license-and-redistribution-review",
+    "native-acceleration-evidence",
+    "bounded-artifact-verification",
+    "privacy-and-consent-policy",
+    "cancellation-and-recovery",
+    "retention-and-cleanup",
+    "uninstall",
+    "source-package-parity",
+    "native-package-smoke",
+    "exact-sha-hosted-checks"
+  ],
+  "authority": {
+    "providerSelected": false,
+    "providerInstallAllowed": false,
+    "modelDownloadAllowed": false,
+    "generationAllowed": false,
+    "artifactWriteAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "registryEntryAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}

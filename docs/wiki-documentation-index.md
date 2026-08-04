@@ -33,6 +33,7 @@ page list remains the complete alphabetical inventory.
 
 - [[Engineering Model Selection|Engineering-Model-Selection]]
 - [[Image Provider Admission|Image-Provider-Admission]]
+- [[Local Image Runtime License Review|Local-Image-Runtime-License-Review]]
 - [[Local Text Capabilities|Local-Text-Capabilities]]
 - [[Local Model Reliability|Local-Model-Reliability]]
 - [[Model Tool Use Validation|Model-Tool-Use-Validation]]

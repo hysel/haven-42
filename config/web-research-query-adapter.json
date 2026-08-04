@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.query-adapter",
+  "status": "development-disabled-transport-unbound",
+  "provider": {
+    "id": "wikipedia-query",
+    "method": "GET",
+    "scheme": "https",
+    "host": "en.wikipedia.org",
+    "port": 443,
+    "path": "/w/api.php",
+    "fixedParameters": {
+      "action": "query",
+      "format": "json",
+      "formatversion": "2",
+      "list": "search",
+      "srnamespace": "0",
+      "srprop": "timestamp",
+      "utf8": "1"
+    },
+    "queryParameter": "srsearch",
+    "limitParameter": "srlimit"
+  },
+  "limits": {
+    "maximumQueryCharacters": 256,
+    "maximumResults": 10,
+    "maximumResponseBytes": 65536,
+    "maximumTitleCharacters": 200,
+    "maximumJsonDepth": 8,
+    "maximumJsonNodes": 2048
+  },
+  "transportRequirements": {
+    "systemTrustStoreRequired": true,
+    "redirectsAllowed": false,
+    "proxyEnvironmentInherited": false,
+    "credentialsAllowed": false,
+    "cookiesAllowed": false,
+    "responseContentType": "application/json",
+    "dnsAndResolvedIpRevalidationRequired": true,
+    "timeoutSeconds": 10
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "modelToolAllowed": false,
+    "nativeTransportBound": false,
+    "networkActivationAllowed": false,
+    "pageRetrievalAllowed": false,
+    "activeNavigationAllowed": false,
+    "persistenceAllowed": false,
+    "automaticFollowUpAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}

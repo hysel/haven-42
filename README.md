@@ -41,6 +41,12 @@ conversation history, PDF/Office/OpenDocument parsing, folder scanning,
 controlled web research, signing, notarization, installers, and active online
 updates are not shipped.
 
+Contributor-only preparation now includes a residue-free synthetic temporary
+history database validator, a bounded content-free folder inspector, a disabled
+fixed-provider research query adapter, exact package dependency admission, and
+object-only inspection of immutable public repository candidates. None is a
+user-facing feature or a production-readiness claim.
+
 ## Quick start
 
 ### Run from source
@@ -157,8 +163,8 @@ for scope, evidence, blockers, and exit criteria.
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial Linux CUDA evidence exists; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | Candidate research and a fail-closed Quadro hardware/storage preflight exist; no executable video integration ships. |
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel evidence plus bounded Ollama 0.32.5 tool-envelope validation exists; WSL2 AMD and every tool-execution path remain unadmitted. |
-| Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; retrieval, complex documents, and persistent history remain gated. |
-| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts exist without a live network adapter or model tool. |
+| Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; synthetic temporary database and explicit-folder inspection foundations exist, while runtime retrieval, complex documents, semantic embeddings, and persistent history remain gated. |
+| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts and a disabled fixed-provider fixture-transport adapter exist without live transport, UI, page retrieval, or a model tool. |
 
 The project uses a pass-before-ship rule: evidence is specific to the exact
 artifact, model, provider, operating system, hardware, and operation tested.

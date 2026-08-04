@@ -5,9 +5,18 @@ portable development package keep prompts, responses, prompt recall, selected
 context, and provider details in memory and discard them at a task boundary or
 shutdown according to the existing lifecycle policy.
 
-This document defines the first offline, simulation-only foundation for an
-optional local conversation database. It is architecture and test evidence, not
-an active storage feature.
+This document defines the offline foundation for an optional local conversation
+database. It is architecture and development-test evidence, not an active
+storage feature.
+
+`config/conversation-history-development-contract.json` and
+`scripts/validate-conversation-history-development.py` add a self-contained
+SQLite development exercise. It creates only fixed synthetic records inside a
+fresh temporary directory, uses fixed DDL and parameterized writes, verifies a
+read-only backup/restore path and cascade deletion, and removes the database,
+journal, WAL, shared-memory, and backup files. It accepts no caller database
+path or user content and exposes no route, UI, provider, package, or persistent
+application behavior.
 
 ## Current boundary
 
@@ -15,7 +24,8 @@ an active storage feature.
 
 - **Private session** is the default and is provably write-free.
 - No runtime route or UI control exists.
-- No database is opened or created.
+- No application or user database is opened or created; the separate
+  development validator uses only its own temporary synthetic database.
 - No file, browser storage, network request, child process, provider call, or
   machine modification is allowed.
 - The renderer and model cannot supply SQL, a query, database path, filename,

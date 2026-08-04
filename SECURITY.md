@@ -74,6 +74,13 @@ Portable build dependencies are exact-version and SHA-256 locked for the admitte
 
 Public-history privacy is enforced before push and in a least-privilege GitHub Actions job. The versioned policy scans reachable commits, commit messages, author and committer identities, unique historical blobs, and every tracked or untracked non-ignored working-tree file for private-network endpoints, machine-specific user paths and SSH command targets, key material, fingerprints, credential-bearing URLs, and likely secrets. GitHub noreply identities and narrowly enumerated hostile-test pattern sources are admitted; ignored recovery evidence and unreachable Git objects remain local and must never be tracked.
 
+The lightweight pack validator uses the same Git-bounded tracked and
+non-ignored file inventory instead of recursively walking ignored development
+artifacts. It rejects symbolic links and junctions before reading candidate
+text while allowing ordinary OneDrive cloud-file metadata. This prevents
+inaccessible or unusually large ignored evidence from producing environment-
+specific validation failures without weakening pending-file scans.
+
 Task composition is simulation-only. Its admitted planner accepts only registered UI-ready read-only workflows, bounded acyclic dependencies, exact fields, exact metadata-only intermediate records, and engine-consistent fresh/retry/cancel identity. It accepts no renderer arguments or approval grants and cannot create a process, access a filesystem or network, execute a workflow, or modify a machine. A separate inactive execution-admission simulator can validate exact effect disclosure, typed intermediate metadata, digest-bound approval scope, expiry/replay state, and retry/recovery/cancellation consistency for future workflows. It accepts no token secret and never issues, consumes, or accepts an approval for execution. An additional digest-chain simulator binds non-authoritative execution, effect, completion, failure, and cancellation claims to the exact admission and approval identifiers. It rejects reordering, forged completion, cross-admission reuse, unsafe retry, and uncertain recovery but writes no journal and proves no effect. Possible prior effects block recovery; every runtime effect and `ExecutionAllowed` remain false.
 
 The Milestone 27 retrieval engine is offline, deterministic, and memory-only.
@@ -133,6 +140,38 @@ Hosted package jobs use versioned runner labels and accept only the exact
 reviewed Python 3.14.6 archive identity for their platform. A missing,
 cross-platform, or mutated archive name/digest fails before evidence
 generation. Local builds are never reported as hosted-source verified.
+
+New development-only data boundaries remain outside the application. The
+conversation-history validator accepts no user content or caller database
+path, uses a fixed parameterized SQLite schema only in a fresh temporary
+directory, verifies backup/restore and cascade deletion, and fails unless all
+database and journal files are removed. The folder inspector returns no
+content or absolute path, reads verified regular-file descriptors, detects
+changes during read, and rejects recursion without explicit choice, links,
+reparse points, hidden and unsupported entries, invalid UTF-8, executable or
+archive signatures, binary content, and every resource overrun.
+
+The controlled research query adapter is disabled and has no native transport.
+It revalidates the complete fixed-host request, rejects credential-like or
+active query content, accepts only finite bounded JSON with exact fields, and
+derives inactive citation destinations from numeric identifiers. Live network,
+DNS, proxy inheritance, redirects, cookies, credentials, page retrieval,
+model tools, UI, persistence, and follow-up remain false. Self-hosted and
+multi-query contracts cannot weaken SSRF or citation controls.
+
+Approved public-repository inspection uses ignored bare object stores only.
+It rejects checkout-only objects, symlinks, submodules, alternates, reparse
+points, config includes, unsafe repository config, replacement objects,
+mutable commits, license mismatches, and resource overruns. Lazy network fetch
+is disabled during validation, and no target hook, package, build, test, or
+source file executes. Passing static inspection cannot promote Aider,
+OpenCode, a model, or real-project write access.
+
+The package dependency admission test cross-checks every exact build version,
+SHA-256 lock, license expression, and platform marker across the requirements
+file, builder inventory, contract, and least-privilege workflow. npm, Cargo,
+Tauri, installers, signing, updater activation, release publication, and
+production redistribution remain outside that development-only admission.
 
 ## Reporting A Vulnerability
 

@@ -482,11 +482,21 @@ done
 PRIVATE_IP_PATTERN='(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})'
 SECRET_PATTERN='(api[_-]?key|access[_-]?token|personal[_-]?access[_-]?token|password|secret)[[:space:]]*[:=][[:space:]]*["'\'']?[A-Za-z0-9_-]{16,}'
 
-while IFS= read -r file; do
-  rel="${file#$REPO_ROOT/}"
+if ! git -c core.excludesFile=/dev/null -C "$REPO_ROOT" ls-files --cached --others --exclude-standard -z >/dev/null; then
+  fail "could not enumerate Git-bounded files for privacy validation"
+fi
+
+while IFS= read -r -d '' rel; do
   case "$rel" in
-    .git/*|runtime-validation-output/*|.continue/config.local*.yaml) continue ;;
+    runtime-validation-output/*|*/runtime-validation-output/*|.continue/config.local*.yaml) continue ;;
   esac
+
+  file="$REPO_ROOT/$rel"
+  [ -e "$file" ] || continue
+  if [ -L "$file" ]; then
+    fail "privacy validation refuses a symbolic-link file: $rel"
+    continue
+  fi
 
   case "$file" in
     *.md|*.yaml|*.yml|*.ps1|*.sh|*.tsv|*.txt)
@@ -499,7 +509,7 @@ while IFS= read -r file; do
       fi
       ;;
   esac
-done < <(find "$REPO_ROOT" -type f)
+done < <(git -c core.excludesFile=/dev/null -C "$REPO_ROOT" ls-files --cached --others --exclude-standard -z)
 
 if [ "$FAILED" -eq 0 ]; then
   printf 'Validation passed.\n'

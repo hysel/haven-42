@@ -40,6 +40,12 @@ Each selected test reports elapsed time. The final summary records the selected 
 
 PowerShell repository-validation fixtures are created in the operating system's temporary directory from the current Git-tracked and non-ignored working files. This includes pending publishable edits while excluding ignored build output, lab evidence, privacy backups, and other local-only data. Fixture assembly rejects rooted paths, paths outside the approved roots, symbolic links, and junctions while allowing ordinary OneDrive cloud-file metadata. Tests that need only generated configuration use a smaller purpose-built fixture instead of copying the repository.
 
+The direct PowerShell and shared-shell validators use that same Git-bounded
+inventory for private-IP and likely-secret checks. They do not recursively
+walk ignored `dist/local-review` or other local-only artifact trees, and they
+reject symbolic links and junctions instead of following them while allowing
+ordinary OneDrive cloud-file metadata.
+
 ## Exact Content-Tree Receipt
 
 A successful Full run with no unstaged or untracked files writes schema-v3 `haven-42-test-receipt-v1` inside the repository's private `.git` directory. The tested content may be the clean `HEAD` tree or the exact staged index tree. The receipt records the current commit for diagnostics, the authoritative tested tree, its `head` or `index` source, tier, and runner. It is not committed or included in release packages.

@@ -292,6 +292,10 @@ function Copy-RepositoryForTest {
             Copy-Item -LiteralPath $source -Destination $destination -Force
         }
 
+        & git -c init.templateDir= init --quiet $tempRoot
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not initialize the isolated Git-bounded repository fixture."
+        }
         return $tempRoot
     }
     catch {
@@ -314,6 +318,15 @@ Invoke-PackTest "validate-pack succeeds for repository" {
     $result = Invoke-CommandCapture -FilePath (Join-Path $repoRoot "scripts/validate-pack.ps1")
     Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "validate-pack should succeed."
     Assert-True -Condition ($result.Output -match "Validation passed\.") -Message "Validation pass message was not found."
+}
+
+Invoke-PackTest "validate-pack privacy scan is Git bounded" {
+    $windowsValidator = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/validate-pack.ps1") -Raw
+    $sharedValidator = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/validate-pack.shared.sh") -Raw
+    Assert-True -Condition ($windowsValidator -match "ls-files --cached --others --exclude-standard -z") -Message "PowerShell validation should scan only Git-bounded tracked and non-ignored files."
+    Assert-True -Condition ($windowsValidator -notmatch 'Get-ChildItem -LiteralPath \$repoRoot -Recurse') -Message "PowerShell validation must not recurse through ignored artifact directories."
+    Assert-True -Condition ($sharedValidator -match "ls-files --cached --others --exclude-standard -z") -Message "Shared validation should scan only Git-bounded tracked and non-ignored files."
+    Assert-True -Condition ($sharedValidator -notmatch 'find "\$REPO_ROOT" -type f') -Message "Shared validation must not recurse through ignored artifact directories."
 }
 
 Invoke-PackTest "validate-pack fails for wrong expected version" {
@@ -5238,6 +5251,36 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $imageLifecycleOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-image-lifecycle-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-image lifecycle simulation tests should pass."
     Assert-True -Condition (($imageLifecycleOutput -join "`n") -match "28 cases") -Message "Local-image lifecycle planning must cover install, update, rollback, recovery, retention, and uninstall without effects."
+    $imageLicenseOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-audit-local-image-runtime.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-image runtime license audit security tests should pass."
+    Assert-True -Condition (($imageLicenseOutput -join "`n") -match "9 fail-closed checks") -Message "Local-image runtime inventory must remain bounded, link-safe, path-free, non-overwriting, and unable to grant redistribution authority."
+    $imageEvidenceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-build-local-image-runtime-review-evidence.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-image candidate evidence hostile tests should pass."
+    Assert-True -Condition (($imageEvidenceOutput -join "`n") -match "7 hostile checks") -Message "Image-runtime inventory, notices, and SBOM evidence must remain deterministic, path-safe, non-overwriting, and explicitly unfit for distribution."
+    $roadmapLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-roadmap-closure-ledger.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Roadmap closure ledger tests should pass."
+    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "48 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
+    $historyDevelopmentOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-conversation-history-development.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Conversation-history development database security tests should pass."
+    Assert-True -Condition (($historyDevelopmentOutput -join "`n") -match "6 security checks") -Message "The development database must remain synthetic, temporary, residue-free, and outside runtime authority."
+    $folderSelectionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-folder-selection-foundation.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Folder-selection foundation security tests should pass."
+    Assert-True -Condition (($folderSelectionOutput -join "`n") -match "8 security checks") -Message "Folder inspection must remain explicit, bounded, content-free, link-safe, type-safe, and unadmitted."
+    $webQueryAdapterOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-web-research-query-adapter.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Web-research query-adapter security tests should pass."
+    Assert-True -Condition (($webQueryAdapterOutput -join "`n") -match "15 security checks") -Message "The query adapter must remain fixed-provider, fixture-transport-only, bounded, inactive, and unable to accept model links."
+    $packageDependencyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-package-dependency-admission.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Package dependency admission tests should pass."
+    Assert-True -Condition (($packageDependencyOutput -join "`n") -match "12 exact-lock and non-admission checks") -Message "Package locks, builder inventory, workflow Python, and unadmitted ecosystems must remain aligned."
+    $nonContinueProfileOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-non-continue-validation-profiles.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Non-Continue candidate profile tests should pass."
+    Assert-True -Condition (($nonContinueProfileOutput -join "`n") -match "15 candidate-only safety checks") -Message "Candidate profiles must remain read-only, non-executable, private-safe, and unpromoted."
+    $publicCandidateOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-public-repository-candidate.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public-repository candidate safety tests should pass."
+    Assert-True -Condition (($publicCandidateOutput -join "`n") -match "8 fail-closed checks") -Message "Public candidates must remain immutable, permissive, object-only, unexecuted, and non-promotional."
+    $futureExpansionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-future-expansion-contracts.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Future expansion security contracts should pass."
+    Assert-True -Condition (($futureExpansionOutput -join "`n") -match "26 fail-closed checks") -Message "Retrieval, research, audio, and video expansions must remain independently gated and non-authorizing."
     $parserOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-parser-worker-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Restricted parser-worker hostile tests should pass."
     Assert-True -Condition (($parserOutput -join "`n") -match "27 cases") -Message "The parser-worker foundation must reject hostile PDF, Office Open XML, and OpenDocument containers and grant no parser authority."
@@ -5301,7 +5344,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $researchSynthesisOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-cited-synthesis.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline cited-synthesis hostile tests should pass."
     Assert-True -Condition (($researchSynthesisOutput -join "`n") -match "26 checks") -Message "Research synthesis must remain source-bound, exactly cited, link-free, effect-free, and runtime-unadmitted."
-    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
+    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/local-image-runtime-license-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, image-runtime license, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
 }
 
 Invoke-PackTest "task composition and repository privacy foundations fail closed" {

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.non-continue.validation-profiles",
+  "status": "candidate-profiles-not-runtime-admitted",
+  "profiles": [
+    {
+      "id": "aider-public-repository-readonly",
+      "surfaceId": "aider",
+      "targetClass": "explicitly-approved-public-permissive-repository",
+      "operations": ["repository-discovery", "read-only-review", "plan-only"],
+      "writeAllowed": false,
+      "automaticCommitAllowed": false,
+      "networkBeyondExplicitProviderAllowed": false,
+      "promotionAllowed": false
+    },
+    {
+      "id": "opencode-public-repository-readonly",
+      "surfaceId": "opencode",
+      "targetClass": "explicitly-approved-public-permissive-repository",
+      "operations": ["repository-discovery", "read-only-review", "plan-only"],
+      "writeAllowed": false,
+      "automaticCommitAllowed": false,
+      "networkBeyondExplicitProviderAllowed": false,
+      "promotionAllowed": false
+    }
+  ],
+  "repositoryRequirements": {
+    "publicRepositoryRequired": true,
+    "permissiveLicenseEvidenceRequired": true,
+    "immutableCommitRequired": true,
+    "ignoredDisposableCloneRequired": true,
+    "cleanTreeRequired": true,
+    "submodulesAllowed": false,
+    "gitLfsSmudgeAllowed": false,
+    "repositoryHooksAllowed": false,
+    "packageInstallationAllowed": false,
+    "buildScriptsAllowed": false,
+    "testsFromTargetRepositoryAllowed": false
+  },
+  "evidence": {
+    "rawTranscriptCommitted": false,
+    "sourceContentCommitted": false,
+    "absolutePathsCommitted": false,
+    "providerEndpointCommitted": false,
+    "sanitizedSummaryOnly": true
+  },
+  "authority": {
+    "runtimeAdmissionAllowed": false,
+    "defaultMenuVisibilityAllowed": false,
+    "realProjectWritePromotionAllowed": false,
+    "installAutomationAllowed": false,
+    "configurationGenerationAllowed": false,
+    "modelInvocationAllowed": false
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.conversation-history.development-validation",
+  "status": "synthetic-temporary-validation-only",
+  "database": {
+    "engine": "python-standard-library-sqlite3",
+    "temporaryDirectoryOnly": true,
+    "callerPathAllowed": false,
+    "preexistingDatabaseAllowed": false,
+    "symlinksOrReparsePointsAllowed": false,
+    "extensionLoadingAllowed": false,
+    "trustedSchemaAllowed": false,
+    "foreignKeysRequired": true,
+    "parameterizedValuesRequired": true,
+    "syntheticContentOnly": true,
+    "cleanupRequired": true
+  },
+  "validation": {
+    "maximumSyntheticMessages": 8,
+    "maximumSyntheticCharacters": 4096,
+    "backupRestoreRequired": true,
+    "cascadeDeletionRequired": true,
+    "residueCheckRequired": true
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "userContentAllowed": false,
+    "userSelectedPathAllowed": false,
+    "persistentDatabaseAllowed": false,
+    "providerPayloadAllowed": false,
+    "networkAllowed": false,
+    "packageAdmissionAllowed": false,
+    "productionUseAllowed": false
+  }
+}

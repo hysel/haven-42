@@ -246,6 +246,7 @@
 
 - [ ] Add workflow-specific remediation templates for non-filename deterministic output verification failures if they recur.
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
+  - [x] Add and execute an object-only read-only inspection against immutable Click 8.2.1, Express 5.1.0, and serde_json 1.0.140 public permissive candidates. Exact commits and license digests passed under ignored bare storage with no checkout or target execution; ripgrep 14.1.1 was rejected for a symlink and replaced without weakening policy. Live agent/model validation remains external.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
 
 ## Milestone 14: Agent Surface Portability And Broader Audience
@@ -570,6 +571,7 @@
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
 - [ ] Add future surface-specific profile generation after non-Continue validation.
+  - [x] Add candidate-only Aider and OpenCode public-repository read-only validation profiles with immutable permissive targets, ignored clones, no target code execution, sanitized-summary-only evidence, and no install, config, model, write, menu, runtime, or promotion authority.
 - [x] Confirm the unified starter-toolkit UI follows general-purpose capability contracts as Milestone 22.
 - [x] Require external wiki synchronization for mapped documentation and hosted CI.
 - [x] Resolve the native macOS Milestone 18 workflow gap. Devstral Small 2 completed all required generated-fixture CLI cells; language rule packs remain evidence-gated for real repositories and editor surfaces.
@@ -584,7 +586,7 @@
 - [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
   - ComfyUI v0.30.0 Intel portable on an Arc B580 passed exact archive/checkpoint integrity, XPU detection in both runtime and service, loopback-only startup, production-adapter generation, metadata exclusion, three-run stability, distinct outputs, invalid-workflow recovery, active cancellation, exact-process forced recovery, history cleanup, bounded idle stability, and secure shutdown. An immutable v0.29.2 rollback and v0.30.0 forward-selection transition also passed. Automatic idle shutdown, complete session/runtime cleanup and uninstall, package parity, redistribution review, consumer onboarding, and promotion remain open.
 - [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
-  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. An exact side-by-side v0.30.0 update and v0.28.0 rollback also passed archive integrity, HIP identity, production-adapter generation, metadata/history cleanup, idle stability, and exact-process shutdown. Consumer onboarding, automatic idle shutdown, package parity, redistribution review, and promotion remain open.
+  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. An exact side-by-side v0.30.0 update and v0.28.0 rollback also passed archive integrity, HIP identity, production-adapter generation, metadata/history cleanup, idle stability, and exact-process shutdown. The exact v0.30.0 archive now also passes a bounded offline license inventory: all 448 native files have a distribution or embedded-runtime owner and every available wheel-recorded SHA-256 matches. Missing or unassociated license evidence and unreconciled native component terms keep redistribution blocked. Consumer onboarding, automatic idle shutdown, package parity, explicit redistribution approval, and promotion remain open.
 - [ ] Park the physical Apple Silicon MPS image-provider profile until suitable
   Mac hardware is acquired; do not let it block Windows or Linux development.
 - [x] Keep custom nodes and external API nodes disabled unless each exact extension independently passes promotion.
@@ -683,6 +685,7 @@
 - [x] Implement pure migration/rollback, retention, bounded context, deletion, recovery, backup, and restore planners without importing SQLite, creating a database, accepting a path, or writing a file.
 - [x] Review encryption-at-rest and key-management architecture: keep SQLCipher-equivalent selection unadmitted, require user-scoped OS credential storage with no plaintext fallback, define rotation/loss/recovery behavior, and retain supply-chain, licensing, SBOM, binding, and native packaging as admission gates.
 - [ ] Seek separate approval before any opt-in development history database, runtime route, UI control, database file, backup/restore write, or saved message is activated.
+  - [x] Owner approved a development-only synthetic temporary database validator. It now exercises fixed-schema SQLite create, parameterized write/read, backup/restore, cascade deletion, and residue-free cleanup with no user content, caller path, runtime route, UI, provider, package, or persistence authority.
 - [x] Add and hostile-test the deterministic memory-only lexical retrieval core with token estimates, per-result chunk disclosure, removal, clear-all, strict budgets, stable ranking, and failure cleanup; keep runtime route, UI, and provider integration unadmitted.
 - [x] Add the restricted parser-worker admission contract and 27-case metadata-only hostile suite for PDF, Office Open XML, and OpenDocument candidates before selecting any dependency; keep every parser, worker, route, filesystem, temporary-file, and execution effect unadmitted.
 - [x] Compare maintained PDF parser candidates and record `pypdf` 6.14.2 as a preferred review candidate only; keep dependency admission, parser import, real hostile PDFs, worker isolation, packaging evidence, native parity, runtime routes, and UI activation open.
@@ -710,6 +713,8 @@
 - [x] Add source/package parity and native Windows, Linux, and macOS packaged-browser smoke tests for the currently admitted text, structured-text, source-code, and PNG attachment slice.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before admitting PDF, Office, or OpenDocument parsing; physical macOS clipboard evidence remains owner-parked.
 - [ ] Evaluate folder selection, semantic embeddings, and persistent encrypted libraries only as separate later security and product gates.
+  - [x] Add and hostile-test a development-only explicit folder inspector with non-recursive default, bounded opt-in recursion, relative content-free manifests, strict UTF-8 source/text allowlisting, and fail-closed link, hidden, binary, executable, archive, unsupported-type, and resource-limit handling. Runtime, UI, provider, persistence, embeddings, and package authority remain false.
+  - [x] Define separate fail-closed semantic-embedding and persistent-encrypted-library evaluation gates without selecting a model, storage engine, encryption engine, route, UI, download, index, database, provider payload, or package.
 
 ## Milestone 28: Controlled Web Research
 
@@ -718,6 +723,7 @@
 - [x] Add inert hostile offline fixtures for destination confusion, IP classes, redirects, credentials, oversized content, prompt injection, citation forgery, cancellation, and cleanup; executable broker tests remain with a future adapter.
 - [ ] Implement one explicit query-only adapter that sends only the reviewed bounded query and returns strict result metadata.
   - [x] Add a 28-check offline caller-fixture boundary for bounded query validation, strict public-HTTPS result metadata, engine-derived inactive citations, and exact source accounting with no network stack or runtime authority.
+  - [x] Add a fixed-provider development query adapter with a strict request shape, injected fixture transport, bounded metadata parser, and engine-derived inactive Wikipedia destinations. Native transport, live network, runtime, model-tool, UI, page-fetch, follow-up, persistence, and package authority remain disabled.
 - [ ] Add trusted citation rendering with destination disclosure and no model-supplied active links.
   - [x] Define and hostile-test the trusted citation data shape and destination disclosure fields while keeping navigation inactive and adding no UI.
 - [ ] Add explicit selected-page retrieval only after DNS/IP revalidation, redirect controls, textual content allowlisting, byte/time limits, inert extraction, and no page execution pass.
@@ -729,6 +735,7 @@
     digest-verified bundle on native Windows and Ubuntu Linux; macOS source and
     every native package lane remain open.
 - [ ] Evaluate self-hosted search and bounded multi-query research only as later independent gates.
+  - [x] Define separate self-hosted and four-query-maximum evaluation contracts that preserve SSRF/citation controls, require visible per-query approval and aggregate budgets, forbid autonomous or page-injected follow-ups, and grant no provider, network, runtime, UI, model-tool, or package authority.
 
 ## Security architecture remediation
 

@@ -207,6 +207,18 @@ rest; runtime persistence stays blocked until encryption/key management,
 least-privilege per-user storage, deletion/recovery, and native package evidence
 pass separate approval.
 
+The real-SQLite development validator does not weaken that boundary. It accepts
+no caller path or user content, uses fixed DDL and parameterized writes only in
+a newly created temporary directory, opens its backup read-only, verifies
+foreign-key deletion, and removes the database plus journal/WAL/shared-memory
+sidecars. It exposes no renderer, model, provider, package, or runtime route.
+The explicit-folder development inspector similarly requires one operator-
+selected root, defaults to non-recursive reads, enforces depth/file/byte/path
+budgets, rejects links, reparse points, special files, binary signatures,
+archives, active-script masquerading, encoding failures, and change-during-read
+races, and emits only relative metadata. It adds no watcher, index, provider
+payload, background scan, arbitrary path API, or application permission.
+
 Milestone 26 Intel inference evidence grants no runtime admission. The physical
 Arc B580 review kept oneAPI, Level Zero development files, llama.cpp source and
 builds, OpenVINO wheels and portable archives, models, caches, and raw logs
@@ -282,5 +294,13 @@ markup, unknown pages, altered authority fields, or autonomous follow-up. It
 does not invoke a model or grant tool, network, file, package, UI, runtime, or
 execution authority. The admitted fixed Ollama catalog search does
 not grant or imply general research-search authority.
+
+The disabled fixed-Wikipedia query adapter has no native HTTP transport. Tests
+inject a fixture callable, while the adapter revalidates the complete request,
+rejects credential-like or active query text, bounds finite JSON, accepts no
+model-supplied links, and derives inactive destinations from validated numeric
+page identifiers. Self-hosted and multi-query contracts add no implementation;
+the latter requires visible approval for each of at most four queries and
+forbids autonomous or retrieved-page follow-up.
 
 The local-web admission applies to read-only readiness inspection, zero-effect setup planning, status, exact-digest Ollama discovery and text, plan-only registered read-only software workflows, and the exact promoted Linux ComfyUI/SDXL image profile through loopback. It does not admit workflow process execution, arbitrary provider profiles, client persistence, installation, elevation, service or driver changes, updates, remote UI access, or Tauri packaging. No optional desktop runtime ships until actual Windows, Linux, and macOS binaries pass renderer, IPC, canonical-path, lifecycle, update, rollback, packaging, uninstall, privilege, and security tests. Unsupported or failed provider cells remain documentation-only and leave no executable integration.

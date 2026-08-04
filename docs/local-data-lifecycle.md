@@ -43,11 +43,22 @@ inactive web-research foundation, and conversation-history foundation retain
 no application runtime state because none exposes a route. The parser
 foundation opens no document and starts no worker. Lexical test state is caller-owned memory and is cleared
 on removal, failure, and shutdown; it has no persistence API. The history
-foundation contains a logical schema and pure planners only: it never imports
-SQLite, opens or creates a database, accepts a path, writes a backup, or
-restores data. Private session remains the default and write-free. See
+foundation contains a logical schema and pure planners. A separate development
+validator opens only a fresh temporary SQLite database containing fixed
+synthetic records, verifies backup/restore and deletion, and removes every
+sidecar; it cannot accept a caller path or user content and is absent from the
+runtime and package. Private session remains the default and write-free. See
 [Conversation History Database Foundation](conversation-history-database.md)
 and [Conversation History Encryption Review](conversation-history-encryption-review.md).
+
+The folder-selection foundation is also a command-line development validator,
+not an application scanner. It requires one explicit absolute root, defaults to
+non-recursive inspection, enforces depth/file/byte budgets and the existing
+text/source allowlist, rejects links, reparse points, hidden/special files,
+archives, binary signatures, NULs, non-UTF-8 data, and files that change during
+the read, and returns only relative names, sizes, extensions, and digests. It
+stores no content or path and grants no browser, provider, watcher, index, or
+background authority.
 
 Restricted PDF and complex-document review fixtures, candidate artifacts, and
 native evidence exist only beneath ignored `dist/local-review` during explicit

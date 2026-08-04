@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "status": "development-review-only",
+  "purpose": "Fail-closed offline inventory contract for exact Windows ComfyUI portable image-provider runtimes. An audit result never grants installation, redistribution, packaging, or provider admission.",
+  "limits": {
+    "maxFiles": 250000,
+    "maxDepth": 24,
+    "maxMetadataBytes": 4194304,
+    "maxRecordBytes": 16777216,
+    "maxRecordRowsPerDistribution": 250000,
+    "maxLicenseBytes": 1048576,
+    "maxGlobalLicenseBytes": 33554432,
+    "maxLicenseFilesPerDistribution": 24,
+    "maxGlobalLicenseFiles": 2048,
+    "maxNativeBasenames": 4096
+  },
+  "nativeSuffixes": [
+    ".dll",
+    ".exe",
+    ".pyd",
+    ".sys"
+  ],
+  "licenseBasenamePrefixes": [
+    "copying",
+    "license",
+    "notice"
+  ],
+  "reviewedDistributionLicenses": {
+    "comfy-aimdo@0.4.11": {
+      "licenseExpression": "GPL-3.0-only",
+      "packagedLicenseSha256": "330573baee6bc748324bbc5f902fb2c754c6d5fc0157b9a44daff4f9cce150c9",
+      "reviewStatus": "exact-packaged-license-recorded-redistribution-review-required"
+    }
+  },
+  "profiles": {
+    "windows-amd-comfyui-0.30.0": {
+      "operatingSystem": "windows",
+      "accelerator": "amd-rocm",
+      "provider": "ComfyUI",
+      "providerVersion": "0.30.0",
+      "embeddedRuntime": "CPython 3.12.10 portable runtime",
+      "archiveSha256": "0f3816fa1149e5a739e4d095d7733bc4ea28b02c8872fadeb8f73b933b141568"
+    },
+    "windows-intel-comfyui-0.30.0": {
+      "operatingSystem": "windows",
+      "accelerator": "intel-xpu",
+      "provider": "ComfyUI",
+      "providerVersion": "0.30.0",
+      "embeddedRuntime": "CPython 3.13.14 portable runtime",
+      "archiveSha256": "3fc6b62317c8aae50f43296762929a3808615ae891900587218d00234d366135"
+    },
+    "windows-nvidia-comfyui-0.30.0": {
+      "operatingSystem": "windows",
+      "accelerator": "nvidia-cuda",
+      "provider": "ComfyUI",
+      "providerVersion": "0.30.0",
+      "embeddedRuntime": "CPython 3.13.14 portable runtime",
+      "archiveSha256": "f4353d069dd7342e3bef421f07f003cca53ca84168102705cfc83f66449f5ae5"
+    }
+  },
+  "mandatoryBlockers": [
+    "archive-not-independently-verified",
+    "duplicate-distribution",
+    "distribution-inventory-empty",
+    "distribution-metadata-missing",
+    "license-evidence-missing",
+    "license-metadata-missing",
+    "native-components-require-exact-review"
+  ],
+  "prohibitions": [
+    "no-code-execution",
+    "no-module-import",
+    "no-network",
+    "no-runtime-write",
+    "no-link-traversal",
+    "no-automatic-license-clearance",
+    "no-automatic-redistribution-clearance",
+    "no-provider-promotion"
+  ]
+}

@@ -39,6 +39,12 @@ The non-Continue validation requirement is satisfied by Aider and OpenCode gener
 
 Candidate means "worth testing", not "approved for edits".
 
+`config/non-continue-validation-profiles.json` now records read-only candidate
+profiles for Aider and OpenCode against public immutable repository evidence.
+It contains no install command, executable command, endpoint, model selection,
+write permission, active menu entry, or runtime promotion. Live surface runs
+and externally verified changes remain required before either profile advances.
+
 ## Validation Levels
 
 Use the same labels for every surface:

@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.package-dependency-admission",
+  "status": "unsigned-development-build-only",
+  "pythonVersion": "3.14.6",
+  "buildDependencies": {
+    "altgraph": {"version": "0.17.5", "license": "MIT", "platform": "all"},
+    "macholib": {"version": "1.16.3", "license": "MIT", "platform": "darwin"},
+    "packaging": {"version": "26.2", "license": "Apache-2.0 OR BSD-2-Clause", "platform": "all"},
+    "pefile": {"version": "2024.8.26", "license": "MIT", "platform": "win32"},
+    "pyinstaller": {"version": "6.21.0", "license": "GPL-2.0-or-later WITH Bootloader-exception", "platform": "all"},
+    "pyinstaller-hooks-contrib": {"version": "2026.6", "license": "GPL-2.0-or-later WITH Bootloader-exception", "platform": "all"},
+    "pywin32-ctypes": {"version": "0.2.3", "license": "BSD-3-Clause", "platform": "win32"},
+    "setuptools": {"version": "83.0.0", "license": "MIT", "platform": "all"}
+  },
+  "requirements": {
+    "exactPinsRequired": true,
+    "sha256HashesRequired": true,
+    "transitiveClosureExplicitlyListed": true,
+    "indexFallbackAllowed": false,
+    "unlistedDependencyAllowed": false
+  },
+  "unadmittedEcosystems": {
+    "npmRuntime": false,
+    "cargoRuntime": false,
+    "tauriRuntime": false,
+    "externalNativeInstaller": false
+  },
+  "authority": {
+    "productionRedistributionCleared": false,
+    "signingAllowed": false,
+    "releasePublicationAllowed": false,
+    "installerAllowed": false,
+    "updaterActivationAllowed": false
+  }
+}

@@ -23,6 +23,14 @@ library. It makes no DNS request, opens no connection, writes no file, and is
 absent from the application and portable package. Passing fixture validation
 does not admit a live search provider or page retrieval.
 
+The separately disabled query-adapter prototype fixes the destination to the
+English Wikipedia metadata search API and permits only a bounded query and
+result count to vary. Tests inject a fixture transport; the implementation has
+no HTTP client and revalidates the complete request and strict response shape
+before producing inactive engine-derived destination metadata. It cannot run
+from the product, accept a model-selected destination, retrieve a page, or
+persist a result.
+
 An additional 26-check page-text foundation accepts only caller-supplied
 bounded UTF-8 bytes labeled `text/plain` or `text/html`. Its strict HTML parser
 keeps no attributes or remote references, rejects non-allowlisted elements,
@@ -57,3 +65,9 @@ response content and time budgets, transport-to-extractor binding, cancellation,
 residue-free cleanup, source/package parity, and native evidence on each
 supported platform. Citation navigation also remains a user-reviewed UI
 decision.
+
+`config/web-research-expansion-evaluation.json` records two later gates without
+activating either: a self-hosted provider must meet the same public-destination
+and transport controls, and multi-query research is capped at four visible
+queries with separate approval and cancellation. No autonomous or page-derived
+follow-up is allowed.

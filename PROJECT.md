@@ -126,6 +126,16 @@ and key-management architecture review now requires user-scoped OS credential
 storage and fail-closed Private session with no plaintext fallback. Dependency
 selection, per-user storage implementation, UI activation, and saved messages
 remain separate approval gates.
+
+Owner-approved development validation now exercises a real fixed-schema SQLite
+database using only synthetic records inside a fresh temporary directory. It
+passes parameterized create/read, backup/restore, cascade-deletion, permission,
+and residue-cleanup checks while accepting no user content or caller database
+path. A separate explicit-folder foundation produces only bounded relative
+metadata and rejects links, hidden or unsupported entries, binaries,
+executables, archives, encoding failures, resource overruns, and files changed
+during read. Neither foundation is connected to the runtime, UI, provider, or
+package.
 Milestone 28 defines proposed controlled web research with inactive offline
 contracts and hostile fixtures. A 28-check caller-fixture boundary validates
 bounded queries, strict public-HTTPS result metadata, engine-derived inactive
@@ -138,6 +148,24 @@ page retrieval, trusted UI
 navigation, SSRF enforcement against resolved destinations, and autonomous
 follow-up remain unadmitted; no model or renderer internet tool exists. Broader
 surface and provider parity remains evidence-gated.
+
+A fixed-provider development query adapter now validates the exact Wikipedia
+metadata-search request and response shape through an injected fixture
+transport. Fifteen security checks cover request tampering, duplicate keys,
+strict unused metadata, Unicode controls, credential-like and
+active queries, result and response budgets, non-finite JSON, model-supplied
+links, duplicate identifiers, timestamps, and disabled authority. It imports
+no network client. Separate contracts now preserve self-hosted, bounded
+multi-query, semantic-embedding, encrypted-library, audio, and video gates
+without selecting or admitting an implementation.
+
+Local object-only inspection also passes against immutable Click 8.2.1,
+Express 5.1.0, and serde_json 1.0.140 public permissive repositories. Exact
+license bytes, commit identity, safe tree modes, and aggregate budgets were
+verified from ignored bare clones without checkout or target execution. A
+ripgrep candidate was rejected for a symlink and replaced without weakening
+the policy. Candidate Aider and OpenCode profiles remain read-only and do not
+promote real-project writes.
 
 Capability Evidence Contract v2 now prevents model readiness from being
 inherited across surfaces, operating systems, or operations. Deterministic

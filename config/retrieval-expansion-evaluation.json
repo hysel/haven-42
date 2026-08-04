@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.retrieval.expansion-evaluation",
+  "status": "evaluation-contract-only",
+  "semanticEmbeddings": {
+    "candidateSelected": false,
+    "modelIdentityRequired": true,
+    "immutableDigestRequired": true,
+    "licenseReviewRequired": true,
+    "explicitDownloadConsentRequired": true,
+    "separateFromGenerationModelRequired": true,
+    "offlineOperationRequired": true,
+    "hardwareCapacityGateRequired": true,
+    "qualityComparisonAgainstLexicalRequired": true,
+    "promptInjectionIsolationRequired": true,
+    "modelAndIndexCleanupRequired": true
+  },
+  "persistentEncryptedLibrary": {
+    "storageEngineSelected": false,
+    "encryptionEngineSelected": false,
+    "plaintextFallbackAllowed": false,
+    "userScopedOsCredentialStoreRequired": true,
+    "databaseKeyStoredBesideDataAllowed": false,
+    "pathDisclosureAllowed": false,
+    "attachmentBytesStoredByDefault": false,
+    "atomicMigrationAndRollbackRequired": true,
+    "retentionDeletionBackupRestoreRequired": true,
+    "keyLossMustPreserveCiphertextRequired": true,
+    "nativePackageParityRequired": true,
+    "uninstallChoiceRequired": true
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "modelDownloadAllowed": false,
+    "embeddingInvocationAllowed": false,
+    "indexCreationAllowed": false,
+    "databaseCreationAllowed": false,
+    "filesystemPersistenceAllowed": false,
+    "providerPayloadAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}
