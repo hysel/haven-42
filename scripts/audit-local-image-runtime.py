@@ -390,9 +390,6 @@ def audit(args: argparse.Namespace) -> dict:
     if not resolved_root.is_dir() or is_link_or_reparse(args.runtime, root_info):
         raise AuditError("invalid-runtime-root")
     root = runtime_filesystem_root(resolved_root)
-    output = args.output.resolve(strict=False)
-    if output.exists():
-        raise AuditError("output-already-exists")
     if not safe_name(args.output.name):
         raise AuditError("invalid-output-name")
     output_parent = args.output.parent
@@ -401,8 +398,10 @@ def audit(args: argparse.Namespace) -> dict:
     output_parent_info = output_parent.stat(follow_symlinks=False)
     if is_link_or_reparse(output_parent, output_parent_info):
         raise AuditError("output-parent-link-rejected")
-    if os.path.normcase(str(output_parent.resolve())) != os.path.normcase(str(output_parent.absolute())):
-        raise AuditError("output-parent-redirect-rejected")
+    resolved_output_parent = output_parent.resolve(strict=True)
+    output = resolved_output_parent / args.output.name
+    if output.exists():
+        raise AuditError("output-already-exists")
     try:
         output.relative_to(resolved_root)
     except ValueError:
@@ -582,6 +581,14 @@ def audit(args: argparse.Namespace) -> dict:
             "endpointsRecorded": False,
         },
     }
+    current_parent_info = output_parent.stat(follow_symlinks=False)
+    if (
+        is_link_or_reparse(output_parent, current_parent_info)
+        or output_parent.resolve(strict=True) != resolved_output_parent
+        or (current_parent_info.st_dev, current_parent_info.st_ino)
+        != (output_parent_info.st_dev, output_parent_info.st_ino)
+    ):
+        raise AuditError("output-parent-changed")
     with output.open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(report, stream, indent=2, sort_keys=True, ensure_ascii=True)
         stream.write("\n")

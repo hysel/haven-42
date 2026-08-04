@@ -1856,8 +1856,8 @@ test_solution_architecture_review_doc() {
     grep -q "25: Local Video Generation" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "26: Hardware-Adaptive Model Quantization" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "21: General-Purpose AI Assistant And Intent Routing | Complete | Complete for the promoted provider set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "22: Unified Product UI And Task Composition | In progress; local tools runnable | Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, structural trust/execution admission, and offline installer/update simulation implemented" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Real cryptographic verification, token issuance/acceptance, workflow execution, executable composition, persistence, real machine effects, remote UI access, signing, and optional Tauri packaging remain open" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "22: Unified Product UI And Task Composition | In progress; local tools runnable | Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, structural trust/execution admission, offline installer/update simulation, and inactive post-quantum migration planning implemented" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -q "Real cryptographic verification, PQC profile selection/activation, token issuance/acceptance, workflow execution, executable composition, persistence, real machine effects, remote UI access, signing, and optional Tauri packaging remain open" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "21: General-Purpose AI Assistant And Intent Routing | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     ! grep -q "22: Unified Product UI And Task Composition | Planned" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "automated status-consistency checks" "$REPO_ROOT/docs/solution-architecture-review.md" &&
@@ -2626,7 +2626,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-local-image-lifecycle-foundation.py" |
     grep -q "28 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-audit-local-image-runtime.py" |
-    grep -q "24 fail-closed checks" || return 1
+    grep -q "25 fail-closed checks" || return 1
   python3 "$REPO_ROOT/scripts/test-build-local-image-runtime-review-evidence.py" |
     grep -q "9 hostile checks" || return 1
   python3 "$REPO_ROOT/scripts/test-roadmap-closure-ledger.py" |

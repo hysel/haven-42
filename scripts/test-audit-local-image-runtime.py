@@ -425,6 +425,25 @@ class AuditTests(unittest.TestCase):
             ):
                 MODULE.audit(Args(runtime, redirected / "report.json"))
 
+    def test_redirected_ancestor_with_regular_output_parent_is_allowed(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            runtime = base / "runtime"
+            runtime.mkdir()
+            target = base / "target"
+            output_parent = target / "reports"
+            output_parent.mkdir(parents=True)
+            redirected_ancestor = base / "redirected-ancestor"
+            try:
+                redirected_ancestor.symlink_to(target, target_is_directory=True)
+            except OSError:
+                self.skipTest("directory symlinks are unavailable")
+            report = MODULE.audit(
+                Args(runtime, redirected_ancestor / "reports" / "report.json")
+            )
+            self.assertEqual(report["status"], "review-required")
+            self.assertTrue((output_parent / "report.json").is_file())
+
 
 if __name__ == "__main__":
     suite = unittest.defaultTestLoader.loadTestsFromTestCase(AuditTests)
