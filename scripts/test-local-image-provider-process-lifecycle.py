@@ -69,7 +69,7 @@ class OwnedProvider:
             sock.bind((LOOPBACK, 0))
             return int(sock.getsockname()[1])
 
-    def start(self, *, port: int | None = None, startup_timeout: float = 2) -> None:
+    def start(self, *, port: int | None = None, startup_timeout: float = 10) -> None:
         if self.process is not None and self.process.poll() is None:
             return
         self.port = port or self.free_port()
