@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {"id": "amd-missing-evidence", "os": "windows", "architecture": "x86_64", "vendor": "AMD", "model": "Radeon RX 7800 XT", "runtime": "HIP", "runtimeVersion": "7.2.53211-158bd99533", "driverIdentity": null, "vramBytes": 17179869184, "expected": null},
+    {"id": "nvidia-incomplete-storage-evidence", "os": "windows", "architecture": "x86_64", "vendor": "NVIDIA", "model": "Quadro RTX 5000", "runtime": "CUDA", "runtimeVersion": "13.0", "driverIdentity": "582.70", "vramBytes": 17179869184, "expected": null},
+    {"id": "intel-incomplete-storage-evidence", "os": "windows", "architecture": "x86_64", "vendor": "Intel", "model": "Arc B580", "runtime": "XPU", "runtimeVersion": "2.13.0+xpu", "driverIdentity": "32.0.101.8864", "vramBytes": 12884901888, "expected": null},
+    {"id": "linux-cannot-inherit-windows", "os": "linux", "architecture": "x86_64", "vendor": "NVIDIA", "model": "Quadro RTX 5000", "runtime": "CUDA", "runtimeVersion": "13.0", "driverIdentity": "582.70", "vramBytes": 17179869184, "expected": null},
+    {"id": "cpu-fallback-rejected", "os": "windows", "architecture": "x86_64", "vendor": "CPU", "model": "generic", "runtime": "CPU", "runtimeVersion": "unknown", "driverIdentity": "unknown", "vramBytes": 0, "expected": null},
+    {"id": "wrong-nvidia-model-rejected", "os": "windows", "architecture": "x86_64", "vendor": "NVIDIA", "model": "different", "runtime": "CUDA", "runtimeVersion": "13.0", "driverIdentity": "582.70", "vramBytes": 17179869184, "expected": null},
+    {"id": "insufficient-vram-rejected", "os": "windows", "architecture": "x86_64", "vendor": "Intel", "model": "Arc B580", "runtime": "XPU", "runtimeVersion": "2.13.0+xpu", "driverIdentity": "32.0.101.8864", "vramBytes": 8589934592, "expected": null}
+  ]
+}

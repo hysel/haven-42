@@ -2,12 +2,14 @@ param(
     [string]$ExpectedVersion = "0.3.0",
     [ValidateSet("Fast", "Integration", "Full")]
     [string]$Tier = "Full",
+    [string[]]$TestName = @(),
     [switch]$NoReceipt
 )
 
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+Import-Module (Join-Path $PSScriptRoot "PowerShellCompatibility.psm1") -Force
 $failed = $false
 $testCount = 0
 $skippedCount = 0
@@ -99,6 +101,10 @@ function Invoke-PackTest {
     )
 
     $isIntegration = $script:integrationTests -contains $Name
+    if ($script:TestName.Count -gt 0 -and $script:TestName -notcontains $Name) {
+        $script:skippedCount++
+        return
+    }
     if (($script:Tier -eq "Fast" -and $isIntegration) -or ($script:Tier -eq "Integration" -and -not $isIntegration)) {
         $script:skippedCount++
         return
@@ -180,10 +186,57 @@ function Invoke-CommandCapture {
         [string]$WorkingDirectory = $repoRoot
     )
 
-    $output = & pwsh -NoProfile -ExecutionPolicy Bypass -File $FilePath @Arguments 2>&1
+    function ConvertTo-WindowsProcessArgument {
+        param([AllowEmptyString()][string]$Value)
+
+        if ($Value.Length -gt 0 -and $Value -notmatch '[\s"]') { return $Value }
+        $builder = New-Object System.Text.StringBuilder
+        [void]$builder.Append('"')
+        $slashes = 0
+        foreach ($character in $Value.ToCharArray()) {
+            if ($character -eq '\') {
+                $slashes++
+                continue
+            }
+            if ($character -eq '"') {
+                [void]$builder.Append(('\' * (($slashes * 2) + 1)))
+                [void]$builder.Append('"')
+                $slashes = 0
+                continue
+            }
+            if ($slashes -gt 0) {
+                [void]$builder.Append(('\' * $slashes))
+                $slashes = 0
+            }
+            [void]$builder.Append($character)
+        }
+        if ($slashes -gt 0) { [void]$builder.Append(('\' * ($slashes * 2))) }
+        [void]$builder.Append('"')
+        return $builder.ToString()
+    }
+
+    $powerShell = Get-Command pwsh -ErrorAction Stop | Select-Object -First 1
+    $processArguments = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $FilePath) + @($Arguments)
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = $powerShell.Source
+    $startInfo.Arguments = (@($processArguments | ForEach-Object { ConvertTo-WindowsProcessArgument ([string]$_) }) -join ' ')
+    $startInfo.WorkingDirectory = $WorkingDirectory
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $process = New-Object System.Diagnostics.Process
+    $process.StartInfo = $startInfo
+    [void]$process.Start()
+    $stdout = $process.StandardOutput.ReadToEndAsync()
+    $stderr = $process.StandardError.ReadToEndAsync()
+    $process.WaitForExit()
+    $exitCode = $process.ExitCode
+    $output = @($stdout.Result, $stderr.Result) | Where-Object { -not [string]::IsNullOrEmpty($_) }
+    $process.Dispose()
 
     return [pscustomobject]@{
-        ExitCode = $LASTEXITCODE
+        ExitCode = $exitCode
         Output = ($output -join "`n")
     }
 }
@@ -269,7 +322,9 @@ function Copy-RepositoryForTest {
                 throw "A Git-enumerated repository fixture file is missing: $relativePath"
             }
             $sourceItem = Get-Item -LiteralPath $source -Force
-            if ($sourceItem.LinkType -in @("SymbolicLink", "Junction") -or $null -ne $sourceItem.Target) {
+            $sourceLinkTarget = [string]($sourceItem.Target -join "")
+            if ($sourceItem.LinkType -in @("SymbolicLink", "Junction") -or
+                -not [string]::IsNullOrEmpty($sourceLinkTarget)) {
                 throw "Repository fixture files must not use symbolic links or junctions: $relativePath"
             }
 
@@ -280,7 +335,9 @@ function Copy-RepositoryForTest {
                 }
                 if ($checkedSourceDirectories.Add($sourceParent)) {
                     $parentItem = Get-Item -LiteralPath $sourceParent -Force
-                    if ($parentItem.LinkType -in @("SymbolicLink", "Junction") -or $null -ne $parentItem.Target) {
+                    $parentLinkTarget = [string]($parentItem.Target -join "")
+                    if ($parentItem.LinkType -in @("SymbolicLink", "Junction") -or
+                        -not [string]::IsNullOrEmpty($parentLinkTarget)) {
                         throw "Repository fixture directories must not use symbolic links or junctions."
                     }
                 }
@@ -292,6 +349,10 @@ function Copy-RepositoryForTest {
             Copy-Item -LiteralPath $source -Destination $destination -Force
         }
 
+        & git -c init.templateDir= init --quiet $tempRoot
+        if ($LASTEXITCODE -ne 0) {
+            throw "Could not initialize the isolated Git-bounded repository fixture."
+        }
         return $tempRoot
     }
     catch {
@@ -314,6 +375,40 @@ Invoke-PackTest "validate-pack succeeds for repository" {
     $result = Invoke-CommandCapture -FilePath (Join-Path $repoRoot "scripts/validate-pack.ps1")
     Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "validate-pack should succeed."
     Assert-True -Condition ($result.Output -match "Validation passed\.") -Message "Validation pass message was not found."
+}
+
+function Invoke-NativeCapture {
+    param(
+        [string]$FilePath,
+        [string[]]$Arguments = @()
+    )
+
+    $previousErrorActionPreference = $ErrorActionPreference
+    try {
+        # Windows PowerShell 5.1 represents redirected native stderr as error
+        # records. Capture it without letting ordinary test-runner output abort
+        # the harness; the native exit code remains authoritative.
+        $ErrorActionPreference = "Continue"
+        $output = @(& $FilePath @Arguments 2>&1)
+        $exitCode = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    return [pscustomobject]@{
+        ExitCode = $exitCode
+        Output = ($output -join "`n")
+    }
+}
+
+Invoke-PackTest "validate-pack privacy scan is Git bounded" {
+    $windowsValidator = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/validate-pack.ps1") -Raw
+    $sharedValidator = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/validate-pack.shared.sh") -Raw
+    Assert-True -Condition ($windowsValidator -match "ls-files --cached --others --exclude-standard -z") -Message "PowerShell validation should scan only Git-bounded tracked and non-ignored files."
+    Assert-True -Condition ($windowsValidator -notmatch 'Get-ChildItem -LiteralPath \$repoRoot -Recurse') -Message "PowerShell validation must not recurse through ignored artifact directories."
+    Assert-True -Condition ($sharedValidator -match "ls-files --cached --others --exclude-standard -z") -Message "Shared validation should scan only Git-bounded tracked and non-ignored files."
+    Assert-True -Condition ($sharedValidator -notmatch 'find "\$REPO_ROOT" -type f') -Message "Shared validation must not recurse through ignored artifact directories."
 }
 
 Invoke-PackTest "validate-pack fails for wrong expected version" {
@@ -400,8 +495,9 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     $python = Get-Command python -ErrorAction SilentlyContinue
     if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
     Assert-True -Condition ($null -ne $python) -Message "Python 3 should be available for repository policy verification."
-    $policyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-github-repository-policy.py") 2>&1)
+    $policyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-github-repository-policy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Committed workflow and GitHub repository policy should remain aligned: $($policyOutput -join [Environment]::NewLine)"
+    Assert-True -Condition (($policyOutput -join "`n") -match "with 7 hostile checks") -Message "Workflow policy must reject excessive permissions, unbounded execution, persisted credentials, unsafe artifacts, and release publication."
 }
 
 Invoke-PackTest "Windows PowerShell 5.1 and PowerShell 7 compatibility is enforced" {
@@ -428,11 +524,11 @@ Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     $workflow = Get-Content -LiteralPath (Join-Path $repoRoot ".github/workflows/validate-pack.yml") -Raw
     $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/test-tiers.md") -Raw
     Assert-True -Condition ($windowsRunner -match 'ValidateSet\("Fast", "Integration", "Full"\)' -and $windowsRunner -match "Stopwatch") -Message "Windows tests should expose timed Fast, Integration, and Full tiers."
-    Assert-True -Condition ($windowsRunner -match "ls-files --cached --others --exclude-standard -z" -and $windowsRunner -match 'LinkType -in @\("SymbolicLink", "Junction"\)') -Message "Windows disposable repository fixtures should include current non-ignored Git content and reject linked files."
+    Assert-True -Condition ($windowsRunner -match "ls-files --cached --others --exclude-standard -z" -and $windowsRunner -match 'LinkType -in @\("SymbolicLink", "Junction"\)' -and $windowsRunner -match 'IsNullOrEmpty\(\$sourceLinkTarget\)') -Message "Windows disposable repository fixtures should include current non-ignored Git content, reject actual linked files, and allow empty OneDrive link metadata."
     Assert-True -Condition ($sharedRunner -match 'fast\|integration\|full' -and $sharedRunner -match "RUN_STARTED_SECONDS") -Message "Native tests should expose timed Fast, Integration, and Full tiers."
     Assert-True -Condition ($windowsRunner -match "haven-42-test-receipt-v1" -and $sharedRunner -match "haven-42-test-receipt-v1") -Message "Both runners should write the same receipt contract."
     Assert-True -Condition ($pushHook -match "Exact content-tree full-test receipt found" -and $pushHook -match "HEAD\^\{tree\}" -and $pushHook -match "schema=3") -Message "Pre-push should require a schema-v3 exact content-tree receipt."
-    Assert-True -Condition ($commitHook -match "ensure-test-python3\.shared\.sh" -and $commitHook -match "verify-pre-commit-readiness\.py" -and $commitHook -match "sync-wiki\.ps1" -and $commitHook -match "sync-wiki\.shared\.sh") -Message "Pre-commit should use validated Python 3, require the exact staged-tree Full receipt, and check an available wiki clone with the native platform runner."
+    Assert-True -Condition ($commitHook -match "ensure-test-python3\.shared\.sh" -and $commitHook -match "security-review-gate\.py" -and $commitHook -match "verify-pre-commit-readiness\.py" -and $commitHook -match "sync-wiki\.ps1" -and $commitHook -match "sync-wiki\.shared\.sh") -Message "Pre-commit should use validated Python 3, require exact staged-tree security and Full receipts, and check an available wiki clone with the native platform runner."
     Assert-True -Condition ($workflow -match "-Tier Full -NoReceipt" -and $workflow -match "--tier full --no-receipt") -Message "Hosted CI should always run Full without trusting local receipts."
     Assert-True -Condition (([regex]::Matches($workflow, "Run pack validation")).Count -eq 0) -Message "Hosted CI should not run validation separately when Full tests already include it."
     Assert-True -Condition ($doc -match "GitHub Actions always runs Full independently") -Message "Test-tier docs should preserve hosted CI authority."
@@ -442,6 +538,16 @@ Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     $preCommitOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pre-commit-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Pre-commit readiness hostile tests should pass."
     Assert-True -Condition (($preCommitOutput -join "`n") -match "Pre-commit readiness hostile tests passed") -Message "Pre-commit readiness must reject missing or stale receipts, partial staging, and untracked files."
+    $securityReviewOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-security-review-gate.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Security-review gate hostile tests should pass."
+    Assert-True -Condition (($securityReviewOutput -join "`n") -match "Security review gate hostile tests passed: 13 checks") -Message "Security-review gate must reject missing, stale, findings-bearing, incomplete, case-varied, and binary review states."
+    $preMergeOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-pre-merge-readiness.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Pre-merge readiness hostile tests should pass."
+    Assert-True -Condition (($preMergeOutput -join "`n") -match "Pre-merge readiness hostile tests passed: 12 checks") -Message "Pre-merge readiness must reject repository confusion, unsafe history, hostile ignored inputs, and command injection."
+    $preMergeSource = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/check-pre-merge-readiness.py") -Raw
+    $preMergeConfig = Get-Content -LiteralPath (Join-Path $repoRoot "config/pre-merge-readiness.json") -Raw | ConvertFrom-Json
+    Assert-True -Condition ($preMergeSource -match "wrong-origin-repository" -and $preMergeSource -match "detached-head" -and $preMergeSource -match 'relation in \{"behind", "diverged"\}') -Message "Pre-merge readiness should fail closed on repository and history confusion."
+    Assert-True -Condition ($preMergeConfig.testGroups[-1].id -eq "repository-core" -and $preMergeConfig.fullGate.windows -match "Tier Full") -Message "Changed files should always map to a fallback spot gate while preserving Full before push."
 }
 
 Invoke-PackTest "commands and workflows resolve for the active operating system" {
@@ -459,7 +565,8 @@ Invoke-PackTest "commands and workflows resolve for the active operating system"
         "param()`nexit 0" | Set-Content -LiteralPath $standaloneScript
 
         $shimResolution = Resolve-ExternalCommand -Command $scriptShim
-        if ($IsWindows) {
+        $runningOnWindows = if (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) { [bool]$IsWindows } else { $env:OS -eq 'Windows_NT' }
+        if ($runningOnWindows) {
             Assert-Equal -Actual $shimResolution.LaunchKind -Expected "windows-cmd-shim" -Message "Windows should prefer the adjacent cmd shim."
             Assert-Equal -Actual $shimResolution.FilePath -Expected $cmdShim -Message "Windows cmd shim path should be preserved."
         }
@@ -1938,7 +2045,7 @@ Invoke-PackTest "Continue file references are relative and resolvable" {
     Assert-True -Condition ($fileRefs.Count -gt 0) -Message "Config should include local file references."
 
     foreach ($ref in $fileRefs) {
-        Assert-True -Condition (-not [System.IO.Path]::IsPathFullyQualified($ref)) -Message "File reference should not be absolute: $ref"
+        Assert-True -Condition (-not (Test-HavenPathFullyQualified $ref)) -Message "File reference should not be absolute: $ref"
         Assert-True -Condition ($ref -notmatch "(^|/)\.\.(/|$)") -Message "File reference should not traverse outside .continue: $ref"
 
         $target = Join-Path (Join-Path $repoRoot ".continue") $ref
@@ -3492,7 +3599,7 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($todo -match "\[x\] Replace the no-PowerShell informational fallback") -Message "TODO should mark native onboarding rendering complete."
 
     $listResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-List", "-Json")
-    Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Workflow dispatcher list mode should succeed."
+    Assert-Equal -Actual $listResult.ExitCode -Expected 0 -Message "Workflow dispatcher list mode should succeed. Output: $($listResult.Output)"
     Assert-True -Condition ($listResult.Output -match '"Id":\s*"validate-pack"') -Message "Workflow dispatcher list output should include validate-pack."
 
     $dryRunResult = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "validate-pack", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-ExpectedVersion","0.3.0"]')
@@ -3540,8 +3647,15 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     $testBash = Get-TestBashPath
     $canRunShellDispatcher = $false
     if ($testBash) {
-        & $testBash -c "python3 --version" *> $null
-        $canRunShellDispatcher = $LASTEXITCODE -eq 0
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = "Continue"
+            & $testBash -c "python3 --version" *> $null
+            $canRunShellDispatcher = $LASTEXITCODE -eq 0
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
     }
     if ($canRunShellDispatcher) {
         $linuxListResult = & $testBash $linuxDispatcherPath --list --json 2>&1
@@ -4211,8 +4325,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
         Assert-True -Condition ($doc -match [regex]::Escape($milestone)) -Message "Solution architecture review should cover milestone $milestone."
     }
     Assert-True -Condition ($doc -match "21: General-Purpose AI Assistant And Intent Routing \| Complete \| Complete for the promoted provider set") -Message "Solution audit should keep completed Milestone 21 aligned with the roadmap."
-    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; local tools runnable \| Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, structural trust/execution admission, and offline installer/update simulation implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening workflow execution, real machine effects, signing, or optional desktop runtime claims."
-    Assert-True -Condition ($doc -match "Real cryptographic verification, token issuance/acceptance, workflow execution, executable composition, persistence, real machine effects, remote UI access, signing, and optional Tauri packaging remain open") -Message "Solution audit should keep cryptographic trust, token acceptance, execution, machine effects, signing, and Tauri explicitly unadmitted."
+    Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; local tools runnable \| Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, structural trust/execution admission, offline installer/update simulation, and inactive post-quantum migration planning implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening workflow execution, real machine effects, signing, or optional desktop runtime claims."
+    Assert-True -Condition ($doc -match "Real cryptographic verification, PQC profile selection/activation, token issuance/acceptance, workflow execution, executable composition, persistence, real machine effects, remote UI access, signing, and optional Tauri packaging remain open") -Message "Solution audit should keep cryptographic trust, PQC activation, token acceptance, execution, machine effects, signing, and Tauri explicitly unadmitted."
     Assert-True -Condition ($doc -notmatch "21: General-Purpose AI Assistant And Intent Routing \| Planned" -and $doc -notmatch "22: Unified Product UI And Task Composition \| Planned") -Message "Solution audit must not retain stale Milestone 21 or 22 status."
     Assert-True -Condition ($roadmap -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should align with the architecture audit for Milestones 21 and 22."
     Assert-True -Condition ($readme -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $readme -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "README should align with the architecture audit for Milestones 21 and 22."
@@ -5078,9 +5192,9 @@ Invoke-PackTest "provider performance evidence and capacity preflight fail close
     Assert-True -Condition (-not $ready.NetworkUsed -and -not $ready.FilesWritten -and -not $ready.ProcessesTerminated -and -not $ready.DriverOrServiceChanged) -Message "Capacity preflight should have no machine effects."
     $tooLarge = Invoke-CommandCapture -FilePath $capacityScript -Arguments @("-ProfilePath", $capacityFixture, "-RequiredAcceleratorMiB", "16000", "-RequiredSystemMiB", "8000", "-RequiredDiskMiB", "8000", "-ReserveMiB", "1000", "-AsJson")
     Assert-True -Condition ($tooLarge.ExitCode -ne 0 -and $tooLarge.Output -match 'insufficient-capacity') -Message "Insufficient accelerator headroom should fail closed."
-    $providerSecurityOutput = @(& $python.Source $providerConformanceSecurityTests 2>&1)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Provider conformance cleanup security tests should pass. Output: $($providerSecurityOutput -join ' ')"
-    Assert-True -Condition (($providerSecurityOutput -join "`n") -match "Ran 3 tests") -Message "Provider cleanup security coverage should exercise all three cases."
+    $providerSecurityResult = Invoke-NativeCapture -FilePath $python.Source -Arguments @($providerConformanceSecurityTests)
+    Assert-Equal -Actual $providerSecurityResult.ExitCode -Expected 0 -Message "Provider conformance cleanup security tests should pass. Output: $($providerSecurityResult.Output)"
+    Assert-True -Condition ($providerSecurityResult.Output -match "Ran 3 tests") -Message "Provider cleanup security coverage should exercise all three cases."
 }
 
 Invoke-PackTest "product UI first slice is registry-backed and fail closed" {
@@ -5163,9 +5277,9 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     foreach ($path in @($testPath, $policyPath, $portablePolicyPath, $recommendationPath, $lexicalContractPath, $researchContractPath, $docPath, (Join-Path $repoRoot "scripts/model_catalog_search.py"), (Join-Path $repoRoot "web/server.py"), (Join-Path $repoRoot "web/static/index.html"), (Join-Path $repoRoot "web/static/app.js"), (Join-Path $repoRoot "web/static/styles.css"))) {
         Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Local-web MVP file should exist: $path"
     }
-    $result = @(& $python.Source $testPath 2>&1)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-web offline integration test should pass."
-    $localWebResult = $result -join "`n"
+    $result = Invoke-NativeCapture -FilePath $python.Source -Arguments @($testPath)
+    Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Local-web offline integration test should pass. Output: $($result.Output)"
+    $localWebResult = $result.Output
     $localWebCoverage = [regex]::Match(
         $localWebResult,
         "local-web self-test passed: (?<count>\d+) security and behavior checks"
@@ -5194,9 +5308,12 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
     Assert-True -Condition ($policy.modelDiscovery.explicitOnlineConsentRequired -and -not $policy.modelDiscovery.redirectsAllowed -and -not $policy.modelDiscovery.automaticDownloadsAllowed -and -not $policy.modelDiscovery.pullApiAllowed -and -not $policy.modelDiscovery.commandExecutionAllowed) -Message "Public model discovery must stay explicit, fixed-origin, candidate-only, and non-installing."
     Assert-True -Condition ($lexicalContract.status -eq "offline-engine-implemented-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding engine."
-    $lexicalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-memory-lexical-retrieval.py") 2>&1)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Memory-only lexical retrieval hostile tests should pass. Output: $($lexicalOutput -join ' ')"
-    Assert-True -Condition (($lexicalOutput -join "`n") -match "52 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should disclose each bounded-result truncation cause."
+    $lexicalOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-memory-lexical-retrieval.py"))
+    Assert-Equal -Actual $lexicalOutput.ExitCode -Expected 0 -Message "Memory-only lexical retrieval hostile tests should pass. Output: $($lexicalOutput.Output)"
+    Assert-True -Condition ($lexicalOutput.Output -match "62 deterministic, hostile, and lifecycle checks") -Message "Memory-only lexical retrieval coverage should disclose source/chunk accounting, duplicate handling, cleanup, and each bounded-result truncation cause."
+    $retrievalExpansionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-retrieval-expansion-foundations.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Inactive retrieval-expansion foundation tests should pass. Output: $($retrievalExpansionOutput -join ' ')"
+    Assert-True -Condition (($retrievalExpansionOutput -join "`n") -match "27 inactive-boundary checks") -Message "Embedding and persistent-library preparation must stay unselected, download-free, inactive, and package-excluded."
     $toolTransportOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-structured-tool-transport.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Structured tool-transport security tests should pass. Output: $($toolTransportOutput -join ' ')"
     Assert-True -Condition (($toolTransportOutput -join "`n") -match "62 effect-free security checks") -Message "Structured tool transport must validate the exact final Ollama envelope, remain raw-JSON, allowlisted, effect free, package-excluded, and unable to grant runtime or execution authority."
@@ -5238,6 +5355,54 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $imageLifecycleOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-image-lifecycle-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Local-image lifecycle simulation tests should pass."
     Assert-True -Condition (($imageLifecycleOutput -join "`n") -match "28 cases") -Message "Local-image lifecycle planning must cover install, update, rollback, recovery, retention, and uninstall without effects."
+    $imageLicenseOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-audit-local-image-runtime.py"))
+    Assert-Equal -Actual $imageLicenseOutput.ExitCode -Expected 0 -Message "Local-image runtime license audit security tests should pass. Output: $($imageLicenseOutput.Output)"
+    Assert-True -Condition ($imageLicenseOutput.Output -match "25 fail-closed checks") -Message "Local-image runtime inventory must remain bounded, long-path-safe, narrowly Windows-RECORD-compatible, extraction-root-safe, link-safe, collision-safe, path-free, non-overwriting, and unable to grant redistribution authority."
+    $imageEvidenceOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-build-local-image-runtime-review-evidence.py"))
+    Assert-Equal -Actual $imageEvidenceOutput.ExitCode -Expected 0 -Message "Local-image candidate evidence hostile tests should pass. Output: $($imageEvidenceOutput.Output)"
+    Assert-True -Condition ($imageEvidenceOutput.Output -match "9 hostile checks") -Message "Image-runtime inventory, notices, checksums, and SBOM evidence must remain deterministic, mutually consistent, path-safe, non-overwriting, and explicitly unfit for distribution."
+    $roadmapLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-roadmap-closure-ledger.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Roadmap closure ledger tests should pass."
+    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "48 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
+    $localBatchLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-batch-task-ledger.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Recovered local-batch task ledger tests should pass."
+    Assert-True -Condition (($localBatchLedgerOutput -join "`n") -match "374 exact tasks across 18 phases") -Message "The recovered conversation plan must retain all 374 stable task records."
+    $historyDevelopmentOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-development.py"))
+    Assert-Equal -Actual $historyDevelopmentOutput.ExitCode -Expected 0 -Message "Conversation-history development database security tests should pass. Output: $($historyDevelopmentOutput.Output)"
+    Assert-True -Condition ($historyDevelopmentOutput.Output -match "6 security checks") -Message "The development database must remain synthetic, temporary, residue-free, and outside runtime authority."
+    $folderSelectionOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-folder-selection-foundation.py"))
+    Assert-Equal -Actual $folderSelectionOutput.ExitCode -Expected 0 -Message "Folder-selection foundation security tests should pass. Output: $($folderSelectionOutput.Output)"
+    Assert-True -Condition ($folderSelectionOutput.Output -match "16 security checks") -Message "Folder inspection must remain explicit, bounded, content-free, link-safe, type-safe, and unadmitted."
+    $webQueryAdapterOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-query-adapter.py"))
+    Assert-Equal -Actual $webQueryAdapterOutput.ExitCode -Expected 0 -Message "Web-research query-adapter security tests should pass. Output: $($webQueryAdapterOutput.Output)"
+    Assert-True -Condition ($webQueryAdapterOutput.Output -match "15 security checks") -Message "The query adapter must remain fixed-provider, fixture-transport-only, bounded, inactive, and unable to accept model links."
+    $webTransportGuardOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-transport-guard.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research transport-guard tests should pass."
+    Assert-True -Condition (($webTransportGuardOutput -join "`n") -match "25 hostile and exclusion checks") -Message "Future transport receipts must enforce destination, DNS, rebinding, redirect, content, time, and size boundaries without network authority."
+    $webApprovalOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-approval-state.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research approval-state tests should pass."
+    Assert-True -Condition (($webApprovalOutput -join "`n") -match "17 exact-lifecycle checks") -Message "Research query and page approvals must be exact, single-use, memory-only, and cleared on lifecycle boundaries."
+    $packageDependencyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-package-dependency-admission.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Package dependency admission tests should pass."
+    Assert-True -Condition (($packageDependencyOutput -join "`n") -match "12 exact-lock and non-admission checks") -Message "Package locks, builder inventory, workflow Python, and unadmitted ecosystems must remain aligned."
+    $nonContinueProfileOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-non-continue-validation-profiles.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Non-Continue candidate profile tests should pass."
+    Assert-True -Condition (($nonContinueProfileOutput -join "`n") -match "15 candidate-only safety checks") -Message "Candidate profiles must remain read-only, non-executable, private-safe, and unpromoted."
+    $candidateSurfacePlanOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-agent-surface-candidate-plan.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Candidate agent-surface lifecycle tests should pass."
+    Assert-True -Condition (($candidateSurfacePlanOutput -join "`n") -match "20 dry-run and injection checks") -Message "Candidate surface plans must use exact versions, safe local endpoints and config names, explicit rollback, and no effects or promotion."
+    $publicCandidateOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-public-repository-candidate.py"))
+    Assert-Equal -Actual $publicCandidateOutput.ExitCode -Expected 0 -Message "Public-repository candidate safety tests should pass. Output: $($publicCandidateOutput.Output)"
+    Assert-True -Condition ($publicCandidateOutput.Output -match "8 fail-closed checks") -Message "Public candidates must remain immutable, permissive, object-only, unexecuted, and non-promotional."
+    $publicStructureOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-public-repository-structure-validation.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository structure validation tests should pass."
+    Assert-True -Condition (($publicStructureOutput -join "`n") -match "19 read-only boundary checks") -Message "Public repository structure selection must remain content-free, read-only, non-executing, and non-promotional."
+    $futureExpansionOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-future-expansion-contracts.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Future expansion security contracts should pass."
+    Assert-True -Condition (($futureExpansionOutput -join "`n") -match "26 fail-closed checks") -Message "Retrieval, research, audio, and video expansions must remain independently gated and non-authorizing."
+    $postQuantumOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-post-quantum-readiness.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Post-quantum readiness hostile tests should pass."
+    Assert-True -Condition (($postQuantumOutput -join "`n") -match "37 cases") -Message "PQC planning must remain inactive, hybrid-preferred, classical-fallback-compatible, downgrade-visible, key-free, and non-authorizing."
     $parserOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-parser-worker-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Restricted parser-worker hostile tests should pass."
     Assert-True -Condition (($parserOutput -join "`n") -match "27 cases") -Message "The parser-worker foundation must reject hostile PDF, Office Open XML, and OpenDocument containers and grant no parser authority."
@@ -5246,7 +5411,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($complexContainerOutput -join "`n") -match "49 deterministic security checks across 24 fixtures") -Message "Complex-document review must reject hostile ZIP/XML structures, empty, disguised, or encoded references, and traversal while remaining excluded from runtime and packages."
     $complexSemanticOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-semantic-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument semantic review should pass."
-    Assert-True -Condition (($complexSemanticOutput -join "`n") -match "57 checks across 17 fixtures") -Message "Complex-document semantic review must cover bounded richer provenance while rejecting formulas, tracked changes, and over-budget content and remaining excluded from runtime and packages."
+    Assert-True -Condition (($complexSemanticOutput -join "`n") -match "62 checks across 19 fixtures") -Message "Complex-document semantic review must cover bounded richer provenance while rejecting formulas, tracked changes, charts, drawings, and over-budget content and remaining excluded from runtime and packages."
     $complexNativeOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-complex-document-native-foundation.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Office/OpenDocument native review foundation should pass."
     Assert-True -Condition (($complexNativeOutput -join "`n") -match "12 offline checks") -Message "Complex-document native evidence must remain sanitized, source-only, and unadmitted."
@@ -5301,7 +5466,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $researchSynthesisOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-cited-synthesis.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline cited-synthesis hostile tests should pass."
     Assert-True -Condition (($researchSynthesisOutput -join "`n") -match "26 checks") -Message "Research synthesis must remain source-bound, exactly cited, link-free, effect-free, and runtime-unadmitted."
-    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
+    Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/local-image-runtime-license-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, image-runtime license, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
 }
 
 Invoke-PackTest "task composition and repository privacy foundations fail closed" {
@@ -5328,7 +5493,7 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "12 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
-    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "16 cases") -Message "Hosted Python distribution provenance and protected-resource trust updates must remain explicit and fail closed."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "21 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, and protected-resource trust updates must remain explicit and fail closed."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $privacyScan = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") 2>&1)
@@ -5346,9 +5511,13 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
     $python = Get-Command python -ErrorAction SilentlyContinue
     if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for conversation-history foundation validation."
-    $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-conversation-history-foundation.py") 2>&1)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Conversation-history hostile tests should pass. Output: $($output -join ' ')"
-    Assert-True -Condition (($output -join "`n") -match "45 bounded, effect-free checks") -Message "Conversation-history foundation coverage should remain complete."
+    $output = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-foundation.py"))
+    Assert-Equal -Actual $output.ExitCode -Expected 0 -Message "Conversation-history hostile tests should pass. Output: $($output.Output)"
+    Assert-True -Condition ($output.Output -match "45 bounded, effect-free checks") -Message "Conversation-history foundation coverage should remain complete."
+    foreach ($historyTest in @("scripts/test-conversation-history-development.py", "scripts/test-conversation-history-store.py")) {
+        $historyOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot $historyTest))
+        Assert-Equal -Actual $historyOutput.ExitCode -Expected 0 -Message "Conversation-history development test should pass: $historyTest. Output: $($historyOutput.Output)"
+    }
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-contract.json") | ConvertFrom-Json
     $schema = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-schema.json") | ConvertFrom-Json
     $policy = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/local-web-runtime-policy.json") | ConvertFrom-Json
@@ -5380,7 +5549,13 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
         "config/system-readiness-contract.json",
         "config/setup-plan-contract.json",
         "config/install-component-registry.json",
+        "config/install-artifact-registry.json",
         "config/installation-broker-contract.json",
+        "config/offline-installer-lifecycle-contract.json",
+        "scripts/simulate-offline-installer-lifecycle.py",
+        "scripts/test-offline-installer-lifecycle.py",
+        "examples/fixtures/offline-installer-lifecycle-request.json",
+        "docs/offline-installer-lifecycle-foundation.md",
         "examples/fixtures/installation-simulation-request.json"
     )
     foreach ($path in $paths) {
@@ -5393,6 +5568,13 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     $broker = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/installation-broker-contract.json") | ConvertFrom-Json
     Assert-True -Condition (-not $readiness.probePolicy.shellAllowed -and -not $readiness.probePolicy.networkAllowed -and -not $readiness.probePolicy.installationAllowed) -Message "Readiness probes must remain shell-free and effect-free."
     Assert-True -Condition (-not $broker.runtimeAdmitted -and $broker.implementationStatus -eq "simulation-only") -Message "Installation broker must remain simulation-only."
+    $lifecycleOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-installer-lifecycle.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline installer lifecycle hostile tests should pass. Output: $($lifecycleOutput -join ' ')"
+    Assert-True -Condition (($lifecycleOutput -join "`n") -match "38 checks") -Message "Offline installer lifecycle coverage should remain complete."
+    $lifecycle = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/offline-installer-lifecycle-contract.json") | ConvertFrom-Json
+    $artifacts = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/install-artifact-registry.json") | ConvertFrom-Json
+    Assert-True -Condition (-not $lifecycle.runtimeAdmitted -and $lifecycle.implementationStatus -eq "simulation-only" -and -not ($lifecycle.machineEffects.PSObject.Properties.Value -contains $true)) -Message "Installer lifecycle must remain simulation-only with every machine effect false."
+    Assert-True -Condition (-not $artifacts.runtimeAdmitted -and $artifacts.defaultDecision -eq "deny" -and $artifacts.artifacts.Count -eq 0) -Message "No installer artifact may be admitted by the preparation registry."
 }
 
 if ($IsWindows) {
@@ -5405,7 +5587,8 @@ if ($IsWindows) {
         Assert-True -Condition ($browserSource -match "LOCAL_WEB_STARTUP_TIMEOUT_MS = 45000" -and $browserSource -match "local-web-exited-") -Message "The browser harness should tolerate cold native startup and report early server exits."
         $browserOutput = @(& $node.Source $browserTest 2>&1)
         Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The local-web setup wizard should complete in a headless Chromium browser. Output: $($browserOutput -join ' ')"
-        Assert-True -Condition (($browserOutput -join "`n") -match "passed: 329 checks") -Message "The headless browser flow should exercise all 329 checks."
+        $browserCoverage = [regex]::Match(($browserOutput -join "`n"), "passed: (?<count>\d+) checks")
+        Assert-True -Condition ($browserCoverage.Success -and [int]$browserCoverage.Groups["count"].Value -ge 333) -Message "The headless browser flow should exercise at least the admitted 333-check security baseline."
     }
 }
 
@@ -5431,6 +5614,8 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     }
 
     $image = Get-Content -LiteralPath $imageContractPath -Raw | ConvertFrom-Json
+    Assert-True -Condition (-not $image.distributionBoundary.externalProviderSoftwareBundled -and -not $image.distributionBoundary.providerModelsBundled -and -not $image.distributionBoundary.acceleratorDriversOrRuntimesBundled -and -not $image.distributionBoundary.providerInstallersOrUpdaterPayloadsBundled) -Message "External provider engines, models, accelerator runtimes, and installers must remain outside Haven 42 packages."
+    Assert-True -Condition ($image.distributionBoundary.existingProviderConnectionAllowed -and $image.distributionBoundary.separateUserManagedAcquisitionRequired -and $image.distributionBoundary.havenRuntimeDependenciesMayBeBundledOnlyWhenReviewed) -Message "Haven may connect to separately acquired providers while bundling only reviewed dependencies required by Haven itself."
     $plan = Get-Content -LiteralPath $planContractPath -Raw | ConvertFrom-Json
     $artifact = Get-Content -LiteralPath $artifactContractPath -Raw | ConvertFrom-Json
     $matrix = Get-Content -LiteralPath $matrixPath -Raw | ConvertFrom-Json
@@ -5497,12 +5682,12 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     $selfTest = @(& $python.Source $plannerPath --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Quantization planner self-test should pass."
     Assert-True -Condition (($selfTest -join "`n") -match "3 cases") -Message "Quantization planner should exercise all selection decisions."
-    $crossRunnerTests = @(& $python.Source $crossRunnerTestsPath 2>&1)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator runner security and parser tests should pass. Output: $($crossRunnerTests -join ' ')"
-    Assert-True -Condition (($crossRunnerTests -join "`n") -match "Ran 20 tests" -and ($crossRunnerTests -join "`n") -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
-    $crossFollowOnTests = @(& $python.Source $crossFollowOnTestsPath 2>&1)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Cross-accelerator follow-on security tests should pass. Output: $($crossFollowOnTests -join ' ')"
-    Assert-True -Condition (($crossFollowOnTests -join "`n") -match "Ran 8 tests" -and ($crossFollowOnTests -join "`n") -notmatch "skipped=") -Message "Follow-on hostile coverage should remain complete and skip-free."
+    $crossRunnerTests = Invoke-NativeCapture -FilePath $python.Source -Arguments @($crossRunnerTestsPath)
+    Assert-Equal -Actual $crossRunnerTests.ExitCode -Expected 0 -Message "Cross-accelerator runner security and parser tests should pass. Output: $($crossRunnerTests.Output)"
+    Assert-True -Condition ($crossRunnerTests.Output -match "Ran 20 tests" -and $crossRunnerTests.Output -notmatch "skipped=") -Message "Cross-accelerator hostile coverage should remain complete and skip-free."
+    $crossFollowOnTests = Invoke-NativeCapture -FilePath $python.Source -Arguments @($crossFollowOnTestsPath)
+    Assert-Equal -Actual $crossFollowOnTests.ExitCode -Expected 0 -Message "Cross-accelerator follow-on security tests should pass. Output: $($crossFollowOnTests.Output)"
+    Assert-True -Condition ($crossFollowOnTests.Output -match "Ran 8 tests" -and $crossFollowOnTests.Output -notmatch "skipped=") -Message "Follow-on hostile coverage should remain complete and skip-free."
     $profileText = @(& $python.Source $plannerPath profile --storage-root $repoRoot --context-tokens 16384 --concurrency 1 --workload-lane tool-use 2>&1) -join "`n"
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "OS-aware quantization profile should run."
     $profile = $profileText | ConvertFrom-Json
@@ -5510,11 +5695,16 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     Assert-True -Condition ($profile.privacy.localOnlyHardwareValuesIncluded -and -not $profile.privacy.persistentIdentityValuesIncluded) -Message "Quantization profile should expose local planning values without persistent identity fields."
     Assert-Equal -Actual $profile.target.workloadLane -Expected "tool-use" -Message "Quantization profile should preserve the requested lane."
 
+    foreach ($imageTest in @("scripts/test-local-image-candidate-profiles.py", "scripts/test-local-image-provider-process-lifecycle.py", "scripts/test-local-image-package-boundary.py", "scripts/test-generative-media-candidate-contract.py", "scripts/test-quantized-artifact-lifecycle.py")) {
+        $imageTestOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot $imageTest))
+        Assert-Equal -Actual $imageTestOutput.ExitCode -Expected 0 -Message "Local image security test should pass: $imageTest. Output: $($imageTestOutput.Output)"
+    }
+
     foreach ($wrapper in @("scripts/get-quantization-profile.ps1", "scripts/get-quantization-profile.linux.sh", "scripts/get-quantization-profile.macos.sh", "scripts/plan-model-quantization.ps1", "scripts/plan-model-quantization.linux.sh", "scripts/plan-model-quantization.macos.sh")) {
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $wrapper)) -Message "OS-aware quantization wrapper should exist: $wrapper"
     }
 
-    foreach ($doc in @("docs/local-image-provider-onboarding.md", "docs/local-audio-provider-candidates.md", "docs/local-video-provider-candidates.md", "docs/generative-media-consent-policy.md", "docs/hardware-adaptive-quantization.md", "docs/inference-engine-architecture.md", "examples/inference-engine-validation.md", "examples/cross-accelerator-model-validation.md")) {
+    foreach ($doc in @("docs/local-image-provider-onboarding.md", "docs/local-image-native-validation-packet.md", "docs/local-audio-provider-candidates.md", "docs/local-video-provider-candidates.md", "docs/generative-media-consent-policy.md", "docs/hardware-adaptive-quantization.md", "docs/quantized-artifact-native-validation-packet.md", "docs/inference-engine-architecture.md", "examples/inference-engine-validation.md", "examples/cross-accelerator-model-validation.md")) {
         $content = Get-Content -LiteralPath (Join-Path $repoRoot $doc) -Raw
         Assert-True -Condition ($content -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "Roadmap evidence should not contain private endpoints: $doc"
         Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match [regex]::Escape($doc)) -Message "Roadmap foundation doc should be mapped to the wiki: $doc"

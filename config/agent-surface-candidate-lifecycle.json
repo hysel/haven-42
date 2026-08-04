@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "status": "candidate-dry-run-planning-only",
+  "surfaces": {
+    "aider": {
+      "expectedExecutable": "aider",
+      "expectedVersion": "0.86.2",
+      "versionArguments": ["--version"],
+      "configName": ".aider.conf.local.yml"
+    },
+    "opencode": {
+      "expectedExecutable": "opencode",
+      "expectedVersion": "1.18.2",
+      "versionArguments": ["--version"],
+      "configName": ".opencode.local.json"
+    }
+  },
+  "pathPolicy": {
+    "repositoryRootEngineOwned": true,
+    "configMustBeDirectChild": true,
+    "symlinkOrReparseAllowed": false,
+    "preexistingFileOverwriteAllowed": false,
+    "gitExcludeRequiredBeforeActivation": true,
+    "globalConfigAllowed": false,
+    "homeDirectoryConfigAllowed": false
+  },
+  "rollback": {
+    "newConfig": "remove-exact-created-config-and-exact-git-exclude-line",
+    "preexistingConfig": "reject-without-separate-reviewed-backup-restore-flow",
+    "partialWrite": "remove-exact-temporary-and-final-paths",
+    "failure": "do-not-launch-surface"
+  },
+  "authority": {
+    "installationAllowed": false,
+    "configurationWriteAllowed": false,
+    "executableLaunchAllowed": false,
+    "providerInvocationAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiAllowed": false,
+    "packageAllowed": false,
+    "surfacePromotionAllowed": false
+  }
+}

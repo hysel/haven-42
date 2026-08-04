@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "status": "synthetic-temporary-development-only",
+  "database": {"engine": "python-standard-library-sqlite3", "currentSchemaVersion": 2, "temporaryNewDirectoryOnly": true, "plaintextPromotionAllowed": false, "runtimeDependencyAdmitted": false, "packageAdmissionAllowed": false},
+  "limits": {"titleCharacters": 200, "messageCharacters": 200000, "searchCharacters": 200, "attachmentSnapshotsPerMessage": 10, "attachmentNameCharacters": 255, "exportBytes": 1048576, "importRecords": 1000},
+  "operations": ["create-conversation", "rename-conversation", "list-conversations", "search-conversations", "append-message", "list-messages", "delete-conversation", "clear-all", "export-sanitized", "import-sanitized", "backup", "restore"],
+  "forbiddenImportFields": ["path", "databasePath", "url", "endpoint", "credential", "password", "secret", "token", "sql", "query", "command", "environment", "bytes", "contentBase64"],
+  "attachmentSnapshotFields": ["name", "mediaType", "sizeBytes", "sha256", "availability"],
+  "attachmentBytesAllowed": false,
+  "liveAttachmentReferencesAllowed": false,
+  "encryption": {"sqlCipherReviewed": true, "osCredentialStoresReviewed": true, "admitted": false, "unavailableDecision": "private-session-no-write"},
+  "activation": {"runtimeRoute": false, "ui": false, "shippingResource": false, "userContent": false, "persistentPath": false}
+}

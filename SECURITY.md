@@ -4,6 +4,14 @@
 
 Haven 42 is pre-1.0. Only the latest tagged release and the current `main` branch receive security fixes. Contracts marked `runtimeAdmitted: false`, documentation-only candidates, and failed or partial provider profiles are not supported runtime surfaces.
 
+Security review is a standing repository gate. Every enhancement receives a
+security check, and large, binary, or security-sensitive staged changes require
+a zero-finding review bound to the exact Git index tree before commit. A finding
+of any severity stops commit, push, and merge work until the repository owner is
+notified, every finding is fixed, and the complete staged tree is reviewed
+again. `config/security-review-gate.json` defines the enforced classification;
+the pre-commit hook rejects missing or stale review evidence.
+
 The local-web readiness scan is explicit, loopback-only, CSRF-protected, bounded, shell-free, network-free, and read-only. It returns sanitized capability facts rather than identity or raw command output, stores its snapshot only in memory, and builds setup plans only from the exact current server-owned snapshot. Automatic text recommendations require an exact provider digest and capability evidence; name-only matches remain unverified. Provider token and timing values are diagnostic, memory-only, and never represented as billing or remaining context. Event envelopes are fail-closed: sequences must be contiguous and monotonic, contain exactly one result or error terminal, and stop at that terminal. An unverified manual model is visibly warned, failures do not retry automatically, and restored input remains browser-memory-only for a new request.
 
 The trusted loopback service validates and classifies the normalized provider
@@ -13,6 +21,14 @@ private-network HTTP receives a prominent interception/tampering warning that
 recommends a trusted HTTPS endpoint or a loopback tunnel. HTTPS suppresses the
 HTTP warning but does not broaden the endpoint, redirect, or provider trust
 scope.
+
+Provider and public-catalog transports explicitly disable inherited OS and
+environment proxies, reject redirects, and use exact bounded response shapes.
+The loopback API requires exact JSON field types rather than coercing values,
+limits provider discovery to 512 models, caps request handling at 32 workers,
+and times out stalled sockets after 15 seconds. Assistant Markdown uses only
+inert DOM construction and a 2,048-element rendering budget; excess content is
+preserved as plain preformatted text instead of expanding the DOM.
 
 Optional public model search requires the user to activate the explicitly labeled **Search public catalog** submit action; changing capability or typing locally never starts it. It sends only a 64-character bounded query to the fixed Ollama HTTPS catalog, rejects redirects and responses over 512 KiB, returns at most 20 strictly normalized names, and persists nothing. Every online result is visibly distinguished from models already installed on the connected Ollama server and remains candidate-only with evidence unverified, hardware fit unknown, and license review required. Selecting an uninstalled candidate cannot execute it: Haven 42 neither calls a pull API nor starts a command. The only installation aid is a copyable `ollama pull` instruction constructed from a validated model name.
 
@@ -70,9 +86,31 @@ claims, and replay defense. Those claims remain non-authoritative; no
 authorization is verified and no registry, trust store, runtime verifier,
 package, credential, or filesystem state changes.
 
+The post-quantum readiness foundation is also inventory and policy only. It
+records current cryptographic boundaries and the standardized ML-KEM, ML-DSA,
+and SLH-DSA candidate roles without selecting a parameter set, adding a
+dependency, changing TLS policy, handling a key, or verifying a signature. A
+future TLS claim requires observation of the exact hybrid negotiation and
+certificate signature; HTTP never gains a security claim. Hybrid negotiation
+is preferred but not enforced: an observed secure classical fallback is
+allowed, must be reported as classical, and cannot receive a PQC claim. A future update
+transition must retain classical protection, reject unknown algorithms,
+missing signatures, and silent downgrade, and pass independent native and
+package review. PQC cannot replace bulk symmetric encryption, OS key
+protection, platform code signing, or notarization. All PQC runtime,
+cryptographic, trust, package, update, network, and machine-effect authority
+remains false.
+
 Portable build dependencies are exact-version and SHA-256 locked for the admitted hosted runner platforms. Evidence generation and verification use an exact reviewed platform/version/license allowlist rather than trusting the caller environment. Native hostile tests reject altered, missing, unexpected, and traversal-manifest resources; shutdown authority failures; unsafe, linked, encrypted, oversized, excessive, duplicate, or case-colliding archive members; incomplete checksums/notices; evidence symlinks; unexpected targets; malformed SBOM/provenance; and archive/file-inventory divergence. Provenance is informational and explicitly unsigned/unattested.
 
 Public-history privacy is enforced before push and in a least-privilege GitHub Actions job. The versioned policy scans reachable commits, commit messages, author and committer identities, unique historical blobs, and every tracked or untracked non-ignored working-tree file for private-network endpoints, machine-specific user paths and SSH command targets, key material, fingerprints, credential-bearing URLs, and likely secrets. GitHub noreply identities and narrowly enumerated hostile-test pattern sources are admitted; ignored recovery evidence and unreachable Git objects remain local and must never be tracked.
+
+The lightweight pack validator uses the same Git-bounded tracked and
+non-ignored file inventory instead of recursively walking ignored development
+artifacts. It rejects symbolic links and junctions before reading candidate
+text while allowing ordinary OneDrive cloud-file metadata. This prevents
+inaccessible or unusually large ignored evidence from producing environment-
+specific validation failures without weakening pending-file scans.
 
 Task composition is simulation-only. Its admitted planner accepts only registered UI-ready read-only workflows, bounded acyclic dependencies, exact fields, exact metadata-only intermediate records, and engine-consistent fresh/retry/cancel identity. It accepts no renderer arguments or approval grants and cannot create a process, access a filesystem or network, execute a workflow, or modify a machine. A separate inactive execution-admission simulator can validate exact effect disclosure, typed intermediate metadata, digest-bound approval scope, expiry/replay state, and retry/recovery/cancellation consistency for future workflows. It accepts no token secret and never issues, consumes, or accepts an approval for execution. An additional digest-chain simulator binds non-authoritative execution, effect, completion, failure, and cancellation claims to the exact admission and approval identifiers. It rejects reordering, forged completion, cross-admission reuse, unsafe retry, and uncertain recovery but writes no journal and proves no effect. Possible prior effects block recovery; every runtime effect and `ExecutionAllowed` remain false.
 
@@ -133,6 +171,44 @@ Hosted package jobs use versioned runner labels and accept only the exact
 reviewed Python 3.14.6 archive identity for their platform. A missing,
 cross-platform, or mutated archive name/digest fails before evidence
 generation. Local builds are never reported as hosted-source verified.
+
+New development-only data boundaries remain outside the application. The
+conversation-history validator accepts no user content or caller database
+path, uses a fixed parameterized SQLite schema only in a fresh temporary
+directory, verifies backup/restore and cascade deletion, and fails unless all
+database and journal files are removed. The folder inspector returns no
+content or absolute path, reads verified regular-file descriptors, detects
+changes during read, and rejects recursion without explicit choice, links,
+reparse points, hidden and unsupported entries, invalid UTF-8, executable or
+archive signatures, binary content, and every resource overrun.
+
+The controlled research query adapter is disabled and has no native transport.
+It revalidates the complete fixed-host request, rejects credential-like or
+active query content, accepts only finite bounded JSON with exact fields, and
+derives inactive citation destinations from numeric identifiers. Live network,
+DNS, proxy inheritance, redirects, cookies, credentials, page retrieval,
+model tools, UI, persistence, and follow-up remain false. Self-hosted and
+multi-query contracts cannot weaken SSRF or citation controls.
+
+Approved public-repository inspection uses ignored bare object stores only.
+It rejects checkout-only objects, symlinks, submodules, alternates, reparse
+points, config includes, unsafe repository config, replacement objects,
+mutable commits, license mismatches, and resource overruns. Lazy network fetch
+is disabled during validation, and no target hook, package, build, test, or
+source file executes. Passing static inspection cannot promote Aider,
+OpenCode, a model, or real-project write access.
+
+The package dependency admission test cross-checks every exact build version,
+SHA-256 lock, license expression, and platform marker across the requirements
+file, builder inventory, contract, and least-privilege workflow. npm, Cargo,
+Tauri, installers, signing, updater activation, release publication, and
+production redistribution remain outside that development-only admission.
+
+External provider engines, models, accelerator runtimes, drivers, installers,
+and updater payloads are outside the Haven package trust boundary. Haven may
+connect only through an admitted endpoint contract to separately acquired
+software. Discovery, compatibility evidence, and license audits grant no
+download, installation, update, execution, or redistribution authority.
 
 ## Reporting A Vulnerability
 

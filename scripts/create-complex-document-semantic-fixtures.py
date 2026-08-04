@@ -175,6 +175,27 @@ def cases() -> dict[str, bytes]:
                 )
             ]
         ),
+        "drawing.docx": opc(
+            [
+                (
+                    "word/document.xml",
+                    b"<w:document xmlns:w='urn:w'><w:p><w:r><w:t>Visible text</w:t></w:r></w:p></w:document>",
+                    DEFLATED,
+                ),
+                ("word/drawings/drawing1.xml", b"<drawing/>", DEFLATED),
+            ]
+        ),
+        "chart.xlsx": opc(
+            [
+                ("xl/workbook.xml", b"<workbook/>", DEFLATED),
+                (
+                    "xl/worksheets/sheet1.xml",
+                    b"<worksheet><c r='A1'><v>1</v></c></worksheet>",
+                    DEFLATED,
+                ),
+                ("xl/charts/chart1.xml", b"<chart/>", DEFLATED),
+            ]
+        ),
         "shared-index.xlsx": opc(
             [
                 ("xl/workbook.xml", b"<workbook/>", DEFLATED),

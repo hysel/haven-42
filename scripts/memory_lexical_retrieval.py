@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+import hashlib
 import re
 from typing import Iterable
 
@@ -63,6 +64,14 @@ class MemoryLexicalRetrieval:
         self._chunks.clear()
         self._source_names.clear()
 
+    def provider_changed(self) -> None:
+        """Drop all untrusted context before a provider boundary changes."""
+        self.clear()
+
+    def shutdown(self) -> None:
+        """Drop all retained in-memory context at service shutdown."""
+        self.clear()
+
     def load(self, attachments: Iterable[dict]) -> None:
         self.clear()
         try:
@@ -72,6 +81,7 @@ class MemoryLexicalRetrieval:
                 raise RetrievalError("invalid-source-count")
 
             seen: set[str] = set()
+            seen_content: set[str] = set()
             total_bytes = 0
             chunks: list[_Chunk] = []
             names: list[str] = []
@@ -100,6 +110,10 @@ class MemoryLexicalRetrieval:
                 total_bytes += actual_bytes
                 if total_bytes > budgets["maximumSourceBytes"]:
                     raise RetrievalError("source-budget-exceeded")
+                content_digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+                if content_digest in seen_content:
+                    raise RetrievalError("duplicate-source-content")
+                seen_content.add(content_digest)
 
                 chunk_size = budgets["maximumChunkCharacters"]
                 source_chunks = [
@@ -211,6 +225,17 @@ class MemoryLexicalRetrieval:
                 "truncationReasons": truncation_reasons,
                 "selectedCharacters": selected_characters,
                 "tokenEstimate": sum(item["tokenEstimate"] for item in selected),
+                "indexedSourceCount": self.source_count,
+                "indexedChunkCount": self.chunk_count,
+                "sourceChunkCounts": [
+                    {
+                        "sourceName": name,
+                        "chunkCount": sum(
+                            chunk.source_name == name for chunk in self._chunks
+                        ),
+                    }
+                    for name in self._source_names
+                ],
                 "chunks": selected,
                 "effects": {
                     "filesystemRead": False,

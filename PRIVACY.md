@@ -47,6 +47,13 @@ explicitly selects within strict type and size limits. It sends no filesystem
 path to the model provider. It does not scan folders, watch files, expand
 archives, execute attachment content, or write temporary attachment files.
 
+Development-only folder and history validators do not change that product
+behavior. Folder validation inspects only an operator-specified test directory
+under strict limits and emits metadata without absolute paths or content. The
+SQLite validator creates fixed synthetic records only in its own temporary
+directory and deletes the database, backup, and sidecars. Neither component is
+connected to the browser runtime or included as an active storage feature.
+
 Plan-only software workflows do not read a repository or start a process from
 the browser runtime. Separate developer scripts may read a repository only
 when their operator explicitly selects and runs them under their documented
@@ -79,3 +86,5 @@ Persistent conversation storage, online updates, installers, controlled web
 research, and additional providers remain separately gated. Before activation,
 each feature requires an updated privacy review, explicit user controls,
 retention and deletion behavior, security testing, and documentation.
+The disabled research query prototype uses injected fixtures only and performs
+no network request.

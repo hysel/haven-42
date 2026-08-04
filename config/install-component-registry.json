@@ -3,15 +3,17 @@
   "registryId": "haven42.install-components",
   "defaultDecision": "not-admitted",
   "rendererMayAddComponents": false,
+  "artifactRegistry": "config/install-artifact-registry.json",
+  "managedComponentCount": 0,
   "components": [
     {
       "id": "python",
       "label": "Python 3",
       "category": "core-prerequisite",
       "detectionProbeId": "python",
-      "promotionStatus": "externally-managed-prerequisite",
+      "promotionStatus": "source-prerequisite-portable-package-bundled",
       "managedInstallationAllowed": false,
-      "missingGate": "Haven 42 currently requires Python before its browser service can start."
+      "missingGate": "Source execution requires Python; the portable development package bundles its reviewed runtime, but no managed installer is admitted."
     },
     {
       "id": "ollama",
@@ -63,9 +65,9 @@
       "label": "ComfyUI",
       "category": "image-provider",
       "detectionProbeId": "comfyui",
-      "promotionStatus": "exact-profile-required",
+      "promotionStatus": "external-user-managed-provider",
       "managedInstallationAllowed": false,
-      "missingGate": "No consumer-local OS/GPU installer profile has passed every promotion gate."
+      "missingGate": "Haven 42 does not bundle or manage-install external provider software; the user must connect a separately acquired compatible instance."
     },
     {
       "id": "nvidia-runtime",
@@ -90,9 +92,9 @@
       "label": "Intel runtime",
       "category": "accelerator-runtime",
       "detectionProbeId": "intel-runtime",
-      "promotionStatus": "parked-hardware-required",
+      "promotionStatus": "validated-hardware-user-managed-driver",
       "managedInstallationAllowed": false,
-      "missingGate": "Representative Intel GPU validation and lifecycle evidence is required."
+      "missingGate": "Representative Intel hardware evidence exists, but drivers and system runtimes remain user-managed and no installer lifecycle is admitted."
     },
     {
       "id": "apple-mlx",

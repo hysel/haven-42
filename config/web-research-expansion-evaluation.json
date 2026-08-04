@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.expansion-evaluation",
+  "status": "evaluation-contract-only",
+  "selfHostedSearch": {
+    "candidateSelected": false,
+    "loopbackOrExplicitPrivateEndpointOnly": true,
+    "endpointPersistenceAllowed": false,
+    "credentialsAllowed": false,
+    "sameQueryAndCitationContractRequired": true,
+    "ssrfControlsMayBeWeakened": false,
+    "providerHealthAndVersionEvidenceRequired": true,
+    "installUninstallAndCleanupEvidenceRequired": true
+  },
+  "boundedMultiQuery": {
+    "maximumCandidateQueries": 4,
+    "eachQueryRequiresVisibleApproval": true,
+    "aggregateResultBudgetRequired": true,
+    "aggregateByteAndTimeBudgetRequired": true,
+    "cancellationRequired": true,
+    "exactPerQuerySourceAccountingRequired": true,
+    "autonomousFollowUpAllowed": false,
+    "queryContentFromUntrustedPageAllowed": false
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "networkAllowed": false,
+    "dnsAllowed": false,
+    "modelToolAllowed": false,
+    "providerInstallAllowed": false,
+    "automaticResearchAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}

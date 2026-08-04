@@ -26,7 +26,7 @@ TESTS = (
     (
         "semanticSecurity",
         "scripts/test-complex-document-semantic-review.py",
-        "57 checks across 17 fixtures",
+        "62 checks across 19 fixtures",
     ),
 )
 

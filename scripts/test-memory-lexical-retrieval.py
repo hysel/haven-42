@@ -55,7 +55,7 @@ def main() -> int:
         elif isinstance(node, ast.ImportFrom) and node.module:
             imported_roots.add(node.module.split(".", 1)[0])
     assert imported_roots <= {
-        "__future__", "collections", "dataclasses", "re", "typing"
+        "__future__", "collections", "dataclasses", "hashlib", "re", "typing"
     }
     assert all(marker not in module_source for marker in (
         "open(", "Path(", "socket", "subprocess", "requests", "urllib",
@@ -79,6 +79,12 @@ def main() -> int:
     assert not any(result["effects"].values())
     assert result["runtimeAdmitted"] is False
     assert result["providerPayloadAllowed"] is False
+    assert result["indexedSourceCount"] == 2
+    assert result["indexedChunkCount"] == 3
+    assert result["sourceChunkCounts"] == [
+        {"sourceName": "alpha.txt", "chunkCount": 2},
+        {"sourceName": "beta.md", "chunkCount": 1},
+    ]
     assert all(chunk["contentAuthority"] is False for chunk in result["chunks"])
 
     structured = MODULE.MemoryLexicalRetrieval(CONTRACT)
@@ -96,8 +102,8 @@ def main() -> int:
 
     tie = MODULE.MemoryLexicalRetrieval(CONTRACT)
     tie.load([
-        attachment("first.txt", "same"),
-        attachment("second.txt", "same"),
+        attachment("first.txt", "same one"),
+        attachment("second.txt", "same two"),
     ])
     assert [item["sourceName"] for item in tie.search("same")["chunks"]] == [
         "first.txt", "second.txt"
@@ -123,6 +129,13 @@ def main() -> int:
             attachment("same.TXT", "two"),
         ]),
         "duplicate-source-name",
+    )
+    rejected(
+        lambda: MODULE.MemoryLexicalRetrieval(CONTRACT).load([
+            attachment("first.txt", "identical untrusted content"),
+            attachment("second.txt", "identical untrusted content"),
+        ]),
+        "duplicate-source-content",
     )
     rejected(
         lambda: MODULE.MemoryLexicalRetrieval(CONTRACT).load(
@@ -151,8 +164,8 @@ def main() -> int:
 
     removal = MODULE.MemoryLexicalRetrieval(CONTRACT)
     removal.load([
-        attachment("keep.txt", "needle"),
-        attachment("remove.txt", "needle"),
+        attachment("keep.txt", "needle keep"),
+        attachment("remove.txt", "needle remove"),
     ])
     removal.remove("remove.txt")
     assert [item["sourceName"] for item in removal.search("needle")["chunks"]] == [
@@ -161,6 +174,14 @@ def main() -> int:
     removal.clear()
     assert removal.source_count == 0
     assert removal.chunk_count == 0
+
+    lifecycle = MODULE.MemoryLexicalRetrieval(CONTRACT)
+    lifecycle.load([attachment("provider.txt", "context")])
+    lifecycle.provider_changed()
+    assert lifecycle.source_count == 0 and lifecycle.chunk_count == 0
+    lifecycle.load([attachment("shutdown.txt", "context")])
+    lifecycle.shutdown()
+    assert lifecycle.source_count == 0 and lifecycle.chunk_count == 0
 
     truncated = MODULE.MemoryLexicalRetrieval(CONTRACT)
     truncated.load([
@@ -180,7 +201,10 @@ def main() -> int:
 
     chunk_limited = MODULE.MemoryLexicalRetrieval(CONTRACT)
     chunk_limited.load([
-        attachment(f"bounded-{index}.txt", ("needle " * 300)[:2100])
+        attachment(
+            f"bounded-{index}.txt",
+            (f"source-{index} " + ("needle " * 300))[:2100],
+        )
         for index in range(5)
     ])
     chunk_result = chunk_limited.search("needle")
@@ -205,7 +229,9 @@ def main() -> int:
         ".cs", ".py", ".js", ".jsx", ".ts", ".tsx",
         ".java", ".go", ".rs", ".sql", ".tf",
     ]
-    print("Memory lexical retrieval passed 52 deterministic, hostile, and lifecycle checks.")
+    assert CONTRACT["determinism"]["duplicateContentPolicy"] == "reject-exact-utf8-duplicate"
+    assert CONTRACT["lifecycle"]["cleanupOnProviderChangeRequired"] is True
+    print("Memory lexical retrieval passed 62 deterministic, hostile, and lifecycle checks.")
     return 0
 
 

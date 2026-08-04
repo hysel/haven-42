@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.public-repository.validation-candidates",
+  "status": "read-only-candidate-set-not-surface-promotion",
+  "limits": {
+    "maximumFiles": 20000,
+    "maximumRepositoryBytes": 268435456,
+    "maximumPathCharacters": 512,
+    "maximumLicenseBytes": 262144
+  },
+  "candidates": [
+    {
+      "id": "python-cli-click-8.2.1",
+      "repository": "https://github.com/pallets/click.git",
+      "tag": "8.2.1",
+      "tagObject": "d44436997f26cb2890ff3c094352540473c69777",
+      "commit": "fd183b2ced1cb5857784fe7fb22f4982f671f098",
+      "licenseExpression": "BSD-3-Clause",
+      "licenseFiles": {"LICENSE.txt": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d"}
+    },
+    {
+      "id": "node-web-express-5.1.0",
+      "repository": "https://github.com/expressjs/express.git",
+      "tag": "v5.1.0",
+      "tagObject": "e99649895f714c9dc9b3538e2cb0f58954f0ecfa",
+      "commit": "cd7d4397c398a3f3ecadeaf9ef6ac1377bd414c4",
+      "licenseExpression": "MIT",
+      "licenseFiles": {"LICENSE": "95a5762890e5c1c9808921cef095661fc482c5e1f0bba31446ac85595df6237c"}
+    },
+    {
+      "id": "rust-library-serde-json-1.0.140",
+      "repository": "https://github.com/serde-rs/json.git",
+      "tag": "v1.0.140",
+      "tagObject": "85d60e0f748bacc034a01f40a0714305bad92eb4",
+      "commit": "762783414e6c4f8d670c9d87eb04913efb80d3be",
+      "licenseExpression": "Apache-2.0 OR MIT",
+      "licenseFiles": {
+        "LICENSE-APACHE": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+        "LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+      }
+    }
+  ],
+  "execution": {
+    "workingTreeCheckoutAllowed": false,
+    "hooksAllowed": false,
+    "submodulesAllowed": false,
+    "symlinksAllowed": false,
+    "lazyNetworkFetchAllowedDuringValidation": false,
+    "targetCodeExecutionAllowed": false,
+    "packageInstallationAllowed": false,
+    "targetBuildAllowed": false,
+    "targetTestsAllowed": false
+  },
+  "authority": {
+    "surfacePromotionAllowed": false,
+    "writeValidationAllowed": false,
+    "modelInvocationAllowed": false,
+    "committedSourceAllowed": false,
+    "committedTranscriptAllowed": false
+  }
+}

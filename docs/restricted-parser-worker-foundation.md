@@ -177,9 +177,9 @@ hostile-escape, and package-parity field remains false, so admission remains
 denied. A system-installed `bwrap` is not a self-contained portable dependency.
 
 Office/OpenDocument semantic review remains behind the container gate and uses
-only the standard library. Seventeen deterministic fixtures cover all six
+only the standard library. Nineteen deterministic fixtures cover all six
 candidate formats, richer DOCX/XLSX/PPTX provenance, formulas, tracked changes,
-invalid shared strings, and part/text budget failures. Fifty-seven semantic
+invalid shared strings, explicit chart/drawing rejection, and part/text budget failures. Sixty-two semantic
 checks passed on Windows and Ubuntu Linux. A separate 33-check parity contract
 keeps every packaged cell false, so no dependency, worker, route, provider
 payload, UI, package component, user-document parsing, or unsupported fidelity

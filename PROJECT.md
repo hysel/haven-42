@@ -16,6 +16,11 @@ Continue, Aider, and OpenCode are the maintained engineering surfaces. General t
 
 ## Current Stage
 
+The recovered local-closure plan now has a durable 374-task ledger with stable
+IDs and evidence-required states. Its reconciliation is in progress. The
+existing 48-item parent-roadmap blocker ledger remains valid, but it does not
+prove that every finer-grained conversation task is complete.
+
 The admitted local web UI now enforces one visible primary panel, provides
 dedicated Models and About views, exposes capability-specific installed-model
 selection beside explicit candidate search, labels installed versus uninstalled
@@ -79,12 +84,16 @@ explicitly unverified for that hosted-source claim.
 
 Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system
-status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Windows dependency discovery is path-constrained and fails closed on host-derived API-set/UCRT files after a stale local build exposed unrelated JDK DLL contamination; a clean 31-file local rebuild and native package gate pass, and exact main commit `04baca39b26ec58c189a6ae21ea78b507444e9fa` passed clean hosted Windows/Linux/macOS reproduction and unsigned archive attestation. Applicable redistribution review and any future release-candidate repetition remain open. Milestone 22B now also has a 30-case structural updater-verifier receipt handoff, a 33-case verifier registry/root-transition model, a 49-case future execution-admission simulator, and a 46-case digest-chained effect-journal simulator. None establishes trust, issues or accepts an executable approval, writes a journal, stages an update, or grants runtime authority. Milestone 22B retains real cryptographic verification, executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native
+status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Windows dependency discovery is path-constrained and fails closed on host-derived API-set/UCRT files after a stale local build exposed unrelated JDK DLL contamination; a clean 31-file local rebuild and native package gate pass, and exact main commit `04baca39b26ec58c189a6ae21ea78b507444e9fa` passed clean hosted Windows/Linux/macOS reproduction and unsigned archive attestation. Applicable redistribution review and any future release-candidate repetition remain open. Milestone 22B now also has a 30-case structural updater-verifier receipt handoff, a 33-case verifier registry/root-transition model, a 37-case inactive post-quantum readiness suite, a 49-case future execution-admission simulator, and a 46-case digest-chained effect-journal simulator. The PQC layer inventories current boundaries and records unselected hybrid-preferred TLS with a visible secure classical fallback plus dual-signature candidates without changing TLS, selecting a parameter set, adding a dependency, handling a key, or verifying a signature. None establishes trust, issues or accepts an executable approval, writes a journal, stages an update, or grants runtime authority. Milestone 22B retains real cryptographic verification, PQC activation, executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native
 local image profiles and now has consumer-local discovery and consent contracts
 plus a 28-case effect-free lifecycle planner that admits no machine effects.
 An exact Windows 11/Quadro RTX 5000 ComfyUI/SDXL cell now passes integrity,
 CUDA, generation, cancellation, forced recovery, cleanup, and shutdown, but it
 remains partial and adds no runtime or UI admission.
+External provider engines, models, accelerator runtimes, drivers, installers,
+and updater payloads are excluded from Haven packages by policy. Provider
+audits support connection compatibility and security review but cannot grant
+bundling, redistribution, installation, or update authority.
 Milestone 24 has partial external Linux CUDA audio evidence but no admitted
 provider, while Milestone 25 retains candidate research plus a fail-closed
 hardware/storage preflight. Both remain behind the shared media-consent policy.
@@ -106,7 +115,7 @@ isolation with no attachment-driven execution or tools, and no temporary
 files. A 27-case restricted parser-worker foundation rejects hostile PDF,
 Office Open XML, and OpenDocument metadata but admits no dependency, worker,
 route, or filesystem access. The review-only complex-document layer now passes
-49 container checks across 24 fixtures and 57 semantic checks across 17
+49 container checks across 24 fixtures and 62 semantic checks across 19
 fixtures with Windows and Ubuntu source evidence; a separate 33-check parity
 contract keeps all package
 cells false. PDF production isolation also has a 37-check native OS-control
@@ -114,7 +123,9 @@ evidence gate that rejects WSL2 as native Linux and permits no fallback or
 runtime authority.
 Automatic scan, directory access, real complex parsers, embedding indexes,
 and runtime persistence remain unadmitted. The deterministic memory-only
-lexical core now has bounded offline hostile and lifecycle tests, but its
+lexical core now rejects exact duplicate content, discloses source/chunk and
+truncation accounting, and clears on failure, removal, provider change, and
+shutdown, but its
 default-deny contract still exposes no runtime route, UI control, or provider
 payload.
 The optional conversation-history foundation now defines a non-executable
@@ -126,6 +137,16 @@ and key-management architecture review now requires user-scoped OS credential
 storage and fail-closed Private session with no plaintext fallback. Dependency
 selection, per-user storage implementation, UI activation, and saved messages
 remain separate approval gates.
+
+Owner-approved development validation now exercises a real fixed-schema SQLite
+database using only synthetic records inside a fresh temporary directory. It
+passes parameterized create/read, backup/restore, cascade-deletion, permission,
+and residue-cleanup checks while accepting no user content or caller database
+path. A separate explicit-folder foundation produces only bounded relative
+metadata and rejects links, hidden or unsupported entries, binaries,
+executables, archives, encoding failures, resource overruns, and files changed
+during read. Neither foundation is connected to the runtime, UI, provider, or
+package.
 Milestone 28 defines proposed controlled web research with inactive offline
 contracts and hostile fixtures. A 28-check caller-fixture boundary validates
 bounded queries, strict public-HTTPS result metadata, engine-derived inactive
@@ -135,9 +156,41 @@ bounded UTF-8 text or strict allowlisted HTML into inert untrusted segments
 without retaining attributes or remote references and without network,
 filesystem, runtime, package, UI, or model authority. Live transport, DNS,
 page retrieval, trusted UI
-navigation, SSRF enforcement against resolved destinations, and autonomous
+navigation, actual DNS/network execution, and autonomous
 follow-up remain unadmitted; no model or renderer internet tool exists. Broader
 surface and provider parity remains evidence-gated.
+
+A fixed-provider development query adapter now validates the exact Wikipedia
+metadata-search request and response shape through an injected fixture
+transport. Fifteen security checks cover request tampering, duplicate keys,
+strict unused metadata, Unicode controls, credential-like and
+active queries, result and response budgets, non-finite JSON, model-supplied
+links, duplicate identifiers, timestamps, and disabled authority. It imports
+no network client. Separate contracts now preserve self-hosted, bounded
+multi-query, semantic-embedding, encrypted-library, audio, and video gates
+without selecting or admitting an implementation.
+
+An effect-free transport guard now validates fixed HTTPS destinations, public
+pre-connect and connected DNS snapshots, rebinding, redirects, response type,
+encoding, time, and byte bounds. A separate memory-only state proof requires
+exact single-use query and page approvals and clears them on cancellation,
+failure, provider change, and shutdown. Neither performs DNS or network I/O or
+enters the runtime/package.
+
+Local object-only inspection also passes against immutable Click 8.2.1,
+Express 5.1.0, and serde_json 1.0.140 public permissive repositories. Exact
+license bytes, commit identity, safe tree modes, and aggregate budgets were
+verified from ignored bare clones without checkout or target execution. A
+ripgrep candidate was rejected for a symlink and replaced without weakening
+the policy. Candidate Aider and OpenCode profiles remain read-only and do not
+promote real-project writes.
+
+Those three repositories also pass content-free project detection,
+runtime-context planning, read-only workflow selection, and language-rule
+selection from bare object metadata. Candidate Aider/OpenCode planning pins
+exact expected versions, validates injected discovery facts and local/private
+Ollama endpoints, and supplies rollback/cleanup plans without installation,
+configuration writes, executable launch, or promotion.
 
 Capability Evidence Contract v2 now prevents model readiness from being
 inherited across surfaces, operating systems, or operations. Deterministic

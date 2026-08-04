@@ -375,10 +375,16 @@ def load_component_registry(path: Path | None = None) -> dict[str, dict[str, Any
     value = json.loads((path or ROOT / "config/install-component-registry.json").read_text(encoding="utf-8"))
     if (
         not isinstance(value, dict)
-        or set(value) != {"schemaVersion", "registryId", "defaultDecision", "rendererMayAddComponents", "components"}
+        or set(value) != {
+            "schemaVersion", "registryId", "defaultDecision",
+            "rendererMayAddComponents", "artifactRegistry",
+            "managedComponentCount", "components",
+        }
         or value["schemaVersion"] != 1
         or value["registryId"] != "haven42.install-components"
         or value["rendererMayAddComponents"] is not False
+        or value["artifactRegistry"] != "config/install-artifact-registry.json"
+        or value["managedComponentCount"] != 0
         or not isinstance(value["components"], list)
     ):
         raise ReadinessError("invalid-component-registry")

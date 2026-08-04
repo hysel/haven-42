@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "repository": "hysel/haven-42",
+  "defaultBranch": "main",
+  "upstreamRef": "origin/main",
+  "approvedIgnoredPatterns": [
+    ".continue/config.local*.yaml",
+    ".env",
+    ".env.*",
+    ".privacy-rewrite-backup/**",
+    ".vscode/**",
+    "__pycache__/**",
+    "*.pyc",
+    "*.pyo",
+    "config/model-runtime-policy.local.json",
+    "dist/**",
+    "runtime-validation-output/**"
+  ],
+  "sensitiveIgnoredPatterns": [
+    "**/*credential*",
+    "**/*private*key*",
+    "**/*secret*",
+    "**/*token*",
+    "**/.env*",
+    "**/authorized_keys",
+    "**/id_*",
+    "**/known_hosts",
+    "**/*.key",
+    "**/*.p12",
+    "**/*.pem",
+    "**/*.pfx"
+  ],
+  "testGroups": [
+    {
+      "id": "batch-ledger",
+      "patterns": [
+        "config/local-batch-task-ledger.*",
+        "docs/local-batch-task-ledger.md",
+        "docs/roadmap-closure-ledger.md",
+        "scripts/test-local-batch-task-ledger.py"
+      ],
+      "commands": [
+        "python scripts/test-local-batch-task-ledger.py",
+        "python scripts/test-roadmap-closure-ledger.py"
+      ]
+    },
+    {
+      "id": "github-policy",
+      "patterns": [
+        ".github/**",
+        ".githooks/**",
+        "config/github-repository-policy.json",
+        "config/pre-merge-readiness.json",
+        "config/security-review-gate.json",
+        "docs/github-repository-policy.md",
+        "docs/test-tiers.md",
+        "scripts/check-pre-merge-readiness.py",
+        "scripts/security-review-gate.py",
+        "scripts/test-pre-commit-readiness.py",
+        "scripts/test-pre-merge-readiness.py",
+        "scripts/test-security-review-gate.py",
+        "scripts/verify-github-repository-policy.py",
+        "scripts/verify-pre-commit-readiness.py"
+      ],
+      "commands": [
+        "python scripts/test-pre-commit-readiness.py",
+        "python scripts/test-pre-merge-readiness.py",
+        "python scripts/test-security-review-gate.py",
+        "python scripts/verify-github-repository-policy.py"
+      ]
+    },
+    {
+      "id": "public-privacy",
+      "patterns": [
+        "config/public-repository-privacy-policy.json",
+        "scripts/verify-public-repository-privacy.py"
+      ],
+      "commands": [
+        "python scripts/verify-public-repository-privacy.py --self-test",
+        "python scripts/verify-public-repository-privacy.py"
+      ]
+    },
+    {
+      "id": "image-runtime-review",
+      "patterns": [
+        "docs/local-image-runtime-license-review.md",
+        "scripts/audit-local-image-runtime.py",
+        "scripts/build-local-image-runtime-review-evidence.py",
+        "scripts/test-audit-local-image-runtime.py",
+        "scripts/test-build-local-image-runtime-review-evidence.py"
+      ],
+      "commands": [
+        "python scripts/test-audit-local-image-runtime.py",
+        "python scripts/test-build-local-image-runtime-review-evidence.py"
+      ]
+    },
+    {
+      "id": "portable-supply-chain",
+      "patterns": [
+        ".github/workflows/validate-pack.yml",
+        "config/package-dependency-admission.json",
+        "docs/desktop-dependency-resolution-evidence.md",
+        "docs/package-dependency-admission.md",
+        "package/**",
+        "requirements-package.lock",
+        "scripts/build-portable-development-package.py",
+        "scripts/test-package-dependency-admission.py",
+        "scripts/test-portable-runtime-components.py",
+        "scripts/verify-portable-development-artifacts.py"
+      ],
+      "commands": [
+        "python scripts/test-package-dependency-admission.py",
+        "python scripts/test-portable-runtime-components.py",
+        "python scripts/verify-portable-development-artifacts.py --self-test-only"
+      ]
+    },
+    {
+      "id": "offline-updater-trust",
+      "patterns": [
+        "config/core-update-*.json",
+        "docs/core-update-cryptographic-verifier-review.md",
+        "docs/desktop-storage-and-updates.md",
+        "examples/fixtures/core-update-*",
+        "scripts/core-update-*"
+      ],
+      "commands": [
+        "python scripts/core-update-policy.py --self-test",
+        "python scripts/core-update-trust-handoff.py --self-test",
+        "python scripts/core-update-verifier-transition.py --self-test",
+        "python scripts/core-update-lifecycle.py --self-test"
+      ]
+    },
+    {
+      "id": "offline-installer-lifecycle",
+      "patterns": [
+        "config/install-artifact-registry.json",
+        "config/install-component-registry.json",
+        "config/offline-installer-lifecycle-contract.json",
+        "docs/offline-installer-lifecycle-foundation.md",
+        "examples/fixtures/offline-installer-lifecycle-request.json",
+        "scripts/simulate-offline-installer-lifecycle.py",
+        "scripts/system_readiness.py",
+        "scripts/test-offline-installer-lifecycle.py",
+        "scripts/test-system-readiness.py"
+      ],
+      "commands": [
+        "python scripts/test-system-readiness.py",
+        "python scripts/test-offline-installer-lifecycle.py"
+      ]
+    },
+    {
+      "id": "wiki-docs",
+      "patterns": [
+        "config/wiki-*.tsv",
+        "docs/**",
+        "README.md"
+      ],
+      "commands": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/validate-pack.ps1"
+      ]
+    },
+    {
+      "id": "repository-core",
+      "patterns": [
+        "**"
+      ],
+      "commands": [
+        "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test-pack.ps1 -Tier Fast"
+      ]
+    }
+  ],
+  "fullGate": {
+    "windows": ".\\scripts\\test-pack.ps1 -Tier Full",
+    "posix": "./scripts/test-pack.linux.sh --tier full"
+  }
+}

@@ -25,6 +25,7 @@
     "semanticEmbeddingsAllowed": false,
     "modelRankingAllowed": false,
     "remoteRankingAllowed": false,
+    "duplicateContentPolicy": "reject-exact-utf8-duplicate",
     "stableTieBreak": "attachment-order-then-chunk-offset"
   },
   "budgets": {
@@ -53,6 +54,7 @@
     "browserStorageAllowed": false,
     "cleanupOnTaskBoundaryRequired": true,
     "cleanupOnFailureRequired": true,
+    "cleanupOnProviderChangeRequired": true,
     "cleanupOnShutdownRequired": true
   },
   "implementation": {

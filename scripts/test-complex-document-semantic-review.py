@@ -48,6 +48,8 @@ HOSTILE = {
     "segments.odp": ("odp", "text-segment-budget-exceeded"),
     "tracked.docx": ("docx", "tracked-change-rejected"),
     "shared-index.xlsx": ("xlsx", "shared-string-index-invalid"),
+    "drawing.docx": ("docx", "unsupported-visual-object-rejected"),
+    "chart.xlsx": ("xlsx", "unsupported-visual-object-rejected"),
 }
 RICH = {
     "rich.docx": (
@@ -99,7 +101,7 @@ def main() -> int:
         path.name: hashlib.sha256(path.read_bytes()).hexdigest()
         for path in GENERATOR.generate()
     }
-    assert first == second and len(first) == 17
+    assert first == second and len(first) == 19
     checks += 2
     for name, (format_id, expected) in SAFE.items():
         result = REVIEWER.extract((GENERATOR.OUTPUT / name).read_bytes(), format_id)
@@ -135,9 +137,12 @@ def main() -> int:
     assert contract["policy"]["formulasAllowed"] is False
     assert contract["policy"]["commentsExtracted"] is True
     assert contract["policy"]["trackedChangesRejected"] is True
+    assert contract["policy"]["chartsAllowed"] is False
+    assert contract["policy"]["drawingsAllowed"] is False
+    assert contract["policy"]["unsupportedObjectsRejected"] is True
     assert contract["policy"]["archiveExtractionAllowed"] is False
     assert not any(contract["authority"].values())
-    checks += 8
+    checks += 11
     reviewer = ROOT / "scripts/review-complex-document-semantics.py"
     generator = ROOT / "scripts/create-complex-document-semantic-fixtures.py"
     assert imported_roots(reviewer).isdisjoint(
@@ -161,7 +166,7 @@ def main() -> int:
     assert "complex-document-semantic-review" not in package + resources
     checks += 3
     print(
-        f"Complex-document semantic review passed {checks} checks across 17 fixtures."
+        f"Complex-document semantic review passed {checks} checks across 19 fixtures."
     )
     return 0
 

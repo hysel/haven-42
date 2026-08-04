@@ -1,5 +1,12 @@
 # Controlled Web Research Foundation
 
+The candidate-only preparation also includes an effect-free transport guard
+and memory-only approval-state proof. They validate fixed HTTPS destinations,
+public DNS answers before and at connection, rebinding, redirect, encoding,
+content-type, byte, and time boundaries, plus exact single-use query/page
+approval and cancellation cleanup. Neither performs DNS resolution or network
+I/O, and neither is present in the runtime or package.
+
 Milestone 28 remains runtime-unadmitted. Haven 42 has no general internet model
 tool, research UI route, DNS authority, URL fetcher, browser automation, page
 renderer, download path, or autonomous follow-up search.
@@ -22,6 +29,14 @@ This foundation imports no socket, HTTP client, browser, or child-process
 library. It makes no DNS request, opens no connection, writes no file, and is
 absent from the application and portable package. Passing fixture validation
 does not admit a live search provider or page retrieval.
+
+The separately disabled query-adapter prototype fixes the destination to the
+English Wikipedia metadata search API and permits only a bounded query and
+result count to vary. Tests inject a fixture transport; the implementation has
+no HTTP client and revalidates the complete request and strict response shape
+before producing inactive engine-derived destination metadata. It cannot run
+from the product, accept a model-selected destination, retrieve a page, or
+persist a result.
 
 An additional 26-check page-text foundation accepts only caller-supplied
 bounded UTF-8 bytes labeled `text/plain` or `text/html`. Its strict HTML parser
@@ -57,3 +72,9 @@ response content and time budgets, transport-to-extractor binding, cancellation,
 residue-free cleanup, source/package parity, and native evidence on each
 supported platform. Citation navigation also remains a user-reviewed UI
 decision.
+
+`config/web-research-expansion-evaluation.json` records two later gates without
+activating either: a self-hosted provider must meet the same public-destination
+and transport controls, and multi-query research is capped at four visible
+queries with separate approval and cancellation. No autonomous or page-derived
+follow-up is allowed.

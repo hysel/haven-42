@@ -6,6 +6,7 @@ repo_root="$(git rev-parse --show-toplevel)"
 # shellcheck source=../scripts/ensure-test-python3.shared.sh
 . "$repo_root/scripts/ensure-test-python3.shared.sh"
 ensure_test_python3
+python3 "$repo_root/scripts/security-review-gate.py" --verify
 python3 "$repo_root/scripts/verify-pre-commit-readiness.py"
 
 wiki_path="${repo_root}.wiki"
@@ -26,4 +27,4 @@ if [ -d "$wiki_path/.git" ]; then
   esac
 fi
 
-printf '%s\n' "Exact staged-tree Full-test receipt and available wiki synchronization verified."
+printf '%s\n' "Exact staged-tree clean security review, Full-test receipt, and available wiki synchronization verified."

@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "registryId": "haven42.install-artifacts",
+  "defaultDecision": "deny",
+  "runtimeAdmitted": false,
+  "exactIdentityRequired": true,
+  "requiredIdentityFields": [
+    "artifactId",
+    "componentId",
+    "fileName",
+    "version",
+    "platform",
+    "architecture",
+    "byteLength",
+    "sha256",
+    "sourceType",
+    "licenseReviewed",
+    "integrityVerified",
+    "lifecycleEvidence"
+  ],
+  "artifacts": [],
+  "notes": [
+    "No installer input is admitted.",
+    "Portable development archives are build outputs, not registered installer inputs.",
+    "A future entry requires an exact immutable identity and native lifecycle evidence before it can be considered."
+  ]
+}

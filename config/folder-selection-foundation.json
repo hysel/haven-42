@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.folder-selection.foundation",
+  "status": "development-inspection-only-not-runtime-admitted",
+  "limits": {
+    "maximumDepth": 4,
+    "maximumFiles": 100,
+    "maximumFileBytes": 65536,
+    "maximumTotalBytes": 1048576,
+    "maximumRelativePathCharacters": 240,
+    "maximumElapsedMilliseconds": 2000
+  },
+  "allowedExtensions": [
+    ".txt", ".md", ".csv", ".json", ".cs", ".py", ".js", ".jsx",
+    ".ts", ".tsx", ".java", ".go", ".rs", ".sql", ".tf"
+  ],
+  "excludedDirectoryNames": [
+    ".git", ".hg", ".svn", ".venv", "__pycache__", "node_modules",
+    "vendor", "build", "dist", "target", "coverage", ".cache"
+  ],
+  "contentValidation": {
+    "sharedAttachmentIdentityValidator": "web.server.validate_context_content_identity",
+    "sharedStructuredValidator": "web.server.validate_structured_context",
+    "contentIsUntrustedDataNeverInstructions": true
+  },
+  "policy": {
+    "explicitSelectionRequired": true,
+    "recursiveByDefault": false,
+    "linksOrReparsePointsAllowed": false,
+    "hiddenEntriesAllowed": false,
+    "unsupportedEntriesIgnored": false,
+    "archivesAllowed": false,
+    "executablesAllowed": false,
+    "contentReturned": false,
+    "absolutePathsReturned": false,
+    "duplicateHardLinksAllowed": false,
+    "mountBoundaryCrossingAllowed": false
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "providerPayloadAllowed": false,
+    "automaticScanningAllowed": false,
+    "persistenceAllowed": false,
+    "fileModificationAllowed": false,
+    "networkAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}

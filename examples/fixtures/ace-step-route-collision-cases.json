@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {"id": "unsafe-shadow", "routes": ["/v1/{provider:path}", "/v1/models"], "request": "/v1/models", "expected": "collision"},
+    {"id": "exact-first", "routes": ["/v1/models", "/v1/{provider:path}"], "request": "/v1/models", "expected": "exact"},
+    {"id": "inventory-unambiguous", "routes": ["/v1/{provider:path}", "/v1/model_inventory"], "request": "/v1/model_inventory", "expected": "collision"}
+  ],
+  "requiredFix": "Every non-health route requires top-level authentication and reserved local routes are resolved before catch-all proxy routes."
+}

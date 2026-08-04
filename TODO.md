@@ -1,5 +1,10 @@
 # TODO
 
+The recovered 374-task local-batch plan is reconciled separately in
+`config/local-batch-task-ledger.tsv`. Its remaining `unverified`, partial,
+blocked, deferred, and not-started records must not be inferred from the parent
+checkbox totals below.
+
 ## Milestone 1: Minimum Usable Pack
 
 ### Project Documentation
@@ -246,6 +251,7 @@
 
 - [ ] Add workflow-specific remediation templates for non-filename deterministic output verification failures if they recur.
 - [ ] Validate the pack against additional real repositories when suitable targets are available.
+  - [x] Add and execute an object-only read-only inspection against immutable Click 8.2.1, Express 5.1.0, and serde_json 1.0.140 public permissive candidates. Exact commits and license digests passed under ignored bare storage with no checkout or target execution; ripgrep 14.1.1 was rejected for a symlink and replaced without weakening policy. Live agent/model validation remains external.
 - [ ] Convert repeated validation failures into prompt, rule, documentation, or script updates.
 
 ## Milestone 14: Agent Surface Portability And Broader Audience
@@ -420,6 +426,14 @@
     consecutive versions, validity overlap, continuity anchors, current-root
     threshold claims, and replay. It verifies no authorization and applies no
     registry, trust-store, or runtime change.
+  - [x] Add a cryptographic inventory, a fail-closed post-quantum agility
+    contract, and 37 hostile checks covering standardized ML-KEM/ML-DSA/
+    SLH-DSA candidate roles, hybrid TLS observation, dual-signature migration,
+    downgrade rejection, key isolation, and zero runtime authority.
+    Exact PQC profile selection and activation remain part of the open trusted-
+    verification gate above and require owner approval, independent security
+    review, immutable dependency and test-vector evidence, full key lifecycle
+    design, and native source/package parity on Windows, Linux, and macOS.
 - [x] Keep engine binaries separate from user configuration, workspaces, models, provider data, generated artifacts, and evidence in the versioned storage and update contracts.
 - [ ] Add compatibility preflight, atomic activation, post-update health checks, automatic rollback, retained-version cleanup, offline behavior, and a disabled-update mode.
   - [x] Add a cross-platform effect-free lifecycle simulator for healthy,
@@ -570,6 +584,7 @@
 - [ ] Provide or approve suitable non-generated repositories for future real-repository validation.
 - [ ] Confirm whether surface-specific install/configure profiles should be prioritized before more non-Continue evidence exists.
 - [ ] Add future surface-specific profile generation after non-Continue validation.
+  - [x] Add candidate-only Aider and OpenCode public-repository read-only validation profiles with immutable permissive targets, ignored clones, no target code execution, sanitized-summary-only evidence, and no install, config, model, write, menu, runtime, or promotion authority.
 - [x] Confirm the unified starter-toolkit UI follows general-purpose capability contracts as Milestone 22.
 - [x] Require external wiki synchronization for mapped documentation and hosted CI.
 - [x] Resolve the native macOS Milestone 18 workflow gap. Devstral Small 2 completed all required generated-fixture CLI cells; language rule packs remain evidence-gated for real repositories and editor surfaces.
@@ -579,17 +594,18 @@
 
 - [x] Validate the pinned Linux ComfyUI/SDXL provider, typed PNG artifact, metadata exclusion, history cleanup, recovery, SSH tunnel, and visual result for its exact NVIDIA V100 scope.
 - [x] Define hardware discovery and consent-driven local image-provider onboarding that does not require an external server.
-- [ ] Validate a pinned Windows NVIDIA CUDA image-provider profile before shipping its local installer or runtime files.
+- [x] Keep every external provider engine, model, driver, runtime, installer, and updater payload outside Haven packages; connect only to separately acquired compatible providers.
+- [ ] Validate a pinned Windows NVIDIA CUDA image-provider profile before supporting its consumer connection profile.
   - ComfyUI v0.29.2 NVIDIA portable on a Quadro RTX 5000 passed exact checksum, CUDA detection, loopback-only startup, production-adapter generation, metadata exclusion, repeated-run stability, invalid-workflow recovery, active cancellation, exact-process forced recovery, retention cleanup, and secure shutdown. An exact side-by-side v0.30.0 update and v0.29.2 rollback also passed archive safety, CUDA identity, production-adapter generation, metadata/history cleanup, bounded idle stability, and exact-process shutdown. Consumer onboarding, automatic idle shutdown, uninstall, package parity, and redistribution review remain open, so the profile is not promoted.
-- [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before shipping its local installer or runtime files.
+- [ ] Validate a pinned Windows Intel GPU/XPU image-provider profile, including XPU acceleration, generation, metadata, recovery, cleanup, and typed-adapter evidence, before supporting its consumer connection profile.
   - ComfyUI v0.30.0 Intel portable on an Arc B580 passed exact archive/checkpoint integrity, XPU detection in both runtime and service, loopback-only startup, production-adapter generation, metadata exclusion, three-run stability, distinct outputs, invalid-workflow recovery, active cancellation, exact-process forced recovery, history cleanup, bounded idle stability, and secure shutdown. An immutable v0.29.2 rollback and v0.30.0 forward-selection transition also passed. Automatic idle shutdown, complete session/runtime cleanup and uninstall, package parity, redistribution review, consumer onboarding, and promotion remain open.
-- [ ] Validate a pinned Windows AMD GPU image-provider profile before shipping its local installer or runtime files.
-  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. An exact side-by-side v0.30.0 update and v0.28.0 rollback also passed archive integrity, HIP identity, production-adapter generation, metadata/history cleanup, idle stability, and exact-process shutdown. Consumer onboarding, automatic idle shutdown, package parity, redistribution review, and promotion remain open.
+- [ ] Validate a pinned Windows AMD GPU image-provider profile before supporting its consumer connection profile.
+  - ComfyUI v0.28.0 AMD portable on an RX 7800 XT passed generation, typed artifact, visual, privacy, history, restart, active cancellation, invalid-workflow recovery, forced process recovery, repeated-run stability, retention cleanup, and uninstall checks. An exact side-by-side v0.30.0 update and v0.28.0 rollback also passed archive integrity, HIP identity, production-adapter generation, metadata/history cleanup, idle stability, and exact-process shutdown. The exact v0.30.0 archive now also passes a bounded offline license inventory: all 448 native files have a distribution or embedded-runtime owner and every available wheel-recorded SHA-256 matches. External providers are excluded from Haven bundles by policy; missing license evidence and unreconciled native terms additionally keep redistribution blocked. Consumer connection onboarding, automatic idle shutdown, package parity, and promotion remain open.
 - [ ] Park the physical Apple Silicon MPS image-provider profile until suitable
   Mac hardware is acquired; do not let it block Windows or Linux development.
 - [x] Keep custom nodes and external API nodes disabled unless each exact extension independently passes promotion.
 - [x] Add a simulation-only local image lifecycle planner for promoted exact profiles with hostile install, update, rollback, interruption, retention, and uninstall cases while every machine effect remains denied.
-- [ ] Add native installer and provider lifecycle files only after the exact profile passes; failed profiles leave documentation only.
+- [ ] Add provider connection lifecycle support only after the exact profile passes; external provider installers and runtime files remain out of scope.
 
 ## Milestone 24: Local Music And Audio Generation
 
@@ -683,7 +699,8 @@
 - [x] Implement pure migration/rollback, retention, bounded context, deletion, recovery, backup, and restore planners without importing SQLite, creating a database, accepting a path, or writing a file.
 - [x] Review encryption-at-rest and key-management architecture: keep SQLCipher-equivalent selection unadmitted, require user-scoped OS credential storage with no plaintext fallback, define rotation/loss/recovery behavior, and retain supply-chain, licensing, SBOM, binding, and native packaging as admission gates.
 - [ ] Seek separate approval before any opt-in development history database, runtime route, UI control, database file, backup/restore write, or saved message is activated.
-- [x] Add and hostile-test the deterministic memory-only lexical retrieval core with token estimates, per-result chunk disclosure, removal, clear-all, strict budgets, stable ranking, and failure cleanup; keep runtime route, UI, and provider integration unadmitted.
+  - [x] Owner approved a development-only synthetic temporary database validator. It now exercises fixed-schema SQLite create, parameterized write/read, backup/restore, cascade deletion, and residue-free cleanup with no user content, caller path, runtime route, UI, provider, package, or persistence authority.
+- [x] Add and hostile-test the deterministic memory-only lexical retrieval core with token estimates, exact source/chunk/truncation disclosure, duplicate-content rejection, removal, clear-all, failure/provider-change/shutdown cleanup, strict budgets, and stable ranking; keep runtime route, UI, and provider integration unadmitted.
 - [x] Add the restricted parser-worker admission contract and 27-case metadata-only hostile suite for PDF, Office Open XML, and OpenDocument candidates before selecting any dependency; keep every parser, worker, route, filesystem, temporary-file, and execution effect unadmitted.
 - [x] Compare maintained PDF parser candidates and record `pypdf` 6.14.2 as a preferred review candidate only; keep dependency admission, parser import, real hostile PDFs, worker isolation, packaging evidence, native parity, runtime routes, and UI activation open.
 - [x] Verify and lock the exact `pypdf` 6.14.2 universal wheel, embedded metadata, and BSD-3-Clause license digests without retaining or installing the wheel; record that the Python 3.14 packaging baseline selects no mandatory or optional dependency.
@@ -699,7 +716,7 @@
 - [x] Complete a 27-check production-isolation assessment that explicitly blocks admission on missing Windows restricted-token/AppContainer-equivalent, Linux namespace/seccomp/Landlock-equivalent, and macOS sandbox controls.
 - [x] Catalog three metadata-only public PDF corpus sources without selecting or downloading an artifact; add a 23-case offline intake verifier with public same-host HTTPS/revision binding and a 19-check non-acquisition gate.
 - [x] Define a 15-check PDF source/package parity contract with Windows and Ubuntu source true, macOS source and all package cells false, exact future component inventory requirements, and zero promotion authority.
-- [x] Expand the standard-library review-only semantic prototype for DOCX/XLSX/PPTX/ODT/ODS/ODP to 17 deterministic fixtures and 57 formula/tracked-change/shared-string/provenance/budget/security/exclusion checks, plus a 33-check source/package parity gate and sanitized Windows/Ubuntu source evidence; keep all dependencies, runtime routes, UI, provider payloads, user-document parsing, and packages unadmitted.
+- [x] Expand the standard-library review-only semantic prototype for DOCX/XLSX/PPTX/ODT/ODS/ODP to 19 deterministic fixtures and 62 formula/tracked-change/chart/drawing/shared-string/provenance/budget/security/exclusion checks, plus a 33-check source/package parity gate and sanitized Windows/Ubuntu source evidence; keep all dependencies, runtime routes, UI, provider payloads, user-document parsing, and packages unadmitted.
 - [x] Show a prominent private-network transfer warning and treat deliberate Send as confirmation without a separate checkbox; continue blocking public provider destinations.
 - [x] Record one sanitized Windows source-runtime/default-browser native
   clipboard-PNG paste and user-reviewed `qwen3.5:9b` screenshot-description pass
@@ -710,6 +727,8 @@
 - [x] Add source/package parity and native Windows, Linux, and macOS packaged-browser smoke tests for the currently admitted text, structured-text, source-code, and PNG attachment slice.
 - [ ] Add source/package parity and native Windows, Linux, and macOS smoke tests before admitting PDF, Office, or OpenDocument parsing; physical macOS clipboard evidence remains owner-parked.
 - [ ] Evaluate folder selection, semantic embeddings, and persistent encrypted libraries only as separate later security and product gates.
+  - [x] Add and hostile-test a development-only explicit folder inspector with non-recursive default, bounded opt-in recursion, relative content-free manifests, strict UTF-8 source/text allowlisting, and fail-closed link, hidden, binary, executable, archive, unsupported-type, and resource-limit handling. Runtime, UI, provider, persistence, embeddings, and package authority remain false.
+  - [x] Define separate fail-closed semantic-embedding and persistent-encrypted-library evaluation gates without selecting a model, storage engine, encryption engine, route, UI, download, index, database, provider payload, or package.
 
 ## Milestone 28: Controlled Web Research
 
@@ -718,6 +737,9 @@
 - [x] Add inert hostile offline fixtures for destination confusion, IP classes, redirects, credentials, oversized content, prompt injection, citation forgery, cancellation, and cleanup; executable broker tests remain with a future adapter.
 - [ ] Implement one explicit query-only adapter that sends only the reviewed bounded query and returns strict result metadata.
   - [x] Add a 28-check offline caller-fixture boundary for bounded query validation, strict public-HTTPS result metadata, engine-derived inactive citations, and exact source accounting with no network stack or runtime authority.
+  - [x] Add a fixed-provider development query adapter with a strict request shape, injected fixture transport, bounded metadata parser, and engine-derived inactive Wikipedia destinations. Native transport, live network, runtime, model-tool, UI, page-fetch, follow-up, persistence, and package authority remain disabled.
+  - [x] Add a 25-check effect-free transport guard for fixed HTTPS destinations, public DNS snapshots, rebinding, redirects, response type, encoding, time, and bytes without implementing DNS or network I/O.
+  - [x] Add a 17-check memory-only query/page approval state with exact single-use consent and cancellation, failure, provider-change, and shutdown cleanup; keep it outside runtime, UI, and packages.
 - [ ] Add trusted citation rendering with destination disclosure and no model-supplied active links.
   - [x] Define and hostile-test the trusted citation data shape and destination disclosure fields while keeping navigation inactive and adding no UI.
 - [ ] Add explicit selected-page retrieval only after DNS/IP revalidation, redirect controls, textual content allowlisting, byte/time limits, inert extraction, and no page execution pass.
@@ -729,6 +751,7 @@
     digest-verified bundle on native Windows and Ubuntu Linux; macOS source and
     every native package lane remain open.
 - [ ] Evaluate self-hosted search and bounded multi-query research only as later independent gates.
+  - [x] Define separate self-hosted and four-query-maximum evaluation contracts that preserve SSRF/citation controls, require visible per-query approval and aggregate budgets, forbid autonomous or page-injected follow-ups, and grant no provider, network, runtime, UI, model-tool, or package authority.
 
 ## Security architecture remediation
 
@@ -742,4 +765,7 @@
 - [x] Align committed CI, staged-tree receipts, wiki retry, portable-package
   checks, merge methods, Actions SHA enforcement, and live GitHub settings
   under one verifiable repository policy.
+- [x] Enforce a standing exact-tree security review before every large, binary,
+  or security-sensitive commit; any finding stops commit, push, and merge work
+  until the owner is notified and every finding is fixed.
 - [ ] Add signed release tags and artifact provenance before admitting the automatic updater or native installers.

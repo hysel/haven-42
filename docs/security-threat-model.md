@@ -80,6 +80,12 @@ retry, recovery, approval consumption, nor execution is authorized.
 Onboarding settings are schema-bounded and default-deny. The renderer cannot supply state, evidence, approval, commands, raw endpoints, raw paths, or plaintext credentials. It receives and submits opaque references only; the evaluator never resolves or returns them. Existing setups require independent validation, cross-domain admission is rejected, public binding is absent, and settings outside exact passed evidence become unverified rather than inheriting trust.
 The admitted local-web application binds only to `127.0.0.1`; validates the exact Host and Origin; requires a random in-memory request token; rejects cross-site fetch metadata; serves bundled assets under a restrictive Content Security Policy; accepts only bounded JSON; and classifies IP-literal provider endpoints through the shared no-redirect policy. Automatic browser launch accepts only the engine-generated IPv4-loopback HTTP origin, uses fixed platform mechanisms without a shell, ignores `BROWSER`, strips unneeded inherited Unix environment authority, and safely falls back to a printed URL. Linux supplies only fixed system-owned application data roots needed for Flatpak, Ubuntu Snap, and base-system browser discovery and rejects inherited `XDG_DATA_DIRS`, preventing a caller-controlled desktop entry from becoming launch authority. An immediate opener error or nonzero exit cannot suppress the manual fallback and advances to the next fixed Linux opener; a zero exit or process that remains active through the bounded confirmation window is required for success. It exposes no repository, generic filesystem, shell, arbitrary process, download, update, or arbitrary provider surface. Recommendation catalog loading rejects unknown fields, unsafe or duplicate model names, invalid or mismatched digests, forged capability/operation bindings, duplicate evidence IDs, traversal-like evidence paths, and evidence rows that do not exactly match committed records. Automatic text selection requires exact name, digest, and capability evidence. Provider-reported metrics use a strict nullable numeric shape and are memory-only.
 
+The local-web transport independently disables OS and environment proxies,
+requires exact JSON field types, times out stalled request sockets after 15
+seconds, caps request workers at 32, and rejects provider inventories over 512
+models. These limits apply in addition to the existing Host, Origin, token,
+fetch-metadata, content-type, body-size, IP-literal, and redirect controls.
+
 Public model search is a separately disclosed outbound boundary. It accepts
 only a bounded phrase after explicit opt-in, targets one fixed HTTPS origin,
 rejects redirects and oversized or malformed HTML, and emits at most 20 strict
@@ -108,6 +114,10 @@ Assistant text rendering accepts only a small Markdown block/inline allowlist,
 creates every element directly, assigns all model text through `textContent`,
 maps model headings below the page heading, and never creates model-supplied
 links, images, HTML, scripts, or handlers. Hostile tags remain visible text.
+A 2,048-element renderer budget prevents provider Markdown from amplifying
+into an unbounded DOM. Once exhausted, all remaining content is preserved in a
+single inert preformatted text element.
+
 Prompt recall is a bounded task-local browser-memory ring with a 20-entry
 default and fixed 50/100-entry options. It stores only submitted user text,
 suppresses consecutive duplicates, preserves multiline cursor behavior, and
@@ -130,6 +140,11 @@ A 27-case metadata-only parser-worker foundation covers PDF, `.docx/.xlsx/.pptx`
 
 Three dependency-inventory, notice, and CycloneDX files are generated deterministically only beneath ignored local review. They are explicitly not package evidence and do not change the committed false generation/admission flags. The wheel remains uninstalled, unpackaged, and absent from dependencies. Windows and Ubuntu Linux source orchestration passed; macOS source, non-synthetic hostile evidence, actual package compliance integration, source/package parity, and native package smoke remain mandatory before admission. The production-isolation assessment also requires a Windows restricted-token/AppContainer-equivalent boundary, Linux namespace/seccomp/Landlock-equivalent controls, and a physical macOS sandbox evaluation. Missing controls fail closed rather than silently weakening isolation. PDF, Office, OpenDocument, archive, rendering, OCR, directory, retrieval-index, embedding, and persistent-index support do not inherit approval from this prototype.
 
+Every text request receives a fresh unpredictable attachment boundary. The
+engine verifies that the boundary does not occur in selected content and
+supplies exact UTF-8 lengths, preventing file text from closing or forging a
+marker chosen before the request.
+
 The Office/OpenDocument container prototype adds no extraction authority. Its
 41-check synthetic suite rejects traversal and ambiguous member names,
 case-insensitive duplicates, ZIP symlinks, encryption, unsupported compression,
@@ -144,10 +159,11 @@ The semantic review prototype remains behind that container gate. It reads
 only fixed in-memory XML parts, uses no third-party parser, extracts no image or
 archive member to disk, rejects formulas and cached formula values, and bounds
 selected parts, XML depth, segments, segment length, and total output. Its
-44-check suite across 12 synthetic DOCX/XLSX/PPTX/ODT/ODS/ODP fixtures passed
+62-check suite across 19 synthetic DOCX/XLSX/PPTX/ODT/ODS/ODP fixtures passed
 on Windows and Ubuntu Linux. Unsupported tables, shared strings, comments,
-tracked changes, notes, charts, headers, footers, and ordering cannot be
-silently treated as complete semantics. No route, provider payload, UI,
+tracked changes, notes, charts, drawings, headers, footers, and ordering cannot
+be silently treated as complete semantics; chart and drawing parts are rejected
+explicitly. No route, provider payload, UI,
 dependency, worker, or package authority follows from the review.
 
 Native PDF evidence generation refuses platform mismatch and an absent,
@@ -206,6 +222,32 @@ remains the write-free default. Standard SQLite is treated as unencrypted at
 rest; runtime persistence stays blocked until encryption/key management,
 least-privilege per-user storage, deletion/recovery, and native package evidence
 pass separate approval.
+
+The post-quantum readiness layer does not change this storage boundary or any
+transport. Its threat model covers harvest-now/decrypt-later exposure on HTTPS,
+false claims based only on a capable client library, classical-certificate
+authentication remaining after hybrid key establishment, silent downgrade,
+unknown or missing update signatures, oversized key/signature denial of
+service, immature or custom implementations, private-key disclosure, and
+algorithm or trust-root lock-in. The mitigations are an exact cryptographic
+inventory, hybrid classical/PQ transition candidates, observed negotiation,
+versioned identifiers and envelopes, fail-closed unknown/missing algorithm
+handling, immutable maintained verifiers, strict resource budgets, independent
+review, and native source/package evidence. The current contract selects and
+executes nothing; every key, trust, TLS, signature, updater, package, network,
+and machine-effect flag remains false.
+
+The real-SQLite development validator does not weaken that boundary. It accepts
+no caller path or user content, uses fixed DDL and parameterized writes only in
+a newly created temporary directory, opens its backup read-only, verifies
+foreign-key deletion, and removes the database plus journal/WAL/shared-memory
+sidecars. It exposes no renderer, model, provider, package, or runtime route.
+The explicit-folder development inspector similarly requires one operator-
+selected root, defaults to non-recursive reads, enforces depth/file/byte/path
+budgets, rejects links, reparse points, special files, binary signatures,
+archives, active-script masquerading, encoding failures, and change-during-read
+races, and emits only relative metadata. It adds no watcher, index, provider
+payload, background scan, arbitrary path API, or application permission.
 
 Milestone 26 Intel inference evidence grants no runtime admission. The physical
 Arc B580 review kept oneAPI, Level Zero development files, llama.cpp source and
@@ -282,5 +324,13 @@ markup, unknown pages, altered authority fields, or autonomous follow-up. It
 does not invoke a model or grant tool, network, file, package, UI, runtime, or
 execution authority. The admitted fixed Ollama catalog search does
 not grant or imply general research-search authority.
+
+The disabled fixed-Wikipedia query adapter has no native HTTP transport. Tests
+inject a fixture callable, while the adapter revalidates the complete request,
+rejects credential-like or active query text, bounds finite JSON, accepts no
+model-supplied links, and derives inactive destinations from validated numeric
+page identifiers. Self-hosted and multi-query contracts add no implementation;
+the latter requires visible approval for each of at most four queries and
+forbids autonomous or retrieved-page follow-up.
 
 The local-web admission applies to read-only readiness inspection, zero-effect setup planning, status, exact-digest Ollama discovery and text, plan-only registered read-only software workflows, and the exact promoted Linux ComfyUI/SDXL image profile through loopback. It does not admit workflow process execution, arbitrary provider profiles, client persistence, installation, elevation, service or driver changes, updates, remote UI access, or Tauri packaging. No optional desktop runtime ships until actual Windows, Linux, and macOS binaries pass renderer, IPC, canonical-path, lifecycle, update, rollback, packaging, uninstall, privilege, and security tests. Unsupported or failed provider cells remain documentation-only and leave no executable integration.

@@ -11,6 +11,32 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added an exact staged-tree security-review gate for large, binary, and
+  security-sensitive commits. Any finding now stops the commit flow until the
+  owner is notified, all findings are fixed, and a zero-finding review is
+  recorded again.
+
+- Fixed five browser-boundary security findings: provider and catalog traffic
+  no longer inherit proxies, API JSON types fail closed, attachment prompt
+  framing uses unpredictable collision-checked boundaries, loopback request
+  sockets and workers are bounded, and provider model/Markdown rendering work
+  has explicit limits. Hostile server and browser coverage exercises every
+  control without requiring a live provider.
+
+- Added an inactive post-quantum cryptography readiness foundation with an
+  eight-boundary cryptographic inventory, standardized ML-KEM/ML-DSA/SLH-DSA
+  candidate roles, hybrid TLS and dual-signature transition gates, and 31
+  fail-closed hostile checks. It adds no dependency, key handling, TLS change,
+  signature verification, updater authority, or production claim.
+
+- Reconciled the local-only preparation batch through controlled research and
+  candidate agent surfaces: hardened lexical retrieval and cleanup, recorded
+  unselected embedding/encrypted-library contracts, explicitly rejected Office
+  chart/drawing semantics, added effect-free research transport and approval
+  guards, validated three pinned public repositories from bare objects, and
+  added exact-version dry-run Aider/OpenCode lifecycle plans. All new paths are
+  hostile-tested, inactive, package-excluded, and non-authorizing.
+
 - Classified Moonshot AI's Kimi family as documentation-only experimental and
   untested on the project's current hardware, with a sanitized community
   evidence path that grants no catalog, recommendation, installer, provider,

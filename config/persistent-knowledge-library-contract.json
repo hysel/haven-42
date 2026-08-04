@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "status": "architecture-only-inactive",
+  "defaultMode": "memory-only-no-library",
+  "storage": {
+    "engineSelected": false,
+    "encryptionEngineSelected": false,
+    "plaintextFallbackAllowed": false,
+    "databaseKeyBesideDataAllowed": false,
+    "currentUserCredentialStoreRequired": true,
+    "perUserStorageRequired": true,
+    "callerPathAllowed": false,
+    "sharedMachineLibraryAllowed": false,
+    "networkFilesystemAllowed": false,
+    "worldOrGroupWritableLocationAllowed": false
+  },
+  "schemaLifecycle": {
+    "versionRequired": true,
+    "atomicMigrationRequired": true,
+    "rollbackRequired": true,
+    "integrityCheckBeforeAndAfterMigration": true,
+    "downgradeAllowed": false,
+    "corruptionRecoveryReadOnly": true,
+    "automaticResetOrOverwriteAllowed": false,
+    "wrongKeyPreservesCiphertext": true
+  },
+  "contentLifecycle": {
+    "explicitImportConsentRequired": true,
+    "validatedSnapshotsOnly": true,
+    "liveFilesystemReferencesAllowed": false,
+    "originalPathsStored": false,
+    "retentionPolicyRequired": true,
+    "deletionCoversIndexesJournalsWalAndBackups": true,
+    "exportMustRemainEncryptedOrExplicitlyWarned": true,
+    "backupMustRemainEncrypted": true,
+    "restoreRequiresIntegrityAndVersionValidation": true,
+    "uninstallDeletionRequiresExplicitChoice": true
+  },
+  "indexLifecycle": {
+    "embeddingModelIdRequired": true,
+    "embeddingModelRevisionRequired": true,
+    "chunkingContractVersionRequired": true,
+    "contentDigestRequired": true,
+    "staleIndexRejected": true,
+    "partialIndexCleanupRequired": true
+  },
+  "authority": {
+    "databaseCreateAllowed": false,
+    "filesystemPersistenceAllowed": false,
+    "embeddingAllowed": false,
+    "runtimeRouteAllowed": false,
+    "providerPayloadAllowed": false,
+    "uiAllowed": false,
+    "packageAllowed": false
+  }
+}

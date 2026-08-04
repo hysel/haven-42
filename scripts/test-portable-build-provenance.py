@@ -53,6 +53,64 @@ def main() -> int:
     }
     passed = 1
 
+    commit = "1" * 40
+    snapshot = "2" * 64
+    with patch.dict(
+        "os.environ",
+        {
+            "HAVEN42_SOURCE_COMMIT": commit,
+            "HAVEN42_SOURCE_TREE_STATE": "modified-uncommitted",
+            "HAVEN42_SOURCE_SNAPSHOT_SHA256": snapshot,
+        },
+        clear=False,
+    ):
+        source = MODULE.source_provenance()
+    assert source == {
+        "repository": "https://github.com/hysel/haven-42",
+        "commit": commit,
+        "treeState": "modified-uncommitted",
+        "commitIsExactSource": False,
+        "snapshotSha256": snapshot,
+    }
+    passed += 1
+
+    for environment, message in (
+        (
+            {"HAVEN42_SOURCE_COMMIT": commit, "HAVEN42_SOURCE_TREE_STATE": "modified-uncommitted", "HAVEN42_SOURCE_SNAPSHOT_SHA256": ""},
+            "Modified source exports require HAVEN42_SOURCE_SNAPSHOT_SHA256.",
+        ),
+        (
+            {"HAVEN42_SOURCE_COMMIT": commit, "HAVEN42_SOURCE_TREE_STATE": "unknown", "HAVEN42_SOURCE_SNAPSHOT_SHA256": snapshot},
+            "Invalid HAVEN42_SOURCE_TREE_STATE.",
+        ),
+        (
+            {"HAVEN42_SOURCE_COMMIT": commit, "HAVEN42_SOURCE_TREE_STATE": "exact-commit", "HAVEN42_SOURCE_SNAPSHOT_SHA256": "bad"},
+            "Invalid HAVEN42_SOURCE_SNAPSHOT_SHA256.",
+        ),
+    ):
+        with patch.dict("os.environ", environment, clear=False):
+            try:
+                MODULE.source_provenance()
+            except SystemExit as error:
+                assert str(error) == message
+            else:
+                raise AssertionError("Unsafe source provenance was accepted.")
+        passed += 1
+
+    with patch.dict(
+        "os.environ",
+        {
+            "HAVEN42_SOURCE_COMMIT": commit,
+            "HAVEN42_SOURCE_TREE_STATE": "exact-commit",
+            "HAVEN42_SOURCE_SNAPSHOT_SHA256": "",
+        },
+        clear=False,
+    ):
+        exact_source = MODULE.source_provenance()
+    assert exact_source["commitIsExactSource"] is True
+    assert exact_source["treeState"] == "exact-commit"
+    passed += 1
+
     for target, expected in MODULE.PYTHON_DISTRIBUTIONS.items():
         with patch.dict(
             "os.environ",

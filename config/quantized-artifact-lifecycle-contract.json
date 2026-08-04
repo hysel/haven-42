@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "status": "simulation-only-inactive",
+  "operations": ["inspect", "plan-activation", "plan-rollback", "recover-interrupted", "plan-partial-cleanup"],
+  "requiredFields": ["schemaVersion", "operation", "source", "derivative", "recipe", "compatibility", "storage", "validation", "state"],
+  "forbiddenFields": ["path", "url", "command", "arguments", "environment", "credential", "secret", "token"],
+  "sourceFields": ["repository", "revision", "sha256", "license", "derivativeAllowed"],
+  "derivativeFields": ["artifactId", "format", "sha256", "sizeBytes", "license", "provenanceComplete"],
+  "recipeFields": ["tool", "toolVersion", "method", "bits", "groupSize", "calibrationDigest"],
+  "compatibilityFields": ["runtime", "runtimeVersion", "operatingSystem", "architecture", "accelerator", "driver", "contextTokens", "fullOffloadRequired"],
+  "storageFields": ["availableBytes", "finalBytes", "temporaryBytes", "reserveBytes"],
+  "validationFields": ["functionalPassed", "qualityPassed", "toolUsePassed", "cleanupPassed", "rollbackPassed", "silentFallbackObserved"],
+  "stateFields": ["phase", "activeArtifactId", "previousArtifactId", "partialArtifactId"],
+  "statePhases": ["idle", "converting", "staged", "activating", "rollback-required", "partial-cleanup"],
+  "catalogAdmission": {"exactPassingCellRequired": true, "licenseAndProvenanceRequired": true, "movingRevisionAllowed": false, "silentFallbackAllowed": false},
+  "effects": {"network": false, "download": false, "write": false, "conversion": false, "activation": false, "rollback": false, "cleanup": false, "catalogChange": false}
+}

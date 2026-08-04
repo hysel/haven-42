@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "source": "recovered-conversation-local-closure-plan",
+  "sourceSha256": "0c51b63fab5b001c9e6835c4622e4288ba49199b5606864e8068e5c12f7524d0",
+  "phaseCount": 18,
+  "taskCount": 374,
+  "taskLedger": "config/local-batch-task-ledger.tsv",
+  "statuses": [
+    "unverified",
+    "completed",
+    "partial",
+    "blocked",
+    "deferred",
+    "not-started"
+  ],
+  "blockers": [
+    "none",
+    "external-machine",
+    "external-service",
+    "upstream",
+    "owner",
+    "signing-release",
+    "prerequisite"
+  ],
+  "authority": {
+    "runtimeAdmission": false,
+    "networkActivation": false,
+    "machineModification": false,
+    "packagePromotion": false,
+    "productionRelease": false,
+    "signing": false
+  }
+}

@@ -43,6 +43,15 @@ For each repository category:
 
 When additional real repositories are not available, create local sample repositories for representative categories. Generated samples should contain realistic file names, minimal source/configuration files, and no private code or endpoints.
 
+The local closure batch also inspected immutable public revisions of Click,
+Express, and serde_json as bare, ignored object stores. The validator allowed
+only fixed tag/commit identities, safe tree modes and paths, bounded object
+counts and bytes, and exact repository-license digests. It disabled hooks,
+submodules, working-tree checkout, lazy object retrieval, alternates,
+replacement objects, target builds, and target tests. These results broaden
+repository-shape evidence only; they do not promote Aider, OpenCode, or any
+other agent surface for real-repository writes.
+
 Do not skip the clean-tree check. It is the easiest way to avoid mixing pack
 validation with unrelated user changes.
 

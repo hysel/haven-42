@@ -57,6 +57,24 @@ Before finishing a change, verify:
 - README claims match implemented behavior.
 - TODO and ROADMAP remain consistent with the actual state.
 
+## Standing Security Review Gate
+
+- Security is a standing task for every enhancement and feature, regardless of
+  perceived severity.
+- Before a large commit, a commit containing binary content, or a change to a
+  security-sensitive path, stage the complete intended change and review the
+  entire staged diff. The enforced thresholds and paths live in
+  `config/security-review-gate.json`.
+- If the review finds anything, stop. Do not commit, push, merge, or record a
+  clean receipt. Tell the repository owner what was found, fix every finding,
+  and repeat the review against the new complete staged tree.
+- Only a review with zero findings may be recorded with
+  `python scripts/security-review-gate.py --record-clean`. This command records
+  an exact staged-tree receipt; it is never a substitute for performing the
+  review.
+- Do not edit or partially stage content after recording the review. The
+  pre-commit hook rejects a missing or stale security-review receipt.
+
 ## Push Completion Contract
 
 After every push, run the platform-specific `verify-hosted-ci` script for the

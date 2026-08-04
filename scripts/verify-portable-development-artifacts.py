@@ -239,6 +239,70 @@ def verify_checksums(directory: Path) -> None:
         raise ArtifactVerificationError("checksum-coverage-mismatch")
 
 
+def verify_sbom_document(
+    sbom: dict, inventory: dict, runtime_inventory: dict, target: str
+) -> None:
+    expected_tools = [
+        {"name": record["name"], "type": "application", "version": record["version"]}
+        for record in inventory["buildDependencies"]
+    ]
+    if (
+        set(sbom) != {"bomFormat", "specVersion", "version", "metadata", "components"}
+        or sbom.get("bomFormat") != "CycloneDX"
+        or sbom.get("specVersion") != "1.5"
+        or sbom.get("version") != 1
+        or sbom.get("metadata", {}).get("component") != {
+            "type": "application",
+            "name": "Haven 42",
+            "version": "0.3.0",
+            "licenses": [{"expression": "MIT"}],
+        }
+        or sbom.get("metadata", {}).get("tools", {}).get("components") != expected_tools
+        or sbom.get("metadata", {}).get("properties") != [
+            {"name": "haven42:artifact-kind", "value": "unsigned-development"},
+            {"name": "haven42:target", "value": target},
+        ]
+        or sbom.get("components") != [
+            {
+                "type": "framework" if item["id"] == "cpython" else "library",
+                "name": item["name"],
+                "version": item["version"],
+                "scope": "required",
+                "licenses": [{"expression": item["license"]}],
+                "properties": [
+                    {"name": "haven42:component-id", "value": item["id"]},
+                    {"name": "haven42:review-status", "value": item["reviewStatus"]},
+                    {"name": "haven42:file-count", "value": str(item["fileCount"])},
+                    {"name": "haven42:signing-eligible", "value": "false"},
+                ],
+            }
+            for item in runtime_inventory["runtimeComponents"]
+        ]
+    ):
+        raise ArtifactVerificationError("invalid-sbom")
+
+
+def verify_notice_text(notices: str, inventory: dict, runtime_inventory: dict) -> None:
+    for record in inventory["buildDependencies"]:
+        if f"{record['name']} {record['version']} — {record['license']}" not in notices:
+            raise ArtifactVerificationError("third-party-notice-coverage-mismatch")
+    if "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION." not in notices:
+        raise ArtifactVerificationError("runtime-clearance-warning-missing")
+    if (
+        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
+        "LIBFFI-3.4.4-LICENSE.txt are included as hash-verified license evidence."
+        not in notices
+    ):
+        raise ArtifactVerificationError("license-evidence-notice-missing")
+    for record in runtime_inventory["runtimeComponents"]:
+        marker = (
+            f"{record['name']} {record['version']} — {record['license']} — "
+            f"{record['reviewStatus']} — {record['fileCount']} files"
+        )
+        if marker not in notices:
+            raise ArtifactVerificationError("runtime-notice-coverage-mismatch")
+
+
 def verify_evidence(directory: Path) -> None:
     for name, expected_digest in EXPECTED_LICENSE_EVIDENCE.items():
         path = directory / name
@@ -289,7 +353,10 @@ def verify_evidence(directory: Path) -> None:
         or provenance.get("artifactKind") != "unsigned-development"
         or application != {"name": "Haven 42", "version": "0.3.0"}
         or source.get("repository") != "https://github.com/hysel/haven-42"
-        or set(source) != {"repository", "commit"}
+        or set(source) != {
+            "repository", "commit", "treeState", "commitIsExactSource",
+            "snapshotSha256",
+        }
         or set(builder) != {"kind", "workflow", "runId"}
         or builder.get("kind") not in {"github-actions", "local"}
         or not all(isinstance(builder.get(field), str) and builder[field] for field in ("workflow", "runId"))
@@ -306,6 +373,21 @@ def verify_evidence(directory: Path) -> None:
             if field != "pythonDistribution"
         )
         or not re.fullmatch(r"[0-9a-f]{40}", str(commit))
+        or source.get("treeState") not in {"exact-commit", "modified-uncommitted"}
+        or source.get("commitIsExactSource")
+            is not (source.get("treeState") == "exact-commit")
+        or not isinstance(source.get("snapshotSha256"), str)
+        or (
+            source.get("snapshotSha256") != ""
+            and not re.fullmatch(r"[0-9a-f]{64}", source["snapshotSha256"])
+        )
+        or (
+            builder.get("kind") == "github-actions"
+            and (
+                source.get("treeState") != "exact-commit"
+                or source.get("snapshotSha256") != ""
+            )
+        )
         or security != {
             "attested": False,
             "dependencyHashesRequired": True,
@@ -376,68 +458,12 @@ def verify_evidence(directory: Path) -> None:
     if inventory["runtimeComponents"] != expected_runtime_summaries:
         raise ArtifactVerificationError("dependency-runtime-component-mismatch")
     sbom = load_json(directory / "haven42.cdx.json")
-    expected_tools = [
-        {"name": record["name"], "type": "application", "version": record["version"]}
-        for record in inventory["buildDependencies"]
-    ]
-    if (
-        set(sbom) != {"bomFormat", "specVersion", "version", "metadata", "components"}
-        or
-        sbom.get("bomFormat") != "CycloneDX"
-        or sbom.get("specVersion") != "1.5"
-        or sbom.get("version") != 1
-        or sbom.get("metadata", {}).get("component", {}).get("name") != "Haven 42"
-        or sbom.get("metadata", {}).get("component") != {
-            "type": "application",
-            "name": "Haven 42",
-            "version": "0.3.0",
-            "licenses": [{"expression": "MIT"}],
-        }
-        or sbom.get("metadata", {}).get("tools", {}).get("components") != expected_tools
-        or sbom.get("metadata", {}).get("properties") != [
-            {"name": "haven42:artifact-kind", "value": "unsigned-development"},
-            {"name": "haven42:target", "value": target},
-        ]
-        or sbom.get("components") != [
-            {
-                "type": "framework" if item["id"] == "cpython" else "library",
-                "name": item["name"],
-                "version": item["version"],
-                "scope": "required",
-                "licenses": [{"expression": item["license"]}],
-                "properties": [
-                    {"name": "haven42:component-id", "value": item["id"]},
-                    {"name": "haven42:review-status", "value": item["reviewStatus"]},
-                    {"name": "haven42:file-count", "value": str(item["fileCount"])},
-                    {"name": "haven42:signing-eligible", "value": "false"},
-                ],
-            }
-            for item in runtime_inventory["runtimeComponents"]
-        ]
-    ):
-        raise ArtifactVerificationError("invalid-sbom")
+    verify_sbom_document(sbom, inventory, runtime_inventory, str(target))
     try:
         notices = (directory / "THIRD-PARTY-NOTICES.txt").read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as error:
         raise ArtifactVerificationError("invalid-third-party-notices") from error
-    for record in inventory["buildDependencies"]:
-        if f"{record['name']} {record['version']} — {record['license']}" not in notices:
-            raise ArtifactVerificationError("third-party-notice-coverage-mismatch")
-    if "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION." not in notices:
-        raise ArtifactVerificationError("runtime-clearance-warning-missing")
-    if (
-        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
-        "LIBFFI-3.4.4-LICENSE.txt are included as hash-verified license evidence."
-        not in notices
-    ):
-        raise ArtifactVerificationError("license-evidence-notice-missing")
-    for record in runtime_inventory["runtimeComponents"]:
-        marker = (
-            f"{record['name']} {record['version']} — {record['license']} — "
-            f"{record['reviewStatus']} — {record['fileCount']} files"
-        )
-        if marker not in notices:
-            raise ArtifactVerificationError("runtime-notice-coverage-mismatch")
+    verify_notice_text(notices, inventory, runtime_inventory)
 
 
 def verify(directory: Path) -> None:
@@ -540,18 +566,94 @@ def run_self_tests() -> None:
             hostile_cases += 1
         else:
             raise AssertionError("expected checksum-mismatch")
-    if hostile_cases != 4:
+        license_root = root / "licenses"
+        license_root.mkdir()
+        for name in EXPECTED_LICENSE_EVIDENCE:
+            (license_root / name).write_bytes(b"substituted license\n")
+        try:
+            verify_evidence(license_root)
+        except ArtifactVerificationError as error:
+            if str(error) != "license-evidence-mismatch":
+                raise AssertionError(f"expected license-evidence-mismatch, received {error}") from error
+            hostile_cases += 1
+        else:
+            raise AssertionError("expected license-evidence-mismatch")
+
+        inventory = {
+            "buildDependencies": [{"name": "tool", "version": "1.0", "license": "MIT"}]
+        }
+        runtime_inventory = {
+            "runtimeComponents": [{
+                "id": "cpython",
+                "name": "CPython embedded runtime",
+                "version": "3.14.6",
+                "license": "PSF-2.0",
+                "reviewStatus": "review-required",
+                "fileCount": 1,
+            }]
+        }
+        valid_sbom = {
+            "bomFormat": "CycloneDX",
+            "specVersion": "1.5",
+            "version": 1,
+            "metadata": {
+                "component": {
+                    "type": "application",
+                    "name": "Haven 42",
+                    "version": "0.3.0",
+                    "licenses": [{"expression": "MIT"}],
+                },
+                "tools": {"components": [{"name": "tool", "type": "application", "version": "1.0"}]},
+                "properties": [
+                    {"name": "haven42:artifact-kind", "value": "unsigned-development"},
+                    {"name": "haven42:target", "value": "windows-amd64"},
+                ],
+            },
+            "components": [],
+        }
+        try:
+            verify_sbom_document(valid_sbom, inventory, runtime_inventory, "windows-amd64")
+        except ArtifactVerificationError as error:
+            if str(error) != "invalid-sbom":
+                raise AssertionError(f"expected invalid-sbom, received {error}") from error
+            hostile_cases += 1
+        else:
+            raise AssertionError("expected invalid-sbom")
+
+        incomplete_notice = (
+            "tool 1.0 — MIT\n"
+            "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION.\n"
+        )
+        try:
+            verify_notice_text(incomplete_notice, inventory, runtime_inventory)
+        except ArtifactVerificationError as error:
+            if str(error) != "license-evidence-notice-missing":
+                raise AssertionError(
+                    f"expected license-evidence-notice-missing, received {error}"
+                ) from error
+            hostile_cases += 1
+        else:
+            raise AssertionError("expected license-evidence-notice-missing")
+    if hostile_cases != 7:
         raise AssertionError("hostile archive self-test failed")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--artifact-directory", required=True)
+    parser.add_argument("--artifact-directory")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--self-test-only", action="store_true")
     args = parser.parse_args()
+    if args.self_test_only and (args.self_test or args.artifact_directory):
+        parser.error("--self-test-only cannot be combined with artifact verification")
+    if not args.self_test_only and not args.artifact_directory:
+        parser.error("--artifact-directory is required unless --self-test-only is used")
     try:
-        if args.self_test:
+        if args.self_test or args.self_test_only:
             run_self_tests()
+        if args.self_test_only:
+            print("Portable verifier hostile self-tests passed 7 cases.")
+            return 0
         verify(Path(args.artifact_directory).resolve())
     except ArtifactVerificationError as error:
         print(f"Portable artifact verification failed: {error}")

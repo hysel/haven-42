@@ -73,6 +73,14 @@
     "embeddedObjectsAllowed": false,
     "imagesExtracted": false,
     "stylesExtracted": false,
+    "chartsAllowed": false,
+    "drawingsAllowed": false,
+    "unsupportedObjectsRejected": true,
+    "unsupportedVisualPartPatterns": [
+      "word/(?:charts|drawings)/.+",
+      "xl/(?:charts|drawings)/.+",
+      "ppt/(?:charts|drawings|diagrams)/.+"
+    ],
     "commentsExtracted": true,
     "trackedChangesInterpreted": false,
     "trackedChangesRejected": true,

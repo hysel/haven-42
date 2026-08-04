@@ -19,6 +19,74 @@ class PolicyError(ValueError):
     pass
 
 
+def workflow_jobs(text: str, name: str) -> list[tuple[str, str]]:
+    marker = "\njobs:\n"
+    if marker not in text:
+        raise PolicyError(f"workflow-jobs-missing:{name}")
+    section = text.split(marker, 1)[1]
+    matches = list(re.finditer(r"(?m)^  ([a-z0-9][a-z0-9-]*):\s*$", section))
+    if not matches:
+        raise PolicyError(f"workflow-jobs-missing:{name}")
+    result: list[tuple[str, str]] = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(section)
+        result.append((match.group(1), section[match.start():end]))
+    return result
+
+
+def verify_workflow_safety(workflows: dict[str, str]) -> None:
+    if set(workflows) != {"validate-pack.yml", "codeql.yml"}:
+        raise PolicyError("unexpected-workflow-inventory")
+    combined = "\n".join(workflows[name] for name in sorted(workflows))
+    for name, text in workflows.items():
+        header = text.split("\njobs:\n", 1)[0]
+        if not re.search(
+            r"(?ms)^concurrency:\s*\n\s+group:\s*\S.+\n\s+cancel-in-progress:\s*true\s*$",
+            header,
+        ):
+            raise PolicyError(f"workflow-concurrency-unbounded:{name}")
+        if not re.search(r"(?ms)^permissions:\s*\n(?:  [a-z-]+:\s*(?:read|write)\s*\n?)+", header):
+            raise PolicyError(f"workflow-permissions-missing:{name}")
+        for job_id, block in workflow_jobs(text, name):
+            if not re.search(r"(?m)^    runs-on:\s*.+\s*$", block):
+                raise PolicyError(f"workflow-runner-missing:{name}:{job_id}")
+            timeout = re.search(r"(?m)^    timeout-minutes:\s*([0-9]+)\s*$", block)
+            if not timeout or not 1 <= int(timeout.group(1)) <= 30:
+                raise PolicyError(f"workflow-timeout-invalid:{name}:{job_id}")
+    checkout_blocks = re.findall(
+        r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/checkout@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
+        combined,
+    )
+    if not checkout_blocks or any(
+        not re.search(r"(?m)^\s+persist-credentials:\s*false\s*$", block)
+        for block in checkout_blocks
+    ):
+        raise PolicyError("checkout-credentials-persisted")
+    forbidden_permissions = (
+        "actions", "administration", "contents", "deployments", "packages",
+        "pull-requests", "releases",
+    )
+    if any(re.search(rf"(?m)^\s+{field}:\s*write\s*$", combined) for field in forbidden_permissions):
+        raise PolicyError("workflow-write-permission-forbidden")
+    if any(marker in combined.lower() for marker in (
+        "gh release create", "softprops/action-gh-release", "ncipollo/release-action",
+    )):
+        raise PolicyError("release-publication-enabled")
+    upload_blocks = re.findall(
+        r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/upload-artifact@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
+        combined,
+    )
+    if len(upload_blocks) != 1:
+        raise PolicyError("unexpected-artifact-upload-count")
+    upload = upload_blocks[0]
+    if (
+        "unsigned-development" not in upload
+        or not re.search(r"(?m)^\s+retention-days:\s*7\s*$", upload)
+        or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", upload)
+    ):
+        raise PolicyError("unsafe-artifact-upload-policy")
+
+
 def load_policy() -> dict:
     try:
         value = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
@@ -106,10 +174,12 @@ def verify_static(policy: dict) -> None:
     }:
         raise PolicyError("unsafe-artifact-attestation-policy")
 
-    workflow_text = "\n".join(
-        path.read_text(encoding="utf-8")
+    workflows = {
+        path.name: path.read_text(encoding="utf-8")
         for path in sorted((ROOT / ".github/workflows").glob("*.yml"))
-    )
+    }
+    verify_workflow_safety(workflows)
+    workflow_text = "\n".join(workflows[name] for name in sorted(workflows))
     validate_workflow = (ROOT / ".github/workflows/validate-pack.yml").read_text(encoding="utf-8")
     for check in expected_checks - {
         "Windows portable package", "Linux portable package", "macOS portable package"
@@ -221,6 +291,47 @@ def verify_static(policy: dict) -> None:
         raise PolicyError("duplicate-package-workflow")
 
 
+def run_self_tests() -> int:
+    workflows = {
+        path.name: path.read_text(encoding="utf-8")
+        for path in sorted((ROOT / ".github/workflows").glob("*.yml"))
+    }
+    cases = (
+        ("cancel-in-progress: true", "cancel-in-progress: false", "workflow-concurrency-unbounded"),
+        ("timeout-minutes: 10", "timeout-minutes: 0", "workflow-timeout-invalid"),
+        ("persist-credentials: false", "persist-credentials: true", "checkout-credentials-persisted"),
+        ("contents: read", "contents: write", "workflow-write-permission-forbidden"),
+        ("retention-days: 7", "retention-days: 90", "unsafe-artifact-upload-policy"),
+        ("if-no-files-found: error", "if-no-files-found: warn", "unsafe-artifact-upload-policy"),
+    )
+    checks = 0
+    for old, new, expected in cases:
+        hostile = dict(workflows)
+        target = next((name for name, text in hostile.items() if old in text), None)
+        if target is None:
+            raise AssertionError(f"self-test marker missing: {old}")
+        hostile[target] = hostile[target].replace(old, new, 1)
+        try:
+            verify_workflow_safety(hostile)
+        except PolicyError as error:
+            if expected not in str(error):
+                raise AssertionError(f"expected {expected}, received {error}") from error
+            checks += 1
+        else:
+            raise AssertionError(f"unsafe workflow accepted: {expected}")
+    release_hostile = dict(workflows)
+    release_hostile["validate-pack.yml"] += "\n# gh release create forbidden\n"
+    try:
+        verify_workflow_safety(release_hostile)
+    except PolicyError as error:
+        if str(error) != "release-publication-enabled":
+            raise AssertionError(f"unexpected release rejection: {error}") from error
+        checks += 1
+    else:
+        raise AssertionError("release publication marker was accepted")
+    return checks
+
+
 def gh_json(endpoint: str) -> object:
     result = subprocess.run(
         ["gh", "api", endpoint],
@@ -288,16 +399,20 @@ def verify_live(policy: dict) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--live", action="store_true")
+    parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     try:
         policy = load_policy()
         verify_static(policy)
+        checks = run_self_tests() if args.self_test else 0
         if args.live:
             verify_live(policy)
     except PolicyError as error:
         print(f"GitHub repository policy verification failed: {error}", file=sys.stderr)
         return 2
-    print(f"GitHub repository policy verification passed ({'live' if args.live else 'static'}).")
+    scope = "live" if args.live else "static"
+    suffix = f" with {checks} hostile checks" if args.self_test else ""
+    print(f"GitHub repository policy verification passed ({scope}{suffix}).")
     return 0
 
 

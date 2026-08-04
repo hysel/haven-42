@@ -91,7 +91,8 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
         },
         method="GET",
     )
-    opener = urllib.request.build_opener(_NoRedirect())
+    # Search consent covers the fixed catalog origin, not an inherited proxy.
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
     try:
         with opener.open(request, timeout=timeout_seconds) as response:
             final = urllib.parse.urlsplit(response.geturl())

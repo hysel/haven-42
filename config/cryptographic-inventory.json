@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "inventoryId": "haven42.cryptographic-inventory",
+  "reviewedOn": "2026-08-04",
+  "status": "readiness-inventory-only",
+  "description": "Inventory of current and explicitly unadmitted cryptographic boundaries. It is not a cryptographic provider, policy override, or runtime capability claim.",
+  "entries": [
+    {
+      "id": "browser-loopback-transport",
+      "boundary": "browser-to-local-service",
+      "state": "runtime-admitted",
+      "mechanism": "ipv4-loopback-http-with-session-and-csrf-authority",
+      "purpose": "local-process transport and request authority",
+      "quantumConcern": "not-a-public-key-cryptography-boundary",
+      "pqcAction": "none"
+    },
+    {
+      "id": "package-and-resource-integrity",
+      "boundary": "portable-package-and-embedded-resources",
+      "state": "runtime-admitted",
+      "mechanism": "sha-256",
+      "purpose": "accidental-or-unauthorized-content-change-detection-without-authenticity",
+      "quantumConcern": "symmetric-hash-security-margin-remains-but-algorithm-agility-is-required",
+      "pqcAction": "retain-and-version-algorithm-identifier"
+    },
+    {
+      "id": "provider-https-transport",
+      "boundary": "local-service-to-private-provider",
+      "state": "runtime-admitted-when-user-selects-https",
+      "mechanism": "python-ssl-and-bundled-openssl-policy",
+      "purpose": "transport-confidentiality-integrity-and-server-authentication",
+      "quantumConcern": "negotiated-key-establishment-and-certificate-signature-may-remain-classical",
+      "pqcAction": "measure-hybrid-negotiation-before-any-claim"
+    },
+    {
+      "id": "provider-http-transport",
+      "boundary": "local-service-to-private-provider",
+      "state": "runtime-admitted-with-visible-warning",
+      "mechanism": "unencrypted-http",
+      "purpose": "private-provider-compatibility",
+      "quantumConcern": "already-unencrypted-and-unauthenticated",
+      "pqcAction": "none-retain-warning-and-recommend-trusted-https-or-loopback-tunnel"
+    },
+    {
+      "id": "session-and-csrf-authority",
+      "boundary": "local-browser-session",
+      "state": "runtime-admitted",
+      "mechanism": "operating-system-backed-python-secrets-random-tokens",
+      "purpose": "unpredictable-session-and-request-authority",
+      "quantumConcern": "symmetric-random-token-security-margin",
+      "pqcAction": "retain-bounded-lifetime-and-entropy-requirements"
+    },
+    {
+      "id": "conversation-history-encryption",
+      "boundary": "future-persistent-user-content",
+      "state": "architecture-only-runtime-unadmitted",
+      "mechanism": "full-database-aes-256-candidate-with-os-wrapped-random-key",
+      "purpose": "future-encryption-at-rest",
+      "quantumConcern": "local-key-protection-and-implementation-quality-not-a-kem-use-case",
+      "pqcAction": "do-not-replace-bulk-symmetric-encryption-with-pqc"
+    },
+    {
+      "id": "core-update-authorization",
+      "boundary": "future-offline-update-verifier",
+      "state": "structural-only-runtime-unadmitted",
+      "mechanism": "no-cryptographic-verifier-active",
+      "purpose": "future-artifact-authenticity-and-publisher-authorization",
+      "quantumConcern": "future-classical-signatures-require-an-agile-transition-plan",
+      "pqcAction": "evaluate-dual-classical-and-ml-dsa-verification"
+    },
+    {
+      "id": "platform-code-signing",
+      "boundary": "future-release-artifacts",
+      "state": "policy-only-inactive",
+      "mechanism": "no-signing-workflow-or-key-active",
+      "purpose": "future-platform-publisher-trust",
+      "quantumConcern": "platform-ecosystems-and-certificates-may-remain-classical",
+      "pqcAction": "supplement-never-claim-to-replace-platform-signing"
+    }
+  ],
+  "effects": {
+    "networkUsed": false,
+    "filesWritten": false,
+    "keysGenerated": false,
+    "keysRead": false,
+    "trustStoreChanged": false,
+    "tlsPolicyChanged": false,
+    "signatureVerified": false,
+    "packageAuthorized": false,
+    "updateActivated": false
+  }
+}

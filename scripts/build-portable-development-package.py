@@ -249,17 +249,61 @@ def commit_identity() -> str:
     value = os.environ.get("GITHUB_SHA", "")
     if re.fullmatch(r"[0-9a-f]{40}", value):
         return value
-    result = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=ROOT,
-        check=True,
-        capture_output=True,
-        text=True,
-    )
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except (FileNotFoundError, subprocess.CalledProcessError) as error:
+        raise SystemExit(
+            "Could not resolve an exact build commit. Source exports must set "
+            "HAVEN42_SOURCE_COMMIT and HAVEN42_SOURCE_TREE_STATE."
+        ) from error
     value = result.stdout.strip()
     if not re.fullmatch(r"[0-9a-f]{40}", value):
         raise SystemExit("Could not resolve an exact build commit.")
     return value
+
+
+def source_provenance() -> dict[str, object]:
+    commit = commit_identity()
+    state = os.environ.get("HAVEN42_SOURCE_TREE_STATE", "")
+    snapshot = os.environ.get("HAVEN42_SOURCE_SNAPSHOT_SHA256", "")
+    if state:
+        if state not in {"exact-commit", "modified-uncommitted"}:
+            raise SystemExit("Invalid HAVEN42_SOURCE_TREE_STATE.")
+        if state == "modified-uncommitted" and not re.fullmatch(r"[0-9a-f]{64}", snapshot):
+            raise SystemExit(
+                "Modified source exports require HAVEN42_SOURCE_SNAPSHOT_SHA256."
+            )
+        if snapshot and not re.fullmatch(r"[0-9a-f]{64}", snapshot):
+            raise SystemExit("Invalid HAVEN42_SOURCE_SNAPSHOT_SHA256.")
+    else:
+        try:
+            result = subprocess.run(
+                ["git", "status", "--porcelain", "--untracked-files=normal"],
+                cwd=ROOT,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except (FileNotFoundError, subprocess.CalledProcessError) as error:
+            raise SystemExit(
+                "Could not determine source tree state. Source exports must set "
+                "HAVEN42_SOURCE_TREE_STATE and, when modified, "
+                "HAVEN42_SOURCE_SNAPSHOT_SHA256."
+            ) from error
+        state = "modified-uncommitted" if result.stdout.strip() else "exact-commit"
+    return {
+        "repository": "https://github.com/hysel/haven-42",
+        "commit": commit,
+        "treeState": state,
+        "commitIsExactSource": state == "exact-commit",
+        "snapshotSha256": snapshot,
+    }
 
 
 def package_file_records(package_dir: Path) -> list[dict[str, object]]:
@@ -408,10 +452,7 @@ def main() -> int:
         "schemaVersion": 1,
         "artifactKind": "unsigned-development",
         "application": {"name": "Haven 42", "version": APP_VERSION},
-        "source": {
-            "repository": "https://github.com/hysel/haven-42",
-            "commit": commit_identity(),
-        },
+        "source": source_provenance(),
         "builder": {
             "kind": "github-actions" if os.environ.get("GITHUB_ACTIONS") == "true" else "local",
             "workflow": os.environ.get("GITHUB_WORKFLOW", "local"),

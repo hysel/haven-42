@@ -3,6 +3,17 @@
   "description": "Fail-closed hardware discovery and consent contract for consumer-local image-provider onboarding.",
   "executionDefault": "dry-run",
   "externalServerRequired": false,
+  "distributionBoundary": {
+    "externalProviderSoftwareBundled": false,
+    "providerModelsBundled": false,
+    "acceleratorDriversOrRuntimesBundled": false,
+    "providerInstallersOrUpdaterPayloadsBundled": false,
+    "existingProviderConnectionAllowed": true,
+    "separateUserManagedAcquisitionRequired": true,
+    "havenRuntimeDependenciesMayBeBundledOnlyWhenReviewed": true
+  },
+  "candidateProfileManifest": "config/local-image-candidate-profiles.json",
+  "hardwareSelectionFixtures": "examples/fixtures/local-image-hardware-profile-cases.json",
   "sharedOnboarding": {
     "contract": "config/progressive-onboarding-contract.json",
     "choiceIds": ["guided-setup", "existing-setup", "not-now"],
@@ -125,6 +136,7 @@
   "promotion": {
     "failedProfileLeavesDocumentationOnly": true,
     "runtimeOrInstallerFilesRequireExactProfilePass": true,
-    "physicalMacReservedForFinalNativeHardwareGate": true
+    "physicalMacReservedForFinalNativeHardwareGate": true,
+    "allWindowsCandidateProfilesRemainUnpromoted": true
   }
 }

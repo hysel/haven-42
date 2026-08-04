@@ -6,6 +6,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+Import-Module (Join-Path $PSScriptRoot "PowerShellCompatibility.psm1") -Force
 
 if (-not (Test-Path -LiteralPath $TargetRepo)) {
     throw "Target repository path does not exist: $TargetRepo"
@@ -58,7 +59,7 @@ function Add-Section {
 function Get-RelativePath {
     param([string]$Path)
 
-    $relative = [System.IO.Path]::GetRelativePath($target, $Path)
+    $relative = Get-HavenRelativePath -BasePath $target -TargetPath $Path
     return $relative.Replace('\', '/')
 }
 

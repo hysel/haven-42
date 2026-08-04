@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "status": "external-native-execution-required",
+  "manifests": [
+    {"id": "ace-step-linux-nvidia-audio", "candidateId": "ace-step-1.5", "operations": ["instrumental", "vocal-request"], "artifactFormats": ["wav", "flac"], "requiredGates": ["identity", "license", "hardware-fit", "loopback", "route-authentication", "signal", "cancellation", "cleanup"]},
+    {"id": "hunyuan-linux-nvidia-video", "candidateId": "hunyuanvideo-1.5", "operations": ["text-to-video", "image-to-video"], "artifactFormats": ["mp4", "webm"], "requiredGates": ["identity", "license", "hardware-fit", "network-disabled", "decoding", "cancellation", "cleanup"]},
+    {"id": "wan-linux-nvidia-video", "candidateId": "wan2.2-ti2v-5b", "operations": ["text-to-video", "image-to-video"], "artifactFormats": ["mp4", "webm"], "requiredGates": ["identity", "license", "hardware-fit", "decoding", "cancellation", "cleanup"]},
+    {"id": "ltx-linux-nvidia-video", "candidateId": "ltx-2.3", "operations": ["text-to-video", "image-to-video"], "artifactFormats": ["mp4", "webm"], "requiredGates": ["identity", "license", "hardware-fit", "decoding", "cancellation", "cleanup"]}
+  ],
+  "authority": {"download": false, "install": false, "launch": false, "machineModification": false, "promotion": false}
+}

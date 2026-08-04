@@ -178,6 +178,8 @@ REQUIRED_FILES=(
   "config/core-update-check-contract.json"
   "config/core-update-trust-handoff-contract.json"
   "config/core-update-verifier-transition-contract.json"
+  "config/cryptographic-inventory.json"
+  "config/post-quantum-cryptography-contract.json"
   "examples/fixtures/core-update-trust-receipt.json"
   "examples/fixtures/core-update-verifier-transition.json"
   "examples/fixtures/task-execution-admission-request.json"
@@ -188,6 +190,9 @@ REQUIRED_FILES=(
   ".github/workflows/codeql.yml"
   "docs/provider-endpoint-security.md"
   "scripts/provider_security.py"
+  "scripts/validate-post-quantum-readiness.py"
+  "scripts/test-post-quantum-readiness.py"
+  "docs/post-quantum-cryptography-readiness.md"
   "scripts/verify-public-repository-privacy.py"
   "scripts/simulate-task-composition.py"
   "scripts/test-task-composition.py"
@@ -482,11 +487,21 @@ done
 PRIVATE_IP_PATTERN='(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})'
 SECRET_PATTERN='(api[_-]?key|access[_-]?token|personal[_-]?access[_-]?token|password|secret)[[:space:]]*[:=][[:space:]]*["'\'']?[A-Za-z0-9_-]{16,}'
 
-while IFS= read -r file; do
-  rel="${file#$REPO_ROOT/}"
+if ! git -c core.excludesFile=/dev/null -C "$REPO_ROOT" ls-files --cached --others --exclude-standard -z >/dev/null; then
+  fail "could not enumerate Git-bounded files for privacy validation"
+fi
+
+while IFS= read -r -d '' rel; do
   case "$rel" in
-    .git/*|runtime-validation-output/*|.continue/config.local*.yaml) continue ;;
+    runtime-validation-output/*|*/runtime-validation-output/*|.continue/config.local*.yaml) continue ;;
   esac
+
+  file="$REPO_ROOT/$rel"
+  [ -e "$file" ] || continue
+  if [ -L "$file" ]; then
+    fail "privacy validation refuses a symbolic-link file: $rel"
+    continue
+  fi
 
   case "$file" in
     *.md|*.yaml|*.yml|*.ps1|*.sh|*.tsv|*.txt)
@@ -499,7 +514,7 @@ while IFS= read -r file; do
       fi
       ;;
   esac
-done < <(find "$REPO_ROOT" -type f)
+done < <(git -c core.excludesFile=/dev/null -C "$REPO_ROOT" ls-files --cached --others --exclude-standard -z)
 
 if [ "$FAILED" -eq 0 ]; then
   printf 'Validation passed.\n'

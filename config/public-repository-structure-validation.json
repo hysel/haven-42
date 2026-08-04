@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "status": "read-only-bare-object-validation",
+  "expected": {
+    "python-cli-click-8.2.1": "python",
+    "node-web-express-5.1.0": "javascript-typescript",
+    "rust-library-serde-json-1.0.140": "rust"
+  },
+  "operations": ["project-detection", "runtime-context-plan", "workflow-selection", "language-rule-selection", "context-boundary"],
+  "selectedWorkflows": ["repository-discovery", "implementation-plan", "code-review"],
+  "limits": {"maximumReportedPaths": 200, "maximumEvidenceBytes": 131072},
+  "effects": {
+    "workingTreeCheckout": false,
+    "targetFileWrite": false,
+    "targetCodeExecution": false,
+    "targetBuild": false,
+    "targetTest": false,
+    "packageInstallation": false,
+    "modelInvocation": false,
+    "networkDuringValidation": false,
+    "upstreamContact": false,
+    "issueCreation": false,
+    "forkCreation": false,
+    "branchPush": false
+  },
+  "authority": {"surfacePromotionAllowed": false, "writeWorkflowAllowed": false, "runtimeAdmissionAllowed": false}
+}

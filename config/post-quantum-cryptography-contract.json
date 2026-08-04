@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.post-quantum-cryptography-readiness",
+  "reviewedOn": "2026-08-04",
+  "status": "crypto-agility-foundation-only",
+  "runtimeAdmitted": false,
+  "description": "Fail-closed planning contract for post-quantum migration. It activates no algorithm, provider, TLS policy, signature verifier, signing workflow, key store, package trust, or updater authority.",
+  "standards": [
+    {
+      "id": "FIPS-203",
+      "algorithm": "ML-KEM",
+      "role": "key-establishment-candidate"
+    },
+    {
+      "id": "FIPS-204",
+      "algorithm": "ML-DSA",
+      "role": "primary-signature-candidate"
+    },
+    {
+      "id": "FIPS-205",
+      "algorithm": "SLH-DSA",
+      "role": "alternative-signature-candidate"
+    }
+  ],
+  "candidateProfiles": {
+    "providerTls": {
+      "profileId": "tls13-x25519-mlkem768-hybrid-candidate",
+      "group": "X25519MLKEM768",
+      "mode": "prefer-hybrid-with-visible-classical-fallback",
+      "pqcRequiredForConnection": false,
+      "classicalFallbackAllowed": true,
+      "fallbackMustBeReported": true,
+      "selected": false,
+      "requiredEvidence": [
+        "exact-client-runtime-and-openssl-version",
+        "exact-server-runtime-and-tls-termination-version",
+        "negotiated-group-observation",
+        "certificate-signature-inventory",
+        "source-versus-package-parity",
+        "windows-linux-macos-native-evidence",
+        "downgrade-and-incompatibility-tests"
+      ]
+    },
+    "updateAuthorization": {
+      "profileId": "dual-classical-ml-dsa-candidate",
+      "mode": "require-both-during-transition",
+      "parameterSetSelected": false,
+      "selected": false,
+      "requiredEvidence": [
+        "exact-classical-signature-profile",
+        "exact-ml-dsa-parameter-set",
+        "canonical-signed-payload-format",
+        "independent-pinned-verifier",
+        "valid-invalid-and-downgrade-vectors",
+        "key-rotation-and-compromise-recovery",
+        "source-versus-package-parity",
+        "windows-linux-macos-native-evidence"
+      ]
+    },
+    "alternativeSignature": {
+      "profileId": "slh-dsa-alternative-candidate",
+      "mode": "independent-algorithm-family-fallback",
+      "parameterSetSelected": false,
+      "selected": false,
+      "requiredEvidence": [
+        "explicit-use-case",
+        "exact-parameter-set",
+        "signature-size-and-performance-budget",
+        "independent-pinned-verifier",
+        "native-package-evidence"
+      ]
+    }
+  },
+  "migrationRules": {
+    "customCryptographicImplementationAllowed": false,
+    "experimentalAlgorithmAllowed": false,
+    "rawPrivateKeyInRepositoryAllowed": false,
+    "rawPrivateKeyInLogsAllowed": false,
+    "rendererKeyAccessAllowed": false,
+    "modelKeyAccessAllowed": false,
+    "algorithmIdentifierRequired": true,
+    "versionedEnvelopeRequired": true,
+    "unknownAlgorithmFailsClosed": true,
+    "missingRequiredSignatureFailsClosed": true,
+    "silentDowngradeAllowed": false,
+    "pqcRequiredForConnection": false,
+    "secureClassicalFallbackAllowed": true,
+    "classicalFallbackMustBeReported": true,
+    "classicalProtectionRetainedDuringTransition": true,
+    "pqcReplacesPlatformSigning": false,
+    "pqcMakesHttpSecure": false,
+    "negotiatedTlsClaimWithoutObservationAllowed": false,
+    "bulkContentEncryptionUsesPqc": false
+  },
+  "activationGates": [
+    "owner-approval-for-the-exact-cryptographic-profile",
+    "security-threat-model-and-misuse-case-review",
+    "maintained-standards-conformant-library-selection",
+    "immutable-source-license-sbom-and-vulnerability-review",
+    "deterministic-positive-negative-and-downgrade-vectors",
+    "key-generation-storage-rotation-revocation-and-recovery-design",
+    "source-versus-package-parity",
+    "native-windows-linux-and-macos-evidence",
+    "performance-memory-and-artifact-size-budgets",
+    "rollback-and-compatibility-plan",
+    "independent-security-review",
+    "production-admission-decision"
+  ],
+  "evidence": {
+    "inventoryCompleteForCurrentKnownBoundaries": true,
+    "algorithmActivated": false,
+    "tlsHybridNegotiationVerified": false,
+    "updateSignatureVerified": false,
+    "nativeWindowsVerified": false,
+    "nativeLinuxVerified": false,
+    "nativeMacosVerified": false,
+    "sourcePackageParityVerified": false,
+    "productionReady": false
+  },
+  "effects": {
+    "networkUsed": false,
+    "filesWritten": false,
+    "dependencyAdded": false,
+    "keysGenerated": false,
+    "keysRead": false,
+    "trustStoreChanged": false,
+    "tlsPolicyChanged": false,
+    "signatureVerified": false,
+    "packageAuthorized": false,
+    "updateActivated": false,
+    "machineModified": false
+  }
+}

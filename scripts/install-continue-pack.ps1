@@ -35,6 +35,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+Import-Module (Join-Path $PSScriptRoot "PowerShellCompatibility.psm1") -Force
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
 $runtimePolicy = (& (Join-Path $PSScriptRoot "get-model-runtime-policy.ps1") | ConvertFrom-Json)
@@ -151,14 +152,14 @@ function Write-Plan {
 function Get-PackFiles {
     Get-ChildItem -LiteralPath $sourceContinue -Recurse -File -Force |
         Where-Object {
-            $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
+            $relative = (Get-HavenRelativePath -BasePath $sourceContinue -TargetPath $_.FullName).Replace('\', '/')
             $relative -notmatch "^config\.local.*\.ya?ml$"
         }
 }
 
 function Copy-PackFiles {
     foreach ($file in Get-PackFiles) {
-        $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $file.FullName)
+        $relative = Get-HavenRelativePath -BasePath $sourceContinue -TargetPath $file.FullName
         $destination = Join-Path $targetContinue $relative
         $destinationDirectory = Split-Path -Parent $destination
 
@@ -174,7 +175,7 @@ function Copy-PackFilesToRoot {
     param([string]$DestinationRoot)
 
     foreach ($file in Get-PackFiles) {
-        $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $file.FullName)
+        $relative = Get-HavenRelativePath -BasePath $sourceContinue -TargetPath $file.FullName
         $destination = Join-Path $DestinationRoot $relative
         $destinationDirectory = Split-Path -Parent $destination
 
@@ -201,7 +202,7 @@ function Test-InstalledPack {
     }
 
     foreach ($ref in $fileRefs) {
-        if ([System.IO.Path]::IsPathFullyQualified($ref) -or $ref -match "(^|/)\.\.(/|$)") {
+        if ((Test-HavenPathFullyQualified $ref) -or $ref -match "(^|/)\.\.(/|$)") {
             throw "Installed config has unsafe file reference: $ref"
         }
 
@@ -243,8 +244,8 @@ function Install-TargetProjectProfile {
     foreach ($rulePack in @($ProfileResult.Value.SelectedRulePacks)) {
         $sourceRelative = [string]$rulePack.SourcePath
         $activeRelative = [string]$rulePack.ActivePath
-        if ([System.IO.Path]::IsPathFullyQualified($sourceRelative) -or
-            [System.IO.Path]::IsPathFullyQualified($activeRelative) -or
+        if ((Test-HavenPathFullyQualified $sourceRelative) -or
+            (Test-HavenPathFullyQualified $activeRelative) -or
             $sourceRelative -match "(^|[/\\])\.\.([/\\]|$)" -or
             $activeRelative -match "(^|[/\\])\.\.([/\\]|$)") {
             throw "Project profile contains an unsafe rule-pack path."
@@ -674,12 +675,12 @@ if ($DryRun) {
     Write-Plan "Files that would be copied:"
     if ($SharedAssets) {
         Get-PackFiles | ForEach-Object {
-            $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
+            $relative = (Get-HavenRelativePath -BasePath $sourceContinue -TargetPath $_.FullName).Replace('\', '/')
             Write-Host "- $sharedAssetsResolved/$relative"
         }
     } else {
         Get-PackFiles | ForEach-Object {
-            $relative = [System.IO.Path]::GetRelativePath($sourceContinue, $_.FullName).Replace('\', '/')
+            $relative = (Get-HavenRelativePath -BasePath $sourceContinue -TargetPath $_.FullName).Replace('\', '/')
             Write-Host "- .continue/$relative"
         }
         Write-Plan "Would write .continue/project-profile.json and activate the selected project rule packs under .continue/rules/."

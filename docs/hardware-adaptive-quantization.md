@@ -6,6 +6,7 @@ Haven 42 treats quantization as an evidence-bound model lifecycle, not a bit-cou
 
 - `config/quantization-plan-contract.json` defines dry-run decisions: `existing-artifact`, `local-derivative`, or `no-safe-recommendation`.
 - `config/quantized-artifact-manifest-contract.json` records immutable source identity, input and output hashes, pinned tools, the full recipe, runtime compatibility, exact evidence scope, activation, rollback, and cleanup state.
+- `config/quantized-artifact-lifecycle-contract.json` and its simulator exercise storage preflight, inactive activation/rollback plans, interrupted conversion recovery, and exact partial cleanup with every machine effect false.
 - `config/quantization-support-matrix.json` defines candidate format/runtime boundaries. It deliberately does not claim that equal bit counts or different accelerators are interchangeable.
 
 Source weights and derivatives stay outside the application and repository. A conversion never overwrites its source. Moving branches, missing hashes, unknown licenses, unapproved calibration material, unsupported kernels, silent CPU fallback, and inadequate temporary storage all produce `no-safe-recommendation`.
@@ -49,6 +50,8 @@ Create a local request JSON containing `source`, `target`, `hardwareProfile`, op
 ```
 
 The new output file is created exclusively and is never overwritten; the plan is not printed to the console because it may contain local hardware and model metadata. The result always reports `network`, `downloads`, `writes`, `conversion`, and `activation` as false. A `local-derivative` result is only a proposal for a later approved and independently validated workflow.
+
+Future Windows Intel and native macOS cells use the [Quantized Artifact Native Validation Packet](quantized-artifact-native-validation-packet.md). Failed SYCL evidence remains a failed cell and cannot grant catalog or activation authority.
 
 ## Validated Linux NVIDIA Cell
 

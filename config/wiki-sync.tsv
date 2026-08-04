@@ -39,10 +39,13 @@ docs/local-image-capability.md	Local-Image-Capability.md	Local Image Capability
 docs/comfyui-image-provider-setup.md	ComfyUI-Image-Provider-Setup.md	ComfyUI Image Provider Setup
 docs/wiki-image-setup.md	Local-Image-Provider-Onboarding.md	Set Up Local Images
 docs/local-image-provider-onboarding.md	Image-Provider-Admission.md	Image Provider Admission
+docs/local-image-native-validation-packet.md	Local-Image-Native-Validation-Packet.md	Local Image Native Validation Packet
+docs/local-image-runtime-license-review.md	Local-Image-Runtime-License-Review.md	Local Image Runtime License Review
 docs/local-audio-provider-candidates.md	Local-Audio-Provider-Candidates.md	Local Audio Provider Candidates
 docs/local-video-provider-candidates.md	Local-Video-Provider-Candidates.md	Local Video Provider Candidates
 docs/generative-media-consent-policy.md	Generative-Media-Consent-Policy.md	Generative Media Consent Policy
 docs/hardware-adaptive-quantization.md	Hardware-Adaptive-Quantization.md	Hardware-Adaptive Quantization
+docs/quantized-artifact-native-validation-packet.md	Quantized-Artifact-Native-Validation-Packet.md	Quantized Artifact Native Validation Packet
 examples/quantization-validation.md	Quantization-Validation.md	Quantization Validation
 docs/inference-engine-architecture.md	Inference-Engine-Architecture.md	Inference Engine Architecture
 examples/inference-engine-validation.md	Inference-Engine-Validation.md	Inference Engine Validation
@@ -101,6 +104,8 @@ docs/desktop-dependency-resolution-evidence.md	Desktop-Dependency-Resolution-Evi
 docs/desktop-ipc-contract.md	Desktop-IPC-Contract.md	Desktop IPC Contract
 docs/native-bridge-boundary-evidence.md	Native-Bridge-Boundary-Evidence.md	Native Bridge Boundary Evidence
 docs/desktop-storage-and-updates.md	Desktop-Storage-And-Updates.md	Desktop Storage And Updates
+docs/core-update-cryptographic-verifier-review.md	Core-Update-Cryptographic-Verifier-Review.md	Core Update Cryptographic Verifier Review
+docs/post-quantum-cryptography-readiness.md	Post-Quantum-Cryptography-Readiness.md	Post-Quantum Cryptography Readiness
 docs/workflow-reliability.md	Workflow-Reliability.md	Workflow Reliability
 docs/security-threat-model.md	Security-Threat-Model.md	Security Threat Model
 docs/local-data-lifecycle.md	Local-Data-Lifecycle.md	Local Data Lifecycle
@@ -120,6 +125,7 @@ docs/local-web-mvp.md	Local-Web-MVP.md	Local Web MVP
 examples/local-web-mvp-validation.md	Local-Web-MVP-Validation.md	Local Web MVP Validation
 docs/portable-development-package.md	Portable-Development-Package.md	Portable Development Package
 docs/github-repository-policy.md	GitHub-Repository-Policy.md	GitHub Repository Policy
+docs/offline-installer-lifecycle-foundation.md	Offline-Installer-Lifecycle-Foundation.md	Offline Installer Lifecycle Foundation
 docs/milestone22-admission-readiness.md	Milestone-22-Admission-Readiness.md	Milestone 22 Admission Readiness
 docs/artifact-attestation.md	Artifact-Attestation.md	Unsigned Development Artifact Attestation
 CODE-SIGNING-POLICY.md	Code-Signing-Policy.md	Code Signing Policy
@@ -134,3 +140,6 @@ docs/pdf-production-isolation.md	PDF-Production-Isolation.md	PDF Production Isol
 examples/complex-document-semantic-validation.md	Complex-Document-Semantic-Validation.md	Complex Document Semantic Validation
 docs/project-status-consistency.md	Project-Status-Consistency.md	Project Status Consistency
 docs/controlled-web-research-foundation.md	Controlled-Web-Research-Foundation.md	Controlled Web Research Foundation
+docs/retrieval-expansion-foundations.md	Retrieval-Expansion-Foundations.md	Retrieval Expansion Foundations
+docs/public-repository-validation-candidates.md	Public-Repository-Validation-Candidates.md	Public Repository Validation Candidates
+docs/local-batch-task-ledger.md	Local-Batch-Task-Ledger.md	Local Batch Task Ledger

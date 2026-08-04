@@ -155,6 +155,8 @@ $requiredFiles = @(
     "config/core-update-check-contract.json",
     "config/core-update-trust-handoff-contract.json",
     "config/core-update-verifier-transition-contract.json",
+    "config/cryptographic-inventory.json",
+    "config/post-quantum-cryptography-contract.json",
     "examples/fixtures/core-update-trust-receipt.json",
     "examples/fixtures/core-update-verifier-transition.json",
     "examples/fixtures/task-execution-admission-request.json",
@@ -166,6 +168,9 @@ $requiredFiles = @(
     ".github/workflows/codeql.yml",
     "docs/provider-endpoint-security.md",
     "scripts/provider_security.py",
+    "scripts/validate-post-quantum-readiness.py",
+    "scripts/test-post-quantum-readiness.py",
+    "docs/post-quantum-cryptography-readiness.md",
     "scripts/verify-public-repository-privacy.py",
     "scripts/simulate-task-composition.py",
     "scripts/test-task-composition.py",
@@ -522,15 +527,36 @@ foreach ($relativePath in $requiredFiles) {
     }
 }
 
-$textFiles = Get-ChildItem -LiteralPath $repoRoot -Recurse -File |
-    Where-Object {
-        $normalizedPath = $_.FullName.Replace('\', '/')
-
-        $normalizedPath -notmatch "/\.git/" -and
-        $normalizedPath -notmatch "/\.continue/config\.local.*\.yaml$" -and
-        $normalizedPath -notmatch "/runtime-validation-output/" -and
-        $_.Extension -in @(".md", ".yaml", ".yml", ".ps1", ".sh", ".tsv", ".txt")
+$nullDevice = if ([System.IO.Path]::DirectorySeparatorChar -eq '\') { "NUL" } else { "/dev/null" }
+$rawTextPaths = (& git -c "core.excludesFile=$nullDevice" -C $repoRoot ls-files --cached --others --exclude-standard -z) -join "`n"
+if ($LASTEXITCODE -ne 0) {
+    throw "Could not enumerate Git-bounded files for privacy validation."
+}
+$textFiles = [System.Collections.Generic.List[System.IO.FileInfo]]::new()
+$repoFull = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar)
+$repoPrefix = $repoFull + [System.IO.Path]::DirectorySeparatorChar
+foreach ($relativePath in @($rawTextPaths -split "`0" | Where-Object { $_ })) {
+    $normalizedPath = $relativePath.Replace('\', '/')
+    if ($normalizedPath -match '^\.continue/config\.local.*\.yaml$' -or
+        $normalizedPath -match '(^|/)runtime-validation-output/' -or
+        [System.IO.Path]::GetExtension($relativePath) -notin @(".md", ".yaml", ".yml", ".ps1", ".sh", ".tsv", ".txt")) {
+        continue
     }
+    $candidate = [System.IO.Path]::GetFullPath((Join-Path $repoFull $relativePath))
+    if (-not $candidate.StartsWith($repoPrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Git returned a privacy-validation path outside the repository."
+    }
+    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+        continue
+    }
+    $item = Get-Item -LiteralPath $candidate -Force
+    $linkTarget = [string]($item.Target -join "")
+    if ($item.LinkType -in @("SymbolicLink", "Junction") -or
+        -not [string]::IsNullOrEmpty($linkTarget)) {
+        throw "Privacy validation refuses a symbolic-link or junction file: $relativePath"
+    }
+    $textFiles.Add($item)
+}
 
 $privateIpPattern = "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b"
 $secretPattern = "(?i)(api[_-]?key|access[_-]?token|personal[_-]?access[_-]?token|password|secret)\s*[:=]\s*['""]?[A-Za-z0-9_\-]{16,}"

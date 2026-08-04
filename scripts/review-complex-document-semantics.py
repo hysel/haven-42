@@ -24,6 +24,10 @@ assert SPEC.loader is not None
 sys.modules[SPEC.name] = INSPECTOR
 SPEC.loader.exec_module(INSPECTOR)
 LIMITS = CONTRACT["limits"]
+UNSUPPORTED_VISUAL_PART_PATTERNS = tuple(
+    re.compile(pattern, re.I)
+    for pattern in CONTRACT["policy"]["unsupportedVisualPartPatterns"]
+)
 
 
 class SemanticRejected(ValueError):
@@ -98,6 +102,15 @@ def selected_parts(names: list[str], format_id: str) -> list[tuple[str, str]]:
         ]
         return slides + notes
     return [("document-content", "content.xml")]
+
+
+def reject_unsupported_parts(names: list[str]) -> None:
+    if any(
+        pattern.fullmatch(name.replace("\\", "/"))
+        for name in names
+        for pattern in UNSUPPORTED_VISUAL_PART_PATTERNS
+    ):
+        raise SemanticRejected("unsupported-visual-object-rejected")
 
 
 def clean_text(raw: str) -> str:
@@ -274,7 +287,9 @@ def extract(data: bytes, format_id: str) -> dict[str, object]:
     except INSPECTOR.ContainerRejected as error:
         raise SemanticRejected(f"container-{error}") from error
     with zipfile.ZipFile(BytesIO(data)) as archive:
-        parts = selected_parts(archive.namelist(), format_id)
+        names = archive.namelist()
+        reject_unsupported_parts(names)
+        parts = selected_parts(names, format_id)
         if not 1 <= len(parts) <= LIMITS["maximumSelectedXmlParts"]:
             raise SemanticRejected("selected-part-budget-exceeded")
         segments: list[dict[str, str]] = []

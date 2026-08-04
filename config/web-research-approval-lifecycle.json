@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "status": "offline-state-contract-only",
+  "queryApproval": {
+    "exactNormalizedQueryRequired": true,
+    "maximumQueries": 4,
+    "approvalCannotBeInferred": true,
+    "modelCannotApprove": true,
+    "approvalExpiresAfterSingleRetrieval": true
+  },
+  "pageApproval": {
+    "trustedCitationIdRequired": true,
+    "exactEngineDerivedDestinationRequired": true,
+    "approvalCannotBeInferred": true,
+    "modelCannotApprove": true,
+    "unapprovedPageRetrievalAllowed": false
+  },
+  "lifecycle": {
+    "memoryOnly": true,
+    "cancelClearsApprovalsAndResults": true,
+    "failureClearsApprovalsAndResults": true,
+    "shutdownClearsApprovalsAndResults": true,
+    "providerChangeClearsApprovalsAndResults": true,
+    "automaticFollowUpAllowed": false
+  },
+  "authority": {
+    "runtimeRouteAllowed": false,
+    "uiAllowed": false,
+    "networkAllowed": false,
+    "modelToolAllowed": false,
+    "persistenceAllowed": false,
+    "packageAllowed": false
+  }
+}
