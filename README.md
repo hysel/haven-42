@@ -98,6 +98,13 @@ connection is unencrypted, so Haven 42 displays a warning. Use a trusted HTTPS
 endpoint or a loopback tunnel when sensitive traffic must cross another
 machine.
 
+If the Ollama endpoint requires authentication, expand **Advanced connection
+settings** and choose **Bearer token** or **X-API-Key**. Authenticated
+private-network connections require HTTPS. Haven 42 keeps the key only for the
+current session and never stores or returns it. Most users should keep
+**Automatic (Recommended)**; a future Haven-managed HTTPS
+gateway will select its configured authentication mode during setup.
+
 Haven 42 never downloads a model automatically. Search results that are not
 installed remain inactive candidates until you install and review them in the
 Ollama environment you control.
@@ -138,8 +145,10 @@ or [Troubleshooting](docs/troubleshooting.md).
 
 - The application server binds only to IPv4 loopback.
 - Provider endpoints are restricted to same-machine or private-network scopes.
-- Credentials in provider URLs, public provider addresses, and unsafe redirects
-  are blocked.
+- Credentials in provider URLs, public provider addresses, arbitrary
+  authentication headers, and unsafe redirects are blocked. Optional Bearer
+  and X-API-Key values are bounded, memory-only, and HTTPS-required outside
+  same-machine loopback.
 - Attachment names, extensions, and browser MIME values are untrusted hints;
   browser and server checks reject disallowed or suspicious content.
 - Attached content is inert reference data and receives no command, tool,

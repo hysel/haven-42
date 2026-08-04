@@ -3,18 +3,18 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "c1bd445efaebe4a6c673e1d473eb6c30219a8dff71bee067d901900621a21dd0",
-      "sizeBytes": 29771
+      "sha256": "75adb0fb202b5ce1624de326ac010ba0c89a9383dbce05da8b958195f775d8a7",
+      "sizeBytes": 31627
     },
     {
       "path": "web/static/app.js",
-      "sha256": "db0f2bb88dd24ec2e45a257dfded389ce4b95b54509971aa7aad3e95f280128e",
-      "sizeBytes": 99390
+      "sha256": "a05708c538337d2122c2d046ef5fdbf9426738f84438edd0d3992ff9af5d56db",
+      "sizeBytes": 102161
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "00644febf6afdea82ebc21f74fc545e5ebf87da419a5dd736a05aa5abc15e6e6",
-      "sizeBytes": 26644
+      "sha256": "9297ec57d17f22a79f049fd4ffb771cd76db4600c79186791aa5242176d13948",
+      "sizeBytes": 26734
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -38,8 +38,8 @@
     },
     {
       "path": "config/install-component-registry.json",
-      "sha256": "28f1bd8a91da71a424d00c17c363467e0f064a05f9095f86dcc0843abe7cbd5a",
-      "sizeBytes": 4278
+      "sha256": "77c22880a8fbcc1cdb29502ba9d7a7bb361eb79c8931213076f52eceb16c9f3f",
+      "sizeBytes": 4467
     },
     {
       "path": "config/workflows.json",

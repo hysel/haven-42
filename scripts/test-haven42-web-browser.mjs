@@ -51,6 +51,8 @@ let models = ["qwen3.5:9b", "unknown-model:latest"];
 const loaded = new Set();
 const requests = [];
 const chatPayloads = [];
+const providerAuthorization = [];
+let requiredOllamaAuthorization = null;
 const trace = (message) => {
   if (process.env.HAVEN42_BROWSER_TEST_TRACE === "1") process.stderr.write(`[browser-test] ${message}\n`);
 };
@@ -63,6 +65,12 @@ function json(response, status, value) {
 
 const fake = createServer((request, response) => {
   requests.push(`${request.method} ${request.url}`);
+  if (["/api/version", "/api/tags", "/api/ps", "/api/chat", "/api/generate"].includes(request.url)) {
+    providerAuthorization.push([request.method, request.url, request.headers.authorization || null]);
+    if (requiredOllamaAuthorization !== null && request.headers.authorization !== requiredOllamaAuthorization) {
+      return json(response, 401, { error: "authentication-required" });
+    }
+  }
   if (request.method === "GET" && request.url === "/api/version") return json(response, 200, { version: "browser-test" });
   if (request.method === "GET" && request.url === "/api/tags") return json(response, 200, {
     models: models.map((name) => ({
@@ -465,19 +473,29 @@ try {
     endpoint: document.querySelector('#wizard-endpoint').getBoundingClientRect().height,
     timeout: document.querySelector('#wizard-timeout').getBoundingClientRect().height,
     cleanup: document.querySelector('#wizard-idle-unload').getBoundingClientRect().height,
+    authentication: document.querySelector('#wizard-auth-mode').getBoundingClientRect().height,
     endpointFont: getComputedStyle(document.querySelector('#wizard-endpoint')).fontSize,
     timeoutFont: getComputedStyle(document.querySelector('#wizard-timeout')).fontSize,
-    cleanupFont: getComputedStyle(document.querySelector('#wizard-idle-unload')).fontSize
+    cleanupFont: getComputedStyle(document.querySelector('#wizard-idle-unload')).fontSize,
+    authenticationFont: getComputedStyle(document.querySelector('#wizard-auth-mode')).fontSize,
+    authenticationValue: document.querySelector('#wizard-auth-mode').value,
+    authenticationText: document.querySelector('#wizard-auth-mode').selectedOptions[0].textContent,
+    keyDisabled: document.querySelector('#wizard-api-key').disabled
   })`);
   if (
     wizardControlSizing.endpoint !== 36
     || wizardControlSizing.timeout !== 36
     || wizardControlSizing.cleanup !== 36
+    || wizardControlSizing.authentication !== 36
     || wizardControlSizing.endpointFont !== "13px"
     || wizardControlSizing.timeoutFont !== "13px"
     || wizardControlSizing.cleanupFont !== "13px"
+    || wizardControlSizing.authenticationFont !== "13px"
+    || wizardControlSizing.authenticationValue !== "none"
+    || wizardControlSizing.authenticationText !== "Automatic (Recommended)"
+    || !wizardControlSizing.keyDisabled
   ) throw new Error(`compact-wizard-controls:${JSON.stringify(wizardControlSizing)}`);
-  checks += 6;
+  checks += 11;
 
   await cdp.evaluate(`(() => {
     const input = document.querySelector('#wizard-endpoint');
@@ -585,21 +603,29 @@ try {
     endpoint: document.querySelector('#endpoint').getBoundingClientRect().height,
     cleanup: document.querySelector('#system-idle-unload').getBoundingClientRect().height,
     model: document.querySelector('#model').getBoundingClientRect().height,
+    authentication: document.querySelector('#auth-mode').getBoundingClientRect().height,
     endpointFont: getComputedStyle(document.querySelector('#endpoint')).fontSize,
     cleanupFont: getComputedStyle(document.querySelector('#system-idle-unload')).fontSize,
     timeoutFont: getComputedStyle(document.querySelector('#timeout')).fontSize,
-    advancedCleanupFont: getComputedStyle(document.querySelector('#idle-unload')).fontSize
+    advancedCleanupFont: getComputedStyle(document.querySelector('#idle-unload')).fontSize,
+    authenticationFont: getComputedStyle(document.querySelector('#auth-mode')).fontSize,
+    authenticationText: document.querySelector('#auth-mode').selectedOptions[0].textContent,
+    keyDisabled: document.querySelector('#api-key').disabled
   })`);
   if (
     Math.abs(compactControls.endpoint - compactControls.model) > 1
     || Math.abs(compactControls.cleanup - compactControls.model) > 1
+    || Math.abs(compactControls.authentication - compactControls.model) > 1
     || compactControls.endpoint >= 44
     || compactControls.endpointFont !== "13px"
     || compactControls.cleanupFont !== "13px"
     || compactControls.timeoutFont !== "13px"
     || compactControls.advancedCleanupFont !== "13px"
+    || compactControls.authenticationFont !== "13px"
+    || compactControls.authenticationText !== "Automatic (Recommended)"
+    || !compactControls.keyDisabled
   ) throw new Error(`compact-provider-controls:${JSON.stringify(compactControls)}`);
-  checks += 7;
+  checks += 11;
 
   const connectedControls = await cdp.evaluate(`({
     connectionText: document.querySelector('#connect-button').textContent,
@@ -614,6 +640,73 @@ try {
     || !connectedControls.cleanupDisabled
   ) throw new Error(`connected-controls:${JSON.stringify(connectedControls)}`);
   checks += 4;
+
+  const browserAuthSecret = "synthetic-browser-bearer";
+  requiredOllamaAuthorization = `Bearer ${browserAuthSecret}`;
+  const authorizationStart = providerAuthorization.length;
+  const authenticationDirty = await cdp.evaluate(`(() => {
+    const mode = document.querySelector('#auth-mode');
+    const key = document.querySelector('#api-key');
+    mode.value = 'bearer';
+    mode.dispatchEvent(new Event('change', {bubbles: true}));
+    key.value = '${browserAuthSecret}';
+    key.dispatchEvent(new Event('input', {bubbles: true}));
+    const before = {
+      keyEnabled: !key.disabled,
+      keyRequired: key.required,
+      buttonText: document.querySelector('#connect-button').textContent,
+      buttonEnabled: !document.querySelector('#connect-button').disabled,
+    };
+    document.querySelector('#connection-form').requestSubmit();
+    return before;
+  })()`);
+  if (
+    !authenticationDirty.keyEnabled
+    || !authenticationDirty.keyRequired
+    || authenticationDirty.buttonText !== "Apply changes"
+    || !authenticationDirty.buttonEnabled
+  ) throw new Error(`authentication-dirty-state:${JSON.stringify(authenticationDirty)}`);
+  await waitFor(() => cdp.evaluate(`(
+    document.querySelector('#connect-button').disabled
+    && document.querySelector('#connect-button').textContent === 'Connected'
+    && document.querySelector('#api-key').value === ''
+    && document.querySelector('#wizard-api-key').value === ''
+    && document.querySelector('#wizard-auth-mode').value === 'bearer'
+    && document.querySelector('#connection-badge').textContent.includes('authenticated')
+  )`));
+  const authenticatedRequests = providerAuthorization.slice(authorizationStart);
+  if (
+    authenticatedRequests.length < 2
+    || authenticatedRequests.some(([, , authorization]) => authorization !== `Bearer ${browserAuthSecret}`)
+  ) throw new Error(`provider-authentication-headers:${JSON.stringify(authenticatedRequests)}`);
+  checks += 11;
+
+  await cdp.evaluate(`(() => {
+    const key = document.querySelector('#api-key');
+    key.value = 'synthetic-browser-wrong-key';
+    key.dispatchEvent(new Event('input', {bubbles: true}));
+    document.querySelector('#connection-form').requestSubmit();
+  })()`);
+  await waitFor(() => cdp.evaluate(`(
+    !document.querySelector('#connection-error').classList.contains('hidden')
+    && document.querySelector('#connection-error').textContent.includes('could not reach Ollama')
+    && document.querySelector('#connect-button').textContent === 'Connect'
+    && document.querySelector('#prompt').disabled
+    && document.querySelector('#connection-badge').textContent === 'Not connected'
+  )`));
+  await cdp.evaluate(`(() => {
+    const key = document.querySelector('#api-key');
+    key.value = '${browserAuthSecret}';
+    key.dispatchEvent(new Event('input', {bubbles: true}));
+    document.querySelector('#connection-form').requestSubmit();
+  })()`);
+  await waitFor(() => cdp.evaluate(`(
+    document.querySelector('#connect-button').disabled
+    && document.querySelector('#connect-button').textContent === 'Connected'
+    && document.querySelector('#api-key').value === ''
+    && !document.querySelector('#prompt').disabled
+  )`));
+  checks += 7;
 
   const transportWarnings = await cdp.evaluate(`(() => {
     renderProviderTransportWarning("trusted-lan", "http");

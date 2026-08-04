@@ -22,7 +22,7 @@
       "detectionProbeId": "ollama",
       "promotionStatus": "installation-validation-required",
       "managedInstallationAllowed": false,
-      "missingGate": "Pinned per-OS install, upgrade, rollback, uninstall, signature, and license evidence is required."
+      "missingGate": "Pinned per-OS install, upgrade, rollback, uninstall, signature, and license evidence is required. Any private-network profile also requires the separately gated HTTPS, authentication, certificate, trust, rotation, and cleanup lifecycle in config/ollama-https-installation-contract.json."
     },
     {
       "id": "ollama-model-qwen35-9b",

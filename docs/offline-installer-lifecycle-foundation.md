@@ -44,3 +44,10 @@ are review requirements, not claims that a native lifecycle passed. Admission
 would still require an exact registered artifact, cryptographic trust,
 platform-native path and permission enforcement, clean-host and interrupted
 lifecycle evidence, package parity, and separate owner approval.
+
+Future installation of Ollama for private-network use has an additional
+fail-closed HTTPS lifecycle. Ollama remains loopback-bound behind a separately
+acquired, reviewed TLS gateway. Locally generated certificates are permitted
+only with an exact endpoint-IP SAN, explicit client trust, protected private
+keys, negative TLS tests, rotation, rollback, and transaction-owned cleanup.
+See [Ollama HTTPS installation foundation](ollama-https-installation-foundation.md).

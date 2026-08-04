@@ -12,11 +12,19 @@ the user specifically requests or configures that operation.
 
 ## Information Kept In Memory
 
-The current admitted browser runtime keeps provider settings, prompts,
+The current admitted browser runtime keeps provider settings, optional
+provider API keys,
+prompts,
 conversation text, selected attachments, model responses, run metrics, and
 generated image bytes in process or browser memory. It does not persist them as
 Haven 42 configuration or conversation history. Closing Haven 42 clears that
 state.
+
+An API key is accepted only through the password field for a fixed Bearer or
+X-API-Key mode. It is cleared from the visible field after connection, never
+returned by the local API, and never written to Haven 42 configuration,
+history, logs, evidence, or browser storage. A separately managed provider or
+gateway may record authentication and request metadata under its own policy.
 
 Provider software may have its own retention behavior. Haven 42 discloses known
 provider-side image retention before generation and cannot promise deletion

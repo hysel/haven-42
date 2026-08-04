@@ -77,6 +77,8 @@
     "checksum verification",
     "exact OS and architecture evidence",
     "install and health validation",
+    "loopback-only provider binding or separately admitted private-network HTTPS gateway evidence",
+    "certificate trust rotation and exact cleanup evidence for private-network profiles",
     "upgrade and rollback validation",
     "uninstall and cleanup validation",
     "OS-controlled elevation",

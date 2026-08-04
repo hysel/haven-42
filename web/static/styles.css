@@ -244,7 +244,8 @@ input, select, textarea {
   outline: none;
 }
 .compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }
-.advanced-grid select { height: 36px; padding: 8px 10px; font-size: 13px; }
+.advanced-grid select, .advanced-grid input { height: 36px; padding: 8px 10px; font-size: 13px; }
+input:disabled, select:disabled { opacity: 0.55; cursor: default; }
 input:focus, select:focus, textarea:focus { border-color: rgba(98, 230, 198, 0.65); box-shadow: 0 0 0 3px rgba(98, 230, 198, 0.08); }
 .field-help { color: #718481; margin: 7px 0 0; font-size: 11px; }
 .model-search-status { margin: 12px 0 8px; color: var(--muted); font-size: 11px; }

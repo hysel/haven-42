@@ -16,12 +16,108 @@ from typing import Any
 
 
 TRUST_SCOPES = {"loopback", "trusted-lan", "external"}
+PROVIDER_AUTHENTICATION_MODES = {"none", "bearer", "x-api-key"}
+MAX_PROVIDER_API_KEY_BYTES = 4096
 MAX_JSON_RESPONSE_BYTES = 8 * 1024 * 1024
 MAX_IMAGE_RESPONSE_BYTES = 64 * 1024 * 1024
 
 
 class ProviderSecurityError(ValueError):
     pass
+
+
+class ProviderAuthentication:
+    """Memory-only, fixed-header provider authentication without secret repr."""
+
+    __slots__ = ("_mode", "_header_name", "_header_value")
+
+    def __init__(self, mode: str, header_name: str | None, header_value: str | None):
+        valid = (
+            (mode == "none" and header_name is None and header_value is None)
+            or (
+                mode == "bearer"
+                and header_name == "Authorization"
+                and isinstance(header_value, str)
+                and header_value.startswith("Bearer ")
+                and 0 < len(header_value.removeprefix("Bearer ").encode("ascii", "ignore"))
+                <= MAX_PROVIDER_API_KEY_BYTES
+                and header_value.removeprefix("Bearer ").isascii()
+                and all(0x21 <= ord(character) <= 0x7E for character in header_value.removeprefix("Bearer "))
+            )
+            or (
+                mode == "x-api-key"
+                and header_name == "X-API-Key"
+                and isinstance(header_value, str)
+                and 0 < len(header_value.encode("ascii", "ignore")) <= MAX_PROVIDER_API_KEY_BYTES
+                and header_value.isascii()
+                and all(0x21 <= ord(character) <= 0x7E for character in header_value)
+            )
+        )
+        if not valid:
+            raise ProviderSecurityError("invalid-provider-authentication-object")
+        self._mode = mode
+        self._header_name = header_name
+        self._header_value = header_value
+
+    @property
+    def mode(self) -> str:
+        return self._mode
+
+    def __repr__(self) -> str:
+        return f"ProviderAuthentication(mode={self.mode!r}, secret=<redacted>)"
+
+    @property
+    def configured(self) -> bool:
+        return self.mode != "none"
+
+    def request_headers(self) -> dict[str, str]:
+        if self._header_name is None or self._header_value is None:
+            return {}
+        return {self._header_name: self._header_value}
+
+    def public_summary(self) -> dict[str, Any]:
+        return {
+            "mode": self.mode,
+            "configured": self.configured,
+            "persisted": False,
+        }
+
+
+NO_PROVIDER_AUTHENTICATION = ProviderAuthentication("none", None, None)
+
+
+def validate_provider_authentication(
+    mode: object,
+    api_key: object,
+    endpoint_policy: dict[str, Any],
+) -> ProviderAuthentication:
+    if not isinstance(mode, str) or mode not in PROVIDER_AUTHENTICATION_MODES:
+        raise ProviderSecurityError("invalid-provider-authentication-mode")
+    if not isinstance(api_key, str):
+        raise ProviderSecurityError("invalid-provider-api-key")
+    if mode == "none":
+        if api_key:
+            raise ProviderSecurityError("unexpected-provider-api-key")
+        return NO_PROVIDER_AUTHENTICATION
+    try:
+        encoded = api_key.encode("ascii")
+    except UnicodeEncodeError as error:
+        raise ProviderSecurityError("invalid-provider-api-key") from error
+    if (
+        not encoded
+        or len(encoded) > MAX_PROVIDER_API_KEY_BYTES
+        or api_key != api_key.strip()
+        or any(byte < 0x21 or byte > 0x7E for byte in encoded)
+    ):
+        raise ProviderSecurityError("invalid-provider-api-key")
+    if (
+        endpoint_policy.get("trustScope") != "loopback"
+        and not str(endpoint_policy.get("baseUrl", "")).startswith("https://")
+    ):
+        raise ProviderSecurityError("authenticated-provider-requires-https")
+    if mode == "bearer":
+        return ProviderAuthentication(mode, "Authorization", f"Bearer {api_key}")
+    return ProviderAuthentication(mode, "X-API-Key", api_key)
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -161,7 +257,31 @@ def write_new_file(path: Path, data: bytes) -> None:
 
 
 def self_test() -> None:
-    assert validate_base_url("http://127.0.0.1:11434", "loopback")["executionLocation"] == "same-machine"
+    loopback = validate_base_url("http://127.0.0.1:11434", "loopback")
+    assert loopback["executionLocation"] == "same-machine"
+    validated_auth = validate_provider_authentication("bearer", "synthetic-fixture", loopback)
+    assert validated_auth.request_headers() == {"Authorization": "Bearer synthetic-fixture"}
+    assert "synthetic-fixture" not in repr(validated_auth)
+    assert validated_auth.public_summary() == {"mode": "bearer", "configured": True, "persisted": False}
+    try:
+        ProviderAuthentication("bearer", "X-Arbitrary-Header", "synthetic-fixture")
+    except ProviderSecurityError:
+        pass
+    else:
+        raise AssertionError("arbitrary authentication header was accepted")
+    trusted_http = validate_base_url("http://[fd00::1]:11434", "trusted-lan")
+    for mode, key, policy in (
+        ("unknown", "synthetic-fixture", loopback),
+        ("none", "synthetic-fixture", loopback),
+        ("bearer", "line\nbreak", loopback),
+        ("x-api-key", "synthetic-fixture", trusted_http),
+    ):
+        try:
+            validate_provider_authentication(mode, key, policy)
+        except ProviderSecurityError:
+            pass
+        else:
+            raise AssertionError((mode, policy["trustScope"]))
     for value, scope in (("http://192.0.2.1", "loopback"), ("http://127.0.0.1", "external"), ("http://169.254.169.254", "trusted-lan"), ("http://user:pass@127.0.0.1", "loopback"), ("http://localhost:11434", "loopback")):
         try:
             validate_base_url(value, scope)
@@ -181,7 +301,7 @@ def self_test() -> None:
             pass
         else:
             raise AssertionError("exclusive write must reject overwrite")
-    print("Provider security self-test passed: 8 cases")
+    print("Provider security self-test passed: 16 cases")
 
 
 if __name__ == "__main__":

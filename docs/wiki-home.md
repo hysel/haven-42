@@ -27,7 +27,8 @@ If something does not work, begin with [[Troubleshooting]].
 ## What works today
 
 - One continuous conversation for chat, drafting, and summarization.
-- Explicit connection to a same-device or private-network Ollama server.
+- Explicit connection to a same-device or private-network Ollama server,
+  including optional memory-only Bearer or X-API-Key authentication.
 - Installed-model selection and explicit, download-free public catalog search.
 - Memory-only prompt recall and conversation state.
 - Bounded text, source-code, structured-text, and PNG screenshot attachments.

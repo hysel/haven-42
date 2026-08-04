@@ -33,6 +33,21 @@
     "loopbackHttpWarningSeverity": "same-machine-notice",
     "ipLiteralRequired": true,
     "credentialsInUrlAllowed": false,
+    "authentication": {
+      "allowedModes": ["none", "bearer", "x-api-key"],
+      "bearerHeader": "Authorization",
+      "apiKeyHeader": "X-API-Key",
+      "arbitraryHeaderNamesAllowed": false,
+      "maximumKeyBytes": 4096,
+      "keyCharacterSet": "visible-ascii-no-whitespace",
+      "privateNetworkHttpsRequired": true,
+      "loopbackHttpAllowed": true,
+      "memoryOnly": true,
+      "responseDisclosureAllowed": false,
+      "loggingAllowed": false,
+      "evidenceInclusionAllowed": false,
+      "blankReuseScope": "same-process-same-normalized-endpoint-and-mode"
+    },
     "redirectsAllowed": false,
     "modelDiscoveryRequiredBeforeUse": true
   },

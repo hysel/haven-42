@@ -32,7 +32,8 @@
       "requiresOwnerDecision": true,
       "satisfiedEvidence": [
         "examples/writing-model-matrix-validation.md",
-        "examples/blind-writing-quality-review.md"
+        "examples/blind-writing-quality-review.md",
+        "docs/roadmap-owner-decisions.md"
       ],
       "remainingBlockers": [
         "independent-reviewers",
@@ -65,7 +66,8 @@
       "requiresOwnerDecision": true,
       "satisfiedEvidence": [
         "docs/desktop-runtime-dependency-evaluation.md",
-        "docs/native-bridge-boundary-evidence.md"
+        "docs/native-bridge-boundary-evidence.md",
+        "docs/roadmap-owner-decisions.md"
       ],
       "remainingBlockers": [
         "tauri-rust-remain-unadmitted",
@@ -88,7 +90,8 @@
         "CODE-SIGNING-POLICY.md",
         "PRIVACY.md",
         "docs/signpath-eligibility-audit.md",
-        "docs/windows-package-component-audit.md"
+        "docs/windows-package-component-audit.md",
+        "docs/roadmap-owner-decisions.md"
       ],
       "remainingBlockers": [
         "existing-public-release-in-form-to-sign",
@@ -109,12 +112,17 @@
       "requiresOwnerDecision": true,
       "satisfiedEvidence": [
         "config/installation-broker-contract.json",
-        "scripts/simulate-install-broker.py"
+        "scripts/simulate-install-broker.py",
+        "config/ollama-https-installation-contract.json",
+        "docs/ollama-https-installation-foundation.md",
+        "docs/roadmap-owner-decisions.md"
       ],
       "remainingBlockers": [
         "trusted-package-verification",
         "canonical-user-scoped-paths",
         "transactional-rollback",
+        "separately-acquired-tls-gateway",
+        "native-certificate-lifecycle-evidence",
         "native-install-upgrade-uninstall-evidence"
       ]
     },
@@ -127,7 +135,8 @@
       "requiresOwnerDecision": true,
       "satisfiedEvidence": [
         "config/core-update-lifecycle-contract.json",
-        "docs/desktop-storage-and-updates.md"
+        "docs/desktop-storage-and-updates.md",
+        "docs/roadmap-owner-decisions.md"
       ],
       "remainingBlockers": [
         "real-signature-or-attestation-verifier",
@@ -145,7 +154,8 @@
       "requiresOwnerDecision": true,
       "satisfiedEvidence": [
         "config/task-execution-admission-contract.json",
-        "config/task-effect-journal-contract.json"
+        "config/task-effect-journal-contract.json",
+        "docs/roadmap-owner-decisions.md"
       ],
       "remainingBlockers": [
         "engine-owned-opaque-approval-broker",
