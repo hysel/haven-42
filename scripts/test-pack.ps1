@@ -6,6 +6,16 @@ param(
     [switch]$NoReceipt
 )
 
+$receiptModeAtStart = if ($NoReceipt.IsPresent) {
+    "disabled"
+} elseif ($Tier -ne "Full") {
+    "non-full"
+} elseif ($TestName.Count -gt 0) {
+    "selected"
+} else {
+    "full"
+}
+
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -124,8 +134,30 @@ function Invoke-PackTest {
     }
 }
 
+function Get-GitReceiptValue {
+    param(
+        [string[]]$Arguments,
+        [string]$Operation
+    )
+
+    for ($attempt = 1; $attempt -le 3; $attempt++) {
+        $output = @(& git -C $script:repoRoot @Arguments 2>$null)
+        $gitExitCode = $LASTEXITCODE
+        $value = $output | Select-Object -First 1
+        if ($gitExitCode -eq 0 -and $value) {
+            return $value.Trim()
+        }
+        if ($attempt -lt 3) { Start-Sleep -Milliseconds 150 }
+    }
+    throw "receipt-git-failed:$Operation"
+}
+
 function Write-TestReceipt {
-    if ($NoReceipt -or $Tier -ne "Full") { return }
+    if ($script:receiptModeAtStart -in @("disabled", "non-full")) { return }
+    if ($script:receiptModeAtStart -eq "selected") {
+        Write-Host "Receipt not written: selected tests cannot produce a Full-test receipt." -ForegroundColor Yellow
+        return
+    }
 
     & git -C $repoRoot diff --quiet -- 2>$null
     $unstagedExitCode = $LASTEXITCODE
@@ -135,11 +167,10 @@ function Write-TestReceipt {
         return
     }
 
-    $commit = (& git -C $repoRoot rev-parse HEAD 2>$null | Select-Object -First 1).Trim()
-    $tree = (& git -C $repoRoot write-tree 2>$null | Select-Object -First 1).Trim()
-    $headTree = (& git -C $repoRoot rev-parse 'HEAD^{tree}' 2>$null | Select-Object -First 1).Trim()
-    $gitDirectory = (& git -C $repoRoot rev-parse --git-dir 2>$null | Select-Object -First 1).Trim()
-    if ($LASTEXITCODE -ne 0 -or -not $commit -or -not $tree -or -not $headTree -or -not $gitDirectory) { return }
+    $commit = Get-GitReceiptValue -Arguments @("rev-parse", "HEAD") -Operation "rev-parse-head"
+    $tree = Get-GitReceiptValue -Arguments @("write-tree") -Operation "write-tree"
+    $headTree = Get-GitReceiptValue -Arguments @("rev-parse", "HEAD^{tree}") -Operation "rev-parse-head-tree"
+    $gitDirectory = Get-GitReceiptValue -Arguments @("rev-parse", "--git-dir") -Operation "rev-parse-git-dir"
     if (-not [System.IO.Path]::IsPathRooted($gitDirectory)) {
         $gitDirectory = Join-Path $repoRoot $gitDirectory
     }
@@ -527,6 +558,7 @@ Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     Assert-True -Condition ($windowsRunner -match "ls-files --cached --others --exclude-standard -z" -and $windowsRunner -match 'LinkType -in @\("SymbolicLink", "Junction"\)' -and $windowsRunner -match 'IsNullOrEmpty\(\$sourceLinkTarget\)') -Message "Windows disposable repository fixtures should include current non-ignored Git content, reject actual linked files, and allow empty OneDrive link metadata."
     Assert-True -Condition ($sharedRunner -match 'fast\|integration\|full' -and $sharedRunner -match "RUN_STARTED_SECONDS") -Message "Native tests should expose timed Fast, Integration, and Full tiers."
     Assert-True -Condition ($windowsRunner -match "haven-42-test-receipt-v1" -and $sharedRunner -match "haven-42-test-receipt-v1") -Message "Both runners should write the same receipt contract."
+    Assert-True -Condition ($windowsRunner -match '\$receiptModeAtStart = if \(\$NoReceipt\.IsPresent\)' -and $windowsRunner -match '\$script:receiptModeAtStart -eq "selected"' -and $windowsRunner -match '\$gitExitCode = \$LASTEXITCODE' -and $windowsRunner -match "selected tests cannot produce a Full-test receipt" -and $windowsRunner -match "receipt-git-failed:write-tree") -Message "Windows Full receipts must capture their invocation mode, reject selected-test runs, capture native exit status before pipelines, and fail closed on Git metadata errors."
     Assert-True -Condition ($pushHook -match "Exact content-tree full-test receipt found" -and $pushHook -match "HEAD\^\{tree\}" -and $pushHook -match "schema=3") -Message "Pre-push should require a schema-v3 exact content-tree receipt."
     Assert-True -Condition ($commitHook -match "ensure-test-python3\.shared\.sh" -and $commitHook -match "security-review-gate\.py" -and $commitHook -match "verify-pre-commit-readiness\.py" -and $commitHook -match "sync-wiki\.ps1" -and $commitHook -match "sync-wiki\.shared\.sh") -Message "Pre-commit should use validated Python 3, require exact staged-tree security and Full receipts, and check an available wiki clone with the native platform runner."
     Assert-True -Condition ($workflow -match "-Tier Full -NoReceipt" -and $workflow -match "--tier full --no-receipt") -Message "Hosted CI should always run Full without trusting local receipts."

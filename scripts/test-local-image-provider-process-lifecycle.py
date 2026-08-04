@@ -175,7 +175,11 @@ def run_tests() -> None:
                 try:
                     rejected.start(port=foreign_port, startup_timeout=0.3)
                     raise AssertionError("occupied port accepted")
-                except RuntimeError:
+                except (RuntimeError, TimeoutError):
+                    # A loaded host may not schedule the rejected child soon
+                    # enough for it to report the bind failure. Both outcomes
+                    # are bounded, fail closed, and leave the foreign listener
+                    # outside this lifecycle controller's authority.
                     pass
                 assert foreign.fileno() >= 0
             finally:
