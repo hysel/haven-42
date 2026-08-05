@@ -2,9 +2,32 @@
 
 ## Purpose
 
-This style guide keeps documentation, prompts, rules, agents, and templates consistent as the pack grows.
+This style guide keeps the product, documentation, prompts, rules, agents, and
+templates consistent as Haven 42 grows.
 
-The pack should feel like a practical senior engineering toolkit: clear, direct, reviewable, and safe for enterprise use.
+The product and its primary documentation are written first for people who are
+new to local AI. Maintainer material remains precise, reviewable, and safe, but
+must not make the everyday experience feel like an engineering console.
+
+## Audience and progressive disclosure
+
+- Assume an end user knows how to open an application and follow on-screen
+  instructions, but does not know Python, Ollama, model quantization, API
+  terminology, network scopes, package formats, or software supply-chain terms.
+- Lead with what the user can do, what will happen, and whether anything will
+  leave or change their computer.
+- Put commands, identifiers, hashes, ports, protocols, evidence states, and
+  implementation detail under clearly labeled **Advanced** or maintainer
+  sections unless the user must act on them.
+- Explain a necessary technical term the first time it appears. For example:
+  “A model is the AI that reads your request and writes the response.”
+- Prefer a safe recommended default. Explain alternatives only when the user
+  opens an advanced control.
+- Error messages state the problem, whether Haven stopped safely, and the next
+  action. Do not show internal error codes in the primary UI.
+- Never simplify away permission prompts, security warnings, limitations, or
+  uncertainty. Translate them into plain language and keep technical detail in
+  an expandable explanation or linked advanced document.
 
 ## General Writing
 
@@ -15,6 +38,10 @@ The pack should feel like a practical senior engineering toolkit: clear, direct,
 - State assumptions explicitly.
 - Distinguish required behavior from recommended behavior.
 - Use examples when they remove ambiguity.
+- Prefer common words: “check” over “scan,” “available” over “admitted,” “AI
+  server” over “provider,” and “this computer” over “loopback” in primary copy.
+- Use the precise term in parentheses or an Advanced section when it helps
+  support and troubleshooting.
 
 ## Markdown Conventions
 
@@ -39,6 +66,10 @@ It should answer:
 - Where do I go for deeper detail?
 
 The README should not carry detailed implementation planning once that content belongs in `ROADMAP.md` or `TODO.md`.
+
+The first screenful must help a first-time user understand the product and
+find the recommended start path. Contributor and evidence links belong after
+the end-user path.
 
 ## Project Documentation Style
 

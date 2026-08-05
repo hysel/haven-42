@@ -1,0 +1,46 @@
+name: Alpha experience feedback
+description: Suggest a clearer or easier experience for Windows Alpha testers.
+title: "[Alpha feedback]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping make Haven 42 easier for everyday users. This is a public report. Do not include prompts, responses, attachment names or contents, credentials, addresses, usernames, full paths, machine identifiers, or private screenshots.
+
+        Use the [Alpha problem report](https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml) for a reproducible failure. Report security concerns through [private vulnerability reporting](https://github.com/hysel/haven-42/security/advisories/new).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Download and first launch
+        - Guided setup
+        - Chat, writing, or summarization
+        - Model selection
+        - Attachments
+        - System and maintenance
+        - Troubleshooting
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: confusing
+    attributes:
+      label: What was difficult or unclear?
+      description: Describe the experience without including private content.
+    validations:
+      required: true
+  - type: textarea
+    id: improvement
+    attributes:
+      label: What would make it easier?
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I reviewed this feedback and removed secrets, private content, addresses, identity, machine identifiers, and local paths.
+          required: true

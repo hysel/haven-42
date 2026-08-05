@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "ledgerId": "haven42.windows-alpha-0.4-alpha-1",
+  "version": "0.4.0-alpha.1",
+  "distributionStatus": "not-authorized",
+  "stages": [
+    {
+      "id": 1,
+      "name": "scope-and-authority",
+      "implementation": "complete",
+      "nativeEvidence": "not-required",
+      "evidence": ["config/private-alpha-readiness-contract.json", "docs/windows-alpha-0.4-alpha-1.md"]
+    },
+    {
+      "id": 2,
+      "name": "windows-hardware-inventory",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["scripts/system_readiness.py", "scripts/test-system-readiness.py", "docs/windows-alpha-native-validation.md"]
+    },
+    {
+      "id": 3,
+      "name": "minimum-hardware-threshold",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-contract.json", "scripts/windows_alpha.py", "scripts/test-windows-alpha.py"]
+    },
+    {
+      "id": 4,
+      "name": "consumer-driver-advisory",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-component-registry.json", "scripts/windows_alpha.py", "docs/windows-alpha-0.4-alpha-1.md"]
+    },
+    {
+      "id": 5,
+      "name": "pinned-component-registry",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-component-registry.json", "scripts/windows_alpha_setup.py", "scripts/test-windows-alpha-setup.py"]
+    },
+    {
+      "id": 6,
+      "name": "hardware-aware-model-catalog",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-model-catalog.json", "scripts/windows_alpha.py", "docs/windows-alpha-native-validation.md"]
+    },
+    {
+      "id": 7,
+      "name": "guided-or-manual-setup-choice",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["web/static/app.js", "scripts/test-windows-alpha-web-policy.py", "docs/private-alpha-test-plan.md"]
+    },
+    {
+      "id": 8,
+      "name": "download-and-archive-security",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["scripts/windows_alpha_setup.py", "scripts/test-windows-alpha-setup.py", "docs/windows-alpha-native-validation.md"]
+    },
+    {
+      "id": 9,
+      "name": "current-user-runtime-lifecycle",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["scripts/windows_user_paths.py", "scripts/windows_alpha_setup.py", "docs/windows-alpha-native-validation.md"]
+    },
+    {
+      "id": 10,
+      "name": "loopback-runtime-control",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["scripts/windows_alpha_setup.py", "web/server.py", "scripts/run-windows-alpha-native-validation.ps1"]
+    },
+    {
+      "id": 11,
+      "name": "verified-model-download",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-model-catalog.json", "scripts/windows_alpha_setup.py", "scripts/test-windows-alpha-setup.py"]
+    },
+    {
+      "id": 12,
+      "name": "prequantized-first-policy",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-quantization-contract.json", "scripts/windows_alpha.py", "docs/windows-alpha-0.4-alpha-1.md"]
+    },
+    {
+      "id": 13,
+      "name": "server-enforced-text-only-surface",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/local-web-runtime-policy.json", "web/server.py", "scripts/test-haven42-web.py"]
+    },
+    {
+      "id": 14,
+      "name": "local-resource-and-token-metrics",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["config/windows-alpha-resource-monitor-contract.json", "scripts/windows_alpha.py", "web/static/app.js"]
+    },
+    {
+      "id": 15,
+      "name": "unsigned-windows-package-and-evidence",
+      "implementation": "complete",
+      "nativeEvidence": "current-candidate-three-vendor",
+      "evidence": ["scripts/build-windows-alpha-candidate.py", "scripts/test-portable-package.py", "docs/windows-alpha-native-validation.md"]
+    },
+    {
+      "id": 16,
+      "name": "security-release-and-tester-gates",
+      "implementation": "in-progress",
+      "nativeEvidence": "candidate-required",
+      "evidence": ["config/private-alpha-readiness-contract.json", "SECURITY.md", "docs/private-alpha-test-plan.md", "docs/windows-alpha-0.4-alpha-1.md", "docs/local-data-lifecycle.md"]
+    }
+  ],
+  "stopBoundaries": {
+    "commitAllowed": false,
+    "pushAllowed": false,
+    "mergeAllowed": false,
+    "tagAllowed": false,
+    "publicReleaseAllowed": false,
+    "signingAllowed": false,
+    "productionClaimAllowed": false
+  }
+}

@@ -4,6 +4,13 @@
 
 Haven 42 is organized as a provider-neutral capability, configuration, documentation, and workflow repository. Its engineering foundation includes the `.continue` directory plus maintained Aider and OpenCode paths; its general-purpose layer adds repository-optional sessions, routing, provider adapters, and typed artifacts.
 
+The product surface is novice-first even though its internal contracts remain
+strict and technical. The ordinary path presents one recommended action,
+explains effects and permissions in plain language, and uses progressive
+disclosure for server addresses, authentication, evidence, and implementation
+detail. Contributor documentation preserves exact contract vocabulary; users
+do not need that vocabulary to complete setup or use text features.
+
 The currently validated runtime architecture is:
 
 `capability -> provider contract -> inference engine -> hardware backend -> model artifact`
@@ -52,13 +59,21 @@ workflow registry -> read-only plan artifacts (no process or arguments)
 unload and process-list verification after every response
 ```
 
-The process persists no endpoint, prompt, response, or provider run detail; exposes no repository, generic filesystem, shell, or arbitrary process API; permits no remote UI assets; and cannot bind to a LAN interface. A shared standard-library evidence engine reads only the three bundled sanitized catalogs and produces the same dashboard schema for PowerShell, Linux, macOS, source web, and frozen web callers. The browser receives a smaller strict read-only summary that excludes paths, raw notes, and live provider data and declares every network, process, repository, write, provider, and machine effect false. Automatic text selection requires the exact installed Ollama digest and matching capability evidence. Text, workflow-plan, and image execution use the shared schema-v1 event vocabulary. The browser rejects malformed, non-monotonic, multiple-terminal, or post-terminal event streams before rendering an artifact. Assistant chat and Markdown-document text pass through a small dependency-free block/inline allowlist that creates nodes with `createElement` and `textContent`; raw HTML cannot become markup, links, images, scripts, or handlers. Unicode emoji remain ordinary text with cross-platform font fallbacks. Unverified manual models add a warning event; provider failures return typed errors and memory-only recovery declarations. No automatic retry occurs, and a retry is always a new request.
+The process persists no endpoint, prompt, response, or provider run detail; exposes no repository, generic filesystem, shell, or arbitrary process API; permits no remote UI assets; and cannot bind to a LAN interface. A shared standard-library evidence engine reads only the three bundled sanitized catalogs and produces the same dashboard schema for PowerShell, Linux, macOS, source web, and frozen web callers. The browser receives a smaller strict read-only summary that excludes paths, raw notes, and live provider data and declares every network, process, repository, write, provider, and machine effect false. Automatic text selection requires the exact installed Ollama digest and matching capability evidence. Text, workflow-plan, and image execution use the shared schema-v1 event vocabulary. The browser rejects malformed, non-monotonic, multiple-terminal, or post-terminal event streams before rendering an artifact. Assistant chat and Markdown-document text pass through a small dependency-free block/inline allowlist that creates nodes with `createElement` and `textContent`; raw HTML cannot become markup, links, images, scripts, or handlers. Unicode emoji remain ordinary text with cross-platform font fallbacks. While text generation is active, the browser exposes one Stop control bound to a fresh opaque request identifier. The authenticated loopback cancellation route accepts only that exact active identifier, closes only the tracked bounded provider stream, unloads the active model, restores the unsent conversation state and prompt, and cannot terminate arbitrary processes. Unverified manual models add a warning event; provider failures return typed errors and memory-only recovery declarations. No automatic retry occurs, and a retry is always a new request.
 
 External provider software is a separate distribution boundary. Haven packages
 may contain reviewed dependencies required to run Haven itself, but never
 provider engines, provider models or checkpoints, accelerator drivers or
 runtimes, provider installers, or updater payloads. Provider compatibility and
 license audits do not grant package or installation authority.
+
+Private-alpha preparation is also a separate admission boundary. It reuses the
+unsigned one-folder package and adds no runtime surface. Candidate identity,
+target cells, exact-tree security/CI evidence, artifact digests, invited
+audience, authenticated HTTPS delivery, expiry, and revocation must be bound
+before distribution can be considered. The preparation contract cannot create
+a tag, publish an artifact, enable an installer or updater, or claim production
+readiness.
 
 Model discovery is separate from model installation. Installed-model filtering is browser-local, results explicitly distinguish the connected provider inventory from uninstalled candidates, and changing the target capability clears stale query/candidate state before ranking installed choices by selected and evidence status. The explicit **Search public catalog** submit action crosses the engine boundary with only a bounded query, which can reach only the fixed `https://ollama.com/search` origin with redirects disabled and a capped HTML response. The engine normalizes strict model names and returns at most 20 candidate-only records. An uninstalled choice is browser-memory intent, not execution authority; its command is constructed from the validated name, copied only on request, and never executed. Text execution still requires the model to appear in the connected provider's installed inventory.
 
@@ -371,6 +386,54 @@ informational views remains a known portability gap; native validation and
 installer workflows are unaffected and continue to require no PowerShell.
 
 ## Responsibility Boundaries
+
+### Windows 0.4 Alpha 1 boundary
+
+The Windows managed-state root is the fixed marker-owned `Haven42-Data`
+directory beside the packaged executable. The recommendation engine measures
+that exact portable volume and the executor rechecks it before effects;
+inherited environment variables and renderer input cannot redirect managed
+downloads, models, or runtime state.
+
+The Windows Alpha keeps the existing browser/loopback architecture and adds a
+current-user setup broker behind the server. The renderer submits only registry
+identifiers and a one-time plan approval; it cannot supply a URL, path, command,
+arguments, environment, driver action, or privilege request. The broker pins
+external component size and SHA-256, validates archive structure and Windows
+publisher signature, owns the exact loopback process it starts, and verifies
+the selected model manifest. On Windows, the broker assigns the suspended
+managed provider to a kill-on-close Job Object before resuming it, so normal,
+crash, and forced Haven termination close the owned descendant tree. External
+providers never enter that job. Its removal boundary also stops only processes
+executing beneath a validated managed tree, rejects linked or unrecognized
+trees, and deletes only that data directory. Sanitized diagnostics use the
+separate fixed sibling `Haven42-Logs` directory, which managed-component
+removal cannot delete. The bounded fixed-schema writer rotates two local files,
+marks an unclean prior session without collecting crash output, creates a local
+support report only on request, and provides separately confirmed event clearing
+and complete log removal. See
+`config/windows-alpha-stage-ledger.json` and
+`docs/windows-alpha-0.4-alpha-1.md`.
+
+The Alpha server admits exactly `general.chat`, `content.write`, and
+`content.summarize` through one bounded conversation route. The renderer may
+default to deterministic intent detection or submit one of those exact IDs;
+unknown and non-text capability IDs fail closed. Capability-specific system
+prompts and typed chat/Markdown artifacts remain server-owned.
+
+Setup progress is server-authored from the pinned component registry and model
+catalog. The renderer receives only bounded identifiers, display labels,
+versions, purposes, byte sizes, states, and percentages. It receives no source
+URL, command, argument, environment value, local path, or credential, and
+renders every value through text nodes.
+
+A completed portable setup is not trusted merely because files exist. At each
+launch the server rebuilds the hardware-derived plan and verifies the bounded
+completion receipt, runtime content inventory, Authenticode publisher, exact
+registered model, managed directories, and loopback provider before allowing
+the browser to skip onboarding. Resume performs no download or installation;
+failure leaves the connection/setup UI available. The renderer cannot choose
+the managed executable, model path, environment, endpoint, or backend.
 
 - `config.yaml` wires the pack together.
 - Agents define role behavior.

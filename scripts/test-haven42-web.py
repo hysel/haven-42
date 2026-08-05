@@ -3,11 +3,13 @@
 
 from __future__ import annotations
 
+import atexit
 import base64
 import importlib.util
 import json
 import os
 import re
+import shutil
 import socket
 import subprocess
 import struct
@@ -30,6 +32,13 @@ SPEC = importlib.util.spec_from_file_location("haven42_web_server", ROOT / "web/
 assert SPEC and SPEC.loader
 WEB = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(WEB)
+# This suite preserves coverage of the broader development UI. The separate
+# Windows Alpha policy suite verifies that the shipped Alpha default denies
+# every capability beyond the Alpha text-only boundary.
+WEB.ALPHA_TEXT_ONLY = False
+DIAGNOSTIC_TEST_PARENT = Path(tempfile.mkdtemp(prefix="haven42-web-diagnostics-"))
+DIAGNOSTIC_TEST_ROOT = DIAGNOSTIC_TEST_PARENT / "Haven42-Logs"
+atexit.register(shutil.rmtree, DIAGNOSTIC_TEST_PARENT, True)
 
 
 def png_chunk(chunk_type: bytes, payload: bytes) -> bytes:
@@ -503,8 +512,39 @@ def main() -> int:
             "unsafe model<script>",
             "qwen3.5",
         ] if query == "writing" else [],
+        diagnostic_root=DIAGNOSTIC_TEST_ROOT,
     )
+    if state.alpha_setup is None:
+        # This suite supplies a synthetic Windows readiness snapshot on every
+        # host. Inject the matching effect-free setup coordinator so Linux and
+        # macOS validate the same Windows API contract without enabling it in
+        # the production server on those platforms.
+        state.alpha_setup = WEB.SetupCoordinator(
+            state.csrf_token,
+            (DIAGNOSTIC_TEST_PARENT / "Haven42-Data").resolve(),
+        )
+    class ClosingResponse:
+        closed = False
+
+        def close(self):
+            self.closed = True
+
+    cancellation_id = "a" * 32
+    cancellation_event = state._open_text_request(cancellation_id)
+    tracked_response = ClosingResponse()
+    state._register_text_response(cancellation_id, tracked_response)
+    assert state.cancel_text_request("b" * 32) == {
+        "cancelAccepted": False, "alreadyComplete": True,
+    }
+    assert not cancellation_event.is_set() and not tracked_response.closed
+    assert state.cancel_text_request(cancellation_id) == {
+        "cancelAccepted": True, "alreadyComplete": False,
+    }
+    assert cancellation_event.is_set() and tracked_response.closed
+    state._finish_text_request(cancellation_id)
+    checks += 3
     invalid_assurance_state = WEB.HavenState(
+        diagnostic_root=DIAGNOSTIC_TEST_ROOT,
         assurance_provider=lambda: {
             "kind": "read-only-assurance-summary",
             "status": "ready",
@@ -525,6 +565,7 @@ def main() -> int:
         assert error.code == "assurance-evidence-invalid"
         assert error.status == HTTPStatus.SERVICE_UNAVAILABLE
     unavailable_assurance_state = WEB.HavenState(
+        diagnostic_root=DIAGNOSTIC_TEST_ROOT,
         assurance_provider=lambda: (_ for _ in ()).throw(
             WEB.EvidenceDashboardError("unavailable")
         ),
@@ -569,6 +610,28 @@ def main() -> int:
         assert "default-src 'self'" in headers["Content-Security-Policy"]
         token = bootstrap["sessionToken"]
         checks += 6
+
+        status, diagnostics, _ = request_json(
+            origin + "/api/alpha/diagnostics", "POST", {}, token, origin,
+        )
+        assert status == 200
+        assert diagnostics["kind"] == "haven42-sanitized-diagnostics"
+        assert diagnostics["storageDirectoryName"] == "Haven42-Logs"
+        assert diagnostics["removedForSession"] is False
+        assert all(value is False for value in diagnostics["privacy"].values())
+        assert all(set(event) == {
+            "schemaVersion", "timestamp", "eventId", "category", "code", "outcome", "appVersion",
+        } for event in diagnostics["events"])
+        status, report, _ = request_json(
+            origin + "/api/alpha/diagnostics/report", "POST", {}, token, origin,
+        )
+        assert status == 200 and report["directoryName"] == "Haven42-Logs"
+        assert re.fullmatch(r"support-report-[a-f0-9]{16}\.json", report["fileName"])
+        status, cleared, _ = request_json(
+            origin + "/api/alpha/diagnostics/clear", "POST", {"confirmed": True}, token, origin,
+        )
+        assert status == 200 and cleared["cleared"] is True and cleared["reportsPreserved"] is True
+        checks += 8
 
         assert wait_until(lambda: app._request_slots._value == WEB.MAX_HTTP_WORKERS)
         held_slots = [
@@ -644,6 +707,21 @@ def main() -> int:
                 {"capabilityId": "general.chat", "model": 1, "messages": []},
                 "invalid-text-fields",
             ),
+            (
+                "/api/text/cancel",
+                {"requestId": "not-a-request-id"},
+                "invalid-text-cancel-fields",
+            ),
+            (
+                "/api/alpha/diagnostics/clear",
+                {"confirmed": False},
+                "diagnostic-clear-confirmation-required",
+            ),
+            (
+                "/api/alpha/diagnostics/remove",
+                {"confirmed": False},
+                "diagnostic-removal-confirmation-required",
+            ),
         )
         for path, hostile_body, expected_error in strict_type_cases:
             status, error, _ = request_json(
@@ -651,6 +729,14 @@ def main() -> int:
             )
             assert status == 400 and error["error"] == expected_error
             checks += 1
+
+        status, stale_cancel, _ = request_json(
+            origin + "/api/text/cancel", "POST", {"requestId": "c" * 32}, token, origin,
+        )
+        assert status == 200 and stale_cancel == {
+            "cancelAccepted": False, "alreadyComplete": True,
+        }
+        checks += 1
 
         status, workflow_catalog, _ = request_json(
             origin + "/api/workflows", "POST", {}, token, origin,
@@ -855,7 +941,79 @@ def main() -> int:
             token, origin,
         )
         assert status == 400 and error["error"] == "invalid-setup-plan-fields"
-        checks += 9
+        status, storage_status, _ = request_json(origin + "/api/alpha/setup-status")
+        assert status == 200, (status, storage_status)
+        assert storage_status["storageScope"] == "inside-extracted-folder"
+        assert storage_status["storageDirectoryName"] == "Haven42-Data"
+        assert isinstance(storage_status["managedComponentsPresent"], bool)
+        assert isinstance(storage_status["legacyManagedComponentsPresent"], bool)
+        if plan.get("alphaCandidate", {}).get("managedPlan") is not None:
+            progress_components = storage_status["components"]
+            assert 2 <= len(progress_components) <= 4
+            assert {item["kind"] for item in progress_components} == {"runtime", "model"}
+            assert all(
+                set(item) == {
+                    "componentId", "kind", "displayName", "version",
+                    "technologyName", "technologyVersion", "purpose",
+                    "sizeBytes", "state", "progressPercent",
+                }
+                for item in progress_components
+            )
+            assert all(item["state"] == "pending" for item in progress_components)
+            assert all("url" not in json.dumps(item).casefold() for item in progress_components)
+        original_resume = state.resume_managed_provider
+        state.resume_managed_provider = lambda: {
+            "connected": True,
+            "managedResume": {
+                "endpoint": "http://127.0.0.1:11435",
+                "receiptVerified": True,
+                "integrityVerified": True,
+                "publisherVerified": True,
+                "downloadPerformed": False,
+                "installationPerformed": False,
+            },
+        }
+        try:
+            status, resumed, _ = request_json(
+                origin + "/api/alpha/connect-managed-provider", "POST", {}, token, origin,
+            )
+            assert status == 200 and resumed["connected"] is True
+            status, error, _ = request_json(
+                origin + "/api/alpha/connect-managed-provider", "POST",
+                {"endpoint": "http://attacker.invalid"}, token, origin,
+            )
+            assert status == 400 and error["error"] == "invalid-managed-provider-connect-fields"
+        finally:
+            state.resume_managed_provider = original_resume
+        status, error, _ = request_json(
+            origin + "/api/alpha/remove-managed-components", "POST",
+            {"confirmed": False}, token, origin,
+        )
+        assert status == 400 and error["error"] == "managed-components-removal-confirmation-required"
+        original_remove = state.remove_managed_components
+        state.remove_managed_components = lambda: {
+            "schemaVersion": 1,
+            "kind": "windows-alpha-managed-components-removal",
+            "removed": True,
+            "managedComponentsPresent": False,
+            "legacyManagedComponentsRemoved": True,
+            "storageScope": "inside-extracted-folder",
+            "driversChanged": False,
+            "servicesChanged": False,
+            "firewallChanged": False,
+            "globalRuntimeChanged": False,
+            "applicationFilesRemoved": False,
+        }
+        try:
+            status, removed, _ = request_json(
+                origin + "/api/alpha/remove-managed-components", "POST",
+                {"confirmed": True}, token, origin,
+            )
+            assert status == 200 and removed["removed"] is True
+            assert removed["applicationFilesRemoved"] is False
+        finally:
+            state.remove_managed_components = original_remove
+        checks += 18
 
         status, error, _ = request_json(
             origin + "/api/connect",
@@ -1169,7 +1327,10 @@ def main() -> int:
             "content.write": "compatible",
             "content.summarize": "compatible",
         }
-        unavailable_catalog = WEB.HavenState(ROOT / "config/does-not-exist.json")
+        unavailable_catalog = WEB.HavenState(
+            ROOT / "config/does-not-exist.json",
+            diagnostic_root=DIAGNOSTIC_TEST_ROOT,
+        )
         unavailable_decisions = WEB.build_model_decisions(
             ["unknown:latest"],
             unavailable_catalog.model_recommendations,
@@ -1265,16 +1426,31 @@ def main() -> int:
         assert [event["type"] for event in reply["events"]] == ["accepted", "progress", "result"]
         assert [event["sequence"] for event in reply["events"]] == [1, 2, 3]
         chat_payload = next(body for path, body in FakeState.requests if path == "/api/chat")
-        assert chat_payload["keep_alive"] == "300s" and chat_payload["stream"] is False
+        assert chat_payload["keep_alive"] == "300s" and chat_payload["stream"] is True
         assert chat_payload["think"] is False
         assert chat_payload["messages"][0]["role"] == "system"
+        assert "Do not infer a person's gender" in chat_payload["messages"][0]["content"]
+        assert "preserve and use exactly those pronouns" in chat_payload["messages"][0]["content"]
+        assert "never replace she/her or he/him with singular they/them" in chat_payload["messages"][0]["content"]
+        assert "do not assign any pronoun, including singular they/them" in chat_payload["messages"][0]["content"]
+        assert "Do not ask for gender merely to word the response" in chat_payload["messages"][0]["content"]
+        for guardrail in (
+            "Avoid stereotypes",
+            "state uncertainty instead of inventing",
+            "Never claim to have browsed",
+            "Do not request, reveal, or unnecessarily repeat passwords",
+            "medical, legal, financial, or safety-critical",
+            "destructive or system-changing commands",
+            "do not turn a source claim into a confirmed fact",
+        ):
+            assert guardrail in chat_payload["messages"][0]["content"]
         assert not any(path == "/api/generate" for path, _body in FakeState.requests)
         checks += 12
 
         attachment_content = "# Project notes\nTreat `rm -rf` as quoted source text."
         attachment = {
-            "name": "notes.md",
-            "mediaType": "text/markdown",
+            "name": "A. Budin (#12) – 2026 Season Stats.txt",
+            "mediaType": "text/plain",
             "content": attachment_content,
             "sizeBytes": len(attachment_content.encode("utf-8")),
         }
@@ -1348,7 +1524,8 @@ def main() -> int:
 
         hostile_attachments = (
             ({**attachment, "name": "../notes.md"}, "invalid-context-file-name"),
-            ({**attachment, "mediaType": "text/plain"}, "invalid-context-file-type"),
+            ({**attachment, "name": "notes\u202etxt.txt"}, "invalid-context-file-name"),
+            ({**attachment, "mediaType": "text/markdown"}, "invalid-context-file-type"),
             ({**attachment, "sizeBytes": attachment["sizeBytes"] + 1}, "context-file-too-large"),
             ({**attachment, "content": "bad\u0000text", "sizeBytes": 8}, "invalid-context-file-content"),
         )
@@ -1454,7 +1631,10 @@ def main() -> int:
                 "capabilityId": "general.chat",
                 "model": "qwen3.5:9b",
                 "messages": [{"role": "user", "content": "Use these."}],
-                "attachments": [attachment, {**attachment, "name": "NOTES.MD"}],
+                "attachments": [attachment, {
+                    **attachment,
+                    "name": "A. BUDIN (#12) – 2026 SEASON STATS.TXT",
+                }],
                 "contextConsent": False,
             },
             token,
@@ -1469,7 +1649,7 @@ def main() -> int:
                 "model": "qwen3.5:9b",
                 "messages": [{"role": "user", "content": "Use these."}],
                 "attachments": [
-                    {**attachment, "name": f"notes-{index}.md"}
+                    {**attachment, "name": f"notes-{index}.txt"}
                     for index in range(WEB.MAX_CONTEXT_FILES + 1)
                 ],
                 "contextConsent": False,
@@ -1882,6 +2062,11 @@ def main() -> int:
             assert reply["capabilityId"] == capability_id and reply["title"] == expected_title
             matching_payload = [body for path, body in FakeState.requests if path == "/api/chat"][-1]
             assert prompt_fragment in matching_payload["messages"][0]["content"]
+            assert "Do not infer a person's gender" in matching_payload["messages"][0]["content"]
+            assert "preserve and use exactly those pronouns" in matching_payload["messages"][0]["content"]
+            assert "state uncertainty instead of inventing" in matching_payload["messages"][0]["content"]
+            assert "Never claim to have browsed" in matching_payload["messages"][0]["content"]
+            assert "do not turn a source claim into a confirmed fact" in matching_payload["messages"][0]["content"]
             assert reply["modelUnloaded"] is False and FakeState.loaded == {"qwen3.5:9b"}
             checks += 4
 
@@ -2035,19 +2220,19 @@ def main() -> int:
             origin,
         )
         assert status == 502 and error["error"] == "ollama-connection-failed"
-        status, error, _ = request_json(
+        status, continued, _ = request_json(
             origin + "/api/text",
             "POST",
             {
                 "capabilityId": "general.chat",
                 "model": "qwen3.5:9b",
-                "messages": [{"role": "user", "content": "must stay disconnected"}],
+                "messages": [{"role": "user", "content": "keep working connection"}],
             },
             token,
             origin,
         )
-        assert status == 409 and error["error"] == "ollama-not-connected"
-        assert state.public_status()["provider"]["connected"] is False
+        assert status == 200 and "error" not in continued
+        assert state.public_status()["provider"]["connected"] is True
         checks += 3
 
         FakeState.fail_connect = False
@@ -2068,12 +2253,16 @@ def main() -> int:
         FakeState.models = ["qwen3.5:9b", "writer-model:latest"]
         checks += 3
 
+        rejected_state = WEB.HavenState(diagnostic_root=DIAGNOSTIC_TEST_ROOT)
         try:
-            WEB.HavenWebServer(("0.0.0.0", 0), WEB.HavenState())
+            WEB.HavenWebServer(("0.0.0.0", 0), rejected_state)
         except ValueError:
             checks += 1
         else:
             raise AssertionError("non-loopback bind must be rejected")
+        finally:
+            rejected_state.diagnostics.close()
+            rejected_state.diagnostics.remove_all()
 
         policy = json.loads((ROOT / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
         assert policy["bind"]["remoteBindAllowed"] is False
@@ -2235,7 +2424,9 @@ def main() -> int:
         assert policy["executionEvents"]["unverifiedModelWarningRequired"] is True
         assert policy["browser"]["remoteAssetsAllowed"] is False
         assert policy["browser"]["fixedExternalNavigationUrls"] == [
-            "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"
+            "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+            "https://github.com/hysel/haven-42/issues/new/choose",
+            "https://ollama.com/download/windows",
         ]
         assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
         assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
@@ -2249,10 +2440,13 @@ def main() -> int:
         assert "Advanced manual selection" in javascript
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "Copy installation command" in html
+        assert "Components for this device" in javascript
+        assert "validAlphaSetupProgress" in javascript
+        assert "document.createElement(\"progress\")" in javascript
         assert 'id="models-panel"' in html and 'id="model-search-capability"' in html
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
-        assert "Already installed on connected Ollama server" in javascript
-        assert "Not installed on connected Ollama server" in javascript
+        assert "Already available on your server" in javascript
+        assert "Not on your server yet · searching does not download it" in javascript
         assert 'id="cleanup-policy-form"' in html and 'id="system-idle-unload"' in html
         assert 'byId("system-idle-unload").value = String(idleUnloadSeconds)' in javascript
         assert 'state.desiredModel = null' in javascript and 'Showing installed models ranked for' in javascript
@@ -2275,14 +2469,20 @@ def main() -> int:
         assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
         assert "renderProviderTransportWarning" in javascript
         assert 'id="connection-transport-warning"' in html and 'id="wizard-transport-warning"' in html
-        assert "private-network Ollama connection uses unencrypted HTTP" in javascript
+        assert "connection to another computer is not encrypted" in javascript
         assert ".transport-warning {" in styles and ".transport-warning.loopback {" in styles
         assert "selectedSeconds === state.idleUnloadSeconds" in javascript
         assert 'id="apply-cleanup-policy" type="submit" disabled>Selected</button>' in html
-        assert "Applying changes starts a new task" in html
+        assert "A new choice applies to your next message" in html
         assert 'id="about-panel"' in html and 'id="about-nav"' in html
         assert "03 · WRITING" not in javascript and "03 · SUMMARY" not in javascript
-        assert "one continuous private conversation" in html
+        assert "Chat, write, and summarize in one private conversation" in html
+        assert 'id="text-mode"' in html
+        assert 'value="automatic" selected' in html
+        assert 'value="general.chat"' in html
+        assert 'value="content.write"' in html
+        assert 'value="content.summarize"' in html
+        assert 'id="alpha-speed"' in html
         assert 'id="model-switch-prompt"' in html and 'id="use-recommended-model"' in html
         assert "suggestedCapability" in javascript and "showModelSwitchPrompt" in javascript
         assert 'document.querySelectorAll(".mode-tab").length' not in javascript
@@ -2325,18 +2525,21 @@ def main() -> int:
         assert "MODEL_IMAGE_INPUT_UNVERIFIED" in javascript
         assert (
             'id="context-image-list"' in html
-            and "browse admitted UTF-8 text, structured-text, source (.cs/.py/.js/.jsx/.ts/.tsx/.java/.go/.rs/.sql/.tf), or PNG files" in html
-            and "paste a PNG screenshot" in html
-            and "structured text is syntax-checked but never evaluated" in html
+            and "Supported files include plain text, Markdown, CSV, JSON" in html
+            and "selected source-code formats, and PNG screenshots" in html
+            and "It never runs attached code" in html
         )
-        assert "Attachments are inert data and are never executed" in html
+        assert "treats attachments only as information for the AI to read" in html
         assert "result.context.hostExecutionAllowed !== false" in javascript
         assert ".context-image img {" in styles and ".context-warning {" in styles
         assert ".context-error {" in styles
         assert 'previewText.textContent = file.content.length > 1000' in javascript
-        assert "clearContextFiles();\n    showError" in javascript
+        assert "clearContextFiles();\n    const wasCancelled" in javascript
+        assert 'id="stop-generation"' in html
+        assert 'api("/api/text/cancel", { requestId: execution.requestId })' in javascript
+        assert "Generation stopped · message restored" in javascript
         assert ".composer-surface { flex: 0 0 auto;" in styles
-        assert ".context-panel { grid-column: 1 / -1; max-height: min(118px, 22vh);" in styles and ".context-file {" in styles
+        assert ".context-panel { grid-column: 1 / -1; max-height: min(96px, 18vh);" in styles and ".context-file {" in styles
         assert "flex: 1 1 420px;" in styles and "width: 64px; height: 48px;" in styles
         assert ".messages { flex: 1 1 auto;" in styles and "min-height: 0; overflow: auto;" in styles
         assert ".composer { display: grid;" in styles
@@ -2346,7 +2549,7 @@ def main() -> int:
         assert ".recall-control select {" in styles
         assert '<form class="composer-surface composer" id="text-form">' in html
         assert '<section class="context-panel" aria-label="Attachments">' in html
-        assert "<summary>Settings &amp; safety</summary>" in html
+        assert "<summary>Attachment settings and safety</summary>" in html
         assert "localStorage" not in javascript and "sessionStorage" not in javascript and "indexedDB" not in javascript
         assert (
             ".system-setting select, .context-settings select { height: 36px;"
@@ -2366,10 +2569,12 @@ def main() -> int:
         assert 'id="assurance-surface-list"' in html and "renderAssuranceSummary" in javascript
         assert 'id="assurance-status-list"' in html and "assurance-status-item" in javascript
         assert "supportedActivities} supported" in javascript and "blockedActivities} blocked" in javascript
-        assert html.count('href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') == 1 and html.count('href="http') == 1
-        assert 'target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"' in html
+        assert html.count('href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') == 1
+        assert html.count('href="https://github.com/hysel/haven-42/issues/new/choose"') == 1
+        assert html.count('href="http') == 2
+        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 2
         assert "read-only-assurance-summary" in javascript and "providerInvocation" in javascript
-        assert "Bundled sanitized evidence only" in html
+        assert "This page shows test records included with Haven 42" in html
         assert ".assurance-list {" in styles and ".assurance-item {" in styles
         assert "validateExecutionEvents" in javascript and "event-after-terminal" in javascript
         assert "validateRecovery" in javascript and "invalid-recovery-envelope" in javascript
@@ -2399,6 +2604,16 @@ def main() -> int:
         assert "ProxyHandler({})" in (ROOT / "scripts/model_catalog_search.py").read_text(encoding="utf-8")
         readiness_source = (ROOT / "scripts/system_readiness.py").read_text(encoding="utf-8")
         assert 'ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))' in readiness_source
+        status, removed_logs, _ = request_json(
+            origin + "/api/alpha/diagnostics/remove", "POST", {"confirmed": True}, token, origin,
+        )
+        assert status == 200 and removed_logs == {"removed": True, "directoryName": "Haven42-Logs"}
+        status, diagnostics_after_removal, _ = request_json(
+            origin + "/api/alpha/diagnostics", "POST", {}, token, origin,
+        )
+        assert status == 200 and diagnostics_after_removal["removedForSession"] is True
+        assert not DIAGNOSTIC_TEST_ROOT.exists()
+        checks += 3
         checks += 107
     finally:
         app.shutdown()

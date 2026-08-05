@@ -16,6 +16,7 @@ from portable_runtime_components import ComponentClassificationError, classify
 
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+APP_VERSION = "0.4.0-alpha.1"
 REQUIRED_EVIDENCE = {
     "APACHE-2.0.txt",
     "CPYTHON-3.14.6-LICENSE.txt",
@@ -254,7 +255,7 @@ def verify_sbom_document(
         or sbom.get("metadata", {}).get("component") != {
             "type": "application",
             "name": "Haven 42",
-            "version": "0.3.0",
+            "version": APP_VERSION,
             "licenses": [{"expression": "MIT"}],
         }
         or sbom.get("metadata", {}).get("tools", {}).get("components") != expected_tools
@@ -351,7 +352,7 @@ def verify_evidence(directory: Path) -> None:
         }
         or provenance.get("schemaVersion") != 1
         or provenance.get("artifactKind") != "unsigned-development"
-        or application != {"name": "Haven 42", "version": "0.3.0"}
+        or application != {"name": "Haven 42", "version": APP_VERSION}
         or source.get("repository") != "https://github.com/hysel/haven-42"
         or set(source) != {
             "repository", "commit", "treeState", "commitIsExactSource",
@@ -600,7 +601,7 @@ def run_self_tests() -> None:
                 "component": {
                     "type": "application",
                     "name": "Haven 42",
-                    "version": "0.3.0",
+                    "version": APP_VERSION,
                     "licenses": [{"expression": "MIT"}],
                 },
                 "tools": {"components": [{"name": "tool", "type": "application", "version": "1.0"}]},

@@ -1,10 +1,14 @@
-# Documentation Index
+# Advanced Documentation Index
 
 _For contributors, maintainers, security reviewers, and evaluators._
 
-This index keeps detailed engineering material available without placing more
-than one hundred development pages in the main end-user sidebar. GitHub's wiki
-page list remains the complete alphabetical inventory.
+You do not need these pages to set up or use Haven 42. Start with
+[[Quick Start|Quick-Start]], [[Using Haven 42|Using-Haven-42]], or the
+[[Glossary|Glossary]].
+
+This index keeps detailed engineering material available to contributors
+without placing more than one hundred development pages in the main user
+sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Product and architecture
 
@@ -76,6 +80,7 @@ page list remains the complete alphabetical inventory.
 - [[Unsigned Development Artifact Attestation|Artifact-Attestation]]
 - [[Release Guidance|Release-Guidance]]
 - [[Milestone 22 Admission Readiness|Milestone-22-Admission-Readiness]]
+- [[Windows Alpha Native Validation|Windows-Alpha-Native-Validation]]
 
 ## Project management and maintenance
 

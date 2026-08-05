@@ -4,15 +4,24 @@
 
 `config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. `config/core-update-manifest-contract.json` defines the future immutable core-engine update boundary, `config/core-update-check-contract.json` defines the narrower offline GitHub Release candidate check, `config/core-update-trust-handoff-contract.json` defines a structural handoff from a future native cryptographic verifier, `config/core-update-verifier-transition-contract.json` defines structural verifier-registry and trust-root transitions, and `config/core-update-lifecycle-contract.json` defines an effect-free lifecycle simulation. The policy scripts can validate and model these inputs offline, but they are not network clients, cryptographic verifiers, trust-store managers, downloaders, installers, activators, cleanup tools, or admitted desktop runtimes.
 
-The central rule is simple: an application update may replace the versioned engine, but it must not own or silently change the user's configuration, repositories, generated artifacts, models, provider data, or credentials.
+The central rule is simple: Haven 42-managed files stay inside the folder the
+user extracted. The fixed mutable root is `Haven42-Data` beside the executable.
+An application update may replace a versioned engine only inside that portable
+boundary, and it must not own or silently change user-selected repositories or
+inputs. Persistent secrets are not written to the portable folder.
 
 ## Native Path Resolution
 
-The application must resolve paths through native platform APIs at runtime. It must not persist unresolved environment-variable strings or assume that a home, Documents, or application-data directory has its default location.
+The application resolves its portable installation root from the running
+executable, not from an environment variable, registry entry, home directory,
+or application-data directory. It canonicalizes that root before use and
+rejects reparse-point or symbolic-link redirection. Native platform APIs remain
+appropriate for user-selected external inputs, but those inputs stay in their
+original locations.
 
-- Windows uses Known Folder resolution, including `FOLDERID_UserProgramFiles`, `FOLDERID_RoamingAppData`, `FOLDERID_LocalAppData`, and `FOLDERID_Documents`. See Microsoft's [KNOWNFOLDERID reference](https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid).
-- Linux follows the [XDG Base Directory Specification](https://specifications.freedesktop.org/basedir-spec/latest/) and requires an explicit user choice when a documents directory cannot be resolved safely.
-- macOS uses Foundation directory resolution for Application Support, Caches, Documents, and the selected Applications directory. See Apple's [File System Programming Guide](https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/FileSystemOverview/FileSystemOverview.html).
+- Windows managed state uses only `portable-install-root/Haven42-Data`. The former `%LocalAppData%/Haven42/alpha` path may be read only by the bounded legacy cleanup flow and is never a write target.
+- Linux managed state uses only `portable-install-root/Haven42-Data`; XDG directories are not managed-write targets.
+- macOS managed state uses only `portable-install-root/Haven42-Data`; Application Support, Caches, Documents, and Keychain are not managed-write targets.
 - Tauri path helpers may implement native resolution, but the native bridge remains responsible for canonicalization, protected-directory checks, and path grants. See the [Tauri path API](https://v2.tauri.app/reference/javascript/api/namespacepath/).
 
 ## Ownership Boundaries
@@ -25,15 +34,22 @@ The application must resolve paths through native platform APIs at runtime. It m
 | Provider data | Ollama, ComfyUI, managed model files, provider caches | Preserve; remove only through an explicit provider cleanup preview. |
 | Reconstructible cache | Download cache, rendered indexes, disposable extraction | May be cleaned while the application is stopped. |
 | Update state | Verified downloads, staged versions, activation journal, rollback version | Preserve until activation and rollback retention rules permit cleanup. |
-| Secrets | Provider tokens or credentials | Use Windows Credential Manager, a Linux Secret Service keyring, or macOS Keychain; never ordinary JSON configuration. |
+| Secrets | Provider tokens or credentials | Memory only by default; never ordinary JSON configuration or a file in `Haven42-Data`. |
 
 Repositories remain where the user selected them. Desktop access uses the opaque path-grant rules in `config/desktop-ipc-contract.json`; the renderer never gains a raw-path execution surface.
 
 ## Platform Shape
 
-The machine-readable contract records native identifiers rather than hard-coded absolute paths. Packaging can choose an installer-managed immutable application location, but mutable data always remains outside it.
+The machine-readable contract records paths relative to the canonical portable
+installation root rather than hard-coded absolute paths. The package does not
+use an installer-managed application location.
 
-Windows keeps roaming configuration separate from local state, caches, models, update downloads, and staged versions. Linux separates XDG config, state, cache, and data roots. macOS separates Application Support and Caches from the signed application bundle. Generated artifacts default to the user's native Documents location only when it can be resolved and disclosed; otherwise the user selects a directory.
+On every platform, configuration, state, caches, models, generated artifacts,
+update downloads, staged versions, and activation journals all remain beneath
+`Haven42-Data`. Removing managed components uses a marker-owned, bounded,
+link-free cleanup; after Haven 42 is closed, deleting the extracted folder
+removes the application itself. Linux and macOS remain future packages, but
+their storage contracts enforce the same portable boundary.
 
 ## Immutable Update Manifest
 

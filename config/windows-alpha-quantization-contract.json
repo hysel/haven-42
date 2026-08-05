@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.windows-alpha.quantization",
+  "alphaVersion": "0.4.0-alpha.1",
+  "defaultDecision": "use-pinned-prequantized-model",
+  "catalogQuantizations": ["Q8_0", "Q4_K_M"],
+  "runtimeQuantizationEnabled": false,
+  "reason": "The bounded catalog spans 0.8B through 35B with immutable prequantized artifacts; converting a model adds temporary storage, license, provenance, quality, crash-recovery, and runtime-compatibility risk without an admitted Alpha need.",
+  "fallback": {
+    "first": "select-smaller-pinned-prequantized-model",
+    "second": "deny-local-setup-below-minimum-threshold",
+    "advancedLocalDerivative": "future-evidence-required"
+  },
+  "forbidden": [
+    "download-unquantized-model-for-automatic-conversion",
+    "use-user-content-as-calibration-data",
+    "overwrite-source-model",
+    "silent-cpu-fallback",
+    "unverified-derivative-activation"
+  ]
+}

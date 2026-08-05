@@ -1,4 +1,4 @@
-# Advanced Topics
+# Advanced and Contributor Topics
 
 _For advanced users, evaluators, and contributors. Each linked page states its
 own evidence boundary._
@@ -6,6 +6,9 @@ own evidence boundary._
 The everyday browser workflow is documented in [[Using Haven 42|Using-Haven-42]].
 This page collects advanced setup and engineering paths without placing their
 detailed validation records in the main user navigation.
+
+You do not need anything on this page for normal guided setup, chat, writing,
+or summarization.
 
 ## Editor and agent setup
 

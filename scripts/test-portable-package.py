@@ -23,6 +23,16 @@ import urllib.request
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def remove_test_diagnostics(parent: Path) -> None:
+    root = parent / "Haven42-Logs"
+    if not root.exists():
+        return
+    from diagnostic_logging import DiagnosticLogger
+    logger = DiagnosticLogger("0.4.0-alpha.1", root)
+    logger.remove_all()
+    logger.close()
+
+
 def request(url: str, method: str = "GET", token: str = "", body: bytes | None = None):
     parsed = urllib.parse.urlsplit(url)
     origin = f"{parsed.scheme}://{parsed.netloc}"
@@ -111,6 +121,18 @@ def probe(
         assert bootstrap["updates"]["activationAllowed"] is False
         assert bootstrap["package"]["required"] is packaged
         assert bootstrap["package"]["verified"] is packaged
+        assert bootstrap["version"] == "0.4.0-alpha.1"
+        assert bootstrap["alpha"] == {
+            "label": "Haven 42 0.4 Alpha 1",
+            "windowsOnly": True,
+            "chatOnly": False,
+            "textOnly": True,
+            "unsigned": True,
+            "productionReady": False,
+            "managedSetupRuntimeAdmitted": False,
+            "managedSetupCandidateAvailable": bootstrap["runtime"]["platform"] == "windows",
+            "managedSetupCompletedCandidate": False,
+        }
         token = bootstrap.pop("sessionToken")
         authority = {
             "Origin": origin,
@@ -156,6 +178,86 @@ def probe(
             assert len(plan["actions"]) >= 2
             assert plan["installationAllowed"] is False
             assert all(action["installControl"] == "disabled" for action in plan["actions"])
+            alpha_plan = plan["alphaCandidate"]
+            assert alpha_plan["version"] == "0.4.0-alpha.1"
+            assert alpha_plan["quantizationDecision"] == "use-pinned-prequantized-model"
+            assert alpha_plan["managedSetupRuntimeAdmitted"] is False
+            automatic_allowed = alpha_plan["modelSelection"]["automaticExecutionAllowed"] is True
+            managed = alpha_plan.get("managedPlan")
+            expected_managed = bootstrap["runtime"]["platform"] == "windows" and automatic_allowed
+            assert alpha_plan["managedSetupCandidateAvailable"] is expected_managed
+            if expected_managed:
+                assert managed is not None
+                assert managed["kind"] == "windows-alpha-setup-plan"
+                assert managed["effects"] == [
+                    "network-download", "portable-folder-files", "owned-process",
+                    "local-model-validation",
+                ]
+                assert managed["backendMode"] in {"cpu", "cuda", "rocm", "vulkan"}
+                assert isinstance(managed["gpuAccelerationRequired"], bool)
+                assert (
+                    isinstance(managed["requiredStorageBytes"], int)
+                    and not isinstance(managed["requiredStorageBytes"], bool)
+                    and managed["requiredStorageBytes"] > 0
+                )
+                selected_storage = alpha_plan["modelSelection"]["selected"]["requiredStorageGiB"]
+                assert isinstance(selected_storage, (int, float)) and selected_storage > 0
+                assert managed["requiredStorageBytes"] <= int(selected_storage * (1024 ** 3))
+                renderer_plan = json.dumps(managed, sort_keys=True)
+                assert "http://" not in renderer_plan and "https://" not in renderer_plan
+                assert "ollama.exe" not in renderer_plan and "\\\\" not in renderer_plan
+            else:
+                assert managed is None
+        with request(origin + "/api/alpha/resources") as response:
+            resources = json.load(response)
+            assert resources["kind"] == "windows-alpha-local-metrics"
+            assert resources["persisted"] is False
+            assert resources["externalTelemetryUsed"] is False
+            assert resources["sample"]["persisted"] is False
+            assert resources["sample"]["externalTelemetryUsed"] is False
+            assert resources["sessionTokens"]["persisted"] is False
+        with request(
+            origin + "/api/alpha/diagnostics", "POST", token, b"{}",
+        ) as response:
+            diagnostics = json.load(response)
+            assert diagnostics["kind"] == "haven42-sanitized-diagnostics"
+            assert diagnostics["storageDirectoryName"] == "Haven42-Logs"
+            assert diagnostics["storageScope"] == "inside-extracted-folder"
+            assert diagnostics["removedForSession"] is False
+            assert all(value is False for value in diagnostics["privacy"].values())
+            assert all(set(event) == {
+                "schemaVersion", "timestamp", "eventId", "category", "code", "outcome", "appVersion",
+            } for event in diagnostics["events"])
+        expect_http_error(
+            origin + "/api/workflows",
+            authority,
+            b"{}",
+            404,
+            "alpha-text-only",
+        )
+        if bootstrap["runtime"]["platform"] == "windows":
+            with request(origin + "/api/alpha/setup-status") as response:
+                setup_status = json.load(response)
+                assert setup_status["phase"] == "idle"
+                assert setup_status["planId"] == (managed["planId"] if managed else None)
+                assert setup_status["driverChanges"] is False
+                assert setup_status["serviceChanges"] is False
+                assert setup_status["firewallChanges"] is False
+                assert setup_status["elevationRequested"] is False
+            rejected_approval = json.dumps({
+                "planId": setup_status["planId"] or ("0" * 32),
+                "effects": ["driver-install"],
+                "confirmed": True,
+            }).encode("utf-8")
+            expect_http_error(
+                origin + "/api/alpha/setup-approve",
+                authority,
+                rejected_approval,
+                409,
+                "approval-does-not-match-plan",
+            )
+            with request(origin + "/api/alpha/setup-status") as response:
+                assert json.load(response)["phase"] == "idle"
         expect_http_error(
             origin + "/api/shutdown",
             {"Origin": origin, "Content-Type": "application/json"},
@@ -186,6 +288,13 @@ def probe(
         )
         with request(origin + "/api/bootstrap") as response:
             assert response.status == 200
+        if diagnostics["available"]:
+            with request(
+                origin + "/api/alpha/diagnostics/remove", "POST", token, b'{"confirmed":true}',
+            ) as response:
+                assert json.load(response) == {
+                    "removed": True, "directoryName": "Haven42-Logs",
+                }
         with request(
             origin + "/api/shutdown", "POST", token, b"{}",
         ) as response:
@@ -371,6 +480,8 @@ def main() -> int:
     test_abrupt_exit_recovery(executable, packaged)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
+    remove_test_diagnostics(ROOT)
+    remove_test_diagnostics(executable.parent)
     print(
         "Portable package parity, relocation, read-only startup, abrupt-exit recovery, "
         "repeated lifecycle, port collision, shutdown authority, hostile environment, "

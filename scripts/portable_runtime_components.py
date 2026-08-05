@@ -21,6 +21,11 @@ PROJECT_FILES = {
     "_internal/config/agent-surface-solutions.json",
     "_internal/config/install-component-registry.json",
     "_internal/config/workflows.json",
+    "_internal/config/windows-alpha-contract.json",
+    "_internal/config/windows-alpha-model-catalog.json",
+    "_internal/config/windows-alpha-component-registry.json",
+    "_internal/config/windows-alpha-resource-monitor-contract.json",
+    "_internal/config/windows-alpha-quantization-contract.json",
 }
 NATIVE_SUFFIX = re.compile(r"(?i)(?:\.dll|\.pyd|\.dylib|\.so(?:\.\d+)*)$")
 PYTHON_LIBRARY = re.compile(
@@ -265,7 +270,7 @@ def classify(
         "target": target,
         "projectOwned": {
             "name": "Haven 42",
-            "version": "0.3.0",
+            "version": "0.4.0-alpha.1",
             "license": "MIT",
             "signingEligibleFiles": [
                 path for path in ("haven42", "haven42.exe") if path in seen

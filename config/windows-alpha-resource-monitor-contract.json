@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.windows-alpha.resource-monitor",
+  "status": "implementation-in-progress",
+  "sampleIntervalSeconds": 2,
+  "maximumHistorySeconds": 60,
+  "facts": [
+    "system-cpu-percent",
+    "system-memory-used-bytes",
+    "system-memory-total-bytes",
+    "haven-process-memory-bytes",
+    "gpu-utilization-percent",
+    "gpu-memory-used-bytes",
+    "gpu-memory-total-bytes",
+    "ollama-loaded-model-bytes",
+    "ollama-loaded-vram-bytes",
+    "provider-input-tokens",
+    "provider-output-tokens",
+    "provider-total-tokens",
+    "provider-generation-tokens-per-second"
+  ],
+  "unknownValuePolicy": "report-unavailable-never-estimate",
+  "gpuTelemetry": {
+    "nvidia": "nvidia-smi-when-available",
+    "windowsVendorNeutralFallback": "pdh-english-gpu-engine-and-adapter-memory-counters",
+    "aggregation": "sum-process-values-per-physical-engine-then-report-busiest-engine",
+    "firstSampleMayBeUnavailable": true
+  },
+  "persistence": {
+    "samplesPersisted": false,
+    "sessionTokenTotalsPersisted": false,
+    "externalTelemetryAllowed": false
+  },
+  "privacy": {
+    "processCommandLinesAllowed": false,
+    "processPathsAllowed": false,
+    "hostIdentityAllowed": false,
+    "deviceIdentifiersAllowed": false,
+    "providerTransmissionAllowed": false
+  }
+}

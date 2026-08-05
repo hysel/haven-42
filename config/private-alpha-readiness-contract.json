@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.private-alpha-readiness",
+  "implementationStatus": "candidate-implementation-not-admitted",
+  "currentReleaseLine": "0.4.0-alpha.1",
+  "alphaIdentity": {
+    "label": "Haven 42 0.4 Alpha 1",
+    "candidateVersion": "0.4.0-alpha.1",
+    "candidateTag": null,
+    "candidateCommit": null
+  },
+  "audience": {
+    "mode": "invited-testers-only",
+    "testerGroupSelected": true,
+    "privateDistributionChannelSelected": false,
+    "publicEnrollmentAllowed": false
+  },
+  "scope": {
+    "artifactKind": "unsigned-pyinstaller-one-folder-private-alpha",
+    "externalSoftwareBundled": false,
+    "installerIncluded": false,
+    "administratorAccessRequired": false,
+    "systemServiceIncluded": false,
+    "onlineUpdaterEnabled": false,
+    "workflowExecutionEnabled": false,
+    "admittedCapabilities": ["general.chat", "content.write", "content.summarize"],
+    "managedUserScopedSetupCandidate": true,
+    "tauriOrRustIncluded": false
+  },
+  "targetCells": [
+    {
+      "id": "windows-x64",
+      "hostedPackageEvidence": true,
+      "physicalDevelopmentEvidence": true,
+      "selectedForAlpha": true,
+      "remainingBoundary": "native-smoke-passed-clean-commit-gates-remain"
+    },
+    {
+      "id": "linux-x64",
+      "hostedPackageEvidence": true,
+      "physicalDevelopmentEvidence": true,
+      "selectedForAlpha": false,
+      "remainingBoundary": "exact-alpha-candidate-native-smoke"
+    },
+    {
+      "id": "macos-arm64",
+      "hostedPackageEvidence": true,
+      "physicalDevelopmentEvidence": false,
+      "selectedForAlpha": false,
+      "remainingBoundary": "owner-parked-physical-macos-evidence"
+    }
+  ],
+  "gates": [
+    {
+      "id": "development-foundation",
+      "status": "satisfied",
+      "evidence": [
+        "config/portable-development-package-contract.json",
+        "docs/portable-development-package.md",
+        "docs/artifact-attestation.md"
+      ]
+    },
+    {
+      "id": "candidate-version-and-commit",
+      "status": "candidate-required",
+      "evidence": [
+        "docs/private-alpha-preparation.md"
+      ]
+    },
+    {
+      "id": "target-platform-selection",
+      "status": "satisfied",
+      "evidence": [
+        "docs/private-alpha-preparation.md"
+      ]
+    },
+    {
+      "id": "exact-candidate-security-review",
+      "status": "candidate-required",
+      "evidence": [
+        "config/security-review-gate.json",
+        "SECURITY.md"
+      ]
+    },
+    {
+      "id": "exact-candidate-hosted-ci",
+      "status": "candidate-required",
+      "evidence": [
+        "docs/hosted-ci-verification.md"
+      ]
+    },
+    {
+      "id": "exact-candidate-artifact-set",
+      "status": "candidate-required",
+      "evidence": [
+        "docs/portable-development-package.md",
+        "docs/artifact-attestation.md"
+      ]
+    },
+    {
+      "id": "known-limitations-snapshot",
+      "status": "satisfied",
+      "evidence": [
+        "docs/private-alpha-known-limitations.md"
+      ]
+    },
+    {
+      "id": "tester-runbook",
+      "status": "satisfied",
+      "evidence": [
+        "docs/private-alpha-test-plan.md"
+      ]
+    },
+    {
+      "id": "feedback-and-triage",
+      "status": "satisfied",
+      "evidence": [
+        "docs/private-alpha-feedback-template.md",
+        "docs/windows-alpha-download-and-feedback.md",
+        ".github/ISSUE_TEMPLATE/alpha-bug-report.yml",
+        ".github/ISSUE_TEMPLATE/alpha-feedback.yml",
+        ".github/ISSUE_TEMPLATE/config.yml"
+      ]
+    },
+    {
+      "id": "private-distribution-activation",
+      "status": "owner-required",
+      "evidence": [
+        "docs/private-alpha-preparation.md"
+      ]
+    }
+  ],
+  "authority": {
+    "alphaCandidateAdmitted": false,
+    "artifactDistributionActivated": false,
+    "publicReleaseAllowed": false,
+    "releaseTagAllowed": false,
+    "signingAllowed": false,
+    "notarizationAllowed": false,
+    "installerActivationAllowed": false,
+    "onlineUpdateActivationAllowed": false,
+    "machineModificationAllowed": false,
+    "productionReadinessClaimAllowed": false
+  }
+}

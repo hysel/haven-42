@@ -46,6 +46,27 @@ AI-assisted work in this repository should:
 - Avoid introducing secrets, tokens, private URLs, or organization-specific confidential details.
 - Suggest validation steps when behavior changes.
 
+## Novice-First Product Standard
+
+Haven 42 is designed first for people who have never installed or managed a
+local AI system. All user-facing UI, primary documentation, errors, and setup
+instructions must therefore:
+
+- lead with what the person can do and what will happen next;
+- use ordinary words before terms such as model, Ollama, provider, endpoint,
+  token, loopback, digest, quantization, or runtime;
+- offer one safe recommended choice and place specialist choices under a
+  clearly labelled **Advanced** control;
+- explain downloads, permissions, storage, network use, and computer changes
+  before asking for approval;
+- give recovery steps in the same place as an error;
+- preserve every security warning and fail-closed boundary while translating
+  its consequence into plain language.
+
+Engineering precision belongs in contributor documentation and optional
+technical-detail views. It must not be removed, but it must not be required to
+complete an ordinary setup or conversation.
+
 ## Review Checklist
 
 Before finishing a change, verify:
@@ -55,6 +76,8 @@ Before finishing a change, verify:
 - New rule content is reusable outside a single prompt.
 - New agent content does not encode a full task workflow.
 - README claims match implemented behavior.
+- A first-time user can follow the primary path without knowing local-AI terms.
+- Advanced terminology is defined on first use or linked to the glossary.
 - TODO and ROADMAP remain consistent with the actual state.
 
 ## Standing Security Review Gate

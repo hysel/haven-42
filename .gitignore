@@ -7,6 +7,9 @@ config/model-runtime-policy.local.json
 .privacy-rewrite-backup/
 runtime-validation-output/
 dist/
+Haven42-Data/
+Haven42-Logs/
+.venv-build/
 
 __pycache__/
 *.py[cod]

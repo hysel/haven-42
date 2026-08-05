@@ -1,5 +1,13 @@
 # Security Policy
 
+## Clear security information
+
+Haven 42 is designed for people who may be new to local AI. Security messages
+must explain the practical consequence and the safe next step in plain
+language. Technical detail may be placed under **Advanced**, but warnings,
+approval boundaries, uncertainty, and fail-closed behavior must never be hidden
+or removed to make the interface appear simpler.
+
 ## Supported Versions
 
 Haven 42 is pre-1.0. Only the latest tagged release and the current `main` branch receive security fixes. Contracts marked `runtimeAdmitted: false`, documentation-only candidates, and failed or partial provider profiles are not supported runtime surfaces.
@@ -228,6 +236,77 @@ and updater payloads are outside the Haven package trust boundary. Haven may
 connect only through an admitted endpoint contract to separately acquired
 software. Discovery, compatibility evidence, and license audits grant no
 download, installation, update, execution, or redistribution authority.
+
+## Windows Alpha setup security boundary
+
+The Alpha text API accepts only `general.chat`, `content.write`, and
+`content.summarize`. Images, software workflows, research, and unknown
+capability identifiers remain server-blocked regardless of renderer state.
+Writing and summarization use the same message, attachment, size, provider,
+and memory-only boundaries as chat, with separate server-owned prompts and
+typed Markdown results.
+
+Active text generation uses a fresh 128-bit browser request identifier only
+for cancellation correlation. The same-origin, CSRF-protected loopback cancel
+route accepts exact lowercase hexadecimal identifiers and can affect only the
+single request currently tracked by the engine. It sets an in-memory event,
+closes the bounded no-proxy/no-redirect Ollama response stream, and unloads the
+active model. It exposes no PID, signal, shell, arbitrary process, or stale
+request authority, and cancellation restores the prompt without retaining the
+partial response.
+
+The managed Alpha state root is the fixed `Haven42-Data` directory beside the
+packaged executable, not a caller-controlled environment variable or renderer
+path. Hardware selection measures free space on that same portable volume, and
+execution rechecks the exact conservative byte requirement before network or
+process effects.
+
+The sanitized diagnostic root is the separate fixed sibling directory
+`Haven42-Logs`. It accepts only allowlisted event categories, stable codes,
+outcomes, timestamps, random references, and the application version; its API
+cannot accept arbitrary caller details. Files rotate at fixed bounds, malformed
+or linked content fails closed, and reports are created locally only after an
+explicit action. Managed-component removal has authority only over validated
+marker-owned `Haven42-Data` roots and preserves `Haven42-Logs`. Removing logs
+requires a separate confirmation and disables logging for the rest of that
+process so shutdown cannot recreate the directory.
+
+The `0.4.0-alpha.1` candidate does not bundle or invoke an Ollama installer.
+After an explicit, effect-bound, single-use approval it may download only exact
+registered standalone archives over HTTPS, enforce byte length and SHA-256,
+reject traversal, links, devices, case collisions, excessive members and
+expanded size, then require a valid Ollama Authenticode signer. A content-hash
+inventory is generated from the verified extraction and must match before a
+managed runtime is reused. It writes only inside the marker-owned portable data
+directory and starts `ollama.exe serve` at the fixed loopback endpoint it owns.
+Cancellation and any worker failure close only that managed process tree;
+model-pull reads use a bounded inactivity timeout rather than waiting
+indefinitely.
+On later launches, the presence of `Haven42-Data` alone grants no process
+authority. Automatic local reconnection requires a valid bounded completion
+receipt and fresh verification of the hardware-derived registered plan,
+runtime content inventory, Authenticode publisher, exact model manifest,
+managed directories, and fixed loopback endpoint. Resume neither downloads nor
+installs anything. Any mismatch leaves onboarding visible and stops a process
+that could not be connected safely.
+On Windows the managed runtime starts suspended, is assigned to a non-inherited
+Job Object with `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`, and is resumed only after
+assignment succeeds. Windows therefore closes the managed runtime and its
+descendants when Haven exits normally, crashes, or is force-terminated. An
+external provider is never assigned to this job and remains outside Haven's
+process-control authority.
+Removal requires an explicit same-origin request and audits the marker-owned
+tree before deleting it. On Windows, it enumerates process image paths and
+stops only processes whose executable resolves beneath that validated tree,
+including orphaned provider children left by an interrupted run. It audits the
+tree again before deletion. Links, reparse points, special files, unrecognized
+ownership, and excessive entry counts fail closed.
+The running application never attempts to delete itself.
+Pre-release legacy Local AppData cleanup is admitted only through the same
+explicit removal action and only after validating its fixed known-folder path,
+Alpha receipt, registered identifiers, bounded layout, and link-free tree.
+Drivers, updates, firmware, services, firewall, certificate trust, elevation,
+and system runtimes are unconditionally outside its authority.
 
 ## Reporting A Vulnerability
 

@@ -577,6 +577,23 @@ checkbox totals below.
   20-case hostile evaluator covering the development-admitted read-only scope,
   owner deferral, Tauri policy block, and production package, installer,
   updater, and executable-composition gates without granting authority.
+- [x] Add a preparation-only private-alpha readiness contract, known-limitations
+  snapshot, tester runbook, sanitized feedback template, and hostile evaluator;
+  leave candidate version, commit, platform selection, tester group, private
+  distribution, tagging, publication, and every production authority denied.
+- [x] Admit Chat, Writing, and Summarization to the Windows Alpha through one
+  continuous text workspace with explicit task choices, default automatic
+  routing, capability-specific prompts, and provider-reported generation speed;
+  keep every non-text capability server-blocked.
+- [x] Add the bounded fixed-schema Alpha diagnostic core in the separate
+  `Haven42-Logs` portable directory with rotation, immediate lifecycle writes,
+  unclean-session detection, local support reports, separate clear/remove
+  controls, managed-component preservation, source/package smoke coverage, and
+  hostile privacy tests. Keep expanded component-decision and disk-failure
+  evidence gated before invited distribution.
+- [x] Add novice-facing Alpha download and SHA-256 verification instructions,
+  structured privacy-safe GitHub problem and feedback forms, a private
+  vulnerability-report path, and an allowlisted in-product report link.
 
 ## Solution Architecture Review Backlog
 

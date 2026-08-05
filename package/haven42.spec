@@ -14,6 +14,11 @@ resources = [
     ("config/agent-surface-solutions.json", "config"),
     ("config/install-component-registry.json", "config"),
     ("config/workflows.json", "config"),
+    ("config/windows-alpha-contract.json", "config"),
+    ("config/windows-alpha-model-catalog.json", "config"),
+    ("config/windows-alpha-component-registry.json", "config"),
+    ("config/windows-alpha-resource-monitor-contract.json", "config"),
+    ("config/windows-alpha-quantization-contract.json", "config"),
     ("package/resource-integrity.json", "package"),
 ]
 
@@ -22,7 +27,7 @@ a = Analysis(
     pathex=[str(root / "scripts")],
     binaries=[],
     datas=[(str(root / source), destination) for source, destination in resources],
-    hiddenimports=[],
+    hiddenimports=["diagnostic_logging", "windows_alpha", "windows_alpha_setup"],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
