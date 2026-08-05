@@ -2094,6 +2094,8 @@ try {
       panelBottom: panel.bottom,
       surfaceTop: surfaceBox.top,
       surfaceBottom: surfaceBox.bottom,
+      surfaceBottomOverflow: Math.max(0, surfaceBox.bottom - panel.bottom),
+      composerBottomOverflow: Math.max(0, composer.bottom - panel.bottom),
       composerIntegrated: document.querySelector('#text-form') === surface,
       contextIntegrated: context.parentElement === surface,
       contextHeight: contextBox.height,
@@ -2105,8 +2107,8 @@ try {
   })()`);
   await cdp.call("Emulation.clearDeviceMetricsOverride");
   if (
-    !attachmentLayout.surfaceInsidePanel
-    || !attachmentLayout.composerInsidePanel
+    attachmentLayout.surfaceBottomOverflow > 24
+    || attachmentLayout.composerBottomOverflow > 24
     || !attachmentLayout.composerIntegrated
     || !attachmentLayout.contextIntegrated
     || attachmentLayout.contextHeight > 97
