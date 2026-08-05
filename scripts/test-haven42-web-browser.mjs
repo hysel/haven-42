@@ -2180,7 +2180,9 @@ try {
       diagnosticPrivacy: document.querySelector('#diagnostics-control').textContent,
       maintenanceHeading: document.querySelector('#local-ai-maintenance-title').textContent,
       localSetupLabel: document.querySelector('#setup-local-components').textContent,
+      localSetupDisabled: document.querySelector('#setup-local-components').disabled,
       uninstallLabel: document.querySelector('#remove-managed-components').textContent,
+      uninstallDisabled: document.querySelector('#remove-managed-components').disabled,
     };
     document.querySelector('#assurance-nav').click();
     const assurance = {
@@ -2201,6 +2203,13 @@ try {
     };
     return {reducedMotion, models, system, assurance, about};
   })()`);
+  const localSetupUnavailable = navigation.system.localSetupLabel === "Local setup unavailable on this system";
+  const localSetupControlsValid = localSetupUnavailable
+    ? navigation.system.localSetupDisabled
+      && navigation.system.uninstallLabel === "Uninstall unavailable on this system"
+      && navigation.system.uninstallDisabled
+    : navigation.system.localSetupLabel.includes("local AI")
+      && navigation.system.uninstallLabel.includes("local AI components");
   if (
     navigation.reducedMotion !== "auto"
     || !navigation.models.active
@@ -2215,8 +2224,7 @@ try {
     || navigation.system.diagnosticActions !== 4
     || !navigation.system.diagnosticPrivacy.includes("never recorded or uploaded")
     || navigation.system.maintenanceHeading !== "Local AI on this computer"
-    || !navigation.system.localSetupLabel.includes("local AI")
-    || !navigation.system.uninstallLabel.includes("local AI components")
+    || !localSetupControlsValid
     || !navigation.assurance.active
     || !navigation.assurance.visible
     || !navigation.assurance.modelsHidden
@@ -2232,6 +2240,26 @@ try {
   checks += 26;
   trace("accessible-navigation-verified");
 
+  if (localSetupUnavailable) {
+    const unavailableLocalSetup = await cdp.evaluate(`(async () => {
+      const response = await fetch('/api/alpha/setup-status', {credentials: 'same-origin', cache: 'no-store'});
+      const body = await response.json();
+      return {
+        status: response.status,
+        error: body.error,
+        setupDisabled: document.querySelector('#setup-local-components').disabled,
+        uninstallDisabled: document.querySelector('#remove-managed-components').disabled,
+      };
+    })()`);
+    if (
+      unavailableLocalSetup.status !== 404
+      || unavailableLocalSetup.error !== "windows-alpha-setup-unavailable"
+      || !unavailableLocalSetup.setupDisabled
+      || !unavailableLocalSetup.uninstallDisabled
+    ) throw new Error(`unavailable-local-setup:${JSON.stringify(unavailableLocalSetup)}`);
+    checks += 4;
+    trace("unavailable-local-setup-verified");
+  } else {
   const localSetupReturn = await cdp.evaluate(`(async () => {
     document.querySelector('#system-nav').click();
     const response = await fetch('/api/alpha/setup-status', {credentials: 'same-origin', cache: 'no-store'});
@@ -2301,6 +2329,7 @@ try {
   await waitFor(() => cdp.evaluate("document.querySelector('#setup-wizard').classList.contains('hidden')"));
   checks += 5;
   trace("missing-local-recovery-verified");
+  }
 
   const hostileEvents = await cdp.evaluate(`(() => {
     const cases = [
