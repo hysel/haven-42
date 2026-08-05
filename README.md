@@ -11,14 +11,15 @@
 > because the current package is not digitally signed. Use only a package you
 > received from a trusted Haven 42 test source.
 
-> **Windows Alpha work in progress:** `0.4.0-alpha.1` targets invited Windows
+> **Windows Alpha available:** `0.4.0-alpha.1` targets invited Windows
 > 11 x64 testing with Chat, Writing, and Summarization in one text workspace.
-> Its unsigned package, managed current-user
-> setup, and private delivery are not yet admitted. See the
+> Its unsigned package and managed current-user setup are admitted only for
+> this early test boundary. See the
 > [Alpha boundary](docs/windows-alpha-0.4-alpha-1.md).
 
-The unsigned package is not public yet. When the exact candidate passes its
-security review and hosted checks, testers will use the
+Download the unsigned package from the
+[Haven 42 0.4.0 Alpha 1 prerelease](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1).
+Testers should use the
 [Windows Alpha download and feedback guide](docs/windows-alpha-download-and-feedback.md)
 to verify the download and report problems without exposing private data.
 

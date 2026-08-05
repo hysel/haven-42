@@ -20,7 +20,7 @@ the archive.
 
 ## Download and verify
 
-After publication, download these two files from the official
+Download these two files from the official
 [Haven 42 Releases page](https://github.com/hysel/haven-42/releases):
 
 - `haven42-0.4.0-alpha.1-windows-x64-unsigned.zip`
@@ -72,5 +72,5 @@ not a public issue.
 ## Known limits
 
 Read the candidate-bound [known limitations](private-alpha-known-limitations.md)
-before testing. Publishing this unsigned Alpha will not claim production
+before testing. This unsigned Alpha publication does not claim production
 readiness, activate automatic updates, or authorize signing.

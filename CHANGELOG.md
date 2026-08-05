@@ -11,6 +11,8 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+## 0.4.0-alpha.1 - 2026-08-05
+
 - Added a novice-friendly Windows Alpha download and checksum guide, structured
   public problem and experience-feedback forms, a private vulnerability-report
   route, and a fixed allowlisted reporting button on the About page. Every
@@ -32,15 +34,15 @@ This project follows a simple changelog format:
   UI and documentation changes aligned with this standard without weakening
   security disclosures.
 
-- Began the Windows-only Haven 42 `0.4.0-alpha.1` candidate: server-enforced
+- Added the Windows-only Haven 42 `0.4.0-alpha.1` Alpha: server-enforced
   text-only Chat, Writing, and Summarization scope, bounded Windows readiness
   and hardware thresholds, pinned
   Qwen3.5 model tiers, manual consumer-driver guidance, exact standalone Ollama
   component identities, single-use setup approval, hostile archive checks,
   owned loopback process lifecycle, verified model pull, memory-only resource
-  and session-token information, and an explicit 16-stage ledger. All artifacts
-  remain unsigned, private, uncommitted candidate work with no distribution,
-  tag, signing, public release, or production authority.
+  and session-token information, and an explicit 16-stage ledger. The published
+  prerelease remains unsigned and grants no signing, installer,
+  automatic-update, or production authority.
 
 - Added an explicit Automatic/Chat/Write/Summarize selector to the unified
   Alpha text workspace and a provider-reported tokens-per-second indicator.
@@ -57,8 +59,9 @@ This project follows a simple changelog format:
 - Added a preparation-only private-alpha readiness contract, frozen known
   limitations, tester runbook, sanitized feedback template, and hostile
   evaluator. Candidate version, commit, target platforms, tester group,
-  authenticated private delivery, distribution, tagging, publication,
-  signing, installation, updates, and production authority remain denied.
+  authenticated delivery, distribution, tagging, publication, signing,
+  installation, updates, and production authority remain owner-gated outside
+  that non-authoritative preparation contract.
 
 - Added an exact staged-tree security-review gate for large, binary, and
   security-sensitive commits. Any finding now stops the commit flow until the
