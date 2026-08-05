@@ -7,15 +7,16 @@ Every unchecked `TODO.md` parent item is covered exactly once by a fail-closed m
 Current owner decisions and their strict authority boundaries are recorded in
 `docs/roadmap-owner-decisions.md`.
 
-Windows private-alpha implementation is now scoped as `0.4.0-alpha.1` for
-Windows 11 x64 and invited testers. Its 16-stage ledger covers server-enforced
-text-only Chat, Writing, and Summarization in one continuous workspace,
+Windows Alpha `0.4.0-alpha.1` is published as an unsigned GitHub prerelease for
+Windows 11 x64 and invited testers. Tag `v0.4.0-alpha.1` resolves to exact
+validated commit `6624dfb967a58c67d2d5a9a01437cf3213eee289`. Its 16-stage
+ledger covers server-enforced text-only Chat, Writing, and Summarization in one
+continuous workspace,
 readiness, consumer-driver guidance, pinned standalone Ollama and model
 identities, current-user setup, prequantized selection, local metrics including
-provider-reported generation speed, packaging, and gates. Distribution, the
-exact commit, the private channel, tagging, signing, public release, and
-production claims remain denied until privacy-safe tester diagnostics,
-native candidate evidence, and owner review finish.
+provider-reported generation speed, packaging, and gates. The prerelease remains
+unsigned and not production-ready; signing, installers, automatic updates, and
+production promotion remain separately denied.
 
 Completed managed setups now have a fail-closed next-launch path: Haven
 rebuilds the device-derived plan, verifies the completion receipt, runtime
@@ -37,9 +38,8 @@ package's no-effect, managed first-run, and managed reuse paths. That evidence
 includes immutable runtime/model verification, Intel Vulkan inference with
 nonzero model VRAM, real Chat and token/resource reporting, unload, port
 closure, and exact-process shutdown. It does not promote other Windows hardware
-cells or authorize distribution; CPU-only/low-memory, NVIDIA, AMD, hosted CI,
-clean-commit security evidence, owner UI review, and private delivery remain
-separate gates. See `docs/windows-alpha-native-validation.md`.
+cells; CPU-only/low-memory, NVIDIA, and AMD coverage remain separate evidence
+tracks. See `docs/windows-alpha-native-validation.md`.
 
 Milestone 22A also includes explicit candidate-only public Ollama catalog
 search without installation authority: the explicit submit action replaces a
