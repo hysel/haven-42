@@ -25,10 +25,10 @@ Alpha 1 Windows candidate.
   updates remain server-blocked.
 - Managed model setup is currently evidence-approved only for the pinned Qwen
   3.5 9B Q4 artifact on the tested Windows Intel Vulkan, AMD ROCm, and NVIDIA
-  CUDA paths. The earlier final13 archive has exact managed reuse evidence on
-  all three paths. The current final18 candidate adds portable-storage,
-  managed-process lifecycle, and component-progress changes and
-  cleanup hardening and still requires fresh external-hardware validation.
+  CUDA paths. An earlier candidate has exact managed reuse evidence on all
+  three paths. The published Alpha adds portable-storage, managed-process
+  lifecycle, component-progress, and cleanup hardening changes and still
+  requires fresh external-hardware validation.
   Other catalog tiers are visible as hardware-fit candidates
   with manual instructions but cannot be downloaded or run automatically by
   Haven.
