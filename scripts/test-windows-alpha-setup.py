@@ -222,7 +222,7 @@ def main() -> int:
     checks += 4
 
     with tempfile.TemporaryDirectory() as directory:
-        coordinator = MODULE.SetupCoordinator("b" * 16, Path(directory) / "state")
+        coordinator = MODULE.SetupCoordinator("b" * 16, Path(directory).resolve() / "state")
         registered = coordinator.register_plan(cpu)
         assert registered["phase"] == "idle" and registered["planId"] == cpu["planId"]
         assert [item["kind"] for item in registered["components"]] == ["runtime", "model"]
@@ -251,7 +251,7 @@ def main() -> int:
         checks += 15
 
     with tempfile.TemporaryDirectory() as directory:
-        state_root = Path(directory) / "Haven42-Data"
+        state_root = Path(directory).resolve() / "Haven42-Data"
         owned = MODULE._owned_state_root(state_root, create=True)
         runtime_version = MODULE.load_component_registry()["components"][0]["version"]
         (owned / "runtime" / runtime_version).mkdir(parents=True)
@@ -296,7 +296,7 @@ def main() -> int:
         checks += 13
 
     with tempfile.TemporaryDirectory() as directory:
-        base = Path(directory)
+        base = Path(directory).resolve()
         state_root = base / "Haven42-Data"
         owned = MODULE._owned_state_root(state_root, create=True)
         (owned / "models").mkdir()
@@ -350,7 +350,7 @@ def main() -> int:
         checks += 3
 
     with tempfile.TemporaryDirectory() as directory:
-        base = Path(directory)
+        base = Path(directory).resolve()
         legacy = base / "legacy-alpha"
         legacy.mkdir()
         (legacy / "models").mkdir()
@@ -387,7 +387,7 @@ def main() -> int:
             free=cpu["requiredStorageBytes"] - 1,
         )
         with tempfile.TemporaryDirectory() as directory:
-            coordinator = MODULE.SetupCoordinator("d" * 16, Path(directory) / "state")
+            coordinator = MODULE.SetupCoordinator("d" * 16, Path(directory).resolve() / "state")
             coordinator._run(cpu)
             assert coordinator.status()["phase"] == "failed"
             assert coordinator.status()["error"] == "insufficient-managed-storage"
@@ -396,7 +396,7 @@ def main() -> int:
         MODULE.shutil.disk_usage = original_disk_usage
 
     with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
+        root = Path(directory).resolve()
         good = root / "good.zip"
         make_zip(good, [("ollama.exe", b"safe", stat.S_IFREG | 0o644), ("lib/runtime.dll", b"safe", stat.S_IFREG | 0o644)])
         assert len(MODULE.validate_zip(good)) == 2
@@ -421,18 +421,23 @@ def main() -> int:
                 )
 
             MODULE.subprocess.run = signed_run
-            signature = MODULE.verify_authenticode(fake_ollama)
-            assert signature["status"] == "Valid"
-            assert captured["shell"] is False
-            assert captured["env"]["PSModulePath"].endswith(
-                "System32\\WindowsPowerShell\\v1.0\\Modules"
-            )
-            assert captured["env"]["HAVEN42_AUTHENTICODE_TARGET"] == str(fake_ollama.resolve())
-            assert set(captured["env"]) == {
-                "SYSTEMROOT", "PATH", "PSModulePath", "HAVEN42_AUTHENTICODE_TARGET",
-            }
-            assert str(fake_ollama.resolve()) not in captured["command"]
-            checks += 5
+            if os.name == "nt":
+                signature = MODULE.verify_authenticode(fake_ollama)
+                assert signature["status"] == "Valid"
+                assert captured["shell"] is False
+                assert captured["env"]["PSModulePath"].endswith(
+                    "System32\\WindowsPowerShell\\v1.0\\Modules"
+                )
+                assert captured["env"]["HAVEN42_AUTHENTICODE_TARGET"] == str(fake_ollama.resolve())
+                assert set(captured["env"]) == {
+                    "SYSTEMROOT", "PATH", "PSModulePath", "HAVEN42_AUTHENTICODE_TARGET",
+                }
+                assert str(fake_ollama.resolve()) not in captured["command"]
+                checks += 5
+            else:
+                rejected("authenticode-windows-only", MODULE.verify_authenticode, fake_ollama)
+                assert captured == {}
+                checks += 2
         finally:
             MODULE.subprocess.run = original_run
 
@@ -535,7 +540,7 @@ def main() -> int:
         checks += 2
 
     with tempfile.TemporaryDirectory() as directory:
-        blocked_root = Path(directory) / "not-a-directory"
+        blocked_root = Path(directory).resolve() / "not-a-directory"
         blocked_root.write_text("blocked", encoding="utf-8")
         coordinator = MODULE.SetupCoordinator("c" * 16, blocked_root / "state")
         coordinator._run(cpu)
@@ -547,7 +552,12 @@ def main() -> int:
     registry = MODULE.load_component_registry()
     hostile_component = dict(registry["components"][0], sourceUrl="https://evil.example/a.zip")
     with tempfile.TemporaryDirectory() as directory:
-        rejected("unregistered-component", MODULE.download_registered_component, hostile_component, Path(directory) / "a.zip")
+        rejected(
+            "unregistered-component",
+            MODULE.download_registered_component,
+            hostile_component,
+            Path(directory).resolve() / "a.zip",
+        )
     checks += 1
     print(f"Windows alpha setup hostile tests passed: {checks} checks.")
     return 0

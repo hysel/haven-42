@@ -473,14 +473,20 @@ try {
     nextText: document.querySelector('#wizard-readiness-next').textContent,
     status: document.querySelector('#wizard-scan-status').textContent
   })`);
+  const detectedAmd = /Accelerator\s*AMD\b/i.test(guided.factsText);
+  const detectedNvidia = /Accelerator\s*NVIDIA\b/i.test(guided.factsText);
+  const detectedIntel = /Accelerator\s*Intel\b/i.test(guided.factsText);
+  const showsAmdTools = guided.factsText.includes("AMD ROCm tools");
+  const showsNvidiaTools = guided.factsText.includes("NVIDIA tools");
+  const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
   if (
     guided.current !== "middle"
     || guided.facts < 4
     || !/(Windows 10|Windows 11|Linux|macOS)/.test(guided.factsText)
     || !guided.factsText.includes("Embedded Python runtime")
-    || !guided.factsText.includes("AMD ROCm tools")
-    || guided.factsText.includes("NVIDIA tools")
-    || guided.factsText.includes("Intel oneAPI tools")
+    || showsAmdTools !== detectedAmd
+    || showsNvidiaTools !== detectedNvidia
+    || showsIntelTools !== detectedIntel
     || guided.planActions < 2
     || !guided.planText.includes("Haven 42 checked your computer")
     || !guided.status.includes("Nothing was installed")
@@ -494,11 +500,11 @@ try {
       || guided.installationProgressBars !== guided.installationRows + 1
       || !guided.planText.includes("Components for this device")
       || !guided.planText.includes("Ollama local runtime")
-      || !guided.planText.includes("AMD GPU acceleration · ROCm 7.1")
-      || !guided.planText.includes("Ollama 0.32.5 AMD support package")
       || !guided.planText.includes("Download:")
       || !guided.planText.includes("Required to run the selected text model locally")
       || !guided.planText.includes("Download and safety details")
+      || (detectedAmd && !guided.planText.includes("AMD GPU acceleration · ROCm 7.1"))
+      || (detectedAmd && !guided.planText.includes("Ollama 0.32.5 AMD support package"))
     )
   ) throw new Error(`guided-installation-progress:${JSON.stringify(guided)}`);
   if (!guided.installationPanel && (!guided.nextDisabled || guided.nextText !== "Local setup unavailable")) {

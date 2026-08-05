@@ -1,4 +1,6 @@
 *.sh text eol=lf
+*.py text eol=lf
+*.mjs text eol=lf
 .gitattributes text eol=lf
 .githooks/* text eol=lf
 scripts/test-shims/* text eol=lf
@@ -12,5 +14,6 @@ config/agent-surface-capabilities.json text eol=lf
 config/agent-surface-solutions.json text eol=lf
 config/install-component-registry.json text eol=lf
 config/workflows.json text eol=lf
+config/windows-alpha-*.json text eol=lf
 package/resource-integrity.json text eol=lf
 *.bin binary
