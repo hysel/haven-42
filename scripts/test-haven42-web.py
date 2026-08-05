@@ -514,6 +514,15 @@ def main() -> int:
         ] if query == "writing" else [],
         diagnostic_root=DIAGNOSTIC_TEST_ROOT,
     )
+    if state.alpha_setup is None:
+        # This suite supplies a synthetic Windows readiness snapshot on every
+        # host. Inject the matching effect-free setup coordinator so Linux and
+        # macOS validate the same Windows API contract without enabling it in
+        # the production server on those platforms.
+        state.alpha_setup = WEB.SetupCoordinator(
+            state.csrf_token,
+            (DIAGNOSTIC_TEST_PARENT / "Haven42-Data").resolve(),
+        )
     class ClosingResponse:
         closed = False
 
@@ -933,7 +942,7 @@ def main() -> int:
         )
         assert status == 400 and error["error"] == "invalid-setup-plan-fields"
         status, storage_status, _ = request_json(origin + "/api/alpha/setup-status")
-        assert status == 200
+        assert status == 200, (status, storage_status)
         assert storage_status["storageScope"] == "inside-extracted-folder"
         assert storage_status["storageDirectoryName"] == "Haven42-Data"
         assert isinstance(storage_status["managedComponentsPresent"], bool)

@@ -482,7 +482,7 @@ try {
   if (
     guided.current !== "middle"
     || guided.facts < 4
-    || !/(Windows 10|Windows 11|Linux|macOS)/.test(guided.factsText)
+    || !/(Windows 10|Windows 11|Linux|macOS)/i.test(guided.factsText)
     || !guided.factsText.includes("Embedded Python runtime")
     || showsAmdTools !== detectedAmd
     || showsNvidiaTools !== detectedNvidia
