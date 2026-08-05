@@ -18,6 +18,8 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 
+from windows_user_paths import WindowsUserPathError, portable_install_root
+
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
 ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
@@ -125,6 +127,54 @@ def _memory_gib() -> float | None:
         return None
 
 
+def _windows_platform_facts() -> dict[str, Any]:
+    facts: dict[str, Any] = {
+        "productName": None,
+        "buildNumber": None,
+        "cpuFeatures": [],
+        "pendingRestart": None,
+    }
+    if os.name != "nt":
+        return facts
+    try:
+        version = sys.getwindowsversion()
+        facts["buildNumber"] = int(version.build)
+        facts["productName"] = "Windows 11" if version.build >= 22000 else "Windows 10"
+    except (AttributeError, OSError, ValueError):
+        pass
+    feature_ids = {"sse2": 10, "sse3": 13, "avx": 39, "avx2": 40}
+    for name, feature_id in feature_ids.items():
+        try:
+            if ctypes.windll.kernel32.IsProcessorFeaturePresent(feature_id):
+                facts["cpuFeatures"].append(name)
+        except (AttributeError, OSError):
+            break
+    try:
+        import winreg
+        checks = (
+            (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\Component Based Servicing\RebootPending", None),
+            (winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\WindowsUpdate\Auto Update\RebootRequired", None),
+            (winreg.HKEY_LOCAL_MACHINE, r"SYSTEM\CurrentControlSet\Control\Session Manager", "PendingFileRenameOperations"),
+        )
+        pending = False
+        for hive, key_path, value_name in checks:
+            try:
+                with winreg.OpenKey(hive, key_path, 0, winreg.KEY_READ | getattr(winreg, "KEY_WOW64_64KEY", 0)) as key:
+                    if value_name is None:
+                        pending = True
+                    else:
+                        value, _ = winreg.QueryValueEx(key, value_name)
+                        pending = bool(value)
+            except OSError:
+                continue
+            if pending:
+                break
+        facts["pendingRestart"] = pending
+    except ImportError:
+        pass
+    return facts
+
+
 def _software_item(
     runner: ProbeRunner,
     component_id: str,
@@ -204,12 +254,24 @@ def _windows_gpu_items() -> list[dict[str, Any]]:
                                 else "Intel" if re.search("intel", name, re.I)
                                 else "Unknown"
                             )
+                            try:
+                                raw_driver, _ = winreg.QueryValueEx(key, "DriverVersion")
+                                driver_version = _sanitize_text(str(raw_driver), 64)
+                            except OSError:
+                                driver_version = None
+                            backend = (
+                                "cuda-candidate" if vendor == "NVIDIA"
+                                else "rocm-or-vulkan-candidate" if vendor == "AMD"
+                                else "vulkan-candidate" if vendor == "Intel"
+                                else "unknown"
+                            )
                             items.append({
                                 "vendor": vendor, "model": name,
                                 "memoryGiB": round(memory_bytes / (1024 ** 3), 1) if memory_bytes else None,
                                 "memoryType": "shared-or-unknown" if vendor == "Intel" else "unknown",
                                 "state": "detected", "source": "windows-display-registry",
-                                "confidence": "medium",
+                                "confidence": "medium", "driverVersion": driver_version,
+                                "backendCandidate": backend,
                             })
                     except OSError:
                         continue
@@ -221,12 +283,12 @@ def _windows_gpu_items() -> list[dict[str, Any]]:
 def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
     probe = runner.run(
         "nvidia-smi",
-        ("--query-gpu=name,memory.total", "--format=csv,noheader,nounits"),
+        ("--query-gpu=name,memory.total,driver_version", "--format=csv,noheader,nounits"),
     )
     items: list[dict[str, Any]] = []
     if probe["state"] == "detected":
         for line in probe["output"].splitlines()[:16]:
-            match = re.fullmatch(r"\s*([^,\r\n]{1,120})\s*,\s*(\d{1,8})\s*", line)
+            match = re.fullmatch(r"\s*([^,\r\n]{1,120})\s*,\s*(\d{1,8})\s*,\s*([0-9.]{1,32})\s*", line)
             if not match:
                 continue
             name = _sanitize_text(match.group(1), 120)
@@ -239,6 +301,8 @@ def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
                     "state": "detected",
                     "source": "nvidia-smi",
                     "confidence": "high",
+                    "driverVersion": match.group(3),
+                    "backendCandidate": "cuda-candidate",
                 })
         return items
     if system == "windows":
@@ -261,6 +325,7 @@ def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
                         "vendor": vendor, "model": name, "memoryGiB": None,
                         "memoryType": "unknown", "state": "detected",
                         "source": "lspci", "confidence": "medium",
+                        "driverVersion": None, "backendCandidate": "unknown",
                     })
     elif system == "macos":
         profiler = runner.run("system_profiler", ("SPDisplaysDataType", "-json"))
@@ -274,6 +339,7 @@ def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
                             "vendor": "Apple" if "apple" in name.lower() else "Unknown",
                             "model": name, "memoryGiB": None, "memoryType": "unified",
                             "state": "detected", "source": "system-profiler", "confidence": "medium",
+                            "driverVersion": None, "backendCandidate": "metal-candidate",
                         })
             except (json.JSONDecodeError, AttributeError):
                 pass
@@ -286,15 +352,16 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
     architecture = platform.machine().lower() or "unknown"
     memory = _memory_gib()
     try:
-        storage = round(shutil.disk_usage(ROOT).free / (1024 ** 3), 1)
-    except OSError:
+        storage_root = portable_install_root() if system == "windows" else ROOT
+        storage = round(shutil.disk_usage(storage_root).free / (1024 ** 3), 1)
+    except (OSError, WindowsUserPathError):
         storage = None
     software = [
         {
             "componentId": "python", "state": "validated",
             "version": platform.python_version(), "source": "running-interpreter", "confidence": "high",
         },
-        _presence_item("ollama", "ollama"),
+        _software_item(runner, "ollama", "ollama", ("--version",)),
         _software_item(runner, "continue", "cn", ("--version",)),
         _software_item(runner, "aider", "aider", ("--version",)),
         _software_item(runner, "opencode", "opencode", ("--version",)),
@@ -304,6 +371,7 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
     ]
     if system == "darwin":
         system = "macos"
+    windows_facts = _windows_platform_facts()
     if system != "macos":
         software.append({
             "componentId": "apple-mlx", "state": "unsupported", "version": None,
@@ -329,6 +397,10 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
             "logicalProcessors": os.cpu_count(),
             "systemMemoryGiB": memory,
             "availableStorageGiB": storage,
+            "productName": windows_facts["productName"],
+            "buildNumber": windows_facts["buildNumber"],
+            "cpuFeatures": windows_facts["cpuFeatures"],
+            "pendingRestart": windows_facts["pendingRestart"],
         },
         "accelerators": _gpu_items(runner, system),
         "software": software,

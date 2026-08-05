@@ -5,20 +5,20 @@ Current packages are unsigned development software._
 
 **Your private, local AI station.**
 
-Haven 42 is a local-first browser application for private AI conversations,
-writing, summarization, selected-file context, model management, and an
-admitted local image workflow. The application runs on your device and uses a
-local or explicitly selected private-network provider.
+Haven 42 is an application for private AI chat, writing, and summarization. It
+opens in your browser, but the application runs on your computer. It can use an
+AI model on the same computer or on a private server you choose.
 
-Haven 42 has no hosted chat service, user account, telemetry, or automatic
-model download. Current builds are unsigned development artifacts.
+Haven 42 has no hosted chat service, user account, or tracking. It never
+downloads a model silently: guided setup first shows what is needed and asks
+permission. Current builds are unsigned development packages.
 
 ## Start here
 
 1. Follow the [[Quick Start|Quick-Start]] guide to run the source version or an
    exact unsigned portable development package.
-2. Open Haven 42 in your browser and choose **Explore** or connect an existing
-   Ollama provider.
+2. Choose **Set up this computer · Recommended**. Haven 42 checks your computer,
+   explains what it needs, and asks before downloading anything.
 3. Read [[Using Haven 42|Using-Haven-42]] for chat, attachments, models, and
    image-generation guidance.
 
@@ -27,20 +27,30 @@ If something does not work, begin with [[Troubleshooting]].
 ## What works today
 
 - One continuous conversation for chat, drafting, and summarization.
-- Explicit connection to a same-device or private-network Ollama server,
-  including optional memory-only Bearer or X-API-Key authentication.
+- Automatic connection to a completed Haven-managed local setup, or an advanced
+  connection to Ollama on another private computer.
 - Installed-model selection and explicit, download-free public catalog search.
 - Memory-only prompt recall and conversation state.
 - Bounded text, source-code, structured-text, and PNG screenshot attachments.
-- Safe Markdown-style response formatting without model-supplied HTML or links.
-- Provider-reported token and timing details.
+- Safe response formatting for headings, lists, code, quotations, and emoji.
+- Token totals, response timing, and tokens per second.
 - A promoted loopback Linux ComfyUI/SDXL image workflow.
 - Read-only system readiness, software plans, and bundled evidence views.
 
-Capabilities that are experimental, evidence-only, or not admitted are labeled
-as such in the interface and documentation. Haven 42 does not silently install
-software, download models, execute attached files, enable online updates, or
-modify system configuration.
+Features that are still experimental are kept out of the main experience.
+Haven 42 explains approved setup downloads, never runs attached files, and does
+not silently change drivers, Windows settings, or automatic updates.
+
+## Common words
+
+- **Model:** the AI that reads your request and writes the response.
+- **Ollama:** the local AI engine that runs a model.
+- **AI server:** the computer running Ollama. It may be this computer or another
+  computer on your private network.
+- **Token:** a small piece of text counted by the model. Tokens per second is a
+  rough measure of response speed.
+
+See [[Common Words|Glossary]] for more definitions.
 
 ## Choose a guide
 

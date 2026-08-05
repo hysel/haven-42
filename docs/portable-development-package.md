@@ -36,7 +36,7 @@ These outputs are unsigned development artifacts. They are not installers or pro
 
 Windows builds also embed deterministic executable identity metadata:
 ProductName and FileDescription `Haven 42`, ProductVersion and FileVersion
-`0.3.0`, and OriginalFilename `haven42.exe`. The build reads this metadata
+`0.4.0-alpha.1`, and OriginalFilename `haven42.exe`. The Alpha build reads this metadata
 from `package/haven42-version-info.txt` and independently parses the emitted PE
 resources before it can create the archive. This identity metadata is not a
 digital signature and conveys no publisher trust.

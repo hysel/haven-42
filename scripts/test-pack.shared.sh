@@ -2098,10 +2098,19 @@ assert policy["headlessSeparation"]["inheritsDesktopEvidence"] is False
 assert storage["schemaVersion"] == 1
 assert storage["resolutionRules"]["resolveWithNativePlatformApis"] is True
 assert storage["resolutionRules"]["persistUnexpandedEnvironmentPaths"] is False
+assert storage["resolutionRules"]["managedDataBesideExecutable"] is True
+assert storage["resolutionRules"]["managedWritesOutsidePortableRootAllowed"] is False
+assert storage["resolutionRules"]["legacyExternalStorageAccess"] == "cleanup-only"
 for platform in ("windows", "linux", "macos"):
     values = storage["platforms"][platform]
     for field in ("immutableApplication", "configuration", "state", "cache", "managedModels", "defaultArtifacts", "updateDownloads", "stagedVersions", "activationJournal", "credentials"):
         assert values[field]
+for platform in ("windows", "linux", "macos"):
+    for field in ("immutableApplication", "configuration", "state", "cache", "managedModels", "defaultArtifacts", "updateDownloads", "stagedVersions", "activationJournal"):
+        value = storage["platforms"][platform][field]
+        assert "portable-install-root" in value
+        assert not any(fragment in value.lower() for fragment in ("appdata", "documents", "userprogramfiles", "xdg_", "nsapplication", "nscaches", "nsdocument"))
+    assert storage["platforms"][platform]["credentials"] == "memory only; no persistent secret file"
 assert "user-content" in storage["lifecycleRules"]["updateMustPreserve"]
 assert "provider-data" in storage["lifecycleRules"]["updateMustPreserve"]
 assert storage["lifecycleRules"]["rollbackMustNotDowngradeUserDataWithoutCompatibleMigration"] is True
@@ -2157,9 +2166,8 @@ PY
     grep -q "headless-loopback" "$contract_doc" &&
     grep -q "Immutable engine" "$storage_doc" &&
     grep -q "user-owned" "$storage_doc" &&
-    grep -q "Windows Credential Manager" "$storage_doc" &&
-    grep -q "Secret Service" "$storage_doc" &&
-    grep -q "macOS Keychain" "$storage_doc" &&
+    grep -q "Haven42-Data" "$storage_doc" &&
+    grep -q "cleanup flow" "$storage_doc" &&
     grep -q 'unattended `git pull`' "$storage_doc" &&
     grep -q "Atomically" "$storage_doc" &&
     grep -q "docs/desktop-runtime-dependency-evaluation.md" "$REPO_ROOT/config/wiki-sync.tsv" &&
@@ -2485,6 +2493,15 @@ PY
 }
 
 test_local_web_mvp() {
+  python3 "$REPO_ROOT/scripts/test-windows-alpha.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-windows-alpha-setup.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-windows-alpha-job-lifecycle.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-diagnostic-logging.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-windows-alpha-web-policy.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-novice-experience.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-windows-alpha-stage-ledger.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-windows-alpha-candidate.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-private-alpha-readiness.py" || return 1
   local_web_output="$(python3 "$REPO_ROOT/scripts/test-haven42-web.py")" || return 1
   local_web_count="$(
     printf '%s\n' "$local_web_output" |
@@ -2548,7 +2565,8 @@ assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promo
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["fixedExternalNavigationUrls"] == [
-    "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"
+    "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+    "https://ollama.com/download/windows",
 ]
 assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
 assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False

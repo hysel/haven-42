@@ -26,8 +26,8 @@ class FakeRunner:
         outputs = {
             (
                 "nvidia-smi",
-                ("--query-gpu=name,memory.total", "--format=csv,noheader,nounits"),
-            ): ("detected", "NVIDIA Test GPU, 16384\n", 0),
+                ("--query-gpu=name,memory.total,driver_version", "--format=csv,noheader,nounits"),
+            ): ("detected", "NVIDIA Test GPU, 16384, 582.70\n", 0),
         }
         state, output, code = outputs.get(
             (executable, arguments),
@@ -69,6 +69,8 @@ def main() -> int:
     assert snapshot["installedModels"] == []
     assert snapshot["accelerators"][0]["vendor"] == "NVIDIA"
     assert snapshot["accelerators"][0]["memoryGiB"] == 16.0
+    assert snapshot["accelerators"][0]["driverVersion"] == "582.70"
+    assert snapshot["accelerators"][0]["backendCandidate"] == "cuda-candidate"
     assert all(value is False for value in snapshot["effects"].values())
     assert snapshot["privacy"] == {
         "persisted": False,
@@ -78,7 +80,7 @@ def main() -> int:
     }
     assert all(call[2] <= 3 for call in runner.calls)
     assert not any(call[0] in {"cmd", "cmd.exe", "powershell", "powershell.exe", "sh", "bash"} for call in runner.calls)
-    assert not any(call[0] == "ollama" for call in runner.calls)
+    assert any(call[:2] == ("ollama", ("--version",)) for call in runner.calls)
     checks += 9
 
     registry = READINESS.load_component_registry()

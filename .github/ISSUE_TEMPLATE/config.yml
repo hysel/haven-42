@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security problem privately
+    url: https://github.com/hysel/haven-42/security/advisories/new
+    about: Do not disclose vulnerabilities, credentials, or private data in a public issue.
+  - name: Read the troubleshooting guide
+    url: https://github.com/hysel/haven-42/wiki/Troubleshooting
+    about: Check the beginner-friendly troubleshooting steps before opening a report.

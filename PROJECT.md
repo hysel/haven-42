@@ -6,6 +6,11 @@ Haven 42
 
 Tagline: Your private, local AI station.
 
+Primary audience: people who want private AI but may have no experience with
+models, local AI engines, command lines, or computer administration. Advanced
+users and contributors remain supported through clearly separated controls and
+documentation.
+
 ## Purpose
 
 This repository defines an evidence-gated, local-first AI workbench for individual users, developers, teams, consultants, and enterprise groups. It combines repeatable software-engineering workflows with repository-optional chat, writing, summarization, and image capabilities under common routing, approval, privacy, and typed-artifact contracts.
@@ -17,9 +22,26 @@ Continue, Aider, and OpenCode are the maintained engineering surfaces. General t
 ## Current Stage
 
 The recovered local-closure plan now has a durable 374-task ledger with stable
-IDs and evidence-required states. Its reconciliation is in progress. The
-existing 48-item parent-roadmap blocker ledger remains valid, but it does not
-prove that every finer-grained conversation task is complete.
+IDs and evidence-required states. Its reconciliation records 360 completed,
+seven owner-deferred, seven partial, and zero unverified tasks. The existing
+48-item parent-roadmap blocker ledger remains valid; classification does not
+turn deferred or partial product work into completed scope.
+
+The current private-alpha implementation target is Haven 42 `0.4.0-alpha.1`,
+Windows 11 x64, invited testers, and server-enforced text-only Chat, Writing,
+and Summarization in one continuous workspace. Automatic request routing is the
+default with explicit task choices available, and provider-reported generation
+speed appears beside local resource and token totals. It adds a candidate
+current-user managed setup without bundling external software or automating
+drivers. The exact commit, authenticated private delivery channel, distribution
+approval, tag, public Release, signing, updater, and production claim remain
+inactive.
+
+A completed Haven-managed local setup reconnects on later launches only after
+fresh receipt, runtime-integrity, publisher, exact-model, managed-path, and
+loopback verification, then bypasses redundant connection onboarding. The
+system summary uses the detected Windows 10/11 name, build, architecture, and
+available software/driver versions rather than a generic platform label.
 
 The admitted local web UI now enforces one visible primary panel, provides
 dedicated Models and About views, exposes capability-specific installed-model

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.windows-alpha",
+  "version": "0.4.0-alpha.1",
+  "displayVersion": "Haven 42 0.4 Alpha 1",
+  "implementationStatus": "implementation-complete-native-validation-required",
+  "platform": {
+    "operatingSystem": "windows",
+    "minimumProduct": "Windows 11",
+    "architecture": "x64",
+    "administratorRequired": false
+  },
+  "capabilityPolicy": {
+    "admitted": ["general.chat", "content.write", "content.summarize"],
+    "denied": [
+      "media.image.create",
+      "audio.music.create",
+      "media.video.create",
+      "software.workflow.execute",
+      "web.research"
+    ],
+    "rendererMayBroaden": false,
+    "serverEnforcementRequired": true
+  },
+  "minimumCandidateHardware": {
+    "logicalProcessors": 4,
+    "systemMemoryGiB": 8,
+    "availableStorageGiB": 15,
+    "gpuRequired": false,
+    "belowThresholdBehavior": "open-ui-and-deny-local-chat-setup"
+  },
+  "managedSetup": {
+    "implementationStatus": "alpha-candidate-native-validation-required",
+    "explicitUserApprovalRequired": true,
+    "automaticComponents": ["ollama", "ollama-model"],
+    "guidedAlternativeRequired": true,
+    "networkOrigins": [
+      "https://github.com",
+      "https://objects.githubusercontent.com",
+      "https://release-assets.githubusercontent.com",
+      "https://ollama.com",
+      "https://registry.ollama.ai"
+    ],
+    "externalRuntimeStrategy": "downloaded-versioned-standalone-not-bundled",
+    "managedStorageScope": "inside-extracted-folder/Haven42-Data",
+    "existingUserInstallationOwnership": "never-assumed",
+    "userScopedOnly": true,
+    "persistentRecoveryJournalAllowed": true,
+    "journalMayContainUserContent": false,
+    "removalPolicy": {
+      "explicitConfirmationRequired": true,
+      "ownedDataOnly": true,
+      "applicationSelfDeletionAllowed": false,
+      "driversOrExternalInstallationsRemoved": false
+    },
+    "managedProcessPolicy": {
+      "windowsJobObjectRequired": true,
+      "assignBeforeProcessResume": true,
+      "killProcessTreeWhenHavenExits": true,
+      "externalProviderProcessesIncluded": false,
+      "processNameAloneGrantsTermination": false
+    },
+    "storagePreflight": {
+      "freeReserveGiB": 2,
+      "maximumExpandedGiBPerComponent": 4,
+      "includeComponentArchives": true,
+      "includeModelArtifact": true,
+      "recheckBeforeEffects": true
+    }
+  },
+  "forbiddenEffects": [
+    "driver-install",
+    "driver-update",
+    "driver-downgrade",
+    "windows-update-change",
+    "firmware-change",
+    "bios-change",
+    "firewall-change",
+    "certificate-trust-change",
+    "system-service-change",
+    "system-wide-runtime-install",
+    "automatic-elevation"
+  ],
+  "driverPolicy": {
+    "automationAllowed": false,
+    "officialGuidanceOnly": true,
+    "consumerBaseline": true,
+    "nvidiaChannels": ["game-ready", "studio"],
+    "enterpriseDriverRequired": false,
+    "professionalHardwareIsConsumerEvidence": false
+  },
+  "modelPolicy": {
+    "trustedPrequantizedFirst": true,
+    "smallerTrustedModelBeforeLocalConversion": true,
+    "localQuantizationDefault": "advanced-not-admitted-until-exact-validation",
+    "silentCpuFallbackAllowed": false,
+    "cloudModelsAllowed": false,
+    "maximumCandidateParameterClass": "35b"
+  },
+  "resourceMonitoring": {
+    "localOnly": true,
+    "memoryOnlySamples": true,
+    "sampleIntervalSeconds": 2,
+    "maximumHistorySeconds": 60,
+    "externalTelemetryAllowed": false,
+    "providerMetricsMustBeLabeled": true
+  },
+  "distribution": {
+    "artifactKind": "unsigned-pyinstaller-one-folder",
+    "privateInvitedTestersOnly": true,
+    "authenticatedHttpsRequired": true,
+    "publicGitHubReleaseAllowed": false,
+    "releaseTagAllowed": false,
+    "productionClaimAllowed": false
+  }
+}

@@ -4,16 +4,32 @@
 
 [Quick start](#quick-start) · [What works](#what-works-today) ·
 [Roadmap](#roadmap-at-a-glance) · [Wiki](https://github.com/hysel/haven-42/wiki) ·
+[Alpha downloads and feedback](docs/windows-alpha-download-and-feedback.md) ·
 [Code signing policy](CODE-SIGNING-POLICY.md) · [Privacy policy](PRIVACY.md)
 
-> **Development status:** Haven 42 is active, unsigned development software—not
-> a production-ready or publicly released application. It does not install a
-> system service, require administrator access, or enable automatic updates.
+> **Before you start:** Haven 42 is still being tested. Windows may warn you
+> because the current package is not digitally signed. Use only a package you
+> received from a trusted Haven 42 test source.
 
-Haven 42 is a local-first AI workbench for private chat, writing,
-summarization, selected-file context, model management, and carefully admitted
-local AI workflows. The browser interface runs on your device and connects only
-to a local or explicitly selected private-network provider.
+> **Windows Alpha work in progress:** `0.4.0-alpha.1` targets invited Windows
+> 11 x64 testing with Chat, Writing, and Summarization in one text workspace.
+> Its unsigned package, managed current-user
+> setup, and private delivery are not yet admitted. See the
+> [Alpha boundary](docs/windows-alpha-0.4-alpha-1.md).
+
+The unsigned package is not public yet. When the exact candidate passes its
+security review and hosted checks, testers will use the
+[Windows Alpha download and feedback guide](docs/windows-alpha-download-and-feedback.md)
+to verify the download and report problems without exposing private data.
+
+Haven 42 is a local-first AI workbench for private chat, writing, and
+summarization. It runs in your web browser, but the application itself runs on
+your computer. It can use an AI model on the same computer or one on a private
+server you choose.
+
+You do not need to understand Python, model sizes, graphics runtimes, or server
+settings to use guided setup. Haven 42 checks your computer, recommends a safe
+choice, explains each download, and asks before making the approved changes.
 
 The primary experience is for everyday users. Deeper software-engineering tools
 for Continue, Aider, and OpenCode remain available to advanced users and
@@ -23,12 +39,12 @@ contributors.
 
 | Capability | Current state |
 | --- | --- |
-| Local browser application | Runs from source or an unsigned PyInstaller one-folder development package on Windows, Linux, and macOS. |
-| Chat, writing, and summarization | One continuous, memory-only conversation through a user-managed Ollama provider. |
-| Models | Lists installed models, identifies exact evidence-backed choices, and provides explicit download-free public catalog search. |
+| Application | Opens in your normal web browser while staying on your computer. |
+| Chat, writing, and summarization | Uses one continuous conversation that Haven 42 does not save. |
+| Models | Shows available AI models, recommends a suitable choice, and lets you search without automatically downloading. |
 | Attachments | Accepts a bounded set of selected UTF-8 text, CSV, JSON, source-code, and PNG screenshot files. Clipboard PNG paste is supported. Attachments are never executed. |
 | Response display | Safely renders headings, lists, emphasis, code, quotations, and Unicode emoji without model-supplied active HTML or links. |
-| Run information | Shows provider-reported token counts, timing, and throughput details. |
+| Response information | Shows token totals, response time, and tokens per second. |
 | Local images | Haven connects to separately acquired providers and never bundles their engines, models, drivers, or installers. Linux ComfyUI/SDXL is validated for one promoted loopback profile; Windows profiles remain independently gated. |
 | Software workflows | Shows registered read-only plans. The browser cannot start their processes, read a repository, or write files. |
 | Evidence and readiness | Displays bounded system readiness and bundled sanitized evidence without running background tests. |
@@ -41,22 +57,17 @@ conversation history, PDF/Office/OpenDocument parsing, folder scanning,
 controlled web research, signing, notarization, installers, and active online
 updates are not shipped.
 
-Contributor-only preparation now includes a residue-free synthetic temporary
-history database validator, a bounded content-free folder inspector, hardened
-memory-only lexical retrieval, unselected embedding and encrypted-library
-contracts, disabled research transport and approval guards, exact package
-dependency admission, and object-only inspection of immutable public
-repository candidates. It also includes an inactive cryptographic inventory
-and post-quantum agility contract; these select no algorithm, change no TLS
-policy, verify no signature, and grant no updater authority. None is a
-user-facing feature or a production-readiness claim.
+Advanced engineering plans and test evidence are kept outside this beginner
+overview. Contributors can start with [Project information](PROJECT.md) and the
+[documentation index](docs/wiki-documentation-index.md).
 
 ## Quick start
 
-### Run from source
+### Run from source · Advanced
 
-The source version requires Python 3. Ollama and an installed model are needed
-only for text generation; you can explore the interface without them.
+Most users should use the portable package. Running from source is for
+developers and requires Python 3. Ollama and an installed model are needed only
+for AI responses; you can still look around without them.
 
 From the repository root, run the command for your platform.
 
@@ -88,10 +99,16 @@ printed in the terminal into your browser.
 
 ### First-run choices
 
-- **Explore Haven 42** opens the interface without scanning or connecting.
-- **Connect existing setup** connects to an Ollama server you already manage.
-- **Guided setup** performs a bounded read-only readiness scan and produces a
-  disabled setup plan. It installs nothing.
+- **Set up this computer · Recommended** safely checks the computer, recommends
+  a model, explains every download, and asks permission before starting.
+- **Use another AI server · Advanced** connects to Ollama that you already
+  manage on this computer or your private network.
+- **Look around first** opens Haven 42 without checking, downloading, or
+  connecting anything.
+
+After guided local setup finishes, Haven 42 checks those files again on every
+launch, starts its local AI engine, and opens the conversation. You can still
+switch to another AI server later from **System**.
 
 For same-machine Ollama, use `http://127.0.0.1:11434`. A private-network HTTP
 connection is unencrypted, so Haven 42 displays a warning. Use a trusted HTTPS
@@ -105,16 +122,17 @@ current session and never stores or returns it. Most users should keep
 **Automatic (Recommended)**; a future Haven-managed HTTPS
 gateway will select its configured authentication mode during setup.
 
-Haven 42 never downloads a model automatically. Search results that are not
-installed remain inactive candidates until you install and review them in the
-Ollama environment you control.
+Normal model search never downloads a model. The separate Windows Alpha guided
+setup may download its exact recommended model only after the tester approves
+the displayed setup plan.
 
-### Portable development package
+### Portable package · Recommended for testers
 
-Unsigned one-folder packages include their own Python runtime and require no
-global Python installation, installer, administrator access, service, driver,
-firewall rule, or startup entry. Extract the complete archive, keep its files
-together, and verify the supplied checksum before running it.
+The portable package includes everything Haven 42 itself needs. Extract the ZIP
+into a folder you own, keep all extracted files together, and run `haven42.exe`.
+It does not require administrator access or install Haven 42 as a Windows
+service. Guided setup explains and asks permission before downloading Ollama or
+an AI model into the same extracted folder.
 
 See [Portable Development Package](docs/portable-development-package.md) for
 the build, integrity, inventory, SBOM, and native smoke-test evidence. Haven 42
@@ -128,8 +146,8 @@ artifacts.
 - Use **New task** to clear the current in-memory conversation.
 - Open **Models** to choose an installed model or explicitly search the public
   catalog without downloading anything.
-- Use **Browse files** or paste a PNG screenshot to add bounded context.
-- Expand run details for provider-reported token and timing information.
+- Use **Attach files** or paste a PNG screenshot to give the AI more context.
+- Expand **Response details · Advanced** for token and timing information.
 - Use **System** to choose immediate, 5-minute, 15-minute, or 30-minute idle
   model cleanup.
 
@@ -141,20 +159,30 @@ Start with the [wiki Quick Start](https://github.com/hysel/haven-42/wiki/Quick-S
 then use the [Using Haven 42 guide](https://github.com/hysel/haven-42/wiki/Using-Haven-42)
 or [Troubleshooting](docs/troubleshooting.md).
 
-## Security model
+## Privacy and safety
 
-- The application server binds only to IPv4 loopback.
-- Provider endpoints are restricted to same-machine or private-network scopes.
-- Credentials in provider URLs, public provider addresses, arbitrary
-  authentication headers, and unsafe redirects are blocked. Optional Bearer
-  and X-API-Key values are bounded, memory-only, and HTTPS-required outside
-  same-machine loopback.
-- Attachment names, extensions, and browser MIME values are untrusted hints;
-  browser and server checks reject disallowed or suspicious content.
-- Attached content is inert reference data and receives no command, tool,
-  filesystem, provider, or model-selection authority.
+- The Haven 42 page is available only from this computer.
+- AI server addresses are limited to this computer or a private network.
+- Haven 42 blocks public AI server addresses, passwords placed in an address,
+  and unsafe redirects. Advanced API keys stay in memory and require an
+  encrypted HTTPS connection when another computer is used.
+- Haven 42 checks attachment names, formats, and contents and rejects files
+  that look suspicious or do not match their stated type.
+- Attachments are information for the AI to read. Haven 42 never runs attached
+  code or treats attachment instructions as computer commands.
 - Models do not receive an unrestricted internet tool.
-- Features must pass their exact security and evidence gates before admission.
+- Features remain unavailable until their exact security tests pass.
+
+## Common words
+
+- **Model:** the AI that reads your request and writes the response.
+- **Ollama:** the local AI engine that loads and runs a model.
+- **AI server:** the computer and software running Ollama. It can be this
+  computer or another computer on your private network.
+- **Token:** a small piece of text counted by the model. Tokens per second is a
+  rough measure of response speed.
+- **Portable package:** a folder you can run and later remove without a normal
+  application installer.
 
 Read the [privacy policy](PRIVACY.md), [security policy](SECURITY.md),
 [threat model](docs/security-threat-model.md), and
@@ -171,7 +199,7 @@ for scope, evidence, blockers, and exit criteria.
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Recommendation, configuration, dispatch, health, cleanup, and evidence foundations. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, hardened unsigned portable packages, and inactive post-quantum migration planning; signing, PQC activation, and machine effects remain gated. |
+| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, hardened unsigned portable packages, private-alpha preparation, and inactive post-quantum migration planning; no alpha candidate or distribution is admitted, and signing, PQC activation, and machine effects remain gated. |
 | Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial Linux CUDA evidence exists; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | Candidate research and a fail-closed Quadro hardware/storage preflight exist; no executable video integration ships. |

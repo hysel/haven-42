@@ -1,14 +1,17 @@
 {
   "schemaVersion": 1,
   "applicationId": "org.haven42.desktop",
-  "description": "Cross-platform ownership and location contract that separates immutable Haven 42 engine assets from user-owned configuration, workspaces, models, artifacts, credentials, caches, updates, and rollback state.",
+  "description": "Cross-platform ownership and location contract. Every Haven 42-managed file remains inside the user-extracted portable folder; user-selected inputs remain in place and are never copied into managed storage without explicit approval.",
   "resolutionRules": {
     "resolveWithNativePlatformApis": true,
     "persistUnexpandedEnvironmentPaths": false,
     "allowUserSelectedLocationsOnlyThroughPathGrants": true,
     "canonicalizeBeforeUse": true,
     "createWithUserOnlyPermissionsWhereSupported": true,
-    "followPlatformPackageManagerForImmutableApplication": true
+    "followPlatformPackageManagerForImmutableApplication": false,
+    "managedDataBesideExecutable": true,
+    "managedWritesOutsidePortableRootAllowed": false,
+    "legacyExternalStorageAccess": "cleanup-only"
   },
   "ownershipClasses": {
     "immutable-engine": "Versioned application and packaged engine files; never mixed with mutable user data.",
@@ -21,40 +24,40 @@
   },
   "platforms": {
     "windows": {
-      "immutableApplication": "installer-managed per-user application location; preferred default is FOLDERID_UserProgramFiles/Haven 42",
-      "configuration": "FOLDERID_RoamingAppData/Haven42/config",
-      "state": "FOLDERID_LocalAppData/Haven42/state",
-      "cache": "FOLDERID_LocalAppData/Haven42/cache",
-      "managedModels": "FOLDERID_LocalAppData/Haven42/models",
-      "defaultArtifacts": "FOLDERID_Documents/Haven 42/Artifacts",
-      "updateDownloads": "FOLDERID_LocalAppData/Haven42/updates/downloads",
-      "stagedVersions": "FOLDERID_LocalAppData/Haven42/updates/versions",
-      "activationJournal": "FOLDERID_LocalAppData/Haven42/updates/activation.json",
-      "credentials": "Windows Credential Manager"
+      "immutableApplication": "portable-install-root containing the user-extracted Haven 42 package",
+      "configuration": "portable-install-root/Haven42-Data/config",
+      "state": "portable-install-root/Haven42-Data/state",
+      "cache": "portable-install-root/Haven42-Data/cache",
+      "managedModels": "portable-install-root/Haven42-Data/models",
+      "defaultArtifacts": "portable-install-root/Haven42-Data/artifacts",
+      "updateDownloads": "portable-install-root/Haven42-Data/updates/downloads",
+      "stagedVersions": "portable-install-root/Haven42-Data/updates/versions",
+      "activationJournal": "portable-install-root/Haven42-Data/updates/activation.json",
+      "credentials": "memory only; no persistent secret file"
     },
     "linux": {
-      "immutableApplication": "package-manager location or XDG_DATA_HOME/haven42/versions for a per-user portable install",
-      "configuration": "XDG_CONFIG_HOME/haven42",
-      "state": "XDG_STATE_HOME/haven42",
-      "cache": "XDG_CACHE_HOME/haven42",
-      "managedModels": "XDG_DATA_HOME/haven42/models",
-      "defaultArtifacts": "user-selected XDG documents directory/Haven 42/Artifacts",
-      "updateDownloads": "XDG_CACHE_HOME/haven42/updates/downloads",
-      "stagedVersions": "XDG_DATA_HOME/haven42/versions",
-      "activationJournal": "XDG_STATE_HOME/haven42/update-activation.json",
-      "credentials": "Secret Service compatible keyring; otherwise no persistent secret"
+      "immutableApplication": "portable-install-root containing the user-extracted Haven 42 package",
+      "configuration": "portable-install-root/Haven42-Data/config",
+      "state": "portable-install-root/Haven42-Data/state",
+      "cache": "portable-install-root/Haven42-Data/cache",
+      "managedModels": "portable-install-root/Haven42-Data/models",
+      "defaultArtifacts": "portable-install-root/Haven42-Data/artifacts",
+      "updateDownloads": "portable-install-root/Haven42-Data/updates/downloads",
+      "stagedVersions": "portable-install-root/Haven42-Data/updates/versions",
+      "activationJournal": "portable-install-root/Haven42-Data/updates/activation.json",
+      "credentials": "memory only; no persistent secret file"
     },
     "macos": {
-      "immutableApplication": "signed installer-managed Haven 42.app in the user-selected Applications directory",
-      "configuration": "NSApplicationSupportDirectory/Haven 42/config",
-      "state": "NSApplicationSupportDirectory/Haven 42/state",
-      "cache": "NSCachesDirectory/org.haven42.desktop",
-      "managedModels": "NSApplicationSupportDirectory/Haven 42/models",
-      "defaultArtifacts": "NSDocumentDirectory/Haven 42/Artifacts",
-      "updateDownloads": "NSCachesDirectory/org.haven42.desktop/updates/downloads",
-      "stagedVersions": "NSApplicationSupportDirectory/Haven 42/updates/versions",
-      "activationJournal": "NSApplicationSupportDirectory/Haven 42/state/update-activation.json",
-      "credentials": "macOS Keychain"
+      "immutableApplication": "portable-install-root containing the user-extracted Haven 42 package",
+      "configuration": "portable-install-root/Haven42-Data/config",
+      "state": "portable-install-root/Haven42-Data/state",
+      "cache": "portable-install-root/Haven42-Data/cache",
+      "managedModels": "portable-install-root/Haven42-Data/models",
+      "defaultArtifacts": "portable-install-root/Haven42-Data/artifacts",
+      "updateDownloads": "portable-install-root/Haven42-Data/updates/downloads",
+      "stagedVersions": "portable-install-root/Haven42-Data/updates/versions",
+      "activationJournal": "portable-install-root/Haven42-Data/updates/activation.json",
+      "credentials": "memory only; no persistent secret file"
     }
   },
   "workspaceRules": [

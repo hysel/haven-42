@@ -32,6 +32,37 @@ Use semantic versioning while the pack matures:
 
 The current release line is `0.3.0`. Changes after its release remain under `Unreleased` until the next version is deliberately prepared. Do not create a release tag until the release readiness gate and exact-SHA hosted CI pass.
 
+## Private Alpha Preparation
+
+An invited private alpha is a separate development-evaluation gate, not a
+GitHub Release or production promotion. It may use only the unsigned
+PyInstaller one-folder development artifacts and must retain every current
+security, privacy, loopback, package-integrity, and external-software boundary.
+
+Before proposing a candidate, use
+`config/private-alpha-readiness-contract.json` and the
+[private-alpha preparation guide](private-alpha-preparation.md). Review the
+[known limitations](private-alpha-known-limitations.md), follow the
+[test plan](private-alpha-test-plan.md), and use the
+[feedback template](private-alpha-feedback-template.md). The repository owner must separately
+select the prerelease version, exact candidate commit, target platform cells,
+invited tester group, private delivery channel, and candidate-bound
+distribution approval. A fresh exact-tree security review, Full gate, hosted
+CI, native artifact verification, checksums, inventory, notices, SBOM,
+provenance, known-limitations snapshot, and tester documentation are required.
+
+Do not create a tag, publish a GitHub Release, upload a public artifact, enable
+an installer/updater, sign, notarize, or claim production readiness as part of
+private-alpha preparation.
+
+The public-facing download, checksum-verification, and privacy-safe feedback
+instructions are prepared in
+`docs/windows-alpha-download-and-feedback.md`. Preparing those instructions and
+the repository issue forms does not authorize a tag, artifact upload, or public
+release. Publication still requires an exact clean candidate commit, fresh
+security review, hosted CI, native artifact evidence, and explicit owner
+approval for the final candidate.
+
 ## Files To Update
 
 For each release, update:
@@ -61,6 +92,10 @@ Before tagging a release:
 - [ ] Confirm `mcpServers: []` remains the default unless a decision record changes that posture.
 - [ ] Confirm no private IPs, private hostnames, tokens, or project identifiers are committed.
 - [ ] Confirm new examples and fixtures are sanitized.
+- [ ] Confirm the Alpha issue forms still disable blank issues, direct security
+  reports to the private channel, and prohibit private content and raw logs.
+- [ ] Confirm the public release description links the exact checksum, known
+  limitations, download guide, issue chooser, and private security channel.
 - [ ] Confirm shell scripts and hooks are executable in Git before pushing.
 - [ ] Confirm `CHANGELOG.md` has a release entry.
 - [ ] Run the wiki synchronization script, review and commit the wiki repository, and confirm `--check` or `-Check` passes.

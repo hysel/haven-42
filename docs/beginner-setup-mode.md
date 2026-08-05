@@ -1,5 +1,10 @@
 # Beginner Setup Mode
 
+> **Advanced contributor tool:** This page describes a command-line planning
+> utility for repository contributors. It is not the beginner setup shown in
+> the Haven 42 application. New users should follow the wiki
+> [Quick Start](Quick-Start) instead.
+
 Beginner setup mode creates an ordered local setup plan from the workflow registry.
 
 It is intentionally a plan generator, not an installer. The first output shows exactly which commands to run, which workflow each command uses, and where the workflow boundary changes from read-only to previewing a write.

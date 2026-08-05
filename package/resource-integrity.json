@@ -3,18 +3,18 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "75adb0fb202b5ce1624de326ac010ba0c89a9383dbce05da8b958195f775d8a7",
-      "sizeBytes": 31627
+      "sha256": "6068121f980a0f6b9a3cf822b9673173f101ff7d3ca7080c7fd75aa157f6b457",
+      "sizeBytes": 37872
     },
     {
       "path": "web/static/app.js",
-      "sha256": "a05708c538337d2122c2d046ef5fdbf9426738f84438edd0d3992ff9af5d56db",
-      "sizeBytes": 102161
+      "sha256": "7b1999ecb56de3beb476e850c09696cd78939c758ed05eef4bcd0e1da6823d5f",
+      "sizeBytes": 151791
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "9297ec57d17f22a79f049fd4ffb771cd76db4600c79186791aa5242176d13948",
-      "sizeBytes": 26734
+      "sha256": "130fc53d960b590e48a9b2a436ca1e4785cf26ab509e110bb0fac7dbd3c55824",
+      "sizeBytes": 32703
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -45,6 +45,31 @@
       "path": "config/workflows.json",
       "sha256": "12a01739b7f9170ed0984fd0963a9de5c3431975d399c95ecbf4b9fd81595418",
       "sizeBytes": 20227
+    },
+    {
+      "path": "config/windows-alpha-contract.json",
+      "sha256": "73daa24cbf58f85fe6ea1a071651fae517a1d2230ef8428894a21b61430d2b58",
+      "sizeBytes": 3760
+    },
+    {
+      "path": "config/windows-alpha-model-catalog.json",
+      "sha256": "c842f3651e7fad91c4c57927bb83fa536bf8eec37ee7aff8da7ce44889e2fdf3",
+      "sizeBytes": 3649
+    },
+    {
+      "path": "config/windows-alpha-component-registry.json",
+      "sha256": "89b3df7d704a4fa87ffeb9e3349bfc41db8901c1839245ff773730dec0c820aa",
+      "sizeBytes": 3091
+    },
+    {
+      "path": "config/windows-alpha-resource-monitor-contract.json",
+      "sha256": "1858f31c7839f8208f442c9b7a07ef42c0acc94091419d041c9b9fc1243ec819",
+      "sizeBytes": 1307
+    },
+    {
+      "path": "config/windows-alpha-quantization-contract.json",
+      "sha256": "b02fbc57e192ddfb4784c5dfa8dd007fc19fc28a77b57c1bc68d5f660fd6b3b8",
+      "sizeBytes": 917
     }
   ],
   "schemaVersion": 1

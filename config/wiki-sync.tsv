@@ -86,6 +86,7 @@ docs/approved-tool-backed-changes.md	Approved-Tool-Backed-Changes.md	Approved To
 docs/scoped-edits.md	Scoped-Edits.md	Scoped Edits
 docs/editor-compatibility.md	Editor-Compatibility.md	Editor Compatibility
 docs/wiki-troubleshooting.md	Troubleshooting.md	Troubleshooting
+docs/wiki-glossary.md	Glossary.md	Common Words
 docs/troubleshooting.md	Engineering-Troubleshooting.md	Engineering Troubleshooting
 docs/runtime-validation.md	Runtime-Validation.md	Runtime Validation
 docs/runtime-output-verification.md	Runtime-Output-Verification.md	Runtime Output Verification
@@ -127,6 +128,10 @@ docs/portable-development-package.md	Portable-Development-Package.md	Portable De
 docs/github-repository-policy.md	GitHub-Repository-Policy.md	GitHub Repository Policy
 docs/offline-installer-lifecycle-foundation.md	Offline-Installer-Lifecycle-Foundation.md	Offline Installer Lifecycle Foundation
 docs/ollama-https-installation-foundation.md	Ollama-HTTPS-Installation-Foundation.md	Ollama HTTPS Installation Foundation
+docs/private-alpha-preparation.md	Private-Alpha-Preparation.md	Private Alpha Preparation
+docs/private-alpha-known-limitations.md	Private-Alpha-Known-Limitations.md	Private Alpha Known Limitations
+docs/private-alpha-test-plan.md	Private-Alpha-Test-Plan.md	Private Alpha Test Plan
+docs/private-alpha-feedback-template.md	Private-Alpha-Feedback-Template.md	Private Alpha Feedback Template
 docs/milestone22-admission-readiness.md	Milestone-22-Admission-Readiness.md	Milestone 22 Admission Readiness
 docs/artifact-attestation.md	Artifact-Attestation.md	Unsigned Development Artifact Attestation
 CODE-SIGNING-POLICY.md	Code-Signing-Policy.md	Code Signing Policy
@@ -144,3 +149,4 @@ docs/controlled-web-research-foundation.md	Controlled-Web-Research-Foundation.md
 docs/retrieval-expansion-foundations.md	Retrieval-Expansion-Foundations.md	Retrieval Expansion Foundations
 docs/public-repository-validation-candidates.md	Public-Repository-Validation-Candidates.md	Public Repository Validation Candidates
 docs/local-batch-task-ledger.md	Local-Batch-Task-Ledger.md	Local Batch Task Ledger
+docs/windows-alpha-native-validation.md	Windows-Alpha-Native-Validation.md	Windows Alpha Native Validation

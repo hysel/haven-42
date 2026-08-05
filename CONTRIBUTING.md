@@ -13,6 +13,9 @@ This repository is primarily documentation, Continue configuration, rules, promp
 - Update documentation when behavior, setup, or workflow expectations change.
 - Treat AI output as review assistance, not as an authority.
 - Evaluate new agent software outside the tracked repository and admit agent-specific assets only after every promotion gate passes.
+- Design the primary product journey and end-user documentation for people who
+  are new to local AI. Put specialist choices and implementation detail behind
+  a clearly labelled **Advanced** path.
 
 ## Before Changing Files
 
@@ -64,6 +67,10 @@ For Continue-specific changes, also inspect:
 ### Documentation
 
 - Keep README focused on setup, usage, and repository orientation.
+- Lead with novice instructions; define unfamiliar terms on first use and link
+  to the glossary when a longer explanation is useful.
+- Mark maintainer, evaluator, and engineering pages as advanced so users do not
+  mistake them for required setup steps.
 - Keep ROADMAP focused on staged delivery.
 - Keep TODO focused on trackable work.
 - Keep DECISIONS focused on durable decisions and tradeoffs.
@@ -122,6 +129,7 @@ required hosted jobs report success. See `docs/hosted-ci-verification.md`.
 ## Pull Request Checklist
 
 - [ ] The change follows `STYLEGUIDE.md`.
+- [ ] New or changed user-facing text passes the novice-first product standard.
 - [ ] The relevant docs are updated.
 - [ ] New examples are sanitized.
 - [ ] No secrets, private endpoints, or machine-specific paths are committed.

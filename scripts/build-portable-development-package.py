@@ -24,7 +24,7 @@ from portable_runtime_components import classify
 
 
 ROOT = Path(__file__).resolve().parent.parent
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.4.0-alpha.1"
 RESOURCE_PATHS = (
     "web/static/index.html",
     "web/static/app.js",
@@ -35,6 +35,11 @@ RESOURCE_PATHS = (
     "config/agent-surface-solutions.json",
     "config/install-component-registry.json",
     "config/workflows.json",
+    "config/windows-alpha-contract.json",
+    "config/windows-alpha-model-catalog.json",
+    "config/windows-alpha-component-registry.json",
+    "config/windows-alpha-resource-monitor-contract.json",
+    "config/windows-alpha-quantization-contract.json",
 )
 ALLOWED_PACKAGE_ENTRIES = {"haven42", "haven42.exe", "_internal", "DEVELOPMENT-BUILD.txt"}
 COMMON_BUILD_DISTRIBUTIONS = {

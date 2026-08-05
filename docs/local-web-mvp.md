@@ -231,6 +231,21 @@ Use the single Chat composer for all admitted text tasks:
 - Ordinary questions use `general.chat`.
 - Explicit write, draft, compose, or rewrite requests use the bounded `content.write` prompt and return a Markdown-document response inside the same conversation.
 - Explicit summarize, summarise, condense, summary, or TL;DR requests use `content.summarize`; its system instruction permits only source-grounded summarization and requires uncertainty to be preserved.
+- Chat, Writing, and Summarization do not infer gender, pronouns, titles, or
+  relationships from a name or appearance alone. They preserve pronouns stated
+  by the user or supplied source exactly. They never replace an explicit
+  individual pronoun with singular they/them. When no pronoun is supplied, they
+  use the person's name or a neutral noun such as `the person` or `the author`
+  and do not assign or request a gender merely to word the response.
+- The same compact response policy rejects unsupported sensitive-trait
+  inference and stereotypes, distinguishes supplied information from
+  assumptions, preserves source uncertainty, forbids invented browsing/file/
+  execution claims, avoids repeating secrets, treats high-stakes guidance as
+  uncertain rather than professional determination, and places effect and
+  verification guidance before destructive or system-changing commands. These
+  are model-behavior instructions, not security authorization; the server's
+  deterministic route, filesystem, process, network, and approval controls
+  remain the security boundary.
 
 All three paths retain the same bounded conversation in browser memory. The
 local intent hint is advisory routing among already admitted text capabilities;

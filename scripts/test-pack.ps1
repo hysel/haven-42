@@ -5030,11 +5030,21 @@ Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
     Assert-Equal -Actual $storage.schemaVersion -Expected 1 -Message "Desktop storage contract should be schema v1."
     Assert-True -Condition ($storage.resolutionRules.resolveWithNativePlatformApis) -Message "Desktop paths should use native platform resolution."
     Assert-True -Condition (-not $storage.resolutionRules.persistUnexpandedEnvironmentPaths) -Message "Desktop paths should not persist unresolved environment values."
+    Assert-True -Condition ($storage.resolutionRules.managedDataBesideExecutable) -Message "Desktop managed data should remain beside the executable."
+    Assert-True -Condition (-not $storage.resolutionRules.managedWritesOutsidePortableRootAllowed) -Message "Desktop managed writes outside the portable root must be forbidden."
+    Assert-Equal -Actual $storage.resolutionRules.legacyExternalStorageAccess -Expected "cleanup-only" -Message "Legacy external storage must be cleanup-only."
     foreach ($platform in @("windows", "linux", "macos")) {
         $platformConfig = $storage.platforms.$platform
         foreach ($field in @("immutableApplication", "configuration", "state", "cache", "managedModels", "defaultArtifacts", "updateDownloads", "stagedVersions", "activationJournal", "credentials")) {
             Assert-True -Condition (-not [string]::IsNullOrWhiteSpace($platformConfig.$field)) -Message "Desktop storage should define $platform $field."
         }
+    }
+    foreach ($platform in @("windows", "linux", "macos")) {
+        foreach ($field in @("immutableApplication", "configuration", "state", "cache", "managedModels", "defaultArtifacts", "updateDownloads", "stagedVersions", "activationJournal")) {
+            Assert-True -Condition ($storage.platforms.$platform.$field -match "portable-install-root") -Message "$platform desktop storage should keep $field inside the portable root."
+            Assert-True -Condition ($storage.platforms.$platform.$field -notmatch "(?i)AppData|Documents|UserProgramFiles|XDG_|NSApplication|NSCaches|NSDocument") -Message "$platform desktop storage should not use an external platform folder for $field."
+        }
+        Assert-Equal -Actual $storage.platforms.$platform.credentials -Expected "memory only; no persistent secret file" -Message "$platform desktop credentials should remain memory-only."
     }
     Assert-True -Condition ($storage.lifecycleRules.updateMustPreserve -contains "user-content" -and $storage.lifecycleRules.updateMustPreserve -contains "provider-data") -Message "Updates must preserve user and provider data."
     Assert-True -Condition ($storage.lifecycleRules.rollbackMustNotDowngradeUserDataWithoutCompatibleMigration) -Message "Rollback must protect user-data compatibility."
@@ -5054,7 +5064,7 @@ Invoke-PackTest "desktop runtime and IPC contracts are pinned and fail closed" {
         Assert-True -Condition ($contractDoc -match [regex]::Escape($marker)) -Message "Desktop IPC guide should retain marker: $marker"
     }
     $storageDoc = Get-Content -LiteralPath $storageDocPath -Raw
-    foreach ($marker in @("immutable engine", "user-owned", "Windows Credential Manager", "Secret Service", "macOS Keychain", 'unattended `git pull`', "Atomically")) {
+    foreach ($marker in @("immutable engine", "user-owned", "Haven42-Data", "cleanup flow", 'unattended `git pull`', "Atomically")) {
         Assert-True -Condition ($storageDoc -match [regex]::Escape($marker)) -Message "Desktop storage/update guide should retain marker: $marker"
     }
     Assert-True -Condition ($wikiMap -match "docs/desktop-runtime-dependency-evaluation\.md") -Message "Desktop dependency review should be mapped to the wiki."
@@ -5327,7 +5337,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
     Assert-True -Condition ($policy.images.admittedProfile -eq "linux-comfyui-sdxl-promoted" -and $policy.images.endpointTrustScope -eq "loopback" -and -not $policy.images.customNodesAllowed -and -not $policy.images.localFileWritesAllowed) -Message "The promoted image flow must remain the exact loopback, built-in, browser-memory profile."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects -and $policy.browser.automaticLaunchUrlScope -eq "ipv4-loopback-http-origin-only" -and -not $policy.browser.environmentOverrideAllowed -and -not $policy.browser.shellLaunchAllowed) -Message "Browser security and automatic launch should remain local and default-deny."
-    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard" -Message "External navigation must remain fixed to the detailed evidence wiki."
+    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard,https://github.com/hysel/haven-42/issues/new/choose,https://ollama.com/download/windows" -Message "External navigation must remain fixed to the issue chooser, detailed evidence wiki, and official Ollama Windows instructions."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
     Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction) -Message "Portable evidence must cover every runtime file, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
@@ -5376,7 +5386,13 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
     $externalLinks = [regex]::Matches($assets, '(?i)href\s*=\s*["'']https?://[^"'']+["'']')
     Assert-True -Condition ($assets -notmatch '(?i)src\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
-    Assert-True -Condition ($externalLinks.Count -eq 1 -and $externalLinks[0].Value -eq 'href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') -Message "The only remote navigation must be the fixed evidence wiki link."
+    $allowedExternalLinks = @(
+        'href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"',
+        'href="https://github.com/hysel/haven-42/issues/new/choose"',
+        'href = "https://ollama.com/download/windows"'
+    )
+    $observedExternalLinks = @($externalLinks | ForEach-Object Value | Sort-Object)
+    Assert-True -Condition ($externalLinks.Count -eq 3 -and (($observedExternalLinks -join "`n") -eq (($allowedExternalLinks | Sort-Object) -join "`n"))) -Message "Remote navigation must be limited to the fixed issue form, evidence wiki, and official Ollama Windows instructions."
     Assert-True -Condition ($html.IndexOf('id="text-panel"') -lt $html.IndexOf('id="connection-panel"') -and $html -match 'interaction-grid' -and $html -match 'configuration-column') -Message "Chat should be the primary interaction before the compact configuration column."
     Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."
     Assert-True -Condition ($writingDoc -match 'qwen3\.5:9b' -and $writingDoc -match 'gemma3:12b' -and $writingDoc -match 'mistral-small3\.2' -and $writingDoc -match 'granite4:7b-a1b-h' -and $writingDoc -match 'No candidate.*product default') -Message "Writing-model candidates must remain evidence-gated and unpromoted."
@@ -5596,6 +5612,20 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-system-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Readiness security tests should pass. Output: $($output -join ' ')"
     Assert-True -Condition (($output -join "`n") -match "48") -Message "Readiness test coverage should remain complete."
+    foreach ($alphaTest in @(
+        "scripts/test-windows-alpha.py",
+        "scripts/test-windows-alpha-setup.py",
+        "scripts/test-windows-alpha-job-lifecycle.py",
+        "scripts/test-diagnostic-logging.py",
+        "scripts/test-windows-alpha-web-policy.py",
+        "scripts/test-novice-experience.py",
+        "scripts/test-windows-alpha-stage-ledger.py",
+        "scripts/test-windows-alpha-candidate.py",
+        "scripts/test-private-alpha-readiness.py"
+    )) {
+        $alphaOutput = @(& $python.Source (Join-Path $repoRoot $alphaTest) 2>&1)
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows Alpha hostile test should pass: $alphaTest. Output: $($alphaOutput -join ' ')"
+    }
     $readiness = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/system-readiness-contract.json") | ConvertFrom-Json
     $broker = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/installation-broker-contract.json") | ConvertFrom-Json
     Assert-True -Condition (-not $readiness.probePolicy.shellAllowed -and -not $readiness.probePolicy.networkAllowed -and -not $readiness.probePolicy.installationAllowed) -Message "Readiness probes must remain shell-free and effect-free."

@@ -11,6 +11,55 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a novice-friendly Windows Alpha download and checksum guide, structured
+  public problem and experience-feedback forms, a private vulnerability-report
+  route, and a fixed allowlisted reporting button on the About page. Every
+  reporting surface warns testers to remove conversations, attachment details,
+  credentials, addresses, identity, local paths, machine identifiers, and raw
+  logs before submission.
+
+- Added local-only Alpha troubleshooting logs in the separate portable
+  `Haven42-Logs` directory. Events use a bounded fixed schema that excludes
+  conversations, attachments, credentials, endpoints, identities, paths,
+  commands, and raw process output. The System page can view recent events,
+  save a sanitized support report, clear events while preserving reports, or
+  separately remove all logs; managed-component removal preserves them.
+
+- Changed the product and primary documentation to a novice-first experience:
+  one recommended setup path, plain-language status and recovery messages,
+  clearer permission and download explanations, advanced technical-detail
+  separation, and a shared local-AI glossary. Added policy checks to keep later
+  UI and documentation changes aligned with this standard without weakening
+  security disclosures.
+
+- Began the Windows-only Haven 42 `0.4.0-alpha.1` candidate: server-enforced
+  text-only Chat, Writing, and Summarization scope, bounded Windows readiness
+  and hardware thresholds, pinned
+  Qwen3.5 model tiers, manual consumer-driver guidance, exact standalone Ollama
+  component identities, single-use setup approval, hostile archive checks,
+  owned loopback process lifecycle, verified model pull, memory-only resource
+  and session-token information, and an explicit 16-stage ledger. All artifacts
+  remain unsigned, private, uncommitted candidate work with no distribution,
+  tag, signing, public release, or production authority.
+
+- Added an explicit Automatic/Chat/Write/Summarize selector to the unified
+  Alpha text workspace and a provider-reported tokens-per-second indicator.
+  The server admits only the three bounded text capability IDs; images,
+  software workflows, research, and broader capability routes remain blocked.
+
+- Changed completed portable setup startup to bypass redundant provider
+  onboarding only after revalidating the hardware-derived plan, completion
+  receipt, runtime inventory, Authenticode publisher, registered model,
+  managed paths, and loopback endpoint. Readiness now names Windows 10 or 11,
+  reports its build and architecture, and displays bounded software and driver
+  versions where detected.
+
+- Added a preparation-only private-alpha readiness contract, frozen known
+  limitations, tester runbook, sanitized feedback template, and hostile
+  evaluator. Candidate version, commit, target platforms, tester group,
+  authenticated private delivery, distribution, tagging, publication,
+  signing, installation, updates, and production authority remain denied.
+
 - Added an exact staged-tree security-review gate for large, binary, and
   security-sensitive commits. Any finding now stops the commit flow until the
   owner is notified, all findings are fixed, and a zero-finding review is

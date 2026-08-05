@@ -13,7 +13,11 @@
     "telemetryAllowed": false,
     "crossOriginRequestsAllowed": false,
     "automaticLaunchUrlScope": "ipv4-loopback-http-origin-only",
-    "fixedExternalNavigationUrls": ["https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"],
+      "fixedExternalNavigationUrls": [
+        "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+        "https://github.com/hysel/haven-42/issues/new/choose",
+        "https://ollama.com/download/windows"
+      ],
     "fixedExternalNavigationRequiresExplicitClick": true,
     "rendererSuppliedExternalNavigationAllowed": false,
     "environmentOverrideAllowed": false,

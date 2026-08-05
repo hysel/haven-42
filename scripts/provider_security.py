@@ -12,7 +12,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 TRUST_SCOPES = {"loopback", "trusted-lan", "external"}
@@ -24,6 +24,78 @@ MAX_IMAGE_RESPONSE_BYTES = 64 * 1024 * 1024
 
 class ProviderSecurityError(ValueError):
     pass
+
+
+class ProviderRequestCancelled(ProviderSecurityError):
+    """Raised when the caller closes a bounded provider stream intentionally."""
+
+
+def read_json_stream(
+    request: urllib.request.Request,
+    timeout: int,
+    maximum_bytes: int,
+    cancelled: Callable[[], bool],
+    on_open: Callable[[Any], None],
+    on_close: Callable[[], None],
+) -> list[dict[str, Any]]:
+    """Read bounded newline-delimited JSON without proxies or redirects."""
+    if (
+        isinstance(timeout, bool)
+        or not isinstance(timeout, int)
+        or timeout < 1
+        or timeout > 3600
+        or isinstance(maximum_bytes, bool)
+        or not isinstance(maximum_bytes, int)
+        or maximum_bytes < 1
+        or maximum_bytes > MAX_IMAGE_RESPONSE_BYTES
+    ):
+        raise ProviderSecurityError("invalid-provider-io-bound")
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
+    records: list[dict[str, Any]] = []
+    total_bytes = 0
+    try:
+        with opener.open(request, timeout=timeout) as response:
+            on_open(response)
+            content_length = response.headers.get("Content-Length")
+            if content_length is not None:
+                try:
+                    if int(content_length) > maximum_bytes:
+                        raise ProviderSecurityError("provider-response-too-large")
+                except ValueError as error:
+                    raise ProviderSecurityError("invalid-provider-content-length") from error
+            while True:
+                if cancelled():
+                    raise ProviderRequestCancelled("provider-request-cancelled")
+                line = response.readline(maximum_bytes - total_bytes + 1)
+                if not line:
+                    break
+                total_bytes += len(line)
+                if total_bytes > maximum_bytes:
+                    raise ProviderSecurityError("provider-response-too-large")
+                if not line.strip():
+                    continue
+                try:
+                    value = json.loads(line.decode("utf-8"))
+                except (UnicodeDecodeError, json.JSONDecodeError) as error:
+                    raise ProviderSecurityError("invalid-provider-json") from error
+                if not isinstance(value, dict):
+                    raise ProviderSecurityError("provider-json-root-must-be-object")
+                records.append(value)
+    except urllib.error.HTTPError as error:
+        if cancelled():
+            raise ProviderRequestCancelled("provider-request-cancelled") from error
+        raise ProviderSecurityError(f"provider-http-error-{error.code}") from error
+    except (OSError, ValueError) as error:
+        if cancelled():
+            raise ProviderRequestCancelled("provider-request-cancelled") from error
+        raise
+    finally:
+        on_close()
+    if cancelled():
+        raise ProviderRequestCancelled("provider-request-cancelled")
+    if not records:
+        raise ProviderSecurityError("invalid-provider-json")
+    return records
 
 
 class ProviderAuthentication:

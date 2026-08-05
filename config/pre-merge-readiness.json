@@ -153,6 +153,30 @@
       ]
     },
     {
+      "id": "private-alpha-preparation",
+      "patterns": [
+        "config/private-alpha-readiness-contract.json",
+        "config/windows-alpha-*.json",
+        "docs/private-alpha-*.md",
+        "docs/windows-alpha-*.md",
+        "docs/release.md",
+        "scripts/evaluate-private-alpha-readiness.py",
+        "scripts/test-private-alpha-readiness.py",
+        "scripts/windows_alpha.py",
+        "scripts/windows_alpha_setup.py",
+        "scripts/test-windows-alpha*.py"
+      ],
+      "commands": [
+        "python scripts/test-private-alpha-readiness.py",
+        "python scripts/evaluate-private-alpha-readiness.py",
+        "python scripts/test-windows-alpha.py",
+        "python scripts/test-windows-alpha-setup.py",
+        "python scripts/test-windows-alpha-web-policy.py",
+        "python scripts/test-windows-alpha-stage-ledger.py",
+        "python scripts/test-windows-alpha-candidate.py"
+      ]
+    },
+    {
       "id": "wiki-docs",
       "patterns": [
         "config/wiki-*.tsv",

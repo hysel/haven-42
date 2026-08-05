@@ -7,6 +7,40 @@ Every unchecked `TODO.md` parent item is covered exactly once by a fail-closed m
 Current owner decisions and their strict authority boundaries are recorded in
 `docs/roadmap-owner-decisions.md`.
 
+Windows private-alpha implementation is now scoped as `0.4.0-alpha.1` for
+Windows 11 x64 and invited testers. Its 16-stage ledger covers server-enforced
+text-only Chat, Writing, and Summarization in one continuous workspace,
+readiness, consumer-driver guidance, pinned standalone Ollama and model
+identities, current-user setup, prequantized selection, local metrics including
+provider-reported generation speed, packaging, and gates. Distribution, the
+exact commit, the private channel, tagging, signing, public release, and
+production claims remain denied until privacy-safe tester diagnostics,
+native candidate evidence, and owner review finish.
+
+Completed managed setups now have a fail-closed next-launch path: Haven
+rebuilds the device-derived plan, verifies the completion receipt, runtime
+inventory, publisher, exact model, managed directories, and loopback provider,
+then opens the text workspace without a redundant connection step. Windows
+readiness reports Windows 10 or Windows 11, build, architecture, accelerator
+driver version, and bounded software probe versions. External provider setup
+remains available as an explicit later choice.
+
+The product and primary documentation now follow a novice-first standard.
+Setup leads with one safe recommendation, defines local-AI terms in context,
+explains downloads and permissions before approval, and places connection,
+evidence, and engineering detail under clearly labelled advanced paths. A
+shared glossary and automated policy checks keep later work aligned with this
+standard.
+
+One exact physical Windows 11 Intel Arc B580 cell now passes the unsigned Alpha
+package's no-effect, managed first-run, and managed reuse paths. That evidence
+includes immutable runtime/model verification, Intel Vulkan inference with
+nonzero model VRAM, real Chat and token/resource reporting, unload, port
+closure, and exact-process shutdown. It does not promote other Windows hardware
+cells or authorize distribution; CPU-only/low-memory, NVIDIA, AMD, hosted CI,
+clean-commit security evidence, owner UI review, and private delivery remain
+separate gates. See `docs/windows-alpha-native-validation.md`.
+
 Milestone 22A also includes explicit candidate-only public Ollama catalog
 search without installation authority: the explicit submit action replaces a
 redundant checkbox, installed and uninstalled states are labeled, changing the
@@ -45,7 +79,7 @@ The repository has entered user-visible product implementation. Milestones 1 thr
 | Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Continue profiles plus Aider and OpenCode install/configure/health/test paths satisfy supported-surface parity with deterministic cross-platform contracts. Failed or retired integrations are absent from active catalogs and scripts; OpenHands is documentation-only. |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Hardware-aware recommendations, local-only config generation, surface-neutral model lanes, workflow dispatch and envelopes, setup health, cleanup, release readiness, evidence views, cross-platform onboarding, and the stable UI-facing foundation are implemented. Future surface profiles remain separately evidence-gated. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, deterministic and optional bounded LLM routing, provider-neutral local text, live-validated ComfyUI images, runtime discovery, typed artifacts, and engineering workflow route plans are implemented with cross-platform contracts. Ollama text includes an exact Linux Laguna XS 2.1 conformance cell; llama.cpp transport has a direct exact-profile Linux NVIDIA/CUDA live run. |
-| Milestone 22: Unified Product UI And Task Composition | In progress; local tools and hardened portable development package runnable | The shared local-web application and unsigned PyInstaller one-folder packages provide system status, inferred local/LAN Ollama scope, immutable-digest model selection, provider metrics, a bounded read-only committed-evidence view, accessible chat/writing/summarization recovery, plan-only read-only software workflows, lifecycle-aware effect-free composition, structural updater trust/transition and future execution/journal simulations, promoted loopback ComfyUI/SDXL images, hostile integrity and bounded-archive validation, native source/packaged browser parity on Windows/Linux/macOS, an additional least-privilege physical Windows Intel parity cell, bounded cleanup, and effect-free offline installer/update simulation. Broader human review, real cryptographic verification, workflow execution, executable composition, persistence, real machine effects, signing, public releases, and Tauri remain gated. |
+| Milestone 22: Unified Product UI And Task Composition | In progress; local tools and hardened portable development package runnable | The shared local-web application and unsigned PyInstaller one-folder packages provide system status, inferred local/LAN Ollama scope, immutable-digest model selection, provider metrics, a bounded read-only committed-evidence view, accessible chat/writing/summarization recovery, plan-only read-only software workflows, lifecycle-aware effect-free composition, structural updater trust/transition and future execution/journal simulations, promoted loopback ComfyUI/SDXL images, hostile integrity and bounded-archive validation, native source/packaged browser parity on Windows/Linux/macOS, an additional least-privilege physical Windows Intel parity cell, bounded cleanup, and effect-free offline installer/update simulation. A preparation-only private-alpha contract now freezes limitations, testing, feedback, target evidence, and candidate gates without selecting or distributing a candidate. Broader human review, real cryptographic verification, workflow execution, executable composition, persistence, real machine effects, signing, public releases, and Tauri remain gated. |
 | Milestone 23: Native Local Image Generation | In progress | External provider engines, models, drivers, and installers are never bundled with Haven; users connect separately acquired compatible providers. The Linux ComfyUI/SDXL profile is live-validated and promoted; a 28-case effect-free lifecycle planner covers lifecycle outcomes without granting machine authority. Windows NVIDIA, AMD, and Intel have exact-profile evidence but remain independently gated. Runtime audits remain compatibility/security evidence and do not grant redistribution or package authority. Consumer onboarding, automatic idle shutdown, complete cleanup/parity, and Apple Silicon remain gated. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has partial Linux CUDA evidence across V100 and Quadro profiles. The Quadro cell passes instrumental/vocal-request WAV structure, signal/clipping, cancellation, recovery, GPU-use, isolated retention, and review-only typed evidence. Listening, deletion/uninstall, a production adapter, package parity, and an upstream route-authentication fix remain open. |
 | Milestone 25: Local Video Generation | Research and hardware preflight in progress | Exact HunyuanVideo, Wan2.2, and LTX-2.3 candidate records plus identity/media consent policy are complete. A Quadro RTX 5000 preflight rejected Wan2.2 for VRAM, LTX-2.3 for VRAM/storage, and HunyuanVideo for insufficient safe storage before downloading any runtime or model. No live provider is promoted. |
@@ -691,9 +725,53 @@ Scope:
 - Reuse the Milestone 20 evidence dashboard, health, cleanup, recommendation, installation, validation, and release-readiness workflows. Done for one shared cross-platform evidence engine plus a bounded read-only committed-evidence UI summary; live validation, installation, and release-readiness execution remain gated.
 - Reuse Milestone 21 routing and provider contracts; keep LLM routing advisory and policy enforcement deterministic.
 - Add a cross-platform core-engine updater that can check for, stage, and optionally install stable releases published by the official GitHub repository. Never update a production installation with an unattended `git pull` or from a moving branch.
+- After the Windows Alpha, add opt-in update discovery for Haven-managed
+  components such as the Ollama runtime, accelerator support package, and
+  models. Alpha packages must continue using exact reviewed versions and must
+  never interpret an upstream "latest" version as approved. A future component
+  catalog must distinguish the installed version, current Haven-tested version,
+  a newer Haven-tested update, and an upstream version that has not passed Haven
+  compatibility and security review. Only immutable catalog entries may become
+  eligible for an explicitly approved download.
 - Separate immutable engine files from user workspaces, local configuration, models, provider data, generated artifacts, and evidence so an engine update cannot overwrite user-owned state.
 - Add accessible progress, warning, failure, retry, and recovery experiences over the versioned workflow envelope. Done for strict local-web text envelopes, visible unverified-model warnings, typed failures, and memory-only input restoration that requires a new request; broader workflow execution remains open.
-- Render typed text artifacts and progress/result/error states in the admitted local-web slice without granting filesystem authority. Done for admitted text artifacts and warning/failure/recovery states; broader workflow and artifact-location UI remain open.
+- Before invited Alpha distribution, add bounded privacy-safe diagnostic logging
+  under the sibling portable directory `Haven42-Logs` with immediate writes for important lifecycle
+  transitions, rotation and storage limits, sanitized stable event/reference
+  IDs, setup and integrity outcomes, component versions, hardware-selection
+  decisions, owned-process lifecycle, and clean versus observed-abnormal
+  shutdown state. Add novice-facing Troubleshooting controls to view recent
+  activity, copy one error's safe details, create an explicitly saved sanitized
+  support report, and clear logs. Never record prompts, responses, attachment
+  content or names, credentials, full endpoints, usernames, hostnames, personal
+  paths, environment values, commands, or arbitrary child output. Nothing is
+  uploaded automatically. Removing managed components must never delete
+  `Haven42-Logs`; full uninstall must present logs as a separate explicit removal
+  choice. The fixed-schema event writer, two-file rotation, unclean-session
+  marker, local support-report creation, separate clear/remove controls, and
+  hostile privacy tests are implemented. Expanded component-decision events,
+  interrupted-write and disk-full evidence, packaged UI parity, and owner review
+  remain required before Alpha distribution.
+- The same Troubleshooting surface should provide **Report this answer** using
+  only a sanitized local event reference, model artifact identity, capability,
+  app/runtime version, selected issue category, and optional tester note. It
+  must not capture or upload the prompt, response, attachments, or conversation;
+  sharing redacted content remains a separate explicit tester action.
+- Render typed text artifacts and progress/result/error states in the admitted local-web slice without granting filesystem authority. Done for admitted text artifacts, warning/failure/recovery states, and an active Stop control that closes only the exact tracked provider stream, unloads the active model, discards partial output, and restores the prompt; broader workflow and artifact-location UI remain open.
+- Apply one compact universal response policy to Chat, Writing, and
+  Summarization: preserve explicitly supplied individual pronouns exactly; when
+  none are supplied, use the person's name or a neutral noun and never assign
+  an individual pronoun, including singular they/them; no unsupported
+  sensitive-trait inference, no
+  stereotypes, explicit separation of supplied facts and assumptions, visible
+  uncertainty, no invented browsing/file/execution claims, no unnecessary
+  secret repetition, cautious high-stakes guidance, safe framing of destructive
+  commands, and preservation of source meaning. Prompt delivery and hostile
+  deterministic tests are implemented. Before invited Alpha distribution, run
+  a fixed compliance matrix against every exact model eligible for automatic
+  selection; repeated critical violations block that model's recommendation.
+  Treat these instructions as behavior guidance only, never as the security
+  boundary.
 - Add tested multi-step task composition only after individual capabilities and artifact contracts have passed their own gates.
 - Keep future surface-specific profiles outside the UI until their exact integrations pass the agent admission policy.
 - Use GitHub-hosted platform runners for routine builds. Pursue Microsoft Store or SignPath Foundation Windows signing before paid Artifact Signing, and defer Apple Developer enrollment until the first public macOS beta is otherwise ready.
@@ -733,7 +811,22 @@ Exit criteria:
   project with signing-service MFA. Repository-account MFA was
   owner-confirmed on 2026-07-27. No signing or publication is active.
 - A failed update automatically restores the previous known-good engine. Offline use remains available, update checks can be disabled, stable is the default channel, and automatic installation is an explicit user choice.
+- Post-Alpha managed-component updates require network disclosure and explicit
+  user approval, exact size and SHA-256 verification, expected publisher
+  signature verification where applicable, safe archive inspection,
+  hardware/driver/model compatibility preflight, side-by-side staging inside
+  `Haven42-Data`, a local health test, atomic activation, and automatic rollback
+  to the retained known-good version. Models use a separate decision because an
+  update can be large and can change behavior or hardware requirements.
+  Unreviewed upstream versions remain visible only as unsupported information
+  and cannot be downloaded or activated by Haven 42. Drivers, firmware,
+  Windows components, certificate stores, firewall rules, and services remain
+  outside automatic update authority.
 - Windows, Linux, and macOS contract tests cover routing, workflow dispatch, artifacts, failures, recovery, and safe composition.
+- Invited Alpha errors expose a stable reference ID that maps to bounded local
+  sanitized diagnostics, and a tester can create a support report without
+  exposing chat content, attachments, credentials, identities, endpoints, or
+  personal filesystem paths.
 
 ### Recommended Implementation Order
 
@@ -752,8 +845,15 @@ Exit criteria:
 6. Connect setup, health, model choice, engineering workflows, and evidence views from Milestone 20. Readiness inspection, zero-effect setup planning, the provider wizard, exact-digest text recommendations, provider metrics, typed text results with safe DOM-built Markdown and Unicode emoji, configurable task-bound prompt recall, provider health, a shared cross-platform evidence dashboard engine, a bounded read-only committed-evidence view, disabled-update status, and registered read-only workflow planning are done; real installation, live validation, and workflow execution remain.
 7. Add repository-free text and image flows only for providers promoted in Milestone 21 or Milestone 23. Done for admitted text tools and the promoted Linux ComfyUI/SDXL profile; other image profiles remain independently gated.
 8. Implement the GitHub release updater with explicit channels, network disclosure, immutable asset selection, checksum and signature or attestation verification, compatibility preflight, atomic activation, post-update health checks, rollback, and retained-version cleanup. The offline candidate and lifecycle policies now validate strict release fixtures and model healthy, failed-health, interrupted, rollback, retention, and disabled paths while denying network, download, writes, staging, activation, cleanup, and every other machine effect. A 30-case structural trust handoff binds a future verifier receipt to exact verifier/release/asset/platform/lifetime/replay metadata. A separate 33-case transition model checks consecutive verifier-registry versions, validity overlap, exact verifier continuity, active-root continuity, current-root threshold claims, and replay. A cryptographic inventory and 37-case post-quantum readiness suite add an inactive hybrid-preferred `X25519MLKEM768` TLS candidate with visible secure classical fallback, an unselected dual classical/ML-DSA update-signature candidate, an SLH-DSA alternative, downgrade rules, and exact activation gates. None performs cryptographic verification, accepts authorization, changes trust or TLS policy, handles keys, or stages an asset. Actual acquisition, trusted cryptographic verification, PQC selection, staging, activation, and rollback remain unadmitted.
-9. Add cross-platform UI contract, updater, rollback, packaging, signing, and uninstall tests. Source browser UI and native packaged browser/parity smoke coverage now run on Windows, Linux, and macOS; offline updater/rollback/uninstall policy tests remain effect-free, while signing/notarization and real lifecycle tests remain gated.
-10. Add bounded multi-step composition with explicit intermediate artifacts and approvals. The registry-backed dependency planner, cancellation-before-execution, and metadata-only intermediate references are done. A 49-case effect-free admission model validates exact workflow effects, typed intermediate metadata, digest- and lifecycle-bound engine approval scope, expiry/replay state, retry, cancellation, absent approval on non-execution paths, and blocked recovery. A 46-case digest-chained journal model binds later scenario records to that scope and rejects cross-admission reuse, forged completion, future or reordered records, understated cancellation risk, unsafe retry, and uncertain recovery while treating every claimed event as untrusted. Neither accepts a token, writes a journal, or grants execution. Native opaque-token issuance, executable dispatch, durable effect journaling, runtime cancellation/retry/recovery, and rollback remain gated.
+9. After Alpha completion, implement a separate managed-component update catalog
+   and UI over exact reviewed Ollama/runtime/model entries. Keep checks manual by
+   default, identify but never activate unreviewed upstream releases, require a
+   fresh approval for each download, stage versions side by side, validate them
+   locally, retain the prior version for rollback, and clean retained versions
+   only with explicit consent. Do not place driver or operating-system updates
+   in this channel.
+10. Add cross-platform UI contract, updater, rollback, packaging, signing, and uninstall tests. Source browser UI and native packaged browser/parity smoke coverage now run on Windows, Linux, and macOS; offline updater/rollback/uninstall policy tests remain effect-free, while signing/notarization and real lifecycle tests remain gated.
+11. Add bounded multi-step composition with explicit intermediate artifacts and approvals. The registry-backed dependency planner, cancellation-before-execution, and metadata-only intermediate references are done. A 49-case effect-free admission model validates exact workflow effects, typed intermediate metadata, digest- and lifecycle-bound engine approval scope, expiry/replay state, retry, cancellation, absent approval on non-execution paths, and blocked recovery. A 46-case digest-chained journal model binds later scenario records to that scope and rejects cross-admission reuse, forged completion, future or reordered records, understated cancellation risk, unsafe retry, and uncertain recovery while treating every claimed event as untrusted. Neither accepts a token, writes a journal, or grants execution. Native opaque-token issuance, executable dispatch, durable effect journaling, runtime cancellation/retry/recovery, and rollback remain gated.
 
 ## Milestone 23: Native Local Image Generation
 

@@ -8,7 +8,7 @@ import re
 
 
 ROOT = Path(__file__).resolve().parent.parent
-EXPECTED_VERSION = "0.3.0"
+EXPECTED_VERSION = "0.4.0-alpha.1"
 
 
 def read(relative: str) -> str:

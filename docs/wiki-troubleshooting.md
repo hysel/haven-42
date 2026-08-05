@@ -11,14 +11,17 @@ _For Haven 42 users. Begin here before using the engineering diagnostics._
   Haven 42 process before starting another copy.
 - Do not substitute a LAN address. The Haven 42 interface is loopback-only.
 
-## Ollama does not connect
+## The AI server does not connect
 
-1. Confirm Ollama is running on the selected machine.
-2. Confirm the address and port. Same-machine Ollama normally uses
+1. If you used guided local setup, close and reopen the same extracted Haven 42
+   copy. Haven 42 will check and restart its local AI engine automatically.
+2. If you chose an advanced external server, confirm Ollama is running on that
+   computer.
+3. Confirm the address and port. Same-machine Ollama normally uses
    `http://127.0.0.1:11434`.
-3. For another machine, use its explicit private-network IP address and the
+4. For another machine, use its private-network numeric address and the
    port on which Ollama is listening.
-4. Check that the two machines can reach each other under the network policy
+5. Check that the two machines can reach each other under the network policy
    you manage.
 
 Haven 42 blocks public addresses, credentials in URLs, redirects, and unsupported
@@ -36,9 +39,10 @@ that warning is expected until you use trusted HTTPS or a loopback tunnel.
 
 ## A model is missing
 
-Haven 42 does not download models automatically. Use **Models** to search the
-public catalog, review the suggested Ollama instruction, and run it yourself on
-the Ollama system. Reconnect afterward.
+Public model search does not download anything. If you use guided Windows
+setup, return to **Set up this computer** and review the displayed download and
+permission. Advanced users managing their own Ollama server can follow the
+instruction shown under **Models**, then reconnect.
 
 ## An attachment is rejected
 
@@ -52,13 +56,13 @@ chat attachments.
 
 ## The response is slow
 
-- Compare the provider timing shown under **Run details**.
+- Compare the timing shown under **Response details · Advanced**.
 - Try a smaller installed model.
 - Reduce attachment size or start a focused new task.
 - Check the Ollama machine for competing model or GPU workloads.
 
-If the Haven 42 page itself responds quickly but generation is slow, the delay
-is normally on the model-provider side rather than in the local browser server.
+If the Haven 42 page responds quickly but the answer appears slowly, the AI
+model or the computer running it is usually the slow part.
 
 ## Still stuck?
 
