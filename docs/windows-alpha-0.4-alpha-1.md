@@ -204,8 +204,8 @@ requires a clean security review, privacy scan, full local gate, native Windows
 smoke and lifecycle test for every admitted model tier,
 package integrity/checksum/SBOM/notices evidence, clean hosted checks on the
 eventual commit, owner review, and an authenticated private delivery decision.
-The earlier final13 archive has exact Qwen 3.5 9B managed reuse evidence on
-Windows Intel Vulkan, AMD ROCm, and NVIDIA CUDA. The current final18 candidate
-adds portable-storage and cleanup hardening and still requires fresh
+An earlier candidate has exact Qwen 3.5 9B managed reuse evidence on Windows
+Intel Vulkan, AMD ROCm, and NVIDIA CUDA. The published Alpha adds
+portable-storage and cleanup hardening and still requires fresh
 external-hardware validation. The other catalog tiers remain instruction-only.
-Signing, tagging, and public release remain outside this batch.
+Signing and production promotion remain outside this Alpha.

@@ -74,10 +74,10 @@ The native harness verified across the recorded cells:
   inference, Chat, unload, and shutdown lifecycle without redownloading the
   runtime or model.
 
-The earlier final13 archive completed that managed reuse run independently on
-the Intel Vulkan, NVIDIA CUDA, and AMD ROCm cells. The current final18 candidate
-adds portable-storage and cleanup hardening and still requires fresh validation
-on external hardware. Before sufficient target
+An earlier candidate completed that managed reuse run independently on the
+Intel Vulkan, NVIDIA CUDA, and AMD ROCm cells. The published Alpha adds
+portable-storage and cleanup hardening and still requires fresh validation on
+external hardware. Before sufficient target
 space was available, the same AMD cell also passed the native `StorageDenied`
 path at 7.4 GiB free: no model or managed plan was selected, the broker stayed
 idle, managed-state existence did not change, shutdown was clean, and no user
