@@ -110,6 +110,7 @@ const state = {
   pendingTextRequest: null,
   activeTextExecution: null,
   approvedTextRequest: null,
+  pendingAnswerReport: null,
   alphaTextOnly: true,
 };
 
@@ -527,6 +528,7 @@ function humanError(error) {
     "unsafe-portable-data-entry": "Haven 42 found an unexpected linked file or folder, so it safely stopped removal.",
     "portable-data-removal-failed": "Haven could not completely remove its managed data. No other location was touched.",
     "diagnostic-report-save-failed": "Haven 42 could not safely create the support report. No report was uploaded.",
+    "answer-report-save-failed": "Haven 42 could not safely create the answer report. The question and answer were not recorded or uploaded.",
     "diagnostic-clear-failed": "Haven 42 could not safely clear the troubleshooting events.",
     "diagnostic-removal-failed": "Haven 42 found an unexpected item in the log folder, so it left the folder unchanged.",
   };
@@ -1368,6 +1370,7 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
     consent.checked = false;
     button.disabled = true;
     reviewButton.disabled = false;
+    await refreshDiagnosticsQuietly();
   }
 }
 
@@ -1397,6 +1400,8 @@ async function runReadiness() {
       : "Local setup unavailable";
   } catch (error) {
     byId("wizard-scan-status").textContent = humanError(error);
+  } finally {
+    await refreshDiagnosticsQuietly();
   }
 }
 
@@ -1600,6 +1605,21 @@ function renderDiagnostics(value) {
 async function refreshDiagnostics() {
   const value = await api("/api/alpha/diagnostics", {});
   renderDiagnostics(value);
+}
+
+let diagnosticsRefreshPromise = null;
+
+function refreshDiagnosticsQuietly() {
+  if (diagnosticsRefreshPromise) return diagnosticsRefreshPromise;
+  diagnosticsRefreshPromise = refreshDiagnostics()
+    .catch(() => {
+      byId("diagnostics-status").textContent =
+        "Troubleshooting events are unavailable. Haven 42 will continue without recording them.";
+    })
+    .finally(() => {
+      diagnosticsRefreshPromise = null;
+    });
+  return diagnosticsRefreshPromise;
 }
 
 function hideModelSwitchPrompt() {
@@ -1858,7 +1878,9 @@ function renderTypedResult(result, capability, capabilityId) {
   byId("alpha-speed").textContent = result.runDetails.tokensPerSecond == null
     ? "Not reported"
     : `${result.runDetails.tokensPerSecond} tokens/s`;
-  addMessage("assistant", result.artifact.content.text, capability.resultLabel);
+  addMessage("assistant", result.artifact.content.text, capability.resultLabel, {
+    reportToken: result.answerReportToken,
+  });
 }
 
 function reserveMarkdownElements(budget, count = 1) {
@@ -2039,7 +2061,35 @@ function appendMarkdown(container, source) {
   }
 }
 
-function addMessage(role, content, label) {
+function validAnswerReportIdentity(value) {
+  return Boolean(
+    value
+    && Object.keys(value).join("|") === "reportToken"
+    && typeof value.reportToken === "string"
+    && /^[a-f0-9]{32}$/.test(value.reportToken)
+  );
+}
+
+function closeAnswerReport(restoreFocus = true) {
+  const trigger = state.pendingAnswerReport?.trigger;
+  state.pendingAnswerReport = null;
+  byId("answer-report-panel").classList.add("hidden");
+  byId("answer-report-note").value = "";
+  byId("answer-report-status").textContent = "";
+  if (restoreFocus && trigger?.isConnected) trigger.focus();
+}
+
+function openAnswerReport(identity, trigger) {
+  if (!validAnswerReportIdentity(identity)) return;
+  state.pendingAnswerReport = { identity: {...identity}, trigger };
+  byId("answer-report-category").value = "incorrect";
+  byId("answer-report-note").value = "";
+  byId("answer-report-status").textContent = "Nothing is sent anywhere. The report stays in Haven42-Logs.";
+  byId("answer-report-panel").classList.remove("hidden");
+  byId("answer-report-category").focus();
+}
+
+function addMessage(role, content, label, answerReportIdentity = null) {
   const article = document.createElement("article");
   article.className = `message ${role}`;
   const avatar = document.createElement("div");
@@ -2058,6 +2108,17 @@ function addMessage(role, content, label) {
     text.append(paragraph);
   }
   body.append(heading, text);
+  if (role === "assistant" && validAnswerReportIdentity(answerReportIdentity)) {
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+    const report = document.createElement("button");
+    report.type = "button";
+    report.className = "button secondary message-action";
+    report.textContent = "Report this answer";
+    report.addEventListener("click", () => openAnswerReport(answerReportIdentity, report));
+    actions.append(report);
+    body.append(actions);
+  }
   article.append(avatar, body);
   byId("messages").append(article);
   article.scrollIntoView({ behavior: motionBehavior(), block: "end" });
@@ -2566,6 +2627,7 @@ function recallPrompt(direction) {
 }
 
 function resetTask() {
+  if (state.pendingAnswerReport) closeAnswerReport(false);
   state.messages = [];
   state.approvedTextRequest = null;
   hideModelSwitchPrompt();
@@ -3349,6 +3411,10 @@ byId("image-run-button").addEventListener("click", async () => {
 });
 byId("system-nav").addEventListener("click", () => {
   activateNavigation("system-nav", "status-panel", "system-title");
+  void refreshDiagnosticsQuietly();
+});
+byId("diagnostics-control").addEventListener("toggle", () => {
+  if (byId("diagnostics-control").open) void refreshDiagnosticsQuietly();
 });
 document.querySelectorAll(".availability-nav").forEach((button) => {
   button.addEventListener("click", () => {
@@ -3408,6 +3474,7 @@ byId("scan-system-button").addEventListener("click", async () => {
     button.textContent = "Check this computer";
   } finally {
     button.disabled = false;
+    await refreshDiagnosticsQuietly();
   }
 });
 byId("setup-local-components").addEventListener("click", async () => {
@@ -3482,6 +3549,37 @@ byId("refresh-diagnostics").addEventListener("click", async () => {
     byId("diagnostics-action-status").textContent = "Troubleshooting events refreshed.";
   } catch (error) {
     byId("diagnostics-action-status").textContent = humanError(error);
+  }
+});
+byId("cancel-answer-report").addEventListener("click", () => closeAnswerReport());
+byId("save-answer-report").addEventListener("click", async () => {
+  const pending = state.pendingAnswerReport;
+  if (!pending || !validAnswerReportIdentity(pending.identity)) return;
+  const button = byId("save-answer-report");
+  const testerNote = byId("answer-report-note").value.trim();
+  button.disabled = true;
+  byId("answer-report-status").textContent = "Saving a private report in Haven42-Logs…";
+  try {
+    const result = await api("/api/alpha/diagnostics/answer-report", {
+      reportToken: pending.identity.reportToken,
+      category: byId("answer-report-category").value,
+      testerNote,
+    });
+    if (
+      !result || result.saved !== true || result.directoryName !== "Haven42-Logs"
+      || result.automaticUpload !== false
+      || !/^answer-report-[a-f0-9]{16}\.json$/.test(result.fileName)
+      || !/^[a-f0-9]{16}$/.test(result.eventReference)
+      || Object.keys(result).sort().join("|") !== "automaticUpload|directoryName|eventReference|fileName|saved"
+    ) throw new Error("invalid-answer-report-result");
+    closeAnswerReport(false);
+    setTaskEvent(`Private answer report saved as ${result.fileName} in Haven42-Logs · nothing uploaded`, "result");
+    await refreshDiagnosticsQuietly();
+    pending.trigger?.focus();
+  } catch (error) {
+    byId("answer-report-status").textContent = humanError(error);
+  } finally {
+    button.disabled = false;
   }
 });
 byId("save-support-report").addEventListener("click", async () => {

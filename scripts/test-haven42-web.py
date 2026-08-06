@@ -522,6 +522,7 @@ def main() -> int:
         state.alpha_setup = WEB.SetupCoordinator(
             state.csrf_token,
             (DIAGNOSTIC_TEST_PARENT / "Haven42-Data").resolve(),
+            state.diagnostics.record,
         )
     class ClosingResponse:
         closed = False
@@ -627,11 +628,42 @@ def main() -> int:
         )
         assert status == 200 and report["directoryName"] == "Haven42-Logs"
         assert re.fullmatch(r"support-report-[a-f0-9]{16}\.json", report["fileName"])
+        report_token = "b" * 32
+        with app.state.lock:
+            app.state.answer_report_contexts[report_token] = {
+                "capabilityId": "general.chat",
+                "model": "qwen3.5:9b",
+                "modelDigest": "a" * 64,
+                "runtimeVersion": "0.32.5",
+            }
+        status, answer_report, _ = request_json(
+            origin + "/api/alpha/diagnostics/answer-report",
+            "POST",
+            {
+                "category": "incorrect",
+                "reportToken": report_token,
+                "testerNote": "The date appears wrong; no chat content included.",
+            },
+            token,
+            origin,
+        )
+        assert status == 200 and answer_report["directoryName"] == "Haven42-Logs"
+        assert answer_report["automaticUpload"] is False
+        assert re.fullmatch(r"answer-report-[a-f0-9]{16}\.json", answer_report["fileName"])
+        assert re.fullmatch(r"[a-f0-9]{16}", answer_report["eventReference"])
+        status, stale_report, _ = request_json(
+            origin + "/api/alpha/diagnostics/answer-report",
+            "POST",
+            {"category": "incorrect", "reportToken": report_token, "testerNote": ""},
+            token,
+            origin,
+        )
+        assert status == 409 and stale_report["error"] == "answer-report-save-failed"
         status, cleared, _ = request_json(
             origin + "/api/alpha/diagnostics/clear", "POST", {"confirmed": True}, token, origin,
         )
         assert status == 200 and cleared["cleared"] is True and cleared["reportsPreserved"] is True
-        checks += 8
+        checks += 14
 
         assert wait_until(lambda: app._request_slots._value == WEB.MAX_HTTP_WORKERS)
         held_slots = [
@@ -721,6 +753,11 @@ def main() -> int:
                 "/api/alpha/diagnostics/remove",
                 {"confirmed": False},
                 "diagnostic-removal-confirmation-required",
+            ),
+            (
+                "/api/alpha/diagnostics/answer-report",
+                {"category": "incorrect"},
+                "invalid-answer-report-fields",
             ),
         )
         for path, hostile_body, expected_error in strict_type_cases:
@@ -948,6 +985,7 @@ def main() -> int:
         assert isinstance(storage_status["managedComponentsPresent"], bool)
         assert isinstance(storage_status["legacyManagedComponentsPresent"], bool)
         if plan.get("alphaCandidate", {}).get("managedPlan") is not None:
+            managed_plan = plan["alphaCandidate"]["managedPlan"]
             progress_components = storage_status["components"]
             assert 2 <= len(progress_components) <= 4
             assert {item["kind"] for item in progress_components} == {"runtime", "model"}
@@ -959,6 +997,13 @@ def main() -> int:
                 }
                 for item in progress_components
             )
+            status, decision_diagnostics, _ = request_json(
+                origin + "/api/alpha/diagnostics", "POST", {}, token, origin,
+            )
+            assert status == 200
+            decision_codes = {item["code"] for item in decision_diagnostics["events"]}
+            assert WEB.COMPONENT_DECISION_CODES[managed_plan["components"][0]] in decision_codes
+            assert WEB.MODEL_DECISION_CODES[managed_plan["modelId"]] in decision_codes
             assert all(item["state"] == "pending" for item in progress_components)
             assert all("url" not in json.dumps(item).casefold() for item in progress_components)
         original_resume = state.resume_managed_provider
@@ -1316,6 +1361,7 @@ def main() -> int:
                     "digest": "2" * 64,
                     "priority": 1,
                     "evidenceId": "chat",
+                    "evidenceStatus": "passed",
                 },),
                 "content.write": (),
                 "content.summarize": (),
@@ -1399,6 +1445,7 @@ def main() -> int:
         assert reply["artifact"]["policy"]["fileWrite"] is False
         assert reply["artifact"]["policy"]["networkAccess"] is False
         assert reply["modelDigestVerified"] is True
+        assert re.fullmatch(r"[a-f0-9]{32}", reply["answerReportToken"])
         assert reply["context"] == {
             "fileCount": 0,
             "totalBytes": 0,
@@ -1433,12 +1480,14 @@ def main() -> int:
         assert "preserve and use exactly those pronouns" in chat_payload["messages"][0]["content"]
         assert "never replace she/her or he/him with singular they/them" in chat_payload["messages"][0]["content"]
         assert "do not assign any pronoun, including singular they/them" in chat_payload["messages"][0]["content"]
+        assert "credential-shaped placeholders" in chat_payload["messages"][0]["content"]
+        assert "even when the user asks for dummy or test credentials" in chat_payload["messages"][0]["content"]
         assert "Do not ask for gender merely to word the response" in chat_payload["messages"][0]["content"]
         for guardrail in (
             "Avoid stereotypes",
             "state uncertainty instead of inventing",
             "Never claim to have browsed",
-            "Do not request, reveal, or unnecessarily repeat passwords",
+            "Do not request, reveal, invent examples of, or unnecessarily repeat passwords",
             "medical, legal, financial, or safety-critical",
             "destructive or system-changing commands",
             "do not turn a source claim into a confirmed fact",

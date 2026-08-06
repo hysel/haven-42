@@ -598,8 +598,22 @@ checkbox totals below.
   `Haven42-Logs` portable directory with rotation, immediate lifecycle writes,
   unclean-session detection, local support reports, separate clear/remove
   controls, managed-component preservation, source/package smoke coverage, and
-  hostile privacy tests. Keep expanded component-decision and disk-failure
-  evidence gated before invited distribution.
+  hostile privacy tests. Record only fixed-code component, backend, model,
+  interrupted-write recovery, insufficient-space, and storage-write outcomes;
+  never record caller-supplied diagnostic details.
+- [x] Add a privacy-safe per-answer report that saves only a local event
+  reference, fixed issue category, exact task/model digest/runtime metadata,
+  and an optional 300-character tester note. Exclude the prompt, answer,
+  attachments, endpoint, and identity; never upload automatically.
+- [x] Add a digest-bound Windows Alpha response-compliance runner with bounded
+  local review evidence and guaranteed model cleanup. Run the exact Qwen 3.5 9B
+  matrix and remediate one credential-policy failure. Retain response findings
+  as advisory quality evidence without changing the approved hardware-based
+  automatic default; keep the matrix pending owner review.
+- [x] Screen the already installed, previously constrained Gemma 3 12B, Mistral
+  Small 3.2 24B, and Qwen 3.5 4B Writing alternatives without granting
+  selection authority. Record their quality findings without replacing the
+  approved automatic default.
 - [x] Add novice-facing Alpha download and SHA-256 verification instructions,
   structured privacy-safe GitHub problem and feedback forms, a private
   vulnerability-report path, and an allowlisted in-product report link.

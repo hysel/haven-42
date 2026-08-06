@@ -56,6 +56,20 @@ COMPONENT_PROGRESS_STATES = {
     "pending", "present", "downloading", "verifying", "installing", "ready",
     "validating", "complete", "failed", "cancelled",
 }
+COMPONENT_DECISION_CODES = {
+    "ollama-windows-core": "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_5_SELECTED",
+    "ollama-windows-amd-rocm": (
+        "SETUP_COMPONENT_OLLAMA_WINDOWS_AMD_ROCM_0_32_5_ROCM_7_1_SELECTED"
+    ),
+}
+MODEL_DECISION_CODES = {
+    "qwen35-08b-q8": "SETUP_MODEL_QWEN35_08B_Q8_SELECTED",
+    "qwen35-2b-q8": "SETUP_MODEL_QWEN35_2B_Q8_SELECTED",
+    "qwen35-4b-q4": "SETUP_MODEL_QWEN35_4B_Q4_SELECTED",
+    "qwen35-9b-q4": "SETUP_MODEL_QWEN35_9B_Q4_SELECTED",
+    "qwen35-27b-q4": "SETUP_MODEL_QWEN35_27B_Q4_SELECTED",
+    "qwen35-35b-q4": "SETUP_MODEL_QWEN35_35B_Q4_SELECTED",
+}
 STALE_JOURNAL_TEMP = re.compile(r"^\.setup-transaction\.json\.[0-9a-f]{16}\.tmp$")
 SAFE_PLAN_ID = re.compile(r"^[A-Za-z0-9_-]{16,128}$")
 OWNER_MARKER_NAME = ".haven42-managed-data.json"
@@ -640,9 +654,12 @@ def write_journal(root: Path, transaction: dict[str, Any]) -> Path:
             handle.flush()
             os.fsync(handle.fileno())
         os.replace(temporary, target)
-    except Exception:
-        temporary.unlink(missing_ok=True)
-        raise
+    except OSError as error:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise SetupError("portable-data-journal-write-failed") from error
     return target
 
 
@@ -755,7 +772,10 @@ def verify_runtime_integrity(state_root: Path, version: str, runtime: Path) -> d
         or not isinstance(value.get("files"), list)
     ):
         raise SetupError("managed-runtime-integrity-invalid")
-    actual = _runtime_records(runtime)
+    try:
+        actual = _runtime_records(runtime)
+    except OSError as error:
+        raise SetupError("managed-runtime-integrity-unreadable") from error
     if value["files"] != actual:
         raise SetupError("managed-runtime-integrity-mismatch")
     return {"verified": True, "fileCount": len(actual), "version": version}
@@ -892,13 +912,15 @@ class OwnedProcess:
             _assign_windows_kill_job(job, self._process)
             _resume_windows_process(self._process)
             self._job = job
-        except Exception:
+        except Exception as error:
             _close_windows_job(job)
             if self._process is not None and self._process.poll() is None:
                 self._process.kill()
                 self._process.wait(timeout=5)
             self._process = None
-            raise
+            if isinstance(error, SetupError):
+                raise
+            raise SetupError("managed-process-start-failed") from error
         return self._process.pid
 
     def stop(self, timeout_seconds: float = 10) -> bool:
@@ -1206,7 +1228,12 @@ class SetupCoordinator:
 
     PHASES = {"idle", "approved", "downloading", "verifying", "extracting", "starting", "model-download", "validating", "complete", "failed", "cancelled"}
 
-    def __init__(self, session_id: str, state_root: Path | None = None) -> None:
+    def __init__(
+        self,
+        session_id: str,
+        state_root: Path | None = None,
+        event_sink: Callable[[str, str, str], bool] | None = None,
+    ) -> None:
         self.approvals = ApprovalStore(session_id)
         self.root = state_root or default_state_root()
         self.legacy_root = legacy_state_root() if state_root is None else None
@@ -1220,6 +1247,16 @@ class SetupCoordinator:
         self._plan: dict[str, Any] | None = None
         self._cancel = threading.Event()
         self._thread: threading.Thread | None = None
+        self._event_sink = event_sink
+
+    def _emit(self, category: str, code: str, outcome: str) -> None:
+        """Best-effort fixed-code evidence must never alter setup behavior."""
+        if self._event_sink is None:
+            return
+        try:
+            self._event_sink(category, code, outcome)
+        except Exception:
+            pass
 
     def register_plan(self, plan: dict[str, Any]) -> dict[str, Any]:
         if self._thread is not None and self._thread.is_alive():
@@ -1232,6 +1269,14 @@ class SetupCoordinator:
                 "components": setup_progress_components(self._plan, present),
             }
             self._active_component_id = None
+        self._emit(
+            "setup",
+            f"SETUP_BACKEND_{self._plan['backendMode'].upper()}_SELECTED",
+            "observed",
+        )
+        for component_id in self._plan["components"]:
+            self._emit("setup", COMPONENT_DECISION_CODES[component_id], "observed")
+        self._emit("setup", MODEL_DECISION_CODES[self._plan["modelId"]], "observed")
         return self.status()
 
     def approve(self, plan_id: str, acknowledged_effects: list[str]) -> str:
@@ -1498,7 +1543,8 @@ class SetupCoordinator:
             components = {item["id"]: item for item in registry["components"]}
             model = next(item for item in catalog["models"] if item["id"] == plan["modelId"])
             state_root = _owned_state_root(self.root, create=True)
-            clean_stale_journal_temps(state_root)
+            if clean_stale_journal_temps(state_root):
+                self._emit("storage", "SETUP_INTERRUPTED_WRITE_RECOVERED", "warning")
             staging = state_root / "staging" / transaction_id
             downloads = state_root / "downloads"
             runtime_version = registry["components"][0]["version"]
@@ -1606,6 +1652,7 @@ class SetupCoordinator:
             self._set_component(model["id"], "complete", 100)
             self._set("complete", 100)
             journal["phase"] = "complete"; write_journal(state_root, journal)
+            self._emit("setup", "MANAGED_SETUP_COMPLETED", "completed")
         except Exception as error:
             with self._lock:
                 active_component_id = self._active_component_id
@@ -1614,6 +1661,15 @@ class SetupCoordinator:
                     if item["componentId"] == active_component_id
                 ), None)
             code = str(error) if isinstance(error, SetupError) else "setup-internal-failure"
+            if code == "insufficient-managed-storage":
+                self._emit("storage", "SETUP_STORAGE_INSUFFICIENT", "failed")
+            elif code in {
+                "portable-data-marker-write-failed",
+                "portable-data-journal-write-failed",
+                "portable-data-root-unavailable",
+            }:
+                self._emit("storage", "SETUP_STORAGE_WRITE_FAILED", "failed")
+            self._emit("setup", "MANAGED_SETUP_FAILED", "failed")
             if active_component is not None:
                 self._set_component(
                     active_component["componentId"],
@@ -1673,8 +1729,10 @@ class SetupCoordinator:
             try:
                 shutil.rmtree(root)
             except OSError as error:
+                self._emit("storage", "SETUP_STORAGE_REMOVAL_FAILED", "failed")
                 raise SetupError("portable-data-removal-failed") from error
             if root.exists():
+                self._emit("storage", "SETUP_STORAGE_REMOVAL_FAILED", "failed")
                 raise SetupError("portable-data-removal-failed")
         with self._lock:
             self._plan = None

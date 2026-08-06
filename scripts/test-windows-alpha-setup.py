@@ -61,6 +61,18 @@ def main() -> int:
             )
             checks += 1
     model = MODULE.load_model_catalog()["models"][0]
+    registry_components = {
+        item["id"]: item for item in MODULE.load_component_registry()["components"]
+    }
+    assert set(MODULE.COMPONENT_DECISION_CODES) == set(registry_components)
+    assert all(
+        item["version"].replace(".", "_") in MODULE.COMPONENT_DECISION_CODES[item["id"]]
+        for item in registry_components.values()
+    )
+    assert set(MODULE.MODEL_DECISION_CODES) == {
+        item["id"] for item in MODULE.load_model_catalog()["models"]
+    }
+    checks += 3
     base = {"accelerators": []}
     cpu = MODULE.build_plan(base, model)
     assert cpu["components"] == ["ollama-windows-core"]
@@ -222,13 +234,23 @@ def main() -> int:
     checks += 4
 
     with tempfile.TemporaryDirectory() as directory:
-        coordinator = MODULE.SetupCoordinator("b" * 16, Path(directory).resolve() / "state")
+        diagnostic_events: list[tuple[str, str, str]] = []
+        coordinator = MODULE.SetupCoordinator(
+            "b" * 16,
+            Path(directory).resolve() / "state",
+            lambda category, code, outcome: diagnostic_events.append((category, code, outcome)) is None,
+        )
         registered = coordinator.register_plan(cpu)
         assert registered["phase"] == "idle" and registered["planId"] == cpu["planId"]
         assert [item["kind"] for item in registered["components"]] == ["runtime", "model"]
         assert registered["components"][0]["displayName"] == "Ollama local runtime"
         assert registered["components"][1]["displayName"] == model["name"]
         assert all(item["state"] == "pending" and item["progressPercent"] == 0 for item in registered["components"])
+        assert diagnostic_events == [
+            ("setup", "SETUP_BACKEND_CPU_SELECTED", "observed"),
+            ("setup", "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_5_SELECTED", "observed"),
+            ("setup", "SETUP_MODEL_QWEN35_08B_Q8_SELECTED", "observed"),
+        ]
         coordinator._download_progress("ollama-windows-core", 1, 4)
         progress_status = coordinator.status()
         assert progress_status["components"][0]["state"] == "downloading"
@@ -248,7 +270,11 @@ def main() -> int:
             coordinator.register_plan,
             dict(cpu, requiredStorageBytes=cpu["requiredStorageBytes"] - 1),
         )
-        checks += 15
+        checks += 16
+
+        coordinator._event_sink = lambda _category, _code, _outcome: (_ for _ in ()).throw(RuntimeError("sink unavailable"))
+        coordinator.register_plan(cpu)
+        checks += 1
 
     with tempfile.TemporaryDirectory() as directory:
         state_root = Path(directory).resolve() / "Haven42-Data"
@@ -348,6 +374,44 @@ def main() -> int:
             rejected("portable-data-entry-limit", MODULE._audit_removal_tree, owned)
         assert linked.is_file()
         checks += 3
+
+    with tempfile.TemporaryDirectory() as directory:
+        diagnostic_events = []
+        coordinator = MODULE.SetupCoordinator(
+            "f" * 16,
+            Path(directory).resolve() / "state",
+            lambda category, code, outcome: diagnostic_events.append((category, code, outcome)) is None,
+        )
+        coordinator.register_plan(cpu)
+        owned = MODULE._owned_state_root(coordinator.root, create=True)
+        (owned / ".setup-transaction.json.0123456789abcdef.tmp").write_text(
+            "interrupted", encoding="ascii",
+        )
+        with mock.patch.object(
+            MODULE,
+            "write_journal",
+            side_effect=MODULE.SetupError("portable-data-journal-write-failed"),
+        ):
+            coordinator._run(cpu)
+        assert coordinator.status()["error"] == "portable-data-journal-write-failed"
+        assert ("storage", "SETUP_INTERRUPTED_WRITE_RECOVERED", "warning") in diagnostic_events
+        assert ("storage", "SETUP_STORAGE_WRITE_FAILED", "failed") in diagnostic_events
+        assert ("setup", "MANAGED_SETUP_FAILED", "failed") in diagnostic_events
+        checks += 4
+
+    with tempfile.TemporaryDirectory() as directory:
+        diagnostic_events = []
+        coordinator = MODULE.SetupCoordinator(
+            "g" * 16,
+            Path(directory).resolve() / "state",
+            lambda category, code, outcome: diagnostic_events.append((category, code, outcome)) is None,
+        )
+        coordinator.register_plan(cpu)
+        with mock.patch.object(MODULE.shutil, "disk_usage", return_value=mock.Mock(free=0)):
+            coordinator._run(cpu)
+        assert coordinator.status()["error"] == "insufficient-managed-storage"
+        assert ("storage", "SETUP_STORAGE_INSUFFICIENT", "failed") in diagnostic_events
+        checks += 2
 
     with tempfile.TemporaryDirectory() as directory:
         base = Path(directory).resolve()
@@ -492,7 +556,18 @@ def main() -> int:
                 {**process_environment, "OLLAMA_NO_CLOUD": "0"},
                 "cpu",
             )
-            checks += 10
+            MODULE.subprocess.Popen = mock.Mock(
+                side_effect=PermissionError("private process detail"),
+            )
+            rejected(
+                "managed-process-start-failed",
+                MODULE.OwnedProcess().start,
+                fake_ollama,
+                ("serve",),
+                process_environment,
+                "cpu",
+            )
+            checks += 11
         finally:
             MODULE.subprocess.Popen = original_popen
 
@@ -518,7 +593,14 @@ def main() -> int:
         value = json.loads(target.read_text(encoding="ascii"))
         assert value == journal and target.stat().st_size < 4096
         rejected("invalid-transaction-journal", MODULE.write_journal, root / "state", {**journal, "url": "secret"})
-        checks += 2
+        with mock.patch.object(MODULE.Path, "open", side_effect=OSError("private path detail")):
+            rejected(
+                "portable-data-journal-write-failed",
+                MODULE.write_journal,
+                root / "state",
+                journal,
+            )
+        checks += 3
 
         stale = root / "state" / ".setup-transaction.json.0123456789abcdef.tmp"
         stale.write_text("stale", encoding="ascii")
@@ -537,7 +619,19 @@ def main() -> int:
         assert verified == {"verified": True, "fileCount": 2, "version": "0.32.5"}
         (runtime / "runtime.dll").write_bytes(b"tampered")
         rejected("managed-runtime-integrity-mismatch", MODULE.verify_runtime_integrity, root / "managed", "0.32.5", runtime)
-        checks += 2
+        with mock.patch.object(
+            MODULE,
+            "_runtime_records",
+            side_effect=PermissionError("private path detail"),
+        ):
+            rejected(
+                "managed-runtime-integrity-unreadable",
+                MODULE.verify_runtime_integrity,
+                root / "managed",
+                "0.32.5",
+                runtime,
+            )
+        checks += 3
 
     with tempfile.TemporaryDirectory() as directory:
         blocked_root = Path(directory).resolve() / "not-a-directory"

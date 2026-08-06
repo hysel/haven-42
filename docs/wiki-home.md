@@ -64,6 +64,7 @@ See [[Common Words|Glossary]] for more definitions.
 | Secure a local or private-network provider | [Connection Security](Provider-Endpoint-Security) |
 | Fix a problem | [Troubleshooting](Troubleshooting) |
 | Use engineering and contributor features | [Advanced Topics](Advanced-Topics) |
+| See the computers and AI engines tested | [Tested Hardware and AI Engines](Tested-Hardware-And-AI-Engines) |
 | See maturity and future work | [Project Information](Project-Information) |
 
 ## Privacy and security

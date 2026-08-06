@@ -154,9 +154,16 @@ inference, Chat/Writing/Summarization metrics, zero-download relaunch,
 sanitized logs outside managed components, human-filename attachment context,
 disguised-script rejection, local/private-network/local switching, external
 model unload, marker-owned uninstall, retained logs/application files, and
-package-verified empty-state relaunch. The archive remains uncommitted unsigned
-development evidence; fresh AMD/NVIDIA repetition, redistribution clearance,
-signing, and production promotion remain open.
+package-verified empty-state relaunch. A later closure candidate repeated fresh
+managed setup, exact model validation, GPU-backed Chat, unload, shutdown, and
+port closure on Windows AMD/ROCm and Windows NVIDIA/CUDA. It also passed the
+trusted-LAN Ollama `0.32.6` Chat/Writing/Summarization switch and returned to
+verified local AI with zero external models left loaded. A replacement archive
+containing the resulting fail-closed relaunch-error correction passed package,
+browser, and no-effect native selection/shutdown cells on all three Windows
+accelerator families. These archives remain uncommitted unsigned development
+evidence; exact Microsoft redistribution clearance, signing, and production
+promotion remain open.
 
 Public signing and privacy policies, a fail-closed SignPath audit,
 deterministic Windows executable metadata, and build-time metadata verification
@@ -909,14 +916,20 @@ Scope:
   `Haven42-Logs`; full uninstall must present logs as a separate explicit removal
   choice. The fixed-schema event writer, two-file rotation, unclean-session
   marker, local support-report creation, separate clear/remove controls, and
-  hostile privacy tests are implemented. Expanded component-decision events,
-  interrupted-write and disk-full evidence, packaged UI parity, and owner review
-  remain required before Alpha distribution.
+  hostile privacy tests are implemented. Fixed-code backend, exact registered
+  component/version, model-selection, interrupted-write recovery,
+  insufficient-space, and storage-write-failure events are implemented without
+  accepting arbitrary diagnostic details. Packaged UI parity and owner review
+  remain release gates.
 - The same Troubleshooting surface should provide **Report this answer** using
   only a sanitized local event reference, model artifact identity, capability,
   app/runtime version, selected issue category, and optional tester note. It
   must not capture or upload the prompt, response, attachments, or conversation;
-  sharing redacted content remains a separate explicit tester action.
+  sharing redacted content remains a separate explicit tester action. Done in
+  the source UI with a per-answer action, fixed issue categories, a bounded
+  optional note, exact model digest/task/runtime metadata, a local event
+  reference, local-only report storage, and hostile/browser privacy tests.
+  Packaged UI parity and owner review remain gates.
 - Render typed text artifacts and progress/result/error states in the admitted local-web slice without granting filesystem authority. Done for admitted text artifacts, warning/failure/recovery states, and an active Stop control that closes only the exact tracked provider stream, unloads the active model, discards partial output, and restores the prompt; broader workflow and artifact-location UI remain open.
 - Apply one compact universal response policy to Chat, Writing, and
   Summarization: preserve explicitly supplied individual pronouns exactly; when
@@ -927,9 +940,20 @@ Scope:
   uncertainty, no invented browsing/file/execution claims, no unnecessary
   secret repetition, cautious high-stakes guidance, safe framing of destructive
   commands, and preservation of source meaning. Prompt delivery and hostile
-  deterministic tests are implemented. Before invited Alpha distribution, run
-  a fixed compliance matrix against every exact model eligible for automatic
-  selection; repeated critical violations block that model's recommendation.
+  deterministic tests are implemented. A reusable digest-bound native runner
+  completed the fixed 30-cell matrix twice against exact `qwen3.5:9b`. The
+  first run exposed invented credential-shaped text in Writing. After a prompt
+  remediation, Writing repeated that finding and Chat assigned singular `they`
+  to an invented individual. These remain advisory model-quality evidence and
+  do not override the approved hardware-based automatic default. The ten
+  Summarization cells completed without an observed violation during agent
+  pre-review; owner review remains required. Every future exact model considered
+  for automatic selection should run the same fixed matrix. Default eligibility,
+  hardware routing, or model-policy changes require explicit owner approval.
+  Candidate-only critical screens also rejected exact Gemma 3 12B and Mistral
+  Small 3.2 24B for Writing. Exact Qwen 3.5 4B advanced to the full Writing
+  matrix but then failed no-pronoun, explicit-pronoun, and credential-handling
+  cases. None earned a higher quality ranking than the current default.
   Treat these instructions as behavior guidance only, never as the security
   boundary.
 - Add tested multi-step task composition only after individual capabilities and artifact contracts have passed their own gates.

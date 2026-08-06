@@ -228,6 +228,20 @@ def probe(
             assert all(set(event) == {
                 "schemaVersion", "timestamp", "eventId", "category", "code", "outcome", "appVersion",
             } for event in diagnostics["events"])
+            if expected_managed:
+                diagnostic_codes = {event["code"] for event in diagnostics["events"]}
+                assert (
+                    f"SETUP_BACKEND_{managed['backendMode'].upper()}_SELECTED"
+                    in diagnostic_codes
+                )
+                assert len([
+                    code for code in diagnostic_codes
+                    if code.startswith("SETUP_COMPONENT_") and code.endswith("_SELECTED")
+                ]) == len(managed["components"])
+                assert len([
+                    code for code in diagnostic_codes
+                    if code.startswith("SETUP_MODEL_") and code.endswith("_SELECTED")
+                ]) == 1
         expect_http_error(
             origin + "/api/workflows",
             authority,

@@ -2,6 +2,64 @@
 
 This file records important project decisions. Use it for choices that affect architecture, compatibility, governance, or long-term maintenance.
 
+## 2026-08-06: Keep Runtime Selection Operating-System-Aware And Owner-Controlled
+
+Status: Accepted
+
+Context:
+Haven 42's text capabilities can run through Ollama or a directly managed
+llama.cpp server, and future models may originate from the Ollama registry or
+Hugging Face. Runtime suitability does not transfer between Windows, Linux,
+macOS, x64, ARM64, GPU vendors, driver stacks, or inference backends. The same
+model and quantization can behave differently across CUDA, ROCm/HIP, Metal,
+SYCL, Vulkan, OpenVINO, and CPU execution. Image and audio generation also need
+capability-specific runtimes rather than inheriting the text-runtime decision.
+As the product grows, an implementation finding must not silently redefine the
+approved beginner experience, default model, or supported platform.
+
+Decision:
+Keep Chat, Writing, and Summarization behind the provider-neutral text contract.
+Use portable Ollama as the novice-facing Windows Alpha runtime. Retain direct
+llama.cpp only as an evidence-gated future provider for exact operating-system,
+architecture, hardware, backend, driver, runtime, and model-artifact profiles.
+Ollama and llama.cpp may coexist as separate providers, but one request uses one
+provider; Haven must not unnecessarily start both for the same model. A verified
+Hugging Face GGUF may later be imported into Ollama without admitting a direct
+llama.cpp runtime.
+
+Runtime and model selection must consider the complete validated tuple:
+
+`operating system + architecture + CPU features + accelerator vendor/model + driver + usable memory + backend + runtime version + model artifact + capability`
+
+Select the largest validated comfortable fit, fall back only to a smaller
+validated fit, and never silently fall back to CPU or an unvalidated backend.
+Windows, Linux, and macOS packages, including x64 and ARM64 variants, require
+independent native evidence. WSL2, virtual-machine, container, or cross-platform
+results remain scoped to that environment. Windows Intel GPU acceleration,
+Linux distribution and device-permission differences, Linux ROCm/CUDA/Vulkan
+requirements, Apple Silicon unified memory and Metal, Intel Mac CPU-only limits,
+signing/notarization, suspend/resume, and portable process/storage behavior are
+separate compatibility inputs and gates.
+
+Use capability-specific admitted runtimes for image, audio, speech, and video;
+neither Ollama nor llama.cpp becomes their generic execution engine. Hugging
+Face remains a candidate artifact and metadata source, not execution authority.
+
+Treat test failures as evidence. Changing default runtime, model eligibility,
+hardware routing, supported platform, fallback behavior, or beginner setup is a
+product design decision requiring explicit repository-owner approval before
+implementation. Security, integrity, compatibility, and execution failures may
+stop a release but do not independently authorize a replacement design.
+
+Consequences:
+The current Alpha remains simple and Ollama-first while preserving a path for
+better exact-profile llama.cpp, Metal, MLX, OpenVINO, or other backends later.
+The support matrix and native test workload grow with every admitted OS,
+architecture, accelerator, backend, and capability. Haven must maintain pinned
+platform packages, driver guidance, lifecycle tests, truthful fallback states,
+and separate evidence. Better benchmark results alone cannot change the default
+product experience.
+
 ## 2026-07-22: Do Not Admit The First Resolved Tauri Runtime Graph
 
 Status: Accepted

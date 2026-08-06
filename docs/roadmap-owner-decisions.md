@@ -29,6 +29,14 @@ signing process, publication flow, dependency, or machine effect.
    available.
 10. The current reviewed UI and security batch remains uncommitted and
     unpushed until a separate explicit commit authorization.
+11. Text capabilities remain provider-neutral, with portable Ollama as the
+    novice-facing Windows Alpha runtime and direct llama.cpp retained as an
+    exact-profile future provider. Operating system, architecture, CPU
+    features, accelerator, driver, usable memory, backend, runtime, model, and
+    capability all participate in selection. Silent CPU fallback is prohibited.
+    Image, audio, speech, and video require separate runtimes. Any change to
+    default runtime, model eligibility, hardware routing, supported platform,
+    fallback behavior, or beginner setup requires explicit owner approval.
 
 Any future change to these decisions must be explicit and must pass the
 applicable security, privacy, lifecycle, native-platform, and evidence gates.

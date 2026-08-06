@@ -1171,6 +1171,37 @@ try {
   checks += 8;
   trace("typed-result-verified");
 
+  const answerReportDisclosure = await cdp.evaluate(`(() => {
+    const report = [...document.querySelectorAll('.message-action')].at(-1);
+    if (!report) return null;
+    report.click();
+    return {
+      label: report.textContent,
+      panelVisible: !document.querySelector('#answer-report-panel').classList.contains('hidden'),
+      disclosure: document.querySelector('#answer-report-description').textContent,
+      status: document.querySelector('#answer-report-status').textContent,
+    };
+  })()`);
+  if (
+    !answerReportDisclosure
+    || answerReportDisclosure.label !== "Report this answer"
+    || !answerReportDisclosure.panelVisible
+    || !answerReportDisclosure.disclosure.includes("never includes the question, answer, or attachments")
+    || !answerReportDisclosure.disclosure.includes("nothing is uploaded")
+    || !answerReportDisclosure.status.includes("stays in Haven42-Logs")
+  ) throw new Error(`answer-report-disclosure:${JSON.stringify(answerReportDisclosure)}`);
+  await cdp.evaluate(`(() => {
+    document.querySelector('#answer-report-category').value = 'incorrect';
+    document.querySelector('#answer-report-note').value = 'The result appears factually incorrect.';
+    document.querySelector('#save-answer-report').click();
+  })()`);
+  await waitFor(() => cdp.evaluate(`(
+    document.querySelector('#answer-report-panel').classList.contains('hidden')
+    && document.querySelector('#task-event').textContent.includes('nothing uploaded')
+  )`));
+  checks += 7;
+  trace("answer-report-privacy-flow-verified");
+
   await cdp.evaluate(`(() => {
     document.querySelector('#prompt').value = 'markdown showcase';
     document.querySelector('#text-form').requestSubmit();
@@ -2160,6 +2191,15 @@ try {
     media: "screen",
     features: [{name: "prefers-reduced-motion", value: "reduce"}],
   });
+  await cdp.evaluate(`(() => {
+    const originalFetch = window.fetch.bind(window);
+    window.__haven42DiagnosticFetchCount = 0;
+    window.fetch = (...args) => {
+      const target = typeof args[0] === 'string' ? args[0] : args[0]?.url;
+      if (target === '/api/alpha/diagnostics') window.__haven42DiagnosticFetchCount += 1;
+      return originalFetch(...args);
+    };
+  })()`);
   const navigation = await cdp.evaluate(`(() => {
     const reducedMotion = motionBehavior();
     document.querySelector('#models-nav').click();
@@ -2239,6 +2279,24 @@ try {
   ) throw new Error(`accessible-navigation:${JSON.stringify(navigation)}`);
   checks += 26;
   trace("accessible-navigation-verified");
+
+  await waitFor(async () => (
+    await cdp.evaluate("window.__haven42DiagnosticFetchCount >= 1")
+  ));
+  await delay(200);
+  const diagnosticsBeforeDisclosure = await cdp.evaluate("window.__haven42DiagnosticFetchCount");
+  await cdp.evaluate(`(() => {
+    document.querySelector('#system-nav').click();
+    const disclosure = document.querySelector('#diagnostics-control');
+    disclosure.open = false;
+    disclosure.open = true;
+    disclosure.dispatchEvent(new Event('toggle'));
+  })()`);
+  await waitFor(async () => (
+    await cdp.evaluate(`window.__haven42DiagnosticFetchCount > ${diagnosticsBeforeDisclosure}`)
+  ));
+  checks += 2;
+  trace("diagnostics-auto-refresh-verified");
 
   if (localSetupUnavailable) {
     const unavailableLocalSetup = await cdp.evaluate(`(async () => {
