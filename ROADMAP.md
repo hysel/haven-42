@@ -2,6 +2,57 @@
 
 ## Status
 
+> **Current release:** Windows `0.4.0-alpha.1` is available as an unsigned
+> prerelease for invited testing. It is not signed, installer-backed, stable,
+> or production-ready.
+
+### At a glance
+
+| Area | Current position |
+| --- | --- |
+| Milestones 1–21 | Complete for their defined scope. Historical detail is collapsed below. |
+| Milestone 22 | Active. The Windows Alpha is published; dependency, signing, broader lifecycle, and production gates remain open. |
+| Milestones 23–27 | Active evidence tracks for images, audio, video, quantization, and local knowledge. Each capability remains independently gated. |
+| Milestone 28 | Proposed. Controlled web research remains default-deny and runtime-unadmitted. |
+
+Status terms are intentionally strict:
+
+- **Complete** means complete only for the milestone's written scope.
+- **Active** means work or evidence is still open.
+- **Proposed** means no runtime capability has been admitted.
+- **Gated** means implementation cannot proceed until the named security,
+  evidence, owner, hardware, or external prerequisite is satisfied.
+
+### Current priority order
+
+1. Stabilize the published Windows Alpha from tester feedback and complete its
+   exact packaged-dependency and license review.
+2. Close remaining Milestone 22 release, lifecycle, and platform evidence
+   without enabling signing, installers, automatic updates, or production
+   promotion prematurely.
+3. Advance Milestones 23–27 only through their independent hardware, security,
+   cleanup, packaging, and source-versus-package gates.
+4. Keep Milestone 28 offline and default-deny until its network and citation
+   security boundaries are independently admitted.
+
+`ROADMAP.md` explains direction and milestone boundaries. `TODO.md` is the
+exact actionable checklist, and `config/roadmap-closure-ledger.json` ensures
+every open parent task has one explicit blocker or work classification.
+
+### Jump to active work
+
+- [Milestone 22 — Unified Product UI and task composition](#milestone-22-unified-product-ui-and-task-composition)
+- [Milestone 23 — Native local image generation](#milestone-23-native-local-image-generation)
+- [Milestone 24 — Local music and audio generation](#milestone-24-local-music-and-audio-generation)
+- [Milestone 25 — Local video generation](#milestone-25-local-video-generation)
+- [Milestone 26 — Hardware-adaptive model quantization](#milestone-26-hardware-adaptive-model-quantization)
+- [Milestone 27 — Local knowledge context and retrieval](#milestone-27-local-knowledge-context-and-retrieval)
+- [Milestone 28 — Controlled web research](#milestone-28-controlled-web-research)
+- [Implemented security baseline](#security-hardening-baseline-implemented)
+
+<details>
+<summary>Detailed current status and evidence</summary>
+
 Every unchecked `TODO.md` parent item is covered exactly once by a fail-closed machine-readable closure ledger. It distinguishes local work from external evidence, upstream dependencies, owner decisions, prerequisite admissions, and signing or release gates so implementation cannot silently drift between milestones. The separately recovered 374-task conversation plan in `config/local-batch-task-ledger.tsv` is reconciled one to one: 360 completed, seven explicitly owner-deferred, seven partial, and zero unverified. Classification does not turn deferred or partial product work into completed scope.
 
 Current owner decisions and their strict authority boundaries are recorded in
@@ -51,9 +102,74 @@ four bounded cleanup policies and applies changes through the existing validated
 provider connection. Wizard and workspace provider controls now share compact,
 tested sizing and typography rather than diverging between setup surfaces.
 
-The repository has entered user-visible product implementation. Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now ships a runnable local-web application and security-hardened unsigned PyInstaller one-folder development packaging for sanitized system status, immutable-digest Ollama recommendations, accessible private chat, writing, summarization and recovery, provider run metrics, two bounded one-reviewer blind writing packets, plan-only registered read-only software workflows, lifecycle-aware effect-free composition planning, the promoted Linux ComfyUI/SDXL image flow, and verified cleanup on Windows, Linux, and macOS. Build inputs are hash-locked and native hosted tests cover hostile resources, shutdown authority, relocation, read-only startup, abrupt-exit recovery, repeated lifecycle, occupied ports, hostile environments, bounded archive structure, checksums, exact inventories, notices, SBOM, and unsigned provenance. The owner-approved Windows `0.4.0-alpha.1` artifact is now a public unsigned prerelease bound to its exact commit, size, digest, hosted evidence, and reporting routes. The main-push-only GitHub job continues to reverify and attest unsigned development archives after native package success with no pull-request write authority, platform-signing, notarization, updater-trust, or production claim. Public signing/privacy policies, a fail-closed SignPath audit, deterministic Windows executable metadata, and build-time metadata verification are prepared. Repository-account MFA was owner-confirmed on 2026-07-27; provider eligibility and future signing remain blocked by provider acceptance, signing-service MFA, and exact dependency/license review. Offline installer and update foundations model install/upgrade/uninstall evidence, compatibility, staged/post health, phase-specific interrupted recovery, replay defense, rollback, retention, disabled mode, a structural future-verifier receipt handoff, and verifier registry/root transitions with every machine effect denied. A cryptographic inventory and 37-case post-quantum readiness suite now defines hybrid-preferred TLS with a visible secure classical fallback plus dual-signature candidates while activating no algorithm, dependency, key, verifier, trust, or machine effect. Separate 49-case execution-admission and 46-case digest-chained journal simulators validate effect disclosure, typed intermediate metadata, digest- and lifecycle-bound approval scope, retry, cancellation, bounded record time and ordering, absent approval on non-execution paths, and blocked recovery without issuing or accepting a token, writing a journal, or granting execution. A 20-case admission-readiness ledger now separates the admitted unsigned/read-only development scope from owner-deferred, policy-blocked, security-blocked, and external-blocked promotion work without granting authority. Platform signing, notarization, real updater cryptographic verification, PQC activation, real installers, activated online updates, stable or production promotion, workflow execution, executable composition, and optional Tauri packaging remain separately gated. Milestone 23 adds a 28-case effect-free lifecycle planner around its promoted Linux image profile while keeping all three native Windows profiles partial and unpromoted. Milestone 24 has partial Linux CUDA ACE-Step evidence, while Milestone 25 remains documentation-only. Milestone 26 has its foundation plus exact Linux/NVIDIA and Windows/AMD evidence. Milestone 27 now admits bounded inert CSV/JSON/source text alongside `.txt`/`.md` and PNG. PDF and Office remain blocked; an exact ignored `pypdf` wheel is exercised only by an offline synthetic-corpus worker prototype with no runtime, UI, provider, dependency, or package admission.
+The repository has entered user-visible product implementation. Milestones 1
+through 21 are complete for their defined scopes.
 
-## Stage Status
+Milestone 22A now ships a runnable local-web application and
+security-hardened unsigned PyInstaller one-folder development packaging. It
+includes sanitized system status, immutable-digest Ollama recommendations,
+accessible private chat, writing, summarization and recovery, provider run
+metrics, two bounded one-reviewer blind writing packets, plan-only registered
+read-only software workflows, lifecycle-aware effect-free composition
+planning, the promoted Linux ComfyUI/SDXL image flow, and verified cleanup on
+Windows, Linux, and macOS.
+
+Build inputs are hash-locked. Native hosted tests cover hostile resources,
+shutdown authority, relocation, read-only startup, abrupt-exit recovery,
+repeated lifecycle, occupied ports, hostile environments, bounded archive
+structure, checksums, exact inventories, notices, SBOM, and unsigned
+provenance. The owner-approved Windows `0.4.0-alpha.1` artifact is a public
+unsigned prerelease bound to its exact commit, size, digest, hosted evidence,
+and reporting routes. The main-push-only GitHub job continues to reverify and
+attest unsigned development archives after native package success, with no
+pull-request write authority, platform-signing, notarization, updater-trust,
+or production claim.
+
+Public signing and privacy policies, a fail-closed SignPath audit,
+deterministic Windows executable metadata, and build-time metadata verification
+are prepared. Repository-account MFA was owner-confirmed on 2026-07-27.
+Provider eligibility and future signing remain blocked by provider acceptance,
+signing-service MFA, and exact dependency/license review.
+
+Offline installer and update foundations model install, upgrade, uninstall,
+compatibility, health, interrupted recovery, replay defense, rollback,
+retention, disabled mode, a structural future-verifier receipt handoff, and
+verifier registry/root transitions with every machine effect denied. A
+cryptographic inventory and 37-case post-quantum readiness suite defines
+hybrid-preferred TLS with a visible secure classical fallback plus
+dual-signature candidates while activating no algorithm, dependency, key,
+verifier, trust, or machine effect.
+
+Separate 49-case execution-admission and 46-case digest-chained journal
+simulators validate effect disclosure, typed intermediate metadata, digest-
+and lifecycle-bound approval scope, retry, cancellation, bounded record time
+and ordering, absent approval on non-execution paths, and blocked recovery.
+They do not issue or accept a token, write a journal, or grant execution. A
+20-case admission-readiness ledger separates the admitted unsigned/read-only
+development scope from owner-deferred, policy-blocked, security-blocked, and
+external-blocked promotion work without granting authority.
+
+Platform signing, notarization, real updater cryptographic verification, PQC
+activation, real installers, activated online updates, stable or production
+promotion, workflow execution, executable composition, and optional Tauri
+packaging remain separately gated.
+
+Milestone 23 adds a 28-case effect-free lifecycle planner around its promoted
+Linux image profile while keeping all three native Windows profiles partial
+and unpromoted. Milestone 24 has partial Linux CUDA ACE-Step evidence, while
+Milestone 25 remains documentation-only. Milestone 26 has its foundation plus
+exact Linux/NVIDIA and Windows/AMD evidence. Milestone 27 admits bounded inert
+CSV, JSON, source text, `.txt`, `.md`, and PNG. PDF and Office remain blocked;
+an exact ignored `pypdf` wheel is exercised only by an offline synthetic-corpus
+worker prototype with no runtime, UI, provider, dependency, or package
+admission.
+
+</details>
+
+## Milestone status
+
+<details>
+<summary>Full milestone-by-milestone status table</summary>
 
 | Stage | Status | Summary |
 | --- | --- | --- |
@@ -86,6 +202,13 @@ The repository has entered user-visible product implementation. Milestones 1 thr
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Separate Windows NVIDIA and Windows AMD follow-ons record patch, context, repeated-lifecycle, vision, and direct structured tool-call outcomes without promoting failed quality cells. A 62-check structured tool-transport parser validates exact final Ollama 0.32.5 and normalized OpenAI-compatible candidate shapes while granting no execution, approval, provider, or runtime authority. A bounded manual live run passed four tool-capable installed models and correctly classified one unsupported model; it retained no content and unloaded every tested model. Physical Intel Arc B580 candidate evidence covers Linux llama.cpp SYCL plus Linux and Windows OpenVINO GenAI. A native Windows llama.cpp SYCL cell passed exact artifact preflight but was rejected after zero-free-memory reporting, tensor-load failure, and an OpenCL fallback fast-fail; no engine is promoted. Vulkan failed the patch gate. |
 | Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | Explicit bounded text, structured-text, source-code, and PNG attachments are admitted and pass source/native-package browser smoke on Windows, Linux, and macOS. Retrieval, history, PDF, Office, OpenDocument, folder scanning, embeddings, OCR, persistence, physical macOS clipboard evidence, and complex-document UI remain independently gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Default-deny contracts plus offline result, page-text, citation, and cited-synthesis hostile suites exist, but no model invocation, model tool, renderer route, DNS, network, page retrieval, active citation, or autonomous follow-up authority is admitted. |
+
+</details>
+
+## Completed milestone details
+
+<details>
+<summary>Milestones 1–21 (completed for their defined scope)</summary>
 
 ## Milestone 1: Minimum Usable Pack
 
@@ -689,6 +812,10 @@ Exit criteria:
 5. Add the optional LLM routing layer as an untrusted suggestion boundary. Done with structured output, committed-registry validation, explicit clarification/rejection states, no persistence, and no automatic invocation.
 6. Add provider discovery and one evidence-gated image-generation adapter. Done for a pinned, hardened, localhost-only ComfyUI service and session-bound SDXL adapter with live Linux evidence and cross-platform fixture contracts.
 7. Hand stable individual capabilities and artifact contracts to Milestone 22 for UI integration and tested multi-step composition. Done; the UI design checkpoint completed with the first product slice recorded in `docs/product-ui-first-slice.md`.
+
+</details>
+
+## Active and proposed milestone details
 
 ## Milestone 22: Unified Product UI And Task Composition
 
