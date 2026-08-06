@@ -41,14 +41,14 @@ every open parent task has one explicit blocker or work classification.
 
 ### Jump to active work
 
-- [Milestone 22 — Unified Product UI and task composition](#milestone-22-unified-product-ui-and-task-composition)
-- [Milestone 23 — Native local image generation](#milestone-23-native-local-image-generation)
-- [Milestone 24 — Local music and audio generation](#milestone-24-local-music-and-audio-generation)
-- [Milestone 25 — Local video generation](#milestone-25-local-video-generation)
-- [Milestone 26 — Hardware-adaptive model quantization](#milestone-26-hardware-adaptive-model-quantization)
-- [Milestone 27 — Local knowledge context and retrieval](#milestone-27-local-knowledge-context-and-retrieval)
-- [Milestone 28 — Controlled web research](#milestone-28-controlled-web-research)
-- [Implemented security baseline](#security-hardening-baseline-implemented)
+- <a href="#milestone-22-unified-product-ui-and-task-composition">Milestone 22 — Unified Product UI and task composition</a>
+- <a href="#milestone-23-native-local-image-generation">Milestone 23 — Native local image generation</a>
+- <a href="#milestone-24-local-music-and-audio-generation">Milestone 24 — Local music and audio generation</a>
+- <a href="#milestone-25-local-video-generation">Milestone 25 — Local video generation</a>
+- <a href="#milestone-26-hardware-adaptive-model-quantization">Milestone 26 — Hardware-adaptive model quantization</a>
+- <a href="#milestone-27-local-knowledge-context-and-retrieval">Milestone 27 — Local knowledge context and retrieval</a>
+- <a href="#milestone-28-controlled-web-research">Milestone 28 — Controlled web research</a>
+- <a href="#security-hardening-baseline-implemented">Implemented security baseline</a>
 
 <details>
 <summary>Detailed current status and evidence</summary>
