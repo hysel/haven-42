@@ -25,6 +25,9 @@ from portable_runtime_components import classify
 
 ROOT = Path(__file__).resolve().parent.parent
 APP_VERSION = "0.4.0-alpha.1"
+REQUIRED_PYTHON_VERSION = "3.14.6"
+REQUIRED_PYINSTALLER_VERSION = "6.21.0"
+LOCAL_BUILD_ENVIRONMENT = ".venv-build"
 RESOURCE_PATHS = (
     "web/static/index.html",
     "web/static/app.js",
@@ -97,6 +100,111 @@ def sha256(path: Path) -> str:
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def isolated_python_environment() -> dict[str, str]:
+    environment = os.environ.copy()
+    environment.pop("PYTHONHOME", None)
+    environment.pop("PYTHONPATH", None)
+    environment["PYTHONNOUSERSITE"] = "1"
+    environment["PYTHONSAFEPATH"] = "1"
+    return environment
+
+
+def isolated_pyinstaller_version(executable: Path) -> str | None:
+    probe = subprocess.run(
+        [
+            str(executable),
+            "-I",
+            "-c",
+            "import importlib.metadata as m,platform; "
+            "print(platform.python_version()); print(m.version('pyinstaller'))",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=isolated_python_environment(),
+    )
+    if probe.returncode != 0:
+        return None
+    versions = probe.stdout.splitlines()
+    if len(versions) != 2 or versions[0].strip() != REQUIRED_PYTHON_VERSION:
+        return None
+    version = versions[1].strip()
+    return version or None
+
+
+def installed_pyinstaller_version() -> str | None:
+    return isolated_pyinstaller_version(Path(sys.executable).resolve())
+
+
+def repository_build_python(root: Path = ROOT) -> Path | None:
+    environment = root / LOCAL_BUILD_ENVIRONMENT
+    executable = environment / (
+        "Scripts/python.exe" if platform.system() == "Windows" else "bin/python"
+    )
+    for path in (environment, executable.parent, executable):
+        if path.is_symlink():
+            raise SystemExit(
+                "The repository-local portable build environment is unsafe because "
+                "it contains a symbolic link. Recreate .venv-build before building."
+            )
+    if not executable.is_file():
+        return None
+    resolved_root = root.resolve()
+    resolved_environment = environment.resolve()
+    resolved_executable = executable.resolve()
+    try:
+        resolved_environment.relative_to(resolved_root)
+        resolved_executable.relative_to(resolved_environment)
+    except ValueError as error:
+        raise SystemExit(
+            "The repository-local portable build Python escapes .venv-build."
+        ) from error
+    return resolved_executable
+
+
+def delegate_to_repository_build_environment() -> int | None:
+    current = installed_pyinstaller_version()
+    if current == REQUIRED_PYINSTALLER_VERSION:
+        return None
+    executable = repository_build_python()
+    if executable is None:
+        found = current or "not installed"
+        raise SystemExit(
+            f"Portable packaging requires PyInstaller "
+            f"{REQUIRED_PYINSTALLER_VERSION} on Python {REQUIRED_PYTHON_VERSION}; "
+            f"the current isolated Python has {found}, and .venv-build is missing. "
+            f"Create .venv-build with Python {REQUIRED_PYTHON_VERSION} and "
+            "install package/requirements-build.txt with --require-hashes."
+        )
+    local_version = isolated_pyinstaller_version(executable)
+    if local_version != REQUIRED_PYINSTALLER_VERSION:
+        raise SystemExit(
+            f"The repository-local build environment must contain exact "
+            f"Python {REQUIRED_PYTHON_VERSION} and PyInstaller "
+            f"{REQUIRED_PYINSTALLER_VERSION}. Recreate .venv-build "
+            "from package/requirements-build.txt with --require-hashes."
+        )
+    print(
+        f"Using repository-local .venv-build with Python "
+        f"{REQUIRED_PYTHON_VERSION} and PyInstaller {REQUIRED_PYINSTALLER_VERSION}."
+    )
+    script = Path(__file__).resolve()
+    bootstrap = (
+        "import runpy,sys;"
+        f"sys.path.insert(0,{str(script.parent)!r});"
+        f"sys.argv=[{str(script)!r},*sys.argv[1:]];"
+        f"runpy.run_path({str(script)!r},run_name='__main__')"
+    )
+    completed = subprocess.run(
+        [str(executable), "-I", "-c", bootstrap, *sys.argv[1:]],
+        cwd=ROOT,
+        check=False,
+        env=isolated_python_environment(),
+    )
+    return completed.returncode
 
 
 def resolve_build_output(value: str) -> Path:
@@ -498,6 +606,9 @@ def main() -> int:
         update_resource_manifest()
         print(ROOT / "package/resource-integrity.json")
         return 0
+    delegated = delegate_to_repository_build_environment()
+    if delegated is not None:
+        return delegated
     output = resolve_build_output(args.output)
     work = output / "work"
     artifact_dir = output / "artifacts"

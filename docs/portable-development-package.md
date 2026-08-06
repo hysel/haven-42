@@ -4,12 +4,23 @@ Haven 42 can be built as an unsigned PyInstaller one-folder development package 
 
 ## Build And Run
 
-Install the exact hash-locked build dependencies in an isolated environment, then run:
+Create the repository-local, ignored build environment once and install the
+exact hash-locked dependencies. On Windows:
 
 ```text
-python -m pip install --require-hashes -r package/requirements-build.txt
+py -3.14 -m venv .venv-build
+.venv-build\Scripts\python.exe -m pip install --require-hashes -r package/requirements-build.txt
 python scripts/build-portable-development-package.py
 ```
+
+On Linux or macOS, use `.venv-build/bin/python` in place of the Windows
+executable. The final build command may use the ordinary system `python`: the
+builder accepts it only when isolated Python 3.14.6 and PyInstaller 6.21.0 are
+both available there. Otherwise it validates and delegates automatically to
+the repository-local `.venv-build`. Stale per-user package metadata cannot
+make an incomplete system installation look usable. Missing, wrong-version,
+symlinked, or escaping local build environments fail closed with remediation
+instructions instead of starting a partial package build.
 
 A source export without `.git` must provide `HAVEN42_SOURCE_COMMIT` and
 `HAVEN42_SOURCE_TREE_STATE`. A modified export must additionally provide the

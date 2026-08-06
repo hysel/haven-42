@@ -5549,7 +5549,7 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
-    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "23 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, protected-resource trust updates, repository-local build caches, and output confinement must remain explicit and fail closed."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "30 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, protected-resource trust updates, repository-local build-tool selection, build caches, and output confinement must remain explicit and fail closed."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $privacyScan = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") 2>&1)

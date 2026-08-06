@@ -53,6 +53,126 @@ def main() -> int:
     }
     passed = 1
 
+    with (
+        patch.object(
+            MODULE,
+            "installed_pyinstaller_version",
+            return_value=MODULE.REQUIRED_PYINSTALLER_VERSION,
+        ),
+        patch.object(MODULE.subprocess, "run") as run,
+    ):
+        assert MODULE.delegate_to_repository_build_environment() is None
+        run.assert_not_called()
+    passed += 1
+
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(MODULE, "repository_build_python", return_value=None),
+    ):
+        try:
+            MODULE.delegate_to_repository_build_environment()
+        except SystemExit as error:
+            assert ".venv-build is missing" in str(error)
+        else:
+            raise AssertionError("Missing repository build environment was accepted.")
+    passed += 1
+
+    delegated_python = ROOT / ".venv-build" / "Scripts" / "python.exe"
+    probe_result = MODULE.subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="3.14.6\n6.21.0\n", stderr=""
+    )
+    delegated_result = MODULE.subprocess.CompletedProcess(args=[], returncode=23)
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(
+            MODULE,
+            "repository_build_python",
+            return_value=delegated_python,
+        ),
+        patch.object(
+            MODULE.subprocess,
+            "run",
+            side_effect=(probe_result, delegated_result),
+        ) as run,
+    ):
+        assert MODULE.delegate_to_repository_build_environment() == 23
+        assert run.call_count == 2
+        assert run.call_args_list[0].args[0][0] == str(delegated_python)
+        assert run.call_args_list[0].args[0][1] == "-I"
+        assert run.call_args_list[1].args[0][0] == str(delegated_python)
+        assert run.call_args_list[1].args[0][1] == "-I"
+    passed += 1
+
+    wrong_probe = MODULE.subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="3.14.6\n6.20.0\n", stderr=""
+    )
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(
+            MODULE,
+            "repository_build_python",
+            return_value=delegated_python,
+        ),
+        patch.object(MODULE.subprocess, "run", return_value=wrong_probe) as run,
+    ):
+        try:
+            MODULE.delegate_to_repository_build_environment()
+        except SystemExit as error:
+            assert "PyInstaller 6.21.0" in str(error)
+        else:
+            raise AssertionError("Wrong repository PyInstaller version was accepted.")
+        assert run.call_count == 1
+    passed += 1
+
+    wrong_python_probe = MODULE.subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="3.13.0\n6.21.0\n", stderr=""
+    )
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(
+            MODULE,
+            "repository_build_python",
+            return_value=delegated_python,
+        ),
+        patch.object(
+            MODULE.subprocess,
+            "run",
+            return_value=wrong_python_probe,
+        ),
+    ):
+        try:
+            MODULE.delegate_to_repository_build_environment()
+        except SystemExit as error:
+            assert "Python 3.14.6" in str(error)
+        else:
+            raise AssertionError("Wrong repository Python version was accepted.")
+    passed += 1
+
+    with patch.dict(
+        "os.environ",
+        {
+            "PYTHONHOME": r"C:\hostile-python",
+            "PYTHONPATH": r"C:\hostile-imports",
+        },
+        clear=False,
+    ):
+        isolated_environment = MODULE.isolated_python_environment()
+    assert "PYTHONHOME" not in isolated_environment
+    assert "PYTHONPATH" not in isolated_environment
+    assert isolated_environment["PYTHONNOUSERSITE"] == "1"
+    assert isolated_environment["PYTHONSAFEPATH"] == "1"
+    passed += 1
+
+    with tempfile.TemporaryDirectory(prefix="haven42-build-environment-") as temporary:
+        root = Path(temporary)
+        scripts = root / ".venv-build" / "Scripts"
+        scripts.mkdir(parents=True)
+        executable = scripts / "python.exe"
+        executable.write_bytes(b"fixture")
+        with patch.object(MODULE.platform, "system", return_value="Windows"):
+            assert MODULE.repository_build_python(root) == executable.resolve()
+    passed += 1
+
     commit = "1" * 40
     snapshot = "2" * 64
     with patch.dict(

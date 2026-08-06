@@ -2742,7 +2742,7 @@ test_task_composition_and_repository_privacy() {
   python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "20 effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "13 cases" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "23 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "30 cases" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" |
     grep -q "tracked or untracked non-ignored working files" || return 1
