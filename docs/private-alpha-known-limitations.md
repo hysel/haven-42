@@ -1,7 +1,7 @@
 # Private alpha known limitations
 
-These limitations are mandatory disclosures for the unadmitted Haven 42 0.4
-Alpha 1 Windows candidate.
+These limitations are mandatory disclosures for the published, unsigned Haven
+42 `0.4.0-alpha.1` Windows prerelease.
 
 - Artifacts are unsigned and not notarized. Operating-system reputation or
   antivirus warnings may appear.
@@ -38,8 +38,9 @@ Alpha 1 Windows candidate.
   Windows vendor-neutral GPU performance counters. The first baseline sample
   or a system without usable counters may briefly or persistently report
   `Unavailable`; values are never estimated.
-- Tauri/Rust, signing, notarization, public release publication, and production
-  readiness remain unadmitted.
+- Tauri/Rust, signing, notarization, stable or production promotion, and
+  production readiness remain unadmitted.
 
-Any candidate must freeze this page at its exact revision and add newly known
-issues before distribution. A tester report does not silently widen support.
+Any future candidate must freeze this page at its exact revision and add newly
+known issues before distribution. A tester report does not silently widen
+support.

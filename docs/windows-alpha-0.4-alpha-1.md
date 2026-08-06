@@ -1,7 +1,9 @@
 # Haven 42 0.4 Alpha 1
 
-This is an unsigned, invited-test-only Windows 11 x64 candidate. It is not a
-public release, installer, signed product, or production-readiness claim.
+This is a published, unsigned Windows 11 x64 GitHub prerelease for invited
+Alpha testing. It is not an installer, signed product, stable release, or
+production-readiness claim. Its exact publication identity is recorded in
+[Windows Alpha release record](windows-alpha-release.md).
 
 ## Alpha boundary
 
@@ -197,13 +199,13 @@ model must pass a fixed Chat, Writing, and Summarization compliance matrix;
 repeated critical violations block recommendation even if ordinary inference
 works.
 
-## Remaining candidate evidence
+## Published candidate evidence and remaining gaps
 
-Implementation alone does not admit distribution. The exact package still
-requires a clean security review, privacy scan, full local gate, native Windows
-smoke and lifecycle test for every admitted model tier,
-package integrity/checksum/SBOM/notices evidence, clean hosted checks on the
-eventual commit, owner review, and an authenticated private delivery decision.
+The published package passed a clean security review, privacy scan, full local
+gate, native package smoke, package integrity/checksum/SBOM/notices checks,
+clean exact-commit hosted checks, owner review, and public prerelease
+publication verification. The post-publication record binds those results to
+the exact artifact and reporting routes without granting future authority.
 An earlier candidate has exact Qwen 3.5 9B managed reuse evidence on Windows
 Intel Vulkan, AMD ROCm, and NVIDIA CUDA. The published Alpha adds
 portable-storage and cleanup hardening and still requires fresh

@@ -122,7 +122,7 @@ promotion:
 ## Remaining boundaries
 
 These cells do not validate low-memory/CPU-only hardware, every supported model
-tier, guided UI review by an invited tester, hosted CI on an exact clean commit,
-or a private distribution channel. The package remains unsigned and
-unadmitted. Signing, tagging, public publication, installer activation, driver
-automation, system changes, and production claims remain blocked.
+tier, or the later portable-storage and cleanup changes on every external
+hardware cell. The published Alpha remains unsigned. Signing, stable or
+production promotion, installer activation, driver automation, broader system
+changes, and production claims remain blocked.

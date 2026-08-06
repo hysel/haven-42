@@ -5621,6 +5621,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
         "scripts/test-novice-experience.py",
         "scripts/test-windows-alpha-stage-ledger.py",
         "scripts/test-windows-alpha-candidate.py",
+        "scripts/test-windows-alpha-release-record.py",
         "scripts/test-private-alpha-readiness.py"
     )) {
         $alphaOutput = @(& $python.Source (Join-Path $repoRoot $alphaTest) 2>&1)

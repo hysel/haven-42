@@ -95,7 +95,24 @@ background, and navigation requires an explicit user click. The link opens a
 separate browsing context with `noopener`, `noreferrer`, and a no-referrer
 policy.
 
-Unsigned portable development builds preserve this boundary. They verify their allowlisted browser/data resources at startup, bind only to IPv4 loopback, construct only a loopback browser URL, expose no arbitrary process control, and require same-origin session authority plus verified model cleanup for HTTP shutdown. Native smoke tests include read-only-package startup and recovery after abrupt test-owned process termination. Package archives include SHA-256 checksums, dependency inventory, third-party notices, and CycloneDX SBOM evidence. They are not signed, notarized, installer-backed, published releases, or production-ready. The offline installer and updater policy foundations cannot modify a machine or activate an update. The lifecycle simulator rejects raw paths, URLs, commands, arguments, and environment input; models healthy, failed-health, phase-specific interrupted recovery, replay defense, rollback, retention, and disabled paths; and always reports network, writes, download, staging, activation, rollback, cleanup, installation, elevation, service, driver, firewall, process, and user-data effects as false.
+Unsigned portable development builds preserve this boundary. They verify their
+allowlisted browser/data resources at startup, bind only to IPv4 loopback,
+construct only a loopback browser URL, expose no arbitrary process control, and
+require same-origin session authority plus verified model cleanup for HTTP
+shutdown. Native smoke tests include read-only-package startup and recovery
+after abrupt test-owned process termination. Package archives include SHA-256
+checksums, dependency inventory, third-party notices, and CycloneDX SBOM
+evidence. They are not signed, notarized, installer-backed, or
+production-ready. One exact Windows archive is separately recorded as the
+owner-approved `0.4.0-alpha.1` public unsigned prerelease; that publication
+grants no authority to another artifact. The offline installer and updater
+policy foundations cannot modify a machine or activate an update. The
+lifecycle simulator rejects raw paths, URLs, commands, arguments, and
+environment input; models healthy, failed-health, phase-specific interrupted
+recovery, replay defense, rollback, retention, and disabled paths; and always
+reports network, writes, download, staging, activation, rollback, cleanup,
+installation, elevation, service, driver, firewall, process, and user-data
+effects as false.
 
 The updater trust-handoff foundation does not verify cryptography. It only
 checks the strict shape, exact release/asset digest binding, bounded lifetime,

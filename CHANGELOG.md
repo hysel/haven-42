@@ -11,6 +11,12 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a fail-closed post-publication record for the exact Windows
+  `0.4.0-alpha.1` prerelease and aligned roadmap, security, preparation,
+  limitations, validation, and owner-decision language with the published
+  Alpha while keeping signing, installers, automatic updates, and stable or
+  production promotion denied.
+
 ## 0.4.0-alpha.1 - 2026-08-05
 
 - Added a novice-friendly Windows Alpha download and checksum guide, structured

@@ -1,5 +1,10 @@
 # Private alpha preparation
 
+> Historical preparation record: the owner later approved the exact Windows
+> candidate, and `0.4.0-alpha.1` was published as an unsigned GitHub prerelease
+> on 2026-08-05. See the [published release record](windows-alpha-release.md).
+> This document and its preparation contract do not authorize another release.
+
 Haven 42 has selected the `0.4.0-alpha.1` Windows x64 implementation for an
 invited private-alpha test candidate. This remains preparation only: the exact
 source commit, distribution channel, release tag, GitHub Release, signing
