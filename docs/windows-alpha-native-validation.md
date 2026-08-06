@@ -43,16 +43,62 @@ every Windows hardware combination.
 - Runtime backend: Ollama `0.32.5`, CUDA
 - Selected model: `qwen3.5:9b`, pinned Q4 catalog entry
 
-No hostname, address, username, SSH material, prompt content, model response,
-or local filesystem path is retained in this record.
+No hostname, address, username, SSH material, endpoint, prompt content, model
+response, or local filesystem path is retained in this record.
+
+## Fresh Intel portable-closure cell
+
+On 2026-08-06, a fresh 41-file development archive built from the pending
+portable-evidence correction passed an additional physical Windows 11 x64
+Intel Arc B580 cell under a dedicated non-administrator account:
+
+- archive: `haven42-windows-amd64-unsigned-development.zip`;
+- SHA-256:
+  `1aefe03183828adea0f21ad9e2c8ee100187142d38158e17578b6aeaa6ed71cf`;
+- package identity: unsigned Haven 42 `0.4.0-alpha.1` development evidence,
+  not the immutable published Alpha asset and not authorized for distribution;
+- managed runtime: pinned portable Ollama `0.32.5`, Intel Vulkan backend; and
+- selected model: pinned `qwen3.5:9b` Q4 entry with exact manifest verification.
+
+The isolated extracted package passed:
+
+- transferred-archive digest verification, 41-file extraction, packaged
+  resource integrity, security headers, loopback-only reachability, session-
+  token shutdown authority, process exit, and port closure;
+- explicit single-use setup approval for only network download, portable-
+  folder files, one owned process, and local-model validation, while driver,
+  service, firewall, certificate, firmware, global-runtime, and elevation
+  effects remained forbidden and false;
+- fresh current-user setup, Authenticode and runtime-integrity verification,
+  exact model digest, required GPU acceleration, and real Chat, Writing, and
+  Summarization with positive provider-reported token rates;
+- second-launch receipt, runtime-integrity, and publisher revalidation with no
+  download, installation, or managed-data growth;
+- sanitized support-report creation under `Haven42-Logs`, outside the
+  replaceable `Haven42-Data` component tree;
+- acceptance of a bounded human filename containing spaces, parentheses, and
+  a Unicode en dash as inert memory-only text context, with no temporary file,
+  filesystem, tool, or host-execution authority;
+- rejection of PowerShell shebang content renamed with a `.txt` suffix;
+- verified local-to-private-network-to-local provider switching against
+  Ollama `0.32.6`, including the unencrypted trusted-LAN transport state,
+  all three text capabilities, no-download local return, and zero externally
+  loaded models after cleanup; and
+- confirmed uninstall of 7.947 GiB of marker-owned `Haven42-Data`, while the
+  application and sanitized logs remained, followed by a package-verified
+  relaunch in the empty/setup-ready state.
+
+The remote harnesses were disposable ignored test artifacts. They are not
+application, package, workflow, or repository surfaces and grant no ongoing
+machine authority.
 
 ## Passed evidence
 
 The native harness verified across the recorded cells:
 
 - exact candidate SHA-256 before extraction;
-- packaged resource integrity, unsigned Alpha identity, Chat-only policy, and
-  IPv4 loopback binding;
+- packaged resource integrity, unsigned Alpha identity, the admitted text-only
+  Chat, Writing, and Summarization boundary, and IPv4 loopback binding;
 - read-only hardware detection without network, installation, elevation,
   service, firewall, or driver effects;
 - rejection of a forged setup-effect approval without changing setup state;
@@ -75,9 +121,9 @@ The native harness verified across the recorded cells:
   runtime or model.
 
 An earlier candidate completed that managed reuse run independently on the
-Intel Vulkan, NVIDIA CUDA, and AMD ROCm cells. The published Alpha adds
-portable-storage and cleanup hardening and still requires fresh validation on
-external hardware. Before sufficient target
+Intel Vulkan, NVIDIA CUDA, and AMD ROCm cells. The fresh portable-closure build
+now covers the later portable-storage and cleanup behavior on the Intel cell;
+equivalent fresh AMD and NVIDIA repetition remains open. Before sufficient target
 space was available, the same AMD cell also passed the native `StorageDenied`
 path at 7.4 GiB free: no model or managed plan was selected, the broker stayed
 idle, managed-state existence did not change, shutdown was clean, and no user
@@ -122,7 +168,7 @@ promotion:
 ## Remaining boundaries
 
 These cells do not validate low-memory/CPU-only hardware, every supported model
-tier, or the later portable-storage and cleanup changes on every external
-hardware cell. The published Alpha remains unsigned. Signing, stable or
-production promotion, installer activation, driver automation, broader system
-changes, and production claims remain blocked.
+tier, or the later portable-storage and cleanup changes on the AMD and NVIDIA
+cells. The published Alpha remains unsigned. Signing, stable or production
+promotion, installer activation, driver automation, broader system changes,
+and production claims remain blocked.

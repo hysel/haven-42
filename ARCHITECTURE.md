@@ -99,14 +99,30 @@ A third evidence layer maps every packaged file to Haven 42 or an explicit
 CPython, OpenSSL, libffi, Microsoft, or unresolved platform-runtime component.
 The mapping carries exact path/digest/size coverage, rejects unknown files,
 marks upstream components signing-ineligible, and drives matching SBOM and
-notice rows. Coverage does not imply redistribution clearance: CPython and
-Apache 2.0 texts are hash-verified, while unresolved libffi/Microsoft evidence
-and platform provenance keep production promotion false.
+notice rows. The extracted package also carries the Haven 42 MIT license, its
+generated third-party notice, and exact hash-verified CPython, Apache 2.0, and
+libffi license files. These form a separate non-signable distribution-evidence
+group whose static digests and archive parity fail closed. Coverage does not
+imply redistribution clearance: the Microsoft licensed-user condition and
+remaining platform provenance keep production promotion false.
 
 Hosted package provenance fixes the runner generation, Python 3.14.6,
 immutable `setup-python` action commit, and official
 `actions/python-versions` release archive digest per platform. Local builds
 cannot inherit that claim and are labeled `local-unverified`.
+
+Aggregate Alpha usage reporting is an independent repository-observation
+boundary. The scheduled/manual workflow has only read-only repository contents
+permission and queries three fixed HTTPS GitHub API paths: the exact Alpha
+release plus an explicit unavailable state for optional aggregate clone and
+view traffic. GitHub's built-in workflow token cannot request the repository
+Administration permission required by the traffic API. It rejects redirects, oversized
+or malformed responses, unsafe asset names, identity drift, invalid counts, and
+unsafe output targets. Only fixed-schema Markdown/JSON totals are retained as
+30-day workflow artifacts; no report is committed and no downloader identity,
+IP address, user content, device information, or Haven 42 telemetry exists in
+the report. Traffic denial degrades visibly to release-only reporting without
+requesting a broader credential.
 
 The first composition boundary is deliberately non-executable. A strict engine-owned contract admits at most six registry-backed `read-only` workflow references, rejects renderer arguments and approvals, validates fresh/retry/cancel identity with one bounded retry, orders dependencies deterministically, and emits exactly typed metadata-only intermediate plan references. Cancellation ends before plan artifacts are emitted. A separate inactive execution-admission model validates future workflow effect disclosure, typed intermediate type/media/digest metadata, digest-bound engine approval scope, expiry/replay state, and fresh/retry/recover/cancel consistency. An effect-free digest-chain model binds later scenario records to that admission and rejects forged completion, reordering, cross-admission reuse, unsafe retry, and uncertain recovery. It writes no journal and treats every start, completion, failure, and cancellation record as a non-authoritative claim. These models accept no token secret, path, content, arguments, URL, or environment; all results deny approval acceptance, execution, process, filesystem, network, artifact, and machine-modification authority.
 
@@ -133,9 +149,10 @@ The future Windows signing boundary is likewise defined but inactive.
 upstream runtime components. PyInstaller emits deterministic product and
 version metadata on Windows, and the package builder independently verifies
 those fields before producing evidence. `docs/signpath-eligibility-audit.md`
-keeps provider eligibility external-blocked: there is no published Release in
-the form to sign, exact dependency/license review and provider enrollment
-remain open, and no signing workflow or private key exists. Repository-account
+keeps provider eligibility external-blocked: the public unsigned Alpha supplies
+an exact binary form for provider review but does not establish dependency
+clearance, provider eligibility, signing authorization, or production readiness.
+Provider enrollment remains open, and no signing workflow or private key exists. Repository-account
 MFA was owner-confirmed on 2026-07-27; signing-service MFA remains required
 during any later enrollment.
 

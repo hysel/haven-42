@@ -50,6 +50,12 @@ must be investigated before treating those hosted archives as provenance
 attested, but it does not retroactively turn an unsigned development package
 into a signed or production artifact.
 
+`Alpha Usage Report` is a separate scheduled/manual observation workflow, not
+a pull-request check and not release evidence. It uploads aggregate reports
+without changing repository content. Its failure does not invalidate a code
+build, but malformed counts, permission drift, or privacy-policy failures must
+be fixed before relying on its measurements.
+
 ## Prerequisites
 
 Install GitHub CLI, authenticate it, and run the command from the repository:

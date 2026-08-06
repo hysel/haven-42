@@ -470,7 +470,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", required=True)
     args = parser.parse_args()
-    source = probe([sys.executable, str(ROOT / "web/server.py")], False)
+    source = probe([
+        sys.executable,
+        str(ROOT / "scripts/run-haven42-web-browser-test.py"),
+    ], False)
     executable = Path(args.executable).resolve()
     packaged = probe([str(executable)], True)
     assert source == packaged, "source and packaged behavior diverged"
@@ -480,7 +483,6 @@ def main() -> int:
     test_abrupt_exit_recovery(executable, packaged)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
-    remove_test_diagnostics(ROOT)
     remove_test_diagnostics(executable.parent)
     print(
         "Portable package parity, relocation, read-only startup, abrupt-exit recovery, "

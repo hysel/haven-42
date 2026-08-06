@@ -68,9 +68,11 @@ def main() -> int:
         "Eligibility audit must fail closed.",
     )
     require(
-        "zero published Releases/assets" in audit
-        or "no published Releases and no downloadable release assets" in audit,
-        "Audit must record the missing existing-release prerequisite.",
+        "exact unsigned Windows" in audit
+        and "`0.4.0-alpha.1` prerelease" in audit
+        and "does not establish provider eligibility" in audit
+        and "Provider review required" in audit,
+        "Audit must record the public unsigned Alpha without treating it as provider eligibility.",
     )
     require(
         "MFA for repository and signing service | GitHub confirmed; signing service pending enrollment"
@@ -81,7 +83,8 @@ def main() -> int:
     require(
         "earlier 70-file local build is no longer an admitted candidate"
         in component_audit
-        and "replacement clean local build contains 31 files" in component_audit
+        and "replacement clean local build contained 31 files" in component_audit
+        and "disposable 41-file Windows package" in component_audit
         and "host-derived contamination" in component_audit
         and "exact packaged dependency/license gate remains" in component_audit,
         "The contaminated Windows build must be rejected while hosted and legal review remain gated.",

@@ -304,7 +304,8 @@ for the same line can duplicate content. `READ_TOOLS_UNAVAILABLE` cannot be labe
 
 ## Version and license
 
-Version `0.3.0` is the current release line. Later work remains under
-`Unreleased` until deliberately versioned and verified.
+The latest public test build is the unsigned Windows `0.4.0-alpha.1`
+prerelease. Version `0.3.0` is the latest stable release line. Later work
+remains under `Unreleased` until deliberately versioned and verified.
 
 Haven 42 is licensed under the [MIT License](LICENSE).

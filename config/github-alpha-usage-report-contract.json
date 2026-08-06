@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "repository": "hysel/haven-42",
+  "releaseTag": "v0.4.0-alpha.1",
+  "primaryAsset": "haven42-0.4.0-alpha.1-windows-x64-unsigned.zip",
+  "apiOrigin": "https://api.github.com",
+  "schedule": "41 7 * * 1",
+  "trafficWindowDays": 14,
+  "artifactRetentionDays": 30,
+  "collectDownloaderIdentity": false,
+  "collectIpAddress": false,
+  "countGeneratedSourceArchives": false,
+  "commitReportsToRepository": false
+}

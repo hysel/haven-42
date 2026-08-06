@@ -509,6 +509,10 @@ checkbox totals below.
   updater-trust, or production claim. Qualifying main pushes now produce
   attestations for the unsigned development archives; this grants no signing,
   Release-publication, updater, or production authority.
+- [x] Add a weekly/manual, least-privilege Alpha usage report with the exact
+  release-asset download totals, optional aggregate 14-day clone/view traffic,
+  bounded Markdown/JSON artifacts, offline hostile tests, no committed metrics,
+  and no downloader identity, IP address, device data, or product telemetry.
 - [x] Prepare public inactive code-signing and privacy policies, a fail-closed
   SignPath eligibility audit, CODEOWNERS protection, deterministic Windows
   executable metadata, build-time metadata verification, and offline
@@ -540,6 +544,10 @@ checkbox totals below.
   including the applicable Microsoft terms for the two retained,
   origin-verified Visual C++ runtime DLLs, plus the separately gated provider
   eligibility and publication decisions.
+  - [x] Embed the Haven 42 license, exact CPython/OpenSSL/libffi license
+    evidence, and generated third-party notice in future extracted packages;
+    classify them separately, verify their digests and archive parity, and
+    disclose that Alpha 1 exposes them only as release-page sidecars.
 - [x] Add native read-only-package startup and abrupt-exit recovery tests, exact build dependency/license verification, archive count/size bounds, encrypted/evidence-link rejection, and target-name validation.
 - [ ] Promote packaging beyond development only after signing/notarization, installer/uninstall, provenance, platform lifecycle, and production release gates pass. Keep online updater activation and machine modification disabled until separately approved and validated.
 - [x] Define the first product slice, first-run flow, Home/Chat/Software/Images/Models/System navigation, approval review, wireframes, and renderer-safe registry-backed view model without admitting a desktop runtime.

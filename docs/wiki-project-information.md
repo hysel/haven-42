@@ -7,7 +7,12 @@ software and makes no production-readiness claim._
 
 Haven 42 has a runnable local browser application, unsigned one-folder
 development packages for Windows, Linux, and macOS, and evidence-gated local AI
-capabilities. The current release line is `0.3.0`; later changes are unreleased.
+capabilities. The latest public test build is the unsigned Windows
+`0.4.0-alpha.1` prerelease; the latest stable release line is `0.3.0`. Work
+newer than those exact published versions remains unreleased.
+
+See [[Windows Alpha Release|Windows-Alpha-Release]] for the exact Alpha files,
+checksums, publication record, and boundaries.
 
 The project deliberately separates three states:
 

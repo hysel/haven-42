@@ -5,10 +5,11 @@
 > on 2026-08-05. See the [published release record](windows-alpha-release.md).
 > This document and its preparation contract do not authorize another release.
 
-Haven 42 has selected the `0.4.0-alpha.1` Windows x64 implementation for an
-invited private-alpha test candidate. This remains preparation only: the exact
-source commit, distribution channel, release tag, GitHub Release, signing
-identity, installer, updater, and production claim have not been admitted.
+At preparation time, Haven 42 selected the `0.4.0-alpha.1` Windows x64
+implementation for invited Alpha testing. The preparation record itself granted
+no authority; the later publication is governed by the exact release record
+linked above. Signing identity, installer activation, online updates, and stable
+or production promotion remain unadmitted.
 
 ## Proposed boundary
 

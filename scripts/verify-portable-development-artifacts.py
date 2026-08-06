@@ -12,7 +12,11 @@ import tarfile
 import tempfile
 import zipfile
 
-from portable_runtime_components import ComponentClassificationError, classify
+from portable_runtime_components import (
+    ComponentClassificationError,
+    DISTRIBUTION_EVIDENCE_HASHES,
+    classify,
+)
 
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -291,7 +295,8 @@ def verify_notice_text(notices: str, inventory: dict, runtime_inventory: dict) -
         raise ArtifactVerificationError("runtime-clearance-warning-missing")
     if (
         "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
-        "LIBFFI-3.4.4-LICENSE.txt are included as hash-verified license evidence."
+        "LIBFFI-3.4.4-LICENSE.txt are included in the extracted package and "
+        "artifact evidence as hash-verified license evidence."
         not in notices
     ):
         raise ArtifactVerificationError("license-evidence-notice-missing")
@@ -420,7 +425,24 @@ def verify_evidence(directory: Path) -> None:
         raise ArtifactVerificationError("build-dependency-allowlist-mismatch")
     runtime_inventory = load_json(directory / "runtime-component-inventory.json")
     package_inventory = load_json(directory / "package-file-inventory.json")
-    expected_package_files(directory / "package-file-inventory.json")
+    packaged_files = expected_package_files(
+        directory / "package-file-inventory.json"
+    )
+    expected_distribution_paths = {
+        *DISTRIBUTION_EVIDENCE_HASHES,
+        "THIRD-PARTY-NOTICES.txt",
+    }
+    if not expected_distribution_paths.issubset(packaged_files):
+        raise ArtifactVerificationError("embedded-license-evidence-missing")
+    if any(
+        packaged_files[path][1] != digest
+        for path, digest in DISTRIBUTION_EVIDENCE_HASHES.items()
+    ):
+        raise ArtifactVerificationError("embedded-license-evidence-mismatch")
+    if packaged_files["THIRD-PARTY-NOTICES.txt"][1] != sha256_file(
+        directory / "THIRD-PARTY-NOTICES.txt"
+    ):
+        raise ArtifactVerificationError("embedded-third-party-notice-mismatch")
     runtime_records = runtime_inventory.get("runtimeComponents")
     if not isinstance(runtime_records, list):
         raise ArtifactVerificationError("invalid-runtime-component-inventory")

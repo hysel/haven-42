@@ -35,7 +35,9 @@ def workflow_jobs(text: str, name: str) -> list[tuple[str, str]]:
 
 
 def verify_workflow_safety(workflows: dict[str, str]) -> None:
-    if set(workflows) != {"validate-pack.yml", "codeql.yml"}:
+    if set(workflows) != {
+        "alpha-usage-report.yml", "codeql.yml", "validate-pack.yml",
+    }:
         raise PolicyError("unexpected-workflow-inventory")
     combined = "\n".join(workflows[name] for name in sorted(workflows))
     for name, text in workflows.items():
@@ -76,15 +78,50 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
         r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/upload-artifact@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
         combined,
     )
-    if len(upload_blocks) != 1:
+    if len(upload_blocks) != 2:
         raise PolicyError("unexpected-artifact-upload-count")
-    upload = upload_blocks[0]
+    package_uploads = [block for block in upload_blocks if "unsigned-development" in block]
+    report_uploads = [block for block in upload_blocks if "alpha-usage-report" in block]
     if (
-        "unsigned-development" not in upload
-        or not re.search(r"(?m)^\s+retention-days:\s*7\s*$", upload)
-        or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", upload)
+        len(package_uploads) != 1
+        or len(report_uploads) != 1
+        or not re.search(r"(?m)^\s+retention-days:\s*7\s*$", package_uploads[0])
+        or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", package_uploads[0])
+        or not re.search(r"(?m)^\s+retention-days:\s*30\s*$", report_uploads[0])
+        or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", report_uploads[0])
     ):
         raise PolicyError("unsafe-artifact-upload-policy")
+    report_workflow = workflows["alpha-usage-report.yml"]
+    required_report_markers = {
+        "name: Alpha Usage Report",
+        "workflow_dispatch:",
+        'cron: "41 7 * * 1"',
+        "group: alpha-usage-report-${{ github.workflow }}",
+        "contents: read",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 5",
+        "persist-credentials: false",
+        "HAVEN42_GITHUB_REPORT_TOKEN: ${{ github.token }}",
+        "python scripts/generate-github-alpha-usage-report.py",
+        'cat dist/alpha-usage-report/alpha-usage-report.md >> "$GITHUB_STEP_SUMMARY"',
+        "name: haven42-alpha-usage-report-${{ github.run_id }}",
+        "path: dist/alpha-usage-report/",
+        "if-no-files-found: error",
+        "retention-days: 30",
+    }
+    if any(marker not in report_workflow for marker in required_report_markers):
+        raise PolicyError("alpha-usage-report-workflow-incomplete")
+    report_header = report_workflow.split("\njobs:\n", 1)[0]
+    if (
+        "pull_request:" in report_header
+        or "pull_request_target:" in report_header
+        or re.search(r"(?m)^\s+push:\s*$", report_header)
+        or "contents: write" in report_workflow
+        or "issues: write" in report_workflow
+        or "actions: write" in report_workflow
+        or "secrets." in report_workflow
+    ):
+        raise PolicyError("alpha-usage-report-workflow-overprivileged")
 
 
 def load_policy() -> dict:
@@ -94,7 +131,7 @@ def load_policy() -> dict:
         raise PolicyError("invalid-policy-json") from error
     required = {
         "schemaVersion", "repository", "defaultBranch", "mergePolicy",
-        "branchProtection", "actions", "artifactAttestations",
+        "branchProtection", "actions", "artifactAttestations", "usageReports",
     }
     if not isinstance(value, dict) or set(value) != required or value["schemaVersion"] != 1:
         raise PolicyError("invalid-policy-shape")
@@ -173,6 +210,17 @@ def verify_static(policy: dict) -> None:
         "productionReadinessClaimAllowed": False,
     }:
         raise PolicyError("unsafe-artifact-attestation-policy")
+    if policy["usageReports"] != {
+        "enabled": True,
+        "workflow": "alpha-usage-report.yml",
+        "triggers": ["weekly", "manual"],
+        "permissions": ["contents:read"],
+        "repositoryData": "aggregate-only",
+        "downloaderIdentityCollected": False,
+        "reportRetentionDays": 30,
+        "commitsReportsToRepository": False,
+    }:
+        raise PolicyError("unsafe-usage-report-policy")
 
     workflows = {
         path.name: path.read_text(encoding="utf-8")
@@ -197,7 +245,7 @@ def verify_static(policy: dict) -> None:
     upload_artifact = (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
     )
-    if workflow_text.count(upload_artifact) != 1:
+    if workflow_text.count(upload_artifact) != 2:
         raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
     setup_python = (
         "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97"
@@ -303,6 +351,13 @@ def run_self_tests() -> int:
         ("contents: read", "contents: write", "workflow-write-permission-forbidden"),
         ("retention-days: 7", "retention-days: 90", "unsafe-artifact-upload-policy"),
         ("if-no-files-found: error", "if-no-files-found: warn", "unsafe-artifact-upload-policy"),
+        ('cron: "41 7 * * 1"', 'cron: "* * * * *"', "alpha-usage-report-workflow-incomplete"),
+        (
+            "HAVEN42_GITHUB_REPORT_TOKEN: ${{ github.token }}",
+            "HAVEN42_GITHUB_REPORT_TOKEN: ${{ secrets.REPORT_TOKEN }}",
+            "alpha-usage-report-workflow-incomplete",
+        ),
+        ("retention-days: 30", "retention-days: 365", "unsafe-artifact-upload-policy"),
     )
     checks = 0
     for old, new, expected in cases:

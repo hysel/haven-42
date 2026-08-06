@@ -32,6 +32,15 @@ caller Git line-ending settings cannot silently change packaged identities.
 
 The native executable is under `dist/portable/bundle/haven42/`. It accepts `--port` and `--no-open`. Port `0` asks the operating system for an unused loopback port. The build also creates a platform archive and evidence in `dist/portable/artifacts/`.
 
+The builder overrides PyInstaller's per-user configuration directory and keeps
+its cache beneath the selected ignored build output. A package build therefore
+does not depend on or create Haven-specific PyInstaller state in the user's
+profile.
+
+Build outputs are restricted to the repository's ignored `dist` tree. Before
+inventory or archive creation, every package link must resolve inside the
+one-folder bundle; an external or missing target fails the build.
+
 These outputs are unsigned development artifacts. They are not installers or production releases. Antivirus and operating-system reputation prompts are possible because signing and notarization are deliberately outside this batch.
 
 Windows builds also embed deterministic executable identity metadata:
@@ -136,6 +145,9 @@ Each artifact set contains:
   group;
 - hash-verified CPython 3.14.6 bundled-license evidence, the Apache 2.0
   license text used by OpenSSL 3.5.7, and the exact libffi 3.4.4 MIT license;
+- the Haven 42 MIT license, generated third-party notice, and those exact
+  upstream license files inside the extracted package as well as the sidecar
+  evidence set;
 - unsigned build provenance binding a clean build to its exact source commit or a modified development build to its base commit plus exact source-snapshot SHA-256, alongside OS, architecture, Python, PyInstaller, workflow identity, and explicit absence of platform signing, notarization, an in-build attestation, and release publication.
 
 The local build remains unattested. Separately, an approved future push to

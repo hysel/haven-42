@@ -159,10 +159,13 @@ function Write-TestReceipt {
         return
     }
 
-    & git -C $repoRoot diff --quiet -- 2>$null
-    $unstagedExitCode = $LASTEXITCODE
-    $untracked = @(& git -C $repoRoot ls-files --others --exclude-standard 2>$null)
-    if ($unstagedExitCode -ne 0 -or $LASTEXITCODE -ne 0 -or $untracked.Count -gt 0) {
+    $unstaged = Invoke-NativeCapture -FilePath "git" -Arguments @("-C", $repoRoot, "diff", "--quiet", "--")
+    $untracked = Invoke-NativeCapture -FilePath "git" -Arguments @("-C", $repoRoot, "ls-files", "--others", "--exclude-standard")
+    if (
+        $unstaged.ExitCode -ne 0 -or
+        $untracked.ExitCode -ne 0 -or
+        -not [string]::IsNullOrWhiteSpace($untracked.Output)
+    ) {
         Write-Host "Receipt not written: stage every intended file and remove unstaged or untracked changes." -ForegroundColor Yellow
         return
     }
@@ -528,7 +531,10 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     Assert-True -Condition ($null -ne $python) -Message "Python 3 should be available for repository policy verification."
     $policyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-github-repository-policy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Committed workflow and GitHub repository policy should remain aligned: $($policyOutput -join [Environment]::NewLine)"
-    Assert-True -Condition (($policyOutput -join "`n") -match "with 7 hostile checks") -Message "Workflow policy must reject excessive permissions, unbounded execution, persisted credentials, unsafe artifacts, and release publication."
+    Assert-True -Condition (($policyOutput -join "`n") -match "with 10 hostile checks") -Message "Workflow policy must reject excessive permissions, unbounded execution, persisted credentials, unsafe artifacts, report drift, and release publication."
+    $reportOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-github-alpha-usage-report.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Aggregate Alpha usage reporting should pass offline hostile tests: $($reportOutput -join [Environment]::NewLine)"
+    Assert-True -Condition (($reportOutput -join "`n") -match "26 checks") -Message "Alpha reporting must reject hostile identities, counts, traffic, API responses, redirects, timestamps, and escaped output paths without collecting individuals."
 }
 
 Invoke-PackTest "Windows PowerShell 5.1 and PowerShell 7 compatibility is enforced" {
@@ -5340,9 +5346,11 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard,https://github.com/hysel/haven-42/issues/new/choose,https://ollama.com/download/windows" -Message "External navigation must remain fixed to the issue chooser, detailed evidence wiki, and official Ollama Windows instructions."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
-    Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction) -Message "Portable evidence must cover every runtime file, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
+    Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and -not $portablePolicy.security.pyinstallerUserCacheAllowed -and $portablePolicy.security.buildOutputsRestrictedToRepositoryDist -and -not $portablePolicy.security.packageLinksMayEscapeBundle -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction -and $portablePolicy.security.distributionEvidenceEmbeddedInExtractedPackage -and $portablePolicy.security.distributionEvidenceRequiresExactHashes -and $portablePolicy.security.distributionEvidenceExcludedFromSigningScope) -Message "Portable evidence must cover every runtime file, keep build cache and outputs inside the ignored repository build tree, reject escaping package links, embed exact non-signable distribution evidence, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "runtime-component-inventory.json") -Message "Portable evidence must include the exact runtime component inventory."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "CPYTHON-3.14.6-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "APACHE-2.0.txt" -and $portablePolicy.supplyChainEvidence -contains "LIBFFI-3.4.4-LICENSE.txt") -Message "Portable evidence must include hash-verified CPython, Apache, and libffi license texts."
+    $embeddedEvidence = @($portablePolicy.embeddedDistributionEvidence)
+    Assert-True -Condition ($embeddedEvidence.Count -eq 5 -and $embeddedEvidence -contains "LICENSE.txt" -and $embeddedEvidence -contains "THIRD-PARTY-NOTICES.txt" -and $embeddedEvidence -contains "licenses/APACHE-2.0.txt" -and $embeddedEvidence -contains "licenses/CPYTHON-3.14.6-LICENSE.txt" -and $embeddedEvidence -contains "licenses/LIBFFI-3.4.4-LICENSE.txt") -Message "Portable packages must embed the exact five-file distribution-evidence set."
     Assert-Equal -Actual (($portablePolicy.security.browserLaunchExecutables.linux) -join ",") -Expected "/usr/bin/gio,/usr/bin/xdg-open" -Message "Linux browser launchers must remain fixed and allowlisted."
     Assert-Equal -Actual (($portablePolicy.security.linuxBrowserApplicationDataDirectories) -join ",") -Expected "/var/lib/flatpak/exports/share,/var/lib/snapd/desktop,/usr/local/share,/usr/share" -Message "Linux browser application discovery must use only fixed system-owned Flatpak, Snap, and base-system data directories."
     Assert-True -Condition (-not $portablePolicy.security.linuxBrowserApplicationDataDirectoriesInherited) -Message "Linux browser application discovery must not inherit caller-controlled XDG_DATA_DIRS."
@@ -5538,10 +5546,10 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($signingOutput -join "`n") -match "20 effect-free checks") -Message "Code-signing readiness must remain inactive and fail closed."
     $runtimeComponentOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-runtime-components.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable runtime component hostile tests should pass."
-    Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "12 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
+    Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
-    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "21 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, and protected-resource trust updates must remain explicit and fail closed."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "23 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, protected-resource trust updates, repository-local build caches, and output confinement must remain explicit and fail closed."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $privacyScan = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") 2>&1)

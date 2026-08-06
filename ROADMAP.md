@@ -69,6 +69,16 @@ provider-reported generation speed, packaging, and gates. The prerelease remains
 unsigned and not production-ready; signing, installers, automatic updates, and
 production promotion remain separately denied.
 
+A privacy-preserving Alpha usage report is prepared locally for weekly or
+manual GitHub Actions execution. It records the exact uploaded Alpha ZIP and
+supporting-asset download totals plus GitHub's aggregate 14-day clone/view
+traffic only if a separately approved credential is introduced later. The
+built-in workflow token cannot request the traffic API's required repository
+Administration permission. The report collects no
+identity or IP address, commits no metrics, uses only read-only repository
+permission, and retains Markdown/JSON workflow artifacts for 30 days. Public
+asset counts remain available without a stored credential.
+
 Completed managed setups now have a fail-closed next-launch path: Haven
 rebuilds the device-derived plan, verifies the completion receipt, runtime
 inventory, publisher, exact model, managed directories, and loopback provider,
@@ -124,6 +134,29 @@ and reporting routes. The main-push-only GitHub job continues to reverify and
 attest unsigned development archives after native package success, with no
 pull-request write authority, platform-signing, notarization, updater-trust,
 or production claim.
+
+The portable builder now embeds the Haven 42 license, generated third-party
+notice, and exact hash-verified CPython, Apache 2.0, and libffi license texts in
+the extracted package as non-signable distribution evidence. The immutable
+published Alpha ZIP predates this correction; equivalent documents remain
+available beside it as Release assets. Exact Microsoft runtime redistribution
+clearance remains open, so this correction does not authorize signing or
+production promotion. A fresh 41-file Windows rebuild passed exact inventory,
+archive, parity, relocation, recovery, lifecycle, shutdown, and integrity
+checks, and the builder now keeps PyInstaller cache beneath its ignored output
+instead of the user profile. Build outputs cannot escape the repository's
+ignored `dist` tree, and package links cannot resolve outside the bundle.
+
+That fresh 41-file archive also passed a physical Windows 11 Intel Arc B580
+non-administrator closure cell on 2026-08-06: exact transfer and extraction,
+loopback and shutdown authority, approved portable Ollama/model setup, Vulkan
+inference, Chat/Writing/Summarization metrics, zero-download relaunch,
+sanitized logs outside managed components, human-filename attachment context,
+disguised-script rejection, local/private-network/local switching, external
+model unload, marker-owned uninstall, retained logs/application files, and
+package-verified empty-state relaunch. The archive remains uncommitted unsigned
+development evidence; fresh AMD/NVIDIA repetition, redistribution clearance,
+signing, and production promotion remain open.
 
 Public signing and privacy policies, a fail-closed SignPath audit,
 deterministic Windows executable metadata, and build-time metadata verification
@@ -932,11 +965,12 @@ Exit criteria:
   main commit `04baca39b26ec58c189a6ae21ea78b507444e9fa`; applicable Microsoft
   redistribution review and repetition for any later release candidate remain
   open.
-  Eligibility remains externally blocked until an existing public Release in
-  the form to sign is explicitly approved, the exact packaged
-  dependency/license inventory is reviewed, and the provider accepts the
-  project with signing-service MFA. Repository-account MFA was
-  owner-confirmed on 2026-07-27. No signing or publication is active.
+  The public unsigned Alpha supplies an exact binary form for provider review,
+  but eligibility remains externally blocked until the exact packaged
+  dependency/license inventory is cleared and the provider accepts the project
+  with signing-service MFA. Repository-account MFA was
+  owner-confirmed on 2026-07-27. No signing, stable publication, or production
+  promotion is active.
 - A failed update automatically restores the previous known-good engine. Offline use remains available, update checks can be disabled, stable is the default channel, and automatic installation is an explicit user choice.
 - Post-Alpha managed-component updates require network disclosure and explicit
   user approval, exact size and SHA-256 verification, expected publisher

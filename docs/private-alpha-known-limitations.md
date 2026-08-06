@@ -5,6 +5,10 @@ These limitations are mandatory disclosures for the published, unsigned Haven
 
 - Artifacts are unsigned and not notarized. Operating-system reputation or
   antivirus warnings may appear.
+- The release page provides hashed runtime license and third-party-notice files
+  as separate downloads, but Alpha 1's application ZIP does not contain those
+  documents. The next package builder embeds them; the published Alpha archive
+  remains immutable.
 - The package has no installer, automatic updater, system service, or
   privileged setup. Its optional guided path writes a pinned standalone Ollama
   runtime and recommended model inside `Haven42-Data` in the extracted package

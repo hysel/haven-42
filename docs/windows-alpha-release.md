@@ -19,6 +19,11 @@ and private-vulnerability-reporting URLs. Hostile tests reject a changed tag,
 commit, artifact name, size, digest, evidence URL, reporting URL, platform, or
 authority boundary.
 
+The release page also carries independently hashed CPython, Apache 2.0, libffi,
+third-party-notice, inventory, SBOM, and provenance sidecar assets. Those
+license and notice documents are not embedded inside Alpha 1's immutable ZIP;
+future package builds now include them in the extracted application folder.
+
 Publication grants no signing, notarization, installer, automatic core-update,
 driver, service, firewall, Tauri/Rust, bundled external-software, stable-release,
 or production authority. Future candidates require their own exact artifact,
