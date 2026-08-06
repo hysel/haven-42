@@ -2112,7 +2112,9 @@ def main() -> int:
         assert status == 200 and immediate["modelUnloaded"] is True and not FakeState.loaded
         checks += 3
 
-        state.idle_unload_seconds = 0.05
+        # Leave enough separation for a slower hosted runner to exercise the
+        # stale-generation no-op before the real idle timer can win the race.
+        state.idle_unload_seconds = 0.5
         status, warm, _ = request_json(
             origin + "/api/text",
             "POST",
