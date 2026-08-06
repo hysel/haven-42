@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "recordId": "haven42.windows-alpha-release.0.4.0-alpha.1",
+  "release": {
+    "version": "0.4.0-alpha.1",
+    "tag": "v0.4.0-alpha.1",
+    "title": "Haven 42 0.4.0 Alpha 1",
+    "repository": "hysel/haven-42",
+    "url": "https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1",
+    "publishedAtUtc": "2026-08-05T22:35:32Z",
+    "channel": "github-public-prerelease",
+    "prerelease": true,
+    "invitedTestingBoundary": true
+  },
+  "candidate": {
+    "sourceCommit": "6624dfb967a58c67d2d5a9a01437cf3213eee289",
+    "operatingSystem": "windows",
+    "architecture": "x64",
+    "artifactName": "haven42-0.4.0-alpha.1-windows-x64-unsigned.zip",
+    "byteLength": 9650721,
+    "sha256": "d1648667807dde37c645beb2199503b8a4852a585a2f62eb4ebe2c0b90465106"
+  },
+  "verification": {
+    "validatePackRun": "https://github.com/hysel/haven-42/actions/runs/31050714006",
+    "codeQlRun": "https://github.com/hysel/haven-42/actions/runs/31050714049",
+    "exactSourceSecurityReviewPassed": true,
+    "publicHistoryPrivacyPassed": true,
+    "nativePackageSmokePassed": true,
+    "crossPlatformHostedPackagePassed": true,
+    "releaseAssetDigestVerified": true
+  },
+  "reporting": {
+    "issueChooser": "https://github.com/hysel/haven-42/issues/new/choose",
+    "privateVulnerabilityReporting": "https://github.com/hysel/haven-42/security/advisories/new"
+  },
+  "authority": {
+    "publicUnsignedAlphaDistributionRecorded": true,
+    "platformSigningAllowed": false,
+    "notarizationAllowed": false,
+    "stableOrProductionPromotionAllowed": false,
+    "installerActivationAllowed": false,
+    "onlineCoreUpdaterAllowed": false,
+    "driverServiceOrFirewallModificationAllowed": false,
+    "tauriOrRustAdmitted": false,
+    "externalSoftwareBundled": false
+  }
+}

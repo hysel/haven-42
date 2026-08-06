@@ -529,9 +529,10 @@ checkbox totals below.
 - [x] Record the official Windows Python installer/SBOM, immutable CPython
   source commit, exact OpenSSL 3.5.7 and libffi 3.4.4 source/binary dependency
   commits, source archive hashes, and hash-verified libffi license evidence.
-- [ ] Complete the exact packaged dependency/license audit, obtain provider
-  eligibility review with signing-service MFA, and decide separately whether
-  to publish an unsigned development Release in the form proposed for signing.
+- [ ] Complete the exact packaged dependency/license audit and obtain provider
+  eligibility review with signing-service MFA before considering a signed or
+  production package. The published unsigned Alpha does not satisfy those
+  separate promotion gates.
   A clean 31-file local rebuild proves the 39 banned host-derived JDK
   UCRT/API-set files are absent and passes the native package gate. Clean
   hosted reproduction and unsigned development-archive attestation are

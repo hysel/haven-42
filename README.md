@@ -200,7 +200,7 @@ for scope, evidence, blockers, and exit criteria.
 | --- | --- | --- |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Recommendation, configuration, dispatch, health, cleanup, and evidence foundations. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, hardened unsigned portable packages, private-alpha preparation, and inactive post-quantum migration planning; no alpha candidate or distribution is admitted, and signing, PQC activation, and machine effects remain gated. |
+| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, hardened unsigned portable packages, published Windows `0.4.0-alpha.1` prerelease, and inactive post-quantum migration planning; signing, stable or production promotion, PQC activation, and broader machine effects remain gated. |
 | Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial Linux CUDA evidence exists; no audio provider is promoted. |
 | Milestone 25: Local Video Generation | Research in progress | Candidate research and a fail-closed Quadro hardware/storage preflight exist; no executable video integration ships. |
