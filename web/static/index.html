@@ -218,6 +218,28 @@
             </div>
           </section>
 
+          <section class="model-switch-prompt hidden" id="answer-report-panel" role="dialog" aria-labelledby="answer-report-title" aria-describedby="answer-report-description">
+            <div class="answer-report-fields">
+              <strong id="answer-report-title">Report this answer</strong>
+              <p id="answer-report-description">This creates a private file in Haven42-Logs. It includes the model, task type, software versions, category, and your optional note. It never includes the question, answer, or attachments, and nothing is uploaded.</p>
+              <label for="answer-report-category">What went wrong?</label>
+              <select id="answer-report-category">
+                <option value="incorrect">The answer was incorrect</option>
+                <option value="unsafe">The answer seemed unsafe</option>
+                <option value="unclear">The answer was unclear</option>
+                <option value="formatting">The formatting was difficult to use</option>
+                <option value="other">Something else</option>
+              </select>
+              <label for="answer-report-note">Optional note <small>Do not include private chat content or personal information.</small></label>
+              <textarea id="answer-report-note" maxlength="300" rows="3" placeholder="Describe the problem without copying the question or answer."></textarea>
+              <p class="field-help" id="answer-report-status" role="status"></p>
+            </div>
+            <div class="model-switch-actions">
+              <button class="button secondary" id="cancel-answer-report" type="button">Cancel</button>
+              <button class="button primary" id="save-answer-report" type="button">Save private report</button>
+            </div>
+          </section>
+
           <form class="composer-surface composer" id="text-form">
             <section class="context-panel" aria-label="Attachments">
               <div class="context-toolbar">

@@ -30,7 +30,11 @@ Use semantic versioning while the pack matures:
 - Minor: new workflows, new rule groups, new optional integrations, or meaningful pack capability additions.
 - Major: breaking config changes, incompatible Continue schema changes, or default integration/model posture changes.
 
-The current release line is `0.3.0`. Changes after its release remain under `Unreleased` until the next version is deliberately prepared. Do not create a release tag until the release readiness gate and exact-SHA hosted CI pass.
+The latest stable release line is `0.3.0`. The latest public test build is the
+unsigned Windows `0.4.0-alpha.1` prerelease. Changes after those exact published
+versions remain under `Unreleased` until another version is deliberately
+prepared. Do not create a release tag until the release readiness gate and
+exact-SHA hosted CI pass.
 
 ## Private Alpha Preparation
 
@@ -72,6 +76,8 @@ For each release, update:
 - `README.md`, if setup, status, or workflow docs changed
 - `ROADMAP.md`, if milestone state changed
 - `TODO.md`, if tracked work changed
+- `config/github-alpha-usage-report-contract.json`, when the monitored Alpha
+  tag or primary downloadable asset changes
 
 Update `DECISIONS.md` when the release includes a durable policy, architecture, compatibility, or governance decision.
 
@@ -126,6 +132,10 @@ the exact SHA, run URL, and one of `Pushed`, `CI running`, `CI passed`, or
 Use the packaging scripts after validation passes and the working tree is clean.
 The scripts package tracked repository files, write a manifest, and create a
 SHA-256 checksum next to the archive.
+
+The `0.3.0` commands below are stable-release examples. The Windows Alpha uses
+its separately gated candidate and publication workflow; do not substitute an
+Alpha version into these commands without a deliberate release decision.
 
 Windows PowerShell creates a `.zip` archive:
 

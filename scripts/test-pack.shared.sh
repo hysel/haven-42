@@ -306,7 +306,9 @@ test_github_actions_dependencies() {
     grep -Eq '^[[:space:]]+codeql-action:' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Fq '"github/codeql-action/*"' "$REPO_ROOT/.github/dependabot.yml" &&
     python3 "$REPO_ROOT/scripts/verify-github-repository-policy.py" --self-test |
-      grep -q 'with 7 hostile checks'
+      grep -q 'with 10 hostile checks' &&
+    python3 "$REPO_ROOT/scripts/test-github-alpha-usage-report.py" |
+      grep -q '26 checks'
 }
 
 test_test_tier_contract() {
@@ -2588,11 +2590,24 @@ assert portable["security"]["unknownRuntimeComponentFilesRejected"] is True
 assert portable["security"]["windowsApplicationLocalApiSetOrUcrtAllowed"] is False
 assert portable["security"]["windowsVisualCppRuntimeExactHashesRequired"] is True
 assert portable["security"]["pyinstallerHostPathInheritanceAllowed"] is False
+assert portable["security"]["pyinstallerUserCacheAllowed"] is False
+assert portable["security"]["buildOutputsRestrictedToRepositoryDist"] is True
+assert portable["security"]["packageLinksMayEscapeBundle"] is False
 assert portable["security"]["runtimeRedistributionClearanceRequiredForProduction"] is True
+assert portable["security"]["distributionEvidenceEmbeddedInExtractedPackage"] is True
+assert portable["security"]["distributionEvidenceRequiresExactHashes"] is True
+assert portable["security"]["distributionEvidenceExcludedFromSigningScope"] is True
 assert "runtime-component-inventory.json" in portable["supplyChainEvidence"]
 assert "CPYTHON-3.14.6-LICENSE.txt" in portable["supplyChainEvidence"]
 assert "APACHE-2.0.txt" in portable["supplyChainEvidence"]
 assert "LIBFFI-3.4.4-LICENSE.txt" in portable["supplyChainEvidence"]
+assert portable["embeddedDistributionEvidence"] == [
+    "LICENSE.txt",
+    "THIRD-PARTY-NOTICES.txt",
+    "licenses/APACHE-2.0.txt",
+    "licenses/CPYTHON-3.14.6-LICENSE.txt",
+    "licenses/LIBFFI-3.4.4-LICENSE.txt",
+]
 assert policy["text"]["capabilityIds"] == ["general.chat", "content.write", "content.summarize"]
 assert policy["text"]["modelResidency"] == "bounded-idle-timeout"
 assert policy["text"]["defaultIdleUnloadSeconds"] == 300
@@ -2726,8 +2741,8 @@ test_task_composition_and_repository_privacy() {
   python3 "$REPO_ROOT/scripts/test-task-effect-journal.py" | grep -q "46 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "20 effect-free checks" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "12 cases" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "21 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "13 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "30 cases" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" |
     grep -q "tracked or untracked non-ignored working files" || return 1

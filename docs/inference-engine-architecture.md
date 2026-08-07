@@ -24,6 +24,38 @@ The shared local-text discovery and invocation entry points implement this bound
 
 `oneAPI` is a compiler/runtime toolkit rather than a standalone inference engine. It may become a dependency of an admitted Intel backend, but it is not presented as a provider. OpenVINO GenAI remains a separate Intel-focused engine candidate. See `examples/intel-b580-inference-engine-validation.md` for the sanitized exact-host evidence and blockers.
 
+## Operating-System Decision Matrix
+
+Runtime selection is an exact-profile decision, not a GPU-name lookup. The
+selection tuple includes operating system, architecture, CPU features,
+accelerator vendor and model, driver, usable memory, backend, runtime version,
+model artifact, and requested capability.
+
+| Platform profile | Current direction | Important boundary |
+| --- | --- | --- |
+| Windows 11 x64 NVIDIA | Portable Ollama/CUDA | Current Alpha direction; validate consumer drivers, usable WDDM memory, lifecycle, and no silent CPU fallback. |
+| Windows 11 x64 AMD | Portable Ollama/ROCm | Current Alpha direction; core and ROCm packages, supported GPU/driver, and exact model must pass together. |
+| Windows 11 x64 Intel | Portable Ollama with experimental Vulkan only for the exact validated Arc B580 Alpha profile; otherwise CPU | The B580 Alpha cell proved nonzero GPU residency, but this evidence does not transfer to another Intel GPU or driver. Native llama.cpp SYCL failed its recorded model-load gate. |
+| Windows x64 CPU-only | Portable Ollama with a smaller validated model | CPU features, RAM, thermals, and minimum usable token rate require native tier evidence. |
+| Windows ARM64 | Future separate package | x64 evidence and dependencies do not transfer. |
+| Linux NVIDIA | Ollama first; direct llama.cpp CUDA is an exact-profile option | Distribution, libc, driver, device permissions, suspend/resume, and portable user-process behavior remain gates. |
+| Linux AMD | Ollama/ROCm first; llama.cpp HIP remains profile-specific | Kernel driver, ROCm version, device groups, and native-Linux evidence are required; WSL2 evidence does not transfer. |
+| Linux Intel | Compare Ollama Vulkan, llama.cpp SYCL, and OpenVINO | Existing Intel results are candidate-only and cannot select a packaged runtime. |
+| macOS Apple Silicon | Compare Ollama Metal, llama.cpp Metal, and later MLX | Unified-memory headroom, native package lifecycle, signing, and notarization require physical-Mac evidence. |
+| macOS Intel | CPU-only future consideration | Apple Silicon Metal evidence does not transfer; low performance may make the profile unsupported. |
+
+Chat, Writing, and Summarization continue to use one provider-neutral text
+contract. Ollama and llama.cpp can be separate providers, but Haven should not
+run both for the same request. A verified Hugging Face GGUF can later be
+imported into the managed Ollama runtime without admitting a direct llama.cpp
+provider. Image, audio, speech, and video use separately admitted runtimes.
+
+The default is the largest validated comfortable fit, with fallback only to a
+smaller validated fit. Silent CPU fallback and unvalidated backend selection are
+prohibited. Test results remain evidence; default runtime, model eligibility,
+hardware routing, supported-platform, fallback, and beginner-flow changes need
+explicit owner approval. See `DECISIONS.md` for the accepted governance record.
+
 The development-only cross-accelerator manifest and sanitized completed baseline
 are documented in `examples/cross-accelerator-model-validation.md`. Its runner
 is offline during inference, listener-free, shell-free, hash-gated, and

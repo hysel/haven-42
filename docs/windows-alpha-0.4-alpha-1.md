@@ -173,9 +173,17 @@ for one error reference, explicitly saving a sanitized support report, and
 clearing logs. Removing managed components deletes only `Haven42-Data` and
 preserves `Haven42-Logs`. Full uninstall treats logs as a separate user-owned
 class and removes them only after an explicit choice. Hostile privacy, rotation, disk-full,
-interrupted-write, disk-full, packaged UI parity, and expanded component-decision
-tests remain required. Privacy, rotation, unclean-session, report, clear, and
-separate-removal hostile tests are implemented.
+interrupted-write, component-decision, privacy, unclean-session, report, clear,
+and separate-removal tests are implemented. These records use fixed codes for
+the selected backend, exact registered runtime/technology version, registered
+model, interrupted-write recovery, insufficient space, and storage-write
+failure; no raw exception or path is accepted. Packaged UI parity and owner
+review remain release gates. A completed answer now offers **Report this
+answer**. After an explicit click, the tester selects one fixed issue category
+and may enter a note of at most 300 characters. Haven saves the task ID, exact
+model digest, runtime version, sanitized event reference, category, and optional
+note locally in `Haven42-Logs`; the prompt, answer, attachments, endpoint, and
+machine identity are excluded, and nothing is uploaded.
 
 ## Response guardrails
 
@@ -195,9 +203,27 @@ response.
 These instructions do not grant or enforce filesystem, process, network, tool,
 or machine authority. The deterministic server boundary remains responsible
 for security. Before invited distribution, every automatically selectable exact
-model must pass a fixed Chat, Writing, and Summarization compliance matrix;
-repeated critical violations block recommendation even if ordinary inference
-works.
+model should run a fixed Chat, Writing, and Summarization compliance matrix.
+Results inform guardrails and comparative quality evidence. They do not change
+the approved hardware-based default or model eligibility without explicit owner
+approval; deterministic security, integrity, compatibility, or execution
+failures remain separate release blockers.
+
+The exact Qwen 3.5 9B Alpha artifact completed the 30-cell matrix twice on
+2026-08-06. Writing repeatedly invented credential-shaped example text, and
+the remediated Chat run assigned singular `they` to an invented individual.
+These findings are retained as advisory model-quality evidence while the
+approved hardware-based Qwen default remains automatic. Summarization completed
+its ten cells without an observed violation during agent pre-review, but owner
+review remains required. See
+`examples/windows-alpha-response-compliance-validation.md` for the sanitized
+record.
+
+Exact Gemma 3 12B, Mistral Small 3.2 24B, and Qwen 3.5 4B replacement
+candidates also failed one or more pronoun or credential-handling checks. None
+earned a higher quality ranking than the current automatic default. A tester may
+still choose another installed model manually from the advanced list and will
+see an unverified-model warning when applicable.
 
 ## Published candidate evidence and remaining gaps
 

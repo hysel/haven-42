@@ -59,5 +59,15 @@
     "platformCodeSigningClaimAllowed": false,
     "notarizationClaimAllowed": false,
     "productionReadinessClaimAllowed": false
+  },
+  "usageReports": {
+    "enabled": true,
+    "workflow": "alpha-usage-report.yml",
+    "triggers": ["weekly", "manual"],
+    "permissions": ["contents:read"],
+    "repositoryData": "aggregate-only",
+    "downloaderIdentityCollected": false,
+    "reportRetentionDays": 30,
+    "commitsReportsToRepository": false
   }
 }

@@ -2,6 +2,9 @@
 
 Audit date: 2026-07-27
 
+Status updated: 2026-08-06 after publication of the unsigned Windows
+`0.4.0-alpha.1` prerelease.
+
 This is a sanitized repository-readiness audit, not a SignPath Foundation
 application, acceptance, certificate, signature, or legal conclusion. The
 authoritative conditions are published by
@@ -13,18 +16,19 @@ No certificate, signing service, or signing workflow is active.
 
 **Not currently eligible to request production signing.**
 
-The public repository has version tags through `v0.3.0`, but the authoritative
-GitHub Release API reported no published Releases and no downloadable release
-assets at audit time. SignPath requires a project to be released already in
-the form that should be signed. Haven 42 also remains explicitly
-unsigned-development-only, and public Release publication requires a separate
-owner decision.
+At the original audit, the public repository had version tags through
+`v0.3.0`, but no published GitHub Release or downloadable release assets. The
+owner subsequently approved and published the exact unsigned Windows
+`0.4.0-alpha.1` prerelease on 2026-08-05. That removes the earlier absence of a
+public binary as a factual gap, but it does not establish provider eligibility,
+license clearance, signing authority, or production readiness. SignPath must
+decide whether the published prerelease satisfies its release-form requirement.
 
 The Windows executable also lacked product and version metadata at the start
 of this audit. Deterministic metadata is now defined in
-`package/haven42-version-info.txt`. A local unsigned Windows rebuild confirmed
-ProductName and FileDescription `Haven 42`, ProductVersion and FileVersion
-`0.3.0`, CompanyName `Haven 42 open-source project`, and OriginalFilename
+`package/haven42-version-info.txt`. The published Alpha records ProductName and
+FileDescription `Haven 42`, ProductVersion and FileVersion `0.4.0-alpha.1`,
+CompanyName `Haven 42 open-source project`, and OriginalFilename
 `haven42.exe`; the archive/evidence verifier and native portable parity,
 relocation, read-only, recovery, lifecycle, port-collision, shutdown,
 hostile-environment, and integrity tests passed. Hosted native evidence for
@@ -39,8 +43,8 @@ platforms; the eventual immutable release candidate must still repeat it.
 | No proprietary project code | Confirmed for tracked Haven 42 source; packaged dependency review pending | Tracked source is MIT. The embedded runtime and every packaged native library still require final license/notices review for the exact candidate archive. |
 | No malware or potentially unwanted behavior | External review required | CodeQL, privacy scanning, strict package integrity, and hostile tests exist, but only SignPath can decide eligibility. |
 | Actively maintained | Confirmed by repository history | Current `main` activity and maintained documentation exist. |
-| Existing release in the form to sign | Blocked | Tags exist, but GitHub reported zero published Releases/assets. Do not publish one without explicit approval. |
-| Functionality documented on download/release page | Partially satisfied | README and package documentation are detailed; no public binary download/release page exists. |
+| Existing release in the form to sign | Provider review required | The exact unsigned Windows `0.4.0-alpha.1` prerelease and asset are public. SignPath must decide whether that prerelease satisfies its requirement. |
+| Functionality documented on download/release page | Confirmed for the Alpha boundary | README, release notes, download guidance, checksums, limitations, and feedback routes describe the public unsigned Alpha. |
 | Project team owns source and build scripts | Confirmed | Authoritative repository and build definitions are maintained by `@hysel`. |
 | Sign only project-owned binaries | Policy defined; local Windows identity verified | Initial scope is only `haven42.exe`; upstream Python/PyInstaller/system libraries are excluded from signing scope. Provider artifact configuration remains external. |
 | No hacking-tool runtime | Likely satisfied; external decision required | End-user runtime provides local AI and read-only evidence/setup functions. Security scanning is limited to development/build validation rather than active exploitation. |
@@ -49,7 +53,7 @@ platforms; the eventual immutable release candidate must still repeat it.
 | MFA for repository and signing service | GitHub confirmed; signing service pending enrollment | The repository owner confirmed GitHub MFA is enabled on 2026-07-27. Enable signing-service MFA during any later enrollment. No authentication proof or secret is recorded. |
 | Author, reviewer, and approver roles | Defined; provider review pending | `CODE-SIGNING-POLICY.md` names the current maintainer roles. SignPath decides whether the project structure is acceptable. |
 | Public code-signing policy and privacy statement | Prepared | `CODE-SIGNING-POLICY.md` and `PRIVACY.md`. The SignPath provider sentence is explicitly marked planned until acceptance. |
-| Product and version metadata | Local Windows gate passed; hosted candidate pending | ProductName `Haven 42`, ProductVersion/FileVersion `0.3.0`, and `haven42.exe` identity were emitted and independently parsed from the rebuilt executable. |
+| Product and version metadata | Published Alpha gate passed | ProductName `Haven 42`, ProductVersion/FileVersion `0.4.0-alpha.1`, and `haven42.exe` identity were emitted and independently parsed from the published candidate. |
 | Verifiable automated build | Development evidence available | Hash-locked inputs, exact source SHA, native package matrix, checksums, inventory, notices, SBOM, provenance, and prepared GitHub attestation exist. SignPath configuration remains external. |
 | Manual approval for every signing request | Policy defined; service not configured | Every future request is digest- and release-bound and requires manual approval. |
 
@@ -73,7 +77,7 @@ Before applying:
 The existing SBOM and notices are development evidence and must not be
 described as complete production legal clearance.
 
-The current 70-file Windows candidate is categorized in
+The rejected 70-file Windows build and its clean 31-file replacement are categorized in
 `docs/windows-package-component-audit.md`. Exact component evidence now binds
 every file to Haven 42 or an explicit upstream/runtime group, rejects
 unclassified files, expands the SBOM, and marks all upstream components
@@ -96,6 +100,12 @@ redistribution terms and repetition for a later release candidate remain
 incomplete, so the promotion gate remains blocked rather than inferred from
 successful development packaging.
 
+The 2026-08-06 official-source closure review reconfirmed that application-local
+deployment and the Visual Studio 2022 distributable list remain conditional on
+the applicable Microsoft license. File provenance, signatures, and unmodified
+bytes do not establish that entitlement, so the audit continues to deny
+production redistribution and signing eligibility.
+
 Hosted Python input provenance is now exact for the three pinned native
 runners: the official `actions/python-versions` 3.14.6 release tag, archive
 name, and SHA-256 are workflow-bound and recorded in build provenance. This
@@ -106,8 +116,8 @@ redistribution review.
 
 Before an application:
 
-1. decide whether to approve one public unsigned development Release in the
-   exact form proposed for later signing;
+1. ask the provider to confirm whether the published unsigned Windows
+   `0.4.0-alpha.1` prerelease satisfies its release-form requirement;
 2. identify any additional public reviewer or signing approver if available;
 3. review the public privacy and code-signing policies;
 4. approve submitting the application and the information it will disclose;

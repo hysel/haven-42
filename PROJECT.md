@@ -27,15 +27,15 @@ seven owner-deferred, seven partial, and zero unverified tasks. The existing
 48-item parent-roadmap blocker ledger remains valid; classification does not
 turn deferred or partial product work into completed scope.
 
-The current private-alpha implementation target is Haven 42 `0.4.0-alpha.1`,
-Windows 11 x64, invited testers, and server-enforced text-only Chat, Writing,
-and Summarization in one continuous workspace. Automatic request routing is the
+The current public test build is Haven 42 `0.4.0-alpha.1` for Windows 11 x64
+and invited testers, with server-enforced text-only Chat, Writing, and
+Summarization in one continuous workspace. Automatic request routing is the
 default with explicit task choices available, and provider-reported generation
-speed appears beside local resource and token totals. It adds a candidate
-current-user managed setup without bundling external software or automating
-drivers. The exact commit, authenticated private delivery channel, distribution
-approval, tag, public Release, signing, updater, and production claim remain
-inactive.
+speed appears beside local resource and token totals. Its current-user managed
+setup does not bundle external software or automate drivers. The exact unsigned
+artifact, source commit, tag, public prerelease, checksums, and reporting routes
+are recorded in `config/windows-alpha-release-record.json`. Signing, stable or
+production promotion, installer activation, and online updates remain inactive.
 
 A completed Haven-managed local setup reconnects on later launches only after
 fresh receipt, runtime-integrity, publisher, exact-model, managed-path, and
@@ -82,22 +82,52 @@ including run `30826478326` at commit
 `28bba796876a398869034e4d3b8b0c1ab6fa3056`. This does not authorize signing,
 notarization, a GitHub Release, updater activation, or production use.
 
+A separate weekly/manual Alpha usage-report workflow is prepared locally. It
+uses only `contents: read`, reports cumulative counts for the exact public Alpha
+ZIP and its supporting assets, and includes aggregate 14-day repository
+clone/view traffic only if a separately approved credential with repository
+Administration read access is introduced later. The default workflow uploads
+bounded Markdown/JSON reports for 30 days, commits nothing, and collects no
+downloader identity, IP address, device data, or Haven 42 telemetry.
+
 Public code-signing and privacy policies plus a fail-closed SignPath
 eligibility audit are now prepared locally. The Windows package specification
 defines deterministic Haven 42 executable identity metadata, and the package
 builder verifies it before generating an archive. This is readiness evidence
-only: the project has no public binary Release in the form required for an
-application, exact packaged-dependency review and provider enrollment remain
-open, and no certificate, signing workflow, signature, or publication is
-active. The owner confirmed repository-account MFA on 2026-07-27;
+only: the public unsigned `0.4.0-alpha.1` prerelease does not establish SignPath
+eligibility or production readiness. Exact packaged-dependency review and
+provider enrollment remain open, and no certificate, signing workflow, or
+signature is active. The owner confirmed repository-account MFA on 2026-07-27;
 signing-service MFA remains a future enrollment requirement.
 
 Portable evidence now adds an exact runtime-component inventory alongside the
 whole-package inventory. Every file is bound by path, digest, and size to
 Haven 42 or an explicit upstream/runtime group; unclassified files fail, SBOM
 and notice rows must match, and upstream components cannot enter Haven 42's
-signing scope. Runtime redistribution and production promotion remain false
-until complete license texts and platform provenance pass review.
+signing scope. Future packages also embed the Haven 42 license, generated
+third-party notice, and exact hash-verified upstream license texts in a
+non-signable distribution-evidence group. The published Alpha predates this
+correction and provides those documents as separate Release assets rather than
+inside its immutable ZIP. Runtime redistribution and production promotion
+remain false until the Microsoft licensed-user condition, complete license
+review, and platform provenance are resolved.
+
+Fresh Windows development builds also isolate PyInstaller configuration and
+cache beneath the ignored build output. They do not create Haven-specific
+build-tool state in the user's profile. Output paths and package links fail
+closed if they escape the repository build tree or bundle.
+
+A fresh 41-file unsigned development archive passed an end-to-end physical
+Windows 11 Intel Arc B580/non-administrator cell on 2026-08-06. The cell covers
+archive identity, package integrity, loopback confinement, approved portable
+Ollama `0.32.5` plus `qwen3.5:9b` setup, Vulkan inference, Chat/Writing/
+Summarization metrics, zero-download relaunch, sanitized logs outside managed
+components, inert human-filename attachments, disguised-script rejection,
+local/private-network/local provider switching with external Ollama `0.32.6`,
+complete external model unload, scoped uninstall, and package-verified empty-
+state relaunch. This is uncommitted development evidence, not a replacement
+release, redistribution clearance, signing eligibility, or production
+promotion.
 
 The hosted package matrix now uses versioned Windows 2025, Ubuntu 24.04, and
 macOS 15 runners, one immutable `setup-python` action, and exact official

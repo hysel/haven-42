@@ -10,6 +10,10 @@ product includes private conversation, bounded attachments, explicit Ollama
 connections, model selection, token and timing details, and a promoted Linux
 ComfyUI/SDXL image path.
 
+The latest public test build is the unsigned Windows `0.4.0-alpha.1`
+prerelease. The latest stable release line is `0.3.0`. Neither version is a
+production-readiness claim.
+
 Security-sensitive capabilities remain unavailable until their own evidence and
 approval gates are complete. Haven 42 makes no production-readiness claim.
 

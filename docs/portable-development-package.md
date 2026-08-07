@@ -4,12 +4,23 @@ Haven 42 can be built as an unsigned PyInstaller one-folder development package 
 
 ## Build And Run
 
-Install the exact hash-locked build dependencies in an isolated environment, then run:
+Create the repository-local, ignored build environment once and install the
+exact hash-locked dependencies. On Windows:
 
 ```text
-python -m pip install --require-hashes -r package/requirements-build.txt
+py -3.14 -m venv .venv-build
+.venv-build\Scripts\python.exe -m pip install --require-hashes -r package/requirements-build.txt
 python scripts/build-portable-development-package.py
 ```
+
+On Linux or macOS, use `.venv-build/bin/python` in place of the Windows
+executable. The final build command may use the ordinary system `python`: the
+builder accepts it only when isolated Python 3.14.6 and PyInstaller 6.21.0 are
+both available there. Otherwise it validates and delegates automatically to
+the repository-local `.venv-build`. Stale per-user package metadata cannot
+make an incomplete system installation look usable. Missing, wrong-version,
+symlinked, or escaping local build environments fail closed with remediation
+instructions instead of starting a partial package build.
 
 A source export without `.git` must provide `HAVEN42_SOURCE_COMMIT` and
 `HAVEN42_SOURCE_TREE_STATE`. A modified export must additionally provide the
@@ -31,6 +42,15 @@ Protected resources and the manifest use repository-enforced LF bytes so
 caller Git line-ending settings cannot silently change packaged identities.
 
 The native executable is under `dist/portable/bundle/haven42/`. It accepts `--port` and `--no-open`. Port `0` asks the operating system for an unused loopback port. The build also creates a platform archive and evidence in `dist/portable/artifacts/`.
+
+The builder overrides PyInstaller's per-user configuration directory and keeps
+its cache beneath the selected ignored build output. A package build therefore
+does not depend on or create Haven-specific PyInstaller state in the user's
+profile.
+
+Build outputs are restricted to the repository's ignored `dist` tree. Before
+inventory or archive creation, every package link must resolve inside the
+one-folder bundle; an external or missing target fails the build.
 
 These outputs are unsigned development artifacts. They are not installers or production releases. Antivirus and operating-system reputation prompts are possible because signing and notarization are deliberately outside this batch.
 
@@ -136,6 +156,9 @@ Each artifact set contains:
   group;
 - hash-verified CPython 3.14.6 bundled-license evidence, the Apache 2.0
   license text used by OpenSSL 3.5.7, and the exact libffi 3.4.4 MIT license;
+- the Haven 42 MIT license, generated third-party notice, and those exact
+  upstream license files inside the extracted package as well as the sidecar
+  evidence set;
 - unsigned build provenance binding a clean build to its exact source commit or a modified development build to its base commit plus exact source-snapshot SHA-256, alongside OS, architecture, Python, PyInstaller, workflow identity, and explicit absence of platform signing, notarization, an in-build attestation, and release publication.
 
 The local build remains unattested. Separately, an approved future push to

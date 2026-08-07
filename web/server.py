@@ -80,7 +80,9 @@ from windows_alpha import (  # noqa: E402
     validate_provider_metrics,
 )
 from windows_alpha_setup import (  # noqa: E402
+    COMPONENT_DECISION_CODES,
     MANAGED_OLLAMA_URL,
+    MODEL_DECISION_CODES,
     SetupCoordinator,
     SetupError,
     build_plan as build_windows_alpha_plan,
@@ -99,6 +101,8 @@ MAX_TEXT_REQUEST_BYTES = 12 * 1024 * 1024
 MAX_CONVERSATION_BYTES = 64 * 1024
 MAX_MESSAGE_BYTES = 32 * 1024
 MAX_CHAT_RESPONSE_BYTES = 1024 * 1024
+MAX_PENDING_ANSWER_REPORTS = 20
+ANSWER_REPORT_TOKEN = re.compile(r"[a-f0-9]{32}")
 MAX_WEB_IMAGE_BYTES = 16 * 1024 * 1024
 MAX_IMAGE_PROMPT_BYTES = 8 * 1024
 MAX_CONVERSATION_MESSAGES = 20
@@ -366,8 +370,9 @@ UNIVERSAL_RESPONSE_GUARDRAILS = (
     "knowledge, and assumptions; state uncertainty instead of inventing missing details. "
     "Never claim to have browsed, opened a local file, executed code, changed a system, or "
     "verified a current fact unless the supplied conversation or tool result proves that "
-    "action. Do not request, reveal, or unnecessarily repeat passwords, API keys, tokens, "
-    "private paths, or other sensitive data. For medical, legal, financial, or safety-critical "
+    "action. Do not request, reveal, invent examples of, or unnecessarily repeat passwords, "
+    "API keys, tokens, credential-shaped placeholders, private paths, or other sensitive data, "
+    "even when the user asks for dummy or test credentials. For medical, legal, financial, or safety-critical "
     "questions, identify material uncertainty and do not present unverified guidance as a "
     "professional determination. When describing destructive or system-changing commands, "
     "explain the effect and provide a safe verification or backup step first. Preserve quoted "
@@ -809,7 +814,11 @@ class HavenState:
         self.diagnostics = DiagnosticLogger(APP_VERSION, diagnostic_root)
         self.alpha_tokens = SessionTokenTotals()
         self.alpha_resources = ResourceHistory(maximum_samples=30)
-        self.alpha_setup = SetupCoordinator(self.csrf_token) if os.name == "nt" else None
+        self.answer_report_contexts: dict[str, dict[str, str]] = {}
+        self.alpha_setup = (
+            SetupCoordinator(self.csrf_token, event_sink=self.diagnostics.record)
+            if os.name == "nt" else None
+        )
 
     def assurance_summary(self) -> dict[str, Any]:
         try:
@@ -1534,6 +1543,7 @@ class HavenState:
             authentication = self.authentication
             allowed_models = self.models
             model_digests = dict(self.model_digests)
+            runtime_version = self.ollama_version
         if base_url is None:
             raise WebRequestError("ollama-not-connected", HTTPStatus.CONFLICT)
         if capability_id not in CAPABILITY_PROMPTS:
@@ -1893,6 +1903,23 @@ class HavenState:
             "code": "TEXT_ARTIFACT_READY",
         })
         self.diagnostics.record("text", "TEXT_GENERATION_COMPLETED", "completed")
+        answer_report_token = ""
+        model_digest = model_digests.get(model, "")
+        if (
+            isinstance(runtime_version, str)
+            and re.fullmatch(r"[0-9A-Za-z][0-9A-Za-z.+_-]{0,63}", runtime_version)
+            and re.fullmatch(r"[a-f0-9]{64}", model_digest)
+        ):
+            answer_report_token = secrets.token_hex(16)
+            with self.lock:
+                while len(self.answer_report_contexts) >= MAX_PENDING_ANSWER_REPORTS:
+                    self.answer_report_contexts.pop(next(iter(self.answer_report_contexts)))
+                self.answer_report_contexts[answer_report_token] = {
+                    "capabilityId": capability_id,
+                    "model": model,
+                    "modelDigest": model_digest,
+                    "runtimeVersion": runtime_version,
+                }
         return {
             "schemaVersion": 1,
             "kind": artifact_kind,
@@ -1907,6 +1934,9 @@ class HavenState:
                 else "Summary"
             ),
             "model": model,
+            "modelDigest": model_digest,
+            "runtimeVersion": runtime_version,
+            "answerReportToken": answer_report_token,
             "providerId": "ollama.local-text",
             "modelDigestVerified": model_is_evidenced,
             "runDetails": run_details,
@@ -2036,6 +2066,26 @@ class HavenState:
             return self.diagnostics.save_support_report()
         except (OSError, DiagnosticLogError) as error:
             raise WebRequestError("diagnostic-report-save-failed", HTTPStatus.CONFLICT) from error
+
+    def save_answer_report(self, body: dict[str, Any]) -> dict[str, Any]:
+        report_token = body.get("reportToken")
+        if not isinstance(report_token, str) or not ANSWER_REPORT_TOKEN.fullmatch(report_token):
+            raise WebRequestError("answer-report-save-failed", HTTPStatus.CONFLICT)
+        with self.lock:
+            context = self.answer_report_contexts.pop(report_token, None)
+        if context is None:
+            raise WebRequestError("answer-report-save-failed", HTTPStatus.CONFLICT)
+        try:
+            return self.diagnostics.save_answer_report(
+                body["category"],
+                context["capabilityId"],
+                context["model"],
+                context["modelDigest"],
+                context["runtimeVersion"],
+                body["testerNote"],
+            )
+        except (KeyError, OSError, DiagnosticLogError) as error:
+            raise WebRequestError("answer-report-save-failed", HTTPStatus.CONFLICT) from error
 
     def clear_diagnostic_events(self) -> dict[str, Any]:
         try:
@@ -2394,6 +2444,11 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if body:
                     raise WebRequestError("invalid-diagnostic-report-fields")
                 self._send_json(HTTPStatus.OK, self.server.state.save_diagnostic_report())
+                return
+            if self.path == "/api/alpha/diagnostics/answer-report":
+                if set(body) != {"category", "reportToken", "testerNote"}:
+                    raise WebRequestError("invalid-answer-report-fields")
+                self._send_json(HTTPStatus.OK, self.server.state.save_answer_report(body))
                 return
             if self.path == "/api/alpha/diagnostics/clear":
                 if set(body) != {"confirmed"} or body["confirmed"] is not True:

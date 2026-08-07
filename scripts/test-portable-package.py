@@ -228,6 +228,20 @@ def probe(
             assert all(set(event) == {
                 "schemaVersion", "timestamp", "eventId", "category", "code", "outcome", "appVersion",
             } for event in diagnostics["events"])
+            if expected_managed:
+                diagnostic_codes = {event["code"] for event in diagnostics["events"]}
+                assert (
+                    f"SETUP_BACKEND_{managed['backendMode'].upper()}_SELECTED"
+                    in diagnostic_codes
+                )
+                assert len([
+                    code for code in diagnostic_codes
+                    if code.startswith("SETUP_COMPONENT_") and code.endswith("_SELECTED")
+                ]) == len(managed["components"])
+                assert len([
+                    code for code in diagnostic_codes
+                    if code.startswith("SETUP_MODEL_") and code.endswith("_SELECTED")
+                ]) == 1
         expect_http_error(
             origin + "/api/workflows",
             authority,
@@ -470,7 +484,10 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", required=True)
     args = parser.parse_args()
-    source = probe([sys.executable, str(ROOT / "web/server.py")], False)
+    source = probe([
+        sys.executable,
+        str(ROOT / "scripts/run-haven42-web-browser-test.py"),
+    ], False)
     executable = Path(args.executable).resolve()
     packaged = probe([str(executable)], True)
     assert source == packaged, "source and packaged behavior diverged"
@@ -480,7 +497,6 @@ def main() -> int:
     test_abrupt_exit_recovery(executable, packaged)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
-    remove_test_diagnostics(ROOT)
     remove_test_diagnostics(executable.parent)
     print(
         "Portable package parity, relocation, read-only startup, abrupt-exit recovery, "

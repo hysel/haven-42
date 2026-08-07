@@ -64,6 +64,7 @@ See [[Common Words|Glossary]] for more definitions.
 | Secure a local or private-network provider | [Connection Security](Provider-Endpoint-Security) |
 | Fix a problem | [Troubleshooting](Troubleshooting) |
 | Use engineering and contributor features | [Advanced Topics](Advanced-Topics) |
+| See the computers and AI engines tested | [Tested Hardware and AI Engines](Tested-Hardware-And-AI-Engines) |
 | See maturity and future work | [Project Information](Project-Information) |
 
 ## Privacy and security
@@ -82,10 +83,13 @@ before using private or sensitive material.
 
 ## Project status
 
-The current release line is `0.3.0`; later work remains unreleased. Haven 42 is
-still development software. Packages are unsigned, signing and notarization are
-inactive, the updater cannot modify a machine, and no public production release
-claim is made.
+The latest public test build is the unsigned Windows `0.4.0-alpha.1`
+prerelease. The latest stable release line is `0.3.0`. Haven 42 is still
+development software: signing and notarization are inactive, the updater cannot
+modify a machine, and no production-readiness claim is made.
+
+Windows testers can review the exact published files, checksums, and limits on
+the [[Windows Alpha Release|Windows-Alpha-Release]] page.
 
 See [[Project Information|Project-Information]], the concise navigation in the
 [[Roadmap]], and detailed [[Evidence Dashboard|Evidence-Dashboard]] records.

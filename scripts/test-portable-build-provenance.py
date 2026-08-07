@@ -53,6 +53,126 @@ def main() -> int:
     }
     passed = 1
 
+    with (
+        patch.object(
+            MODULE,
+            "installed_pyinstaller_version",
+            return_value=MODULE.REQUIRED_PYINSTALLER_VERSION,
+        ),
+        patch.object(MODULE.subprocess, "run") as run,
+    ):
+        assert MODULE.delegate_to_repository_build_environment() is None
+        run.assert_not_called()
+    passed += 1
+
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(MODULE, "repository_build_python", return_value=None),
+    ):
+        try:
+            MODULE.delegate_to_repository_build_environment()
+        except SystemExit as error:
+            assert ".venv-build is missing" in str(error)
+        else:
+            raise AssertionError("Missing repository build environment was accepted.")
+    passed += 1
+
+    delegated_python = ROOT / ".venv-build" / "Scripts" / "python.exe"
+    probe_result = MODULE.subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="3.14.6\n6.21.0\n", stderr=""
+    )
+    delegated_result = MODULE.subprocess.CompletedProcess(args=[], returncode=23)
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(
+            MODULE,
+            "repository_build_python",
+            return_value=delegated_python,
+        ),
+        patch.object(
+            MODULE.subprocess,
+            "run",
+            side_effect=(probe_result, delegated_result),
+        ) as run,
+    ):
+        assert MODULE.delegate_to_repository_build_environment() == 23
+        assert run.call_count == 2
+        assert run.call_args_list[0].args[0][0] == str(delegated_python)
+        assert run.call_args_list[0].args[0][1] == "-I"
+        assert run.call_args_list[1].args[0][0] == str(delegated_python)
+        assert run.call_args_list[1].args[0][1] == "-I"
+    passed += 1
+
+    wrong_probe = MODULE.subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="3.14.6\n6.20.0\n", stderr=""
+    )
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(
+            MODULE,
+            "repository_build_python",
+            return_value=delegated_python,
+        ),
+        patch.object(MODULE.subprocess, "run", return_value=wrong_probe) as run,
+    ):
+        try:
+            MODULE.delegate_to_repository_build_environment()
+        except SystemExit as error:
+            assert "PyInstaller 6.21.0" in str(error)
+        else:
+            raise AssertionError("Wrong repository PyInstaller version was accepted.")
+        assert run.call_count == 1
+    passed += 1
+
+    wrong_python_probe = MODULE.subprocess.CompletedProcess(
+        args=[], returncode=0, stdout="3.13.0\n6.21.0\n", stderr=""
+    )
+    with (
+        patch.object(MODULE, "installed_pyinstaller_version", return_value=None),
+        patch.object(
+            MODULE,
+            "repository_build_python",
+            return_value=delegated_python,
+        ),
+        patch.object(
+            MODULE.subprocess,
+            "run",
+            return_value=wrong_python_probe,
+        ),
+    ):
+        try:
+            MODULE.delegate_to_repository_build_environment()
+        except SystemExit as error:
+            assert "Python 3.14.6" in str(error)
+        else:
+            raise AssertionError("Wrong repository Python version was accepted.")
+    passed += 1
+
+    with patch.dict(
+        "os.environ",
+        {
+            "PYTHONHOME": r"C:\hostile-python",
+            "PYTHONPATH": r"C:\hostile-imports",
+        },
+        clear=False,
+    ):
+        isolated_environment = MODULE.isolated_python_environment()
+    assert "PYTHONHOME" not in isolated_environment
+    assert "PYTHONPATH" not in isolated_environment
+    assert isolated_environment["PYTHONNOUSERSITE"] == "1"
+    assert isolated_environment["PYTHONSAFEPATH"] == "1"
+    passed += 1
+
+    with tempfile.TemporaryDirectory(prefix="haven42-build-environment-") as temporary:
+        root = Path(temporary)
+        scripts = root / ".venv-build" / "Scripts"
+        scripts.mkdir(parents=True)
+        executable = scripts / "python.exe"
+        executable.write_bytes(b"fixture")
+        with patch.object(MODULE.platform, "system", return_value="Windows"):
+            assert MODULE.repository_build_python(root) == executable.resolve()
+    passed += 1
+
     commit = "1" * 40
     snapshot = "2" * 64
     with patch.dict(
@@ -161,25 +281,74 @@ def main() -> int:
                 "PATH": r"C:\hostile-jdk\bin;C:\unreviewed-tools",
                 "PYTHONHOME": r"C:\hostile-python",
                 "PYTHONPATH": r"C:\hostile-imports",
+                "PYINSTALLER_CONFIG_DIR": r"C:\hostile-cache",
                 "SystemRoot": r"C:\Windows",
             },
             clear=False,
         ),
     ):
-        build_environment = MODULE.pyinstaller_environment()
+        expected_config = MODULE.Path(r"E:\safe-output\config").resolve()
+        build_environment = MODULE.pyinstaller_environment(expected_config)
     assert "hostile" not in build_environment["PATH"].casefold()
     assert "unreviewed" not in build_environment["PATH"].casefold()
     assert "PYTHONHOME" not in build_environment
     assert "PYTHONPATH" not in build_environment
     assert build_environment["PYTHONNOUSERSITE"] == "1"
     assert build_environment["PYTHONSAFEPATH"] == "1"
+    assert build_environment["PYINSTALLER_CONFIG_DIR"] == str(expected_config)
     assert str(MODULE.Path(sys.executable).resolve().parent) in build_environment["PATH"]
+    passed += 1
+
+    safe_output = MODULE.resolve_build_output("dist/provenance-test-output")
+    assert safe_output == (ROOT / "dist/provenance-test-output").resolve()
+    try:
+        MODULE.resolve_build_output(str(ROOT.parent / "escaped-output"))
+    except SystemExit as error:
+        assert "must stay beneath" in str(error)
+    else:
+        raise AssertionError("Escaped portable build output was accepted.")
+    passed += 1
+
+    test_output = ROOT / "dist"
+    test_output.mkdir(exist_ok=True)
+    with tempfile.TemporaryDirectory(
+        prefix="haven42-package-link-", dir=test_output
+    ) as raw:
+        package = Path(raw) / "package"
+        package.mkdir()
+        inside = package / "inside.txt"
+        inside.write_text("inside\n", encoding="utf-8")
+        outside = Path(raw) / "outside.txt"
+        outside.write_text("outside\n", encoding="utf-8")
+        link = package / "escape.txt"
+        try:
+            link.symlink_to(outside)
+        except OSError:
+            pass
+        else:
+            try:
+                MODULE.package_file_records(package)
+            except SystemExit as error:
+                assert "escapes the bundle" in str(error)
+            else:
+                raise AssertionError("Escaping package link was accepted.")
     passed += 1
 
     spec_text = (ROOT / "package" / "haven42.spec").read_text(encoding="utf-8")
     assert 'startswith("api-ms-win-")' in spec_text
     assert '== "ucrtbase.dll"' in spec_text
     assert "VCRUNTIME" in spec_text
+    attributes_text = (ROOT / ".gitattributes").read_text(encoding="utf-8")
+    assert "LICENSE text eol=lf" in attributes_text.splitlines()
+    build_text = (ROOT / "scripts/build-portable-development-package.py").read_text(
+        encoding="utf-8"
+    )
+    assert build_text.index("shutil.copytree(package_dir, staged_package_dir") < (
+        build_text.index("preliminary_inventory = classify")
+    )
+    assert 'write_package_text(staged_package_dir / "THIRD-PARTY-NOTICES.txt"' in (
+        build_text
+    )
     assert MODULE.LICENSE_EVIDENCE["LIBFFI-3.4.4-LICENSE.txt"] == (
         "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388"
     )

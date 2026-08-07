@@ -26,6 +26,11 @@ Download these two files from the official
 - `haven42-0.4.0-alpha.1-windows-x64-unsigned.zip`
 - the published SHA-256 checksum file for that archive
 
+Alpha 1's runtime license and third-party-notice documents are separate hashed
+assets on that release page rather than files inside the application ZIP. This
+is a known Alpha 1 packaging limitation; future package builds embed them in the
+extracted folder.
+
 In Windows PowerShell 5.1 or PowerShell 7, change to the download folder and
 run:
 

@@ -27,6 +27,21 @@ PROJECT_FILES = {
     "_internal/config/windows-alpha-resource-monitor-contract.json",
     "_internal/config/windows-alpha-quantization-contract.json",
 }
+DISTRIBUTION_EVIDENCE_HASHES = {
+    "LICENSE.txt": (
+        "da343e362fb1cc2b46c07e179936040dcfe8e92de4aa6d61f2bd4a43486f3ccc"
+    ),
+    "licenses/APACHE-2.0.txt": (
+        "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b"
+    ),
+    "licenses/CPYTHON-3.14.6-LICENSE.txt": (
+        "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020"
+    ),
+    "licenses/LIBFFI-3.4.4-LICENSE.txt": (
+        "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388"
+    ),
+}
+DYNAMIC_DISTRIBUTION_EVIDENCE = {"THIRD-PARTY-NOTICES.txt"}
 NATIVE_SUFFIX = re.compile(r"(?i)(?:\.dll|\.pyd|\.dylib|\.so(?:\.\d+)*)$")
 PYTHON_LIBRARY = re.compile(
     r"(?i)(?:^|/)(?:python\d+(?:t)?\.dll|libpython\d+(?:\.\d+)*(?:t)?\.so(?:\.\d+)*"
@@ -186,6 +201,7 @@ def classify(
     if not re.fullmatch(r"(?:windows|linux|darwin)-[a-z0-9_]+", target):
         raise ComponentClassificationError("invalid-component-target")
     project_files: list[dict[str, Any]] = []
+    distribution_evidence: list[dict[str, Any]] = []
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     seen: set[str] = set()
     for record in package_files:
@@ -207,6 +223,16 @@ def classify(
             raise ComponentClassificationError("invalid-component-file-record")
         path = path_value
         seen.add(path)
+        if path in DISTRIBUTION_EVIDENCE_HASHES:
+            if record["sha256"] != DISTRIBUTION_EVIDENCE_HASHES[path]:
+                raise ComponentClassificationError(
+                    f"distribution-evidence-hash-mismatch:{path}"
+                )
+            distribution_evidence.append(record)
+            continue
+        if path in DYNAMIC_DISTRIBUTION_EVIDENCE:
+            distribution_evidence.append(record)
+            continue
         if path in {"haven42", "haven42.exe"} or path in PROJECT_FILES:
             project_files.append(record)
             continue
@@ -263,7 +289,13 @@ def classify(
             "files": files,
         })
     project_files.sort(key=lambda item: item["path"])
-    if len(project_files) + sum(item["fileCount"] for item in runtime_components) != len(package_files):
+    distribution_evidence.sort(key=lambda item: item["path"])
+    if (
+        len(project_files)
+        + len(distribution_evidence)
+        + sum(item["fileCount"] for item in runtime_components)
+        != len(package_files)
+    ):
         raise ComponentClassificationError("component-file-coverage-mismatch")
     return {
         "schemaVersion": 1,
@@ -277,6 +309,12 @@ def classify(
             ],
             "fileCount": len(project_files),
             "files": project_files,
+        },
+        "distributionEvidence": {
+            "name": "Packaged license and notice evidence",
+            "signingEligible": False,
+            "fileCount": len(distribution_evidence),
+            "files": distribution_evidence,
         },
         "runtimeComponents": runtime_components,
         "unclassifiedFiles": [],

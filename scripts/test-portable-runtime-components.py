@@ -24,6 +24,28 @@ def hashed_record(path: str, digest: str) -> dict:
     return {"path": path, "sha256": digest, "sizeBytes": 1}
 
 
+def distribution_records() -> list[dict]:
+    return [
+        hashed_record(
+            "LICENSE.txt",
+            "da343e362fb1cc2b46c07e179936040dcfe8e92de4aa6d61f2bd4a43486f3ccc",
+        ),
+        hashed_record(
+            "licenses/APACHE-2.0.txt",
+            "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
+        ),
+        hashed_record(
+            "licenses/CPYTHON-3.14.6-LICENSE.txt",
+            "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
+        ),
+        hashed_record(
+            "licenses/LIBFFI-3.4.4-LICENSE.txt",
+            "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
+        ),
+        record("THIRD-PARTY-NOTICES.txt"),
+    ]
+
+
 def rejected(files: list[dict], code: str, target: str = "windows-amd64") -> None:
     try:
         classify(files, target, "3.14.6", "3.5.7")
@@ -34,7 +56,7 @@ def rejected(files: list[dict], code: str, target: str = "windows-amd64") -> Non
 
 
 def main() -> int:
-    fixture = [
+    fixture = distribution_records() + [
         record("haven42.exe"),
         record("DEVELOPMENT-BUILD.txt"),
         record("_internal/package/resource-integrity.json"),
@@ -60,6 +82,8 @@ def main() -> int:
         "productionPromotionAllowed": False,
     }
     assert result["projectOwned"]["signingEligibleFiles"] == ["haven42.exe"]
+    assert result["distributionEvidence"]["fileCount"] == 5
+    assert result["distributionEvidence"]["signingEligible"] is False
     assert result["unclassifiedFiles"] == []
     groups = {item["id"]: item for item in result["runtimeComponents"]}
     assert set(groups) == {"cpython", "libffi", "microsoft-runtime", "openssl"}
@@ -93,6 +117,14 @@ def main() -> int:
         (
             fixture + [record("_internal/unknown.dat")],
             "unclassified-package-file:_internal/unknown.dat",
+            "windows-amd64",
+        ),
+        (
+            [
+                record("LICENSE.txt") if item["path"] == "LICENSE.txt" else item
+                for item in fixture
+            ],
+            "distribution-evidence-hash-mismatch:LICENSE.txt",
             "windows-amd64",
         ),
         (
@@ -144,7 +176,7 @@ def main() -> int:
         rejected(files, code, target)
         passed += 1
 
-    linux = [
+    linux = distribution_records() + [
         record("haven42"),
         record("DEVELOPMENT-BUILD.txt"),
         record("_internal/package/resource-integrity.json"),
@@ -167,7 +199,7 @@ def main() -> int:
     )
     passed += 1
 
-    macos = [
+    macos = distribution_records() + [
         record("haven42"),
         record("DEVELOPMENT-BUILD.txt"),
         record("_internal/package/resource-integrity.json"),

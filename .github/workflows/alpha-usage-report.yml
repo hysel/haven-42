@@ -1,0 +1,42 @@
+name: Alpha Usage Report
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "41 7 * * 1"
+
+concurrency:
+  group: alpha-usage-report-${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: Aggregate Alpha usage report
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Generate aggregate report
+        env:
+          HAVEN42_GITHUB_REPORT_TOKEN: ${{ github.token }}
+        run: python scripts/generate-github-alpha-usage-report.py
+
+      - name: Add report to workflow summary
+        shell: bash
+        run: cat dist/alpha-usage-report/alpha-usage-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload aggregate report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: haven42-alpha-usage-report-${{ github.run_id }}
+          path: dist/alpha-usage-report/
+          if-no-files-found: error
+          retention-days: 30

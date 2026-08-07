@@ -43,6 +43,12 @@ def main() -> int:
         checks += 3
 
         assert logger.record("setup", "READINESS_SCAN_COMPLETED", "completed") is True
+        assert logger.record(
+            "setup",
+            "SETUP_COMPONENT_OLLAMA_WINDOWS_AMD_ROCM_0_32_5_ROCM_7_1_SELECTED",
+            "observed",
+        ) is True
+        assert logger.record("storage", "SETUP_STORAGE_WRITE_FAILED", "failed") is True
         assert logger.record("invalid", "READINESS_SCAN_COMPLETED", "completed") is False
         assert logger.record("setup", "bad-code", "completed") is False
         try:
@@ -56,7 +62,7 @@ def main() -> int:
             if item.is_file()
         )
         assert secret not in serialized
-        checks += 5
+        checks += 7
 
         real_open = os.open
         def deny_event_write(path, flags, mode=0o777):
@@ -81,13 +87,34 @@ def main() -> int:
         assert len(logger.summary()["events"]) <= 100
         checks += 2
 
+        answer = logger.save_answer_report(
+            "incorrect",
+            "general.chat",
+            "qwen3.5:9b",
+            "a" * 64,
+            "0.32.5",
+            "The date appears wrong; no chat content included.",
+        )
+        assert answer["saved"] is True and answer["automaticUpload"] is False
+        answer_path = log_root(parent) / LOGS.REPORT_DIRECTORY_NAME / answer["fileName"]
+        answer_payload = json.loads(answer_path.read_text(encoding="utf-8"))
+        assert answer_payload["eventReference"] == answer["eventReference"]
+        assert answer_payload["containsPrompt"] is False and answer_payload["containsResponse"] is False
+        assert answer_payload["containsAttachments"] is False and answer_payload["automaticUpload"] is False
+        try:
+            logger.save_answer_report(
+                "incorrect", "general.chat", "qwen3.5:9b", "a" * 64, "0.32.5", "x" * 301,
+            )
+            raise AssertionError("oversized answer-report note was accepted")
+        except LOGS.DiagnosticLogError as error:
+            assert str(error) == "invalid-answer-report"
         report = logger.save_support_report()
         assert report["saved"] is True and LOGS.REPORT_NAME.fullmatch(report["fileName"])
         report_path = log_root(parent) / LOGS.REPORT_DIRECTORY_NAME / report["fileName"]
         payload = json.loads(report_path.read_text(encoding="utf-8"))
         assert payload["automaticUpload"] is False and payload["containsUserContent"] is False
         assert secret not in report_path.read_text(encoding="utf-8")
-        for _ in range(LOGS.MAX_REPORT_FILES - 1):
+        for _ in range(LOGS.MAX_REPORT_FILES - 2):
             logger.save_support_report()
         try:
             logger.save_support_report()
@@ -96,7 +123,7 @@ def main() -> int:
             assert str(error) == "diagnostic-report-limit-reached"
         logger.clear_events()
         assert report_path.is_file() and logger.summary()["eventCount"] == 0
-        checks += 6
+        checks += 12
 
         removal = logger.remove_all()
         assert removal == {"removed": True, "directoryName": "Haven42-Logs"}

@@ -57,6 +57,16 @@ administration remain non-writable. The static verifier rejects attestation on
 write permissions, incomplete native artifact coverage, or drift from
 `config/github-repository-policy.json`.
 
+The separate Alpha usage-report workflow runs weekly and can be started
+manually. It has only `contents: read`, uses SHA-pinned GitHub-owned actions,
+and uploads aggregate Markdown/JSON evidence for 30 days without committing it.
+Release-asset counts are always reported. Repository clone/view traffic is
+shown as unavailable because the built-in `GITHUB_TOKEN` cannot be granted the
+traffic API's required repository `Administration: read` permission. The
+workflow never requests a broader credential. The
+report contains no downloader identity, IP address, prompt, device, or Haven 42
+telemetry. See `docs/alpha-usage-report.md`.
+
 ## Efficient Local-to-Hosted Flow
 
 1. Make the complete local change and synchronize the wiki before opening the PR.

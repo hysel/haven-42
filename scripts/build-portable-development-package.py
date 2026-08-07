@@ -25,6 +25,9 @@ from portable_runtime_components import classify
 
 ROOT = Path(__file__).resolve().parent.parent
 APP_VERSION = "0.4.0-alpha.1"
+REQUIRED_PYTHON_VERSION = "3.14.6"
+REQUIRED_PYINSTALLER_VERSION = "6.21.0"
+LOCAL_BUILD_ENVIRONMENT = ".venv-build"
 RESOURCE_PATHS = (
     "web/static/index.html",
     "web/static/app.js",
@@ -41,7 +44,15 @@ RESOURCE_PATHS = (
     "config/windows-alpha-resource-monitor-contract.json",
     "config/windows-alpha-quantization-contract.json",
 )
-ALLOWED_PACKAGE_ENTRIES = {"haven42", "haven42.exe", "_internal", "DEVELOPMENT-BUILD.txt"}
+ALLOWED_PACKAGE_ENTRIES = {
+    "haven42",
+    "haven42.exe",
+    "_internal",
+    "DEVELOPMENT-BUILD.txt",
+    "LICENSE.txt",
+    "THIRD-PARTY-NOTICES.txt",
+    "licenses",
+}
 COMMON_BUILD_DISTRIBUTIONS = {
     "altgraph": ("0.17.5", "MIT"),
     "packaging": ("26.2", "Apache-2.0 OR BSD-2-Clause"),
@@ -91,6 +102,126 @@ def write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
+def isolated_python_environment() -> dict[str, str]:
+    environment = os.environ.copy()
+    environment.pop("PYTHONHOME", None)
+    environment.pop("PYTHONPATH", None)
+    environment["PYTHONNOUSERSITE"] = "1"
+    environment["PYTHONSAFEPATH"] = "1"
+    return environment
+
+
+def isolated_pyinstaller_version(executable: Path) -> str | None:
+    probe = subprocess.run(
+        [
+            str(executable),
+            "-I",
+            "-c",
+            "import importlib.metadata as m,platform; "
+            "print(platform.python_version()); print(m.version('pyinstaller'))",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+        env=isolated_python_environment(),
+    )
+    if probe.returncode != 0:
+        return None
+    versions = probe.stdout.splitlines()
+    if len(versions) != 2 or versions[0].strip() != REQUIRED_PYTHON_VERSION:
+        return None
+    version = versions[1].strip()
+    return version or None
+
+
+def installed_pyinstaller_version() -> str | None:
+    return isolated_pyinstaller_version(Path(sys.executable).resolve())
+
+
+def repository_build_python(root: Path = ROOT) -> Path | None:
+    environment = root / LOCAL_BUILD_ENVIRONMENT
+    executable = environment / (
+        "Scripts/python.exe" if platform.system() == "Windows" else "bin/python"
+    )
+    for path in (environment, executable.parent, executable):
+        if path.is_symlink():
+            raise SystemExit(
+                "The repository-local portable build environment is unsafe because "
+                "it contains a symbolic link. Recreate .venv-build before building."
+            )
+    if not executable.is_file():
+        return None
+    resolved_root = root.resolve()
+    resolved_environment = environment.resolve()
+    resolved_executable = executable.resolve()
+    try:
+        resolved_environment.relative_to(resolved_root)
+        resolved_executable.relative_to(resolved_environment)
+    except ValueError as error:
+        raise SystemExit(
+            "The repository-local portable build Python escapes .venv-build."
+        ) from error
+    return resolved_executable
+
+
+def delegate_to_repository_build_environment() -> int | None:
+    current = installed_pyinstaller_version()
+    if current == REQUIRED_PYINSTALLER_VERSION:
+        return None
+    executable = repository_build_python()
+    if executable is None:
+        found = current or "not installed"
+        raise SystemExit(
+            f"Portable packaging requires PyInstaller "
+            f"{REQUIRED_PYINSTALLER_VERSION} on Python {REQUIRED_PYTHON_VERSION}; "
+            f"the current isolated Python has {found}, and .venv-build is missing. "
+            f"Create .venv-build with Python {REQUIRED_PYTHON_VERSION} and "
+            "install package/requirements-build.txt with --require-hashes."
+        )
+    local_version = isolated_pyinstaller_version(executable)
+    if local_version != REQUIRED_PYINSTALLER_VERSION:
+        raise SystemExit(
+            f"The repository-local build environment must contain exact "
+            f"Python {REQUIRED_PYTHON_VERSION} and PyInstaller "
+            f"{REQUIRED_PYINSTALLER_VERSION}. Recreate .venv-build "
+            "from package/requirements-build.txt with --require-hashes."
+        )
+    print(
+        f"Using repository-local .venv-build with Python "
+        f"{REQUIRED_PYTHON_VERSION} and PyInstaller {REQUIRED_PYINSTALLER_VERSION}."
+    )
+    script = Path(__file__).resolve()
+    bootstrap = (
+        "import runpy,sys;"
+        f"sys.path.insert(0,{str(script.parent)!r});"
+        f"sys.argv=[{str(script)!r},*sys.argv[1:]];"
+        f"runpy.run_path({str(script)!r},run_name='__main__')"
+    )
+    completed = subprocess.run(
+        [str(executable), "-I", "-c", bootstrap, *sys.argv[1:]],
+        cwd=ROOT,
+        check=False,
+        env=isolated_python_environment(),
+    )
+    return completed.returncode
+
+
+def resolve_build_output(value: str) -> Path:
+    requested = Path(value)
+    if not requested.is_absolute():
+        requested = ROOT / requested
+    output = requested.resolve()
+    allowed = (ROOT / "dist").resolve()
+    try:
+        relative = output.relative_to(allowed)
+    except ValueError as error:
+        raise SystemExit("Portable build output must stay beneath repository dist.") from error
+    if not relative.parts or output.is_symlink() or (output.exists() and not output.is_dir()):
+        raise SystemExit("Portable build output is unsafe.")
+    return output
+
+
 def windows_system_root() -> Path:
     buffer = ctypes.create_unicode_buffer(32_768)
     length = ctypes.windll.kernel32.GetWindowsDirectoryW(buffer, len(buffer))
@@ -99,12 +230,13 @@ def windows_system_root() -> Path:
     return Path(buffer.value).resolve()
 
 
-def pyinstaller_environment() -> dict[str, str]:
+def pyinstaller_environment(config_dir: Path) -> dict[str, str]:
     environment = os.environ.copy()
     environment.pop("PYTHONHOME", None)
     environment.pop("PYTHONPATH", None)
     environment["PYTHONNOUSERSITE"] = "1"
     environment["PYTHONSAFEPATH"] = "1"
+    environment["PYINSTALLER_CONFIG_DIR"] = str(config_dir.resolve())
     if platform.system() == "Windows":
         system_root = windows_system_root()
         admitted = (
@@ -175,6 +307,82 @@ def copy_license_evidence(evidence: Path) -> None:
         if not source.is_file() or sha256(source) != expected_digest:
             raise SystemExit(f"License evidence mismatch: {name}")
         shutil.copy2(source, evidence / name)
+
+
+def copy_package_license_evidence(package_dir: Path) -> None:
+    project_license = ROOT / "LICENSE"
+    expected_project_digest = (
+        "da343e362fb1cc2b46c07e179936040dcfe8e92de4aa6d61f2bd4a43486f3ccc"
+    )
+    if (
+        not project_license.is_file()
+        or project_license.is_symlink()
+        or sha256(project_license) != expected_project_digest
+    ):
+        raise SystemExit("Haven 42 license evidence mismatch.")
+    project_destination = package_dir / "LICENSE.txt"
+    reject_unsafe_write_destination(project_destination)
+    shutil.copy2(project_license, project_destination)
+    license_dir = package_dir / "licenses"
+    if license_dir.exists():
+        if not license_dir.is_dir() or license_dir.is_symlink():
+            raise SystemExit("Package license directory is unsafe.")
+    else:
+        license_dir.mkdir()
+    for name, expected_digest in sorted(LICENSE_EVIDENCE.items()):
+        source = ROOT / "package" / "licenses" / name
+        if (
+            not source.is_file()
+            or source.is_symlink()
+            or sha256(source) != expected_digest
+        ):
+            raise SystemExit(f"License evidence mismatch: {name}")
+        destination = license_dir / name
+        reject_unsafe_write_destination(destination)
+        shutil.copy2(source, destination)
+
+
+def reject_unsafe_write_destination(path: Path) -> None:
+    if path.is_symlink() or (path.exists() and not path.is_file()):
+        raise SystemExit(f"Package evidence destination is unsafe: {path.name}")
+
+
+def write_package_text(path: Path, content: str) -> None:
+    reject_unsafe_write_destination(path)
+    path.write_text(content, encoding="utf-8")
+
+
+def third_party_notice(
+    dependencies: list[dict[str, str]],
+    runtime_inventory: dict[str, object],
+) -> str:
+    notices = [
+        "THIRD-PARTY NOTICES — unsigned development package",
+        "",
+        "Build-tool versions and license expressions are an explicit reviewed allowlist.",
+        "These tools influence the generated package but are not imported application dependencies.",
+        "",
+    ]
+    notices.extend(
+        f"{item['name']} {item['version']} — {item['license']}"
+        for item in dependencies
+    )
+    notices.extend([
+        "",
+        "Embedded runtime component inventory",
+        "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION.",
+        "Every runtime component below is excluded from Haven 42 signing scope.",
+        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
+        "LIBFFI-3.4.4-LICENSE.txt are included in the extracted package and "
+        "artifact evidence as hash-verified license evidence.",
+        "",
+    ])
+    notices.extend(
+        f"{item['name']} {item['version']} — {item['license']} — "
+        f"{item['reviewStatus']} — {item['fileCount']} files"
+        for item in runtime_inventory["runtimeComponents"]
+    )
+    return "\n".join(notices) + "\n"
 
 
 def dependency_records() -> list[dict[str, str]]:
@@ -312,6 +520,13 @@ def source_provenance() -> dict[str, object]:
 
 
 def package_file_records(package_dir: Path) -> list[dict[str, object]]:
+    package_root = package_dir.resolve()
+    for path in package_dir.rglob("*"):
+        if path.is_symlink():
+            try:
+                path.resolve(strict=True).relative_to(package_root)
+            except (OSError, ValueError) as error:
+                raise SystemExit("Package link escapes the bundle.") from error
     return [
         {
             "path": path.relative_to(package_dir).as_posix(),
@@ -391,32 +606,39 @@ def main() -> int:
         update_resource_manifest()
         print(ROOT / "package/resource-integrity.json")
         return 0
-    output = Path(args.output).resolve()
+    delegated = delegate_to_repository_build_environment()
+    if delegated is not None:
+        return delegated
+    output = resolve_build_output(args.output)
     work = output / "work"
     artifact_dir = output / "artifacts"
+    bundle_dir = output / "bundle"
+    if bundle_dir.is_symlink():
+        raise SystemExit("PyInstaller bundle directory is unsafe.")
     target = f"{platform.system().lower()}-{platform.machine().lower()}"
     verify_resource_manifest()
     if not args.skip_pyinstaller:
         subprocess.run([
             sys.executable, "-m", "PyInstaller",
             "--noconfirm", "--clean",
-            "--distpath", str(output / "bundle"),
+            "--distpath", str(bundle_dir),
             "--workpath", str(work),
             str(ROOT / "package/haven42.spec"),
-        ], cwd=ROOT, check=True, env=pyinstaller_environment())
-    package_dir = output / "bundle" / "haven42"
-    if not package_dir.is_dir():
+        ], cwd=ROOT, check=True, env=pyinstaller_environment(work / "config"))
+    package_dir = bundle_dir / "haven42"
+    if not package_dir.is_dir() or package_dir.is_symlink():
         raise SystemExit("PyInstaller one-folder output was not found.")
     validate_windows_executable_metadata(package_dir)
     unexpected = {path.name for path in package_dir.iterdir()} - ALLOWED_PACKAGE_ENTRIES
     if unexpected:
         raise SystemExit(f"Unexpected top-level package entries: {sorted(unexpected)}")
-    (package_dir / "DEVELOPMENT-BUILD.txt").write_text(
+    write_package_text(
+        package_dir / "DEVELOPMENT-BUILD.txt",
         "Haven 42 unsigned development build.\n"
         "No installer, signing, notarization, updater activation, or production-readiness claim.\n",
-        encoding="utf-8",
     )
     dependencies = dependency_records()
+    copy_package_license_evidence(package_dir)
     evidence = output / "evidence"
     archive_staging = tempfile.TemporaryDirectory(
         prefix="haven42-archive-staging-",
@@ -424,6 +646,15 @@ def main() -> int:
     )
     staged_package_dir = Path(archive_staging.name) / "haven42"
     shutil.copytree(package_dir, staged_package_dir, symlinks=False)
+    preliminary_inventory = classify(
+        package_file_records(staged_package_dir),
+        target,
+        platform.python_version(),
+        openssl_runtime_version(),
+    )
+    notices = third_party_notice(dependencies, preliminary_inventory)
+    write_package_text(package_dir / "THIRD-PARTY-NOTICES.txt", notices)
+    write_package_text(staged_package_dir / "THIRD-PARTY-NOTICES.txt", notices)
     package_files = package_file_records(staged_package_dir)
     runtime_inventory = classify(
         package_files,
@@ -519,29 +750,7 @@ def main() -> int:
             for item in runtime_inventory["runtimeComponents"]
         ],
     })
-    notices = [
-        "THIRD-PARTY NOTICES — unsigned development package",
-        "",
-        "Build-tool versions and license expressions are an explicit reviewed allowlist.",
-        "These tools influence the generated package but are not imported application dependencies.",
-        "",
-    ]
-    notices.extend(f"{item['name']} {item['version']} — {item['license']}" for item in dependencies)
-    notices.extend([
-        "",
-        "Embedded runtime component inventory",
-        "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION.",
-        "Every runtime component below is excluded from Haven 42 signing scope.",
-        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
-        "LIBFFI-3.4.4-LICENSE.txt are included as hash-verified license evidence.",
-        "",
-    ])
-    notices.extend(
-        f"{item['name']} {item['version']} — {item['license']} — "
-        f"{item['reviewStatus']} — {item['fileCount']} files"
-        for item in runtime_inventory["runtimeComponents"]
-    )
-    (evidence / "THIRD-PARTY-NOTICES.txt").write_text("\n".join(notices) + "\n", encoding="utf-8")
+    (evidence / "THIRD-PARTY-NOTICES.txt").write_text(notices, encoding="utf-8")
     copy_license_evidence(evidence)
     archive = create_archive(staged_package_dir, artifact_dir, target)
     archive_staging.cleanup()

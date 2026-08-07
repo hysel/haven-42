@@ -31,8 +31,14 @@ MAX_EVENT_CODE_LENGTH = 80
 ALLOWED_CATEGORIES = {"application", "provider", "setup", "text", "storage", "security"}
 ALLOWED_OUTCOMES = {"started", "completed", "cancelled", "failed", "warning", "observed"}
 EVENT_CODE = re.compile(r"[A-Z][A-Z0-9_]{2,79}")
-REPORT_NAME = re.compile(r"support-report-[a-f0-9]{16}\.json")
+REPORT_NAME = re.compile(r"(?:support|answer)-report-[a-f0-9]{16}\.json")
 EVENT_TIMESTAMP = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+ANSWER_REPORT_CATEGORIES = {"incorrect", "unsafe", "unclear", "formatting", "other"}
+ANSWER_REPORT_CAPABILITIES = {"general.chat", "content.write", "content.summarize"}
+MODEL_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/-]{0,119}")
+MODEL_DIGEST = re.compile(r"[a-f0-9]{64}")
+RUNTIME_VERSION = re.compile(r"[0-9A-Za-z][0-9A-Za-z.+_-]{0,63}")
+MAX_TESTER_NOTE_CHARACTERS = 300
 MARKER = {
     "schemaVersion": 1,
     "kind": "haven42-sanitized-diagnostic-root",
@@ -158,15 +164,7 @@ class DiagnosticLogger:
             if self._closed or self._removed_for_session:
                 return False
             try:
-                self._ensure_root()
-                self._rotate_if_needed(len(data))
-                flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
-                if hasattr(os, "O_NOFOLLOW"):
-                    flags |= os.O_NOFOLLOW
-                descriptor = os.open(self.root / EVENT_FILE_NAME, flags, 0o600)
-                with os.fdopen(descriptor, "ab", buffering=0) as handle:
-                    handle.write(data)
-                    os.fsync(handle.fileno())
+                self._write_event(data)
                 self._available = True
                 self._error = None
                 return True
@@ -174,6 +172,17 @@ class DiagnosticLogger:
                 self._available = False
                 self._error = str(error) or "diagnostic-write-failed"
                 return False
+
+    def _write_event(self, data: bytes) -> None:
+        self._ensure_root()
+        self._rotate_if_needed(len(data))
+        flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
+        if hasattr(os, "O_NOFOLLOW"):
+            flags |= os.O_NOFOLLOW
+        descriptor = os.open(self.root / EVENT_FILE_NAME, flags, 0o600)
+        with os.fdopen(descriptor, "ab", buffering=0) as handle:
+            handle.write(data)
+            os.fsync(handle.fileno())
 
     def _read_events(self) -> list[dict[str, Any]]:
         events: list[dict[str, Any]] = []
@@ -286,6 +295,88 @@ class DiagnosticLogger:
                 target.unlink(missing_ok=True)
                 raise DiagnosticLogError("diagnostic-report-too-large")
             return {"saved": True, "fileName": name, "directoryName": LOG_DIRECTORY_NAME}
+
+    def save_answer_report(
+        self,
+        category: str,
+        capability_id: str,
+        model: str,
+        model_digest: str,
+        runtime_version: str,
+        tester_note: str,
+    ) -> dict[str, Any]:
+        if (
+            category not in ANSWER_REPORT_CATEGORIES
+            or capability_id not in ANSWER_REPORT_CAPABILITIES
+            or not isinstance(model, str) or not MODEL_NAME.fullmatch(model)
+            or not isinstance(model_digest, str) or not MODEL_DIGEST.fullmatch(model_digest)
+            or not isinstance(runtime_version, str) or not RUNTIME_VERSION.fullmatch(runtime_version)
+            or not isinstance(tester_note, str)
+            or len(tester_note) > MAX_TESTER_NOTE_CHARACTERS
+            or any(ord(character) < 32 and character not in "\n\t" for character in tester_note)
+        ):
+            raise DiagnosticLogError("invalid-answer-report")
+        with self._lock:
+            if self._removed_for_session:
+                raise DiagnosticLogError("diagnostics-removed-for-session")
+            reports = self.root / REPORT_DIRECTORY_NAME
+            if reports.exists() and _is_link_or_reparse(reports):
+                raise DiagnosticLogError("diagnostic-report-link-rejected")
+            reports.mkdir(mode=0o700, exist_ok=True)
+            existing_reports = list(reports.iterdir())
+            if any(
+                not item.is_file()
+                or _is_link_or_reparse(item)
+                or not REPORT_NAME.fullmatch(item.name)
+                or item.stat().st_size > MAX_REPORT_FILE_BYTES
+                for item in existing_reports
+            ):
+                raise DiagnosticLogError("unsafe-diagnostic-report-entry")
+            if len(existing_reports) >= MAX_REPORT_FILES:
+                raise DiagnosticLogError("diagnostic-report-limit-reached")
+            event = self._event("text", "ANSWER_REPORT_REQUESTED", "observed")
+            event_data = (json.dumps(event, separators=(",", ":"), sort_keys=True) + "\n").encode("utf-8")
+            self._write_event(event_data)
+            name = f"answer-report-{secrets.token_hex(8)}.json"
+            report = {
+                "schemaVersion": 1,
+                "kind": "haven42-sanitized-answer-report",
+                "createdAt": _timestamp(),
+                "appVersion": self.app_version,
+                "eventReference": event["eventId"],
+                "category": category,
+                "capabilityId": capability_id,
+                "model": model,
+                "modelDigest": model_digest,
+                "runtimeVersion": runtime_version,
+                "testerNote": tester_note or None,
+                "containsPrompt": False,
+                "containsResponse": False,
+                "containsAttachments": False,
+                "automaticUpload": False,
+            }
+            target = reports / name
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
+            if hasattr(os, "O_NOFOLLOW"):
+                flags |= os.O_NOFOLLOW
+            descriptor = os.open(target, flags, 0o600)
+            with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+                json.dump(report, handle, indent=2, sort_keys=True)
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            if target.stat().st_size > MAX_REPORT_FILE_BYTES:
+                target.unlink(missing_ok=True)
+                raise DiagnosticLogError("diagnostic-report-too-large")
+            self._available = True
+            self._error = None
+            return {
+                "saved": True,
+                "fileName": name,
+                "directoryName": LOG_DIRECTORY_NAME,
+                "eventReference": event["eventId"],
+                "automaticUpload": False,
+            }
 
     def clear_events(self) -> dict[str, Any]:
         with self._lock:
