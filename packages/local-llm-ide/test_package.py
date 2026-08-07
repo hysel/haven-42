@@ -178,10 +178,14 @@ def main() -> int:
             try:
                 link.symlink_to(target / "missing")
             except OSError:
-                pass
+                # Some Windows runners deny symlink creation to ordinary
+                # users. Exercise the same fail-closed branch without making
+                # the check count depend on host policy.
+                with patch.object(Path, "is_symlink", return_value=True):
+                    rejected(lambda: TOOL.ensure_safe_destination(link, target), "symbolic link")
             else:
                 rejected(lambda: TOOL.ensure_safe_destination(link, target), "symbolic link")
-                passed += 1
+            passed += 1
 
         with patch.object(TOOL, "PACKAGE_ROOT", package_root):
             rejected(lambda: TOOL.safe_target(str(package_root.parent)), "not the IDE tools package")

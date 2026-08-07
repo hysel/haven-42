@@ -171,7 +171,9 @@ def continue_files(package_root: Optional[Path] = None) -> list[tuple[Path, Path
 
 
 def ensure_safe_destination(path: Path, target: Path) -> None:
-    if path.exists() and path.is_symlink():
+    # A dangling link reports exists() == False even though writes through it
+    # can escape the selected project. Check the link itself first.
+    if path.is_symlink():
         raise SetupError(f"Refusing to replace symbolic link: {path.name}")
     try:
         path.resolve().relative_to(target)

@@ -2054,7 +2054,7 @@ run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
 test_local_llm_ide_package() {
-  python3 "$REPO_ROOT/packages/local-llm-ide/test_package.py" | grep -q "29 checks"
+  python3 "$REPO_ROOT/packages/local-llm-ide/test_package.py" | grep -q "30 checks"
 }
 run_test "standalone local LLM IDE package is narrow and safe" test_local_llm_ide_package
 run_test "evidence catalog has valid schema and sanitized links" test_evidence_catalog_schema

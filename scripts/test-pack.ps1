@@ -711,7 +711,7 @@ Invoke-PackTest "standalone local LLM IDE package is narrow and safe" {
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for coding-tools package validation."
     $output = @(& $python.Source (Join-Path $repoRoot "packages/local-llm-ide/test_package.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The standalone IDE package tests should pass."
-    Assert-True -Condition (($output -join "`n") -match "29 checks") -Message "The IDE package must keep its narrow file set, preview-first writes, backups, local endpoint policy, reproducible archive, native wrapper smoke, and integrity tests."
+    Assert-True -Condition (($output -join "`n") -match "30 checks") -Message "The IDE package must keep its narrow file set, preview-first writes, backups, local endpoint policy, reproducible archive, native wrapper smoke, and integrity tests."
 }
 Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
@@ -885,9 +885,12 @@ Invoke-PackTest "hardware profile scripts report CPU architecture" {
         Assert-True -Condition ($windowsProfileSource -match '\$displayClassProfiles\s*=\s*@\(Get-WindowsDisplayClassGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single display-class GPU as a one-item collection."
         Assert-True -Condition ($windowsProfileSource -match '\$nvidiaProfiles\s*=\s*@\(Get-NvidiaGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single NVIDIA GPU as a one-item collection."
         Assert-True -Condition ($windowsProfileSource -match '\$rocmProfiles\s*=\s*@\(Get-RocmGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single AMD GPU as a one-item collection."
-        $profileOutput = @(& $windowsProfilePath -AsJson 2>&1)
-        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows hardware profile JSON should be generated successfully."
-        $profile = ($profileOutput -join "`n") | ConvertFrom-Json
+        # A PowerShell script invocation does not reset LASTEXITCODE. Run the
+        # profile in a child process so an earlier native-command failure
+        # cannot be mistaken for a hardware-profile failure.
+        $profileResult = Invoke-CommandCapture -FilePath $windowsProfilePath -Arguments @("-AsJson")
+        Assert-Equal -Actual $profileResult.ExitCode -Expected 0 -Message "Windows hardware profile JSON should be generated successfully."
+        $profile = $profileResult.Output | ConvertFrom-Json
         foreach ($gpu in @($profile.Gpus)) {
             Assert-True -Condition ($gpu.Name.Length -le 256) -Message "Windows GPU labels must remain bounded."
             Assert-True -Condition ($gpu.Name -notmatch '[\u0000-\u001F\u007F\uFFFD]') -Message "Windows GPU labels must not expose registry control or invalid-decoding characters."
