@@ -33,7 +33,8 @@ choice, explains each download, and asks before making the approved changes.
 The main download is for everyday use. Coding tools for Continue, Aider, and
 OpenCode are now kept in a separate
 [Local LLM IDE Tools package](packages/local-llm-ide/README.md). You do not
-need that package to use Haven 42.
+need that package to use Haven 42. People who use these coding tools can get
+the optional package from the [Local LLM IDE Tools development prerelease](https://github.com/hysel/haven-42/releases/tag/local-llm-ide-tools-v0.1.0-development).
 
 ## What works today
 
@@ -218,6 +219,11 @@ If you want to connect Continue, Aider, or OpenCode to local Ollama, use the
 small setup command, previews changes before writing, and contains only the
 files needed for those tools. It does not include the Haven 42 app, test
 scripts, Ollama, models, IDEs, or drivers.
+
+[Download the unsigned development ZIP](https://github.com/hysel/haven-42/releases/download/local-llm-ide-tools-v0.1.0-development/haven42-local-llm-ide-tools-0.1.0-development.zip),
+then follow the package guide to verify the checksum before extracting it. The
+[release page](https://github.com/hysel/haven-42/releases/tag/local-llm-ide-tools-v0.1.0-development)
+also provides the checksum and package manifest.
 
 Contributors can still read the detailed [IDE compatibility notes](docs/agent-surface-options.md),
 [Continue testing guide](docs/continue-cli-model-testing.md), and
