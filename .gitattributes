@@ -7,6 +7,7 @@ LICENSE text eol=lf
 scripts/test-shims/* text eol=lf
 package/licenses/* text eol=lf
 web/static/index.html text eol=lf
+web/static/accessibility.html text eol=lf
 web/static/app.js text eol=lf
 web/static/styles.css text eol=lf
 config/text-capability-model-recommendations.json text eol=lf

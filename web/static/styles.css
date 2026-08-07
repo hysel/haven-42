@@ -1283,6 +1283,14 @@ textarea[aria-invalid="true"] {
   .chat-footer { padding-inline: 14px; }
 }
 
+/* Keep the accessible 44px controls inside the chat surface on short
+   desktop displays without reducing their target size. */
+@media (max-height: 700px) and (min-width: 1181px) {
+  .chat-panel > .panel-heading { padding-bottom: 8px; }
+  .context-panel { max-height: 56px; }
+  .chat-footer { padding-block: 4px 8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

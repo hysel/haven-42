@@ -6,6 +6,7 @@ root = Path(SPECPATH).parent
 version_info = str(root / "package/haven42-version-info.txt") if sys.platform == "win32" else None
 resources = [
     ("web/static/index.html", "web/static"),
+    ("web/static/accessibility.html", "web/static"),
     ("web/static/app.js", "web/static"),
     ("web/static/styles.css", "web/static"),
     ("config/text-capability-model-recommendations.json", "config"),
