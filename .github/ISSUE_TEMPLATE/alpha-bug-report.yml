@@ -7,25 +7,13 @@ body:
       value: |
         Thank you for testing Haven 42. This is a public report.
 
-        **Do not include** prompts, responses, attachment names or contents, API keys, passwords, private network addresses, hostnames, usernames, full local paths, machine identifiers, or screenshots containing personal information. Do not paste raw logs. If you saved a Haven 42 support report, open and review it before sharing its sanitized contents.
+        **Do not include** prompts, responses, attachment names or contents, API keys, passwords, private network addresses, hostnames, usernames, full local paths, machine identifiers, or screenshots containing personal information. Do not paste raw logs.
+
+        If you opened this form from Haven 42, you can paste the short computer-details block that Haven 42 prepared for you. Review it before submitting. You do not need to find version numbers or checksums yourself.
+
+        If you need help before opening a public issue, email haven42localai@gmail.com. Do not email passwords, API keys, private prompts, attached files, or raw logs.
 
         Report a suspected vulnerability through [private vulnerability reporting](https://github.com/hysel/haven-42/security/advisories/new), not here.
-  - type: input
-    id: version
-    attributes:
-      label: Haven 42 version
-      description: Copy the version shown on the About page.
-      placeholder: 0.4.0-alpha.1
-    validations:
-      required: true
-  - type: input
-    id: checksum
-    attributes:
-      label: Package SHA-256
-      description: Copy the published checksum if you verified it. Do not enter a local path.
-      placeholder: 64 hexadecimal characters, or Not checked
-    validations:
-      required: true
   - type: dropdown
     id: area
     attributes:
@@ -43,64 +31,48 @@ body:
         - Other
     validations:
       required: true
-  - type: input
-    id: system
+  - type: textarea
+    id: actual
     attributes:
-      label: General computer details
-      description: Include Windows edition/build, CPU family, RAM, and GPU model only. Do not include a computer name, username, serial number, or address.
-      placeholder: Windows 11 build 26100; AMD CPU; 32 GiB RAM; Radeon RX 7800 XT
+      label: What happened?
+      description: Describe the message or behavior you saw. A short explanation is enough. Do not paste private content or raw logs.
+      placeholder: I selected guided setup, and then…
     validations:
       required: true
   - type: textarea
     id: steps
     attributes:
-      label: Steps to reproduce
-      description: Use synthetic example text and omit private file names or content.
+      label: What were you doing? (optional)
+      description: Add a few simple steps if you remember them. Omit private file names or content.
       placeholder: |
         1. Open Haven 42.
         2. Choose ...
         3. Observe ...
-    validations:
-      required: true
   - type: textarea
     id: expected
     attributes:
-      label: Expected result
-    validations:
-      required: true
-  - type: textarea
-    id: actual
-    attributes:
-      label: Actual result
-      description: Include an on-screen error or sanitized support-report reference when available. Do not paste private content or raw logs.
-    validations:
-      required: true
+      label: What did you expect? (optional)
   - type: dropdown
     id: frequency
     attributes:
-      label: Frequency
+      label: Does it happen again?
       options:
         - Every time
-        - Intermittent
-        - Once
+        - Sometimes
+        - It happened once
+        - I am not sure
     validations:
       required: true
-  - type: dropdown
-    id: impact
+  - type: textarea
+    id: safe_details
     attributes:
-      label: Impact
-      options:
-        - Blocked from using Haven 42
-        - Feature is degraded
-        - Cosmetic or wording problem
-    validations:
-      required: true
+      label: Computer details prepared by Haven 42 (optional)
+      description: Paste the short block copied from Haven 42. You can leave this empty.
+      placeholder: Haven 42 version, Windows version, memory, and graphics information
   - type: checkboxes
     id: privacy
     attributes:
       label: Privacy confirmation
       options:
-        - label: I reviewed this report and removed secrets, private content, addresses, identity, machine identifiers, and local paths.
-          required: true
-        - label: This is not a suspected security vulnerability.
+        - label: I reviewed this report, removed private information, and understand that suspected security vulnerabilities should be reported privately.
           required: true

@@ -63,6 +63,10 @@ Use the [Alpha report chooser](https://github.com/hysel/haven-42/issues/new/choo
 for ordinary bugs or experience feedback. The same link is available on the
 About page inside Haven 42.
 
+If you need help before opening a public issue, email
+[haven42localai@gmail.com](mailto:haven42localai@gmail.com). Do not email
+passwords, API keys, private prompts, attached files, or raw logs.
+
 Before submitting a public report, remove prompts, responses, attachment names
 and contents, credentials, private addresses, hostnames, usernames, full local
 paths, machine identifiers, and screenshots containing personal information.
