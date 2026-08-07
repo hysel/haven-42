@@ -413,6 +413,61 @@ try {
   })`);
   if (initial.modal !== "true" || initial.current !== "welcome" || initial.progressMarkers !== 3 || !initial.focused || !initial.skip) throw new Error("initial-accessibility-state");
   checks += 5;
+  const accessibility = await cdp.evaluate(`(() => {
+    const guided = document.querySelector('#wizard-guided');
+    guided.focus();
+    const focusedStyle = getComputedStyle(guided);
+    return {
+      navLandmarks: document.querySelectorAll('nav').length,
+      mainLandmarks: document.querySelectorAll('main').length,
+      complementaryLandmarks: document.querySelectorAll('aside').length,
+      pageHeadings: document.querySelectorAll('h1').length,
+      skipTarget: document.querySelector('.skip-link').getAttribute('href'),
+      targetHeight: guided.getBoundingClientRect().height,
+      focusOutlineWidth: focusedStyle.outlineWidth,
+      focusOutlineStyle: focusedStyle.outlineStyle,
+      endpointDescription: document.querySelector('#endpoint').getAttribute('aria-describedby'),
+      wizardEndpointDescription: document.querySelector('#wizard-endpoint').getAttribute('aria-describedby'),
+      hiddenFileTabIndex: document.querySelector('#context-files').tabIndex,
+      liveMetricsRole: document.querySelector('#resource-status-announcement').getAttribute('role'),
+      liveMetricsMode: document.querySelector('#resource-status-announcement').getAttribute('aria-live'),
+      statusAtomic: document.querySelector('#connection-badge').getAttribute('aria-atomic'),
+    };
+  })()`);
+  if (
+    accessibility.navLandmarks !== 1
+    || accessibility.mainLandmarks !== 1
+    || accessibility.complementaryLandmarks !== 1
+    || accessibility.pageHeadings !== 1
+    || accessibility.skipTarget !== "#main-content"
+    || accessibility.targetHeight < 44
+    || Number.parseFloat(accessibility.focusOutlineWidth) < 3
+    || accessibility.focusOutlineStyle === "none"
+    || !accessibility.endpointDescription.includes("connection-error")
+    || !accessibility.wizardEndpointDescription.includes("wizard-error")
+    || accessibility.hiddenFileTabIndex !== -1
+    || accessibility.liveMetricsRole !== "status"
+    || accessibility.liveMetricsMode !== "polite"
+    || accessibility.statusAtomic !== "true"
+  ) throw new Error(`wcag-structure:${JSON.stringify(accessibility)}`);
+  checks += 14;
+  const escapeDismissal = await cdp.evaluate(`(() => {
+    const card = document.querySelector('.wizard-card');
+    card.focus();
+    card.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}));
+    const result = {
+      hidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+      focus: document.activeElement.id,
+    };
+    document.querySelector('#setup-wizard').classList.remove('hidden');
+    showWizardStep('welcome');
+    document.querySelector('.wizard-card').focus();
+    return result;
+  })()`);
+  if (!escapeDismissal.hidden || escapeDismissal.focus !== "home-nav") {
+    throw new Error(`escape-dismissal:${JSON.stringify(escapeDismissal)}`);
+  }
+  checks += 2;
   trace("welcome-verified");
 
   await waitFor(() => cdp.evaluate("document.querySelector('#assurance-badge').textContent === 'Committed evidence'"));
@@ -498,7 +553,13 @@ try {
       || guided.nextText !== "Complete setup above"
       || guided.installationRows < 2
       || guided.installationProgressBars !== guided.installationRows + 1
-      || !guided.planText.includes("Components for this device")
+      || !guided.planText.includes("What Haven 42 needs")
+      || !guided.planText.includes("local AI model for chat, writing, and summaries")
+      || !guided.planText.includes("Technical model name")
+      || !guided.planText.includes("Install location")
+      || !guided.planText.includes("stored beside the app")
+      || !guided.planText.includes("Haven42-Data")
+      || !guided.planText.includes("Does not use Program Files or AppData")
       || !guided.planText.includes("Ollama local runtime")
       || !guided.planText.includes("Download:")
       || !guided.planText.includes("Required to run the selected text model locally")
@@ -528,6 +589,7 @@ try {
         disclosure: document.querySelector('#alpha-setup-storage-summary').textContent,
         progress: document.querySelector('#alpha-setup-progress').textContent,
         approvalHidden: document.querySelector('#alpha-setup-approval').classList.contains('hidden'),
+        installedChecks: document.querySelectorAll('.installation-component-check').length,
       };
       await refreshAlphaSetupProgress();
       return result;
@@ -539,7 +601,116 @@ try {
       || !reusePresentation.disclosure.includes("already installed")
       || !reusePresentation.progress.includes("Nothing will be downloaded, installed, or replaced")
       || !reusePresentation.approvalHidden
+      || reusePresentation.installedChecks < 2
     ) throw new Error(`setup-reuse-presentation:${JSON.stringify(reusePresentation)}`);
+    const interruptedDownloadPresentation = await cdp.evaluate(`(async () => {
+      const response = await fetch('/api/alpha/setup-status', {credentials: 'same-origin', cache: 'no-store'});
+      const status = await response.json();
+      const interrupted = {
+        ...status,
+        phase: 'failed',
+        progressPercent: 66,
+        error: 'model-download-failed',
+        components: status.components.map((item) => item.kind === 'runtime'
+          ? {...item, state: 'ready', progressPercent: 100, downloadedBytes: item.sizeBytes, bytesPerSecond: 0, etaSeconds: 0, progressActive: false}
+          : {...item, state: 'failed', progressPercent: 4, downloadedBytes: Math.min(item.sizeBytes, 32 * 1024 * 1024), bytesPerSecond: 0, etaSeconds: null, progressActive: false}),
+      };
+      renderAlphaSetupProgress(interrupted);
+      updateManagedSetupAvailability(interrupted);
+      const result = {
+        buttonText: document.querySelector('#alpha-setup-review').textContent,
+        buttonMode: document.querySelector('#alpha-setup-review').dataset.mode,
+        disclosure: document.querySelector('#alpha-setup-storage-summary').textContent,
+        progress: document.querySelector('#alpha-setup-progress').textContent,
+        installedChecks: document.querySelectorAll('.installation-component-check').length,
+        failedChecks: document.querySelectorAll('.installation-component.state-failed .installation-component-check').length,
+        troubleshootingVisible: !document.querySelector('#alpha-setup-troubleshooting').hidden,
+        stoppedProgress: document.querySelector('.installation-component.state-failed .installation-component-live-progress').textContent,
+      };
+      document.querySelector('#alpha-setup-review').click();
+      result.approvalVisible = !document.querySelector('#alpha-setup-approval').classList.contains('hidden');
+      result.approvalText = document.querySelector('#alpha-setup-approval-description').textContent;
+      document.querySelector('#alpha-setup-approval .button.secondary').click();
+      await refreshAlphaSetupProgress();
+      return result;
+    })()`);
+    if (
+      interruptedDownloadPresentation.buttonText !== 'Retry model download'
+      || interruptedDownloadPresentation.buttonMode !== 'retry-download'
+      || !interruptedDownloadPresentation.disclosure.includes('internet connection was lost')
+      || !interruptedDownloadPresentation.progress.includes('ask for permission')
+      || interruptedDownloadPresentation.installedChecks < 1
+      || interruptedDownloadPresentation.failedChecks !== 0
+      || !interruptedDownloadPresentation.troubleshootingVisible
+      || !interruptedDownloadPresentation.stoppedProgress.includes('Existing local download data was kept')
+      || !interruptedDownloadPresentation.approvalVisible
+      || !interruptedDownloadPresentation.approvalText.includes('retry only the missing local AI model')
+    ) throw new Error(`setup-interrupted-download:${JSON.stringify(interruptedDownloadPresentation)}`);
+    const liveDownloadPresentation = await cdp.evaluate(`(async () => {
+      const response = await fetch('/api/alpha/setup-status', {credentials: 'same-origin', cache: 'no-store'});
+      const status = await response.json();
+      const downloading = {
+        ...status,
+        phase: 'model-download',
+        progressPercent: 72,
+        error: null,
+        components: status.components.map((item) => item.kind === 'runtime'
+          ? {...item, state: 'ready', progressPercent: 100, downloadedBytes: item.sizeBytes, bytesPerSecond: 0, etaSeconds: 0, progressActive: false}
+          : {...item, state: 'downloading', progressPercent: 25, downloadedBytes: Math.min(item.sizeBytes, 256 * 1024 * 1024), bytesPerSecond: 8 * 1024 * 1024, etaSeconds: 95, progressActive: true}),
+      };
+      renderAlphaSetupProgress(downloading);
+      updateManagedSetupAvailability(downloading);
+      const result = {
+        progress: document.querySelector('.installation-component.state-downloading .installation-component-live-progress').textContent,
+        cancelVisible: !document.querySelector('#alpha-setup-cancel').hidden,
+        cancelText: document.querySelector('#alpha-setup-cancel').textContent,
+        troubleshootingHidden: document.querySelector('#alpha-setup-troubleshooting').hidden,
+      };
+      await refreshAlphaSetupProgress();
+      return result;
+    })()`);
+    if (
+      !liveDownloadPresentation.progress.includes('of')
+      || !liveDownloadPresentation.progress.includes('8.0 MiB/s')
+      || !liveDownloadPresentation.progress.includes('About 2 minutes remaining')
+      || !liveDownloadPresentation.cancelVisible
+      || liveDownloadPresentation.cancelText !== 'Cancel model download'
+      || !liveDownloadPresentation.troubleshootingHidden
+    ) throw new Error(`setup-live-download:${JSON.stringify(liveDownloadPresentation)}`);
+    const failedValidationPresentation = await cdp.evaluate(`(async () => {
+      const response = await fetch('/api/alpha/setup-status', {credentials: 'same-origin', cache: 'no-store'});
+      const status = await response.json();
+      const failed = {
+        ...status,
+        phase: 'failed',
+        progressPercent: 95,
+        error: 'managed-inference-request-failed',
+        components: status.components.map((item) => item.kind === 'runtime'
+          ? {...item, state: 'ready', progressPercent: 100, downloadedBytes: item.sizeBytes, bytesPerSecond: 0, etaSeconds: 0, progressActive: false}
+          : {...item, state: 'failed', progressPercent: 95, downloadedBytes: item.sizeBytes, bytesPerSecond: 0, etaSeconds: null, progressActive: false}),
+      };
+      renderAlphaSetupProgress(failed);
+      updateManagedSetupAvailability(failed);
+      const result = {
+        buttonText: document.querySelector('#alpha-setup-review').textContent,
+        buttonMode: document.querySelector('#alpha-setup-review').dataset.mode,
+        disclosure: document.querySelector('#alpha-setup-storage-summary').textContent,
+        progress: document.querySelector('#alpha-setup-progress').textContent,
+        componentProgress: document.querySelector('.installation-component.state-failed .installation-component-live-progress').textContent,
+        troubleshootingVisible: !document.querySelector('#alpha-setup-troubleshooting').hidden,
+      };
+      await refreshAlphaSetupProgress();
+      return result;
+    })()`);
+    if (
+      failedValidationPresentation.buttonText !== 'Retry local AI test'
+      || failedValidationPresentation.buttonMode !== 'retry-validation'
+      || !failedValidationPresentation.disclosure.includes('model is downloaded')
+      || !failedValidationPresentation.progress.includes('stopped responding during its private test')
+      || !failedValidationPresentation.progress.includes('reuse the downloaded model')
+      || !failedValidationPresentation.componentProgress.includes('Model download complete')
+      || !failedValidationPresentation.troubleshootingVisible
+    ) throw new Error(`setup-failed-validation:${JSON.stringify(failedValidationPresentation)}`);
     const setupDetailsPersistence = await cdp.evaluate(`(async () => {
       const response = await fetch('/api/alpha/setup-status', {credentials: 'same-origin', cache: 'no-store'});
       const status = await response.json();
@@ -630,10 +801,10 @@ try {
     keyDisabled: document.querySelector('#wizard-api-key').disabled
   })`);
   if (
-    wizardControlSizing.endpoint !== 36
-    || wizardControlSizing.timeout !== 36
-    || wizardControlSizing.cleanup !== 36
-    || wizardControlSizing.authentication !== 36
+    wizardControlSizing.endpoint < 44
+    || wizardControlSizing.timeout < 44
+    || wizardControlSizing.cleanup < 44
+    || wizardControlSizing.authentication < 44
     || wizardControlSizing.endpointFont !== "13px"
     || wizardControlSizing.timeoutFont !== "13px"
     || wizardControlSizing.cleanupFont !== "13px"
@@ -703,6 +874,104 @@ try {
   checks += 1;
 
   await cdp.evaluate("document.querySelector('#wizard-finish').click()");
+  await waitFor(() => cdp.evaluate(`(
+    !document.querySelector('#section-tour-layer').classList.contains('hidden')
+    && document.activeElement.id === 'section-tour-next'
+    && document.querySelector('#section-tour-spotlight').getBoundingClientRect().width > 4
+  )`));
+  const chatTour = await cdp.evaluate(`({
+    dialogRole: document.querySelector('#section-tour-dialog').getAttribute('role'),
+    modal: document.querySelector('#section-tour-dialog').getAttribute('aria-modal'),
+    label: document.querySelector('#section-tour-dialog').getAttribute('aria-label'),
+    progress: document.querySelector('#section-tour-progress').textContent,
+    title: document.querySelector('#section-tour-title').textContent,
+    dots: document.querySelectorAll('#section-tour-dots .section-tour-dot').length,
+    focused: document.activeElement.id,
+    spotlightWidth: document.querySelector('#section-tour-spotlight').getBoundingClientRect().width,
+    skipVisible: document.querySelector('#section-tour-skip').getBoundingClientRect().width > 0,
+    closeLabel: document.querySelector('#section-tour-close').getAttribute('aria-label'),
+    backDisabled: document.querySelector('#section-tour-back').disabled,
+    backgroundInert: document.querySelector('.shell').inert,
+  })`);
+  if (
+    chatTour.dialogRole !== "dialog"
+    || chatTour.modal !== "true"
+    || !chatTour.label.includes("Chat help, step 1 of 6")
+    || !chatTour.progress.includes("Step 1 of 6")
+    || chatTour.title !== "Move around Haven 42"
+    || chatTour.dots !== 6
+    || chatTour.focused !== "section-tour-next"
+    || chatTour.spotlightWidth <= 0
+    || !chatTour.skipVisible
+    || chatTour.closeLabel !== "Close this section tour"
+    || !chatTour.backDisabled
+    || !chatTour.backgroundInert
+  ) throw new Error(`chat-section-tour:${JSON.stringify(chatTour)}`);
+  const tourNavigation = await cdp.evaluate(`(() => {
+    document.querySelector('#section-tour-next').click();
+    const forward = {
+      progress: document.querySelector('#section-tour-progress').textContent,
+      title: document.querySelector('#section-tour-title').textContent,
+      backEnabled: !document.querySelector('#section-tour-back').disabled,
+    };
+    document.querySelector('#section-tour-back').click();
+    const back = document.querySelector('#section-tour-progress').textContent;
+    const last = document.querySelector('#section-tour-next');
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent('keydown', {key: 'Tab', bubbles: true, cancelable: true}));
+    return {...forward, back, trappedFocus: document.activeElement.id};
+  })()`);
+  if (
+    !tourNavigation.progress.includes("Step 2 of 6")
+    || tourNavigation.title !== "Choose what you want to do"
+    || !tourNavigation.backEnabled
+    || !tourNavigation.back.includes("Step 1 of 6")
+    || tourNavigation.trappedFocus !== "section-tour-close"
+  ) throw new Error(`section-tour-navigation:${JSON.stringify(tourNavigation)}`);
+  await cdp.evaluate("document.querySelector('#section-tour-dialog').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))");
+  await waitFor(() => cdp.evaluate("document.querySelector('#section-tour-layer').classList.contains('hidden')"));
+  const dismissedTour = await cdp.evaluate(`({
+    state: JSON.parse(localStorage.getItem('haven42.section-tours.v1')),
+    focused: document.activeElement.id,
+    backgroundInert: document.querySelector('.shell').inert,
+  })`);
+  if (dismissedTour.state.chat !== true || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+    throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
+  }
+  const sectionTourCounts = {models: 5, system: 5, technical: 4, about: 4};
+  const sectionTourNavigation = {models: "models-nav", system: "system-nav", technical: "assurance-nav", about: "about-nav"};
+  for (const [section, expectedSteps] of Object.entries(sectionTourCounts)) {
+    await cdp.evaluate(`document.querySelector('#${sectionTourNavigation[section]}').click()`);
+    await waitFor(() => cdp.evaluate("!document.querySelector('#section-tour-layer').classList.contains('hidden')"));
+    const result = await cdp.evaluate(`({
+      label: document.querySelector('#section-tour-dialog').getAttribute('aria-label'),
+      dots: document.querySelectorAll('#section-tour-dots .section-tour-dot').length,
+      description: document.querySelector('#section-tour-description').textContent,
+    })`);
+    if (!result.label.includes(`step 1 of ${expectedSteps}`) || result.dots !== expectedSteps || !result.description) {
+      throw new Error(`section-tour-${section}:${JSON.stringify(result)}`);
+    }
+    await cdp.evaluate("document.querySelector('#section-tour-skip').click()");
+    await waitFor(() => cdp.evaluate("document.querySelector('#section-tour-layer').classList.contains('hidden')"));
+  }
+  await cdp.evaluate("document.querySelector('#home-nav').click()");
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  if (!await cdp.evaluate("document.querySelector('#section-tour-layer').classList.contains('hidden')")) {
+    throw new Error("completed-section-tour-retriggered");
+  }
+  const manualTour = await cdp.evaluate(`(() => {
+    const button = document.querySelector('[data-tour-section="chat"]');
+    button.click();
+    const visible = !document.querySelector('#section-tour-layer').classList.contains('hidden');
+    document.querySelector('#section-tour-close').click();
+    return {visible, focused: document.activeElement === button};
+  })()`);
+  if (!manualTour.visible || !manualTour.focused) throw new Error(`manual-section-tour:${JSON.stringify(manualTour)}`);
+  const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
+  if (Object.values(allTourState).length !== 5 || Object.values(allTourState).some((value) => value !== true)) {
+    throw new Error(`section-tour-state:${JSON.stringify(allTourState)}`);
+  }
+  checks += 35;
   const opened = await cdp.evaluate(`({
     hidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
     promptEnabled: !document.querySelector('#prompt').disabled,
@@ -746,6 +1015,7 @@ try {
   checks += 14;
   trace("chat-handoff-verified");
 
+  await cdp.evaluate("document.querySelector('#system-nav').click()");
   const compactControls = await cdp.evaluate(`({
     endpoint: document.querySelector('#endpoint').getBoundingClientRect().height,
     cleanup: document.querySelector('#system-idle-unload').getBoundingClientRect().height,
@@ -760,10 +1030,9 @@ try {
     keyDisabled: document.querySelector('#api-key').disabled
   })`);
   if (
-    Math.abs(compactControls.endpoint - compactControls.model) > 1
-    || Math.abs(compactControls.cleanup - compactControls.model) > 1
-    || Math.abs(compactControls.authentication - compactControls.model) > 1
-    || compactControls.endpoint >= 44
+    compactControls.endpoint < 44
+    || Math.abs(compactControls.cleanup - compactControls.endpoint) > 1
+    || Math.abs(compactControls.authentication - compactControls.endpoint) > 1
     || compactControls.endpointFont !== "13px"
     || compactControls.cleanupFont !== "13px"
     || compactControls.timeoutFont !== "13px"
@@ -820,13 +1089,17 @@ try {
     && document.querySelector('#wizard-api-key').value === ''
     && document.querySelector('#wizard-auth-mode').value === 'bearer'
     && document.querySelector('#connection-badge').textContent.includes('authenticated')
+    && !document.querySelector('#text-panel').classList.contains('hidden')
+    && document.querySelector('#system-panel').classList.contains('hidden')
+    && document.querySelector('#home-nav').classList.contains('active')
+    && document.activeElement.id === 'prompt'
   )`));
   const authenticatedRequests = providerAuthorization.slice(authorizationStart);
   if (
     authenticatedRequests.length < 2
     || authenticatedRequests.some(([, , authorization]) => authorization !== `Bearer ${browserAuthSecret}`)
   ) throw new Error(`provider-authentication-headers:${JSON.stringify(authenticatedRequests)}`);
-  checks += 11;
+  checks += 15;
 
   await cdp.evaluate(`(() => {
     const key = document.querySelector('#api-key');
@@ -927,6 +1200,15 @@ try {
     && document.querySelector('#connect-button').textContent === 'Connected'
     && document.querySelector('#text-status').textContent.includes('2 installed models found')
   )`));
+  const testedManualModel = await cdp.evaluate(`(() => ({
+    option: document.querySelector('#model option[value="manual:qwen3.5:9b"]')?.textContent || '',
+    automatic: document.querySelector('#model option[value="automatic"]')?.textContent || '',
+  }))()`);
+  if (
+    !testedManualModel.option.includes('tested for this task')
+    || !testedManualModel.automatic.includes('Recommended')
+  ) throw new Error(`tested-model-label:${JSON.stringify(testedManualModel)}`);
+  checks += 2;
   const requestsBeforeUnchangedSubmit = requests.length;
   await cdp.evaluate("document.querySelector('#connection-form').requestSubmit()");
   await delay(150);
@@ -1153,6 +1435,10 @@ try {
     status: document.querySelector('#text-status').textContent,
     error: document.querySelector('#connection-error').textContent,
     speed: document.querySelector('#alpha-speed').textContent,
+    sidebarSpeed: document.querySelector('#sidebar-speed').textContent,
+    sidebarConnection: document.querySelector('#sidebar-connection-status').textContent,
+    sidebarModel: document.querySelector('#sidebar-model-name').textContent,
+    sidebarForms: document.querySelectorAll('.configuration-column form').length,
     runDetailsVisible: !document.querySelector('#run-details').classList.contains('hidden'),
     runDetails: document.querySelector('#run-details-list').textContent
   })`);
@@ -1162,13 +1448,17 @@ try {
     || !result.typed.includes("has not tested this model")
     || result.kind !== "warning"
     || result.speed !== "2 tokens/s"
+    || result.sidebarSpeed !== "2 tokens/s"
+    || result.sidebarConnection !== "Connected"
+    || !result.sidebarModel.includes("unknown-model:latest")
+    || result.sidebarForms !== 0
     || !result.runDetailsVisible
     || !result.runDetails.includes("40")
     || !result.runDetails.includes("2 tokens/s")
   ) {
     throw new Error(`typed-result-rendering:${JSON.stringify(result)}`);
   }
-  checks += 8;
+  checks += 12;
   trace("typed-result-verified");
 
   const answerReportDisclosure = await cdp.evaluate(`(() => {
@@ -2020,7 +2310,7 @@ try {
     || advancedScreenshotLimit.initial.stateLimit !== 2
     || !advancedScreenshotLimit.initial.status.includes("Up to 2 screenshots")
     || JSON.stringify(advancedScreenshotLimit.initial.style) !== JSON.stringify({
-      height: "36px",
+      height: "44px",
       fontSize: "13px",
       paddingLeft: "10px",
       paddingRight: "34px",
@@ -2214,6 +2504,10 @@ try {
     const system = {
       active: document.querySelector('#system-nav').classList.contains('active'),
       focused: document.activeElement.id,
+      visible: !document.querySelector('#system-panel').classList.contains('hidden'),
+      sidebarForms: document.querySelectorAll('.configuration-column form').length,
+      sidebarStatus: document.querySelector('#sidebar-connection-status').textContent,
+      sidebarDetailsAction: document.querySelector('#view-system-details').textContent,
       diagnosticStatus: document.querySelector('#diagnostics-status').textContent,
       diagnosticRows: document.querySelectorAll('#diagnostic-events li').length,
       diagnosticActions: document.querySelectorAll('#diagnostics-control button').length,
@@ -2258,7 +2552,11 @@ try {
     || !navigation.models.imageHidden
     || navigation.models.installed !== 2
     || !navigation.system.active
-    || navigation.system.focused !== "system-title"
+    || navigation.system.focused !== "system-workspace-title"
+    || !navigation.system.visible
+    || navigation.system.sidebarForms !== 0
+    || !navigation.system.sidebarStatus
+    || !navigation.system.sidebarDetailsAction.includes("View system details")
     || navigation.system.diagnosticStatus.includes("Loading")
     || navigation.system.diagnosticRows < 1
     || navigation.system.diagnosticActions !== 4
@@ -2277,8 +2575,32 @@ try {
     || navigation.about.focused !== "about-title"
     || !navigation.about.version.startsWith("v")
   ) throw new Error(`accessible-navigation:${JSON.stringify(navigation)}`);
-  checks += 26;
+  checks += 30;
   trace("accessible-navigation-verified");
+
+  await cdp.evaluate("document.querySelector('#prepare-problem-report').click()");
+  await waitFor(async () => (
+    await cdp.evaluate(`(() => {
+      const status = document.querySelector('#problem-report-status').textContent;
+      return status && !status.includes('Checking general computer details');
+    })()`)
+  ));
+  const problemReport = await cdp.evaluate(`(() => ({
+    details: document.querySelector('#problem-report-details').value,
+    status: document.querySelector('#problem-report-status').textContent,
+    formUrl: document.querySelector('.alpha-reporting a').href,
+  }))()`);
+  if (
+    !problemReport.details.includes("Haven 42:")
+    || !problemReport.details.includes("Operating system:")
+    || !problemReport.details.includes("Memory:")
+    || !problemReport.details.includes("Graphics:")
+    || !problemReport.details.includes("no hostname, username, address, local path, prompt, response, or file name included")
+    || !problemReport.status.includes("details")
+    || problemReport.formUrl !== "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"
+  ) throw new Error(`problem-report-helper:${JSON.stringify(problemReport)}`);
+  checks += 7;
+  trace("problem-report-helper-verified");
 
   await waitFor(async () => (
     await cdp.evaluate("window.__haven42DiagnosticFetchCount >= 1")
@@ -2490,6 +2812,96 @@ try {
   ) throw new Error(`diagnostic-cleanup:${JSON.stringify(diagnosticCleanup)}`);
   checks += 16;
   trace("post-removal-experience-verified");
+
+  const managedDefaultHandoff = await cdp.evaluate(`(() => {
+    state.modelSelections = Object.fromEntries(
+      Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+    );
+    const recommendations = Object.fromEntries(
+      Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {
+        status: 'validated', model: 'qwen3.5:0.8b', automatic: true,
+        digestVerified: true, hardwareFit: 'validated-on-this-device',
+        evidenceId: 'windows-alpha-qwen35-08b-q8-managed-self-test'
+      }])
+    );
+    applyProviderConnection({
+      models: ['qwen3.5:0.8b'],
+      modelOptions: [{
+        name: 'qwen3.5:0.8b', digestVerified: true,
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated'])
+        )
+      }],
+      recommendations,
+      authentication: {mode: 'none', configured: false, persisted: false},
+      trustScope: 'loopback', transportScheme: 'http', version: '0.32.5',
+      idleUnloadSeconds: 300,
+      providerHealth: {status: 'healthy'},
+      evidenceBoundary: {
+        catalogStatus: 'ready', immutableDigestBound: true,
+        hardwareFitMeasured: true, unknownModelsGainAuthority: false
+      }
+    }, 'http://127.0.0.1:11435', 120, 300);
+    return {
+      selections: Object.values(state.modelSelections).map((item) => item.mode),
+      selected: document.querySelector('#model').value,
+      label: document.querySelector('#model').selectedOptions[0]?.textContent || '',
+      status: document.querySelector('#model-state').textContent,
+      promptEnabled: !document.querySelector('#prompt').disabled
+    };
+  })()`);
+  if (
+    managedDefaultHandoff.selections.some((mode) => mode !== "automatic")
+    || managedDefaultHandoff.selected !== "automatic"
+    || !managedDefaultHandoff.label.includes("qwen3.5:0.8b")
+    || !managedDefaultHandoff.status.includes("qwen3.5:0.8b")
+    || !managedDefaultHandoff.promptEnabled
+  ) throw new Error(`managed-default-handoff:${JSON.stringify(managedDefaultHandoff)}`);
+  checks += 5;
+  trace("managed-default-handoff-verified");
+  const aboutAccessibilityLink = await cdp.evaluate(`(() => {
+    const link = document.querySelector('#about-panel a[href="/accessibility"]');
+    return link ? {text: link.textContent.trim(), href: link.getAttribute('href')} : null;
+  })()`);
+  if (!aboutAccessibilityLink || aboutAccessibilityLink.text !== "Open the accessibility statement" || aboutAccessibilityLink.href !== "/accessibility") {
+    throw new Error(`about-accessibility-link:${JSON.stringify(aboutAccessibilityLink)}`);
+  }
+  await cdp.evaluate("location.href = '/accessibility'");
+  await waitFor(() => cdp.evaluate("document.readyState === 'complete' && Boolean(document.querySelector('.statement-content'))"));
+  const accessibilityStatement = await cdp.evaluate(`(() => {
+    const action = document.querySelector('.statement-action');
+    action.focus();
+    const style = getComputedStyle(action);
+    return {
+      title: document.title,
+      h1: document.querySelectorAll('h1').length,
+      main: document.querySelectorAll('main').length,
+      navigation: document.querySelectorAll('nav').length,
+      lastReviewed: document.querySelector('.statement-updated').textContent,
+      limitation: document.querySelector('#known-limitations').parentElement.textContent,
+      targetHeight: action.getBoundingClientRect().height,
+      outlineWidth: style.outlineWidth,
+      externalTarget: action.target,
+      externalRel: action.rel,
+      scripts: document.querySelectorAll('script').length,
+    };
+  })()`);
+  if (
+    accessibilityStatement.title !== "Accessibility Statement · Haven 42"
+    || accessibilityStatement.h1 !== 1
+    || accessibilityStatement.main !== 1
+    || accessibilityStatement.navigation !== 1
+    || !accessibilityStatement.lastReviewed.includes("August 7, 2026")
+    || !accessibilityStatement.limitation.includes("not yet been manually tested")
+    || accessibilityStatement.targetHeight < 44
+    || Number.parseFloat(accessibilityStatement.outlineWidth) < 3
+    || accessibilityStatement.externalTarget !== "_blank"
+    || !accessibilityStatement.externalRel.includes("noopener")
+    || !accessibilityStatement.externalRel.includes("noreferrer")
+    || accessibilityStatement.scripts !== 0
+  ) throw new Error(`accessibility-statement:${JSON.stringify(accessibilityStatement)}`);
+  checks += 14;
+  trace("accessibility-statement-verified");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
 } finally {
   trace("cleanup-started");

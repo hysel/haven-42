@@ -88,7 +88,8 @@ def main() -> int:
         "qwen3.5:9b", "qwen3.5:27b", "qwen3.5:35b",
     ]
     assert [item["name"] for item in catalog["models"] if item["windowsEvidenceStatus"] == "validated-exact-windows-cell"] == ["qwen3.5:9b"]
-    checks += 15
+    assert [item["name"] for item in catalog["models"] if item["windowsEvidenceStatus"] == "admitted-bounded-windows-cpu-self-test"] == ["qwen3.5:0.8b"]
+    checks += 16
 
     for path, mutate, code, loader in (
         (MODULE.CONTRACT_PATH, lambda value: value["capabilityPolicy"].update(rendererMayBroaden=True), "invalid-alpha-capability-policy", MODULE.load_contract),
@@ -148,15 +149,23 @@ def main() -> int:
     for value, expected in selections:
         result = MODULE.select_model(value)
         assert result["selected"]["name"] == expected
-        expected_automatic = expected == "qwen3.5:9b"
-        assert result["decision"] == ("validated-selection" if expected_automatic else "candidate-selection")
+        expected_automatic = expected in {"qwen3.5:0.8b", "qwen3.5:9b"}
+        expected_decision = (
+            "bounded-cpu-self-test-selection"
+            if expected == "qwen3.5:0.8b"
+            else "validated-selection"
+            if expected == "qwen3.5:9b"
+            else "candidate-selection"
+        )
+        assert result["decision"] == expected_decision
         assert result["automaticExecutionAllowed"] is expected_automatic
         checks += 3
 
     cpu_large_ram = MODULE.select_model(snapshot(ram=128, gpu=None))
     assert cpu_large_ram["selected"]["name"] == "qwen3.5:0.8b"
     assert cpu_large_ram["eligible"] == ["qwen35-08b-q8"]
-    checks += 2
+    assert cpu_large_ram["automaticExecutionAllowed"] is True
+    checks += 3
 
     storage_fallback = MODULE.select_model(snapshot(ram=64, storage=20, gpu=32))
     assert storage_fallback["selected"]["name"] == "qwen3.5:9b"
@@ -195,6 +204,18 @@ def main() -> int:
     assert guidance[0]["automaticInstallAllowed"] is False
     assert guidance[0]["officialUrl"].startswith("https://www.nvidia.com/")
     checks += 4
+
+    unmeasured_intel = snapshot(ram=16, storage=100, gpu=0)
+    unmeasured_intel["accelerators"][0]["vendor"] = "Intel"
+    assert MODULE.setup_backend(unmeasured_intel)["backendMode"] == "cpu"
+    assert MODULE.select_model(unmeasured_intel)["selected"]["name"] == "qwen3.5:0.8b"
+    assert MODULE.select_model(unmeasured_intel)["automaticExecutionAllowed"] is True
+    measured_intel = snapshot(ram=16, storage=100, gpu=8)
+    measured_intel["accelerators"][0]["vendor"] = "Intel"
+    assert MODULE.setup_backend(measured_intel)["backendMode"] == "vulkan"
+    assert MODULE.automatic_setup_admitted(catalog["models"][0], unmeasured_intel) is True
+    assert MODULE.automatic_setup_admitted(catalog["models"][0], measured_intel) is False
+    checks += 6
 
     metrics = {
         "inputTokens": 10, "outputTokens": 20, "totalTokens": 30,

@@ -28,7 +28,11 @@ HEX64 = re.compile(r"^[0-9a-f]{64}$")
 SAFE_MODEL = re.compile(r"^[a-z0-9][a-z0-9._:+/-]{0,127}$")
 SAFE_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SAFE_TEXT = re.compile(r"^[\x20-\x7e]{1,160}$")
-AUTOMATIC_EVIDENCE = {"validated-exact-windows-cell"}
+EXACT_AUTOMATIC_EVIDENCE = {"validated-exact-windows-cell"}
+BOUNDED_CPU_SELF_TEST_EVIDENCE = {"admitted-bounded-windows-cpu-self-test"}
+ALLOWED_WINDOWS_EVIDENCE = {
+    "required", *EXACT_AUTOMATIC_EVIDENCE, *BOUNDED_CPU_SELF_TEST_EVIDENCE,
+}
 SUPPORTED_ARCHITECTURES = {"amd64", "x86_64", "x64"}
 MAX_METRIC = 2**63 - 1
 GIB = 1024**3
@@ -122,7 +126,7 @@ def load_model_catalog(path: Path = MODEL_CATALOG_PATH) -> dict[str, Any]:
         set(value) != {"schemaVersion", "catalogId", "catalogStatus", "source", "selectionPolicy", "models"}
         or value.get("schemaVersion") != 1
         or value.get("catalogId") != "haven42.windows-alpha.chat-models"
-        or value.get("catalogStatus") != "candidate-ladder-requires-exact-windows-evidence"
+        or value.get("catalogStatus") != "candidate-ladder-with-bounded-cpu-self-test"
     ):
         raise WindowsAlphaError("invalid-alpha-model-catalog")
     source = value.get("source", {})
@@ -187,9 +191,7 @@ def load_model_catalog(path: Path = MODEL_CATALOG_PATH) -> dict[str, Any]:
             or isinstance(model["minimumUsableGpuMemoryGiB"], bool)
             or not isinstance(model["minimumUsableGpuMemoryGiB"], (int, float))
             or not 0 <= model["minimumUsableGpuMemoryGiB"] <= 256
-            or model["windowsEvidenceStatus"] not in {
-                "required", "validated-exact-windows-cell"
-            }
+            or model["windowsEvidenceStatus"] not in ALLOWED_WINDOWS_EVIDENCE
         ):
             raise WindowsAlphaError("invalid-alpha-model-entry")
         seen_ids.add(model["id"])
@@ -219,6 +221,13 @@ def setup_backend(snapshot: dict[str, Any]) -> dict[str, Any]:
         else:
             continue
         memory = _number(item.get("memoryGiB")) or 0
+        # An accelerator without measured dedicated/usable memory is not an
+        # admitted GPU execution path. Older integrated adapters commonly
+        # appear in Windows inventory without a trustworthy capacity value;
+        # treating those as mandatory Vulkan devices makes a safe CPU setup
+        # impossible and later fails the accelerator-residency check.
+        if memory <= 0:
+            continue
         candidates.append((memory, priorities[backend], backend, component))
     if not candidates:
         return {
@@ -429,9 +438,22 @@ def select_model(
             ),
         }
     selected = max(eligible, key=lambda item: item["candidatePriority"])
-    automatic = selected["windowsEvidenceStatus"] in AUTOMATIC_EVIDENCE
+    evidence = selected["windowsEvidenceStatus"]
+    automatic = (
+        evidence in EXACT_AUTOMATIC_EVIDENCE
+        or (
+            evidence in BOUNDED_CPU_SELF_TEST_EVIDENCE
+            and backend["backendMode"] == "cpu"
+        )
+    )
     return {
-        "decision": "validated-selection" if automatic else "candidate-selection",
+        "decision": (
+            "validated-selection"
+            if evidence in EXACT_AUTOMATIC_EVIDENCE
+            else "bounded-cpu-self-test-selection"
+            if automatic
+            else "candidate-selection"
+        ),
         "hardware": hardware,
         "selected": {
             "id": selected["id"],
@@ -447,10 +469,29 @@ def select_model(
         "automaticExecutionAllowed": automatic,
         "reason": (
             "The strongest exact Windows-validated model with bounded headroom was selected."
+            if evidence in EXACT_AUTOMATIC_EVIDENCE
+            else (
+                "The pinned low-memory model is admitted only for an explicit CPU "
+                "compatibility setup with a mandatory local inference self-test."
+            )
             if automatic
             else "The strongest fitting catalog candidate still requires exact Windows evidence."
         ),
     }
+
+
+def automatic_setup_admitted(model: dict[str, Any], snapshot: dict[str, Any]) -> bool:
+    """Return whether one registered model may run managed setup on this device."""
+    catalog = load_model_catalog()
+    if model not in catalog["models"] or not isinstance(snapshot, dict):
+        raise WindowsAlphaError("invalid-alpha-admission-request")
+    evidence = model["windowsEvidenceStatus"]
+    if evidence in EXACT_AUTOMATIC_EVIDENCE:
+        return True
+    return (
+        evidence in BOUNDED_CPU_SELF_TEST_EVIDENCE
+        and setup_backend(snapshot)["backendMode"] == "cpu"
+    )
 
 
 def driver_guidance(snapshot: dict[str, Any], registry: dict[str, Any] | None = None) -> list[dict[str, Any]]:

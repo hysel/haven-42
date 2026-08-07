@@ -44,6 +44,15 @@ setup, return to **Set up this computer** and review the displayed download and
 permission. Advanced users managing their own Ollama server can follow the
 instruction shown under **Models**, then reconnect.
 
+## Setup stops while testing a downloaded model
+
+If setup reaches 95%, the model download is complete and Haven 42 is running a
+short private local test. Open **View troubleshooting logs** if that test stops.
+Keep `Haven42-Data`: retrying the local test reuses the verified model instead
+of downloading it again. When Haven 42 selects processor compatibility mode,
+it explicitly uses Ollama's most-compatible CPU runner rather than relying on
+automatic acceleration detection.
+
 ## An attachment is rejected
 
 The current product accepts bounded UTF-8 text, CSV, JSON, admitted source-code

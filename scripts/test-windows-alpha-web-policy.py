@@ -101,6 +101,8 @@ def main() -> int:
     WEB.driver_guidance = lambda _snapshot: []
     WEB.load_model_catalog = lambda: {"models": [{
         "id": "model-1",
+        "name": "qwen3.5:0.8b",
+        "manifestDigest": "a" * 64,
         "windowsEvidenceStatus": "validated-exact-windows-cell",
         "minimumSystemMemoryGiB": 8,
         "minimumUsableGpuMemoryGiB": 0,
@@ -108,6 +110,7 @@ def main() -> int:
     WEB.build_windows_alpha_plan = lambda _snapshot, _selected: {
         "planId": "plan-1", "components": ["ollama-windows-core"],
     }
+    WEB.automatic_setup_admitted = lambda _selected, _snapshot: True
     WEB.select_model = lambda _snapshot: {
         "selected": {"id": "model-1"}, "automaticExecutionAllowed": False,
     }
@@ -133,7 +136,19 @@ def main() -> int:
     original_connect = state.connect
     state.connect = lambda endpoint, timeout, idle, mode, key: {
         "connected": endpoint == WEB.MANAGED_OLLAMA_URL,
+        "recommendations": {},
+        "modelOptions": [{
+            "name": "qwen3.5:0.8b", "digestVerified": False,
+            "capabilityStatus": {},
+        }],
+        "evidenceBoundary": {
+            "recommendationBinding": "model-name-digest-and-capability-evidence",
+            "immutableDigestBound": False,
+            "hardwareFitMeasured": False,
+            "unknownModelsGainAuthority": False,
+        },
     }
+    state.model_digests = {"qwen3.5:0.8b": "a" * 64}
     try:
         resumed = state.resume_managed_provider()
         state.base_url = WEB.MANAGED_OLLAMA_URL
@@ -152,7 +167,10 @@ def main() -> int:
     assert "Recommended setup for this computer" in setup_renderer
     assert "Haven 42 checked your computer" in setup_renderer
     assert "cannot safely set it up automatically yet" in setup_renderer
-    assert "This setup needs at least ${storageText}" in setup_renderer
+    assert "processor compatibility mode" in setup_renderer
+    assert "detected graphics hardware is not required" in setup_renderer
+    assert "stop safely unless processor compatibility mode works" in setup_renderer
+    assert "${storageText} required · stored beside the app" in setup_renderer
     assert "What Haven 42 will do · details" in setup_renderer
     assert "Drivers and Windows settings are not changed automatically" in setup_renderer
     assert "Download and safety details" in app
@@ -164,6 +182,7 @@ def main() -> int:
     assert "summary.textContent = plan.summary" not in setup_renderer
     assert "if (!managed || button.disabled || !consent.checked) return" in app
     assert 'api("/api/alpha/connect-managed-provider", {})' in app
+    assert 'selection.mode === "none"' in app
     assert "managedSetupCompletedCandidate === true" in app
     assert "Finish the local setup above" in app
     assert 'byId("alpha-setup-review")?.focus()' in app
@@ -186,9 +205,9 @@ def main() -> int:
     assert "Haven42-Logs" in removal
     assert ".innerHTML" not in removal
     html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
-    assert 'href="https://github.com/hysel/haven-42/issues/new/choose"' in html
+    assert 'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"' in html
     assert 'referrerpolicy="no-referrer"' in html
-    assert "remove chat text, file names, addresses" in html
+    assert "prompts, responses, file names, addresses" in html
     assert 'id="local-ai-maintenance-title">Local AI on this computer' in html
     assert 'id="setup-local-components"' in html
     assert 'id="remove-managed-components"' in html
@@ -214,6 +233,17 @@ def main() -> int:
     assert "It does not remove drivers, another Ollama installation" in html
     assert "Uninstall local AI components" in app
     assert "No local AI components installed" in app
+    assert "Retry model download" in app
+    assert "retry only the missing local AI model" in app
+    assert "installation-component-check" in app
+    assert "did not start within 2 minutes" in app
+    assert "System → Troubleshooting logs" in app
+    assert "View troubleshooting logs" in app
+    assert "Cancel model download" in app
+    assert "Calculating speed" in app
+    assert "Existing local download data was kept" in app
+    assert "Model download complete. The local test stopped" in app
+    assert "Retry local AI test" in app
     assert 'id="diagnostics-control"' in html
     assert "never recorded or uploaded" in html
     assert all(path in app for path in (

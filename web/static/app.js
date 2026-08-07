@@ -75,6 +75,75 @@ const CHAT_TEXT_SIZE_PERCENTAGES = {
 };
 const MAX_DISCOVERED_MODELS = 512;
 const MAX_MARKDOWN_DOM_ELEMENTS = 2048;
+const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1";
+const SECTION_TOURS = Object.freeze({
+  chat: Object.freeze({
+    label: "Chat",
+    panelId: "text-panel",
+    returnId: "capability-title",
+    steps: Object.freeze([
+      { target: ".rail", title: "Move around Haven 42", description: "Use this menu to open Chat, Models, System, Technical details, or About. Each section has its own short help tour." },
+      { target: ".task-mode-select", title: "Choose what you want to do", description: "Leave this on Recommended and Haven 42 will choose Chat, Write, or Summarize from your request. You can also choose a task yourself." },
+      { target: ".model-select", title: "Choose an AI model", description: "Haven 42 recommends a compatible installed model for each task. Warnings here explain when another model has not been tested for the selected task." },
+      { target: ".composer-surface", title: "Write and attach files", description: "Type your request here, press Enter to send, or use Shift+Enter for a new line. Attachments stay in memory for the current task, and the Keep setting controls prompt recall for this session." },
+      { target: ".status-glance-stats", title: "See live resource use", description: "This compact strip shows CPU, memory, graphics, and response speed while Haven 42 is open. It is session information, not billing data." },
+      { target: ".status-glance-connection", title: "Check your connection", description: "This status shows which AI server and model are active. “This computer” means requests stay on this device; a private-network server is a separate computer you chose." },
+    ]),
+  }),
+  models: Object.freeze({
+    label: "Models",
+    panelId: "models-panel",
+    returnId: "models-title",
+    steps: Object.freeze([
+      { target: "#models-title", title: "Your AI models", description: "This page helps you understand and choose the models available from your connected Ollama server." },
+      { target: "#model-search-capability", title: "Choose the task", description: "Select Chat, Writing, or Summarization to see which installed model Haven 42 recommends for that work." },
+      { target: "#model-choice-status", title: "Read the recommendation", description: "This message explains the current model choice and whether Haven 42 has test evidence for the selected task." },
+      { target: "#model-discovery", title: "Find another model", description: "You can search installed models or Ollama's public catalog. A public search sends only your search words and never downloads a model." },
+      { target: "#model-search-form", title: "Search without installing", description: "Enter a model name or capability here. Haven 42 shows a manual command when one is available, but does not run it for you." },
+    ]),
+  }),
+  system: Object.freeze({
+    label: "System",
+    panelId: "system-panel",
+    returnId: "system-workspace-title",
+    steps: Object.freeze([
+      { target: "#system-workspace-title", title: "System settings", description: "Use this page to manage your AI connection, local components, resource information, and troubleshooting tools." },
+      { target: "#connection-panel", title: "Connect another AI server", description: "A local setup connects automatically. Advanced users can use this area to switch to another trusted Ollama server." },
+      { target: "#status-panel", title: "Manage this computer", description: "Review the app version, local AI components, model cleanup setting, computer scan, and private troubleshooting logs here." },
+      { target: "#capability-panel", title: "See available features", description: "This list shows what the current connection can do now and which features still need setup." },
+      { target: "#evidence-panel", title: "Check connection health", description: "These checks explain whether the AI server, model information, and local files are ready." },
+    ]),
+  }),
+  technical: Object.freeze({
+    label: "Technical details",
+    panelId: "assurance-panel",
+    returnId: "assurance-title",
+    steps: Object.freeze([
+      { target: "#assurance-title", title: "Technical test details", description: "This optional page summarizes the evidence included with this Haven 42 build. It is mainly for advanced users and contributors." },
+      { target: "#assurance-panel .status-list", title: "Evidence summary", description: "These counts show how many test records, models, and app surfaces are represented in the included evidence." },
+      { target: "#assurance-status-list", title: "Evidence outcomes", description: "Review the recorded test outcomes here. Opening this page does not run a live hardware test." },
+      { target: ".assurance-wiki-link", title: "Open the detailed evidence", description: "Use this link when you want the full evidence dashboard on GitHub. It opens an external website in a new tab." },
+    ]),
+  }),
+  about: Object.freeze({
+    label: "About",
+    panelId: "about-panel",
+    returnId: "about-title",
+    steps: Object.freeze([
+      { target: "#about-title", title: "About Haven 42", description: "This page explains what the app does, which version you are using, and how it handles your chat." },
+      { target: "#about-panel .status-list", title: "What this version includes", description: "This summary covers text AI, experimental features, software tools, chat privacy, and the status of this test build." },
+      { target: ".about-reference", title: "Accessibility information", description: "Open the Accessibility Statement to review completed checks, known limitations, and ways to report a barrier." },
+      { target: ".alpha-reporting", title: "Get help or report a problem", description: "Prepare safe computer details, open the short problem form, or contact the project email. Nothing is collected or uploaded until you choose an action." },
+    ]),
+  }),
+});
+const PANEL_TOUR_SECTIONS = Object.freeze({
+  "text-panel": "chat",
+  "models-panel": "models",
+  "system-panel": "system",
+  "assurance-panel": "technical",
+  "about-panel": "about",
+});
 
 const state = {
   token: "",
@@ -112,13 +181,16 @@ const state = {
   approvedTextRequest: null,
   pendingAnswerReport: null,
   alphaTextOnly: true,
+  appVersion: "unknown",
+  lastMetricsAnnouncementAt: 0,
 };
 
 const byId = (id) => document.getElementById(id);
 
-function showError(message) {
+function showError(message, fieldId = null) {
   const box = byId("connection-error");
   box.textContent = message;
+  if (fieldId) byId(fieldId)?.setAttribute("aria-invalid", "true");
   box.tabIndex = -1;
   box.classList.remove("hidden");
   box.focus({ preventScroll: true });
@@ -128,6 +200,7 @@ function clearError() {
   const box = byId("connection-error");
   box.classList.add("hidden");
   box.removeAttribute("tabindex");
+  byId("endpoint")?.removeAttribute("aria-invalid");
 }
 
 function showContextError(message) {
@@ -160,6 +233,17 @@ function renderProviderTransportWarning(trustScope, transportScheme) {
     box.textContent = message;
     box.classList.toggle("hidden", !message);
     box.classList.toggle("loopback", isHttp && trustScope === "loopback");
+    box.setAttribute("aria-atomic", "true");
+    if (!message) {
+      box.setAttribute("role", "status");
+      box.setAttribute("aria-live", "off");
+    } else if (trustScope === "loopback") {
+      box.setAttribute("role", "note");
+      box.setAttribute("aria-live", "polite");
+    } else {
+      box.setAttribute("role", "alert");
+      box.setAttribute("aria-live", "assertive");
+    }
   }
 }
 
@@ -167,9 +251,168 @@ function motionBehavior() {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
 }
 
+function emptySectionTourState() {
+  return Object.fromEntries(Object.keys(SECTION_TOURS).map((section) => [section, false]));
+}
+
+function loadSectionTourState() {
+  const result = emptySectionTourState();
+  try {
+    const saved = window.localStorage.getItem(SECTION_TOUR_STORAGE_KEY);
+    if (!saved || saved.length > 2048) return result;
+    const parsed = JSON.parse(saved);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return result;
+    for (const section of Object.keys(result)) result[section] = parsed[section] === true;
+  } catch (_error) {
+    // Browser storage can be unavailable. Tours remain usable without persistence.
+  }
+  return result;
+}
+
+const sectionTourState = loadSectionTourState();
+const activeSectionTour = { section: null, stepIndex: 0, returnFocus: null };
+
+function saveSectionTourState() {
+  try {
+    const safeState = Object.fromEntries(
+      Object.keys(SECTION_TOURS).map((section) => [section, sectionTourState[section] === true]),
+    );
+    window.localStorage.setItem(SECTION_TOUR_STORAGE_KEY, JSON.stringify(safeState));
+  } catch (_error) {
+    // Completion persistence is optional; never block the app when storage is unavailable.
+  }
+}
+
+function activeTourConfiguration() {
+  return activeSectionTour.section ? SECTION_TOURS[activeSectionTour.section] : null;
+}
+
+function visibleTourTarget(selector) {
+  const target = document.querySelector(selector);
+  if (!(target instanceof HTMLElement) || target.closest(".hidden")) return null;
+  return target;
+}
+
+function positionSectionTour() {
+  const configuration = activeTourConfiguration();
+  if (!configuration) return;
+  const step = configuration.steps[activeSectionTour.stepIndex];
+  const target = visibleTourTarget(step.target);
+  if (!target) return;
+  const rect = target.getBoundingClientRect();
+  const margin = 8;
+  const spotlight = byId("section-tour-spotlight");
+  const spotlightLeft = Math.max(margin, rect.left - margin);
+  const spotlightTop = Math.max(margin, rect.top - margin);
+  const spotlightRight = Math.min(window.innerWidth - margin, rect.right + margin);
+  const spotlightBottom = Math.min(window.innerHeight - margin, rect.bottom + margin);
+  spotlight.style.left = `${spotlightLeft}px`;
+  spotlight.style.top = `${spotlightTop}px`;
+  spotlight.style.width = `${Math.max(1, spotlightRight - spotlightLeft)}px`;
+  spotlight.style.height = `${Math.max(1, spotlightBottom - spotlightTop)}px`;
+
+  const dialog = byId("section-tour-dialog");
+  const dialogRect = dialog.getBoundingClientRect();
+  const gap = 18;
+  const viewportPadding = 12;
+  let left = rect.right + gap;
+  let top = rect.top;
+  if (left + dialogRect.width > window.innerWidth - viewportPadding) left = rect.left - dialogRect.width - gap;
+  if (left < viewportPadding) {
+    left = Math.min(
+      Math.max(viewportPadding, rect.left),
+      Math.max(viewportPadding, window.innerWidth - dialogRect.width - viewportPadding),
+    );
+    top = rect.bottom + gap;
+    if (top + dialogRect.height > window.innerHeight - viewportPadding) top = rect.top - dialogRect.height - gap;
+  }
+  top = Math.min(
+    Math.max(viewportPadding, top),
+    Math.max(viewportPadding, window.innerHeight - dialogRect.height - viewportPadding),
+  );
+  dialog.style.left = `${Math.round(left)}px`;
+  dialog.style.top = `${Math.round(top)}px`;
+}
+
+function renderSectionTourStep() {
+  const configuration = activeTourConfiguration();
+  if (!configuration) return;
+  const step = configuration.steps[activeSectionTour.stepIndex];
+  const target = visibleTourTarget(step.target);
+  if (!target) {
+    finishSectionTour();
+    return;
+  }
+  const stepNumber = activeSectionTour.stepIndex + 1;
+  byId("section-tour-progress").textContent = `${configuration.label} · Step ${stepNumber} of ${configuration.steps.length}`;
+  byId("section-tour-title").textContent = step.title;
+  byId("section-tour-description").textContent = step.description;
+  byId("section-tour-dialog").setAttribute("aria-label", `${configuration.label} help, step ${stepNumber} of ${configuration.steps.length}`);
+  byId("section-tour-back").disabled = activeSectionTour.stepIndex === 0;
+  byId("section-tour-next").textContent = stepNumber === configuration.steps.length ? "Finish" : "Next";
+  const dots = configuration.steps.map((_item, index) => {
+    const dot = document.createElement("span");
+    dot.className = "section-tour-dot";
+    dot.classList.toggle("active", index === activeSectionTour.stepIndex);
+    return dot;
+  });
+  byId("section-tour-dots").replaceChildren(...dots);
+  target.scrollIntoView({ behavior: motionBehavior(), block: "center", inline: "nearest" });
+  window.requestAnimationFrame(() => {
+    positionSectionTour();
+    byId("section-tour-next").focus({ preventScroll: true });
+  });
+}
+
+function startSectionTour(section, options = {}) {
+  if (!Object.hasOwn(SECTION_TOURS, section)) return false;
+  const configuration = SECTION_TOURS[section];
+  if (activeSectionTour.section) return false;
+  if (!options.manual && sectionTourState[section] === true) return false;
+  const panel = byId(configuration.panelId);
+  if (!panel || panel.classList.contains("hidden") || !byId("setup-wizard").classList.contains("hidden")) return false;
+  activeSectionTour.section = section;
+  activeSectionTour.stepIndex = 0;
+  activeSectionTour.returnFocus = options.returnFocus instanceof HTMLElement
+    ? options.returnFocus
+    : byId(configuration.returnId);
+  byId("section-tour-layer").classList.remove("hidden");
+  byId("section-tour-layer").setAttribute("aria-hidden", "false");
+  document.querySelector(".shell").inert = true;
+  document.body.classList.add("section-tour-active");
+  renderSectionTourStep();
+  return true;
+}
+
+function finishSectionTour() {
+  const configuration = activeTourConfiguration();
+  if (!configuration) return;
+  sectionTourState[activeSectionTour.section] = true;
+  saveSectionTourState();
+  const returnTarget = activeSectionTour.returnFocus;
+  activeSectionTour.section = null;
+  activeSectionTour.stepIndex = 0;
+  activeSectionTour.returnFocus = null;
+  byId("section-tour-layer").classList.add("hidden");
+  byId("section-tour-layer").setAttribute("aria-hidden", "true");
+  document.querySelector(".shell").inert = false;
+  document.body.classList.remove("section-tour-active");
+  if (returnTarget instanceof HTMLElement && returnTarget.isConnected) {
+    returnTarget.focus({ preventScroll: true });
+  }
+}
+
+function scheduleSectionTour(section) {
+  window.setTimeout(() => startSectionTour(section), 0);
+}
+
 function activateNavigation(buttonId, targetId, focusId) {
-  document.querySelectorAll(".nav-item").forEach((button) => button.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach((button) => {
+    button.classList.remove("active");
+    button.removeAttribute("aria-current");
+  });
   byId(buttonId).classList.add("active");
+  byId(buttonId).setAttribute("aria-current", "page");
   const target = byId(targetId);
   target.scrollIntoView({ behavior: motionBehavior(), block: "start" });
   byId(focusId).focus({ preventScroll: true });
@@ -182,6 +425,10 @@ function setTaskEvent(message, kind = "progress") {
   else delete event.dataset.kind;
   event.classList.toggle("error", kind === "error");
   event.classList.toggle("hidden", !message);
+  const urgent = kind === "error" || kind === "warning";
+  event.setAttribute("role", urgent ? "alert" : "status");
+  event.setAttribute("aria-live", urgent ? "assertive" : "polite");
+  event.setAttribute("aria-atomic", "true");
 }
 
 function renderCapabilities() {
@@ -411,10 +658,58 @@ async function loadAssurance() {
 }
 
 function showPrimaryPanel(panelId, navigationId, focusId) {
-  ["text-panel", "software-panel", "image-panel", "models-panel", "assurance-panel", "about-panel"].forEach((id) => {
+  ["text-panel", "software-panel", "image-panel", "models-panel", "system-panel", "assurance-panel", "about-panel"].forEach((id) => {
     byId(id).classList.toggle("hidden", id !== panelId);
   });
   activateNavigation(navigationId, panelId, focusId);
+  const tourSection = PANEL_TOUR_SECTIONS[panelId];
+  if (tourSection) scheduleSectionTour(tourSection);
+}
+
+function initializeSystemWorkspace() {
+  const workspace = byId("system-workspace-content");
+  for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel"]) {
+    workspace.append(byId(id));
+  }
+}
+
+function openSystem() {
+  showPrimaryPanel("system-panel", "system-nav", "system-workspace-title");
+  void refreshDiagnosticsQuietly();
+}
+
+function openChat() {
+  showPrimaryPanel("text-panel", "home-nav", "capability-title");
+  byId("prompt").focus({ preventScroll: true });
+}
+
+function syncStatusSidebar() {
+  const connected = state.connected === true;
+  const status = byId("sidebar-connection-status");
+  status.textContent = connected ? "Connected" : "Not connected";
+  status.classList.toggle("good", connected);
+  byId("sidebar-server-name").textContent = connected
+    ? byId("connection-badge").textContent
+    : "AI server not connected";
+  const model = selectedModel(state.capabilityId);
+  byId("sidebar-model-name").textContent = model
+    ? `Model · ${model}`
+    : "No model selected";
+  for (const [source, target] of [
+    ["alpha-cpu", "sidebar-cpu"],
+    ["alpha-ram", "sidebar-ram"],
+    ["alpha-gpu", "sidebar-gpu"],
+    ["alpha-speed", "sidebar-speed"],
+  ]) byId(target).textContent = byId(source).textContent;
+}
+
+function initializeStatusSidebar() {
+  const observer = new MutationObserver(syncStatusSidebar);
+  for (const id of [
+    "connection-badge", "model-state", "alpha-cpu", "alpha-ram", "alpha-gpu", "alpha-speed",
+  ]) observer.observe(byId(id), { attributes: true, childList: true, characterData: true, subtree: true });
+  byId("model").addEventListener("change", syncStatusSidebar);
+  syncStatusSidebar();
 }
 
 function openSoftware() {
@@ -524,6 +819,22 @@ function humanError(error) {
     "duplicate-context-image-name": "Remove the duplicate screenshot filename.",
     "managed-components-removal-confirmation-required": "Confirm removal before deleting managed components.",
     "setup-already-running": "Wait for setup to finish or cancel it before removing components.",
+    "model-download-failed": "The model download was interrupted. Check your internet connection, then retry. Haven 42 will keep verified files and request permission before continuing.",
+    "managed-provider-request-failed": "The local AI engine stopped responding. Try again. Haven 42 will keep verified files and request permission before continuing.",
+    "managed-provider-start-timeout": "The local AI engine did not start within 2 minutes. Your downloaded files were kept. Use View troubleshooting logs for more details.",
+    "managed-provider-exited-before-ready": "The local AI engine closed before it was ready. Your downloaded files were kept. Use View troubleshooting logs for more details.",
+    "managed-provider-exited-during-validation": "The model downloaded, but the local AI engine closed during its private test. Your model was kept for retry.",
+    "managed-inference-request-failed": "The model downloaded, but the local AI engine stopped responding during its private test. Your model was kept for retry.",
+    "managed-inference-request-rejected": "The model downloaded, but the local AI engine could not load or test it on this computer. Your model was kept for troubleshooting.",
+    "managed-inference-response-invalid": "The model downloaded, but its private test returned an unexpected result. Your model was kept for troubleshooting.",
+    "managed-model-status-request-failed": "The private model test finished, but Haven 42 could not confirm that the model stayed loaded.",
+    "managed-model-status-request-rejected": "The local AI engine would not report the loaded model after its private test.",
+    "managed-model-status-response-invalid": "The local AI engine returned an unexpected model status after its private test.",
+    "managed-inference-validation-failed": "The model downloaded, but it did not complete Haven 42's private test correctly.",
+    "managed-model-not-loaded": "The private test finished, but the selected model was no longer loaded.",
+    "managed-accelerator-not-active": "The private test did not use the required graphics hardware, so Haven 42 stopped safely.",
+    "insufficient-managed-storage": "There is not enough free space in this Haven 42 folder to complete local setup.",
+    "component-integrity-mismatch": "A downloaded component did not pass its safety check. Haven 42 did not use it.",
     "unowned-portable-data-root": "Haven 42 found a data folder it did not create, so it left the folder unchanged.",
     "unsafe-portable-data-entry": "Haven 42 found an unexpected linked file or folder, so it safely stopped removal.",
     "portable-data-removal-failed": "Haven could not completely remove its managed data. No other location was touched.",
@@ -532,7 +843,7 @@ function humanError(error) {
     "diagnostic-clear-failed": "Haven 42 could not safely clear the troubleshooting events.",
     "diagnostic-removal-failed": "Haven 42 found an unexpected item in the log folder, so it left the folder unchanged.",
   };
-  return messages[error.message] || "Haven 42 safely stopped this request because it could not verify it. Try again, or open Troubleshooting if the problem continues.";
+  return messages[error.message] || "Haven 42 safely stopped this request because it could not verify it. Choose Back, then open System → Troubleshooting logs for more details.";
 }
 
 function modelMatchesQuery(name, query) {
@@ -892,6 +1203,61 @@ function renderSystemReadiness(containerId, snapshot) {
   }
 }
 
+function safeProblemReportValue(value, fallback = "Not available", maximumLength = 160) {
+  const text = String(value ?? "")
+    .replace(/[\u0000-\u001f\u007f]/g, " ")
+    .replace(/[@<>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return text ? text.slice(0, maximumLength) : fallback;
+}
+
+function problemReportDetails(snapshot) {
+  const platformName = safeProblemReportValue(
+    snapshot.platform.productName || snapshot.platform.operatingSystem,
+  );
+  const platformBuild = Number.isSafeInteger(snapshot.platform.buildNumber)
+    ? ` build ${snapshot.platform.buildNumber}`
+    : "";
+  const memory = snapshot.platform.systemMemoryGiB == null
+    ? "Not available"
+    : `${snapshot.platform.systemMemoryGiB} GiB`;
+  const graphics = snapshot.accelerators.length
+    ? snapshot.accelerators.slice(0, 4).map((item) => (
+      `${safeProblemReportValue(item.vendor, "Unknown", 40)} ${safeProblemReportValue(item.model, "graphics device", 120)}${item.memoryGiB ? ` (${item.memoryGiB} GiB)` : ""}${item.driverVersion ? `, driver ${safeProblemReportValue(item.driverVersion, "", 80)}` : ""}`
+    )).join("; ")
+    : "Not detected or permission limited";
+  return [
+    `Haven 42: ${safeProblemReportValue(state.appVersion, "Unknown", 40)}`,
+    `Operating system: ${platformName}${platformBuild} · ${safeProblemReportValue(snapshot.platform.architecture, "Unknown", 40)}`,
+    `Memory: ${memory}`,
+    `Graphics: ${graphics}`,
+    "Privacy: no hostname, username, address, local path, prompt, response, or file name included.",
+  ].join("\n");
+}
+
+async function prepareProblemReport() {
+  const status = byId("problem-report-status");
+  status.textContent = "Checking general computer details…";
+  try {
+    const snapshot = state.readinessSnapshot || await api("/api/readiness", { force: true });
+    state.readinessSnapshot = snapshot;
+    const details = problemReportDetails(snapshot);
+    const field = byId("problem-report-details");
+    field.value = details;
+    try {
+      await navigator.clipboard.writeText(details);
+      status.textContent = "Copied. Review the text, open the short form, and paste it into the optional computer-details box.";
+    } catch (_error) {
+      field.focus();
+      field.select();
+      status.textContent = "The details are ready. Copy the selected text, then paste it into the optional computer-details box.";
+    }
+  } catch (error) {
+    status.textContent = humanError(error);
+  }
+}
+
 function validAlphaSetupProgress(status) {
   const states = new Set([
     "pending", "present", "downloading", "verifying", "installing", "ready",
@@ -926,6 +1292,15 @@ function validAlphaSetupProgress(status) {
       || !states.has(item.state)
       || !Number.isSafeInteger(item.progressPercent)
       || item.progressPercent < 0 || item.progressPercent > 100
+      || !Number.isSafeInteger(item.downloadedBytes)
+      || item.downloadedBytes < 0 || item.downloadedBytes > item.sizeBytes
+      || !Number.isSafeInteger(item.bytesPerSecond)
+      || item.bytesPerSecond < 0 || item.bytesPerSecond > item.sizeBytes * 10
+      || !(
+        item.etaSeconds === null
+        || (Number.isSafeInteger(item.etaSeconds) && item.etaSeconds >= 0 && item.etaSeconds <= 604800)
+      )
+      || typeof item.progressActive !== "boolean"
     ) return false;
     identifiers.add(item.componentId);
   }
@@ -937,12 +1312,26 @@ function formatSetupBytes(value) {
   return gib >= 0.1 ? `${gib.toFixed(1)} GiB` : `${Math.ceil(value / (1024 ** 2))} MiB`;
 }
 
+function formatSetupRate(value) {
+  if (!Number.isSafeInteger(value) || value <= 0) return "Calculating speed";
+  if (value >= 1024 ** 2) return `${(value / (1024 ** 2)).toFixed(1)} MiB/s`;
+  return `${Math.max(1, Math.round(value / 1024))} KiB/s`;
+}
+
+function formatSetupEta(value) {
+  if (!Number.isSafeInteger(value) || value < 0) return "Estimating time remaining";
+  if (value < 60) return "Less than a minute remaining";
+  if (value < 3600) return `About ${Math.ceil(value / 60)} minutes remaining`;
+  return `About ${Math.ceil(value / 3600)} hours remaining`;
+}
+
 function setupComponentDetails(item) {
   if (item.kind === "model") {
     return {
-      why: "Selected as the best validated model fit for this computer's detected memory and graphics capacity.",
-      contents: `Local text model weights for chat, writing, and summarization, already prepared in ${item.version} format. Haven 42 does not quantize this model on your computer.`,
+      why: "Selected to provide private chat, writing, and summaries while fitting this computer's detected memory and graphics capacity.",
+      contents: `The files that let the local AI understand and create text, already prepared in ${item.version} format. Haven 42 does not modify this model on your computer.`,
       source: "Ollama model registry",
+      technicalName: item.displayName,
     };
   }
   if (item.componentId === "ollama-windows-amd-rocm") {
@@ -994,15 +1383,27 @@ function renderAlphaSetupProgress(status) {
     row.dataset.componentId = item.componentId;
     const heading = document.createElement("div");
     heading.className = "installation-component-heading";
+    const identityGroup = document.createElement("div");
+    identityGroup.className = "installation-component-identity";
+    if (["present", "ready", "complete"].includes(item.state)) {
+      const installed = document.createElement("span");
+      installed.className = "installation-component-check";
+      installed.setAttribute("aria-hidden", "true");
+      installed.textContent = "✓";
+      identityGroup.append(installed);
+    }
     const identity = document.createElement("strong");
-    identity.textContent = item.technologyName
-      ? `${item.displayName} · ${item.technologyName} ${item.technologyVersion}`
-      : `${item.displayName} · ${item.version}`;
+    identity.textContent = item.kind === "model"
+      ? "Local AI model for chat, writing, and summaries"
+      : item.technologyName
+        ? `${item.displayName} · ${item.technologyName} ${item.technologyVersion}`
+        : `${item.displayName} · ${item.version}`;
     const stateLabel = document.createElement("span");
     stateLabel.textContent = item.state === "present"
       ? "Found locally · verification required"
       : `${stateLabels[item.state]} · ${item.progressPercent}%`;
-    heading.append(identity, stateLabel);
+    identityGroup.append(identity);
+    heading.append(identityGroup, stateLabel);
     const purpose = document.createElement("p");
     purpose.textContent = item.purpose;
     const selectionReason = document.createElement("p");
@@ -1013,12 +1414,28 @@ function renderAlphaSetupProgress(status) {
     downloadSummary.textContent = item.state === "present"
       ? `Already downloaded locally · original size ${formatSetupBytes(item.sizeBytes)} · source: ${details.source}.`
       : `Download: ${formatSetupBytes(item.sizeBytes)} from ${details.source}.`;
+    const liveProgress = document.createElement("p");
+    liveProgress.className = "installation-component-live-progress";
+    if (item.kind === "model" && item.state === "downloading") {
+      liveProgress.textContent = item.downloadedBytes > 0
+        ? `${formatSetupBytes(item.downloadedBytes)} of ${formatSetupBytes(item.sizeBytes)} · ${formatSetupRate(item.bytesPerSecond)} · ${formatSetupEta(item.etaSeconds)}`
+        : "Waiting for download progress from the local AI engine…";
+    } else if (item.kind === "model" && ["failed", "cancelled"].includes(item.state) && item.downloadedBytes > 0) {
+      liveProgress.textContent = item.downloadedBytes === item.sizeBytes
+        ? "Model download complete. The local test stopped, and the downloaded model was kept for troubleshooting and retry."
+        : `Download stopped after ${formatSetupBytes(item.downloadedBytes)}. Existing local download data was kept so Haven 42 can retry safely.`;
+    } else {
+      liveProgress.classList.add("hidden");
+    }
     const information = document.createElement("details");
     information.className = "installation-component-details";
     information.open = expandedComponentIds.has(item.componentId);
     const informationSummary = document.createElement("summary");
     informationSummary.textContent = "Download and safety details";
     const informationList = document.createElement("dl");
+    if (details.technicalName) {
+      appendSetupDetail(informationList, "Technical model name", details.technicalName);
+    }
     appendSetupDetail(informationList, "Contents", details.contents);
     appendSetupDetail(informationList, "Storage", "Haven42-Data inside this extracted Haven 42 folder.");
     appendSetupDetail(informationList, "Verification", "Size, SHA-256 checksum, safe archive paths, and executable signature where applicable are checked before use.");
@@ -1028,7 +1445,7 @@ function renderAlphaSetupProgress(status) {
     progress.max = 100;
     progress.value = item.progressPercent;
     progress.setAttribute("aria-label", `${item.displayName} progress`);
-    row.append(heading, purpose, selectionReason, downloadSummary, information, progress);
+    row.append(heading, purpose, selectionReason, downloadSummary, liveProgress, information, progress);
     list.append(row);
   }
 }
@@ -1038,18 +1455,68 @@ function updateManagedSetupAvailability(status) {
   const disclosure = byId("alpha-setup-storage-summary");
   const approvalDescription = byId("alpha-setup-approval-description");
   const progress = byId("alpha-setup-progress");
+  const cancelButton = byId("alpha-setup-cancel");
+  const troubleshootingButton = byId("alpha-setup-troubleshooting");
   if (!reviewButton || !disclosure || !approvalDescription || !progress) return;
+  const active = [
+    "approved", "downloading", "verifying", "extracting", "starting",
+    "model-download", "validating",
+  ].includes(status.phase);
+  if (cancelButton) {
+    cancelButton.hidden = !active;
+    cancelButton.disabled = false;
+    cancelButton.textContent = status.phase === "model-download" ? "Cancel model download" : "Cancel setup";
+  }
+  if (troubleshootingButton) {
+    troubleshootingButton.hidden = !["failed", "cancelled"].includes(status.phase);
+  }
   const reusable = status.completedSetupCandidate === true
     && status.components.length > 0 && status.components.every((item) => (
     ["present", "ready", "complete"].includes(item.state)
   ));
-  reviewButton.dataset.mode = reusable ? "resume" : "setup";
-  reviewButton.textContent = reusable ? "Try starting local AI" : "Review and approve setup";
+  const interruptedModelDownload = status.phase === "failed"
+    && status.error === "model-download-failed"
+    && status.components.some((item) => item.kind === "runtime" && ["present", "ready", "complete"].includes(item.state))
+    && status.components.some((item) => item.kind === "model" && item.state === "failed");
+  const validationErrors = new Set([
+    "managed-provider-exited-during-validation",
+    "managed-inference-request-failed", "managed-inference-request-rejected",
+    "managed-inference-response-invalid", "managed-inference-validation-failed",
+    "managed-model-status-request-failed", "managed-model-status-request-rejected",
+    "managed-model-status-response-invalid", "managed-model-not-loaded",
+    "managed-accelerator-not-active",
+  ]);
+  const failedValidation = status.phase === "failed" && validationErrors.has(status.error);
+  reviewButton.dataset.mode = reusable
+    ? "resume"
+    : interruptedModelDownload
+      ? "retry-download"
+      : failedValidation
+        ? "retry-validation"
+        : "setup";
+  reviewButton.textContent = reusable
+    ? "Try starting local AI"
+    : interruptedModelDownload
+      ? "Retry model download"
+      : failedValidation
+        ? "Retry local AI test"
+        : "Review and approve setup";
   const manualButton = byId("alpha-setup-manual");
   if (manualButton) manualButton.hidden = reusable;
   if (reusable) {
     disclosure.textContent = "Your local AI is already installed in Haven42-Data. Haven 42 could not start it automatically, so you can safely try again.";
     progress.textContent = "Trying again will verify and start the existing local AI only. Nothing will be downloaded, installed, or replaced.";
+    approvalDescription.textContent = "Allow Haven 42 to verify and start the existing local AI. Nothing will be downloaded, installed, or replaced.";
+  } else if (interruptedModelDownload) {
+    disclosure.textContent = "The internet connection was lost while downloading the local AI model. The verified local AI engine is still ready.";
+    progress.textContent = "Reconnect to the internet, then choose Retry model download. Haven 42 will keep verified files and ask for permission before continuing.";
+    approvalDescription.textContent = "Allow Haven 42 to retry only the missing local AI model, keep verified files in Haven42-Data, start the local AI engine, and run a short private test.";
+  } else if (failedValidation) {
+    disclosure.textContent = "The model is downloaded in Haven42-Data, but the local AI test did not finish successfully.";
+    progress.textContent = `${humanError(new Error(status.error))} Retrying will reuse the downloaded model.`;
+    approvalDescription.textContent = "Allow Haven 42 to reuse the downloaded model, restart the local AI engine, and repeat its short private test. Nothing will be downloaded or replaced.";
+  } else {
+    approvalDescription.textContent = "Allow Haven 42 to download any missing items shown above, keep them in Haven42-Data, start the local AI engine, and run a short private test.";
   }
 }
 
@@ -1064,6 +1531,16 @@ async function refreshAlphaSetupProgress() {
   return status;
 }
 
+async function openSetupTroubleshooting() {
+  byId("setup-wizard").classList.add("hidden");
+  openSystem();
+  const diagnostics = byId("diagnostics-control");
+  diagnostics.open = true;
+  await refreshDiagnosticsQuietly();
+  diagnostics.scrollIntoView({ block: "start" });
+  diagnostics.querySelector("summary")?.focus();
+}
+
 function renderSetupPlan(plan) {
   const container = byId("wizard-setup-plan");
   container.replaceChildren();
@@ -1075,13 +1552,17 @@ function renderSetupPlan(plan) {
   const modelSelection = plan.alphaCandidate?.modelSelection;
   const alphaModel = modelSelection?.selected?.name;
   const automaticAllowed = modelSelection?.automaticExecutionAllowed === true;
+  const managed = plan.alphaCandidate?.managedPlan;
+  const cpuCompatibilityMode = managed?.backendMode === "cpu";
   fit.textContent = alphaModel
     ? automaticAllowed
-      ? `Haven 42 recommends ${alphaModel} because it fits the memory and graphics hardware detected on this computer.`
-      : `${alphaModel} may fit this computer, but Haven 42 cannot safely set it up automatically yet. You can view the manual steps instead.`
+      ? cpuCompatibilityMode
+        ? `Haven 42 selected a local AI model for chat, writing, and summaries that can run in processor compatibility mode. The detected graphics hardware is not required, and Haven 42 must pass a private local test before setup can finish. Technical model name: ${alphaModel}.`
+        : `Haven 42 selected a local AI model for chat, writing, and summaries because it fits this computer's memory and graphics hardware. Technical model name: ${alphaModel}.`
+      : `Haven 42 found a local AI model that may fit this computer, but cannot safely set it up automatically yet. You can view the manual steps instead. Technical model name: ${alphaModel}.`
     : plan.hardwareAssessment.candidateModel
-      ? `Hardware guidance: evaluate ${plan.hardwareAssessment.candidateModel} · planning confidence ${plan.hardwareAssessment.confidence}`
-      : "Hardware guidance: no safe automatic model recommendation from the known capacity.";
+      ? `Haven 42 found a possible local AI model, but has not confirmed that it can be set up safely on this computer. Technical model name: ${plan.hardwareAssessment.candidateModel}.`
+      : "Haven 42 could not safely choose a local AI model from the available computer information.";
   container.append(heading, summary, fit);
   for (const action of plan.actions) {
     const row = document.createElement("div");
@@ -1098,16 +1579,43 @@ function renderSetupPlan(plan) {
     row.append(label, stateLabel);
     container.append(row);
   }
-  const managed = plan.alphaCandidate?.managedPlan;
   if (managed && plan.alphaCandidate?.managedSetupCandidateAvailable === true) {
-    const disclosure = document.createElement("p");
+    const disclosure = document.createElement("span");
     disclosure.id = "alpha-setup-storage-summary";
     disclosure.className = "setup-storage-summary";
     const requiredStorageGiB = Number.isSafeInteger(managed.requiredStorageBytes) && managed.requiredStorageBytes > 0
       ? Math.ceil((managed.requiredStorageBytes / (1024 ** 3)) * 10) / 10
       : null;
     const storageText = requiredStorageGiB == null ? "verified free space" : `${requiredStorageGiB} GiB free space`;
-    disclosure.textContent = `This setup needs at least ${storageText}. Every downloaded file stays in Haven42-Data inside this Haven 42 folder.`;
+    disclosure.textContent = `${storageText} required · stored beside the app`;
+    const installLocation = document.createElement("details");
+    installLocation.className = "setup-install-location";
+    installLocation.setAttribute("aria-label", "Local AI install location");
+    const installLocationSummary = document.createElement("summary");
+    installLocationSummary.className = "setup-install-location-summary";
+    const installLocationCopy = document.createElement("span");
+    installLocationCopy.className = "setup-install-location-copy";
+    const installLocationTitle = document.createElement("strong");
+    installLocationTitle.textContent = "Install location";
+    installLocationCopy.append(installLocationTitle, disclosure);
+    const installLocationPath = document.createElement("code");
+    installLocationPath.textContent = "Haven42-Data";
+    installLocationSummary.append(installLocationCopy, installLocationPath);
+    const installLocationDetails = document.createElement("div");
+    installLocationDetails.className = "setup-install-location-details";
+    const installLocationIntro = document.createElement("p");
+    installLocationIntro.textContent = "Open this row for storage details. Haven 42 keeps its local AI files together in the extracted app folder.";
+    const installLocationList = document.createElement("ul");
+    for (const text of [
+      "Contains the local AI engine, graphics support, model, and temporary setup files.",
+      "Does not use Program Files or AppData, and does not create a Windows service.",
+    ]) {
+      const item = document.createElement("li");
+      item.textContent = text;
+      installLocationList.append(item);
+    }
+    installLocationDetails.append(installLocationIntro, installLocationList);
+    installLocation.append(installLocationSummary, installLocationDetails);
     const safeguards = document.createElement("details");
     safeguards.className = "setup-safeguards";
     const safeguardsSummary = document.createElement("summary");
@@ -1115,7 +1623,9 @@ function renderSetupPlan(plan) {
     const safeguardsList = document.createElement("ul");
     for (const text of [
       "Download only the Ollama and model files shown below, then check that every file is genuine and unchanged.",
-      "Run a short private test and confirm that your graphics card is used when required.",
+      cpuCompatibilityMode
+        ? "Use processor compatibility mode and require a successful private local response before setup can finish."
+        : "Run a short private test and confirm that your graphics card is used when required.",
       "Stop and explain the problem if a safety check fails.",
       "Keep all downloaded files in this Haven 42 folder so they are easy to remove later.",
     ]) {
@@ -1140,6 +1650,30 @@ function renderSetupPlan(plan) {
     instructions.className = "button secondary";
     instructions.textContent = "Show manual steps";
     instructions.addEventListener("click", () => renderManualAlphaSteps(plan, container));
+    const cancelSetup = document.createElement("button");
+    cancelSetup.id = "alpha-setup-cancel";
+    cancelSetup.type = "button";
+    cancelSetup.className = "button secondary";
+    cancelSetup.textContent = "Cancel setup";
+    cancelSetup.hidden = true;
+    cancelSetup.addEventListener("click", async () => {
+      cancelSetup.disabled = true;
+      cancelSetup.textContent = "Stopping safely…";
+      try {
+        await api("/api/alpha/setup-cancel", {});
+        progress.textContent = "Stopping setup safely. Downloaded local data will be kept for retry.";
+      } catch (error) {
+        progress.textContent = humanError(error);
+        cancelSetup.disabled = false;
+      }
+    });
+    const troubleshooting = document.createElement("button");
+    troubleshooting.id = "alpha-setup-troubleshooting";
+    troubleshooting.type = "button";
+    troubleshooting.className = "button secondary";
+    troubleshooting.textContent = "View troubleshooting logs";
+    troubleshooting.hidden = true;
+    troubleshooting.addEventListener("click", () => { void openSetupTroubleshooting(); });
     const progress = document.createElement("p");
     progress.id = "alpha-setup-progress";
     progress.setAttribute("role", "status");
@@ -1153,7 +1687,7 @@ function renderSetupPlan(plan) {
     installationHeading.className = "installation-progress-heading";
     const installationTitle = document.createElement("strong");
     installationTitle.id = "alpha-installation-title";
-    installationTitle.textContent = "Components for this device";
+    installationTitle.textContent = "What Haven 42 needs";
     const overallValue = document.createElement("output");
     overallValue.id = "alpha-installation-overall-value";
     overallValue.textContent = "0%";
@@ -1182,7 +1716,9 @@ function renderSetupPlan(plan) {
       "Download only missing files, using the official sources shown above.",
       "Keep downloaded files inside Haven42-Data in this extracted folder.",
       "Start the local AI engine for this Haven 42 session only.",
-      "Send a short private test message and check that compatible graphics hardware is used.",
+      cpuCompatibilityMode
+        ? "Send a short private test message and stop safely unless processor compatibility mode works."
+        : "Send a short private test message and check that compatible graphics hardware is used.",
     ]) {
       const item = document.createElement("li");
       item.textContent = text;
@@ -1228,8 +1764,8 @@ function renderSetupPlan(plan) {
     ));
     approvalActions.append(approve, cancelApproval);
     approvalPanel.append(approvalTitle, approvalDescription, approvalEffects, consentRow, approvalActions);
-    controls.append(automatic, instructions);
-    container.append(disclosure, safeguards, installationPanel, controls, approvalPanel, progress);
+    controls.append(automatic, instructions, cancelSetup, troubleshooting);
+    container.append(installLocation, safeguards, installationPanel, controls, approvalPanel, progress);
     refreshAlphaSetupProgress().catch(() => {
       progress.textContent = "Component details are temporarily unavailable. Setup has not started.";
     });
@@ -1261,7 +1797,10 @@ function renderManualAlphaSteps(plan, container) {
   const title = document.createElement("strong");
   title.textContent = "Manual setup";
   const text = document.createElement("p");
-  text.textContent = `Install the Ollama AI engine from its official Windows download, then add ${plan.alphaCandidate?.modelSelection?.selected?.name || "the recommended model"}. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`;
+  const technicalModelName = plan.alphaCandidate?.modelSelection?.selected?.name;
+  text.textContent = technicalModelName
+    ? `Install the Ollama local AI engine from its official Windows download, then add the recommended model for chat, writing, and summaries. Its technical name is ${technicalModelName}. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`
+    : "Install the Ollama local AI engine from its official Windows download, then add a compatible text model. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.";
   const link = document.createElement("a");
   link.href = "https://ollama.com/download/windows";
   link.target = "_blank";
@@ -1288,7 +1827,7 @@ async function retryManagedAlphaSetup(button, progress) {
     applyProviderConnection(managed, managed.managedResume.endpoint, 120, 300);
     await showManagedLocalReady();
     byId("setup-wizard").classList.add("hidden");
-    byId("prompt").focus();
+    openChat();
   } catch (error) {
     progress.textContent = `The existing local AI could not start safely. Nothing was downloaded or replaced. ${humanError(error)}`;
     button.disabled = false;
@@ -1319,7 +1858,7 @@ async function showManagedLocalReady() {
     byId("local-setup-action-status").textContent = "Local AI is installed and connected on this computer.";
   } catch (_error) {
     byId("portable-storage-status").textContent = "Local AI is connected, but Haven 42 could not refresh the installation details.";
-    byId("local-setup-action-status").textContent = "Chat remains available. Open Troubleshooting if this status does not update after restarting Haven 42.";
+    byId("local-setup-action-status").textContent = "Chat remains available. Open System → Troubleshooting logs if this status does not update after restarting Haven 42.";
   }
 }
 
@@ -1356,7 +1895,9 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
       const safeError = status.error ? ` · ${humanError(new Error(status.error))}` : "";
       progress.textContent = `${labels[status.phase] || "Preparing"} · ${status.progressPercent}%${safeError}`;
       if (status.phase === "complete") {
-        await connectProvider("http://127.0.0.1:11435", 120, 300, "none", "");
+        const connection = await api("/api/alpha/connect-managed-provider", {});
+        validateManagedProviderResume(connection);
+        applyProviderConnection(connection, connection.managedResume.endpoint, 120, 300);
         await showManagedLocalReady();
         byId("wizard-readiness-next").disabled = false;
         byId("wizard-readiness-next").textContent = "Open chat";
@@ -1468,6 +2009,16 @@ function renderAlphaMetrics(value) {
   byId("alpha-gpu").textContent = value.sample.gpuUtilizationPercent == null
     ? "Unavailable" : `${Math.round(value.sample.gpuUtilizationPercent)}% · ${formatBytes(value.sample.gpuMemoryUsedBytes)}`;
   byId("alpha-tokens").textContent = String(value.sessionTokens.totalTokens ?? 0);
+  const now = Date.now();
+  if (now - state.lastMetricsAnnouncementAt >= 60000) {
+    byId("resource-status-announcement").textContent = [
+      `CPU ${byId("alpha-cpu").textContent}`,
+      `memory ${byId("alpha-ram").textContent}`,
+      `GPU ${byId("alpha-gpu").textContent}`,
+      `session tokens ${byId("alpha-tokens").textContent}`,
+    ].join(", ");
+    state.lastMetricsAnnouncementAt = now;
+  }
 }
 
 async function refreshAlphaMetrics() {
@@ -1665,10 +2216,10 @@ function renderModelSelect() {
     for (const item of state.modelOptions) {
       const option = document.createElement("option");
       const status = item.capabilityStatus[capabilityId] || "unverified";
-      const statusLabel = status === "validated"
+      const statusLabel = ["recommended", "validated"].includes(status)
         ? "tested for this task"
         : status === "compatible"
-          ? "expected to work"
+          ? "tested for a different task"
           : "not tested for this task";
       option.value = `manual:${item.name}`;
       option.textContent = `${item.name} — ${statusLabel}`;
@@ -1688,8 +2239,14 @@ function renderModelSelect() {
   const status = selection.mode === "manual"
     ? state.modelOptions.find((item) => item.name === model)?.capabilityStatus[capabilityId]
     : recommendation?.status;
+  const testedForTask = ["recommended", "validated"].includes(status);
+  const selectedStatusLabel = testedForTask
+    ? "Tested choice"
+    : status === "compatible"
+      ? "Available · tested for a different task"
+      : "Available · not tested for this task";
   byId("model-state").textContent = model
-    ? `${status === "validated" ? "Tested choice" : "Available · not tested for this task"} · ${model}`
+    ? `${selectedStatusLabel} · ${model}`
     : `No suitable installed model found · add ${recommendation?.model || "a recommended model"}, then connect again`;
   byId("reset-model-button").classList.toggle(
     "hidden",
@@ -2688,7 +3245,7 @@ function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSec
     if (!selection || (
       selection.mode === "manual"
       && !state.modelOptions.some((item) => item.name === selection.model)
-    )) {
+    ) || selection.mode === "none") {
       state.modelSelections[capabilityId] = {
         mode: state.recommendations[capabilityId]?.automatic ? "automatic" : "none",
         model: null,
@@ -2746,6 +3303,7 @@ async function bootstrap() {
     const result = await response.json();
     state.token = result.sessionToken;
     state.alphaTextOnly = result.alpha?.textOnly === true;
+    state.appVersion = result.version;
     byId("app-version").textContent = `v${result.version}`;
     byId("about-version").textContent = `v${result.version}`;
     const runtimeBuild = Number.isSafeInteger(result.runtime.buildNumber)
@@ -2785,6 +3343,7 @@ async function bootstrap() {
       byId("setup-wizard").querySelector(".wizard-card").focus();
     } else {
       byId("prompt").focus();
+      scheduleSectionTour("chat");
     }
     await refreshAlphaMetrics();
     await refreshManagedStorageStatus();
@@ -2820,6 +3379,7 @@ byId("connection-form").addEventListener("submit", async (event) => {
       requestedConfig.authMode,
       requestedConfig.apiKey,
     );
+    openChat();
   } catch (error) {
     if (!wasConnected) {
       state.connected = false;
@@ -2832,7 +3392,7 @@ byId("connection-form").addEventListener("submit", async (event) => {
       byId("prompt").placeholder = "Reconnect Ollama to begin…";
       byId("text-status").textContent = "AI not connected";
     }
-    showError(humanError(error));
+    showError(humanError(error), "endpoint");
   } finally {
     updateProviderConnectionControl();
   }
@@ -2841,6 +3401,10 @@ byId("connection-form").addEventListener("submit", async (event) => {
 ["endpoint", "timeout", "idle-unload", "auth-mode", "api-key"].forEach((id) => {
   const eventName = ["endpoint", "api-key"].includes(id) ? "input" : "change";
   byId(id).addEventListener(eventName, () => {
+    if (id === "endpoint") {
+      byId("endpoint").removeAttribute("aria-invalid");
+      byId("connection-error").classList.add("hidden");
+    }
     if (["endpoint", "auth-mode"].includes(id)) updateProviderAuthenticationControl();
     updateProviderConnectionControl();
   });
@@ -2849,6 +3413,10 @@ byId("connection-form").addEventListener("submit", async (event) => {
 ["wizard-endpoint", "wizard-timeout", "wizard-idle-unload", "wizard-auth-mode", "wizard-api-key"].forEach((id) => {
   const eventName = ["wizard-endpoint", "wizard-api-key"].includes(id) ? "input" : "change";
   byId(id).addEventListener(eventName, () => {
+    if (id === "wizard-endpoint") {
+      byId("wizard-endpoint").removeAttribute("aria-invalid");
+      byId("wizard-error").classList.add("hidden");
+    }
     if (["wizard-endpoint", "wizard-auth-mode"].includes(id)) {
       updateProviderAuthenticationControl("wizard-");
     }
@@ -3265,7 +3833,7 @@ byId("new-task-button").addEventListener("click", async () => {
   }
 });
 byId("home-nav").addEventListener("click", () => {
-  showPrimaryPanel("text-panel", "home-nav", "capability-title");
+  openChat();
   window.scrollTo({ top: 0, behavior: motionBehavior() });
 });
 byId("software-nav").addEventListener("click", openSoftware);
@@ -3410,14 +3978,19 @@ byId("image-run-button").addEventListener("click", async () => {
   }
 });
 byId("system-nav").addEventListener("click", () => {
-  activateNavigation("system-nav", "status-panel", "system-title");
-  void refreshDiagnosticsQuietly();
+  openSystem();
 });
+byId("view-system-details").addEventListener("click", openSystem);
 byId("diagnostics-control").addEventListener("toggle", () => {
   if (byId("diagnostics-control").open) void refreshDiagnosticsQuietly();
 });
+
+byId("prepare-problem-report").addEventListener("click", () => {
+  void prepareProblemReport();
+});
 document.querySelectorAll(".availability-nav").forEach((button) => {
   button.addEventListener("click", () => {
+    openSystem();
     byId("capability-panel").scrollIntoView({ behavior: motionBehavior() });
   });
 });
@@ -3433,6 +4006,7 @@ byId("wizard-provider-back").addEventListener("click", () => {
 byId("wizard-explore").addEventListener("click", () => {
   byId("setup-wizard").classList.add("hidden");
   byId("welcome-message").textContent = "You can look through Chat, Models, System, and About. When you are ready, use Setup to connect an AI server.";
+  openSystem();
   byId("connection-panel").scrollIntoView({ behavior: motionBehavior() });
 });
 byId("wizard-readiness-back").addEventListener("click", () => {
@@ -3447,7 +4021,7 @@ byId("wizard-readiness-back").addEventListener("click", () => {
 byId("wizard-readiness-next").addEventListener("click", () => {
   if (state.connected) {
     byId("setup-wizard").classList.add("hidden");
-    byId("prompt").focus();
+    openChat();
     return;
   }
   if (
@@ -3645,6 +4219,7 @@ byId("wizard-connection-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const errorBox = byId("wizard-error");
   errorBox.classList.add("hidden");
+  byId("wizard-endpoint").removeAttribute("aria-invalid");
   const button = byId("wizard-connect");
   const wasConnected = state.connected;
   const requestedConfig = providerFormConfig("wizard-");
@@ -3664,6 +4239,7 @@ byId("wizard-connection-form").addEventListener("submit", async (event) => {
       requestedConfig.authMode,
       requestedConfig.apiKey,
     );
+    byId("wizard-endpoint").removeAttribute("aria-invalid");
     renderWizardReadiness();
     showWizardStep("ready");
   } catch (error) {
@@ -3673,6 +4249,7 @@ byId("wizard-connection-form").addEventListener("submit", async (event) => {
       setProviderReady(false);
     }
     errorBox.textContent = humanError(error);
+    byId("wizard-endpoint").setAttribute("aria-invalid", "true");
     errorBox.classList.remove("hidden");
   } finally {
     updateWizardConnectionControl();
@@ -3684,9 +4261,23 @@ byId("wizard-back").addEventListener("click", () => {
 });
 byId("wizard-finish").addEventListener("click", () => {
   byId("setup-wizard").classList.add("hidden");
-  byId("prompt").focus();
+  openChat();
 });
 byId("setup-wizard").addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    byId("setup-wizard").classList.add("hidden");
+    const previous = state.lastFocusBeforeWizard;
+    const returnTarget = previous instanceof HTMLElement
+      && !previous.closest("#setup-wizard")
+      && previous.matches('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+      ? previous
+      : byId("home-nav");
+    returnTarget.focus({ preventScroll: true });
+    const visiblePanel = Object.entries(PANEL_TOUR_SECTIONS).find(([panelId]) => !byId(panelId).classList.contains("hidden"));
+    if (visiblePanel) scheduleSectionTour(visiblePanel[1]);
+    return;
+  }
   if (event.key !== "Tab") return;
   const focusable = [...byId("setup-wizard").querySelectorAll(
     'button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
@@ -3703,6 +4294,58 @@ byId("setup-wizard").addEventListener("keydown", (event) => {
   }
 });
 
+document.querySelectorAll("[data-tour-section]").forEach((button) => {
+  button.addEventListener("click", () => {
+    startSectionTour(button.dataset.tourSection, { manual: true, returnFocus: button });
+  });
+});
+byId("section-tour-close").addEventListener("click", finishSectionTour);
+byId("section-tour-skip").addEventListener("click", finishSectionTour);
+byId("section-tour-back").addEventListener("click", () => {
+  if (!activeSectionTour.section || activeSectionTour.stepIndex === 0) return;
+  activeSectionTour.stepIndex -= 1;
+  renderSectionTourStep();
+});
+byId("section-tour-next").addEventListener("click", () => {
+  const configuration = activeTourConfiguration();
+  if (!configuration) return;
+  if (activeSectionTour.stepIndex >= configuration.steps.length - 1) {
+    finishSectionTour();
+    return;
+  }
+  activeSectionTour.stepIndex += 1;
+  renderSectionTourStep();
+});
+byId("section-tour-layer").addEventListener("keydown", (event) => {
+  if (!activeSectionTour.section) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    finishSectionTour();
+    return;
+  }
+  if (event.key === "Enter" && event.target === byId("section-tour-dialog")) {
+    event.preventDefault();
+    byId("section-tour-next").click();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const controls = [...byId("section-tour-dialog").querySelectorAll("button:not([disabled])")];
+  if (controls.length === 0) return;
+  const first = controls[0];
+  const last = controls[controls.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+window.addEventListener("resize", positionSectionTour);
+window.addEventListener("scroll", positionSectionTour, true);
+
 updateProviderAuthenticationControl();
 updateProviderAuthenticationControl("wizard-");
+initializeSystemWorkspace();
+initializeStatusSidebar();
 bootstrap();

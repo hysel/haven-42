@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "catalogId": "haven42.windows-alpha.chat-models",
-  "catalogStatus": "candidate-ladder-requires-exact-windows-evidence",
+  "catalogStatus": "candidate-ladder-with-bounded-cpu-self-test",
   "source": {
     "registry": "https://registry.ollama.ai",
     "library": "qwen3.5",
@@ -29,7 +29,7 @@
       "minimumSystemMemoryGiB": 8,
       "minimumUsableGpuMemoryGiB": 0,
       "candidatePriority": 10,
-      "windowsEvidenceStatus": "required"
+      "windowsEvidenceStatus": "admitted-bounded-windows-cpu-self-test"
     },
     {
       "id": "qwen35-2b-q8",

@@ -112,6 +112,13 @@ def probe(
             assert "default-src 'self'" in response.headers["Content-Security-Policy"]
         with request(origin + "/app.js") as response:
             app_digest = __import__("hashlib").sha256(response.read()).hexdigest()
+        with request(origin + "/accessibility") as response:
+            accessibility_bytes = response.read()
+            assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+            assert response.headers["X-Frame-Options"] == "DENY"
+            assert b"(WCAG) 2.1 Level AA" in accessibility_bytes
+            assert b"not a claim of third-party certification" in accessibility_bytes
+            accessibility_digest = __import__("hashlib").sha256(accessibility_bytes).hexdigest()
         try:
             urllib.request.urlopen(origin.replace("127.0.0.1", "localhost") + "/api/bootstrap", timeout=5)
             raise AssertionError("alternate Host was accepted")
@@ -322,6 +329,7 @@ def probe(
             "updates": bootstrap["updates"],
             "privacy": bootstrap["privacy"],
             "appDigest": app_digest,
+            "accessibilityDigest": accessibility_digest,
             "assurance": assurance,
         }
     finally:

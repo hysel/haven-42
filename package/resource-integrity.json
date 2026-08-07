@@ -3,18 +3,23 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "53ad58c0ad5c22c214b06579639137be6b1e97ec6854b7f59d3a31e9d2763b76",
-      "sizeBytes": 39664
+      "sha256": "51dbabd5ce7d70928123f9db00e535a54919b26efead5840eddfcaf0b7a1c38f",
+      "sizeBytes": 46008
+    },
+    {
+      "path": "web/static/accessibility.html",
+      "sha256": "ef1c90e11292f87f78853d741b8e899cefaef2d60c2e7ac4a80d7b4b41e78362",
+      "sizeBytes": 6018
     },
     {
       "path": "web/static/app.js",
-      "sha256": "3270d40799f387715165e2fdf4bc122e8549d28b3ae7c1c2cea9044562f6d474",
-      "sizeBytes": 155920
+      "sha256": "a1d76ee29668bd2e271f02fc6ceaf0bc6b611efbb78f7c064677945c49b63fa5",
+      "sizeBytes": 190320
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "1cb36a68380c7c36936beca7f34ef713f95e6f107978484325c557a78717fe04",
-      "sizeBytes": 33193
+      "sha256": "b6af14cfc25f2dcaef2efed51151075a303b475ee7780fe367cde3bcd208b709",
+      "sizeBytes": 59712
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -53,8 +58,8 @@
     },
     {
       "path": "config/windows-alpha-model-catalog.json",
-      "sha256": "c842f3651e7fad91c4c57927bb83fa536bf8eec37ee7aff8da7ce44889e2fdf3",
-      "sizeBytes": 3649
+      "sha256": "b31bd0d72a6849c52786f4b07143a236523f6d49eb165235dbf47e2992115f74",
+      "sizeBytes": 3674
     },
     {
       "path": "config/windows-alpha-component-registry.json",

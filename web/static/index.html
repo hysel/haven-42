@@ -8,15 +8,15 @@
   <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <a class="skip-link" href="#text-panel">Skip to local AI workspace</a>
-  <div class="ambient ambient-one"></div>
-  <div class="ambient ambient-two"></div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="/" aria-label="Haven 42 home">
       <span class="brand-mark" aria-hidden="true">H42</span>
       <span><strong>Haven 42</strong><small>0.4 Alpha 1 · private AI on your computer</small></span>
     </a>
-    <div class="privacy-pill"><span class="status-dot"></span> Private session · no tracking</div>
+    <div class="privacy-pill status-indicator good" role="status">Private session · no tracking</div>
   </header>
 
   <section class="wizard-backdrop" id="setup-wizard" role="dialog" aria-modal="true" aria-labelledby="wizard-title" aria-describedby="wizard-description">
@@ -28,7 +28,7 @@
       </div>
       <section class="wizard-step" data-wizard-step="welcome">
         <p class="eyebrow">LET'S GET STARTED</p>
-        <h1 id="wizard-title">Welcome to Haven 42</h1>
+        <h2 id="wizard-title">Welcome to Haven 42</h2>
         <p id="wizard-description">Haven 42 helps you use AI on your own computer. The recommended setup checks what your computer can run and explains every download before asking permission.</p>
         <ul class="wizard-promises">
           <li>Your chats stay in memory and are not saved by Haven 42.</li>
@@ -36,14 +36,14 @@
           <li>You will see what is needed and approve it before anything is downloaded.</li>
         </ul>
         <div class="wizard-choices">
-          <button class="setup-choice primary-choice" id="wizard-guided" type="button"><strong>Set up this computer · Recommended</strong><span>Check this computer and choose a suitable local AI model.</span></button>
+          <button class="setup-choice primary-choice" id="wizard-guided" type="button"><strong>Set up this computer</strong><span>Check this computer and choose a suitable local AI model.</span></button>
           <button class="setup-choice" id="wizard-existing" type="button"><strong>Use another AI server · Advanced</strong><span>Connect to Ollama that you already run on this computer or your private network.</span></button>
           <button class="setup-choice" id="wizard-explore" type="button"><strong>Look around first</strong><span>Open Haven 42 without setting up or connecting anything.</span></button>
         </div>
       </section>
       <section class="wizard-step hidden" data-wizard-step="removed">
         <p class="eyebrow">LOCAL AI REMOVED</p>
-        <h1 id="removed-title">Local AI was removed successfully</h1>
+        <h2 id="removed-title">Local AI was removed successfully</h2>
         <p id="removed-description">Haven 42 stopped the local AI and removed its managed runtime, downloaded models, and working data. Chat is unavailable until you set up local AI again or connect another server.</p>
         <p class="field-help">The Haven 42 application remains in this extracted folder. Any future troubleshooting logs in Haven42-Logs are kept separately from the removed components.</p>
         <div class="wizard-choices" id="removed-actions">
@@ -55,7 +55,7 @@
       </section>
       <section class="wizard-step hidden" data-wizard-step="readiness">
         <p class="eyebrow">STEP 2 · CHECK YOUR COMPUTER</p>
-        <h1>What can this computer run?</h1>
+        <h2>What can this computer run?</h2>
         <p id="wizard-scan-status" role="status">Haven 42 is safely checking Windows, memory, storage, and graphics hardware. This does not change anything.</p>
         <div class="readiness-dashboard" id="wizard-system-readiness" aria-live="polite"></div>
         <div class="setup-plan" id="wizard-setup-plan"></div>
@@ -66,12 +66,12 @@
       </section>
       <section class="wizard-step hidden" data-wizard-step="provider">
         <p class="eyebrow">STEP 2 · ADVANCED CONNECTION</p>
-        <h1>Connect to another Ollama server</h1>
-        <p>If you already run Ollama elsewhere, enter its address below. Most people using guided local setup can skip this screen.</p>
+        <h2>Connect to another Ollama server</h2>
+        <p id="wizard-endpoint-help">If you already run Ollama elsewhere, enter its address below. Most people using guided local setup can skip this screen.</p>
         <form id="wizard-connection-form">
           <label for="wizard-endpoint">Ollama address</label>
           <div class="field-row compact-control-row">
-            <input id="wizard-endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off">
+            <input id="wizard-endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off" aria-describedby="wizard-endpoint-help wizard-transport-warning wizard-error" aria-errormessage="wizard-error">
             <button class="button primary" id="wizard-connect" type="submit">Check connection</button>
           </div>
           <details>
@@ -113,7 +113,7 @@
       </section>
       <section class="wizard-step hidden" data-wizard-step="ready">
         <p class="eyebrow">STEP 3 · CHOOSE YOUR AI</p>
-        <h1 id="wizard-ready-title">Choose a model</h1>
+        <h2 id="wizard-ready-title">Choose a model</h2>
         <p id="wizard-ready-summary">A model is the AI that reads your request and writes the response. Haven 42 recommends one for each task.</p>
         <p class="transport-warning hidden" id="wizard-transport-warning" role="status"></p>
         <div class="wizard-readiness" id="wizard-readiness"></div>
@@ -125,24 +125,24 @@
     </div>
   </section>
 
-  <main class="shell">
-    <aside class="rail" aria-label="Primary navigation">
-      <button class="nav-item active" id="home-nav" type="button"><span>✦</span>Chat</button>
-      <button class="nav-item hidden" id="software-nav" type="button" aria-hidden="true" tabindex="-1"><span>⌘</span>Software</button>
-      <button class="nav-item hidden" id="image-nav" type="button" aria-hidden="true" tabindex="-1"><span>◫</span>Images</button>
-      <button class="nav-item" id="models-nav" type="button"><span>◉</span>Models</button>
-      <button class="nav-item" id="system-nav" type="button"><span>◇</span>System</button>
-      <button class="nav-item" id="assurance-nav" type="button"><span>✓</span>Technical details</button>
-      <button class="nav-item" id="about-nav" type="button"><span>ⓘ</span>About</button>
+  <div class="shell">
+    <nav class="rail" aria-label="Primary navigation">
+      <button class="nav-item active" id="home-nav" type="button" aria-current="page"><span aria-hidden="true">✦</span>Chat</button>
+      <button class="nav-item hidden" id="software-nav" type="button" aria-hidden="true" tabindex="-1"><span aria-hidden="true">⌘</span>Software</button>
+      <button class="nav-item hidden" id="image-nav" type="button" aria-hidden="true" tabindex="-1"><span aria-hidden="true">◫</span>Images</button>
+      <button class="nav-item" id="models-nav" type="button"><span aria-hidden="true">◉</span>Models</button>
+      <button class="nav-item" id="system-nav" type="button"><span aria-hidden="true">◇</span>System</button>
+      <button class="nav-item" id="assurance-nav" type="button"><span aria-hidden="true">✓</span>Technical details</button>
+      <button class="nav-item" id="about-nav" type="button"><span aria-hidden="true">ⓘ</span>About</button>
       <div class="rail-note">
         <span>AI runs</span>
         <strong>On your computer</strong>
         <span>Your files</span>
         <strong>Only when attached</strong>
       </div>
-    </aside>
+    </nav>
 
-    <section class="workspace">
+    <main class="workspace" id="main-content" tabindex="-1">
       <div class="hero">
         <p class="eyebrow">PRIVATE LOCAL AI</p>
         <h1>Your AI, ready when you are.</h1>
@@ -155,6 +155,7 @@
             <div>
               <p class="eyebrow" id="capability-eyebrow">CONVERSATION</p>
               <h2 id="capability-title" tabindex="-1">Private conversation</h2>
+              <button class="button text-button section-tour-help" type="button" data-tour-section="chat" aria-label="Show help for Chat">? Help</button>
             </div>
             <div class="text-actions">
               <label class="task-mode-select"><span>Task</span>
@@ -185,14 +186,14 @@
 
           <div class="messages" id="messages" aria-live="polite">
             <article class="message assistant">
-              <div class="avatar">42</div>
+              <div class="avatar" aria-hidden="true">42</div>
               <div>
                 <strong>Haven 42</strong>
                 <p id="welcome-message">Connect your Ollama server in Setup. Once it responds, choose an installed model and we can talk.</p>
               </div>
             </article>
           </div>
-          <div class="task-event hidden" id="task-event" role="status" aria-live="polite"></div>
+          <div class="task-event hidden" id="task-event" role="status" aria-live="polite" aria-atomic="true"></div>
           <section class="alpha-metrics" aria-label="Local session resources" id="alpha-metrics">
             <span><strong>CPU</strong> <output id="alpha-cpu">Checking…</output></span>
             <span><strong>RAM</strong> <output id="alpha-ram">Checking…</output></span>
@@ -200,6 +201,7 @@
             <span><strong>Speed</strong> <output id="alpha-speed">Waiting</output></span>
             <span><strong>Session tokens</strong> <output id="alpha-tokens">0</output></span>
             <small>Live information for this session · token counts come from the AI server</small>
+            <span class="sr-only" id="resource-status-announcement" role="status" aria-live="polite" aria-atomic="true"></span>
           </section>
           <details class="run-details hidden" id="run-details">
             <summary>Response details · Advanced</summary>
@@ -244,7 +246,7 @@
             <section class="context-panel" aria-label="Attachments">
               <div class="context-toolbar">
                 <button class="button secondary context-picker" id="browse-context" type="button" disabled>Attach files</button>
-                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.csv,.json,.cs,.py,.js,.jsx,.ts,.tsx,.java,.go,.rs,.sql,.tf,.png,text/plain,text/markdown,text/csv,application/json,image/png" multiple disabled>
+                <input id="context-files" class="sr-only" type="file" accept=".txt,.md,.csv,.json,.cs,.py,.js,.jsx,.ts,.tsx,.java,.go,.rs,.sql,.tf,.png,text/plain,text/markdown,text/csv,application/json,image/png" multiple disabled tabindex="-1" aria-label="Choose attachment files">
                 <p id="context-status">No files or screenshots selected · memory only</p>
                 <button class="button text-button hidden" id="clear-context" type="button">Clear all</button>
                 <details class="context-settings">
@@ -263,8 +265,8 @@
               <div class="notice context-error hidden" id="context-error" role="alert" aria-atomic="true"></div>
               <ul class="context-files hidden" id="context-file-list" aria-label="Selected context files"></ul>
               <ul class="context-images hidden" id="context-image-list" aria-label="Selected screenshots"></ul>
-              <p class="context-warning hidden" id="context-network-warning">Your attached files will be sent to the Ollama server you connected. Only continue if you trust that server.</p>
-              <p class="context-warning hidden" id="context-image-warning">Haven 42 has not confirmed that the selected model can understand screenshots. If it cannot, the message will safely stop and your input will remain available.</p>
+              <p class="context-warning hidden" id="context-network-warning" role="note">Your attached files will be sent to the Ollama server you connected. Only continue if you trust that server.</p>
+              <p class="context-warning hidden" id="context-image-warning" role="note">Haven 42 has not confirmed that the selected model can understand screenshots. If it cannot, the message will safely stop and your input will remain available.</p>
             </section>
 
             <label class="sr-only" id="prompt-label" for="prompt">Message</label>
@@ -285,7 +287,7 @@
             </div>
           </form>
           <div class="chat-footer">
-            <span id="text-status">AI not connected</span>
+            <span id="text-status" role="status" aria-live="polite" aria-atomic="true">AI not connected</span>
             <span>Messages, attachments, and responses are not saved by Haven 42</span>
           </div>
         </section>
@@ -317,7 +319,7 @@
               <p class="eyebrow">IMAGES · PROMOTED LINUX PROFILE</p>
               <h2 id="image-title" tabindex="-1">Create an image locally</h2>
             </div>
-            <span class="badge" id="image-provider-badge">Not connected</span>
+            <span class="badge status-indicator" id="image-provider-badge" role="status" aria-live="polite" aria-atomic="true">Not connected</span>
           </div>
           <div class="workflow-planner">
             <p>Image generation is an advanced experimental feature and uses a separate ComfyUI image server on this computer. Custom workflows and internet image services are not available.</p>
@@ -345,7 +347,7 @@
                 </select>
               </label>
             </div>
-            <p class="notice">The image server may keep a copy of a generated image. Haven 42 clears its request history, but it cannot delete that separate copy. The image shown here stays in browser memory until you choose to download it.</p>
+            <p class="notice" role="note">The image server may keep a copy of a generated image. Haven 42 clears its request history, but it cannot delete that separate copy. The image shown here stays in browser memory until you choose to download it.</p>
             <button class="button primary" id="image-run-button" type="button" disabled>Generate with disclosed retention</button>
             <article class="workflow-result hidden" id="image-result" role="status" aria-live="polite">
               <img id="image-preview" tabindex="-1" alt="Generated Haven 42 result">
@@ -361,7 +363,10 @@
               <p class="eyebrow">YOUR AI MODELS</p>
               <h2 id="models-title" tabindex="-1">Choose or find a model</h2>
             </div>
-            <span class="badge">No automatic downloads</span>
+            <div class="panel-heading-actions">
+              <span class="badge">No automatic downloads</span>
+              <button class="button text-button section-tour-help" type="button" data-tour-section="models" aria-label="Show help for Models">? Help</button>
+            </div>
           </div>
           <div class="workflow-planner model-workspace">
             <p>A model is the AI that answers you. Choose one already on your server, or search for another model. Searching does not download anything.</p>
@@ -402,7 +407,10 @@
               <p class="eyebrow">ABOUT · HAVEN 42</p>
               <h2 id="about-title" tabindex="-1">Your private, local AI station</h2>
             </div>
-            <span class="badge" id="about-version">Checking version…</span>
+            <div class="panel-heading-actions">
+              <span class="badge" id="about-version">Checking version…</span>
+              <button class="button text-button section-tour-help" type="button" data-tour-section="about" aria-label="Show help for About">? Help</button>
+            </div>
           </div>
           <div class="workflow-planner about-content">
             <p>Haven 42 lets you chat, write, and summarize with AI running on your computer or another computer you trust.</p>
@@ -413,13 +421,40 @@
               <div><dt>Chat privacy</dt><dd>Kept in memory and cleared when Haven 42 closes</dd></div>
               <div><dt>This version</dt><dd>Unsigned development package for private testing</dd></div>
             </dl>
-            <p class="notice">This is an early test version and has no publisher signature. Use it only if you received it from a source you trust. Guided setup explains every download and asks permission; it never installs drivers or changes Windows settings.</p>
+            <p class="notice" role="note">This is an early test version and has no publisher signature. Use it only if you received it from a source you trust. Guided setup explains every download and asks permission; it never installs drivers or changes Windows settings.</p>
+            <section class="about-reference" aria-labelledby="accessibility-reference-title">
+              <h3 id="accessibility-reference-title">Accessibility</h3>
+              <p>Read what has been tested, the current limitations, and how to report an accessibility barrier.</p>
+              <a class="button secondary" href="/accessibility">Open the accessibility statement</a>
+            </section>
             <section class="alpha-reporting" aria-labelledby="alpha-reporting-title">
               <h3 id="alpha-reporting-title">Help us improve this Alpha</h3>
-              <p>Haven 42 can open a public report form in your normal browser. Before submitting, remove chat text, file names, addresses, usernames, full paths, keys, and other private information. For a security concern, use the private security-reporting link on that page.</p>
-              <a class="button secondary" href="https://github.com/hysel/haven-42/issues/new/choose" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Report an Alpha problem</a>
+              <p>You only need to tell us what happened. Haven 42 can prepare general computer details so you do not have to find version numbers yourself. Review the text before sharing it; prompts, responses, file names, addresses, usernames, paths, and keys are never included.</p>
+              <label for="problem-report-details">Safe computer details</label>
+              <textarea id="problem-report-details" rows="5" readonly>Choose “Prepare computer details” to collect a short, reviewable summary.</textarea>
+              <div class="diagnostic-actions">
+                <button class="button secondary" id="prepare-problem-report" type="button">Prepare computer details</button>
+                <a class="button secondary" href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open the short problem form</a>
+              </div>
+              <p class="field-help" id="problem-report-status" role="status">Nothing is collected or uploaded until you choose the button.</p>
+              <p class="field-help">Need help first? Email <a href="mailto:haven42localai@gmail.com">haven42localai@gmail.com</a>. Do not email passwords, API keys, private prompts, attached files, or raw logs.</p>
+              <p class="field-help">For a security concern, use the private security-reporting link on the problem form.</p>
             </section>
           </div>
+        </section>
+
+        <section class="panel chat-panel hidden" id="system-panel" aria-labelledby="system-workspace-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">SYSTEM</p>
+              <h2 id="system-workspace-title" tabindex="-1">AI server and this computer</h2>
+            </div>
+            <div class="panel-heading-actions">
+              <span class="badge status-indicator good">Local controls</span>
+              <button class="button text-button section-tour-help" type="button" data-tour-section="system" aria-label="Show help for System">? Help</button>
+            </div>
+          </div>
+          <div class="system-workspace" id="system-workspace-content"></div>
         </section>
 
         <section class="panel chat-panel hidden" id="assurance-panel" aria-labelledby="assurance-title">
@@ -428,7 +463,10 @@
               <p class="eyebrow">ADVANCED · TEST INFORMATION</p>
               <h2 id="assurance-title" tabindex="-1">Technical test details</h2>
             </div>
-            <span class="badge" id="assurance-badge">Loading</span>
+            <div class="panel-heading-actions">
+              <span class="badge" id="assurance-badge">Loading</span>
+              <button class="button text-button section-tour-help" type="button" data-tour-section="technical" aria-label="Show help for Technical details">? Help</button>
+            </div>
           </div>
           <div class="workflow-planner assurance-workspace">
             <p>This optional page is for advanced users and contributors. It summarizes which features and computer setups have been tested.</p>
@@ -447,22 +485,38 @@
           </div>
         </section>
 
-        <aside class="configuration-column" aria-label="Provider and system configuration">
+        <aside class="configuration-column" aria-label="Current AI and system status">
+          <section class="status-glance" aria-labelledby="status-glance-title">
+            <p class="eyebrow" id="status-glance-title">STATUS</p>
+            <div class="status-glance-connection">
+              <span class="status-indicator" id="sidebar-connection-status" role="status" aria-live="polite" aria-atomic="true">Not connected</span>
+              <strong id="sidebar-server-name">AI server not connected</strong>
+              <small id="sidebar-model-name">No model selected</small>
+            </div>
+            <div class="status-glance-stats" aria-label="Current resource use">
+              <span><strong>CPU</strong><output id="sidebar-cpu">Checking…</output></span>
+              <span><strong>RAM</strong><output id="sidebar-ram">Checking…</output></span>
+              <span><strong>GPU</strong><output id="sidebar-gpu">Checking…</output></span>
+              <span><strong>Speed</strong><output id="sidebar-speed">Waiting</output></span>
+            </div>
+            <button class="button text-button status-glance-link" id="view-system-details" type="button">View system details →</button>
+          </section>
+
           <section class="panel connection-panel" id="connection-panel">
             <div class="panel-heading">
               <div>
                 <p class="eyebrow">SETUP · AI SERVER</p>
                 <h2 id="connection-title" tabindex="-1">Another AI server</h2>
               </div>
-              <span class="badge" id="connection-badge" aria-live="polite">Not connected</span>
+              <span class="badge status-indicator" id="connection-badge" role="status" aria-live="polite" aria-atomic="true">Not connected</span>
             </div>
             <form id="connection-form">
               <label for="endpoint">Ollama address</label>
               <div class="field-row compact-control-row">
-                <input id="endpoint" name="endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off">
+                <input id="endpoint" name="endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off" aria-describedby="endpoint-help connection-transport-warning connection-error" aria-errormessage="connection-error">
                 <button class="button primary" id="connect-button" type="submit">Connect</button>
               </div>
-              <p class="field-help">A Haven-managed local setup connects automatically. Use this section later only to switch to another same-machine or private-network Ollama server. Applying changes starts a new task.</p>
+              <p class="field-help" id="endpoint-help">A Haven-managed local setup connects automatically. Use this section later only to switch to another same-machine or private-network Ollama server. Applying changes starts a new task.</p>
               <details>
                 <summary>Advanced connection settings</summary>
                 <div class="advanced-grid">
@@ -505,7 +559,7 @@
                 <p class="eyebrow">SETUP · THIS COMPUTER</p>
                 <h2 id="system-title" tabindex="-1">System and maintenance</h2>
               </div>
-              <span class="badge good">Loopback only</span>
+              <span class="badge status-indicator good" role="status">Loopback only</span>
             </div>
             <dl class="status-list">
               <div><dt>Haven 42</dt><dd id="app-version">Checking…</dd></div>
@@ -574,7 +628,7 @@
                 <p class="eyebrow">CONNECTION CHECK</p>
                 <h2>Connection status</h2>
               </div>
-              <span class="badge" id="health-badge">Offline</span>
+              <span class="badge status-indicator" id="health-badge" role="status" aria-live="polite" aria-atomic="true">Offline</span>
             </div>
             <dl class="status-list">
               <div><dt>AI server</dt><dd id="provider-health">Not connected</dd></div>
@@ -586,8 +640,27 @@
 
         </aside>
       </div>
+    </main>
+  </div>
+  <div class="section-tour-layer hidden" id="section-tour-layer" aria-hidden="true">
+    <div class="section-tour-spotlight" id="section-tour-spotlight" aria-hidden="true"></div>
+    <section class="section-tour-dialog" id="section-tour-dialog" role="dialog" aria-modal="true" aria-labelledby="section-tour-title" aria-describedby="section-tour-description" tabindex="-1">
+      <header class="section-tour-header">
+        <p class="section-tour-progress" id="section-tour-progress">Step 1 of 1</p>
+        <button class="section-tour-close" id="section-tour-close" type="button" aria-label="Close this section tour">×</button>
+      </header>
+      <h2 id="section-tour-title">Section help</h2>
+      <p id="section-tour-description"></p>
+      <div class="section-tour-dots" id="section-tour-dots" aria-hidden="true"></div>
+      <footer class="section-tour-actions">
+        <button class="section-tour-skip" id="section-tour-skip" type="button">Skip tour</button>
+        <span class="section-tour-navigation">
+          <button class="button secondary" id="section-tour-back" type="button">Back</button>
+          <button class="button primary" id="section-tour-next" type="button">Next</button>
+        </span>
+      </footer>
     </section>
-  </main>
+  </div>
   <script src="/app.js" defer></script>
 </body>
 </html>

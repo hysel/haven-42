@@ -411,6 +411,10 @@ checkbox totals below.
 
 ## Milestone 22: Unified Product UI And Task Composition
 
+- [x] Define the owner-requested Windows x64 and Linux x64 `0.4.0-alpha.2`
+  execution checklist, including Ubuntu, Debian, Mint, Pop!_OS, Fedora,
+  Bazzite, CachyOS, Arch, CPU-only, NVIDIA, AMD, and Intel evidence boundaries
+  without promoting any untested target. See `docs/alpha-2-task-list.md`.
 - [x] Select and document the shared browser UI plus minimum trusted PyInstaller
   launcher/service as the active cross-platform development boundary; keep
   Tauri/Rust unadmitted.

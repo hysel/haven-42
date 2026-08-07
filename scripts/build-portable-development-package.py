@@ -30,6 +30,7 @@ REQUIRED_PYINSTALLER_VERSION = "6.21.0"
 LOCAL_BUILD_ENVIRONMENT = ".venv-build"
 RESOURCE_PATHS = (
     "web/static/index.html",
+    "web/static/accessibility.html",
     "web/static/app.js",
     "web/static/styles.css",
     "config/text-capability-model-recommendations.json",

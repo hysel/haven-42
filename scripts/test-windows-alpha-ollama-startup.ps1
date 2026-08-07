@@ -63,6 +63,7 @@ $previous = @{
     OLLAMA_MODELS = $env:OLLAMA_MODELS
     OLLAMA_ORIGINS = $env:OLLAMA_ORIGINS
     OLLAMA_VULKAN = $env:OLLAMA_VULKAN
+    OLLAMA_LLM_LIBRARY = $env:OLLAMA_LLM_LIBRARY
     OLLAMA_NO_CLOUD = $env:OLLAMA_NO_CLOUD
     OLLAMA_NOHISTORY = $env:OLLAMA_NOHISTORY
     HOME = $env:HOME
@@ -78,9 +79,15 @@ try {
     $env:OLLAMA_ORIGINS = "http://127.0.0.1"
     if ($BackendMode -eq "vulkan") {
         $env:OLLAMA_VULKAN = "1"
+        Remove-Item Env:OLLAMA_LLM_LIBRARY -ErrorAction SilentlyContinue
+    }
+    elseif ($BackendMode -eq "cpu") {
+        Remove-Item Env:OLLAMA_VULKAN -ErrorAction SilentlyContinue
+        $env:OLLAMA_LLM_LIBRARY = "cpu"
     }
     else {
         Remove-Item Env:OLLAMA_VULKAN -ErrorAction SilentlyContinue
+        Remove-Item Env:OLLAMA_LLM_LIBRARY -ErrorAction SilentlyContinue
     }
     if ($ConstrainedProfile) {
         $managedRoot = [IO.Directory]::GetParent($models).FullName
@@ -208,7 +215,7 @@ finally {
         $process.WaitForExit()
     }
     foreach ($name in @(
-        "OLLAMA_HOST", "OLLAMA_MODELS", "OLLAMA_ORIGINS", "OLLAMA_VULKAN",
+        "OLLAMA_HOST", "OLLAMA_MODELS", "OLLAMA_ORIGINS", "OLLAMA_VULKAN", "OLLAMA_LLM_LIBRARY",
         "OLLAMA_NO_CLOUD", "OLLAMA_NOHISTORY", "HOME", "USERPROFILE",
         "LOCALAPPDATA", "APPDATA", "TEMP", "TMP"
     )) {

@@ -30,6 +30,19 @@ Provider software may have its own retention behavior. Haven 42 discloses known
 provider-side image retention before generation and cannot promise deletion
 from a separately operated provider.
 
+## Browser Preferences
+
+Haven 42 stores one small, versioned browser preference that records whether
+the short help tour for Chat, Models, System, Technical details, and About has
+been completed or dismissed. Each value is only `true` or `false`. This keeps a
+finished tour from opening automatically on later visits while still allowing
+the user to reopen it with the section's **Help** button.
+
+This preference contains no prompt, response, attachment information, model,
+provider address, API key, system detail, identity, or usage history. Skipping,
+closing, or completing a tour records the same `true` value; partial progress
+is not retained.
+
 ## User-Requested Network Operations
 
 Network access occurs only for an explicit feature the user activates:
