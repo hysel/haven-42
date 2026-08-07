@@ -13,9 +13,19 @@ documentation.
 
 ## Purpose
 
-This repository defines an evidence-gated, local-first AI workbench for individual users, developers, teams, consultants, and enterprise groups. It combines repeatable software-engineering workflows with repository-optional chat, writing, summarization, and image capabilities under common routing, approval, privacy, and typed-artifact contracts.
+Haven 42 is a private AI app for people who want to chat, write, and summarize
+without sending their work to a public AI service. The app runs on the user's
+computer and opens in a normal browser.
 
-The engineering pack turns common senior engineering activities into version-controlled prompts, rules, agents, and templates that can be reviewed, improved, and reused across repositories. The broader Haven 42 product now includes a runnable loopback-only local web experience over the same tested contracts and an unsigned PyInstaller one-folder development package. Tauri/Rust remains unadmitted.
+This repository also contains developer tools that predate the everyday app.
+Those tools are now released separately as **Haven 42 Local LLM IDE Tools**.
+They help configure Continue, Aider, and OpenCode, but they are not required by
+the Haven 42 app and are not included in its package.
+
+The code still uses strict internal checks for network access, file access,
+processes, downloads, and package contents. User instructions should explain
+the result of those checks in normal language rather than exposing internal
+contract terms.
 
 Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence. Linux Intel Arc B580 has candidate-only llama.cpp SYCL and OpenVINO GenAI evidence, while Windows OpenVINO is separately candidate-only and native Windows llama.cpp SYCL failed its model-load gate; none is selectable or packaged. Every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
 

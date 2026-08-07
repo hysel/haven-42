@@ -13,9 +13,8 @@
 
 > **Windows Alpha available:** `0.4.0-alpha.1` targets invited Windows
 > 11 x64 testing with Chat, Writing, and Summarization in one text workspace.
-> Its unsigned package and managed current-user setup are admitted only for
-> this early test boundary. See the
-> [Alpha boundary](docs/windows-alpha-0.4-alpha-1.md).
+> Its unsigned package and local setup are available only for this early test.
+> See [what the Alpha includes](docs/windows-alpha-0.4-alpha-1.md).
 
 Download the unsigned package from the
 [Haven 42 0.4.0 Alpha 1 prerelease](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1).
@@ -23,18 +22,18 @@ Testers should use the
 [Windows Alpha download and feedback guide](docs/windows-alpha-download-and-feedback.md)
 to verify the download and report problems without exposing private data.
 
-Haven 42 is a local-first AI workbench for private chat, writing, and
-summarization. It runs in your web browser, but the application itself runs on
-your computer. It can use an AI model on the same computer or one on a private
-server you choose.
+Haven 42 is a private app for chat, writing, and summarization. It opens in
+your web browser, but it runs on your computer. It can use a model on the same
+computer or on a private server you choose.
 
 You do not need to understand Python, model sizes, graphics runtimes, or server
 settings to use guided setup. Haven 42 checks your computer, recommends a safe
 choice, explains each download, and asks before making the approved changes.
 
-The primary experience is for everyday users. Deeper software-engineering tools
-for Continue, Aider, and OpenCode remain available to advanced users and
-contributors.
+The main download is for everyday use. Coding tools for Continue, Aider, and
+OpenCode are now kept in a separate
+[Local LLM IDE Tools package](packages/local-llm-ide/README.md). You do not
+need that package to use Haven 42.
 
 ## What works today
 
@@ -46,9 +45,9 @@ contributors.
 | Attachments | Accepts a bounded set of selected UTF-8 text, CSV, JSON, source-code, and PNG screenshot files. Clipboard PNG paste is supported. Attachments are never executed. |
 | Response display | Safely renders headings, lists, emphasis, code, quotations, and Unicode emoji without model-supplied active HTML or links. |
 | Response information | Shows token totals, response time, and tokens per second. |
-| Local images | Haven connects to separately acquired providers and never bundles their engines, models, drivers, or installers. Linux ComfyUI/SDXL is validated for one promoted loopback profile; Windows profiles remain independently gated. |
+| Local images | Haven connects to image software that the user installs separately. One Linux ComfyUI/SDXL setup has passed testing. Windows image setup is not ready. |
 | Software workflows | Shows registered read-only plans. The browser cannot start their processes, read a repository, or write files. |
-| Evidence and readiness | Displays bounded system readiness and bundled sanitized evidence without running background tests. |
+| System information | Shows whether the computer is ready and summarizes completed tests without running background checks. |
 
 Music and video are not available in the product. Audio has partial external
 Linux CUDA evidence, and video remains research-only after a fail-closed
@@ -143,7 +142,7 @@ artifacts.
 ## Using Haven 42
 
 - Press **Enter** to send and **Shift+Enter** for a new line.
-- Use **Up** and **Down** at the appropriate text boundary to recall prompts.
+- Use **Up** and **Down** at the start or end of the text box to recall prompts.
 - Use **New task** to clear the current in-memory conversation.
 - Open **Models** to choose an installed model or explicitly search the public
   catalog without downloading anything.
@@ -198,35 +197,33 @@ for scope, evidence, blockers, and exit criteria.
 
 | Milestone | Status | Summary |
 | --- | --- | --- |
-| Milestone 20: Hardware-Aware Model And Config Automation | Complete | Recommendation, configuration, dispatch, health, cleanup, and evidence foundations. |
-| Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional local text and image capabilities, routing, and typed artifacts. |
-| Milestone 22: Unified Product UI And Task Composition | In progress | Runnable browser product, read-only workflow plans, hardened unsigned portable packages, published Windows `0.4.0-alpha.1` prerelease, and inactive post-quantum migration planning; signing, stable or production promotion, PQC activation, and broader machine effects remain gated. |
-| Milestone 23: Native Local Image Generation | In progress | One promoted Linux profile; Windows NVIDIA and AMD exact-profile cells are partial; remaining lifecycle and platform gates are open. |
-| Milestone 24: Local Music And Audio Generation | Live feasibility in progress | Partial Linux CUDA evidence exists; no audio provider is promoted. |
-| Milestone 25: Local Video Generation | Research in progress | Candidate research and a fail-closed Quadro hardware/storage preflight exist; no executable video integration ships. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact NVIDIA, AMD, and Intel evidence plus bounded Ollama 0.32.5 tool-envelope validation exists; WSL2 AMD and every tool-execution path remain unadmitted. |
-| Milestone 27: Local Knowledge Context And Retrieval | In progress | Bounded attachments are available; lexical, temporary-database, explicit-folder, parser, embedding-evaluation, and encrypted-library foundations remain inactive or independently gated. |
-| Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Offline security contracts, transport guards, exact approval state, and a disabled fixed-provider fixture adapter exist without live transport, UI, page retrieval, or a model tool. |
+| Milestone 20: Choose models for the computer | Complete | Haven can inspect hardware and recommend suitable local model settings. |
+| Milestone 21: Shared text and image foundations | Complete | Chat, writing, summarization, and the tested image path use common safety checks. |
+| Milestone 22: Main application | In progress | The browser app and Windows Alpha work. Signing, normal installers, and stable release work remain open. |
+| Milestone 23: Local images | In progress | One Linux setup works. Windows setup is still being tested. |
+| Milestone 24: Local audio | In progress | Some Linux testing passed, but audio is not available in the app. |
+| Milestone 25: Local video | Research | Video is not available in the app. |
+| Milestone 26: Match model size to hardware | More hardware tests complete | NVIDIA, AMD, and Intel tests exist; automatic model conversion is not available. |
+| Milestone 27: Use local files as context | In progress | Selected text and PNG attachments work. Folder libraries, PDF, and Office files are not ready. |
+| Milestone 28: Web research | Proposed | Web research is not available in the app. |
 
-The project uses a pass-before-ship rule: evidence is specific to the exact
-artifact, model, provider, operating system, hardware, and operation tested.
-A fixture-backed contract does not establish general native support.
+Haven 42 lists a feature as working only when that exact software, model,
+operating system, and hardware combination has passed its tests. A simulated
+test does not prove that the feature works on a real computer.
 
-## For software engineering
+## Coding tools are a separate package
 
-The maintained agent surfaces are Continue, Aider, and OpenCode. Begin with
-read-only review and planning; approve narrow writes only after confirming the
-target and independently verifying the resulting diff.
+If you want to connect Continue, Aider, or OpenCode to local Ollama, use the
+[Local LLM IDE Tools package](packages/local-llm-ide/README.md). It has one
+small setup command, previews changes before writing, and contains only the
+files needed for those tools. It does not include the Haven 42 app, test
+scripts, Ollama, models, IDEs, or drivers.
 
-- [VS Code and Continue setup](docs/vscode-continue-setup.md)
-- [Agent surface options](docs/agent-surface-options.md)
-- [Agent surface solutions](docs/agent-surface-solutions.md)
-- [Setup paths](docs/setup-paths.md)
-- [Tool-use modes](docs/tool-use-modes.md)
-- [Approved tool-backed changes](docs/approved-tool-backed-changes.md)
-
-These engineering tools operate outside the everyday browser flow and may have
-separate repository, software, or network effects.
+Contributors can still read the detailed [IDE compatibility notes](docs/agent-surface-options.md),
+[Continue testing guide](docs/continue-cli-model-testing.md), and
+[setup design](docs/agent-surface-solutions.md). The complete
+[setup-path reference](docs/setup-paths.md) remains available for maintainers.
+Those documents are not part of the normal app setup.
 
 ## Documentation
 

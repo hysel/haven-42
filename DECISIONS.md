@@ -2,6 +2,27 @@
 
 This file records important project decisions. Use it for choices that affect architecture, compatibility, governance, or long-term maintenance.
 
+## 2026-08-06: Ship IDE Tools Separately From The Haven 42 App
+
+Status: Accepted
+
+The repository grew from a Continue configuration bundle into an everyday
+local AI application. Keeping both deliverables in one download made the app
+harder to understand and left users facing hundreds of maintainer scripts.
+
+The Haven 42 app and the Local LLM IDE Tools are now separate packages. The
+IDE package contains one dependency-free setup helper and the reviewed
+Continue assets. It can create local settings for Continue, Aider, and
+OpenCode, but it does not install those programs or bundle Ollama, models,
+drivers, IDEs, or the Haven 42 browser app. Setup is preview-first, existing
+files require an explicit replacement choice, and backups are created before
+replacement.
+
+The source repository may retain maintainer scripts needed for testing and
+release work. End-user documentation must not send ordinary users into that
+folder. Public app documentation uses normal language; detailed contract and
+test terminology belongs in contributor and security documents.
+
 ## 2026-08-06: Keep Runtime Selection Operating-System-Aware And Owner-Controlled
 
 Status: Accepted

@@ -5,6 +5,19 @@ The recovered 374-task local-batch plan is reconciled separately in
 blocked, deferred, and not-started records must not be inferred from the parent
 checkbox totals below.
 
+## Product and IDE package split
+
+- [x] Separate the Continue, Aider, and OpenCode setup experience from the
+  everyday Haven 42 application package.
+- [x] Add a small preview-first setup helper for the supported IDE tools.
+- [x] Build the IDE package from an explicit file list with a manifest and
+  SHA-256 checksum.
+- [x] Exclude the browser app, maintainer scripts, third-party software,
+  models, drivers, IDEs, and installers from the IDE package.
+- [x] Add cross-platform hostile and archive tests for the IDE package.
+- [x] Explain in plain language that ordinary Haven 42 users do not need the
+  IDE package or the repository's internal scripts.
+
 ## Milestone 1: Minimum Usable Pack
 
 ### Project Documentation

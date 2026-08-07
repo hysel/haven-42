@@ -61,7 +61,7 @@
     "complete": "(?i)^complete$",
     "in-progress": "(?i)\\bin progress\\b",
     "research": "(?i)\\bresearch\\b",
-    "evidence-expanded": "(?i)\\bevidence expanded\\b",
+    "evidence-expanded": "(?i)(\\bevidence expanded\\b|\\bmore hardware tests complete\\b)",
     "proposed": "(?i)\\bproposed\\b"
   },
   "requiredMarkers": {

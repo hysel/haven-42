@@ -129,6 +129,26 @@ the exact SHA, run URL, and one of `Pushed`, `CI running`, `CI passed`, or
 
 ## Build Release Artifacts
 
+The Haven 42 app and the optional coding tools are different packages. Do not
+ship the full source repository to an app user.
+
+Build the development Local LLM IDE Tools ZIP with:
+
+```text
+python packages/local-llm-ide/build.py
+```
+
+That builder uses an explicit file list and writes a ZIP, SHA-256 checksum,
+and JSON manifest under `dist/local-llm-ide`. It includes the small setup
+helper and Continue assets only. It excludes the browser app, maintainer test
+scripts, validation records, Ollama, models, IDEs, drivers, and third-party
+installers. Publishing this development ZIP still requires a separate release
+decision and successful hosted checks.
+
+The older `build-release-package.*` commands below reproduce the historical
+`0.3.0` source/configuration archive. They are retained for that release line;
+they are not the packaging path for the Haven 42 app or the new IDE tools ZIP.
+
 Use the packaging scripts after validation passes and the working tree is clean.
 The scripts package tracked repository files, write a manifest, and create a
 SHA-256 checksum next to the archive.
