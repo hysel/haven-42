@@ -52,6 +52,7 @@ run_test() {
   category="fast"
   case "$name" in
     "release packaging scripts define archives, checksums, and sanitized dry runs"|\
+    "standalone local LLM IDE package is narrow and safe"|\
     "runtime context generation captures useful files and excludes build output"|\
     "install script dry run does not modify target repository"|\
     "project classifier emits a sanitized evidence-backed profile"|\
@@ -1885,25 +1886,21 @@ test_solution_architecture_review_doc() {
     grep -q "headless Linux" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "Microsoft Store MSIX signing or the SignPath Foundation" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "Defer Apple Developer Program enrollment" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
-    grep -q "Milestone 22: Unified Product UI And Task Composition | In progress" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete" "$REPO_ROOT/README.md" &&
-    grep -q "Milestone 22: Unified Product UI And Task Composition | In progress" "$REPO_ROOT/README.md" &&
+    grep -Eq "Milestones 1.+21 \| Complete" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "Milestone 22 | Active" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\[x\] Select and document the shared browser UI" "$REPO_ROOT/TODO.md" &&
     grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/README.md" &&
     grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/README.md" &&
-    grep -q "local-first AI workbench" "$REPO_ROOT/README.md" &&
-    grep -q "Continue, Aider, and OpenCode" "$REPO_ROOT/README.md" &&
-    grep -q "general.chat" "$REPO_ROOT/README.md" &&
-    grep -q "content.write" "$REPO_ROOT/README.md" &&
-    grep -q "content.summarize" "$REPO_ROOT/README.md" &&
-    grep -q "media.image.create" "$REPO_ROOT/README.md" &&
-    grep -q "pass-before-ship" "$REPO_ROOT/README.md" &&
-    grep -q "Milestone 22: Unified Product UI And Task Composition" "$REPO_ROOT/README.md" &&
-    grep -q "Milestone 23: Native Local Image Generation" "$REPO_ROOT/README.md" &&
-    grep -q "Milestone 24: Local Music And Audio Generation" "$REPO_ROOT/README.md" &&
-    grep -q "Milestone 25: Local Video Generation" "$REPO_ROOT/README.md" &&
-    grep -q "Linux ComfyUI/SDXL.*validated" "$REPO_ROOT/README.md" &&
+    grep -q "private app for chat, writing, and summarization" "$REPO_ROOT/README.md" &&
+    grep -q "Coding tools for Continue, Aider, and" "$REPO_ROOT/README.md" &&
+    grep -q "Continue" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
+    grep -q "Aider" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
+    grep -q "OpenCode" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
+    grep -q "## Milestone 22" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "## Milestone 23" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "## Milestone 24" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "## Milestone 25" "$REPO_ROOT/ROADMAP.md" &&
+    grep -q "One Linux ComfyUI/SDXL setup has passed testing" "$REPO_ROOT/README.md" &&
     grep -q "documentation-only candidate inventories" "$REPO_ROOT/README.md" &&
     ! grep -Eq '(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})' "$REPO_ROOT/README.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
@@ -2056,6 +2053,10 @@ test_comfyui_setup_guide_contract() {
 run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
+test_local_llm_ide_package() {
+  python3 "$REPO_ROOT/packages/local-llm-ide/test_package.py" | grep -q "30 checks"
+}
+run_test "standalone local LLM IDE package is narrow and safe" test_local_llm_ide_package
 run_test "evidence catalog has valid schema and sanitized links" test_evidence_catalog_schema
 test_desktop_runtime_and_ipc_contracts() {
   dependency="$REPO_ROOT/docs/desktop-runtime-dependency-evaluation.md"

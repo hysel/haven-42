@@ -62,8 +62,8 @@ def main() -> int:
         ),
         (
             "README.md",
-            "| Milestone 25: Local Video Generation | Research in progress |",
-            "| Milestone 25: Local Video Generation | Complete |",
+            "| Milestone 25: Local video | Research |",
+            "| Milestone 25: Local video | Complete |",
         ),
         (
             "ROADMAP.md",

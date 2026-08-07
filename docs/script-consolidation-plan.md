@@ -2,15 +2,21 @@
 
 ## Purpose
 
-This plan keeps the command surface small for end users while preserving tested scripts for maintainers and automation.
+The `scripts` folder is now an internal maintainer area. App users are not sent
+there. Continue, Aider, and OpenCode users receive the separate Local LLM IDE
+Tools package, which exposes one setup helper and keeps its internal file list
+small.
 
-The goal is not to hide behavior. The goal is to move repeated behavior into shared engines, registries, or dispatchers, then keep only thin wrappers where they make the pack easier to use on a specific platform or agent surface.
+The remaining consolidation work reduces maintenance cost; it is not an
+end-user navigation strategy. The goal is to move repeated behavior into
+shared engines and keep thin platform wrappers only where they remain useful.
 
 ## Principles
 
 - Treat `config/workflows.json`, `config/workflow-envelope-contract.json`, `scripts/invoke-workflow.ps1`, and the cross-platform `scripts/invoke-workflow.*.sh` wrappers as the stable workflow API for menus, reports, and the future UI.
 - Keep repeated business logic in shared engines instead of duplicating it across surface-specific scripts.
-- Keep thin wrapper scripts when they improve beginner usability, cross-platform ergonomics, or agent-specific command naming.
+- Keep platform launchers as thin wrappers when they make setup easier across
+  Windows, Linux, and macOS or preserve a tool's familiar command name.
 - Keep individual script docs in `docs/script-reference-appendix.md` for maintainers, troubleshooting, and automation authors.
 - Do not remove a script until README links, workflow registry entries, appendix coverage, tests, release readiness checks, and migration notes agree.
 - Do not promote a planned or blocked agent surface while consolidating scripts; promotion still depends on evidence in the surface catalogs.

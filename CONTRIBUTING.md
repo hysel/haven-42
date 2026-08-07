@@ -2,7 +2,10 @@
 
 Thank you for improving Haven 42.
 
-This repository is primarily documentation, Continue configuration, rules, prompts, agents, templates, examples, and validation guidance. Changes should make the pack more reusable, safer for enterprise repositories, and easier to validate.
+This repository contains the Haven 42 application, an optional coding-tools
+package, documentation, and the tests used to verify both. App changes and IDE
+tool changes must remain separate so one package does not silently inherit the
+other package's files or permissions.
 
 ## Contribution Principles
 
@@ -36,6 +39,7 @@ For Continue-specific changes, also inspect:
 - `.continue/prompts/`
 - `.continue/agents/`
 - `.continue/templates/`
+- `packages/local-llm-ide/`
 
 ## Change Guidelines
 

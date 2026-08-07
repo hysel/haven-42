@@ -2,14 +2,24 @@
 
 ## Overview
 
-Haven 42 is organized as a provider-neutral capability, configuration, documentation, and workflow repository. Its engineering foundation includes the `.continue` directory plus maintained Aider and OpenCode paths; its general-purpose layer adds repository-optional sessions, routing, provider adapters, and typed artifacts.
+Haven 42 now has two clearly separated deliverables:
 
-The product surface is novice-first even though its internal contracts remain
+1. **Haven 42 app** — the browser-based app for chat, writing, and
+   summarization.
+2. **Local LLM IDE Tools** — an optional package for Continue, Aider, and
+   OpenCode.
+
+The app package never includes IDE settings or engineering test scripts. The
+IDE package never includes the browser app, Ollama, models, drivers, IDEs, or
+third-party installers. Both are built from this repository, but they have
+separate manifests, checksums, instructions, and tests.
+
+The app is written for new users even though its internal checks remain
 strict and technical. The ordinary path presents one recommended action,
 explains effects and permissions in plain language, and uses progressive
-disclosure for server addresses, authentication, evidence, and implementation
-detail. Contributor documentation preserves exact contract vocabulary; users
-do not need that vocabulary to complete setup or use text features.
+disclosure for server addresses, authentication, and implementation detail.
+Contributor documentation may use exact technical terms; users do not need
+those terms to complete setup or use text features.
 
 The currently validated runtime architecture is:
 

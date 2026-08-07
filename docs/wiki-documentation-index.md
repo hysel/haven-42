@@ -54,6 +54,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Agent and engineering workflows
 
+- [[Coding Tools for Local Models|Coding-Tools-For-Local-Models]]
 - [[Agent Integration Admission Policy|Agent-Integration-Admission-Policy]]
 - [[Agent Surface Promotion Gates|Agent-Surface-Promotion-Gates]]
 - [[Agent Surface Capability Parity|Agent-Surface-Capability-Parity]]

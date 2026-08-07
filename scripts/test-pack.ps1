@@ -29,6 +29,7 @@ $integrationTests = @(
     "validate-pack fails when private endpoint is committed",
     "validate-pack fails when required safety doc is missing",
     "release packaging scripts define archives, checksums, and sanitized dry runs",
+    "standalone local LLM IDE package is narrow and safe",
     "project classifier selects sanitized rule packs across generated ecosystems",
     "sample repository factory creates expected fixtures",
     "medium language workflow matrix is complete and evidence-gated",
@@ -130,7 +131,11 @@ function Invoke-PackTest {
     }
     catch {
         $stopwatch.Stop()
-        Add-TestFailure -Name $Name -Message $_.Exception.Message
+        $failureMessage = $_.Exception.Message
+        if ($_.InvocationInfo -and $_.InvocationInfo.ScriptLineNumber) {
+            $failureMessage += " (test-pack.ps1 line $($_.InvocationInfo.ScriptLineNumber))"
+        }
+        Add-TestFailure -Name $Name -Message $failureMessage
     }
 }
 
@@ -699,6 +704,15 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains "!.env.example") -Message "A sanitized environment example should remain admissible."
     Assert-True -Condition ((Get-Content -LiteralPath $gitignorePath) -contains ".privacy-rewrite-backup/") -Message "Local privacy rewrite backups should be ignored repository-wide."
 }
+
+Invoke-PackTest "standalone local LLM IDE package is narrow and safe" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for coding-tools package validation."
+    $output = @(& $python.Source (Join-Path $repoRoot "packages/local-llm-ide/test_package.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The standalone IDE package tests should pass."
+    Assert-True -Condition (($output -join "`n") -match "30 checks") -Message "The IDE package must keep its narrow file set, preview-first writes, backups, local endpoint policy, reproducible archive, native wrapper smoke, and integrity tests."
+}
 Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
     $docPath = Join-Path $repoRoot "docs/evidence-catalog.md"
@@ -871,9 +885,12 @@ Invoke-PackTest "hardware profile scripts report CPU architecture" {
         Assert-True -Condition ($windowsProfileSource -match '\$displayClassProfiles\s*=\s*@\(Get-WindowsDisplayClassGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single display-class GPU as a one-item collection."
         Assert-True -Condition ($windowsProfileSource -match '\$nvidiaProfiles\s*=\s*@\(Get-NvidiaGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single NVIDIA GPU as a one-item collection."
         Assert-True -Condition ($windowsProfileSource -match '\$rocmProfiles\s*=\s*@\(Get-RocmGpuProfiles\)') -Message "Windows PowerShell 5.1 should preserve a single AMD GPU as a one-item collection."
-        $profileOutput = @(& $windowsProfilePath -AsJson 2>&1)
-        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows hardware profile JSON should be generated successfully."
-        $profile = ($profileOutput -join "`n") | ConvertFrom-Json
+        # A PowerShell script invocation does not reset LASTEXITCODE. Run the
+        # profile in a child process so an earlier native-command failure
+        # cannot be mistaken for a hardware-profile failure.
+        $profileResult = Invoke-CommandCapture -FilePath $windowsProfilePath -Arguments @("-AsJson")
+        Assert-Equal -Actual $profileResult.ExitCode -Expected 0 -Message "Windows hardware profile JSON should be generated successfully."
+        $profile = $profileResult.Output | ConvertFrom-Json
         foreach ($gpu in @($profile.Gpus)) {
             Assert-True -Condition ($gpu.Name.Length -le 256) -Message "Windows GPU labels must remain bounded."
             Assert-True -Condition ($gpu.Name -notmatch '[\u0000-\u001F\u007F\uFFFD]') -Message "Windows GPU labels must not expose registry control or invalid-decoding characters."
@@ -4366,8 +4383,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($doc -match "22: Unified Product UI And Task Composition \| In progress; local tools runnable \| Accessible local web text tools, registered software planning, promoted Linux image flow, hardened portable development packaging, structural trust/execution admission, offline installer/update simulation, and inactive post-quantum migration planning implemented") -Message "Solution audit should report the admitted local-web and portable development scope without broadening workflow execution, real machine effects, signing, or optional desktop runtime claims."
     Assert-True -Condition ($doc -match "Real cryptographic verification, PQC profile selection/activation, token issuance/acceptance, workflow execution, executable composition, persistence, real machine effects, remote UI access, signing, and optional Tauri packaging remain open") -Message "Solution audit should keep cryptographic trust, PQC activation, token acceptance, execution, machine effects, signing, and Tauri explicitly unadmitted."
     Assert-True -Condition ($doc -notmatch "21: General-Purpose AI Assistant And Intent Routing \| Planned" -and $doc -notmatch "22: Unified Product UI And Task Composition \| Planned") -Message "Solution audit must not retain stale Milestone 21 or 22 status."
-    Assert-True -Condition ($roadmap -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should align with the architecture audit for Milestones 21 and 22."
-    Assert-True -Condition ($readme -match "Milestone 21: General-Purpose AI Assistant And Intent Routing \| Complete" -and $readme -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "README should align with the architecture audit for Milestones 21 and 22."
+    Assert-True -Condition ($roadmap -match "Milestones 1.+21 \| Complete" -and $roadmap -match "Milestone 22 \| Active") -Message "Roadmap should summarize the current Milestone 21 and 22 status in plain language."
     Assert-True -Condition ($doc -match "Input-Dependent Decisions") -Message "Solution architecture review should list input-dependent decisions."
     Assert-True -Condition ($doc -match "new integration proposal") -Message "Solution architecture review should require removed surfaces to restart through promotion gates."
     Assert-True -Condition ($doc -match "Complete for positioning and support-tier governance") -Message "Solution architecture review should classify Milestone 14 accurately."
@@ -4390,7 +4406,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($uiDoc -match "headless Linux") -Message "Unified UI design should keep headless loopback mode separately scoped."
     Assert-True -Condition ($uiDoc -match "Microsoft Store MSIX signing or the SignPath Foundation") -Message "Unified UI design should prefer the agreed low-cost Windows signing paths."
     Assert-True -Condition ($uiDoc -match "Defer Apple Developer Program enrollment") -Message "Unified UI design should defer Apple enrollment until the public beta gate."
-    Assert-True -Condition ($roadmap -match "Milestone 22: Unified Product UI And Task Composition \| In progress") -Message "Roadmap should mark the architecture-selected UI milestone in progress."
+    Assert-True -Condition ($roadmap -match "Milestone 22 \| Active") -Message "Roadmap should mark Milestone 22 active."
     Assert-True -Condition ($todo -match "\[x\] Select and document the shared browser UI") -Message "TODO should mark the browser/PyInstaller runtime selection complete."
     Assert-True -Condition ($readme -match "docs/solution-architecture-review\.md") -Message "README should link solution architecture review."
     Assert-True -Condition ($readme -match "docs/unified-starter-toolkit-ui\.md") -Message "README should link unified UI design."
@@ -4409,11 +4425,17 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "scripts/bootstrap-macos-agent-host.sh") -Raw) -match "\.haven-42-mlx") -Message "Managed MLX path should use Haven 42."
     $legacyIdentity = @(& git -C $repoRoot grep -n -I -i -E 'engineering[ -]+agent[ -]+pack|local[ _-]+engineering[ _-]+agent[ _-]+pack' 2>$null)
     Assert-Equal -Actual $legacyIdentity.Count -Expected 0 -Message "Tracked files must not retain the former product identity or slug."
-    foreach ($marker in @("local-first AI workbench", "Continue, Aider, and OpenCode", "general.chat", "content.write", "content.summarize", "media.image.create", "pass-before-ship", "Milestone 22: Unified Product UI And Task Composition", "Milestone 23: Native Local Image Generation", "Milestone 24: Local Music And Audio Generation", "Milestone 25: Local Video Generation")) {
-        Assert-True -Condition ($readme -match [regex]::Escape($marker)) -Message "README should reflect current product position: $marker"
+    $idePackageReadme = Get-Content -LiteralPath (Join-Path $repoRoot "packages/local-llm-ide/README.md") -Raw
+    Assert-True -Condition ($readme -match "private app for chat, writing, and summarization") -Message "README should explain the app in plain language."
+    Assert-True -Condition ($readme -match "Coding tools for Continue, Aider, and\s+OpenCode are now kept in a separate") -Message "README should keep coding tools outside the everyday app flow."
+    foreach ($tool in @("Continue", "Aider", "OpenCode")) {
+        Assert-True -Condition ($idePackageReadme -match [regex]::Escape($tool)) -Message "The separate coding-tools package should document $tool."
     }
-    Assert-True -Condition ($readme -match "Linux ComfyUI/SDXL.*validated") -Message "README should state the bounded validated image baseline."
-    Assert-True -Condition ($readme -match "documentation-only candidate inventories") -Message "README should keep unshipped media capabilities clearly gated."
+    foreach ($milestone in @(22, 23, 24, 25)) {
+        Assert-True -Condition ($roadmap -match "## Milestone $milestone") -Message "The engineering roadmap should retain Milestone $milestone details."
+    }
+    Assert-True -Condition ($readme -match "One Linux ComfyUI/SDXL setup has passed testing") -Message "README should state the bounded image baseline plainly."
+    Assert-True -Condition ($readme -match "documentation-only candidate inventories") -Message "README should clearly say unshipped media candidates are documentation only."
     Assert-True -Condition ($readme -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "README should not contain a private address."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should include solution architecture backlog."
     Assert-True -Condition ($todo -match "\[x\] Add a milestone solution completeness audit") -Message "TODO should mark solution audit doc complete."
@@ -5325,7 +5347,12 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     foreach ($path in @($testPath, $policyPath, $portablePolicyPath, $recommendationPath, $lexicalContractPath, $researchContractPath, $docPath, (Join-Path $repoRoot "scripts/model_catalog_search.py"), (Join-Path $repoRoot "web/server.py"), (Join-Path $repoRoot "web/static/index.html"), (Join-Path $repoRoot "web/static/app.js"), (Join-Path $repoRoot "web/static/styles.css"))) {
         Assert-True -Condition (Test-Path -LiteralPath $path -PathType Leaf) -Message "Local-web MVP file should exist: $path"
     }
-    $result = Invoke-NativeCapture -FilePath $python.Source -Arguments @($testPath)
+    # Windows PowerShell 5.1 can promote a Python child's redirected stderr
+    # records before Invoke-NativeCapture can report the complete traceback.
+    # Run this long child suite through cmd so output remains plain text and
+    # the native exit code remains the only pass/fail signal.
+    $pythonCommand = '"{0}" "{1}"' -f $python.Source, $testPath
+    $result = Invoke-NativeCapture -FilePath "cmd.exe" -Arguments @("/d", "/s", "/c", $pythonCommand)
     Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Local-web offline integration test should pass. Output: $($result.Output)"
     $localWebResult = $result.Output
     $localWebCoverage = [regex]::Match(

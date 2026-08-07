@@ -11,6 +11,15 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Split the optional Continue, Aider, and OpenCode setup helpers into a small
+  standalone coding-tools package. It previews changes by default, verifies
+  its packaged files before use, writes only to a project folder the user
+  selects, and does not bundle or install third-party software.
+
+- Reworked the README, roadmap summary, package guidance, and writing rules so
+  people using the app see short, direct instructions while maintainer details
+  remain available in the engineering documentation.
+
 - Added a fail-closed post-publication record for the exact Windows
   `0.4.0-alpha.1` prerelease and aligned roadmap, security, preparation,
   limitations, validation, and owner-decision language with the published

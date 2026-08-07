@@ -42,6 +42,15 @@ must not make the everyday experience feel like an engineering console.
   server” over “provider,” and “this computer” over “loopback” in primary copy.
 - Use the precise term in parentheses or an Advanced section when it helps
   support and troubleshooting.
+- Do not use stock phrases such as “leverage,” “unlock,” “seamless,” “robust,”
+  “comprehensive,” or “cutting-edge” when a concrete sentence will do.
+- Avoid internal phrases such as “evidence-gated,” “capability surface,”
+  “typed artifact,” “authority boundary,” and “runtime admission” in README,
+  wiki, UI, and setup instructions. State what works, what does not work, and
+  what the user should do next. These terms remain acceptable in security and
+  maintainer documents when they have a precise defined meaning.
+- Prefer active sentences with a named subject. For example, write “Haven 42
+  checks the file before opening it,” not “file validation is performed.”
 
 ## Markdown Conventions
 
@@ -147,7 +156,7 @@ Templates should be easy to paste into issues, pull requests, architecture recor
 
 Use consistent terms:
 
-- "pack" for this repository's Continue configuration bundle
+- "IDE tools package" for the separate Continue, Aider, and OpenCode bundle
 - "agent" for a role-specific assistant definition
 - "prompt" for a task-specific workflow
 - "rule" for reusable engineering guidance

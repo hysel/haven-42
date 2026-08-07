@@ -12,16 +12,16 @@
 | --- | --- |
 | Milestones 1–21 | Complete for their defined scope. Historical detail is collapsed below. |
 | Milestone 22 | Active. The Windows Alpha is published; dependency, signing, broader lifecycle, and production gates remain open. |
-| Milestones 23–27 | Active evidence tracks for images, audio, video, quantization, and local knowledge. Each capability remains independently gated. |
-| Milestone 28 | Proposed. Controlled web research remains default-deny and runtime-unadmitted. |
+| Milestones 23–27 | Work continues on images, audio, video, model sizing, and local files. Each feature must pass its own tests before it appears in the app. |
+| Milestone 28 | Proposed. Web research is not available in the app. |
 
 Status terms are intentionally strict:
 
 - **Complete** means complete only for the milestone's written scope.
 - **Active** means work or evidence is still open.
 - **Proposed** means no runtime capability has been admitted.
-- **Gated** means implementation cannot proceed until the named security,
-  evidence, owner, hardware, or external prerequisite is satisfied.
+- **Blocked** means a named security, owner, hardware, or outside dependency
+  must be resolved before work can continue.
 
 ### Current priority order
 
@@ -34,6 +34,14 @@ Status terms are intentionally strict:
    cleanup, packaging, and source-versus-package gates.
 4. Keep Milestone 28 offline and default-deny until its network and citation
    security boundaries are independently admitted.
+
+### Product and IDE package split
+
+The everyday Haven 42 app and the optional Local LLM IDE Tools are separate
+downloads. The IDE package contains only its setup helper and the Continue
+prompt/rule files. It configures Continue, Aider, or OpenCode that the user
+already installed. It does not include the app, Ollama, models, drivers, IDEs,
+or maintainer test scripts.
 
 `ROADMAP.md` explains direction and milestone boundaries. `TODO.md` is the
 exact actionable checklist, and `config/roadmap-closure-ledger.json` ensures
