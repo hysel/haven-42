@@ -12,6 +12,20 @@ Setup shows a preview first. It writes only after you add `--apply`, stops
 before replacing existing settings unless you add `--replace`, and creates a
 backup before replacement.
 
-See the [package guide](https://github.com/hysel/haven-42/tree/main/packages/local-llm-ide)
-for build and setup commands. No public coding-tools release is claimed until
-its exact package and hosted checks are approved.
+## Download
+
+Open the
+[Local LLM IDE Tools development prerelease](https://github.com/hysel/haven-42/releases/tag/local-llm-ide-tools-v0.1.0-development)
+and download the ZIP plus its `.sha256` file. This is an unsigned development
+package, not a production release.
+
+The expected ZIP SHA-256 is:
+
+```text
+da12ab46c26aaf9ea4f4105b927345bfe3d0900a416591ba29b3a33edaf16644
+```
+
+Follow the
+[package guide](https://github.com/hysel/haven-42/tree/main/packages/local-llm-ide)
+to verify the download, extract it, preview setup, and apply only the changes
+you approve. You do not need to clone the full repository.

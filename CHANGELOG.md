@@ -11,6 +11,10 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Published the optional Local LLM IDE Tools as a separate unsigned
+  `0.1.0-development` prerelease with a SHA-256 checksum and package manifest.
+  The main README, package guide, and wiki now point users to that download.
+
 - Split the optional Continue, Aider, and OpenCode setup helpers into a small
   standalone coding-tools package. It previews changes by default, verifies
   its packaged files before use, writes only to a project folder the user

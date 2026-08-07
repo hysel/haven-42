@@ -31,10 +31,11 @@ Use semantic versioning while the pack matures:
 - Major: breaking config changes, incompatible Continue schema changes, or default integration/model posture changes.
 
 The latest stable release line is `0.3.0`. The latest public test build is the
-unsigned Windows `0.4.0-alpha.1` prerelease. Changes after those exact published
-versions remain under `Unreleased` until another version is deliberately
-prepared. Do not create a release tag until the release readiness gate and
-exact-SHA hosted CI pass.
+unsigned Windows `0.4.0-alpha.1` prerelease. The optional coding tools are a
+separate unsigned `0.1.0-development` prerelease for Continue, Aider, and
+OpenCode. Changes after those exact published versions remain under
+`Unreleased` until another version is deliberately prepared. Do not create a
+release tag until the release readiness gate and exact-SHA hosted CI pass.
 
 ## Private Alpha Preparation
 
