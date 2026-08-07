@@ -5,6 +5,7 @@
 [Quick start](#quick-start) · [What works](#what-works-today) ·
 [Roadmap](#roadmap-at-a-glance) · [Wiki](https://github.com/hysel/haven-42/wiki) ·
 [Alpha downloads and feedback](docs/windows-alpha-download-and-feedback.md) ·
+[Contact](mailto:haven42localai@gmail.com) ·
 [Code signing policy](CODE-SIGNING-POLICY.md) · [Privacy policy](PRIVACY.md)
 
 > **Before you start:** Haven 42 is still being tested. Windows may warn you
