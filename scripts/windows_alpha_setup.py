@@ -49,7 +49,8 @@ MANAGED_OLLAMA_HOST = "127.0.0.1:11435"
 MANAGED_OLLAMA_URL = "http://127.0.0.1:11435"
 MAX_PROVIDER_RESPONSE_BYTES = 4 * 1024 * 1024
 MAX_RUNTIME_FILES = 8192
-MODEL_PULL_SOCKET_TIMEOUT_SECONDS = 30
+MANAGED_PROVIDER_START_TIMEOUT_SECONDS = 120
+MODEL_PULL_SOCKET_TIMEOUT_SECONDS = 120
 RUNTIME_INTEGRITY_PREFIX = "runtime-integrity-"
 BACKEND_MODES = {"cpu", "cuda", "rocm", "vulkan"}
 COMPONENT_PROGRESS_STATES = {
@@ -69,6 +70,21 @@ MODEL_DECISION_CODES = {
     "qwen35-9b-q4": "SETUP_MODEL_QWEN35_9B_Q4_SELECTED",
     "qwen35-27b-q4": "SETUP_MODEL_QWEN35_27B_Q4_SELECTED",
     "qwen35-35b-q4": "SETUP_MODEL_QWEN35_35B_Q4_SELECTED",
+}
+SETUP_FAILURE_DIAGNOSTIC_CODES = {
+    "managed-provider-start-timeout": "MANAGED_PROVIDER_START_TIMEOUT",
+    "managed-provider-exited-before-ready": "MANAGED_PROVIDER_EXITED_EARLY",
+    "managed-provider-exited-during-validation": "MANAGED_PROVIDER_EXITED_DURING_VALIDATION",
+    "model-download-failed": "MODEL_DOWNLOAD_INTERRUPTED",
+    "managed-inference-request-failed": "MANAGED_INFERENCE_REQUEST_FAILED",
+    "managed-inference-request-rejected": "MANAGED_INFERENCE_REQUEST_REJECTED",
+    "managed-inference-response-invalid": "MANAGED_INFERENCE_RESPONSE_INVALID",
+    "managed-model-status-request-failed": "MANAGED_MODEL_STATUS_REQUEST_FAILED",
+    "managed-model-status-request-rejected": "MANAGED_MODEL_STATUS_REQUEST_REJECTED",
+    "managed-model-status-response-invalid": "MANAGED_MODEL_STATUS_RESPONSE_INVALID",
+    "managed-inference-validation-failed": "MANAGED_INFERENCE_VALIDATION_FAILED",
+    "managed-model-not-loaded": "MANAGED_MODEL_NOT_LOADED",
+    "managed-accelerator-not-active": "MANAGED_ACCELERATOR_NOT_ACTIVE",
 }
 STALE_JOURNAL_TEMP = re.compile(r"^\.setup-transaction\.json\.[0-9a-f]{16}\.tmp$")
 SAFE_PLAN_ID = re.compile(r"^[A-Za-z0-9_-]{16,128}$")
@@ -867,14 +883,16 @@ class OwnedProcess:
             raise SetupError("invalid-runtime-arguments")
         if backend_mode not in BACKEND_MODES:
             raise SetupError("invalid-runtime-backend")
-        allowed_environment = {
+        required_environment = {
             "OLLAMA_HOST", "OLLAMA_MODELS", "OLLAMA_ORIGINS", "OLLAMA_NO_CLOUD",
             "OLLAMA_NOHISTORY", "HOME", "USERPROFILE", "LOCALAPPDATA", "APPDATA",
             "TEMP", "TMP",
         }
-        expected_environment = set(allowed_environment)
+        expected_environment = set(required_environment)
         if backend_mode == "vulkan":
             expected_environment.add("OLLAMA_VULKAN")
+        elif backend_mode == "cpu":
+            expected_environment.add("OLLAMA_LLM_LIBRARY")
         models_path = Path(environment.get("OLLAMA_MODELS", "")).resolve(strict=False)
         managed_root = models_path.parent
         expected_paths = {
@@ -895,6 +913,7 @@ class OwnedProcess:
                 for name, expected in expected_paths.items()
             )
             or (backend_mode == "vulkan" and environment.get("OLLAMA_VULKAN") != "1")
+            or (backend_mode == "cpu" and environment.get("OLLAMA_LLM_LIBRARY") != "cpu")
         ):
             raise SetupError("invalid-runtime-environment")
         child_environment = {"PATH": str(executable.parent), "SYSTEMROOT": os.environ.get("SYSTEMROOT", "C:\\Windows"), **environment}
@@ -1004,6 +1023,10 @@ def _provider_json(path: str, body: dict[str, Any] | None = None, timeout: int =
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
             raw = response.read(MAX_PROVIDER_RESPONSE_BYTES + 1)
+    except urllib.error.HTTPError as error:
+        if not 400 <= error.code <= 599:
+            raise SetupError("managed-provider-request-failed") from error
+        raise SetupError("managed-provider-request-rejected") from error
     except (OSError, urllib.error.URLError) as error:
         raise SetupError("managed-provider-request-failed") from error
     if len(raw) > MAX_PROVIDER_RESPONSE_BYTES:
@@ -1017,9 +1040,18 @@ def _provider_json(path: str, body: dict[str, Any] | None = None, timeout: int =
     return value
 
 
-def wait_for_managed_provider(expected_version: str, timeout_seconds: float = 30) -> None:
+def wait_for_managed_provider(
+    expected_version: str,
+    timeout_seconds: float = MANAGED_PROVIDER_START_TIMEOUT_SECONDS,
+    process_running: Callable[[], bool] | None = None,
+    cancelled: Callable[[], bool] | None = None,
+) -> None:
     deadline = time.monotonic() + timeout_seconds
     while time.monotonic() < deadline:
+        if cancelled is not None and cancelled():
+            raise SetupError("setup-cancelled")
+        if process_running is not None and not process_running():
+            raise SetupError("managed-provider-exited-before-ready")
         try:
             value = _provider_json("/api/version", timeout=2)
             if value.get("version") == expected_version:
@@ -1086,6 +1118,8 @@ def pull_registered_model(
     except SetupError:
         raise
     except (OSError, urllib.error.URLError) as error:
+        if cancel is not None and cancel.is_set():
+            raise SetupError("setup-cancelled") from error
         raise SetupError("model-download-failed") from error
     if not isinstance(value, dict) or value.get("status") != "success":
         raise SetupError("model-download-failed")
@@ -1133,17 +1167,30 @@ def validate_managed_inference(model: dict[str, Any], gpu_required: bool) -> dic
     catalog = load_model_catalog()
     if model not in catalog["models"] or not isinstance(gpu_required, bool):
         raise SetupError("invalid-managed-validation-request")
-    generated = _provider_json(
-        "/api/generate",
-        {
-            "model": model["name"],
-            "prompt": "Reply with only the word ready.",
-            "stream": False,
-            "keep_alive": "5m",
-            "options": {"temperature": 0, "seed": 42, "num_predict": 8},
-        },
-        timeout=300,
-    )
+    try:
+        generated = _provider_json(
+            "/api/generate",
+            {
+                "model": model["name"],
+                "prompt": "Reply with only the word ready.",
+                "stream": False,
+                "keep_alive": "5m",
+                "options": {"temperature": 0, "seed": 42, "num_predict": 8},
+            },
+            timeout=300,
+        )
+    except SetupError as error:
+        code = str(error)
+        if code == "managed-provider-request-rejected":
+            raise SetupError("managed-inference-request-rejected") from error
+        if code == "managed-provider-request-failed":
+            raise SetupError("managed-inference-request-failed") from error
+        if code in {
+            "invalid-managed-provider-response",
+            "managed-provider-response-too-large",
+        }:
+            raise SetupError("managed-inference-response-invalid") from error
+        raise
     response_text = generated.get("response")
     thinking_text = generated.get("thinking", "")
     if (
@@ -1156,10 +1203,23 @@ def validate_managed_inference(model: dict[str, Any], gpu_required: bool) -> dic
         or not 1 <= generated["eval_count"] <= 64
     ):
         raise SetupError("managed-inference-validation-failed")
-    processes = _provider_json("/api/ps")
+    try:
+        processes = _provider_json("/api/ps")
+    except SetupError as error:
+        code = str(error)
+        if code == "managed-provider-request-rejected":
+            raise SetupError("managed-model-status-request-rejected") from error
+        if code == "managed-provider-request-failed":
+            raise SetupError("managed-model-status-request-failed") from error
+        if code in {
+            "invalid-managed-provider-response",
+            "managed-provider-response-too-large",
+        }:
+            raise SetupError("managed-model-status-response-invalid") from error
+        raise
     records = processes.get("models")
     if not isinstance(records, list):
-        raise SetupError("invalid-managed-provider-response")
+        raise SetupError("managed-model-status-response-invalid")
     matches = [
         item for item in records
         if isinstance(item, dict) and item.get("name") == model["name"]
@@ -1173,7 +1233,7 @@ def validate_managed_inference(model: dict[str, Any], gpu_required: bool) -> dic
         or size_vram < 0
         or size_vram > MAX_EXPANDED_BYTES * 16
     ):
-        raise SetupError("invalid-managed-provider-response")
+        raise SetupError("managed-model-status-response-invalid")
     if gpu_required and size_vram <= 0:
         raise SetupError("managed-accelerator-not-active")
     return {
@@ -1205,6 +1265,10 @@ def setup_progress_components(
             "sizeBytes": components[component_id]["byteLength"],
             "state": "present" if component_id in present else "pending",
             "progressPercent": 100 if component_id in present else 0,
+            "downloadedBytes": components[component_id]["byteLength"] if component_id in present else 0,
+            "bytesPerSecond": 0,
+            "etaSeconds": 0 if component_id in present else None,
+            "progressActive": False,
         }
         for component_id in validated["components"]
     ]
@@ -1219,6 +1283,10 @@ def setup_progress_components(
         "sizeBytes": model["modelBytes"],
         "state": "present" if model["id"] in present else "pending",
         "progressPercent": 100 if model["id"] in present else 0,
+        "downloadedBytes": model["modelBytes"] if model["id"] in present else 0,
+        "bytesPerSecond": 0,
+        "etaSeconds": 0 if model["id"] in present else None,
+        "progressActive": False,
     })
     return result
 
@@ -1244,6 +1312,7 @@ class SetupCoordinator:
             "components": [],
         }
         self._active_component_id: str | None = None
+        self._download_samples: dict[str, tuple[int, float]] = {}
         self._plan: dict[str, Any] | None = None
         self._cancel = threading.Event()
         self._thread: threading.Thread | None = None
@@ -1269,6 +1338,7 @@ class SetupCoordinator:
                 "components": setup_progress_components(self._plan, present),
             }
             self._active_component_id = None
+            self._download_samples = {}
         self._emit(
             "setup",
             f"SETUP_BACKEND_{self._plan['backendMode'].upper()}_SELECTED",
@@ -1347,10 +1417,15 @@ class SetupCoordinator:
         }
         if validated["backendMode"] == "vulkan":
             environment["OLLAMA_VULKAN"] = "1"
+        elif validated["backendMode"] == "cpu":
+            environment["OLLAMA_LLM_LIBRARY"] = "cpu"
         if not self.process.is_running():
             try:
                 self.process.start(executable, ("serve",), environment, validated["backendMode"])
-                wait_for_managed_provider(runtime_version)
+                wait_for_managed_provider(
+                    runtime_version,
+                    process_running=self.process.is_running,
+                )
             except Exception:
                 self.process.stop()
                 raise
@@ -1397,6 +1472,15 @@ class SetupCoordinator:
                 raise SetupError("invalid-component-progress")
             matches[0]["state"] = state
             matches[0]["progressPercent"] = progress
+            matches[0]["progressActive"] = state == "downloading"
+            if state in {"present", "ready", "complete"}:
+                matches[0]["downloadedBytes"] = matches[0]["sizeBytes"]
+                matches[0]["bytesPerSecond"] = 0
+                matches[0]["etaSeconds"] = 0
+            elif state in {"failed", "cancelled"}:
+                matches[0]["bytesPerSecond"] = 0
+                matches[0]["etaSeconds"] = None
+                matches[0]["progressActive"] = False
             if state in {"downloading", "verifying", "installing", "validating"}:
                 self._active_component_id = component_id
             elif self._active_component_id == component_id:
@@ -1414,6 +1498,28 @@ class SetupCoordinator:
         with self._lock:
             components = self._status["components"]
             current = next(item for item in components if item["componentId"] == component_id)
+            now = time.monotonic()
+            previous = self._download_samples.get(component_id)
+            bytes_per_second = current["bytesPerSecond"]
+            if previous is not None and completed >= previous[0] and now > previous[1]:
+                elapsed = now - previous[1]
+                if elapsed >= 0.05:
+                    bytes_per_second = min(
+                        int((completed - previous[0]) / elapsed),
+                        current["sizeBytes"] * 10,
+                    )
+            self._download_samples[component_id] = (completed, now)
+            current["downloadedBytes"] = min(completed, current["sizeBytes"])
+            current["bytesPerSecond"] = max(0, bytes_per_second)
+            current["etaSeconds"] = (
+                min(
+                    7 * 24 * 60 * 60,
+                    (current["sizeBytes"] - current["downloadedBytes"] + bytes_per_second - 1)
+                    // bytes_per_second,
+                )
+                if bytes_per_second > 0 else None
+            )
+            current["progressActive"] = True
             if current["kind"] == "model" and self._status["phase"] == "model-download":
                 calculated = 65 + component_progress * 30 // 75
                 self._status["progressPercent"] = max(
@@ -1531,6 +1637,12 @@ class SetupCoordinator:
 
     def cancel(self) -> None:
         self._cancel.set()
+        try:
+            self.process.stop(timeout_seconds=2)
+        except Exception:
+            # The worker observes the cancellation flag even if Windows does
+            # not let this request close the owned process immediately.
+            pass
 
     def _run(self, plan: dict[str, Any]) -> None:
         state_root: Path | None = None
@@ -1629,8 +1741,14 @@ class SetupCoordinator:
             }
             if plan["backendMode"] == "vulkan":
                 environment["OLLAMA_VULKAN"] = "1"
+            elif plan["backendMode"] == "cpu":
+                environment["OLLAMA_LLM_LIBRARY"] = "cpu"
             self.process.start(executable, ("serve",), environment, plan["backendMode"])
-            wait_for_managed_provider(components["ollama-windows-core"]["version"])
+            wait_for_managed_provider(
+                components["ollama-windows-core"]["version"],
+                process_running=self.process.is_running,
+                cancelled=self._cancel.is_set,
+            )
             self._set("model-download", 65)
             if registered_model_present(model):
                 self._set_component(model["id"], "ready", 100)
@@ -1648,13 +1766,19 @@ class SetupCoordinator:
             self._set("validating", 95)
             self._set_component(model["id"], "validating", 95)
             journal["phase"] = "validating"; write_journal(state_root, journal)
-            validate_managed_inference(model, plan["gpuAccelerationRequired"])
+            try:
+                validate_managed_inference(model, plan["gpuAccelerationRequired"])
+            except SetupError as error:
+                if not self.process.is_running():
+                    raise SetupError("managed-provider-exited-during-validation") from error
+                raise
             self._set_component(model["id"], "complete", 100)
             self._set("complete", 100)
             journal["phase"] = "complete"; write_journal(state_root, journal)
             self._emit("setup", "MANAGED_SETUP_COMPLETED", "completed")
         except Exception as error:
             with self._lock:
+                preserved_progress = self._status["progressPercent"]
                 active_component_id = self._active_component_id
                 active_component = next((
                     dict(item) for item in self._status["components"]
@@ -1669,6 +1793,9 @@ class SetupCoordinator:
                 "portable-data-root-unavailable",
             }:
                 self._emit("storage", "SETUP_STORAGE_WRITE_FAILED", "failed")
+            diagnostic_code = SETUP_FAILURE_DIAGNOSTIC_CODES.get(code)
+            if diagnostic_code is not None:
+                self._emit("setup", diagnostic_code, "failed")
             self._emit("setup", "MANAGED_SETUP_FAILED", "failed")
             if active_component is not None:
                 self._set_component(
@@ -1687,7 +1814,11 @@ class SetupCoordinator:
                 and _is_relative_to(staging.resolve(strict=False), state_root.resolve(strict=False))
             ):
                 shutil.rmtree(staging, ignore_errors=True)
-            self._set("cancelled" if code == "setup-cancelled" else "failed", 0, code)
+            self._set(
+                "cancelled" if code == "setup-cancelled" else "failed",
+                preserved_progress,
+                code,
+            )
             if journal is not None and state_root is not None:
                 journal["phase"] = "failed"
                 try:

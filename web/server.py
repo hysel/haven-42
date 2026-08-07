@@ -73,6 +73,7 @@ from windows_alpha import (  # noqa: E402
     ResourceHistory,
     SessionTokenTotals,
     WindowsAlphaError,
+    automatic_setup_admitted,
     driver_guidance,
     evaluate_hardware,
     load_model_catalog,
@@ -650,6 +651,52 @@ def build_model_decisions(
         "modelOptions": options,
         "downloadsPerformed": False,
     }
+
+
+def bind_managed_model_decisions(
+    connected: dict[str, Any],
+    selected: dict[str, Any],
+    installed_digests: dict[str, str],
+) -> dict[str, Any]:
+    """Make the verified managed model the default without affecting external servers."""
+    model = selected["name"]
+    expected_digest = selected["manifestDigest"]
+    actual_digest = installed_digests.get(model, "")
+    options = connected.get("modelOptions")
+    recommendations = connected.get("recommendations")
+    matching_options = [
+        item for item in options or []
+        if isinstance(item, dict) and item.get("name") == model
+    ]
+    if (
+        not MODEL_NAME.fullmatch(model)
+        or not MODEL_DIGEST.fullmatch(expected_digest)
+        or not MODEL_DIGEST.fullmatch(actual_digest)
+        or not secrets.compare_digest(expected_digest, actual_digest)
+        or not isinstance(recommendations, dict)
+        or len(matching_options) != 1
+        or not isinstance(matching_options[0].get("capabilityStatus"), dict)
+    ):
+        raise WebRequestError("managed-model-digest-mismatch", HTTPStatus.CONFLICT)
+
+    evidence_id = f"windows-alpha-{selected['id']}-managed-self-test"
+    for capability_id in CAPABILITY_PROMPTS:
+        recommendations[capability_id] = {
+            "status": "validated",
+            "model": model,
+            "evidenceId": evidence_id,
+            "digestVerified": True,
+            "hardwareFit": "validated-on-this-device",
+            "automatic": True,
+        }
+        matching_options[0]["capabilityStatus"][capability_id] = "validated"
+    matching_options[0]["digestVerified"] = True
+    connected["evidenceBoundary"].update({
+        "recommendationBinding": "managed-receipt-model-digest-and-local-self-test",
+        "immutableDigestBound": True,
+        "hardwareFitMeasured": True,
+    })
+    return connected
 
 
 def load_read_only_workflows(path: Path = WORKFLOW_REGISTRY_PATH) -> dict[str, dict[str, Any]]:
@@ -1995,7 +2042,7 @@ class HavenState:
             non_storage_blockers = set(assessment["blockers"]) - {"storage-threshold"}
             if (
                 non_storage_blockers
-                or selected["windowsEvidenceStatus"] != "validated-exact-windows-cell"
+                or not automatic_setup_admitted(selected, snapshot)
                 or assessment["systemMemoryGiB"] is None
                 or assessment["systemMemoryGiB"] < selected["minimumSystemMemoryGiB"]
                 or (
@@ -2020,6 +2067,24 @@ class HavenState:
             connected = self.connect(MANAGED_OLLAMA_URL, 120, 300, "none", "")
         except WebRequestError:
             self.alpha_setup.close()
+            raise
+        try:
+            with self.lock:
+                installed_digests = dict(self.model_digests)
+            bind_managed_model_decisions(connected, selected, installed_digests)
+        except WebRequestError:
+            self.alpha_setup.close()
+            with self.lock:
+                if self.base_url == MANAGED_OLLAMA_URL:
+                    self.base_url = None
+                    self.trust_scope = None
+                    self.authentication = NO_PROVIDER_AUTHENTICATION
+                    self.models = ()
+                    self.model_digests = {}
+                    self.ollama_version = None
+                    self.active_model = None
+                    self.used_models.clear()
+                    self.lifecycle_generation += 1
             raise
         connected["managedResume"] = resumed
         return connected
@@ -2295,6 +2360,8 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
             assets = {
                 "/": ("index.html", "text/html; charset=utf-8"),
                 "/index.html": ("index.html", "text/html; charset=utf-8"),
+                "/accessibility": ("accessibility.html", "text/html; charset=utf-8"),
+                "/accessibility.html": ("accessibility.html", "text/html; charset=utf-8"),
                 "/app.js": ("app.js", "text/javascript; charset=utf-8"),
                 "/styles.css": ("styles.css", "text/css; charset=utf-8"),
             }

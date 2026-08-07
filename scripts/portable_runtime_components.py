@@ -13,6 +13,7 @@ PROJECT_FILES = {
     "DEVELOPMENT-BUILD.txt",
     "_internal/package/resource-integrity.json",
     "_internal/web/static/index.html",
+    "_internal/web/static/accessibility.html",
     "_internal/web/static/app.js",
     "_internal/web/static/styles.css",
     "_internal/config/text-capability-model-recommendations.json",

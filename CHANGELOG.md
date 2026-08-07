@@ -11,6 +11,25 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added short, independent first-visit help tours for Chat, Models, System,
+  Technical details, and About. Each section keeps its own completion flag,
+  includes keyboard-accessible Back, Next, Skip, close, and Escape controls,
+  and can be reopened from its Help button.
+
+- Redesigned the conversation-first interface and setup presentation, added a
+  self-assessed accessibility statement and WCAG-focused keyboard, focus,
+  contrast, reduced-motion, and forced-color safeguards, and simplified the
+  Alpha problem-reporting flow without collecting private content.
+
+- Fixed interrupted managed-model recovery, generic CPU-runner selection on
+  compatible low-end Windows systems, setup progress and troubleshooting
+  explanations, and automatic reuse of the exact receipt-backed model after a
+  successful local setup.
+
+- Added the controlled `0.4.0-alpha.2` Windows and Linux preparation checklist
+  with distribution-specific evidence boundaries. The published
+  `v0.4.0-alpha.1` tag and release remain unchanged.
+
 - Published the optional Local LLM IDE Tools as a separate unsigned
   `0.1.0-development` prerelease with a SHA-256 checksum and package manifest.
   The main README, package guide, and wiki now point users to that download.

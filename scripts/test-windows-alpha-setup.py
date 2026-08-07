@@ -77,13 +77,22 @@ def main() -> int:
     cpu = MODULE.build_plan(base, model)
     assert cpu["components"] == ["ollama-windows-core"]
     assert cpu["backendMode"] == "cpu" and cpu["gpuAccelerationRequired"] is False
-    amd = MODULE.build_plan({"accelerators": [{"vendor": "AMD"}]}, model)
+    amd = MODULE.build_plan({
+        "accelerators": [{"vendor": "AMD", "memoryGiB": 16}],
+    }, model)
     assert amd["components"] == ["ollama-windows-core", "ollama-windows-amd-rocm"]
     assert amd["backendMode"] == "rocm" and amd["gpuAccelerationRequired"] is True
     intel = MODULE.build_plan({"accelerators": [{"vendor": "Intel"}]}, model)
     assert intel["components"] == ["ollama-windows-core"]
-    assert intel["backendMode"] == "vulkan" and intel["gpuAccelerationRequired"] is True
-    nvidia = MODULE.build_plan({"accelerators": [{"vendor": "NVIDIA"}]}, model)
+    assert intel["backendMode"] == "cpu" and intel["gpuAccelerationRequired"] is False
+    measured_intel = MODULE.build_plan({
+        "accelerators": [{"vendor": "Intel", "memoryGiB": 8}],
+    }, model)
+    assert measured_intel["backendMode"] == "vulkan"
+    assert measured_intel["gpuAccelerationRequired"] is True
+    nvidia = MODULE.build_plan({
+        "accelerators": [{"vendor": "NVIDIA", "memoryGiB": 16}],
+    }, model)
     assert nvidia["backendMode"] == "cuda" and nvidia["gpuAccelerationRequired"] is True
     assert cpu["driverAutomationAllowed"] is False
     assert cpu["effects"] == [
@@ -98,7 +107,7 @@ def main() -> int:
     ]}, model)
     assert mixed["backendMode"] == "rocm"
     assert mixed["components"] == ["ollama-windows-core", "ollama-windows-amd-rocm"]
-    checks += 13
+    checks += 15
     rejected("invalid-hardware-snapshot", MODULE.build_plan, {"accelerators": "Intel"}, model)
     checks += 1
 
@@ -166,7 +175,28 @@ def main() -> int:
         rejected("managed-accelerator-not-active", MODULE.validate_managed_inference, model, True)
         cpu_result = MODULE.validate_managed_inference(model, False)
         assert cpu_result["gpuAccelerationVerified"] is False
-        checks += 4
+
+        for provider_code, expected_code in (
+            ("managed-provider-request-failed", "managed-inference-request-failed"),
+            ("managed-provider-request-rejected", "managed-inference-request-rejected"),
+            ("invalid-managed-provider-response", "managed-inference-response-invalid"),
+        ):
+            MODULE._provider_json = mock.Mock(
+                side_effect=MODULE.SetupError(provider_code),
+            )
+            rejected(expected_code, MODULE.validate_managed_inference, model, False)
+
+        for provider_code, expected_code in (
+            ("managed-provider-request-failed", "managed-model-status-request-failed"),
+            ("managed-provider-request-rejected", "managed-model-status-request-rejected"),
+            ("invalid-managed-provider-response", "managed-model-status-response-invalid"),
+        ):
+            MODULE._provider_json = mock.Mock(side_effect=[
+                {"done": True, "response": "ready", "eval_count": 1},
+                MODULE.SetupError(provider_code),
+            ])
+            rejected(expected_code, MODULE.validate_managed_inference, model, False)
+        checks += 10
     finally:
         MODULE._provider_json = original_provider_json
 
@@ -246,6 +276,13 @@ def main() -> int:
         assert registered["components"][0]["displayName"] == "Ollama local runtime"
         assert registered["components"][1]["displayName"] == model["name"]
         assert all(item["state"] == "pending" and item["progressPercent"] == 0 for item in registered["components"])
+        assert all(
+            item["downloadedBytes"] == 0
+            and item["bytesPerSecond"] == 0
+            and item["etaSeconds"] is None
+            and item["progressActive"] is False
+            for item in registered["components"]
+        )
         assert diagnostic_events == [
             ("setup", "SETUP_BACKEND_CPU_SELECTED", "observed"),
             ("setup", "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_5_SELECTED", "observed"),
@@ -255,6 +292,8 @@ def main() -> int:
         progress_status = coordinator.status()
         assert progress_status["components"][0]["state"] == "downloading"
         assert progress_status["components"][0]["progressPercent"] == 18
+        assert progress_status["components"][0]["downloadedBytes"] == 1
+        assert progress_status["components"][0]["progressActive"] is True
         rejected("invalid-component-progress", coordinator._download_progress, "ollama-windows-core", 5, 4)
         rejected("invalid-component-progress", coordinator._set_component, "unknown", "ready", 100)
         rejected("approval-does-not-match-plan", coordinator.approve, "wrong", cpu["effects"])
@@ -270,7 +309,7 @@ def main() -> int:
             coordinator.register_plan,
             dict(cpu, requiredStorageBytes=cpu["requiredStorageBytes"] - 1),
         )
-        checks += 16
+        checks += 19
 
         coordinator._event_sink = lambda _category, _code, _outcome: (_ for _ in ()).throw(RuntimeError("sink unavailable"))
         coordinator.register_plan(cpu)
@@ -316,10 +355,31 @@ def main() -> int:
         assert resumed["endpoint"] == MODULE.MANAGED_OLLAMA_URL
         verify_inventory.assert_called_once()
         verify_publisher.assert_called_once()
-        wait_provider.assert_called_once_with(runtime_version)
+        wait_provider.assert_called_once_with(
+            runtime_version,
+            process_running=fake_process.is_running,
+        )
         fake_process.start.assert_called_once()
+        assert fake_process.start.call_args.args[2]["OLLAMA_LLM_LIBRARY"] == "cpu"
         assert coordinator.status()["phase"] == "complete"
-        checks += 13
+        checks += 14
+
+    assert MODULE.MANAGED_PROVIDER_START_TIMEOUT_SECONDS == 120
+    assert MODULE.MODEL_PULL_SOCKET_TIMEOUT_SECONDS == 120
+    rejected(
+        "managed-provider-exited-before-ready",
+        lambda: MODULE.wait_for_managed_provider(
+            "0.32.5", process_running=lambda: False,
+        ),
+    )
+    checks += 3
+
+    coordinator = MODULE.SetupCoordinator("z" * 16, Path.cwd() / "unused-cancel-state")
+    coordinator.process = mock.Mock()
+    coordinator.cancel()
+    assert coordinator._cancel.is_set()
+    coordinator.process.stop.assert_called_once_with(timeout_seconds=2)
+    checks += 2
 
     with tempfile.TemporaryDirectory() as directory:
         base = Path(directory).resolve()
@@ -394,10 +454,11 @@ def main() -> int:
         ):
             coordinator._run(cpu)
         assert coordinator.status()["error"] == "portable-data-journal-write-failed"
+        assert coordinator.status()["progressPercent"] == 1
         assert ("storage", "SETUP_INTERRUPTED_WRITE_RECOVERED", "warning") in diagnostic_events
         assert ("storage", "SETUP_STORAGE_WRITE_FAILED", "failed") in diagnostic_events
         assert ("setup", "MANAGED_SETUP_FAILED", "failed") in diagnostic_events
-        checks += 4
+        checks += 5
 
     with tempfile.TemporaryDirectory() as directory:
         diagnostic_events = []
@@ -410,8 +471,9 @@ def main() -> int:
         with mock.patch.object(MODULE.shutil, "disk_usage", return_value=mock.Mock(free=0)):
             coordinator._run(cpu)
         assert coordinator.status()["error"] == "insufficient-managed-storage"
+        assert coordinator.status()["progressPercent"] == 1
         assert ("storage", "SETUP_STORAGE_INSUFFICIENT", "failed") in diagnostic_events
-        checks += 2
+        checks += 3
 
     with tempfile.TemporaryDirectory() as directory:
         base = Path(directory).resolve()
@@ -458,6 +520,59 @@ def main() -> int:
             checks += 2
     finally:
         MODULE.shutil.disk_usage = original_disk_usage
+
+    with tempfile.TemporaryDirectory() as directory:
+        state_root = Path(directory).resolve() / "Haven42-Data"
+        owned = MODULE._owned_state_root(state_root, create=True)
+        runtime_version = MODULE.load_component_registry()["components"][0]["version"]
+        runtime = owned / "runtime" / runtime_version
+        runtime.mkdir(parents=True)
+        (runtime / "ollama.exe").write_bytes(b"signed-runtime")
+        coordinator_events: list[tuple[str, str, str]] = []
+        coordinator = MODULE.SetupCoordinator(
+            "r" * 16,
+            state_root,
+            lambda category, code, outcome: coordinator_events.append(
+                (category, code, outcome)
+            ) is None,
+        )
+        coordinator.register_plan(cpu)
+        coordinator.process = mock.Mock()
+        with (
+            mock.patch.object(MODULE, "verify_runtime_integrity"),
+            mock.patch.object(MODULE, "verify_authenticode"),
+            mock.patch.object(MODULE, "wait_for_managed_provider"),
+            mock.patch.object(MODULE, "registered_model_present", return_value=False),
+            mock.patch.object(
+                MODULE, "download_registered_component",
+                side_effect=AssertionError("verified runtime must not be downloaded again"),
+            ) as runtime_download,
+            mock.patch.object(
+                MODULE, "pull_registered_model",
+                side_effect=[MODULE.SetupError("model-download-failed"), None],
+            ) as model_download,
+            mock.patch.object(MODULE, "validate_managed_inference"),
+        ):
+            coordinator._run(cpu)
+            interrupted = coordinator.status()
+            assert interrupted["phase"] == "failed"
+            assert interrupted["error"] == "model-download-failed"
+            assert interrupted["progressPercent"] == 65
+            assert next(item for item in interrupted["components"] if item["kind"] == "runtime")["state"] == "ready"
+            assert next(item for item in interrupted["components"] if item["kind"] == "model")["state"] == "failed"
+            assert (
+                "setup", "MODEL_DOWNLOAD_INTERRUPTED", "failed"
+            ) in coordinator_events
+            coordinator._run(cpu)
+        assert coordinator.status()["phase"] == "complete"
+        assert runtime_download.call_count == 0
+        assert model_download.call_count == 2
+        assert coordinator.process.start.call_count == 2
+        assert all(
+            call.args[2]["OLLAMA_LLM_LIBRARY"] == "cpu"
+            for call in coordinator.process.start.call_args_list
+        )
+        checks += 11
 
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory).resolve()
@@ -514,6 +629,7 @@ def main() -> int:
             "OLLAMA_ORIGINS": "http://127.0.0.1",
             "OLLAMA_NO_CLOUD": "1",
             "OLLAMA_NOHISTORY": "1",
+            "OLLAMA_LLM_LIBRARY": "cpu",
             "HOME": str((managed_root / "home").resolve()),
             "USERPROFILE": str((managed_root / "home").resolve()),
             "LOCALAPPDATA": str((managed_root / "appdata" / "local").resolve()),
@@ -547,6 +663,7 @@ def main() -> int:
             assert popen_capture["shell"] is False
             assert popen_capture["env"]["OLLAMA_NO_CLOUD"] == "1"
             assert popen_capture["env"]["OLLAMA_NOHISTORY"] == "1"
+            assert popen_capture["env"]["OLLAMA_LLM_LIBRARY"] == "cpu"
             assert popen_capture["env"]["USERPROFILE"] == str((managed_root / "home").resolve())
             rejected(
                 "invalid-runtime-environment",
@@ -554,6 +671,14 @@ def main() -> int:
                 fake_ollama,
                 ("serve",),
                 {**process_environment, "OLLAMA_NO_CLOUD": "0"},
+                "cpu",
+            )
+            rejected(
+                "invalid-runtime-environment",
+                MODULE.OwnedProcess().start,
+                fake_ollama,
+                ("serve",),
+                {**process_environment, "OLLAMA_LLM_LIBRARY": "cpu_avx2"},
                 "cpu",
             )
             MODULE.subprocess.Popen = mock.Mock(
@@ -567,7 +692,7 @@ def main() -> int:
                 process_environment,
                 "cpu",
             )
-            checks += 11
+            checks += 13
         finally:
             MODULE.subprocess.Popen = original_popen
 

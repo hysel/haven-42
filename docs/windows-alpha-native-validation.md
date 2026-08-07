@@ -190,6 +190,17 @@ promotion:
    later relaunch could escape as a closed browser connection. They now return
    bounded setup errors while retaining fail-closed integrity and process
    ownership checks.
+8. A low-end Windows tester showed that selecting CPU mode without enforcing
+   Ollama's generic CPU runner could let runtime autodetection choose a native
+   runner that crashed during the private model test. Managed CPU mode now sets
+   the exact `cpu` library override; the same downloaded model completed the
+   bounded validation request under that override.
+9. The first successful low-end setup entered Chat without selecting the model
+   it had just validated because Chat reapplied the general external-server
+   recommendation. Receipt-backed local reconnects now bind the exact installed
+   model name and digest to the completed local self-test, select it
+   automatically for Chat, Writing, and Summaries, and leave external-server
+   recommendations unchanged.
 
 ## Remaining boundaries
 

@@ -62,7 +62,9 @@ The launcher opens `http://127.0.0.1:4242`. Use `-NoOpen` on Windows or `--no-op
 
 ## Accessibility And Capability Status
 
-The wizard is a labeled modal with an announced description and current-step state. Keyboard focus enters the wizard after secure-session bootstrap, moves to the active step, and remains trapped among visible controls until setup finishes. Provider endpoint, timeout, and cleanup controls share the main workspace's compact 36-pixel geometry and 13-pixel input typography. A skip link, visible focus styles, semantic status/alert regions, responsive layout, sufficient status contrast, and reduced-motion behavior support keyboard and assistive-technology use.
+The wizard is a labeled modal with an announced description and current-step state. Keyboard focus enters the wizard after secure-session bootstrap and moves to the active step. Tab and Shift+Tab move among its visible controls; Escape dismisses the wizard and returns focus to a usable application control. Provider endpoint, timeout, cleanup, authentication, and other primary controls have a minimum 44-pixel target. A skip link, three-pixel high-contrast focus ring, navigation/main/complementary landmarks, one page-level heading, labeled form fields, text-backed status indicators, semantic status/alert/note regions, responsive layout, deterministic contrast checks, forced-color support, and reduced-motion behavior support keyboard and assistive-technology use. Live resource values remain visually current while their polite screen-reader summary is limited to one update per minute.
+
+The separate local `/accessibility` route contains the application's self-assessed WCAG 2.1 Level AA target, implemented features, known testing gaps, technical scope, assessment approach, and accessibility issue-reporting link. The About view links to that statement. It explicitly does not claim third-party certification or completed manual testing across screen-reader and browser combinations.
 
 The capability view is read-only and engine-derived. Chat, Writing, and Summarization change from `configuration-required` to `available` only after a successful provider check. Software stays `not-admitted-in-web`; Images stays `provider-profile-required`. Clicking either unavailable navigation item explains its state and never invokes an operation.
 
@@ -254,6 +256,20 @@ or network authority.
 
 Press Enter to submit a text task. Use Shift+Enter for a new line. Input-method
 composition is not submitted until composition has ended.
+
+Chat, Models, System, Technical details, and About each provide an independent
+three-to-six-step help tour. A tour opens automatically only on the first visit
+to its own section, never navigates between sections, and can always be opened
+again from that section's **Help** button. Every step provides Back, Next, Skip,
+close, and Escape behavior; focus stays in the tour dialog and returns to the
+section when the tour closes. Skip, close, and completion all mark that section
+as seen instead of saving a resume position.
+
+The only persistent tour state is the fixed-key
+`haven42.section-tours.v1` browser preference with one boolean for each known
+section. It contains no conversation, attachment, model, provider, system, or
+identity data. Invalid or unavailable browser storage is ignored and cannot
+block the application.
 
 Up and Down recall older and newer submitted prompts when the caret is on the
 first or last textarea line respectively, so ordinary multiline cursor movement

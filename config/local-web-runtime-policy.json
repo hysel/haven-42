@@ -15,7 +15,7 @@
     "automaticLaunchUrlScope": "ipv4-loopback-http-origin-only",
       "fixedExternalNavigationUrls": [
         "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
-        "https://github.com/hysel/haven-42/issues/new/choose",
+        "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
         "https://ollama.com/download/windows"
       ],
     "fixedExternalNavigationRequiresExplicitClick": true,
@@ -25,6 +25,17 @@
     "hostHeaderValidationRequired": true,
     "csrfTokenRequiredForEffects": true,
     "contentSecurityPolicyRequired": true
+  },
+  "browserPreferences": {
+    "storageKey": "haven42.section-tours.v1",
+    "allowedFields": ["chat", "models", "system", "technical", "about"],
+    "allowedValueType": "boolean",
+    "tourProgressPersistenceAllowed": false,
+    "conversationContentAllowed": false,
+    "attachmentInformationAllowed": false,
+    "modelOrProviderInformationAllowed": false,
+    "systemOrIdentityInformationAllowed": false,
+    "credentialsAllowed": false
   },
   "providerConnections": {
     "configuredInMemoryOnly": true,

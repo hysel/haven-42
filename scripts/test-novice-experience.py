@@ -29,7 +29,7 @@ def main() -> int:
     download_guide = read("docs/windows-alpha-download-and-feedback.md")
 
     required_ui = (
-        "Set up this computer · Recommended",
+        "Set up this computer",
         "Use another AI server · Advanced",
         "Look around first",
         "Choose for me · Recommended",
@@ -42,9 +42,52 @@ def main() -> int:
         assert phrase in html or phrase in app, phrase
     assert html.count("data-wizard-progress=") == 3
     assert "STEP 4" not in html
-    assert "Report an Alpha problem" in html
+    assert "Open the short problem form" in html
+    assert "Prepare computer details" in html
+    assert "problemReportDetails" in app
+    assert "safeProblemReportValue" in app
+    assert "navigator.clipboard.writeText(details)" in app
+    assert "Local AI model for chat, writing, and summaries" in app
+    assert "Technical model name" in app
+    assert "Local text model weights" not in app
+    assert 'installLocationTitle.textContent = "Install location"' in app
+    assert "stored beside the app" in app
+    assert "Does not use Program Files or AppData" in app
     assert 'rel="noopener noreferrer"' in html
     assert 'referrerpolicy="no-referrer"' in html
+
+    for section, step_count in (
+        ("chat", 6),
+        ("models", 5),
+        ("system", 5),
+        ("technical", 4),
+        ("about", 4),
+    ):
+        assert f'data-tour-section="{section}"' in html, section
+        assert f'{section}: Object.freeze(' in app, section
+        tour_block = app.split(f'{section}: Object.freeze(', 1)[1].split("}),\n", 1)[0]
+        assert tour_block.count("{ target:") == step_count, section
+    for phrase in (
+        'id="section-tour-dialog" role="dialog" aria-modal="true"',
+        'id="section-tour-skip"',
+        'id="section-tour-back"',
+        'id="section-tour-next"',
+        'aria-label="Close this section tour"',
+    ):
+        assert phrase in html, phrase
+    for phrase in (
+        'const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1"',
+        "sectionTourState[activeSectionTour.section] = true",
+        'event.key === "Escape"',
+        'event.key !== "Tab"',
+        "returnTarget.focus({ preventScroll: true })",
+        "target.scrollIntoView({ behavior: motionBehavior()",
+        'document.querySelector(".shell").inert = true',
+        'document.querySelector(".shell").inert = false',
+    ):
+        assert phrase in app, phrase
+    assert "localStorage" in app
+    assert "resume" not in app[app.index("const SECTION_TOURS"):app.index("const state =")].lower()
 
     required_policy = (
         "novice-first",
@@ -74,6 +117,16 @@ def main() -> int:
     assert "status.error ? ` · ${status.error}`" not in app
     assert '"Provider not connected"' not in app
     assert "relevantSoftware(item.componentId)" in app
+    assert "Retry model download" in app
+    assert "installation-component-check" in app
+    assert "The model download was interrupted" in app
+    assert "System → Troubleshooting logs" in app
+    assert "View troubleshooting logs" in app
+    assert "Cancel model download" in app
+    assert "Calculating speed" in app
+    assert "Existing local download data was kept" in app
+    assert "Model download complete. The local test stopped" in app
+    assert "Retry local AI test" in app
     assert ".innerHTML" not in app
 
     reporting = f"{issue_config}\n{bug_form}\n{feedback_form}\n{download_guide}"
@@ -87,11 +140,16 @@ def main() -> int:
         "Never paste raw logs",
     ):
         assert phrase in reporting, phrase
-    assert "https://github.com/hysel/haven-42/issues/new/choose" in html
+    assert "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml" in html
+    assert "label: Package SHA-256" not in bug_form
+    assert "label: Haven 42 version" not in bug_form
+    assert "label: General computer details" not in bug_form
+    assert "Computer details prepared by Haven 42 (optional)" in bug_form
+    assert bug_form.count("required: true") == 4
     assert "password:" not in reporting.lower()
     assert "api key:" not in reporting.lower()
 
-    print(f"Novice-experience policy tests passed: {len(required_ui) + len(required_policy) + 31} checks.")
+    print(f"Novice-experience policy tests passed: {len(required_ui) + len(required_policy) + 54} checks.")
     return 0
 
 

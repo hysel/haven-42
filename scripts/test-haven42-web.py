@@ -239,6 +239,22 @@ def wait_until(predicate, timeout_seconds: float = 2.0) -> bool:
     return predicate()
 
 
+def contrast_ratio(foreground: str, background: str) -> float:
+    def luminance(value: str) -> float:
+        channels = [int(value[index:index + 2], 16) / 255 for index in (1, 3, 5)]
+        linear = [
+            channel / 12.92 if channel <= 0.04045
+            else ((channel + 0.055) / 1.055) ** 2.4
+            for channel in channels
+        ]
+        return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+
+    lighter, darker = sorted(
+        (luminance(foreground), luminance(background)), reverse=True,
+    )
+    return (lighter + 0.05) / (darker + 0.05)
+
+
 def main() -> int:
     checks = 0
     collision_attachment = [{
@@ -611,6 +627,21 @@ def main() -> int:
         assert "default-src 'self'" in headers["Content-Security-Policy"]
         token = bootstrap["sessionToken"]
         checks += 6
+
+        with urllib.request.urlopen(origin + "/accessibility", timeout=5) as response:
+            accessibility_page = response.read().decode("utf-8")
+            assert response.status == 200
+            assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+            assert response.headers["X-Frame-Options"] == "DENY"
+            assert "default-src 'self'" in response.headers["Content-Security-Policy"]
+        assert accessibility_page.count("<h1") == 1
+        assert "(WCAG) 2.1 Level AA" in accessibility_page
+        assert "self-assessed target" in accessibility_page
+        assert "Last reviewed:</strong> August 7, 2026" in accessibility_page
+        assert "has not yet been manually tested across NVDA, JAWS, VoiceOver, TalkBack" in accessibility_page
+        assert "does not currently promise a response time" in accessibility_page
+        assert '<a class="button secondary" href="/accessibility">Open the accessibility statement</a>' in (ROOT / "web/static/index.html").read_text(encoding="utf-8")
+        checks += 11
 
         status, diagnostics, _ = request_json(
             origin + "/api/alpha/diagnostics", "POST", {}, token, origin,
@@ -993,10 +1024,15 @@ def main() -> int:
                 set(item) == {
                     "componentId", "kind", "displayName", "version",
                     "technologyName", "technologyVersion", "purpose",
-                    "sizeBytes", "state", "progressPercent",
+                    "sizeBytes", "state", "progressPercent", "downloadedBytes",
+                    "bytesPerSecond", "etaSeconds", "progressActive",
                 }
                 for item in progress_components
             )
+            assert all(item["downloadedBytes"] == 0 for item in progress_components)
+            assert all(item["bytesPerSecond"] == 0 for item in progress_components)
+            assert all(item["etaSeconds"] is None for item in progress_components)
+            assert all(item["progressActive"] is False for item in progress_components)
             status, decision_diagnostics, _ = request_json(
                 origin + "/api/alpha/diagnostics", "POST", {}, token, origin,
             )
@@ -1373,6 +1409,54 @@ def main() -> int:
             "content.write": "compatible",
             "content.summarize": "compatible",
         }
+        managed_decisions = WEB.build_model_decisions(
+            ["qwen3.5:0.8b"], {}, {"qwen3.5:0.8b": "a" * 64},
+        )
+        managed_connection = {
+            **managed_decisions,
+            "evidenceBoundary": {
+                "recommendationBinding": "model-name-digest-and-capability-evidence",
+                "immutableDigestBound": False,
+                "hardwareFitMeasured": False,
+                "unknownModelsGainAuthority": False,
+            },
+        }
+        WEB.bind_managed_model_decisions(
+            managed_connection,
+            {
+                "id": "qwen35-08b-q8",
+                "name": "qwen3.5:0.8b",
+                "manifestDigest": "a" * 64,
+            },
+            {"qwen3.5:0.8b": "a" * 64},
+        )
+        assert all(
+            decision == {
+                "status": "validated",
+                "model": "qwen3.5:0.8b",
+                "evidenceId": "windows-alpha-qwen35-08b-q8-managed-self-test",
+                "digestVerified": True,
+                "hardwareFit": "validated-on-this-device",
+                "automatic": True,
+            }
+            for decision in managed_connection["recommendations"].values()
+        )
+        assert set(managed_connection["modelOptions"][0]["capabilityStatus"].values()) == {"validated"}
+        assert managed_connection["evidenceBoundary"]["hardwareFitMeasured"] is True
+        try:
+            WEB.bind_managed_model_decisions(
+                managed_connection,
+                {
+                    "id": "qwen35-08b-q8",
+                    "name": "qwen3.5:0.8b",
+                    "manifestDigest": "a" * 64,
+                },
+                {"qwen3.5:0.8b": "b" * 64},
+            )
+        except WEB.WebRequestError as error:
+            assert str(error) == "managed-model-digest-mismatch"
+        else:
+            raise AssertionError("managed model digest mismatch must fail closed")
         unavailable_catalog = WEB.HavenState(
             ROOT / "config/does-not-exist.json",
             diagnostic_root=DIAGNOSTIC_TEST_ROOT,
@@ -1407,7 +1491,7 @@ def main() -> int:
             unexpected["rendererMayPromote"] = True
             hostile_path.write_text(json.dumps(unexpected), encoding="utf-8")
             assert WEB.load_model_recommendations(hostile_path) == {}
-        checks += 8
+        checks += 12
 
         status, error, _ = request_json(
             origin + "/api/text",
@@ -2476,7 +2560,7 @@ def main() -> int:
         assert policy["browser"]["remoteAssetsAllowed"] is False
         assert policy["browser"]["fixedExternalNavigationUrls"] == [
             "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
-            "https://github.com/hysel/haven-42/issues/new/choose",
+            "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
             "https://ollama.com/download/windows",
         ]
         assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
@@ -2484,6 +2568,16 @@ def main() -> int:
         javascript = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
         html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
         styles = (ROOT / "web/static/styles.css").read_text(encoding="utf-8")
+        accessibility_html = (ROOT / "web/static/accessibility.html").read_text(encoding="utf-8")
+        assert '<main class="statement-content" id="statement-content" tabindex="-1">' in accessibility_html
+        assert '<nav class="statement-breadcrumb" aria-label="Breadcrumb">' in accessibility_html
+        assert "This is a self-assessed target, not a claim of third-party certification." in accessibility_html
+        assert "No complete manual screen-reader and browser matrix has been recorded yet" in accessibility_html
+        assert "Section help tours use labeled modal dialogs" in accessibility_html
+        assert "section help tours, chat, models, system" in accessibility_html
+        assert "<script" not in accessibility_html
+        assert ".statement-page" in styles and ".statement-content" in styles
+        checks += 6
         assert "innerHTML" not in javascript and "X-Haven-Token" in javascript
         assert "/api/text" in javascript and "content.summarize" in javascript
         assert "trust-scope" not in javascript and "modelSelections" in javascript
@@ -2491,7 +2585,12 @@ def main() -> int:
         assert "Advanced manual selection" in javascript
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "Copy installation command" in html
-        assert "Components for this device" in javascript
+        assert "What Haven 42 needs" in javascript
+        assert "Local AI model for chat, writing, and summaries" in javascript
+        assert "Technical model name" in javascript
+        assert 'installLocationTitle.textContent = "Install location"' in javascript
+        assert "stored beside the app" in javascript
+        assert "Does not use Program Files or AppData" in javascript
         assert "validAlphaSetupProgress" in javascript
         assert "document.createElement(\"progress\")" in javascript
         assert 'id="models-panel"' in html and 'id="model-search-capability"' in html
@@ -2516,7 +2615,17 @@ def main() -> int:
         assert "config.apiKey.length > 0" in javascript
         assert 'byId("api-key").value = ""' in javascript
         assert "apiKey" + ": result.authentication" not in javascript
-        assert "localStorage" not in javascript and "sessionStorage" not in javascript
+        assert "sessionStorage" not in javascript and "indexedDB" not in javascript
+        assert javascript.count("window.localStorage.") == 2
+        assert 'const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1"' in javascript
+        runtime_policy = json.loads((ROOT / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
+        tour_preferences = runtime_policy["browserPreferences"]
+        assert tour_preferences["storageKey"] == "haven42.section-tours.v1"
+        assert tour_preferences["allowedFields"] == ["chat", "models", "system", "technical", "about"]
+        assert tour_preferences["allowedValueType"] == "boolean"
+        assert not tour_preferences["tourProgressPersistenceAllowed"]
+        assert not tour_preferences["conversationContentAllowed"]
+        assert not tour_preferences["credentialsAllowed"]
         assert 'button.textContent = changed ? "Apply changes" : "Continue"' in javascript
         assert "renderProviderTransportWarning" in javascript
         assert 'id="connection-transport-warning"' in html and 'id="wizard-transport-warning"' in html
@@ -2601,7 +2710,8 @@ def main() -> int:
         assert '<form class="composer-surface composer" id="text-form">' in html
         assert '<section class="context-panel" aria-label="Attachments">' in html
         assert "<summary>Attachment settings and safety</summary>" in html
-        assert "localStorage" not in javascript and "sessionStorage" not in javascript and "indexedDB" not in javascript
+        assert "sessionStorage" not in javascript and "indexedDB" not in javascript
+        assert javascript.count("window.localStorage.") == 2
         assert (
             ".system-setting select, .context-settings select { height: 36px;"
             in styles
@@ -2616,12 +2726,12 @@ def main() -> int:
         assert "/api/assurance" in javascript and 'id="assurance-panel"' in html
         assert 'id="assurance-nav"' in html and 'class="panel chat-panel hidden" id="assurance-panel"' in html
         assert html.index('id="assurance-panel"') < html.index('class="configuration-column"')
-        assert '"assurance-panel", "about-panel"' in javascript and "openAssurance" in javascript
+        assert '"system-panel", "assurance-panel", "about-panel"' in javascript and "openAssurance" in javascript
         assert 'id="assurance-surface-list"' in html and "renderAssuranceSummary" in javascript
         assert 'id="assurance-status-list"' in html and "assurance-status-item" in javascript
         assert "supportedActivities} supported" in javascript and "blockedActivities} blocked" in javascript
         assert html.count('href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') == 1
-        assert html.count('href="https://github.com/hysel/haven-42/issues/new/choose"') == 1
+        assert html.count('href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"') == 1
         assert html.count('href="http') == 2
         assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 2
         assert "read-only-assurance-summary" in javascript and "providerInvocation" in javascript
@@ -2634,12 +2744,49 @@ def main() -> int:
         assert "event.dataset.kind = kind" in javascript
         assert "innerHTML" not in javascript and "insertAdjacentHTML" not in javascript
         assert html.count('id="connection-panel"') == 1 and html.count('id="status-panel"') == 1
+        assert 'id="system-panel"' in html and 'id="system-workspace-content"' in html
+        assert 'id="sidebar-connection-status"' in html and 'id="view-system-details"' in html
+        assert 'for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel"])' in javascript
+        assert 'byId("view-system-details").addEventListener("click", openSystem)' in javascript
+        assert 'function openChat()' in javascript
+        assert 'await connectProvider(' in javascript and 'openChat();' in javascript
+        assert '["recommended", "validated"].includes(status)' in javascript
+        assert '"tested for a different task"' in javascript
+        assert ".status-glance-stats" in styles and ".system-workspace" in styles
         assert html.count('id="setup-wizard"') == 1 and 'id="wizard-connection-form"' in html
         assert all(
             marker in html
             for marker in ('id="wizard-guided"', 'id="wizard-existing"', 'id="wizard-explore"')
         )
         assert 'class="skip-link"' in html and 'aria-modal="true"' in html
+        assert 'href="#main-content"' in html
+        assert '<nav class="rail" aria-label="Primary navigation">' in html
+        assert '<main class="workspace" id="main-content" tabindex="-1">' in html
+        assert html.count("<h1") == 1
+        assert 'aria-hidden="true">✦</span>' in html
+        assert 'id="context-files"' in html and 'tabindex="-1" aria-label="Choose attachment files"' in html
+        assert 'id="home-nav" type="button" aria-current="page"' in html
+        assert 'byId(buttonId).setAttribute("aria-current", "page")' in javascript
+        assert 'aria-errormessage="connection-error"' in html
+        assert 'aria-errormessage="wizard-error"' in html
+        assert 'id="resource-status-announcement" role="status" aria-live="polite" aria-atomic="true"' in html
+        assert 'event.setAttribute("role", urgent ? "alert" : "status")' in javascript
+        assert 'box.setAttribute("role", "note")' in javascript
+        assert 'box.setAttribute("role", "alert")' in javascript
+        assert 'setAttribute("aria-invalid", "true")' in javascript
+        assert "now - state.lastMetricsAnnouncementAt >= 60000" in javascript
+        assert ':focus-visible {' in styles and 'outline: 3px solid var(--focus-ring) !important' in styles
+        assert '@media (prefers-reduced-motion: reduce)' in styles and 'animation-duration: 0.01ms !important' in styles
+        assert '@media (forced-colors: active)' in styles
+        assert contrast_ratio("#edf5f4", "#101413") >= 4.5
+        assert contrast_ratio("#94a9a7", "#252c2a") >= 4.5
+        assert contrast_ratio("#e8ca8b", "#17180f") >= 4.5
+        assert contrast_ratio("#829b96", "#252c2a") >= 3.0
+        assert contrast_ratio("#62e6c6", "#202624") >= 3.0
+        assert contrast_ratio("#eef7f5", "#12201e") >= 4.5
+        assert contrast_ratio("#cbd8d5", "#12201e") >= 4.5
+        assert contrast_ratio("#b8c7c4", "#12201e") >= 4.5
+        assert contrast_ratio("#f0bd63", "#12201e") >= 3.0
         assert 'id="capability-panel"' in html and 'id="evidence-panel"' in html
         assert html.index('id="text-panel"') < html.index('id="connection-panel"')
         assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
@@ -2665,7 +2812,7 @@ def main() -> int:
         assert status == 200 and diagnostics_after_removal["removedForSession"] is True
         assert not DIAGNOSTIC_TEST_ROOT.exists()
         checks += 3
-        checks += 107
+        checks += 130
     finally:
         app.shutdown()
         app.server_close()

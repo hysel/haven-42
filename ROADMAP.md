@@ -25,14 +25,20 @@ Status terms are intentionally strict:
 
 ### Current priority order
 
-1. Stabilize the published Windows Alpha from tester feedback and complete its
-   exact packaged-dependency and license review.
-2. Close remaining Milestone 22 release, lifecycle, and platform evidence
+1. Stabilize the published Windows Alpha from tester feedback and prepare the
+   separate Windows x64 and Linux x64 `0.4.0-alpha.2` candidates through the
+   [Alpha 2 task list](https://github.com/hysel/haven-42/blob/main/docs/alpha-2-task-list.md). Linux promotion begins with
+   Ubuntu and Mint targets plus explicitly labelled Debian, Pop!_OS, Fedora,
+   Bazzite, CachyOS, and Arch evidence; a passing distribution does not promote
+   another one.
+2. Complete the exact packaged-dependency and license review for both Alpha 2
+   application archives and their separately downloaded managed components.
+3. Close remaining Milestone 22 release, lifecycle, and platform evidence
    without enabling signing, installers, automatic updates, or production
    promotion prematurely.
-3. Advance Milestones 23–27 only through their independent hardware, security,
+4. Advance Milestones 23–27 only through their independent hardware, security,
    cleanup, packaging, and source-versus-package gates.
-4. Keep Milestone 28 offline and default-deny until its network and citation
+5. Keep Milestone 28 offline and default-deny until its network and citation
    security boundaries are independently admitted.
 
 ### Product and IDE package split

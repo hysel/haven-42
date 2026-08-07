@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Accessibility Statement · Haven 42</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="statement-page">
+  <a class="skip-link" href="#statement-content">Skip to accessibility statement</a>
+  <header class="statement-header">
+    <a class="brand" href="/" aria-label="Return to Haven 42">
+      <span class="brand-mark" aria-hidden="true">H42</span>
+      <span><strong>Haven 42</strong><small>Accessibility statement</small></span>
+    </a>
+  </header>
+
+  <main class="statement-content" id="statement-content" tabindex="-1">
+    <nav class="statement-breadcrumb" aria-label="Breadcrumb">
+      <a href="/">Haven 42</a><span aria-hidden="true">/</span><span aria-current="page">Accessibility</span>
+    </nav>
+
+    <header class="statement-introduction">
+      <p class="eyebrow">REFERENCE</p>
+      <h1>Accessibility statement</h1>
+      <p class="statement-updated"><strong>Last reviewed:</strong> August 7, 2026</p>
+      <p>Haven 42 aims to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA. This is a self-assessed target, not a claim of third-party certification.</p>
+    </header>
+
+    <section aria-labelledby="completed-work">
+      <h2 id="completed-work">What has been implemented</h2>
+      <ul>
+        <li>Keyboard access for navigation, setup, chat controls, forms, native dropdowns, attachments, and disclosures.</li>
+        <li>Visible focus indicators and minimum 44 by 44 pixel targets for primary interactive controls.</li>
+        <li>Navigation, main-content, complementary-content, heading, label, status, alert, and note semantics for assistive technology.</li>
+        <li>Text, warning, status, focus, and control-boundary colors checked against WCAG AA contrast thresholds.</li>
+        <li>Status information is provided with text as well as color. Connection errors identify and describe the affected field.</li>
+        <li>Reduced-motion and Windows forced-color preferences are supported.</li>
+        <li>Section help tours use labeled modal dialogs, keep focus within their controls, support Back, Next, Skip, close, and Escape, and return focus when dismissed.</li>
+        <li>Live resource information remains visible but screen-reader announcements are limited to no more than once per minute.</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="known-limitations">
+      <h2 id="known-limitations">Known limitations</h2>
+      <ul>
+        <li>The interface has not yet been manually tested across NVDA, JAWS, VoiceOver, TalkBack, and their supported browser combinations.</li>
+        <li>Live system statistics use a polite status region, but that behavior has not been verified with every screen reader and browser combination.</li>
+        <li>Automated keyboard and responsive-layout checks do not replace a complete manual keyboard, zoom, and screen-reader review.</li>
+        <li>The setup wizard keeps keyboard focus within its visible controls while open. Escape closes it and returns focus to the application.</li>
+        <li>The section help tours have automated keyboard, focus, reduced-motion, and responsive-positioning coverage, but have not yet been manually verified with the full screen-reader matrix above.</li>
+      </ul>
+      <p>Testing is ongoing. This section will be updated when additional barriers or validation results are identified.</p>
+    </section>
+
+    <section aria-labelledby="technical-scope">
+      <h2 id="technical-scope">Technical scope</h2>
+      <dl class="statement-facts">
+        <div><dt>Covered version</dt><dd>Haven 42 desktop application 0.4.0-alpha.1</dd></div>
+        <div><dt>Covered interface</dt><dd>The bundled local web interface, setup wizard, section help tours, chat, models, system, technical details, About page, and this statement</dd></div>
+        <div><dt>Automated browser coverage</dt><dd>A locally installed Chromium-family browser in headless mode on Windows, including narrow viewport and reduced-motion checks</dd></div>
+        <div><dt>Screen-reader coverage</dt><dd>No complete manual screen-reader and browser matrix has been recorded yet</dd></div>
+      </dl>
+    </section>
+
+    <section aria-labelledby="assessment-approach">
+      <h2 id="assessment-approach">Assessment approach</h2>
+      <p>This statement is based on a repository self-assessment. The current checks include deterministic contrast calculations, static semantic and security checks, and a real-browser flow covering landmarks, focus visibility, control sizes, dialog dismissal, responsive behavior, and reduced motion. Manual testing with named screen readers has not yet been completed, so this statement does not claim that coverage.</p>
+    </section>
+
+    <section aria-labelledby="accessibility-feedback">
+      <h2 id="accessibility-feedback">Report an accessibility barrier</h2>
+      <p>Use the Haven 42 problem form and begin the report title with <strong>Accessibility:</strong>. Describe what you were trying to do, what happened, and the browser or assistive technology you used. Do not include passwords, API keys, private prompts, or attached file contents.</p>
+      <p><a class="button secondary statement-action" href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open the accessibility problem form</a></p>
+      <p>This Alpha project does not currently promise a response time. Reports will be reviewed as development capacity permits, and confirmed accessibility barriers will be tracked with the other Alpha issues.</p>
+      <p>To request a correction to this statement, use the same form and identify the section that needs an update.</p>
+    </section>
+
+    <p><a class="statement-back" href="/">← Return to Haven 42</a></p>
+  </main>
+</body>
+</html>
