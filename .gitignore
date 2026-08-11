@@ -1,6 +1,8 @@
 .vscode/
 .continue/config.local*.yaml
 config/model-runtime-policy.local.json
+config/alpha-2-proxmox-lab.local.json
+config/alpha-2-proxmox-live-state.local.json
 .env
 .env.*
 !.env.example

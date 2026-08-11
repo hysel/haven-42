@@ -20,6 +20,11 @@ resources = [
     ("config/windows-alpha-component-registry.json", "config"),
     ("config/windows-alpha-resource-monitor-contract.json", "config"),
     ("config/windows-alpha-quantization-contract.json", "config"),
+    ("config/linux-alpha-contract.json", "config"),
+    ("config/linux-alpha-component-registry.json", "config"),
+    ("config/alpha-2-model-catalog.json", "config"),
+    ("config/alpha-2-model-selection-evidence.json", "config"),
+    ("config/alpha-2-model-selection-policy.json", "config"),
     ("package/resource-integrity.json", "package"),
 ]
 
@@ -28,7 +33,11 @@ a = Analysis(
     pathex=[str(root / "scripts")],
     binaries=[],
     datas=[(str(root / source), destination) for source, destination in resources],
-    hiddenimports=["diagnostic_logging", "windows_alpha", "windows_alpha_setup"],
+    hiddenimports=[
+        "alpha2_model_selector", "alpha_platform", "diagnostic_logging", "linux_alpha",
+        "linux_alpha_runtime", "linux_alpha_setup", "windows_alpha",
+        "windows_alpha_setup",
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

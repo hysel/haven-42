@@ -45,7 +45,7 @@
     "trigger": "push-main-after-native-package-success",
     "subjects": "unsigned-development-archives-only",
     "action": "actions/attest",
-    "actionCommit": "508db95dd578ae2727ebd6217d5ba78e4fbda05d",
+    "actionCommit": "1e69f48acb82d1966a394da916b4c1698aa569d6",
     "actionRelease": "v4.2.1",
     "requiredJobPermissions": [
       "actions:read",

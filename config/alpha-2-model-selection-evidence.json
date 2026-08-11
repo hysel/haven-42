@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "kind": "alpha2-reviewed-automatic-selection-evidence",
+  "release": "0.4.0-alpha.2",
+  "records": [],
+  "promotionAuthority": "owner-review-required",
+  "containsPrivateMachineIdentity": false,
+  "containsRawPromptsOrResponses": false
+}

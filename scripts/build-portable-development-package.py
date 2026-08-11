@@ -24,7 +24,7 @@ from portable_runtime_components import classify
 
 
 ROOT = Path(__file__).resolve().parent.parent
-APP_VERSION = "0.4.0-alpha.1"
+APP_VERSION = "0.4.0-alpha.2" if platform.system() == "Linux" else "0.4.0-alpha.1"
 REQUIRED_PYTHON_VERSION = "3.14.6"
 REQUIRED_PYINSTALLER_VERSION = "6.21.0"
 LOCAL_BUILD_ENVIRONMENT = ".venv-build"
@@ -44,6 +44,11 @@ RESOURCE_PATHS = (
     "config/windows-alpha-component-registry.json",
     "config/windows-alpha-resource-monitor-contract.json",
     "config/windows-alpha-quantization-contract.json",
+    "config/linux-alpha-contract.json",
+    "config/linux-alpha-component-registry.json",
+    "config/alpha-2-model-catalog.json",
+    "config/alpha-2-model-selection-evidence.json",
+    "config/alpha-2-model-selection-policy.json",
 )
 ALLOWED_PACKAGE_ENTRIES = {
     "haven42",

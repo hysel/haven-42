@@ -1,0 +1,314 @@
+{
+  "schemaVersion": 1,
+  "inventoryId": "haven42.alpha2.model-family-versions",
+  "release": "0.4.0-alpha.2",
+  "reviewedAtUtc": "2026-08-09T16:00:00Z",
+  "status": "qualification-inventory-not-selection-policy",
+  "capabilities": [
+    "general.chat",
+    "content.write",
+    "content.summarize"
+  ],
+  "qualificationProvider": {
+    "name": "ollama",
+    "exactVersion": "0.32.5",
+    "transport": "ipv4-loopback-only"
+  },
+  "rules": {
+    "officialPrimarySourcesOnly": true,
+    "exactManifestDigestRequiredBeforeExecution": true,
+    "downloadsRequireExplicitApply": true,
+    "mutableLatestTagsAllowed": false,
+    "automaticPromotionAllowed": false,
+    "rawPromptsOrResponsesAllowed": false,
+    "unloadAfterEverySampleRequired": true
+  },
+  "families": [
+    {
+      "family": "Qwen",
+      "license": "Apache-2.0",
+      "licenseSource": "https://huggingface.co/Qwen/Qwen3.6-27B/blob/main/LICENSE",
+      "versions": [
+        {
+          "version": "3.5",
+          "artifactStatus": "local-artifacts-tested",
+          "officialSource": "https://ollama.com/library/qwen3.5",
+          "evidenceReference": "config/alpha-2-model-catalog.json",
+          "qualificationState": "native-evidence-in-progress"
+        },
+        {
+          "version": "3.6",
+          "artifactStatus": "local-artifacts-verified",
+          "officialSource": "https://ollama.com/library/qwen3.6/tags",
+          "qualificationState": "pending-higher-memory-hardware",
+          "candidates": [
+            {
+              "id": "qwen36-27b-q4",
+              "model": "qwen3.6:27b-q4_K_M",
+              "manifestDigest": "a50eda8ed977ab48a12431878896b27ffd5cef552c17af3317d9623b939a7f1e",
+              "modelLayerDigest": "83c54730a5fea8a0958598c01617c1419c431e93b33bacf980b49a420c798926",
+              "modelBytes": 17420420832,
+              "downloadBytes": 17420432739,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "high-memory-partial-offload-or-greater"
+            },
+            {
+              "id": "qwen36-35b-a3b-q4",
+              "model": "qwen3.6:35b-a3b-q4_K_M",
+              "manifestDigest": "07d35212591fc27746f0a317c975a6d68754fb38e9053d82e25f06057af28522",
+              "modelBytes": 24000000000,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "high-memory-partial-offload-or-greater"
+            }
+          ]
+        },
+        {
+          "version": "3.7",
+          "artifactStatus": "official-local-artifact-not-found",
+          "officialSource": "https://qwen.ai/home",
+          "qualificationState": "hosted-api-review-pending",
+          "candidates": []
+        },
+        {
+          "version": "3.8",
+          "artifactStatus": "official-local-artifact-not-found",
+          "officialSource": "https://github.com/QwenLM",
+          "qualificationState": "announced-or-preview-only-do-not-infer-local-availability",
+          "candidates": []
+        }
+      ]
+    },
+    {
+      "family": "Gemma",
+      "license": "Gemma-Terms",
+      "licenseSource": "https://ai.google.dev/gemma/terms",
+      "versions": [
+        {
+          "version": "3",
+          "artifactStatus": "local-artifacts-verified",
+          "officialSource": "https://ollama.com/library/gemma3/tags",
+          "qualificationState": "12b-comparison-passed-smaller-tiers-pending",
+          "candidates": [
+            {
+              "id": "gemma3-1b-q4",
+              "model": "gemma3:1b-it-q4_K_M",
+              "manifestDigest": "8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc",
+              "modelLayerDigest": "7cd4618c1faf8b7233c6c906dac1694b6a47684b37b8895d470ac688520b9c01",
+              "modelBytes": 815310432,
+              "downloadBytes": 815319299,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "constrained"
+            },
+            {
+              "id": "gemma3-4b-q4",
+              "model": "gemma3:4b-it-q4_K_M",
+              "manifestDigest": "a2af6cc3eb7fa8be8504abaf9b04e88f17a119ec3f04a3addf55f92841195f5a",
+              "modelLayerDigest": "aeda25e63ebd698fab8638ffb778e68bed908b960d39d0becc650fa981609d25",
+              "modelBytes": 3338792448,
+              "downloadBytes": 3338801315,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "mainstream"
+            },
+            {
+              "id": "gemma3-12b-q4",
+              "model": "gemma3:12b-it-q4_K_M",
+              "manifestDigest": "f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a",
+              "modelLayerDigest": "e8ad13eff07a78d89926e9e8b882317d082ef5bf9768ad7b50fcdbbcd63748de",
+              "modelBytes": 8149180896,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "high"
+            }
+          ]
+        },
+        {
+          "version": "4",
+          "license": "Apache-2.0",
+          "licenseSource": "https://ollama.com/library/gemma4:e2b",
+          "artifactStatus": "local-artifacts-verified",
+          "officialSource": "https://ollama.com/library/gemma4/tags",
+          "qualificationState": "pending",
+          "candidates": [
+            {
+              "id": "gemma4-e2b-qat",
+              "model": "gemma4:e2b-it-qat",
+              "manifestDigest": "07ea59a474013479c8b6b802bef095c40e964a1d776ba02f264c0e30e1aede0c",
+              "modelLayerDigest": "3646b4c147cd235a44d91df1546d3b7d8e29b547dbe4e1f80856419aa455e6fd",
+              "modelBytes": 3349514112,
+              "downloadBytes": 4336357640,
+              "quantization": "QAT",
+              "hardwareClass": "constrained"
+            },
+            {
+              "id": "gemma4-e4b-qat",
+              "model": "gemma4:e4b-it-qat",
+              "manifestDigest": "ee665637121887cf3befff38abbb1be4ee117c7db867d97a67e29049ecd7e15f",
+              "modelLayerDigest": "e8b6a059ba86947a44ace84d6e5679795bc41862c25c30513142588f0e9dba1d",
+              "modelBytes": 5154939136,
+              "downloadBytes": 6146501256,
+              "quantization": "QAT",
+              "hardwareClass": "mainstream"
+            },
+            {
+              "id": "gemma4-12b-qat",
+              "model": "gemma4:12b-it-qat",
+              "manifestDigest": "38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+              "modelLayerDigest": "faff1a63667fac17ac5e777f47114688fcefea96e220e211aaa8d62c2c4561f1",
+              "modelBytes": 6975877728,
+              "downloadBytes": 7151003208,
+              "quantization": "QAT",
+              "hardwareClass": "high"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "Granite",
+      "license": "Apache-2.0",
+      "licenseSource": "https://www.ibm.com/granite/docs/models/granite4-1",
+      "versions": [
+        {
+          "version": "4.0",
+          "artifactStatus": "local-artifact-tested",
+          "officialSource": "https://ollama.com/library/granite4/tags",
+          "qualificationState": "7b-a1b-h-comparison-passed",
+          "evidenceReference": "config/alpha-2-model-comparison-contract.json"
+        },
+        {
+          "version": "4.1",
+          "artifactStatus": "local-artifacts-verified",
+          "officialSource": "https://ollama.com/library/granite4.1",
+          "qualificationState": "pending",
+          "candidates": [
+            {
+              "id": "granite41-3b-q4",
+              "model": "granite4.1:3b-q4_K_M",
+              "manifestDigest": "6fd349357287c7ffc9e38189a93b48ea175d24fc566b38f09cfc564fb7f303eb",
+              "modelLayerDigest": "662b0626cd58f443baea23559b469df6576a81d349649c59413b36a9fb32eb29",
+              "modelBytes": 2099501664,
+              "downloadBytes": 2099519864,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "constrained"
+            },
+            {
+              "id": "granite41-8b-q4",
+              "model": "granite4.1:8b-q4_K_M",
+              "manifestDigest": "444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852",
+              "modelLayerDigest": "ed902ac9eb6adce5a90c6a08c8ea201b50e23fdc5976d1cd0362006afac5309e",
+              "modelBytes": 5347914400,
+              "downloadBytes": 5347932600,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "mainstream"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "Phi",
+      "license": "MIT",
+      "licenseSource": "https://huggingface.co/microsoft/Phi-4-mini-instruct/blob/main/LICENSE",
+      "versions": [
+        {
+          "version": "4 Mini",
+          "artifactStatus": "local-artifact-verified",
+          "officialSource": "https://ollama.com/library/phi4-mini/tags",
+          "qualificationState": "pending",
+          "candidates": [
+            {
+              "id": "phi4-mini-38b-q4",
+              "model": "phi4-mini:3.8b-q4_K_M",
+              "manifestDigest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+              "modelLayerDigest": "3c168af1dea0a414299c7d9077e100ac763370e5a98b3c53801a958a47f0a5db",
+              "modelBytes": 2491874624,
+              "downloadBytes": 2491876774,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "constrained"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "Llama",
+      "license": "Llama-3.2-Community-License",
+      "licenseSource": "https://huggingface.co/meta-llama/Llama-3.2-3B-Instruct/blob/main/LICENSE.txt",
+      "versions": [
+        {
+          "version": "3.2",
+          "artifactStatus": "local-artifact-verified",
+          "officialSource": "https://ollama.com/library/llama3.2/tags",
+          "qualificationState": "pending",
+          "candidates": [
+            {
+              "id": "llama32-3b-q4",
+              "model": "llama3.2:3b-instruct-q4_K_M",
+              "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+              "modelLayerDigest": "dde5aa3fc5ffc17176b5e8bdc82f587b24b2678c6c66101bf7da77af9f7ccdff",
+              "modelBytes": 2019377376,
+              "downloadBytes": 2019393189,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "constrained"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "Ministral",
+      "license": "Apache-2.0",
+      "licenseSource": "https://huggingface.co/mistralai/Ministral-3-3B-Instruct-2512/blob/main/LICENSE",
+      "versions": [
+        {
+          "version": "3",
+          "artifactStatus": "local-artifacts-verified",
+          "officialSource": "https://ollama.com/library/ministral-3/tags",
+          "qualificationState": "pending",
+          "candidates": [
+            {
+              "id": "ministral3-3b-q4",
+              "model": "ministral-3:3b-instruct-2512-q4_K_M",
+              "manifestDigest": "f04aa1c738f64e13c625b82ae92504fc0260fa6723b509ed1ece0fa188179b1d",
+              "modelLayerDigest": "910e4bf4e2338f181e99796d7452404e85c1b6bbbf8cd0bb094672cf9b6f2f22",
+              "modelBytes": 2953825504,
+              "downloadBytes": 2953840808,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "constrained"
+            },
+            {
+              "id": "ministral3-8b-q4",
+              "model": "ministral-3:8b-instruct-2512-q4_K_M",
+              "manifestDigest": "1922accd5827ebe6829e536369195db25eaf664528dc66206d646ea3bb386b71",
+              "modelLayerDigest": "3ea32f882c990baebcfe6ab5cda2e3167d54ab16d7937c0b9aa3db11aba01574",
+              "modelBytes": 6022221312,
+              "downloadBytes": 6022236616,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "mainstream"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "Mistral Small",
+      "license": "Apache-2.0",
+      "licenseSource": "https://huggingface.co/mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "versions": [
+        {
+          "version": "3.2",
+          "artifactStatus": "local-artifact-tested",
+          "officialSource": "https://ollama.com/library/mistral-small3.2/tags",
+          "qualificationState": "24b-q4-comparison-passed",
+          "evidenceReference": "config/alpha-2-model-comparison-contract.json"
+        },
+        {
+          "version": "4",
+          "artifactStatus": "official-weights-available-no-official-ollama-artifact-admitted",
+          "officialSource": "https://huggingface.co/mistralai/Mistral-Small-4-119B-2603",
+          "qualificationState": "outside-current-hardware-envelope",
+          "candidates": []
+        }
+      ]
+    }
+  ]
+}

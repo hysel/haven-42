@@ -69,29 +69,36 @@ from evidence_dashboard import (  # noqa: E402
     EvidenceDashboardError,
     build_public_assurance_summary,
 )
-from windows_alpha import (  # noqa: E402
+from alpha_platform import (  # noqa: E402
+    AlphaPlatformError,
+    COMPONENT_DECISION_CODES,
+    MANAGED_OLLAMA_URL,
+    MANAGED_SETUP_SUPPORTED,
+    MODEL_DECISION_CODES,
     ResourceHistory,
     SessionTokenTotals,
-    WindowsAlphaError,
+    SetupCoordinator,
+    SetupError,
     automatic_setup_admitted,
+    build_plan as build_alpha_plan,
     driver_guidance,
     evaluate_hardware,
     load_model_catalog,
     select_model,
     validate_provider_metrics,
 )
-from windows_alpha_setup import (  # noqa: E402
-    COMPONENT_DECISION_CODES,
-    MANAGED_OLLAMA_URL,
-    MODEL_DECISION_CODES,
-    SetupCoordinator,
-    SetupError,
-    build_plan as build_windows_alpha_plan,
-)
 from diagnostic_logging import DiagnosticLogError, DiagnosticLogger  # noqa: E402
 
 
-APP_VERSION = "0.4.0-alpha.1"
+LINUX_ALPHA = sys.platform.startswith("linux")
+APP_VERSION = "0.4.0-alpha.2" if LINUX_ALPHA else "0.4.0-alpha.1"
+ALPHA_PLATFORM_PREFIX = "linux-alpha" if LINUX_ALPHA else "windows-alpha"
+MANAGED_SETUP_UNAVAILABLE = (
+    "windows-alpha-setup-unavailable" if os.name == "nt"
+    else "linux-alpha-setup-unavailable"
+)
+# Compatibility seam retained for existing Windows policy tests and embedders.
+build_windows_alpha_plan = build_alpha_plan
 ALPHA_TEXT_ONLY = True
 ALPHA_TEXT_CAPABILITIES = frozenset({
     "general.chat", "content.write", "content.summarize",
@@ -864,7 +871,7 @@ class HavenState:
         self.answer_report_contexts: dict[str, dict[str, str]] = {}
         self.alpha_setup = (
             SetupCoordinator(self.csrf_token, event_sink=self.diagnostics.record)
-            if os.name == "nt" else None
+            if MANAGED_SETUP_SUPPORTED else None
         )
 
     def assurance_summary(self) -> dict[str, Any]:
@@ -969,8 +976,11 @@ class HavenState:
                     for item in CAPABILITY_SUMMARY
                 ],
                 "alpha": {
-                    "label": "Haven 42 0.4 Alpha 1",
-                    "windowsOnly": True,
+                    "label": (
+                        "Haven 42 0.4 Alpha 2" if LINUX_ALPHA
+                        else "Haven 42 0.4 Alpha 1"
+                    ),
+                    "windowsOnly": not LINUX_ALPHA,
                     "chatOnly": False,
                     "textOnly": True,
                     "unsigned": True,
@@ -1318,7 +1328,7 @@ class HavenState:
                 self.alpha_setup.register_plan(managed)
                 plan["alphaCandidate"]["managedPlan"] = managed
             return plan
-        except (ReadinessError, WindowsAlphaError, SetupError) as error:
+        except (ReadinessError, AlphaPlatformError, SetupError) as error:
             raise WebRequestError(str(error)) from error
 
     def connect(
@@ -1898,7 +1908,7 @@ class HavenState:
         alpha_metrics["providerReported"] = True
         try:
             session_totals = self.alpha_tokens.add(validate_provider_metrics(alpha_metrics))
-        except WindowsAlphaError:
+        except AlphaPlatformError:
             session_totals = self.alpha_tokens.summary()
         now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         artifact = {
@@ -2027,7 +2037,7 @@ class HavenState:
     def resume_managed_provider(self) -> dict[str, Any]:
         """Reconnect an already approved portable setup without redownloading it."""
         if self.alpha_setup is None:
-            raise WebRequestError("windows-alpha-setup-unavailable", HTTPStatus.NOT_FOUND)
+            raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
         try:
             snapshot = self.inspect_readiness(False)
             identity = self.alpha_setup.completed_setup_identity()
@@ -2060,7 +2070,7 @@ class HavenState:
                 raise SetupError("managed-backend-changed")
             self.alpha_setup.register_plan(plan)
             resumed = self.alpha_setup.resume_completed()
-        except (ReadinessError, WindowsAlphaError, SetupError, StopIteration) as error:
+        except (ReadinessError, AlphaPlatformError, SetupError, StopIteration) as error:
             code = str(error) if not isinstance(error, StopIteration) else "managed-model-not-registered"
             raise WebRequestError(code, HTTPStatus.CONFLICT) from error
         try:
@@ -2091,7 +2101,7 @@ class HavenState:
 
     def remove_managed_components(self) -> dict[str, Any]:
         if self.alpha_setup is None:
-            raise WebRequestError("windows-alpha-setup-unavailable", HTTPStatus.NOT_FOUND)
+            raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
         with self.operation_lock:
             self._cancel_idle_timer()
             try:
@@ -2113,7 +2123,7 @@ class HavenState:
         self.diagnostics.record("storage", "MANAGED_COMPONENTS_REMOVED", "completed")
         return {
             "schemaVersion": 1,
-            "kind": "windows-alpha-managed-components-removal",
+            "kind": f"{ALPHA_PLATFORM_PREFIX}-managed-components-removal",
             **result,
             "driversChanged": False,
             "servicesChanged": False,
@@ -2345,7 +2355,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 sample = self.server.state.alpha_resources.take()
                 self._send_json(HTTPStatus.OK, {
                     "schemaVersion": 1,
-                    "kind": "windows-alpha-local-metrics",
+                    "kind": f"{ALPHA_PLATFORM_PREFIX}-local-metrics",
                     "sample": sample,
                     "sessionTokens": self.server.state.alpha_tokens.summary(),
                     "persisted": False,
@@ -2354,7 +2364,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/api/alpha/setup-status":
                 if self.server.state.alpha_setup is None:
-                    raise WebRequestError("windows-alpha-setup-unavailable", HTTPStatus.NOT_FOUND)
+                    raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
                 self._send_json(HTTPStatus.OK, self.server.state.alpha_setup.status())
                 return
             assets = {
@@ -2549,7 +2559,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/api/alpha/setup-approve":
                 if self.server.state.alpha_setup is None:
-                    raise WebRequestError("windows-alpha-setup-unavailable", HTTPStatus.NOT_FOUND)
+                    raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
                 if (
                     set(body) != {"planId", "effects", "confirmed"}
                     or not isinstance(body["planId"], str)
@@ -2568,7 +2578,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/api/alpha/setup-execute":
                 if self.server.state.alpha_setup is None:
-                    raise WebRequestError("windows-alpha-setup-unavailable", HTTPStatus.NOT_FOUND)
+                    raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
                 if set(body) != {"approvalToken"} or not isinstance(body["approvalToken"], str):
                     raise WebRequestError("invalid-alpha-setup-execution-fields")
                 try:
@@ -2580,7 +2590,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 return
             if self.path == "/api/alpha/setup-cancel":
                 if self.server.state.alpha_setup is None:
-                    raise WebRequestError("windows-alpha-setup-unavailable", HTTPStatus.NOT_FOUND)
+                    raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
                 if body:
                     raise WebRequestError("invalid-alpha-setup-cancel-fields")
                 self.server.state.alpha_setup.cancel()

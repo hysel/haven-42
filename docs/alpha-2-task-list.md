@@ -256,12 +256,12 @@ hostname, username, address, personal path, prompt, response, or API key.
 
 ## Phase 10: Native accelerator matrix
 
-- [ ] Windows 11 x64 NVIDIA: repeat the complete current-candidate CUDA cell.
+- [x] Windows 11 x64 NVIDIA: repeat the complete current-candidate CUDA cell.
 - [ ] Windows 11 x64 AMD: repeat the complete current-candidate ROCm cell.
 - [ ] Windows 11 x64 Intel: repeat the exact admitted Arc/Vulkan cell.
 - [ ] Windows 11 x64 CPU-only or constrained profile: validate threshold,
   automatic model selection, inference, metrics, and cleanup.
-- [ ] Ubuntu Linux x64 NVIDIA: validate exact CUDA driver, runtime, model,
+- [x] Ubuntu Linux x64 NVIDIA: validate exact CUDA driver, runtime, model,
   nonzero residency, Chat/Writing/Summarization, metrics, unload, and shutdown.
 - [ ] Bazzite NVIDIA: treat as a separate exact profile and promote only after
   the immutable-host lifecycle and browser cells pass.
@@ -371,3 +371,116 @@ promotion:
 5. Add native Linux AMD only when appropriate physical hardware is available.
 6. Run a final clean Windows and Linux candidate pass after all fixes are in
    the exact archives.
+
+### Long-term Linux campaign preparation
+
+- [x] Define an effect-free public campaign contract for all nine Linux target
+  profiles, with CPU coverage on every profile and one-at-a-time NVIDIA lanes.
+- [x] Keep Ubuntu 26.04 and Bazzite as the only NVIDIA promotion candidates;
+  treat additional distribution results as experimental evidence.
+- [x] Add hostile offline validation proving that the public planner has no
+  network, shell, machine, Proxmox, or GPU authority.
+- [x] Reserve an ignored local profile path for private VM numbers, addresses,
+  host fingerprints, and controller configuration.
+- [x] Add a shared, effect-free model selector that fails closed unless model
+  fit, platform storage admission, exact execution-profile evidence, and all
+  requested capability results agree.
+- [x] Add hostile selector tests for altered digests, OS or backend mismatch,
+  provider-version mismatch, partial capability evidence, missing storage
+  admission, and prohibited silent fallback.
+- [x] Add an atomic, resumable campaign checkpoint with hostile offline tests;
+  keep its future private state and raw controller logs outside the repository.
+- [x] Extend that checkpoint with 57 exact model cells and require three passed
+  samples plus three successful unload checks before any model cell can pass.
+- [x] Add an effect-free campaign scheduler that permits only one test VM at a
+  time, treats protected containers as read-only infrastructure, stages results
+  before cleanup, and requires shutdown plus GPU release before finalization.
+- [x] Add a sanitized report builder that exports selector-compatible evidence
+  only after all three capabilities match the same exact artifact, OS, backend,
+  provider version, memory measurements, storage admission, and cleanup proof.
+- [x] Add an effect-free Proxmox live-state parser that binds the exact PCI
+  mapping definition, resolves its NVIDIA index, inventories every guest, and
+  refuses raw, unknown, duplicate, or protected-container passthrough conflicts.
+- [x] Add and hostile-test a fixed-command, root-side read-only collector with
+  no shell, no caller-selected paths, bounded output, and no mutation commands.
+- [x] Capture and review the first live Proxmox inventory without granting any
+  controller authority; keep its exact identities in the ignored local policy.
+- [x] Identify which protected-container GPU index is the Quadro and whether
+  the protected Ollama workload actively needs it.
+- [x] Replace or remove conflicting legacy raw passthrough only after explicit
+  owner approval, leaving the excluded Windows guest outside controller scope.
+- [x] Establish safe storage headroom before package downloads or soak tests;
+  do not weaken the committed stop threshold to make the campaign proceed.
+- [x] Obtain owner approval for the dedicated controller guest and restricted
+  root-owned Proxmox command wrapper.
+- [x] Implement and hostile-test the restricted lifecycle and exclusive-GPU
+  controller before deployment.
+- [x] Deploy private SSH mappings, restartable checkpoints, stop conditions,
+  sanitized logging, and evidence export outside the repository.
+- [x] Run CPU smoke cells before any soak or NVIDIA assignment.
+- [x] Run one NVIDIA owner at a time and release the mapping after every cell.
+- [x] Build one source-snapshot-bound unsigned Linux candidate with the pinned
+  isolated Python and PyInstaller toolchain, then pass its exact archive
+  integrity and lifecycle suite on all nine distribution targets.
+- [x] Audit Quadro visibility and NVIDIA runtime readiness on every Linux
+  guest without elevation or configuration changes. Record Ubuntu 26.04 and
+  Bazzite as CUDA-ready and keep the other seven NVIDIA lanes blocked on
+  `nvidia-capacity-or-driver-unverified`.
+- [x] Complete owner-assisted NVIDIA driver installation on Mint, Ubuntu
+  24.04, Debian 13, Pop!_OS, Fedora, CachyOS, and Arch, then repeat readiness,
+  residency, capability, unload, and shutdown evidence for each exact profile.
+- [x] Add an official-source, PCI-ID-bound driver compatibility catalog and an
+  effect-free advisory evaluator. Keep exact validated versions distinct from
+  distribution recommendations; warn and require explicit acknowledgement for
+  an older supported driver, classify newer-than-tested versions as
+  experimental, block known-incompatible automatic GPU use, and fail unknown
+  hardware closed to CPU. The catalog has no install or model-default authority.
+- [x] Bind selector evidence to minimum tested system-memory and usable-GPU-
+  memory floors so higher-memory evidence cannot authorize a lower-memory
+  client silently.
+- [x] Bind every final evidence record to the exact canonical selector-policy
+  digest, keep policy revisions in separate report groups, and reject missing
+  or stale policy bindings before selection.
+- [x] Run the exact model comparison queue for Chat, Writing, and Summarization
+  on each eligible execution profile; comparison results do not promote a
+  default without the complete evidence and owner-approval gate. The isolated
+  Ollama 0.32.6 lane passed 12 cells, 36 samples, and 36 unload checks across
+  Qwen 3.5 9B, Gemma 3 12B, Granite 4 7B, and Mistral Small 3.2 24B.
+- [x] Add an official-source, version-complete qualification inventory that
+  distinguishes exact local artifacts, hosted-only or preview releases,
+  unavailable artifacts, and candidates outside the current hardware envelope;
+  keep it separate from the selector policy.
+- [x] Add a fail-closed cross-family task-quality runner and matrix for Chat,
+  Writing, and Summarization. Require exact digests, loopback-only transport,
+  three samples, three unload proofs, no retained response text, and no product
+  promotion authority.
+- [x] Add an exact-artifact preparation helper that plans by default, requires
+  an explicit apply flag to download, verifies the pinned loopback provider and
+  immutable manifest after transfer, and refuses a conflicting installed tag.
+- [x] Add a fail-closed owner-review ranking that uses only fully passed task
+  gates and 30-minute soaks, retains sanitized task-specific performance, and
+  cannot change automatic selection or a product default.
+- [x] Qualify and soak Gemma 3 1B/4B, Gemma 4 E2B/E4B QAT, Granite 4.1 3B/8B,
+  Phi 4 Mini 3.8B, Llama 3.2 3B, and Ministral 3 3B/8B on the approved CPU and
+  16 GiB CUDA profiles. Qualify Gemma 4 12B QAT on CUDA only.
+  Gemma 3 1B failed its task gate. Gemma 3 4B, Gemma 4 E2B/E4B, Granite 4.1
+  3B/8B, Phi 4 Mini 3.8B, and Llama 3.2 3B passed their required CPU and CUDA
+  task gates and 30-minute soaks; Gemma 4 12B passed its CUDA-only lane.
+  Ministral 3 3B/8B failed deterministic Writing or Summarization gates on
+  both backends and was excluded without a soak as required.
+- [x] Qualify Qwen 3.6 27B on the separate 31 GiB-system/16 GiB-CUDA Windows
+  profile. The exact `qwen3.6:27b-q4_K_M` artifact passed all three task gates
+  and a 30-minute soak with 33 passed samples and 33 unload proofs. This is
+  qualification-only evidence and does not authorize automatic selection or a
+  default change. Keep Qwen 3.6 35B deferred until a 48 GiB-system machine can
+  run it safely, and admit Qwen 3.7/3.8 only after an official local artifact
+  is verified.
+- [x] Feed only passed exact-profile evidence into the selector and exercise
+  low-, medium-, and higher-capacity hardware profiles, including refusal for
+  untested memory and accelerator lanes.
+- [ ] Obtain owner approval before enabling any new automatic default in the
+  product.
+
+See `docs/alpha-2-linux-long-term-validation.md` for the proposed security
+boundary and stop conditions. These preparation checks are not native package
+evidence and do not change a platform support label.

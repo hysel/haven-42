@@ -20,7 +20,11 @@ from portable_runtime_components import (
 
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
-APP_VERSION = "0.4.0-alpha.1"
+EXPECTED_APP_VERSIONS = {
+    "windows": "0.4.0-alpha.1",
+    "darwin": "0.4.0-alpha.1",
+    "linux": "0.4.0-alpha.2",
+}
 REQUIRED_EVIDENCE = {
     "APACHE-2.0.txt",
     "CPYTHON-3.14.6-LICENSE.txt",
@@ -92,6 +96,13 @@ MAX_ARCHIVE_TOTAL_BYTES = 512 * 1024 * 1024
 
 class ArtifactVerificationError(ValueError):
     pass
+
+
+def expected_app_version(operating_system: str) -> str:
+    try:
+        return EXPECTED_APP_VERSIONS[operating_system]
+    except KeyError as error:
+        raise ArtifactVerificationError("invalid-build-provenance") from error
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -245,7 +256,8 @@ def verify_checksums(directory: Path) -> None:
 
 
 def verify_sbom_document(
-    sbom: dict, inventory: dict, runtime_inventory: dict, target: str
+    sbom: dict, inventory: dict, runtime_inventory: dict, target: str,
+    app_version: str,
 ) -> None:
     expected_tools = [
         {"name": record["name"], "type": "application", "version": record["version"]}
@@ -259,7 +271,7 @@ def verify_sbom_document(
         or sbom.get("metadata", {}).get("component") != {
             "type": "application",
             "name": "Haven 42",
-            "version": APP_VERSION,
+            "version": app_version,
             "licenses": [{"expression": "MIT"}],
         }
         or sbom.get("metadata", {}).get("tools", {}).get("components") != expected_tools
@@ -323,6 +335,10 @@ def verify_evidence(directory: Path) -> None:
     operating_system = environment.get("operatingSystem")
     architecture = environment.get("architecture")
     target = inventory.get("target")
+    try:
+        required_app_version = expected_app_version(str(operating_system))
+    except ArtifactVerificationError:
+        required_app_version = None
     if (
         inventory.get("schemaVersion") != 3
         or set(inventory) != {
@@ -357,7 +373,8 @@ def verify_evidence(directory: Path) -> None:
         }
         or provenance.get("schemaVersion") != 1
         or provenance.get("artifactKind") != "unsigned-development"
-        or application != {"name": "Haven 42", "version": APP_VERSION}
+        or required_app_version is None
+        or application != {"name": "Haven 42", "version": required_app_version}
         or source.get("repository") != "https://github.com/hysel/haven-42"
         or set(source) != {
             "repository", "commit", "treeState", "commitIsExactSource",
@@ -481,7 +498,9 @@ def verify_evidence(directory: Path) -> None:
     if inventory["runtimeComponents"] != expected_runtime_summaries:
         raise ArtifactVerificationError("dependency-runtime-component-mismatch")
     sbom = load_json(directory / "haven42.cdx.json")
-    verify_sbom_document(sbom, inventory, runtime_inventory, str(target))
+    verify_sbom_document(
+        sbom, inventory, runtime_inventory, str(target), required_app_version
+    )
     try:
         notices = (directory / "THIRD-PARTY-NOTICES.txt").read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError) as error:
@@ -623,7 +642,7 @@ def run_self_tests() -> None:
                 "component": {
                     "type": "application",
                     "name": "Haven 42",
-                    "version": APP_VERSION,
+                    "version": EXPECTED_APP_VERSIONS["windows"],
                     "licenses": [{"expression": "MIT"}],
                 },
                 "tools": {"components": [{"name": "tool", "type": "application", "version": "1.0"}]},
@@ -635,13 +654,65 @@ def run_self_tests() -> None:
             "components": [],
         }
         try:
-            verify_sbom_document(valid_sbom, inventory, runtime_inventory, "windows-amd64")
+            verify_sbom_document(
+                valid_sbom,
+                inventory,
+                runtime_inventory,
+                "windows-amd64",
+                EXPECTED_APP_VERSIONS["windows"],
+            )
         except ArtifactVerificationError as error:
             if str(error) != "invalid-sbom":
                 raise AssertionError(f"expected invalid-sbom, received {error}") from error
             hostile_cases += 1
         else:
             raise AssertionError("expected invalid-sbom")
+
+        valid_sbom["components"] = [{
+            "type": "framework",
+            "name": "CPython embedded runtime",
+            "version": "3.14.6",
+            "scope": "required",
+            "licenses": [{"expression": "PSF-2.0"}],
+            "properties": [
+                {"name": "haven42:component-id", "value": "cpython"},
+                {"name": "haven42:review-status", "value": "review-required"},
+                {"name": "haven42:file-count", "value": "1"},
+                {"name": "haven42:signing-eligible", "value": "false"},
+            ],
+        }]
+        verify_sbom_document(
+            valid_sbom,
+            inventory,
+            runtime_inventory,
+            "windows-amd64",
+            EXPECTED_APP_VERSIONS["windows"],
+        )
+        valid_sbom["metadata"]["component"]["version"] = EXPECTED_APP_VERSIONS["linux"]
+        try:
+            verify_sbom_document(
+                valid_sbom,
+                inventory,
+                runtime_inventory,
+                "windows-amd64",
+                EXPECTED_APP_VERSIONS["windows"],
+            )
+        except ArtifactVerificationError as error:
+            if str(error) != "invalid-sbom":
+                raise AssertionError(f"expected invalid-sbom, received {error}") from error
+            hostile_cases += 1
+        else:
+            raise AssertionError("expected mixed-version invalid-sbom")
+        try:
+            expected_app_version("unsupported")
+        except ArtifactVerificationError as error:
+            if str(error) != "invalid-build-provenance":
+                raise AssertionError(
+                    f"expected invalid-build-provenance, received {error}"
+                ) from error
+            hostile_cases += 1
+        else:
+            raise AssertionError("expected unsupported platform rejection")
 
         incomplete_notice = (
             "tool 1.0 — MIT\n"
@@ -657,7 +728,7 @@ def run_self_tests() -> None:
             hostile_cases += 1
         else:
             raise AssertionError("expected license-evidence-notice-missing")
-    if hostile_cases != 7:
+    if hostile_cases != 9:
         raise AssertionError("hostile archive self-test failed")
 
 
@@ -675,7 +746,7 @@ def main() -> int:
         if args.self_test or args.self_test_only:
             run_self_tests()
         if args.self_test_only:
-            print("Portable verifier hostile self-tests passed 7 cases.")
+            print("Portable verifier hostile self-tests passed 9 cases.")
             return 0
         verify(Path(args.artifact_directory).resolve())
     except ArtifactVerificationError as error:

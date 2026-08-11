@@ -13,8 +13,8 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "a1d76ee29668bd2e271f02fc6ceaf0bc6b611efbb78f7c064677945c49b63fa5",
-      "sizeBytes": 190320
+      "sha256": "d6c76aead0a311ec404061a732a45cfb1517ce1e50444c3d523f181c091244a8",
+      "sizeBytes": 190402
     },
     {
       "path": "web/static/styles.css",
@@ -75,6 +75,31 @@
       "path": "config/windows-alpha-quantization-contract.json",
       "sha256": "b02fbc57e192ddfb4784c5dfa8dd007fc19fc28a77b57c1bc68d5f660fd6b3b8",
       "sizeBytes": 917
+    },
+    {
+      "path": "config/linux-alpha-contract.json",
+      "sha256": "3121ebec714adc5fa13b3c04870f91d9dff4a71dcc325f53e71080a5a721c542",
+      "sizeBytes": 2367
+    },
+    {
+      "path": "config/linux-alpha-component-registry.json",
+      "sha256": "d895da9f7fdddda82bd91940994443b0be443f2e4a8ad73b545bd153312945b0",
+      "sizeBytes": 2548
+    },
+    {
+      "path": "config/alpha-2-model-catalog.json",
+      "sha256": "f45083663859a43fe9cdcd99eefe5d7eee96de2068af2edfc4806916b8ef3221",
+      "sizeBytes": 3398
+    },
+    {
+      "path": "config/alpha-2-model-selection-evidence.json",
+      "sha256": "c33a88967e5fc4228dd22babbda8ebbad154174d455f0b1c3268df9ceea31331",
+      "sizeBytes": 264
+    },
+    {
+      "path": "config/alpha-2-model-selection-policy.json",
+      "sha256": "1f3e43942781d4c167fc58f52415206fbfa7d7ce2de668dc085910fd1b77c80d",
+      "sizeBytes": 3079
     }
   ],
   "schemaVersion": 1

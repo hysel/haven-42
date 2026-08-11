@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.linux-alpha",
+  "version": "0.4.0-alpha.2",
+  "displayVersion": "Haven 42 0.4 Alpha 2",
+  "implementationStatus": "implementation-in-progress-native-validation-required",
+  "platform": {
+    "operatingSystem": "linux",
+    "architecture": "x64",
+    "minimumGlibcVersion": "2.39",
+    "administratorRequired": false
+  },
+  "capabilityPolicy": {
+    "admitted": ["general.chat", "content.write", "content.summarize"],
+    "rendererMayBroaden": false,
+    "serverEnforcementRequired": true
+  },
+  "minimumCandidateHardware": {
+    "logicalProcessors": 4,
+    "systemMemoryGiB": 8,
+    "availableStorageGiB": 15,
+    "gpuRequired": false,
+    "belowThresholdBehavior": "open-ui-and-deny-local-chat-setup"
+  },
+  "managedSetup": {
+    "explicitUserApprovalRequired": true,
+    "networkOrigins": [
+      "https://github.com",
+      "https://objects.githubusercontent.com",
+      "https://release-assets.githubusercontent.com",
+      "https://registry.ollama.ai"
+    ],
+    "managedStorageScope": "inside-extracted-folder/Haven42-Data",
+    "userScopedOnly": true,
+    "rootOrSudoAllowed": false,
+    "shellOrPackageManagerAllowed": false,
+    "serviceInstallationAllowed": false,
+    "driverAutomationAllowed": false,
+    "linkFreeExtractedTreeRequired": true,
+    "internalArchiveLinksMaterializedAsFiles": true,
+    "loopbackHost": "127.0.0.1",
+    "persistentRecoveryJournalAllowed": true,
+    "journalMayContainUserContent": false
+  },
+  "forbiddenEffects": [
+    "driver-install",
+    "driver-update",
+    "driver-downgrade",
+    "firmware-change",
+    "firewall-change",
+    "certificate-trust-change",
+    "system-service-change",
+    "system-wide-runtime-install",
+    "package-manager-change",
+    "automatic-elevation",
+    "shell-profile-change",
+    "desktop-autostart-change"
+  ],
+  "modelPolicy": {
+    "policyId": "haven42.alpha2.model-selection",
+    "trustedPrequantizedFirst": true,
+    "smallerTrustedModelBeforeLocalConversion": true,
+    "localQuantizationDefault": "not-admitted",
+    "silentCpuFallbackAllowed": false,
+    "cloudModelsAllowed": false,
+    "ownerApprovalRequiredForDefaultChange": true
+  },
+  "distribution": {
+    "artifactKind": "unsigned-pyinstaller-one-folder-tar-gzip",
+    "invitedTestersOnly": true,
+    "publicReleaseAllowed": false,
+    "productionClaimAllowed": false
+  }
+}

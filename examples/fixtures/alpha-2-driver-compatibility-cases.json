@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "cases": [
+    {
+      "id": "mint-validated-current",
+      "input": ["linux", "linux-mint", "22.3", "10de", "1eb0", "595.84"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "ubuntu-older-supported-risk-warning",
+      "input": ["linux", "ubuntu", "24.04", "10de", "1eb0", "550.163.01"],
+      "expected": "supported-update-available"
+    },
+    {
+      "id": "debian-validated-current",
+      "input": ["linux", "debian", "13", "10de", "1eb0", "550.163.01"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "pop-os-validated-current",
+      "input": ["linux", "pop-os", "24.04", "10de", "1eb0", "595.84"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "fedora-validated-current",
+      "input": ["linux", "fedora", "44", "10de", "1eb0", "610.57.04"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "cachyos-validated-current",
+      "input": ["linux", "cachyos", "rolling", "10de", "1eb0", "610.57.04"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "arch-validated-current",
+      "input": ["linux", "arch-linux", "rolling", "10de", "1eb0", "610.57.04"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "windows-validated-current",
+      "input": ["windows", "windows", "11", "10de", "1eb0", "582.70"],
+      "expected": "validated-current"
+    },
+    {
+      "id": "newer-than-tested-is-not-called-current",
+      "input": ["linux", "linux-mint", "22.3", "10de", "1eb0", "610.57.04"],
+      "expected": "newer-than-tested"
+    },
+    {
+      "id": "legacy-quadro-5000",
+      "input": ["linux", "debian", "13", "10de", "06d9", "390.157"],
+      "expected": "legacy-unvalidated"
+    },
+    {
+      "id": "rtx-5000-with-legacy-branch",
+      "input": ["linux", "debian", "13", "10de", "1eb0", "390.157"],
+      "expected": "known-incompatible"
+    },
+    {
+      "id": "unknown-device-fails-closed",
+      "input": ["linux", "debian", "13", "10de", "ffff", "550.163.01"],
+      "expected": "unknown"
+    },
+    {
+      "id": "pending-os-fails-closed",
+      "input": ["linux", "bazzite", "44", "10de", "1eb0", "610.57.04"],
+      "expected": "unknown"
+    }
+  ]
+}

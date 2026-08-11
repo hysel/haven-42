@@ -537,7 +537,7 @@ try {
   if (
     guided.current !== "middle"
     || guided.facts < 4
-    || !/(Windows 10|Windows 11|Linux|macOS)/i.test(guided.factsText)
+    || !/^Operating system\S+/i.test(guided.factsText)
     || !guided.factsText.includes("Embedded Python runtime")
     || showsAmdTools !== detectedAmd
     || showsNvidiaTools !== detectedNvidia
@@ -2490,7 +2490,7 @@ try {
       return originalFetch(...args);
     };
   })()`);
-  const navigation = await cdp.evaluate(`(() => {
+  const navigation = await cdp.evaluate(`(async () => {
     const reducedMotion = motionBehavior();
     document.querySelector('#models-nav').click();
     const models = {
@@ -2501,6 +2501,12 @@ try {
       installed: document.querySelectorAll('#model-search-results .model-search-result').length,
     };
     document.querySelector('#system-nav').click();
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      const setupLabel = document.querySelector('#setup-local-components').textContent;
+      const uninstallLabel = document.querySelector('#remove-managed-components').textContent;
+      if (!setupLabel.startsWith('Checking') && !uninstallLabel.startsWith('Checking')) break;
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
     const system = {
       active: document.querySelector('#system-nav').classList.contains('active'),
       focused: document.activeElement.id,
@@ -2538,12 +2544,16 @@ try {
     return {reducedMotion, models, system, assurance, about};
   })()`);
   const localSetupUnavailable = navigation.system.localSetupLabel === "Local setup unavailable on this system";
-  const localSetupControlsValid = localSetupUnavailable
+  const localSetupChecking = navigation.system.localSetupLabel === "Checking local setup…"
+    && navigation.system.localSetupDisabled
+    && navigation.system.uninstallLabel === "Checking installed components…"
+    && navigation.system.uninstallDisabled;
+  const localSetupControlsValid = localSetupChecking || (localSetupUnavailable
     ? navigation.system.localSetupDisabled
       && navigation.system.uninstallLabel === "Uninstall unavailable on this system"
       && navigation.system.uninstallDisabled
     : navigation.system.localSetupLabel.includes("local AI")
-      && navigation.system.uninstallLabel.includes("local AI components");
+      && navigation.system.uninstallLabel.includes("local AI components"));
   if (
     navigation.reducedMotion !== "auto"
     || !navigation.models.active
@@ -2633,7 +2643,7 @@ try {
     })()`);
     if (
       unavailableLocalSetup.status !== 404
-      || unavailableLocalSetup.error !== "windows-alpha-setup-unavailable"
+      || !/^(windows|linux)-alpha-setup-unavailable$/.test(unavailableLocalSetup.error)
       || !unavailableLocalSetup.setupDisabled
       || !unavailableLocalSetup.uninstallDisabled
     ) throw new Error(`unavailable-local-setup:${JSON.stringify(unavailableLocalSetup)}`);

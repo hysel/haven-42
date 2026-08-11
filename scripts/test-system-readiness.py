@@ -81,7 +81,50 @@ def main() -> int:
     assert all(call[2] <= 3 for call in runner.calls)
     assert not any(call[0] in {"cmd", "cmd.exe", "powershell", "powershell.exe", "sh", "bash"} for call in runner.calls)
     assert any(call[:2] == ("ollama", ("--version",)) for call in runner.calls)
-    checks += 9
+    assert "distributionId" in snapshot["platform"]
+    assert "libcVersion" in snapshot["platform"]
+    assert snapshot["platform"]["sessionMetadataTrusted"] is False
+    checks += 12
+
+    with tempfile.TemporaryDirectory() as directory:
+        release = Path(directory) / "os-release"
+        release.write_text(
+            'ID=testlinux\nVERSION_ID="24.1"\nPRETTY_NAME="Test Linux 24.1"\n',
+            encoding="utf-8",
+        )
+        facts = READINESS._linux_platform_facts(
+            release,
+            {"XDG_CURRENT_DESKTOP": "GNOME", "XDG_SESSION_TYPE": "wayland"},
+        )
+        assert facts["distributionId"] == "testlinux"
+        assert facts["distributionVersion"] == "24.1"
+        assert facts["productName"] == "Test Linux 24.1"
+        assert facts["desktopEnvironmentReported"] == "GNOME"
+        assert facts["sessionTypeReported"] == "wayland"
+        assert facts["sessionMetadataTrusted"] is False
+        release.write_text(
+            'ID=arch\nBUILD_ID=rolling\nPRETTY_NAME="Arch Linux"\n',
+            encoding="utf-8",
+        )
+        rolling = READINESS._linux_platform_facts(release, {})
+        assert rolling["distributionId"] == "arch"
+        assert rolling["distributionVersion"] == "rolling"
+        release.write_text(
+            'ID=testlinux\nBUILD_ID=rolling\nPRETTY_NAME="Test Linux"\n',
+            encoding="utf-8",
+        )
+        unreviewed_rolling = READINESS._linux_platform_facts(release, {})
+        assert unreviewed_rolling["distributionVersion"] is None
+        release.write_text("ID=../../private\nPRETTY_NAME=/home/private\n", encoding="utf-8")
+        hostile = READINESS._linux_platform_facts(
+            release,
+            {"XDG_CURRENT_DESKTOP": "/home/private", "XDG_SESSION_TYPE": "evil"},
+        )
+        assert hostile["distributionId"] is None
+        assert hostile["productName"] is None
+        assert hostile["desktopEnvironmentReported"] is None
+        assert hostile["sessionTypeReported"] is None
+    checks += 13
 
     registry = READINESS.load_component_registry()
     assert registry and all(item["managedInstallationAllowed"] is False for item in registry.values())

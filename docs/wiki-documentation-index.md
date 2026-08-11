@@ -70,6 +70,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Packaging, testing, and release evidence
 
+- [[Arch Linux Test VM Installation|Arch-Linux-Test-VM-Installation]]
 - [[Engineering Evidence Dashboard|Engineering-Evidence-Dashboard]]
 - [[Evidence Catalog|Evidence-Catalog]]
 - [[Evidence Dashboard|Evidence-Dashboard]]

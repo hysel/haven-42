@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "haven42.alpha2.text-models",
+  "catalogStatus": "candidate-ladder-native-evidence-required",
+  "source": {
+    "registry": "https://registry.ollama.ai",
+    "library": "qwen3.5",
+    "retrievedAtUtc": "2026-08-05T00:30:40Z"
+  },
+  "selectionPolicy": {
+    "capabilities": ["general.chat", "content.write", "content.summarize"],
+    "trustedPrequantizedFirst": true,
+    "largestValidatedComfortableFit": true,
+    "minimumMemoryReservePercent": 25,
+    "minimumMemoryReserveGiB": 2,
+    "exactProfileEvidenceRequired": true,
+    "unvalidatedCandidateMayAutoSelect": false,
+    "cloudModelsAllowed": false
+  },
+  "models": [
+    {
+      "id": "qwen35-08b-q8",
+      "name": "qwen3.5:0.8b",
+      "manifestDigest": "f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4",
+      "modelLayerDigest": "afb707b6b8fac6e475acc42bc8380fc0b8d2e0e4190be5a969fbf62fcc897db5",
+      "modelBytes": 1036034688,
+      "parameterClass": "0.8b",
+      "quantization": "Q8_0",
+      "minimumSystemMemoryGiB": 8,
+      "minimumUsableGpuMemoryGiB": 0,
+      "candidatePriority": 10
+    },
+    {
+      "id": "qwen35-2b-q8",
+      "name": "qwen3.5:2b",
+      "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+      "modelLayerDigest": "b709d81508a078a686961de6ca07a953b895d9b286c46e17f00fb267f4f2d297",
+      "modelBytes": 2741180928,
+      "parameterClass": "2b",
+      "quantization": "Q8_0",
+      "minimumSystemMemoryGiB": 12,
+      "minimumUsableGpuMemoryGiB": 4,
+      "candidatePriority": 20
+    },
+    {
+      "id": "qwen35-4b-q4",
+      "name": "qwen3.5:4b",
+      "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+      "modelLayerDigest": "81fb60c7daa80fc1123380b98970b320ae233409f0f71a72ed7b9b0d62f40490",
+      "modelBytes": 3389971840,
+      "parameterClass": "4b",
+      "quantization": "Q4_K_M",
+      "minimumSystemMemoryGiB": 16,
+      "minimumUsableGpuMemoryGiB": 6,
+      "candidatePriority": 30
+    },
+    {
+      "id": "qwen35-9b-q4",
+      "name": "qwen3.5:9b",
+      "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "modelLayerDigest": "dec52a44569a2a25341c4e4d3fee25846eed4f6f0b936278e3a3c900bb99d37c",
+      "modelBytes": 6594462816,
+      "parameterClass": "9b",
+      "quantization": "Q4_K_M",
+      "minimumSystemMemoryGiB": 24,
+      "minimumUsableGpuMemoryGiB": 10,
+      "candidatePriority": 40
+    },
+    {
+      "id": "qwen35-27b-q4",
+      "name": "qwen3.5:27b",
+      "manifestDigest": "7653528ba5cba4dd8e19da24aaddc7f4d0b5ecd93571c0825dfd4137958ec06e",
+      "modelLayerDigest": "d4b8b4f4c350f5d322dc8235175eeae02d32c6f3fd70bdb9ea481e3abb7d7fc4",
+      "modelBytes": 17420420832,
+      "parameterClass": "27b",
+      "quantization": "Q4_K_M",
+      "minimumSystemMemoryGiB": 48,
+      "minimumUsableGpuMemoryGiB": 20,
+      "candidatePriority": 50
+    },
+    {
+      "id": "qwen35-35b-q4",
+      "name": "qwen3.5:35b",
+      "manifestDigest": "3460ffeede5453ead027dbd2f821b12ad0aa3de54630971993babdb2165221f7",
+      "modelLayerDigest": "900dde62fb7ebe8a5a25e35d5b7633f403f226a310965fed51d50f5238ba145a",
+      "modelBytes": 23869179840,
+      "parameterClass": "35b",
+      "quantization": "Q4_K_M",
+      "minimumSystemMemoryGiB": 64,
+      "minimumUsableGpuMemoryGiB": 30,
+      "candidatePriority": 60
+    }
+  ]
+}
