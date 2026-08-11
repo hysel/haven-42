@@ -135,6 +135,7 @@ def operating_system_id(snapshot: dict[str, Any]) -> str | None:
     if not isinstance(platform_info, dict):
         return None
     distro = str(platform_info.get("distributionId") or "").casefold()
+    distro = {"linuxmint": "linux-mint", "pop": "pop-os"}.get(distro, distro)
     version = str(platform_info.get("distributionVersion") or "").casefold()
     candidate = f"{distro}-{version}" if distro and version else ""
     return candidate if SAFE_OS_ID.fullmatch(candidate) else None

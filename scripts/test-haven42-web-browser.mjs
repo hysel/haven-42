@@ -560,7 +560,10 @@ try {
       || !guided.planText.includes("stored beside the app")
       || !guided.planText.includes("Haven42-Data")
       || !guided.planText.includes("Does not use Program Files or AppData")
-      || !guided.planText.includes("Ollama local runtime")
+      || !(
+        guided.planText.includes("Ollama local AI engine")
+        || guided.planText.includes("Ollama local runtime")
+      )
       || !guided.planText.includes("Download:")
       || !guided.planText.includes("Required to run the selected text model locally")
       || !guided.planText.includes("Download and safety details")

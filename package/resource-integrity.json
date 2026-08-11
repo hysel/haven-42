@@ -98,8 +98,8 @@
     },
     {
       "path": "config/alpha-2-model-selection-evidence.json",
-      "sha256": "c33a88967e5fc4228dd22babbda8ebbad154174d455f0b1c3268df9ceea31331",
-      "sizeBytes": 264
+      "sha256": "5f997ef33a0e8a91bfa58739ccefd2bca264b198a595b2dcb3ab5df66993ea57",
+      "sizeBytes": 10516
     },
     {
       "path": "config/alpha-2-model-selection-policy.json",

@@ -7,13 +7,35 @@ software, or claim that Alpha 2 passed.
 
 ## Current campaign status
 
-As of August 10, 2026, the restricted controller is deployed with status,
+As of August 11, 2026, the restricted controller is deployed with status,
 start, and graceful-shutdown authority for the approved campaign guests. A
 guarded stop is exposed only after the latest matching graceful shutdown failed
 or was interrupted and the same logical VM is still running. It has no
 container-management, storage, snapshot, package-installation, shell, or guest-
 configuration authority. The protected Ollama container remained outside the
 campaign and was not changed.
+
+An August 11 exact-candidate sweep repeated the checksum, relocation,
+read-only startup, abrupt-recovery, lifecycle, occupied-port, shutdown,
+hostile-environment, and integrity checks on all nine Linux distributions.
+Every distribution passed that package suite. Pop!_OS also exposed a readiness
+bug: its fixed `/etc/os-release` link resolves to
+`/etc/pop-os/os-release`, which the original fixed-path allowlist did not
+recognize. The source fix admits only that exact system path and continues to
+reject arbitrary links; it passed the real Pop!_OS 24.04 readiness check. A
+new exact candidate still needs to be built and repeated on Pop!_OS before the
+fix can count as release-candidate evidence.
+
+After reviewing the sanitized results, the owner approved the first narrow
+automatic-selection boundary on August 11. The selector now admits Qwen 3.5
+0.8B Q8 on the exact CPU profiles tested across the nine distributions. On
+the exact Ubuntu 26.04 and Bazzite 44 CUDA profiles with at least the measured
+system-memory floor and 16 GiB usable GPU memory, it admits the tested 0.8B,
+2B, and 4B records and chooses Qwen 3.5 4B Q4 as the largest comfortable fit.
+The smaller CUDA records remain validated fallbacks when storage fit excludes
+the larger model. This does not extend approval to other NVIDIA distribution
+profiles, lower memory, AMD or Intel acceleration, other runtimes, or other
+model families.
 
 One identical unsigned Linux candidate passed package integrity, relocation,
 read-only startup, abrupt-exit recovery, repeated lifecycle, occupied-port,

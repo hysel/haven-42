@@ -176,13 +176,23 @@ def _windows_platform_facts() -> dict[str, Any]:
     return facts
 
 
+LINUX_OS_RELEASE_PATHS = {
+    Path("/etc/os-release"),
+    Path("/usr/lib/os-release"),
+    Path("/etc/pop-os/os-release"),
+}
+
+
+def _trusted_linux_os_release_path(requested: Path, resolved: Path) -> bool:
+    """Admit only reviewed fixed OS identity files for the live Linux scan."""
+    return requested != Path("/etc/os-release") or resolved in LINUX_OS_RELEASE_PATHS
+
+
 def _read_linux_os_release(path: Path = Path("/etc/os-release")) -> dict[str, str]:
     """Read only the fixed operating-system identity file with strict bounds."""
     try:
         resolved = path.resolve(strict=True)
-        if path == Path("/etc/os-release") and resolved not in {
-            Path("/etc/os-release"), Path("/usr/lib/os-release"),
-        }:
+        if not _trusted_linux_os_release_path(path, resolved):
             return {}
         if not resolved.is_file() or resolved.stat().st_size > 64 * 1024:
             return {}

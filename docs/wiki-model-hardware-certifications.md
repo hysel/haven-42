@@ -42,16 +42,33 @@ ports, hostile environment handling, and protected-resource integrity. They
 did not by themselves certify the complete guided setup, accessibility,
 attachments, uninstall, or tester-reporting experience.
 
-## Models eligible for automatic-selection review
+The August 11 repeat found one distribution-specific readiness issue after the
+package checks passed: Pop!_OS stores its trusted operating-system identity at
+`/etc/pop-os/os-release`. Haven 42's fixed-path check was updated to recognize
+that exact path without allowing arbitrary links. The correction passed a
+native Pop!_OS 24.04 source check, but it is not yet counted as a fixed-package
+pass; a new exact candidate must be built and tested there first.
 
-These results use the managed Ollama 0.32.5 runtime. Passing a test does not
-change Haven 42's default model; that requires a separate owner decision.
+## Approved automatic choices
+
+These choices use the managed Ollama 0.32.5 runtime. The owner approved the
+exact records below on August 11, 2026. Haven 42 still matches the operating
+system, backend, runtime, memory, artifact digest, and requested tasks before
+it makes an automatic choice; a nearby but untested configuration is not
+treated as equivalent.
 
 | Model | Tested profile | Tasks | Result |
 | --- | --- | --- | --- |
 | Qwen 3.5 0.8B, Q8_0 | CPU on all nine Linux profiles; CUDA on all nine Linux NVIDIA profiles; separate Windows NVIDIA baseline | Chat, writing, summarization, unload, and execution-device checks | **Verified for the exact tested profiles** |
 | Qwen 3.5 2B, Q8_0 | Ubuntu 26.04 and Bazzite with 16 GB NVIDIA profile | Chat, writing, summarization, unload, and execution-device checks | **Verified for those two CUDA profiles only** |
 | Qwen 3.5 4B, Q4_K_M | Ubuntu 26.04 and Bazzite with 16 GB NVIDIA profile | Chat, writing, summarization, unload, and execution-device checks | **Verified for those two CUDA profiles only** |
+
+In practical terms, Haven 42 automatically chooses Qwen 3.5 0.8B Q8 on the
+exact CPU-tested Linux profiles. On the exact Ubuntu 26.04 and Bazzite 44
+CUDA profiles with 16 GiB usable GPU memory, it chooses Qwen 3.5 4B Q4. The
+validated 0.8B and 2B CUDA records remain safe fallbacks if the larger model
+does not pass storage admission. Other Linux CUDA profiles remain
+evidence-pending even where comparison testing succeeded.
 
 The evidence includes measured system-memory and usable-GPU-memory floors.
 Haven 42 must refuse automatic selection when a computer falls below the
@@ -101,6 +118,8 @@ behavior; they do not certify an end-user hardware profile.
   changing the published Alpha 1 package.
 - Complete the beginner guided-setup and daily-use sequence on Windows 11
   NVIDIA, Ubuntu 26.04 NVIDIA, and Bazzite NVIDIA.
+- Build a new exact Linux candidate containing the Pop!_OS identity-path fix
+  and repeat the native Pop!_OS package/readiness sequence.
 - Complete CPU-only desktop sequences on the remaining Linux distributions.
 - Run native Alpha 2 AMD and Intel cells on Windows and Linux.
 - Test constrained-memory and mixed-GPU computers before assigning those
