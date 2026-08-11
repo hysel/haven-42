@@ -2544,12 +2544,16 @@ try {
     return {reducedMotion, models, system, assurance, about};
   })()`);
   const localSetupUnavailable = navigation.system.localSetupLabel === "Local setup unavailable on this system";
-  const localSetupControlsValid = localSetupUnavailable
+  const localSetupChecking = navigation.system.localSetupLabel === "Checking local setup…"
+    && navigation.system.localSetupDisabled
+    && navigation.system.uninstallLabel === "Checking installed components…"
+    && navigation.system.uninstallDisabled;
+  const localSetupControlsValid = localSetupChecking || (localSetupUnavailable
     ? navigation.system.localSetupDisabled
       && navigation.system.uninstallLabel === "Uninstall unavailable on this system"
       && navigation.system.uninstallDisabled
     : navigation.system.localSetupLabel.includes("local AI")
-      && navigation.system.uninstallLabel.includes("local AI components");
+      && navigation.system.uninstallLabel.includes("local AI components"));
   if (
     navigation.reducedMotion !== "auto"
     || !navigation.models.active
