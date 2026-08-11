@@ -745,7 +745,7 @@ test_online_model_discovery_doc() {
     grep -q "Mark a model as tool-safe" "$REPO_ROOT/docs/online-model-discovery.md" &&
     grep -q "private repository content" "$REPO_ROOT/docs/online-model-discovery.md" &&
     grep -q "Approved-write ready" "$REPO_ROOT/docs/online-model-discovery.md" &&
-    grep -q "docs/online-model-discovery.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/online-model-discovery.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "docs/online-model-discovery.md" "$REPO_ROOT/docs/local-model-selection.md" &&
     grep -q "do not discover newer" "$REPO_ROOT/docs/local-agent-model-testing.md"
 }
@@ -880,9 +880,9 @@ test_multi_repository_validation_doc() {
     grep -q "future real-repository runs continue as evidence expansion" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "Complete Milestone 13 coverage" "$REPO_ROOT/TODO.md" &&
     grep -q "Future Multi-Repository Evidence Expansion" "$REPO_ROOT/TODO.md" &&
-    grep -q "docs/multi-repository-validation.md" "$REPO_ROOT/README.md" &&
-    grep -q "docs/runtime-output-verification.md" "$REPO_ROOT/README.md" &&
-    grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/multi-repository-validation.md" "$REPO_ROOT/docs/engineering-index.md" &&
+    grep -q "docs/runtime-output-verification.md" "$REPO_ROOT/docs/engineering-index.md" &&
+    grep -q "examples/multi-repository-validation.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "filename" "$REPO_ROOT/docs/runtime-output-verification.md" &&
     grep -q "unsafe mechanical migration patterns" "$REPO_ROOT/docs/runtime-output-verification.md" &&
     grep -q "current-source verification" "$REPO_ROOT/docs/runtime-output-verification.md"
@@ -907,7 +907,7 @@ test_sample_repository_factory_validation_evidence() {
     grep -q "No private local paths" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
     grep -q "Expanded generated-category evidence" "$REPO_ROOT/docs/sample-repository-factory.md" &&
     grep -q "examples/sample-repository-factory-validation.md" "$REPO_ROOT/docs/sample-repository-factory.md" &&
-    grep -q "examples/sample-repository-factory-validation.md" "$REPO_ROOT/README.md"
+    grep -q "examples/sample-repository-factory-validation.md" "$REPO_ROOT/docs/engineering-index.md"
 }
 
 test_sample_repository_factory_doc() {
@@ -927,7 +927,7 @@ test_sample_repository_factory_doc() {
     grep -q "generate-sample-repositories.macos.sh" "$REPO_ROOT/docs/sample-repository-factory.md" &&
     grep -q "production starter projects" "$REPO_ROOT/docs/sample-repository-factory.md" &&
     grep -q "Generated Category Expansion Validation" "$REPO_ROOT/examples/sample-repository-factory-validation.md" &&
-    grep -q "docs/sample-repository-factory.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/sample-repository-factory.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "| Milestone 16: Sample Repository Factory | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 16 sample repository factory exit criteria" "$REPO_ROOT/TODO.md"
 }
@@ -954,7 +954,7 @@ test_agent_surface_options_doc() {
     grep -q "Docker socket" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "unrestricted network access" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
     grep -q "docs/openhands-validation-boundary.md" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "docs/agent-surface-options.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/agent-surface-options.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "| Milestone 17: Agent Surface Compatibility Validation | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
@@ -1027,7 +1027,7 @@ test_continue_cli_model_testing_doc() {
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
     grep -q "Continue CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&
-    grep -q "docs/continue-cli-model-testing.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/continue-cli-model-testing.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "docs/continue-cli-model-testing.md" "$REPO_ROOT/docs/agent-surface-options.md"
 }
 test_language_support_doc() {
@@ -1045,7 +1045,7 @@ test_language_support_doc() {
     grep -q "Repository discovery | Passed verification | Passed verification" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
     grep -q "Implementation planning | Passed verification | Passed verification" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
     grep -q "Code review | Passed verification | Passed verification" "$REPO_ROOT/examples/multi-language-workflow-validation.md" &&
-    grep -q "docs/language-support.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/language-support.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "| Milestone 15: Multi-Language Engineering Support | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Validate repository discovery, implementation planning, and code review against Python and JavaScript/TypeScript samples" "$REPO_ROOT/TODO.md"
 }
@@ -1089,8 +1089,8 @@ test_optional_language_rule_packs() {
     grep -q "docs/language-rule-packs.md" "$REPO_ROOT/docs/language-support.md" &&
     grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/docs/language-support.md" &&
     grep -q "Optional Language Rule Packs" "$REPO_ROOT/docs/project-detection.md" &&
-    grep -q "docs/language-rule-packs.md" "$REPO_ROOT/README.md" &&
-    grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/language-rule-packs.md" "$REPO_ROOT/docs/engineering-index.md" &&
+    grep -q "examples/language-rule-pack-validation.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "Language Rule Pack Validation Evidence" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
     grep -q "python-api" "$REPO_ROOT/examples/language-rule-pack-validation.md" &&
@@ -1123,7 +1123,7 @@ test_project_detection_doc() {
     grep -q "Do not apply .NET-specific guidance" "$REPO_ROOT/docs/project-detection.md" &&
     grep -q "package metadata is present" "$REPO_ROOT/docs/project-detection.md" &&
     grep -q "docs/project-detection.md" "$REPO_ROOT/docs/language-support.md" &&
-    grep -q "docs/project-detection.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/project-detection.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "Run project classification" "$REPO_ROOT/.continue/rules/general.md" &&
     grep -q "Evidence Gate" "$REPO_ROOT/.continue/rules/dotnet.md" &&
     grep -q "Evidence Gate" "$REPO_ROOT/.continue/rules/aspnetcore.md" &&
@@ -1373,18 +1373,8 @@ test_tool_use_docs_define_platform_aware_write_behavior() {
     grep -q "Test-Path" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "test -f" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
     grep -q "Remove-Item" "$REPO_ROOT/docs/approved-tool-backed-changes.md" &&
-    grep -q "write tools are not validated yet" "$REPO_ROOT/README.md" &&
-    grep -q "read file contents" "$REPO_ROOT/README.md" &&
-    grep -q "git diff -- <file>" "$REPO_ROOT/README.md" &&
-    grep -q "WORKSPACE_UNAVAILABLE" "$REPO_ROOT/README.md" &&
-    grep -q "APPLY_TARGET_MISMATCH" "$REPO_ROOT/README.md" &&
-    grep -q "create_new_file" "$REPO_ROOT/README.md" &&
-    grep -q "Two approval prompts" "$REPO_ROOT/README.md" &&
-    grep -q "edit_file" "$REPO_ROOT/README.md" &&
-    grep -q "created and read back a file" "$REPO_ROOT/README.md" &&
-    grep -q "READ_TOOLS_UNAVAILABLE.*read-only tool validated" "$REPO_ROOT/README.md" &&
-    grep -q "ModelLanes" "$REPO_ROOT/README.md" &&
-    grep -q "1 - WRITE SAFE" "$REPO_ROOT/README.md" &&
+    grep -q "docs/tool-use-modes.md" "$REPO_ROOT/docs/engineering-index.md" &&
+    grep -q "docs/setup-paths.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "Agent Says It Cannot Edit Files" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "WRITE_TOOLS_UNAVAILABLE" "$REPO_ROOT/docs/troubleshooting.md" &&
     grep -q "Agent Lists Files But Cannot Read Or Edit Them" "$REPO_ROOT/docs/troubleshooting.md" &&
@@ -1516,7 +1506,7 @@ PY
     grep -q "WRITE SAFE" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "Selection policy version 1" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "does not read repository source code" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
-    grep -q "hardware-aware model/config recommendation" "$REPO_ROOT/README.md"
+    grep -q "docs/hardware-aware-recommendations.md" "$REPO_ROOT/docs/engineering-index.md"
 }
 
 test_recommended_agent_config_generation() {
@@ -1657,7 +1647,7 @@ test_shared_asset_installation_doc() {
     grep -q "file://\./" "$REPO_ROOT/docs/shared-asset-installation.md" &&
     grep -q "duplicate rule" "$REPO_ROOT/docs/shared-asset-installation.md" &&
     grep -q "Rollback" "$REPO_ROOT/docs/shared-asset-installation.md" &&
-    grep -q "docs/shared-asset-installation.md" "$REPO_ROOT/README.md" &&
+    grep -q "docs/shared-asset-installation.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "docs/shared-asset-installation.md" "$REPO_ROOT/docs/hardware-aware-recommendations.md" &&
     grep -q "centralized shared asset" "$REPO_ROOT/TODO.md" &&
     grep -q "centralized shared asset" "$REPO_ROOT/ROADMAP.md"
@@ -1889,10 +1879,10 @@ test_solution_architecture_review_doc() {
     grep -Eq "Milestones 1.+21 \| Complete" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "Milestone 22 | Active" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\[x\] Select and document the shared browser UI" "$REPO_ROOT/TODO.md" &&
-    grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/README.md" &&
-    grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/README.md" &&
-    grep -q "private app for chat, writing, and summarization" "$REPO_ROOT/README.md" &&
-    grep -q "Coding tools for Continue, Aider, and" "$REPO_ROOT/README.md" &&
+    grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/docs/engineering-index.md" &&
+    grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/docs/engineering-index.md" &&
+    grep -q "application for private AI chat, writing, and summarization" "$REPO_ROOT/README.md" &&
+    grep -q "Continue, Aider, and OpenCode support is distributed as the optional" "$REPO_ROOT/README.md" &&
     grep -q "Continue" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
     grep -q "Aider" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
     grep -q "OpenCode" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
@@ -1900,8 +1890,8 @@ test_solution_architecture_review_doc() {
     grep -q "## Milestone 23" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "## Milestone 24" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "## Milestone 25" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "One Linux ComfyUI/SDXL setup has passed testing" "$REPO_ROOT/README.md" &&
-    grep -q "documentation-only candidate inventories" "$REPO_ROOT/README.md" &&
+    grep -q "One Linux ComfyUI/SDXL image path has passed testing" "$REPO_ROOT/README.md" &&
+    grep -q "other media paths remain gated" "$REPO_ROOT/README.md" &&
     ! grep -Eq '(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})' "$REPO_ROOT/README.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Add a milestone solution completeness audit" "$REPO_ROOT/TODO.md" &&
@@ -1985,13 +1975,15 @@ test_wiki_synchronization() {
   [ "$navigation_links" -ge 10 ] && [ "$navigation_links" -le 25 ] || { rm -rf "$wiki_temp"; return 1; }
   [ "$sidebar_links" -eq $((navigation_links + 1)) ] || { rm -rf "$wiki_temp"; return 1; }
   grep -q '^\*\*Get started\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
-  grep -q '^\*\*Contributors\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q '^\*\*Engineering\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'Internal engineering page' "$wiki_temp/Eng-Evidence-Catalog.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'blob/main/docs/evidence-catalog.md' "$wiki_temp/Eng-Evidence-Catalog.md" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'exactly one level-one heading' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'exactly one newline' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'Broken wiki link' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'Wiki-style link inside a Markdown table' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   validation_line="$(grep -n 'Mapped wiki source must contain exactly one level-one heading' "$sync" | head -n 1 | cut -d: -f1)"
-  copy_line="$(grep -n 'cp \"\$REPO_ROOT/\$source\"' "$sync" | head -n 1 | cut -d: -f1)"
+  copy_line="$(grep -n 'cp \"\$RENDERED_TEMP\"' "$sync" | head -n 1 | cut -d: -f1)"
   [ -n "$validation_line" ] && [ -n "$copy_line" ] && [ "$validation_line" -lt "$copy_line" ] || { rm -rf "$wiki_temp"; return 1; }
   "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
   printf 'stale' > "$wiki_temp/Home.md"
@@ -2572,7 +2564,7 @@ assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promo
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["fixedExternalNavigationUrls"] == [
-    "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+    "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
     "https://ollama.com/download/windows",
 ]
 assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True

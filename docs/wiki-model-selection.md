@@ -44,6 +44,6 @@ The recommendation is guidance, not a restriction.
 ## More detail
 
 - [[Using Haven 42|Using-Haven-42]]
-- [[Online Model Discovery|Online-Model-Discovery]]
-- [[Hardware-Aware Recommendations|Hardware-Aware-Recommendations]]
-- [[Engineering Model Selection|Engineering-Model-Selection]]
+- [[Online Model Discovery|Eng-Online-Model-Discovery]]
+- [[Hardware-Aware Recommendations|Eng-Hardware-Aware-Recommendations]]
+- [[Engineering Model Selection|Eng-Model-Selection]]

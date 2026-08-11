@@ -64,8 +64,10 @@ remain gated.
 
 **Technical details** is optional. It summarizes which features and computer
 setups have been tested. Opening it does not run tests or contact an AI server.
-Detailed engineering records are available through the [[Evidence
-Dashboard|Evidence-Dashboard]].
+Detailed engineering records are available through the [[Engineering and
+Validation Index|Engineering-Index]].
 
 For retention and network behavior, read [[Privacy|Privacy-Policy]] and
 [[Connection Security|Provider-Endpoint-Security]].
+
+**Next:** [[Troubleshooting]]

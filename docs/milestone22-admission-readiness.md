@@ -74,7 +74,7 @@ machine-effect, network-activation, signing, or release authority.
 
 ## Signing Readiness
 
-The public [code-signing policy](https://github.com/hysel/haven-42/wiki/Code-Signing-Policy), [privacy
+The public [code-signing policy](https://github.com/hysel/haven-42/blob/main/CODE-SIGNING-POLICY.md), [privacy
 policy](https://github.com/hysel/haven-42/blob/main/PRIVACY.md), and [SignPath eligibility
 audit](signpath-eligibility-audit.md) prepare evidence without activating
 signing. The Windows build now defines and verifies deterministic Haven 42

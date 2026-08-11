@@ -14,7 +14,16 @@ quick reference if you want a little more detail.
 | Guided setup | The recommended setup that checks the computer, explains required downloads, asks permission, and chooses a suitable model. |
 | Advanced | An optional choice intended for people who already manage an AI server or need technical controls. |
 | Loopback | A private connection that stays on the same computer. Haven 42 commonly shows it as `127.0.0.1`. |
+| API key | A secret used to authenticate to an AI server. Haven 42 keeps a supplied key in memory for the current session and requires HTTPS when the server is on another computer. Never put a key in a public issue. |
+| CPU | The computer's general-purpose processor. A model can run on a CPU when compatible graphics acceleration is unavailable, usually at a lower speed. |
+| GPU | A graphics processor that can accelerate a compatible AI model. Available graphics memory limits which model sizes fit. |
+| CUDA | NVIDIA's software path for running supported work on an NVIDIA GPU. A CUDA result does not apply to an Intel or AMD graphics card. |
+| Runtime | The software that loads and runs a model. Ollama is Haven 42's managed text-model runtime in the current Alpha. |
 | Quantization | A way to make a model smaller so it can fit on more computers. Haven 42 selects an already prepared size; the Alpha does not modify models on the tester's computer. |
+| Quantization label | A model-size label such as `Q4_K_M` or `Q8_0`. It identifies how the model was prepared and affects memory use and output quality. Results for one label do not automatically apply to another. |
+| Soak test | A test that runs for a set period to look for failures that may not appear in a short check. |
+| Checksum or artifact digest | A fixed-length value used to identify exact file contents. A changed file has a different value. |
+| Release candidate | A specific package being considered for release. It still must pass its stated checks before publication. |
 | Unsigned package | A development package that has not yet received a publisher signature. Windows may display an extra warning before it runs. |
 
 If a message is still unclear, see [[Troubleshooting|Troubleshooting]].

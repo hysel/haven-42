@@ -2559,7 +2559,7 @@ def main() -> int:
         assert policy["executionEvents"]["unverifiedModelWarningRequired"] is True
         assert policy["browser"]["remoteAssetsAllowed"] is False
         assert policy["browser"]["fixedExternalNavigationUrls"] == [
-            "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+            "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
             "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
             "https://ollama.com/download/windows",
         ]
@@ -2730,7 +2730,7 @@ def main() -> int:
         assert 'id="assurance-surface-list"' in html and "renderAssuranceSummary" in javascript
         assert 'id="assurance-status-list"' in html and "assurance-status-item" in javascript
         assert "supportedActivities} supported" in javascript and "blockedActivities} blocked" in javascript
-        assert html.count('href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"') == 1
+        assert html.count('href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"') == 1
         assert html.count('href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"') == 1
         assert html.count('href="http') == 2
         assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 2

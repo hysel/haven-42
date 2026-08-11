@@ -37,11 +37,6 @@
       "firstMilestone": 1,
       "lastMilestone": 28
     },
-    "README.md": {
-      "rowPrefix": "Milestone ",
-      "firstMilestone": 20,
-      "lastMilestone": 28
-    },
     "docs/solution-architecture-review.md": {
       "rowPrefix": "",
       "firstMilestone": 1,

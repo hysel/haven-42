@@ -80,6 +80,8 @@ steps that caused it. Remove private endpoints, paths, prompts, and attachments
 before sharing a report.
 
 Developer, Continue, configuration, and repository diagnostics are in
-[[Engineering Troubleshooting|Engineering-Troubleshooting]]. Security issues
+[[Engineering Troubleshooting|Eng-Troubleshooting]]. Security issues
 should be reported privately using the repository's
 [security policy](https://github.com/hysel/haven-42/security/policy).
+
+**Next:** [[Common Words|Glossary]]

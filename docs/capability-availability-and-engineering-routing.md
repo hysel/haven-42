@@ -26,7 +26,7 @@ llama.cpp discovery additionally requires `-ProviderId llamacpp.local-text -Engi
 
 Linux and macOS use `discover-capability-availability.linux.sh` and `.macos.sh`. They select `python3`, then `python`, and fail clearly when Python 3 is absent.
 
-Bounded Windows live-probe evidence is recorded in [Capability Availability Validation](https://github.com/hysel/haven-42/wiki/Capability-Availability-Validation). Runtime state remains transient and configuration-dependent.
+Bounded Windows live-probe evidence is recorded in [Capability Availability Validation](https://github.com/hysel/haven-42/blob/main/examples/capability-availability-validation.md). Runtime state remains transient and configuration-dependent.
 
 ## Engineering routes
 

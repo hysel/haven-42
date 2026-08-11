@@ -5,6 +5,10 @@ not a production release. The download must come from the Haven 42 repository
 release page, and its SHA-256 value must match the checksum published beside
 the archive.
 
+The wiki [Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start) is
+the maintained setup procedure. This page adds release-integrity and reporting
+details without maintaining a second setup sequence.
+
 ## Before downloading
 
 - Use Windows 11 x64. Windows 10 and other operating systems are outside this
@@ -43,14 +47,8 @@ match, delete the download and report the mismatch. Do not run it.
 
 ## Start Haven 42
 
-1. Extract the whole ZIP archive. Do not run the executable from inside the
-   archive.
-2. Open the extracted `haven42` folder.
-3. Run `haven42.exe`.
-4. Read the unsigned-build notice and choose guided setup.
-5. Review the computer check and each proposed download.
-6. Approve setup only when the listed components and download sizes make
-   sense for the computer.
+Follow the [Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start)
+from **Start the portable Windows package** through its explicit **Next** link.
 
 Haven 42 opens in the default browser and binds only to IPv4 loopback. Closing
 the Haven 42 process stops services it started for that session. The System

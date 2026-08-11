@@ -29,6 +29,19 @@ if ($navigationEntries.Count -lt 10 -or $navigationEntries.Count -gt 25) {
     throw "Wiki navigation must contain between 10 and 25 primary links: $navigationPath"
 }
 
+function Get-RenderedWikiText {
+    param(
+        [Parameter(Mandatory)]$Entry,
+        [Parameter(Mandatory)][string]$SourceText
+    )
+    if ($Entry.page -notlike 'Eng-*.md') {
+        return $SourceText
+    }
+    $source = ($Entry.source -replace '\\', '/')
+    $sourceUrl = "https://github.com/hysel/haven-42/blob/main/$source"
+    return "# $($Entry.title)`n`n> **Internal engineering page:** This is an internal engineering page - see [Home](Home) if you are trying to install or use Haven 42.`n`nThe canonical document is [$source]($sourceUrl).`n"
+}
+
 $differences = [System.Collections.Generic.List[string]]::new()
 $mappedPages = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
 $repoPrefix = [System.IO.Path]::GetFullPath($repoRoot).TrimEnd([System.IO.Path]::DirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
@@ -79,21 +92,23 @@ foreach ($entry in $entries) {
     if ($sourceText -match '(?m)^\|[^\r\n]*\[\[') {
         throw "Wiki-style link inside a Markdown table must use standard Markdown syntax: $($entry.source)"
     }
-    foreach ($match in [regex]::Matches($sourceText, '\[\[(?:[^\]|]+\|)?([^\]#]+)(?:#[^\]]+)?\]\]')) {
-        $target = $match.Groups[1].Value.Trim()
-        if (-not $mappedPageStems.Contains($target)) {
-            throw "Broken wiki link in $($entry.source): $target"
+    if ($entry.page -notlike 'Eng-*.md') {
+        foreach ($match in [regex]::Matches($sourceText, '\[\[(?:[^\]|]+\|)?([^\]#]+)(?:#[^\]]+)?\]\]')) {
+            $target = $match.Groups[1].Value.Trim()
+            if (-not $mappedPageStems.Contains($target)) {
+                throw "Broken wiki link in $($entry.source): $target"
+            }
         }
-    }
-    foreach ($match in [regex]::Matches($sourceText, '(?<!\!)\[[^\]]+\]\(([^)#]+)(?:#[^)]*)?\)')) {
-        $target = $match.Groups[1].Value.Trim()
-        if ($target -match '^[a-z][a-z0-9+.-]*:') { continue }
-        if ($target -match '[/\\]') {
-            throw "Path-like relative Markdown link in $($entry.source): $target"
-        }
-        $targetStem = [System.IO.Path]::GetFileNameWithoutExtension($target)
-        if (-not $mappedPageStems.Contains($targetStem)) {
-            throw "Broken relative Markdown link in $($entry.source): $target"
+        foreach ($match in [regex]::Matches($sourceText, '(?<!\!)\[[^\]]+\]\(([^)#]+)(?:#[^)]*)?\)')) {
+            $target = $match.Groups[1].Value.Trim()
+            if ($target -match '^[a-z][a-z0-9+.-]*:') { continue }
+            if ($target -match '[/\\]') {
+                throw "Path-like relative Markdown link in $($entry.source): $target"
+            }
+            $targetStem = [System.IO.Path]::GetFileNameWithoutExtension($target)
+            if (-not $mappedPageStems.Contains($targetStem)) {
+                throw "Broken relative Markdown link in $($entry.source): $target"
+            }
         }
     }
 }
@@ -101,16 +116,21 @@ foreach ($entry in $entries) {
 foreach ($entry in $entries) {
     $sourcePath = [System.IO.Path]::GetFullPath((Join-Path $repoRoot $entry.source))
     $destinationPath = [System.IO.Path]::GetFullPath((Join-Path $WikiPath $entry.page))
-    $sourceBytes = [System.IO.File]::ReadAllBytes($sourcePath)
     $sourceText = ([System.IO.File]::ReadAllText($sourcePath) -replace "`r`n", "`n")
+    $renderedText = Get-RenderedWikiText -Entry $entry -SourceText $sourceText
+    $renderedBytes = if ($entry.page -like 'Eng-*.md') {
+        [System.Text.UTF8Encoding]::new($false).GetBytes($renderedText)
+    } else {
+        [System.IO.File]::ReadAllBytes($sourcePath)
+    }
     $destinationText = if (Test-Path -LiteralPath $destinationPath -PathType Leaf) {
         ([System.IO.File]::ReadAllText($destinationPath) -replace "`r`n", "`n")
     } else { $null }
-    $matches = $null -ne $destinationText -and $sourceText -ceq $destinationText
+    $matches = $null -ne $destinationText -and $renderedText -ceq $destinationText
     if (-not $matches) {
         $differences.Add($entry.page)
         if (-not $Check) {
-            [System.IO.File]::WriteAllBytes($destinationPath, $sourceBytes)
+            [System.IO.File]::WriteAllBytes($destinationPath, $renderedBytes)
             Write-Output "SYNC $($entry.page)"
         }
     }
