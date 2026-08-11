@@ -745,7 +745,10 @@ def main() -> int:
     args = parser.parse_args()
     snapshot = inspect_system()
     value = build_setup_plan(snapshot, args.plan_intent) if args.plan_intent else snapshot
-    print(json.dumps(value, indent=2))
+    # This is an explicit CLI response, not application logging. The readiness
+    # schema is sanitized before serialization and is written as bounded JSON.
+    encoded = json.dumps(value, indent=2).encode("utf-8")
+    sys.stdout.buffer.write(encoded + b"\n")
     return 0
 
 
