@@ -66,6 +66,7 @@ See [[Common Words|Glossary]] for more definitions.
 | Use engineering and contributor features | [Advanced Topics](Advanced-Topics) |
 | Configure Continue, Aider, or OpenCode | [Coding Tools for Local Models](Coding-Tools-For-Local-Models) |
 | See the computers and AI engines tested | [Tested Hardware and AI Engines](Tested-Hardware-And-AI-Engines) |
+| Check exact model and hardware test status | [Model and Hardware Test Status](Model-And-Hardware-Test-Status) |
 | See maturity and future work | [Project Information](Project-Information) |
 
 ## Privacy and security

@@ -490,6 +490,10 @@ def main() -> int:
             "componentIds": cpu["components"],
             "modelId": model["id"],
         }), encoding="utf-8")
+        with mock.patch.object(
+            MODULE, "load_contract", return_value={"version": "0.4.0-alpha.2"},
+        ):
+            assert MODULE._legacy_owned_state_root(legacy) == legacy.resolve()
         assert MODULE._legacy_owned_state_root(legacy) == legacy.resolve()
         coordinator = MODULE.SetupCoordinator("e" * 16, base / "portable")
         coordinator.legacy_root = legacy
@@ -497,7 +501,7 @@ def main() -> int:
         removed = coordinator.remove_managed_components()
         assert removed["legacyManagedComponentsRemoved"] is True
         assert not legacy.exists()
-        checks += 4
+        checks += 5
 
         legacy.mkdir()
         (legacy / MODULE.JOURNAL_NAME).write_text("{}", encoding="utf-8")

@@ -6,6 +6,8 @@ docs/wiki-advanced-topics.md	Advanced-Topics.md	Advanced Topics
 docs/wiki-arch-linux-test-vm-install.md	Arch-Linux-Test-VM-Installation.md	Arch Linux Test VM Installation
 docs/wiki-project-information.md	Project-Information.md	Project Information
 docs/wiki-tested-hardware.md	Tested-Hardware-And-AI-Engines.md	Tested Hardware and AI Engines
+docs/wiki-model-hardware-certifications.md	Model-And-Hardware-Test-Status.md	Model and Hardware Test Status
+docs/alpha-2-linux-long-term-validation.md	Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
 docs/wiki-documentation-index.md	Documentation-Index.md	Documentation Index
 docs/beginner-setup-mode.md	Beginner-Setup-Mode.md	Beginner Setup Mode
 docs/vscode-continue-setup.md	VS-Code-Continue-Setup.md	VS Code Continue Setup
@@ -152,5 +154,6 @@ docs/retrieval-expansion-foundations.md	Retrieval-Expansion-Foundations.md	Retri
 docs/public-repository-validation-candidates.md	Public-Repository-Validation-Candidates.md	Public Repository Validation Candidates
 docs/local-batch-task-ledger.md	Local-Batch-Task-Ledger.md	Local Batch Task Ledger
 docs/windows-alpha-native-validation.md	Windows-Alpha-Native-Validation.md	Windows Alpha Native Validation
+docs/windows-alpha-2-build.md	Windows-Alpha-2-Build.md	Windows Alpha 2 Build
 docs/windows-alpha-release.md	Windows-Alpha-Release.md	Windows Alpha Release
 docs/wiki-coding-tools.md	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models

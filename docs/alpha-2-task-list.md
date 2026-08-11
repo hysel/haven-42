@@ -39,19 +39,66 @@ another operating system, distribution, accelerator, model, or package.
   incomplete or the distribution changes continuously.
 - **Blocked**: a named failure or missing prerequisite prevents promotion.
 
+## Release-candidate gap audit
+
+_Last reconciled: August 11, 2026._
+
+The merged Alpha 2 foundation now includes the Linux platform adapter,
+distribution and hardware admission, exact component registry, link-free
+runtime extraction, portable managed lifecycle, evidence-bound automatic model
+selection, restricted long-term campaign tooling, driver guidance, model
+qualification, and shared Windows/Linux/macOS package regression coverage.
+The exact merged tree passed all hosted Windows, Linux, macOS, CodeQL, privacy,
+and wiki checks. The long-term campaign records package and lifecycle parity on
+all nine Linux targets plus the native model and accelerator evidence described
+later in this file.
+
+That evidence does **not** close the unchecked release tasks below. In
+particular, the campaign report says its nine-distribution result is package
+parity rather than the complete guided desktop, accessibility, attachment,
+uninstall, and tester workflow required for a support label. The following are
+the current release-candidate blockers, in execution order:
+
+1. Build and verify the newly separated Windows Alpha 2 candidate from the
+   same clean commit as the Linux candidate. The ordinary Windows build remains
+   `0.4.0-alpha.1`, and neither path can replace or republish Alpha 1.
+2. Run the complete novice guided-setup and daily-use sequence on the exact
+   Windows 11 NVIDIA, Ubuntu 26.04 NVIDIA, and Bazzite NVIDIA candidates. Run
+   the CPU-only package and desktop sequence on the remaining Linux targets.
+3. Keep every distribution and accelerator label at its present lower level
+   until its own full sequence passes. Native Windows AMD and Intel, native
+   Linux AMD and Intel, low-memory, and mixed-GPU promotion cells remain open.
+4. Build the exact Windows and Linux release candidates from one clean commit,
+   then finish the dependency, license, notice, inventory, SBOM, checksum,
+   provenance, relocation, and source-versus-package reviews for those exact
+   archives.
+5. Complete the Linux threat-model update and the exact-candidate security,
+   privacy, archive, process, network, attachment, logging, and support-report
+   hostile reviews. Any finding blocks publication regardless of severity.
+6. Finish the novice Linux quick start, compatibility table, known
+   limitations, issue-reporting fields, release notes, README, security
+   documentation, and mapped wiki review.
+7. Present the two exact packages, user flows, compatibility labels, model
+   evidence, and release-page wording for owner review. A new automatic model
+   default and Alpha 2 publication each require separate explicit approval.
+
+No package build, test result, or documentation update may overwrite the Alpha
+1 tag or its published assets. Completion of an implementation or offline test
+does not automatically check a native or release-candidate task.
+
 ## Phase 1: Release scope and control
 
-- [ ] Record the owner-approved Alpha 2 capabilities, platforms, audience, and
+- [x] Record the owner-approved Alpha 2 capabilities, platforms, audience, and
   stop boundaries in a versioned release contract.
-- [ ] Freeze `0.4.0-alpha.1`; never replace its tag or published assets.
+- [x] Freeze `0.4.0-alpha.1`; never replace its tag or published assets.
 - [ ] Use `0.4.0-alpha.2` consistently in code, package metadata, evidence,
   documentation, issue forms, and release notes.
-- [ ] Define these candidate assets:
+- [x] Define these candidate assets:
   - `haven42-0.4.0-alpha.2-windows-x64-unsigned.zip`
   - `haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz`
-- [ ] Define separate checksums, inventories, notices, SBOMs, provenance, and
+- [x] Define separate checksums, inventories, notices, SBOMs, provenance, and
   known-limitations evidence for each archive.
-- [ ] Update the release gate so one platform cannot inherit another
+- [x] Update the release gate so one platform cannot inherit another
   platform's passing result.
 
 ## Phase 2: Shared cross-platform product boundary

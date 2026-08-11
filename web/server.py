@@ -88,10 +88,11 @@ from alpha_platform import (  # noqa: E402
     validate_provider_metrics,
 )
 from diagnostic_logging import DiagnosticLogError, DiagnosticLogger  # noqa: E402
+from alpha_release import application_version, display_version  # noqa: E402
 
 
 LINUX_ALPHA = sys.platform.startswith("linux")
-APP_VERSION = "0.4.0-alpha.2" if LINUX_ALPHA else "0.4.0-alpha.1"
+APP_VERSION = application_version()
 ALPHA_PLATFORM_PREFIX = "linux-alpha" if LINUX_ALPHA else "windows-alpha"
 MANAGED_SETUP_UNAVAILABLE = (
     "windows-alpha-setup-unavailable" if os.name == "nt"
@@ -976,10 +977,7 @@ class HavenState:
                     for item in CAPABILITY_SUMMARY
                 ],
                 "alpha": {
-                    "label": (
-                        "Haven 42 0.4 Alpha 2" if LINUX_ALPHA
-                        else "Haven 42 0.4 Alpha 1"
-                    ),
+                    "label": display_version(APP_VERSION),
                     "windowsOnly": not LINUX_ALPHA,
                     "chatOnly": False,
                     "textOnly": True,

@@ -23,6 +23,7 @@ PROJECT_FILES = {
     "_internal/config/install-component-registry.json",
     "_internal/config/workflows.json",
     "_internal/config/windows-alpha-contract.json",
+    "_internal/config/windows-alpha-2-contract.json",
     "_internal/config/windows-alpha-model-catalog.json",
     "_internal/config/windows-alpha-component-registry.json",
     "_internal/config/windows-alpha-resource-monitor-contract.json",

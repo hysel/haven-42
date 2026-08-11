@@ -3305,6 +3305,7 @@ async function bootstrap() {
     state.token = result.sessionToken;
     state.alphaTextOnly = result.alpha?.textOnly === true;
     state.appVersion = result.version;
+    byId("brand-version").textContent = `${result.alpha?.label || `Haven 42 ${result.version}`} · private AI on your computer`;
     byId("app-version").textContent = `v${result.version}`;
     byId("about-version").textContent = `v${result.version}`;
     const runtimeBuild = Number.isSafeInteger(result.runtime.buildNumber)
