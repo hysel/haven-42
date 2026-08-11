@@ -88,7 +88,11 @@ from alpha_platform import (  # noqa: E402
     validate_provider_metrics,
 )
 from diagnostic_logging import DiagnosticLogError, DiagnosticLogger  # noqa: E402
-from alpha_release import application_version, display_version  # noqa: E402
+from alpha_release import (  # noqa: E402
+    ALPHA_1_VERSION,
+    application_version,
+    display_version,
+)
 
 
 LINUX_ALPHA = sys.platform.startswith("linux")
@@ -978,7 +982,7 @@ class HavenState:
                 ],
                 "alpha": {
                     "label": display_version(APP_VERSION),
-                    "windowsOnly": not LINUX_ALPHA,
+                    "windowsOnly": APP_VERSION == ALPHA_1_VERSION,
                     "chatOnly": False,
                     "textOnly": True,
                     "unsigned": True,
