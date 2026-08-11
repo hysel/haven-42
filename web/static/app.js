@@ -1265,7 +1265,7 @@ function validAlphaSetupProgress(status) {
   ]);
   if (
     !status || status.schemaVersion !== 1
-    || status.kind !== "windows-alpha-setup-progress"
+    || !["windows-alpha-setup-progress", "linux-alpha-setup-progress"].includes(status.kind)
     || !Number.isSafeInteger(status.progressPercent)
     || status.progressPercent < 0 || status.progressPercent > 100
     || typeof status.completedSetupCandidate !== "boolean"
@@ -2032,7 +2032,8 @@ async function refreshAlphaMetrics() {
 
 function renderManagedStorageStatus(value) {
   if (
-    !value || value.schemaVersion !== 1 || value.kind !== "windows-alpha-setup-progress"
+    !value || value.schemaVersion !== 1
+    || !["windows-alpha-setup-progress", "linux-alpha-setup-progress"].includes(value.kind)
     || value.storageScope !== "inside-extracted-folder"
     || value.storageDirectoryName !== "Haven42-Data"
     || !["empty", "managed", "legacy-managed", "managed-with-legacy", "blocked-unrecognized"].includes(value.managedComponentsState)
