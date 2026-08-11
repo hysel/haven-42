@@ -84,7 +84,13 @@ def main() -> int:
     assert "distributionId" in snapshot["platform"]
     assert "libcVersion" in snapshot["platform"]
     assert snapshot["platform"]["sessionMetadataTrusted"] is False
-    checks += 12
+    assert READINESS._trusted_linux_os_release_path(
+        Path("/etc/os-release"), Path("/etc/pop-os/os-release")
+    )
+    assert not READINESS._trusted_linux_os_release_path(
+        Path("/etc/os-release"), Path("/home/user/os-release")
+    )
+    checks += 14
 
     with tempfile.TemporaryDirectory() as directory:
         release = Path(directory) / "os-release"

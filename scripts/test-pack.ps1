@@ -5646,7 +5646,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     }
     $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-system-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Readiness security tests should pass. Output: $($output -join ' ')"
-    Assert-True -Condition (($output -join "`n") -match "64") -Message "Readiness test coverage should remain complete."
+    Assert-True -Condition (($output -join "`n") -match "66") -Message "Readiness test coverage should remain complete."
     foreach ($alphaTest in @(
         "scripts/test-windows-alpha.py",
         "scripts/test-windows-alpha-setup.py",

@@ -257,7 +257,7 @@ def probe(
             assert all(set(event) == {
                 "schemaVersion", "timestamp", "eventId", "category", "code", "outcome", "appVersion",
             } for event in diagnostics["events"])
-            if expected_managed:
+            if expected_managed and diagnostics["available"]:
                 diagnostic_codes = {event["code"] for event in diagnostics["events"]}
                 assert (
                     f"SETUP_BACKEND_{managed['backendMode'].upper()}_SELECTED"
@@ -271,6 +271,9 @@ def probe(
                     code for code in diagnostic_codes
                     if code.startswith("SETUP_MODEL_") and code.endswith("_SELECTED")
                 ]) == 1
+            if not diagnostics["available"]:
+                assert diagnostics["events"] == []
+                assert diagnostics["error"] == "diagnostic-data-unavailable"
         expect_http_error(
             origin + "/api/workflows",
             authority,

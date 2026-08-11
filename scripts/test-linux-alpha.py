@@ -64,7 +64,8 @@ def main() -> None:
     MODULE.load_contract()
     MODULE.load_catalog()
     MODULE.load_registry()
-    assert MODULE.load_evidence() == []
+    reviewed = MODULE.load_evidence()
+    assert len(reviewed) == 15
     checks += 4
 
     cuda = snapshot()
@@ -78,21 +79,32 @@ def main() -> None:
     admitted = MODULE.select_model(cuda, [evidence("qwen35-4b-q4")])
     assert admitted["automaticExecutionAllowed"] is True
     assert admitted["selected"]["id"] == "qwen35-4b-q4"
-    checks += 7
+    committed_cuda = MODULE.select_model(cuda)
+    assert committed_cuda["automaticExecutionAllowed"] is True
+    assert committed_cuda["selected"]["id"] == "qwen35-4b-q4"
+    checks += 9
 
     cpu = snapshot(None)
     cpu_evidence = evidence("qwen35-08b-q8", backend="cpu")
     cpu_decision = MODULE.select_model(cpu, [cpu_evidence])
     assert cpu_decision["selected"]["id"] == "qwen35-08b-q8"
     assert cpu_decision["hardware"]["maximumUsableGpuMemoryGiB"] == 0
-    checks += 2
+    committed_cpu = MODULE.select_model(cpu)
+    assert committed_cpu["selected"]["id"] == "qwen35-08b-q8"
+    checks += 3
 
     rolling = snapshot(None)
     rolling["platform"].update(
         distributionId="arch", distributionVersion="rolling",
     )
     assert MODULE.evaluate_hardware(rolling)["operatingSystemId"] == "arch-rolling"
-    checks += 1
+    mint = snapshot(None)
+    mint["platform"].update(distributionId="linuxmint", distributionVersion="22.3")
+    assert MODULE.evaluate_hardware(mint)["operatingSystemId"] == "linux-mint-22.3"
+    pop = snapshot(None)
+    pop["platform"].update(distributionId="pop", distributionVersion="24.04")
+    assert MODULE.evaluate_hardware(pop)["operatingSystemId"] == "pop-os-24.04"
+    checks += 3
 
     for field, value, blocker in (
         ("architecture", "arm64", "linux-x64-required"),
