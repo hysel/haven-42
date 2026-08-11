@@ -103,6 +103,7 @@ def probe(
     packaged: bool,
     cwd: Path = ROOT,
     environment: dict[str, str] | None = None,
+    expected_version: str | None = None,
 ) -> dict:
     process, origin = launch(command, cwd, environment)
     try:
@@ -129,11 +130,19 @@ def probe(
         assert bootstrap["package"]["required"] is packaged
         assert bootstrap["package"]["verified"] is packaged
         linux_alpha = bootstrap["runtime"]["platform"] == "linux"
-        expected_version = "0.4.0-alpha.2" if linux_alpha else "0.4.0-alpha.1"
+        if expected_version is None:
+            expected_version = "0.4.0-alpha.2" if linux_alpha else "0.4.0-alpha.1"
+        assert expected_version in {"0.4.0-alpha.1", "0.4.0-alpha.2"}
+        if linux_alpha:
+            assert expected_version == "0.4.0-alpha.2"
         assert bootstrap["version"] == expected_version
         assert bootstrap["alpha"] == {
-            "label": "Haven 42 0.4 Alpha 2" if linux_alpha else "Haven 42 0.4 Alpha 1",
-            "windowsOnly": not linux_alpha,
+            "label": (
+                "Haven 42 0.4 Alpha 2"
+                if expected_version == "0.4.0-alpha.2"
+                else "Haven 42 0.4 Alpha 1"
+            ),
+            "windowsOnly": expected_version == "0.4.0-alpha.1",
             "chatOnly": False,
             "textOnly": True,
             "unsigned": True,
@@ -422,7 +431,9 @@ def test_hostile_packages(executable: Path) -> None:
             pass
 
 
-def test_relocation_and_hostile_environment(executable: Path, expected: dict) -> None:
+def test_relocation_and_hostile_environment(
+    executable: Path, expected: dict, expected_version: str | None,
+) -> None:
     with tempfile.TemporaryDirectory(prefix="haven42-relocated-package-") as temporary:
         relocated = Path(temporary) / "directory with spaces" / "haven42"
         shutil.copytree(executable.parent, relocated)
@@ -438,6 +449,7 @@ def test_relocation_and_hostile_environment(executable: Path, expected: dict) ->
                 "NO_PROXY": "",
                 "BROWSER": "untrusted-browser-command",
             },
+            expected_version=expected_version,
         )
         assert actual == expected
 
@@ -450,7 +462,9 @@ def restore_writable(root: Path) -> None:
             pass
 
 
-def test_read_only_package(executable: Path, expected: dict) -> None:
+def test_read_only_package(
+    executable: Path, expected: dict, expected_version: str | None,
+) -> None:
     with tempfile.TemporaryDirectory(prefix="haven42-read-only-package-") as temporary:
         copied = Path(temporary) / "haven42"
         shutil.copytree(executable.parent, copied)
@@ -463,12 +477,17 @@ def test_read_only_package(executable: Path, expected: dict) -> None:
                 else:
                     path.chmod(mode & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
             copied.chmod(copied.stat().st_mode & ~stat.S_IWUSR & ~stat.S_IWGRP & ~stat.S_IWOTH)
-            assert probe([str(copied_executable)], True, cwd=copied) == expected
+            assert probe(
+                [str(copied_executable)], True, cwd=copied,
+                expected_version=expected_version,
+            ) == expected
         finally:
             restore_writable(copied)
 
 
-def test_abrupt_exit_recovery(executable: Path, expected: dict) -> None:
+def test_abrupt_exit_recovery(
+    executable: Path, expected: dict, expected_version: str | None,
+) -> None:
     process, origin = launch([str(executable)], executable.parent)
     try:
         with request(origin + "/api/bootstrap") as response:
@@ -479,7 +498,10 @@ def test_abrupt_exit_recovery(executable: Path, expected: dict) -> None:
     finally:
         if process.poll() is None:
             process.kill()
-    assert probe([str(executable)], True, cwd=executable.parent) == expected
+    assert probe(
+        [str(executable)], True, cwd=executable.parent,
+        expected_version=expected_version,
+    ) == expected
 
 
 def test_port_collision(command: list[str]) -> None:
@@ -504,18 +526,29 @@ def test_port_collision(command: list[str]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", required=True)
+    parser.add_argument(
+        "--expected-version",
+        choices=("0.4.0-alpha.1", "0.4.0-alpha.2"),
+        help="Require this embedded packaged release identity.",
+    )
     args = parser.parse_args()
     source = probe([
         sys.executable,
         str(ROOT / "scripts/run-haven42-web-browser-test.py"),
     ], False)
     executable = Path(args.executable).resolve()
-    packaged = probe([str(executable)], True)
+    packaged = probe(
+        [str(executable)], True, expected_version=args.expected_version,
+    )
     assert source == packaged, "source and packaged behavior diverged"
-    assert probe([str(executable)], True) == packaged
-    test_relocation_and_hostile_environment(executable, packaged)
-    test_read_only_package(executable, packaged)
-    test_abrupt_exit_recovery(executable, packaged)
+    assert probe(
+        [str(executable)], True, expected_version=args.expected_version,
+    ) == packaged
+    test_relocation_and_hostile_environment(
+        executable, packaged, args.expected_version,
+    )
+    test_read_only_package(executable, packaged, args.expected_version)
+    test_abrupt_exit_recovery(executable, packaged, args.expected_version)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
     remove_test_diagnostics(executable.parent)
