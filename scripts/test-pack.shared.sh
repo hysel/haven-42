@@ -2507,6 +2507,7 @@ test_local_web_mvp() {
   python3 "$REPO_ROOT/scripts/test-windows-alpha-stage-ledger.py" || return 1
   python3 "$REPO_ROOT/scripts/test-windows-alpha-candidate.py" || return 1
   python3 "$REPO_ROOT/scripts/test-windows-alpha2-candidate.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-linux-alpha2-candidate.py" || return 1
   python3 "$REPO_ROOT/scripts/test-private-alpha-readiness.py" || return 1
   local_web_output="$(python3 "$REPO_ROOT/scripts/test-haven42-web.py")" || return 1
   local_web_count="$(
