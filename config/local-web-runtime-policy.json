@@ -14,7 +14,7 @@
     "crossOriginRequestsAllowed": false,
     "automaticLaunchUrlScope": "ipv4-loopback-http-origin-only",
       "fixedExternalNavigationUrls": [
-        "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+        "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
         "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
         "https://ollama.com/download/windows"
       ],

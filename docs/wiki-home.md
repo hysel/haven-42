@@ -41,17 +41,6 @@ Features that are still experimental are kept out of the main experience.
 Haven 42 explains approved setup downloads, never runs attached files, and does
 not silently change drivers, Windows settings, or automatic updates.
 
-## Common words
-
-- **Model:** the AI that reads your request and writes the response.
-- **Ollama:** the local AI engine that runs a model.
-- **AI server:** the computer running Ollama. It may be this computer or another
-  computer on your private network.
-- **Token:** a small piece of text counted by the model. Tokens per second is a
-  rough measure of response speed.
-
-See [[Common Words|Glossary]] for more definitions.
-
 ## Choose a guide
 
 | I want to… | Read… |
@@ -63,11 +52,11 @@ See [[Common Words|Glossary]] for more definitions.
 | Understand what stays in memory | [Privacy](Privacy-Policy) |
 | Secure a local or private-network provider | [Connection Security](Provider-Endpoint-Security) |
 | Fix a problem | [Troubleshooting](Troubleshooting) |
-| Use engineering and contributor features | [Advanced Topics](Advanced-Topics) |
 | Configure Continue, Aider, or OpenCode | [Coding Tools for Local Models](Coding-Tools-For-Local-Models) |
 | See the computers and AI engines tested | [Tested Hardware and AI Engines](Tested-Hardware-And-AI-Engines) |
 | Check exact model and hardware test status | [Model and Hardware Test Status](Model-And-Hardware-Test-Status) |
-| See maturity and future work | [Project Information](Project-Information) |
+| See maturity and future work | [Roadmap](Roadmap) |
+| Find contributor and validation records | [Engineering and Validation Index](Engineering-Index) |
 
 ## Privacy and security
 
@@ -90,10 +79,10 @@ prerelease. The latest stable release line is `0.3.0`. Haven 42 is still
 development software: signing and notarization are inactive, the updater cannot
 modify a machine, and no production-readiness claim is made.
 
-Windows testers can review the exact published files, checksums, and limits on
-the [[Windows Alpha Release|Windows-Alpha-Release]] page.
+Windows testers can review the exact published files, checksums, and limits in
+the [Windows Alpha release record](https://github.com/hysel/haven-42/blob/main/docs/windows-alpha-release.md).
 
-See [[Project Information|Project-Information]], the concise navigation in the
-[[Roadmap]], and detailed [[Evidence Dashboard|Evidence-Dashboard]] records.
+See [[Project Information|Project-Information]], [[Roadmap]], and the
+[[Engineering and Validation Index|Engineering-Index]].
 
 The source repository is [hysel/haven-42](https://github.com/hysel/haven-42).

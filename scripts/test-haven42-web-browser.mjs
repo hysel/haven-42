@@ -499,7 +499,7 @@ try {
     || assurance.rows !== assurance.surfaces
     || assurance.candidateRows !== 1
     || !assurance.activityDetails
-    || assurance.wikiHref !== "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"
+    || assurance.wikiHref !== "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"
     || assurance.wikiTarget !== "_blank"
     || !assurance.wikiRel.includes("noopener")
     || !assurance.wikiRel.includes("noreferrer")

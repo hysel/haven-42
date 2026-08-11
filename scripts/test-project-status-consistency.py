@@ -53,7 +53,7 @@ def main() -> int:
             "| 1: Minimum Usable Pack | Complete |",
             "| 1: Minimum Usable Pack | Proposed |",
         ),
-        ("README.md", "Milestone 27:", "Milestone 127:"),
+        ("ROADMAP.md", "Milestone 27:", "Milestone 127:"),
         ("ROADMAP.md", "Milestone 28:", "Milestone 128:"),
         (
             "docs/solution-architecture-review.md",
@@ -61,9 +61,9 @@ def main() -> int:
             "| 22: Unified Product UI And Task Composition | Complete;",
         ),
         (
-            "README.md",
-            "| Milestone 25: Local video | Research |",
-            "| Milestone 25: Local video | Complete |",
+            "ROADMAP.md",
+            "| Milestone 25: Local Video Generation | Research and hardware preflight in progress |",
+            "| Milestone 25: Local Video Generation | Complete |",
         ),
         (
             "ROADMAP.md",
@@ -140,7 +140,7 @@ def main() -> int:
     del incomplete_inventory["milestones"]["1"]
     malformed_contracts.append(incomplete_inventory)
     invalid_document_range = json.loads(json.dumps(contract))
-    invalid_document_range["documents"]["README.md"]["firstMilestone"] = 29
+    invalid_document_range["documents"]["ROADMAP.md"]["firstMilestone"] = 29
     malformed_contracts.append(invalid_document_range)
     for index, malformed_contract in enumerate(malformed_contracts):
         with tempfile.TemporaryDirectory(

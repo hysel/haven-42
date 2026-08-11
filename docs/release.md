@@ -1,7 +1,7 @@
 # Release Guidance
 
 Haven 42 currently produces only unsigned development artifacts. Review the
-[Code signing policy](https://github.com/hysel/haven-42/wiki/Code-Signing-Policy) and
+[Code signing policy](https://github.com/hysel/haven-42/blob/main/CODE-SIGNING-POLICY.md) and
 [SignPath Foundation eligibility audit](signpath-eligibility-audit.md) before
 proposing any signing or public binary publication. Neither this guidance nor
 an artifact attestation grants signing or release authority.

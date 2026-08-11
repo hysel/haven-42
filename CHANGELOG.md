@@ -11,6 +11,11 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Reorganized the README and wiki around one maintained source per topic. The
+  wiki now keeps a short user guide, a shared evidence-status scale, and an
+  Engineering and Validation Index; `Eng-` pages point to canonical repository
+  documents instead of duplicating them.
+
 - Added short, independent first-visit help tours for Chat, Models, System,
   Technical details, and About. Each section keeps its own completion flag,
   includes keyboard-accessible Back, Next, Skip, close, and Escape controls,

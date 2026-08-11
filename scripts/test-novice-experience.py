@@ -100,7 +100,8 @@ def main() -> int:
 
     for term in ("AI model", "Ollama", "AI server", "Token", "Portable package", "Quantization"):
         assert term in glossary, term
-    assert "For first-time users" in quick_start
+    assert "For first-time Windows Alpha users" in quick_start
+    assert "Linux and macOS do not yet have a public beginner package" in quick_start
     assert "Glossary.md\tCommon Words" in navigation
     assert "docs/wiki-glossary.md\tGlossary.md\tCommon Words" in sync
 

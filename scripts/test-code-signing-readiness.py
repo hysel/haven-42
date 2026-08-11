@@ -122,19 +122,19 @@ def main() -> int:
         "Signing policy and executable identity must remain code-owner protected.",
     )
     require(
-        "CODE-SIGNING-POLICY.md\tCode-Signing-Policy.md" in wiki_map
+        "CODE-SIGNING-POLICY.md\tEng-Code-Signing-Policy.md" in wiki_map
         and "PRIVACY.md\tPrivacy-Policy.md" in wiki_map
-        and "docs/signpath-eligibility-audit.md\tSignPath-Eligibility-Audit.md"
+        and "docs/signpath-eligibility-audit.md\tEng-SignPath-Eligibility-Audit.md"
         in wiki_map,
         "Signing and privacy pages must be mapped to the public wiki.",
     )
     require(
-        "[Code signing policy](CODE-SIGNING-POLICY.md)" in readme
-        and "[Privacy policy](PRIVACY.md)" in readme,
+        "[code signing policy](code-signing-policy.md)" in readme.lower()
+        and "[privacy policy](privacy.md)" in readme.lower(),
         "Repository home must link the public signing and privacy policies.",
     )
     require(
-        "[Code signing policy](https://github.com/hysel/haven-42/wiki/Code-Signing-Policy)" in release
+        "[Code signing policy](https://github.com/hysel/haven-42/blob/main/CODE-SIGNING-POLICY.md)" in release
         and "unsigned development artifacts" in release,
         "Release guidance must link the policy without claiming signed output.",
     )

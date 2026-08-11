@@ -2,159 +2,161 @@ source	page	title
 docs/wiki-home.md	Home.md	Home
 docs/wiki-quick-start.md	Quick-Start.md	Quick Start
 docs/wiki-using-haven42.md	Using-Haven-42.md	Using Haven 42
-docs/wiki-advanced-topics.md	Advanced-Topics.md	Advanced Topics
-docs/wiki-arch-linux-test-vm-install.md	Arch-Linux-Test-VM-Installation.md	Arch Linux Test VM Installation
+docs/wiki-advanced-topics.md	Eng-Advanced-Topics.md	Advanced Topics
+docs/wiki-arch-linux-test-vm-install.md	Eng-Arch-Linux-Test-VM-Installation.md	Arch Linux Test VM Installation
 docs/wiki-project-information.md	Project-Information.md	Project Information
 docs/wiki-tested-hardware.md	Tested-Hardware-And-AI-Engines.md	Tested Hardware and AI Engines
 docs/wiki-model-hardware-certifications.md	Model-And-Hardware-Test-Status.md	Model and Hardware Test Status
-docs/alpha-2-linux-long-term-validation.md	Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
-docs/wiki-documentation-index.md	Documentation-Index.md	Documentation Index
-docs/beginner-setup-mode.md	Beginner-Setup-Mode.md	Beginner Setup Mode
-docs/vscode-continue-setup.md	VS-Code-Continue-Setup.md	VS Code Continue Setup
-docs/setup-paths.md	Setup-Paths.md	Setup Paths
-docs/haven-42-menu.md	Haven-42-Menu.md	Haven 42 Menu
+docs/alpha-2-linux-long-term-validation.md	Eng-Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
+docs/wiki-documentation-index.md	Eng-Documentation-Index.md	Documentation Index
+docs/beginner-setup-mode.md	Eng-Beginner-Setup-Mode.md	Beginner Setup Mode
+docs/vscode-continue-setup.md	Eng-VS-Code-Continue-Setup.md	VS Code Continue Setup
+docs/setup-paths.md	Eng-Setup-Paths.md	Setup Paths
+docs/haven-42-menu.md	Eng-Haven-42-Menu.md	Haven 42 Menu
 docs/wiki-model-selection.md	Local-Model-Selection.md	Choose a Model
-docs/local-model-selection.md	Engineering-Model-Selection.md	Engineering Model Selection
-docs/writing-model-evaluation.md	Writing-Model-Evaluation.md	Writing Model Evaluation
-examples/writing-model-matrix-validation.md	Writing-Model-Matrix-Validation.md	Writing Model Matrix Validation
-examples/blind-writing-quality-review.md	Blind-Writing-Quality-Review.md	Blind Writing Quality Review
-docs/hardware-aware-recommendations.md	Hardware-Aware-Recommendations.md	Hardware-Aware Recommendations
-docs/online-model-discovery.md	Online-Model-Discovery.md	Online Model Discovery
-docs/local-model-reliability.md	Local-Model-Reliability.md	Local Model Reliability
-docs/local-agent-model-testing.md	Local-Agent-Model-Testing.md	Local Agent Model Testing
-docs/remote-hardware-profile.md	Remote-Hardware-Profile.md	Remote Hardware Profile
-docs/model-tool-use-validation.md	Model-Tool-Use-Validation.md	Model Tool Use Validation
-docs/structured-tool-transport-foundation.md	Structured-Tool-Transport-Foundation.md	Structured Tool Transport Foundation
-docs/evidence-catalog.md	Evidence-Catalog.md	Evidence Catalog
-docs/capability-evidence-contract.md	Capability-Evidence-Contract.md	Capability Evidence Contract
-docs/wiki-evidence-summary.md	Evidence-Dashboard.md	Evidence Dashboard
-docs/evidence-dashboard.md	Engineering-Evidence-Dashboard.md	Engineering Evidence Dashboard
-docs/solution-architecture-review.md	Solution-Architecture-Review.md	Solution Architecture Review
-docs/model-scorecard.md	Model-Scorecard.md	Model Scorecard
-docs/workflow-registry.md	Workflow-Registry.md	Workflow Registry
-docs/workflow-envelope-contract.md	Workflow-Envelope-Contract.md	Workflow Envelope Contract
-docs/task-composition.md	Task-Composition.md	Bounded Task Composition
-docs/workflow-chooser.md	Workflow-Chooser.md	Workflow Chooser
-docs/capability-registry.md	Capability-Registry.md	Capability Registry
-docs/capability-availability-and-engineering-routing.md	Capability-Availability-And-Engineering-Routing.md	Capability Availability And Engineering Routing
-docs/optional-llm-intent-routing.md	Optional-LLM-Intent-Routing.md	Optional LLM Intent Routing
-examples/optional-llm-routing-validation.md	Optional-LLM-Routing-Validation.md	Optional LLM Routing Validation
-docs/local-image-capability.md	Local-Image-Capability.md	Local Image Capability
-docs/comfyui-image-provider-setup.md	ComfyUI-Image-Provider-Setup.md	ComfyUI Image Provider Setup
+docs/local-model-selection.md	Eng-Model-Selection.md	Engineering Model Selection
+docs/writing-model-evaluation.md	Eng-Writing-Model-Evaluation.md	Writing Model Evaluation
+examples/writing-model-matrix-validation.md	Eng-Writing-Model-Matrix-Validation.md	Writing Model Matrix Validation
+examples/blind-writing-quality-review.md	Eng-Blind-Writing-Quality-Review.md	Blind Writing Quality Review
+docs/hardware-aware-recommendations.md	Eng-Hardware-Aware-Recommendations.md	Hardware-Aware Recommendations
+docs/online-model-discovery.md	Eng-Online-Model-Discovery.md	Online Model Discovery
+docs/local-model-reliability.md	Eng-Local-Model-Reliability.md	Local Model Reliability
+docs/local-agent-model-testing.md	Eng-Local-Agent-Model-Testing.md	Local Agent Model Testing
+docs/remote-hardware-profile.md	Eng-Remote-Hardware-Profile.md	Remote Hardware Profile
+docs/model-tool-use-validation.md	Eng-Model-Tool-Use-Validation.md	Model Tool Use Validation
+docs/structured-tool-transport-foundation.md	Eng-Structured-Tool-Transport-Foundation.md	Structured Tool Transport Foundation
+docs/evidence-catalog.md	Eng-Evidence-Catalog.md	Evidence Catalog
+docs/capability-evidence-contract.md	Eng-Capability-Evidence-Contract.md	Capability Evidence Contract
+docs/wiki-evidence-summary.md	Eng-Evidence-Summary.md	Evidence Dashboard
+docs/evidence-dashboard.md	Eng-Evidence-Dashboard.md	Engineering Evidence Dashboard
+docs/solution-architecture-review.md	Eng-Solution-Architecture-Review.md	Solution Architecture Review
+docs/model-scorecard.md	Eng-Model-Scorecard.md	Model Scorecard
+docs/workflow-registry.md	Eng-Workflow-Registry.md	Workflow Registry
+docs/workflow-envelope-contract.md	Eng-Workflow-Envelope-Contract.md	Workflow Envelope Contract
+docs/task-composition.md	Eng-Task-Composition.md	Bounded Task Composition
+docs/workflow-chooser.md	Eng-Workflow-Chooser.md	Workflow Chooser
+docs/capability-registry.md	Eng-Capability-Registry.md	Capability Registry
+docs/capability-availability-and-engineering-routing.md	Eng-Capability-Availability-And-Engineering-Routing.md	Capability Availability And Engineering Routing
+docs/optional-llm-intent-routing.md	Eng-Optional-LLM-Intent-Routing.md	Optional LLM Intent Routing
+examples/optional-llm-routing-validation.md	Eng-Optional-LLM-Routing-Validation.md	Optional LLM Routing Validation
+docs/local-image-capability.md	Eng-Local-Image-Capability.md	Local Image Capability
+docs/comfyui-image-provider-setup.md	Eng-ComfyUI-Image-Provider-Setup.md	ComfyUI Image Provider Setup
 docs/wiki-image-setup.md	Local-Image-Provider-Onboarding.md	Set Up Local Images
-docs/local-image-provider-onboarding.md	Image-Provider-Admission.md	Image Provider Admission
-docs/local-image-native-validation-packet.md	Local-Image-Native-Validation-Packet.md	Local Image Native Validation Packet
-docs/local-image-runtime-license-review.md	Local-Image-Runtime-License-Review.md	Local Image Runtime License Review
-docs/local-audio-provider-candidates.md	Local-Audio-Provider-Candidates.md	Local Audio Provider Candidates
-docs/local-video-provider-candidates.md	Local-Video-Provider-Candidates.md	Local Video Provider Candidates
-docs/generative-media-consent-policy.md	Generative-Media-Consent-Policy.md	Generative Media Consent Policy
-docs/hardware-adaptive-quantization.md	Hardware-Adaptive-Quantization.md	Hardware-Adaptive Quantization
-docs/quantized-artifact-native-validation-packet.md	Quantized-Artifact-Native-Validation-Packet.md	Quantized Artifact Native Validation Packet
-examples/quantization-validation.md	Quantization-Validation.md	Quantization Validation
-docs/inference-engine-architecture.md	Inference-Engine-Architecture.md	Inference Engine Architecture
-examples/inference-engine-validation.md	Inference-Engine-Validation.md	Inference Engine Validation
-examples/intel-b580-inference-engine-validation.md	Intel-B580-Inference-Engine-Validation.md	Intel B580 Inference Engine Validation
-examples/cross-accelerator-model-validation.md	Cross-Accelerator-Model-Validation.md	Cross-Accelerator Model Validation
-examples/local-image-capability-validation.md	Local-Image-Capability-Validation.md	Local Image Capability Validation
-docs/typed-artifact-contract.md	Typed-Artifact-Contract.md	Typed Artifact Contract
-docs/deterministic-intent-routing.md	Deterministic-Intent-Routing.md	Deterministic Intent Routing
-docs/general-ai-session-workspace.md	General-AI-Session-Workspace.md	General AI Session Workspace
-docs/local-text-capabilities.md	Local-Text-Capabilities.md	Local Text Capabilities
-examples/local-text-capability-validation.md	Local-Text-Capability-Validation.md	Local Text Capability Validation
-examples/capability-availability-validation.md	Capability-Availability-Validation.md	Capability Availability Validation
-docs/release.md	Release-Guidance.md	Release Guidance
-docs/hosted-ci-verification.md	Hosted-CI-Verification.md	Hosted CI Verification
-docs/test-tiers.md	Test-Tiers.md	Test Tiers
-docs/wiki-maintenance.md	Wiki-Maintenance.md	Wiki Maintenance
-docs/agent-integration-admission-policy.md	Agent-Integration-Admission-Policy.md	Agent Integration Admission Policy
-docs/agent-surface-options.md	Agent-Surface-Options.md	Agent Surface Options
-docs/agent-surface-promotion-gates.md	Agent-Surface-Promotion-Gates.md	Agent Surface Promotion Gates
-docs/agent-surface-capability-parity.md	Agent-Surface-Capability-Parity.md	Agent Surface Capability Parity
-docs/agent-surface-solutions.md	Agent-Surface-Solutions.md	Agent Surface Solutions
-docs/agent-cli-surface-model-testing.md	Agent-CLI-Surface-Model-Testing.md	Agent CLI Surface Model Testing
-docs/aider-cli-model-testing.md	Aider-CLI-Model-Testing.md	Aider CLI Model Testing
-docs/opencode-cli-model-testing.md	OpenCode-CLI-Model-Testing.md	OpenCode CLI Model Testing
-docs/continue-cli-model-testing.md	Continue-CLI-Model-Testing.md	Continue CLI Model Testing
-examples/continue-cli-model-validation.md	Continue-CLI-Model-Validation.md	Continue CLI Model Validation
-docs/openhands-validation-boundary.md	OpenHands-Validation-Boundary.md	OpenHands Validation Boundary
-docs/language-support.md	Language-Support.md	Language Support
-docs/project-detection.md	Project-Detection.md	Project Detection
-docs/project-profile-classification.md	Project-Profile-Classification.md	Project Profile Classification
-docs/language-rule-packs.md	Language-Rule-Packs.md	Language Rule Packs
-examples/language-rule-pack-validation.md	Language-Rule-Pack-Validation.md	Language Rule Pack Validation
-docs/language-workflow-validation-matrix.md	Language-Workflow-Validation-Matrix.md	Language Workflow Validation Matrix
-examples/multi-language-workflow-validation.md	Multi-Language-Workflow-Validation.md	Multi-Language Workflow Validation
-docs/prompt-quality.md	Prompt-Quality.md	Prompt Quality
-docs/tool-use-modes.md	Tool-Use-Modes.md	Tool Use Modes
-docs/approved-tool-backed-changes.md	Approved-Tool-Backed-Changes.md	Approved Tool-Backed Changes
-docs/scoped-edits.md	Scoped-Edits.md	Scoped Edits
-docs/editor-compatibility.md	Editor-Compatibility.md	Editor Compatibility
+docs/local-image-provider-onboarding.md	Eng-Image-Provider-Admission.md	Image Provider Admission
+docs/local-image-native-validation-packet.md	Eng-Local-Image-Native-Validation-Packet.md	Local Image Native Validation Packet
+docs/local-image-runtime-license-review.md	Eng-Local-Image-Runtime-License-Review.md	Local Image Runtime License Review
+docs/local-audio-provider-candidates.md	Eng-Local-Audio-Provider-Candidates.md	Local Audio Provider Candidates
+docs/local-video-provider-candidates.md	Eng-Local-Video-Provider-Candidates.md	Local Video Provider Candidates
+docs/generative-media-consent-policy.md	Eng-Generative-Media-Consent-Policy.md	Generative Media Consent Policy
+docs/hardware-adaptive-quantization.md	Eng-Hardware-Adaptive-Quantization.md	Hardware-Adaptive Quantization
+docs/quantized-artifact-native-validation-packet.md	Eng-Quantized-Artifact-Native-Validation-Packet.md	Quantized Artifact Native Validation Packet
+examples/quantization-validation.md	Eng-Quantization-Validation.md	Quantization Validation
+docs/inference-engine-architecture.md	Eng-Inference-Engine-Architecture.md	Inference Engine Architecture
+examples/inference-engine-validation.md	Eng-Inference-Engine-Validation.md	Inference Engine Validation
+examples/intel-b580-inference-engine-validation.md	Eng-Intel-B580-Inference-Engine-Validation.md	Intel B580 Inference Engine Validation
+examples/cross-accelerator-model-validation.md	Eng-Cross-Accelerator-Model-Validation.md	Cross-Accelerator Model Validation
+examples/local-image-capability-validation.md	Eng-Local-Image-Capability-Validation.md	Local Image Capability Validation
+docs/typed-artifact-contract.md	Eng-Typed-Artifact-Contract.md	Typed Artifact Contract
+docs/deterministic-intent-routing.md	Eng-Deterministic-Intent-Routing.md	Deterministic Intent Routing
+docs/general-ai-session-workspace.md	Eng-General-AI-Session-Workspace.md	General AI Session Workspace
+docs/local-text-capabilities.md	Eng-Local-Text-Capabilities.md	Local Text Capabilities
+examples/local-text-capability-validation.md	Eng-Local-Text-Capability-Validation.md	Local Text Capability Validation
+examples/capability-availability-validation.md	Eng-Capability-Availability-Validation.md	Capability Availability Validation
+docs/release.md	Eng-Release-Guidance.md	Release Guidance
+docs/hosted-ci-verification.md	Eng-Hosted-CI-Verification.md	Hosted CI Verification
+docs/test-tiers.md	Eng-Test-Tiers.md	Test Tiers
+docs/wiki-maintenance.md	Eng-Wiki-Maintenance.md	Wiki Maintenance
+docs/agent-integration-admission-policy.md	Eng-Agent-Integration-Admission-Policy.md	Agent Integration Admission Policy
+docs/agent-surface-options.md	Eng-Agent-Surface-Options.md	Agent Surface Options
+docs/agent-surface-promotion-gates.md	Eng-Agent-Surface-Promotion-Gates.md	Agent Surface Promotion Gates
+docs/agent-surface-capability-parity.md	Eng-Agent-Surface-Capability-Parity.md	Agent Surface Capability Parity
+docs/agent-surface-solutions.md	Eng-Agent-Surface-Solutions.md	Agent Surface Solutions
+docs/agent-cli-surface-model-testing.md	Eng-Agent-CLI-Surface-Model-Testing.md	Agent CLI Surface Model Testing
+docs/aider-cli-model-testing.md	Eng-Aider-CLI-Model-Testing.md	Aider CLI Model Testing
+docs/opencode-cli-model-testing.md	Eng-OpenCode-CLI-Model-Testing.md	OpenCode CLI Model Testing
+docs/continue-cli-model-testing.md	Eng-Continue-CLI-Model-Testing.md	Continue CLI Model Testing
+examples/continue-cli-model-validation.md	Eng-Continue-CLI-Model-Validation.md	Continue CLI Model Validation
+docs/openhands-validation-boundary.md	Eng-OpenHands-Validation-Boundary.md	OpenHands Validation Boundary
+docs/language-support.md	Eng-Language-Support.md	Language Support
+docs/project-detection.md	Eng-Project-Detection.md	Project Detection
+docs/project-profile-classification.md	Eng-Project-Profile-Classification.md	Project Profile Classification
+docs/language-rule-packs.md	Eng-Language-Rule-Packs.md	Language Rule Packs
+examples/language-rule-pack-validation.md	Eng-Language-Rule-Pack-Validation.md	Language Rule Pack Validation
+docs/language-workflow-validation-matrix.md	Eng-Language-Workflow-Validation-Matrix.md	Language Workflow Validation Matrix
+examples/multi-language-workflow-validation.md	Eng-Multi-Language-Workflow-Validation.md	Multi-Language Workflow Validation
+docs/prompt-quality.md	Eng-Prompt-Quality.md	Prompt Quality
+docs/tool-use-modes.md	Eng-Tool-Use-Modes.md	Tool Use Modes
+docs/approved-tool-backed-changes.md	Eng-Approved-Tool-Backed-Changes.md	Approved Tool-Backed Changes
+docs/scoped-edits.md	Eng-Scoped-Edits.md	Scoped Edits
+docs/editor-compatibility.md	Eng-Editor-Compatibility.md	Editor Compatibility
 docs/wiki-troubleshooting.md	Troubleshooting.md	Troubleshooting
 docs/wiki-glossary.md	Glossary.md	Common Words
-docs/troubleshooting.md	Engineering-Troubleshooting.md	Engineering Troubleshooting
-docs/runtime-validation.md	Runtime-Validation.md	Runtime Validation
-docs/runtime-output-verification.md	Runtime-Output-Verification.md	Runtime Output Verification
-docs/multi-repository-validation.md	Multi-Repository-Validation.md	Multi-Repository Validation
-docs/sample-repository-factory.md	Sample-Repository-Factory.md	Sample Repository Factory
-docs/mcp-setup.md	MCP-Setup.md	MCP Setup
-docs/shared-asset-installation.md	Shared-Asset-Installation.md	Shared Asset Installation
-docs/macos-agent-host-bootstrap.md	macOS-Agent-Host-Bootstrap.md	macOS Agent Host Bootstrap
-examples/hardware-aware-recommendation-validation.md	Hardware-Aware-Recommendation-Validation.md	Hardware-Aware Recommendation Validation
-docs/script-consolidation-plan.md	Script-Consolidation.md	Script Consolidation
-docs/unified-starter-toolkit-ui.md	Unified-Starter-Toolkit-UI.md	Unified Starter Toolkit UI
-docs/progressive-onboarding.md	Progressive-Onboarding.md	Progressive Onboarding
-docs/onboarding-setting-security.md	Onboarding-Setting-Security.md	Onboarding Setting Security
-docs/desktop-runtime-dependency-evaluation.md	Desktop-Runtime-Dependency-Evaluation.md	Desktop Runtime Dependency Evaluation
-docs/desktop-dependency-resolution-evidence.md	Desktop-Dependency-Resolution-Evidence.md	Desktop Dependency Resolution Evidence
-docs/desktop-ipc-contract.md	Desktop-IPC-Contract.md	Desktop IPC Contract
-docs/native-bridge-boundary-evidence.md	Native-Bridge-Boundary-Evidence.md	Native Bridge Boundary Evidence
-docs/desktop-storage-and-updates.md	Desktop-Storage-And-Updates.md	Desktop Storage And Updates
-docs/core-update-cryptographic-verifier-review.md	Core-Update-Cryptographic-Verifier-Review.md	Core Update Cryptographic Verifier Review
-docs/post-quantum-cryptography-readiness.md	Post-Quantum-Cryptography-Readiness.md	Post-Quantum Cryptography Readiness
-docs/workflow-reliability.md	Workflow-Reliability.md	Workflow Reliability
-docs/security-threat-model.md	Security-Threat-Model.md	Security Threat Model
-docs/local-data-lifecycle.md	Local-Data-Lifecycle.md	Local Data Lifecycle
-docs/conversation-history-database.md	Conversation-History-Database.md	Conversation History Database Foundation
-docs/conversation-history-encryption-review.md	Conversation-History-Encryption-Review.md	Conversation History Encryption And Key-Management Review
-examples/laguna-xs-2.1-validation.md	Laguna-XS-2.1-Validation.md	Laguna XS 2.1 Validation
-examples/local-audio-provider-validation.md	Local-Audio-Provider-Validation.md	Local Audio Provider Validation
-examples/windows-amd-image-provider-validation.md	Windows-AMD-Image-Provider-Validation.md	Windows AMD Image Provider Validation
-examples/windows-intel-image-provider-validation.md	Windows-Intel-Image-Provider-Validation.md	Windows Intel Image Provider Validation
-examples/windows-nvidia-image-provider-validation.md	Windows-NVIDIA-Image-Provider-Validation.md	Windows NVIDIA Image Provider Validation
-docs/product-ui-first-slice.md	Product-UI-First-Slice.md	Product UI First Slice
+docs/troubleshooting.md	Eng-Troubleshooting.md	Engineering Troubleshooting
+docs/runtime-validation.md	Eng-Runtime-Validation.md	Runtime Validation
+docs/runtime-output-verification.md	Eng-Runtime-Output-Verification.md	Runtime Output Verification
+docs/multi-repository-validation.md	Eng-Multi-Repository-Validation.md	Multi-Repository Validation
+docs/sample-repository-factory.md	Eng-Sample-Repository-Factory.md	Sample Repository Factory
+docs/mcp-setup.md	Eng-MCP-Setup.md	MCP Setup
+docs/shared-asset-installation.md	Eng-Shared-Asset-Installation.md	Shared Asset Installation
+docs/macos-agent-host-bootstrap.md	Eng-macOS-Agent-Host-Bootstrap.md	macOS Agent Host Bootstrap
+examples/hardware-aware-recommendation-validation.md	Eng-Hardware-Aware-Recommendation-Validation.md	Hardware-Aware Recommendation Validation
+docs/script-consolidation-plan.md	Eng-Script-Consolidation.md	Script Consolidation
+docs/unified-starter-toolkit-ui.md	Eng-Unified-Starter-Toolkit-UI.md	Unified Starter Toolkit UI
+docs/progressive-onboarding.md	Eng-Progressive-Onboarding.md	Progressive Onboarding
+docs/onboarding-setting-security.md	Eng-Onboarding-Setting-Security.md	Onboarding Setting Security
+docs/desktop-runtime-dependency-evaluation.md	Eng-Desktop-Runtime-Dependency-Evaluation.md	Desktop Runtime Dependency Evaluation
+docs/desktop-dependency-resolution-evidence.md	Eng-Desktop-Dependency-Resolution-Evidence.md	Desktop Dependency Resolution Evidence
+docs/desktop-ipc-contract.md	Eng-Desktop-IPC-Contract.md	Desktop IPC Contract
+docs/native-bridge-boundary-evidence.md	Eng-Native-Bridge-Boundary-Evidence.md	Native Bridge Boundary Evidence
+docs/desktop-storage-and-updates.md	Eng-Desktop-Storage-And-Updates.md	Desktop Storage And Updates
+docs/core-update-cryptographic-verifier-review.md	Eng-Core-Update-Cryptographic-Verifier-Review.md	Core Update Cryptographic Verifier Review
+docs/post-quantum-cryptography-readiness.md	Eng-Post-Quantum-Cryptography-Readiness.md	Post-Quantum Cryptography Readiness
+docs/workflow-reliability.md	Eng-Workflow-Reliability.md	Workflow Reliability
+docs/security-threat-model.md	Eng-Security-Threat-Model.md	Security Threat Model
+docs/local-data-lifecycle.md	Eng-Local-Data-Lifecycle.md	Local Data Lifecycle
+docs/conversation-history-database.md	Eng-Conversation-History-Database.md	Conversation History Database Foundation
+docs/conversation-history-encryption-review.md	Eng-Conversation-History-Encryption-Review.md	Conversation History Encryption And Key-Management Review
+examples/laguna-xs-2.1-validation.md	Eng-Laguna-XS-2.1-Validation.md	Laguna XS 2.1 Validation
+examples/local-audio-provider-validation.md	Eng-Local-Audio-Provider-Validation.md	Local Audio Provider Validation
+examples/windows-amd-image-provider-validation.md	Eng-Windows-AMD-Image-Provider-Validation.md	Windows AMD Image Provider Validation
+examples/windows-intel-image-provider-validation.md	Eng-Windows-Intel-Image-Provider-Validation.md	Windows Intel Image Provider Validation
+examples/windows-nvidia-image-provider-validation.md	Eng-Windows-NVIDIA-Image-Provider-Validation.md	Windows NVIDIA Image Provider Validation
+docs/product-ui-first-slice.md	Eng-Product-UI-First-Slice.md	Product UI First Slice
 docs/wiki-roadmap.md	Roadmap.md	Roadmap
-ROADMAP.md	Engineering-Roadmap.md	Engineering Roadmap
-docs/provider-endpoint-security.md	Provider-Endpoint-Security.md	Provider Endpoint Security
-docs/model-catalog.md	Security-Aware-Model-Catalog.md	Security-Aware Model Catalog
-docs/local-web-mvp.md	Local-Web-MVP.md	Local Web MVP
-examples/local-web-mvp-validation.md	Local-Web-MVP-Validation.md	Local Web MVP Validation
-docs/portable-development-package.md	Portable-Development-Package.md	Portable Development Package
-docs/github-repository-policy.md	GitHub-Repository-Policy.md	GitHub Repository Policy
-docs/offline-installer-lifecycle-foundation.md	Offline-Installer-Lifecycle-Foundation.md	Offline Installer Lifecycle Foundation
-docs/ollama-https-installation-foundation.md	Ollama-HTTPS-Installation-Foundation.md	Ollama HTTPS Installation Foundation
-docs/private-alpha-preparation.md	Private-Alpha-Preparation.md	Private Alpha Preparation
-docs/private-alpha-known-limitations.md	Private-Alpha-Known-Limitations.md	Private Alpha Known Limitations
-docs/private-alpha-test-plan.md	Private-Alpha-Test-Plan.md	Private Alpha Test Plan
-docs/private-alpha-feedback-template.md	Private-Alpha-Feedback-Template.md	Private Alpha Feedback Template
-docs/milestone22-admission-readiness.md	Milestone-22-Admission-Readiness.md	Milestone 22 Admission Readiness
-docs/artifact-attestation.md	Artifact-Attestation.md	Unsigned Development Artifact Attestation
-CODE-SIGNING-POLICY.md	Code-Signing-Policy.md	Code Signing Policy
+ROADMAP.md	Eng-Roadmap.md	Engineering Roadmap
+docs/provider-endpoint-security.md	Eng-Provider-Endpoint-Security.md	Provider Endpoint Security
+docs/wiki-provider-endpoint-security.md	Provider-Endpoint-Security.md	Connection Security
+docs/model-catalog.md	Eng-Security-Aware-Model-Catalog.md	Security-Aware Model Catalog
+docs/local-web-mvp.md	Eng-Local-Web-MVP.md	Local Web MVP
+examples/local-web-mvp-validation.md	Eng-Local-Web-MVP-Validation.md	Local Web MVP Validation
+docs/portable-development-package.md	Eng-Portable-Development-Package.md	Portable Development Package
+docs/github-repository-policy.md	Eng-GitHub-Repository-Policy.md	GitHub Repository Policy
+docs/offline-installer-lifecycle-foundation.md	Eng-Offline-Installer-Lifecycle-Foundation.md	Offline Installer Lifecycle Foundation
+docs/ollama-https-installation-foundation.md	Eng-Ollama-HTTPS-Installation-Foundation.md	Ollama HTTPS Installation Foundation
+docs/private-alpha-preparation.md	Eng-Private-Alpha-Preparation.md	Private Alpha Preparation
+docs/private-alpha-known-limitations.md	Eng-Private-Alpha-Known-Limitations.md	Private Alpha Known Limitations
+docs/private-alpha-test-plan.md	Eng-Private-Alpha-Test-Plan.md	Private Alpha Test Plan
+docs/private-alpha-feedback-template.md	Eng-Private-Alpha-Feedback-Template.md	Private Alpha Feedback Template
+docs/milestone22-admission-readiness.md	Eng-Milestone-22-Admission-Readiness.md	Milestone 22 Admission Readiness
+docs/artifact-attestation.md	Eng-Artifact-Attestation.md	Unsigned Development Artifact Attestation
+CODE-SIGNING-POLICY.md	Eng-Code-Signing-Policy.md	Code Signing Policy
 PRIVACY.md	Privacy-Policy.md	Privacy Policy
-docs/signpath-eligibility-audit.md	SignPath-Eligibility-Audit.md	SignPath Foundation Eligibility Audit
-docs/windows-package-component-audit.md	Windows-Package-Component-Audit.md	Windows Package Component Audit
-docs/restricted-parser-worker-foundation.md	Restricted-Parser-Worker-Foundation.md	Restricted Parser-Worker Foundation
-examples/restricted-pdf-worker-validation.md	Restricted-PDF-Worker-Validation.md	Restricted PDF Worker Validation
-examples/complex-document-container-validation.md	Complex-Document-Container-Validation.md	Complex Document Container Validation
-examples/restricted-pdf-native-validation.md	Restricted-PDF-Native-Validation.md	Restricted PDF Native Validation
-docs/pdf-production-isolation.md	PDF-Production-Isolation.md	PDF Production Isolation Assessment
-examples/complex-document-semantic-validation.md	Complex-Document-Semantic-Validation.md	Complex Document Semantic Validation
-docs/project-status-consistency.md	Project-Status-Consistency.md	Project Status Consistency
-docs/controlled-web-research-foundation.md	Controlled-Web-Research-Foundation.md	Controlled Web Research Foundation
-docs/retrieval-expansion-foundations.md	Retrieval-Expansion-Foundations.md	Retrieval Expansion Foundations
-docs/public-repository-validation-candidates.md	Public-Repository-Validation-Candidates.md	Public Repository Validation Candidates
-docs/local-batch-task-ledger.md	Local-Batch-Task-Ledger.md	Local Batch Task Ledger
-docs/windows-alpha-native-validation.md	Windows-Alpha-Native-Validation.md	Windows Alpha Native Validation
-docs/windows-alpha-2-build.md	Windows-Alpha-2-Build.md	Windows Alpha 2 Build
-docs/linux-alpha-2-build.md	Linux-Alpha-2-Build.md	Linux Alpha 2 Build
-docs/windows-alpha-release.md	Windows-Alpha-Release.md	Windows Alpha Release
+docs/signpath-eligibility-audit.md	Eng-SignPath-Eligibility-Audit.md	SignPath Foundation Eligibility Audit
+docs/windows-package-component-audit.md	Eng-Windows-Package-Component-Audit.md	Windows Package Component Audit
+docs/restricted-parser-worker-foundation.md	Eng-Restricted-Parser-Worker-Foundation.md	Restricted Parser-Worker Foundation
+examples/restricted-pdf-worker-validation.md	Eng-Restricted-PDF-Worker-Validation.md	Restricted PDF Worker Validation
+examples/complex-document-container-validation.md	Eng-Complex-Document-Container-Validation.md	Complex Document Container Validation
+examples/restricted-pdf-native-validation.md	Eng-Restricted-PDF-Native-Validation.md	Restricted PDF Native Validation
+docs/pdf-production-isolation.md	Eng-PDF-Production-Isolation.md	PDF Production Isolation Assessment
+examples/complex-document-semantic-validation.md	Eng-Complex-Document-Semantic-Validation.md	Complex Document Semantic Validation
+docs/project-status-consistency.md	Eng-Project-Status-Consistency.md	Project Status Consistency
+docs/controlled-web-research-foundation.md	Eng-Controlled-Web-Research-Foundation.md	Controlled Web Research Foundation
+docs/retrieval-expansion-foundations.md	Eng-Retrieval-Expansion-Foundations.md	Retrieval Expansion Foundations
+docs/public-repository-validation-candidates.md	Eng-Public-Repository-Validation-Candidates.md	Public Repository Validation Candidates
+docs/local-batch-task-ledger.md	Eng-Local-Batch-Task-Ledger.md	Local Batch Task Ledger
+docs/windows-alpha-native-validation.md	Eng-Windows-Alpha-Native-Validation.md	Windows Alpha Native Validation
+docs/windows-alpha-2-build.md	Eng-Windows-Alpha-2-Build.md	Windows Alpha 2 Build
+docs/linux-alpha-2-build.md	Eng-Linux-Alpha-2-Build.md	Linux Alpha 2 Build
+docs/windows-alpha-release.md	Eng-Windows-Alpha-Release.md	Windows Alpha Release
 docs/wiki-coding-tools.md	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models
+docs/engineering-index.md	Engineering-Index.md	Engineering and Validation Index

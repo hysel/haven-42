@@ -1985,13 +1985,15 @@ test_wiki_synchronization() {
   [ "$navigation_links" -ge 10 ] && [ "$navigation_links" -le 25 ] || { rm -rf "$wiki_temp"; return 1; }
   [ "$sidebar_links" -eq $((navigation_links + 1)) ] || { rm -rf "$wiki_temp"; return 1; }
   grep -q '^\*\*Get started\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
-  grep -q '^\*\*Contributors\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q '^\*\*Engineering\*\*$' "$wiki_temp/_Sidebar.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'Internal engineering page' "$wiki_temp/Eng-Evidence-Catalog.md" || { rm -rf "$wiki_temp"; return 1; }
+  grep -q 'blob/main/docs/evidence-catalog.md' "$wiki_temp/Eng-Evidence-Catalog.md" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'exactly one level-one heading' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'exactly one newline' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'Broken wiki link' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   grep -q 'Wiki-style link inside a Markdown table' "$sync" || { rm -rf "$wiki_temp"; return 1; }
   validation_line="$(grep -n 'Mapped wiki source must contain exactly one level-one heading' "$sync" | head -n 1 | cut -d: -f1)"
-  copy_line="$(grep -n 'cp \"\$REPO_ROOT/\$source\"' "$sync" | head -n 1 | cut -d: -f1)"
+  copy_line="$(grep -n 'cp \"\$RENDERED_TEMP\"' "$sync" | head -n 1 | cut -d: -f1)"
   [ -n "$validation_line" ] && [ -n "$copy_line" ] && [ "$validation_line" -lt "$copy_line" ] || { rm -rf "$wiki_temp"; return 1; }
   "$sync" --wiki-path "$wiki_temp" --check >/dev/null 2>&1 || { rm -rf "$wiki_temp"; return 1; }
   printf 'stale' > "$wiki_temp/Home.md"
@@ -2572,7 +2574,7 @@ assert policy["implementationStatus"] == "text-tools-workflow-planning-and-promo
 assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["fixedExternalNavigationUrls"] == [
-    "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard",
+    "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
     "https://ollama.com/download/windows",
 ]
 assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True

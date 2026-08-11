@@ -19,6 +19,7 @@ $receiptModeAtStart = if ($NoReceipt.IsPresent) {
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$engineeringIndex = Get-Content -LiteralPath (Join-Path $repoRoot "docs/engineering-index.md") -Raw
 Import-Module (Join-Path $PSScriptRoot "PowerShellCompatibility.psm1") -Force
 $failed = $false
 $testCount = 0
@@ -1090,7 +1091,7 @@ Invoke-PackTest "online model discovery docs preserve offline local-first defaul
     Assert-True -Condition ($doc -match "Mark a model as tool-safe") -Message "Online discovery doc should prevent false validation."
     Assert-True -Condition ($doc -match "private repository content") -Message "Online discovery doc should prohibit sending private context online."
     Assert-True -Condition ($doc -match "Approved-write ready") -Message "Online discovery doc should define validated status progression."
-    Assert-True -Condition ($readme -match "docs/online-model-discovery.md") -Message "README should link online discovery doc."
+    Assert-True -Condition ($engineeringIndex -match "docs/online-model-discovery.md") -Message "Engineering index should link online discovery doc."
     Assert-True -Condition ($selection -match "docs/online-model-discovery.md") -Message "Local model selection should reference online discovery doc."
     Assert-True -Condition ($agentTesting -match "do not discover newer") -Message "Local Agent testing should distinguish testing from discovery."
 }
@@ -1144,9 +1145,9 @@ Invoke-PackTest "multi-repository validation docs define sanitized evidence work
     Assert-True -Condition ($roadmap -match "future real-repository runs continue as evidence expansion") -Message "Roadmap should keep real repository validation as evidence expansion."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 13 coverage") -Message "TODO should mark Milestone 13 coverage complete."
     Assert-True -Condition ($todo -match "Future Multi-Repository Evidence Expansion") -Message "TODO should keep future multi-repository expansion separate."
-    Assert-True -Condition ($readme -match "docs/multi-repository-validation.md") -Message "README should link multi-repository validation doc."
-    Assert-True -Condition ($readme -match "docs/runtime-output-verification.md") -Message "README should link runtime output verification doc."
-    Assert-True -Condition ($readme -match "examples/multi-repository-validation.md") -Message "README should link multi-repository validation template."
+    Assert-True -Condition ($engineeringIndex -match "docs/multi-repository-validation.md") -Message "Engineering index should link multi-repository validation doc."
+    Assert-True -Condition ($engineeringIndex -match "docs/runtime-output-verification.md") -Message "Engineering index should link runtime output verification doc."
+    Assert-True -Condition ($engineeringIndex -match "examples/multi-repository-validation.md") -Message "Engineering index should link multi-repository validation template."
     Assert-True -Condition ($runtimeOutputVerification -match "filename") -Message "Runtime output verification doc should describe filename checks."
     Assert-True -Condition ($runtimeOutputVerification -match "unsafe mechanical migration patterns") -Message "Runtime output verification doc should describe unsafe migration checks."
     Assert-True -Condition ($runtimeOutputVerification -match "current-source verification") -Message "Runtime output verification doc should describe source verification qualifiers."
@@ -1177,7 +1178,7 @@ Invoke-PackTest "sample repository factory validation evidence is sanitized" {
     Assert-True -Condition ($evidence -match "No private local paths") -Message "Evidence should include sanitization checklist."
     Assert-True -Condition ($doc -match "Expanded generated-category evidence") -Message "Sample factory docs should mention expanded generated-category evidence."
     Assert-True -Condition ($doc -match "examples/sample-repository-factory-validation\.md") -Message "Sample factory doc should link evidence."
-    Assert-True -Condition ($readme -match "examples/sample-repository-factory-validation\.md") -Message "README should link evidence."
+    Assert-True -Condition ($engineeringIndex -match "examples/sample-repository-factory-validation\.md") -Message "Engineering index should link evidence."
 }
 
 Invoke-PackTest "sample repository factory docs define generated fixtures" {
@@ -1200,7 +1201,7 @@ Invoke-PackTest "sample repository factory docs define generated fixtures" {
     Assert-True -Condition ($doc -match "generate-sample-repositories\.macos\.sh") -Message "Sample factory doc should include the macOS script."
     Assert-True -Condition ($doc -match "production starter projects") -Message "Sample factory doc should include guardrails."
     Assert-True -Condition ($evidence -match "Generated Category Expansion Validation") -Message "Sample factory evidence should include expanded validation."
-    Assert-True -Condition ($readme -match "docs/sample-repository-factory\.md") -Message "README should link to sample factory docs."
+    Assert-True -Condition ($engineeringIndex -match "docs/sample-repository-factory\.md") -Message "Engineering index should link to sample factory docs."
     Assert-True -Condition ($roadmap -match "\| Milestone 16: Sample Repository Factory \| Complete \|") -Message "Roadmap should mark Milestone 16 complete."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 16 sample repository factory exit criteria") -Message "TODO should mark Milestone 16 completion audit complete."
 }
@@ -1235,7 +1236,7 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     Assert-True -Condition ($doc -match "External verification commands") -Message "Agent surface doc should require external verification evidence."
     Assert-True -Condition ($doc -match "Blocked") -Message "Agent surface doc should block unvalidated approved writes."
     Assert-True -Condition ($doc -match "Non-Enterprise Use") -Message "Agent surface doc should address non-enterprise users."
-    Assert-True -Condition ($readme -match "docs/agent-surface-options.md") -Message "README should link agent surface options."
+    Assert-True -Condition ($engineeringIndex -match "docs/agent-surface-options.md") -Message "Engineering index should link agent surface options."
     Assert-True -Condition ($roadmap -match "\| Milestone 14: Agent Surface Portability And Broader Audience \| Complete \|") -Message "Roadmap should mark Milestone 14 complete for portability and broader-audience scope."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria") -Message "TODO should mark Milestone 14 positioning scope complete."
     Assert-True -Condition ($todo -match "\[x\] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19") -Message "TODO should show full cross-agent parity moved to Milestones 17 and 19."
@@ -1334,8 +1335,8 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash shared CLI tester should support model unload after each run."
     Assert-True -Condition ($bashScript -match 'ReadStatus.*failed' -and $bashScript -match 'ScopedEditStatus.*failed' -and $bashScript -match 'exit 1') -Message "Bash shared CLI tester should return nonzero when a requested gate fails."
     Assert-True -Condition ($catalog -match "Shared agent CLI model test harness") -Message "Evidence catalog should track the shared CLI harness."
-    Assert-True -Condition ($readme -match "docs/agent-cli-surface-model-testing.md") -Message "README should link shared agent CLI model testing doc."
-    Assert-True -Condition ($readme -match "docs/agent-surface-promotion-gates.md") -Message "README should link agent surface promotion gates."
+    Assert-True -Condition ($engineeringIndex -match "docs/agent-cli-surface-model-testing.md") -Message "Engineering index should link shared agent CLI model testing doc."
+    Assert-True -Condition ($engineeringIndex -match "docs/agent-surface-promotion-gates.md") -Message "Engineering index should link agent surface promotion gates."
     Assert-True -Condition ($surfaceDoc -match "docs/agent-surface-promotion-gates.md") -Message "Agent surface options should link promotion gates."
     foreach ($surface in @("Aider", "OpenCode", "OpenHands")) {
         Assert-True -Condition ($promotionGates -match [regex]::Escape($surface)) -Message "Promotion gates should cover $surface."
@@ -1432,7 +1433,7 @@ Invoke-PackTest "Continue CLI model testing docs define automation workflow" {
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Continue CLI tester should support model unload after each run."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Continue CLI tester should support model unload after each run."
     Assert-True -Condition ($catalog -match "Continue CLI model test harness") -Message "Evidence catalog should track Continue CLI harness validation."
-    Assert-True -Condition ($readme -match "docs/continue-cli-model-testing.md") -Message "README should link Continue CLI model testing doc."
+    Assert-True -Condition ($engineeringIndex -match "docs/continue-cli-model-testing.md") -Message "Engineering index should link Continue CLI model testing doc."
     Assert-True -Condition ($surfaceDoc -match "docs/continue-cli-model-testing.md") -Message "Agent surface docs should link Continue CLI testing doc."
 }
 Invoke-PackTest "language support docs define staged multi-language boundary" {
@@ -1460,7 +1461,7 @@ Invoke-PackTest "language support docs define staged multi-language boundary" {
     Assert-True -Condition ($doc -match "Do not apply \.NET-specific advice") -Message "Language support doc should guard against .NET advice in non-.NET repos."
     Assert-True -Condition (($workflowEvidence -match "Python API Sample") -and ($workflowEvidence -match "TypeScript Frontend Sample")) -Message "Workflow evidence should include Python and TypeScript samples."
     Assert-True -Condition (($workflowEvidence -match "Repository discovery \| Passed verification \| Passed verification") -and ($workflowEvidence -match "Implementation planning \| Passed verification \| Passed verification") -and ($workflowEvidence -match "Code review \| Passed verification \| Passed verification")) -Message "Workflow evidence should show required Python and TypeScript validation passes."
-    Assert-True -Condition ($readme -match "docs/language-support.md") -Message "README should link language support doc."
+    Assert-True -Condition ($engineeringIndex -match "docs/language-support.md") -Message "Engineering index should link language support doc."
     Assert-True -Condition ($roadmap -match "\| Milestone 15: Multi-Language Engineering Support \| Complete \|") -Message "Roadmap should mark Milestone 15 complete."
     Assert-True -Condition ($todo -match "\[x\] Validate repository discovery, implementation planning, and code review against Python and JavaScript/TypeScript samples") -Message "TODO should mark required Python and TypeScript validation complete."
 }
@@ -1539,8 +1540,8 @@ Invoke-PackTest "optional language rule packs are evidence-gated and not globall
     Assert-True -Condition ($languageSupport -match "docs/language-rule-packs.md") -Message "Language support doc should link optional rule-pack doc."
     Assert-True -Condition ($languageSupport -match "examples/language-rule-pack-validation\.md") -Message "Language support doc should link language rule-pack evidence."
     Assert-True -Condition ($projectDetection -match "Optional Language Rule Packs") -Message "Project detection doc should mention optional language rule packs."
-    Assert-True -Condition ($readme -match "docs/language-rule-packs.md") -Message "README should link optional language rule-pack doc."
-    Assert-True -Condition ($readme -match "examples/language-rule-pack-validation\.md") -Message "README should link language rule-pack evidence."
+    Assert-True -Condition ($engineeringIndex -match "docs/language-rule-packs.md") -Message "Engineering index should link optional language rule-pack doc."
+    Assert-True -Condition ($engineeringIndex -match "examples/language-rule-pack-validation\.md") -Message "Engineering index should link language rule-pack evidence."
     Assert-True -Condition ($todo -match "Add optional Python rule pack") -Message "TODO should track Python rule-pack completion."
     Assert-True -Condition ($roadmap -match "Milestone 18: Language Rule Packs") -Message "Roadmap should include language rule packs milestone."
     Assert-True -Condition ($roadmap -match "Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs") -Message "Roadmap should describe current optional packs."
@@ -1646,7 +1647,7 @@ Invoke-PackTest "project detection docs and guidance are evidence-gated" {
     Assert-True -Condition ($doc -match "Do not apply \.NET-specific guidance") -Message "Project detection doc should block unsupported .NET advice."
     Assert-True -Condition ($doc -match "package metadata is present") -Message "Project detection doc should prefer package metadata over source guesses."
     Assert-True -Condition ($language -match "docs/project-detection.md") -Message "Language support doc should link project detection."
-    Assert-True -Condition ($readme -match "docs/project-detection.md") -Message "README should link project detection."
+    Assert-True -Condition ($engineeringIndex -match "docs/project-detection.md") -Message "Engineering index should link project detection."
     Assert-True -Condition ($generalRule -match "Run project classification") -Message "General rule should require project classification."
     Assert-True -Condition ($generalRule -match "Do not apply \.NET") -Message "General rule should gate language-specific advice."
     Assert-True -Condition ($dotnetRule -match "Evidence Gate") -Message ".NET rule should include evidence gate."
@@ -2044,19 +2045,8 @@ Invoke-PackTest "tool-use docs define platform-aware approved write behavior" {
     Assert-True -Condition ($approvedChanges -match "Test-Path") -Message "Approved changes docs should include Windows write verification."
     Assert-True -Condition ($approvedChanges -match "test -f") -Message "Approved changes docs should include Linux/macOS write verification."
     Assert-True -Condition ($approvedChanges -match "Remove-Item") -Message "Approved changes docs should include Windows cleanup."
-    Assert-True -Condition ($readme -match "write tools are not validated yet") -Message "README should explain unvalidated write-tool behavior."
-    Assert-True -Condition ($readme -match "read file contents") -Message "README should require content-read validation before real code changes."
-    Assert-True -Condition ($readme -match "git diff -- <file>") -Message "README should require user diff verification after approved writes."
-    Assert-True -Condition ($readme -match "currently opened repository folder") -Message "README should explain current-folder path resolution."
-    Assert-True -Condition ($readme -match "WORKSPACE_UNAVAILABLE") -Message "README should reference workspace discovery failure guidance."
-    Assert-True -Condition ($readme -match "APPLY_TARGET_MISMATCH") -Message "README should reference apply target mismatch guidance."
-    Assert-True -Condition ($readme -match "create_new_file") -Message "README should mention create_new_file exclusion for existing-file write tests."
-    Assert-True -Condition ($readme -match "Two approval prompts") -Message "README should cover duplicate approval prompts."
-    Assert-True -Condition ($readme -match "edit_file") -Message "README should mention printed edit-call text without real changes."
-    Assert-True -Condition ($readme -match "created and read back a file") -Message "README should cover false positive write readback."
-    Assert-True -Condition ($readme -match "READ_TOOLS_UNAVAILABLE.*read-only tool validated") -Message "README should explain failure signals cannot be successful status labels."
-    Assert-True -Condition ($readme -match "ModelLanes") -Message "README should document model lanes installer option."
-    Assert-True -Condition ($readme -match "1 - WRITE SAFE") -Message "README should describe WRITE SAFE lane guidance."
+    Assert-True -Condition ($engineeringIndex -match "docs/tool-use-modes.md") -Message "Engineering index should link tool-use guidance."
+    Assert-True -Condition ($engineeringIndex -match "docs/setup-paths.md") -Message "Engineering index should link setup-path guidance."
 
     $troubleshootingPath = Join-Path $repoRoot "docs/troubleshooting.md"
     $troubleshooting = Get-Content -LiteralPath $troubleshootingPath -Raw
@@ -3165,7 +3155,7 @@ Invoke-PackTest "remote hardware profile scripts are documented and SSH-based" {
     Assert-True -Condition ($doc -match "scp") -Message "Remote hardware profile docs should mention scp for interactive mode."
     Assert-True -Condition ($doc -match "Progress Output") -Message "Remote hardware profile docs should explain numbered progress output."
     Assert-True -Condition ($doc -match "\[5/6\]") -Message "Remote hardware profile docs should explain the remote detection progress step."
-    Assert-True -Condition ($readme -match "docs/remote-hardware-profile.md") -Message "README should link to remote hardware profile docs."
+    Assert-True -Condition ($engineeringIndex -match "docs/remote-hardware-profile.md") -Message "Engineering index should link to remote hardware profile docs."
     Assert-True -Condition ($selection -match "remote-hardware-profile.md") -Message "Local model selection docs should link to remote hardware profile docs."
 }
 Invoke-PackTest "local agent model tests support explicit failed-model cleanup" {
@@ -3281,7 +3271,7 @@ Invoke-PackTest "hardware-aware recommendation scripts emit sanitized model lane
         Assert-True -Condition ($doc -match "ModelLanes") -Message "Recommendation docs should explain surface-neutral model lanes."
         Assert-True -Condition ($doc -match "WRITE SAFE") -Message "Recommendation docs should explain WRITE SAFE lane."
         Assert-True -Condition ($doc -match "does not read repository source code") -Message "Recommendation docs should explain privacy boundaries."
-        Assert-True -Condition ($readme -match "hardware-aware model/config recommendation") -Message "README should link the hardware-aware recommendation path."
+        Assert-True -Condition ($engineeringIndex -match "docs/hardware-aware-recommendations.md") -Message "Engineering index should link the hardware-aware recommendation path."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -3485,8 +3475,8 @@ Invoke-PackTest "shared asset installation docs define centralized config strate
     Assert-True -Condition ($doc -match "file://\./") -Message "Shared asset doc should warn against project-relative global references."
     Assert-True -Condition ($doc -match "duplicate rule") -Message "Shared asset doc should cover duplicate-rule behavior."
     Assert-True -Condition ($doc -match "Rollback") -Message "Shared asset doc should include rollback guidance."
-    Assert-True -Condition ($readme -match "docs/shared-asset-installation.md") -Message "README should link shared asset doc."
-    Assert-True -Condition ($readme -match "docs/config-generation-strategy.md") -Message "README should link config generation strategy."
+    Assert-True -Condition ($engineeringIndex -match "docs/shared-asset-installation.md") -Message "Engineering index should link shared asset doc."
+    Assert-True -Condition ($engineeringIndex -match "docs/config-generation-strategy.md") -Message "Engineering index should link config generation strategy."
     Assert-True -Condition ($hardwareDoc -match "docs/shared-asset-installation.md") -Message "Hardware-aware docs should link shared asset planning."
     Assert-True -Condition ($hardwareDoc -match "docs/config-generation-strategy.md") -Message "Hardware-aware docs should link config generation strategy."
     Assert-True -Condition ($doc -match "docs/config-generation-strategy.md") -Message "Shared asset docs should link config generation strategy."
@@ -3621,11 +3611,11 @@ Invoke-PackTest "workflow registry defines stable UI entry points" {
     Assert-True -Condition ($appendix -match "Workflow Reference") -Message "Script appendix should include workflow reference table."
     Assert-True -Condition ($appendix -match "docs/haven-42-menu.md") -Message "Script appendix should point beginners to the guided menu."
     Assert-True -Condition ($appendix -match "Maintenance Rule") -Message "Script appendix should define maintenance rule."
-    Assert-True -Condition ($readme -match "docs/workflow-registry.md") -Message "README should link workflow registry docs."
-    Assert-True -Condition ($readme -match "docs/workflow-chooser.md") -Message "README should link workflow chooser docs."
-    Assert-True -Condition ($readme -match "docs/script-consolidation-plan.md") -Message "README should link script consolidation plan."
-    Assert-True -Condition ($readme -match "docs/script-reference-appendix.md") -Message "README should link script appendix."
-    Assert-True -Condition ($readme -match "docs/autonomous-maintainer-queue.md") -Message "README should link autonomous maintainer queue."
+    Assert-True -Condition ($engineeringIndex -match "docs/workflow-registry.md") -Message "Engineering index should link workflow registry docs."
+    Assert-True -Condition ($engineeringIndex -match "docs/workflow-chooser.md") -Message "Engineering index should link workflow chooser docs."
+    Assert-True -Condition ($engineeringIndex -match "docs/script-consolidation-plan.md") -Message "Engineering index should link script consolidation plan."
+    Assert-True -Condition ($engineeringIndex -match "docs/script-reference-appendix.md") -Message "Engineering index should link script appendix."
+    Assert-True -Condition ($engineeringIndex -match "docs/autonomous-maintainer-queue.md") -Message "Engineering index should link autonomous maintainer queue."
     Assert-True -Condition ($autonomousQueue -match "Safe Without Prompt") -Message "Autonomous queue should define safe autonomous work."
     Assert-True -Condition ($autonomousQueue -match "Needs Explicit Input") -Message "Autonomous queue should define input boundaries."
     Assert-True -Condition ($autonomousQueue -match "docs/script-consolidation-plan.md") -Message "Autonomous queue should link script consolidation plan."
@@ -4023,8 +4013,8 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($promotionGates -match "Configure supported") -Message "Promotion gates should define configure promotion."
     Assert-True -Condition ($menuDoc -match "docs/agent-surface-solutions.md") -Message "Menu docs should link solution catalog."
     Assert-True -Condition ($dashboardDoc -match "docs/agent-surface-solutions.md") -Message "Evidence dashboard docs should link solution catalog."
-    Assert-True -Condition ($readme -match "docs/agent-surface-solutions.md") -Message "README should link solution catalog."
-    Assert-True -Condition ($readme -match "docs/surface-specific-config-bundles.md") -Message "README should link config bundle policy."
+    Assert-True -Condition ($engineeringIndex -match "docs/agent-surface-solutions.md") -Message "Engineering index should link solution catalog."
+    Assert-True -Condition ($engineeringIndex -match "docs/surface-specific-config-bundles.md") -Message "Engineering index should link config bundle policy."
     Assert-True -Condition ($todo -match "surface-neutral install/configure/test solution catalog") -Message "TODO should track solution catalog completion."
     Assert-True -Condition ($todo -match "\[x\] Decide whether install scripts should generate surface-specific config bundles") -Message "TODO should mark config bundle decision complete."
 }
@@ -4408,8 +4398,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($uiDoc -match "Defer Apple Developer Program enrollment") -Message "Unified UI design should defer Apple enrollment until the public beta gate."
     Assert-True -Condition ($roadmap -match "Milestone 22 \| Active") -Message "Roadmap should mark Milestone 22 active."
     Assert-True -Condition ($todo -match "\[x\] Select and document the shared browser UI") -Message "TODO should mark the browser/PyInstaller runtime selection complete."
-    Assert-True -Condition ($readme -match "docs/solution-architecture-review\.md") -Message "README should link solution architecture review."
-    Assert-True -Condition ($readme -match "docs/unified-starter-toolkit-ui\.md") -Message "README should link unified UI design."
+    Assert-True -Condition ($engineeringIndex -match "docs/solution-architecture-review\.md") -Message "Engineering index should link solution architecture review."
+    Assert-True -Condition ($engineeringIndex -match "docs/unified-starter-toolkit-ui\.md") -Message "Engineering index should link unified UI design."
     Assert-True -Condition ($readme -match "(?m)^# Haven 42\r?$") -Message "README should use the Haven 42 product name."
     Assert-True -Condition ($readme -match "Your private, local AI station") -Message "README should use the Haven 42 tagline."
     Assert-True -Condition ($project -match "(?ms)## Name\s+Haven 42") -Message "Project identity should use Haven 42."
@@ -4426,16 +4416,16 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     $legacyIdentity = @(& git -C $repoRoot grep -n -I -i -E 'engineering[ -]+agent[ -]+pack|local[ _-]+engineering[ _-]+agent[ _-]+pack' 2>$null)
     Assert-Equal -Actual $legacyIdentity.Count -Expected 0 -Message "Tracked files must not retain the former product identity or slug."
     $idePackageReadme = Get-Content -LiteralPath (Join-Path $repoRoot "packages/local-llm-ide/README.md") -Raw
-    Assert-True -Condition ($readme -match "private app for chat, writing, and summarization") -Message "README should explain the app in plain language."
-    Assert-True -Condition ($readme -match "Coding tools for Continue, Aider, and\s+OpenCode are now kept in a separate") -Message "README should keep coding tools outside the everyday app flow."
+    Assert-True -Condition ($readme -match "application for private AI chat, writing, and summarization") -Message "README should explain the app in plain language."
+    Assert-True -Condition ($readme -match "Continue, Aider, and OpenCode support is distributed as the optional") -Message "README should keep coding tools outside the everyday app flow."
     foreach ($tool in @("Continue", "Aider", "OpenCode")) {
         Assert-True -Condition ($idePackageReadme -match [regex]::Escape($tool)) -Message "The separate coding-tools package should document $tool."
     }
     foreach ($milestone in @(22, 23, 24, 25)) {
         Assert-True -Condition ($roadmap -match "## Milestone $milestone") -Message "The engineering roadmap should retain Milestone $milestone details."
     }
-    Assert-True -Condition ($readme -match "One Linux ComfyUI/SDXL setup has passed testing") -Message "README should state the bounded image baseline plainly."
-    Assert-True -Condition ($readme -match "documentation-only candidate inventories") -Message "README should clearly say unshipped media candidates are documentation only."
+    Assert-True -Condition ($readme -match "One Linux ComfyUI/SDXL image path has passed testing") -Message "README should state the bounded image baseline plainly."
+    Assert-True -Condition ($readme -match "other media paths remain gated") -Message "README should clearly say unshipped media paths remain gated."
     Assert-True -Condition ($readme -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b") -Message "README should not contain a private address."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should include solution architecture backlog."
     Assert-True -Condition ($todo -match "\[x\] Add a milestone solution completeness audit") -Message "TODO should mark solution audit doc complete."
@@ -4537,7 +4527,7 @@ Invoke-PackTest "sample scenario packs reference existing assets" {
 
     Assert-True -Condition ($doc -match "Legacy migration") -Message "Scenario docs should list legacy migration."
     Assert-True -Condition ($doc -match "approved-write status") -Message "Scenario docs should avoid promoting write readiness."
-    Assert-True -Condition ($readme -match "docs/sample-scenario-packs.md") -Message "README should link scenario pack docs."
+    Assert-True -Condition ($engineeringIndex -match "docs/sample-scenario-packs.md") -Message "Engineering index should link scenario pack docs."
     Assert-True -Condition ($todo -match "sample scenario packs") -Message "TODO should track sample scenario packs."
 }
 Invoke-PackTest "release readiness gate checks core release invariants" {
@@ -4701,7 +4691,7 @@ Invoke-PackTest "beginner setup plan maps first-run commands to workflows" {
         Assert-True -Condition ($setupPaths -match "Team Or Enterprise Path") -Message "Setup paths doc should define team or enterprise path."
         Assert-True -Condition ($setupPaths -match "audit evidence") -Message "Setup paths doc should cover audit evidence."
         Assert-True -Condition ($setupPaths -match "Beginner-friendly does not mean weaker safety") -Message "Setup paths doc should preserve shared safety boundary."
-        Assert-True -Condition ($readme -match "docs/setup-paths.md") -Message "README should link setup paths doc."
+        Assert-True -Condition ($engineeringIndex -match "docs/setup-paths.md") -Message "Engineering index should link setup paths doc."
         Assert-True -Condition ($todo -match "\[x\] Keep beginner-friendly local setup guidance aligned with enterprise-safe review and audit guidance") -Message "TODO should mark setup path alignment complete."
 
         $dispatch = Invoke-CommandCapture -FilePath $dispatcherPath -Arguments @("-WorkflowId", "get-beginner-setup-plan", "-DryRun", "-Json", "-WorkflowArgumentsJson", '["-AsJson"]')
@@ -4870,7 +4860,9 @@ Invoke-PackTest "wiki synchronization is deterministic and hosted" {
         $syncResult = Invoke-CommandCapture -FilePath $syncPath -Arguments @("-WikiPath", $tempWiki)
         Assert-Equal -Actual $syncResult.ExitCode -Expected 0 -Message "Wiki synchronization should populate an empty wiki directory."
         $sidebar = Get-Content -LiteralPath (Join-Path $tempWiki "_Sidebar.md") -Raw
-        Assert-True -Condition ($sidebar -match "\*\*Get started\*\*" -and $sidebar -match "\*\*Contributors\*\*") -Message "Wiki sidebar should preserve compact grouped end-user-first navigation."
+        Assert-True -Condition ($sidebar -match "\*\*Get started\*\*" -and $sidebar -match "\*\*Engineering\*\*") -Message "Wiki sidebar should preserve compact grouped end-user-first navigation."
+        $engineeringPage = Get-Content -LiteralPath (Join-Path $tempWiki "Eng-Evidence-Catalog.md") -Raw
+        Assert-True -Condition ($engineeringPage -match "Internal engineering page" -and $engineeringPage -match "blob/main/docs/evidence-catalog\.md") -Message "Engineering wiki pages should identify and link their canonical repository document."
         $syncSource = Get-Content -LiteralPath $syncPath -Raw
         Assert-True -Condition ($syncSource -match "exactly one newline" -and $syncSource -match "exactly one level-one heading" -and $syncSource -match "Broken wiki link" -and $syncSource -match "Wiki-style link inside a Markdown table") -Message "Wiki synchronization should validate final newlines, page structure, table-compatible link syntax, and internal links."
         Assert-True -Condition ($syncSource.IndexOf("Mapped wiki source must contain exactly one level-one heading", [System.StringComparison]::Ordinal) -lt $syncSource.IndexOf("WriteAllBytes", [System.StringComparison]::Ordinal)) -Message "Wiki synchronization should validate every mapped source before writing a page."
@@ -5370,7 +5362,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
     Assert-True -Condition ($policy.images.admittedProfile -eq "linux-comfyui-sdxl-promoted" -and $policy.images.endpointTrustScope -eq "loopback" -and -not $policy.images.customNodesAllowed -and -not $policy.images.localFileWritesAllowed) -Message "The promoted image flow must remain the exact loopback, built-in, browser-memory profile."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects -and $policy.browser.automaticLaunchUrlScope -eq "ipv4-loopback-http-origin-only" -and -not $policy.browser.environmentOverrideAllowed -and -not $policy.browser.shellLaunchAllowed) -Message "Browser security and automatic launch should remain local and default-deny."
-    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Evidence-Dashboard,https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml,https://ollama.com/download/windows" -Message "External navigation must remain fixed to the problem form, detailed evidence wiki, and official Ollama Windows instructions."
+    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status,https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml,https://ollama.com/download/windows" -Message "External navigation must remain fixed to the problem form, model and hardware evidence, and official Ollama Windows instructions."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
     Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and -not $portablePolicy.security.pyinstallerUserCacheAllowed -and $portablePolicy.security.buildOutputsRestrictedToRepositoryDist -and -not $portablePolicy.security.packageLinksMayEscapeBundle -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction -and $portablePolicy.security.distributionEvidenceEmbeddedInExtractedPackage -and $portablePolicy.security.distributionEvidenceRequiresExactHashes -and $portablePolicy.security.distributionEvidenceExcludedFromSigningScope) -Message "Portable evidence must cover every runtime file, keep build cache and outputs inside the ignored repository build tree, reject escaping package links, embed exact non-signable distribution evidence, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
@@ -5422,7 +5414,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $externalLinks = [regex]::Matches($assets, '(?i)href\s*=\s*["'']https?://[^"'']+["'']')
     Assert-True -Condition ($assets -notmatch '(?i)src\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
     $allowedExternalLinks = @(
-        'href="https://github.com/hysel/haven-42/wiki/Evidence-Dashboard"',
+        'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
         'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
         'href = "https://ollama.com/download/windows"'
     )

@@ -7,14 +7,9 @@ Use Haven 42	Local-Model-Selection.md	Choose a Model
 Use Haven 42	Local-Image-Provider-Onboarding.md	Set Up Local Images
 Use Haven 42	Privacy-Policy.md	Privacy
 Use Haven 42	Provider-Endpoint-Security.md	Connection Security
-Advanced	Advanced-Topics.md	Advanced and Contributor Topics
-Advanced	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models
-Advanced	VS-Code-Continue-Setup.md	VS Code and Continue
-Test lab	Arch-Linux-Test-VM-Installation.md	Install the Arch Linux Test VM
+Use Haven 42	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models
 Project	Project-Information.md	Project Information
 Project	Tested-Hardware-And-AI-Engines.md	Tested Hardware and AI Engines
 Project	Model-And-Hardware-Test-Status.md	Model and Hardware Test Status
 Project	Roadmap.md	Roadmap
-Project	Evidence-Dashboard.md	Evidence Dashboard
-Contributors	Documentation-Index.md	Documentation Index
-Contributors	Wiki-Maintenance.md	Wiki Maintenance
+Engineering	Engineering-Index.md	Engineering and Validation Index

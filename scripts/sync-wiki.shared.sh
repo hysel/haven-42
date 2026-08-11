@@ -38,7 +38,8 @@ NAVIGATION_COUNT=0
 SIDEBAR_TEMP="$(mktemp)"
 MAPPED_TEMP="$(mktemp)"
 LINKS_TEMP="$(mktemp)"
-trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$LINKS_TEMP"' EXIT
+RENDERED_TEMP="$(mktemp)"
+trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$LINKS_TEMP" "$RENDERED_TEMP"' EXIT
 printf '%s\n' '- [Home](Home)' > "$SIDEBAR_TEMP"
 
 while IFS=$'\t' read -r source page title; do
@@ -74,31 +75,42 @@ while IFS=$'\t' read -r source page title; do
   esac
   if grep -Eq '^\|.*\[\[' "$REPO_ROOT/$source"; then printf 'Wiki-style link inside a Markdown table must use standard Markdown syntax: %s\n' "$source" >&2; exit 1; fi
 
-  grep -oE '\[\[[^]]+\]\]' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
-  while IFS= read -r link; do
-    target="${link#'[['}"; target="${target%']]'}"; target="${target##*|}"; target="${target%%#*}"
-    grep -Fqxi -- "$target.md" "$MAPPED_TEMP" || { printf 'Broken wiki link in %s: %s\n' "$source" "$target" >&2; exit 1; }
-  done < "$LINKS_TEMP"
+  case "$page" in
+    Eng-*.md) ;;
+    *)
+      grep -oE '\[\[[^]]+\]\]' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
+      while IFS= read -r link; do
+        target="${link#'[['}"; target="${target%']]'}"; target="${target##*|}"; target="${target%%#*}"
+        grep -Fqxi -- "$target.md" "$MAPPED_TEMP" || { printf 'Broken wiki link in %s: %s\n' "$source" "$target" >&2; exit 1; }
+      done < "$LINKS_TEMP"
 
-  grep -oE '\]\([^)]+\)' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
-  while IFS= read -r link; do
-    target="${link#']('}"; target="${target%')'}"; target="${target%%#*}"
-    case "$target" in *:*) continue ;; esac
-    case "$target" in */*|*'\'*) printf 'Path-like relative Markdown link in %s: %s\n' "$source" "$target" >&2; exit 1 ;; esac
-    target="${target##*/}"
-    target="${target%.md}"
-    grep -Fqxi -- "$target.md" "$MAPPED_TEMP" || { printf 'Broken relative Markdown link in %s: %s\n' "$source" "$target" >&2; exit 1; }
-  done < "$LINKS_TEMP"
+      grep -oE '\]\([^)]+\)' "$REPO_ROOT/$source" > "$LINKS_TEMP" || true
+      while IFS= read -r link; do
+        target="${link#']('}"; target="${target%')'}"; target="${target%%#*}"
+        case "$target" in *:*) continue ;; esac
+        case "$target" in */*|*'\'*) printf 'Path-like relative Markdown link in %s: %s\n' "$source" "$target" >&2; exit 1 ;; esac
+        target="${target##*/}"
+        target="${target%.md}"
+        grep -Fqxi -- "$target.md" "$MAPPED_TEMP" || { printf 'Broken relative Markdown link in %s: %s\n' "$source" "$target" >&2; exit 1; }
+      done < "$LINKS_TEMP"
+      ;;
+  esac
 done < "$MAP_PATH"
 
 while IFS=$'\t' read -r source page title; do
   source="${source%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
   [ "$source" != "source" ] || continue
   [ -n "$source" ] || continue
-  if ! cmp -s "$REPO_ROOT/$source" "$WIKI_PATH/$page"; then
+  case "$page" in
+    Eng-*.md)
+      printf '# %s\n\n> **Internal engineering page:** This is an internal engineering page — see [Home](Home) if you'"'"'re trying to install or use Haven 42.\n\nThe canonical document is [%s](https://github.com/hysel/haven-42/blob/main/%s).\n' "$title" "$source" "$source" > "$RENDERED_TEMP"
+      ;;
+    *) cp "$REPO_ROOT/$source" "$RENDERED_TEMP" ;;
+  esac
+  if ! cmp -s "$RENDERED_TEMP" "$WIKI_PATH/$page"; then
     DIFFERENCES=1
     if [ "$CHECK" -eq 0 ]; then
-      cp "$REPO_ROOT/$source" "$WIKI_PATH/$page"
+      cp "$RENDERED_TEMP" "$WIKI_PATH/$page"
       printf 'SYNC %s\n' "$page"
     fi
   fi
@@ -106,7 +118,7 @@ done < "$MAP_PATH"
 
 CURRENT_SECTION=''
 NAVIGATION_PAGES_TEMP="$(mktemp)"
-trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$LINKS_TEMP" "$NAVIGATION_PAGES_TEMP"' EXIT
+trap 'rm -f "$SIDEBAR_TEMP" "$MAPPED_TEMP" "$LINKS_TEMP" "$RENDERED_TEMP" "$NAVIGATION_PAGES_TEMP"' EXIT
 while IFS=$'\t' read -r section page title; do
   section="${section%$'\r'}"; page="${page%$'\r'}"; title="${title%$'\r'}"
   [ "$section" != "section" ] || continue

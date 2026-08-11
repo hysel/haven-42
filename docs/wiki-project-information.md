@@ -5,22 +5,21 @@ software and makes no production-readiness claim._
 
 ## Current position
 
-Haven 42 has a runnable local browser application, unsigned one-folder
-development packages for Windows, Linux, and macOS, and evidence-gated local AI
-capabilities. The latest public test build is the unsigned Windows
+Haven 42 has a local browser application, unsigned one-folder development
+packages for Windows, Linux, and macOS, and local AI features that are enabled
+only after their tests pass. The latest public test build is the unsigned Windows
 `0.4.0-alpha.1` prerelease; the latest stable release line is `0.3.0`. Work
 newer than those exact published versions remains unreleased.
 
-See [[Windows Alpha Release|Windows-Alpha-Release]] for the exact Alpha files,
+See [[Windows Alpha Release|Eng-Windows-Alpha-Release]] for the exact Alpha files,
 checksums, publication record, and boundaries.
 
-The project deliberately separates three states:
+The project separates three states:
 
-- **Available:** implemented in the current admitted product boundary.
-- **Validated or evidence-only:** demonstrated under a specific recorded
-  environment but not necessarily available to every user.
-- **Planned or gated:** design and security foundations exist, but runtime or
-  machine-modification authority is not enabled.
+- **Available:** present in the current app.
+- **Tested only:** demonstrated on a specific recorded setup, but not available
+  to every user.
+- **Planned:** designed or under test, but not enabled in the app.
 
 ## Major active areas
 
@@ -33,7 +32,7 @@ The project deliberately separates three states:
 - Controlled web-research transport/approval guards without an active network adapter.
 
 For milestone detail, open the [[Roadmap]]. For exact committed outcomes and
-limits, use the [[Evidence Dashboard|Evidence-Dashboard]].
+limits, use the [[Evidence Summary|Eng-Evidence-Summary]].
 
 ## Important limitations
 
@@ -51,9 +50,9 @@ limits, use the [[Evidence Dashboard|Evidence-Dashboard]].
 
 - [[Privacy|Privacy-Policy]]
 - [[Connection Security|Provider-Endpoint-Security]]
-- [[Security Threat Model|Security-Threat-Model]]
-- [[Code Signing Policy|Code-Signing-Policy]]
-- [[GitHub Repository Policy|GitHub-Repository-Policy]]
+- [[Security Threat Model|Eng-Security-Threat-Model]]
+- [[Code Signing Policy|Eng-Code-Signing-Policy]]
+- [[GitHub Repository Policy|Eng-GitHub-Repository-Policy]]
 
 Security issues should be reported privately using the process in the source
 repository's `SECURITY.md`, without posting credentials, private prompts, or
@@ -61,6 +60,7 @@ personal files in a public issue.
 
 ## Contributing and deeper documentation
 
-The [[Documentation Index|Documentation-Index]] organizes contributor,
-architecture, validation, evidence, and research pages. Maintainers should also
-read [[Wiki Maintenance|Wiki-Maintenance]] before editing synchronized pages.
+The [[Engineering and Validation Index|Engineering-Index]] organizes
+contributor, architecture, validation, evidence, and research records.
+Maintainers should also read [[Wiki Maintenance|Eng-Wiki-Maintenance]] before
+editing synchronized pages.

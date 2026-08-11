@@ -1,6 +1,6 @@
 # Wiki Maintenance
 
-The GitHub wiki is a separate Git repository, but its mapped content is generated from this repository. `config/wiki-sync.tsv` defines every authoritative source file and wiki filename. `config/wiki-navigation.tsv` defines the small, grouped, end-user-first sidebar independently. Detailed engineering pages remain mapped and reachable through the Documentation Index without crowding the primary navigation. `config/wiki-retired-pages.txt` lists obsolete wiki pages that synchronization removes.
+The GitHub wiki is a separate Git repository, but its mapped content is generated from this repository. `config/wiki-sync.tsv` defines every authoritative source file and wiki filename. `config/wiki-navigation.tsv` defines the small, grouped, end-user-first sidebar independently. Repository files remain canonical for engineering material; synchronized `Eng-` pages contain a banner and a link to their source instead of copying the complete document. The Engineering and Validation Index keeps those records reachable without crowding the primary navigation. `config/wiki-retired-pages.txt` lists obsolete wiki pages that synchronization removes.
 
 Do not edit mapped wiki pages directly. Edit their repository source, run synchronization, review both repositories, and commit the wiki before pushing the main repository change.
 
@@ -24,7 +24,7 @@ macOS:
 ./scripts/sync-wiki.macos.sh --wiki-path ../haven-42.wiki
 ```
 
-The scripts copy mapped pages byte-for-byte, regenerate `_Sidebar.md` from the explicit navigation allowlist, and remove explicitly retired pages. They require exactly one level-one heading, paired code fences, resolvable internal links, and HTML-free line spacing on the short user-facing pages. A navigation entry must reference a mapped page, and duplicate or path-like destination names fail closed. The scripts do not commit or push either repository.
+The scripts copy user pages from their mapped sources, render each `Eng-` page as a labeled canonical-source pointer, regenerate `_Sidebar.md` from the explicit navigation allowlist, and remove explicitly retired pages. They require exactly one level-one heading, paired code fences, resolvable internal links on user pages, and HTML-free line spacing on the short user-facing pages. A navigation entry must reference a mapped page, and duplicate or path-like destination names fail closed. The scripts do not commit or push either repository.
 
 ## Check
 

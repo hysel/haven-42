@@ -89,7 +89,7 @@ validation or production readiness has occurred.
 
 The Evidence page renders committed outcome counts and agent-surface activity
 counts locally. Its only external navigation is the fixed
-`https://github.com/hysel/haven-42/wiki/Evidence-Dashboard` address. The
+`https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status` address. The
 renderer cannot supply or change that URL; Haven 42 does not fetch it in the
 background, and navigation requires an explicit user click. The link opens a
 separate browsing context with `noopener`, `noreferrer`, and a no-referrer

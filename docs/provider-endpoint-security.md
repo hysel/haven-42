@@ -49,7 +49,7 @@ topology keeps Ollama on HTTP loopback behind a separately reviewed HTTPS
 gateway. It supports an explicitly trusted locally generated certificate only
 after exact-IP SAN, key protection, trust, rotation, negative-handshake, and
 uninstall-cleanup gates pass. See
-[Ollama HTTPS installation foundation](ollama-https-installation-foundation.md).
+[Ollama HTTPS installation foundation](https://github.com/hysel/haven-42/blob/main/docs/ollama-https-installation-foundation.md).
 
 ## Post-quantum readiness
 
@@ -58,7 +58,7 @@ server runtime, negotiated key-establishment group, and certificate signature
 must be observed before such a claim. The inactive PQC readiness contract lists
 hybrid `X25519MLKEM768` only as a candidate; it does not change TLS policy or
 permit silent downgrade. See
-[Post-quantum cryptography readiness](post-quantum-cryptography-readiness.md).
+[Post-quantum cryptography readiness](https://github.com/hysel/haven-42/blob/main/docs/post-quantum-cryptography-readiness.md).
 
 ## Data and file controls
 

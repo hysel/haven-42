@@ -1,18 +1,22 @@
 # Quick Start
 
-_For first-time users on Windows, Linux, and macOS. Current packages are
-unsigned development software._
+_For first-time Windows Alpha users and developers starting from source on
+Windows, Linux, or macOS. Current packages are unsigned development software._
 
-This guide assumes you have never used local AI before. You do not need to know
-Python, graphics settings, model formats, or server administration to follow
-the recommended Windows setup.
+The current public beginner package supports Windows 11 x64. You do not need to
+know Python, graphics settings, model formats, or server administration for
+that path. Linux and macOS do not yet have a public beginner package; their
+instructions below are for developers running reviewed source with Python 3.
 
 ## Before you begin
 
 Choose one of these forms:
 
-- **Portable package · Recommended:** extract the ZIP and run `haven42.exe`.
-  Use only a package supplied by a trusted Haven 42 test source.
+- **Windows portable package · Recommended:** download
+  [`haven42-0.4.0-alpha.1-windows-x64-unsigned.zip`](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.1/haven42-0.4.0-alpha.1-windows-x64-unsigned.zip)
+  and its [published checksum file](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.1/haven42-0.4.0-alpha.1-windows-x64-unsigned.zip.sha256)
+  from the official Alpha 1 release. Use only these files from the Haven 42
+  repository.
 - **Source · Advanced:** for developers who already have Python 3 and a reviewed
   copy of this repository.
 
@@ -22,15 +26,24 @@ Haven 42 folder after showing the downloads and asking your permission.
 
 ## Start the portable Windows package · Recommended
 
-1. Extract the complete ZIP into a folder you own. Do not run it from inside
+1. In PowerShell, check the ZIP before opening it:
+
+   ```powershell
+   Get-FileHash -Algorithm SHA256 .\haven42-0.4.0-alpha.1-windows-x64-unsigned.zip
+   ```
+
+   The complete SHA-256 value must be
+   `d1648667807dde37c645beb2199503b8a4852a585a2f62eb4ebe2c0b90465106`.
+   Stop and delete the ZIP if it differs.
+2. Extract the complete ZIP into a folder you own. Do not run it from inside
    the ZIP.
-2. Keep every extracted file together.
-3. Run `haven42.exe`.
-4. Choose **Set up this computer · Recommended**.
-5. Review the computer check and the list of downloads.
-6. Check the permission box only if you agree, then choose **Approve and
+3. Keep every extracted file together.
+4. Run `haven42.exe`.
+5. Choose **Set up this computer · Recommended**.
+6. Review the computer check and the list of downloads.
+7. Check the permission box only if you agree, then choose **Approve and
    continue**.
-7. Wait for every item to say **Complete**, then open Chat.
+8. Wait for every item to say **Complete**, then open Chat.
 
 Windows may display a warning because this Alpha package is not digitally
 signed. This is expected for invited testing, but you should stop if the file
@@ -38,7 +51,10 @@ did not come from your trusted Haven 42 test source.
 
 ## Start from source
 
-Open a terminal in the Haven 42 repository root.
+Download or clone the reviewed source from the
+[Haven 42 repository](https://github.com/hysel/haven-42), install a working
+Python 3 interpreter, and open a terminal in the repository root. This path is
+for developers; it does not install Ollama or a model.
 
 Windows PowerShell:
 
@@ -94,5 +110,4 @@ conversation is not saved. A Haven-managed local AI engine stops with Haven 42
 and is checked and restarted automatically the next time you open the same
 extracted copy.
 
-Continue with [[Using Haven 42|Using-Haven-42]] or open [[Troubleshooting]] if
-the server, browser, or provider connection does not behave as expected.
+**Next:** [[Using Haven 42|Using-Haven-42]]
