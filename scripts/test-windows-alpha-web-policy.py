@@ -16,7 +16,9 @@ SPEC.loader.exec_module(WEB)
 
 
 def main() -> int:
-    assert WEB.APP_VERSION == "0.4.0-alpha.1"
+    expected_version = "0.4.0-alpha.2" if WEB.LINUX_ALPHA else "0.4.0-alpha.1"
+    expected_label = "Haven 42 0.4 Alpha 2" if WEB.LINUX_ALPHA else "Haven 42 0.4 Alpha 1"
+    assert WEB.APP_VERSION == expected_version
     assert WEB.ALPHA_TEXT_ONLY is True
     assert WEB.ALPHA_TEXT_CAPABILITIES == {
         "general.chat", "content.write", "content.summarize",
@@ -35,11 +37,11 @@ def main() -> int:
     )
     status = state.public_status()
     assert status["alpha"] == {
-        "label": "Haven 42 0.4 Alpha 1", "windowsOnly": True,
+        "label": expected_label, "windowsOnly": not WEB.LINUX_ALPHA,
         "chatOnly": False, "textOnly": True,
         "unsigned": True, "productionReady": False,
         "managedSetupRuntimeAdmitted": False,
-        "managedSetupCandidateAvailable": os.name == "nt",
+        "managedSetupCandidateAvailable": WEB.MANAGED_SETUP_SUPPORTED,
         "managedSetupCompletedCandidate": False,
     }
     for capability in ("content.write", "content.summarize"):

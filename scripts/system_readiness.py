@@ -251,7 +251,10 @@ def _linux_platform_facts(
         if match:
             facts["libcFamily"] = match.group(1).casefold()
             facts["libcVersion"] = match.group(2)
-    source = os.environ if environment is None else environment
+    # Session environment values are not trusted readiness evidence. Tests may
+    # inject a bounded fixture, but live inspection deliberately avoids
+    # copying process-environment data into the public readiness report.
+    source = {} if environment is None else environment
     desktop = _sanitize_text(str(source.get("XDG_CURRENT_DESKTOP", "")), 64)
     session = _sanitize_text(str(source.get("XDG_SESSION_TYPE", "")), 32)
     if desktop and re.fullmatch(r"[A-Za-z0-9 ._:+-]{1,64}", desktop):
