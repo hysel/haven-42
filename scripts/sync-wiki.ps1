@@ -39,7 +39,7 @@ function Get-RenderedWikiText {
     }
     $source = ($Entry.source -replace '\\', '/')
     $sourceUrl = "https://github.com/hysel/haven-42/blob/main/$source"
-    return "# $($Entry.title)`n`n> **Internal engineering page:** This is an internal engineering page — see [Home](Home) if you're trying to install or use Haven 42.`n`nThe canonical document is [$source]($sourceUrl).`n"
+    return "# $($Entry.title)`n`n> **Internal engineering page:** This is an internal engineering page - see [Home](Home) if you are trying to install or use Haven 42.`n`nThe canonical document is [$source]($sourceUrl).`n"
 }
 
 $differences = [System.Collections.Generic.List[string]]::new()

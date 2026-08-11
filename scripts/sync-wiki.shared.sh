@@ -103,7 +103,7 @@ while IFS=$'\t' read -r source page title; do
   [ -n "$source" ] || continue
   case "$page" in
     Eng-*.md)
-      printf '# %s\n\n> **Internal engineering page:** This is an internal engineering page — see [Home](Home) if you'"'"'re trying to install or use Haven 42.\n\nThe canonical document is [%s](https://github.com/hysel/haven-42/blob/main/%s).\n' "$title" "$source" "$source" > "$RENDERED_TEMP"
+      printf '# %s\n\n> **Internal engineering page:** This is an internal engineering page - see [Home](Home) if you are trying to install or use Haven 42.\n\nThe canonical document is [%s](https://github.com/hysel/haven-42/blob/main/%s).\n' "$title" "$source" "$source" > "$RENDERED_TEMP"
       ;;
     *) cp "$REPO_ROOT/$source" "$RENDERED_TEMP" ;;
   esac
