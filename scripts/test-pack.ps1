@@ -5659,6 +5659,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
         "scripts/test-windows-alpha-stage-ledger.py",
         "scripts/test-windows-alpha-candidate.py",
         "scripts/test-windows-alpha2-candidate.py",
+        "scripts/test-linux-alpha2-candidate.py",
         "scripts/test-windows-alpha-release-record.py",
         "scripts/test-private-alpha-readiness.py"
     )) {
