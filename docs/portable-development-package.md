@@ -41,6 +41,11 @@ python scripts/build-portable-development-package.py --update-resource-integrity
 Protected resources and the manifest use repository-enforced LF bytes so
 caller Git line-ending settings cannot silently change packaged identities.
 
+The ordinary Windows command continues to build Alpha 1. The separate,
+explicit Windows Alpha 2 build and candidate-assembly commands are documented
+in [[Windows Alpha 2 Build|Windows-Alpha-2-Build]]. They cannot publish or
+replace a release.
+
 The native executable is under `dist/portable/bundle/haven42/`. It accepts `--port` and `--no-open`. Port `0` asks the operating system for an unused loopback port. The build also creates a platform archive and evidence in `dist/portable/artifacts/`.
 
 The builder overrides PyInstaller's per-user configuration directory and keeps
@@ -55,11 +60,13 @@ one-folder bundle; an external or missing target fails the build.
 These outputs are unsigned development artifacts. They are not installers or production releases. Antivirus and operating-system reputation prompts are possible because signing and notarization are deliberately outside this batch.
 
 Windows builds also embed deterministic executable identity metadata:
-ProductName and FileDescription `Haven 42`, ProductVersion and FileVersion
-`0.4.0-alpha.1`, and OriginalFilename `haven42.exe`. The Alpha build reads this metadata
-from `package/haven42-version-info.txt` and independently parses the emitted PE
-resources before it can create the archive. This identity metadata is not a
-digital signature and conveys no publisher trust.
+ProductName and FileDescription `Haven 42`, the explicitly selected Alpha
+version for ProductVersion and FileVersion, and OriginalFilename
+`haven42.exe`. The ordinary build uses the unchanged Alpha 1 version resource;
+the explicit Alpha 2 build uses a separate Alpha 2 resource and runtime hook.
+The builder independently parses the emitted PE resources before it can create
+the archive. This identity metadata is not a digital signature and conveys no
+publisher trust.
 
 ## Security Boundary
 

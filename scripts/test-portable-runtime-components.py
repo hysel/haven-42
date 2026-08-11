@@ -60,6 +60,7 @@ def main() -> int:
         record("haven42.exe"),
         record("DEVELOPMENT-BUILD.txt"),
         record("_internal/package/resource-integrity.json"),
+        record("_internal/config/windows-alpha-2-contract.json"),
         record("_internal/python314.dll"),
         record("_internal/_ssl.pyd"),
         record("_internal/base_library.zip"),

@@ -1,9 +1,26 @@
 # -*- mode: python ; coding: utf-8 -*-
 from pathlib import Path
+import os
 import sys
 
 root = Path(SPECPATH).parent
-version_info = str(root / "package/haven42-version-info.txt") if sys.platform == "win32" else None
+default_version = "0.4.0-alpha.2" if sys.platform.startswith("linux") else "0.4.0-alpha.1"
+build_version = os.environ.get("HAVEN42_BUILD_VERSION", default_version)
+if build_version not in {"0.4.0-alpha.1", "0.4.0-alpha.2"}:
+    raise ValueError("Invalid Haven 42 build version")
+if sys.platform.startswith("linux") and build_version != "0.4.0-alpha.2":
+    raise ValueError("Linux packaging is restricted to Alpha 2")
+version_file = (
+    "package/haven42-alpha2-version-info.txt"
+    if build_version == "0.4.0-alpha.2"
+    else "package/haven42-version-info.txt"
+)
+runtime_hook = (
+    "package/runtime-hook-alpha2.py"
+    if build_version == "0.4.0-alpha.2"
+    else "package/runtime-hook-alpha1.py"
+)
+version_info = str(root / version_file) if sys.platform == "win32" else None
 resources = [
     ("web/static/index.html", "web/static"),
     ("web/static/accessibility.html", "web/static"),
@@ -16,6 +33,7 @@ resources = [
     ("config/install-component-registry.json", "config"),
     ("config/workflows.json", "config"),
     ("config/windows-alpha-contract.json", "config"),
+    ("config/windows-alpha-2-contract.json", "config"),
     ("config/windows-alpha-model-catalog.json", "config"),
     ("config/windows-alpha-component-registry.json", "config"),
     ("config/windows-alpha-resource-monitor-contract.json", "config"),
@@ -40,7 +58,7 @@ a = Analysis(
     ],
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=[str(root / runtime_hook)],
     excludes=["tkinter", "unittest"],
     noarchive=False,
     optimize=1,

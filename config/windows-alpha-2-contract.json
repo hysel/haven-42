@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.windows-alpha-2-identity",
+  "version": "0.4.0-alpha.2",
+  "displayVersion": "Haven 42 0.4 Alpha 2",
+  "baseContract": "config/windows-alpha-contract.json",
+  "baseContractSha256": "73daa24cbf58f85fe6ea1a071651fae517a1d2230ef8428894a21b61430d2b58",
+  "policyChanges": [],
+  "publicationAuthorized": false
+}

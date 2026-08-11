@@ -98,11 +98,21 @@ class ArtifactVerificationError(ValueError):
     pass
 
 
-def expected_app_version(operating_system: str) -> str:
+def expected_app_version(
+    operating_system: str, requested_version: str | None = None,
+) -> str:
     try:
-        return EXPECTED_APP_VERSIONS[operating_system]
+        default = EXPECTED_APP_VERSIONS[operating_system]
     except KeyError as error:
         raise ArtifactVerificationError("invalid-build-provenance") from error
+    if requested_version is None:
+        return default
+    allowed = {default}
+    if operating_system == "windows":
+        allowed.add("0.4.0-alpha.2")
+    if requested_version not in allowed:
+        raise ArtifactVerificationError("invalid-build-provenance")
+    return requested_version
 
 
 def sha256_bytes(data: bytes) -> str:
@@ -321,7 +331,7 @@ def verify_notice_text(notices: str, inventory: dict, runtime_inventory: dict) -
             raise ArtifactVerificationError("runtime-notice-coverage-mismatch")
 
 
-def verify_evidence(directory: Path) -> None:
+def verify_evidence(directory: Path, expected_version: str | None = None) -> None:
     for name, expected_digest in EXPECTED_LICENSE_EVIDENCE.items():
         path = directory / name
         if not path.is_file() or path.is_symlink() or sha256_file(path) != expected_digest:
@@ -336,7 +346,9 @@ def verify_evidence(directory: Path) -> None:
     architecture = environment.get("architecture")
     target = inventory.get("target")
     try:
-        required_app_version = expected_app_version(str(operating_system))
+        required_app_version = expected_app_version(
+            str(operating_system), expected_version,
+        )
     except ArtifactVerificationError:
         required_app_version = None
     if (
@@ -508,7 +520,7 @@ def verify_evidence(directory: Path) -> None:
     verify_notice_text(notices, inventory, runtime_inventory)
 
 
-def verify(directory: Path) -> None:
+def verify(directory: Path, expected_version: str | None = None) -> None:
     if not directory.is_dir():
         raise ArtifactVerificationError("artifact-directory-not-found")
     if any(path.is_symlink() for path in directory.iterdir()):
@@ -524,7 +536,7 @@ def verify(directory: Path) -> None:
     if present != expected_artifacts:
         raise ArtifactVerificationError("required-evidence-missing")
     verify_checksums(directory)
-    verify_evidence(directory)
+    verify_evidence(directory, expected_version)
     provenance = load_json(directory / "build-provenance.json")
     target = (
         f"{provenance['environment']['operatingSystem']}-"
@@ -713,6 +725,16 @@ def run_self_tests() -> None:
             hostile_cases += 1
         else:
             raise AssertionError("expected unsupported platform rejection")
+        assert expected_app_version("windows", "0.4.0-alpha.2") == "0.4.0-alpha.2"
+        try:
+            expected_app_version("linux", "0.4.0-alpha.1")
+        except ArtifactVerificationError as error:
+            if str(error) != "invalid-build-provenance":
+                raise AssertionError(
+                    f"expected invalid-build-provenance, received {error}"
+                ) from error
+        else:
+            raise AssertionError("expected Linux Alpha 1 rejection")
 
         incomplete_notice = (
             "tool 1.0 — MIT\n"
@@ -737,6 +759,11 @@ def main() -> int:
     parser.add_argument("--artifact-directory")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--self-test-only", action="store_true")
+    parser.add_argument(
+        "--expected-version",
+        choices=("0.4.0-alpha.1", "0.4.0-alpha.2"),
+        help="Require this exact application identity; defaults preserve existing platform behavior.",
+    )
     args = parser.parse_args()
     if args.self_test_only and (args.self_test or args.artifact_directory):
         parser.error("--self-test-only cannot be combined with artifact verification")
@@ -748,7 +775,7 @@ def main() -> int:
         if args.self_test_only:
             print("Portable verifier hostile self-tests passed 9 cases.")
             return 0
-        verify(Path(args.artifact_directory).resolve())
+        verify(Path(args.artifact_directory).resolve(), args.expected_version)
     except ArtifactVerificationError as error:
         print(f"Portable artifact verification failed: {error}")
         return 2

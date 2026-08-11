@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import ctypes
+import hashlib
 import json
 import math
 import os
@@ -18,10 +19,13 @@ from collections import deque
 from pathlib import Path
 from typing import Any, Callable
 
+from alpha_release import ALPHA_1_VERSION, ALPHA_2_VERSION, application_version
+
 
 SOURCE_ROOT = Path(__file__).resolve().parents[1]
 ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 CONTRACT_PATH = ROOT / "config" / "windows-alpha-contract.json"
+ALPHA_2_IDENTITY_PATH = ROOT / "config" / "windows-alpha-2-contract.json"
 MODEL_CATALOG_PATH = ROOT / "config" / "windows-alpha-model-catalog.json"
 COMPONENT_REGISTRY_PATH = ROOT / "config" / "windows-alpha-component-registry.json"
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -61,7 +65,7 @@ def load_contract(path: Path = CONTRACT_PATH) -> dict[str, Any]:
     if (
         value.get("schemaVersion") != 1
         or value.get("contractId") != "haven42.windows-alpha"
-        or value.get("version") != "0.4.0-alpha.1"
+        or value.get("version") != ALPHA_1_VERSION
         or value.get("implementationStatus") != "implementation-complete-native-validation-required"
     ):
         raise WindowsAlphaError("invalid-alpha-contract")
@@ -117,6 +121,29 @@ def load_contract(path: Path = CONTRACT_PATH) -> dict[str, Any]:
         }
     ):
         raise WindowsAlphaError("invalid-alpha-managed-storage-policy")
+    active_version = application_version()
+    if active_version == ALPHA_1_VERSION:
+        return value
+    if active_version != ALPHA_2_VERSION or path != CONTRACT_PATH:
+        raise WindowsAlphaError("invalid-alpha-release-identity")
+    identity = _load(ALPHA_2_IDENTITY_PATH)
+    if identity != {
+        "schemaVersion": 1,
+        "contractId": "haven42.windows-alpha-2-identity",
+        "version": ALPHA_2_VERSION,
+        "displayVersion": "Haven 42 0.4 Alpha 2",
+        "baseContract": "config/windows-alpha-contract.json",
+        "baseContractSha256": "73daa24cbf58f85fe6ea1a071651fae517a1d2230ef8428894a21b61430d2b58",
+        "policyChanges": [],
+        "publicationAuthorized": False,
+    }:
+        raise WindowsAlphaError("invalid-alpha-2-identity-contract")
+    if hashlib.sha256(path.read_bytes()).hexdigest() != identity["baseContractSha256"]:
+        raise WindowsAlphaError("alpha-2-base-contract-digest-mismatch")
+    value = dict(value)
+    value["version"] = identity["version"]
+    value["displayVersion"] = identity["displayVersion"]
+    value["publicationAuthorized"] = False
     return value
 
 

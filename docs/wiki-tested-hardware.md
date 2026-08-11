@@ -5,6 +5,9 @@ This page summarizes the real computers and operating systems used during Haven
 does not guarantee that every computer with the same GPU family will behave the
 same way.
 
+For the current Alpha 2 status of individual models and computer profiles, see
+[[Model and Hardware Test Status|Model-And-Hardware-Test-Status]].
+
 ## Computers used for testing
 
 | Operating system | Hardware | Environment |

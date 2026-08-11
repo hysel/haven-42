@@ -37,6 +37,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Models, providers, and media
 
+- [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]]
 - [[Engineering Model Selection|Engineering-Model-Selection]]
 - [[Image Provider Admission|Image-Provider-Admission]]
 - [[Local Image Runtime License Review|Local-Image-Runtime-License-Review]]
@@ -70,6 +71,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Packaging, testing, and release evidence
 
+- [[Alpha 2 Linux Long-Term Validation|Alpha-2-Linux-Long-Term-Validation]]
 - [[Arch Linux Test VM Installation|Arch-Linux-Test-VM-Installation]]
 - [[Engineering Evidence Dashboard|Engineering-Evidence-Dashboard]]
 - [[Evidence Catalog|Evidence-Catalog]]
@@ -83,6 +85,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 - [[Release Guidance|Release-Guidance]]
 - [[Milestone 22 Admission Readiness|Milestone-22-Admission-Readiness]]
 - [[Windows Alpha Native Validation|Windows-Alpha-Native-Validation]]
+- [[Windows Alpha 2 Build|Windows-Alpha-2-Build]]
 
 ## Project management and maintenance
 

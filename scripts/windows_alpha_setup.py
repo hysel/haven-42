@@ -34,6 +34,7 @@ from windows_alpha import (
     required_setup_storage_bytes,
     setup_backend,
 )
+from alpha_release import ALPHA_1_VERSION, application_version
 from windows_user_paths import WindowsUserPathError, portable_data_root, windows_local_app_data
 
 
@@ -354,7 +355,7 @@ def _legacy_owned_state_root(path: Path) -> Path:
         not isinstance(receipt, dict)
         or set(receipt) != expected_keys
         or receipt.get("schemaVersion") != 1
-        or receipt.get("version") != "0.4.0-alpha.1"
+        or receipt.get("version") not in {ALPHA_1_VERSION, load_contract()["version"]}
         or not isinstance(receipt.get("transactionId"), str)
         or not SAFE_PLAN_ID.fullmatch(receipt["transactionId"])
         or not isinstance(receipt.get("planId"), str)
@@ -566,7 +567,7 @@ def download_registered_component(
     if destination.exists():
         raise SetupError("download-destination-exists")
     opener = urllib.request.build_opener(FixedOriginRedirectHandler(allowed_hosts))
-    request = urllib.request.Request(component["sourceUrl"], headers={"User-Agent": "Haven42/0.4.0-alpha.1"})
+    request = urllib.request.Request(component["sourceUrl"], headers={"User-Agent": f"Haven42/{application_version()}"})
     digest = hashlib.sha256()
     written = 0
     try:
@@ -1017,7 +1018,7 @@ def _provider_json(path: str, body: dict[str, Any] | None = None, timeout: int =
     data = None if body is None else json.dumps(body, separators=(",", ":")).encode("utf-8")
     request = urllib.request.Request(
         MANAGED_OLLAMA_URL + path, data=data,
-        headers={"Content-Type": "application/json", "User-Agent": "Haven42/0.4.0-alpha.1"},
+        headers={"Content-Type": "application/json", "User-Agent": f"Haven42/{application_version()}"},
         method="GET" if data is None else "POST",
     )
     try:
@@ -1073,7 +1074,7 @@ def pull_registered_model(
     request = urllib.request.Request(
         MANAGED_OLLAMA_URL + "/api/pull",
         data=json.dumps({"model": model["name"], "stream": True}).encode("utf-8"),
-        headers={"Content-Type": "application/json", "User-Agent": "Haven42/0.4.0-alpha.1"},
+        headers={"Content-Type": "application/json", "User-Agent": f"Haven42/{application_version()}"},
         method="POST",
     )
     try:

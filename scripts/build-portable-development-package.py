@@ -21,10 +21,11 @@ import tempfile
 import zipfile
 
 from portable_runtime_components import classify
+from alpha_release import ALPHA_1_VERSION, ALPHA_2_VERSION
 
 
 ROOT = Path(__file__).resolve().parent.parent
-APP_VERSION = "0.4.0-alpha.2" if platform.system() == "Linux" else "0.4.0-alpha.1"
+APP_VERSION = ALPHA_2_VERSION if platform.system() == "Linux" else ALPHA_1_VERSION
 REQUIRED_PYTHON_VERSION = "3.14.6"
 REQUIRED_PYINSTALLER_VERSION = "6.21.0"
 LOCAL_BUILD_ENVIRONMENT = ".venv-build"
@@ -40,6 +41,7 @@ RESOURCE_PATHS = (
     "config/install-component-registry.json",
     "config/workflows.json",
     "config/windows-alpha-contract.json",
+    "config/windows-alpha-2-contract.json",
     "config/windows-alpha-model-catalog.json",
     "config/windows-alpha-component-registry.json",
     "config/windows-alpha-resource-monitor-contract.json",
@@ -236,13 +238,16 @@ def windows_system_root() -> Path:
     return Path(buffer.value).resolve()
 
 
-def pyinstaller_environment(config_dir: Path) -> dict[str, str]:
+def pyinstaller_environment(config_dir: Path, app_version: str = APP_VERSION) -> dict[str, str]:
     environment = os.environ.copy()
     environment.pop("PYTHONHOME", None)
     environment.pop("PYTHONPATH", None)
     environment["PYTHONNOUSERSITE"] = "1"
     environment["PYTHONSAFEPATH"] = "1"
     environment["PYINSTALLER_CONFIG_DIR"] = str(config_dir.resolve())
+    if app_version not in {ALPHA_1_VERSION, ALPHA_2_VERSION}:
+        raise SystemExit("Invalid portable build release identity.")
+    environment["HAVEN42_BUILD_VERSION"] = app_version
     if platform.system() == "Windows":
         system_root = windows_system_root()
         admitted = (
@@ -594,15 +599,31 @@ def create_archive(package_dir: Path, artifact_dir: Path, target: str) -> Path:
 
 
 def main() -> int:
+    global APP_VERSION
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", default=str(ROOT / "dist" / "portable"))
     parser.add_argument("--skip-pyinstaller", action="store_true")
+    parser.add_argument(
+        "--release-line",
+        choices=("platform-default", "alpha2"),
+        default="platform-default",
+        help=(
+            "Use the existing platform default, or explicitly build Alpha 2. "
+            "The explicit Alpha 2 option is supported only on Windows and Linux."
+        ),
+    )
     parser.add_argument(
         "--update-resource-integrity",
         action="store_true",
         help="Update only the tracked protected-resource manifest for review.",
     )
     args = parser.parse_args()
+    if args.release_line == "alpha2":
+        if platform.system() not in {"Windows", "Linux"}:
+            parser.error("--release-line alpha2 is supported only on Windows and Linux.")
+        APP_VERSION = ALPHA_2_VERSION
+    else:
+        APP_VERSION = ALPHA_2_VERSION if platform.system() == "Linux" else ALPHA_1_VERSION
     if args.update_resource_integrity:
         if args.skip_pyinstaller:
             parser.error(
@@ -630,7 +651,7 @@ def main() -> int:
             "--distpath", str(bundle_dir),
             "--workpath", str(work),
             str(ROOT / "package/haven42.spec"),
-        ], cwd=ROOT, check=True, env=pyinstaller_environment(work / "config"))
+        ], cwd=ROOT, check=True, env=pyinstaller_environment(work / "config", APP_VERSION))
     package_dir = bundle_dir / "haven42"
     if not package_dir.is_dir() or package_dir.is_symlink():
         raise SystemExit("PyInstaller one-folder output was not found.")
