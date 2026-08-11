@@ -10,6 +10,7 @@ import os
 import platform
 import re
 import secrets
+import shlex
 import shutil
 import subprocess
 import sys
@@ -172,6 +173,91 @@ def _windows_platform_facts() -> dict[str, Any]:
         facts["pendingRestart"] = pending
     except ImportError:
         pass
+    return facts
+
+
+def _read_linux_os_release(path: Path = Path("/etc/os-release")) -> dict[str, str]:
+    """Read only the fixed operating-system identity file with strict bounds."""
+    try:
+        resolved = path.resolve(strict=True)
+        if path == Path("/etc/os-release") and resolved not in {
+            Path("/etc/os-release"), Path("/usr/lib/os-release"),
+        }:
+            return {}
+        if not resolved.is_file() or resolved.stat().st_size > 64 * 1024:
+            return {}
+        raw = resolved.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return {}
+    values: dict[str, str] = {}
+    allowed = {
+        "ID", "NAME", "PRETTY_NAME", "VERSION_ID", "VERSION", "BUILD_ID",
+    }
+    for line in raw.splitlines()[:256]:
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, encoded = line.split("=", 1)
+        if key not in allowed or key in values or len(encoded) > 512:
+            continue
+        try:
+            parsed = shlex.split(encoded, comments=False, posix=True)
+        except ValueError:
+            continue
+        if len(parsed) != 1:
+            continue
+        sanitized = _sanitize_text(parsed[0], 160)
+        if sanitized is not None:
+            values[key] = sanitized
+    return values
+
+
+def _linux_platform_facts(
+    os_release_path: Path = Path("/etc/os-release"),
+    environment: dict[str, str] | None = None,
+) -> dict[str, Any]:
+    facts: dict[str, Any] = {
+        "distributionId": None,
+        "distributionVersion": None,
+        "productName": None,
+        "kernelVersion": None,
+        "libcFamily": None,
+        "libcVersion": None,
+        "desktopEnvironmentReported": None,
+        "sessionTypeReported": None,
+        "sessionMetadataTrusted": False,
+    }
+    if platform.system().lower() != "linux" and os_release_path == Path("/etc/os-release"):
+        return facts
+    release = _read_linux_os_release(os_release_path)
+    distro_id = release.get("ID")
+    if distro_id and re.fullmatch(r"[A-Za-z0-9._+-]{1,64}", distro_id):
+        facts["distributionId"] = distro_id.casefold()
+    version = release.get("VERSION_ID")
+    if (
+        version is None
+        and facts["distributionId"] in {"arch", "cachyos"}
+        and release.get("BUILD_ID", "").casefold() == "rolling"
+    ):
+        version = "rolling"
+    facts["distributionVersion"] = version
+    facts["productName"] = release.get("PRETTY_NAME") or release.get("NAME")
+    facts["kernelVersion"] = _sanitize_text(platform.release(), 96)
+    try:
+        libc = os.confstr("CS_GNU_LIBC_VERSION")
+    except (AttributeError, OSError, ValueError):
+        libc = None
+    if isinstance(libc, str):
+        match = re.fullmatch(r"([A-Za-z0-9._+-]{1,32})\s+([0-9][0-9A-Za-z._+-]{0,31})", libc)
+        if match:
+            facts["libcFamily"] = match.group(1).casefold()
+            facts["libcVersion"] = match.group(2)
+    source = os.environ if environment is None else environment
+    desktop = _sanitize_text(str(source.get("XDG_CURRENT_DESKTOP", "")), 64)
+    session = _sanitize_text(str(source.get("XDG_SESSION_TYPE", "")), 32)
+    if desktop and re.fullmatch(r"[A-Za-z0-9 ._:+-]{1,64}", desktop):
+        facts["desktopEnvironmentReported"] = desktop
+    if session and session.casefold() in {"wayland", "x11", "tty", "unspecified"}:
+        facts["sessionTypeReported"] = session.casefold()
     return facts
 
 
@@ -372,6 +458,17 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
     if system == "darwin":
         system = "macos"
     windows_facts = _windows_platform_facts()
+    linux_facts = _linux_platform_facts() if system == "linux" else {
+        "distributionId": None,
+        "distributionVersion": None,
+        "productName": None,
+        "kernelVersion": None,
+        "libcFamily": None,
+        "libcVersion": None,
+        "desktopEnvironmentReported": None,
+        "sessionTypeReported": None,
+        "sessionMetadataTrusted": False,
+    }
     if system != "macos":
         software.append({
             "componentId": "apple-mlx", "state": "unsupported", "version": None,
@@ -397,10 +494,21 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
             "logicalProcessors": os.cpu_count(),
             "systemMemoryGiB": memory,
             "availableStorageGiB": storage,
-            "productName": windows_facts["productName"],
+            "productName": (
+                windows_facts["productName"]
+                if system == "windows" else linux_facts["productName"]
+            ),
             "buildNumber": windows_facts["buildNumber"],
             "cpuFeatures": windows_facts["cpuFeatures"],
             "pendingRestart": windows_facts["pendingRestart"],
+            "distributionId": linux_facts["distributionId"],
+            "distributionVersion": linux_facts["distributionVersion"],
+            "kernelVersion": linux_facts["kernelVersion"],
+            "libcFamily": linux_facts["libcFamily"],
+            "libcVersion": linux_facts["libcVersion"],
+            "desktopEnvironmentReported": linux_facts["desktopEnvironmentReported"],
+            "sessionTypeReported": linux_facts["sessionTypeReported"],
+            "sessionMetadataTrusted": linux_facts["sessionMetadataTrusted"],
         },
         "accelerators": _gpu_items(runner, system),
         "software": software,

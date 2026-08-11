@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.alpha2.model-comparison",
+  "release": "0.4.0-alpha.2",
+  "status": "comparison-only-no-product-promotion",
+  "selectionPolicyBinding": {
+    "path": "config/alpha-2-model-selection-policy.json",
+    "canonicalSha256": "8df57209a039293257355f4a88264424794c48bc1ae22f0d292479887536b30e"
+  },
+  "provider": {
+    "name": "ollama",
+    "exactVersion": "0.32.6",
+    "transport": "verified-no-command-ipv4-loopback-tunnel"
+  },
+  "candidates": [
+    {
+      "id": "qwen35-9b-control",
+      "model": "qwen3.5:9b",
+      "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "purpose": "existing exact-artifact control",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    },
+    {
+      "id": "gemma3-12b",
+      "model": "gemma3:12b",
+      "digest": "f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a",
+      "purpose": "writing and summarization comparison",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    },
+    {
+      "id": "granite4-7b-a1b-h",
+      "model": "granite4:7b-a1b-h",
+      "digest": "566b725534ea0e9824f844abe6a78e1ab6f7357f1efb549be94908cb681513bb",
+      "purpose": "lower-memory writing efficiency comparison",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    },
+    {
+      "id": "mistral-small32-24b-q4",
+      "model": "mistral-small3.2:24b-instruct-2506-q4_K_M",
+      "digest": "5a408ab55df5c1b5cf46533c368813b30bf9e4d8fc39263bf2a3338cfa3b895b",
+      "purpose": "higher-capacity writing and summarization comparison",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    }
+  ],
+  "constraints": {
+    "selectionEvidenceAllowed": false,
+    "automaticDefaultChangeAllowed": false,
+    "downloadsAllowed": false,
+    "rawPromptsOrResponsesAllowed": false,
+    "unloadAfterEverySampleRequired": true,
+    "exactManifestDigestRequired": true,
+    "exactProviderVersionRequired": true
+  }
+}

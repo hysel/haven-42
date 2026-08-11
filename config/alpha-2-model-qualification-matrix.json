@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "matrixId": "haven42.alpha2.cross-family-qualification",
+  "release": "0.4.0-alpha.2",
+  "status": "qualification-only-no-product-promotion",
+  "inventoryBinding": {
+    "path": "config/alpha-2-model-version-inventory.json",
+    "canonicalSha256": "79eb36fc4c332651962b92d46a6b81d60e5309468200a82ff7d18c011d0c992b"
+  },
+  "provider": {
+    "name": "ollama",
+    "exactVersion": "0.32.5",
+    "transport": "ipv4-loopback-only"
+  },
+  "taskChecks": [
+    {
+      "capability": "general.chat",
+      "check": "exact-sentinel-response",
+      "samples": 3
+    },
+    {
+      "capability": "content.write",
+      "check": "single-sentence-word-range-and-required-topic",
+      "samples": 3
+    },
+    {
+      "capability": "content.summarize",
+      "check": "single-sentence-required-facts-no-invented-number",
+      "samples": 3
+    }
+  ],
+  "profiles": [
+    {
+      "id": "cpu-16gib",
+      "backend": "cpu",
+      "minimumSystemMemoryGiB": 15,
+      "minimumUsableGpuMemoryGiB": 0
+    },
+    {
+      "id": "cuda-16gib",
+      "backend": "cuda",
+      "minimumSystemMemoryGiB": 15,
+      "minimumUsableGpuMemoryGiB": 16
+    },
+    {
+      "id": "cuda-32gib-system-16gib",
+      "backend": "cuda",
+      "minimumSystemMemoryGiB": 31,
+      "minimumUsableGpuMemoryGiB": 16
+    }
+  ],
+  "candidates": [
+    {
+      "modelId": "gemma3-1b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "gemma3-4b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "gemma4-e2b-qat",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "gemma4-e4b-qat",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "gemma4-12b-qat",
+      "requiredProfiles": ["cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "granite41-3b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "granite41-8b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "phi4-mini-38b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "llama32-3b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "ministral3-3b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "ministral3-8b-q4",
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "qwen36-27b-q4",
+      "requiredProfiles": ["cuda-32gib-system-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "qwen36-35b-a3b-q4",
+      "requiredProfiles": [],
+      "state": "deferred-requires-at-least-48gib-system-memory"
+    }
+  ],
+  "soakGate": {
+    "allTaskChecksMustPass": true,
+    "durationMinutes": 30,
+    "intervalSeconds": 120,
+    "unloadAfterEverySampleRequired": true,
+    "rawPromptsOrResponsesAllowed": false,
+    "automaticSelectionEvidenceAllowed": false,
+    "automaticDefaultChangeAllowed": false
+  }
+}

@@ -1,0 +1,161 @@
+{
+  "schemaVersion": 1,
+  "kind": "alpha2-model-selection-synthetic-fixtures",
+  "productAdmission": false,
+  "description": "Deterministic selector tests only. Synthetic evidence in this file is not native model evidence and cannot promote a model.",
+  "cases": [
+    {
+      "id": "cpu-low-8g",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cpu",
+        "systemMemoryGiB": 8,
+        "usableGpuMemoryGiB": 0,
+        "storageAdmittedModelIds": ["qwen35-08b-q8"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8"],
+      "expectedModelId": "qwen35-08b-q8"
+    },
+    {
+      "id": "cpu-large-memory-stays-cpu-admitted",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cpu",
+        "systemMemoryGiB": 128,
+        "usableGpuMemoryGiB": 0,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4", "qwen35-27b-q4", "qwen35-35b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8"],
+      "expectedModelId": "qwen35-08b-q8"
+    },
+    {
+      "id": "cuda-entry-12g-4g",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cuda",
+        "systemMemoryGiB": 12,
+        "usableGpuMemoryGiB": 4,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8"],
+      "expectedModelId": "qwen35-2b-q8"
+    },
+    {
+      "id": "vulkan-mid-16g-8g",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "vulkan",
+        "systemMemoryGiB": 16,
+        "usableGpuMemoryGiB": 8,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4"],
+      "expectedModelId": "qwen35-4b-q4"
+    },
+    {
+      "id": "cuda-home-24g-16g",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cuda",
+        "systemMemoryGiB": 24,
+        "usableGpuMemoryGiB": 16,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4"],
+      "expectedModelId": "qwen35-9b-q4"
+    },
+    {
+      "id": "rocm-high-48g-24g",
+      "profile": {
+        "platformFamily": "windows",
+        "operatingSystemId": "windows-11",
+        "architecture": "x64",
+        "backendMode": "rocm",
+        "systemMemoryGiB": 48,
+        "usableGpuMemoryGiB": 24,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4", "qwen35-27b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4", "qwen35-27b-q4"],
+      "expectedModelId": "qwen35-27b-q4"
+    },
+    {
+      "id": "cuda-ultra-64g-32g",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cuda",
+        "systemMemoryGiB": 64,
+        "usableGpuMemoryGiB": 32,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4", "qwen35-27b-q4", "qwen35-35b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4", "qwen35-27b-q4", "qwen35-35b-q4"],
+      "expectedModelId": "qwen35-35b-q4"
+    },
+    {
+      "id": "strongest-storage-denied",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cuda",
+        "systemMemoryGiB": 24,
+        "usableGpuMemoryGiB": 16,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4"],
+      "expectedModelId": "qwen35-4b-q4"
+    },
+    {
+      "id": "no-exact-evidence",
+      "profile": {
+        "platformFamily": "linux",
+        "operatingSystemId": "ubuntu-26-04",
+        "architecture": "x64",
+        "backendMode": "cuda",
+        "systemMemoryGiB": 24,
+        "usableGpuMemoryGiB": 16,
+        "storageAdmittedModelIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4", "qwen35-9b-q4"],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5"
+      },
+      "evidencedModelIds": [],
+      "expectedModelId": null
+    }
+  ]
+}

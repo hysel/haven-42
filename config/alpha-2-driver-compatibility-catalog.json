@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "haven42.alpha2.driver-compatibility",
+  "release": "0.4.0-alpha.2",
+  "reviewedAtUtc": "2026-08-10T00:00:00Z",
+  "status": "initial-reviewed-subset-advisory-only",
+  "authority": {
+    "changesAutomaticModelSelection": false,
+    "installsOrUpdatesDrivers": false,
+    "authorizesAutomaticDriverInstallation": false,
+    "unknownHardwareFallsBackToCpu": true,
+    "newerThanTestedIsExperimental": true,
+    "olderSupportedRequiresRiskAcknowledgement": true,
+    "knownIncompatibleBlocksAutomaticGpuUse": true
+  },
+  "sources": [
+    {
+      "id": "nvidia-unified-595-supported-products",
+      "kind": "vendor-supported-products",
+      "url": "https://download.nvidia.com/XFree86/Linux-x86_64/595.45.04/README/supportedchips.html"
+    },
+    {
+      "id": "nvidia-unix-legacy-gpu-list",
+      "kind": "vendor-legacy-products",
+      "url": "https://www.nvidia.com/en-us/drivers/unix/legacy-gpu/"
+    },
+    {
+      "id": "ubuntu-nvidia-driver-guidance",
+      "kind": "distribution-driver-guidance",
+      "url": "https://documentation.ubuntu.com/server/how-to/graphics/install-nvidia-drivers/"
+    },
+    {
+      "id": "debian-nvidia-driver-guidance",
+      "kind": "distribution-driver-guidance",
+      "url": "https://wiki.debian.org/NvidiaGraphicsDrivers"
+    }
+  ],
+  "devices": [
+    {
+      "id": "nvidia-quadro-rtx-5000-1eb0",
+      "vendorId": "10de",
+      "deviceId": "1eb0",
+      "name": "NVIDIA Quadro RTX 5000",
+      "architecture": "Turing",
+      "supportClass": "current-unified",
+      "minimumReviewedBranch": 550,
+      "supportEvidence": [
+        "nvidia-unified-595-supported-products",
+        "debian-nvidia-driver-guidance"
+      ]
+    },
+    {
+      "id": "nvidia-quadro-5000-06d9",
+      "vendorId": "10de",
+      "deviceId": "06d9",
+      "name": "NVIDIA Quadro 5000",
+      "architecture": "Fermi",
+      "supportClass": "legacy-390",
+      "maximumReviewedBranch": 390,
+      "supportEvidence": [
+        "nvidia-unix-legacy-gpu-list"
+      ]
+    }
+  ],
+  "profiles": [
+    {
+      "id": "linux-mint-22.3-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "linux-mint",
+      "version": "22.3",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "distribution-packages-only",
+      "recommendedBranch": 595,
+      "recommendedExactVersion": "595.84",
+      "validatedExactVersions": [
+        "595.84"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "native-distribution-recommendation-observed"
+    },
+    {
+      "id": "ubuntu-24.04-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "ubuntu",
+      "version": "24.04",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "ubuntu-drivers-recommended-uda",
+      "recommendedBranch": 595,
+      "recommendedExactVersion": "595.84",
+      "validatedExactVersions": [
+        "595.84"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "native-ubuntu-drivers-recommendation-observed"
+    },
+    {
+      "id": "debian-13-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "debian",
+      "version": "13",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "debian-stable-packages-only",
+      "recommendedBranch": 550,
+      "recommendedExactVersion": "550.163.01",
+      "validatedExactVersions": [
+        "550.163.01"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "debian-stable-package-and-native-validation"
+    },
+    {
+      "id": "pop-os-24.04-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "pop-os",
+      "version": "24.04",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "system76-first-party-packages",
+      "recommendedBranch": 595,
+      "recommendedExactVersion": "595.84",
+      "validatedExactVersions": [
+        "595.84"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "system76-package-and-native-validation"
+    },
+    {
+      "id": "fedora-44-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "fedora",
+      "version": "44",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "rpm-fusion-akmod-packages",
+      "recommendedBranch": 610,
+      "recommendedExactVersion": "610.57.04",
+      "validatedExactVersions": [
+        "610.57.04"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "rpm-fusion-package-and-native-validation"
+    },
+    {
+      "id": "cachyos-rolling-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "cachyos",
+      "version": "rolling",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "cachyos-chwd-recommended-profile",
+      "recommendedBranch": 610,
+      "recommendedExactVersion": "610.57.04",
+      "validatedExactVersions": [
+        "610.57.04"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "cachyos-chwd-and-native-validation"
+    },
+    {
+      "id": "arch-linux-rolling-quadro-rtx-5000",
+      "platform": "linux",
+      "distribution": "arch-linux",
+      "version": "rolling",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "arch-official-repository-packages",
+      "recommendedBranch": 610,
+      "recommendedExactVersion": "610.57.04",
+      "validatedExactVersions": [
+        "610.57.04"
+      ],
+      "evidenceState": "native-post-reboot-validated",
+      "recommendationEvidence": "arch-repository-package-and-native-validation"
+    },
+    {
+      "id": "windows-11-quadro-rtx-5000",
+      "platform": "windows",
+      "distribution": "windows",
+      "version": "11",
+      "device": "nvidia-quadro-rtx-5000-1eb0",
+      "packagePolicy": "manual-consumer-or-workstation-driver-guidance",
+      "recommendedBranch": 582,
+      "recommendedExactVersion": "582.70",
+      "validatedExactVersions": [
+        "582.70"
+      ],
+      "evidenceState": "native-validated-existing-evidence",
+      "recommendationEvidence": "haven42-native-validation-not-global-latest-claim"
+    }
+  ],
+  "pendingProfiles": [
+    "ubuntu-26.04",
+    "bazzite-44"
+  ],
+  "outcomes": {
+    "validated-current": {
+      "automaticGpuUseAllowed": true,
+      "acknowledgementRequired": false
+    },
+    "supported-update-available": {
+      "automaticGpuUseAllowed": false,
+      "continueAllowed": true,
+      "acknowledgementRequired": true
+    },
+    "legacy-unvalidated": {
+      "automaticGpuUseAllowed": false,
+      "continueAllowed": true,
+      "acknowledgementRequired": true
+    },
+    "newer-than-tested": {
+      "automaticGpuUseAllowed": false,
+      "continueAllowed": true,
+      "acknowledgementRequired": true
+    },
+    "known-incompatible": {
+      "automaticGpuUseAllowed": false,
+      "continueAllowed": false,
+      "acknowledgementRequired": false
+    },
+    "unknown": {
+      "automaticGpuUseAllowed": false,
+      "continueAllowed": false,
+      "acknowledgementRequired": false
+    }
+  }
+}

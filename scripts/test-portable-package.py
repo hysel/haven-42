@@ -128,16 +128,18 @@ def probe(
         assert bootstrap["updates"]["activationAllowed"] is False
         assert bootstrap["package"]["required"] is packaged
         assert bootstrap["package"]["verified"] is packaged
-        assert bootstrap["version"] == "0.4.0-alpha.1"
+        linux_alpha = bootstrap["runtime"]["platform"] == "linux"
+        expected_version = "0.4.0-alpha.2" if linux_alpha else "0.4.0-alpha.1"
+        assert bootstrap["version"] == expected_version
         assert bootstrap["alpha"] == {
-            "label": "Haven 42 0.4 Alpha 1",
-            "windowsOnly": True,
+            "label": "Haven 42 0.4 Alpha 2" if linux_alpha else "Haven 42 0.4 Alpha 1",
+            "windowsOnly": not linux_alpha,
             "chatOnly": False,
             "textOnly": True,
             "unsigned": True,
             "productionReady": False,
             "managedSetupRuntimeAdmitted": False,
-            "managedSetupCandidateAvailable": bootstrap["runtime"]["platform"] == "windows",
+            "managedSetupCandidateAvailable": bootstrap["runtime"]["platform"] in {"windows", "linux"},
             "managedSetupCompletedCandidate": False,
         }
         token = bootstrap.pop("sessionToken")
@@ -177,25 +179,34 @@ def probe(
             "snapshotId": readiness["snapshotId"],
             "intent": "guided-setup",
         }).encode("utf-8")
-        with request(
-            origin + "/api/setup-plan", "POST", token, plan_body,
-        ) as response:
+        try:
+            setup_response = request(
+                origin + "/api/setup-plan", "POST", token, plan_body,
+            )
+        except urllib.error.HTTPError as error:
+            detail = error.read(4096).decode("utf-8", errors="replace")
+            raise AssertionError(
+                f"setup-plan returned HTTP {error.code}: {detail}"
+            ) from error
+        with setup_response as response:
             plan = json.load(response)
             assert plan["kind"] == "setup-plan"
             assert len(plan["actions"]) >= 2
             assert plan["installationAllowed"] is False
             assert all(action["installControl"] == "disabled" for action in plan["actions"])
             alpha_plan = plan["alphaCandidate"]
-            assert alpha_plan["version"] == "0.4.0-alpha.1"
+            assert alpha_plan["version"] == expected_version
             assert alpha_plan["quantizationDecision"] == "use-pinned-prequantized-model"
             assert alpha_plan["managedSetupRuntimeAdmitted"] is False
             automatic_allowed = alpha_plan["modelSelection"]["automaticExecutionAllowed"] is True
             managed = alpha_plan.get("managedPlan")
-            expected_managed = bootstrap["runtime"]["platform"] == "windows" and automatic_allowed
+            expected_managed = bootstrap["runtime"]["platform"] in {"windows", "linux"} and automatic_allowed
             assert alpha_plan["managedSetupCandidateAvailable"] is expected_managed
             if expected_managed:
                 assert managed is not None
-                assert managed["kind"] == "windows-alpha-setup-plan"
+                assert managed["kind"] == (
+                    "linux-alpha-setup-plan" if linux_alpha else "windows-alpha-setup-plan"
+                )
                 assert managed["effects"] == [
                     "network-download", "portable-folder-files", "owned-process",
                     "local-model-validation",
@@ -217,7 +228,9 @@ def probe(
                 assert managed is None
         with request(origin + "/api/alpha/resources") as response:
             resources = json.load(response)
-            assert resources["kind"] == "windows-alpha-local-metrics"
+            assert resources["kind"] == (
+                "linux-alpha-local-metrics" if linux_alpha else "windows-alpha-local-metrics"
+            )
             assert resources["persisted"] is False
             assert resources["externalTelemetryUsed"] is False
             assert resources["sample"]["persisted"] is False
@@ -256,7 +269,7 @@ def probe(
             404,
             "alpha-text-only",
         )
-        if bootstrap["runtime"]["platform"] == "windows":
+        if bootstrap["runtime"]["platform"] in {"windows", "linux"}:
             with request(origin + "/api/alpha/setup-status") as response:
                 setup_status = json.load(response)
                 assert setup_status["phase"] == "idle"

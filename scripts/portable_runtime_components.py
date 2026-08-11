@@ -27,6 +27,11 @@ PROJECT_FILES = {
     "_internal/config/windows-alpha-component-registry.json",
     "_internal/config/windows-alpha-resource-monitor-contract.json",
     "_internal/config/windows-alpha-quantization-contract.json",
+    "_internal/config/linux-alpha-contract.json",
+    "_internal/config/linux-alpha-component-registry.json",
+    "_internal/config/alpha-2-model-catalog.json",
+    "_internal/config/alpha-2-model-selection-evidence.json",
+    "_internal/config/alpha-2-model-selection-policy.json",
 }
 DISTRIBUTION_EVIDENCE_HASHES = {
     "LICENSE.txt": (

@@ -194,7 +194,7 @@ def verify_static(policy: dict) -> None:
         "trigger": "push-main-after-native-package-success",
         "subjects": "unsigned-development-archives-only",
         "action": "actions/attest",
-        "actionCommit": "508db95dd578ae2727ebd6217d5ba78e4fbda05d",
+        "actionCommit": "1e69f48acb82d1966a394da916b4c1698aa569d6",
         "actionRelease": "v4.2.1",
         "requiredJobPermissions": [
             "actions:read",
@@ -300,13 +300,13 @@ def verify_static(policy: dict) -> None:
     )
     if workflow_text.count(download_artifact) != 1:
         raise PolicyError("reviewed-node24-download-artifact-not-pinned")
-    codeql_sha = "f205ea1c3313d32999d8d6a48b4f6530d4437b38"
+    codeql_sha = "5595ccaf912efad79be6eef63a5619ff05969be3"
     if (
         workflow_text.count(f"github/codeql-action/init@{codeql_sha}") != 1
         or workflow_text.count(f"github/codeql-action/analyze@{codeql_sha}") != 1
     ):
         raise PolicyError("reviewed-codeql-action-pair-not-pinned")
-    attest = "actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d"
+    attest = "actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6"
     if workflow_text.count(attest) != 1:
         raise PolicyError("reviewed-attestation-action-not-pinned")
     attestation_markers = {

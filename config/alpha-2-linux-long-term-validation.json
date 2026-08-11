@@ -1,0 +1,210 @@
+{
+  "campaignId": "alpha2-linux-long-term",
+  "release": "0.4.0-alpha.2",
+  "schemaVersion": 1,
+  "status": "review-only-no-machine-authority",
+  "capabilities": [
+    "chat",
+    "writing",
+    "summarization"
+  ],
+  "targets": [
+    {
+      "id": "ubuntu-26-04-gnome",
+      "distribution": "Ubuntu 26.04 LTS",
+      "desktop": "GNOME",
+      "cpuLane": "required",
+      "nvidiaLane": "promotion-candidate"
+    },
+    {
+      "id": "ubuntu-24-04-gnome",
+      "distribution": "Ubuntu 24.04 LTS",
+      "desktop": "GNOME",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    },
+    {
+      "id": "debian-13-gnome",
+      "distribution": "Debian 13",
+      "desktop": "GNOME",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    },
+    {
+      "id": "linux-mint-22-cinnamon",
+      "distribution": "Linux Mint 22",
+      "desktop": "Cinnamon",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    },
+    {
+      "id": "pop-os-24-04-cosmic",
+      "distribution": "Pop!_OS 24.04 LTS",
+      "desktop": "COSMIC",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    },
+    {
+      "id": "fedora-44-gnome",
+      "distribution": "Fedora Workstation 44",
+      "desktop": "GNOME",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    },
+    {
+      "id": "bazzite-kde",
+      "distribution": "Bazzite",
+      "desktop": "KDE Plasma",
+      "cpuLane": "required",
+      "nvidiaLane": "promotion-candidate"
+    },
+    {
+      "id": "cachyos-kde",
+      "distribution": "CachyOS",
+      "desktop": "KDE Plasma",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    },
+    {
+      "id": "arch-linux-kde",
+      "distribution": "Arch Linux",
+      "desktop": "KDE Plasma",
+      "cpuLane": "required",
+      "nvidiaLane": "experimental"
+    }
+  ],
+  "stages": [
+    {
+      "id": "preflight",
+      "requiresGpu": false,
+      "maximumMinutes": 10
+    },
+    {
+      "id": "cpu-smoke",
+      "requiresGpu": false,
+      "maximumMinutes": 30
+    },
+    {
+      "id": "cpu-functional",
+      "requiresGpu": false,
+      "maximumMinutes": 120
+    },
+    {
+      "id": "cpu-soak",
+      "requiresGpu": false,
+      "maximumMinutes": 720
+    },
+    {
+      "id": "nvidia-smoke",
+      "requiresGpu": true,
+      "maximumMinutes": 30
+    },
+    {
+      "id": "nvidia-functional",
+      "requiresGpu": true,
+      "maximumMinutes": 120
+    },
+    {
+      "id": "nvidia-soak",
+      "requiresGpu": true,
+      "maximumMinutes": 720
+    },
+    {
+      "id": "cleanup",
+      "requiresGpu": false,
+      "maximumMinutes": 20
+    }
+  ],
+  "requiredChecks": [
+    "package-integrity",
+    "hardware-detection",
+    "automatic-model-selection",
+    "chat",
+    "writing",
+    "summarization",
+    "stop-and-retry",
+    "new-task-and-recall",
+    "attachments",
+    "metrics",
+    "model-unload",
+    "managed-process-cleanup",
+    "loopback-only",
+    "logs-and-support-report",
+    "uninstall-separation",
+    "privacy"
+  ],
+  "modelValidation": {
+    "selectorPolicyId": "haven42.alpha2.model-selection",
+    "selectorPolicyCanonicalSha256": "8df57209a039293257355f4a88264424794c48bc1ae22f0d292479887536b30e",
+    "repetitionsPerCell": 3,
+    "lanes": [
+      {
+        "id": "cpu-selection",
+        "targetScope": "all-linux-targets",
+        "requiresGpu": false,
+        "evidenceUse": "automatic-candidate",
+        "candidateIds": ["qwen35-08b-q8"],
+        "capabilities": ["general.chat", "content.write", "content.summarize"],
+        "maximumMinutes": 45
+      },
+      {
+        "id": "cuda-selection",
+        "targetScope": "nvidia-promotion-targets",
+        "requiresGpu": true,
+        "evidenceUse": "automatic-candidate",
+        "candidateIds": ["qwen35-08b-q8", "qwen35-2b-q8", "qwen35-4b-q4"],
+        "capabilities": ["general.chat", "content.write", "content.summarize"],
+        "maximumMinutes": 60
+      },
+      {
+        "id": "external-provider-comparison",
+        "targetScope": "protected-external-provider",
+        "requiresGpu": false,
+        "evidenceUse": "comparison-only",
+        "candidateIds": ["qwen35-9b-control", "gemma3-12b", "granite4-7b-a1b-h", "mistral-small32-24b-q4"],
+        "capabilities": ["general.chat", "content.write", "content.summarize"],
+        "maximumMinutes": 90
+      }
+    ],
+    "deferredHardwareTiers": [
+      {
+        "modelId": "qwen35-9b-q4",
+        "minimumSystemMemoryGiB": 24,
+        "minimumUsableGpuMemoryGiB": 10
+      },
+      {
+        "modelId": "qwen35-27b-q4",
+        "minimumSystemMemoryGiB": 48,
+        "minimumUsableGpuMemoryGiB": 20
+      },
+      {
+        "modelId": "qwen35-35b-q4",
+        "minimumSystemMemoryGiB": 64,
+        "minimumUsableGpuMemoryGiB": 30
+      }
+    ],
+    "constraints": {
+      "exactDigestRequired": true,
+      "providerVersionRequired": true,
+      "rawPromptsOrResponsesAllowed": false,
+      "unloadAfterEverySampleRequired": true,
+      "protectedProviderDownloadsAllowed": false,
+      "comparisonEvidenceMayPromote": false,
+      "ownerApprovalRequiredForPromotion": true
+    }
+  },
+  "safety": {
+    "networkContactAllowed": false,
+    "machineChangesAllowed": false,
+    "proxmoxControlAllowed": false,
+    "gpuAssignmentAllowed": false,
+    "shellExecutionAllowed": false,
+    "maximumConcurrentGpuOwners": 1,
+    "minimumLocalZfsFreePercent": 16,
+    "rawPromptsOrResponsesAllowed": false,
+    "machineIdentityInEvidenceAllowed": false,
+    "resumeCheckpointRequired": true,
+    "stopOnUnresolvedSecurityFinding": true,
+    "stopOnUnresolvedPrivacyFinding": true
+  }
+}

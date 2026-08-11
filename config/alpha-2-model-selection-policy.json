@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "policyId": "haven42.alpha2.model-selection",
+  "release": "0.4.0-alpha.2",
+  "status": "evidence-collection-no-new-product-promotion",
+  "sourceCatalog": {
+    "path": "config/alpha-2-model-catalog.json",
+    "canonicalSha256": "07d0823b45ac6719a33e06cef187e067f69814b4f072c5283df725bc43e88000"
+  },
+  "capabilities": [
+    "general.chat",
+    "content.write",
+    "content.summarize"
+  ],
+  "selectionPolicy": {
+    "largestValidatedComfortableFit": true,
+    "exactArtifactDigestRequired": true,
+    "exactExecutionProfileEvidenceRequired": true,
+    "testedMemoryFloorRequired": true,
+    "allRequestedCapabilitiesRequired": true,
+    "platformStorageAdmissionRequired": true,
+    "unknownGpuCapacityMeansZero": true,
+    "silentCpuFallbackAllowed": false,
+    "unverifiedModelAutomaticSelectionAllowed": false,
+    "manualSelectionOfUnverifiedInstalledModelAllowed": true,
+    "downloadsAllowedBySelector": false
+  },
+  "fitLadder": [
+    "qwen35-08b-q8",
+    "qwen35-2b-q8",
+    "qwen35-4b-q4",
+    "qwen35-9b-q4",
+    "qwen35-27b-q4",
+    "qwen35-35b-q4"
+  ],
+  "comparisonCandidates": [
+    {
+      "id": "qwen35-9b-control",
+      "model": "qwen3.5:9b",
+      "digest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "purpose": "existing exact-artifact control",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    },
+    {
+      "id": "gemma3-12b",
+      "model": "gemma3:12b",
+      "digest": "f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a",
+      "purpose": "writing and summarization comparison",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    },
+    {
+      "id": "granite4-7b-a1b-h",
+      "model": "granite4:7b-a1b-h",
+      "digest": "566b725534ea0e9824f844abe6a78e1ab6f7357f1efb549be94908cb681513bb",
+      "purpose": "lower-memory writing efficiency comparison",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    },
+    {
+      "id": "mistral-small32-24b-q4",
+      "model": "mistral-small3.2:24b-instruct-2506-q4_K_M",
+      "digest": "5a408ab55df5c1b5cf46533c368813b30bf9e4d8fc39263bf2a3338cfa3b895b",
+      "purpose": "higher-capacity writing and summarization comparison",
+      "capabilities": [
+        "general.chat",
+        "content.write",
+        "content.summarize"
+      ],
+      "automaticPromotionAllowed": false
+    }
+  ],
+  "promotionRequirements": [
+    "exact-model-name-and-manifest-digest",
+    "exact-provider-and-version",
+    "exact-operating-system-version-and-architecture",
+    "exact-backend-and-measured-usable-memory",
+    "platform-specific-storage-admission",
+    "chat-writing-and-summarization-contracts",
+    "repeated-performance-and-cleanup-evidence",
+    "license-review",
+    "security-and-privacy-gates",
+    "owner-approval"
+  ]
+}
