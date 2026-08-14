@@ -42,6 +42,10 @@ def distribution_records() -> list[dict]:
             "licenses/LIBFFI-3.4.4-LICENSE.txt",
             "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
         ),
+        hashed_record(
+            "licenses/OLLAMA-MIT-LICENSE.txt",
+            "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226",
+        ),
         record("THIRD-PARTY-NOTICES.txt"),
     ]
 
@@ -83,7 +87,7 @@ def main() -> int:
         "productionPromotionAllowed": False,
     }
     assert result["projectOwned"]["signingEligibleFiles"] == ["haven42.exe"]
-    assert result["distributionEvidence"]["fileCount"] == 5
+    assert result["distributionEvidence"]["fileCount"] == 6
     assert result["distributionEvidence"]["signingEligible"] is False
     assert result["unclassifiedFiles"] == []
     groups = {item["id"]: item for item in result["runtimeComponents"]}
@@ -186,6 +190,11 @@ def main() -> int:
         record("_internal/config/alpha-2-model-catalog.json"),
         record("_internal/config/alpha-2-model-selection-evidence.json"),
         record("_internal/config/alpha-2-model-selection-policy.json"),
+        record("_internal/config/alpha-2-model-version-inventory.json"),
+        record("_internal/config/alpha-2-model-runtime-requirements.json"),
+        record("_internal/config/alpha-2-runtime-compatibility.json"),
+        record("_internal/config/linux-runtime-artifact-review.json"),
+        record("_internal/config/linux-model-artifact-review.json"),
         record("_internal/libpython3.14.so.1.0"),
         record("_internal/lib-dynload/_ssl.cpython-314-x86_64-linux-gnu.so"),
         record("_internal/libssl.so.3"),

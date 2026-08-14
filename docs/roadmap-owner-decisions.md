@@ -37,6 +37,23 @@ signing process, publication flow, dependency, or machine effect.
     Image, audio, speech, and video require separate runtimes. Any change to
     default runtime, model eligibility, hardware routing, supported platform,
     fallback behavior, or beginner setup requires explicit owner approval.
+12. For Alpha 2 and later, every approved managed model must declare its
+    minimum compatible Ollama version. Haven 42 must resolve that requirement
+    before download and install an exact, checksum-pinned compatible portable
+    runtime inside `Haven42-Data`. It must fail closed when no admitted runtime
+    satisfies the model, explain the required version to the user, and leave
+    any system Ollama installation unchanged. Mutable `latest` downloads and
+    silent runtime upgrades are prohibited. The owner approved this policy on
+    2026-08-12; each new runtime artifact still requires its normal native
+    lifecycle and regression evidence before product admission.
+13. Model compatibility is engine-specific. Every managed model route must
+    name either Ollama or llama.cpp, the minimum compatible engine version,
+    and the exact model and runtime artifacts that Haven 42 may use. Evidence
+    from one engine does not certify the other, and Haven 42 must never switch
+    engines silently. If the selected engine has no admitted compatible route,
+    setup must stop and explain which engine and version are required. This
+    requirement does not change the automatic model default. The owner
+    approved this policy on 2026-08-12.
 
 Any future change to these decisions must be explicit and must pass the
 applicable security, privacy, lifecycle, native-platform, and evidence gates.

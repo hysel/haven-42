@@ -36,9 +36,16 @@ Status terms are intentionally strict:
 3. Close remaining Milestone 22 release, lifecycle, and platform evidence
    without enabling signing, installers, automatic updates, or production
    promotion prematurely.
-4. Advance Milestones 23–27 only through their independent hardware, security,
+4. Complete the staged model-certification funnel: exact-artifact task gates,
+   per-model soaks, real hardware tiers, operating-system anchor models,
+   comparative quality, recovery evidence, and exact-profile GPU energy and
+   electricity-cost measurements. Lab qualification never changes the
+   automatic model ladder without explicit owner approval. The offline
+   reliability contract, preparation planner, and evidence validator are in
+   place; native execution remains separately approval-gated.
+5. Advance Milestones 23–27 only through their independent hardware, security,
    cleanup, packaging, and source-versus-package gates.
-5. Keep Milestone 28 offline and default-deny until its network and citation
+6. Keep Milestone 28 offline and default-deny until its network and citation
    security boundaries are independently admitted.
 
 ### Product and IDE package split

@@ -12,6 +12,8 @@ from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 INVENTORY_PATH = ROOT / "config" / "alpha-2-model-version-inventory.json"
+RUNTIME_REQUIREMENTS_PATH = ROOT / "config" / "alpha-2-model-runtime-requirements.json"
+ALPHA2_CATALOG_PATH = ROOT / "config" / "alpha-2-model-catalog.json"
 HEX_64 = re.compile(r"^[0-9a-f]{64}$")
 READY_DOWNLOAD_IDS = {
     "gemma3-1b-q4",
@@ -40,6 +42,12 @@ class ModelVersionInventoryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.inventory = json.loads(INVENTORY_PATH.read_text(encoding="utf-8"))
+        cls.runtime_requirements = json.loads(
+            RUNTIME_REQUIREMENTS_PATH.read_text(encoding="utf-8")
+        )
+        cls.alpha2_catalog = json.loads(
+            ALPHA2_CATALOG_PATH.read_text(encoding="utf-8")
+        )
 
     def test_inventory_is_fail_closed_and_not_selection_policy(self) -> None:
         self.assertEqual(self.inventory["schemaVersion"], 1)
@@ -108,6 +116,114 @@ class ModelVersionInventoryTests(unittest.TestCase):
         }
         self.assertEqual(actual, expected)
 
+    def test_muse_glimmer_candidates_are_exact_and_runtime_gated(self) -> None:
+        muse = next(
+            item for item in self.inventory["families"]
+            if item["family"] == "Muse Glimmer"
+        )
+        self.assertEqual(muse["license"], "Apache-2.0")
+        version = muse["versions"][0]
+        self.assertEqual(version["version"], "30B")
+        self.assertEqual(
+            version["qualificationState"],
+            "planned-awaiting-compatible-runtime-and-hardware",
+        )
+        candidates = {item["id"]: item for item in version["candidates"]}
+        self.assertEqual(
+            {
+                model_id: (
+                    candidate["model"],
+                    candidate["manifestDigest"],
+                    candidate["minimumOllamaVersion"],
+                )
+                for model_id, candidate in candidates.items()
+            },
+            {
+                "muse-glimmer-30b-q4": (
+                    "muse-glimmer:30b",
+                    "de878ce33ad81d060001db1469a02eebe4d86f0ad58cfe52dc062fdcbe4464c1",
+                    "0.32.8",
+                ),
+                "muse-glimmer-30b-mlx-nvfp4": (
+                    "muse-glimmer:30b-mlx",
+                    "ef32a55b4976faa955cbab0462d09bd081351ef5b87d73d8fcd299bf17c111d7",
+                    "0.32.7",
+                ),
+            },
+        )
+        self.assertEqual(
+            candidates["muse-glimmer-30b-q4"]["projectorLayerDigest"],
+            "f48b452316f9b213758e8659444029b961a24a07f99a1abb2a9f88b06f7c00c6",
+        )
+        self.assertEqual(
+            candidates["muse-glimmer-30b-mlx-nvfp4"]["configDigest"],
+            "751aed2d7eee5bdf40f0d4138aa7fe57f0e54e96a430902dc9fa08fba3ae5f6a",
+        )
+
+    def test_nemotron_lightning_candidates_are_exact_and_not_promoted(self) -> None:
+        family = next(
+            item for item in self.inventory["families"]
+            if item["family"] == "NVIDIA Nemotron"
+        )
+        self.assertEqual(family["license"], "NVIDIA-Nemotron-Open-Model-License")
+        version = family["versions"][0]
+        self.assertEqual(version["version"], "3.5 Lightning")
+        self.assertEqual(
+            version["qualificationState"],
+            "planned-awaiting-explicit-owner-start",
+        )
+        self.assertEqual(
+            version["architecture"],
+            {
+                "type": "mixture-of-experts",
+                "totalParameters": "30B",
+                "activeParameters": "3B",
+            },
+        )
+        candidates = {item["id"]: item for item in version["candidates"]}
+        self.assertEqual(
+            candidates["nemotron35-lightning-30b-a3b-q4"]["minimumOllamaVersion"],
+            "0.32.9",
+        )
+        self.assertEqual(
+            candidates["nemotron35-lightning-30b-a3b-q8"]["minimumOllamaVersion"],
+            "0.32.9",
+        )
+        self.assertEqual(
+            {
+                model_id: (candidate["model"], candidate["manifestDigest"])
+                for model_id, candidate in candidates.items()
+            },
+            {
+                "nemotron35-lightning-30b-a3b-q4": (
+                    "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+                    "e7a64ff15fb174c42b4f463e5c888c4f2c7b9cabf9e8d65a1c0874405426c1b2",
+                ),
+                "nemotron35-lightning-30b-a3b-q8": (
+                    "nemotron-3.5-lightning:30b-a3b-q8_0",
+                    "9983b24ee511395c8d58ce1f92e0e8c11c4e2fb43029d1718c1d6694e8187117",
+                ),
+                "nemotron35-lightning-30b-a3b-bf16": (
+                    "nemotron-3.5-lightning:30b-a3b-bf16",
+                    "721c64cd61aca9b6dad20ef642d3e41ca16f0054099a3e3f42c9375aae649f39",
+                ),
+                "nemotron35-lightning-30b-a3b-mlx-nvfp4": (
+                    "nemotron-3.5-lightning:30b-a3b-mlx",
+                    "8b1474be6e54dc19eb7aa08bebfb9bda147c4b9ef9796a726131ad29ad15645a",
+                ),
+                "nemotron35-lightning-30b-a3b-mlx-mxfp8": (
+                    "nemotron-3.5-lightning:30b-a3b-mxfp8",
+                    "906068bad076d14ef66bb8d7245879ee2c1c5a70188f5baa37166b83c69f5d6d",
+                ),
+                "nemotron35-lightning-30b-a3b-mlx-bf16": (
+                    "nemotron-3.5-lightning:30b-a3b-mlx-bf16",
+                    "7bf11b5991edd861896d66dfefb55f3fa837b139f7070edba980d982a56a25d6",
+                ),
+            },
+        )
+        self.assertEqual(candidates["nemotron35-lightning-30b-a3b-q4"]["contextWindowTokens"], 1048576)
+        self.assertEqual(candidates["nemotron35-lightning-30b-a3b-mlx-nvfp4"]["contextWindowTokens"], 262144)
+
     def test_candidates_are_exact_unique_and_never_latest(self) -> None:
         ids: set[str] = set()
         models: set[str] = set()
@@ -125,12 +241,69 @@ class ModelVersionInventoryTests(unittest.TestCase):
                     self.assertRegex(candidate["manifestDigest"], HEX_64)
                     if "modelLayerDigest" in candidate:
                         self.assertRegex(candidate["modelLayerDigest"], HEX_64)
+                    if "projectorLayerDigest" in candidate:
+                        self.assertRegex(candidate["projectorLayerDigest"], HEX_64)
+                    if "configDigest" in candidate:
+                        self.assertRegex(candidate["configDigest"], HEX_64)
                     self.assertIsInstance(candidate["modelBytes"], int)
                     self.assertGreater(candidate["modelBytes"], 0)
                     if candidate["id"] in READY_DOWNLOAD_IDS:
                         download_bytes = candidate["downloadBytes"]
                         self.assertIsInstance(download_bytes, int)
                         self.assertGreaterEqual(download_bytes, candidate["modelBytes"])
+
+    def test_runtime_requirement_references_match_exact_model_routes(self) -> None:
+        requirements = {
+            item["modelId"]: item for item in self.runtime_requirements["models"]
+        }
+        referenced_ids: set[str] = set()
+
+        for family in self.inventory["families"]:
+            for version in family["versions"]:
+                for candidate in version.get("candidates", []):
+                    minimum = candidate.get("minimumOllamaVersion")
+                    reference = candidate.get("runtimeRequirementReference")
+                    if minimum is None and reference is None:
+                        continue
+
+                    self.assertIsNotNone(minimum, candidate["id"])
+                    self.assertEqual(
+                        reference,
+                        f"config/alpha-2-model-runtime-requirements.json#{candidate['id']}",
+                    )
+                    requirement = requirements[candidate["id"]]
+                    referenced_ids.add(candidate["id"])
+                    ollama_route = next(
+                        route
+                        for route in requirement["routes"]
+                        if route["engine"] == "ollama"
+                    )
+                    self.assertEqual(ollama_route["minimumRuntimeVersion"], minimum)
+                    self.assertEqual(
+                        ollama_route["modelArtifact"]["exactTag"], candidate["model"]
+                    )
+                    self.assertEqual(
+                        ollama_route["modelArtifact"]["manifestSha256"],
+                        candidate["manifestDigest"],
+                    )
+
+        for candidate in self.alpha2_catalog["models"]:
+            requirement = requirements[candidate["id"]]
+            referenced_ids.add(candidate["id"])
+            self.assertEqual(len(requirement["routes"]), 1)
+            ollama_route = requirement["routes"][0]
+            self.assertEqual(ollama_route["engine"], "ollama")
+            self.assertEqual(ollama_route["admissionState"], "admitted")
+            self.assertEqual(ollama_route["minimumRuntimeVersion"], "0.32.5")
+            self.assertEqual(
+                ollama_route["modelArtifact"]["exactTag"], candidate["name"]
+            )
+            self.assertEqual(
+                ollama_route["modelArtifact"]["manifestSha256"],
+                candidate["manifestDigest"],
+            )
+
+        self.assertEqual(referenced_ids, set(requirements))
 
     def test_sources_are_https_and_from_reviewed_primary_hosts(self) -> None:
         for family in self.inventory["families"]:

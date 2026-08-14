@@ -7,6 +7,10 @@ docs/wiki-arch-linux-test-vm-install.md	Eng-Arch-Linux-Test-VM-Installation.md	A
 docs/wiki-project-information.md	Project-Information.md	Project Information
 docs/wiki-tested-hardware.md	Tested-Hardware-And-AI-Engines.md	Tested Hardware and AI Engines
 docs/wiki-model-hardware-certifications.md	Model-And-Hardware-Test-Status.md	Model and Hardware Test Status
+docs/wiki-model-power-evidence.md	Model-Power-And-Electricity-Evidence.md	Model Power and Electricity Evidence
+examples/windows-amd-rx7800xt-power-validation.md	Windows-AMD-RX7800XT-Power-Validation.md	Radeon RX 7800 XT Model Power Validation
+examples/nvidia-v100-nemotron-validation.md	NVIDIA-V100-Nemotron-Validation.md	NVIDIA V100 Nemotron Validation
+examples/intel-b580-granite41-8b-validation.md	Intel-B580-Granite41-8B-Validation.md	Intel Arc B580 Granite 4.1 Validation
 docs/alpha-2-linux-long-term-validation.md	Eng-Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
 docs/wiki-documentation-index.md	Eng-Documentation-Index.md	Documentation Index
 docs/beginner-setup-mode.md	Eng-Beginner-Setup-Mode.md	Beginner Setup Mode
@@ -157,6 +161,117 @@ docs/local-batch-task-ledger.md	Eng-Local-Batch-Task-Ledger.md	Local Batch Task 
 docs/windows-alpha-native-validation.md	Eng-Windows-Alpha-Native-Validation.md	Windows Alpha Native Validation
 docs/windows-alpha-2-build.md	Eng-Windows-Alpha-2-Build.md	Windows Alpha 2 Build
 docs/linux-alpha-2-build.md	Eng-Linux-Alpha-2-Build.md	Linux Alpha 2 Build
+docs/linux-runtime-supply-chain.md	Eng-Linux-Runtime-Supply-Chain.md	Linux Runtime Supply-Chain Review
 docs/windows-alpha-release.md	Eng-Windows-Alpha-Release.md	Windows Alpha Release
 docs/wiki-coding-tools.md	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models
 docs/engineering-index.md	Engineering-Index.md	Engineering and Validation Index
+docs/wiki-evidence-record-index.md	Evidence-Record-Index.md	Evidence Record Index
+docs/evidence-records/evidence-2853e8649d47ac07.md	Evidence-Record-2853e8649d47ac07.md	Aider CLI disposable write-smoke validation
+docs/evidence-records/evidence-ef5cd44e633c9e80.md	Evidence-Record-ef5cd44e633c9e80.md	Aider CLI model test harness
+docs/evidence-records/evidence-1e8e513a7ede9aeb.md	Evidence-Record-1e8e513a7ede9aeb.md	Aider CLI qwen3.5 9B disposable write-smoke validation
+docs/evidence-records/evidence-168923a7d31793f3.md	Evidence-Record-168923a7d31793f3.md	Aider CLI qwen3.5 9B read-only context validation
+docs/evidence-records/evidence-3bc3e961aa89d354.md	Evidence-Record-3bc3e961aa89d354.md	Aider CLI read-only context validation
+docs/evidence-records/evidence-eee8463c09ed1a53.md	Evidence-Record-eee8463c09ed1a53.md	Aider CLI realistic scoped-edit validation
+docs/evidence-records/evidence-c836e3b6f82ceb6c.md	Evidence-Record-c836e3b6f82ceb6c.md	Aider CLI richer disposable scoped-edit validation
+docs/evidence-records/evidence-4c8889255c609520.md	Evidence-Record-4c8889255c609520.md	Aider and OpenCode candidate lifecycle plans
+docs/evidence-records/evidence-c48f68ae267ddaeb.md	Evidence-Record-c48f68ae267ddaeb.md	Continue CLI model test harness
+docs/evidence-records/evidence-1e2f129e7b81d26f.md	Evidence-Record-1e2f129e7b81d26f.md	OpenCode CLI Devstral Small 2 generated-sample scoped edit
+docs/evidence-records/evidence-3a97cf812d7ead4b.md	Evidence-Record-3a97cf812d7ead4b.md	OpenCode CLI Devstral Small 2 generated-sample validation
+docs/evidence-records/evidence-cba49f1efb99951d.md	Evidence-Record-cba49f1efb99951d.md	OpenCode CLI qwen3.5 35B write smoke
+docs/evidence-records/evidence-0077a93bb585cbc8.md	Evidence-Record-0077a93bb585cbc8.md	OpenCode CLI qwen3.5 9B read validation
+docs/evidence-records/evidence-b7a23e13a579dff1.md	Evidence-Record-b7a23e13a579dff1.md	OpenCode CLI wrapper scaffold
+docs/evidence-records/evidence-ef3643c281067618.md	Evidence-Record-ef3643c281067618.md	Shared agent CLI model test harness
+docs/evidence-records/evidence-03d2a694b6d22720.md	Evidence-Record-03d2a694b6d22720.md	Offline cited-synthesis source parity
+docs/evidence-records/evidence-1c20a3dfac18ae0a.md	Evidence-Record-1c20a3dfac18ae0a.md	Offline transport and approval guards
+docs/evidence-records/evidence-9865b9af8dddb72e.md	Evidence-Record-9865b9af8dddb72e.md	VS Code-compatible Continue Agent
+docs/evidence-records/evidence-3532849d1fcc1eb8.md	Evidence-Record-3532849d1fcc1eb8.md	VSCodium Continue Agent
+docs/evidence-records/evidence-e5ae46fbbffbcb08.md	Evidence-Record-e5ae46fbbffbcb08.md	VSCodium Continue Agent Qwen 3.5 4B MLX strict write smoke
+docs/evidence-records/evidence-b0c0bfde405ff09e.md	Evidence-Record-b0c0bfde405ff09e.md	VSCodium Continue Agent Qwen 3.5 9B MLX scoped edit
+docs/evidence-records/evidence-9a6b5c12842514d3.md	Evidence-Record-9a6b5c12842514d3.md	Pinned public repository structure selection
+docs/evidence-records/evidence-eff6c9e174bbfc81.md	Evidence-Record-eff6c9e174bbfc81.md	Gemma 3 12B writing constraint matrix
+docs/evidence-records/evidence-a6e6ffd682af210d.md	Evidence-Record-a6e6ffd682af210d.md	Granite 4 7B-A1B-H writing constraint matrix
+docs/evidence-records/evidence-794bb0b437c5bd12.md	Evidence-Record-794bb0b437c5bd12.md	Local ComfyUI SDXL image generation
+docs/evidence-records/evidence-7f4b6f4a0b5c9599.md	Evidence-Record-7f4b6f4a0b5c9599.md	Local Ollama capability availability discovery
+docs/evidence-records/evidence-e2cf27858869b71b.md	Evidence-Record-e2cf27858869b71b.md	Local Ollama general chat
+docs/evidence-records/evidence-a661b8ee3cb73a5c.md	Evidence-Record-a661b8ee3cb73a5c.md	Local Ollama general writing
+docs/evidence-records/evidence-91816f73fe0522a8.md	Evidence-Record-91816f73fe0522a8.md	Local Ollama summarization
+docs/evidence-records/evidence-9160baf776098a16.md	Evidence-Record-9160baf776098a16.md	Mistral Small 3.2 writing constraint matrix
+docs/evidence-records/evidence-e868714f9f8c5344.md	Evidence-Record-e868714f9f8c5344.md	Optional local LLM capability suggestion
+docs/evidence-records/evidence-b91e58b8e387a4cc.md	Evidence-Record-b91e58b8e387a4cc.md	Qwen 3.5 9B writing constraint matrix
+docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b24c.md	Script-level recommendation and config generation
+docs/evidence-records/evidence-05d02ca020d00629.md	Evidence-Record-05d02ca020d00629.md	OpenVINO GenAI on Intel Arc B580
+docs/evidence-records/evidence-13d3451c24d5c713.md	Evidence-Record-13d3451c24d5c713.md	OpenVINO GenAI on Intel Arc B580
+docs/evidence-records/evidence-d2ac550dc4f53937.md	Evidence-Record-d2ac550dc4f53937.md	llama.cpp 11-model identical-byte AMD/NVIDIA matrix
+docs/evidence-records/evidence-599dbc1e05b646b6.md	Evidence-Record-599dbc1e05b646b6.md	llama.cpp CUDA on Quadro RTX 5000
+docs/evidence-records/evidence-85720f2f0c014451.md	Evidence-Record-85720f2f0c014451.md	llama.cpp HIP on Radeon RX 7800 XT
+docs/evidence-records/evidence-1a16a98b5cd40e10.md	Evidence-Record-1a16a98b5cd40e10.md	llama.cpp HIP through WSL2 DXG on Radeon RX 7800 XT
+docs/evidence-records/evidence-3d02244dab060bc7.md	Evidence-Record-3d02244dab060bc7.md	llama.cpp SYCL on Intel Arc B580
+docs/evidence-records/evidence-a43711f9d74d1e5f.md	Evidence-Record-a43711f9d74d1e5f.md	llama.cpp SYCL on Intel Arc B580
+docs/evidence-records/evidence-d535eb939e00de72.md	Evidence-Record-d535eb939e00de72.md	llama.cpp Windows NVIDIA and AMD follow-on matrix
+docs/evidence-records/evidence-61e94680de9075db.md	Evidence-Record-61e94680de9075db.md	Approved-write install profile
+docs/evidence-records/evidence-fbf3040ee5b605aa.md	Evidence-Record-fbf3040ee5b605aa.md	Read-only install profile
+docs/evidence-records/evidence-c730707485ed58be.md	Evidence-Record-c730707485ed58be.md	Memory lexical retrieval hardening
+docs/evidence-records/evidence-128249f02a932a5d.md	Evidence-Record-128249f02a932a5d.md	Office/OpenDocument unsupported-object boundary
+docs/evidence-records/evidence-fa1c4c4d706dbb95.md	Evidence-Record-fa1c4c4d706dbb95.md	Python optional rule pack
+docs/evidence-records/evidence-bf0a844bf50dad6c.md	Evidence-Record-bf0a844bf50dad6c.md	TypeScript optional rule pack
+docs/evidence-records/evidence-9fe4829db45f23cf.md	Evidence-Record-9fe4829db45f23cf.md	Devstral Small 2 medium language matrix
+docs/evidence-records/evidence-ead5ac43339950f8.md	Evidence-Record-ead5ac43339950f8.md	Native macOS Python read workflows
+docs/evidence-records/evidence-e9278f1fa33b50ed.md	Evidence-Record-e9278f1fa33b50ed.md	Native macOS Python scoped-write
+docs/evidence-records/evidence-e133b0735c64b090.md	Evidence-Record-e133b0735c64b090.md	Qwen 3.5 35B medium language matrix
+docs/evidence-records/evidence-4d55669e8b4fe1d1.md	Evidence-Record-4d55669e8b4fe1d1.md	Rust scoped-write lane
+docs/evidence-records/evidence-74a1cb2f558d7e4f.md	Evidence-Record-74a1cb2f558d7e4f.md	TypeScript scoped-write lane
+docs/evidence-records/evidence-64b5695c570a65eb.md	Evidence-Record-64b5695c570a65eb.md	Alpha 2 managed lifecycle on Arch Linux rolling
+docs/evidence-records/evidence-6d9b244b1163f0ba.md	Evidence-Record-6d9b244b1163f0ba.md	Alpha 2 managed lifecycle on Bazzite 44
+docs/evidence-records/evidence-1d6bdc9189569bea.md	Evidence-Record-1d6bdc9189569bea.md	Alpha 2 managed lifecycle on CachyOS rolling
+docs/evidence-records/evidence-367cf17184e6d096.md	Evidence-Record-367cf17184e6d096.md	Alpha 2 managed lifecycle on Debian 13
+docs/evidence-records/evidence-a466eb1da4889753.md	Evidence-Record-a466eb1da4889753.md	Alpha 2 managed lifecycle on Fedora 44
+docs/evidence-records/evidence-996fb8fe75402f31.md	Evidence-Record-996fb8fe75402f31.md	Alpha 2 managed lifecycle on Linux Mint 22.3
+docs/evidence-records/evidence-f15751caa49c9951.md	Evidence-Record-f15751caa49c9951.md	Alpha 2 managed lifecycle on Pop OS 24.04
+docs/evidence-records/evidence-d3fe8b7c516fde7c.md	Evidence-Record-d3fe8b7c516fde7c.md	Alpha 2 managed lifecycle on Ubuntu 24.04
+docs/evidence-records/evidence-2a865071c8c4974a.md	Evidence-Record-2a865071c8c4974a.md	Alpha 2 managed lifecycle on Ubuntu 26.04
+docs/evidence-records/evidence-c9663d1fe857b9a0.md	Evidence-Record-c9663d1fe857b9a0.md	ACE-Step 1.5 Linux CUDA feasibility
+docs/evidence-records/evidence-3d3a187ec32169e6.md	Evidence-Record-3d3a187ec32169e6.md	ComfyUI SDXL on Intel Arc B580
+docs/evidence-records/evidence-9144ebf0180b2118.md	Evidence-Record-9144ebf0180b2118.md	ComfyUI SDXL on Quadro RTX 5000
+docs/evidence-records/evidence-dda5053a14f25d32.md	Evidence-Record-dda5053a14f25d32.md	ComfyUI SDXL on Radeon RX 7800 XT
+docs/evidence-records/evidence-4e44f89b53777abb.md	Evidence-Record-4e44f89b53777abb.md	Local video candidate hardware preflight
+docs/evidence-records/evidence-749f44fc9f8604f4.md	Evidence-Record-749f44fc9f8604f4.md	Laguna XS 2.1 Ollama conformance
+docs/evidence-records/evidence-739440533a3f6c7a.md	Evidence-Record-739440533a3f6c7a.md	Granite 4.1 8B on Intel Arc B580
+docs/evidence-records/evidence-999c817bcb50d175.md	Evidence-Record-999c817bcb50d175.md	Nemotron 3.5 Lightning Q4 on dual Tesla V100
+docs/evidence-records/evidence-b4871f9bcbf09daa.md	Evidence-Record-b4871f9bcbf09daa.md	Nemotron 3.5 Lightning Q8 on dual Tesla V100
+docs/evidence-records/evidence-029248b547774d8a.md	Evidence-Record-029248b547774d8a.md	Ollama 0.32.9 five-model task-contract retry on dual Tesla V100
+docs/evidence-records/evidence-08bad671d73e509b.md	Evidence-Record-08bad671d73e509b.md	Qwen 3.5 9B synchronized power on Radeon RX 7800 XT
+docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
+docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
+docs/evidence-records/evidence-8a4966fb74923f8b.md	Evidence-Record-8a4966fb74923f8b.md	Devstral Small 2 MLX endpoint tool call
+docs/evidence-records/evidence-a4f5cee50428c764.md	Evidence-Record-a4f5cee50428c764.md	Qwen 3.5 4B MLX Continue CLI read
+docs/evidence-records/evidence-5f39cc023ffe9b89.md	Evidence-Record-5f39cc023ffe9b89.md	Qwen 3.5 4B MLX Continue CLI scoped write smoke
+docs/evidence-records/evidence-5937518d2dcbae62.md	Evidence-Record-5937518d2dcbae62.md	Qwen 3.5 4B MLX endpoint tool call
+docs/evidence-records/evidence-2281ebc7777a2289.md	Evidence-Record-2281ebc7777a2289.md	Qwen 3.5 9B MLX Continue CLI plan
+docs/evidence-records/evidence-254db10e5008805c.md	Evidence-Record-254db10e5008805c.md	Qwen 3.5 9B MLX Continue CLI read
+docs/evidence-records/evidence-55a17b5d93fb9c09.md	Evidence-Record-55a17b5d93fb9c09.md	Qwen 3.5 9B MLX Continue CLI review
+docs/evidence-records/evidence-32993a66ac4b468f.md	Evidence-Record-32993a66ac4b468f.md	Qwen 3.5 9B MLX Continue CLI scoped write smoke
+docs/evidence-records/evidence-3f7866c9fa36fa50.md	Evidence-Record-3f7866c9fa36fa50.md	Qwen 3.5 9B MLX endpoint tool call
+docs/evidence-records/evidence-de86611b0dd8c860.md	Evidence-Record-de86611b0dd8c860.md	Qwen 3.5 9B baseline MLX Continue CLI read
+docs/evidence-records/evidence-ccd5b4bdd03c1ef2.md	Evidence-Record-ccd5b4bdd03c1ef2.md	Qwen 3.5 9B baseline MLX Continue CLI scoped write smoke
+docs/evidence-records/evidence-fd71babae537344a.md	Evidence-Record-fd71babae537344a.md	Qwen 3.5 9B baseline MLX endpoint tool call
+docs/evidence-records/evidence-0fd3dc956063fdaa.md	Evidence-Record-0fd3dc956063fdaa.md	Qwen3-Coder-Next generated workflows
+docs/evidence-records/evidence-b0b0a5a9fbafbfd4.md	Evidence-Record-b0b0a5a9fbafbfd4.md	devstral-small-2 generated workflows
+docs/evidence-records/evidence-ebc97e7569950583.md	Evidence-Record-ebc97e7569950583.md	devstral-small-2:24b Continue CLI read
+docs/evidence-records/evidence-2b8fd551abe47dcd.md	Evidence-Record-2b8fd551abe47dcd.md	devstral-small-2:24b Continue CLI write
+docs/evidence-records/evidence-460f76e4260d68fd.md	Evidence-Record-460f76e4260d68fd.md	devstral-small-2:24b read
+docs/evidence-records/evidence-8cdb147cb46a0942.md	Evidence-Record-8cdb147cb46a0942.md	qwen3-coder:30b Continue CLI read
+docs/evidence-records/evidence-688536975056f222.md	Evidence-Record-688536975056f222.md	qwen3-coder:30b Continue CLI write
+docs/evidence-records/evidence-d2ccbc89525e4a4b.md	Evidence-Record-d2ccbc89525e4a4b.md	qwen3-coder:30b read
+docs/evidence-records/evidence-e81d875e828d2c8f.md	Evidence-Record-e81d875e828d2c8f.md	qwen3.5:9b Continue CLI read
+docs/evidence-records/evidence-3b61696216f40c39.md	Evidence-Record-3b61696216f40c39.md	qwen3.5:9b Continue CLI write
+docs/evidence-records/evidence-2410a7d9b3a44da6.md	Evidence-Record-2410a7d9b3a44da6.md	qwen3.5:9b plan
+docs/evidence-records/evidence-011e7524d4091077.md	Evidence-Record-011e7524d4091077.md	qwen3.5:9b read
+docs/evidence-records/evidence-1c9a5cb51bde73c4.md	Evidence-Record-1c9a5cb51bde73c4.md	qwen3.5:9b write
+docs/evidence-records/evidence-cce994c7b1684c6e.md	Evidence-Record-cce994c7b1684c6e.md	Generated Python sample workflows
+docs/evidence-records/evidence-ddd493cef4288ac4.md	Evidence-Record-ddd493cef4288ac4.md	Generated Python sample workflows
+docs/evidence-records/evidence-588241e349f32b95.md	Evidence-Record-588241e349f32b95.md	Generated TypeScript sample workflows
+docs/evidence-records/evidence-dff8d8e0aff407ab.md	Evidence-Record-dff8d8e0aff407ab.md	Generated TypeScript sample workflows
+docs/evidence-records/evidence-2de3f0726ddaba91.md	Evidence-Record-2de3f0726ddaba91.md	Online model discovery
+docs/evidence-records/evidence-77e5fbc983b71597.md	Evidence-Record-77e5fbc983b71597.md	Remote hardware profiling
+docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ede9d.md	Python API generated sample
+docs/evidence-records/evidence-22701a5715776e0d.md	Evidence-Record-22701a5715776e0d.md	TypeScript frontend generated sample

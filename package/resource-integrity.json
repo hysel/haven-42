@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "4d86c6a0c4bbbea7a9801519047de6f04a4b59ad19b6ad8ce8ec2ad954d451cc",
-      "sizeBytes": 46032
+      "sha256": "041b2321a6aaacfbb0e8710a742e2241a6ab8e0860bde1a1749f09c0a96f83cd",
+      "sizeBytes": 59499
     },
     {
       "path": "web/static/accessibility.html",
@@ -13,13 +13,13 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "58cff693a45a703f0a69f935e7626a1044a03b3bec7447d3a55ef5fc56509e84",
-      "sizeBytes": 190531
+      "sha256": "ae7b0a76ff31f836b390eda4825501298e7be4e86831ad4e3b2e068ba6a1f5a5",
+      "sizeBytes": 207651
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "b6af14cfc25f2dcaef2efed51151075a303b475ee7780fe367cde3bcd208b709",
-      "sizeBytes": 59712
+      "sha256": "394b35499a1be339e242430f7a284fd3d57406a2718d0b9eff7c240bef728140",
+      "sizeBytes": 63822
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -28,8 +28,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "4916d8835b498c547ba0b89e879247c4b96aa521b22910dd09441970ed56cae9",
-      "sizeBytes": 34695
+      "sha256": "82aa8a6f94c246503f5b3743d370b9b0c9f72bb83967e98b64b369f8fc9c93ae",
+      "sizeBytes": 41362
     },
     {
       "path": "config/agent-surface-capabilities.json",
@@ -48,8 +48,8 @@
     },
     {
       "path": "config/workflows.json",
-      "sha256": "12a01739b7f9170ed0984fd0963a9de5c3431975d399c95ecbf4b9fd81595418",
-      "sizeBytes": 20227
+      "sha256": "964c66e549937b5353f53fa76afa8c22baff4c7b94a4b6f5e0beb04ebf37abd6",
+      "sizeBytes": 20346
     },
     {
       "path": "config/windows-alpha-contract.json",
@@ -88,8 +88,8 @@
     },
     {
       "path": "config/linux-alpha-component-registry.json",
-      "sha256": "d895da9f7fdddda82bd91940994443b0be443f2e4a8ad73b545bd153312945b0",
-      "sizeBytes": 2548
+      "sha256": "8e9a0c83f70ce6ada91864f69ef74f21836b44d53fa799d302cf2ac2f0e42217",
+      "sizeBytes": 2914
     },
     {
       "path": "config/alpha-2-model-catalog.json",
@@ -105,6 +105,31 @@
       "path": "config/alpha-2-model-selection-policy.json",
       "sha256": "1f3e43942781d4c167fc58f52415206fbfa7d7ce2de668dc085910fd1b77c80d",
       "sizeBytes": 3079
+    },
+    {
+      "path": "config/alpha-2-model-version-inventory.json",
+      "sha256": "46c0630962b6fa5d46facaf6f540d7b549b391ec81490e37adffd2e8fb0813c5",
+      "sizeBytes": 20970
+    },
+    {
+      "path": "config/alpha-2-model-runtime-requirements.json",
+      "sha256": "3a742aff35424ac22bcd2f7746da1a80b34d822fd7daab8da4994d6fbd3d83fc",
+      "sizeBytes": 9021
+    },
+    {
+      "path": "config/alpha-2-runtime-compatibility.json",
+      "sha256": "0f3775a92feb36de4ac9ec7b36036ec3d5d143642c39e8a91d38bf485e064668",
+      "sizeBytes": 9815
+    },
+    {
+      "path": "config/linux-runtime-artifact-review.json",
+      "sha256": "8adc705c9e118f2d01456b7fe3f35096d6a308dffca26de69f09c6c313e209cc",
+      "sizeBytes": 2758
+    },
+    {
+      "path": "config/linux-model-artifact-review.json",
+      "sha256": "8a7f45bca5d59ea8f12db5b25da762baad89426cf2adc88516b0e4457a930563",
+      "sizeBytes": 6024
     }
   ],
   "schemaVersion": 1

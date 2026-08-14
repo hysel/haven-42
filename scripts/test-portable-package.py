@@ -188,17 +188,25 @@ def probe(
             "snapshotId": readiness["snapshotId"],
             "intent": "guided-setup",
         }).encode("utf-8")
+        managed = None
+        expected_managed = False
+        setup_response = None
         try:
             setup_response = request(
                 origin + "/api/setup-plan", "POST", token, plan_body,
             )
         except urllib.error.HTTPError as error:
             detail = error.read(4096).decode("utf-8", errors="replace")
-            raise AssertionError(
-                f"setup-plan returned HTTP {error.code}: {detail}"
-            ) from error
-        with setup_response as response:
-            plan = json.load(response)
+            if bootstrap["runtime"]["platform"] not in {"windows", "linux"}:
+                assert error.code == 501
+                assert json.loads(detail) == {"error": "unsupported-platform-operation"}
+            else:
+                raise AssertionError(
+                    f"setup-plan returned HTTP {error.code}: {detail}"
+                ) from error
+        if setup_response is not None:
+            with setup_response as response:
+                plan = json.load(response)
             assert plan["kind"] == "setup-plan"
             assert len(plan["actions"]) >= 2
             assert plan["installationAllowed"] is False
@@ -206,10 +214,19 @@ def probe(
             alpha_plan = plan["alphaCandidate"]
             assert alpha_plan["version"] == expected_version
             assert alpha_plan["quantizationDecision"] == "use-pinned-prequantized-model"
-            assert alpha_plan["managedSetupRuntimeAdmitted"] is False
             automatic_allowed = alpha_plan["modelSelection"]["automaticExecutionAllowed"] is True
+            runtime_admitted = alpha_plan["managedSetupRuntimeAdmitted"] is True
+            assert isinstance(alpha_plan["managedSetupRuntimeAdmitted"], bool)
+            if expected_version == "0.4.0-alpha.2" and automatic_allowed:
+                compatibility = alpha_plan["runtimeCompatibility"]
+                assert isinstance(compatibility, dict)
+                assert runtime_admitted is (compatibility.get("decision") == "install")
             managed = alpha_plan.get("managedPlan")
-            expected_managed = bootstrap["runtime"]["platform"] in {"windows", "linux"} and automatic_allowed
+            expected_managed = (
+                bootstrap["runtime"]["platform"] in {"windows", "linux"}
+                and automatic_allowed
+                and runtime_admitted
+            )
             assert alpha_plan["managedSetupCandidateAvailable"] is expected_managed
             if expected_managed:
                 assert managed is not None

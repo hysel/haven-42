@@ -47,6 +47,12 @@ def expect_error(code: str, function, *arguments) -> None:
 
 def main() -> int:
     checks = 0
+    detection_cases = json.loads(
+        (ROOT / "examples/fixtures/linux-system-detection-cases.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert detection_cases["schemaVersion"] == 1
     bounded_runner = READINESS.ProbeRunner(maximum_scan_seconds=2)
     oversized = bounded_runner.run(
         __import__("sys").executable,
@@ -88,7 +94,7 @@ def main() -> int:
         Path("/etc/os-release"), Path("/etc/pop-os/os-release")
     )
     assert not READINESS._trusted_linux_os_release_path(
-        Path("/etc/os-release"), Path("/home/user/os-release")
+        Path("/etc/os-release"), Path("/var/tmp/os-release")
     )
     checks += 14
 
@@ -121,16 +127,124 @@ def main() -> int:
         )
         unreviewed_rolling = READINESS._linux_platform_facts(release, {})
         assert unreviewed_rolling["distributionVersion"] is None
-        release.write_text("ID=../../private\nPRETTY_NAME=/home/private\n", encoding="utf-8")
+        release.write_text("ID=../../private\nPRETTY_NAME=token=synthetic\n", encoding="utf-8")
         hostile = READINESS._linux_platform_facts(
             release,
-            {"XDG_CURRENT_DESKTOP": "/home/private", "XDG_SESSION_TYPE": "evil"},
+            {
+                "XDG_CURRENT_DESKTOP": "token=synthetic",
+                "XDG_SESSION_TYPE": "evil",
+                "HOME": "token=synthetic",
+                "USER": "private-user",
+            },
         )
         assert hostile["distributionId"] is None
         assert hostile["productName"] is None
         assert hostile["desktopEnvironmentReported"] is None
         assert hostile["sessionTypeReported"] is None
+        safe_session = READINESS._linux_platform_facts(
+            release,
+            {
+                "XDG_CURRENT_DESKTOP": "KDE:Plasma",
+                "XDG_SESSION_TYPE": "x11",
+                "UNRELATED_PRIVATE_VALUE": "secret",
+            },
+        )
+        assert safe_session["desktopEnvironmentReported"] == "KDE:Plasma"
+        assert safe_session["sessionTypeReported"] == "x11"
+        assert safe_session["sessionMetadataTrusted"] is False
     checks += 13
+
+    with tempfile.TemporaryDirectory() as directory:
+        release = Path(directory) / "os-release"
+        for case in detection_cases["osReleaseCases"]:
+            release.write_text(case["content"], encoding="utf-8")
+            facts = READINESS._linux_platform_facts(release, {})
+            for field, expected in case["expected"].items():
+                assert facts[field] == expected, (case["id"], field)
+            checks += 1
+        for case in detection_cases["rejectedOsReleaseCases"]:
+            release.write_text(case["content"], encoding="utf-8")
+            facts = READINESS._linux_platform_facts(release, {})
+            assert facts["distributionId"] is None, case["id"]
+            checks += 1
+        release.write_text("ID=ubuntu\n" + ("#" * (64 * 1024)), encoding="utf-8")
+        assert READINESS._read_linux_os_release(release) == {}
+        checks += 1
+
+    class LinuxPciRunner:
+        def run(self, executable: str, arguments: tuple[str, ...], timeout: int = 3):
+            if executable == "nvidia-smi":
+                return {"state": "not-detected", "output": "", "code": None}
+            if executable == "lspci" and arguments == ("-D", "-k"):
+                return {
+                    "state": "detected",
+                    "output": detection_cases["linuxPciOutput"],
+                    "code": 0,
+                }
+            if executable == "modinfo" and arguments == ("-F", "version", "amdgpu"):
+                return {"state": "detected", "output": "6.19.0\n", "code": 0}
+            if executable == "modinfo" and arguments == ("-F", "version", "xe"):
+                return {"state": "detected", "output": "1.2.3\n", "code": 0}
+            return {"state": "not-detected", "output": "", "code": None}
+
+    linux_gpus = READINESS._gpu_items(LinuxPciRunner(), "linux")
+    assert [item["vendor"] for item in linux_gpus] == ["AMD", "Intel"]
+    assert all(item["memoryGiB"] is None for item in linux_gpus)
+    assert [item["driverName"] for item in linux_gpus] == ["amdgpu", "xe"]
+    assert [item["driverVersion"] for item in linux_gpus] == ["6.19.0", "1.2.3"]
+    assert all(item["source"] == "lspci-kernel-driver" for item in linux_gpus)
+    assert [item["backendCandidate"] for item in linux_gpus] == [
+        "rocm-or-vulkan-candidate", "vulkan-candidate",
+    ]
+    checks += 5
+
+    class HostileDriverRunner:
+        def __init__(self) -> None:
+            self.calls = []
+
+        def run(self, executable: str, arguments: tuple[str, ...], timeout: int = 3):
+            self.calls.append((executable, arguments))
+            if executable == "nvidia-smi":
+                return {"state": "not-detected", "output": "", "code": None}
+            if executable == "lspci":
+                return {
+                    "state": "detected",
+                    "output": (
+                        "0000:03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Test Radeon\n"
+                        "\tKernel driver in use: ../../untrusted\n"
+                    ),
+                    "code": 0,
+                }
+            raise AssertionError(f"unregistered driver probe executed: {executable} {arguments}")
+
+    hostile_driver = HostileDriverRunner()
+    hostile_gpus = READINESS._gpu_items(hostile_driver, "linux")
+    assert hostile_gpus[0]["driverName"] is None
+    assert hostile_gpus[0]["driverVersion"] is None
+    assert all(call[0] != "modinfo" for call in hostile_driver.calls)
+
+    class RuntimeRunner:
+        def run(self, executable: str, arguments: tuple[str, ...], timeout: int = 3):
+            outputs = {
+                ("amd-smi", ("version",)): ("detected", "AMD SMI 26.1.0\n", 0),
+                ("xpu-smi", ("version",)): ("detected", "xpu-smi 1.3.2\n", 0),
+            }
+            state, output, code = outputs.get(
+                (executable, arguments), ("not-detected", "", None)
+            )
+            return {"state": state, "output": output, "code": code}
+
+    amd_runtime = READINESS._first_software_item(
+        RuntimeRunner(), "amd-runtime",
+        (("amd-smi", ("version",)), ("rocm-smi", ("--version",))),
+    )
+    intel_runtime = READINESS._first_software_item(
+        RuntimeRunner(), "intel-runtime",
+        (("xpu-smi", ("version",)), ("sycl-ls", ("--version",))),
+    )
+    assert amd_runtime["version"] == "AMD SMI 26.1.0"
+    assert intel_runtime["version"] == "xpu-smi 1.3.2"
+    checks += 7
 
     registry = READINESS.load_component_registry()
     assert registry and all(item["managedInstallationAllowed"] is False for item in registry.values())
@@ -160,8 +274,23 @@ def main() -> int:
     bad = copy.deepcopy(snapshot)
     bad["installedModels"] = ["<script>"]
     expect_error("invalid-readiness-snapshot", READINESS.validate_snapshot, bad)
+    bad = copy.deepcopy(snapshot)
+    bad["platform"]["hostname"] = "private-host"
+    expect_error("invalid-readiness-snapshot", READINESS.validate_snapshot, bad)
+    bad = copy.deepcopy(snapshot)
+    bad["platform"]["desktopEnvironmentReported"] = "Z:\\synthetic\\session"
+    expect_error("invalid-readiness-snapshot", READINESS.validate_snapshot, bad)
+    bad = copy.deepcopy(snapshot)
+    bad["accelerators"][0]["command"] = "nvidia-smi --query"
+    expect_error("invalid-readiness-snapshot", READINESS.validate_snapshot, bad)
+    bad = copy.deepcopy(snapshot)
+    bad["software"][0]["environment"] = {"PATH": "private"}
+    expect_error("invalid-readiness-snapshot", READINESS.validate_snapshot, bad)
+    bad = copy.deepcopy(snapshot)
+    bad["privacy"]["hostIdentityIncluded"] = True
+    expect_error("invalid-readiness-snapshot", READINESS.validate_snapshot, bad)
     expect_error("invalid-setup-intent", READINESS.build_setup_plan, snapshot, "install-everything")
-    checks += 4
+    checks += 9
 
     request = json.loads(
         (ROOT / "examples/fixtures/installation-simulation-request.json").read_text(encoding="utf-8")

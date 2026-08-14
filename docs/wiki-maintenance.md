@@ -4,6 +4,13 @@ The GitHub wiki is a separate Git repository, but its mapped content is generate
 
 Do not edit mapped wiki pages directly. Edit their repository source, run synchronization, review both repositories, and commit the wiki before pushing the main repository change.
 
+Evidence-record pages are generated rather than edited individually. Change
+`config/evidence-catalog.tsv`, run
+`python scripts/generate-evidence-wiki-pages.py`, and then synchronize the
+wiki. `python scripts/generate-evidence-wiki-pages.py --check` verifies that
+the page set, index, wiki mappings, and future-update evidence registry all
+match the catalog.
+
 ## Synchronize
 
 Windows PowerShell:

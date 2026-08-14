@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 1,
+  "registryId": "haven42.alpha2.model-runtime-requirements",
+  "defaultDecision": "deny",
+  "policy": {
+    "runtimeRouteRequiredForModelSelection": true,
+    "exactRuntimeArtifactRequired": true,
+    "exactModelArtifactRequired": true,
+    "minimumRuntimeVersionEnforced": true,
+    "mutableLatestAllowed": false,
+    "crossEngineEvidenceInheritanceAllowed": false,
+    "silentEngineFallbackAllowed": false,
+    "automaticDefaultChangeAllowed": false
+  },
+  "models": [
+    {
+      "modelId": "qwen35-08b-q8",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.5",
+          "admissionState": "admitted",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "qwen3.5:0.8b",
+            "manifestSha256": "f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "qwen35-2b-q8",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.5",
+          "admissionState": "admitted",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "qwen3.5:2b",
+            "manifestSha256": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "qwen35-4b-q4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.5",
+          "admissionState": "admitted",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "qwen3.5:4b",
+            "manifestSha256": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "qwen35-9b-q4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.5",
+          "admissionState": "admitted",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "qwen3.5:9b",
+            "manifestSha256": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "qwen35-27b-q4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.5",
+          "admissionState": "admitted",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "qwen3.5:27b",
+            "manifestSha256": "7653528ba5cba4dd8e19da24aaddc7f4d0b5ecd93571c0825dfd4137958ec06e"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "qwen35-35b-q4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.5",
+          "admissionState": "admitted",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "qwen3.5:35b",
+            "manifestSha256": "3460ffeede5453ead027dbd2f821b12ad0aa3de54630971993babdb2165221f7"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "muse-glimmer-30b-q4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.8",
+          "admissionState": "candidate-runtime-evidence-required",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "muse-glimmer:30b",
+            "manifestSha256": "de878ce33ad81d060001db1469a02eebe4d86f0ad58cfe52dc062fdcbe4464c1"
+          }
+        },
+        {
+          "engine": "llama.cpp",
+          "minimumRuntimeVersion": "b10353",
+          "admissionState": "candidate-runtime-and-model-evidence-required",
+          "modelArtifact": {
+            "kind": "hugging-face-gguf-revision",
+            "repository": "meta-models/Muse-Glimmer-30B-GGUF",
+            "revision": "a0532f7263ee67f1e0a5f5c5fdcd50dd62fc9aa4",
+            "components": [
+              {
+                "role": "text-model",
+                "filename": "muse-glimmer-30B-kquant-17gb.gguf",
+                "byteLength": 16756681056,
+                "sha256": "7e9b74b7c8875e9e265695df9613bf6290f2392e479ce740495a129019c488d8",
+                "requiredForCapabilities": [
+                  "general.chat",
+                  "content.write",
+                  "content.summarize",
+                  "tools",
+                  "thinking"
+                ]
+              },
+              {
+                "role": "vision-projector",
+                "filename": "mmproj-kquant.gguf",
+                "byteLength": 1400328928,
+                "sha256": "f48b452316f9b213758e8659444029b961a24a07f99a1abb2a9f88b06f7c00c6",
+                "requiredForCapabilities": ["vision"]
+              },
+              {
+                "role": "speculative-drafter",
+                "filename": "dflash-kquant.gguf",
+                "byteLength": 1631205312,
+                "sha256": "27d9a805fa29b943cfb6ad4843367cd4eaaaf06bd452d8cc3e00a2cd18a677bc",
+                "optional": true,
+                "requiredForCapabilities": []
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "muse-glimmer-30b-mlx-nvfp4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.7",
+          "admissionState": "deferred-apple-silicon-hardware-required",
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "muse-glimmer:30b-mlx",
+            "manifestSha256": "ef32a55b4976faa955cbab0462d09bd081351ef5b87d73d8fcd299bf17c111d7"
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "nemotron35-lightning-30b-a3b-q4",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.9",
+          "admissionState": "candidate-qualification-partial-remaining-gates",
+          "evidenceReferences": [
+            "examples/nvidia-v100-nemotron-validation.md"
+          ],
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+            "manifestSha256": "e7a64ff15fb174c42b4f463e5c888c4f2c7b9cabf9e8d65a1c0874405426c1b2"
+          }
+        },
+        {
+          "engine": "llama.cpp",
+          "minimumRuntimeVersion": "b10375",
+          "minimumVersionBasis": "first-conservatively-pinned-release-reviewed-by-haven42",
+          "admissionState": "candidate-runtime-and-model-evidence-required",
+          "modelArtifact": {
+            "kind": "hugging-face-gguf-revision",
+            "repository": "ggml-org/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF",
+            "revision": "88d7ce0b0fa385c5108866ce5d33690927531a37",
+            "components": [
+              {
+                "role": "text-model",
+                "filename": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-Q4_K_M.gguf",
+                "byteLength": 25430738944,
+                "sha256": "6110e2e2e6cd324e6ee69ddced5a6b34fad6c94ca9827222a1e420fb92e3c90b",
+                "requiredForCapabilities": [
+                  "general.chat",
+                  "content.write",
+                  "content.summarize",
+                  "tools",
+                  "thinking"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "modelId": "nemotron35-lightning-30b-a3b-q8",
+      "routes": [
+        {
+          "engine": "ollama",
+          "minimumRuntimeVersion": "0.32.9",
+          "admissionState": "candidate-qualification-partial-remaining-gates",
+          "evidenceReferences": [
+            "examples/nvidia-v100-nemotron-validation.md"
+          ],
+          "modelArtifact": {
+            "kind": "ollama-registry-manifest",
+            "exactTag": "nemotron-3.5-lightning:30b-a3b-q8_0",
+            "manifestSha256": "9983b24ee511395c8d58ce1f92e0e8c11c4e2fb43029d1718c1d6694e8187117"
+          }
+        },
+        {
+          "engine": "llama.cpp",
+          "minimumRuntimeVersion": "b10375",
+          "minimumVersionBasis": "first-conservatively-pinned-release-reviewed-by-haven42",
+          "admissionState": "candidate-runtime-and-model-evidence-required",
+          "modelArtifact": {
+            "kind": "hugging-face-gguf-revision",
+            "repository": "ggml-org/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-GGUF",
+            "revision": "88d7ce0b0fa385c5108866ce5d33690927531a37",
+            "components": [
+              {
+                "role": "text-model",
+                "filename": "NVIDIA-Nemotron-3.5-Lightning-30B-A3B-Q8_0.gguf",
+                "byteLength": 35004642304,
+                "sha256": "8544826247d087745baf4e7540f6911608a61caba7a16702314946af5e4235ae",
+                "requiredForCapabilities": [
+                  "general.chat",
+                  "content.write",
+                  "content.summarize",
+                  "tools",
+                  "thinking"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 from pathlib import Path
 import tempfile
+import urllib.request
 from unittest import mock
 
 
@@ -75,8 +76,36 @@ def main() -> None:
     refused(lambda: approvals.consume(token, value), "invalid-or-expired-approval")
     checks += 2
 
+    redirects = MODULE._Redirects()
+    request = urllib.request.Request("https://github.com/ollama/ollama/releases/download/v0.32.5/a")
+    refused(
+        lambda: redirects.redirect_request(
+            request, None, 302, "Found", {}, "http://github.com/unsafe"
+        ),
+        "unsafe-download-redirect",
+    )
+    redirects = MODULE._Redirects()
+    refused(
+        lambda: redirects.redirect_request(
+            request, None, 302, "Found", {}, "https://example.com/unsafe"
+        ),
+        "unsafe-download-redirect",
+    )
+    redirects = MODULE._Redirects()
+    redirects.count = MODULE.MAX_REDIRECTS
+    refused(
+        lambda: redirects.redirect_request(
+            request, None, 302, "Found", {},
+            "https://release-assets.githubusercontent.com/too-many",
+        ),
+        "unsafe-download-redirect",
+    )
+    checks += 3
+
     with tempfile.TemporaryDirectory() as directory:
-        base = Path(directory)
+        # macOS exposes /var through /private/var. Resolve the temporary root
+        # so the portable-root guard evaluates the actual directory tree.
+        base = Path(directory).resolve()
         managed = base / "Haven42-Data"
         root = MODULE._owned_root(managed, create=True)
         assert root == managed.resolve() and (root / MODULE.OWNER_MARKER_NAME).is_file()
@@ -97,6 +126,39 @@ def main() -> None:
         assert isinstance(approval, str) and len(approval) >= 32
         refused(lambda: coordinator.approve(value["planId"], []), "approval-does-not-match-plan")
         checks += 4
+
+        ordering_root = MODULE._owned_root(base / "ordering", create=True)
+        runtime_version = MODULE.load_registry()["components"][0]["version"]
+        (ordering_root / "runtime" / runtime_version).mkdir(parents=True)
+        ordering = MODULE.SetupCoordinator(
+            "9" * 32, state_root=ordering_root,
+        )
+        ordering.register_plan(value)
+        events: list[tuple[str, str]] = []
+
+        def record_journal(_root: Path, receipt: dict) -> None:
+            events.append(("receipt", receipt["phase"]))
+
+        original_set = ordering._set
+
+        def record_status(phase: str, percent: int, error: str | None = None) -> None:
+            events.append(("status", phase))
+            original_set(phase, percent, error)
+
+        with (
+            mock.patch.object(MODULE, "_journal", side_effect=record_journal),
+            mock.patch.object(MODULE, "_verify_integrity"),
+            mock.patch.object(MODULE, "_model_record", return_value=True),
+            mock.patch.object(MODULE, "_validate_inference"),
+            mock.patch.object(MODULE, "_wait_provider"),
+            mock.patch.object(ordering, "_start_runtime"),
+            mock.patch.object(ordering, "_set", side_effect=record_status),
+        ):
+            ordering._run(dict(value))
+        assert events.index(("receipt", "complete")) < events.index(
+            ("status", "complete")
+        )
+        checks += 1
 
         receipt_root = MODULE._owned_root(base / "receipt", create=True)
         hostile_receipt = {
@@ -190,12 +252,20 @@ def main() -> None:
             lambda: process.start(executable, environment, "rocm"),
             "invalid-runtime-backend",
         )
+        with mock.patch.object(MODULE.subprocess, "Popen") as popen:
+            popen.return_value.pid = 12345
+            assert process.start(executable, environment, "cpu") == 12345
+            launched = popen.call_args
+            assert launched.args[0] == [str(executable.resolve()), "serve"]
+            assert launched.kwargs["shell"] is False
+            assert launched.kwargs["start_new_session"] is True
+        process.process = None
         environment["HOME"] = str(root.parent)
         refused(
             lambda: process.start(executable, environment, "cpu"),
             "invalid-runtime-environment",
         )
-    checks += 3
+    checks += 4
     print(f"Linux Alpha setup passed {checks} security and lifecycle checks.")
 
 

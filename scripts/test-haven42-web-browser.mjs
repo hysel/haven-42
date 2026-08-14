@@ -509,6 +509,8 @@ try {
   checks += 17;
   trace("assurance-view-verified");
 
+  const managedSetupHost = process.platform === "win32" || process.platform === "linux";
+  if (managedSetupHost) {
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");
   await waitFor(() => cdp.evaluate("document.querySelectorAll('#wizard-setup-plan .plan-action').length >= 2"));
   await waitFor(() => cdp.evaluate(`
@@ -531,9 +533,12 @@ try {
   const detectedAmd = /Accelerator\s*AMD\b/i.test(guided.factsText);
   const detectedNvidia = /Accelerator\s*NVIDIA\b/i.test(guided.factsText);
   const detectedIntel = /Accelerator\s*Intel\b/i.test(guided.factsText);
-  const showsAmdTools = guided.factsText.includes("AMD ROCm tools");
+  const showsAmdTools = guided.factsText.includes("AMD graphics tools");
   const showsNvidiaTools = guided.factsText.includes("NVIDIA tools");
   const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
+  const storageBoundaryText = process.platform === "win32"
+    ? "Does not use Program Files or AppData"
+    : "Does not use system application folders";
   if (
     guided.current !== "middle"
     || guided.facts < 4
@@ -559,7 +564,7 @@ try {
       || !guided.planText.includes("Install location")
       || !guided.planText.includes("stored beside the app")
       || !guided.planText.includes("Haven42-Data")
-      || !guided.planText.includes("Does not use Program Files or AppData")
+      || !guided.planText.includes(storageBoundaryText)
       || !(
         guided.planText.includes("Ollama local AI engine")
         || guided.planText.includes("Ollama local runtime")
@@ -765,6 +770,25 @@ try {
     checks += 22;
   }
   checks += 4;
+  } else {
+    await cdp.evaluate("document.querySelector('#wizard-guided').click()");
+    await waitFor(() => cdp.evaluate(
+      "document.querySelector('#wizard-scan-status').textContent.includes('safely stopped')"
+    ));
+    const unsupportedSetup = await cdp.evaluate(`({
+      current: document.querySelector('[aria-current="step"]').dataset.wizardProgress,
+      planActions: document.querySelectorAll('#wizard-setup-plan .plan-action').length,
+      nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
+      status: document.querySelector('#wizard-scan-status').textContent,
+    })`);
+    if (
+      unsupportedSetup.current !== "middle"
+      || unsupportedSetup.planActions !== 0
+      || !unsupportedSetup.nextDisabled
+      || !unsupportedSetup.status.includes("safely stopped")
+    ) throw new Error(`unsupported-managed-setup:${JSON.stringify(unsupportedSetup)}`);
+    checks += 4;
+  }
   await cdp.evaluate("document.querySelector('#wizard-readiness-back').click()");
   await waitFor(() => cdp.evaluate("document.querySelector('[aria-current=\"step\"]').dataset.wizardProgress === 'welcome'"));
   trace("guided-readiness-verified");
@@ -941,7 +965,7 @@ try {
   if (dismissedTour.state.chat !== true || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
-  const sectionTourCounts = {models: 5, system: 5, technical: 4, about: 4};
+  const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
   const sectionTourNavigation = {models: "models-nav", system: "system-nav", technical: "assurance-nav", about: "about-nav"};
   for (const [section, expectedSteps] of Object.entries(sectionTourCounts)) {
     await cdp.evaluate(`document.querySelector('#${sectionTourNavigation[section]}').click()`);

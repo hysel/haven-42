@@ -174,6 +174,21 @@ and reported dependency vulnerabilities. That path was rejected. Only the
 separate clean offline build described above was used for recorded inference
 evidence; no web UI or dependency tree is admitted or packaged.
 
+### Newer-runtime regression check
+
+On August 12, 2026, the same WSL2/DXG profile compared newer exact llama.cpp
+builds against the passing b10088 baseline. Builds b10375 and b10380 detected
+the RX 7800 XT but exited before producing the first benchmark result. For
+b10375, disabling HIP graphs and requesting zero, one, or all GPU layers did
+not change the failure. An exact-commit CPU-only b10375 build passed the same
+Gemma 3 1B artifact, which isolates the observed regression to loading the HIP
+backend on this WSL2/DXG route rather than to the GGUF or core CPU path.
+
+Haven 42 therefore retains b10088 as the last passing version for this exact
+candidate route. The newer failures do not invalidate the historical b10088
+matrix, do not establish native Linux AMD behavior, and do not authorize an
+automatic runtime downgrade or selection change.
+
 ## Windows NVIDIA And Follow-On Results
 
 An independent Windows x86_64 NVIDIA cell used the same b10088 source commit,

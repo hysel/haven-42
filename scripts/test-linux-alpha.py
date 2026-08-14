@@ -31,7 +31,8 @@ def snapshot(vendor: str | None = "NVIDIA") -> dict:
             "operatingSystem": "linux", "architecture": "x86_64",
             "logicalProcessors": 8, "systemMemoryGiB": 32,
             "availableStorageGiB": 64, "distributionId": "ubuntu",
-            "distributionVersion": "26.04", "libcVersion": "2.42",
+            "distributionVersion": "26.04", "libcFamily": "glibc",
+            "libcVersion": "2.42",
         },
         "accelerators": accelerators,
     }
@@ -73,6 +74,14 @@ def main() -> None:
     assert hardware["decision"] == "candidate"
     assert hardware["managedBackendCandidate"] == "cuda"
     assert hardware["operatingSystemId"] == "ubuntu-26.04"
+    assert hardware["runtimeCompatibility"] == {
+        "libraryFamily": "glibc",
+        "detectedVersion": "2.42",
+        "minimumPlatformVersion": "2.39",
+        "minimumRuntimeVersion": "2.28",
+        "effectiveMinimumVersion": "2.39",
+        "decision": "compatible",
+    }
     empty = MODULE.select_model(cuda, [])
     assert empty["automaticExecutionAllowed"] is False
     assert empty["selected"] is None
@@ -120,14 +129,26 @@ def main() -> None:
         result = MODULE.evaluate_hardware(hostile)
         assert result["decision"] == "unsupported" and blocker in result["blockers"]
         checks += 1
+    non_glibc = copy.deepcopy(cuda)
+    non_glibc["platform"].update(libcFamily="musl", libcVersion="1.2.5")
+    result = MODULE.evaluate_hardware(non_glibc)
+    assert result["runtimeCompatibility"]["decision"] == "incompatible-or-unavailable"
+    assert "glibc-required" in result["blockers"]
+    checks += 1
     multi = copy.deepcopy(cuda)
     multi["accelerators"].append({"vendor": "AMD", "memoryGiB": 16, "source": "lspci"})
     assert "multiple-accelerators-require-manual-review" in MODULE.evaluate_hardware(multi)["blockers"]
     amd = snapshot("AMD")
     assert "linux-amd-native-evidence-required" in MODULE.evaluate_hardware(amd)["blockers"]
+    assert MODULE.driver_guidance(amd)["decision"] == "evidence-pending"
     intel = snapshot("Intel")
     assert "linux-intel-native-evidence-required" in MODULE.evaluate_hardware(intel)["blockers"]
-    checks += 3
+    assert MODULE.driver_guidance(intel)["decision"] == "evidence-pending"
+    assert MODULE.driver_guidance(cpu)["decision"] == "not-required"
+    assert MODULE.driver_guidance(cuda)["decision"] == "ready"
+    misleading = snapshot("Not Intel")
+    assert MODULE.setup_backend(misleading)["backendMode"] == "cpu"
+    checks += 8
 
     wrong = evidence("qwen35-4b-q4", os_id="ubuntu-24.04")
     assert MODULE.select_model(cuda, [wrong])["automaticExecutionAllowed"] is False

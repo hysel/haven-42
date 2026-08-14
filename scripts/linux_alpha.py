@@ -149,8 +149,8 @@ def setup_backend(snapshot: dict[str, Any]) -> dict[str, Any]:
     for item in accelerators:
         if not isinstance(item, dict):
             raise LinuxAlphaError("invalid-hardware-snapshot")
-        vendor_text = str(item.get("vendor", "")).casefold()
-        vendor = next((name for name in ("nvidia", "amd", "intel") if name in vendor_text), None)
+        vendor_text = str(item.get("vendor", "")).strip().casefold()
+        vendor = vendor_text if vendor_text in {"nvidia", "amd", "intel"} else None
         if vendor:
             supported.append((vendor, item))
     vendors = {vendor for vendor, _ in supported}
@@ -199,8 +199,14 @@ def evaluate_hardware(snapshot: dict[str, Any]) -> dict[str, Any]:
     logical = _number(platform_info.get("logicalProcessors"))
     memory = _number(platform_info.get("systemMemoryGiB"))
     storage = _number(platform_info.get("availableStorageGiB"))
+    libc_family = str(platform_info.get("libcFamily") or "").casefold()
     glibc = _version_tuple(platform_info.get("libcVersion"))
     minimum_glibc = _version_tuple(contract["platform"]["minimumGlibcVersion"])
+    runtime_minimum_text = load_registry()["components"][0]["minimumGlibcVersion"]
+    runtime_minimum_glibc = _version_tuple(runtime_minimum_text)
+    effective_minimum_glibc = max(
+        value for value in (minimum_glibc, runtime_minimum_glibc) if value is not None
+    )
     if str(platform_info.get("operatingSystem", "")).casefold() != "linux":
         blockers.append("linux-required")
     if normalized_architecture != "x64":
@@ -209,7 +215,9 @@ def evaluate_hardware(snapshot: dict[str, Any]) -> dict[str, Any]:
         blockers.append("linux-distribution-not-in-alpha2-matrix")
     if operating_system_id(snapshot) is None:
         blockers.append("linux-distribution-version-unavailable")
-    if glibc is None or minimum_glibc is None or glibc < minimum_glibc:
+    if libc_family != "glibc":
+        blockers.append("glibc-required")
+    elif glibc is None or glibc < effective_minimum_glibc:
         blockers.append("glibc-version-threshold")
     policy = contract["minimumCandidateHardware"]
     if logical is None or logical < policy["logicalProcessors"]:
@@ -229,10 +237,50 @@ def evaluate_hardware(snapshot: dict[str, Any]) -> dict[str, Any]:
         "logicalProcessors": int(logical) if logical is not None else None,
         "systemMemoryGiB": memory,
         "availableStorageGiB": storage,
+        "runtimeCompatibility": {
+            "libraryFamily": libc_family or None,
+            "detectedVersion": platform_info.get("libcVersion"),
+            "minimumPlatformVersion": contract["platform"]["minimumGlibcVersion"],
+            "minimumRuntimeVersion": runtime_minimum_text,
+            "effectiveMinimumVersion": ".".join(str(item) for item in effective_minimum_glibc),
+            "decision": "compatible" if (
+                libc_family == "glibc"
+                and glibc is not None
+                and glibc >= effective_minimum_glibc
+            ) else "incompatible-or-unavailable",
+        },
         "glibcVersion": platform_info.get("libcVersion"),
         "managedBackendCandidate": backend["backendMode"],
         "maximumUsableGpuMemoryGiB": backend["usableGpuMemoryGiB"],
         "localSetupAllowed": not blockers,
+    }
+
+
+def driver_guidance(snapshot: dict[str, Any]) -> dict[str, Any]:
+    """Explain detected Linux graphics readiness without changing system drivers."""
+    hardware = evaluate_hardware(snapshot)
+    backend = hardware.get("managedBackendCandidate")
+    blockers = set(hardware.get("blockers", []))
+    if backend == "cuda":
+        decision = "ready"
+        message = "The installed NVIDIA driver exposed a usable graphics accelerator. Haven 42 will not change it."
+    elif "nvidia-capacity-or-driver-unverified" in blockers:
+        decision = "action-required"
+        message = "The NVIDIA driver or graphics memory could not be verified. Use your Linux distribution's driver tools, then check again; Haven 42 does not install drivers."
+    elif "linux-amd-native-evidence-required" in blockers:
+        decision = "evidence-pending"
+        message = "AMD graphics hardware was detected, but this Linux acceleration route is not yet approved for managed setup. Haven 42 will not change the driver or silently use the CPU."
+    elif "linux-intel-native-evidence-required" in blockers:
+        decision = "evidence-pending"
+        message = "Intel graphics hardware was detected, but this Linux acceleration route is not yet approved for managed setup. Haven 42 will not change the driver or silently use the CPU."
+    else:
+        decision = "not-required"
+        message = "The reviewed CPU setup does not require a graphics-driver change."
+    return {
+        "decision": decision,
+        "message": message,
+        "automaticInstallationAllowed": False,
+        "systemDriverChangesAllowed": False,
     }
 
 

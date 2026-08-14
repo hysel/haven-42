@@ -16,7 +16,8 @@
       "fixedExternalNavigationUrls": [
         "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
         "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
-        "https://ollama.com/download/windows"
+        "https://ollama.com/download/windows",
+        "https://ollama.com/download/linux"
       ],
     "fixedExternalNavigationRequiresExplicitClick": true,
     "rendererSuppliedExternalNavigationAllowed": false,

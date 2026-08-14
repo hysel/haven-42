@@ -80,6 +80,11 @@ See the human-readable [tested hardware](https://github.com/hysel/haven-42/wiki/
 and [model and hardware status](https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status)
 pages for exact evidence boundaries.
 
+Want Haven 42 to evaluate a particular locally runnable model? Submit the
+[short model test request form](https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml).
+You do not need to know the model's technical details, and a request does not
+change Haven 42's automatic model choices.
+
 ## Coding tools are separate
 
 Continue, Aider, and OpenCode support is distributed as the optional

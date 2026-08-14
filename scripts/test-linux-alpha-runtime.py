@@ -28,6 +28,28 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
 
 
+if _stdlib_zstd is None and os.name != "posix":
+    class _TestArchiveCodec:
+        """Exercise archive policy where no safe native zstd exists.
+
+        Production extraction still fails closed without its reviewed zstd
+        backend. This test-only passthrough keeps the platform-neutral archive
+        traversal and link checks runnable on Windows CI.
+        """
+
+        @staticmethod
+        def compress(value: bytes) -> bytes:
+            return value
+
+        @staticmethod
+        def open(path: Path, mode: str):
+            assert mode == "rb"
+            return path.open(mode)
+
+    _stdlib_zstd = _TestArchiveCodec()
+    MODULE._stdlib_zstd = _stdlib_zstd
+
+
 def make_archive(path: Path, members: list[tuple[str, str, bytes | str]]) -> dict:
     raw = io.BytesIO()
     expanded = files = directories = links = 0
@@ -96,7 +118,10 @@ def refused(function, code: str) -> None:
 def main() -> None:
     MODULE.load_registry()
     with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
+        # macOS exposes /var through /private/var. Canonicalize the test root
+        # so the Linux extractor's intentional ancestor-symlink rejection is
+        # tested against the actual directory rather than that host alias.
+        root = Path(directory).resolve()
         archive = root / "runtime.tar.zst"
         component = make_archive(
             archive,
@@ -119,6 +144,13 @@ def main() -> None:
         if os.name == "posix":
             assert (output / "bin/ollama").stat().st_mode & 0o777 == 0o500
             assert (output / "lib/libreal.so").stat().st_mode & 0o777 == 0o400
+
+        nested_output = root / "new-parent" / "nested" / "runtime"
+        nested_result = MODULE.extract_registered_archive(
+            archive, nested_output, component,
+        )
+        assert nested_result["linkFree"] is True
+        assert (nested_output / "bin/ollama").read_bytes() == b"runtime"
 
         bad_hash = dict(component, sha256="0" * 64)
         refused(
@@ -173,7 +205,7 @@ def main() -> None:
                 "invalid-component-archive",
             )
         assert stream.closed is True
-    print("Linux Alpha runtime extractor passed 22 safety and behavior checks.")
+    print("Linux Alpha runtime extractor passed 23 safety and behavior checks.")
 
 
 if __name__ == "__main__":

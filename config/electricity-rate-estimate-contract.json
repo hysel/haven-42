@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-electricity-rate-estimate-contract",
+  "purpose": "Country-neutral electricity-cost estimates from measured energy and an explicitly selected local rate.",
+  "rateProfileKind": "haven42-electricity-rate-profile",
+  "requiredRateProfileFields": [
+    "schemaVersion",
+    "kind",
+    "sourceKind",
+    "sourceId",
+    "countryCode",
+    "currency",
+    "ratePerKwh",
+    "effectivePeriod",
+    "taxScope",
+    "estimateOnly",
+    "locationWasInferred"
+  ],
+  "sourceKinds": [
+    "manual-bill-rate",
+    "official-average",
+    "utility-tariff"
+  ],
+  "privacy": {
+    "locationInferenceAllowed": false,
+    "automaticIpGeolocationAllowed": false,
+    "streetAddressRequired": false,
+    "countryOrRegionSelectionMustBeExplicit": true,
+    "rateProfilesRemainLocal": true
+  },
+  "calculation": {
+    "energyUnit": "kWh",
+    "rateUnit": "selected currency per kWh",
+    "currencyConversionAllowed": false,
+    "fixedBillChargesIncluded": false,
+    "estimateMustRetainSourceCurrency": true,
+    "gpuOnlyEvidenceMustRemainLabeledGpuOnly": true,
+    "wholeComputerClaimRequiresWallMeasurement": true
+  },
+  "fallbackOrder": [
+    "manual rate copied from the user's electricity bill",
+    "official subnational residential average selected by the user",
+    "official national residential average selected by the user",
+    "no estimate"
+  ],
+  "display": {
+    "showCountry": true,
+    "showCurrency": true,
+    "showEffectivePeriod": true,
+    "showTaxScope": true,
+    "showSource": true,
+    "showEstimateWarning": true
+  }
+}

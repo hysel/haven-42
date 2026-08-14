@@ -7,13 +7,30 @@
       "id": "ollama",
       "type": "ollama-library",
       "baseUrl": "https://ollama.com/library",
-      "defaultQueries": ["qwen3.5", "qwen3-coder", "devstral", "gpt-oss", "glm", "laguna-xs-2.1"]
+      "defaultQueries": [
+        "qwen3.5",
+        "qwen3.6",
+        "qwen3-coder",
+        "gemma3",
+        "gemma4",
+        "granite4.1",
+        "phi4-mini",
+        "llama3.2",
+        "ministral-3",
+        "mistral-small3.2",
+        "muse-glimmer",
+        "nemotron-3.5-lightning",
+        "devstral",
+        "gpt-oss",
+        "glm",
+        "laguna-xs-2.1"
+      ]
     },
     {
       "id": "huggingface",
       "type": "huggingface-hub",
       "baseUrl": "https://huggingface.co",
-      "defaultQueries": ["agentic coding", "tool calling", "GGUF"]
+      "defaultQueries": ["local text generation", "agentic coding", "tool calling", "reasoning", "GGUF", "MLX"]
     }
   ]
 }

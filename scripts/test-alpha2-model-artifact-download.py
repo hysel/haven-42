@@ -88,6 +88,16 @@ def main() -> None:
             lambda: MODULE._require_ready_candidate("qwen36-35b-a3b-q4"),
             "candidate-not-ready-for-qualification",
         )
+        for deferred_model in (
+            "muse-glimmer-30b-q4",
+            "muse-glimmer-30b-mlx-nvfp4",
+        ):
+            refused(
+                lambda model_id=deferred_model: MODULE._require_ready_candidate(
+                    model_id
+                ),
+                "candidate-not-ready-for-qualification",
+            )
     finally:
         for name, value in originals.items():
             setattr(runner, name, value)

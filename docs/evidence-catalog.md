@@ -9,6 +9,28 @@ The machine-readable catalog lives at `config/evidence-catalog.tsv`.
 Its machine-readable definition lives at
 `config/capability-evidence-contract.json`.
 
+Every catalog row also has a generated, plain-language wiki page. Browse them
+through [[Evidence Record Index|Evidence-Record-Index]]. The stable mapping
+between claims and pages lives in `config/evidence-page-registry.json`.
+
+Regenerate the pages and registry after changing the catalog:
+
+```text
+python scripts/generate-evidence-wiki-pages.py
+```
+
+Check that committed pages are current without changing files:
+
+```text
+python scripts/generate-evidence-wiki-pages.py --check
+```
+
+The registry is reserved as an evidence input for the automatic-updates work
+on the roadmap. It is advisory only: it cannot start a download, install a
+runtime, promote a model, or change a default. A future updater must still
+require signed update metadata, an exact capability match, user policy,
+compatibility and health checks, and rollback.
+
 ## Capability Evidence Contract v2
 
 Version 2 makes readiness a capability claim instead of a model-wide claim.

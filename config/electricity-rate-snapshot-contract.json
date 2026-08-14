@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-electricity-rate-snapshot-contract",
+  "profileKind": "haven42-electricity-rate-profile",
+  "snapshotVersion": 1,
+  "purpose": "A versioned local copy of one explicitly selected official electricity-rate observation.",
+  "requirements": {
+    "explicitCountrySelection": true,
+    "locationInferenceAllowed": false,
+    "currencyInferenceAllowed": false,
+    "currencyConversionAllowed": false,
+    "apiCredentialsPersisted": false,
+    "overwriteRequiresExplicitReplace": true,
+    "officialAverageMustRemainEstimateOnly": true
+  },
+  "supportedAdapters": ["eia-us-residential-average", "eurostat-household-electricity"],
+  "requiredFields": [
+    "schemaVersion", "snapshotVersion", "kind", "sourceKind", "sourceId",
+    "countryCode", "currency", "ratePerKwh", "effectivePeriod", "taxScope",
+    "retrievedAt", "estimateOnly", "locationWasInferred"
+  ]
+}

@@ -16,6 +16,8 @@
     "QuantizationSignals",
     "ProvenanceStatus",
     "ValidationStatus",
+    "InventoryStatus",
+    "TestQueueStatus",
     "Status",
     "Reason",
     "NextStep"
@@ -28,6 +30,10 @@
     "rewritesContinueConfig": false,
     "repositoryContentSent": false,
     "hardwareProfileSent": false,
+    "certificationInventorySent": false,
+    "writesCertificationInventory": false,
+    "startsTests": false,
+    "changesAutomaticModelSelection": false,
     "sourceClaimsDoNotPromote": true,
     "communityArtifactsRequireIndependentReview": true,
     "missingLicenseBlocksAutomaticPromotion": true

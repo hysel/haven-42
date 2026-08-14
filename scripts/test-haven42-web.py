@@ -257,6 +257,12 @@ def contrast_ratio(foreground: str, background: str) -> float:
 
 def main() -> int:
     checks = 0
+    try:
+        WEB._request_process_shutdown(15, None)
+    except KeyboardInterrupt:
+        checks += 1
+    else:
+        raise AssertionError("Termination signal did not enter normal cleanup")
     collision_attachment = [{
         "name": "collision.txt",
         "mediaType": "text/plain",
@@ -991,31 +997,76 @@ def main() -> int:
             origin + "/api/readiness", "POST", {"force": False, "command": "whoami"}, token, origin,
         )
         assert status == 400 and error["error"] == "invalid-readiness-fields"
+        for field, value in (
+            ("executable", "untrusted-tool"),
+            ("environment", {"UNTRUSTED": "1"}),
+            ("destination", "untrusted-location"),
+            ("archiveMember", "untrusted-member"),
+            ("localPath", "untrusted-path"),
+            ("processId", 42),
+        ):
+            status, error, _ = request_json(
+                origin + "/api/readiness", "POST",
+                {"force": False, field: value}, token, origin,
+            )
+            assert status == 400 and error["error"] == "invalid-readiness-fields", field
         status, error, _ = request_json(
             origin + "/api/setup-plan", "POST",
             {"snapshotId": "wrong-snapshot-id", "intent": "guided-setup"}, token, origin,
         )
-        assert status == 409 and error["error"] == "readiness-snapshot-mismatch"
-        status, plan, _ = request_json(
-            origin + "/api/setup-plan", "POST",
-            {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
-        )
-        assert status == 200 and plan["installationAllowed"] is False
-        assert all(action["installControl"] == "disabled" for action in plan["actions"])
-        assert all(value is False for value in plan["effects"].values())
+        if WEB.MANAGED_SETUP_SUPPORTED:
+            assert status == 409 and error["error"] == "readiness-snapshot-mismatch"
+            status, plan, _ = request_json(
+                origin + "/api/setup-plan", "POST",
+                {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
+            )
+            assert status == 200 and plan["installationAllowed"] is False
+            assert all(action["installControl"] == "disabled" for action in plan["actions"])
+            assert all(value is False for value in plan["effects"].values())
+        else:
+            assert status == 501 and error["error"] == "unsupported-platform-operation"
+            status, error, _ = request_json(
+                origin + "/api/setup-plan", "POST",
+                {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
+            )
+            assert status == 501 and error["error"] == "unsupported-platform-operation"
         status, error, _ = request_json(
             origin + "/api/setup-plan", "POST",
             {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup", "hardware": {"ram": 999}},
             token, origin,
         )
         assert status == 400 and error["error"] == "invalid-setup-plan-fields"
+        if state.alpha_setup is not None:
+            status, error, _ = request_json(
+                origin + "/api/alpha/setup-approve", "POST",
+                {
+                    "planId": "untrusted-plan", "effects": [], "confirmed": True,
+                    "executable": "untrusted-tool",
+                },
+                token, origin,
+            )
+            assert status == 400 and error["error"] == "invalid-alpha-setup-approval-fields"
+            status, error, _ = request_json(
+                origin + "/api/alpha/setup-execute", "POST",
+                {"approvalToken": "untrusted", "processName": "untrusted-process"},
+                token, origin,
+            )
+            assert status == 400 and error["error"] == "invalid-alpha-setup-execution-fields"
+            status, error, _ = request_json(
+                origin + "/api/alpha/setup-cancel", "POST",
+                {"processId": 42}, token, origin,
+            )
+            assert status == 400 and error["error"] == "invalid-alpha-setup-cancel-fields"
         status, storage_status, _ = request_json(origin + "/api/alpha/setup-status")
         assert status == 200, (status, storage_status)
         assert storage_status["storageScope"] == "inside-extracted-folder"
         assert storage_status["storageDirectoryName"] == "Haven42-Data"
         assert isinstance(storage_status["managedComponentsPresent"], bool)
         assert isinstance(storage_status["legacyManagedComponentsPresent"], bool)
-        if plan.get("alphaCandidate", {}).get("managedPlan") is not None:
+        if (
+            WEB.MANAGED_SETUP_SUPPORTED
+            and plan.get("alphaCandidate", {}).get("managedPlan") is not None
+        ):
             managed_plan = plan["alphaCandidate"]["managedPlan"]
             progress_components = storage_status["components"]
             assert 2 <= len(progress_components) <= 4
@@ -1094,7 +1145,7 @@ def main() -> int:
             assert removed["applicationFilesRemoved"] is False
         finally:
             state.remove_managed_components = original_remove
-        checks += 18
+        checks += 27
 
         status, error, _ = request_json(
             origin + "/api/connect",
@@ -2562,6 +2613,7 @@ def main() -> int:
             "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
             "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
             "https://ollama.com/download/windows",
+            "https://ollama.com/download/linux",
         ]
         assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
         assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
@@ -2746,7 +2798,19 @@ def main() -> int:
         assert html.count('id="connection-panel"') == 1 and html.count('id="status-panel"') == 1
         assert 'id="system-panel"' in html and 'id="system-workspace-content"' in html
         assert 'id="sidebar-connection-status"' in html and 'id="view-system-details"' in html
-        assert 'for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel"])' in javascript
+        assert 'for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel", "energy-estimator-panel"])' in javascript
+        assert 'id="energy-estimator-panel"' in html and "/api/electricity-rate" in javascript
+        assert "Your electricity-bill information stays private" in html
+        assert "does not save, upload, or add that price or your usage values to troubleshooting logs" in html
+        assert 'id="energy-country" autocomplete="country"' in html
+        assert "selected?.dataset.currency" in javascript
+        assert 'id="status-energy-widget"' in html and 'id="energy-pin-status"' in html
+        assert "function syncEnergyStatusWidget()" in javascript
+        assert "state.energyEstimate = Object.freeze" in javascript
+        assert '["Linux kernel", snapshot.platform.kernelVersion || "Unavailable"]' in javascript
+        assert '["Desktop session",' in javascript
+        assert '["Linux compatibility",' in javascript
+        assert "location is never inferred" in javascript
         assert 'byId("view-system-details").addEventListener("click", openSystem)' in javascript
         assert 'function openChat()' in javascript
         assert 'await connectProvider(' in javascript and 'openChat();' in javascript

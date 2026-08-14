@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "modelId": "example-3b-q4",
+      "identity": {
+        "provider": "ollama",
+        "runtimeVersion": "0.32.8",
+        "model": "example:3b-q4",
+        "manifestDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "environment": {
+        "operatingSystem": "Windows 11",
+        "acceleratorVendor": "AMD",
+        "acceleratorModel": "Example GPU",
+        "driverVersion": "example-driver"
+      },
+      "assessment": {
+        "campaignScope": "shared-baseline",
+        "fitStatus": "comfortable",
+        "executionMode": "full-accelerator",
+        "tasks": {
+          "chat": "passed",
+          "writing": "passed",
+          "summarization": "passed"
+        },
+        "recommendationStatus": "candidate",
+        "recommendationRole": "Balanced local text candidate",
+        "limitations": ["Hardware comparison is not complete"],
+        "measurements": {
+          "averageTokensPerSecond": 42.5,
+          "acceleratorMemoryGiB": 3.5,
+          "systemMemoryGiB": 16.0,
+          "averagePowerWatts": null
+        }
+      },
+      "gates": {
+        "discovered": {
+          "passed": true,
+          "evidence": ["evidence/discovery.json"]
+        },
+        "taskQualified": {
+          "passed": true,
+          "evidence": ["evidence/tasks.json"]
+        },
+        "soakPassed": {
+          "passed": true,
+          "evidence": ["evidence/soak.json"]
+        },
+        "hardwareVerified": {
+          "passed": false,
+          "evidence": []
+        },
+        "osVerified": {
+          "passed": false,
+          "evidence": []
+        },
+        "recommended": {
+          "passed": false,
+          "evidence": []
+        },
+        "defaultCandidate": {
+          "passed": false,
+          "evidence": []
+        },
+        "failedNeedsRetest": {
+          "passed": false,
+          "evidence": []
+        }
+      },
+      "ownerApprovalReference": null
+    }
+  ]
+}

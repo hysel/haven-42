@@ -1,0 +1,229 @@
+{
+  "schemaVersion": 1,
+  "registryId": "haven42.alpha2.inference-runtime-compatibility",
+  "defaultDecision": "deny",
+  "policy": {
+    "approvedModelMinimumVersionRequired": true,
+    "exactRuntimeArtifactRequired": true,
+    "checksumVerificationRequired": true,
+    "mutableLatestAllowed": false,
+    "systemRuntimeModificationAllowed": false,
+    "installationRoot": "Haven42-Data",
+    "selectionRule": "newest-admitted-compatible-version",
+    "modelRequirementRegistry": "config/alpha-2-model-runtime-requirements.json",
+    "crossEngineEvidenceInheritanceAllowed": false,
+    "silentEngineFallbackAllowed": false
+  },
+  "runtimes": [
+    {
+      "version": "0.32.5",
+      "release": "https://github.com/ollama/ollama/releases/tag/v0.32.5",
+      "admissionState": "admitted",
+      "artifacts": [
+        {
+          "platform": "windows-x64",
+          "backend": "core",
+          "name": "ollama-windows-amd64.zip",
+          "byteLength": 1457824795,
+          "sha256": "7c941ae084569d298062d29f8139163a3187c76dbca0479c70d085e78fd8c7bb",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.5/ollama-windows-amd64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "rocm",
+          "name": "ollama-windows-amd64-rocm.zip",
+          "byteLength": 245370090,
+          "sha256": "f2284e7008ffd64eadb7a05ac4ca1a0de843d1e8d0c861aa0923ef855ca94615",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.5/ollama-windows-amd64-rocm.zip"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "core",
+          "name": "ollama-linux-amd64.tar.zst",
+          "byteLength": 1422353729,
+          "sha256": "f7d6bdbcf71b83aa8670c4e7dc4b6936c0952fcf8b114eaf6a11cbadb9684214",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.5/ollama-linux-amd64.tar.zst"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "rocm",
+          "name": "ollama-linux-amd64-rocm.tar.zst",
+          "byteLength": 1047683394,
+          "sha256": "9e36f651af94f33d63295f86582909bad63b6dc762e53f2c9099337dccd2cf44",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.5/ollama-linux-amd64-rocm.tar.zst"
+        }
+      ]
+    },
+    {
+      "version": "0.32.9",
+      "release": "https://github.com/ollama/ollama/releases/tag/v0.32.9",
+      "publishedAtUtc": "2026-08-11T13:23:33Z",
+      "admissionState": "candidate-native-lifecycle-evidence-required",
+      "artifacts": [
+        {
+          "platform": "windows-x64",
+          "backend": "core",
+          "name": "ollama-windows-amd64.zip",
+          "byteLength": 1459368267,
+          "sha256": "7b4f6ce09c1f2c3b21561b323779beaf3ca3c7012f8e4522605a13cbbb19f0b8",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-windows-amd64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "rocm",
+          "name": "ollama-windows-amd64-rocm.zip",
+          "byteLength": 245721122,
+          "sha256": "5d5d049435dacfc12dde87cf2ca8d530b4ae16978d55d8acc7a4591803b8fe12",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-windows-amd64-rocm.zip"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "core",
+          "name": "ollama-linux-amd64.tar.zst",
+          "byteLength": 1421653242,
+          "sha256": "5d747a43369f61e38f20b5a39fcc5c90647e562cdc61e2e56034f1c5b113d540",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-linux-amd64.tar.zst"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "rocm",
+          "name": "ollama-linux-amd64-rocm.tar.zst",
+          "byteLength": 1047461645,
+          "sha256": "ab93c931df3ea570827f57fa752b3bea7bbc961af71412fc0d4cdaf5c48a356a",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-linux-amd64-rocm.tar.zst"
+        }
+      ]
+    }
+  ],
+  "llamaCppRuntimes": [
+    {
+      "version": "b10375",
+      "build": 10375,
+      "commit": "ba360efe1f574ebae727aad64112d18ecedca85a",
+      "release": "https://github.com/ggml-org/llama.cpp/releases/tag/b10375",
+      "publishedAtUtc": "2026-08-12T12:18:24Z",
+      "admissionState": "candidate-native-lifecycle-evidence-required",
+      "profileEvidence": [
+        {
+          "platform": "linux-x64",
+          "backend": "sycl-fp16",
+          "acceleratorClass": "intel-arc-b580-12gib",
+          "outcome": "partial-pass",
+          "evidence": "examples/intel-b580-granite41-8b-validation.md",
+          "automaticAdmissionAllowed": false
+        },
+        {
+          "platform": "wsl2-ubuntu-x64",
+          "backend": "hip-dxg",
+          "acceleratorClass": "radeon-rx-7800-xt-16gib",
+          "outcome": "failed-before-first-benchmark",
+          "decision": "deny-this-runtime-on-this-profile",
+          "lastPassingRuntime": "b10088",
+          "lastPassingCommit": "67b9b0e7f6ce45d929a4411907d3c48ec719e81c",
+          "evidence": "examples/cross-accelerator-model-validation.md",
+          "automaticAdmissionAllowed": false
+        }
+      ],
+      "artifacts": [
+        {
+          "platform": "windows-x64",
+          "backend": "cpu",
+          "role": "runtime",
+          "name": "llama-b10375-bin-win-cpu-x64.zip",
+          "byteLength": 18460055,
+          "sha256": "c18ad6aa9cef9d119e957472d71e34eb5183848eb9c57f51647fd18692a456c7",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-win-cpu-x64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "cuda-12.4",
+          "role": "runtime",
+          "name": "llama-b10375-bin-win-cuda-12.4-x64.zip",
+          "byteLength": 250753377,
+          "sha256": "dd840b604c508b2f57f2ed467f70c711d1840c07b0d09a3bba8f6dfbd8b3da84",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-win-cuda-12.4-x64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "cuda-12.4",
+          "role": "runtime-support",
+          "name": "cudart-llama-bin-win-cuda-12.4-x64.zip",
+          "byteLength": 391443627,
+          "sha256": "8c79a9b226de4b3cacfd1f83d24f962d0773be79f1e7b75c6af4ded7e32ae1d6",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/cudart-llama-bin-win-cuda-12.4-x64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "rocm",
+          "role": "runtime",
+          "name": "llama-b10375-bin-win-rocm-7.14-x64.zip",
+          "byteLength": 196536845,
+          "sha256": "46464da654280440970ea8e742d3b9294291a1bcf6adb88c5160734082250334",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-win-rocm-7.14-x64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "sycl",
+          "role": "runtime",
+          "name": "llama-b10375-bin-win-sycl-x64.zip",
+          "byteLength": 119562606,
+          "sha256": "a76acaedb824b32dd573c4376ed293df9f313ce6dea92010bec9fc7371168b78",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-win-sycl-x64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "vulkan",
+          "role": "runtime",
+          "name": "llama-b10375-bin-win-vulkan-x64.zip",
+          "byteLength": 34203191,
+          "sha256": "1fef77a8b7742485c3f9f0acd16b68330ca9d5f447b73eb80d32862e4b2c7cfa",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-win-vulkan-x64.zip"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "cpu",
+          "role": "runtime",
+          "name": "llama-b10375-bin-ubuntu-x64.tar.gz",
+          "byteLength": 16601046,
+          "sha256": "b6a7ed005240eccd61e1af42debd75b876c639c1416bfa90985fd02618919a88",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-ubuntu-x64.tar.gz"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "rocm",
+          "role": "runtime",
+          "name": "llama-b10375-bin-ubuntu-rocm-7.14-x64.tar.gz",
+          "byteLength": 204484498,
+          "sha256": "712cee42f49d4ae627f621eaa352ccfcacf51547d0afc58ef4d1873c0d9d1e25",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-ubuntu-rocm-7.14-x64.tar.gz"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "sycl-fp16",
+          "role": "runtime",
+          "name": "llama-b10375-bin-ubuntu-sycl-fp16-x64.tar.gz",
+          "byteLength": 53304610,
+          "sha256": "6ca1e348d2c7c2fd4810d5ceac221792bb027aa937a8dd65bb06490853a84abb",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-ubuntu-sycl-fp16-x64.tar.gz"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "vulkan",
+          "role": "runtime",
+          "name": "llama-b10375-bin-ubuntu-vulkan-x64.tar.gz",
+          "byteLength": 32612910,
+          "sha256": "cbf7354e70f9bcda5a389e1f02e2293414d47fe525b271c3a8063327754e3ef9",
+          "sourceUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10375/llama-b10375-bin-ubuntu-vulkan-x64.tar.gz"
+        }
+      ],
+      "unavailableManagedProfiles": [
+        {
+          "platform": "linux-x64",
+          "backend": "cuda",
+          "reason": "no-official-prebuilt-linux-cuda-runtime-artifact-in-release",
+          "manualSourceBuildEvidenceMayBeTrackedSeparately": true
+        }
+      ]
+    }
+  ]
+}

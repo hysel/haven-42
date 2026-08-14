@@ -42,6 +42,7 @@ grants permission to install software or modify a machine.
 
 ## Read the detailed records
 
+- [[Evidence Record Index|Evidence-Record-Index]]
 - [[Engineering Evidence Dashboard|Engineering-Evidence-Dashboard]]
 - [[Evidence Catalog|Evidence-Catalog]]
 - [[Capability Evidence Contract|Capability-Evidence-Contract]]

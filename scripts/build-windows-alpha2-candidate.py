@@ -19,6 +19,7 @@ SHA256 = re.compile(r"^[0-9a-f]{64}$")
 FULL_COMMIT = re.compile(r"^[0-9a-f]{40}$")
 REQUIRED_EVIDENCE = {
     "APACHE-2.0.txt", "CPYTHON-3.14.6-LICENSE.txt", "LIBFFI-3.4.4-LICENSE.txt",
+    "OLLAMA-MIT-LICENSE.txt",
     "THIRD-PARTY-NOTICES.txt", "build-provenance.json", "dependency-inventory.json",
     "haven42.cdx.json", "package-file-inventory.json", "runtime-component-inventory.json",
 }

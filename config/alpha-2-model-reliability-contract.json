@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.alpha2.model-reliability",
+  "release": "0.4.0-alpha.2",
+  "status": "preparation-only-explicit-execution-approval-required",
+  "evidenceLabelsAllowed": ["Soak passed", "Hardware verified", "OS verified", "Failed or needs retest"],
+  "globalSafety": {
+    "networkDownloadAllowedDuringPreparation": false,
+    "modelExecutionAllowedDuringPreparation": false,
+    "processSignalAllowedDuringPreparation": false,
+    "powerTransitionAllowedDuringPreparation": false,
+    "resourcePressureAllowedDuringPreparation": false,
+    "rawPromptOrResponseRetentionAllowed": false,
+    "privateMachineIdentityRetentionAllowed": false,
+    "providerEndpointRetentionAllowed": false,
+    "automaticPromotionAllowed": false,
+    "automaticDefaultChangeAllowed": false,
+    "freshExecutionApprovalRequired": true,
+    "activeCampaignIsolationRequired": true,
+    "appOwnedProcessReceiptRequired": true,
+    "realDiskFillAllowed": false,
+    "unboundedMemoryPressureAllowed": false,
+    "wildcardProcessTerminationAllowed": false
+  },
+  "scenarios": [
+    {
+      "id": "cold-start-and-multi-turn",
+      "name": "Three cold starts and multi-turn use",
+      "authority": "provider-lifecycle",
+      "minimumAttempts": 3,
+      "maximumMinutes": 30,
+      "procedure": [
+        "Start only the approved Haven-managed provider from a confirmed stopped state.",
+        "Run a bounded multi-turn Chat, Writing, and Summarization sequence without retaining content.",
+        "Record first-token latency, throughput, memory, accelerator residency, and bounded error codes.",
+        "Unload the exact model and stop only processes bound to the current Haven process receipt."
+      ],
+      "passCriteria": [
+        "All three cold starts become ready within the declared timeout.",
+        "Every capability completes and retains no prompt or response.",
+        "Every attempt unloads the model and closes the managed listener and processes."
+      ]
+    },
+    {
+      "id": "cancellation-and-cleanup",
+      "name": "Cancellation and exact cleanup",
+      "authority": "request-cancellation",
+      "minimumAttempts": 3,
+      "maximumMinutes": 20,
+      "procedure": [
+        "Start a bounded long response using the exact approved model.",
+        "Cancel through Haven's request-specific cancellation path.",
+        "Verify one terminal cancellation result and discard partial content.",
+        "Unload the model and verify the receipt-bound process and listener cleanup."
+      ],
+      "passCriteria": [
+        "Cancellation affects only the active request and produces one bounded terminal result.",
+        "No partial content, managed listener, loaded model, or receipt-bound child process remains."
+      ]
+    },
+    {
+      "id": "unload-and-reload",
+      "name": "Unload and reload",
+      "authority": "provider-lifecycle",
+      "minimumAttempts": 3,
+      "maximumMinutes": 20,
+      "procedure": [
+        "Complete one bounded request and unload the exact model.",
+        "Verify zero residency for that model.",
+        "Reload the same digest and complete the next bounded request.",
+        "Repeat without downloading, deleting, or changing model selection."
+      ],
+      "passCriteria": [
+        "Every unload is independently observed before reload.",
+        "Every reload uses the same model digest and the requested accelerator.",
+        "No stale model or provider process remains after final cleanup."
+      ]
+    },
+    {
+      "id": "runtime-restart-and-provider-failure",
+      "name": "Runtime restart and provider failure recovery",
+      "authority": "provider-lifecycle",
+      "minimumAttempts": 3,
+      "maximumMinutes": 30,
+      "procedure": [
+        "Record the exact managed provider process receipt and stop only that process.",
+        "Confirm Haven reports a bounded provider-unavailable error without losing the unsent prompt.",
+        "Restart the approved provider and verify the same runtime version and model digest.",
+        "Run one bounded recovery request, then unload and clean up."
+      ],
+      "passCriteria": [
+        "The failure is visible and bounded rather than silently falling back.",
+        "Recovery uses the same provider version, model digest, and accelerator path.",
+        "No stale listener or duplicate provider survives."
+      ]
+    },
+    {
+      "id": "interrupted-download-recovery",
+      "name": "Interrupted download recovery",
+      "authority": "controlled-download-fault",
+      "minimumAttempts": 2,
+      "maximumMinutes": 45,
+      "procedure": [
+        "Use only a separately approved disposable managed-data root and exact reviewed artifact.",
+        "Interrupt the request through the test transport after a recorded byte boundary.",
+        "Verify partial data remains quarantined and cannot be selected as an installed model.",
+        "Retry through the normal verified path and require exact size and digest before admission."
+      ],
+      "passCriteria": [
+        "Interrupted bytes are never treated as installed or executable.",
+        "Retry either resumes safely or restarts clearly and ends with the exact verified digest.",
+        "Cleanup removes only disposable test data named in the execution receipt."
+      ]
+    },
+    {
+      "id": "bounded-low-resource-recovery",
+      "name": "Bounded low-memory and low-disk recovery",
+      "authority": "bounded-resource-pressure",
+      "minimumAttempts": 2,
+      "maximumMinutes": 30,
+      "procedure": [
+        "Run inside an approved job, cgroup, VM, or equivalent memory limit with host headroom preserved.",
+        "Use a quota-limited disposable directory to simulate low disk without filling a real filesystem.",
+        "Verify setup and inference stop with specific recoverable errors.",
+        "Release the limits, retry once, then unload and clean up receipt-bound resources."
+      ],
+      "passCriteria": [
+        "The host retains its declared memory and storage safety floor.",
+        "No real filesystem is filled and no unrelated process is pressured.",
+        "Haven reports bounded low-resource errors and succeeds after the constraint is removed."
+      ]
+    },
+    {
+      "id": "sleep-and-wake-recovery",
+      "name": "Sleep and wake recovery",
+      "authority": "system-power-transition",
+      "minimumAttempts": 2,
+      "maximumMinutes": 30,
+      "procedure": [
+        "Confirm the operating system and hardware support a controlled sleep test.",
+        "Require an operator-present approval immediately before each power transition.",
+        "Enter sleep with no active model response and then resume.",
+        "Verify connection state, run one bounded request, unload, and clean up."
+      ],
+      "passCriteria": [
+        "Resume does not create a duplicate provider or stale listener.",
+        "Haven either reconnects safely or presents a clear retry path.",
+        "Post-resume inference uses the same model digest and accelerator."
+      ]
+    },
+    {
+      "id": "concurrent-load-and-final-cleanup",
+      "name": "Concurrent system load and final cleanup",
+      "authority": "bounded-concurrent-load",
+      "minimumAttempts": 3,
+      "maximumMinutes": 30,
+      "procedure": [
+        "Start a bounded synthetic load with declared CPU, memory, duration, and temperature stops.",
+        "Run the fixed Chat, Writing, and Summarization checks while recording latency and throughput.",
+        "Stop the synthetic load through its exact receipt.",
+        "Close Haven and verify model unload, listener closure, and exact managed-process cleanup."
+      ],
+      "passCriteria": [
+        "The model remains accelerated and produces bounded results without unsafe temperature or memory pressure.",
+        "Performance degradation is recorded rather than hidden.",
+        "No synthetic-load, provider, model, listener, or Haven-owned child process remains."
+      ]
+    }
+  ],
+  "universalStopConditions": [
+    "unexpected accelerator or CPU fallback",
+    "temperature, power, driver, filesystem, or operating-system warning",
+    "loss of active-campaign isolation",
+    "missing or mismatched process receipt",
+    "unbounded error or cleanup failure",
+    "private content or machine identity entering evidence"
+  ]
+}

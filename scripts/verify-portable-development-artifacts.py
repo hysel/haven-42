@@ -29,6 +29,7 @@ REQUIRED_EVIDENCE = {
     "APACHE-2.0.txt",
     "CPYTHON-3.14.6-LICENSE.txt",
     "LIBFFI-3.4.4-LICENSE.txt",
+    "OLLAMA-MIT-LICENSE.txt",
     "THIRD-PARTY-NOTICES.txt",
     "build-provenance.json",
     "dependency-inventory.json",
@@ -40,6 +41,7 @@ EXPECTED_LICENSE_EVIDENCE = {
     "APACHE-2.0.txt": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
     "CPYTHON-3.14.6-LICENSE.txt": "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
     "LIBFFI-3.4.4-LICENSE.txt": "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
+    "OLLAMA-MIT-LICENSE.txt": "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226",
 }
 EXPECTED_COMMON_BUILD_DEPENDENCIES = {
     "altgraph": ("0.17.5", "MIT"),
@@ -316,8 +318,9 @@ def verify_notice_text(notices: str, inventory: dict, runtime_inventory: dict) -
     if "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION." not in notices:
         raise ArtifactVerificationError("runtime-clearance-warning-missing")
     if (
-        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
-        "LIBFFI-3.4.4-LICENSE.txt are included in the extracted package and "
+        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, "
+        "LIBFFI-3.4.4-LICENSE.txt, and OLLAMA-MIT-LICENSE.txt are included "
+        "in the extracted package and "
         "artifact evidence as hash-verified license evidence."
         not in notices
     ):

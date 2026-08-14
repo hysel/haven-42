@@ -38,6 +38,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 ## Models, providers, and media
 
 - [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]]
+- [[Model Power and Electricity Evidence|Model-Power-And-Electricity-Evidence]]
 - [[Engineering Model Selection|Engineering-Model-Selection]]
 - [[Image Provider Admission|Image-Provider-Admission]]
 - [[Local Image Runtime License Review|Local-Image-Runtime-License-Review]]
@@ -74,6 +75,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 - [[Alpha 2 Linux Long-Term Validation|Alpha-2-Linux-Long-Term-Validation]]
 - [[Arch Linux Test VM Installation|Arch-Linux-Test-VM-Installation]]
 - [[Engineering Evidence Dashboard|Engineering-Evidence-Dashboard]]
+- [[Evidence Record Index|Evidence-Record-Index]]
 - [[Evidence Catalog|Evidence-Catalog]]
 - [[Evidence Dashboard|Evidence-Dashboard]]
 - [[Capability Evidence Contract|Capability-Evidence-Contract]]
@@ -87,6 +89,7 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 - [[Windows Alpha Native Validation|Windows-Alpha-Native-Validation]]
 - [[Windows Alpha 2 Build|Windows-Alpha-2-Build]]
 - [[Linux Alpha 2 Build|Linux-Alpha-2-Build]]
+- [[Linux Runtime Supply-Chain Review|Linux-Runtime-Supply-Chain]]
 
 ## Project management and maintenance
 
