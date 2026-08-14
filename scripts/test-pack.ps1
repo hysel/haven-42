@@ -728,7 +728,8 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
         "approved-write-ready",
         "static-validated",
         "validated-by-tests",
-        "partial-pass"
+        "partial-pass",
+        "failed-validation"
     )
 
     Assert-True -Condition (Test-Path -LiteralPath $catalogPath) -Message "Evidence catalog should exist."
@@ -776,9 +777,17 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     Assert-True -Condition (-not $contract.aggregation.allowCrossSurfaceInheritance) -Message "Contract should prohibit cross-surface inheritance."
     Assert-True -Condition (-not $contract.aggregation.allowCrossOperationInheritance) -Message "Contract should prohibit cross-operation inheritance."
     Assert-True -Condition ($contract.aggregation.retainAllEvidencePaths) -Message "Contract should retain provenance."
+    Assert-Equal -Actual $contract.pageRegistry -Expected "config/evidence-page-registry.json" -Message "Contract should name the generated evidence page registry."
+    Assert-True -Condition (-not $contract.futureAutomaticUpdateInput.activatesUpdates) -Message "Evidence registry must not activate updates."
     Assert-True -Condition ($doc -match "config/evidence-catalog\.tsv") -Message "Evidence catalog docs should reference the TSV file."
     Assert-True -Condition ($doc -match "approved-write-ready") -Message "Evidence catalog docs should define approved-write-ready."
     Assert-True -Condition ($doc -match "Capability Evidence Contract v2") -Message "Evidence catalog docs should explain contract v2."
+
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for evidence page validation."
+    $generatorOutput = @(& $python.Source (Join-Path $repoRoot "scripts/generate-evidence-wiki-pages.py") --check 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Generated evidence pages and registry should match the catalog: $($generatorOutput -join ' ')"
 }
 Invoke-PackTest "model recommendation catalog has valid schema" {
     $catalogPath = Join-Path $repoRoot "config/model-recommendations.tsv"
@@ -2932,6 +2941,11 @@ Invoke-PackTest "online model discovery parses a local fixture without network" 
         Assert-True -Condition ($report.HardwareProfileSent -eq $false) -Message "Discovery report should state hardware profile was not sent."
         Assert-True -Condition ($report.PullsModels -eq $false) -Message "Discovery report should state models were not pulled."
         Assert-True -Condition ($report.RewritesContinueConfig -eq $false) -Message "Discovery report should state Continue config was not rewritten."
+        Assert-True -Condition ($report.WritesCertificationInventory -eq $false) -Message "Candidate updates must not rewrite the certification inventory."
+        Assert-True -Condition ($report.StartsTests -eq $false) -Message "Candidate updates must not start tests."
+        Assert-True -Condition ($report.ChangesAutomaticModelSelection -eq $false) -Message "Candidate updates must not change automatic model selection."
+        Assert-True -Condition ($null -ne $report.UpdateSummary) -Message "Discovery should include an inventory update summary."
+        Assert-True -Condition (Test-Path -LiteralPath ([System.IO.Path]::ChangeExtension($outputPath, ".md"))) -Message "Discovery should write a human-readable review queue."
         Assert-True -Condition ($models -contains "qwen3.5:9b") -Message "Discovery report should include qwen3.5 fixture candidate."
         Assert-True -Condition ($models -contains "devstral-small-2:24b") -Message "Discovery report should include devstral fixture candidate."
         $doc = Get-Content -LiteralPath (Join-Path $repoRoot "docs/online-model-discovery.md") -Raw
@@ -5362,14 +5376,14 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
     Assert-True -Condition ($policy.images.admittedProfile -eq "linux-comfyui-sdxl-promoted" -and $policy.images.endpointTrustScope -eq "loopback" -and -not $policy.images.customNodesAllowed -and -not $policy.images.localFileWritesAllowed) -Message "The promoted image flow must remain the exact loopback, built-in, browser-memory profile."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects -and $policy.browser.automaticLaunchUrlScope -eq "ipv4-loopback-http-origin-only" -and -not $policy.browser.environmentOverrideAllowed -and -not $policy.browser.shellLaunchAllowed) -Message "Browser security and automatic launch should remain local and default-deny."
-    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status,https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml,https://ollama.com/download/windows" -Message "External navigation must remain fixed to the problem form, model and hardware evidence, and official Ollama Windows instructions."
+    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status,https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml,https://ollama.com/download/windows,https://ollama.com/download/linux" -Message "External navigation must remain fixed to the problem form, model and hardware evidence, and official Ollama Windows and Linux instructions."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
     Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and -not $portablePolicy.security.pyinstallerUserCacheAllowed -and $portablePolicy.security.buildOutputsRestrictedToRepositoryDist -and -not $portablePolicy.security.packageLinksMayEscapeBundle -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction -and $portablePolicy.security.distributionEvidenceEmbeddedInExtractedPackage -and $portablePolicy.security.distributionEvidenceRequiresExactHashes -and $portablePolicy.security.distributionEvidenceExcludedFromSigningScope) -Message "Portable evidence must cover every runtime file, keep build cache and outputs inside the ignored repository build tree, reject escaping package links, embed exact non-signable distribution evidence, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "runtime-component-inventory.json") -Message "Portable evidence must include the exact runtime component inventory."
-    Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "CPYTHON-3.14.6-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "APACHE-2.0.txt" -and $portablePolicy.supplyChainEvidence -contains "LIBFFI-3.4.4-LICENSE.txt") -Message "Portable evidence must include hash-verified CPython, Apache, and libffi license texts."
+    Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "CPYTHON-3.14.6-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "APACHE-2.0.txt" -and $portablePolicy.supplyChainEvidence -contains "LIBFFI-3.4.4-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "OLLAMA-MIT-LICENSE.txt") -Message "Portable evidence must include hash-verified CPython, Apache, libffi, and Ollama license texts."
     $embeddedEvidence = @($portablePolicy.embeddedDistributionEvidence)
-    Assert-True -Condition ($embeddedEvidence.Count -eq 5 -and $embeddedEvidence -contains "LICENSE.txt" -and $embeddedEvidence -contains "THIRD-PARTY-NOTICES.txt" -and $embeddedEvidence -contains "licenses/APACHE-2.0.txt" -and $embeddedEvidence -contains "licenses/CPYTHON-3.14.6-LICENSE.txt" -and $embeddedEvidence -contains "licenses/LIBFFI-3.4.4-LICENSE.txt") -Message "Portable packages must embed the exact five-file distribution-evidence set."
+    Assert-True -Condition ($embeddedEvidence.Count -eq 6 -and $embeddedEvidence -contains "LICENSE.txt" -and $embeddedEvidence -contains "THIRD-PARTY-NOTICES.txt" -and $embeddedEvidence -contains "licenses/APACHE-2.0.txt" -and $embeddedEvidence -contains "licenses/CPYTHON-3.14.6-LICENSE.txt" -and $embeddedEvidence -contains "licenses/LIBFFI-3.4.4-LICENSE.txt" -and $embeddedEvidence -contains "licenses/OLLAMA-MIT-LICENSE.txt") -Message "Portable packages must embed the exact six-file distribution-evidence set."
     Assert-Equal -Actual (($portablePolicy.security.browserLaunchExecutables.linux) -join ",") -Expected "/usr/bin/gio,/usr/bin/xdg-open" -Message "Linux browser launchers must remain fixed and allowlisted."
     Assert-Equal -Actual (($portablePolicy.security.linuxBrowserApplicationDataDirectories) -join ",") -Expected "/var/lib/flatpak/exports/share,/var/lib/snapd/desktop,/usr/local/share,/usr/share" -Message "Linux browser application discovery must use only fixed system-owned Flatpak, Snap, and base-system data directories."
     Assert-True -Condition (-not $portablePolicy.security.linuxBrowserApplicationDataDirectoriesInherited) -Message "Linux browser application discovery must not inherit caller-controlled XDG_DATA_DIRS."
@@ -5415,11 +5429,11 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($assets -notmatch '(?i)src\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
     $allowedExternalLinks = @(
         'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
-        'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
-        'href = "https://ollama.com/download/windows"'
+        'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"'
     )
     $observedExternalLinks = @($externalLinks | ForEach-Object Value | Sort-Object)
-    Assert-True -Condition ($externalLinks.Count -eq 3 -and (($observedExternalLinks -join "`n") -eq (($allowedExternalLinks | Sort-Object) -join "`n"))) -Message "Remote navigation must be limited to the fixed issue form, evidence wiki, and official Ollama Windows instructions."
+    Assert-True -Condition ($externalLinks.Count -eq 2 -and (($observedExternalLinks -join "`n") -eq (($allowedExternalLinks | Sort-Object) -join "`n"))) -Message "Static remote navigation must be limited to the fixed issue form and evidence wiki."
+    Assert-True -Condition ($assets -match 'link\.href\s*=\s*state\.platformFamily\s*===\s*"linux"\s*\?\s*"https://ollama\.com/download/linux"\s*:\s*"https://ollama\.com/download/windows"') -Message "Manual runtime guidance must choose only the official Ollama Linux or Windows download."
     Assert-True -Condition ($html.IndexOf('id="text-panel"') -lt $html.IndexOf('id="connection-panel"') -and $html -match 'interaction-grid' -and $html -match 'configuration-column') -Message "Chat should be the primary interaction before the compact configuration column."
     Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."
     Assert-True -Condition ($writingDoc -match 'qwen3\.5:9b' -and $writingDoc -match 'gemma3:12b' -and $writingDoc -match 'mistral-small3\.2' -and $writingDoc -match 'granite4:7b-a1b-h' -and $writingDoc -match 'No candidate.*product default') -Message "Writing-model candidates must remain evidence-gated and unpromoted."
@@ -5620,6 +5634,20 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     $paths = @(
         "scripts/system_readiness.py",
         "scripts/test-system-readiness.py",
+        "scripts/alpha_platform.py",
+        "scripts/test-alpha-platform.py",
+        "scripts/linux_alpha.py",
+        "scripts/test-linux-alpha.py",
+        "scripts/test-linux-alpha-runtime.py",
+        "scripts/test-linux-alpha-setup.py",
+        "scripts/test-linux-runtime-supply-chain.py",
+        "scripts/audit-linux-runtime-supply-chain.py",
+        "config/linux-alpha-contract.json",
+        "config/linux-alpha-component-registry.json",
+        "config/linux-runtime-artifact-review.json",
+        "config/linux-model-artifact-review.json",
+        "examples/fixtures/alpha-platform-adapter-cases.json",
+        "examples/fixtures/linux-system-detection-cases.json",
         "scripts/simulate-install-broker.py",
         "config/system-readiness-contract.json",
         "config/setup-plan-contract.json",
@@ -5638,13 +5666,19 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     }
     $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-system-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Readiness security tests should pass. Output: $($output -join ' ')"
-    Assert-True -Condition (($output -join "`n") -match "66") -Message "Readiness test coverage should remain complete."
+    $readinessCoverage = [regex]::Match(($output -join "`n"), "passed: (?<count>\d+)")
+    Assert-True -Condition ($readinessCoverage.Success -and [int]$readinessCoverage.Groups["count"].Value -ge 85) -Message "Readiness test coverage should remain complete."
     foreach ($alphaTest in @(
         "scripts/test-windows-alpha.py",
         "scripts/test-windows-alpha-setup.py",
         "scripts/test-windows-alpha-job-lifecycle.py",
         "scripts/test-diagnostic-logging.py",
         "scripts/test-windows-alpha-web-policy.py",
+        "scripts/test-alpha-platform.py",
+        "scripts/test-linux-alpha.py",
+        "scripts/test-linux-alpha-runtime.py",
+        "scripts/test-linux-alpha-setup.py",
+        "scripts/test-linux-runtime-supply-chain.py",
         "scripts/test-alpha-release.py",
         "scripts/test-alpha2-release-contract.py",
         "scripts/test-novice-experience.py",
@@ -5656,7 +5690,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
         "scripts/test-private-alpha-readiness.py"
     )) {
         $alphaOutput = @(& $python.Source (Join-Path $repoRoot $alphaTest) 2>&1)
-        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows Alpha hostile test should pass: $alphaTest. Output: $($alphaOutput -join ' ')"
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Alpha platform hostile test should pass: $alphaTest. Output: $($alphaOutput -join ' ')"
     }
     $readiness = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/system-readiness-contract.json") | ConvertFrom-Json
     $broker = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/installation-broker-contract.json") | ConvertFrom-Json
@@ -5792,6 +5826,11 @@ Invoke-PackTest "media onboarding and quantization foundations fail closed" {
     foreach ($imageTest in @("scripts/test-local-image-candidate-profiles.py", "scripts/test-local-image-provider-process-lifecycle.py", "scripts/test-local-image-package-boundary.py", "scripts/test-generative-media-candidate-contract.py", "scripts/test-quantized-artifact-lifecycle.py")) {
         $imageTestOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot $imageTest))
         Assert-Equal -Actual $imageTestOutput.ExitCode -Expected 0 -Message "Local image security test should pass: $imageTest. Output: $($imageTestOutput.Output)"
+    }
+
+    foreach ($energyTest in @("scripts/test-alpha2-model-energy-measurement.py", "scripts/test-import-alpha2-model-energy-log.py", "scripts/test-finalize-amd-adrenalin-soak.py", "scripts/test-electricity-rate-cost.py", "scripts/test-electricity-rate-updater.py", "scripts/test-electricity-rate-service.py")) {
+        $energyTestOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot $energyTest))
+        Assert-Equal -Actual $energyTestOutput.ExitCode -Expected 0 -Message "Model-energy and electricity-rate test should pass: $energyTest. Output: $($energyTestOutput.Output)"
     }
 
     foreach ($wrapper in @("scripts/get-quantization-profile.ps1", "scripts/get-quantization-profile.linux.sh", "scripts/get-quantization-profile.macos.sh", "scripts/plan-model-quantization.ps1", "scripts/plan-model-quantization.linux.sh", "scripts/plan-model-quantization.macos.sh")) {

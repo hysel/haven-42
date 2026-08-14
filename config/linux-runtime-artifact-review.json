@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "reviewId": "haven42.alpha2.linux-runtime-artifact-review",
+  "defaultDecision": "deny",
+  "managedRuntimeChangeApproved": false,
+  "automaticDefaultChangeAllowed": false,
+  "runtime": {
+    "engine": "ollama",
+    "version": "0.32.9",
+    "admissionState": "candidate-native-lifecycle-evidence-required",
+    "releasePage": "https://github.com/ollama/ollama/releases/tag/v0.32.9",
+    "publishedAtUtc": "2026-08-11T13:23:33Z",
+    "sourceRepository": "https://github.com/ollama/ollama",
+    "sourceRef": "v0.32.9",
+    "license": {
+      "expression": "MIT",
+      "sourcePath": "LICENSE",
+      "sourceBlobSha": "8e3dc978a7ca8c53f56bbedc5b558116140fc02e",
+      "evidencePath": "package/licenses/OLLAMA-MIT-LICENSE.txt",
+      "appliesToReviewedVersions": ["0.32.5", "0.32.9"],
+      "embeddedInReleaseArchives": false
+    },
+    "artifacts": [
+      {
+        "id": "ollama-linux-core-0-32-9-candidate",
+        "platform": "linux-x64",
+        "backend": "core",
+        "role": "runtime",
+        "name": "ollama-linux-amd64.tar.zst",
+        "byteLength": 1421653242,
+        "sha256": "5d747a43369f61e38f20b5a39fcc5c90647e562cdc61e2e56034f1c5b113d540",
+        "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-linux-amd64.tar.zst",
+        "archiveFormat": "tar.zst",
+        "maximumArchiveMembers": 128,
+        "expectedRegularFiles": 34,
+        "expectedDirectories": 3,
+        "expectedInternalLinks": 17,
+        "expandedByteLength": 2245353064,
+        "requiredExecutableRelativePath": "bin/ollama",
+        "embeddedLicenseNotice": false,
+        "managedInstallationAllowed": false
+      },
+      {
+        "id": "ollama-linux-rocm-0-32-9-candidate",
+        "platform": "linux-x64",
+        "backend": "rocm",
+        "role": "runtime-supplement",
+        "name": "ollama-linux-amd64-rocm.tar.zst",
+        "byteLength": 1047461645,
+        "sha256": "ab93c931df3ea570827f57fa752b3bea7bbc961af71412fc0d4cdaf5c48a356a",
+        "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-linux-amd64-rocm.tar.zst",
+        "archiveFormat": "tar.zst",
+        "maximumArchiveMembers": 2048,
+        "expectedRegularFiles": 1808,
+        "expectedDirectories": 3,
+        "expectedInternalLinks": 14,
+        "expandedByteLength": 2594730880,
+        "requiredExecutableRelativePath": null,
+        "embeddedLicenseNotice": false,
+        "managedInstallationAllowed": false
+      }
+    ]
+  },
+  "review": {
+    "officialReleaseMetadataMatched": true,
+    "archiveHashesMatched": true,
+    "archiveInventoriesRecorded": true,
+    "hostileArchiveValidationRequired": true,
+    "nativeLifecycleEvidenceRequired": true,
+    "productionPromotionAllowed": false
+  }
+}

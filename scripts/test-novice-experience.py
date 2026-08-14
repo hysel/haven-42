@@ -26,6 +26,7 @@ def main() -> int:
     issue_config = read(".github/ISSUE_TEMPLATE/config.yml")
     bug_form = read(".github/ISSUE_TEMPLATE/alpha-bug-report.yml")
     feedback_form = read(".github/ISSUE_TEMPLATE/alpha-feedback.yml")
+    model_test_form = read(".github/ISSUE_TEMPLATE/model-test-request.yml")
     download_guide = read("docs/windows-alpha-download-and-feedback.md")
 
     required_ui = (
@@ -59,7 +60,7 @@ def main() -> int:
     for section, step_count in (
         ("chat", 6),
         ("models", 5),
-        ("system", 5),
+        ("system", 6),
         ("technical", 4),
         ("about", 4),
     ):
@@ -67,6 +68,35 @@ def main() -> int:
         assert f'{section}: Object.freeze(' in app, section
         tour_block = app.split(f'{section}: Object.freeze(', 1)[1].split("}),\n", 1)[0]
         assert tour_block.count("{ target:") == step_count, section
+    assert 'id="energy-estimator-panel"' in html
+    assert "This estimates graphics-card electricity only" in html
+    assert "does not detect your location or change your model choice" in html
+    assert "Use the price from my electricity bill · most accurate" in html
+    assert "Use an average U.S. household price" in html
+    assert "Use an average European household price" in html
+    assert "Country and usual currency" in html
+    assert "United States — USD" in html
+    assert "Germany — EUR" in html
+    assert "Another country — enter currency below" in html
+    assert "Keep kWh and price in the status sidebar" in html
+    assert "Its values are not saved and disappear when the app closes" in html
+    assert "Your electricity-bill information stays private" in html
+    for phrase in (
+        '"Processor", processor',
+        '"Available space", storage',
+        '"Linux kernel"',
+        '"Desktop session"',
+        '"Linux compatibility"',
+        'graphics memory Unavailable',
+        '`${item.driverName} · version ${item.driverVersion || "Unavailable"}`',
+        '"amd-runtime": "AMD graphics tools"',
+        '"intel-runtime": "Intel graphics tools"',
+        'function linuxSetupRemediation(blockers)',
+        'This portable local AI engine requires a glibc-based Linux distribution.',
+        'Free more space beside Haven 42, then run the computer check again.',
+    ):
+        assert phrase in app, phrase
+    assert "Closing Haven 42 clears them" in html
     for phrase in (
         'id="section-tour-dialog" role="dialog" aria-modal="true"',
         'id="section-tour-skip"',
@@ -130,7 +160,10 @@ def main() -> int:
     assert "Retry local AI test" in app
     assert ".innerHTML" not in app
 
-    reporting = f"{issue_config}\n{bug_form}\n{feedback_form}\n{download_guide}"
+    reporting = (
+        f"{issue_config}\n{bug_form}\n{feedback_form}\n{model_test_form}\n"
+        f"{download_guide}"
+    )
     for phrase in (
         "blank_issues_enabled: false",
         "private vulnerability reporting",
@@ -147,10 +180,24 @@ def main() -> int:
     assert "label: General computer details" not in bug_form
     assert "Computer details prepared by Haven 42 (optional)" in bug_form
     assert bug_form.count("required: true") == 4
+    for phrase in (
+        "name: Request a model test",
+        "Which model would you like us to test?",
+        "Official model page (optional)",
+        "What would you like to use this model for?",
+        "What kind of computer should we consider? (optional)",
+        "does not guarantee the model will be downloaded, tested, supported",
+    ):
+        assert phrase in model_test_form, phrase
+    assert "multiple: true" in model_test_form
+    assert model_test_form.count("required: true") == 5
+    assert "https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml" in read(
+        "README.md"
+    )
     assert "password:" not in reporting.lower()
     assert "api key:" not in reporting.lower()
 
-    print(f"Novice-experience policy tests passed: {len(required_ui) + len(required_policy) + 54} checks.")
+    print(f"Novice-experience policy tests passed: {len(required_ui) + len(required_policy) + 63} checks.")
     return 0
 
 

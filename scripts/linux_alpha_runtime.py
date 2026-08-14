@@ -79,6 +79,12 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Any]:
             or isinstance(component.get("byteLength"), bool)
             or not 1 <= component["byteLength"] <= 4 * 1024**3
             or component.get("archiveFormat") != "tar.zst"
+            or component.get("license") != "MIT"
+            or component.get("licenseEvidencePath")
+            != "package/licenses/OLLAMA-MIT-LICENSE.txt"
+            or component.get("licenseSourceRef") != "v0.32.5"
+            or component.get("licenseSourceBlobSha")
+            != "8e3dc978a7ca8c53f56bbedc5b558116140fc02e"
             or not str(component.get("sourceUrl", "")).startswith(
                 "https://github.com/ollama/ollama/releases/download/v0.32.5/"
             )
@@ -315,9 +321,17 @@ def inspect_registered_archive(
         else:
             raise LinuxRuntimeError("archive-link-depth-limit")
         record["resolvedTarget"] = target
-    executable = records.get(component["executableRelativePath"])
-    if executable is None or executable["kind"] != "file" or not executable["mode"] & 0o111:
-        raise LinuxRuntimeError("runtime-executable-missing")
+    executable_path = component.get(
+        "executableRelativePath", component.get("requiredExecutableRelativePath")
+    )
+    if executable_path is not None:
+        executable = records.get(executable_path)
+        if (
+            executable is None
+            or executable["kind"] != "file"
+            or not executable["mode"] & 0o111
+        ):
+            raise LinuxRuntimeError("runtime-executable-missing")
     return {
         "records": records,
         "regularFiles": regular_files,
@@ -341,6 +355,17 @@ def _assert_destination(destination: Path) -> Path:
             break
         if cursor.parent == cursor:
             raise LinuxRuntimeError("runtime-parent-missing")
+        cursor = cursor.parent
+    try:
+        absolute.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+    except OSError as error:
+        raise LinuxRuntimeError("runtime-parent-create-failed") from error
+    cursor = absolute.parent
+    while True:
+        if cursor.is_symlink() or not cursor.is_dir():
+            raise LinuxRuntimeError("unsafe-runtime-destination")
+        if cursor.parent == cursor:
+            break
         cursor = cursor.parent
     return absolute
 

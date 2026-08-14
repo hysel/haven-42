@@ -16,36 +16,37 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 95 |
-| Distinct model-field values | 27 |
+| Evidence records | 109 |
+| Distinct model-field values | 33 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 22 |
+| `partial-pass` | 35 |
 | `validated-by-tests` | 19 |
 | `write-smoke-validated` | 13 |
 | `read-only-tool-validated` | 11 |
 | `read-only-cli-validated` | 9 |
+| `static-validated` | 8 |
 | `approved-write-ready` | 4 |
 | `candidate-only` | 4 |
-| `static-validated` | 8 |
 | `plan-review-candidate` | 2 |
 | `plan-validated` | 2 |
+| `failed-validation` | 1 |
 | `review-validated` | 1 |
 
 ## Validation Modes
 
 | Mode | Count |
 | --- | ---: |
+| Local endpoint | 44 |
 | Generated sample | 38 |
-| Local endpoint | 30 |
 | Editor agent | 9 |
 | Automated tests | 7 |
-| Static | 3 |
 | offline-fixture | 5 |
+| Static | 3 |
 | offline-local | 1 |
 | offline-metadata | 1 |
 | Online discovery | 1 |
@@ -72,6 +73,8 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Model |
 | --- |
+| Click 8.2.1 |
+| Express 5.1.0 |
 | OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
 | Qwen3-Coder-Next:latest |
 | SDXL Base 1.0 |
@@ -79,7 +82,9 @@ See [Evidence Catalog](Evidence-Catalog),
 | devstral-small-2:24b |
 | devstral-small-2:latest |
 | exact-upstream-candidate-records |
+| five exact manifest-pinned models |
 | gemma3:12b |
+| granite41-8b-q4_K_M |
 | granite4:7b-a1b-h |
 | laguna-xs-2.1:q4_K_M |
 | local-config |
@@ -88,10 +93,16 @@ See [Evidence Catalog](Evidence-Catalog),
 | mlx-community/Qwen3.5-4B-4bit |
 | mlx-community/Qwen3.5-9B-4bit |
 | mlx-community/Qwen3.5-9B-OptiQ-4bit |
+| nemotron-3.5-lightning:30b-a3b-q4_K_M |
+| nemotron-3.5-lightning:30b-a3b-q8_0 |
+| no-model |
 | qwen3-coder:30b |
+| qwen3.5:0.8b Q8_0 |
 | qwen3.5:35b |
 | qwen3.5:9b |
+| qwen3.5:9b Q4_K_M |
 | revision-and-sha256-pinned-11-model-corpus |
 | revision-and-sha256-pinned-follow-on-artifacts |
+| serde_json 1.0.140 |
 | synthetic-bounded-source-envelope |
 | unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |

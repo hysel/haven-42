@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "supported": [
+    {
+      "platformId": "windows-x64",
+      "platformFamily": "windows",
+      "managedSetupSupported": true
+    },
+    {
+      "platformId": "linux-x64",
+      "platformFamily": "linux",
+      "managedSetupSupported": true
+    }
+  ],
+  "rejectedPlatformIds": [
+    "",
+    "linux",
+    "linux-arm64",
+    "windows-x64 --command",
+    "../../linux-x64",
+    "freebsd-x64",
+    null,
+    42
+  ],
+  "rejectedOperationIds": [
+    "",
+    "setup",
+    "setup.execute-now",
+    "command.run",
+    "../../setup.plan",
+    "setup.plan\u0000command",
+    null,
+    42
+  ]
+}

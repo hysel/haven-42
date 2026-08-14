@@ -67,6 +67,8 @@ def main() -> None:
         "cuda-32gib-system-16gib"
     ]
     assert candidate_profiles["qwen36-35b-a3b-q4"] == []
+    assert candidate_profiles["muse-glimmer-30b-q4"] == []
+    assert candidate_profiles["muse-glimmer-30b-mlx-nvfp4"] == []
     assert profile_records["cuda-32gib-system-16gib"] == {
         "id": "cuda-32gib-system-16gib",
         "backend": "cuda",
@@ -80,6 +82,158 @@ def main() -> None:
         "ministral3-8b-q4",
     ):
         assert candidate_profiles[model_id] == ["cpu-16gib", "cuda-16gib"]
+
+    muse_candidates = {
+        candidate["modelId"]: candidate
+        for candidate in matrix["candidates"]
+        if candidate["modelId"].startswith("muse-glimmer-")
+    }
+    assert set(muse_candidates) == {
+        "muse-glimmer-30b-q4",
+        "muse-glimmer-30b-mlx-nvfp4",
+    }
+    assert muse_candidates["muse-glimmer-30b-q4"]["state"] == (
+        "deferred-requires-compatible-runtime-and-hardware-approval"
+    )
+    assert muse_candidates["muse-glimmer-30b-mlx-nvfp4"]["state"] == (
+        "deferred-owner-hardware-not-available"
+    )
+    for candidate in muse_candidates.values():
+        plan = candidate["plannedTest"]
+        assert plan["exactRuntimeVersionRequiredAtExecution"] is True
+        assert plan["explicitOwnerStartPromptRequired"] is True
+        assert plan["capabilityChecks"] == [
+            "general.chat",
+            "content.write",
+            "content.summarize",
+            "vision",
+            "tools",
+            "failure-recovery",
+        ]
+    assert muse_candidates["muse-glimmer-30b-q4"]["plannedTest"] == {
+        "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-q4",
+        "minimumOllamaVersion": "0.32.8",
+        "exactRuntimeVersionRequiredAtExecution": True,
+        "admissionFloor": {
+            "backend": "cuda",
+            "minimumSystemMemoryGiB": 32,
+            "minimumUsableGpuMemoryGiB": 24,
+        },
+        "capabilityChecks": [
+            "general.chat",
+            "content.write",
+            "content.summarize",
+            "vision",
+            "tools",
+            "failure-recovery",
+        ],
+        "explicitOwnerStartPromptRequired": True,
+    }
+    assert muse_candidates["muse-glimmer-30b-mlx-nvfp4"]["plannedTest"] == {
+        "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-mlx-nvfp4",
+        "minimumOllamaVersion": "0.32.7",
+        "exactRuntimeVersionRequiredAtExecution": True,
+        "admissionFloor": {
+            "backend": "mlx",
+            "minimumUnifiedMemoryGiB": 48,
+        },
+        "capabilityChecks": [
+            "general.chat",
+            "content.write",
+            "content.summarize",
+            "vision",
+            "tools",
+            "failure-recovery",
+        ],
+        "explicitOwnerStartPromptRequired": True,
+        "ownerDeferredUntilHardwareAvailable": True,
+    }
+
+    nemotron_candidates = {
+        candidate["modelId"]: candidate
+        for candidate in matrix["candidates"]
+        if candidate["modelId"].startswith("nemotron35-lightning-")
+    }
+    assert set(nemotron_candidates) == {
+        "nemotron35-lightning-30b-a3b-q4",
+        "nemotron35-lightning-30b-a3b-q8",
+        "nemotron35-lightning-30b-a3b-bf16",
+        "nemotron35-lightning-30b-a3b-mlx-nvfp4",
+        "nemotron35-lightning-30b-a3b-mlx-mxfp8",
+        "nemotron35-lightning-30b-a3b-mlx-bf16",
+    }
+    assert all(
+        candidate["requiredProfiles"] == []
+        and candidate["state"].startswith("deferred-")
+        and candidate["plannedTest"]["explicitOwnerStartPromptRequired"] is True
+        and candidate["plannedTest"][
+            "exactRuntimeCompatibilityRequiredAtExecution"
+        ]
+        is True
+        for candidate in nemotron_candidates.values()
+    )
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-q4"
+    ]["plannedTest"]["admissionFloor"] == {
+        "backend": "cuda",
+        "minimumSystemMemoryGiB": 64,
+        "minimumAggregateUsableGpuMemoryGiB": 48,
+    }
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-q4"
+    ]["plannedTest"]["minimumOllamaVersion"] == "0.32.9"
+    for model_id in (
+        "nemotron35-lightning-30b-a3b-q4",
+        "nemotron35-lightning-30b-a3b-q8",
+    ):
+        candidate = nemotron_candidates[model_id]
+        assert candidate["state"] == "deferred-partial-qualification-remaining-gates"
+        assert candidate["plannedTest"]["completedEvidence"] == {
+            "path": "examples/nvidia-v100-nemotron-validation.md",
+            "profile": "ubuntu-24.04-dual-tesla-v100-32gib",
+            "runtimeVersion": "0.32.9",
+            "outcome": "chat-writing-summary-soak-passed",
+            "automaticPromotionAllowed": False,
+        }
+        assert {
+            "tools", "thinking", "failure-recovery", "context-8192",
+            "context-32768", "exact-multi-gpu-distribution",
+            "human-quality-review",
+        } == set(candidate["plannedTest"]["remainingChecks"])
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-q4"
+    ]["plannedTest"]["runtimeRequirementReference"] == (
+        "config/alpha-2-model-runtime-requirements.json#nemotron35-lightning-30b-a3b-q4"
+    )
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-q8"
+    ]["plannedTest"]["minimumOllamaVersion"] == "0.32.9"
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-q8"
+    ]["plannedTest"]["runtimeRequirementReference"] == (
+        "config/alpha-2-model-runtime-requirements.json#nemotron35-lightning-30b-a3b-q8"
+    )
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-q8"
+    ]["plannedTest"]["admissionFloor"] == {
+        "backend": "cuda",
+        "minimumSystemMemoryGiB": 96,
+        "minimumAggregateUsableGpuMemoryGiB": 56,
+    }
+    assert nemotron_candidates[
+        "nemotron35-lightning-30b-a3b-bf16"
+    ]["state"] == "deferred-outside-current-full-offload-envelope"
+    for model_id in (
+        "nemotron35-lightning-30b-a3b-mlx-nvfp4",
+        "nemotron35-lightning-30b-a3b-mlx-mxfp8",
+        "nemotron35-lightning-30b-a3b-mlx-bf16",
+    ):
+        assert nemotron_candidates[model_id]["state"] == (
+            "deferred-owner-hardware-not-available"
+        )
+        assert nemotron_candidates[model_id]["plannedTest"][
+            "ownerDeferredUntilHardwareAvailable"
+        ] is True
 
     gate = matrix["soakGate"]
     assert gate == {

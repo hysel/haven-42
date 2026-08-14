@@ -1,0 +1,80 @@
+name: Request a model test
+description: Ask Haven 42 to evaluate a specific model for local use.
+title: "[Model test request]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a model. This is a public request.
+
+        You do not need to know model sizes, quantization names, or technical hardware details. Share what you know and leave optional fields empty.
+
+        **Do not include** passwords, API keys, private network addresses, hostnames, usernames, local file paths, prompts, responses, logs, or other personal information.
+
+        A request does not automatically download a model, start a test, add it to Haven 42, or make it a default. Testing requires an official locally runnable artifact, compatible hardware, available lab time, and a separate approved test run.
+  - type: input
+    id: model
+    attributes:
+      label: Which model would you like us to test?
+      description: Enter the model name and version if you know it. A simple model name is enough.
+      placeholder: For example, Gemma 4 12B or qwen3.6:27b-q4_K_M
+    validations:
+      required: true
+  - type: input
+    id: official_page
+    attributes:
+      label: Official model page (optional)
+      description: Add an official Ollama, Hugging Face publisher, or model-developer link if you have one. Do not link to an unknown download mirror.
+      placeholder: https://ollama.com/library/...
+  - type: dropdown
+    id: uses
+    attributes:
+      label: What would you like to use this model for?
+      description: Select every use that matters to you.
+      multiple: true
+      options:
+        - Chat and questions
+        - Writing and rewriting
+        - Summarizing documents
+        - Coding or development tools
+        - Image understanding
+        - Tool use
+        - Something else
+    validations:
+      required: true
+  - type: dropdown
+    id: hardware_kind
+    attributes:
+      label: What kind of computer should we consider? (optional)
+      description: Choose Not sure if you do not know.
+      options:
+        - Not sure
+        - CPU only or no dedicated graphics card
+        - NVIDIA graphics
+        - AMD graphics
+        - Intel graphics
+        - Apple silicon
+        - Other
+  - type: textarea
+    id: hardware_details
+    attributes:
+      label: Computer details (optional)
+      description: If this request is for a particular computer, list only its operating system, memory, and graphics card. Do not include machine names, addresses, usernames, serial numbers, or full local paths.
+      placeholder: Windows 11, 32 GB memory, NVIDIA graphics with 16 GB graphics memory
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why are you interested in this model?
+      description: A short, plain-language explanation helps us prioritize the right tests.
+      placeholder: I want a faster local model for summarizing long documents on a computer with limited graphics memory.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Before submitting
+      options:
+        - label: I reviewed this public request and removed private or identifying information.
+          required: true
+        - label: I understand that this request does not guarantee the model will be downloaded, tested, supported, recommended, or selected automatically.
+          required: true

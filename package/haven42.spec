@@ -43,6 +43,11 @@ resources = [
     ("config/alpha-2-model-catalog.json", "config"),
     ("config/alpha-2-model-selection-evidence.json", "config"),
     ("config/alpha-2-model-selection-policy.json", "config"),
+    ("config/alpha-2-model-version-inventory.json", "config"),
+    ("config/alpha-2-model-runtime-requirements.json", "config"),
+    ("config/alpha-2-runtime-compatibility.json", "config"),
+    ("config/linux-runtime-artifact-review.json", "config"),
+    ("config/linux-model-artifact-review.json", "config"),
     ("package/resource-integrity.json", "package"),
 ]
 
@@ -52,7 +57,7 @@ a = Analysis(
     binaries=[],
     datas=[(str(root / source), destination) for source, destination in resources],
     hiddenimports=[
-        "alpha2_model_selector", "alpha_platform", "diagnostic_logging", "linux_alpha",
+        "alpha2_model_selector", "alpha2_runtime_compatibility", "alpha_platform", "diagnostic_logging", "electricity_rate_service", "linux_alpha",
         "linux_alpha_runtime", "linux_alpha_setup", "windows_alpha",
         "windows_alpha_setup",
     ],

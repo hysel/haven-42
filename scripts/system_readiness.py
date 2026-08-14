@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import ctypes
 import json
+import math
 import os
 import platform
 import re
@@ -199,6 +200,8 @@ def _read_linux_os_release(path: Path = Path("/etc/os-release")) -> dict[str, st
         raw = resolved.read_text(encoding="utf-8")
     except (OSError, UnicodeError):
         return {}
+    if "\x00" in raw:
+        return {}
     values: dict[str, str] = {}
     allowed = {
         "ID", "NAME", "PRETTY_NAME", "VERSION_ID", "VERSION", "BUILD_ID",
@@ -207,17 +210,20 @@ def _read_linux_os_release(path: Path = Path("/etc/os-release")) -> dict[str, st
         if not line or line.startswith("#") or "=" not in line:
             continue
         key, encoded = line.split("=", 1)
-        if key not in allowed or key in values or len(encoded) > 512:
+        if key not in allowed:
             continue
+        if key in values or len(encoded) > 512:
+            return {}
         try:
             parsed = shlex.split(encoded, comments=False, posix=True)
         except ValueError:
-            continue
+            return {}
         if len(parsed) != 1:
-            continue
+            return {}
         sanitized = _sanitize_text(parsed[0], 160)
-        if sanitized is not None:
-            values[key] = sanitized
+        if sanitized is None:
+            return {}
+        values[key] = sanitized
     return values
 
 
@@ -261,10 +267,10 @@ def _linux_platform_facts(
         if match:
             facts["libcFamily"] = match.group(1).casefold()
             facts["libcVersion"] = match.group(2)
-    # Session environment values are not trusted readiness evidence. Tests may
-    # inject a bounded fixture, but live inspection deliberately avoids
-    # copying process-environment data into the public readiness report.
-    source = {} if environment is None else environment
+    # Only these two non-path session classifications are read. They remain
+    # explicitly reported/untrusted metadata and never grant setup authority.
+    # All other environment values are ignored.
+    source = os.environ if environment is None else environment
     desktop = _sanitize_text(str(source.get("XDG_CURRENT_DESKTOP", "")), 64)
     session = _sanitize_text(str(source.get("XDG_SESSION_TYPE", "")), 32)
     if desktop and re.fullmatch(r"[A-Za-z0-9 ._:+-]{1,64}", desktop):
@@ -290,6 +296,29 @@ def _software_item(
         "version": version,
         "source": "registered-command-probe",
         "confidence": "high" if probe["state"] == "detected" and version else "medium",
+    }
+
+
+def _first_software_item(
+    runner: ProbeRunner,
+    component_id: str,
+    probes: tuple[tuple[str, tuple[str, ...]], ...],
+) -> dict[str, Any]:
+    """Run only a fixed ordered probe list and return the first verified version."""
+    fallback: dict[str, Any] | None = None
+    for executable, arguments in probes:
+        item = _software_item(runner, component_id, executable, arguments)
+        fallback = fallback or item
+        if item["state"] == "detected" and item["version"] is not None:
+            return item
+        if item["state"] == "installed-unverified":
+            fallback = item
+    return fallback or {
+        "componentId": component_id,
+        "state": "not-detected",
+        "version": None,
+        "source": "registered-command-probe",
+        "confidence": "medium",
     }
 
 
@@ -400,6 +429,7 @@ def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
                     "state": "detected",
                     "source": "nvidia-smi",
                     "confidence": "high",
+                    "driverName": "nvidia",
                     "driverVersion": match.group(3),
                     "backendCandidate": "cuda-candidate",
                 })
@@ -407,24 +437,56 @@ def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
     if system == "windows":
         items.extend(_windows_gpu_items())
     elif system == "linux":
-        pci = runner.run("lspci", ())
+        pci = runner.run("lspci", ("-D", "-k"))
         if pci["state"] == "detected":
-            for line in pci["output"].splitlines():
-                if not re.search(r"VGA|3D controller|Display controller", line, re.I):
+            blocks: list[list[str]] = []
+            for line in pci["output"].splitlines()[:512]:
+                if line and not line[0].isspace():
+                    blocks.append([line])
+                elif blocks:
+                    blocks[-1].append(line)
+            allowed_drivers = {"amdgpu", "i915", "xe", "nouveau", "nvidia"}
+            for block in blocks[:64]:
+                header = block[0]
+                if not re.search(r"VGA|3D controller|Display controller", header, re.I):
                     continue
-                name = _sanitize_text(line.split(":", 2)[-1], 120)
+                name = _sanitize_text(header.split(":", 2)[-1], 120)
                 if name:
                     vendor = (
-                        "NVIDIA" if re.search("nvidia", name, re.I)
-                        else "AMD" if re.search("amd|ati", name, re.I)
-                        else "Intel" if re.search("intel", name, re.I)
+                        "NVIDIA" if re.search(r"\bnvidia\b", name, re.I)
+                        else "AMD" if re.search(
+                            r"\bamd\b|\bati\b|advanced micro devices|\bradeon\b",
+                            name,
+                            re.I,
+                        )
+                        else "Intel" if re.search(r"\bintel\b", name, re.I)
                         else "Unknown"
+                    )
+                    driver_name = None
+                    for detail in block[1:]:
+                        match = re.fullmatch(r"\s*Kernel driver in use:\s*([A-Za-z0-9_-]{1,32})\s*", detail)
+                        if match and match.group(1) in allowed_drivers:
+                            driver_name = match.group(1)
+                            break
+                    driver_version = None
+                    if driver_name:
+                        module = runner.run("modinfo", ("-F", "version", driver_name))
+                        if module["state"] == "detected" and module["output"]:
+                            driver_version = _sanitize_text(module["output"].splitlines()[0], 64)
+                    backend = (
+                        "cuda-candidate" if vendor == "NVIDIA"
+                        else "rocm-or-vulkan-candidate" if vendor == "AMD"
+                        else "vulkan-candidate" if vendor == "Intel"
+                        else "unknown"
                     )
                     items.append({
                         "vendor": vendor, "model": name, "memoryGiB": None,
                         "memoryType": "unknown", "state": "detected",
-                        "source": "lspci", "confidence": "medium",
-                        "driverVersion": None, "backendCandidate": "unknown",
+                        "source": "lspci-kernel-driver",
+                        "confidence": "high" if driver_name else "medium",
+                        "driverName": driver_name,
+                        "driverVersion": driver_version,
+                        "backendCandidate": backend,
                     })
     elif system == "macos":
         profiler = runner.run("system_profiler", ("SPDisplaysDataType", "-json"))
@@ -438,6 +500,7 @@ def _gpu_items(runner: ProbeRunner, system: str) -> list[dict[str, Any]]:
                             "vendor": "Apple" if "apple" in name.lower() else "Unknown",
                             "model": name, "memoryGiB": None, "memoryType": "unified",
                             "state": "detected", "source": "system-profiler", "confidence": "medium",
+                            "driverName": None,
                             "driverVersion": None, "backendCandidate": "metal-candidate",
                         })
             except (json.JSONDecodeError, AttributeError):
@@ -465,8 +528,14 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
         _software_item(runner, "aider", "aider", ("--version",)),
         _software_item(runner, "opencode", "opencode", ("--version",)),
         _software_item(runner, "nvidia-runtime", "nvidia-smi", ("--version",)),
-        _software_item(runner, "amd-runtime", "rocm-smi", ("--version",)),
-        _software_item(runner, "intel-runtime", "sycl-ls", ("--version",)),
+        _first_software_item(runner, "amd-runtime", (
+            ("amd-smi", ("version",)),
+            ("rocm-smi", ("--version",)),
+        )),
+        _first_software_item(runner, "intel-runtime", (
+            ("xpu-smi", ("version",)),
+            ("sycl-ls", ("--version",)),
+        )),
     ]
     if system == "darwin":
         system = "macos"
@@ -561,6 +630,107 @@ def validate_snapshot(snapshot: dict[str, Any]) -> None:
     ):
         raise ReadinessError("invalid-readiness-snapshot")
     if any(not isinstance(item, str) or not SAFE_MODEL.fullmatch(item) for item in snapshot["installedModels"]):
+        raise ReadinessError("invalid-readiness-snapshot")
+    platform_facts = snapshot["platform"]
+    required_platform = {
+        "operatingSystem", "architecture", "logicalProcessors",
+        "systemMemoryGiB", "availableStorageGiB",
+    }
+    allowed_platform = required_platform | {
+        "productName", "buildNumber", "cpuFeatures", "pendingRestart",
+        "distributionId", "distributionVersion", "kernelVersion", "libcFamily",
+        "libcVersion", "desktopEnvironmentReported", "sessionTypeReported",
+        "sessionMetadataTrusted",
+    }
+    if not required_platform <= set(platform_facts) or not set(platform_facts) <= allowed_platform:
+        raise ReadinessError("invalid-readiness-snapshot")
+    if platform_facts.get("operatingSystem") not in {"windows", "linux", "macos"}:
+        raise ReadinessError("invalid-readiness-snapshot")
+    if not isinstance(platform_facts.get("architecture"), str) or not re.fullmatch(
+        r"[A-Za-z0-9._+-]{1,32}", platform_facts["architecture"]
+    ):
+        raise ReadinessError("invalid-readiness-snapshot")
+    logical = platform_facts.get("logicalProcessors")
+    if logical is not None and (isinstance(logical, bool) or not isinstance(logical, int) or not 1 <= logical <= 65536):
+        raise ReadinessError("invalid-readiness-snapshot")
+    for field in ("systemMemoryGiB", "availableStorageGiB"):
+        value = platform_facts.get(field)
+        if value is not None and (
+            isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value) or value < 0 or value > 10**9
+        ):
+            raise ReadinessError("invalid-readiness-snapshot")
+    optional_text_limits = {
+        "productName": 160, "distributionId": 64, "distributionVersion": 64,
+        "kernelVersion": 96, "libcFamily": 32, "libcVersion": 32,
+        "desktopEnvironmentReported": 64, "sessionTypeReported": 32,
+    }
+    for field, maximum in optional_text_limits.items():
+        value = platform_facts.get(field)
+        if value is not None and (
+            not isinstance(value, str) or _sanitize_text(value, maximum) != value
+        ):
+            raise ReadinessError("invalid-readiness-snapshot")
+    if platform_facts.get("buildNumber") is not None and (
+        isinstance(platform_facts["buildNumber"], bool)
+        or not isinstance(platform_facts["buildNumber"], int)
+        or not 0 <= platform_facts["buildNumber"] <= 10**9
+    ):
+        raise ReadinessError("invalid-readiness-snapshot")
+    cpu_features = platform_facts.get("cpuFeatures", [])
+    if not isinstance(cpu_features, list) or any(
+        not isinstance(item, str) or not re.fullmatch(r"[a-z0-9._+-]{1,32}", item)
+        for item in cpu_features
+    ):
+        raise ReadinessError("invalid-readiness-snapshot")
+    pending_restart = platform_facts.get("pendingRestart")
+    if pending_restart is not None and type(pending_restart) is not bool:
+        raise ReadinessError("invalid-readiness-snapshot")
+    if platform_facts.get("sessionMetadataTrusted", False) is not False:
+        raise ReadinessError("invalid-readiness-snapshot")
+
+    required_accelerator = {
+        "vendor", "model", "memoryGiB", "memoryType", "state", "source", "confidence",
+    }
+    allowed_accelerator = required_accelerator | {"driverName", "driverVersion", "backendCandidate"}
+    for item in snapshot["accelerators"]:
+        if not isinstance(item, dict) or not required_accelerator <= set(item) or not set(item) <= allowed_accelerator:
+            raise ReadinessError("invalid-readiness-snapshot")
+        if item.get("vendor") not in {"NVIDIA", "AMD", "Intel", "Apple", "Unknown"}:
+            raise ReadinessError("invalid-readiness-snapshot")
+        if not isinstance(item.get("model"), str) or _sanitize_text(item["model"], 120) != item["model"]:
+            raise ReadinessError("invalid-readiness-snapshot")
+        memory_value = item.get("memoryGiB")
+        if memory_value is not None and (
+            isinstance(memory_value, bool) or not isinstance(memory_value, (int, float))
+            or not math.isfinite(memory_value) or memory_value < 0 or memory_value > 10**6
+        ):
+            raise ReadinessError("invalid-readiness-snapshot")
+        for field in ("memoryType", "state", "source", "confidence", "driverName", "driverVersion", "backendCandidate"):
+            value = item.get(field)
+            if value is not None and (
+                not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9._+-]{1,96}", value)
+            ):
+                raise ReadinessError("invalid-readiness-snapshot")
+
+    required_software = {"componentId", "state", "version", "source", "confidence"}
+    for item in snapshot["software"]:
+        if not isinstance(item, dict) or set(item) != required_software:
+            raise ReadinessError("invalid-readiness-snapshot")
+        for field in ("componentId", "state", "source", "confidence"):
+            if not isinstance(item.get(field), str) or not re.fullmatch(r"[A-Za-z0-9._+-]{1,96}", item[field]):
+                raise ReadinessError("invalid-readiness-snapshot")
+        version = item.get("version")
+        if version is not None and (not isinstance(version, str) or _sanitize_text(version, 160) != version):
+            raise ReadinessError("invalid-readiness-snapshot")
+    if any(not isinstance(item, str) or not re.fullmatch(r"[a-z0-9-]{1,160}", item) for item in snapshot["warnings"]):
+        raise ReadinessError("invalid-readiness-snapshot")
+    if snapshot.get("privacy") != {
+        "persisted": False,
+        "rawProbeOutputReturned": False,
+        "hostIdentityIncluded": False,
+        "privatePathsIncluded": False,
+    }:
         raise ReadinessError("invalid-readiness-snapshot")
 
 

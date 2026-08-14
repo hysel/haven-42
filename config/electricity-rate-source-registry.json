@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-electricity-rate-source-registry",
+  "defaultSourceId": "manual-user-entry",
+  "automaticLocationDetection": false,
+  "sources": [
+    {
+      "id": "manual-user-entry",
+      "name": "Rate from your electricity bill",
+      "sourceKind": "manual-bill-rate",
+      "coverage": "worldwide",
+      "countryCodes": ["*"],
+      "networkRequired": false,
+      "updateFrequency": "user-controlled",
+      "recommendedUse": "Most accurate simple estimate in every country and currency."
+    },
+    {
+      "id": "eia-us-residential-average",
+      "name": "U.S. EIA residential electricity price",
+      "sourceKind": "official-average",
+      "coverage": "United States national and state averages",
+      "countryCodes": ["US"],
+      "dataset": "electricity/retail-sales/data",
+      "adapter": "scripts/update-electricity-rate-snapshot.py --source eia",
+      "apiEndpoint": "https://api.eia.gov/v2/electricity/retail-sales/data/",
+      "sourceUrl": "https://www.eia.gov/opendata/documentation.php",
+      "networkRequiredForUpdate": true,
+      "updateFrequency": "monthly",
+      "recommendedUse": "Fallback estimate when the user does not enter a bill rate."
+    },
+    {
+      "id": "eurostat-household-electricity",
+      "name": "Eurostat household electricity prices",
+      "sourceKind": "official-average",
+      "coverage": "Countries reported by Eurostat dataset nrg_pc_204",
+      "countryCodes": ["dataset-reported"],
+      "dataset": "nrg_pc_204",
+      "adapter": "scripts/update-electricity-rate-snapshot.py --source eurostat",
+      "apiEndpoint": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/nrg_pc_204",
+      "sourceUrl": "https://ec.europa.eu/eurostat/databrowser/view/nrg_pc_204/default/table",
+      "networkRequiredForUpdate": true,
+      "updateFrequency": "twice-yearly",
+      "recommendedUse": "Country average with an explicit consumption band, tax scope, period, and source currency."
+    },
+    {
+      "id": "openei-us-utility-rate",
+      "name": "OpenEI U.S. Utility Rate Database",
+      "sourceKind": "utility-tariff",
+      "coverage": "Participating U.S. utilities and tariffs",
+      "countryCodes": ["US"],
+      "sourceUrl": "https://apps.openei.org/services/doc/rest/util_rates/?version=4",
+      "networkRequiredForUpdate": true,
+      "updateFrequency": "source-dependent",
+      "recommendedUse": "Advanced opt-in lookup only; tariffs can include tiers, time-of-use periods, and fixed charges."
+    }
+  ]
+}

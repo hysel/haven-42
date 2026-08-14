@@ -7,6 +7,9 @@ param(
     [string]$SourceHtmlPath,
     [string]$HuggingFaceJsonPath,
     [string]$OutputPath,
+    [string]$MarkdownOutputPath,
+    [string]$InventoryPath,
+    [string]$PreviousReportPath,
     [string]$ModelProfilePath,
     [ValidateSet("TotalDedicated", "MaxDedicated")]
     [string]$VramSelectionMode = "TotalDedicated",
@@ -21,6 +24,12 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 if (-not $OutputPath) {
     $OutputPath = Join-Path $repoRoot "runtime-validation-output/online-model-candidates-$(Get-Date -Format 'yyyyMMdd-HHmmss').json"
 }
+if (-not $MarkdownOutputPath) {
+    $MarkdownOutputPath = [System.IO.Path]::ChangeExtension($OutputPath, ".md")
+}
+if (-not $InventoryPath) {
+    $InventoryPath = Join-Path $repoRoot "config/alpha-2-model-version-inventory.json"
+}
 
 $python = Get-Command python -ErrorAction SilentlyContinue
 $pythonPath = if ($python) { $python.Source } elseif (Get-Command py -ErrorAction SilentlyContinue) { "py" } else { throw "Python 3 is required for provider-neutral model discovery." }
@@ -30,6 +39,8 @@ $arguments = @(
     "--source-config", (Join-Path $repoRoot "config/model-discovery-sources.json"),
     "--contract-path", (Join-Path $repoRoot "config/model-discovery-contract.json"),
     "--output-path", $OutputPath,
+    "--markdown-output-path", $MarkdownOutputPath,
+    "--inventory-path", $InventoryPath,
     "--vram-selection-mode", $VramSelectionMode,
     "--available-vram-gb", ([string]::Format([Globalization.CultureInfo]::InvariantCulture, "{0}", $AvailableVramGb)),
     "--max-results-per-query", $MaxResultsPerQuery,
@@ -42,6 +53,7 @@ if ($HuggingFaceBaseUrl) { $arguments += @("--hugging-face-base-url", $HuggingFa
 if ($SourceHtmlPath) { $arguments += @("--ollama-html-fixture", $SourceHtmlPath) }
 if ($HuggingFaceJsonPath) { $arguments += @("--huggingface-json-fixture", $HuggingFaceJsonPath) }
 if ($ModelProfilePath) { $arguments += @("--model-profile-path", $ModelProfilePath) }
+if ($PreviousReportPath) { $arguments += @("--previous-report-path", $PreviousReportPath) }
 if ($IncludeOversizedModels) { $arguments += "--include-oversized-models" }
 
 # The report contract fixes PullsModels and RewritesContinueConfig to false.

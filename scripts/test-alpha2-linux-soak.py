@@ -132,6 +132,22 @@ def main() -> None:
         ),
         "unreviewed-qualification-cell",
     )
+    for deferred_model in (
+        "muse-glimmer-30b-q4",
+        "muse-glimmer-30b-mlx-nvfp4",
+    ):
+        refused(
+            lambda model_id=deferred_model: run(
+                model_id=model_id,
+                qualification_inventory=True,
+                qualification_profile_id="cuda-16gib",
+                backend="cuda",
+                system_memory_gib=64,
+                usable_gpu_memory_gib=32,
+                cell_runner=passing_qualification_cell,
+            ),
+            "unreviewed-qualification-cell",
+        )
     for duration in (0, 4.999, 721, float("inf"), float("nan"), True):
         refused(lambda value=duration: run(duration_minutes=value), "invalid-soak-duration")
     for interval in (0, 29.999, 301, float("inf"), True):

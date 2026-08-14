@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-model-energy-evidence-contract",
+  "description": "Sanitized GPU-only energy evidence for one exact model, runtime, hardware, operating-system, and fixed workload combination.",
+  "required": [
+    "schemaVersion",
+    "kind",
+    "outcome",
+    "measuredAtUtc",
+    "identity",
+    "environment",
+    "workload",
+    "telemetry",
+    "metrics",
+    "billEstimate",
+    "evidence"
+  ],
+  "measurementFloor": {
+    "idleBaselineSeconds": 120,
+    "activeMeasurementSeconds": 300,
+    "maximumSamplingIntervalSeconds": 10,
+    "minimumSamplingCompletenessPercent": 80
+  },
+  "requiredMetrics": [
+    "idleAverageWatts",
+    "loadAverageWatts",
+    "loadPeakWatts",
+    "idleAdjustedAverageWatts",
+    "measuredGpuEnergyWh",
+    "idleAdjustedGpuEnergyWh",
+    "outputTokens",
+    "outputTokensPerSecond",
+    "outputTokensPerWh",
+    "byTask"
+  ],
+  "interpretation": {
+    "telemetryScope": "GPU board or graphics package only",
+    "wholeComputerEstimateAllowed": false,
+    "multiGpuMeasurementMustIncludeEveryParticipatingDevice": true,
+    "deviceIdentifiersMayBePersisted": false,
+    "compareOnlyExactHardwareModelRuntimeArtifactOsAndWorkload": true,
+    "missingMetricIsUnknown": true,
+    "automaticModelPromotionAllowed": false
+  },
+  "supportedTelemetrySources": [
+    "nvidia-smi",
+    "amd-smi",
+    "xpu-smi",
+    "nvidia-smi-csv",
+    "amd-adrenalin-csv",
+    "intel-xpu-smi-csv"
+  ]
+}

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inventoryId": "haven42.alpha2.model-family-versions",
   "release": "0.4.0-alpha.2",
-  "reviewedAtUtc": "2026-08-09T16:00:00Z",
+  "reviewedAtUtc": "2026-08-12T16:00:00Z",
   "status": "qualification-inventory-not-selection-policy",
   "capabilities": [
     "general.chat",
@@ -307,6 +307,197 @@
           "officialSource": "https://huggingface.co/mistralai/Mistral-Small-4-119B-2603",
           "qualificationState": "outside-current-hardware-envelope",
           "candidates": []
+        }
+      ]
+    },
+    {
+      "family": "Muse Glimmer",
+      "license": "Apache-2.0",
+      "licenseSource": "https://ollama.com/library/muse-glimmer",
+      "versions": [
+        {
+          "version": "30B",
+          "artifactStatus": "local-artifacts-verified",
+          "officialSource": "https://ollama.com/library/muse-glimmer/tags",
+          "qualificationState": "planned-awaiting-compatible-runtime-and-hardware",
+          "candidates": [
+            {
+              "id": "muse-glimmer-30b-q4",
+              "model": "muse-glimmer:30b",
+              "manifestDigest": "de878ce33ad81d060001db1469a02eebe4d86f0ad58cfe52dc062fdcbe4464c1",
+              "modelLayerDigest": "71b5c9c9abbc2a9e7c13550b6f9fe1f062650117a24490b15a310cbd7de03f8b",
+              "projectorLayerDigest": "f48b452316f9b213758e8659444029b961a24a07f99a1abb2a9f88b06f7c00c6",
+              "modelBytes": 16756681056,
+              "downloadBytes": 18157010252,
+              "quantization": "Q4_K_M",
+              "minimumOllamaVersion": "0.32.8",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-q4",
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "vision",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "high-memory-single-gpu"
+            },
+            {
+              "id": "muse-glimmer-30b-mlx-nvfp4",
+              "model": "muse-glimmer:30b-mlx",
+              "manifestDigest": "ef32a55b4976faa955cbab0462d09bd081351ef5b87d73d8fcd299bf17c111d7",
+              "configDigest": "751aed2d7eee5bdf40f0d4138aa7fe57f0e54e96a430902dc9fa08fba3ae5f6a",
+              "modelBytes": 21232871036,
+              "downloadBytes": 21232871036,
+              "quantization": "NVFP4-DFlash",
+              "minimumOllamaVersion": "0.32.7",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-mlx-nvfp4",
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "vision",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "apple-silicon-high-unified-memory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "NVIDIA Nemotron",
+      "license": "NVIDIA-Nemotron-Open-Model-License",
+      "licenseSource": "https://ollama.com/library/nemotron-3.5-lightning:30b-a3b-q4_K_M",
+      "versions": [
+        {
+          "version": "3.5 Lightning",
+          "artifactStatus": "official-local-artifacts-metadata-verified",
+          "officialSource": "https://ollama.com/library/nemotron-3.5-lightning/tags",
+          "qualificationState": "planned-awaiting-explicit-owner-start",
+          "architecture": {
+            "type": "mixture-of-experts",
+            "totalParameters": "30B",
+            "activeParameters": "3B"
+          },
+          "candidates": [
+            {
+              "id": "nemotron35-lightning-30b-a3b-q4",
+              "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+              "minimumOllamaVersion": "0.32.9",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#nemotron35-lightning-30b-a3b-q4",
+              "manifestDigest": "e7a64ff15fb174c42b4f463e5c888c4f2c7b9cabf9e8d65a1c0874405426c1b2",
+              "configDigest": "7101a4a1d9e30ce87a71265e93215173f5e4cc84883e5cf1ef88862547f31fcd",
+              "modelLayerDigest": "5c19f6282f4fc51cb114cb6c876d70ca2fc3b9cf0fbd0a018d9908f4fe1f63b3",
+              "modelBytes": 25430738944,
+              "downloadBytes": 25430749137,
+              "quantization": "Q4_K_M",
+              "contextWindowTokens": 1048576,
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "multi-gpu-high-memory"
+            },
+            {
+              "id": "nemotron35-lightning-30b-a3b-q8",
+              "model": "nemotron-3.5-lightning:30b-a3b-q8_0",
+              "minimumOllamaVersion": "0.32.9",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#nemotron35-lightning-30b-a3b-q8",
+              "manifestDigest": "9983b24ee511395c8d58ce1f92e0e8c11c4e2fb43029d1718c1d6694e8187117",
+              "configDigest": "cdb81d45f590e46457c7e509a49bddaba60a2546aa39b90609999268d11c0009",
+              "modelLayerDigest": "e8bf53c52f9abc31964a844a8d0c04ef6d314c934a8bb6b24403ec3727fdc68c",
+              "modelBytes": 35004642304,
+              "downloadBytes": 35004652497,
+              "quantization": "Q8_0",
+              "contextWindowTokens": 1048576,
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "multi-gpu-very-high-memory"
+            },
+            {
+              "id": "nemotron35-lightning-30b-a3b-bf16",
+              "model": "nemotron-3.5-lightning:30b-a3b-bf16",
+              "manifestDigest": "721c64cd61aca9b6dad20ef642d3e41ca16f0054099a3e3f42c9375aae649f39",
+              "configDigest": "33d772087bd0e63345367a643f1370a35047dc6764789d34f5f3698e32a39148",
+              "modelLayerDigest": "39287049623ab48a23f3d494445377fa8bbd341cd54e55c838b5c48d6a0c9806",
+              "modelBytes": 65852184064,
+              "downloadBytes": 65852194257,
+              "quantization": "BF16",
+              "contextWindowTokens": 1048576,
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "outside-current-full-offload-envelope"
+            },
+            {
+              "id": "nemotron35-lightning-30b-a3b-mlx-nvfp4",
+              "model": "nemotron-3.5-lightning:30b-a3b-mlx",
+              "manifestDigest": "8b1474be6e54dc19eb7aa08bebfb9bda147c4b9ef9796a726131ad29ad15645a",
+              "configDigest": "2070f1ef6337efdcec267ce890140ee11da89e53d808eb673b4128be166ef188",
+              "modelBytes": 22666641292,
+              "downloadBytes": 22666641292,
+              "quantization": "NVFP4",
+              "contextWindowTokens": 262144,
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "apple-silicon-high-unified-memory"
+            },
+            {
+              "id": "nemotron35-lightning-30b-a3b-mlx-mxfp8",
+              "model": "nemotron-3.5-lightning:30b-a3b-mxfp8",
+              "manifestDigest": "906068bad076d14ef66bb8d7245879ee2c1c5a70188f5baa37166b83c69f5d6d",
+              "configDigest": "2070f1ef6337efdcec267ce890140ee11da89e53d808eb673b4128be166ef188",
+              "modelBytes": 33968094663,
+              "downloadBytes": 33968094663,
+              "quantization": "MXFP8",
+              "contextWindowTokens": 262144,
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "apple-silicon-very-high-unified-memory"
+            },
+            {
+              "id": "nemotron35-lightning-30b-a3b-mlx-bf16",
+              "model": "nemotron-3.5-lightning:30b-a3b-mlx-bf16",
+              "manifestDigest": "7bf11b5991edd861896d66dfefb55f3fa837b139f7070edba980d982a56a25d6",
+              "configDigest": "2070f1ef6337efdcec267ce890140ee11da89e53d808eb673b4128be166ef188",
+              "modelBytes": 65843859481,
+              "downloadBytes": 65843859481,
+              "quantization": "BF16",
+              "contextWindowTokens": 262144,
+              "capabilities": [
+                "general.chat",
+                "content.write",
+                "content.summarize",
+                "tools",
+                "thinking"
+              ],
+              "hardwareClass": "apple-silicon-ultra-high-unified-memory"
+            }
+          ]
         }
       ]
     }

@@ -67,10 +67,18 @@ An online discovery helper must not:
   tokens, or hardware reports to a public service.
 - Depend on private or unstable scraped content for release validation.
 
-## Dry-Run Discovery Script
+## Model Candidate Updater
 
-Use the discovery script when you want to look for newer public model tags
-without changing local configuration or pulling models.
+Use the discovery script as Haven 42's model candidate updater. It checks the
+configured public sources, compares the normalized results with
+`config/alpha-2-model-version-inventory.json`, and writes both an engineering
+JSON report and a short Markdown review queue. It distinguishes an exact
+artifact already tracked by Haven 42 from a new tag in a tracked model
+repository and a new upstream model candidate.
+
+The updater runs only when a person starts it. It does not edit the
+certification inventory, download a model, prepare or start a soak, change an
+automatic model choice, or contact a test machine.
 
 Windows PowerShell:
 
@@ -91,10 +99,29 @@ macOS:
 ```
 
 The script writes a sanitized report to `runtime-validation-output/` by
-default. The report records only candidate names, source category, status, and
-next-step guidance. It does not send repository content, hardware profiles,
-local endpoints, usernames, hostnames, or local paths to the public model
-catalog.
+default. The JSON retains bounded public metadata and comparison status for
+engineering review. The matching Markdown file explains only the review queue
+and next actions in plain language. Neither report contains private repository
+content, hardware profiles, local endpoints, usernames, hostnames, or local
+paths from a public request.
+
+To show only candidates that appeared since an earlier check, provide that
+earlier JSON report:
+
+```powershell
+.\scripts\discover-online-model-candidates.ps1 `
+  -PreviousReportPath .\runtime-validation-output\online-model-candidates-previous.json
+```
+
+```bash
+./scripts/discover-online-model-candidates.linux.sh \
+  --previous-report-path runtime-validation-output/online-model-candidates-previous.json
+```
+
+`NewTestCandidates` contains everything not represented by an exact inventory
+artifact. `NewSincePreviousReport` is the smaller delta from the optional
+previous report. A mutable `latest` tag is blocked until an immutable,
+version-pinned artifact is resolved.
 
 To limit discovery to a small set of families:
 

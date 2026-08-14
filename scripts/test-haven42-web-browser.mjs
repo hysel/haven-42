@@ -531,7 +531,7 @@ try {
   const detectedAmd = /Accelerator\s*AMD\b/i.test(guided.factsText);
   const detectedNvidia = /Accelerator\s*NVIDIA\b/i.test(guided.factsText);
   const detectedIntel = /Accelerator\s*Intel\b/i.test(guided.factsText);
-  const showsAmdTools = guided.factsText.includes("AMD ROCm tools");
+  const showsAmdTools = guided.factsText.includes("AMD graphics tools");
   const showsNvidiaTools = guided.factsText.includes("NVIDIA tools");
   const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
   if (
@@ -941,7 +941,7 @@ try {
   if (dismissedTour.state.chat !== true || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
-  const sectionTourCounts = {models: 5, system: 5, technical: 4, about: 4};
+  const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
   const sectionTourNavigation = {models: "models-nav", system: "system-nav", technical: "assurance-nav", about: "about-nav"};
   for (const [section, expectedSteps] of Object.entries(sectionTourCounts)) {
     await cdp.evaluate(`document.querySelector('#${sectionTourNavigation[section]}').click()`);

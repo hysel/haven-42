@@ -445,7 +445,7 @@ class _OwnedProcess:
         expected = set(required)
         if backend == "cpu":
             expected.update({"OLLAMA_LLM_LIBRARY", "CUDA_VISIBLE_DEVICES"})
-        managed_root = executable.parents[2]
+        managed_root = executable.parents[3]
         expected_paths = {
             "OLLAMA_MODELS": managed_root / "models",
             "HOME": managed_root / "home",
@@ -795,8 +795,11 @@ class SetupCoordinator:
             journal["phase"] = "validating"; _journal(root, journal)
             _validate_inference(model, plan["gpuAccelerationRequired"])
             self._component(model["id"], "complete", 100)
-            self._set("complete", 100)
             journal["phase"] = "complete"; _journal(root, journal)
+            # Publish completion only after its durable receipt is visible.
+            # Otherwise a fast caller can observe 100% and reject the setup
+            # while the receipt still says "validating".
+            self._set("complete", 100)
             self._emit("setup", "MANAGED_SETUP_COMPLETED", "completed")
         except Exception as error:
             code = str(error) if isinstance(error, SetupError) else "setup-internal-failure"

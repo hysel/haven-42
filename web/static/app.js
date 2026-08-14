@@ -112,6 +112,7 @@ const SECTION_TOURS = Object.freeze({
       { target: "#status-panel", title: "Manage this computer", description: "Review the app version, local AI components, model cleanup setting, computer scan, and private troubleshooting logs here." },
       { target: "#capability-panel", title: "See available features", description: "This list shows what the current connection can do now and which features still need setup." },
       { target: "#evidence-panel", title: "Check connection health", description: "These checks explain whether the AI server, model information, and local files are ready." },
+      { target: "#energy-estimator-panel", title: "Estimate graphics-card electricity", description: "Use a measured GPU average and your own electricity rate. Official averages are optional, location is never inferred, and the result is not a whole-computer bill prediction." },
     ]),
   }),
   technical: Object.freeze({
@@ -182,7 +183,10 @@ const state = {
   pendingAnswerReport: null,
   alphaTextOnly: true,
   appVersion: "unknown",
+  platformFamily: "unknown",
   lastMetricsAnnouncementAt: 0,
+  electricityRateProfile: null,
+  energyEstimate: null,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -668,8 +672,194 @@ function showPrimaryPanel(panelId, navigationId, focusId) {
 
 function initializeSystemWorkspace() {
   const workspace = byId("system-workspace-content");
-  for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel"]) {
+  for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel", "energy-estimator-panel"]) {
     workspace.append(byId(id));
+  }
+}
+
+const ENERGY_MEASUREMENT_PROFILES = Object.freeze({
+  "rx7800xt-qwen35-9b": Object.freeze({
+    watts: 40.084,
+    label: "RX 7800 XT · Qwen 3.5 9B · Ollama 0.32.5",
+  }),
+});
+
+// The official European source supports this admitted country set. Country
+// choices are explicit; Haven 42 never infers a location from the network,
+// operating system, or browser.
+const EUROSTAT_COUNTRIES = new Set([
+  "AL", "AT", "BA", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE",
+  "ES", "FI", "FR", "GB", "GE", "GR", "HR", "HU", "IE", "IS", "IT",
+  "LI", "LT", "LU", "LV", "MD", "ME", "MK", "MT", "NL", "NO", "PL",
+  "PT", "RO", "RS", "SE", "SI", "SK", "TR", "UA", "XK",
+]);
+
+function applyCountryCurrency() {
+  const selected = byId("energy-country").selectedOptions[0];
+  const currency = selected?.dataset.currency;
+  if (byId("energy-rate-source").value !== "eia") {
+    byId("energy-currency").value = currency || "";
+  }
+}
+
+function filterEnergyCountries(source) {
+  const countrySelect = byId("energy-country");
+  for (const option of countrySelect.options) {
+    const supported = source === "manual"
+      || (source === "eia" && option.value === "US")
+      || (source === "eurostat" && EUROSTAT_COUNTRIES.has(option.value));
+    option.hidden = !supported;
+    option.disabled = !supported;
+  }
+  if (countrySelect.selectedOptions[0]?.disabled) {
+    countrySelect.value = source === "eurostat" ? "DE" : "US";
+  }
+  applyCountryCurrency();
+}
+
+function energyNumber(id, minimum, maximum) {
+  const value = Number(byId(id).value);
+  if (!Number.isFinite(value) || value < minimum || value > maximum) {
+    byId(id).setAttribute("aria-invalid", "true");
+    return null;
+  }
+  byId(id).removeAttribute("aria-invalid");
+  return value;
+}
+
+function updateEnergyRateControls() {
+  const source = byId("energy-rate-source").value;
+  const official = source !== "manual";
+  byId("fetch-official-rate").classList.toggle("hidden", !official);
+  byId("energy-rate").readOnly = official;
+  byId("energy-region-label").classList.toggle("hidden", source === "eurostat");
+  filterEnergyCountries(source);
+  if (source === "eia") {
+    byId("energy-country").value = "US";
+    byId("energy-country").disabled = true;
+    byId("energy-currency").value = "USD";
+    byId("energy-currency").readOnly = true;
+    byId("energy-rate-help").textContent = "This government source provides a U.S. national or state household average—not your utility's exact rate. Choose Get selected official average to continue.";
+  } else if (source === "eurostat") {
+    byId("energy-country").disabled = false;
+    applyCountryCurrency();
+    byId("energy-currency").readOnly = true;
+    byId("energy-region").value = "";
+    byId("energy-rate-help").textContent = "Choose your country, then request the latest available household average with taxes included. Haven 42 selects that country's usual currency.";
+  } else {
+    byId("energy-country").disabled = false;
+    byId("energy-currency").readOnly = false;
+    byId("energy-rate-help").textContent = "Look on your bill for the price per kilowatt-hour (kWh). This is usually more accurate than a country or state average.";
+  }
+  state.electricityRateProfile = null;
+  if (official) byId("energy-rate").value = "";
+  byId("energy-estimate-result").classList.add("hidden");
+}
+
+function updateEnergyMeasurement() {
+  const profile = ENERGY_MEASUREMENT_PROFILES[byId("energy-measurement-profile").value];
+  const input = byId("energy-average-watts");
+  input.readOnly = Boolean(profile);
+  input.value = profile ? String(profile.watts) : "";
+  byId("energy-measurement-help").textContent = profile
+    ? `${profile.label}. This is GPU-board power from one exact 30-minute test, not a general rating for the card.`
+    : "Enter an average measured by your graphics vendor's tool or a wall meter. Do not enter the card's advertised maximum power.";
+  byId("energy-estimate-result").classList.add("hidden");
+}
+
+async function fetchOfficialElectricityRate() {
+  const button = byId("fetch-official-rate");
+  const source = byId("energy-rate-source").value;
+  const country = byId("energy-country").value.trim().toUpperCase();
+  const currency = byId("energy-currency").value.trim().toUpperCase();
+  const region = byId("energy-region").value.trim().toUpperCase();
+  button.disabled = true;
+  button.textContent = "Getting official average…";
+  byId("energy-rate-help").textContent = "Contacting only the selected official source…";
+  try {
+    const profile = await api("/api/electricity-rate", { source, country, currency, region });
+    if (
+      profile.schemaVersion !== 1
+      || profile.kind !== "haven42-electricity-rate-profile"
+      || profile.sourceKind !== "official-average"
+      || profile.locationWasInferred !== false
+      || profile.estimateOnly !== true
+      || !Number.isFinite(profile.ratePerKwh)
+    ) throw new Error("invalid-electricity-rate-response");
+    state.electricityRateProfile = profile;
+    byId("energy-rate").value = String(profile.ratePerKwh);
+    byId("energy-country").value = profile.countryCode;
+    byId("energy-currency").value = profile.currency;
+    const regionText = profile.subdivisionCode ? ` · ${profile.subdivisionCode}` : "";
+    byId("energy-rate-help").textContent = `${profile.sourceName} · ${profile.countryCode}${regionText} · ${profile.effectivePeriod} · ${profile.taxScope}. Estimate only.`;
+  } catch (error) {
+    state.electricityRateProfile = null;
+    byId("energy-rate").value = "";
+    const message = error.message === "electricity-rate-api-key-unavailable"
+      ? "The U.S. government-price lookup is not configured. Use the rate from your bill, or configure an EIA API key before starting Haven 42."
+      : "Haven 42 could not retrieve that official average. Check the country and currency, or use the rate from your bill.";
+    byId("energy-rate-help").textContent = message;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Get selected official average";
+  }
+}
+
+function calculateElectricityEstimate(event) {
+  event.preventDefault();
+  const watts = energyNumber("energy-average-watts", 0.001, 2000);
+  const hours = energyNumber("energy-hours-per-day", 0, 24);
+  const days = energyNumber("energy-billing-days", 1, 366);
+  const rate = energyNumber("energy-rate", 0, 10000000);
+  const country = byId("energy-country").value.trim().toUpperCase();
+  const currency = byId("energy-currency").value.trim().toUpperCase();
+  const result = byId("energy-estimate-result");
+  const countryValid = /^[A-Z]{2}$/.test(country);
+  const currencyValid = /^[A-Z]{3}$/.test(currency);
+  const daysValid = days !== null && Number.isInteger(days);
+  byId("energy-country").toggleAttribute("aria-invalid", !countryValid);
+  byId("energy-currency").toggleAttribute("aria-invalid", !currencyValid);
+  byId("energy-billing-days").toggleAttribute("aria-invalid", !daysValid);
+  if (watts === null || hours === null || !daysValid || rate === null || !countryValid || !currencyValid) {
+    result.classList.remove("hidden");
+    byId("energy-estimate-cost").textContent = "Check the highlighted estimate fields.";
+    byId("energy-estimate-usage").textContent = "Choose a country and use the three-letter currency shown on your bill.";
+    byId("energy-estimate-source").textContent = "No estimate was calculated.";
+    return;
+  }
+  const kwh = watts / 1000 * hours * Math.trunc(days);
+  const cost = kwh * rate;
+  const profile = state.electricityRateProfile;
+  const source = profile
+    ? `${profile.sourceName} · ${profile.effectivePeriod}`
+    : `Rate entered from your bill · ${country}`;
+  const formattedCost = `${cost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${currency}`;
+  const formattedKwh = `${kwh.toFixed(3)} kWh`;
+  byId("energy-estimate-cost").textContent = formattedCost;
+  byId("energy-estimate-usage").textContent = `${formattedKwh} of graphics-card energy over ${Math.trunc(days)} days`;
+  byId("energy-estimate-source").textContent = `${source} · ${rate} ${currency}/kWh`;
+  result.classList.remove("hidden");
+  state.energyEstimate = Object.freeze({ formattedCost, formattedKwh, days: Math.trunc(days) });
+  byId("rail-cost-value").textContent = formattedCost;
+  byId("rail-cost-period").textContent = `${Math.trunc(days)} days · GPU only`;
+  byId("rail-cost-estimate").classList.remove("hidden");
+  syncEnergyStatusWidget();
+}
+
+function syncEnergyStatusWidget() {
+  const widget = byId("status-energy-widget");
+  const pinned = byId("energy-pin-status").checked;
+  const estimate = state.energyEstimate;
+  widget.classList.toggle("hidden", !pinned || !estimate);
+  if (pinned && estimate) {
+    byId("status-energy-kwh").textContent = estimate.formattedKwh;
+    byId("status-energy-cost").textContent = estimate.formattedCost;
+    byId("status-energy-period").textContent = `${estimate.days} days · GPU only · current session`;
+    byId("energy-pin-help").textContent = "Pinned in the status sidebar for this session. The values are not saved.";
+  } else if (pinned) {
+    byId("energy-pin-help").textContent = "Pinned after you calculate an estimate. The values are not saved.";
+  } else {
+    byId("energy-pin-help").textContent = "The widget stays visible while Haven 42 is open. Its values are not saved and disappear when the app closes.";
   }
 }
 
@@ -1143,14 +1333,19 @@ function readinessFacts(snapshot) {
     ? "Unknown"
     : `${snapshot.platform.systemMemoryGiB} GiB`;
   const accelerator = snapshot.accelerators.length
-    ? snapshot.accelerators.map((item) => `${item.vendor} ${item.model}${item.memoryGiB ? ` · ${item.memoryGiB} GiB` : ""}${item.driverVersion ? ` · driver ${item.driverVersion}` : ""}`).join(", ")
+    ? snapshot.accelerators.map((item) => {
+      const driver = item.driverName
+        ? `${item.driverName} · version ${item.driverVersion || "Unavailable"}`
+        : item.driverVersion || "Unavailable";
+      return `${item.vendor} ${item.model} · ${item.memoryGiB ? `${item.memoryGiB} GiB` : "graphics memory Unavailable"} · driver ${driver}`;
+    }).join(", ")
     : "Not detected or permission limited";
   const softwareLabels = {
     python: "Embedded Python runtime",
     ollama: "System Ollama",
     "nvidia-runtime": "NVIDIA tools",
-    "amd-runtime": "AMD ROCm tools",
-    "intel-runtime": "Intel oneAPI tools",
+    "amd-runtime": "AMD graphics tools",
+    "intel-runtime": "Intel graphics tools",
   };
   const detectedVendors = snapshot.accelerators.map((item) => (
     `${item.vendor || ""} ${item.model || ""}`.toLocaleLowerCase()
@@ -1179,10 +1374,28 @@ function readinessFacts(snapshot) {
       softwareLabels[item.componentId],
       item.version ? `${item.state} · ${item.version}` : item.state,
     ]);
+  const processor = Number.isSafeInteger(snapshot.platform.logicalProcessors)
+    ? `${snapshot.platform.logicalProcessors} logical processors`
+    : "Unavailable";
+  const storage = snapshot.platform.availableStorageGiB == null
+    ? "Unavailable"
+    : `${snapshot.platform.availableStorageGiB} GiB free beside Haven 42`;
+  const linuxDetails = snapshot.platform.operatingSystem === "linux"
+    ? [
+      ["Linux kernel", snapshot.platform.kernelVersion || "Unavailable"],
+      ["Desktop session", `${snapshot.platform.desktopEnvironmentReported || "Unavailable"} · ${snapshot.platform.sessionTypeReported || "session type Unavailable"}`],
+      ["Linux compatibility", snapshot.platform.libcFamily && snapshot.platform.libcVersion
+        ? `${snapshot.platform.libcFamily} ${snapshot.platform.libcVersion}`
+        : "Unavailable"],
+    ]
+    : [];
   return [
     ["Operating system", `${platformName}${platformBuild} · ${snapshot.platform.architecture}`],
+    ["Processor", processor],
     ["Memory", memory],
+    ["Available space", storage],
     ["Accelerator", accelerator],
+    ...linuxDetails,
     ...software,
   ];
 }
@@ -1342,8 +1555,8 @@ function setupComponentDetails(item) {
     };
   }
   return {
-    why: "Required to run the selected text model locally on this Windows computer.",
-    contents: "Portable Ollama runtime files. No Windows service or system-wide Ollama installation is created.",
+    why: `Required to run the selected text model locally on this ${state.platformFamily === "linux" ? "Linux" : "Windows"} computer.`,
+    contents: `Portable Ollama runtime files. No ${state.platformFamily === "linux" ? "system service" : "Windows service"} or system-wide Ollama installation is created.`,
     source: "Official Ollama release on GitHub",
   };
 }
@@ -1541,6 +1754,25 @@ async function openSetupTroubleshooting() {
   diagnostics.querySelector("summary")?.focus();
 }
 
+function linuxSetupRemediation(blockers) {
+  const messages = {
+    "linux-x64-required": "This Alpha supports 64-bit Intel or AMD Linux computers only.",
+    "linux-distribution-not-in-alpha2-matrix": "This Linux distribution has not completed Alpha 2 validation. You can still connect to another AI server.",
+    "linux-distribution-version-unavailable": "Haven 42 could not verify the Linux distribution version. Update the operating-system identity files, then check again.",
+    "glibc-required": "This portable local AI engine requires a glibc-based Linux distribution.",
+    "glibc-version-threshold": "The installed Linux compatibility library is older than the version required by this Alpha. Update the operating system, then check again.",
+    "logical-processor-threshold": "This computer needs at least four logical processors for managed local setup.",
+    "system-memory-threshold": "This computer needs at least 8 GiB of memory for managed local setup.",
+    "storage-threshold": "Free more space beside Haven 42, then run the computer check again.",
+    "nvidia-capacity-or-driver-unverified": "Haven 42 could not verify the NVIDIA driver and graphics memory. Use your Linux distribution's driver tools, then check again.",
+    "linux-amd-native-evidence-required": "AMD graphics were detected, but managed AMD acceleration on Linux is still being validated for Alpha 2.",
+    "linux-intel-native-evidence-required": "Intel graphics were detected, but managed Intel acceleration on Linux is still being validated for Alpha 2.",
+    "multiple-accelerators-require-manual-review": "More than one graphics platform was detected. Automatic setup is paused until Haven 42 can choose safely.",
+  };
+  if (!Array.isArray(blockers)) return [];
+  return blockers.filter((item) => Object.hasOwn(messages, item)).map((item) => messages[item]);
+}
+
 function renderSetupPlan(plan) {
   const container = byId("wizard-setup-plan");
   container.replaceChildren();
@@ -1553,6 +1785,7 @@ function renderSetupPlan(plan) {
   const alphaModel = modelSelection?.selected?.name;
   const automaticAllowed = modelSelection?.automaticExecutionAllowed === true;
   const managed = plan.alphaCandidate?.managedPlan;
+  const runtimeCompatibility = plan.alphaCandidate?.runtimeCompatibility;
   const cpuCompatibilityMode = managed?.backendMode === "cpu";
   fit.textContent = alphaModel
     ? automaticAllowed
@@ -1564,6 +1797,15 @@ function renderSetupPlan(plan) {
       ? `Haven 42 found a possible local AI model, but has not confirmed that it can be set up safely on this computer. Technical model name: ${plan.hardwareAssessment.candidateModel}.`
       : "Haven 42 could not safely choose a local AI model from the available computer information.";
   container.append(heading, summary, fit);
+  const remediationMessages = linuxSetupRemediation(
+    plan.alphaCandidate?.hardware?.blockers,
+  );
+  if (remediationMessages.length) {
+    const remediation = document.createElement("p");
+    remediation.className = "setup-remediation";
+    remediation.textContent = remediationMessages.join(" ");
+    container.append(remediation);
+  }
   for (const action of plan.actions) {
     const row = document.createElement("div");
     row.className = "plan-action";
@@ -1580,6 +1822,29 @@ function renderSetupPlan(plan) {
     container.append(row);
   }
   if (managed && plan.alphaCandidate?.managedSetupCandidateAvailable === true) {
+    const runtimeSummary = document.createElement("section");
+    runtimeSummary.className = "setup-runtime-summary";
+    runtimeSummary.setAttribute("aria-label", "Selected local AI software");
+    const runtimeTitle = document.createElement("strong");
+    runtimeTitle.textContent = "Software selected for this model";
+    const runtimeIntro = document.createElement("p");
+    runtimeIntro.textContent = "Haven 42 matched the model to a tested engine route for this computer. These versions are checked again before use.";
+    const runtimeFacts = document.createElement("dl");
+    const engineLabel = runtimeCompatibility?.engine === "llama.cpp" ? "llama.cpp" : "Ollama";
+    const runtimeVersion = runtimeCompatibility?.selectedRuntimeVersion || "Unavailable";
+    const backendLabels = {
+      cpu: "Processor compatibility mode", cuda: "NVIDIA CUDA", rocm: "AMD ROCm",
+      vulkan: "Vulkan graphics", sycl: "Intel SYCL", core: "Automatic hardware support",
+    };
+    const runtimeBytes = (runtimeCompatibility?.runtimeArtifacts || [])
+      .reduce((total, artifact) => total + (Number.isSafeInteger(artifact.byteLength) ? artifact.byteLength : 0), 0);
+    appendSetupDetail(runtimeFacts, "Local AI engine", `${engineLabel} ${runtimeVersion}`);
+    appendSetupDetail(runtimeFacts, "Hardware route", backendLabels[managed.backendMode] || managed.backendMode);
+    appendSetupDetail(runtimeFacts, "AI model", `${alphaModel} · ${modelSelection.selected.quantization}`);
+    appendSetupDetail(runtimeFacts, "Engine download", formatSetupBytes(runtimeBytes));
+    appendSetupDetail(runtimeFacts, "Model download", formatSetupBytes(modelSelection.selected.modelBytes));
+    appendSetupDetail(runtimeFacts, "Stored in", "Haven42-Data beside the Haven 42 app");
+    runtimeSummary.append(runtimeTitle, runtimeIntro, runtimeFacts);
     const disclosure = document.createElement("span");
     disclosure.id = "alpha-setup-storage-summary";
     disclosure.className = "setup-storage-summary";
@@ -1608,7 +1873,9 @@ function renderSetupPlan(plan) {
     const installLocationList = document.createElement("ul");
     for (const text of [
       "Contains the local AI engine, graphics support, model, and temporary setup files.",
-      "Does not use Program Files or AppData, and does not create a Windows service.",
+      state.platformFamily === "linux"
+        ? "Does not use system application folders and does not create a system service."
+        : "Does not use Program Files or AppData, and does not create a Windows service.",
     ]) {
       const item = document.createElement("li");
       item.textContent = text;
@@ -1765,14 +2032,16 @@ function renderSetupPlan(plan) {
     approvalActions.append(approve, cancelApproval);
     approvalPanel.append(approvalTitle, approvalDescription, approvalEffects, consentRow, approvalActions);
     controls.append(automatic, instructions, cancelSetup, troubleshooting);
-    container.append(installLocation, safeguards, installationPanel, controls, approvalPanel, progress);
+    container.append(runtimeSummary, installLocation, safeguards, installationPanel, controls, approvalPanel, progress);
     refreshAlphaSetupProgress().catch(() => {
       progress.textContent = "Component details are temporarily unavailable. Setup has not started.";
     });
   } else if (alphaModel) {
     const disclosure = document.createElement("p");
     disclosure.className = "notice";
-    disclosure.textContent = "This model may fit your computer, but automatic setup has not passed all required tests. You can view manual instructions instead; Haven 42 will not make changes for you.";
+    disclosure.textContent = runtimeCompatibility?.decision === "deny"
+      ? `This model fits the computer, but Haven 42 does not have an approved ${runtimeCompatibility.engine || "local AI engine"} version for it on this operating system. Setup stopped before downloading anything. Technical reason: ${runtimeCompatibility.reason || "no-compatible-runtime"}.`
+      : "This model may fit your computer, but automatic setup has not passed all required tests. You can view manual instructions instead; Haven 42 will not make changes for you.";
     const controls = document.createElement("div");
     controls.className = "wizard-actions";
     const instructions = document.createElement("button");
@@ -1798,15 +2067,16 @@ function renderManualAlphaSteps(plan, container) {
   title.textContent = "Manual setup";
   const text = document.createElement("p");
   const technicalModelName = plan.alphaCandidate?.modelSelection?.selected?.name;
+  const platformLabel = state.platformFamily === "linux" ? "Linux" : "Windows";
   text.textContent = technicalModelName
-    ? `Install the Ollama local AI engine from its official Windows download, then add the recommended model for chat, writing, and summaries. Its technical name is ${technicalModelName}. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`
-    : "Install the Ollama local AI engine from its official Windows download, then add a compatible text model. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.";
+    ? `Install the Ollama local AI engine from its official ${platformLabel} download, then add the recommended model for chat, writing, and summaries. Its technical name is ${technicalModelName}. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`
+    : `Install the Ollama local AI engine from its official ${platformLabel} download, then add a compatible text model. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`;
   const link = document.createElement("a");
-  link.href = "https://ollama.com/download/windows";
+  link.href = state.platformFamily === "linux" ? "https://ollama.com/download/linux" : "https://ollama.com/download/windows";
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   link.referrerPolicy = "no-referrer";
-  link.textContent = "Open official Ollama Windows instructions";
+  link.textContent = `Open official Ollama ${platformLabel} instructions`;
   panel.append(title, text, link);
   for (const guidance of plan.alphaCandidate?.driverGuidance || []) {
     const driver = document.createElement("p");
@@ -1917,7 +2187,7 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
 
 async function runReadiness() {
   showWizardStep("readiness");
-  byId("wizard-scan-status").textContent = "Checking Windows, memory, storage, and graphics hardware…";
+  byId("wizard-scan-status").textContent = `Checking ${state.platformFamily === "linux" ? "Linux" : "Windows"}, memory, storage, and graphics hardware…`;
   byId("wizard-readiness-next").disabled = true;
   try {
     const snapshot = await api("/api/readiness", { force: true });
@@ -3305,6 +3575,7 @@ async function bootstrap() {
     state.token = result.sessionToken;
     state.alphaTextOnly = result.alpha?.textOnly === true;
     state.appVersion = result.version;
+    state.platformFamily = result.runtime.platform;
     byId("brand-version").textContent = `${result.alpha?.label || `Haven 42 ${result.version}`} · private AI on your computer`;
     byId("app-version").textContent = `v${result.version}`;
     byId("about-version").textContent = `v${result.version}`;
@@ -3983,6 +4254,31 @@ byId("system-nav").addEventListener("click", () => {
   openSystem();
 });
 byId("view-system-details").addEventListener("click", openSystem);
+byId("rail-cost-estimate").addEventListener("click", () => {
+  openSystem();
+  byId("energy-estimator-panel").scrollIntoView({ behavior: motionBehavior(), block: "start" });
+  byId("energy-estimator-title").focus({ preventScroll: true });
+});
+byId("energy-measurement-profile").addEventListener("change", updateEnergyMeasurement);
+byId("energy-rate-source").addEventListener("change", updateEnergyRateControls);
+byId("energy-pin-status").addEventListener("change", syncEnergyStatusWidget);
+byId("status-energy-remove").addEventListener("click", () => {
+  byId("energy-pin-status").checked = false;
+  syncEnergyStatusWidget();
+  byId("view-system-details").focus();
+});
+for (const id of ["energy-country", "energy-region", "energy-currency"]) {
+  byId(id).addEventListener("input", () => {
+    if (id === "energy-country") applyCountryCurrency();
+    if (byId("energy-rate-source").value !== "manual") {
+      state.electricityRateProfile = null;
+      byId("energy-rate").value = "";
+      byId("energy-estimate-result").classList.add("hidden");
+    }
+  });
+}
+byId("fetch-official-rate").addEventListener("click", () => { void fetchOfficialElectricityRate(); });
+byId("energy-estimator-form").addEventListener("submit", calculateElectricityEstimate);
 byId("diagnostics-control").addEventListener("toggle", () => {
   if (byId("diagnostics-control").open) void refreshDiagnosticsQuietly();
 });
@@ -4350,4 +4646,6 @@ updateProviderAuthenticationControl();
 updateProviderAuthenticationControl("wizard-");
 initializeSystemWorkspace();
 initializeStatusSidebar();
+updateEnergyMeasurement();
+updateEnergyRateControls();
 bootstrap();

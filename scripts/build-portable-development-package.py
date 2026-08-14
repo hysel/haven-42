@@ -51,6 +51,11 @@ RESOURCE_PATHS = (
     "config/alpha-2-model-catalog.json",
     "config/alpha-2-model-selection-evidence.json",
     "config/alpha-2-model-selection-policy.json",
+    "config/alpha-2-model-version-inventory.json",
+    "config/alpha-2-model-runtime-requirements.json",
+    "config/alpha-2-runtime-compatibility.json",
+    "config/linux-runtime-artifact-review.json",
+    "config/linux-model-artifact-review.json",
 )
 ALLOWED_PACKAGE_ENTRIES = {
     "haven42",
@@ -80,6 +85,7 @@ LICENSE_EVIDENCE = {
     "APACHE-2.0.txt": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
     "CPYTHON-3.14.6-LICENSE.txt": "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
     "LIBFFI-3.4.4-LICENSE.txt": "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
+    "OLLAMA-MIT-LICENSE.txt": "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226",
 }
 PYTHON_DISTRIBUTIONS = {
     "windows-amd64": {
@@ -383,8 +389,9 @@ def third_party_notice(
         "Embedded runtime component inventory",
         "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION.",
         "Every runtime component below is excluded from Haven 42 signing scope.",
-        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, and "
-        "LIBFFI-3.4.4-LICENSE.txt are included in the extracted package and "
+        "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, "
+        "LIBFFI-3.4.4-LICENSE.txt, and OLLAMA-MIT-LICENSE.txt are included "
+        "in the extracted package and "
         "artifact evidence as hash-verified license evidence.",
         "",
     ])

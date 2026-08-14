@@ -1,0 +1,2637 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-evidence-page-registry",
+  "sourceCatalog": "config/evidence-catalog.tsv",
+  "sourceContract": "config/capability-evidence-contract.json",
+  "catalogSha256": "82aa8a6f94c246503f5b3743d370b9b0c9f72bb83967e98b64b369f8fc9c93ae",
+  "recordCount": 109,
+  "futureAutomaticUpdateUse": {
+    "mode": "advisory-evidence-input-only",
+    "automaticUpdateActivationAuthorized": false,
+    "automaticModelPromotionAuthorized": false,
+    "requiresExactCapabilityKeyMatch": true,
+    "requiresSignedUpdateMetadata": true,
+    "requiresCompatibilityPreflight": true,
+    "requiresPostUpdateHealthCheck": true,
+    "requiresAutomaticRollback": true,
+    "requiresUserPolicy": true
+  },
+  "records": [
+    {
+      "id": "evidence-2853e8649d47ac07",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI disposable write-smoke validation",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/aider-validation.md",
+        "notes": "Aider CLI disposable write-smoke validation changed only README.md and passed external verification."
+      },
+      "sourceEvidence": "examples/aider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2853e8649d47ac07.md",
+        "wikiPage": "Evidence-Record-2853e8649d47ac07.md",
+        "title": "Aider CLI disposable write-smoke validation"
+      }
+    },
+    {
+      "id": "evidence-ef5cd44e633c9e80",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI model test harness",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "test-harness",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "docs/aider-cli-model-testing.md",
+        "notes": "Automation defines read-only and disposable write-smoke screening; model-specific evidence remains separate."
+      },
+      "sourceEvidence": "docs/aider-cli-model-testing.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ef5cd44e633c9e80.md",
+        "wikiPage": "Evidence-Record-ef5cd44e633c9e80.md",
+        "title": "Aider CLI model test harness"
+      }
+    },
+    {
+      "id": "evidence-1e8e513a7ede9aeb",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI qwen3.5 9B disposable write-smoke validation",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/aider-validation.md",
+        "notes": "Aider CLI changed only the disposable write target and passed external verification; real-project approval is not claimed."
+      },
+      "sourceEvidence": "examples/aider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1e8e513a7ede9aeb.md",
+        "wikiPage": "Evidence-Record-1e8e513a7ede9aeb.md",
+        "title": "Aider CLI qwen3.5 9B disposable write-smoke validation"
+      }
+    },
+    {
+      "id": "evidence-168923a7d31793f3",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI qwen3.5 9B read-only context validation",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/aider-validation.md",
+        "notes": "Aider CLI read-only context validation passed on a generated Python sample with automatic model unload."
+      },
+      "sourceEvidence": "examples/aider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-168923a7d31793f3.md",
+        "wikiPage": "Evidence-Record-168923a7d31793f3.md",
+        "title": "Aider CLI qwen3.5 9B read-only context validation"
+      }
+    },
+    {
+      "id": "evidence-3bc3e961aa89d354",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI read-only context validation",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/aider-validation.md",
+        "notes": "Aider CLI read-only context validation passed on the generated Python sample."
+      },
+      "sourceEvidence": "examples/aider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3bc3e961aa89d354.md",
+        "wikiPage": "Evidence-Record-3bc3e961aa89d354.md",
+        "title": "Aider CLI read-only context validation"
+      }
+    },
+    {
+      "id": "evidence-eee8463c09ed1a53",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI realistic scoped-edit validation",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "scoped-write",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/aider-validation.md",
+        "notes": "Aider CLI changed only expected source and test files and passed external verification; real-project readiness remains blocked."
+      },
+      "sourceEvidence": "examples/aider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-eee8463c09ed1a53.md",
+        "wikiPage": "Evidence-Record-eee8463c09ed1a53.md",
+        "title": "Aider CLI realistic scoped-edit validation"
+      }
+    },
+    {
+      "id": "evidence-c836e3b6f82ceb6c",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider CLI richer disposable scoped-edit validation",
+        "surface": "Aider CLI",
+        "surface_version": "0.86.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "scoped-write",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/aider-validation.md",
+        "notes": "Aider CLI passed a richer Node service scoped edit; non-generated repository validation remains required."
+      },
+      "sourceEvidence": "examples/aider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-c836e3b6f82ceb6c.md",
+        "wikiPage": "Evidence-Record-c836e3b6f82ceb6c.md",
+        "title": "Aider CLI richer disposable scoped-edit validation"
+      }
+    },
+    {
+      "id": "evidence-4c8889255c609520",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Aider and OpenCode candidate lifecycle plans",
+        "surface": "Aider and OpenCode",
+        "surface_version": "exact-candidate-versions",
+        "provider": "No provider invocation",
+        "os": "Cross-platform",
+        "model": "no-model",
+        "operation": "dry-run-plan",
+        "validation_mode": "offline-fixture",
+        "status": "static-validated",
+        "evidence": "docs/agent-surface-options.md",
+        "notes": "Exact expected versions, injected discovery facts, local/private endpoint validation, repository-local config targets, and rollback plans pass hostile tests; installation, writes, launch, runtime, package, and promotion remain denied."
+      },
+      "sourceEvidence": "docs/agent-surface-options.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-4c8889255c609520.md",
+        "wikiPage": "Evidence-Record-4c8889255c609520.md",
+        "title": "Aider and OpenCode candidate lifecycle plans"
+      }
+    },
+    {
+      "id": "evidence-c48f68ae267ddaeb",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Continue CLI model test harness",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "test-harness",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "docs/continue-cli-model-testing.md",
+        "notes": "Automation defines read-only and disposable write-smoke screening; model-specific evidence remains separate."
+      },
+      "sourceEvidence": "docs/continue-cli-model-testing.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-c48f68ae267ddaeb.md",
+        "wikiPage": "Evidence-Record-c48f68ae267ddaeb.md",
+        "title": "Continue CLI model test harness"
+      }
+    },
+    {
+      "id": "evidence-1e2f129e7b81d26f",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "OpenCode CLI Devstral Small 2 generated-sample scoped edit",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "scoped-write",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/opencode-validation.md",
+        "notes": "Constrained two-file Python scoped edit passed external changed-file, content, and whitespace verification with automatic unload; real-project approval is not claimed."
+      },
+      "sourceEvidence": "examples/opencode-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1e2f129e7b81d26f.md",
+        "wikiPage": "Evidence-Record-1e2f129e7b81d26f.md",
+        "title": "OpenCode CLI Devstral Small 2 generated-sample scoped edit"
+      }
+    },
+    {
+      "id": "evidence-3a97cf812d7ead4b",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "OpenCode CLI Devstral Small 2 generated-sample validation",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "read-and-write",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/opencode-validation.md",
+        "notes": "Read-only, disposable write-smoke, and constrained scoped-edit validation passed with automatic unload; real-project approval is not claimed."
+      },
+      "sourceEvidence": "examples/opencode-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3a97cf812d7ead4b.md",
+        "wikiPage": "Evidence-Record-3a97cf812d7ead4b.md",
+        "title": "OpenCode CLI Devstral Small 2 generated-sample validation"
+      }
+    },
+    {
+      "id": "evidence-cba49f1efb99951d",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "OpenCode CLI qwen3.5 35B write smoke",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:35b",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/opencode-validation.md",
+        "notes": "Disposable README-only write passed external verification; read-only contract failed and real-project approval is not claimed."
+      },
+      "sourceEvidence": "examples/opencode-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-cba49f1efb99951d.md",
+        "wikiPage": "Evidence-Record-cba49f1efb99951d.md",
+        "title": "OpenCode CLI qwen3.5 35B write smoke"
+      }
+    },
+    {
+      "id": "evidence-0077a93bb585cbc8",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "OpenCode CLI qwen3.5 9B read validation",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.2",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/opencode-validation.md",
+        "notes": "Read-only generated-sample validation passed; disposable write failed and real-project approval is not claimed."
+      },
+      "sourceEvidence": "examples/opencode-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0077a93bb585cbc8.md",
+        "wikiPage": "Evidence-Record-0077a93bb585cbc8.md",
+        "title": "OpenCode CLI qwen3.5 9B read validation"
+      }
+    },
+    {
+      "id": "evidence-b7a23e13a579dff1",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "OpenCode CLI wrapper scaffold",
+        "surface": "OpenCode",
+        "surface_version": "not-recorded",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "test-harness",
+        "validation_mode": "static",
+        "status": "validated-by-tests",
+        "evidence": "docs/agent-cli-surface-model-testing.md",
+        "notes": "Thin wrapper delegates to the shared CLI harness; live OpenCode evidence remains pending."
+      },
+      "sourceEvidence": "docs/agent-cli-surface-model-testing.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-b7a23e13a579dff1.md",
+        "wikiPage": "Evidence-Record-b7a23e13a579dff1.md",
+        "title": "OpenCode CLI wrapper scaffold"
+      }
+    },
+    {
+      "id": "evidence-ef3643c281067618",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Shared agent CLI model test harness",
+        "surface": "Agent CLI surfaces",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "test-harness",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "docs/agent-cli-surface-model-testing.md",
+        "notes": "Generic harness defines reusable CLI screening; model-specific evidence remains separate."
+      },
+      "sourceEvidence": "docs/agent-cli-surface-model-testing.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ef3643c281067618.md",
+        "wikiPage": "Evidence-Record-ef3643c281067618.md",
+        "title": "Shared agent CLI model test harness"
+      }
+    },
+    {
+      "id": "evidence-03d2a694b6d22720",
+      "claim": {
+        "schema_version": "2",
+        "area": "controlled-research",
+        "subject": "Offline cited-synthesis source parity",
+        "surface": "No runtime",
+        "surface_version": "1",
+        "provider": "Caller-supplied fixtures",
+        "os": "Windows and Linux",
+        "model": "synthetic-bounded-source-envelope",
+        "operation": "cited-synthesis-validation",
+        "validation_mode": "offline-fixture",
+        "status": "static-validated",
+        "evidence": "docs/controlled-web-research-foundation.md",
+        "notes": "The same sanitized digest-verified source bundle passed 26 hostile/static checks on native Windows and Ubuntu Linux; no model, network, file, UI, package, runtime, or follow-up authority is granted, and macOS plus native package evidence remain open."
+      },
+      "sourceEvidence": "docs/controlled-web-research-foundation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-03d2a694b6d22720.md",
+        "wikiPage": "Evidence-Record-03d2a694b6d22720.md",
+        "title": "Offline cited-synthesis source parity"
+      }
+    },
+    {
+      "id": "evidence-1c20a3dfac18ae0a",
+      "claim": {
+        "schema_version": "2",
+        "area": "controlled-research",
+        "subject": "Offline transport and approval guards",
+        "surface": "No runtime",
+        "surface_version": "1",
+        "provider": "Caller-supplied receipts",
+        "os": "Cross-platform",
+        "model": "no-model",
+        "operation": "offline-boundary",
+        "validation_mode": "offline-fixture",
+        "status": "static-validated",
+        "evidence": "docs/controlled-web-research-foundation.md",
+        "notes": "Effect-free destination/DNS/rebinding/response validation and exact single-use memory approval lifecycle pass hostile tests without DNS, network, UI, provider, model-tool, persistence, or package authority."
+      },
+      "sourceEvidence": "docs/controlled-web-research-foundation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1c20a3dfac18ae0a.md",
+        "wikiPage": "Evidence-Record-1c20a3dfac18ae0a.md",
+        "title": "Offline transport and approval guards"
+      }
+    },
+    {
+      "id": "evidence-9865b9af8dddb72e",
+      "claim": {
+        "schema_version": "2",
+        "area": "editor-surface",
+        "subject": "VS Code-compatible Continue Agent",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "repository-list",
+        "validation_mode": "editor-agent",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/editor-surface-validation.md",
+        "notes": "Sanitized evidence records read-only Agent validation; approved-write readiness is not claimed."
+      },
+      "sourceEvidence": "examples/editor-surface-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9865b9af8dddb72e.md",
+        "wikiPage": "Evidence-Record-9865b9af8dddb72e.md",
+        "title": "VS Code-compatible Continue Agent"
+      }
+    },
+    {
+      "id": "evidence-3532849d1fcc1eb8",
+      "claim": {
+        "schema_version": "2",
+        "area": "editor-surface",
+        "subject": "VSCodium Continue Agent",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "repository-list",
+        "validation_mode": "editor-agent",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/editor-surface-validation.md",
+        "notes": "Sanitized evidence records successful read-only repository listing after prior raw tool-call failure."
+      },
+      "sourceEvidence": "examples/editor-surface-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3532849d1fcc1eb8.md",
+        "wikiPage": "Evidence-Record-3532849d1fcc1eb8.md",
+        "title": "VSCodium Continue Agent"
+      }
+    },
+    {
+      "id": "evidence-e5ae46fbbffbcb08",
+      "claim": {
+        "schema_version": "2",
+        "area": "editor-surface",
+        "subject": "VSCodium Continue Agent Qwen 3.5 4B MLX strict write smoke",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-4B-4bit",
+        "operation": "scoped-write",
+        "validation_mode": "editor-agent",
+        "status": "partial-pass",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "The agent targeted the existing disposable file but appended instead of replacing and added blank lines in two strict attempts; external Git whitespace verification failed. Do not use this model for VSCodium approved writes."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e5ae46fbbffbcb08.md",
+        "wikiPage": "Evidence-Record-e5ae46fbbffbcb08.md",
+        "title": "VSCodium Continue Agent Qwen 3.5 4B MLX strict write smoke"
+      }
+    },
+    {
+      "id": "evidence-b0c0bfde405ff09e",
+      "claim": {
+        "schema_version": "2",
+        "area": "editor-surface",
+        "subject": "VSCodium Continue Agent Qwen 3.5 9B MLX scoped edit",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+        "operation": "scoped-write",
+        "validation_mode": "editor-agent",
+        "status": "write-smoke-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Generated Python fixture only: read and a three-file scoped edit passed direct run, pytest, and external whitespace checks; real-project and broad-write readiness are not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-b0c0bfde405ff09e.md",
+        "wikiPage": "Evidence-Record-b0c0bfde405ff09e.md",
+        "title": "VSCodium Continue Agent Qwen 3.5 9B MLX scoped edit"
+      }
+    },
+    {
+      "id": "evidence-9a6b5c12842514d3",
+      "claim": {
+        "schema_version": "2",
+        "area": "engineering-validation",
+        "subject": "Pinned public repository structure selection",
+        "surface": "No agent surface",
+        "surface_version": "1",
+        "provider": "Bare Git object inspection",
+        "os": "Windows",
+        "model": "Click 8.2.1, Express 5.1.0, serde_json 1.0.140",
+        "operation": "read-only-structure",
+        "validation_mode": "offline-local",
+        "status": "static-validated",
+        "evidence": "docs/public-repository-validation-candidates.md",
+        "notes": "Pinned permissive repositories passed content-free detection, context planning, workflow selection, and language-rule selection without checkout, target execution, writes, builds, tests, model calls, or promotion."
+      },
+      "sourceEvidence": "docs/public-repository-validation-candidates.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9a6b5c12842514d3.md",
+        "wikiPage": "Evidence-Record-9a6b5c12842514d3.md",
+        "title": "Pinned public repository structure selection"
+      }
+    },
+    {
+      "id": "evidence-eff6c9e174bbfc81",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Gemma 3 12B writing constraint matrix",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Linux",
+        "model": "gemma3:12b",
+        "operation": "writing-constraint-screen",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/writing-model-matrix-validation.md",
+        "notes": "Exact digest passed three synthetic automated constraint cases and all unload checks; blind human quality review, license review, and comparative promotion remain open."
+      },
+      "sourceEvidence": "examples/writing-model-matrix-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-eff6c9e174bbfc81.md",
+        "wikiPage": "Evidence-Record-eff6c9e174bbfc81.md",
+        "title": "Gemma 3 12B writing constraint matrix"
+      }
+    },
+    {
+      "id": "evidence-a6e6ffd682af210d",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Granite 4 7B-A1B-H writing constraint matrix",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Linux",
+        "model": "granite4:7b-a1b-h",
+        "operation": "writing-constraint-screen",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/writing-model-matrix-validation.md",
+        "notes": "Exact digest passed two of three synthetic automated cases and all unload checks; it omitted one required uncertainty phrase and gains no recommendation authority."
+      },
+      "sourceEvidence": "examples/writing-model-matrix-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a6e6ffd682af210d.md",
+        "wikiPage": "Evidence-Record-a6e6ffd682af210d.md",
+        "title": "Granite 4 7B-A1B-H writing constraint matrix"
+      }
+    },
+    {
+      "id": "evidence-794bb0b437c5bd12",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Local ComfyUI SDXL image generation",
+        "surface": "Local image capability adapter",
+        "surface_version": "1",
+        "provider": "ComfyUI",
+        "os": "Linux",
+        "model": "SDXL Base 1.0",
+        "operation": "image-generation",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/local-image-capability-validation.md",
+        "notes": "Pinned built-in workflow, checksum, CUDA, 1024x1024 PNG, visual grounding, typed artifact, metadata exclusion, history cleanup, service recovery, SSH tunnel, sanitization, and cleanup checks passed; broader image quality is not claimed."
+      },
+      "sourceEvidence": "examples/local-image-capability-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-794bb0b437c5bd12.md",
+        "wikiPage": "Evidence-Record-794bb0b437c5bd12.md",
+        "title": "Local ComfyUI SDXL image generation"
+      }
+    },
+    {
+      "id": "evidence-7f4b6f4a0b5c9599",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Local Ollama capability availability discovery",
+        "surface": "Capability availability discovery",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "provider-discovery",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/capability-availability-validation.md",
+        "notes": "Read-only tags discovery found the installed model without invoking a capability, persisting or disclosing the endpoint, or changing model state; runtime availability remains transient."
+      },
+      "sourceEvidence": "examples/capability-availability-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-7f4b6f4a0b5c9599.md",
+        "wikiPage": "Evidence-Record-7f4b6f4a0b5c9599.md",
+        "title": "Local Ollama capability availability discovery"
+      }
+    },
+    {
+      "id": "evidence-e2cf27858869b71b",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Local Ollama general chat",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "general-chat",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/local-text-capability-validation.md",
+        "notes": "Bounded live response, typed chat artifact, prompt and endpoint exclusion, no repository read, cleanup, and unload checks passed; runtime availability remains configuration-dependent."
+      },
+      "sourceEvidence": "examples/local-text-capability-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e2cf27858869b71b.md",
+        "wikiPage": "Evidence-Record-e2cf27858869b71b.md",
+        "title": "Local Ollama general chat"
+      }
+    },
+    {
+      "id": "evidence-a661b8ee3cb73a5c",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Local Ollama general writing",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "general-writing",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/local-text-capability-validation.md",
+        "notes": "Bounded live Markdown signals and typed artifact checks passed; broader writing quality and factual verification are not claimed."
+      },
+      "sourceEvidence": "examples/local-text-capability-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a661b8ee3cb73a5c.md",
+        "wikiPage": "Evidence-Record-a661b8ee3cb73a5c.md",
+        "title": "Local Ollama general writing"
+      }
+    },
+    {
+      "id": "evidence-91816f73fe0522a8",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Local Ollama summarization",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "general-summarization",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/local-text-capability-validation.md",
+        "notes": "Bounded supplied-fact retention and typed artifact checks passed; long-document quality is not claimed."
+      },
+      "sourceEvidence": "examples/local-text-capability-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-91816f73fe0522a8.md",
+        "wikiPage": "Evidence-Record-91816f73fe0522a8.md",
+        "title": "Local Ollama summarization"
+      }
+    },
+    {
+      "id": "evidence-9160baf776098a16",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Mistral Small 3.2 writing constraint matrix",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Linux",
+        "model": "mistral-small3.2:24b-instruct-2506-q4_K_M",
+        "operation": "writing-constraint-screen",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/writing-model-matrix-validation.md",
+        "notes": "Exact digest passed three synthetic automated constraint cases and all unload checks; blind human quality review and comparative promotion remain open."
+      },
+      "sourceEvidence": "examples/writing-model-matrix-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9160baf776098a16.md",
+        "wikiPage": "Evidence-Record-9160baf776098a16.md",
+        "title": "Mistral Small 3.2 writing constraint matrix"
+      }
+    },
+    {
+      "id": "evidence-e868714f9f8c5344",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Optional local LLM capability suggestion",
+        "surface": "LLM intent routing",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "intent-routing",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/optional-llm-routing-validation.md",
+        "notes": "Bounded structured-output summarization routing, committed-registry validation, unknown-ID rejection, sanitization, no invocation, and unload checks passed; broad classification accuracy is not claimed."
+      },
+      "sourceEvidence": "examples/optional-llm-routing-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e868714f9f8c5344.md",
+        "wikiPage": "Evidence-Record-e868714f9f8c5344.md",
+        "title": "Optional local LLM capability suggestion"
+      }
+    },
+    {
+      "id": "evidence-b91e58b8e387a4cc",
+      "claim": {
+        "schema_version": "2",
+        "area": "general-capability",
+        "subject": "Qwen 3.5 9B writing constraint matrix",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Linux",
+        "model": "qwen3.5:9b",
+        "operation": "writing-constraint-screen",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/writing-model-matrix-validation.md",
+        "notes": "Exact digest passed three synthetic automated constraint cases and all unload checks; blind human quality review and comparative promotion remain open."
+      },
+      "sourceEvidence": "examples/writing-model-matrix-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-b91e58b8e387a4cc.md",
+        "wikiPage": "Evidence-Record-b91e58b8e387a4cc.md",
+        "title": "Qwen 3.5 9B writing constraint matrix"
+      }
+    },
+    {
+      "id": "evidence-7c544083b952b24c",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-recommendation",
+        "subject": "Script-level recommendation and config generation",
+        "surface": "Pack scripts",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "qwen3.5:9b",
+        "operation": "config-recommendation",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "examples/hardware-aware-recommendation-validation.md",
+        "notes": "Sanitized evidence records recommendation and local-only config generation; editor Apply validation remains separate."
+      },
+      "sourceEvidence": "examples/hardware-aware-recommendation-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-7c544083b952b24c.md",
+        "wikiPage": "Evidence-Record-7c544083b952b24c.md",
+        "title": "Script-level recommendation and config generation"
+      }
+    },
+    {
+      "id": "evidence-05d02ca020d00629",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "OpenVINO GenAI on Intel Arc B580",
+        "surface": "OpenVINO GenAI",
+        "surface_version": "2026.2.0",
+        "provider": "direct library API",
+        "os": "Windows",
+        "model": "OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/intel-b580-inference-engine-validation.md",
+        "notes": "Exact-profile candidate evidence: a hash-verified portable runtime and immutable model passed GPU discovery, three direct inference lifecycles, and process cleanup; strict output behavior failed and no provider, package, installer, or automatic-download admission is granted."
+      },
+      "sourceEvidence": "examples/intel-b580-inference-engine-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-05d02ca020d00629.md",
+        "wikiPage": "Evidence-Record-05d02ca020d00629.md",
+        "title": "OpenVINO GenAI on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-13d3451c24d5c713",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "OpenVINO GenAI on Intel Arc B580",
+        "surface": "OpenVINO GenAI",
+        "surface_version": "2026.2.1",
+        "provider": "direct library API",
+        "os": "Linux",
+        "model": "OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/intel-b580-inference-engine-validation.md",
+        "notes": "Exact-profile candidate evidence: GPU discovery, immutable model execution, and repeated cleanup passed, but the host OS is outside the documented support baseline, strict output behavior failed, and no provider or package admission is granted."
+      },
+      "sourceEvidence": "examples/intel-b580-inference-engine-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-13d3451c24d5c713.md",
+        "wikiPage": "Evidence-Record-13d3451c24d5c713.md",
+        "title": "OpenVINO GenAI on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-d2ac550dc4f53937",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp 11-model identical-byte AMD/NVIDIA matrix",
+        "surface": "llama.cpp CLI",
+        "surface_version": "b10088",
+        "provider": "direct process",
+        "os": "Windows and Linux",
+        "model": "revision-and-sha256-pinned-11-model-corpus",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/cross-accelerator-model-validation.md",
+        "notes": "Exact-profile development evidence: the same 11 artifacts passed identity, HIP/CUDA detection, fixed benchmark, full model-layer GPU offload, bounded exit, and cleanup on Radeon RX 7800 XT and Tesla V100; the same four passed the bounded exact-output gate. Separate follow-on outcomes are tracked independently and grant no wider admission."
+      },
+      "sourceEvidence": "examples/cross-accelerator-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d2ac550dc4f53937.md",
+        "wikiPage": "Evidence-Record-d2ac550dc4f53937.md",
+        "title": "llama.cpp 11-model identical-byte AMD/NVIDIA matrix"
+      }
+    },
+    {
+      "id": "evidence-599dbc1e05b646b6",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp CUDA on Quadro RTX 5000",
+        "surface": "llama.cpp server",
+        "surface_version": "b10088",
+        "provider": "OpenAI-compatible loopback API",
+        "os": "Linux",
+        "model": "unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/inference-engine-validation.md",
+        "notes": "Exact-profile engine evidence: source-built CUDA passed isolated-device discovery, fixed benchmark, bounded response, required tool call, Git-applicable patch, cleanup, and service-preservation checks; agent-surface and consumer-installer readiness are not claimed."
+      },
+      "sourceEvidence": "examples/inference-engine-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-599dbc1e05b646b6.md",
+        "wikiPage": "Evidence-Record-599dbc1e05b646b6.md",
+        "title": "llama.cpp CUDA on Quadro RTX 5000"
+      }
+    },
+    {
+      "id": "evidence-85720f2f0c014451",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp HIP on Radeon RX 7800 XT",
+        "surface": "llama.cpp server",
+        "surface_version": "10088",
+        "provider": "OpenAI-compatible loopback API",
+        "os": "Windows",
+        "model": "unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/inference-engine-validation.md",
+        "notes": "Exact-profile engine evidence: HIP passed device discovery, fixed benchmark, bounded response, required tool call, Git-applicable patch, and cleanup; agent-surface approved-write readiness is not claimed."
+      },
+      "sourceEvidence": "examples/inference-engine-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-85720f2f0c014451.md",
+        "wikiPage": "Evidence-Record-85720f2f0c014451.md",
+        "title": "llama.cpp HIP on Radeon RX 7800 XT"
+      }
+    },
+    {
+      "id": "evidence-1a16a98b5cd40e10",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp HIP through WSL2 DXG on Radeon RX 7800 XT",
+        "surface": "llama.cpp CLI",
+        "surface_version": "b10088",
+        "provider": "direct process",
+        "os": "WSL2 Ubuntu",
+        "model": "revision-and-sha256-pinned-11-model-corpus",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/cross-accelerator-model-validation.md",
+        "notes": "Exact-profile candidate evidence: all 11 artifacts passed identity, HIP/DXG detection, fixed benchmark, full model-layer GPU offload, bounded exit, and cleanup; the same four passed the bounded exact-output gate. This does not establish native Linux AMD support or grant runtime, provider, model, package, or production admission."
+      },
+      "sourceEvidence": "examples/cross-accelerator-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1a16a98b5cd40e10.md",
+        "wikiPage": "Evidence-Record-1a16a98b5cd40e10.md",
+        "title": "llama.cpp HIP through WSL2 DXG on Radeon RX 7800 XT"
+      }
+    },
+    {
+      "id": "evidence-3d02244dab060bc7",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp SYCL on Intel Arc B580",
+        "surface": "llama.cpp completion and benchmark",
+        "surface_version": "b10088",
+        "provider": "direct process",
+        "os": "Windows",
+        "model": "unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "candidate-only",
+        "evidence": "examples/intel-b580-inference-engine-validation.md",
+        "notes": "Exact-profile negative evidence: verified runtime/model preflight and device enumeration passed, but zero-free-memory reporting, tensor-load failure, and an OpenCL fallback fast-fail blocked inference; cleanup passed and no runtime or package admission is granted."
+      },
+      "sourceEvidence": "examples/intel-b580-inference-engine-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3d02244dab060bc7.md",
+        "wikiPage": "Evidence-Record-3d02244dab060bc7.md",
+        "title": "llama.cpp SYCL on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-a43711f9d74d1e5f",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp SYCL on Intel Arc B580",
+        "surface": "llama.cpp server",
+        "surface_version": "5f55650a",
+        "provider": "OpenAI-compatible loopback API",
+        "os": "Linux",
+        "model": "unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/intel-b580-inference-engine-validation.md",
+        "notes": "Exact-profile candidate evidence: text, vision, prompt pressure, tool call, bounded-reasoning patch, adapter, and cleanup cells passed, but 3 of 53 upstream tests failed; no runtime or package admission is granted."
+      },
+      "sourceEvidence": "examples/intel-b580-inference-engine-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a43711f9d74d1e5f.md",
+        "wikiPage": "Evidence-Record-a43711f9d74d1e5f.md",
+        "title": "llama.cpp SYCL on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-d535eb939e00de72",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp Windows NVIDIA and AMD follow-on matrix",
+        "surface": "llama.cpp CLI and server",
+        "surface_version": "b10088",
+        "provider": "direct process",
+        "os": "Windows",
+        "model": "revision-and-sha256-pinned-follow-on-artifacts",
+        "operation": "backend-validation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/cross-accelerator-model-validation.md",
+        "notes": "Exact-profile candidate evidence: CUDA and HIP passed full-offload lifecycle, Gemma vision, and independent direct Qwen 3.5 9B structured tool-call cells; patch outcomes differed for Qwen 3.5, and Qwen 3 8B failed context and patch quality on both. Tool arguments remain untrusted and no execution, runtime, provider, model, UI, package, or production promotion is granted."
+      },
+      "sourceEvidence": "examples/cross-accelerator-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d535eb939e00de72.md",
+        "wikiPage": "Evidence-Record-d535eb939e00de72.md",
+        "title": "llama.cpp Windows NVIDIA and AMD follow-on matrix"
+      }
+    },
+    {
+      "id": "evidence-61e94680de9075db",
+      "claim": {
+        "schema_version": "2",
+        "area": "installer-profile",
+        "subject": "Approved-write install profile",
+        "surface": "Installer scripts",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "install-approved-write",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "scripts/test-pack.ps1",
+        "notes": "Maps to scoped model lanes where only WRITE SAFE has edit/apply roles."
+      },
+      "sourceEvidence": "scripts/test-pack.ps1",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-61e94680de9075db.md",
+        "wikiPage": "Evidence-Record-61e94680de9075db.md",
+        "title": "Approved-write install profile"
+      }
+    },
+    {
+      "id": "evidence-fbf3040ee5b605aa",
+      "claim": {
+        "schema_version": "2",
+        "area": "installer-profile",
+        "subject": "Read-only install profile",
+        "surface": "Installer scripts",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "install-read-only",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "scripts/test-pack.ps1",
+        "notes": "Generates local config without edit/apply roles and is covered by PowerShell and Bash tests."
+      },
+      "sourceEvidence": "scripts/test-pack.ps1",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-fbf3040ee5b605aa.md",
+        "wikiPage": "Evidence-Record-fbf3040ee5b605aa.md",
+        "title": "Read-only install profile"
+      }
+    },
+    {
+      "id": "evidence-c730707485ed58be",
+      "claim": {
+        "schema_version": "2",
+        "area": "knowledge-context",
+        "subject": "Memory lexical retrieval hardening",
+        "surface": "No runtime",
+        "surface_version": "1",
+        "provider": "Caller-supplied validated memory",
+        "os": "Cross-platform",
+        "model": "no-model",
+        "operation": "offline-boundary",
+        "validation_mode": "offline-fixture",
+        "status": "static-validated",
+        "evidence": "docs/retrieval-expansion-foundations.md",
+        "notes": "Exact duplicate content, source/chunk accounting, truncation, removal, failure, provider-change, and shutdown behavior pass locally; no route, provider payload, embedding, persistence, or package authority is granted."
+      },
+      "sourceEvidence": "docs/retrieval-expansion-foundations.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-c730707485ed58be.md",
+        "wikiPage": "Evidence-Record-c730707485ed58be.md",
+        "title": "Memory lexical retrieval hardening"
+      }
+    },
+    {
+      "id": "evidence-128249f02a932a5d",
+      "claim": {
+        "schema_version": "2",
+        "area": "knowledge-context",
+        "subject": "Office/OpenDocument unsupported-object boundary",
+        "surface": "No runtime",
+        "surface_version": "1",
+        "provider": "Synthetic ZIP/XML fixtures",
+        "os": "Windows and Linux",
+        "model": "no-model",
+        "operation": "offline-boundary",
+        "validation_mode": "offline-fixture",
+        "status": "static-validated",
+        "evidence": "docs/restricted-parser-worker-foundation.md",
+        "notes": "The standard-library semantic review explicitly rejects chart and drawing parts within its 62-check, 19-fixture suite; dependencies, user documents, runtime, UI, provider, and packages remain unadmitted."
+      },
+      "sourceEvidence": "docs/restricted-parser-worker-foundation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-128249f02a932a5d.md",
+        "wikiPage": "Evidence-Record-128249f02a932a5d.md",
+        "title": "Office/OpenDocument unsupported-object boundary"
+      }
+    },
+    {
+      "id": "evidence-fa1c4c4d706dbb95",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-rule-pack",
+        "subject": "Python optional rule pack",
+        "surface": "Static validation",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "rule-validation",
+        "validation_mode": "static",
+        "status": "static-validated",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "Optional Python rule pack is evidence-gated and not loaded globally by default."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-fa1c4c4d706dbb95.md",
+        "wikiPage": "Evidence-Record-fa1c4c4d706dbb95.md",
+        "title": "Python optional rule pack"
+      }
+    },
+    {
+      "id": "evidence-bf0a844bf50dad6c",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-rule-pack",
+        "subject": "TypeScript optional rule pack",
+        "surface": "Static validation",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "rule-validation",
+        "validation_mode": "static",
+        "status": "static-validated",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "Optional TypeScript rule pack is evidence-gated and not loaded globally by default."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-bf0a844bf50dad6c.md",
+        "wikiPage": "Evidence-Record-bf0a844bf50dad6c.md",
+        "title": "TypeScript optional rule pack"
+      }
+    },
+    {
+      "id": "evidence-9fe4829db45f23cf",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-workflow-matrix",
+        "subject": "Devstral Small 2 medium language matrix",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "workflow-suite",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "Passed 27 of 28 medium-fixture cells; TypeScript scoped write remains assigned to the Qwen override."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9fe4829db45f23cf.md",
+        "wikiPage": "Evidence-Record-9fe4829db45f23cf.md",
+        "title": "Devstral Small 2 medium language matrix"
+      }
+    },
+    {
+      "id": "evidence-ead5ac43339950f8",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-workflow-matrix",
+        "subject": "Native macOS Python read workflows",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama",
+        "os": "macOS",
+        "model": "qwen3.5:9b",
+        "operation": "read-workflows",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "Python discovery implementation planning and code review passed on a native Apple Silicon host; model unload was verified after each run."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ead5ac43339950f8.md",
+        "wikiPage": "Evidence-Record-ead5ac43339950f8.md",
+        "title": "Native macOS Python read workflows"
+      }
+    },
+    {
+      "id": "evidence-e9278f1fa33b50ed",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-workflow-matrix",
+        "subject": "Native macOS Python scoped-write",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama",
+        "os": "macOS",
+        "model": "qwen3.5:9b",
+        "operation": "scoped-write",
+        "validation_mode": "generated-sample",
+        "status": "approved-write-ready",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "Structured headless output changed only the approved Python test file passed exact marker and Git checks and verified model unload; this does not promote other languages or editor surfaces."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e9278f1fa33b50ed.md",
+        "wikiPage": "Evidence-Record-e9278f1fa33b50ed.md",
+        "title": "Native macOS Python scoped-write"
+      }
+    },
+    {
+      "id": "evidence-e133b0735c64b090",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-workflow-matrix",
+        "subject": "Qwen 3.5 35B medium language matrix",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:35b",
+        "operation": "workflow-suite",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "Passed 27 of 28 medium-fixture cells; Rust scoped write remains assigned to the Devstral default."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e133b0735c64b090.md",
+        "wikiPage": "Evidence-Record-e133b0735c64b090.md",
+        "title": "Qwen 3.5 35B medium language matrix"
+      }
+    },
+    {
+      "id": "evidence-4d55669e8b4fe1d1",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-workflow-matrix",
+        "subject": "Rust scoped-write lane",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "scoped-write",
+        "validation_mode": "generated-sample",
+        "status": "approved-write-ready",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "External diff, exact final marker, and final response passed on the medium Rust fixture."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-4d55669e8b4fe1d1.md",
+        "wikiPage": "Evidence-Record-4d55669e8b4fe1d1.md",
+        "title": "Rust scoped-write lane"
+      }
+    },
+    {
+      "id": "evidence-74a1cb2f558d7e4f",
+      "claim": {
+        "schema_version": "2",
+        "area": "language-workflow-matrix",
+        "subject": "TypeScript scoped-write lane",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:35b",
+        "operation": "scoped-write",
+        "validation_mode": "generated-sample",
+        "status": "approved-write-ready",
+        "evidence": "examples/language-rule-pack-validation.md",
+        "notes": "External diff, exact final marker, and final response passed on the medium TypeScript fixture."
+      },
+      "sourceEvidence": "examples/language-rule-pack-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-74a1cb2f558d7e4f.md",
+        "wikiPage": "Evidence-Record-74a1cb2f558d7e4f.md",
+        "title": "TypeScript scoped-write lane"
+      }
+    },
+    {
+      "id": "evidence-64b5695c570a65eb",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Arch Linux rolling",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Arch Linux rolling",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall passed through an explicit Bash launcher; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-64b5695c570a65eb.md",
+        "wikiPage": "Evidence-Record-64b5695c570a65eb.md",
+        "title": "Alpha 2 managed lifecycle on Arch Linux rolling"
+      }
+    },
+    {
+      "id": "evidence-6d9b244b1163f0ba",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Bazzite 44",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Bazzite 44",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and canonical-home marker-owned uninstall passed; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6d9b244b1163f0ba.md",
+        "wikiPage": "Evidence-Record-6d9b244b1163f0ba.md",
+        "title": "Alpha 2 managed lifecycle on Bazzite 44"
+      }
+    },
+    {
+      "id": "evidence-1d6bdc9189569bea",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on CachyOS rolling",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "CachyOS rolling",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall passed through an explicit Bash launcher; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1d6bdc9189569bea.md",
+        "wikiPage": "Evidence-Record-1d6bdc9189569bea.md",
+        "title": "Alpha 2 managed lifecycle on CachyOS rolling"
+      }
+    },
+    {
+      "id": "evidence-367cf17184e6d096",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Debian 13",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Debian 13",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall passed; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-367cf17184e6d096.md",
+        "wikiPage": "Evidence-Record-367cf17184e6d096.md",
+        "title": "Alpha 2 managed lifecycle on Debian 13"
+      }
+    },
+    {
+      "id": "evidence-a466eb1da4889753",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Fedora 44",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Fedora 44",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "The durable completion-receipt ordering correction passed fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall; packaged repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a466eb1da4889753.md",
+        "wikiPage": "Evidence-Record-a466eb1da4889753.md",
+        "title": "Alpha 2 managed lifecycle on Fedora 44"
+      }
+    },
+    {
+      "id": "evidence-996fb8fe75402f31",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Linux Mint 22.3",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Linux Mint 22.3",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-recovery-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, recovery from an interrupted marker-owned setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall passed; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-996fb8fe75402f31.md",
+        "wikiPage": "Evidence-Record-996fb8fe75402f31.md",
+        "title": "Alpha 2 managed lifecycle on Linux Mint 22.3"
+      }
+    },
+    {
+      "id": "evidence-f15751caa49c9951",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Pop OS 24.04",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Pop OS 24.04 LTS",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "The corrected system identity path passed fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall; packaged repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-f15751caa49c9951.md",
+        "wikiPage": "Evidence-Record-f15751caa49c9951.md",
+        "title": "Alpha 2 managed lifecycle on Pop OS 24.04"
+      }
+    },
+    {
+      "id": "evidence-d3fe8b7c516fde7c",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Ubuntu 24.04",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Ubuntu 24.04.4 LTS",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall passed; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d3fe8b7c516fde7c.md",
+        "wikiPage": "Evidence-Record-d3fe8b7c516fde7c.md",
+        "title": "Alpha 2 managed lifecycle on Ubuntu 24.04"
+      }
+    },
+    {
+      "id": "evidence-2a865071c8c4974a",
+      "claim": {
+        "schema_version": "2",
+        "area": "managed-lifecycle",
+        "subject": "Alpha 2 managed lifecycle on Ubuntu 26.04",
+        "surface": "Haven 42 source candidate",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.5 CUDA",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "qwen3.5:0.8b Q8_0",
+        "operation": "setup-inference-reuse-uninstall",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "docs/linux-managed-lifecycle-validation.md",
+        "notes": "Fresh setup, exact identity, GPU inference, normal shutdown, process and port closure, zero-download reuse, and marker-owned uninstall passed; packaged desktop repetition remains open."
+      },
+      "sourceEvidence": "docs/linux-managed-lifecycle-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2a865071c8c4974a.md",
+        "wikiPage": "Evidence-Record-2a865071c8c4974a.md",
+        "title": "Alpha 2 managed lifecycle on Ubuntu 26.04"
+      }
+    },
+    {
+      "id": "evidence-c9663d1fe857b9a0",
+      "claim": {
+        "schema_version": "2",
+        "area": "media-provider",
+        "subject": "ACE-Step 1.5 Linux CUDA feasibility",
+        "surface": "ACE-Step REST API",
+        "surface_version": "1.5.0",
+        "provider": "ACE-Step",
+        "os": "Linux",
+        "model": "acestep-v15-turbo",
+        "operation": "instrumental-and-vocal-request-generation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/local-audio-provider-validation.md",
+        "notes": "Exact V100 and Quadro cells cover WAV structure, signal/clipping, GPU-use, cancellation, recovery, isolated retention, and review-only typed evidence; listening, deletion/uninstall, production adapter/package parity, and an upstream route-authentication fix remain open."
+      },
+      "sourceEvidence": "examples/local-audio-provider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-c9663d1fe857b9a0.md",
+        "wikiPage": "Evidence-Record-c9663d1fe857b9a0.md",
+        "title": "ACE-Step 1.5 Linux CUDA feasibility"
+      }
+    },
+    {
+      "id": "evidence-3d3a187ec32169e6",
+      "claim": {
+        "schema_version": "2",
+        "area": "media-provider",
+        "subject": "ComfyUI SDXL on Intel Arc B580",
+        "surface": "Local image capability adapter",
+        "surface_version": "1",
+        "provider": "ComfyUI",
+        "os": "Windows",
+        "model": "SDXL Base 1.0",
+        "operation": "image-generation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/windows-intel-image-provider-validation.md",
+        "notes": "Exact Windows Intel portable cell passed immutable v0.29.2 to v0.30.0 selection plus production-adapter, XPU, privacy, cancellation, recovery, cleanup, and endpoint-closure gates; onboarding, automatic idle shutdown, package parity, redistribution approval, and promotion remain open."
+      },
+      "sourceEvidence": "examples/windows-intel-image-provider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3d3a187ec32169e6.md",
+        "wikiPage": "Evidence-Record-3d3a187ec32169e6.md",
+        "title": "ComfyUI SDXL on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-9144ebf0180b2118",
+      "claim": {
+        "schema_version": "2",
+        "area": "media-provider",
+        "subject": "ComfyUI SDXL on Quadro RTX 5000",
+        "surface": "Local image capability adapter",
+        "surface_version": "1",
+        "provider": "ComfyUI",
+        "os": "Windows",
+        "model": "SDXL Base 1.0",
+        "operation": "image-generation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/windows-nvidia-image-provider-validation.md",
+        "notes": "Exact Windows NVIDIA portable cell passed immutable v0.29.2 to v0.30.0 update and rollback plus production-adapter, accelerator, privacy, cancellation, recovery, cleanup, and endpoint-closure gates; onboarding, automatic idle shutdown, package parity, redistribution approval, and promotion remain open."
+      },
+      "sourceEvidence": "examples/windows-nvidia-image-provider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9144ebf0180b2118.md",
+        "wikiPage": "Evidence-Record-9144ebf0180b2118.md",
+        "title": "ComfyUI SDXL on Quadro RTX 5000"
+      }
+    },
+    {
+      "id": "evidence-dda5053a14f25d32",
+      "claim": {
+        "schema_version": "2",
+        "area": "media-provider",
+        "subject": "ComfyUI SDXL on Radeon RX 7800 XT",
+        "surface": "Local image capability adapter",
+        "surface_version": "1",
+        "provider": "ComfyUI",
+        "os": "Windows",
+        "model": "SDXL Base 1.0",
+        "operation": "image-generation",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/windows-amd-image-provider-validation.md",
+        "notes": "Exact Windows AMD portable cell passed immutable v0.28.0 to v0.30.0 update and rollback plus production-adapter, accelerator, privacy, cancellation, recovery, cleanup, and endpoint-closure gates; onboarding, automatic idle shutdown, package parity, redistribution approval, and promotion remain open."
+      },
+      "sourceEvidence": "examples/windows-amd-image-provider-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-dda5053a14f25d32.md",
+        "wikiPage": "Evidence-Record-dda5053a14f25d32.md",
+        "title": "ComfyUI SDXL on Radeon RX 7800 XT"
+      }
+    },
+    {
+      "id": "evidence-4e44f89b53777abb",
+      "claim": {
+        "schema_version": "2",
+        "area": "media-provider",
+        "subject": "Local video candidate hardware preflight",
+        "surface": "No runtime",
+        "surface_version": "not-applicable",
+        "provider": "HunyuanVideo 1.5, Wan2.2, and LTX-2.3",
+        "os": "Linux",
+        "model": "exact-upstream-candidate-records",
+        "operation": "hardware-and-storage-preflight",
+        "validation_mode": "offline-metadata",
+        "status": "candidate-only",
+        "evidence": "docs/local-video-provider-candidates.md",
+        "notes": "Exact Quadro RTX 5000 preflight rejected Wan2.2 and LTX-2.3 for hardware fit and HunyuanVideo for insufficient safe storage; no source, dependency, model, prompt, media, output, or service was created."
+      },
+      "sourceEvidence": "docs/local-video-provider-candidates.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-4e44f89b53777abb.md",
+        "wikiPage": "Evidence-Record-4e44f89b53777abb.md",
+        "title": "Local video candidate hardware preflight"
+      }
+    },
+    {
+      "id": "evidence-749f44fc9f8604f4",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-provider",
+        "subject": "Laguna XS 2.1 Ollama conformance",
+        "surface": "Local text capability adapter",
+        "surface_version": "1",
+        "provider": "Ollama",
+        "os": "Linux",
+        "model": "laguna-xs-2.1:q4_K_M",
+        "operation": "provider-conformance",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/laguna-xs-2.1-validation.md",
+        "notes": "Exact Linux profile passed 16 bounded provider checks; agent-surface approved-write and redistribution readiness are not claimed."
+      },
+      "sourceEvidence": "examples/laguna-xs-2.1-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-749f44fc9f8604f4.md",
+        "wikiPage": "Evidence-Record-749f44fc9f8604f4.md",
+        "title": "Laguna XS 2.1 Ollama conformance"
+      }
+    },
+    {
+      "id": "evidence-739440533a3f6c7a",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Granite 4.1 8B on Intel Arc B580",
+        "surface": "llama.cpp SYCL",
+        "surface_version": "b10375",
+        "provider": "direct process",
+        "os": "Ubuntu Linux",
+        "model": "granite41-8b-q4_K_M",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/intel-b580-granite41-8b-validation.md",
+        "notes": "Exact artifact and runtime binary passed 15 task samples, a 30-minute soak, full 41-layer SYCL offload, card-energy measurement, listener closure, and cleanup; package lifecycle, broader recovery, Windows, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/intel-b580-granite41-8b-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-739440533a3f6c7a.md",
+        "wikiPage": "Evidence-Record-739440533a3f6c7a.md",
+        "title": "Granite 4.1 8B on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-999c817bcb50d175",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Nemotron 3.5 Lightning Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.9",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+        "operation": "chat-writing-summary-soak-energy",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-v100-nemotron-validation.md",
+        "notes": "Exact manifest passed 81 task samples across nine cycles, a 30-minute soak, reported GPU residency, and a separate exact GPU-board energy measurement; tools, thinking, recovery, bounded-context checks, package lifecycle, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/nvidia-v100-nemotron-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-999c817bcb50d175.md",
+        "wikiPage": "Evidence-Record-999c817bcb50d175.md",
+        "title": "Nemotron 3.5 Lightning Q4 on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-b4871f9bcbf09daa",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Nemotron 3.5 Lightning Q8 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.9",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "nemotron-3.5-lightning:30b-a3b-q8_0",
+        "operation": "chat-writing-summary-soak-energy",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-v100-nemotron-validation.md",
+        "notes": "Exact manifest passed 72 task samples across eight cycles, a 30-minute soak, reported GPU residency, and a separate exact GPU-board energy measurement; tools, thinking, recovery, bounded-context checks, package lifecycle, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/nvidia-v100-nemotron-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-b4871f9bcbf09daa.md",
+        "wikiPage": "Evidence-Record-b4871f9bcbf09daa.md",
+        "title": "Nemotron 3.5 Lightning Q8 on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-029248b547774d8a",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Ollama 0.32.9 five-model task-contract retry on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.9",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "five exact manifest-pinned models",
+        "operation": "chat-writing-summary-gate",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/nvidia-v100-ollama0329-task-contract-retry.md",
+        "notes": "All five exact artifacts reproduced the task-contract failure seen on Ollama 0.32.8; the mandatory pre-soak gate failed, no soak pass is claimed, and automatic admission remains prohibited."
+      },
+      "sourceEvidence": "examples/nvidia-v100-ollama0329-task-contract-retry.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-029248b547774d8a.md",
+        "wikiPage": "Evidence-Record-029248b547774d8a.md",
+        "title": "Ollama 0.32.9 five-model task-contract retry on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-08bad671d73e509b",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Qwen 3.5 9B synchronized power on Radeon RX 7800 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.5",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "qwen3.5:9b Q4_K_M",
+        "operation": "chat-writing-summary-soak-energy",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/windows-amd-rx7800xt-power-validation.md",
+        "notes": "Exact 30-minute workload passed 50 of 50 cells with full GPU offload; the synchronized Adrenalin measurement met the 120-second idle-baseline floor and was admitted as exact-profile GPU-only energy evidence. Model qualification remains partial and grants no automatic model, runtime, or cost promotion."
+      },
+      "sourceEvidence": "examples/windows-amd-rx7800xt-power-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-08bad671d73e509b.md",
+        "wikiPage": "Evidence-Record-08bad671d73e509b.md",
+        "title": "Qwen 3.5 9B synchronized power on Radeon RX 7800 XT"
+      }
+    },
+    {
+      "id": "evidence-abbec916eccdc9c2",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-quantization",
+        "subject": "Qwen 3.5 9B Q4_K_M versus Q8_0",
+        "surface": "Ollama",
+        "surface_version": "0.32.1",
+        "provider": "Ollama",
+        "os": "Linux",
+        "model": "qwen3.5:9b",
+        "operation": "trusted-artifact-comparison",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/quantization-validation.md",
+        "notes": "Exact-profile only: Q4_K_M retained the bounded response, structured tool-call, and engineering-patch behavior with lower storage and accelerator memory and higher generation throughput; the disposable Q8_0 candidate was removed."
+      },
+      "sourceEvidence": "examples/quantization-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-abbec916eccdc9c2.md",
+        "wikiPage": "Evidence-Record-abbec916eccdc9c2.md",
+        "title": "Qwen 3.5 9B Q4_K_M versus Q8_0"
+      }
+    },
+    {
+      "id": "evidence-66af319217108136",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-quantization",
+        "subject": "Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.1",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "trusted-artifact-comparison",
+        "validation_mode": "local-endpoint",
+        "status": "validated-by-tests",
+        "evidence": "examples/quantization-validation.md",
+        "notes": "Exact-profile only: the packaged ROCm 7.1 backend fully offloaded both artifacts; Q4_K_M retained functional behavior with lower storage and accelerator memory and higher clean-run throughput; all disposable assets were removed."
+      },
+      "sourceEvidence": "examples/quantization-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-66af319217108136.md",
+        "wikiPage": "Evidence-Record-66af319217108136.md",
+        "title": "Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT"
+      }
+    },
+    {
+      "id": "evidence-8a4966fb74923f8b",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Devstral Small 2 MLX endpoint tool call",
+        "surface": "MLX OpenAI-compatible server",
+        "surface_version": "0.31.3",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Devstral-Small-2-24B-Instruct-2512-4bit",
+        "operation": "structured-tool-call",
+        "validation_mode": "local-endpoint",
+        "status": "candidate-only",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Endpoint did not return the required structured tool call; do not use for MLX tool-backed workflows until the model parsing/runtime issue is resolved and retested."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-8a4966fb74923f8b.md",
+        "wikiPage": "Evidence-Record-8a4966fb74923f8b.md",
+        "title": "Devstral Small 2 MLX endpoint tool call"
+      }
+    },
+    {
+      "id": "evidence-a4f5cee50428c764",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 4B MLX Continue CLI read",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-4B-4bit",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Tool-backed read returned the inspected disposable fixture project name; editor Agent compatibility is not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a4f5cee50428c764.md",
+        "wikiPage": "Evidence-Record-a4f5cee50428c764.md",
+        "title": "Qwen 3.5 4B MLX Continue CLI read"
+      }
+    },
+    {
+      "id": "evidence-5f39cc023ffe9b89",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 4B MLX Continue CLI scoped write smoke",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-4B-4bit",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Only the approved disposable README changed; exact marker and Git whitespace checks passed before cleanup. Editor, plan, review, and broad-write readiness are not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5f39cc023ffe9b89.md",
+        "wikiPage": "Evidence-Record-5f39cc023ffe9b89.md",
+        "title": "Qwen 3.5 4B MLX Continue CLI scoped write smoke"
+      }
+    },
+    {
+      "id": "evidence-5937518d2dcbae62",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 4B MLX endpoint tool call",
+        "surface": "MLX OpenAI-compatible server",
+        "surface_version": "0.31.3",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-4B-4bit",
+        "operation": "structured-tool-call",
+        "validation_mode": "local-endpoint",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Required function call returned valid JSON arguments on a loopback-only Apple Silicon MLX server; agent-surface behavior remains separate."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5937518d2dcbae62.md",
+        "wikiPage": "Evidence-Record-5937518d2dcbae62.md",
+        "title": "Qwen 3.5 4B MLX endpoint tool call"
+      }
+    },
+    {
+      "id": "evidence-2281ebc7777a2289",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B MLX Continue CLI plan",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+        "operation": "implementation-plan",
+        "validation_mode": "generated-sample",
+        "status": "plan-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Read-only plan referenced the inspected scenario and service files and external Git verification remained clean."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2281ebc7777a2289.md",
+        "wikiPage": "Evidence-Record-2281ebc7777a2289.md",
+        "title": "Qwen 3.5 9B MLX Continue CLI plan"
+      }
+    },
+    {
+      "id": "evidence-254db10e5008805c",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B MLX Continue CLI read",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Read-tool output referenced inspected disposable-fixture files; editor Agent compatibility is not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-254db10e5008805c.md",
+        "wikiPage": "Evidence-Record-254db10e5008805c.md",
+        "title": "Qwen 3.5 9B MLX Continue CLI read"
+      }
+    },
+    {
+      "id": "evidence-55a17b5d93fb9c09",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B MLX Continue CLI review",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+        "operation": "code-review",
+        "validation_mode": "generated-sample",
+        "status": "review-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Read-only review referenced the inspected service and test files and external Git verification remained clean."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-55a17b5d93fb9c09.md",
+        "wikiPage": "Evidence-Record-55a17b5d93fb9c09.md",
+        "title": "Qwen 3.5 9B MLX Continue CLI review"
+      }
+    },
+    {
+      "id": "evidence-32993a66ac4b468f",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B MLX Continue CLI scoped write smoke",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Only the approved disposable README changed; exact marker and Git whitespace checks passed before cleanup. Editor and broad-write readiness are not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-32993a66ac4b468f.md",
+        "wikiPage": "Evidence-Record-32993a66ac4b468f.md",
+        "title": "Qwen 3.5 9B MLX Continue CLI scoped write smoke"
+      }
+    },
+    {
+      "id": "evidence-3f7866c9fa36fa50",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B MLX endpoint tool call",
+        "surface": "MLX OpenAI-compatible server",
+        "surface_version": "0.31.3",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-OptiQ-4bit",
+        "operation": "structured-tool-call",
+        "validation_mode": "local-endpoint",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Required function call returned valid JSON arguments on a loopback-only Apple Silicon MLX server; agent-surface behavior remains separate."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3f7866c9fa36fa50.md",
+        "wikiPage": "Evidence-Record-3f7866c9fa36fa50.md",
+        "title": "Qwen 3.5 9B MLX endpoint tool call"
+      }
+    },
+    {
+      "id": "evidence-de86611b0dd8c860",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B baseline MLX Continue CLI read",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-4bit",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Focused read output referenced the approved fixture files; editor Agent compatibility is not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-de86611b0dd8c860.md",
+        "wikiPage": "Evidence-Record-de86611b0dd8c860.md",
+        "title": "Qwen 3.5 9B baseline MLX Continue CLI read"
+      }
+    },
+    {
+      "id": "evidence-ccd5b4bdd03c1ef2",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B baseline MLX Continue CLI scoped write smoke",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-4bit",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Only the approved disposable README changed; exact marker and Git whitespace checks passed before cleanup. Strict plan and review evidence is not claimed."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ccd5b4bdd03c1ef2.md",
+        "wikiPage": "Evidence-Record-ccd5b4bdd03c1ef2.md",
+        "title": "Qwen 3.5 9B baseline MLX Continue CLI scoped write smoke"
+      }
+    },
+    {
+      "id": "evidence-fd71babae537344a",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen 3.5 9B baseline MLX endpoint tool call",
+        "surface": "MLX OpenAI-compatible server",
+        "surface_version": "0.31.3",
+        "provider": "MLX",
+        "os": "macOS",
+        "model": "mlx-community/Qwen3.5-9B-4bit",
+        "operation": "structured-tool-call",
+        "validation_mode": "local-endpoint",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/mlx-model-validation.md",
+        "notes": "Required function call returned valid JSON arguments on a loopback-only Apple Silicon MLX server; agent-surface behavior remains separate."
+      },
+      "sourceEvidence": "examples/mlx-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-fd71babae537344a.md",
+        "wikiPage": "Evidence-Record-fd71babae537344a.md",
+        "title": "Qwen 3.5 9B baseline MLX endpoint tool call"
+      }
+    },
+    {
+      "id": "evidence-0fd3dc956063fdaa",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "Qwen3-Coder-Next generated workflows",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "Qwen3-Coder-Next:latest",
+        "operation": "workflow-review",
+        "validation_mode": "generated-sample",
+        "status": "plan-review-candidate",
+        "evidence": "examples/multi-language-workflow-validation.md",
+        "notes": "Generated-sample workflows are useful for planning and review but are not approved-write evidence."
+      },
+      "sourceEvidence": "examples/multi-language-workflow-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0fd3dc956063fdaa.md",
+        "wikiPage": "Evidence-Record-0fd3dc956063fdaa.md",
+        "title": "Qwen3-Coder-Next generated workflows"
+      }
+    },
+    {
+      "id": "evidence-b0b0a5a9fbafbfd4",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "devstral-small-2 generated workflows",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:latest",
+        "operation": "workflow-review",
+        "validation_mode": "generated-sample",
+        "status": "plan-review-candidate",
+        "evidence": "examples/multi-language-workflow-validation.md",
+        "notes": "Generated-sample workflows are useful for planning and review but are not approved-write evidence."
+      },
+      "sourceEvidence": "examples/multi-language-workflow-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-b0b0a5a9fbafbfd4.md",
+        "wikiPage": "Evidence-Record-b0b0a5a9fbafbfd4.md",
+        "title": "devstral-small-2 generated workflows"
+      }
+    },
+    {
+      "id": "evidence-ebc97e7569950583",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "devstral-small-2:24b Continue CLI read",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/continue-cli-model-validation.md",
+        "notes": "Read-only CLI validation passed on a generated disposable sample."
+      },
+      "sourceEvidence": "examples/continue-cli-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ebc97e7569950583.md",
+        "wikiPage": "Evidence-Record-ebc97e7569950583.md",
+        "title": "devstral-small-2:24b Continue CLI read"
+      }
+    },
+    {
+      "id": "evidence-2b8fd551abe47dcd",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "devstral-small-2:24b Continue CLI write",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/continue-cli-model-validation.md",
+        "notes": "Approved write smoke passed on a generated disposable sample; editor evidence remains separate."
+      },
+      "sourceEvidence": "examples/continue-cli-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2b8fd551abe47dcd.md",
+        "wikiPage": "Evidence-Record-2b8fd551abe47dcd.md",
+        "title": "devstral-small-2:24b Continue CLI write"
+      }
+    },
+    {
+      "id": "evidence-460f76e4260d68fd",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "devstral-small-2:24b read",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:24b",
+        "operation": "read-file",
+        "validation_mode": "editor-agent",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/model-tool-use-validation.md",
+        "notes": "Read-only validation passed; approved-write status is not claimed."
+      },
+      "sourceEvidence": "examples/model-tool-use-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-460f76e4260d68fd.md",
+        "wikiPage": "Evidence-Record-460f76e4260d68fd.md",
+        "title": "devstral-small-2:24b read"
+      }
+    },
+    {
+      "id": "evidence-8cdb147cb46a0942",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3-coder:30b Continue CLI read",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/continue-cli-model-validation.md",
+        "notes": "Read-only CLI validation passed on a generated disposable sample."
+      },
+      "sourceEvidence": "examples/continue-cli-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-8cdb147cb46a0942.md",
+        "wikiPage": "Evidence-Record-8cdb147cb46a0942.md",
+        "title": "qwen3-coder:30b Continue CLI read"
+      }
+    },
+    {
+      "id": "evidence-688536975056f222",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3-coder:30b Continue CLI write",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/continue-cli-model-validation.md",
+        "notes": "Approved write smoke passed on a generated disposable sample; expect slower output on modest hardware."
+      },
+      "sourceEvidence": "examples/continue-cli-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-688536975056f222.md",
+        "wikiPage": "Evidence-Record-688536975056f222.md",
+        "title": "qwen3-coder:30b Continue CLI write"
+      }
+    },
+    {
+      "id": "evidence-d2ccbc89525e4a4b",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3-coder:30b read",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3-coder:30b",
+        "operation": "read-file",
+        "validation_mode": "editor-agent",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/model-tool-use-validation.md",
+        "notes": "Read-only validation passed; performance may be slower on local hardware."
+      },
+      "sourceEvidence": "examples/model-tool-use-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d2ccbc89525e4a4b.md",
+        "wikiPage": "Evidence-Record-d2ccbc89525e4a4b.md",
+        "title": "qwen3-coder:30b read"
+      }
+    },
+    {
+      "id": "evidence-e81d875e828d2c8f",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3.5:9b Continue CLI read",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "read-file",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/continue-cli-model-validation.md",
+        "notes": "Read-only CLI validation passed on a generated disposable sample."
+      },
+      "sourceEvidence": "examples/continue-cli-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e81d875e828d2c8f.md",
+        "wikiPage": "Evidence-Record-e81d875e828d2c8f.md",
+        "title": "qwen3.5:9b Continue CLI read"
+      }
+    },
+    {
+      "id": "evidence-3b61696216f40c39",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3.5:9b Continue CLI write",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "write-smoke",
+        "validation_mode": "generated-sample",
+        "status": "write-smoke-validated",
+        "evidence": "examples/continue-cli-model-validation.md",
+        "notes": "Approved write smoke passed on a generated disposable sample; editor evidence remains separate."
+      },
+      "sourceEvidence": "examples/continue-cli-model-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3b61696216f40c39.md",
+        "wikiPage": "Evidence-Record-3b61696216f40c39.md",
+        "title": "qwen3.5:9b Continue CLI write"
+      }
+    },
+    {
+      "id": "evidence-2410a7d9b3a44da6",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3.5:9b plan",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "plan",
+        "validation_mode": "editor-agent",
+        "status": "plan-validated",
+        "evidence": "examples/model-tool-use-validation.md",
+        "notes": "Manual editor validation recorded an evidence-based plan without file changes."
+      },
+      "sourceEvidence": "examples/model-tool-use-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2410a7d9b3a44da6.md",
+        "wikiPage": "Evidence-Record-2410a7d9b3a44da6.md",
+        "title": "qwen3.5:9b plan"
+      }
+    },
+    {
+      "id": "evidence-011e7524d4091077",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3.5:9b read",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "read-file",
+        "validation_mode": "editor-agent",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/model-tool-use-validation.md",
+        "notes": "Manual editor validation recorded successful read-content tool use after tool settings were corrected."
+      },
+      "sourceEvidence": "examples/model-tool-use-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-011e7524d4091077.md",
+        "wikiPage": "Evidence-Record-011e7524d4091077.md",
+        "title": "qwen3.5:9b read"
+      }
+    },
+    {
+      "id": "evidence-1c9a5cb51bde73c4",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-tool-use",
+        "subject": "qwen3.5:9b write",
+        "surface": "Continue Agent",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:9b",
+        "operation": "scoped-write",
+        "validation_mode": "editor-agent",
+        "status": "approved-write-ready",
+        "evidence": "examples/model-tool-use-validation.md",
+        "notes": "Manual editor validation recorded exact write content without forbidden tool markup after tool settings were corrected."
+      },
+      "sourceEvidence": "examples/model-tool-use-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-1c9a5cb51bde73c4.md",
+        "wikiPage": "Evidence-Record-1c9a5cb51bde73c4.md",
+        "title": "qwen3.5:9b write"
+      }
+    },
+    {
+      "id": "evidence-cce994c7b1684c6e",
+      "claim": {
+        "schema_version": "2",
+        "area": "multi-language-workflow",
+        "subject": "Generated Python sample workflows",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:latest",
+        "operation": "workflow-suite",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/multi-language-workflow-validation.md",
+        "notes": "Most workflows passed runtime verification; documentation and release-style filename drift follow-up remains."
+      },
+      "sourceEvidence": "examples/multi-language-workflow-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-cce994c7b1684c6e.md",
+        "wikiPage": "Evidence-Record-cce994c7b1684c6e.md",
+        "title": "Generated Python sample workflows"
+      }
+    },
+    {
+      "id": "evidence-ddd493cef4288ac4",
+      "claim": {
+        "schema_version": "2",
+        "area": "multi-language-workflow",
+        "subject": "Generated Python sample workflows",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "Qwen3-Coder-Next:latest",
+        "operation": "workflow-suite",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/multi-language-workflow-validation.md",
+        "notes": "Most workflows passed runtime verification; documentation and release-style filename drift follow-up remains."
+      },
+      "sourceEvidence": "examples/multi-language-workflow-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ddd493cef4288ac4.md",
+        "wikiPage": "Evidence-Record-ddd493cef4288ac4.md",
+        "title": "Generated Python sample workflows"
+      }
+    },
+    {
+      "id": "evidence-588241e349f32b95",
+      "claim": {
+        "schema_version": "2",
+        "area": "multi-language-workflow",
+        "subject": "Generated TypeScript sample workflows",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "devstral-small-2:latest",
+        "operation": "workflow-suite",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/multi-language-workflow-validation.md",
+        "notes": "Most workflows passed runtime verification; documentation and release-style filename drift follow-up remains."
+      },
+      "sourceEvidence": "examples/multi-language-workflow-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-588241e349f32b95.md",
+        "wikiPage": "Evidence-Record-588241e349f32b95.md",
+        "title": "Generated TypeScript sample workflows"
+      }
+    },
+    {
+      "id": "evidence-dff8d8e0aff407ab",
+      "claim": {
+        "schema_version": "2",
+        "area": "multi-language-workflow",
+        "subject": "Generated TypeScript sample workflows",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "Qwen3-Coder-Next:latest",
+        "operation": "workflow-suite",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/multi-language-workflow-validation.md",
+        "notes": "Most workflows passed runtime verification; documentation and release-style filename drift follow-up remains."
+      },
+      "sourceEvidence": "examples/multi-language-workflow-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-dff8d8e0aff407ab.md",
+        "wikiPage": "Evidence-Record-dff8d8e0aff407ab.md",
+        "title": "Generated TypeScript sample workflows"
+      }
+    },
+    {
+      "id": "evidence-2de3f0726ddaba91",
+      "claim": {
+        "schema_version": "2",
+        "area": "online-discovery",
+        "subject": "Online model discovery",
+        "surface": "Pack scripts",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "model-discovery",
+        "validation_mode": "online-discovery",
+        "status": "candidate-only",
+        "evidence": "docs/online-model-discovery.md",
+        "notes": "Discovery reports candidates only; it does not mark models as tool-validated or approved-write ready."
+      },
+      "sourceEvidence": "docs/online-model-discovery.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2de3f0726ddaba91.md",
+        "wikiPage": "Evidence-Record-2de3f0726ddaba91.md",
+        "title": "Online model discovery"
+      }
+    },
+    {
+      "id": "evidence-77e5fbc983b71597",
+      "claim": {
+        "schema_version": "2",
+        "area": "remote-profile",
+        "subject": "Remote hardware profiling",
+        "surface": "Pack scripts",
+        "surface_version": "pack-tests",
+        "provider": "N/A",
+        "os": "Cross-platform",
+        "model": "N/A",
+        "operation": "hardware-profile",
+        "validation_mode": "automated-tests",
+        "status": "validated-by-tests",
+        "evidence": "docs/remote-hardware-profile.md",
+        "notes": "SSH-based remote profile flow is documented and covered by script marker tests."
+      },
+      "sourceEvidence": "docs/remote-hardware-profile.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-77e5fbc983b71597.md",
+        "wikiPage": "Evidence-Record-77e5fbc983b71597.md",
+        "title": "Remote hardware profiling"
+      }
+    },
+    {
+      "id": "evidence-32bd4f913b5ede9d",
+      "claim": {
+        "schema_version": "2",
+        "area": "sample-repository",
+        "subject": "Python API generated sample",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "local-config",
+        "operation": "repository-discovery",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/sample-repository-factory-validation.md",
+        "notes": "Generated Python sample supports repository discovery and runtime context validation; editor approved-write validation remains separate."
+      },
+      "sourceEvidence": "examples/sample-repository-factory-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-32bd4f913b5ede9d.md",
+        "wikiPage": "Evidence-Record-32bd4f913b5ede9d.md",
+        "title": "Python API generated sample"
+      }
+    },
+    {
+      "id": "evidence-22701a5715776e0d",
+      "claim": {
+        "schema_version": "2",
+        "area": "sample-repository",
+        "subject": "TypeScript frontend generated sample",
+        "surface": "Continue CLI",
+        "surface_version": "not-recorded",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "local-config",
+        "operation": "repository-discovery",
+        "validation_mode": "generated-sample",
+        "status": "read-only-cli-validated",
+        "evidence": "examples/sample-repository-factory-validation.md",
+        "notes": "Generated TypeScript sample supports repository discovery and runtime context validation; editor approved-write validation remains separate."
+      },
+      "sourceEvidence": "examples/sample-repository-factory-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-22701a5715776e0d.md",
+        "wikiPage": "Evidence-Record-22701a5715776e0d.md",
+        "title": "TypeScript frontend generated sample"
+      }
+    }
+  ]
+}

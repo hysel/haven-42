@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "telemetryUtcOffset": "-04:00",
+  "identity": {
+    "provider": "ollama",
+    "runtimeVersion": "0.32.8",
+    "model": "example:3b-q4",
+    "manifestDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "environment": {
+    "operatingSystem": "Windows 11",
+    "acceleratorVendor": "amd",
+    "acceleratorModel": "Example GPU",
+    "driverVersion": "example-driver"
+  },
+  "samplingIntervalSeconds": 1,
+  "idleWindow": {
+    "startUtc": "2026-08-12T14:00:00Z",
+    "endUtc": "2026-08-12T14:02:00Z"
+  },
+  "activeWindow": {
+    "startUtc": "2026-08-12T14:03:00Z",
+    "endUtc": "2026-08-12T14:08:00Z"
+  },
+  "taskWindows": [
+    {
+      "capability": "general.chat",
+      "startUtc": "2026-08-12T14:03:00Z",
+      "endUtc": "2026-08-12T14:04:40Z",
+      "outputTokens": 1000
+    },
+    {
+      "capability": "content.write",
+      "startUtc": "2026-08-12T14:04:40Z",
+      "endUtc": "2026-08-12T14:06:20Z",
+      "outputTokens": 1000
+    },
+    {
+      "capability": "content.summarize",
+      "startUtc": "2026-08-12T14:06:20Z",
+      "endUtc": "2026-08-12T14:08:00Z",
+      "outputTokens": 1000
+    }
+  ]
+}

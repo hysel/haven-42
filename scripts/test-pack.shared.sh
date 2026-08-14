@@ -182,7 +182,7 @@ test_evidence_catalog_schema() {
     NF != 13 { exit 1 }
     $1 != "2" { exit 1 }
     $1 == "" || $2 == "" || $3 == "" || $4 == "" || $5 == "" || $6 == "" || $7 == "" || $8 == "" || $9 == "" || $10 == "" || $11 == "" || $12 == "" || $13 == "" { exit 1 }
-    $11 !~ /^(candidate-only|plan-review-candidate|plan-validated|review-validated|read-only-tool-validated|read-only-cli-validated|write-smoke-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass)$/ { exit 1 }
+    $11 !~ /^(candidate-only|plan-review-candidate|plan-validated|review-validated|read-only-tool-validated|read-only-cli-validated|write-smoke-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass|failed-validation)$/ { exit 1 }
     $12 ~ /^[A-Za-z]:|^\/|\\|\.\./ { exit 1 }
     $0 ~ /192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|itama|Users\\|OneDrive|customer|token|secret/ { exit 1 }
     $11 == "approved-write-ready" { approved = 1 }
@@ -204,8 +204,13 @@ assert contract["schemaVersion"] == 2
 assert contract["aggregation"]["allowCrossSurfaceInheritance"] is False
 assert contract["aggregation"]["allowCrossOperationInheritance"] is False
 assert contract["aggregation"]["retainAllEvidencePaths"] is True
+assert contract["pageRegistry"] == "config/evidence-page-registry.json"
+assert contract["futureAutomaticUpdateInput"]["activatesUpdates"] is False
 PY
-  grep -q "config/evidence-catalog.tsv" "$doc" && grep -q "approved-write-ready" "$doc" && grep -q "Capability Evidence Contract v2" "$doc"
+  grep -q "config/evidence-catalog.tsv" "$doc" &&
+    grep -q "approved-write-ready" "$doc" &&
+    grep -q "Capability Evidence Contract v2" "$doc" &&
+    python3 "$REPO_ROOT/scripts/generate-evidence-wiki-pages.py" --check
 }
 test_catalog_schema() {
   awk -F'|' '
@@ -2475,6 +2480,12 @@ PY
   python3 "$REPO_ROOT/scripts/test-local-image-package-boundary.py" || return 1
   python3 "$REPO_ROOT/scripts/test-generative-media-candidate-contract.py" || return 1
   python3 "$REPO_ROOT/scripts/test-quantized-artifact-lifecycle.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-alpha2-model-energy-measurement.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-import-alpha2-model-energy-log.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-finalize-amd-adrenalin-soak.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-electricity-rate-cost.py" || return 1
+    python3 "$REPO_ROOT/scripts/test-electricity-rate-updater.py" || return 1
+    python3 "$REPO_ROOT/scripts/test-electricity-rate-service.py" || return 1
   profile="$(python3 "$REPO_ROOT/scripts/quantization-planner.py" profile --storage-root "$REPO_ROOT" --context-tokens 16384 --concurrency 1 --workload-lane tool-use)" || return 1
   python3 - "$profile" <<'PY'
 import json
@@ -2493,6 +2504,12 @@ test_local_web_mvp() {
   python3 "$REPO_ROOT/scripts/test-windows-alpha-job-lifecycle.py" || return 1
   python3 "$REPO_ROOT/scripts/test-diagnostic-logging.py" || return 1
   python3 "$REPO_ROOT/scripts/test-windows-alpha-web-policy.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-alpha-platform.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-system-readiness.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-linux-alpha.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-linux-alpha-runtime.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-linux-alpha-setup.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-linux-runtime-supply-chain.py" || return 1
   python3 "$REPO_ROOT/scripts/test-alpha-release.py" || return 1
   python3 "$REPO_ROOT/scripts/test-alpha2-release-contract.py" || return 1
   python3 "$REPO_ROOT/scripts/test-novice-experience.py" || return 1
@@ -2565,7 +2582,9 @@ assert policy["bind"]["remoteBindAllowed"] is False
 assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["fixedExternalNavigationUrls"] == [
     "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
+    "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
     "https://ollama.com/download/windows",
+    "https://ollama.com/download/linux",
 ]
 assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
 assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
@@ -2598,12 +2617,14 @@ assert "runtime-component-inventory.json" in portable["supplyChainEvidence"]
 assert "CPYTHON-3.14.6-LICENSE.txt" in portable["supplyChainEvidence"]
 assert "APACHE-2.0.txt" in portable["supplyChainEvidence"]
 assert "LIBFFI-3.4.4-LICENSE.txt" in portable["supplyChainEvidence"]
+assert "OLLAMA-MIT-LICENSE.txt" in portable["supplyChainEvidence"]
 assert portable["embeddedDistributionEvidence"] == [
     "LICENSE.txt",
     "THIRD-PARTY-NOTICES.txt",
     "licenses/APACHE-2.0.txt",
     "licenses/CPYTHON-3.14.6-LICENSE.txt",
     "licenses/LIBFFI-3.4.4-LICENSE.txt",
+    "licenses/OLLAMA-MIT-LICENSE.txt",
 ]
 assert policy["text"]["capabilityIds"] == ["general.chat", "content.write", "content.summarize"]
 assert policy["text"]["modelResidency"] == "bounded-idle-timeout"

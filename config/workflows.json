@@ -34,13 +34,13 @@
     },
     {
       "id": "discover-online-models",
-      "name": "Discover Online Model Candidates",
-      "purpose": "Suggest candidate local models from public model metadata while keeping recommendations evidence-gated.",
+      "name": "Check for New Model Test Candidates",
+      "purpose": "Compare public model metadata with the certification inventory and produce a candidate-only review queue without downloading or testing models.",
       "category": "model-selection",
       "safetyLevel": "network-read",
       "uiReady": true,
-      "inputs": ["sources", "queries", "families", "modelProfilePath", "vramSelectionMode", "outputPath"],
-      "outputs": ["onlineModelCandidatesJson"],
+      "inputs": ["sources", "queries", "families", "modelProfilePath", "vramSelectionMode", "previousReportPath", "outputPath", "markdownOutputPath"],
+      "outputs": ["onlineModelCandidatesJson", "modelCandidateReviewMarkdown"],
       "entryPoints": {
         "windows": "scripts/discover-online-model-candidates.ps1",
         "linux": "scripts/discover-online-model-candidates.linux.sh",

@@ -1,6 +1,6 @@
 # Tested Hardware and AI Engines
 
-_Last reviewed: August 11, 2026._
+_Last reviewed: August 13, 2026._
 
 This page summarizes the real operating systems, hardware, and AI engines used
 during Haven 42 development. A result applies only to the row shown. It does
@@ -46,13 +46,13 @@ tables so each result can be read without matching rows by hand.
 | Windows 11 x64, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | llama.cpp with CUDA | ✅ Verified | Passed engine, vision, lifecycle, and tool-call checks. |
 | Ubuntu 26.04 Desktop, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | ✅ Verified | Passed Alpha 2 package, task, driver, and GPU-use checks for the exact profile. |
 | Bazzite 44, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | ✅ Verified | Passed Alpha 2 package, task, driver, and GPU-use checks for the exact profile. |
-| Linux Mint 22.3, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Package, CPU/CUDA task, driver, and GPU-use checks passed; the complete desktop route remains open. |
-| Ubuntu 24.04, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Package, CPU/CUDA task, driver, and GPU-use checks passed; the complete desktop route remains open. |
-| Debian 13, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Package, CPU/CUDA task, driver, and GPU-use checks passed; the complete desktop route remains open. |
-| Pop!_OS 24.04, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | ⚠️ Partial | Native source checks passed after an operating-system identity-path correction; a new fixed package still needs testing. |
-| Fedora 44, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Package, CPU/CUDA task, driver, and GPU-use checks passed; the complete desktop route remains open. |
-| CachyOS, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Package, CPU/CUDA task, driver, and GPU-use checks passed; the complete desktop route remains open. |
-| Arch Linux, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Package, CPU/CUDA task, driver, and GPU-use checks passed; the complete desktop route remains open. |
+| Linux Mint 22.3, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Source-candidate managed lifecycle passed, including interrupted-setup recovery; packaged desktop repetition remains open. |
+| Ubuntu 24.04, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Source-candidate managed lifecycle passed; packaged desktop repetition remains open. |
+| Debian 13, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Source-candidate managed lifecycle passed; packaged desktop repetition remains open. |
+| Pop!_OS 24.04, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | The corrected system identity path passed the source-candidate managed lifecycle; packaged desktop repetition remains open. |
+| Fedora 44, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | The completion-receipt ordering correction passed the source-candidate managed lifecycle; packaged desktop repetition remains open. |
+| CachyOS, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Source-candidate managed lifecycle passed through an explicit Bash launcher; packaged desktop repetition remains open. |
+| Arch Linux, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | 🧪 Engineering evidence | Source-candidate managed lifecycle passed through an explicit Bash launcher; packaged desktop repetition remains open. |
 | Ubuntu Linux, controlled server | NVIDIA Quadro RTX 5000, 16 GB | llama.cpp with CUDA | ✅ Verified | Passed the bounded engine and Haven adapter checks. |
 | Ubuntu Linux, Proxmox container and server | Two NVIDIA Tesla V100 GPUs, 32 GB each | Ollama with CUDA | ✅ Verified | Passed external-server and model checks. |
 | Ubuntu Linux, controlled server | NVIDIA Tesla V100, 32 GB | llama.cpp with CUDA | ✅ Verified | Passed the 11-model operational matrix. |

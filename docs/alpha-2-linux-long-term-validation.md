@@ -15,6 +15,14 @@ container-management, storage, snapshot, package-installation, shell, or guest-
 configuration authority. The protected Ollama container remained outside the
 campaign and was not changed.
 
+On August 13, a later source-candidate managed-lifecycle pass completed on all
+nine Linux profiles with the Quadro RTX 5000 CUDA path. Fresh setup, exact
+Ollama 0.32.5 and Qwen 3.5 0.8B Q8 identity, inference, normal shutdown,
+process and port closure, zero-download reuse, and marker-owned uninstall all
+passed. Mint also passed recovery from an interrupted marker-owned setup. This
+is source-candidate evidence, not a packaged Alpha 2 result; see
+`docs/linux-managed-lifecycle-validation.md`.
+
 An August 11 exact-candidate sweep repeated the checksum, relocation,
 read-only startup, abrupt-recovery, lifecycle, occupied-port, shutdown,
 hostile-environment, and integrity checks on all nine Linux distributions.

@@ -134,6 +134,11 @@
       <button class="nav-item" id="system-nav" type="button"><span aria-hidden="true">◇</span>System</button>
       <button class="nav-item" id="assurance-nav" type="button"><span aria-hidden="true">✓</span>Technical details</button>
       <button class="nav-item" id="about-nav" type="button"><span aria-hidden="true">ⓘ</span>About</button>
+      <button class="rail-cost-estimate hidden" id="rail-cost-estimate" type="button" aria-label="View the current graphics-card electricity estimate in System">
+        <span>GPU electricity estimate</span>
+        <strong id="rail-cost-value">Not calculated</strong>
+        <small id="rail-cost-period">Open System to estimate</small>
+      </button>
       <div class="rail-note">
         <span>AI runs</span>
         <strong>On your computer</strong>
@@ -499,6 +504,17 @@
               <span><strong>GPU</strong><output id="sidebar-gpu">Checking…</output></span>
               <span><strong>Speed</strong><output id="sidebar-speed">Waiting</output></span>
             </div>
+            <div class="status-energy-widget hidden" id="status-energy-widget" aria-live="polite" aria-atomic="true">
+              <div class="status-energy-heading">
+                <strong>Electricity estimate</strong>
+                <button id="status-energy-remove" type="button">Remove</button>
+              </div>
+              <div class="status-energy-values">
+                <span><strong>Energy</strong><output id="status-energy-kwh">—</output></span>
+                <span><strong>Price</strong><output id="status-energy-cost">—</output></span>
+              </div>
+              <small id="status-energy-period">GPU only · current session</small>
+            </div>
             <button class="button text-button status-glance-link" id="view-system-details" type="button">View system details →</button>
           </section>
 
@@ -636,6 +652,153 @@
               <div><dt>File check</dt><dd id="digest-status">Not checked yet</dd></div>
               <div><dt>Update checks</dt><dd id="update-status">Disabled · no network</dd></div>
             </dl>
+          </section>
+
+          <section class="panel status-panel energy-estimator" id="energy-estimator-panel" aria-labelledby="energy-estimator-title">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ELECTRICITY ESTIMATE</p>
+                <h2 id="energy-estimator-title" tabindex="-1">Estimate graphics-card cost</h2>
+              </div>
+              <span class="badge">Estimate only</span>
+            </div>
+            <p>Use a measured graphics-card average and the price from your electricity bill. Haven 42 does not detect your location or change your model choice.</p>
+            <form id="energy-estimator-form">
+              <label for="energy-measurement-profile">Graphics-card measurement</label>
+              <select id="energy-measurement-profile" aria-describedby="energy-measurement-help">
+                <option value="manual" selected>Enter my measured average</option>
+                <option value="rx7800xt-qwen35-9b">RX 7800 XT · Qwen 3.5 9B · exact Haven 42 test</option>
+              </select>
+              <p class="field-help" id="energy-measurement-help">A Haven 42 test profile applies only to the exact card, model, runtime, and workload shown.</p>
+
+              <div class="advanced-grid energy-number-grid">
+                <label for="energy-average-watts">Average GPU watts
+                  <input id="energy-average-watts" inputmode="decimal" type="number" min="0.001" max="2000" step="0.001" placeholder="For example: 40.084" required>
+                </label>
+                <label for="energy-hours-per-day">Hours used per day
+                  <input id="energy-hours-per-day" inputmode="decimal" type="number" min="0" max="24" step="0.25" value="2" required>
+                </label>
+                <label for="energy-billing-days">Days in this estimate
+                  <input id="energy-billing-days" inputmode="numeric" type="number" min="1" max="366" step="1" value="30" required>
+                </label>
+              </div>
+
+              <label for="energy-rate-source">Electricity price source</label>
+              <select id="energy-rate-source">
+                <option value="manual" selected>Use the price from my electricity bill · most accurate</option>
+                <option value="eia">Use an average U.S. household price</option>
+                <option value="eurostat">Use an average European household price</option>
+              </select>
+              <div class="advanced-grid energy-rate-grid">
+                <label for="energy-country">Country and usual currency
+                  <select id="energy-country" autocomplete="country" required>
+                    <option value="US" data-currency="USD" selected>United States — USD</option>
+                    <option value="CA" data-currency="CAD">Canada — CAD</option>
+                    <option value="MX" data-currency="MXN">Mexico — MXN</option>
+                    <option value="AR" data-currency="ARS">Argentina — ARS</option>
+                    <option value="BR" data-currency="BRL">Brazil — BRL</option>
+                    <option value="CL" data-currency="CLP">Chile — CLP</option>
+                    <option value="CO" data-currency="COP">Colombia — COP</option>
+                    <option value="PE" data-currency="PEN">Peru — PEN</option>
+                    <option value="GB" data-currency="GBP">United Kingdom — GBP</option>
+                    <option value="AL" data-currency="ALL">Albania — ALL</option>
+                    <option value="AT" data-currency="EUR">Austria — EUR</option>
+                    <option value="BA" data-currency="BAM">Bosnia and Herzegovina — BAM</option>
+                    <option value="BE" data-currency="EUR">Belgium — EUR</option>
+                    <option value="BG" data-currency="EUR">Bulgaria — EUR</option>
+                    <option value="CH" data-currency="CHF">Switzerland — CHF</option>
+                    <option value="CY" data-currency="EUR">Cyprus — EUR</option>
+                    <option value="CZ" data-currency="CZK">Czechia — CZK</option>
+                    <option value="DE" data-currency="EUR">Germany — EUR</option>
+                    <option value="DK" data-currency="DKK">Denmark — DKK</option>
+                    <option value="EE" data-currency="EUR">Estonia — EUR</option>
+                    <option value="ES" data-currency="EUR">Spain — EUR</option>
+                    <option value="FI" data-currency="EUR">Finland — EUR</option>
+                    <option value="FR" data-currency="EUR">France — EUR</option>
+                    <option value="GE" data-currency="GEL">Georgia — GEL</option>
+                    <option value="GR" data-currency="EUR">Greece — EUR</option>
+                    <option value="HR" data-currency="EUR">Croatia — EUR</option>
+                    <option value="HU" data-currency="HUF">Hungary — HUF</option>
+                    <option value="IE" data-currency="EUR">Ireland — EUR</option>
+                    <option value="IS" data-currency="ISK">Iceland — ISK</option>
+                    <option value="IT" data-currency="EUR">Italy — EUR</option>
+                    <option value="LI" data-currency="CHF">Liechtenstein — CHF</option>
+                    <option value="LT" data-currency="EUR">Lithuania — EUR</option>
+                    <option value="LU" data-currency="EUR">Luxembourg — EUR</option>
+                    <option value="LV" data-currency="EUR">Latvia — EUR</option>
+                    <option value="MD" data-currency="MDL">Moldova — MDL</option>
+                    <option value="ME" data-currency="EUR">Montenegro — EUR</option>
+                    <option value="MK" data-currency="MKD">North Macedonia — MKD</option>
+                    <option value="MT" data-currency="EUR">Malta — EUR</option>
+                    <option value="NL" data-currency="EUR">Netherlands — EUR</option>
+                    <option value="NO" data-currency="NOK">Norway — NOK</option>
+                    <option value="PL" data-currency="PLN">Poland — PLN</option>
+                    <option value="PT" data-currency="EUR">Portugal — EUR</option>
+                    <option value="RO" data-currency="RON">Romania — RON</option>
+                    <option value="RS" data-currency="RSD">Serbia — RSD</option>
+                    <option value="SE" data-currency="SEK">Sweden — SEK</option>
+                    <option value="SI" data-currency="EUR">Slovenia — EUR</option>
+                    <option value="SK" data-currency="EUR">Slovakia — EUR</option>
+                    <option value="TR" data-currency="TRY">Türkiye — TRY</option>
+                    <option value="UA" data-currency="UAH">Ukraine — UAH</option>
+                    <option value="XK" data-currency="EUR">Kosovo — EUR</option>
+                    <option value="AU" data-currency="AUD">Australia — AUD</option>
+                    <option value="NZ" data-currency="NZD">New Zealand — NZD</option>
+                    <option value="CN" data-currency="CNY">China — CNY</option>
+                    <option value="HK" data-currency="HKD">Hong Kong — HKD</option>
+                    <option value="IN" data-currency="INR">India — INR</option>
+                    <option value="ID" data-currency="IDR">Indonesia — IDR</option>
+                    <option value="JP" data-currency="JPY">Japan — JPY</option>
+                    <option value="KR" data-currency="KRW">South Korea — KRW</option>
+                    <option value="MY" data-currency="MYR">Malaysia — MYR</option>
+                    <option value="PH" data-currency="PHP">Philippines — PHP</option>
+                    <option value="PK" data-currency="PKR">Pakistan — PKR</option>
+                    <option value="SG" data-currency="SGD">Singapore — SGD</option>
+                    <option value="TH" data-currency="THB">Thailand — THB</option>
+                    <option value="TW" data-currency="TWD">Taiwan — TWD</option>
+                    <option value="VN" data-currency="VND">Vietnam — VND</option>
+                    <option value="IL" data-currency="ILS">Israel — ILS</option>
+                    <option value="SA" data-currency="SAR">Saudi Arabia — SAR</option>
+                    <option value="AE" data-currency="AED">United Arab Emirates — AED</option>
+                    <option value="EG" data-currency="EGP">Egypt — EGP</option>
+                    <option value="KE" data-currency="KES">Kenya — KES</option>
+                    <option value="MA" data-currency="MAD">Morocco — MAD</option>
+                    <option value="NG" data-currency="NGN">Nigeria — NGN</option>
+                    <option value="ZA" data-currency="ZAR">South Africa — ZAR</option>
+                    <option value="XX" data-currency="">Another country — enter currency below</option>
+                  </select>
+                </label>
+                <label for="energy-region" id="energy-region-label">State code · optional
+                  <input id="energy-region" maxlength="3" placeholder="For example: NY" autocapitalize="characters" spellcheck="false">
+                </label>
+                <label for="energy-currency">Currency used on my bill
+                  <input id="energy-currency" maxlength="3" value="USD" autocapitalize="characters" spellcheck="false" required>
+                </label>
+                <label for="energy-rate">Price per kWh
+                  <input id="energy-rate" inputmode="decimal" type="number" min="0" max="10000000" step="0.000001" placeholder="From your bill" required>
+                </label>
+              </div>
+              <button class="button secondary hidden" id="fetch-official-rate" type="button">Get selected official average</button>
+              <p class="field-help" id="energy-rate-help" role="status" aria-live="polite">Copy the per-kWh price from your bill. The value and country stay in this browser session.</p>
+              <p class="energy-privacy-note" role="note"><strong>Your electricity-bill information stays private.</strong> When you enter the price from your bill, Haven 42 uses it only to calculate the estimate on this screen. It does not save, upload, or add that price or your usage values to troubleshooting logs. Closing Haven 42 clears them. Choosing an official average contacts the named statistics service, but never sends your bill price.</p>
+              <details class="energy-source-help">
+                <summary>What do these price choices mean?</summary>
+                <p><strong>Your electricity bill</strong> is usually the best choice. Look for a price shown per kilowatt-hour or kWh.</p>
+                <p><strong>Average U.S. household price</strong> comes from the U.S. Energy Information Administration, a government statistics agency. It is a national or state average, not the exact price from your utility or ZIP code.</p>
+                <p><strong>Average European household price</strong> comes from Eurostat, the European Union's statistics office. It is a country average and may differ from your electricity plan.</p>
+              </details>
+              <label class="energy-pin-control" for="energy-pin-status">
+                <input id="energy-pin-status" type="checkbox" aria-describedby="energy-pin-help">
+                <span><strong>Keep kWh and price in the status sidebar</strong><small id="energy-pin-help">The widget stays visible while Haven 42 is open. Its values are not saved and disappear when the app closes.</small></span>
+              </label>
+              <button class="button primary" id="calculate-energy-cost" type="submit">Calculate estimate</button>
+            </form>
+            <article class="energy-estimate-result hidden" id="energy-estimate-result" role="status" aria-live="polite" aria-atomic="true">
+              <strong id="energy-estimate-cost"></strong>
+              <span id="energy-estimate-usage"></span>
+              <small id="energy-estimate-source"></small>
+            </article>
+            <p class="notice energy-estimate-warning" role="note">This estimates graphics-card electricity only. It excludes the CPU, memory, storage, cooling, display, and power-supply losses, so it is not a prediction of your utility bill.</p>
           </section>
 
         </aside>

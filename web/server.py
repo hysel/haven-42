@@ -20,6 +20,7 @@ import os
 import platform
 import re
 import secrets
+import signal
 import socket
 import struct
 import subprocess
@@ -75,6 +76,7 @@ from alpha_platform import (  # noqa: E402
     MANAGED_OLLAMA_URL,
     MANAGED_SETUP_SUPPORTED,
     MODEL_DECISION_CODES,
+    PlatformAdapterError,
     ResourceHistory,
     SessionTokenTotals,
     SetupCoordinator,
@@ -83,13 +85,25 @@ from alpha_platform import (  # noqa: E402
     build_plan as build_alpha_plan,
     driver_guidance,
     evaluate_hardware,
+    load_component_registry as load_alpha_component_registry,
     load_model_catalog,
+    require_platform_operation,
     select_model,
     validate_provider_metrics,
 )
 from diagnostic_logging import DiagnosticLogError, DiagnosticLogger  # noqa: E402
+from electricity_rate_service import (  # noqa: E402
+    ElectricityRateError,
+    lookup_official_rate,
+)
+from alpha2_runtime_compatibility import (  # noqa: E402
+    CompatibilityError as RuntimeCompatibilityError,
+    resolve as resolve_alpha2_runtime,
+    validate_managed_setup_binding,
+)
 from alpha_release import (  # noqa: E402
     ALPHA_1_VERSION,
+    ALPHA_2_VERSION,
     application_version,
     display_version,
 )
@@ -878,6 +892,44 @@ class HavenState:
             SetupCoordinator(self.csrf_token, event_sink=self.diagnostics.record)
             if MANAGED_SETUP_SUPPORTED else None
         )
+        self.alpha_runtime_binding: dict[str, Any] | None = None
+        self.alpha_runtime_plan_id: str | None = None
+
+    def _validate_alpha2_runtime_binding(self, plan_id: str | None = None) -> None:
+        if APP_VERSION != ALPHA_2_VERSION:
+            return
+        with self.lock:
+            binding = self.alpha_runtime_binding
+            bound_plan_id = self.alpha_runtime_plan_id
+        if (
+            not isinstance(binding, dict)
+            or binding.get("decision") != "install"
+            or (plan_id is not None and bound_plan_id != plan_id)
+        ):
+            raise SetupError("alpha2-runtime-binding-unavailable")
+        try:
+            current = resolve_alpha2_runtime(
+                binding["modelId"], binding["platform"], binding["backend"],
+                engine=binding["engine"],
+            )
+        except (KeyError, RuntimeCompatibilityError) as error:
+            raise SetupError("alpha2-runtime-binding-invalid") from error
+        if current != binding:
+            raise SetupError("alpha2-runtime-binding-changed")
+
+    def approve_alpha_setup(self, plan_id: str, effects: list[str]) -> str:
+        if self.alpha_setup is None:
+            raise SetupError(MANAGED_SETUP_UNAVAILABLE)
+        require_platform_operation("setup.approve")
+        self._validate_alpha2_runtime_binding(plan_id)
+        return self.alpha_setup.approve(plan_id, effects)
+
+    def start_alpha_setup(self, approval_token: str) -> None:
+        if self.alpha_setup is None:
+            raise SetupError(MANAGED_SETUP_UNAVAILABLE)
+        require_platform_operation("setup.execute")
+        self._validate_alpha2_runtime_binding()
+        self.alpha_setup.start(approval_token)
 
     def assurance_summary(self) -> dict[str, Any]:
         try:
@@ -1272,6 +1324,10 @@ class HavenState:
         }
 
     def inspect_readiness(self, force: bool) -> dict[str, Any]:
+        try:
+            require_platform_operation("readiness.inspect")
+        except PlatformAdapterError as error:
+            raise WebRequestError(str(error), HTTPStatus.NOT_IMPLEMENTED) from error
         with self.lock:
             cached = self.readiness_snapshot
             age = time.monotonic() - self.readiness_created
@@ -1294,6 +1350,13 @@ class HavenState:
             self.readiness_lock.release()
 
     def setup_plan(self, snapshot_id: str, intent: str) -> dict[str, Any]:
+        for operation_id in (
+            "setup.plan", "hardware.evaluate", "model.select", "driver.guidance",
+        ):
+            try:
+                require_platform_operation(operation_id)
+            except PlatformAdapterError as error:
+                raise WebRequestError(str(error), HTTPStatus.NOT_IMPLEMENTED) from error
         with self.lock:
             snapshot = self.readiness_snapshot
             age = time.monotonic() - self.readiness_created
@@ -1302,24 +1365,63 @@ class HavenState:
         if not secrets.compare_digest(str(snapshot.get("snapshotId", "")), snapshot_id):
             raise WebRequestError("readiness-snapshot-mismatch", HTTPStatus.CONFLICT)
         try:
+            with self.lock:
+                self.alpha_runtime_binding = None
+                self.alpha_runtime_plan_id = None
             plan = build_setup_plan(snapshot, intent)
             selection = select_model(snapshot)
+            runtime_compatibility: dict[str, Any] | None = None
+            runtime_admitted = APP_VERSION != ALPHA_2_VERSION
+            if (
+                APP_VERSION == ALPHA_2_VERSION
+                and selection.get("automaticExecutionAllowed") is True
+                and isinstance(selection.get("selected"), dict)
+            ):
+                selected_model = selection["selected"]
+                backend_mode = str(
+                    selection.get("hardware", {}).get("managedBackendCandidate")
+                    or evaluate_hardware(snapshot).get("managedBackendCandidate")
+                    or ""
+                )
+                runtime_backend = "rocm" if backend_mode == "rocm" else "core"
+                try:
+                    runtime_compatibility = resolve_alpha2_runtime(
+                        selected_model["id"],
+                        "linux-x64" if LINUX_ALPHA else "windows-x64",
+                        runtime_backend,
+                        engine="ollama",
+                    )
+                    runtime_admitted = runtime_compatibility.get("decision") == "install"
+                except RuntimeCompatibilityError as error:
+                    runtime_compatibility = {
+                        "schemaVersion": 1,
+                        "decision": "deny",
+                        "engine": "ollama",
+                        "modelId": selected_model["id"],
+                        "platform": "linux-x64" if LINUX_ALPHA else "windows-x64",
+                        "reason": str(error),
+                        "silentEngineFallbackAllowed": False,
+                    }
+                    runtime_admitted = False
             plan["alphaCandidate"] = {
                 "version": APP_VERSION,
                 "hardware": evaluate_hardware(snapshot),
                 "modelSelection": selection,
                 "driverGuidance": driver_guidance(snapshot),
-                "managedSetupRuntimeAdmitted": False,
+                "managedSetupRuntimeAdmitted": runtime_admitted,
                 "managedSetupCandidateAvailable": (
                     self.alpha_setup is not None
                     and selection.get("automaticExecutionAllowed") is True
+                    and runtime_admitted
                 ),
+                "runtimeCompatibility": runtime_compatibility,
                 "quantizationDecision": "use-pinned-prequantized-model",
             }
             if (
                 self.alpha_setup is not None
                 and selection.get("selected") is not None
                 and selection.get("automaticExecutionAllowed") is True
+                and runtime_admitted
             ):
                 catalog = load_model_catalog()
                 selected = next(
@@ -1327,10 +1429,26 @@ class HavenState:
                     if item["id"] == selection["selected"]["id"]
                 )
                 managed = build_windows_alpha_plan(snapshot, selected)
+                if APP_VERSION == ALPHA_2_VERSION:
+                    validate_managed_setup_binding(
+                        runtime_compatibility,
+                        managed,
+                        load_alpha_component_registry(),
+                    )
                 self.alpha_setup.register_plan(managed)
                 plan["alphaCandidate"]["managedPlan"] = managed
+                if APP_VERSION == ALPHA_2_VERSION:
+                    with self.lock:
+                        self.alpha_runtime_binding = runtime_compatibility
+                        self.alpha_runtime_plan_id = managed["planId"]
             return plan
-        except (ReadinessError, AlphaPlatformError, SetupError) as error:
+        except (
+            ReadinessError,
+            AlphaPlatformError,
+            PlatformAdapterError,
+            RuntimeCompatibilityError,
+            SetupError,
+        ) as error:
             raise WebRequestError(str(error)) from error
 
     def connect(
@@ -2041,6 +2159,14 @@ class HavenState:
         if self.alpha_setup is None:
             raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
         try:
+            require_platform_operation("setup.resume")
+        except PlatformAdapterError as error:
+            raise WebRequestError(str(error), HTTPStatus.NOT_IMPLEMENTED) from error
+        if APP_VERSION == ALPHA_2_VERSION:
+            with self.lock:
+                self.alpha_runtime_binding = None
+                self.alpha_runtime_plan_id = None
+        try:
             snapshot = self.inspect_readiness(False)
             identity = self.alpha_setup.completed_setup_identity()
             if identity is None:
@@ -2070,9 +2196,30 @@ class HavenState:
             plan = build_windows_alpha_plan(snapshot, selected)
             if plan["components"] != identity["componentIds"]:
                 raise SetupError("managed-backend-changed")
+            if APP_VERSION == ALPHA_2_VERSION:
+                runtime_binding = resolve_alpha2_runtime(
+                    selected["id"],
+                    "linux-x64" if LINUX_ALPHA else "windows-x64",
+                    "rocm" if plan["backendMode"] == "rocm" else "core",
+                    engine="ollama",
+                )
+                validate_managed_setup_binding(
+                    runtime_binding,
+                    plan,
+                    load_alpha_component_registry(),
+                )
+                with self.lock:
+                    self.alpha_runtime_binding = runtime_binding
+                    self.alpha_runtime_plan_id = plan["planId"]
             self.alpha_setup.register_plan(plan)
             resumed = self.alpha_setup.resume_completed()
-        except (ReadinessError, AlphaPlatformError, SetupError, StopIteration) as error:
+        except (
+            ReadinessError,
+            AlphaPlatformError,
+            RuntimeCompatibilityError,
+            SetupError,
+            StopIteration,
+        ) as error:
             code = str(error) if not isinstance(error, StopIteration) else "managed-model-not-registered"
             raise WebRequestError(code, HTTPStatus.CONFLICT) from error
         try:
@@ -2104,6 +2251,10 @@ class HavenState:
     def remove_managed_components(self) -> dict[str, Any]:
         if self.alpha_setup is None:
             raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
+        try:
+            require_platform_operation("setup.remove")
+        except PlatformAdapterError as error:
+            raise WebRequestError(str(error), HTTPStatus.NOT_IMPLEMENTED) from error
         with self.operation_lock:
             self._cancel_idle_timer()
             try:
@@ -2422,6 +2573,13 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                     self.server.state.search_models(body["query"], body["online"]),
                 )
                 return
+            if self.path == "/api/electricity-rate":
+                try:
+                    rate_profile = lookup_official_rate(body)
+                except ElectricityRateError as error:
+                    raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
+                self._send_json(HTTPStatus.OK, rate_profile)
+                return
             if self.path == "/api/workflow-plan":
                 if ALPHA_TEXT_ONLY:
                     raise WebRequestError("alpha-text-only", HTTPStatus.NOT_FOUND)
@@ -2570,7 +2728,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 ):
                     raise WebRequestError("invalid-alpha-setup-approval-fields")
                 try:
-                    approval = self.server.state.alpha_setup.approve(body["planId"], body["effects"])
+                    approval = self.server.state.approve_alpha_setup(body["planId"], body["effects"])
                 except SetupError as error:
                     raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
                 self._send_json(HTTPStatus.OK, {
@@ -2584,7 +2742,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if set(body) != {"approvalToken"} or not isinstance(body["approvalToken"], str):
                     raise WebRequestError("invalid-alpha-setup-execution-fields")
                 try:
-                    self.server.state.alpha_setup.start(body["approvalToken"])
+                    self.server.state.start_alpha_setup(body["approvalToken"])
                 except SetupError as error:
                     raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
                 self.server.state.diagnostics.record("setup", "MANAGED_SETUP_STARTED", "started")
@@ -2798,6 +2956,11 @@ def open_browser_or_report(url: str) -> None:
         )
 
 
+def _request_process_shutdown(_signum: int, _frame: Any) -> None:
+    """Route termination signals through the normal managed-process cleanup."""
+    raise KeyboardInterrupt
+
+
 def main() -> int:
     args = build_parser().parse_args()
     if args.host != "127.0.0.1":
@@ -2813,6 +2976,10 @@ def main() -> int:
         state.diagnostics.close()
         print(f"Could not start Haven 42 local web server: {error}", file=sys.stderr)
         return 1
+    for signal_name in ("SIGTERM", "SIGHUP"):
+        shutdown_signal = getattr(signal, signal_name, None)
+        if shutdown_signal is not None:
+            signal.signal(shutdown_signal, _request_process_shutdown)
     url = server.expected_origin
     print(f"Haven 42 is available at {url}", flush=True)
     print(

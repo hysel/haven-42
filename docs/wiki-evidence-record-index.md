@@ -1,0 +1,208 @@
+# Evidence Record Index
+
+This index gives every sanitized evidence claim its own page. Each page
+states exactly what was tested, what passed or remains limited, and what
+must not be inferred from the result.
+
+The pages are generated from `config/evidence-catalog.tsv`. Do not edit
+them by hand; update the catalog and run the generator.
+
+## Agent Surface
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Aider CLI disposable write-smoke validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-2853e8649d47ac07) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
+| [Aider CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-ef5cd44e633c9e80) | `validated-by-tests` | Cross-platform · N/A · N/A |
+| [Aider CLI qwen3.5 9B disposable write-smoke validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-1e8e513a7ede9aeb) | `write-smoke-validated` | Windows · Ollama · qwen3.5:9b |
+| [Aider CLI qwen3.5 9B read-only context validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-168923a7d31793f3) | `read-only-tool-validated` | Windows · Ollama · qwen3.5:9b |
+| [Aider CLI read-only context validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-3bc3e961aa89d354) | `read-only-tool-validated` | Windows · Ollama · qwen3-coder:30b |
+| [Aider CLI realistic scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-eee8463c09ed1a53) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
+| [Aider CLI richer disposable scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-c836e3b6f82ceb6c) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
+| [Aider and OpenCode candidate lifecycle plans](https://github.com/hysel/haven-42/wiki/Evidence-Record-4c8889255c609520) | `static-validated` | Cross-platform · No provider invocation · no-model |
+| [Continue CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-c48f68ae267ddaeb) | `validated-by-tests` | Cross-platform · N/A · N/A |
+| [OpenCode CLI Devstral Small 2 generated-sample scoped edit](https://github.com/hysel/haven-42/wiki/Evidence-Record-1e2f129e7b81d26f) | `write-smoke-validated` | Windows · Ollama · devstral-small-2:24b |
+| [OpenCode CLI Devstral Small 2 generated-sample validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-3a97cf812d7ead4b) | `partial-pass` | Windows · Ollama · devstral-small-2:24b |
+| [OpenCode CLI qwen3.5 35B write smoke](https://github.com/hysel/haven-42/wiki/Evidence-Record-cba49f1efb99951d) | `write-smoke-validated` | Windows · Ollama · qwen3.5:35b |
+| [OpenCode CLI qwen3.5 9B read validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-0077a93bb585cbc8) | `read-only-tool-validated` | Windows · Ollama · qwen3.5:9b |
+| [OpenCode CLI wrapper scaffold](https://github.com/hysel/haven-42/wiki/Evidence-Record-b7a23e13a579dff1) | `validated-by-tests` | Cross-platform · N/A · N/A |
+| [Shared agent CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-ef3643c281067618) | `validated-by-tests` | Cross-platform · N/A · N/A |
+## Controlled Research
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Offline cited-synthesis source parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-03d2a694b6d22720) | `static-validated` | Windows and Linux · Caller-supplied fixtures · synthetic-bounded-source-envelope |
+| [Offline transport and approval guards](https://github.com/hysel/haven-42/wiki/Evidence-Record-1c20a3dfac18ae0a) | `static-validated` | Cross-platform · Caller-supplied receipts · no-model |
+## Editor Surface
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [VS Code-compatible Continue Agent](https://github.com/hysel/haven-42/wiki/Evidence-Record-9865b9af8dddb72e) | `read-only-tool-validated` | Windows · Ollama · qwen3-coder:30b |
+| [VSCodium Continue Agent](https://github.com/hysel/haven-42/wiki/Evidence-Record-3532849d1fcc1eb8) | `read-only-tool-validated` | Windows · Ollama · qwen3-coder:30b |
+| [VSCodium Continue Agent Qwen 3.5 4B MLX strict write smoke](https://github.com/hysel/haven-42/wiki/Evidence-Record-e5ae46fbbffbcb08) | `partial-pass` | macOS · MLX · mlx-community/Qwen3.5-4B-4bit |
+| [VSCodium Continue Agent Qwen 3.5 9B MLX scoped edit](https://github.com/hysel/haven-42/wiki/Evidence-Record-b0c0bfde405ff09e) | `write-smoke-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-OptiQ-4bit |
+## Engineering Validation
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Pinned public repository structure selection](https://github.com/hysel/haven-42/wiki/Evidence-Record-9a6b5c12842514d3) | `static-validated` | Windows · Bare Git object inspection · Click 8.2.1, Express 5.1.0, serde_json 1.0.140 |
+## General Capability
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Gemma 3 12B writing constraint matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-eff6c9e174bbfc81) | `validated-by-tests` | Linux · Ollama · gemma3:12b |
+| [Granite 4 7B-A1B-H writing constraint matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-a6e6ffd682af210d) | `partial-pass` | Linux · Ollama · granite4:7b-a1b-h |
+| [Local ComfyUI SDXL image generation](https://github.com/hysel/haven-42/wiki/Evidence-Record-794bb0b437c5bd12) | `validated-by-tests` | Linux · ComfyUI · SDXL Base 1.0 |
+| [Local Ollama capability availability discovery](https://github.com/hysel/haven-42/wiki/Evidence-Record-7f4b6f4a0b5c9599) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
+| [Local Ollama general chat](https://github.com/hysel/haven-42/wiki/Evidence-Record-e2cf27858869b71b) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
+| [Local Ollama general writing](https://github.com/hysel/haven-42/wiki/Evidence-Record-a661b8ee3cb73a5c) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
+| [Local Ollama summarization](https://github.com/hysel/haven-42/wiki/Evidence-Record-91816f73fe0522a8) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
+| [Mistral Small 3.2 writing constraint matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-9160baf776098a16) | `validated-by-tests` | Linux · Ollama · mistral-small3.2:24b-instruct-2506-q4_K_M |
+| [Optional local LLM capability suggestion](https://github.com/hysel/haven-42/wiki/Evidence-Record-e868714f9f8c5344) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
+| [Qwen 3.5 9B writing constraint matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-b91e58b8e387a4cc) | `validated-by-tests` | Linux · Ollama · qwen3.5:9b |
+## Hardware Recommendation
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Script-level recommendation and config generation](https://github.com/hysel/haven-42/wiki/Evidence-Record-7c544083b952b24c) | `validated-by-tests` | Cross-platform · N/A · qwen3.5:9b |
+## Inference Engine
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [OpenVINO GenAI on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-05d02ca020d00629) | `partial-pass` | Windows · direct library API · OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
+| [OpenVINO GenAI on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-13d3451c24d5c713) | `partial-pass` | Linux · direct library API · OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
+| [llama.cpp 11-model identical-byte AMD/NVIDIA matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-d2ac550dc4f53937) | `partial-pass` | Windows and Linux · direct process · revision-and-sha256-pinned-11-model-corpus |
+| [llama.cpp CUDA on Quadro RTX 5000](https://github.com/hysel/haven-42/wiki/Evidence-Record-599dbc1e05b646b6) | `partial-pass` | Linux · OpenAI-compatible loopback API · unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
+| [llama.cpp HIP on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-85720f2f0c014451) | `partial-pass` | Windows · OpenAI-compatible loopback API · unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
+| [llama.cpp HIP through WSL2 DXG on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-1a16a98b5cd40e10) | `partial-pass` | WSL2 Ubuntu · direct process · revision-and-sha256-pinned-11-model-corpus |
+| [llama.cpp SYCL on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-3d02244dab060bc7) | `candidate-only` | Windows · direct process · unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
+| [llama.cpp SYCL on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-a43711f9d74d1e5f) | `partial-pass` | Linux · OpenAI-compatible loopback API · unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
+| [llama.cpp Windows NVIDIA and AMD follow-on matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-d535eb939e00de72) | `partial-pass` | Windows · direct process · revision-and-sha256-pinned-follow-on-artifacts |
+## Installer Profile
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Approved-write install profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-61e94680de9075db) | `validated-by-tests` | Cross-platform · N/A · N/A |
+| [Read-only install profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-fbf3040ee5b605aa) | `validated-by-tests` | Cross-platform · N/A · N/A |
+## Knowledge Context
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Memory lexical retrieval hardening](https://github.com/hysel/haven-42/wiki/Evidence-Record-c730707485ed58be) | `static-validated` | Cross-platform · Caller-supplied validated memory · no-model |
+| [Office/OpenDocument unsupported-object boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-128249f02a932a5d) | `static-validated` | Windows and Linux · Synthetic ZIP/XML fixtures · no-model |
+## Language Rule Pack
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Python optional rule pack](https://github.com/hysel/haven-42/wiki/Evidence-Record-fa1c4c4d706dbb95) | `static-validated` | Cross-platform · N/A · N/A |
+| [TypeScript optional rule pack](https://github.com/hysel/haven-42/wiki/Evidence-Record-bf0a844bf50dad6c) | `static-validated` | Cross-platform · N/A · N/A |
+## Language Workflow Matrix
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Devstral Small 2 medium language matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-9fe4829db45f23cf) | `partial-pass` | Windows · Ollama · devstral-small-2:24b |
+| [Native macOS Python read workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-ead5ac43339950f8) | `read-only-cli-validated` | macOS · Ollama · qwen3.5:9b |
+| [Native macOS Python scoped-write](https://github.com/hysel/haven-42/wiki/Evidence-Record-e9278f1fa33b50ed) | `approved-write-ready` | macOS · Ollama · qwen3.5:9b |
+| [Qwen 3.5 35B medium language matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-e133b0735c64b090) | `partial-pass` | Windows · Ollama · qwen3.5:35b |
+| [Rust scoped-write lane](https://github.com/hysel/haven-42/wiki/Evidence-Record-4d55669e8b4fe1d1) | `approved-write-ready` | Windows · Ollama · devstral-small-2:24b |
+| [TypeScript scoped-write lane](https://github.com/hysel/haven-42/wiki/Evidence-Record-74a1cb2f558d7e4f) | `approved-write-ready` | Windows · Ollama · qwen3.5:35b |
+## Managed Lifecycle
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Alpha 2 managed lifecycle on Arch Linux rolling](https://github.com/hysel/haven-42/wiki/Evidence-Record-64b5695c570a65eb) | `partial-pass` | Arch Linux rolling · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Bazzite 44](https://github.com/hysel/haven-42/wiki/Evidence-Record-6d9b244b1163f0ba) | `partial-pass` | Bazzite 44 · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on CachyOS rolling](https://github.com/hysel/haven-42/wiki/Evidence-Record-1d6bdc9189569bea) | `partial-pass` | CachyOS rolling · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Debian 13](https://github.com/hysel/haven-42/wiki/Evidence-Record-367cf17184e6d096) | `partial-pass` | Debian 13 · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Fedora 44](https://github.com/hysel/haven-42/wiki/Evidence-Record-a466eb1da4889753) | `partial-pass` | Fedora 44 · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Linux Mint 22.3](https://github.com/hysel/haven-42/wiki/Evidence-Record-996fb8fe75402f31) | `partial-pass` | Linux Mint 22.3 · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Pop OS 24.04](https://github.com/hysel/haven-42/wiki/Evidence-Record-f15751caa49c9951) | `partial-pass` | Pop OS 24.04 LTS · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Ubuntu 24.04](https://github.com/hysel/haven-42/wiki/Evidence-Record-d3fe8b7c516fde7c) | `partial-pass` | Ubuntu 24.04.4 LTS · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+| [Alpha 2 managed lifecycle on Ubuntu 26.04](https://github.com/hysel/haven-42/wiki/Evidence-Record-2a865071c8c4974a) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.5 CUDA · qwen3.5:0.8b Q8_0 |
+## Media Provider
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [ACE-Step 1.5 Linux CUDA feasibility](https://github.com/hysel/haven-42/wiki/Evidence-Record-c9663d1fe857b9a0) | `partial-pass` | Linux · ACE-Step · acestep-v15-turbo |
+| [ComfyUI SDXL on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-3d3a187ec32169e6) | `partial-pass` | Windows · ComfyUI · SDXL Base 1.0 |
+| [ComfyUI SDXL on Quadro RTX 5000](https://github.com/hysel/haven-42/wiki/Evidence-Record-9144ebf0180b2118) | `partial-pass` | Windows · ComfyUI · SDXL Base 1.0 |
+| [ComfyUI SDXL on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-dda5053a14f25d32) | `partial-pass` | Windows · ComfyUI · SDXL Base 1.0 |
+| [Local video candidate hardware preflight](https://github.com/hysel/haven-42/wiki/Evidence-Record-4e44f89b53777abb) | `candidate-only` | Linux · HunyuanVideo 1.5, Wan2.2, and LTX-2.3 · exact-upstream-candidate-records |
+## Model Provider
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Laguna XS 2.1 Ollama conformance](https://github.com/hysel/haven-42/wiki/Evidence-Record-749f44fc9f8604f4) | `partial-pass` | Linux · Ollama · laguna-xs-2.1:q4_K_M |
+## Model Qualification
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Granite 4.1 8B on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-739440533a3f6c7a) | `partial-pass` | Ubuntu Linux · direct process · granite41-8b-q4_K_M |
+| [Nemotron 3.5 Lightning Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-999c817bcb50d175) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q4_K_M |
+| [Nemotron 3.5 Lightning Q8 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-b4871f9bcbf09daa) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q8_0 |
+| [Ollama 0.32.9 five-model task-contract retry on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-029248b547774d8a) | `failed-validation` | Ubuntu 24.04.4 · Ollama · five exact manifest-pinned models |
+| [Qwen 3.5 9B synchronized power on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-08bad671d73e509b) | `partial-pass` | Windows 11 · Ollama · qwen3.5:9b Q4_K_M |
+## Model Quantization
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Qwen 3.5 9B Q4_K_M versus Q8_0](https://github.com/hysel/haven-42/wiki/Evidence-Record-abbec916eccdc9c2) | `validated-by-tests` | Linux · Ollama · qwen3.5:9b |
+| [Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-66af319217108136) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
+## Model Tool Use
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Devstral Small 2 MLX endpoint tool call](https://github.com/hysel/haven-42/wiki/Evidence-Record-8a4966fb74923f8b) | `candidate-only` | macOS · MLX · mlx-community/Devstral-Small-2-24B-Instruct-2512-4bit |
+| [Qwen 3.5 4B MLX Continue CLI read](https://github.com/hysel/haven-42/wiki/Evidence-Record-a4f5cee50428c764) | `read-only-cli-validated` | macOS · MLX · mlx-community/Qwen3.5-4B-4bit |
+| [Qwen 3.5 4B MLX Continue CLI scoped write smoke](https://github.com/hysel/haven-42/wiki/Evidence-Record-5f39cc023ffe9b89) | `write-smoke-validated` | macOS · MLX · mlx-community/Qwen3.5-4B-4bit |
+| [Qwen 3.5 4B MLX endpoint tool call](https://github.com/hysel/haven-42/wiki/Evidence-Record-5937518d2dcbae62) | `read-only-tool-validated` | macOS · MLX · mlx-community/Qwen3.5-4B-4bit |
+| [Qwen 3.5 9B MLX Continue CLI plan](https://github.com/hysel/haven-42/wiki/Evidence-Record-2281ebc7777a2289) | `plan-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-OptiQ-4bit |
+| [Qwen 3.5 9B MLX Continue CLI read](https://github.com/hysel/haven-42/wiki/Evidence-Record-254db10e5008805c) | `read-only-cli-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-OptiQ-4bit |
+| [Qwen 3.5 9B MLX Continue CLI review](https://github.com/hysel/haven-42/wiki/Evidence-Record-55a17b5d93fb9c09) | `review-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-OptiQ-4bit |
+| [Qwen 3.5 9B MLX Continue CLI scoped write smoke](https://github.com/hysel/haven-42/wiki/Evidence-Record-32993a66ac4b468f) | `write-smoke-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-OptiQ-4bit |
+| [Qwen 3.5 9B MLX endpoint tool call](https://github.com/hysel/haven-42/wiki/Evidence-Record-3f7866c9fa36fa50) | `read-only-tool-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-OptiQ-4bit |
+| [Qwen 3.5 9B baseline MLX Continue CLI read](https://github.com/hysel/haven-42/wiki/Evidence-Record-de86611b0dd8c860) | `read-only-cli-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-4bit |
+| [Qwen 3.5 9B baseline MLX Continue CLI scoped write smoke](https://github.com/hysel/haven-42/wiki/Evidence-Record-ccd5b4bdd03c1ef2) | `write-smoke-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-4bit |
+| [Qwen 3.5 9B baseline MLX endpoint tool call](https://github.com/hysel/haven-42/wiki/Evidence-Record-fd71babae537344a) | `read-only-tool-validated` | macOS · MLX · mlx-community/Qwen3.5-9B-4bit |
+| [Qwen3-Coder-Next generated workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-0fd3dc956063fdaa) | `plan-review-candidate` | Windows · Ollama · Qwen3-Coder-Next:latest |
+| [devstral-small-2 generated workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-b0b0a5a9fbafbfd4) | `plan-review-candidate` | Windows · Ollama · devstral-small-2:latest |
+| [devstral-small-2:24b Continue CLI read](https://github.com/hysel/haven-42/wiki/Evidence-Record-ebc97e7569950583) | `read-only-cli-validated` | Windows · Ollama · devstral-small-2:24b |
+| [devstral-small-2:24b Continue CLI write](https://github.com/hysel/haven-42/wiki/Evidence-Record-2b8fd551abe47dcd) | `write-smoke-validated` | Windows · Ollama · devstral-small-2:24b |
+| [devstral-small-2:24b read](https://github.com/hysel/haven-42/wiki/Evidence-Record-460f76e4260d68fd) | `read-only-tool-validated` | Windows · Ollama · devstral-small-2:24b |
+| [qwen3-coder:30b Continue CLI read](https://github.com/hysel/haven-42/wiki/Evidence-Record-8cdb147cb46a0942) | `read-only-cli-validated` | Windows · Ollama · qwen3-coder:30b |
+| [qwen3-coder:30b Continue CLI write](https://github.com/hysel/haven-42/wiki/Evidence-Record-688536975056f222) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
+| [qwen3-coder:30b read](https://github.com/hysel/haven-42/wiki/Evidence-Record-d2ccbc89525e4a4b) | `read-only-tool-validated` | Windows · Ollama · qwen3-coder:30b |
+| [qwen3.5:9b Continue CLI read](https://github.com/hysel/haven-42/wiki/Evidence-Record-e81d875e828d2c8f) | `read-only-cli-validated` | Windows · Ollama · qwen3.5:9b |
+| [qwen3.5:9b Continue CLI write](https://github.com/hysel/haven-42/wiki/Evidence-Record-3b61696216f40c39) | `write-smoke-validated` | Windows · Ollama · qwen3.5:9b |
+| [qwen3.5:9b plan](https://github.com/hysel/haven-42/wiki/Evidence-Record-2410a7d9b3a44da6) | `plan-validated` | Windows · Ollama · qwen3.5:9b |
+| [qwen3.5:9b read](https://github.com/hysel/haven-42/wiki/Evidence-Record-011e7524d4091077) | `read-only-tool-validated` | Windows · Ollama · qwen3.5:9b |
+| [qwen3.5:9b write](https://github.com/hysel/haven-42/wiki/Evidence-Record-1c9a5cb51bde73c4) | `approved-write-ready` | Windows · Ollama · qwen3.5:9b |
+## Multi Language Workflow
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Generated Python sample workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-cce994c7b1684c6e) | `partial-pass` | Windows · Ollama · devstral-small-2:latest |
+| [Generated Python sample workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-ddd493cef4288ac4) | `partial-pass` | Windows · Ollama · Qwen3-Coder-Next:latest |
+| [Generated TypeScript sample workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-588241e349f32b95) | `partial-pass` | Windows · Ollama · devstral-small-2:latest |
+| [Generated TypeScript sample workflows](https://github.com/hysel/haven-42/wiki/Evidence-Record-dff8d8e0aff407ab) | `partial-pass` | Windows · Ollama · Qwen3-Coder-Next:latest |
+## Online Discovery
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Online model discovery](https://github.com/hysel/haven-42/wiki/Evidence-Record-2de3f0726ddaba91) | `candidate-only` | Cross-platform · N/A · N/A |
+## Remote Profile
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Remote hardware profiling](https://github.com/hysel/haven-42/wiki/Evidence-Record-77e5fbc983b71597) | `validated-by-tests` | Cross-platform · N/A · N/A |
+## Sample Repository
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Python API generated sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-32bd4f913b5ede9d) | `read-only-cli-validated` | Windows · Ollama · local-config |
+| [TypeScript frontend generated sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-22701a5715776e0d) | `read-only-cli-validated` | Windows · Ollama · local-config |
+
+## Automatic-update boundary
+
+`config/evidence-page-registry.json` is the machine-readable input reserved
+for future update compatibility checks. Its records are advisory evidence
+only and cannot activate an update or change a model default.

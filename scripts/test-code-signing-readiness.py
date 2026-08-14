@@ -109,6 +109,7 @@ def main() -> int:
         and '"CPYTHON-3.14.6-LICENSE.txt"' in builder
         and '"APACHE-2.0.txt"' in builder
         and '"LIBFFI-3.4.4-LICENSE.txt"' in builder
+        and '"OLLAMA-MIT-LICENSE.txt"' in builder
         and "runtime-component-inventory-mismatch" in verifier,
         "The package build must verify Windows metadata, runtime coverage, and license evidence.",
     )

@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "osReleaseCases": [
+    {
+      "id": "ubuntu-versioned",
+      "content": "ID=ubuntu\nVERSION_ID=24.04\nPRETTY_NAME=\"Ubuntu 24.04.4 LTS\"\n",
+      "expected": {
+        "distributionId": "ubuntu",
+        "distributionVersion": "24.04",
+        "productName": "Ubuntu 24.04.4 LTS"
+      }
+    },
+    {
+      "id": "mint-quoted",
+      "content": "ID=linuxmint\nVERSION_ID=22.3\nPRETTY_NAME=\"Linux Mint 22.3\"\n",
+      "expected": {
+        "distributionId": "linuxmint",
+        "distributionVersion": "22.3",
+        "productName": "Linux Mint 22.3"
+      }
+    },
+    {
+      "id": "pop-os",
+      "content": "ID=pop\nVERSION_ID=24.04\nPRETTY_NAME='Pop!_OS 24.04 LTS'\n",
+      "expected": {
+        "distributionId": "pop",
+        "distributionVersion": "24.04",
+        "productName": "Pop!_OS 24.04 LTS"
+      }
+    },
+    {
+      "id": "arch-reviewed-rolling",
+      "content": "ID=arch\nBUILD_ID=rolling\nPRETTY_NAME=\"Arch Linux\"\n",
+      "expected": {
+        "distributionId": "arch",
+        "distributionVersion": "rolling",
+        "productName": "Arch Linux"
+      }
+    }
+  ],
+  "rejectedOsReleaseCases": [
+    {
+      "id": "conflicting-duplicate-id",
+      "content": "ID=debian\nID=spoofed\nVERSION_ID=13\nPRETTY_NAME=\"Debian GNU/Linux 13\"\n"
+    },
+    {
+      "id": "path-content",
+      "content": "ID=../../private\nVERSION_ID=24.04\nPRETTY_NAME=token=synthetic\n"
+    },
+    {
+      "id": "unterminated-quote",
+      "content": "ID=ubuntu\nVERSION_ID=\"24.04\nPRETTY_NAME=\"Ubuntu\n"
+    },
+    {
+      "id": "shell-shaped-values",
+      "content": "ID=ubuntu;curl\nVERSION_ID=$(whoami)\nPRETTY_NAME=Ubuntu\\nInjected\n"
+    },
+    {
+      "id": "embedded-nul",
+      "content": "ID=ubuntu\u0000spoofed\nVERSION_ID=24.04\nPRETTY_NAME=Ubuntu\n"
+    }
+  ],
+  "linuxPciOutput": "0000:03:00.0 VGA compatible controller: Advanced Micro Devices, Inc. [AMD/ATI] Test Radeon\n\tKernel driver in use: amdgpu\n\tKernel modules: amdgpu\n0000:04:00.0 Display controller: Intel Corporation Test Arc\n\tKernel driver in use: xe\n\tKernel modules: xe\n0000:05:00.0 Ethernet controller: Example Network Adapter\n"
+}

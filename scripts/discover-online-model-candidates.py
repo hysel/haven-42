@@ -12,6 +12,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -28,6 +29,109 @@ def csv_values(values):
 def load_json(path):
     with open(path, "r", encoding="utf-8-sig") as handle:
         return json.load(handle)
+
+
+def inventory_index(path):
+    if not path:
+        return {"models": set(), "repositories": set(), "families": set()}
+    inventory = load_json(path)
+    models, repositories = set(), set()
+    for family in inventory.get("families") or []:
+        for version in family.get("versions") or []:
+            for candidate in version.get("candidates") or []:
+                model = str(candidate.get("model") or "").strip().lower()
+                if model:
+                    models.add(model)
+                    repositories.add(model.split(":", 1)[0])
+    return {
+        "models": models,
+        "repositories": repositories,
+        "families": {
+            str(item.get("family") or "").strip().lower()
+            for item in inventory.get("families") or []
+            if str(item.get("family") or "").strip()
+        },
+    }
+
+
+def previous_candidate_keys(path):
+    if not path:
+        return set()
+    previous = load_json(path)
+    records = previous.get("Candidates") or previous.get("NewTestCandidates") or []
+    return {
+        (str(item.get("SourceId") or ""), str(item.get("ArtifactId") or ""), str(item.get("Revision") or ""))
+        for item in records
+        if isinstance(item, dict)
+    }
+
+
+def classify_inventory_candidates(candidates, inventory, previous_keys):
+    untracked = []
+    new_since_previous = []
+    for candidate in candidates:
+        model = str(candidate.get("Model") or "").lower()
+        repository = model.split(":", 1)[0]
+        key = (
+            str(candidate.get("SourceId") or ""),
+            str(candidate.get("ArtifactId") or ""),
+            str(candidate.get("Revision") or ""),
+        )
+        if model in inventory["models"]:
+            inventory_status = "already-tracked-exact-artifact"
+            queue_status = "no-action-already-tracked"
+        elif candidate.get("SourceId") == "ollama" and repository in inventory["repositories"]:
+            inventory_status = "new-artifact-in-tracked-model-repository"
+            queue_status = "review-for-test-queue"
+        else:
+            inventory_status = "new-upstream-model-candidate"
+            queue_status = "review-official-publisher-license-and-local-artifacts"
+        if re.search(r"(?i)(^|:)latest$", model):
+            queue_status = "blocked-mutable-tag-requires-version-pinned-artifact"
+        candidate["InventoryStatus"] = inventory_status
+        candidate["TestQueueStatus"] = queue_status
+        candidate["SeenInPreviousReport"] = key in previous_keys
+        if inventory_status != "already-tracked-exact-artifact":
+            untracked.append(candidate)
+            if key not in previous_keys:
+                new_since_previous.append(candidate)
+    return untracked, new_since_previous
+
+
+def markdown_report(report):
+    summary = report["UpdateSummary"]
+    lines = [
+        "# New Model Candidate Check",
+        "",
+        f"_Checked: {report['GeneratedAtUtc']}_",
+        "",
+        "This is a review queue, not an installation or certification result. No model was downloaded, no test was started, and Haven 42's automatic model choices were not changed.",
+        "",
+        "## Summary",
+        "",
+        f"- {summary['DiscoveredCount']} public candidate records were examined.",
+        f"- {summary['UntrackedCandidateCount']} are not represented by an exact tracked artifact.",
+        f"- {summary['NewSincePreviousReportCount']} were not present in the supplied previous report.",
+        f"- {summary['AlreadyTrackedExactCount']} already match an exact inventory entry.",
+        f"- {summary['SourceErrorCount']} source queries failed.",
+        "",
+        "## Candidates requiring review",
+        "",
+        "| Candidate | Source | Inventory comparison | Next action |",
+        "| --- | --- | --- | --- |",
+    ]
+    for item in report["NewTestCandidates"]:
+        lines.append(
+            f"| `{item['Model']}` | {item['SourceId']} | {item['InventoryStatus'].replace('-', ' ')} | {item['TestQueueStatus'].replace('-', ' ')} |"
+        )
+    if not report["NewTestCandidates"]:
+        lines.append("| None | — | No untracked candidates were found | — |")
+    lines.extend([
+        "",
+        "Before testing, confirm the official publisher, license, immutable revision or manifest digest, local runtime artifact, quantization, size, and hardware fit. Preparing that test still does not authorize a download or soak run.",
+        "",
+    ])
+    return "\n".join(lines)
 
 
 def platform_name(value=None):
@@ -248,6 +352,9 @@ def main():
     parser.add_argument("--ollama-html-fixture", "--source-html-path")
     parser.add_argument("--huggingface-json-fixture", "--hugging-face-json-path")
     parser.add_argument("--output-path", required=True)
+    parser.add_argument("--markdown-output-path")
+    parser.add_argument("--inventory-path")
+    parser.add_argument("--previous-report-path")
     parser.add_argument("--model-profile-path")
     parser.add_argument("--vram-selection-mode", choices=("TotalDedicated", "MaxDedicated"), default="TotalDedicated")
     parser.add_argument("--available-vram-gb", type=float, default=0)
@@ -287,24 +394,53 @@ def main():
     candidates = sorted(unique.values(), key=lambda item: (item["SourceId"], item["Model"]))
     if not args.include_oversized_models:
         pass  # Oversized candidates remain visible but are explicitly labeled and never pulled.
+    inventory = inventory_index(args.inventory_path)
+    previous_keys = previous_candidate_keys(args.previous_report_path)
+    untracked, new_since_previous = classify_inventory_candidates(candidates, inventory, previous_keys)
     report = {
-        "SchemaVersion": contract["schemaVersion"], "GeneratedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "SchemaVersion": contract["schemaVersion"],
+        "GeneratedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
+        "GeneratedAtUtc": datetime.now(timezone.utc).isoformat(),
         "DiscoveryMode": "local-fixture" if args.ollama_html_fixture or args.huggingface_json_fixture else "online",
         "DiscoveryContract": "config/model-discovery-contract.json", "Sources": selected, "QueriesBySource": query_record,
         "RepositoryContentSent": False, "HardwareProfileSent": False,
+        "CertificationInventoryReadLocally": bool(args.inventory_path),
+        "CertificationInventorySent": False,
         "ModelProfilePath": "redacted" if args.model_profile_path else None,
         "VramSelectionMode": args.vram_selection_mode, "AvailableVramGb": available or None,
         "AvailableVramSource": vram_source, "ModelHostPlatform": host,
         "IncludeOversizedModels": args.include_oversized_models, "PullsModels": False,
-        "RewritesContinueConfig": False, "Candidates": candidates, "SkippedCandidates": skipped, "Errors": errors,
+        "RewritesContinueConfig": False, "WritesCertificationInventory": False,
+        "StartsTests": False, "ChangesAutomaticModelSelection": False,
+        "Candidates": candidates, "NewTestCandidates": untracked,
+        "NewSincePreviousReport": new_since_previous,
+        "UpdateSummary": {
+            "DiscoveredCount": len(candidates),
+            "UntrackedCandidateCount": len(untracked),
+            "NewSincePreviousReportCount": len(new_since_previous),
+            "AlreadyTrackedExactCount": sum(
+                item["InventoryStatus"] == "already-tracked-exact-artifact"
+                for item in candidates
+            ),
+            "SkippedCount": len(skipped),
+            "SourceErrorCount": len(errors),
+        },
+        "SkippedCandidates": skipped, "Errors": errors,
         "Note": "Discovery records public metadata candidates only; it never proves provenance, license suitability, runtime compatibility, quality, tool use, or approved-write readiness."
     }
     output = Path(args.output_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    if args.markdown_output_path:
+        markdown_output = Path(args.markdown_output_path)
+        markdown_output.parent.mkdir(parents=True, exist_ok=True)
+        markdown_output.write_text(markdown_report(report), encoding="utf-8")
     print(f"Discovery summary: {len(candidates)} candidate(s), {len(skipped)} skipped candidate(s), {len(errors)} source error(s).")
+    print(f"Update summary: {len(untracked)} untracked candidate(s), {len(new_since_previous)} new since the previous report.")
     print(f"Sources: {', '.join(selected)}")
     print(f"Candidate report written to {output}")
+    if args.markdown_output_path:
+        print(f"Human-readable review written to {args.markdown_output_path}")
     return 0
 
 

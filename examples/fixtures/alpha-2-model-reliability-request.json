@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "example-gpu-windows-reliability",
+  "identity": {
+    "provider": "ollama",
+    "runtimeVersion": "0.32.8",
+    "modelId": "example-3b-q4",
+    "model": "example:3b-q4",
+    "manifestDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "environment": {
+    "platformFamily": "windows",
+    "operatingSystem": "Windows 11",
+    "backend": "rocm",
+    "acceleratorVendor": "AMD",
+    "acceleratorModel": "Example GPU",
+    "driverVersion": "example-driver",
+    "systemMemoryGiB": 32,
+    "usableGpuMemoryGiB": 16
+  },
+  "scenarioDecisions": [
+    {
+      "id": "cold-start-and-multi-turn",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "cancellation-and-cleanup",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "unload-and-reload",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "runtime-restart-and-provider-failure",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "interrupted-download-recovery",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "bounded-low-resource-recovery",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "sleep-and-wake-recovery",
+      "decision": "prepare",
+      "reason": null
+    },
+    {
+      "id": "concurrent-load-and-final-cleanup",
+      "decision": "prepare",
+      "reason": null
+    }
+  ],
+  "executionApprovalReference": null
+}

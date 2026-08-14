@@ -120,6 +120,13 @@ def main() -> None:
             assert (output / "bin/ollama").stat().st_mode & 0o777 == 0o500
             assert (output / "lib/libreal.so").stat().st_mode & 0o777 == 0o400
 
+        nested_output = root / "new-parent" / "nested" / "runtime"
+        nested_result = MODULE.extract_registered_archive(
+            archive, nested_output, component,
+        )
+        assert nested_result["linkFree"] is True
+        assert (nested_output / "bin/ollama").read_bytes() == b"runtime"
+
         bad_hash = dict(component, sha256="0" * 64)
         refused(
             lambda: MODULE.inspect_registered_archive(archive, bad_hash),
@@ -173,7 +180,7 @@ def main() -> None:
                 "invalid-component-archive",
             )
         assert stream.closed is True
-    print("Linux Alpha runtime extractor passed 22 safety and behavior checks.")
+    print("Linux Alpha runtime extractor passed 23 safety and behavior checks.")
 
 
 if __name__ == "__main__":

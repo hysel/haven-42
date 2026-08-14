@@ -103,61 +103,128 @@ does not automatically check a native or release-candidate task.
 
 ## Phase 2: Shared cross-platform product boundary
 
-- [ ] Separate Windows-specific managed-setup operations from the shared
+- [x] Separate Windows-specific managed-setup operations from the shared
   readiness, planning, approval, progress, recovery, and UI contracts.
-- [ ] Add an explicit platform adapter interface with an allowlist of supported
+- [x] Add an explicit platform adapter interface with an allowlist of supported
   operations; reject unknown platforms and operation identifiers.
 - [ ] Preserve exact source-versus-package behavior for Chat, Writing,
   Summarization, attachments, logs, metrics, provider switching, and cleanup.
-- [ ] Keep all renderer input untrusted and keep process, path, download,
+- [x] Keep all renderer input untrusted and keep process, path, download,
   integrity, and lifecycle authority in the local engine.
-- [ ] Add hostile tests proving that renderer or model content cannot choose a
+- [x] Add hostile tests proving that renderer or model content cannot choose a
   command, executable, environment variable, destination, archive member,
   local path, or process to terminate.
-- [ ] Confirm Windows behavior remains unchanged while Linux support is added.
+- [x] Confirm Windows behavior remains unchanged while Linux support is added.
 
 ## Phase 3: Linux system and distribution detection
 
-- [ ] Detect Linux x64 through bounded operating-system APIs and `/etc/os-release`
+- [x] Detect Linux x64 through bounded operating-system APIs and `/etc/os-release`
   without invoking a shell or trusting environment-provided paths.
-- [ ] Report the distribution name/version, kernel, architecture, desktop,
+- [x] Report the distribution name/version, kernel, architecture, desktop,
   Wayland/X11 session, CPU, logical processors, RAM, free space, and detected
   accelerator in novice-friendly language.
-- [ ] Detect glibc and required shared-library compatibility before setup.
-- [ ] Detect NVIDIA, AMD, Intel, and CPU-only profiles without requiring root.
-- [ ] Record driver and runtime versions when bounded read-only probes can
+- [x] Detect glibc and required shared-library compatibility before setup.
+- [x] Detect NVIDIA, AMD, Intel, and CPU-only profiles without requiring root.
+- [x] Record driver and runtime versions when bounded read-only probes can
   obtain them; otherwise show **Unavailable** rather than estimating.
-- [ ] Show only components applicable to the detected platform and accelerator.
-- [ ] Deny managed setup below the approved CPU, RAM, storage, architecture, or
+- [x] Show only components applicable to the detected platform and accelerator.
+- [x] Deny managed setup below the approved CPU, RAM, storage, architecture, or
   runtime-compatibility threshold with a clear remediation message.
-- [ ] Add deterministic fixtures for missing, malformed, spoofed, oversized,
+- [x] Add deterministic fixtures for missing, malformed, spoofed, oversized,
   and conflicting distribution and hardware information.
+
+The completed offline boundary uses exact `windows-x64` and `linux-x64`
+adapters with fixed operation identifiers. Unknown platforms, unknown
+operations, nested snapshot fields, command-shaped data, private paths, raw
+environment data, malformed or duplicated operating-system identity fields,
+oversized identity files, and ambiguous accelerator vendor strings fail
+closed. Linux desktop/session values are bounded, reported as untrusted, and
+never grant setup authority. The readiness layer reports only accelerator tools
+that apply to the detected vendor. On Linux, it reads the active kernel-driver
+name from bounded `lspci -D -k` output and requests a module version only for the
+fixed `amdgpu`, `i915`, `xe`, `nouveau`, or `nvidia` allowlist. AMD SMI, ROCm
+SMI, Intel XPU SMI, and SYCL version probes are also fixed and bounded; missing
+versions remain **Unavailable**.
+
+Linux admission now requires the declared glibc family and the greater of the
+platform and registered-runtime minimum versions. This checks the currently
+declared shared-library ABI before setup; the complete ELF dependency inventory
+for the final Linux archive remains part of the Phase 4 artifact review. The UI
+provides direct remediation for architecture, distribution, glibc, processor,
+memory, storage, and driver-readiness failures. Native distribution validation
+remains separate in the platform matrix below.
+
+The Windows adapter continues to export the existing Windows policy and setup
+implementations directly. Offline parity checks assert those identities, and
+the existing Windows policy, setup, lifecycle, diagnostics, provider, and web
+tests remain in the integration gate. Final source-versus-packaged parity stays
+open until it is rerun against the Alpha 2 release candidate executable.
 
 ## Phase 4: Linux component supply chain
 
-- [ ] Register an exact official standalone Linux x64 Ollama artifact with
+- [x] Register an exact official standalone Linux x64 Ollama artifact with
   immutable version, byte length, SHA-256, source, license, and provenance.
-- [ ] Register every optional accelerator supplement independently; never
+- [x] Register every optional accelerator supplement independently; never
   infer that a Windows runtime artifact applies to Linux.
-- [ ] Register only prequantized model artifacts with exact manifest and layer
+- [x] Register only prequantized model artifacts with exact manifest and layer
   digests, sizes, licenses, capability evidence, and hardware limits.
+- [x] Record the official minimum Ollama version declared by every approved
+  model and bind it to an exact admitted runtime artifact. Reject setup when
+  the requirement cannot be satisfied by the platform-specific registry.
+- [x] Add a fail-closed, engine-specific model/runtime requirement registry
+  and resolver. Each registered route pins Ollama or llama.cpp independently,
+  enforces its minimum version, and refuses cross-engine evidence or silent
+  fallback. The first routes cover Muse Glimmer and Nemotron 3.5 Lightning;
+  remaining candidates must be migrated before they can use managed setup.
 - [ ] Complete the exact packaged dependency and license review for both Haven
   archives and every downloadable managed component.
-- [ ] Reject redirects, changed sizes/digests, unregistered archive members,
+- [x] Reject redirects, changed sizes/digests, unregistered archive members,
   links, devices, sockets, traversal, absolute paths, collisions, expansion
   abuse, and unsupported file types.
-- [ ] Prove that component downloads, staging, extraction, models, temporary
+- [x] Prove that component downloads, staging, extraction, models, temporary
   files, and runtime state remain under the extracted Haven 42 directory.
-- [ ] Keep failed, cancelled, or interrupted transactions recoverable without
+- [x] Keep failed, cancelled, or interrupted transactions recoverable without
   accepting partially verified content.
-- [ ] Generate component descriptions that explain what is downloaded, why it
+- [x] Generate component descriptions that explain what is downloaded, why it
   is needed, its version, size, source, and removal behavior before approval.
+
+The Linux runtime review now records Ollama 0.32.9 as a **candidate**, not an
+automatic upgrade. Official release metadata, both Linux x64 archive hashes,
+the core and ROCm archive inventories, and the tagged MIT license were checked
+independently. Neither candidate artifact is installable until native lifecycle
+evidence is approved. The managed Alpha 2 runtime and automatic model defaults
+remain unchanged. See [Linux runtime supply-chain review](linux-runtime-supply-chain.md).
+
+The six Qwen 3.5 Alpha 2 model records now also include the exact official
+registry manifest size, config layer, prequantized model layer, license layer,
+and parameter layer. Their committed manifest digests were recomputed from the
+official registry responses, and both registered license layers identify the
+Apache 2.0 terms. Existing task capabilities and conservative RAM/graphics
+limits remain the admission boundary; these evidence additions do not reorder
+the model ladder.
 
 ## Phase 5: Linux managed runtime and lifecycle
 
 - [ ] Start the exact registered Ollama executable directly without `sudo`, a
   shell, a package manager, `systemd`, a desktop autostart entry, or global
   installation.
+- [x] Resolve the selected approved model's runtime requirement before asking
+  for setup approval. Display the exact runtime version that Haven 42 will
+  download, and install or reuse only that checksum-pinned portable version.
+  The resolver result must also match the platform installer's component IDs,
+  version, artifact name, byte length, SHA-256, and source URL. Any registry
+  drift stops before a managed plan or approval is issued. Reopening a
+  completed local setup repeats the same model, runtime, component-registry,
+  hardware, receipt, and runtime-file checks before starting the provider.
+- [x] Gate the Alpha 2 setup screen, approval, and execution on the same exact
+  model/runtime binding. The screen now shows the selected engine version,
+  hardware route, model format, download sizes, and `Haven42-Data` destination;
+  approval and execution re-resolve the binding and stop if it changed.
+- [ ] Apply the same lifecycle rule to admitted llama.cpp routes: show the
+  engine, exact build, backend, model file, and any required projector or
+  runtime-support package before approval. Do not offer managed Linux CUDA
+  until an exact reviewed build route exists; the current upstream release
+  provides no official prebuilt Linux CUDA package.
 - [ ] Use a minimal child environment with managed home, model, cache, config,
   and temporary directories beneath Haven's portable data directory.
 - [ ] Bind the managed provider only to `127.0.0.1` on an engine-selected port.
@@ -184,8 +251,15 @@ does not automatically check a native or release-candidate task.
 - [ ] Use the same owner-approved hardware-derived automatic-selection policy
   on Windows and Linux; do not change the default model without explicit owner
   approval.
-- [ ] Select the largest admitted prequantized model that fits conservative
-  RAM, accelerator memory, context, concurrency, and storage budgets.
+- [ ] Select the best verified model for the requested task that fits
+  conservative RAM, accelerator memory, context, concurrency, and storage
+  budgets. Model size is a candidate-admission input, not the ranking goal.
+- [ ] Run a shared exact-artifact baseline where hardware permits so vendor
+  differences remain comparable, then add a hardware-fit expansion queue for
+  every larger or vendor-specific candidate the exact computer can run safely.
+- [ ] Rank equally reliable candidates by measured task quality first, then
+  responsiveness, recovery headroom, and energy efficiency; retain a smaller
+  verified fallback.
 - [ ] Prefer a smaller registered model over local quantization when it fits.
 - [ ] Keep automatic quantization disabled until its separate provenance,
   quality, temporary-storage, recovery, and compatibility gates pass.
@@ -376,6 +450,10 @@ hostname, username, address, personal path, prompt, response, or API key.
 - [ ] Expand Alpha issue forms to collect operating system, distribution,
   version, desktop, session type, CPU/RAM/GPU, setup path, package digest, and
   sanitized error reference without collecting private content.
+- [x] Add a separate novice-friendly public model-test request form that asks
+  for the model, intended uses, optional official source, and optional broad
+  hardware profile; require privacy and no-guarantee acknowledgements, and
+  link it from the README and model-certification page.
 - [ ] Provide separate Windows and Linux download links, checksum commands,
   known limitations, and report-a-problem links.
 - [ ] Review all novice-facing language and remove unexplained engineering
@@ -525,6 +603,105 @@ promotion:
 - [x] Feed only passed exact-profile evidence into the selector and exercise
   low-, medium-, and higher-capacity hardware profiles, including refusal for
   untested memory and accelerator lanes.
+- [ ] Complete the expanded exact-artifact qualification campaign for every
+  locally runnable candidate in the version inventory. Retain every failed
+  task result, and run a separate 30-minute soak for every artifact that passes
+  Chat, Writing, and Summarization. A soak result must not change a default.
+- [ ] Establish real CPU-only, 4, 8, 12, 16, 24, 32, and 48-or-more GiB
+  accelerator test tiers. Treat measured memory use as planning evidence, not
+  proof for a smaller physical device, and do not certify a tier through an
+  artificial memory limit alone.
+- [ ] Test every task-qualified model on at least one hardware profile where it
+  fits. Across operating systems, use a small, medium, large, and very-large
+  anchor set where hardware permits rather than claiming that one distribution
+  proves another or repeating every model on every distribution.
+- [ ] Publish campaign scope as shared baseline, hardware-fit expansion, or OS
+  anchor. Treat the number of models as progress only; never use it as a model-
+  quality score or require unequal hardware to run identical queue sizes.
+- [ ] Produce task-specific recommendations per exact hardware, operating
+  system, runtime, model digest, and quantization. Separate approved
+  recommendations, candidates awaiting comparative review, manual unverified
+  choices, and known failures.
+- [ ] Add a versioned quality corpus for conversation, writing, short and long
+  summaries, known-answer factual checks, long context, ambiguous requests,
+  attachments, multilingual use, refusal behavior, and name consistency.
+  Score correctness, completeness, instruction following, unsupported claims,
+  and formatting; use blind human review for close recommendation decisions.
+- [ ] Add reliability cells for three cold starts, multi-turn use, cancellation,
+  restart, unload and reload, interrupted-download recovery, low disk and
+  memory, provider failure, sleep and wake where supported, concurrent system
+  load, and exact process cleanup after Haven 42 closes. Record first-token
+  latency, throughput, CPU, RAM, accelerator memory, acceleration use, and
+  bounded error codes without retaining user content.
+  The versioned eight-scenario contract, preparation-only planner, and strict
+  result validator are implemented. Native Windows and Linux executors and
+  physical evidence remain open; preparation cannot execute models, signal a
+  process, apply resource pressure, or change machine power state.
+- [x] Add a vendor-neutral, fail-closed model-energy collector for NVIDIA,
+  AMD, and Intel telemetry. Bind every record to the exact model digest,
+  runtime, driver, operating system, and graphics card; retain no endpoint,
+  machine identity, prompt, or response; and prohibit automatic promotion.
+- [x] Add a resumable exact-model energy campaign runner that skips existing
+  evidence, refuses unsafe output paths, and performs no model download,
+  deletion, hardware reconfiguration, or selection-policy change.
+- [x] Add a fail-closed external telemetry importer for NVIDIA, AMD Adrenalin,
+  and Intel CSV logs. Require exact UTC idle, active, and per-task windows,
+  exact artifact and environment identity, bounded sampling coverage, and
+  output-token counts before producing a sanitized energy record.
+- [x] Add a plain-language GPU-only electricity-cost calculator. Clearly state
+  that CPU, RAM, storage, cooling, displays, and power-supply losses require a
+  wall measurement or an explicit operator estimate.
+- [x] Make electricity-cost inputs country-neutral. Manual bill-rate entry
+  works worldwide in the bill's own currency; official-source profiles retain
+  country, subdivision, currency, effective period, tax scope, and source.
+  Never infer location or convert currency. Register EIA and Eurostat averages
+  as estimate sources and keep complex OpenEI tariffs opt-in.
+- [x] Add explicit official-rate snapshot adapters for U.S. EIA and Eurostat.
+  Updates require a user-selected country/currency and output path, retain the
+  source period and tax scope, never infer location or convert currency, and
+  refuse silent replacement of an existing local snapshot.
+- [x] Add an accessible System-page electricity estimator. Default to a rate
+  copied from the user's bill, keep official EIA and Eurostat retrieval
+  explicit, show source and period, retain the source currency, label results
+  GPU-only, and keep estimates separate from automatic model selection.
+- [x] Derive the displayed source currency only from a country the person
+  explicitly enters, using the admitted Eurostat country set, and show the
+  latest estimate in a quiet left-navigation summary linked to the full
+  calculator. Do not infer country from the network, computer, or locale.
+- [x] Record the ZIP-rate boundary: EIA residential averages are state-level,
+  while OpenEI address lookup returns utility tariffs that may contain tiers,
+  time-of-use periods, and fixed charges. Do not mislabel either as one simple
+  ZIP-code electricity price.
+- [x] Publish the first synchronized Windows AMD GPU-board-power evidence for
+  the RX 7800 XT and Qwen 3.5 9B without private machine details or raw user
+  content.
+- [x] Add a fail-closed AMD Adrenalin soak finalizer and watcher. It derives
+  task windows from sanitized soak evidence, waits for a newly finalized CSV,
+  requires the full idle and active coverage floors, and writes no private
+  path or machine identity into its evidence output.
+- [x] Add a human-readable cross-vendor power evidence page that keeps NVIDIA,
+  AMD, and Intel measurements tied to their exact models and test methods
+  instead of presenting unlike workloads as a ranking.
+- [ ] After the expanded soak finishes, run the same two-minute idle and
+  five-minute active energy workload on each representative physical GPU.
+  Publish average/peak watts, watt-hours, tokens per watt-hour, temperature,
+  utilization, and a user-supplied-rate estimate only for exact tested cells.
+- [ ] Publish evidence using the ordered labels Discovered, Task qualified,
+  Soak passed, Hardware verified, OS verified, Recommended, Default candidate,
+  and Failed or needs retest. A higher label requires all earlier applicable
+  gates, and only an owner-approved Default candidate may enter the automatic
+  selection policy.
+  The fail-closed JSON and Markdown report generator is implemented; actual
+  publication remains open until the running campaigns and evidence reviews
+  finish.
+- [ ] Test the purchased GTX 1650 Super 4 GB, RTX 3060 12 GB, and Radeon RX
+  6800 non-XT 16 GB after arrival. The main remaining capacity gap is a 24 GB
+  consumer or workstation card; it is not required for Alpha 2. Broader
+  CPU-only systems, Linux AMD and Intel, and Windows release-candidate routes
+  remain open. Keep Apple silicon owner-deferred until its hardware is
+  available. Use `docs/alpha-2-gpu-rotation-test-plan.md` for the planned
+  phase order, slot maps, RX 7800 XT local lane, RX 580 legacy lane, safety
+  gates, and restoration sequence.
 - [ ] Obtain owner approval before enabling any new automatic default in the
   product.
 
