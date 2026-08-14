@@ -1014,14 +1014,22 @@ def main() -> int:
             origin + "/api/setup-plan", "POST",
             {"snapshotId": "wrong-snapshot-id", "intent": "guided-setup"}, token, origin,
         )
-        assert status == 409 and error["error"] == "readiness-snapshot-mismatch"
-        status, plan, _ = request_json(
-            origin + "/api/setup-plan", "POST",
-            {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
-        )
-        assert status == 200 and plan["installationAllowed"] is False
-        assert all(action["installControl"] == "disabled" for action in plan["actions"])
-        assert all(value is False for value in plan["effects"].values())
+        if WEB.MANAGED_SETUP_SUPPORTED:
+            assert status == 409 and error["error"] == "readiness-snapshot-mismatch"
+            status, plan, _ = request_json(
+                origin + "/api/setup-plan", "POST",
+                {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
+            )
+            assert status == 200 and plan["installationAllowed"] is False
+            assert all(action["installControl"] == "disabled" for action in plan["actions"])
+            assert all(value is False for value in plan["effects"].values())
+        else:
+            assert status == 501 and error["error"] == "unsupported-platform-operation"
+            status, error, _ = request_json(
+                origin + "/api/setup-plan", "POST",
+                {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup"}, token, origin,
+            )
+            assert status == 501 and error["error"] == "unsupported-platform-operation"
         status, error, _ = request_json(
             origin + "/api/setup-plan", "POST",
             {"snapshotId": snapshot["snapshotId"], "intent": "guided-setup", "hardware": {"ram": 999}},
