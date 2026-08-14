@@ -10,6 +10,7 @@ docs/wiki-model-hardware-certifications.md	Model-And-Hardware-Test-Status.md	Mod
 docs/wiki-model-power-evidence.md	Model-Power-And-Electricity-Evidence.md	Model Power and Electricity Evidence
 examples/windows-amd-rx7800xt-power-validation.md	Windows-AMD-RX7800XT-Power-Validation.md	Radeon RX 7800 XT Model Power Validation
 examples/nvidia-v100-nemotron-validation.md	NVIDIA-V100-Nemotron-Validation.md	NVIDIA V100 Nemotron Validation
+examples/nvidia-tesla-v100-single-power-validation.md	NVIDIA-Tesla-V100-Single-Power-Validation.md	NVIDIA Tesla V100 Single-Card Power Validation
 examples/nvidia-quadro-rtx5000-power-validation.md	NVIDIA-Quadro-RTX5000-Power-Validation.md	NVIDIA Quadro RTX 5000 Model Power Validation
 examples/intel-b580-granite41-8b-validation.md	Intel-B580-Granite41-8B-Validation.md	Intel Arc B580 Granite 4.1 Validation
 docs/alpha-2-linux-long-term-validation.md	Eng-Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
