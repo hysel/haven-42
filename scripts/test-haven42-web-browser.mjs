@@ -962,7 +962,7 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== true || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 1 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
   const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
@@ -995,10 +995,51 @@ try {
   })()`);
   if (!manualTour.visible || !manualTour.focused) throw new Error(`manual-section-tour:${JSON.stringify(manualTour)}`);
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
-  if (Object.values(allTourState).length !== 5 || Object.values(allTourState).some((value) => value !== true)) {
+  if (Object.values(allTourState).length !== 5 || Object.values(allTourState).some((value) => value !== 1)) {
     throw new Error(`section-tour-state:${JSON.stringify(allTourState)}`);
   }
-  checks += 35;
+  const helpAlignment = await cdp.evaluate(`(() => {
+    const navigation = {
+      chat: 'home-nav',
+      models: 'models-nav',
+      system: 'system-nav',
+      technical: 'assurance-nav',
+      about: 'about-nav',
+    };
+    return Object.entries(navigation).map(([section, navigationId]) => {
+      document.querySelector('#' + navigationId).click();
+      const button = document.querySelector('[data-tour-section="' + section + '"]');
+      const header = button.closest('.panel-heading');
+      const buttonRect = button.getBoundingClientRect();
+      const headerRect = header.getBoundingClientRect();
+      return {
+        section,
+        rightDelta: Math.abs(headerRect.right - buttonRect.right),
+        insideHeader: buttonRect.top >= headerRect.top && buttonRect.bottom <= headerRect.bottom,
+      };
+    });
+  })()`);
+  const expectedHelpInset = helpAlignment[0].rightDelta;
+  if (helpAlignment.some((item) => Math.abs(item.rightDelta - expectedHelpInset) > 1 || !item.insideHeader)) {
+    throw new Error(`section-tour-help-alignment:${JSON.stringify(helpAlignment)}`);
+  }
+  await cdp.evaluate(`(() => {
+    sectionTourState.chat = true;
+    document.querySelector('#home-nav').click();
+  })()`);
+  await waitFor(() => cdp.evaluate("!document.querySelector('#section-tour-layer').classList.contains('hidden')"));
+  const staleBooleanTour = await cdp.evaluate(`(() => {
+    const visible = !document.querySelector('#section-tour-layer').classList.contains('hidden');
+    document.querySelector('#section-tour-close').click();
+    return {
+      visible,
+      stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
+    };
+  })()`);
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 1) {
+    throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
+  }
+  checks += 41;
   const opened = await cdp.evaluate(`({
     hidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
     promptEnabled: !document.querySelector('#prompt').disabled,
@@ -2928,7 +2969,7 @@ try {
     || accessibilityStatement.h1 !== 1
     || accessibilityStatement.main !== 1
     || accessibilityStatement.navigation !== 1
-    || !accessibilityStatement.lastReviewed.includes("August 7, 2026")
+    || !accessibilityStatement.lastReviewed.includes("August 14, 2026")
     || !accessibilityStatement.limitation.includes("not yet been manually tested")
     || accessibilityStatement.targetHeight < 44
     || Number.parseFloat(accessibilityStatement.outlineWidth) < 3

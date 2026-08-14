@@ -30,7 +30,9 @@
   "browserPreferences": {
     "storageKey": "haven42.section-tours.v1",
     "allowedFields": ["chat", "models", "system", "technical", "about"],
-    "allowedValueType": "boolean",
+    "allowedValueType": "positive-integer-tour-revision",
+    "staleBooleanValuesTreatedAsUnseen": true,
+    "newRevisionRetriggersOnlyChangedSection": true,
     "tourProgressPersistenceAllowed": false,
     "conversationContentAllowed": false,
     "attachmentInformationAllowed": false,

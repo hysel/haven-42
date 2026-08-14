@@ -19,6 +19,7 @@ def main() -> int:
     style = read("STYLEGUIDE.md")
     ai_guide = read("AI.md")
     contributing = read("CONTRIBUTING.md")
+    repository_instructions = read("AGENTS.md")
     quick_start = read("docs/wiki-quick-start.md")
     glossary = read("docs/wiki-glossary.md")
     navigation = read("config/wiki-navigation.tsv")
@@ -107,7 +108,8 @@ def main() -> int:
         assert phrase in html, phrase
     for phrase in (
         'const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1"',
-        "sectionTourState[activeSectionTour.section] = true",
+        "sectionTourState[activeSectionTour.section] = configuration.revision",
+        "sectionTourState[section] === configuration.revision",
         'event.key === "Escape"',
         'event.key !== "Tab"',
         "returnTarget.focus({ preventScroll: true })",
@@ -118,6 +120,30 @@ def main() -> int:
         assert phrase in app, phrase
     assert "localStorage" in app
     assert "resume" not in app[app.index("const SECTION_TOURS"):app.index("const state =")].lower()
+
+    for phrase in (
+        "UI accessibility and compatibility lifecycle",
+        "They are not a one-time audit",
+        "increment only that section's revision",
+        "Automated checks do not replace",
+        "accessibility or supported-platform regression as a release blocker",
+    ):
+        assert phrase in repository_instructions, phrase
+    for phrase in (
+        "README and wiki documentation lifecycle",
+        "Maintain one canonical source for each topic",
+        "README stays concise and points to those sources",
+        "single Engineering and Validation Index",
+        "linear Quick Start to Using Haven 42 to Troubleshooting flow",
+        "Do not declare documentation complete while the two repositories disagree",
+    ):
+        assert phrase in repository_instructions, phrase
+    for phrase in (
+        "accessibility and compatibility lifecycle",
+        "materially changed section tour increments only that section's revision",
+        "without implying certification",
+    ):
+        assert phrase in contributing, phrase
 
     required_policy = (
         "novice-first",

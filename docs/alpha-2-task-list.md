@@ -295,12 +295,19 @@ the model ladder.
 - [x] Close issue #74 by owner approval after implementing its reusable,
   section-scoped help system for Chat,
   Models, System, Technical details, and About. Each short tour has an
-  independent first-visit flag, an always-available manual Help entry point,
+  independent first-visit revision, an always-available manual Help entry point,
   Back, Next, Skip, close, and Escape controls, focus containment and return,
   reduced-motion behavior, and no cross-section navigation. This records local
   implementation and automated validation only; reporter acceptance and Alpha
   2 publication remain separate. The published Alpha 1 package remains
   unchanged.
+- [ ] Before each Alpha 2 release candidate is promoted, repeat the accessibility
+  lifecycle review on the exact Windows and Linux packages: keyboard-only use,
+  focus and announcements, 200% and 400% zoom/reflow, contrast and non-color
+  status, reduced motion, forced colors where supported, default-browser
+  behavior, and the named manual screen-reader/browser cells. Keep untested
+  cells and observed barriers in the Accessibility Statement; automated checks
+  alone do not close this item.
 - [ ] Use the existing guided-first language and explain Linux terms only when
   needed.
 - [ ] Show one recommended setup, with advanced controls collapsed by default.
