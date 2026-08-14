@@ -7,10 +7,12 @@ import argparse
 import json
 from pathlib import Path
 import re
+import sys
 from typing import Any
 
 
-ROOT = Path(__file__).resolve().parents[1]
+SOURCE_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
 INVENTORY = ROOT / "config" / "alpha-2-model-version-inventory.json"
 CATALOG = ROOT / "config" / "alpha-2-model-catalog.json"
 RUNTIMES = ROOT / "config" / "alpha-2-runtime-compatibility.json"

@@ -118,7 +118,10 @@ def refused(function, code: str) -> None:
 def main() -> None:
     MODULE.load_registry()
     with tempfile.TemporaryDirectory() as directory:
-        root = Path(directory)
+        # macOS exposes /var through /private/var. Canonicalize the test root
+        # so the Linux extractor's intentional ancestor-symlink rejection is
+        # tested against the actual directory rather than that host alias.
+        root = Path(directory).resolve()
         archive = root / "runtime.tar.zst"
         component = make_archive(
             archive,

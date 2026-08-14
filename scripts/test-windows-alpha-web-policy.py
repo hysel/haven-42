@@ -115,6 +115,7 @@ def main() -> int:
     }]}
     WEB.build_windows_alpha_plan = lambda _snapshot, _selected: {
         "planId": "plan-1", "components": ["ollama-windows-core"],
+        "backendMode": "cpu",
     }
     WEB.automatic_setup_admitted = lambda _selected, _snapshot: True
     WEB.resolve_alpha2_runtime = lambda *_args, **_kwargs: {"decision": "install"}
@@ -133,7 +134,10 @@ def main() -> int:
     }
     admitted = state.setup_plan("snapshot-1", "guided")
     assert admitted["alphaCandidate"]["managedSetupCandidateAvailable"] is True
-    expected_plan = {"planId": "plan-1", "components": ["ollama-windows-core"]}
+    expected_plan = {
+        "planId": "plan-1", "components": ["ollama-windows-core"],
+        "backendMode": "cpu",
+    }
     assert admitted["alphaCandidate"]["managedPlan"] == expected_plan
     assert setup.registered == [expected_plan]
 

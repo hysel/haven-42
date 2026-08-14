@@ -509,6 +509,8 @@ try {
   checks += 17;
   trace("assurance-view-verified");
 
+  const managedSetupHost = process.platform === "win32" || process.platform === "linux";
+  if (managedSetupHost) {
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");
   await waitFor(() => cdp.evaluate("document.querySelectorAll('#wizard-setup-plan .plan-action').length >= 2"));
   await waitFor(() => cdp.evaluate(`
@@ -765,6 +767,25 @@ try {
     checks += 22;
   }
   checks += 4;
+  } else {
+    await cdp.evaluate("document.querySelector('#wizard-guided').click()");
+    await waitFor(() => cdp.evaluate(
+      "document.querySelector('#wizard-scan-status').textContent.includes('safely stopped')"
+    ));
+    const unsupportedSetup = await cdp.evaluate(`({
+      current: document.querySelector('[aria-current="step"]').dataset.wizardProgress,
+      planActions: document.querySelectorAll('#wizard-setup-plan .plan-action').length,
+      nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
+      status: document.querySelector('#wizard-scan-status').textContent,
+    })`);
+    if (
+      unsupportedSetup.current !== "middle"
+      || unsupportedSetup.planActions !== 0
+      || !unsupportedSetup.nextDisabled
+      || !unsupportedSetup.status.includes("safely stopped")
+    ) throw new Error(`unsupported-managed-setup:${JSON.stringify(unsupportedSetup)}`);
+    checks += 4;
+  }
   await cdp.evaluate("document.querySelector('#wizard-readiness-back').click()");
   await waitFor(() => cdp.evaluate("document.querySelector('[aria-current=\"step\"]').dataset.wizardProgress === 'welcome'"));
   trace("guided-readiness-verified");
