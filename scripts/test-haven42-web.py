@@ -1063,7 +1063,10 @@ def main() -> int:
         assert storage_status["storageDirectoryName"] == "Haven42-Data"
         assert isinstance(storage_status["managedComponentsPresent"], bool)
         assert isinstance(storage_status["legacyManagedComponentsPresent"], bool)
-        if plan.get("alphaCandidate", {}).get("managedPlan") is not None:
+        if (
+            WEB.MANAGED_SETUP_SUPPORTED
+            and plan.get("alphaCandidate", {}).get("managedPlan") is not None
+        ):
             managed_plan = plan["alphaCandidate"]["managedPlan"]
             progress_components = storage_status["components"]
             assert 2 <= len(progress_components) <= 4
