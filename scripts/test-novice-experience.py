@@ -112,9 +112,13 @@ def main() -> int:
             assert hardware["measurementEvidence"], hardware["id"]
     quadro = next(item for item in power_coverage["hardware"] if item["id"] == "nvidia-quadro-rtx-5000-16g")
     assert quadro["status"] == "measured"
+    v100 = next(item for item in power_coverage["hardware"] if item["id"] == "nvidia-tesla-v100-32g")
+    assert v100["status"] == "measured"
+    assert len(v100["measurementEvidence"]) == 3
     assert "151.060 W active average" in power_evidence
+    assert "152.509 W active average" in power_evidence
     assert "unmeasured card cannot be mistaken for a zero-power result" in power_evidence
-    assert "single-card reference" in power_evidence
+    assert "Single-card and two-card records are available" in power_evidence
     for phrase in (
         '"Processor", processor',
         '"Available space", storage',

@@ -1,0 +1,82 @@
+{
+  "billEstimate": null,
+  "environment": {
+    "acceleratorModel": "NVIDIA Tesla V100-SXM2 32GB",
+    "acceleratorVendor": "nvidia",
+    "driverVersion": "580.159.04",
+    "operatingSystem": "Ubuntu 24.04.4 LTS"
+  },
+  "evidence": {
+    "automaticPromotionAllowed": false,
+    "containsPrivateMachineIdentity": false,
+    "containsProviderEndpoint": false,
+    "containsRawPromptsOrResponses": false
+  },
+  "identity": {
+    "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+    "model": "qwen3.5:4b",
+    "provider": "ollama",
+    "runtimeVersion": "0.32.9"
+  },
+  "kind": "haven42-model-energy-measurement",
+  "measuredAtUtc": "2026-08-14T14:40:40Z",
+  "metrics": {
+    "averageGpuUtilizationPercent": 54.85,
+    "byTask": {
+      "content.summarize": {
+        "averageWatts": 156.166,
+        "outputTokens": 6144,
+        "outputTokensPerWh": 1429.944,
+        "peakWatts": 184.39,
+        "requestSeconds": 99.049,
+        "sampleCount": 48
+      },
+      "content.write": {
+        "averageWatts": 152.258,
+        "outputTokens": 6272,
+        "outputTokensPerWh": 1470.734,
+        "peakWatts": 180.83,
+        "requestSeconds": 100.831,
+        "sampleCount": 49
+      },
+      "general.chat": {
+        "averageWatts": 151.202,
+        "outputTokens": 6272,
+        "outputTokensPerWh": 1469.23,
+        "peakWatts": 181.67,
+        "requestSeconds": 101.639,
+        "sampleCount": 49
+      }
+    },
+    "idleAdjustedAverageWatts": 121.941,
+    "idleAdjustedGpuEnergyWh": 10.216524,
+    "idleAverageWatts": 30.568,
+    "loadAverageWatts": 152.509,
+    "loadPeakWatts": 184.39,
+    "measuredGpuEnergyWh": 12.7776,
+    "outputTokens": 18688,
+    "outputTokensPerSecond": 61.959,
+    "outputTokensPerWh": 1462.559,
+    "peakMemoryUsedMiB": 4179.0,
+    "peakTemperatureCelsius": 68.0
+  },
+  "outcome": "passed",
+  "schemaVersion": 1,
+  "telemetry": {
+    "activeSampleCount": 147,
+    "idleSampleCount": 59,
+    "includesCpuRamStorageOrPsuLosses": false,
+    "scope": "gpu-board-or-package-only",
+    "source": "nvidia-smi"
+  },
+  "workload": {
+    "activeMeasurementSeconds": 301.617,
+    "idleBaselineSeconds": 120.0,
+    "samplingIntervalSeconds": 2.0,
+    "taskSampleCounts": {
+      "content.summarize": 48,
+      "content.write": 49,
+      "general.chat": 49
+    }
+  }
+}

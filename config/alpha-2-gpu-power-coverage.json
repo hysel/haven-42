@@ -48,11 +48,12 @@
       "vendor": "NVIDIA",
       "model": "Tesla V100",
       "memoryGiB": 32,
-      "status": "partial",
+      "status": "measured",
       "measurementEvidence": [
-        "examples/nvidia-v100-nemotron-validation.md"
-      ],
-      "remaining": "Add a single-card reference; current evidence measures the two-card configuration."
+        "examples/nvidia-v100-nemotron-validation.md",
+        "examples/fixtures/nvidia-tesla-v100-qwen35-4b-single-energy.json",
+        "examples/nvidia-tesla-v100-single-power-validation.md"
+      ]
     },
     {
       "id": "amd-radeon-rx-580-8g",

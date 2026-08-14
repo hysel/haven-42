@@ -15,6 +15,9 @@ This project follows a simple changelog format:
   machine-readable coverage ledger that keeps every physical Alpha 2 graphics
   card visible until it has an individual reference measurement.
 
+- Added a sanitized single-card Tesla V100 power measurement while preserving
+  the existing two-card records as separate exact-profile evidence.
+
 - Reorganized the README and wiki around one maintained source per topic. The
   wiki now keeps a short user guide, a shared evidence-status scale, and an
   Engineering and Validation Index; `Eng-` pages point to canonical repository
