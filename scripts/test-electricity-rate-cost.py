@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 
@@ -130,6 +131,23 @@ def main() -> int:
             "invalid-official-rate-source-url",
         )
 
+        private_marker = "PRIVATE-ELECTRICITY-VALUE"
+        evidence_path = Path(directory) / "private-evidence.json"
+        evidence_path.write_text(
+            json.dumps({"unexpectedPrivateValue": private_marker}), encoding="utf-8"
+        )
+        rejected = subprocess.run(
+            [
+                sys.executable, str(SCRIPT), str(evidence_path),
+                "--rate", "0.2", "--hours-per-day", "1",
+            ],
+            check=False, capture_output=True, text=True,
+        )
+        diagnostic = rejected.stdout + rejected.stderr
+        assert rejected.returncode != 0
+        assert private_marker not in diagnostic
+        assert "cost input could not be validated" in diagnostic
+
     contract = json.loads(CONTRACT.read_text(encoding="utf-8"))
     assert contract["privacy"]["automaticIpGeolocationAllowed"] is False
     assert contract["calculation"]["currencyConversionAllowed"] is False
@@ -152,6 +170,7 @@ def main() -> int:
     source = SCRIPT.read_text(encoding="utf-8")
     assert "geolocation" not in source.casefold()
     assert "currency conversion" not in source.casefold()
+    assert "parser.error(str(error))" not in source
     print("country-neutral electricity-cost checks passed")
     return 0
 

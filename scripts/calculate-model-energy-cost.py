@@ -233,8 +233,12 @@ def main() -> int:
             rate_profile=rate_profile,
             currency_decimal_places=args.currency_decimal_places,
         )
-    except (CostError, KeyError) as error:
-        parser.error(str(error))
+    except (CostError, KeyError):
+        # Evidence and rate profiles are private local inputs. Do not echo
+        # exception text because parsers can include input values or paths.
+        parser.error(
+            "The cost input could not be validated. Check the evidence and rate-profile files."
+        )
     if args.json:
         print(json.dumps(result, indent=2, sort_keys=True))
     else:
