@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-gpu-power-coverage",
+  "description": "Public, sanitized coverage state for reference power measurements across the physical Alpha 2 GPU inventory.",
+  "policy": {
+    "everyPhysicalCardModelRequiresReference": true,
+    "singleAndMultiGpuConfigurationsRemainDistinct": true,
+    "missingMeasurementMeansUnknownNotZero": true,
+    "automaticModelPromotionAllowed": false
+  },
+  "allowedStatuses": [
+    "measured",
+    "partial",
+    "pending",
+    "unsupported",
+    "failed-needs-retest"
+  ],
+  "hardware": [
+    {
+      "id": "nvidia-geforce-gtx-1650-super-4g",
+      "vendor": "NVIDIA",
+      "model": "GeForce GTX 1650 Super",
+      "memoryGiB": 4,
+      "status": "pending",
+      "measurementEvidence": []
+    },
+    {
+      "id": "nvidia-geforce-rtx-3060-12g",
+      "vendor": "NVIDIA",
+      "model": "GeForce RTX 3060",
+      "memoryGiB": 12,
+      "status": "pending",
+      "measurementEvidence": []
+    },
+    {
+      "id": "nvidia-quadro-rtx-5000-16g",
+      "vendor": "NVIDIA",
+      "model": "Quadro RTX 5000",
+      "memoryGiB": 16,
+      "status": "measured",
+      "measurementEvidence": [
+        "examples/fixtures/nvidia-quadro-rtx5000-qwen35-4b-energy.json",
+        "examples/nvidia-quadro-rtx5000-power-validation.md"
+      ]
+    },
+    {
+      "id": "nvidia-tesla-v100-32g",
+      "vendor": "NVIDIA",
+      "model": "Tesla V100",
+      "memoryGiB": 32,
+      "status": "partial",
+      "measurementEvidence": [
+        "examples/nvidia-v100-nemotron-validation.md"
+      ],
+      "remaining": "Add a single-card reference; current evidence measures the two-card configuration."
+    },
+    {
+      "id": "amd-radeon-rx-580-8g",
+      "vendor": "AMD",
+      "model": "Radeon RX 580",
+      "memoryGiB": 8,
+      "status": "pending",
+      "measurementEvidence": []
+    },
+    {
+      "id": "amd-radeon-rx-6800-16g",
+      "vendor": "AMD",
+      "model": "Radeon RX 6800 non-XT",
+      "memoryGiB": 16,
+      "status": "pending",
+      "measurementEvidence": []
+    },
+    {
+      "id": "amd-radeon-rx-7800-xt-16g",
+      "vendor": "AMD",
+      "model": "Radeon RX 7800 XT",
+      "memoryGiB": 16,
+      "status": "measured",
+      "measurementEvidence": [
+        "examples/windows-amd-rx7800xt-power-validation.md"
+      ]
+    },
+    {
+      "id": "intel-arc-b580-12g",
+      "vendor": "Intel",
+      "model": "Arc B580",
+      "memoryGiB": 12,
+      "status": "measured",
+      "measurementEvidence": [
+        "examples/intel-b580-granite41-8b-validation.md"
+      ]
+    }
+  ]
+}

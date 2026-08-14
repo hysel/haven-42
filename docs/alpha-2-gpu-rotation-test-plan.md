@@ -80,6 +80,9 @@ keep CPU fallback as a separately labelled comparison only.
    application restart, clean shutdown, and post-run process/port cleanup.
 10. Measure an idle baseline and the same active workload. Label vendor GPU
     telemetry separately from whole-computer wall measurements.
+    Every physical card model in the inventory requires at least one reference
+    measurement. Measure single-card and multi-card configurations separately;
+    combined telemetry cannot silently substitute for an individual-card row.
 11. Keep raw evidence outside tracked source until it is sanitized. Public
     records must not contain machine identities, addresses, accounts, keys,
     prompts, responses, or local paths.
@@ -359,6 +362,10 @@ machine-readable sanitized evidence behind it. Each row must state:
   partial, failed, or not tested; and
 - the next decision: no action, targeted retest, recommendation proposal, or
   explicit unsupported/refusal behavior.
+
+The final table must also retain a row for every inventory card that has not
+yet produced a valid measurement. Label that row `Pending`, `Unsupported`, or
+`Failed or needs retest` with a specific reason instead of omitting it.
 
 Update the public hardware and model-certification wiki sources only from
 reviewed, sanitized evidence. Do not promote a model or backend automatically.

@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 
@@ -29,6 +30,8 @@ def main() -> int:
     feedback_form = read(".github/ISSUE_TEMPLATE/alpha-feedback.yml")
     model_test_form = read(".github/ISSUE_TEMPLATE/model-test-request.yml")
     download_guide = read("docs/windows-alpha-download-and-feedback.md")
+    power_evidence = read("docs/wiki-model-power-evidence.md")
+    power_coverage = json.loads(read("config/alpha-2-gpu-power-coverage.json"))
 
     required_ui = (
         "Set up this computer",
@@ -82,6 +85,36 @@ def main() -> int:
     assert "Keep kWh and price in the status sidebar" in html
     assert "Its values are not saved and disappear when the app closes" in html
     assert "Your electricity-bill information stays private" in html
+    for card in (
+        "GeForce GTX 1650 Super 4 GiB",
+        "GeForce RTX 3060 12 GiB",
+        "Quadro RTX 5000 16 GiB",
+        "Tesla V100 32 GiB",
+        "Radeon RX 580 8 GiB",
+        "Radeon RX 6800 non-XT 16 GiB",
+        "Radeon RX 7800 XT 16 GiB",
+        "Intel Arc B580 12 GiB",
+    ):
+        assert card in power_evidence, card
+    assert power_coverage["kind"] == "haven42-gpu-power-coverage"
+    assert power_coverage["policy"]["everyPhysicalCardModelRequiresReference"] is True
+    assert power_coverage["policy"]["singleAndMultiGpuConfigurationsRemainDistinct"] is True
+    assert power_coverage["policy"]["missingMeasurementMeansUnknownNotZero"] is True
+    assert len(power_coverage["hardware"]) == 8
+    allowed_power_statuses = set(power_coverage["allowedStatuses"])
+    for hardware in power_coverage["hardware"]:
+        assert hardware["status"] in allowed_power_statuses, hardware["id"]
+        display_name = f'{hardware["model"]} {hardware["memoryGiB"]} GiB'
+        assert display_name in power_evidence, display_name
+        for evidence_path in hardware["measurementEvidence"]:
+            assert (ROOT / evidence_path).is_file(), evidence_path
+        if hardware["status"] == "measured":
+            assert hardware["measurementEvidence"], hardware["id"]
+    quadro = next(item for item in power_coverage["hardware"] if item["id"] == "nvidia-quadro-rtx-5000-16g")
+    assert quadro["status"] == "measured"
+    assert "151.060 W active average" in power_evidence
+    assert "unmeasured card cannot be mistaken for a zero-power result" in power_evidence
+    assert "single-card reference" in power_evidence
     for phrase in (
         '"Processor", processor',
         '"Available space", storage',
