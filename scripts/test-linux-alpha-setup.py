@@ -103,7 +103,9 @@ def main() -> None:
     checks += 3
 
     with tempfile.TemporaryDirectory() as directory:
-        base = Path(directory)
+        # macOS exposes /var through /private/var. Resolve the temporary root
+        # so the portable-root guard evaluates the actual directory tree.
+        base = Path(directory).resolve()
         managed = base / "Haven42-Data"
         root = MODULE._owned_root(managed, create=True)
         assert root == managed.resolve() and (root / MODULE.OWNER_MARKER_NAME).is_file()

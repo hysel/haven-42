@@ -536,6 +536,9 @@ try {
   const showsAmdTools = guided.factsText.includes("AMD graphics tools");
   const showsNvidiaTools = guided.factsText.includes("NVIDIA tools");
   const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
+  const storageBoundaryText = process.platform === "win32"
+    ? "Does not use Program Files or AppData"
+    : "Does not use system application folders";
   if (
     guided.current !== "middle"
     || guided.facts < 4
@@ -561,7 +564,7 @@ try {
       || !guided.planText.includes("Install location")
       || !guided.planText.includes("stored beside the app")
       || !guided.planText.includes("Haven42-Data")
-      || !guided.planText.includes("Does not use Program Files or AppData")
+      || !guided.planText.includes(storageBoundaryText)
       || !(
         guided.planText.includes("Ollama local AI engine")
         || guided.planText.includes("Ollama local runtime")
