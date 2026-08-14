@@ -28,6 +28,28 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
 
 
+if _stdlib_zstd is None and os.name != "posix":
+    class _TestArchiveCodec:
+        """Exercise archive policy where no safe native zstd exists.
+
+        Production extraction still fails closed without its reviewed zstd
+        backend. This test-only passthrough keeps the platform-neutral archive
+        traversal and link checks runnable on Windows CI.
+        """
+
+        @staticmethod
+        def compress(value: bytes) -> bytes:
+            return value
+
+        @staticmethod
+        def open(path: Path, mode: str):
+            assert mode == "rb"
+            return path.open(mode)
+
+    _stdlib_zstd = _TestArchiveCodec()
+    MODULE._stdlib_zstd = _stdlib_zstd
+
+
 def make_archive(path: Path, members: list[tuple[str, str, bytes | str]]) -> dict:
     raw = io.BytesIO()
     expanded = files = directories = links = 0

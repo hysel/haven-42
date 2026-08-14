@@ -14,6 +14,7 @@ config/text-capability-model-recommendations.json text eol=lf
 config/evidence-catalog.tsv text eol=lf
 config/agent-surface-capabilities.json text eol=lf
 config/agent-surface-solutions.json text eol=lf
+config/*.json text eol=lf
 config/install-component-registry.json text eol=lf
 config/workflows.json text eol=lf
 config/windows-alpha-*.json text eol=lf

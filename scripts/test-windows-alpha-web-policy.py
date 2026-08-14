@@ -99,6 +99,10 @@ def main() -> int:
     state.readiness_snapshot = {"snapshotId": "snapshot-1"}
     state.readiness_created = WEB.time.monotonic()
     WEB.build_setup_plan = lambda _snapshot, _intent: {"kind": "setup-plan"}
+    # This unit test replaces every platform-specific operation with inert
+    # stubs. Exercise the server policy consistently on all CI hosts without
+    # weakening the real active-platform adapter.
+    WEB.require_platform_operation = lambda _operation_id: None
     WEB.evaluate_hardware = lambda _snapshot: {"decision": "candidate"}
     WEB.driver_guidance = lambda _snapshot: []
     WEB.load_model_catalog = lambda: {"models": [{
@@ -113,6 +117,9 @@ def main() -> int:
         "planId": "plan-1", "components": ["ollama-windows-core"],
     }
     WEB.automatic_setup_admitted = lambda _selected, _snapshot: True
+    WEB.resolve_alpha2_runtime = lambda *_args, **_kwargs: {"decision": "install"}
+    WEB.validate_managed_setup_binding = lambda *_args, **_kwargs: None
+    WEB.load_alpha_component_registry = lambda: {}
     WEB.select_model = lambda _snapshot: {
         "selected": {"id": "model-1"}, "automaticExecutionAllowed": False,
     }
