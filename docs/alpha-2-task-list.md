@@ -690,7 +690,10 @@ promotion:
   AMD, and Intel measurements tied to their exact models and test methods
   instead of presenting unlike workloads as a ranking.
 - [ ] After the expanded soak finishes, run the same two-minute idle and
-  five-minute active energy workload on each representative physical GPU.
+  five-minute active energy workload on every physical graphics-card model in
+  the certification inventory. Measure distinct single-card and multi-card
+  configurations separately; do not let one paired result stand in for an
+  individual-card reference.
   Publish average/peak watts, watt-hours, tokens per watt-hour, temperature,
   utilization, and a user-supplied-rate estimate only for exact tested cells.
 - [ ] Publish evidence using the ordered labels Discovered, Task qualified,

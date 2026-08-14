@@ -1,0 +1,82 @@
+{
+  "billEstimate": null,
+  "environment": {
+    "acceleratorModel": "NVIDIA Quadro RTX 5000 16 GiB",
+    "acceleratorVendor": "nvidia",
+    "driverVersion": "595.84",
+    "operatingSystem": "Ubuntu 26.04 LTS"
+  },
+  "evidence": {
+    "automaticPromotionAllowed": false,
+    "containsPrivateMachineIdentity": false,
+    "containsProviderEndpoint": false,
+    "containsRawPromptsOrResponses": false
+  },
+  "identity": {
+    "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+    "model": "qwen3.5:4b",
+    "provider": "ollama",
+    "runtimeVersion": "0.32.5"
+  },
+  "kind": "haven42-model-energy-measurement",
+  "measuredAtUtc": "2026-08-14T13:38:18Z",
+  "metrics": {
+    "averageGpuUtilizationPercent": 53.75,
+    "byTask": {
+      "content.summarize": {
+        "averageWatts": 149.308,
+        "outputTokens": 5504,
+        "outputTokensPerWh": 1326.475,
+        "peakWatts": 192.24,
+        "requestSeconds": 100.046,
+        "sampleCount": 49
+      },
+      "content.write": {
+        "averageWatts": 149.919,
+        "outputTokens": 5504,
+        "outputTokensPerWh": 1324.095,
+        "peakWatts": 190.52,
+        "requestSeconds": 99.817,
+        "sampleCount": 48
+      },
+      "general.chat": {
+        "averageWatts": 154.013,
+        "outputTokens": 5504,
+        "outputTokensPerWh": 1283.676,
+        "peakWatts": 188.58,
+        "requestSeconds": 100.223,
+        "sampleCount": 50
+      }
+    },
+    "idleAdjustedAverageWatts": 131.018,
+    "idleAdjustedGpuEnergyWh": 10.924745,
+    "idleAverageWatts": 20.041,
+    "loadAverageWatts": 151.06,
+    "loadPeakWatts": 192.24,
+    "measuredGpuEnergyWh": 12.595845,
+    "outputTokens": 16512,
+    "outputTokensPerSecond": 55.007,
+    "outputTokensPerWh": 1310.909,
+    "peakMemoryUsedMiB": 3963.0,
+    "peakTemperatureCelsius": 71.0
+  },
+  "outcome": "passed",
+  "schemaVersion": 1,
+  "telemetry": {
+    "activeSampleCount": 148,
+    "idleSampleCount": 59,
+    "includesCpuRamStorageOrPsuLosses": false,
+    "scope": "gpu-board-or-package-only",
+    "source": "nvidia-smi"
+  },
+  "workload": {
+    "activeMeasurementSeconds": 300.18,
+    "idleBaselineSeconds": 120.0,
+    "samplingIntervalSeconds": 2.0,
+    "taskSampleCounts": {
+      "content.summarize": 43,
+      "content.write": 43,
+      "general.chat": 43
+    }
+  }
+}

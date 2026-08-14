@@ -11,6 +11,10 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a sanitized, exact-profile Quadro RTX 5000 power measurement and a
+  machine-readable coverage ledger that keeps every physical Alpha 2 graphics
+  card visible until it has an individual reference measurement.
+
 - Reorganized the README and wiki around one maintained source per topic. The
   wiki now keeps a short user guide, a shared evidence-status scale, and an
   Engineering and Validation Index; `Eng-` pages point to canonical repository
