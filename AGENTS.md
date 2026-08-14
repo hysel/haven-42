@@ -8,3 +8,21 @@
 - Preparing a soak does not authorize running it. Do not download a new model, start or reconfigure hardware, or execute a newly prepared soak until the owner explicitly prompts to start that hardware-dependent test.
 - Version discovery and test evidence must not change an automatic model default, selection ladder, managed runtime, or release policy without explicit owner approval.
 - Never write private lab addresses, host identities, credentials, keys, or other internal infrastructure details to the repository.
+
+## UI accessibility and compatibility lifecycle
+
+- Treat accessibility and compatibility as design, implementation, review, packaging, update, rollback, and release requirements. They are not a one-time audit and may not be deferred merely because an individual UI change is small.
+- For every new or changed user-facing element, reassess semantic structure, accessible name and description, keyboard operation, focus order and return, status announcements, non-color cues, text scaling and zoom, contrast, target size, responsive layout, reduced motion, forced colors, and background interaction while a modal surface is active.
+- Keep section help tours aligned with the interface. When a tour gains or materially changes guidance, increment only that section's revision so returning users see the new guidance once. Preserve manual relaunch and never persist a partial step or user content.
+- Run the novice, local-web, and real-browser accessibility checks for relevant UI changes. Run source-versus-package parity and the planned operating-system/browser/assistive-technology matrix before promotion. Automated checks do not replace the documented manual screen-reader, keyboard, zoom, and packaged-application review.
+- Keep the Accessibility Statement's review date, implemented features, assessment method, contact path, and known limitations factual. Never turn a WCAG target or self-assessment into a certification claim without matching evidence.
+- Treat an accessibility or supported-platform regression as a release blocker. Record the exact affected surface and configuration; do not generalize a passing configuration to other browsers, operating systems, hardware, or assistive technologies.
+
+## README and wiki documentation lifecycle
+
+- Maintain one canonical source for each topic. The wiki owns the full Quick Start, Home capability summary, and Glossary; `ROADMAP.md` owns roadmap detail; repository `docs/` files own contributor and engineering material. README stays concise and points to those sources instead of restating them.
+- Treat README, mapped repository documentation, and the separate wiki as one coordinated user journey. Do not reorganize or rename wiki pages without auditing README, repository docs, release notes, navigation, and incoming links at the same time.
+- Keep the public wiki navigation small and user-first. Detailed validation material uses generated `Eng-` pointer pages, the internal-engineering banner, and the single Engineering and Validation Index rather than appearing in the primary sidebar.
+- Preserve the linear Quick Start to Using Haven 42 to Troubleshooting flow, canonical Glossary terminology, and the shared evidence-status taxonomy. Keep roadmap milestone labels explicitly distinct from evidence labels.
+- Use direct, factual, human-friendly language. Remove generic filler and repeated claims, preserve technical meaning and caveats, and flag possibly outdated or inaccurate claims for owner review instead of silently rewriting the claim.
+- For every mapped documentation change, run the wiki synchronization check, review both repositories for drift and private data, commit and push the wiki first when its generated content changes, and then validate and publish the main-repository change. Do not declare documentation complete while the two repositories disagree.

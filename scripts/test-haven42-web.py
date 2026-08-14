@@ -643,11 +643,13 @@ def main() -> int:
         assert accessibility_page.count("<h1") == 1
         assert "(WCAG) 2.1 Level AA" in accessibility_page
         assert "self-assessed target" in accessibility_page
-        assert "Last reviewed:</strong> August 7, 2026" in accessibility_page
+        assert "Last reviewed:</strong> August 14, 2026" in accessibility_page
+        assert "open once for each new section-tour revision" in accessibility_page
+        assert "haven42localai@gmail.com" in accessibility_page
         assert "has not yet been manually tested across NVDA, JAWS, VoiceOver, TalkBack" in accessibility_page
         assert "does not currently promise a response time" in accessibility_page
         assert '<a class="button secondary" href="/accessibility">Open the accessibility statement</a>' in (ROOT / "web/static/index.html").read_text(encoding="utf-8")
-        checks += 11
+        checks += 13
 
         status, diagnostics, _ = request_json(
             origin + "/api/alpha/diagnostics", "POST", {}, token, origin,
@@ -2674,7 +2676,9 @@ def main() -> int:
         tour_preferences = runtime_policy["browserPreferences"]
         assert tour_preferences["storageKey"] == "haven42.section-tours.v1"
         assert tour_preferences["allowedFields"] == ["chat", "models", "system", "technical", "about"]
-        assert tour_preferences["allowedValueType"] == "boolean"
+        assert tour_preferences["allowedValueType"] == "positive-integer-tour-revision"
+        assert tour_preferences["staleBooleanValuesTreatedAsUnseen"]
+        assert tour_preferences["newRevisionRetriggersOnlyChangedSection"]
         assert not tour_preferences["tourProgressPersistenceAllowed"]
         assert not tour_preferences["conversationContentAllowed"]
         assert not tour_preferences["credentialsAllowed"]

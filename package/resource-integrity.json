@@ -3,23 +3,23 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "041b2321a6aaacfbb0e8710a742e2241a6ab8e0860bde1a1749f09c0a96f83cd",
-      "sizeBytes": 59499
+      "sha256": "750255e9f443c4b934c91631e6679223af8838f4fccbe8bcda2a560b163944a2",
+      "sizeBytes": 59566
     },
     {
       "path": "web/static/accessibility.html",
-      "sha256": "b4c52425f66e70f413bc55f0b7bfc846f205f8434bbeebe9619639b36b58112e",
-      "sizeBytes": 6061
+      "sha256": "922999f5438f1c1f8a4bf2b72665090a2219fbfd221ceba63d56281c9c56daba",
+      "sizeBytes": 6293
     },
     {
       "path": "web/static/app.js",
-      "sha256": "ae7b0a76ff31f836b390eda4825501298e7be4e86831ad4e3b2e068ba6a1f5a5",
-      "sizeBytes": 207651
+      "sha256": "bfb3b44bc92199321acd3bddc76da57cb76d1beb584effbb8b7f70d008c6a2d1",
+      "sizeBytes": 207850
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "394b35499a1be339e242430f7a284fd3d57406a2718d0b9eff7c240bef728140",
-      "sizeBytes": 63822
+      "sha256": "8ea696174420c5c63733293583788b76375e8c12713b2126cbcefae2d7194c39",
+      "sizeBytes": 63966
     },
     {
       "path": "config/text-capability-model-recommendations.json",

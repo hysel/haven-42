@@ -17,9 +17,16 @@ This project follows a simple changelog format:
   documents instead of duplicating them.
 
 - Added short, independent first-visit help tours for Chat, Models, System,
-  Technical details, and About. Each section keeps its own completion flag,
+  Technical details, and About. Each section keeps its own tour revision so
+  new guidance opens once for returning users,
   includes keyboard-accessible Back, Next, Skip, close, and Escape controls,
   and can be reopened from its Help button.
+
+- Made accessibility, supported-platform compatibility, and coordinated
+  README/wiki maintenance explicit design-through-release requirements. UI
+  regressions block promotion, automated checks do not replace the documented
+  manual assistive-technology matrix, and duplicated documentation must retain
+  one canonical source per topic.
 
 - Redesigned the conversation-first interface and setup presentation, added a
   self-assessed accessibility statement and WCAG-focused keyboard, focus,

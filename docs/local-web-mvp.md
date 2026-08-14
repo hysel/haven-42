@@ -266,7 +266,8 @@ section when the tour closes. Skip, close, and completion all mark that section
 as seen instead of saving a resume position.
 
 The only persistent tour state is the fixed-key
-`haven42.section-tours.v1` browser preference with one boolean for each known
+`haven42.section-tours.v1` browser preference with one positive integer tour
+revision for each known
 section. It contains no conversation, attachment, model, provider, system, or
 identity data. Invalid or unavailable browser storage is ignored and cannot
 block the application.

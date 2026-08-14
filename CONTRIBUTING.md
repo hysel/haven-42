@@ -134,13 +134,17 @@ required hosted jobs report success. See `docs/hosted-ci-verification.md`.
 
 - [ ] The change follows `STYLEGUIDE.md`.
 - [ ] New or changed user-facing text passes the novice-first product standard.
+- [ ] New or changed UI has been reviewed across the accessibility and compatibility lifecycle in `AGENTS.md`, including keyboard, focus, semantics, announcements, contrast, zoom, responsive layout, reduced motion, forced colors, and supported package parity as applicable.
+- [ ] A materially changed section tour increments only that section's revision, and the Accessibility Statement remains accurate.
 - [ ] The relevant docs are updated.
+- [ ] README and wiki changes preserve their canonical-source boundaries, shared terminology and status labels, user-first navigation, and required synchronization order from `AGENTS.md`.
 - [ ] New examples are sanitized.
 - [ ] No secrets, private endpoints, or machine-specific paths are committed.
 - [ ] `.continue/config.yaml` remains portable.
 - [ ] New agent-specific assets have complete pass-to-ship evidence, or the change contains documentation only for a failed evaluation.
 - [ ] `CHANGELOG.md` records user-visible changes.
 - [ ] Validation has been run or skipped with a clear reason.
+- [ ] Accessibility limitations and untested browser, operating-system, package, or assistive-technology combinations are stated without implying certification.
 - [ ] The complete staged diff has a zero-finding security review when required.
 - [ ] All roadmap milestones were reviewed for status, evidence, and boundary drift.
 

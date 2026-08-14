@@ -3,9 +3,14 @@
 Haven 42 separates product-owned engine files from user-owned configuration, models, artifacts, and logs. Uninstall may remove the selected engine version and session temporary files; it does not remove user configuration, models, provider data, or generated artifacts by default.
 
 Raw prompts, raw responses, endpoints, and secrets are not persisted by default. Credentials, if a future provider needs them, belong in the operating system credential store rather than repository or configuration files. Alpha logs are local, bounded, sanitized, and stored in the fixed sibling `Haven42-Logs` directory. Removing managed components deletes only `Haven42-Data` and preserves that separate log directory; the Troubleshooting controls ask separately before removing logs.
-The browser stores one fixed-key preference containing five booleans for the
+The browser stores one fixed-key preference containing five positive integer
+tour revisions for the
 Chat, Models, System, Technical details, and About help tours. Completing,
-skipping, or closing a tour sets only that section's boolean. It does not save
+skipping, or closing a tour sets only that section's current revision. A new
+or materially changed section tour increments only its own revision, so that
+guidance opens once even for a returning user. Legacy boolean values are
+treated as unseen and replaced only after that section is completed or
+dismissed. It does not save
 the current step or any conversation, attachment, model, provider, computer,
 credential, or identity information.
 Setup diagnostics use fixed internal codes for registered backend, component,

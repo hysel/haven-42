@@ -970,6 +970,7 @@ body::before { opacity: 0.045; }
 .chat-panel::after { display: none; }
 .chat-panel > .panel-heading {
   width: min(100%, 900px);
+  grid-template-columns: minmax(0, 1fr) auto;
   margin-inline: auto;
   padding: 0 18px 14px;
   border-bottom: 1px solid rgba(164, 185, 181, 0.1);
@@ -983,6 +984,7 @@ body::before { opacity: 0.045; }
 .chat-panel > .panel-heading .eyebrow { margin: 0; }
 .chat-panel > .panel-heading h2 { font-size: 17px; font-weight: 650; }
 .chat-heading .text-actions {
+  grid-column: 1 / -1;
   grid-template-columns: minmax(170px, 0.7fr) minmax(230px, 1fr) auto auto;
   gap: 8px;
   padding: 10px;
@@ -1692,7 +1694,8 @@ textarea[aria-invalid="true"] {
 .section-tour-skip:focus-visible { color: #ffffff; }
 
 @media (max-width: 560px) {
-  .panel-heading-actions { align-items: flex-end; flex-direction: column; }
+  .chat-panel > .panel-heading { grid-template-columns: minmax(0, 1fr); }
+  .panel-heading-actions { align-items: center; justify-content: flex-end; }
   .section-tour-dialog { padding: 16px; }
   .section-tour-actions { align-items: stretch; flex-direction: column-reverse; }
   .section-tour-navigation { width: 100%; }

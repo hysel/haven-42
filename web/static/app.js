@@ -79,6 +79,7 @@ const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
+    revision: 1,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
@@ -92,6 +93,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   models: Object.freeze({
     label: "Models",
+    revision: 1,
     panelId: "models-panel",
     returnId: "models-title",
     steps: Object.freeze([
@@ -104,6 +106,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   system: Object.freeze({
     label: "System",
+    revision: 1,
     panelId: "system-panel",
     returnId: "system-workspace-title",
     steps: Object.freeze([
@@ -117,6 +120,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   technical: Object.freeze({
     label: "Technical details",
+    revision: 1,
     panelId: "assurance-panel",
     returnId: "assurance-title",
     steps: Object.freeze([
@@ -128,6 +132,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   about: Object.freeze({
     label: "About",
+    revision: 1,
     panelId: "about-panel",
     returnId: "about-title",
     steps: Object.freeze([
@@ -256,7 +261,7 @@ function motionBehavior() {
 }
 
 function emptySectionTourState() {
-  return Object.fromEntries(Object.keys(SECTION_TOURS).map((section) => [section, false]));
+  return Object.fromEntries(Object.keys(SECTION_TOURS).map((section) => [section, 0]));
 }
 
 function loadSectionTourState() {
@@ -266,7 +271,10 @@ function loadSectionTourState() {
     if (!saved || saved.length > 2048) return result;
     const parsed = JSON.parse(saved);
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return result;
-    for (const section of Object.keys(result)) result[section] = parsed[section] === true;
+    for (const section of Object.keys(result)) {
+      const revision = parsed[section];
+      result[section] = Number.isSafeInteger(revision) && revision > 0 ? revision : 0;
+    }
   } catch (_error) {
     // Browser storage can be unavailable. Tours remain usable without persistence.
   }
@@ -279,7 +287,7 @@ const activeSectionTour = { section: null, stepIndex: 0, returnFocus: null };
 function saveSectionTourState() {
   try {
     const safeState = Object.fromEntries(
-      Object.keys(SECTION_TOURS).map((section) => [section, sectionTourState[section] === true]),
+      Object.keys(SECTION_TOURS).map((section) => [section, sectionTourState[section]]),
     );
     window.localStorage.setItem(SECTION_TOUR_STORAGE_KEY, JSON.stringify(safeState));
   } catch (_error) {
@@ -372,7 +380,7 @@ function startSectionTour(section, options = {}) {
   if (!Object.hasOwn(SECTION_TOURS, section)) return false;
   const configuration = SECTION_TOURS[section];
   if (activeSectionTour.section) return false;
-  if (!options.manual && sectionTourState[section] === true) return false;
+  if (!options.manual && sectionTourState[section] === configuration.revision) return false;
   const panel = byId(configuration.panelId);
   if (!panel || panel.classList.contains("hidden") || !byId("setup-wizard").classList.contains("hidden")) return false;
   activeSectionTour.section = section;
@@ -391,7 +399,7 @@ function startSectionTour(section, options = {}) {
 function finishSectionTour() {
   const configuration = activeTourConfiguration();
   if (!configuration) return;
-  sectionTourState[activeSectionTour.section] = true;
+  sectionTourState[activeSectionTour.section] = configuration.revision;
   saveSectionTourState();
   const returnTarget = activeSectionTour.returnFocus;
   activeSectionTour.section = null;
