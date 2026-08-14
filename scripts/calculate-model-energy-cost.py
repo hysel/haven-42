@@ -240,23 +240,27 @@ def main() -> int:
             "The cost input could not be validated. Check the evidence and rate-profile files."
         )
     if args.json:
-        print(json.dumps(result, indent=2, sort_keys=True))
+        output = json.dumps(result, indent=2, sort_keys=True)
     else:
-        print(f"Model: {result['model']}")
-        print(f"Graphics card: {result['accelerator']}")
-        print(f"Measured graphics-card average: {result['averageMeasuredGpuWatts']} W")
         places = result["currencyDecimalPlaces"]
-        print(
+        lines = [
+            f"Model: {result['model']}",
+            f"Graphics card: {result['accelerator']}",
+            f"Measured graphics-card average: {result['averageMeasuredGpuWatts']} W",
             f"Estimated graphics-card cost: {result['estimatedGpuOnlyCost']:.{places}f} "
-            f"{result['currency']} for {result['billingDays']} days"
-        )
+            f"{result['currency']} for {result['billingDays']} days",
+        ]
         if result["combinedEstimateUsesOperatorProvidedSystemOverhead"]:
-            print(
+            lines.append(
                 f"Estimated combined cost: {result['estimatedCombinedCost']:.{places}f} "
                 f"{result['currency']} (includes the system overhead you entered)"
             )
         else:
-            print("This is a graphics-card-only estimate, not the whole computer bill.")
+            lines.append("This is a graphics-card-only estimate, not the whole computer bill.")
+        output = "\n".join(lines)
+    # This is the requested command result, not application logging. Keeping
+    # it as one stdout document makes that boundary explicit to callers.
+    sys.stdout.write(output + "\n")
     return 0
 
 
