@@ -90,7 +90,7 @@ def main() -> int:
         "GeForce RTX 3060 12 GiB",
         "Quadro RTX 5000 16 GiB",
         "Tesla V100 32 GiB",
-        "Radeon RX 580 8 GiB",
+        "Radeon RX 5700 XT 8 GiB",
         "Radeon RX 6800 non-XT 16 GiB",
         "Radeon RX 7800 XT 16 GiB",
         "Intel Arc B580 12 GiB",

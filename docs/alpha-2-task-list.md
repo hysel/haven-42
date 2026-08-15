@@ -710,7 +710,7 @@ promotion:
   CPU-only systems, Linux AMD and Intel, and Windows release-candidate routes
   remain open. Keep Apple silicon owner-deferred until its hardware is
   available. Use `docs/alpha-2-gpu-rotation-test-plan.md` for the planned
-  phase order, slot maps, RX 7800 XT local lane, RX 580 legacy lane, safety
+  phase order, slot maps, RX 7800 XT local lane, RX 5700 XT dual-boot lane, safety
   gates, and restoration sequence.
 - [ ] Obtain owner approval before enabling any new automatic default in the
   product.

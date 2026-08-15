@@ -57,7 +57,7 @@ of failure.
 | --- | --- | --- |
 | CPU-only | Real low-, medium-, and high-memory computers | Find a usable fallback and refusal floor. |
 | 4 GiB graphics | The purchased GTX 1650 Super after it arrives | Validate only the best small candidates with safe overhead. No result exists yet. |
-| 8 GiB graphics | The available Radeon RX 580 legacy AMD profile | Validate small candidates and safe fallback behavior. This does not represent modern ROCm support. |
+| 8 GiB graphics | The installed Radeon RX 5700 XT RDNA 1 profile | Validate small candidates and safe fallback behavior on separate Windows and Linux cells. Linux ROCm, Windows, and Vulkan results remain distinct. |
 | 12 GiB graphics | The purchased RTX 3060 12 GB and current Intel Arc B580 | Validate the 8B-to-14B range on NVIDIA and Intel without relying on a larger card. The RTX 3060 has not arrived yet. |
 | 16 GiB graphics | Quadro RTX 5000, Radeon RX 6800 non-XT, and Radeon RX 7800 XT | Compare NVIDIA Turing, AMD RDNA 2, and AMD RDNA 3. The RX 6800 has not arrived yet. |
 | 24 GiB graphics | A physical 24 GiB consumer accelerator | Validate 24B-to-35B candidates and runtime overhead. |

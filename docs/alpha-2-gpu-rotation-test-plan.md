@@ -1,6 +1,6 @@
 # Alpha 2 GPU rotation and soak-test plan
 
-_Prepared: August 12, 2026._
+_Prepared: August 12, 2026. Updated: August 15, 2026._
 
 This plan covers the physical graphics cards currently available or purchased
 for Haven 42 testing. It separates hardware installation, runtime validation,
@@ -44,15 +44,15 @@ ladder change remains a separate owner-approved product decision.
 | NVIDIA mainstream | GeForce RTX 3060 | 12 GiB | Proxmox rotation | Purchased; not yet tested |
 | NVIDIA workstation | Quadro RTX 5000 | 16 GiB | Proxmox baseline | Existing evidence |
 | NVIDIA datacenter | Tesla V100 | 32 GiB each | Proxmox baseline, two cards | Existing evidence |
-| AMD legacy | Radeon RX 580 | 8 GiB | Proxmox legacy rotation | Available; not yet Alpha 2 certified |
+| AMD RDNA 1 | Radeon RX 5700 XT | 8 GiB | Separate physical dual-boot computer | Installed; not yet Alpha 2 certified |
 | AMD RDNA 2 | Radeon RX 6800, non-XT | 16 GiB | Proxmox rotation | Purchased; not yet tested |
 | AMD RDNA 3 | Radeon RX 7800 XT | 16 GiB | This Windows computer | Existing bounded evidence; new soak required |
 | Intel | Arc B580 | 12 GiB | Separate physical dual-boot computer | Campaign already in progress |
 
-The RX 580 is a legacy-compatibility lane. It is not listed in AMD's current
-ROCm Radeon compatibility matrix, so this plan does not claim ROCm support for
-it. Test Vulkan when the selected runtime officially exposes that route, and
-keep CPU fallback as a separately labelled comparison only.
+The RX 5700 XT is the 8 GiB RDNA 1 lane. Ollama's current Linux GPU list names
+this exact card for its ROCm route; Windows and Vulkan remain separate test
+cells and inherit no Linux result. Every cell must still prove GPU execution
+and keep CPU fallback as a separately labelled comparison only.
 
 ## Rules shared by every phase
 
@@ -279,49 +279,45 @@ power is about 520 W, but wall power and temperature must still be watched.
 Every card has an individual result, the concurrent run has no host or PCIe
 errors, and no result depends on an unrecorded CPU fallback or power cap.
 
-## Phase 3: legacy RX 580 compatibility rotation
+## Phase 3: RX 5700 XT native Windows and Linux qualification
 
-Remove the RX 6800 from PCIE1 and install the RX 580 there. Leave the two
-NVIDIA cards physically installed but keep their VMs stopped during the RX 580
-baseline and soak. This minimizes another complete chassis rebuild while
-keeping the legacy AMD result isolated.
+Use the separate physical dual-boot computer where the RX 5700 XT is installed.
+This phase does not require a Proxmox GPU rotation. Run Windows and Linux
+sequentially against the same physical card so operating-system and backend
+results remain comparable without pretending that one route proves another.
 
-### Proxmox slot map
+### Physical map
 
 ```text
-Top / rear I/O
+Separate dual-boot computer
 
-PCIE7  GeForce GTX 1650 Super 4 GiB  [installed, VM stopped]
-PCIE6  empty for airflow
-PCIE5  empty
-PCIE4  GeForce RTX 3060 12 GiB       [installed, VM stopped]
-PCIE3  empty for airflow
-PCIE2  shared resources; do not use for this campaign
-PCIE1  Radeon RX 580 8 GiB           [active test card]
-
-Bottom / front of chassis
+Primary graphics slot  Radeon RX 5700 XT 8 GiB
+Operating systems      Windows and Linux, one at a time
+Other test GPUs         none active in this test cell
 ```
 
 ### Test boundary
 
-- Treat the RX 580 as an unsupported/legacy discovery test first.
-- Do not install or claim a ROCm route merely because another AMD card passed.
-- Prefer an officially exposed Vulkan path; prove that the RX 580, not the CPU,
-  executes the workload.
+- Pin the exact AMD driver, operating system, runtime, backend, and model
+  artifact independently for Windows and Linux.
+- Test the officially listed Linux Ollama ROCm route without generalizing it to
+  Windows, llama.cpp, Vulkan, or another RDNA generation.
+- Test Windows Vulkan and any separately admitted llama.cpp route as distinct
+  cells; prove that the RX 5700 XT, not the CPU, executes each workload.
 - Run only model sizes that leave measured headroom inside 8 GiB.
 - Test clear refusal and recovery for oversized candidates.
-- A successful Vulkan test may become exact-profile engineering evidence. It
-  does not establish modern AMD or ROCm support.
+- Record driver stability, unload/reload behavior, power telemetry availability,
+  and clean shutdown on both operating systems.
 
 ### Exit gate
 
-Record a precise pass, partial result, unsupported result, or failure. Legacy
-hardware is useful evidence even when the correct product behavior is a clear,
-beginner-friendly refusal.
+Record a precise pass, partial result, unsupported result, or failure for each
+operating-system/backend cell. No result changes automatic selection without a
+separate owner decision.
 
 ## Phase 4: restore the enterprise NVIDIA baseline
 
-After consumer and legacy testing, return every original GPU to its labelled
+After consumer testing, return every original GPU to its labelled
 slot and restore only its original resource mapping.
 
 ### Proxmox slot map
@@ -377,9 +373,8 @@ reviewed, sanitized evidence. Do not promote a model or backend automatically.
 | Baseline | None | Close current RTX 5000/V100 evidence |
 | Local RDNA 3 | None on Proxmox | RX 7800 XT native Windows soak |
 | Consumer set | Replace V100 A, V100 B, and RTX 5000 | GTX 1650 Super, RTX 3060, and RX 6800 individual plus coexistence results |
-| Legacy AMD | Replace RX 6800 with RX 580 | Exact RX 580 Vulkan/CPU/refusal evidence |
-| Restore | Replace consumer/legacy cards with labelled originals | Confirmed RTX 5000/V100 return to service |
+| Native RDNA 1 | None on Proxmox | RX 5700 XT Linux ROCm and Windows Vulkan exact-profile evidence |
+| Restore | Replace consumer cards with labelled originals | Confirmed RTX 5000/V100 return to service |
 
-This is two major three-card rebuilds plus one single-card substitution and its
-reversal. The local RX 7800 XT and separate Intel phases require no Proxmox GPU
-swap.
+This is two major three-card rebuilds. The RX 7800 XT, RX 5700 XT, and separate
+Intel phases require no Proxmox GPU swap.

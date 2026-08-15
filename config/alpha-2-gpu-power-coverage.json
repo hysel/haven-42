@@ -56,9 +56,9 @@
       ]
     },
     {
-      "id": "amd-radeon-rx-580-8g",
+      "id": "amd-radeon-rx-5700-xt-8g",
       "vendor": "AMD",
-      "model": "Radeon RX 580",
+      "model": "Radeon RX 5700 XT",
       "memoryGiB": 8,
       "status": "pending",
       "measurementEvidence": []
