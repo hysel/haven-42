@@ -29,7 +29,7 @@ the campaign. The machine-readable coverage source is
 | GeForce RTX 3060 12 GiB | Pending | Measure the fixed idle and active workload after the purchased card is installed. |
 | Quadro RTX 5000 16 GiB | Measured | Add another exact-profile record when the model, runtime, driver, workload, or operating system changes. |
 | Tesla V100 32 GiB | Measured | Single-card and two-card records are available and remain separate exact-profile measurements. |
-| Radeon RX 580 8 GiB | Pending | Measure only with a proven GPU route; keep unsupported or CPU-fallback results clearly labelled. |
+| Radeon RX 5700 XT 8 GiB | Pending | Measure the fixed workload after Windows and Linux prove their exact GPU routes; keep CPU-fallback results separately labelled. |
 | Radeon RX 6800 non-XT 16 GiB | Pending | Measure the fixed workload after the purchased card is installed and its exact AMD route passes. |
 | Radeon RX 7800 XT 16 GiB | Measured | Repeat only when a runtime, driver, workload, or measurement-method change requires a new exact-profile record. |
 | Intel Arc B580 12 GiB | Measured | Add another exact-profile record when the runtime, driver, workload, or operating system changes. |
