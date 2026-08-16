@@ -126,7 +126,7 @@ class ModelVersionInventoryTests(unittest.TestCase):
         self.assertEqual(version["version"], "30B")
         self.assertEqual(
             version["qualificationState"],
-            "planned-awaiting-compatible-runtime-and-hardware",
+            "ollama-0.32.9-task-contract-failed-other-routes-untested",
         )
         candidates = {item["id"]: item for item in version["candidates"]}
         self.assertEqual(

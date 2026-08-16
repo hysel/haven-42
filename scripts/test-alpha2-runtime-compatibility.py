@@ -232,6 +232,17 @@ class RuntimeCompatibilityTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.CompatibilityError, "model-not-registered"):
             MODULE.resolve("unknown-model", "windows-x64", "core", include_candidate=True)
 
+    def test_muse_glimmer_ollama_route_remains_blocked_after_task_failure(self) -> None:
+        with self.assertRaisesRegex(
+            MODULE.CompatibilityError, "no-admitted-compatible-runtime"
+        ):
+            MODULE.resolve(
+                "muse-glimmer-30b-q4",
+                "windows-x64",
+                "rocm",
+                include_candidate=True,
+            )
+
     def test_llamacpp_product_resolution_denies_candidate_runtime(self) -> None:
         with self.assertRaisesRegex(
             MODULE.CompatibilityError, "no-admitted-compatible-runtime"

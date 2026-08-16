@@ -108,13 +108,13 @@
     },
     {
       "path": "config/alpha-2-model-version-inventory.json",
-      "sha256": "2eb5b6b1dbd109003a5ee27bb69b8ee4c8b0717e40233943f93d6521dc1f5183",
-      "sizeBytes": 20971
+      "sha256": "6e71be02c19804f357ee9f3002218b30f6b675f678e5c00d013234a04db06256",
+      "sizeBytes": 20979
     },
     {
       "path": "config/alpha-2-model-runtime-requirements.json",
-      "sha256": "3a742aff35424ac22bcd2f7746da1a80b34d822fd7daab8da4994d6fbd3d83fc",
-      "sizeBytes": 9021
+      "sha256": "cabf60a6835c1518409c608ad4cd1a34847f86dd1be23206b01f2542c426019a",
+      "sizeBytes": 9138
     },
     {
       "path": "config/alpha-2-runtime-compatibility.json",

@@ -5,7 +5,7 @@
   "status": "qualification-only-no-product-promotion",
   "inventoryBinding": {
     "path": "config/alpha-2-model-version-inventory.json",
-    "canonicalSha256": "f64cab0a719b4655fe4ce9acc6f2373f1ec8aab2ce56323e5b14260b0d09f09b"
+    "canonicalSha256": "2108dbc25e80629cb59b7632d08f307fd999068a7b8cf066af731e5858e24029"
   },
   "provider": {
     "name": "ollama",
@@ -118,9 +118,10 @@
     {
       "modelId": "muse-glimmer-30b-q4",
       "requiredProfiles": [],
-      "state": "deferred-requires-compatible-runtime-and-hardware-approval",
+      "state": "failed-needs-retest-ollama-0.32.9-task-contract",
       "plannedTest": {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-q4",
+        "negativeEvidenceReference": "examples/nvidia-v100-ollama0329-task-contract-retry.md",
         "minimumOllamaVersion": "0.32.8",
         "exactRuntimeVersionRequiredAtExecution": true,
         "admissionFloor": {
