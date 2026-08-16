@@ -1,6 +1,6 @@
 # Model and Hardware Test Status
 
-_Last reviewed: August 12, 2026._
+_Last reviewed: August 16, 2026._
 
 This page shows which model and computer combinations Haven 42 has actually
 tested. It records bounded tests, not a promise that every similar computer
@@ -188,7 +188,7 @@ before they can influence automatic selection.
 | CPU-only Alpha 2 Linux profiles | Qwen 3.5 0.8B Q8 | Safe chat, writing, and summarization fallback | Verified only on the exact profiles listed below. |
 | NVIDIA 16 GiB, Ubuntu 26.04 and Bazzite 44 | Qwen 3.5 4B Q4 | Current approved balanced default | Exact approved evidence exists; keep the 0.8B and 2B records as fallbacks. |
 | NVIDIA high-memory lab | Qwen 3.5 27B Q4, Qwen 3.5 35B Q4, Qwen3-Next 80B-A3B Q4, and both tested Nemotron 3.5 Lightning quantizations are candidates | Larger-model quality comparison | The exact Nemotron Q4 and Q8 artifacts passed three task contracts and 30-minute soaks on dual V100s. Exact per-model GPU-board energy is now measured. Comparative human review, remaining capabilities, and exact multi-GPU distribution are still open. |
-| AMD Radeon RX 7800 XT 16 GiB | Gemma 3 1B Q4 and Llama 3.2 3B Q4 are completed baseline candidates | Responsive local baseline | The 17-model campaign completed. An Ollama 0.32.9 retry reproduced summarization failures for Granite 4 7B and Ministral 3 3B/8B, so no final AMD recommendation is made. |
+| AMD Radeon RX 7800 XT 16 GiB | Fourteen models are completed baseline candidates; smaller options include Gemma 3 1B Q4 and Llama 3.2 3B Q4 | Responsive local baseline and hardware-fit comparison | A post-stability-change Ollama 0.32.9 recertification completed all 17 terminal results: 14 passed 30-minute three-task soaks with full ROCm offload, while Granite 4 7B and Ministral 3 3B/8B again failed Summarization before soak. Comparative quality, lifecycle, driver/firmware attestation, and release gates remain open, so no final AMD recommendation is made. |
 | Intel Arc B580 12 GiB | Granite 4.1 8B Q4 is a narrow Linux SYCL candidate | Cross-vendor baseline | The exact artifact passed 15 task samples, a 30-minute soak, full 41-layer offload, cleanup, and card-energy measurement. Other models still have load or task failures, so no final Intel default is proposed. |
 | 4 GiB, 8 GiB, NVIDIA 12 GiB, and AMD RDNA 2 tiers | No recommendation yet | New physical tiers | Wait for the purchased or available cards and run their hardware-fit campaigns. |
 
@@ -263,6 +263,20 @@ losses, displays, or other devices. A wall meter is required for a complete
 computer measurement.
 
 ### Radeon RX 7800 XT result
+
+The latest bounded recertification used Ollama 0.32.9 and 17 exact
+manifest-pinned models. Fourteen completed 30-minute Chat, Writing, and
+Summarization soaks with full ROCm offload. Granite 4 7B and Ministral 3 3B/8B
+repeated the same deterministic Summarization-control failure seen in the
+earlier targeted retry and did not enter a soak. The sanitized run files do
+not independently retain the host firmware or driver identifier, so this is
+not firmware or driver attestation. See the
+[17-model recertification summary](Windows-AMD-RX7800XT-Ollama-0329-Recertification).
+
+No automatic default changes. Task-quality review, lifecycle recovery,
+package parity, and signed-release testing remain open.
+
+### Radeon RX 7800 XT power result
 
 The first synchronized AMD result is now recorded for Windows 11, one Radeon
 RX 7800 XT 16 GiB, Ollama 0.32.5, and `qwen3.5:9b` Q4_K_M. The 30-minute
