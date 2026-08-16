@@ -2820,6 +2820,8 @@ test_conversation_history_foundation() {
     grep -q "27 offline checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-macos-keychain-availability.py" |
     grep -q "30 offline checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-activation-readiness.py" |
+    grep -q "31 fail-closed checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2831,6 +2833,7 @@ windows_persistence = json.loads((root / "config/conversation-history-windows-wr
 windows_acl = json.loads((root / "config/conversation-history-windows-per-user-acl.json").read_text(encoding="utf-8"))
 linux_secret = json.loads((root / "config/conversation-history-linux-secret-service-availability.json").read_text(encoding="utf-8"))
 macos_keychain = json.loads((root / "config/conversation-history-macos-keychain-availability.json").read_text(encoding="utf-8"))
+history_readiness = json.loads((root / "config/conversation-history-activation-readiness.json").read_text(encoding="utf-8"))
 foundation = policy["inactiveFoundations"]["conversationHistory"]
 assert contract["status"] == "simulation-only-not-runtime-admitted"
 assert contract["defaultMode"] == "private-session"
@@ -2932,6 +2935,13 @@ assert "conversation-history-windows-wrapped-key-persistence" not in package_spe
 assert "conversation-history-windows-per-user-acl" not in package_spec
 assert "conversation-history-linux-secret-service-availability" not in package_spec
 assert "conversation-history-macos-keychain-availability" not in package_spec
+assert "conversation-history-activation-readiness" not in package_spec
+assert history_readiness["status"] == "blocked-private-session-only"
+assert history_readiness["defaultMode"] == "private-session"
+assert history_readiness["activationAllowed"] is False
+assert len(history_readiness["requiredGates"]) == 8
+assert all(item["status"] == "open" for item in history_readiness["requiredGates"])
+assert not any(history_readiness["effects"].values())
 assert "docs/conversation-history-database.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 assert "docs/conversation-history-encryption-review.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 PY

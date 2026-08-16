@@ -5628,6 +5628,9 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
     $macosKeychainOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-macos-keychain-availability.py"))
     Assert-Equal -Actual $macosKeychainOutput.ExitCode -Expected 0 -Message "macOS Keychain availability boundary checks should pass. Output: $($macosKeychainOutput.Output)"
     Assert-True -Condition ($macosKeychainOutput.Output -match "30 offline checks") -Message "macOS Keychain boundary must remain system-path pinned, operation-free, sanitized, bounded, and package-excluded."
+    $historyReadinessOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-activation-readiness.py"))
+    Assert-Equal -Actual $historyReadinessOutput.ExitCode -Expected 0 -Message "Conversation-history activation readiness checks should pass. Output: $($historyReadinessOutput.Output)"
+    Assert-True -Condition ($historyReadinessOutput.Output -match "31 fail-closed checks") -Message "Saved-history readiness must keep every admission gate explicit and Private session effective."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-contract.json") | ConvertFrom-Json
     $schema = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-schema.json") | ConvertFrom-Json
     $policy = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/local-web-runtime-policy.json") | ConvertFrom-Json
@@ -5681,6 +5684,13 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
         if ($property.Name -ne "availabilityProbeAllowed") {
             Assert-True -Condition (-not [bool]$property.Value) -Message "macOS Keychain authority must remain inactive: $($property.Name)"
         }
+    }
+    $historyReadiness = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-activation-readiness.json") | ConvertFrom-Json
+    Assert-True -Condition ($historyReadiness.status -eq "blocked-private-session-only" -and $historyReadiness.defaultMode -eq "private-session" -and -not $historyReadiness.activationAllowed) -Message "Saved history must remain blocked and Private session must remain effective."
+    Assert-Equal -Actual @($historyReadiness.requiredGates).Count -Expected 8 -Message "Saved-history admission must retain all eight reviewed gates."
+    Assert-True -Condition (-not (@($historyReadiness.requiredGates) | Where-Object status -ne "open")) -Message "Every saved-history admission gate must remain visibly open until matching evidence exists."
+    foreach ($property in $historyReadiness.effects.PSObject.Properties) {
+        Assert-True -Condition (-not [bool]$property.Value) -Message "Saved-history readiness evaluation must remain effect free: $($property.Name)"
     }
 }
 

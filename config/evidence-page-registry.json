@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "9db999bbb25e9efb05a8613a7bee3f6efc8704365463dd34519d2376085c67af",
-  "recordCount": 123,
+  "catalogSha256": "ec4127907ef5aa9b976a7e4ec3e6b3903cef79caa37325779b9ea58f6d7365bc",
+  "recordCount": 124,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -423,6 +423,30 @@
         "repositorySource": "docs/evidence-records/evidence-1c20a3dfac18ae0a.md",
         "wikiPage": "Evidence-Record-1c20a3dfac18ae0a.md",
         "title": "Offline transport and approval guards"
+      }
+    },
+    {
+      "id": "evidence-91e7db3d8cf9310d",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Conversation-history activation readiness policy",
+        "surface": "Haven 42 admission policy",
+        "surface_version": "1",
+        "provider": "No runtime",
+        "os": "Cross-platform",
+        "model": "none",
+        "operation": "eight-gate-private-session-readiness",
+        "validation_mode": "offline-fixture",
+        "status": "static-validated",
+        "evidence": "examples/conversation-history-activation-readiness.md",
+        "notes": "The 31-check effect-free evaluator keeps all eight evidence-linked gates open, preserves Private session, rejects traversal, links, missing, reordered, effect-bearing, inconsistent, and overstated policies, and cannot activate a database, credential store, route, UI, provider, or network."
+      },
+      "sourceEvidence": "examples/conversation-history-activation-readiness.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-91e7db3d8cf9310d.md",
+        "wikiPage": "Evidence-Record-91e7db3d8cf9310d.md",
+        "title": "Conversation-history activation readiness policy"
       }
     },
     {
