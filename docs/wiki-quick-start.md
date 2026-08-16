@@ -100,8 +100,16 @@ inside an address, and unexpected redirects.
    yourself.
 4. Open **Response details · Advanced** only if you want token and timing data.
 
-Public model search never downloads anything. Guided Windows setup downloads
-only the exact model shown on the permission screen.
+Public model search never downloads silently. Selecting a result opens a review
+showing the exact model and destination; the download starts only after you
+choose **Approve and install**. Guided Windows setup likewise downloads only
+the exact components shown on its permission screen.
+
+After a successful connection, Haven 42 remembers only the last main section
+you viewed and returns there after a browser refresh. It does not store the
+conversation, server address, credentials, research words, or model-install
+approval. If it cannot determine a working connection after restart, setup is
+shown again.
 
 ## Stop Haven 42
 

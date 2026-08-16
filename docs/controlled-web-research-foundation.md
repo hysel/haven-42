@@ -4,19 +4,31 @@ _Last reviewed: August 16, 2026._
 
 ## What is available
 
-Haven 42 now has one narrowly admitted web-research path in the local web
-interface. A person can search the English Wikipedia metadata API, review the
-returned source titles and full destinations as inactive text, and separately
-approve reading one selected page as inert plain text.
+Haven 42 has two narrowly admitted in-app web-research paths. A person can
+search the English Wikipedia metadata API, review returned source titles and
+full destinations as inactive text, and separately approve reading one
+selected page as inert plain text. A person can also approve one bounded
+multi-source search that uses the fixed Brave Search API, retrieves at most
+five returned public HTTPS pages, and asks the selected local Ollama model for
+a strict citation-bound answer.
 
-This is not general model browsing. The local model cannot start a search,
+The interface also retains a separate wider-web browser handoff. After reviewing
+the exact words and fixed Brave Search destination, the user may open that
+search in their normal browser. Haven 42 does not fetch, parse, persist, cite,
+or send those browser results to a model. This handoff is not evidence that
+general in-app browsing or cited synthesis has been admitted.
+
+This is not autonomous model browsing. The local model cannot start a search,
 choose a provider, choose or alter a URL, approve a request, follow a result,
 retrieve another page, or trigger a follow-up query. Haven 42 does not yet feed
-the retrieved text to a model or claim that an answer is grounded by it.
+Wikipedia text to a model. The multi-source path sends only bounded untrusted
+source segments—not URLs, credentials, or tools—to the selected local model,
+then rejects any claim without an engine-issued citation.
 
 ## User flow
 
-1. Open **Research Wikipedia** in Chat and enter at most 256 characters.
+1. Open **Research the web**, keep **Wikipedia** selected, and enter at most
+   256 characters.
 2. Review the exact search words and provider in a modal dialog. Nothing has
    been sent at this point.
 3. Choose **Approve once** or cancel. Approval is held only in server memory,
@@ -33,6 +45,20 @@ from both browser and server memory. Shutdown also clears server-held research
 state. Haven 42 writes no query, result, page, cookie, cache, download,
 temporary file, browser-storage record, or telemetry event for this feature.
 
+For a wider-web search, choose **Wider web**, review the exact query and fixed
+Brave Search URL, approve once, then use the newly revealed browser link. The
+server never contacts Brave in that flow. The browser request and any retention
+by the search provider are governed by the browser and provider, not Haven 42.
+
+For a cited wider-web answer, choose **Wider web with a cited answer**, enter a
+Brave Search API key for the current request, and review the exact query,
+provider, and fixed API destination. After one approval, Haven 42 sends the key
+only to Brave, clears it after use, cancellation, failure, or expiry, validates each result as public
+HTTPS, retrieves at most five pages without redirects or active content, and
+asks the selected local model for a strict JSON claim list. The renderer accepts
+only claims whose citation identifiers were issued by the engine. Citations and
+full destinations remain inactive text.
+
 ## Network boundary
 
 The engine owns the complete network operation. The admitted transports use:
@@ -48,6 +74,13 @@ The engine owns the complete network operation. The admitted transports use:
 - a fresh metadata-query revalidation before a selected-page request; and
 - strict response shapes, engine-derived citation identifiers, and exact digest
   binding before anything reaches the renderer.
+
+The multi-source transport adds a fixed `api.search.brave.com` search endpoint,
+session-only `X-Subscription-Token`, at most five validated public HTTPS result
+destinations, 512 KiB per-page and 20,000-character aggregate context ceilings,
+and a fresh public-DNS check plus connection pin for every page. It refuses
+redirects, compression, cookies, proxy inheritance, credentials in URLs, active
+markup, non-public addresses, model-supplied links, and automatic follow-up.
 
 Loopback, private, link-local, reserved, multicast, unspecified, credentialed,
 or custom-port destinations are rejected. Response fields remain untrusted.
@@ -79,13 +112,15 @@ Accessibility Statement records the current screen-reader/browser limitation.
   citation identity when the provider changes result order.
 - The fixed query transport passes 23 hostile offline security checks.
 - The selected-page transport passes 41 hostile offline security checks.
-- The product runtime passes 40 hostile offline and local-API checks, including
+- The product runtime passes 48 hostile offline and local-API checks, including
   token expiry/replay, wrong-kind consumption, malformed provider responses,
   CSRF refusal, and New task cleanup.
 - The trusted citation renderer passes 40 checks.
 - The explicit approval review passes 64 checks.
-- The local-web server suite passes 460 security and behavior checks.
-- The Windows headless Chromium flow passes 622 checks, including the complete
+- The local-web server suite passes 479 security and behavior checks.
+- The multi-source search, retrieval, synthesis, and lifecycle boundary passes
+  21 dedicated hostile checks; the shared research runtime passes 48 checks.
+- The Windows headless Chromium flow passes 654 checks, including the complete
   two-approval research flow, inert page rendering, focus behavior, a short
   viewport, New task cleanup, and no active result links.
 - One Windows source-runtime live check completed a fixed English Wikipedia
@@ -106,7 +141,7 @@ feature can be described as package-validated.
 
 ## Authority that remains denied
 
-- unrestricted web access or arbitrary URLs;
+- unrestricted in-app web access or arbitrary user/model-selected URLs;
 - model tools, model-initiated searches, or model approvals;
 - automatic or page-derived follow-up queries;
 - active citation links or browser navigation;
@@ -114,7 +149,7 @@ feature can be described as package-validated.
 - query, result, citation, page, cookie, cache, log, or telemetry persistence;
 - retrieval of repository content, attachments, hardware facts, provider
   endpoints, usernames, paths, conversation history, or model metadata; and
-- cited model synthesis or a correctness claim.
+- uncited model synthesis or a correctness claim beyond source accounting.
 
 The self-hosted-provider and bounded multi-query contracts remain independent,
 inactive evaluations. They grant no runtime, provider, network, UI, model-tool,
@@ -132,8 +167,9 @@ The repository keeps the earlier effect-free foundations and hostile fixtures:
   selected-page transport and has no network authority of its own; and
 - a 26-check cited-synthesis validator that invokes no model.
 
-Those components are evidence for later cited synthesis and provider expansion.
-They do not expand the admitted runtime described above.
+Those components remain evidence for provider expansion and stricter future
+quality gates. Only the separately reviewed multi-source route above invokes a
+local model, and it does not expand model authority.
 
 ## Remaining promotion gates
 
@@ -143,7 +179,7 @@ They do not expand the admitted runtime described above.
    Linux, and macOS. Physical macOS testing remains owner-parked.
 3. Complete the documented manual keyboard, zoom, forced-color, and named
    screen-reader/browser matrix.
-4. Add cited model synthesis only through its own source-accounting and
-   no-follow-up admission review.
-5. Keep self-hosted search, multi-query research, and active navigation as
+4. Repeat multi-source synthesis with the exact packaged candidate and record
+   source-accounting, failure, and cleanup parity.
+5. Keep self-hosted search, automatic multi-query research, and active navigation as
    separate owner-approved gates.

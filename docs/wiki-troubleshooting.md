@@ -39,10 +39,22 @@ that warning is expected until you use trusted HTTPS or a loopback tunnel.
 
 ## A model is missing
 
-Public model search does not download anything. If you use guided Windows
-setup, return to **Set up this computer** and review the displayed download and
-permission. Advanced users managing their own Ollama server can follow the
-instruction shown under **Models**, then reconnect.
+Open **Models**, search the public catalog, and choose the result. Haven 42
+shows the exact model and connected destination before anything downloads.
+Choose **Approve and install** only if those details are correct. The model is
+not offered for chat until Ollama confirms that the exact model is installed.
+An advanced manual command remains available as a fallback for server owners.
+
+## Research stops safely
+
+Use **Open troubleshooting logs** directly below the research error. Haven 42
+opens System, expands the log area, refreshes the sanitized events, and moves
+keyboard focus there. Search words and retrieved page text are not recorded.
+
+If Wikipedia reports an unexpected response, retry once. Haven 42 rejects
+unrecognized fields or destinations rather than guessing. For broader results,
+choose **Wider web** and approve the exact browser search; Haven 42 does not
+read or import those browser results.
 
 ## Setup stops while testing a downloaded model
 
@@ -78,6 +90,10 @@ model or the computer running it is usually the slow part.
 Record the operating system, Haven 42 version, exact user-visible error, and the
 steps that caused it. Remove private endpoints, paths, prompts, and attachments
 before sharing a report.
+
+You can also open System and choose the full-width **Open troubleshooting
+logs** button. The collapsible technical log region below it remains available
+for repeat checks and saving a sanitized support report.
 
 Developer, Continue, configuration, and repository diagnostics are in
 [[Engineering Troubleshooting|Eng-Troubleshooting]]. Security issues

@@ -186,6 +186,23 @@ def main() -> int:
                 "research-provider-response-invalid",
             ); checks += 1
 
+            web_prepared = state.prepare_external_web_search("  local   GPU models  ")
+            assert web_prepared["review"]["kind"] == "web"; checks += 1
+            assert web_prepared["review"]["providerId"] == "brave-browser-search"; checks += 1
+            assert web_prepared["review"]["citation"]["destination"] == "https://search.brave.com/search?q=local+GPU+models"; checks += 1
+            assert web_prepared["review"]["networkAuthorityGranted"] is False; checks += 1
+            web_result = state.execute_external_web_search(web_prepared["approvalToken"])
+            assert web_result["networkUsed"] is False and web_result["queryPersisted"] is False; checks += 1
+            assert web_result["destination"] == "https://search.brave.com/search?q=local+GPU+models"; checks += 1
+            refused(
+                lambda: state.execute_external_web_search(web_prepared["approvalToken"]),
+                "research-approval-invalid",
+            ); checks += 1
+            refused(
+                lambda: state.prepare_external_web_search("https://example.com/?secret=x"),
+                "research-query-credential-like",
+            ); checks += 1
+
             state.clear_research()
             assert state.pending_research_approvals == {} and state.research_results == {}; checks += 1
         finally:

@@ -12,7 +12,7 @@ import sys
 import time
 import urllib.parse
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 
@@ -88,6 +88,10 @@ def classify_inventory_candidates(candidates, inventory, previous_keys):
             queue_status = "review-official-publisher-license-and-local-artifacts"
         if re.search(r"(?i)(^|:)latest$", model):
             queue_status = "blocked-mutable-tag-requires-version-pinned-artifact"
+        if candidate.get("SourceType") == "huggingface-publisher-feed" and not candidate.get("Revision"):
+            queue_status = "blocked-missing-immutable-revision"
+        elif candidate.get("SourceType") == "huggingface-publisher-feed" and not candidate.get("License"):
+            queue_status = "blocked-license-review-required"
         candidate["InventoryStatus"] = inventory_status
         candidate["TestQueueStatus"] = queue_status
         candidate["SeenInPreviousReport"] = key in previous_keys
@@ -223,6 +227,16 @@ def ollama_tags(content, query):
     return values
 
 
+def ollama_families(content):
+    """Return model families from the registry's newest-first library index."""
+    values = []
+    for match in re.finditer(r'''(?i)href=["']/library/([a-z0-9][a-z0-9._-]*)''', content):
+        value = match.group(1).lower()
+        if value not in values:
+            values.append(value)
+    return values
+
+
 def common_candidate(model, artifact, source_id, source_type, query, publisher, revision, license_name, gated,
                      pipeline_tag, formats, runtimes, quantizations, tags, size, available, vram_source):
     vram = vram_record(size, available, vram_source)
@@ -285,6 +299,48 @@ def discover_ollama(source, queries, args, host, available, vram_source):
     return results, skipped, errors
 
 
+def discover_ollama_newest(source, args, host, available, vram_source):
+    """Discover registry families without requiring a pre-existing seed name."""
+    try:
+        content = (
+            Path(args.ollama_newest_html_fixture).read_text(encoding="utf-8")
+            if args.ollama_newest_html_fixture
+            else get_text(source["baseUrl"], args.timeout_seconds)
+        )
+        families = ollama_families(content)[:args.max_results_per_query]
+        detail_args = argparse.Namespace(**vars(args))
+        detail_args.ollama_html_fixture = args.ollama_newest_html_fixture
+        detail_source = {**source, "baseUrl": source["detailBaseUrl"]}
+        found, skipped, errors = discover_ollama(
+            detail_source, families, detail_args, host, available, vram_source
+        )
+        represented = {item["Family"] for item in [*found, *skipped]}
+        for family in families:
+            if family not in represented:
+                skipped.append({
+                    "Model": family,
+                    "ArtifactId": family,
+                    "Family": family,
+                    "Query": family,
+                    "Source": "ollama-newest-index",
+                    "SourceId": "ollama-newest",
+                    "SourceType": "ollama-newest-index",
+                    "Status": "registry family found but exact local tag unresolved",
+                    "ValidationStatus": "candidate-only",
+                    "Reason": "The newest-first registry index exposed the family, but no versioned local tag was parsed from its detail page.",
+                    "NextStep": "Review the registry detail page and resolve a full immutable local manifest before planning execution.",
+                    "FailureSignal": "MODEL_TAG_UNRESOLVED",
+                })
+        for item in found:
+            item["SourceId"] = "ollama-newest"
+            item["SourceType"] = "ollama-newest-index"
+            item["Source"] = "ollama-newest-index"
+            item["DiscoveredWithoutSeedQuery"] = True
+        return found, skipped, errors, families
+    except Exception as exc:
+        return [], [], [{"SourceId": "ollama-newest", "Error": str(exc)}], []
+
+
 def hf_formats(item):
     tags = [str(tag).lower() for tag in item.get("tags") or []]
     files = [str(value.get("rfilename") or "").lower() for value in item.get("siblings") or []]
@@ -340,6 +396,126 @@ def discover_huggingface(source, queries, args, host, available, vram_source):
     return results, errors
 
 
+def parse_utc(value):
+    try:
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError) as error:
+        raise ValueError("invalid publisher-feed timestamp") from error
+    if parsed.tzinfo is None:
+        raise ValueError("publisher-feed timestamp must include a UTC offset")
+    return parsed.astimezone(timezone.utc)
+
+
+def discover_publisher_feed(source, args, host, available, vram_source):
+    """Poll configured publisher namespaces directly instead of relying on search rank."""
+    results, skipped, errors = [], [], []
+    publishers = source.get("publisherNamespaces") or []
+    eligible_pipelines = set(source.get("eligiblePipelineTags") or [])
+    discovery_now = (
+        parse_utc(args.discovery_now_utc)
+        if args.discovery_now_utc
+        else datetime.now(timezone.utc)
+    )
+    rolling_since = discovery_now - timedelta(days=int(source.get("lookbackDays") or 45))
+    # A manual timestamp may widen an investigation, but it must never narrow
+    # the configured rolling window.  Publisher metadata dates can precede a
+    # public announcement, so narrowing the window can silently hide a new
+    # family even when its official namespace is polled directly.
+    since = min(parse_utc(args.publisher_since_utc), rolling_since) if args.publisher_since_utc else rolling_since
+    fixture_items = load_json(args.publisher_feed_json_fixture) if args.publisher_feed_json_fixture else None
+    for publisher in publishers:
+        try:
+            if fixture_items is not None:
+                items = [
+                    item for item in fixture_items
+                    if str(item.get("id") or item.get("modelId") or "").split("/", 1)[0].lower()
+                    == str(publisher).lower()
+                ]
+            else:
+                params = urllib.parse.urlencode({
+                    "author": publisher,
+                    "sort": "lastModified",
+                    "direction": -1,
+                    "limit": args.max_results_per_publisher,
+                    "full": "true",
+                    "config": "true",
+                })
+                items = json.loads(get_text(
+                    f"{source['baseUrl'].rstrip('/')}/api/models?{params}", args.timeout_seconds
+                ))
+            for item in items:
+                modified = item.get("lastModified")
+                if not modified or parse_utc(modified) < since:
+                    continue
+                model = str(item.get("id") or item.get("modelId") or "").strip()
+                if not model:
+                    continue
+                pipeline = item.get("pipeline_tag")
+                if pipeline not in eligible_pipelines:
+                    skipped.append({
+                        "Model": model,
+                        "ArtifactId": model,
+                        "Publisher": publisher,
+                        "SourceId": "official-publishers",
+                        "SourceType": "huggingface-publisher-feed",
+                        "Status": "publisher release outside current Haven capability lanes",
+                        "ValidationStatus": "candidate-only",
+                        "LastModified": modified,
+                        "Reason": "The official namespace changed, but its declared pipeline is outside the configured local assistant capability lanes.",
+                        "NextStep": "Reconsider only if the Haven capability roadmap expands to this pipeline.",
+                    })
+                    continue
+                tags = [str(tag) for tag in item.get("tags") or []]
+                license_name = next(
+                    (tag.split(":", 1)[1] for tag in tags if tag.lower().startswith("license:")),
+                    None,
+                )
+                formats, quant, runtimes = hf_formats(item)
+                revision = item.get("sha")
+                candidate = common_candidate(
+                    model,
+                    model,
+                    "official-publishers",
+                    "huggingface-publisher-feed",
+                    model.split("/", 1)[-1],
+                    publisher,
+                    revision,
+                    license_name,
+                    item.get("gated", False),
+                    pipeline,
+                    formats,
+                    runtimes,
+                    quant,
+                    tags,
+                    size_billion(model, tags),
+                    available,
+                    vram_source,
+                )
+                candidate.update({
+                    "Downloads": item.get("downloads"),
+                    "Likes": item.get("likes"),
+                    "LastModified": modified,
+                    "LibraryName": item.get("library_name"),
+                    "DirectOllamaPull": False,
+                    "OfficialPublisherFeed": True,
+                    "PublisherIdentityStatus": "configured-publisher-namespace",
+                })
+                if not revision:
+                    candidate["Status"] = "publisher candidate missing immutable revision"
+                    candidate["FailureSignal"] = "MODEL_REVISION_MISSING"
+                elif not license_name:
+                    candidate["Status"] = "publisher candidate license review required"
+                    candidate["FailureSignal"] = "MODEL_LICENSE_MISSING"
+                results.append(candidate)
+        except Exception as exc:
+            errors.append({
+                "SourceId": "official-publishers",
+                "Publisher": publisher,
+                "Error": str(exc),
+            })
+    return results, skipped, errors, since.isoformat().replace("+00:00", "Z")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--source-config", required=True)
@@ -350,7 +526,11 @@ def main():
     parser.add_argument("--ollama-base-url", "--source-base-url")
     parser.add_argument("--hugging-face-base-url")
     parser.add_argument("--ollama-html-fixture", "--source-html-path")
+    parser.add_argument("--ollama-newest-html-fixture")
     parser.add_argument("--huggingface-json-fixture", "--hugging-face-json-path")
+    parser.add_argument("--publisher-feed-json-fixture")
+    parser.add_argument("--publisher-since-utc")
+    parser.add_argument("--discovery-now-utc")
     parser.add_argument("--output-path", required=True)
     parser.add_argument("--markdown-output-path")
     parser.add_argument("--inventory-path")
@@ -360,19 +540,24 @@ def main():
     parser.add_argument("--available-vram-gb", type=float, default=0)
     parser.add_argument("--include-oversized-models", action="store_true")
     parser.add_argument("--max-results-per-query", type=int, default=10)
+    parser.add_argument("--max-results-per-publisher", type=int, default=60)
     parser.add_argument("--timeout-seconds", type=int, default=30)
     args = parser.parse_args()
 
     config, contract = load_json(args.source_config), load_json(args.contract_path)
     selected = csv_values(args.sources)
-    if not selected and (args.ollama_html_fixture or args.huggingface_json_fixture):
+    if not selected and (
+        args.ollama_html_fixture or args.ollama_newest_html_fixture or args.huggingface_json_fixture or args.publisher_feed_json_fixture
+    ):
         selected = []
         if args.ollama_html_fixture: selected.append("ollama")
+        if args.ollama_newest_html_fixture: selected.append("ollama-newest")
         if args.huggingface_json_fixture: selected.append("huggingface")
+        if args.publisher_feed_json_fixture: selected.append("official-publishers")
     selected = selected or config["defaultSources"]
     global_queries = csv_values(args.queries) or csv_values(args.families)
     host, available, vram_source = load_profile(args.model_profile_path, args.vram_selection_mode, args.available_vram_gb)
-    candidates, skipped, errors, query_record = [], [], [], {}
+    candidates, skipped, errors, query_record, publisher_feed_since = [], [], [], {}, None
     for source in config["sources"]:
         if source["id"] not in selected:
             continue
@@ -383,9 +568,20 @@ def main():
         if source["id"] == "ollama":
             found, source_skipped, source_errors = discover_ollama(source, queries, args, host, available, vram_source)
             candidates.extend(found); skipped.extend(source_skipped); errors.extend(source_errors)
+        elif source["id"] == "ollama-newest":
+            found, source_skipped, source_errors, newest_families = discover_ollama_newest(
+                source, args, host, available, vram_source
+            )
+            query_record[source["id"]] = newest_families
+            candidates.extend(found); skipped.extend(source_skipped); errors.extend(source_errors)
         elif source["id"] == "huggingface":
             found, source_errors = discover_huggingface(source, queries, args, host, available, vram_source)
             candidates.extend(found); errors.extend(source_errors)
+        elif source["id"] == "official-publishers":
+            found, source_skipped, source_errors, publisher_feed_since = discover_publisher_feed(
+                source, args, host, available, vram_source
+            )
+            candidates.extend(found); skipped.extend(source_skipped); errors.extend(source_errors)
 
     unique = {}
     for candidate in candidates:
@@ -401,7 +597,7 @@ def main():
         "SchemaVersion": contract["schemaVersion"],
         "GeneratedAt": time.strftime("%Y-%m-%d %H:%M:%S"),
         "GeneratedAtUtc": datetime.now(timezone.utc).isoformat(),
-        "DiscoveryMode": "local-fixture" if args.ollama_html_fixture or args.huggingface_json_fixture else "online",
+        "DiscoveryMode": "local-fixture" if args.ollama_html_fixture or args.ollama_newest_html_fixture or args.huggingface_json_fixture or args.publisher_feed_json_fixture else "online",
         "DiscoveryContract": "config/model-discovery-contract.json", "Sources": selected, "QueriesBySource": query_record,
         "RepositoryContentSent": False, "HardwareProfileSent": False,
         "CertificationInventoryReadLocally": bool(args.inventory_path),
@@ -409,6 +605,7 @@ def main():
         "ModelProfilePath": "redacted" if args.model_profile_path else None,
         "VramSelectionMode": args.vram_selection_mode, "AvailableVramGb": available or None,
         "AvailableVramSource": vram_source, "ModelHostPlatform": host,
+        "PublisherFeedSinceUtc": publisher_feed_since,
         "IncludeOversizedModels": args.include_oversized_models, "PullsModels": False,
         "RewritesContinueConfig": False, "WritesCertificationInventory": False,
         "StartsTests": False, "ChangesAutomaticModelSelection": False,

@@ -151,13 +151,18 @@ ranking, source/chunk disclosure, removal, and failure cleanup. It has no
 runtime route, UI control, provider payload, path access, parser, network
 operation, embedding, temporary file, or persistent index.
 
-Chat now includes one manual, fixed-provider research path. A person can review
-and approve one exact English Wikipedia metadata search, inspect inactive source
+Chat now includes three manual research choices. A person can review and approve
+one exact English Wikipedia metadata search, inspect inactive source
 destinations, and separately approve reading one selected page as inert text.
-The engine owns the fixed destination, DNS revalidation, pinned TLS connection,
-response limits, citation identity, and memory cleanup. Models cannot invoke or
-approve research, choose URLs, navigate, download, persist results, or trigger
-follow-up searches. Retrieved text is not yet sent to a model. See
+The engine owns that fixed destination, DNS revalidation, pinned TLS connection,
+response limits, citation identity, and memory cleanup. A wider-web choice
+accepts a session-only Brave Search API key, retrieves at most five public HTTPS
+pages under the same SSRF and resource boundary, and asks the selected local
+Ollama model for a strict citation-bound answer after one explicit review. A
+separate browser fallback prepares an exact Brave Search destination and opens
+it only after review; Haven 42 does not ingest those browser results. Models
+cannot invoke or approve research, choose URLs, navigate, download, persist
+results, receive the key, or trigger follow-up searches. See
 `docs/controlled-web-research-foundation.md` for the exact boundary and open
 package and assistive-technology gates.
 

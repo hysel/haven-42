@@ -30,6 +30,9 @@ If you are trying to install or use Haven 42, start with the
 - [Hardware-aware recommendations](https://github.com/hysel/haven-42/blob/main/docs/hardware-aware-recommendations.md)
 - [Model catalog](https://github.com/hysel/haven-42/blob/main/docs/model-catalog.md)
 - [Online model discovery](https://github.com/hysel/haven-42/blob/main/docs/online-model-discovery.md)
+- [Model release radar](https://github.com/hysel/haven-42/blob/main/docs/model-release-radar.md)
+- Machine-readable release evaluation plan: `config/model-release-evaluation-plan.json`
+- [On-demand runtime version certification](https://github.com/hysel/haven-42/blob/main/docs/runtime-version-certification.md)
 - [Inference engine architecture](https://github.com/hysel/haven-42/blob/main/docs/inference-engine-architecture.md)
 - [Alpha 2 Linux long-term validation](https://github.com/hysel/haven-42/blob/main/docs/alpha-2-linux-long-term-validation.md)
 - [Evidence catalog](https://github.com/hysel/haven-42/blob/main/docs/evidence-catalog.md)

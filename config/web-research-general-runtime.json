@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.explicit-multi-source-runtime",
+  "status": "owner-approved-manual-multi-source-runtime",
+  "providers": {
+    "search": {
+      "id": "brave-search-api",
+      "fixedOrigin": "https://api.search.brave.com/res/v1/web/search",
+      "credentialRequired": true,
+      "credentialStorageAllowed": false,
+      "credentialSentToModel": false
+    },
+    "browserFallback": {
+      "id": "brave-browser-search",
+      "fixedOrigin": "https://search.brave.com/search",
+      "resultIngestionAllowed": false
+    }
+  },
+  "approval": {
+    "exactQueryReviewRequired": true,
+    "singleUseTokenRequired": true,
+    "expiresInSeconds": 300,
+    "modelCannotApprove": true,
+    "automaticFollowUpAllowed": false
+  },
+  "retrieval": {
+    "maximumSources": 5,
+    "maximumPageBytes": 524288,
+    "maximumAggregateContextCharacters": 20000,
+    "publicHttpsOnly": true,
+    "dnsRevalidationRequired": true,
+    "connectionPinningRequired": true,
+    "redirectsAllowed": false,
+    "activeContentAllowed": false,
+    "remoteReferencesRetained": false,
+    "filesWritten": false
+  },
+  "synthesis": {
+    "connectedLocalModelOnly": true,
+    "sourceTextTreatedAsUntrusted": true,
+    "everyClaimRequiresEngineIssuedCitation": true,
+    "modelSuppliedLinksAllowed": false,
+    "toolExecutionAllowed": false
+  },
+  "lifecycle": {
+    "memoryOnly": true,
+    "queryPersistenceAllowed": false,
+    "pagePersistenceAllowed": false,
+    "credentialPersistenceAllowed": false,
+    "telemetryContentAllowed": false
+  }
+}

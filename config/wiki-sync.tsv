@@ -27,6 +27,8 @@ examples/writing-model-matrix-validation.md	Eng-Writing-Model-Matrix-Validation.
 examples/blind-writing-quality-review.md	Eng-Blind-Writing-Quality-Review.md	Blind Writing Quality Review
 docs/hardware-aware-recommendations.md	Eng-Hardware-Aware-Recommendations.md	Hardware-Aware Recommendations
 docs/online-model-discovery.md	Eng-Online-Model-Discovery.md	Online Model Discovery
+docs/model-release-radar.md	Eng-Model-Release-Radar.md	Model Release Radar
+docs/runtime-version-certification.md	Eng-Runtime-Version-Certification.md	On-Demand Runtime Version Certification
 docs/local-model-reliability.md	Eng-Local-Model-Reliability.md	Local Model Reliability
 docs/local-agent-model-testing.md	Eng-Local-Agent-Model-Testing.md	Local Agent Model Testing
 docs/remote-hardware-profile.md	Eng-Remote-Hardware-Profile.md	Remote Hardware Profile

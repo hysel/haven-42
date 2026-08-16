@@ -180,6 +180,10 @@ class FakeOllama(BaseHTTPRequestHandler):
                     "prompt_eval_duration": 1_000_000_000,
                     "eval_duration": 5_000_000_000,
                 })
+        elif self.path == "/api/pull" and body.get("stream") is False:
+            if model not in FakeState.models:
+                FakeState.models.append(model)
+            self._json(200, {"status": "success"})
         elif self.path == "/api/generate" and body.get("keep_alive") == 0:
             FakeState.loaded.discard(model)
             self._json(200, {"done": True})
@@ -644,7 +648,7 @@ def main() -> int:
         assert "(WCAG) 2.1 Level AA" in accessibility_page
         assert "self-assessed target" in accessibility_page
         assert "Last reviewed:</strong> August 16, 2026" in accessibility_page
-        assert "Wikipedia research uses a labeled modal review" in accessibility_page
+        assert "Research uses a labeled modal review" in accessibility_page
         assert "open once for each new section-tour revision" in accessibility_page
         assert "haven42localai@gmail.com" in accessibility_page
         assert "has not yet been manually tested across NVDA, JAWS, VoiceOver, TalkBack" in accessibility_page
@@ -773,6 +777,11 @@ def main() -> int:
                 "/api/model-search",
                 {"query": "qwen", "online": 1},
                 "invalid-model-search-fields",
+            ),
+            (
+                "/api/resume-provider",
+                {"endpoint": "http://127.0.0.1:11434"},
+                "invalid-provider-session-fields",
             ),
             (
                 "/api/text",
@@ -1375,6 +1384,18 @@ def main() -> int:
         FakeState.requests.clear()
         checks += 1
 
+        status, resumed_provider, _ = request_json(
+            origin + "/api/resume-provider", "POST", {}, token, origin,
+        )
+        assert status == 200
+        assert resumed_provider["connected"] is True
+        assert resumed_provider["sessionResume"] is True
+        assert resumed_provider["configurationPersisted"] is False
+        assert resumed_provider["endpoint"] == fake_url
+        assert resumed_provider["timeoutSeconds"] == 30
+        assert resumed_provider["models"] == ["qwen3.5:9b", "writer-model:latest"]
+        checks += 7
+
         status, error, _ = request_json(
             origin + "/api/model-search", "POST",
             {"query": "writing", "online": False}, token, origin,
@@ -1417,6 +1438,34 @@ def main() -> int:
                 "installCommand": "ollama pull community/example-writing:7b",
             },
         ]
+        status, install_review, _ = request_json(
+            origin + "/api/model-install/prepare", "POST",
+            {"model": "community/example-writing:7b"}, token, origin,
+        )
+        assert status == 200
+        assert install_review["downloadStarted"] is False
+        assert install_review["singleUse"] is True
+        assert install_review["persisted"] is False
+        assert install_review["destination"] == "This computer"
+        status, installed_model, _ = request_json(
+            origin + "/api/model-install/execute", "POST",
+            {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
+        )
+        assert status == 200
+        assert installed_model["status"] == "installed"
+        assert installed_model["model"] == "community/example-writing:7b"
+        assert installed_model["verifiedByProviderCatalog"] is True
+        assert installed_model["selectedAutomatically"] is False
+        status, replay_error, _ = request_json(
+            origin + "/api/model-install/execute", "POST",
+            {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
+        )
+        assert status == 409 and replay_error["error"] == "model-install-approval-invalid"
+        FakeState.models.remove("community/example-writing:7b")
+        with state.lock:
+            state.models = tuple(name for name in state.models if name != "community/example-writing:7b")
+            state.model_digests.pop("community/example-writing:7b", None)
+        checks += 11
         fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
@@ -2635,6 +2684,9 @@ def main() -> int:
             "persistenceAllowed": False,
         }
         assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
+        assert policy["modelDiscovery"]["pullApiAllowed"] is True
+        assert policy["modelDiscovery"]["explicitInstallApprovalRequired"] is True
+        assert policy["modelDiscovery"]["providerCatalogVerificationRequiredAfterPull"] is True
         assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
         assert policy["executionEvents"]["automaticRetryAllowed"] is False
         assert policy["executionEvents"]["retryRequiresNewRequest"] is True
@@ -2658,7 +2710,7 @@ def main() -> int:
         assert "This is a self-assessed target, not a claim of third-party certification." in accessibility_html
         assert "No complete manual screen-reader and browser matrix has been recorded yet" in accessibility_html
         assert "Section help tours use labeled modal dialogs" in accessibility_html
-        assert "section help tours, chat and its manual Wikipedia research controls, models, system" in accessibility_html
+        assert "section help tours, chat and its manual research controls, model discovery and install review, system" in accessibility_html
         assert "<script" not in accessibility_html
         assert ".statement-page" in styles and ".statement-content" in styles
         checks += 6
@@ -2668,7 +2720,8 @@ def main() -> int:
         assert "Automatic — no validated model installed" in javascript
         assert "Advanced manual selection" in javascript
         assert "result.downloadsPerformed !== false" in javascript
-        assert "/api/model-search" in javascript and "Copy installation command" in html
+        assert "/api/model-search" in javascript and "/api/model-install/execute" in javascript
+        assert "Review and install model" in html and "Copy installation command" in html
         assert "What Haven 42 needs" in javascript
         assert "Local AI model for chat, writing, and summaries" in javascript
         assert "Technical model name" in javascript
@@ -2681,6 +2734,7 @@ def main() -> int:
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
         assert "Not on your server yet · searching does not download it" in javascript
+        assert "Downloads only after you approve" in html
         assert 'id="cleanup-policy-form"' in html and 'id="system-idle-unload"' in html
         assert 'byId("system-idle-unload").value = String(idleUnloadSeconds)' in javascript
         assert 'state.desiredModel = null' in javascript and 'Showing installed models ranked for' in javascript
@@ -2700,8 +2754,9 @@ def main() -> int:
         assert 'byId("api-key").value = ""' in javascript
         assert "apiKey" + ": result.authentication" not in javascript
         assert "sessionStorage" not in javascript and "indexedDB" not in javascript
-        assert javascript.count("window.localStorage.") == 2
+        assert javascript.count("window.localStorage.") == 4
         assert 'const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1"' in javascript
+        assert 'const LAST_SECTION_STORAGE_KEY = "haven42.last-section.v1"' in javascript
         runtime_policy = json.loads((ROOT / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
         tour_preferences = runtime_policy["browserPreferences"]
         assert tour_preferences["storageKey"] == "haven42.section-tours.v1"
@@ -2797,7 +2852,7 @@ def main() -> int:
         assert '<section class="context-panel" aria-label="Attachments">' in html
         assert "<summary>Attachment settings and safety</summary>" in html
         assert "sessionStorage" not in javascript and "indexedDB" not in javascript
-        assert javascript.count("window.localStorage.") == 2
+        assert javascript.count("window.localStorage.") == 4
         assert (
             ".system-setting select, .context-settings select { height: 36px;"
             in styles
@@ -2819,7 +2874,7 @@ def main() -> int:
         assert html.count('href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"') == 1
         assert html.count('href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"') == 1
         assert html.count('href="http') == 2
-        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 2
+        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 3
         assert "read-only-assurance-summary" in javascript and "providerInvocation" in javascript
         assert "This page shows test records included with Haven 42" in html
         assert ".assurance-list {" in styles and ".assurance-item {" in styles

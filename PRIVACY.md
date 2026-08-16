@@ -17,11 +17,13 @@ provider API keys,
 prompts,
 conversation text, selected attachments, model responses, run metrics, and
 generated image bytes in process or browser memory. Manually approved Wikipedia
-search words, result metadata, selected-page text, citations, and single-use
-approval state also remain only in process or browser memory. Haven 42 does not
-persist them as configuration, conversation history, browser storage, logs, or
-telemetry. New task clears research state; closing Haven 42 clears all of this
-state.
+or wider-web search words, result metadata, bounded selected-page text,
+citations, local-model synthesis, and single-use approval state also remain
+only in process or browser memory. A Brave Search key entered for a cited
+wider-web answer remains in memory for that one approved request and is cleared
+after use, cancellation, failure, or expiry. Haven 42 does not persist any of this as configuration,
+conversation history, browser storage, logs, or telemetry. New task clears
+research state; closing Haven 42 clears all of this state.
 
 An API key is accepted only through the password field for a fixed Bearer or
 X-API-Key mode. It is cleared from the visible field after connection, never
@@ -57,14 +59,20 @@ Network access occurs only for an explicit feature the user activates:
 - explicitly searching the fixed public Ollama model catalog;
 - separately reviewing and approving one exact fixed-provider English
   Wikipedia search and one selected-page text request;
+- separately reviewing and approving one exact Brave Search API query, bounded
+  retrieval of at most five returned public HTTPS pages, and citation-bound
+  synthesis by the selected local Ollama model; the search key is sent only to
+  Brave and never to the model;
+- separately reviewing one exact wider-web query before opening the fixed Brave
+  Search destination in the user's normal browser;
 - connecting to the admitted loopback ComfyUI image provider;
 - opening the fixed Haven 42 GitHub wiki link in the default browser; or
 - developer and maintainer operations such as GitHub Actions, dependency
   acquisition, or repository synchronization outside the end-user runtime.
 
 Haven 42 does not automatically download models, activate online updates,
-submit crash reports, browse arbitrary websites, follow research links, send
-retrieved page text to a model, or send prompts to Haven 42's maintainers.
+submit crash reports, browse arbitrary websites, follow research links, let a
+model initiate or extend research, or send prompts to Haven 42's maintainers.
 
 ## Files And Repositories
 
@@ -108,10 +116,11 @@ include credentials, private prompts, or personal files in a public issue.
 
 ## Future Features
 
-Persistent conversation storage, online updates, installers, cited model
-synthesis, additional research providers, multi-query research, and active
-citation navigation remain separately gated. Before activation, each feature
+Persistent conversation storage, online updates, installers, additional
+research providers, automatic multi-query research, and active citation
+navigation remain separately gated. Before activation, each feature
 requires an updated privacy review, explicit user controls, retention and
 deletion behavior, security testing, and documentation. The currently admitted
-research slice is limited to separately approved fixed-Wikipedia query and
-selected-page requests with memory-only results and no model-tool authority.
+research slice is limited to separately approved fixed-Wikipedia requests, one
+bounded Brave multi-source cited-answer request, or one browser handoff, with
+memory-only results and no model-tool or automatic-follow-up authority.

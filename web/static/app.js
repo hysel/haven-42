@@ -76,10 +76,11 @@ const CHAT_TEXT_SIZE_PERCENTAGES = {
 const MAX_DISCOVERED_MODELS = 512;
 const MAX_MARKDOWN_DOM_ELEMENTS = 2048;
 const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1";
+const LAST_SECTION_STORAGE_KEY = "haven42.last-section.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
-    revision: 2,
+    revision: 3,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
@@ -87,32 +88,32 @@ const SECTION_TOURS = Object.freeze({
       { target: ".task-mode-select", title: "Choose what you want to do", description: "Leave this on Recommended and Haven 42 will choose Chat, Write, or Summarize from your request. You can also choose a task yourself." },
       { target: ".model-select", title: "Choose an AI model", description: "Haven 42 recommends a compatible installed model for each task. Warnings here explain when another model has not been tested for the selected task." },
       { target: ".composer-surface", title: "Write and attach files", description: "Type your request here, press Enter to send, or use Shift+Enter for a new line. Attachments stay in memory for the current task, and the Keep setting controls prompt recall for this session." },
-      { target: "#research-tools", title: "Research with explicit approval", description: "Search Wikipedia without giving the AI permission to browse. Haven 42 shows exactly what will be sent before every search or page request, and keeps the returned text only in memory." },
+      { target: "#research-tools", title: "Research with explicit approval", description: "Choose Wikipedia or a wider-web browser search. Haven 42 shows the exact search words before every request, never lets the AI browse on its own, and keeps in-app research only in memory." },
       { target: ".status-glance", title: "Check connection and resources", description: "This quiet status area shows the active AI server, model, CPU, memory, graphics, and response speed. “This computer” means AI requests stay on this device." },
     ]),
   }),
   models: Object.freeze({
     label: "Models",
-    revision: 1,
+    revision: 2,
     panelId: "models-panel",
     returnId: "models-title",
     steps: Object.freeze([
       { target: "#models-title", title: "Your AI models", description: "This page helps you understand and choose the models available from your connected Ollama server." },
       { target: "#model-search-capability", title: "Choose the task", description: "Select Chat, Writing, or Summarization to see which installed model Haven 42 recommends for that work." },
       { target: "#model-choice-status", title: "Read the recommendation", description: "This message explains the current model choice and whether Haven 42 has test evidence for the selected task." },
-      { target: "#model-discovery", title: "Find another model", description: "You can search installed models or Ollama's public catalog. A public search sends only your search words and never downloads a model." },
-      { target: "#model-search-form", title: "Search without installing", description: "Enter a model name or capability here. Haven 42 shows a manual command when one is available, but does not run it for you." },
+      { target: "#model-discovery", title: "Find another model", description: "Search installed models or Ollama's public catalog. Haven 42 asks you to review a model and its destination before any download starts." },
+      { target: "#model-search-form", title: "Search, review, then install", description: "Enter a model name or capability. If the model is not installed, select it and Haven 42 will guide you through a one-time download approval." },
     ]),
   }),
   system: Object.freeze({
     label: "System",
-    revision: 1,
+    revision: 2,
     panelId: "system-panel",
     returnId: "system-workspace-title",
     steps: Object.freeze([
       { target: "#system-workspace-title", title: "System settings", description: "Use this page to manage your AI connection, local components, resource information, and troubleshooting tools." },
       { target: "#connection-panel", title: "Connect another AI server", description: "A local setup connects automatically. Advanced users can use this area to switch to another trusted Ollama server." },
-      { target: "#status-panel", title: "Manage this computer", description: "Review the app version, local AI components, model cleanup setting, computer scan, and private troubleshooting logs here." },
+      { target: "#open-diagnostics", title: "Open troubleshooting logs", description: "Use this clearly labeled button to see recent sanitized technical events or save a support report. Search words, chats, and responses are not recorded." },
       { target: "#capability-panel", title: "See available features", description: "This list shows what the current connection can do now and which features still need setup." },
       { target: "#evidence-panel", title: "Check connection health", description: "These checks explain whether the AI server, model information, and local files are ready." },
       { target: "#energy-estimator-panel", title: "Estimate graphics-card electricity", description: "Use a measured GPU average and your own electricity rate. Official averages are optional, location is never inferred, and the result is not a whole-computer bill prediction." },
@@ -193,6 +194,8 @@ const state = {
   electricityRateProfile: null,
   energyEstimate: null,
   researchResultId: null,
+  activePanelId: "text-panel",
+  pendingModelInstall: null,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -672,12 +675,36 @@ async function loadAssurance() {
 }
 
 function showPrimaryPanel(panelId, navigationId, focusId) {
+  if (panelId !== "text-panel") byId("research-tools").open = false;
   ["text-panel", "software-panel", "image-panel", "models-panel", "system-panel", "assurance-panel", "about-panel"].forEach((id) => {
     byId(id).classList.toggle("hidden", id !== panelId);
   });
+  state.activePanelId = panelId;
+  try {
+    window.localStorage.setItem(LAST_SECTION_STORAGE_KEY, panelId);
+  } catch (_error) {
+    // Remembering the current section is optional and never stores user content.
+  }
   activateNavigation(navigationId, panelId, focusId);
   const tourSection = PANEL_TOUR_SECTIONS[panelId];
   if (tourSection) scheduleSectionTour(tourSection);
+}
+
+function restoreLastSection() {
+  let panelId = "text-panel";
+  try {
+    panelId = window.localStorage.getItem(LAST_SECTION_STORAGE_KEY) || panelId;
+  } catch (_error) {
+    // Use Chat when browser storage is unavailable.
+  }
+  const routes = {
+    "text-panel": openChat,
+    "models-panel": openModels,
+    "system-panel": openSystem,
+    "assurance-panel": openAssurance,
+    "about-panel": openAbout,
+  };
+  (routes[panelId] || openChat)();
 }
 
 function initializeSystemWorkspace() {
@@ -994,18 +1021,36 @@ function humanError(error) {
     "invalid-model-search-query": "Enter a short model name using letters, numbers, spaces, dots, dashes, underscores, or colons.",
     "model-catalog-search-failed": "The public Ollama catalog could not be reached.",
     "invalid-model-catalog-response": "The public catalog returned an invalid response, so Haven 42 rejected it.",
+    "model-install-provider-required": "Connect your Ollama server before installing a model.",
+    "model-install-candidate-expired": "Search for that model again before installing it.",
+    "model-install-approval-invalid": "That one-time model approval expired or was already used. Review the download again.",
+    "ollama-model-install-failed": "Ollama could not finish downloading this model. Existing model data was left in place so you can try again.",
+    "ollama-model-install-verification-failed": "Ollama finished the request but did not list the model afterward, so Haven 42 did not select it.",
+    "invalid-model-install-preparation": "Haven 42 could not verify the model-download review, so nothing was downloaded.",
+    "invalid-model-install-result": "Haven 42 could not verify the completed model download, so it was not selected.",
     "research-query-size": "Enter between 1 and 256 characters to research.",
     "research-query-active-content": "Remove markup or control characters from the research words.",
     "research-query-credential-like": "Remove passwords, tokens, or API-key-like text before researching.",
     "research-approval-invalid": "That one-time approval expired or was already used. Review the request again.",
     "research-selection-invalid": "That result is no longer available in memory. Run the search again.",
-    "research-provider-transport-failed": "Wikipedia could not be reached securely. Nothing was saved; try again later.",
+    "research-provider-transport-failed": "The selected research source could not be reached securely. Nothing was saved; try again later.",
     "research-page-provider-transport-failed": "The approved Wikipedia page could not be reached securely. Nothing was saved.",
-    "research-provider-response-invalid": "Wikipedia returned an unexpected response, so Haven 42 rejected it.",
+    "research-provider-response-invalid": "The selected research source returned an unexpected response, so Haven 42 rejected it.",
+    "research-api-key-invalid": "Enter a valid Brave Search API key. It stays in memory and is never saved.",
+    "research-query-invalid": "Enter plain search words without markup or control characters.",
+    "research-model-not-available": "Connect Ollama and choose an installed chat model before requesting a cited web answer.",
+    "research-search-provider-http-401": "Brave rejected the search key. Check the key and try again.",
+    "research-search-provider-http-403": "This Brave search key is not allowed to run that request.",
+    "research-search-provider-http-429": "The web search provider is temporarily rate-limiting requests. Try again later.",
+    "research-search-provider-transport-failed": "The web search provider could not be reached securely. Nothing was saved.",
+    "research-search-provider-no-results": "No usable public results were returned. Try different search words.",
+    "research-synthesis-failed": "The local AI could not prepare a cited answer. The approved source text was discarded.",
+    "research-synthesis-invalid": "The local AI returned an answer without valid source citations, so Haven 42 rejected it.",
     "research-review-unavailable": "Close the open setup, help, or review window before starting web research.",
     "invalid-research-preparation": "Haven 42 could not verify the research approval request, so nothing was sent.",
     "invalid-research-query-result": "Haven 42 rejected an unexpected research result. Nothing was saved.",
     "invalid-research-page-result": "Haven 42 rejected unexpected page content. Nothing was saved.",
+    "invalid-research-web-result": "Haven 42 could not verify the approved web-search destination, so it did not open it.",
     "private-context-confirmation-required": "Confirm that the attached content may be sent to your private-network Ollama server.",
     "invalid-context-file-count": "Attach no more than five text files.",
     "invalid-context-file-name": "A selected filename is not supported.",
@@ -1055,7 +1100,10 @@ function humanError(error) {
     "diagnostic-clear-failed": "Haven 42 could not safely clear the troubleshooting events.",
     "diagnostic-removal-failed": "Haven 42 found an unexpected item in the log folder, so it left the folder unchanged.",
   };
-  return messages[error.message] || "Haven 42 safely stopped this request because it could not verify it. Choose Back, then open System → Troubleshooting logs for more details.";
+  if (typeof error.message === "string" && error.message.startsWith("research-")) {
+    return "The research source returned information Haven 42 could not safely verify. Nothing was saved. Try again, or open the troubleshooting logs below.";
+  }
+  return messages[error.message] || "Haven 42 safely stopped this request because it could not verify it. Open troubleshooting logs for more details.";
 }
 
 function modelMatchesQuery(name, query) {
@@ -1221,6 +1269,110 @@ function chooseDiscoveredModel(item) {
     byId("model-choice-status").textContent = `${item.name} is not on your AI server yet, so it cannot be used.`;
   }
   renderModelDiscovery();
+}
+
+function closeModelInstallReview() {
+  byId("model-install-review-layer").classList.add("hidden");
+  byId("model-install-review-layer").setAttribute("aria-hidden", "true");
+  document.querySelector(".shell").inert = false;
+  const target = state.pendingModelInstall?.returnFocus;
+  state.pendingModelInstall = null;
+  byId("install-model-button").disabled = false;
+  if (!byId("model-install-status").textContent.includes("Downloading")) {
+    byId("model-install-status").textContent = "Nothing was downloaded. You can review this model again when you are ready.";
+  }
+  if (target instanceof HTMLElement && target.isConnected) target.focus({ preventScroll: true });
+}
+
+function validateModelInstallPreparation(result, expectedModel) {
+  const fields = [
+    "approvalToken", "destination", "downloadStarted", "expiresInSeconds", "hardwareFit",
+    "kind", "licenseStatus", "model", "persisted", "schemaVersion", "singleUse",
+  ];
+  if (
+    !hasExactObjectKeys(result, fields)
+    || result.schemaVersion !== 1
+    || result.kind !== "model-install-approval"
+    || result.model !== expectedModel
+    || !/^[0-9a-f]{32}$/u.test(result.approvalToken)
+    || result.expiresInSeconds !== 300
+    || result.singleUse !== true
+    || result.persisted !== false
+    || result.downloadStarted !== false
+    || result.licenseStatus !== "review-required"
+    || result.hardwareFit !== "unknown"
+    || !["This computer", "Your connected private AI server"].includes(result.destination)
+  ) throw new Error("invalid-model-install-preparation");
+  return result;
+}
+
+async function prepareModelInstall() {
+  const model = state.desiredModel?.name;
+  if (!model) return;
+  const button = byId("install-model-button");
+  button.disabled = true;
+  byId("model-install-status").textContent = "Preparing the model and destination for review…";
+  try {
+    const preparation = validateModelInstallPreparation(
+      await api("/api/model-install/prepare", { model }),
+      model,
+    );
+    state.pendingModelInstall = { ...preparation, returnFocus: button };
+    byId("model-install-review-name").textContent = preparation.model;
+    byId("model-install-review-destination").textContent = preparation.destination;
+    byId("model-install-review-status").textContent = "Nothing has been downloaded.";
+    document.querySelector(".shell").inert = true;
+    byId("model-install-review-layer").classList.remove("hidden");
+    byId("model-install-review-layer").setAttribute("aria-hidden", "false");
+    byId("model-install-review-dialog").focus({ preventScroll: true });
+  } catch (error) {
+    byId("model-install-status").textContent = humanError(error);
+    button.disabled = false;
+  }
+}
+
+async function executeModelInstall() {
+  const pending = state.pendingModelInstall;
+  if (!pending) return;
+  const model = pending.model;
+  const token = pending.approvalToken;
+  closeModelInstallReview();
+  const button = byId("install-model-button");
+  button.disabled = true;
+  button.textContent = "Downloading…";
+  byId("model-install-status").textContent = `Downloading ${model}. Large models can take several minutes; keep Haven 42 open.`;
+  try {
+    const result = await api("/api/model-install/execute", { approvalToken: token, confirmed: true });
+    if (
+      !result
+      || result.schemaVersion !== 1
+      || result.kind !== "model-install-result"
+      || result.status !== "installed"
+      || result.model !== model
+      || result.verifiedByProviderCatalog !== true
+      || result.selectedAutomatically !== false
+      || !result.modelOption
+      || result.modelOption.name !== model
+      || typeof result.modelOption.digestVerified !== "boolean"
+      || !result.modelOption.capabilityStatus
+    ) throw new Error("invalid-model-install-result");
+    state.modelOptions = [...state.modelOptions.filter((item) => item.name !== model), result.modelOption];
+    state.modelSearchResults = state.modelSearchResults.map((item) => (
+      item.name === model ? { ...item, status: "installed", executionAllowed: true, installCommand: null } : item
+    ));
+    const capabilityId = byId("model-search-capability").value;
+    state.modelSelections[capabilityId] = { mode: "manual", model };
+    state.desiredModel = null;
+    renderModelSelect();
+    renderModelDiscovery();
+    byId("model-choice-status").textContent = `${model} is installed and selected for ${CAPABILITIES[capabilityId].modelLabel.toLocaleLowerCase()}.`;
+    byId("model-search-status").textContent = `${model} was downloaded and verified by your Ollama server.`;
+  } catch (error) {
+    byId("model-install-status").textContent = humanError(error);
+  } finally {
+    button.disabled = false;
+    button.textContent = "Review and install model";
+  }
 }
 
 function updateModelChoiceStatus() {
@@ -1774,6 +1926,15 @@ async function openSetupTroubleshooting() {
   await refreshDiagnosticsQuietly();
   diagnostics.scrollIntoView({ block: "start" });
   diagnostics.querySelector("summary")?.focus();
+}
+
+async function openTroubleshootingLogs() {
+  openSystem();
+  const diagnostics = byId("diagnostics-control");
+  diagnostics.open = true;
+  diagnostics.scrollIntoView({ behavior: motionBehavior(), block: "center" });
+  await refreshDiagnosticsQuietly();
+  diagnostics.querySelector("summary")?.focus({ preventScroll: true });
 }
 
 function linuxSetupRemediation(blockers) {
@@ -3003,6 +3164,43 @@ function isTrustedCitationText(value, maximum) {
   );
 }
 
+function isApprovedWebSearchDestination(value, normalizedQuery = null) {
+  try {
+    const destination = new URL(value);
+    return destination.protocol === "https:"
+      && destination.hostname === "search.brave.com"
+      && destination.port === ""
+      && destination.pathname === "/search"
+      && [...destination.searchParams.keys()].join(",") === "q"
+      && isTrustedCitationText(destination.searchParams.get("q"), 256)
+      && (normalizedQuery === null || destination.searchParams.get("q") === normalizedQuery)
+      && destination.hash === ""
+      && destination.username === ""
+      && destination.password === "";
+  } catch (_error) {
+    return false;
+  }
+}
+
+function isPublicResearchDestination(value, expectedDomain) {
+  try {
+    const destination = new URL(value);
+    const host = destination.hostname.toLocaleLowerCase().replace(/\.$/u, "");
+    return destination.protocol === "https:"
+      && destination.port === ""
+      && destination.username === ""
+      && destination.password === ""
+      && destination.hash === ""
+      && host === expectedDomain
+      && !["localhost"].includes(host)
+      && !host.endsWith(".localhost")
+      && !host.endsWith(".local")
+      && /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/u.test(host);
+  } catch (_error) {
+    return false;
+  }
+}
+
 function validateTrustedCitationBundle(bundle) {
   if (
     !hasExactObjectKeys(bundle, TRUSTED_CITATION_BUNDLE_FIELDS)
@@ -3022,8 +3220,8 @@ function validateTrustedCitationBundle(bundle) {
       !hasExactObjectKeys(citation, TRUSTED_CITATION_FIELDS)
       || !/^source-[0-9a-f]{20}$/u.test(citation.citationId)
       || !isTrustedCitationText(citation.title, 200)
-      || citation.displayDomain !== "en.wikipedia.org"
-      || !/^https:\/\/en\.wikipedia\.org\/\?curid=[1-9][0-9]{0,18}$/u.test(citation.destination)
+      || !isTrustedCitationText(citation.displayDomain, 253)
+      || !isPublicResearchDestination(citation.destination, citation.displayDomain)
       || citation.destinationDisclosureRequired !== true
       || citation.activeNavigationAllowed !== false
       || citationIds.has(citation.citationId)
@@ -3088,9 +3286,9 @@ function validateResearchReviewBundle(bundle) {
     !hasExactObjectKeys(bundle, RESEARCH_REVIEW_FIELDS)
     || bundle.schemaVersion !== 1
     || !/^review-[0-9a-f]{20}$/u.test(bundle.reviewId)
-    || !["query", "page"].includes(bundle.kind)
+    || !["query", "page", "web", "general-web"].includes(bundle.kind)
     || !isTrustedCitationText(bundle.normalizedQuery, 256)
-    || bundle.providerId !== "wikipedia"
+    || !["wikipedia", "brave-browser-search", "brave-search-api"].includes(bundle.providerId)
     || bundle.exactReviewRequired !== true
     || bundle.modelApprovalAccepted !== false
     || bundle.networkAuthorityGranted !== false
@@ -3098,7 +3296,7 @@ function validateResearchReviewBundle(bundle) {
     || bundle.persistenceAllowed !== false
     || bundle.automaticFollowUpAllowed !== false
   ) return null;
-  if (bundle.kind === "query" && bundle.citation !== null) return null;
+  if (bundle.kind === "query" && (bundle.citation !== null || bundle.providerId !== "wikipedia")) return null;
   if (bundle.kind === "page") {
     const citations = validateTrustedCitationBundle({
       schemaVersion: 1,
@@ -3108,6 +3306,24 @@ function validateResearchReviewBundle(bundle) {
       runtimeAdmissionGranted: true,
     });
     if (!citations) return null;
+  }
+  if (bundle.kind === "web") {
+    if (
+      bundle.providerId !== "brave-browser-search"
+      || !hasExactObjectKeys(bundle.citation, ["destination", "displayDomain", "title"])
+      || bundle.citation.title !== "Brave Search"
+      || bundle.citation.displayDomain !== "search.brave.com"
+      || !isApprovedWebSearchDestination(bundle.citation.destination, bundle.normalizedQuery)
+    ) return null;
+  }
+  if (bundle.kind === "general-web") {
+    if (
+      bundle.providerId !== "brave-search-api"
+      || !hasExactObjectKeys(bundle.citation, ["destination", "displayDomain", "title"])
+      || bundle.citation.title !== "Brave Search API and selected public pages"
+      || bundle.citation.displayDomain !== "api.search.brave.com"
+      || bundle.citation.destination !== "https://api.search.brave.com/res/v1/web/search"
+    ) return null;
   }
   return Object.freeze({
     ...bundle,
@@ -3161,8 +3377,10 @@ function closeResearchApprovalReview(decision = null) {
   researchReviewReturnFocus = null;
   if (!target.inert) target.focus({ preventScroll: true });
   if (decision === "cancelled" && execution) {
+    if (execution.kind === "general-web") byId("research-api-key").value = "";
     byId("research-query-status").textContent = "Research request cancelled. Nothing was sent.";
     byId("research-query-status").removeAttribute("data-state");
+    void api("/api/research/approval/cancel", { approvalToken: execution.approvalToken }).catch(() => {});
   }
 }
 
@@ -3180,7 +3398,7 @@ function openResearchApprovalReview(bundle, returnFocus = document.activeElement
       execution !== null
       && (
         !hasExactObjectKeys(execution, ["approvalToken", "kind"])
-        || !["query", "page"].includes(execution.kind)
+        || !["query", "page", "web", "general-web"].includes(execution.kind)
         || !/^[0-9a-f]{32}$/u.test(execution.approvalToken)
         || execution.kind !== review.kind
       )
@@ -3198,9 +3416,18 @@ function openResearchApprovalReview(bundle, returnFocus = document.activeElement
   researchReviewReturnFocus = returnFocus instanceof HTMLElement ? returnFocus : byId("home-nav");
   byId("research-review-kind").textContent = review.kind === "query"
     ? "Search Wikipedia"
-    : "Read one selected Wikipedia page";
+    : review.kind === "web"
+      ? "Open a wider-web search in your browser"
+      : review.kind === "general-web"
+        ? "Search selected public pages and create a cited local answer"
+        : "Read one selected Wikipedia page";
+  byId("research-review-description").textContent = review.kind === "web"
+    ? "Haven 42 will not open the wider-web search unless you approve these exact search words and destination."
+    : review.kind === "general-web"
+      ? "Haven 42 will send the exact query to Brave, read a bounded set of returned public pages, and ask your selected local model for a citation-bound answer."
+      : "Haven 42 will not contact Wikipedia unless you approve this exact request.";
   byId("research-review-query").textContent = review.normalizedQuery;
-  const pageReview = review.kind === "page";
+  const pageReview = ["page", "web", "general-web"].includes(review.kind);
   byId("research-review-source-row").classList.toggle("hidden", !pageReview);
   byId("research-review-destination-row").classList.toggle("hidden", !pageReview);
   byId("research-review-source").textContent = pageReview ? review.citation.title : "";
@@ -3209,7 +3436,7 @@ function openResearchApprovalReview(bundle, returnFocus = document.activeElement
   setResearchReviewBackgroundInert(true);
   layer.classList.remove("hidden");
   layer.setAttribute("aria-hidden", "false");
-  byId("research-review-status").textContent = `${pageReview ? "Page" : "Search"} request ready for your review. Nothing has been sent.`;
+  byId("research-review-status").textContent = `${review.kind === "page" ? "Page" : "Search"} request ready for your review. Nothing has been sent.`;
   byId("research-review-dialog").focus({ preventScroll: true });
   return Object.freeze({ accepted: true, opened: true });
 }
@@ -3308,6 +3535,7 @@ function validateResearchCitationBundleAllowEmpty(bundle) {
 function clearResearchWorkspace() {
   state.researchResultId = null;
   byId("research-query").value = "";
+  byId("research-api-key").value = "";
   byId("research-query-status").textContent = "";
   byId("research-query-status").removeAttribute("data-state");
   byId("research-result-list").replaceChildren();
@@ -3316,9 +3544,85 @@ function clearResearchWorkspace() {
   byId("research-page-destination").textContent = "";
   byId("research-page-content").replaceChildren();
   byId("research-page").classList.add("hidden");
+  byId("research-answer-claims").replaceChildren();
+  byId("research-answer").classList.add("hidden");
   byId("research-tools").removeAttribute("aria-busy");
+  byId("research-tools").open = false;
+  byId("research-open-troubleshooting").classList.add("hidden");
+  byId("research-web-link").href = "about:blank";
+  byId("research-web-link").classList.add("hidden");
   clearTrustedCitations();
   clearResearchApprovalReview();
+}
+
+function renderGeneralWebAnswer(result) {
+  const expected = [
+    "automaticFollowUpAllowed", "citations", "claims", "contentPersisted",
+    "credentialPersisted", "kind", "modelToolAllowed", "networkUsed",
+    "normalizedQuery", "queryPersisted", "schemaVersion", "sourceCount", "status",
+  ];
+  const citations = hasExactObjectKeys(result, expected)
+    ? validateTrustedCitationBundle({
+      schemaVersion: 1,
+      citations: result.citations,
+      exactSourceAccounting: true,
+      modelSuppliedLinksAccepted: false,
+      runtimeAdmissionGranted: true,
+    })
+    : null;
+  const allowed = new Set((citations || []).map((item) => item.citationId));
+  if (
+    !citations
+    || result.schemaVersion !== 1
+    || result.kind !== "general-web-research-answer"
+    || result.status !== "succeeded"
+    || !isTrustedCitationText(result.normalizedQuery, 256)
+    || result.sourceCount !== citations.length
+    || !Array.isArray(result.claims)
+    || result.claims.length < 1
+    || result.claims.length > 20
+    || result.claims.some((claim, index) => (
+      !hasExactObjectKeys(claim, ["citationIds", "claimIndex", "text"])
+      || claim.claimIndex !== index + 1
+      || !isTrustedCitationText(claim.text, 1000)
+      || /(?:https?:\/\/|www\.|\[[^\]]+\]\([^\)]+\))/iu.test(claim.text)
+      || !Array.isArray(claim.citationIds)
+      || claim.citationIds.length < 1
+      || claim.citationIds.length > 5
+      || new Set(claim.citationIds).size !== claim.citationIds.length
+      || claim.citationIds.some((item) => !allowed.has(item))
+    ))
+    || result.networkUsed !== true
+    || result.queryPersisted !== false
+    || result.contentPersisted !== false
+    || result.credentialPersisted !== false
+    || result.modelToolAllowed !== false
+    || result.automaticFollowUpAllowed !== false
+  ) throw new Error("invalid-general-web-answer");
+  const claims = result.claims.map((claim) => {
+    const paragraph = document.createElement("p");
+    paragraph.append(document.createTextNode(`${claim.text} `));
+    const references = document.createElement("span");
+    references.className = "research-claim-citations";
+    references.textContent = claim.citationIds.map((id) => {
+      const index = citations.findIndex((item) => item.citationId === id) + 1;
+      return `[${index}]`;
+    }).join(" ");
+    references.setAttribute("aria-label", `Sources ${claim.citationIds.map((id) => citations.findIndex((item) => item.citationId === id) + 1).join(", ")}`);
+    paragraph.append(references);
+    return paragraph;
+  });
+  byId("research-answer-claims").replaceChildren(...claims);
+  byId("research-answer").classList.remove("hidden");
+  renderTrustedCitations({
+    schemaVersion: 1,
+    citations: result.citations,
+    exactSourceAccounting: true,
+    modelSuppliedLinksAccepted: false,
+    runtimeAdmissionGranted: true,
+  });
+  byId("research-query-status").textContent = `Cited answer ready from ${citations.length} public sources. Nothing was saved.`;
+  byId("research-answer-title").focus({ preventScroll: true });
 }
 
 function renderResearchQueryResult(result) {
@@ -3438,20 +3742,54 @@ async function executeResearchApproval(execution) {
   status.removeAttribute("data-state");
   status.textContent = execution.kind === "query"
     ? "Searching Wikipedia…"
-    : "Reading the approved Wikipedia page…";
+    : execution.kind === "web"
+      ? "Preparing your approved web-search link…"
+      : execution.kind === "general-web"
+        ? "Searching public sources and preparing a cited local answer…"
+      : "Reading the approved Wikipedia page…";
   try {
     const result = await api(
       execution.kind === "query"
         ? "/api/research/query/execute"
-        : "/api/research/page/execute",
+        : execution.kind === "web"
+          ? "/api/research/web/execute"
+          : execution.kind === "general-web"
+            ? "/api/research/general/execute"
+          : "/api/research/page/execute",
       { approvalToken: execution.approvalToken, confirmed: true },
     );
     if (execution.kind === "query") renderResearchQueryResult(result);
-    else renderResearchPageResult(result);
+    else if (execution.kind === "general-web") renderGeneralWebAnswer(result);
+    else if (execution.kind === "web") {
+      if (
+        !hasExactObjectKeys(result, [
+          "automaticFollowUpAllowed", "contentPersisted", "destination", "kind",
+          "modelToolAllowed", "networkUsed", "normalizedQuery", "queryPersisted",
+          "schemaVersion", "status",
+        ])
+        || result.schemaVersion !== 1
+        || result.kind !== "external-web-search-navigation"
+        || result.status !== "approved"
+        || !isTrustedCitationText(result.normalizedQuery, 256)
+        || !isApprovedWebSearchDestination(result.destination, result.normalizedQuery)
+        || result.networkUsed !== false
+        || result.queryPersisted !== false
+        || result.contentPersisted !== false
+        || result.modelToolAllowed !== false
+        || result.automaticFollowUpAllowed !== false
+      ) throw new Error("invalid-research-web-result");
+      const link = byId("research-web-link");
+      link.href = result.destination;
+      link.classList.remove("hidden");
+      status.textContent = "Approved. Choose Open approved web search to view results in a new browser tab. Haven 42 will not read or save those pages.";
+      link.focus({ preventScroll: true });
+    } else renderResearchPageResult(result);
   } catch (error) {
     status.dataset.state = "error";
     status.textContent = humanError(error);
+    byId("research-open-troubleshooting").classList.remove("hidden");
   } finally {
+    if (execution.kind === "general-web") byId("research-api-key").value = "";
     byId("research-tools").removeAttribute("aria-busy");
   }
 }
@@ -3482,6 +3820,7 @@ async function prepareResearchPage(citationId, returnFocus) {
 byId("research-query-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const query = byId("research-query").value.trim();
+  const source = byId("research-source").value;
   const button = byId("research-query-button");
   const status = byId("research-query-status");
   if (!query) return;
@@ -3490,13 +3829,21 @@ byId("research-query-form").addEventListener("submit", async (event) => {
   status.textContent = "Preparing the exact search words for review…";
   try {
     const preparation = validateResearchPreparation(
-      await api("/api/research/query/prepare", { query, resultLimit: 5 }),
-      "query",
+      source === "web"
+        ? await api("/api/research/web/prepare", { query })
+        : source === "general-web"
+          ? await api("/api/research/general/prepare", {
+            query,
+            apiKey: byId("research-api-key").value,
+            model: selectedModel("general.chat"),
+          })
+          : await api("/api/research/query/prepare", { query, resultLimit: 5 }),
+      source === "web" ? "web" : source === "general-web" ? "general-web" : "query",
     );
     if (!openResearchApprovalReview(
       preparation.review,
       button,
-      { kind: "query", approvalToken: preparation.approvalToken },
+      { kind: source === "web" ? "web" : source === "general-web" ? "general-web" : "query", approvalToken: preparation.approvalToken },
     ).opened) throw new Error("research-review-unavailable");
   } catch (error) {
     status.dataset.state = "error";
@@ -3504,6 +3851,25 @@ byId("research-query-form").addEventListener("submit", async (event) => {
   } finally {
     button.disabled = false;
   }
+});
+byId("research-source").addEventListener("change", () => {
+  state.researchResultId = null;
+  byId("research-result-list").replaceChildren();
+  byId("research-results").classList.add("hidden");
+  byId("research-page").classList.add("hidden");
+  byId("research-answer-claims").replaceChildren();
+  byId("research-answer").classList.add("hidden");
+  byId("research-web-link").href = "about:blank";
+  byId("research-web-link").classList.add("hidden");
+  byId("research-query-status").textContent = "";
+  byId("research-open-troubleshooting").classList.add("hidden");
+  const general = byId("research-source").value === "general-web";
+  byId("research-api-key-row").classList.toggle("hidden", !general);
+  byId("research-api-key-help").classList.toggle("hidden", !general);
+  byId("research-api-key").required = general;
+});
+byId("research-web-link").addEventListener("click", () => {
+  byId("research-tools").open = false;
 });
 
 function updatePromptHistoryStatus() {
@@ -4144,16 +4510,37 @@ async function bootstrap() {
       !state.alphaTextOnly || Object.hasOwn(CAPABILITIES, item.id)
     ));
     renderCapabilities();
-    let managedConnected = false;
+    let providerConnected = false;
     if (result.alpha?.managedSetupCompletedCandidate === true) {
       try {
         const managed = await api("/api/alpha/connect-managed-provider", {});
         validateManagedProviderResume(managed);
         applyProviderConnection(managed, managed.managedResume.endpoint, 120, 300);
-        managedConnected = true;
+        providerConnected = true;
         byId("setup-wizard").classList.add("hidden");
       } catch (_error) {
         byId("wizard-description").textContent = "Haven 42 found local setup data but could not safely verify and start it. Guided setup will explain what needs attention; no replacement files were downloaded.";
+      }
+    }
+    if (!providerConnected && result.provider?.connected === true) {
+      try {
+        const resumed = await api("/api/resume-provider", {});
+        if (
+          resumed.sessionResume !== true
+          || resumed.configurationPersisted !== false
+          || typeof resumed.endpoint !== "string"
+          || !Number.isSafeInteger(resumed.timeoutSeconds)
+        ) throw new Error("invalid-provider-session-resume");
+        applyProviderConnection(
+          resumed,
+          resumed.endpoint,
+          resumed.timeoutSeconds,
+          resumed.idleUnloadSeconds,
+        );
+        providerConnected = true;
+        byId("setup-wizard").classList.add("hidden");
+      } catch (error) {
+        byId("wizard-description").textContent = `Haven 42 remembered an AI connection for this running session but could not verify that it still works. Setup is shown so you can reconnect safely. ${humanError(error)}`;
       }
     }
     if (!state.alphaTextOnly) await loadWorkflows();
@@ -4165,12 +4552,11 @@ async function bootstrap() {
     byId("update-status").textContent = result.updates?.mode === "disabled"
       ? "Disabled · no network"
       : "Unknown";
-    if (!managedConnected) {
+    if (!providerConnected) {
       state.lastFocusBeforeWizard = document.activeElement;
       byId("setup-wizard").querySelector(".wizard-card").focus();
     } else {
-      byId("prompt").focus();
-      scheduleSectionTour("chat");
+      restoreLastSection();
     }
     await refreshAlphaMetrics();
     await refreshManagedStorageStatus();
@@ -4415,6 +4801,37 @@ byId("copy-model-command").addEventListener("click", async () => {
     byId("copy-model-command").textContent = "Select and copy the command above";
   }
 });
+byId("install-model-button").addEventListener("click", () => { void prepareModelInstall(); });
+byId("model-install-review-close").addEventListener("click", closeModelInstallReview);
+byId("model-install-review-cancel").addEventListener("click", closeModelInstallReview);
+byId("model-install-review-approve").addEventListener("click", (event) => {
+  if (!event.isTrusted) {
+    byId("model-install-review-status").textContent = "Approval requires a direct user action.";
+    return;
+  }
+  void executeModelInstall();
+});
+byId("model-install-review-layer").addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeModelInstallReview();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const controls = [...byId("model-install-review-dialog").querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )];
+  if (controls.length === 0) return;
+  const first = controls[0];
+  const last = controls[controls.length - 1];
+  if (event.shiftKey && [first, byId("model-install-review-dialog")].includes(document.activeElement)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
 
 byId("text-form").addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -4422,6 +4839,7 @@ byId("text-form").addEventListener("submit", async (event) => {
   const prompt = byId("prompt");
   const content = prompt.value.trim();
   if (!content || !state.connected) return;
+  clearResearchWorkspace();
   const capabilityId = suggestedCapability(content);
   const capability = CAPABILITIES[capabilityId];
   const automaticMode = byId("text-mode").value === "automatic";
@@ -4839,6 +5257,8 @@ byId("energy-estimator-form").addEventListener("submit", calculateElectricityEst
 byId("diagnostics-control").addEventListener("toggle", () => {
   if (byId("diagnostics-control").open) void refreshDiagnosticsQuietly();
 });
+byId("open-diagnostics").addEventListener("click", () => { void openTroubleshootingLogs(); });
+byId("research-open-troubleshooting").addEventListener("click", () => { void openTroubleshootingLogs(); });
 
 byId("prepare-problem-report").addEventListener("click", () => {
   void prepareProblemReport();

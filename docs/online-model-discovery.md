@@ -24,9 +24,18 @@ but it never executes that command, calls `/api/pull`, or changes configuration.
 After external installation, reconnect to verify provider inventory and digest.
 
 `config/model-discovery-contract.json` defines the normalized candidate record.
-`config/model-discovery-sources.json` defines source adapters and independent
-seed queries. The initial adapters are the Ollama library and Hugging Face Hub.
-Queries are search inputs, not an allowlist of model families.
+`config/model-discovery-sources.json` defines source adapters, reviewed
+publisher namespaces, and independent seed queries. The adapters cover the
+Ollama library, general Hugging Face Hub search, and direct modification-time
+feeds for reviewed publisher namespaces. Queries are search inputs, not an
+allowlist of model families.
+
+The publisher feed is deliberately independent of search rank. It polls each
+configured namespace by modification time and retains the immutable Hub
+revision. This closes a real discovery gap found on 2026-08-16: Qwen 3.8 had
+official public local weights, but a popularity/trending search did not return
+them promptly. Search engines and mutable `latest` tags are therefore useful
+signals, not release evidence.
 
 ## Default Posture
 
@@ -46,6 +55,8 @@ normal path.
 An online discovery helper may:
 
 - Query configured public Ollama and Hugging Face metadata when explicitly requested.
+- Poll configured official publisher namespaces by modification time so a new
+  repository does not have to become popular before it is reviewed.
 - Search arbitrary names, publishers, capabilities, formats, or families.
 - Record immutable revisions, publisher identity, license tags, gated status,
   task tags, formats, quantization signals, and possible runtimes when a source provides them.
@@ -79,6 +90,11 @@ repository and a new upstream model candidate.
 The updater runs only when a person starts it. It does not edit the
 certification inventory, download a model, prepare or start a soak, change an
 automatic model choice, or contact a test machine.
+
+`config/model-release-watch.json` is the smaller human-reviewed queue produced
+after discovery. It keeps high-value local candidates, runtime and license
+gaps, realistic hardware positions, and oversized-but-not-runnable releases
+visible without adding them to automatic selection.
 
 Windows PowerShell:
 
@@ -156,6 +172,22 @@ Hugging Face discovery uses public Hub model search metadata. Its normalized
 record distinguishes a Hub repository from a direct Ollama pull, retains the
 reported immutable revision when present, and marks every result
 `candidate-only`. See the official [Hugging Face Hub API documentation](https://huggingface.co/docs/huggingface_hub/package_reference/hf_api#huggingface_hub.HfApi.list_models).
+
+The `official-publishers` source instead calls the same public API once per
+configured namespace with `sort=lastModified`. A rolling 45-day window is the
+minimum lookback. `--publisher-since-utc` can widen that window for an
+investigation, but it cannot narrow it; this prevents older repository metadata
+from hiding a newly announced or newly relevant family. Records without a
+license or immutable revision remain blocked. Pipeline types outside Haven
+42's configured assistant capability lanes remain visible only in
+`SkippedCandidates`.
+
+The `ollama-newest` source reads the fixed newest-first registry index and then
+checks each visible family page for local tags. It does not need to know the
+family name in advance. Cloud-only tags remain skipped, and a family with no
+versioned local tag remains an unresolved review record rather than becoming a
+pull command. The older seeded Ollama source remains useful for deep tag review
+of already known families.
 
 For offline parser validation, use a local HTML fixture instead of the network:
 

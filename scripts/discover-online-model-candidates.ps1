@@ -5,6 +5,7 @@ param(
     [string]$SourceBaseUrl,
     [string]$HuggingFaceBaseUrl,
     [string]$SourceHtmlPath,
+    [string]$NewestSourceHtmlPath,
     [string]$HuggingFaceJsonPath,
     [string]$OutputPath,
     [string]$MarkdownOutputPath,
@@ -51,6 +52,7 @@ foreach ($value in $Families) { $arguments += @("--families", $value) }
 if ($SourceBaseUrl) { $arguments += @("--ollama-base-url", $SourceBaseUrl) }
 if ($HuggingFaceBaseUrl) { $arguments += @("--hugging-face-base-url", $HuggingFaceBaseUrl) }
 if ($SourceHtmlPath) { $arguments += @("--ollama-html-fixture", $SourceHtmlPath) }
+if ($NewestSourceHtmlPath) { $arguments += @("--ollama-newest-html-fixture", $NewestSourceHtmlPath) }
 if ($HuggingFaceJsonPath) { $arguments += @("--huggingface-json-fixture", $HuggingFaceJsonPath) }
 if ($ModelProfilePath) { $arguments += @("--model-profile-path", $ModelProfilePath) }
 if ($PreviousReportPath) { $arguments += @("--previous-report-path", $PreviousReportPath) }

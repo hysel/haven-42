@@ -782,6 +782,15 @@ PY
   return "$result"
 }
 
+test_runtime_certification_discovery() {
+  local output
+  output="$(python3 "$REPO_ROOT/scripts/test-runtime-certification-candidates.py" 2>&1)" || {
+    printf '%s\n' "$output" >&2
+    return 1
+  }
+  grep -Fq "passed 23 checks" <<< "$output"
+}
+
 test_model_catalog_assembly() {
   temp_root="$(mktemp -d)"
   discovery_path="$temp_root/discovery.json"
@@ -2636,7 +2645,11 @@ assert policy["text"]["missingModelDownloadsAllowed"] is False
 assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
 assert policy["modelDiscovery"]["redirectsAllowed"] is False
 assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
-assert policy["modelDiscovery"]["pullApiAllowed"] is False
+assert policy["modelDiscovery"]["pullApiAllowed"] is True
+assert policy["modelDiscovery"]["explicitInstallApprovalRequired"] is True
+assert policy["modelDiscovery"]["installCandidateMustComeFromCurrentSessionSearch"] is True
+assert policy["modelDiscovery"]["providerCatalogVerificationRequiredAfterPull"] is True
+assert policy["modelDiscovery"]["automaticSelectionAfterInstallAllowed"] is False
 assert policy["modelDiscovery"]["commandExecutionAllowed"] is False
 assert policy["softwareWorkflows"]["executionMode"] == "plan-only"
 assert policy["softwareWorkflows"]["rendererArgumentsAllowed"] is False
@@ -2695,7 +2708,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-web-research-native-page-transport.py" |
     grep -q "41 offline security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-runtime.py" |
-    grep -q "40 hostile offline checks" || return 1
+    grep -q "48 hostile offline checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-transport-guard.py" |
     grep -q "25 hostile and exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-approval-state.py" |
@@ -3051,6 +3064,7 @@ run_test "editor compatibility docs cover config and tool validation" test_edito
 run_test "model tool-use validation docs define evidence workflow" test_model_tool_use_validation_doc
 run_test "online model discovery docs preserve offline local-first defaults" test_online_model_discovery_doc
 run_test "online model discovery normalizes Ollama and Hugging Face fixtures" test_multi_source_model_discovery
+run_test "runtime release discovery is official-source-only and fail closed" test_runtime_certification_discovery
 run_test "model catalog assembly is license hardware evidence and input safe" test_model_catalog_assembly
 run_test "multi-repository validation docs define sanitized evidence workflow" test_multi_repository_validation_doc
 run_test "sample repository factory validation evidence is sanitized" test_sample_repository_factory_validation_evidence
