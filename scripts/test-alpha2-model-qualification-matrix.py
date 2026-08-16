@@ -53,7 +53,7 @@ def main() -> None:
         if candidate["state"] == "ready-for-qualification":
             assert candidate["requiredProfiles"]
         else:
-            assert candidate["state"].startswith("deferred-")
+            assert candidate["state"].startswith(("deferred-", "failed-"))
             assert candidate["requiredProfiles"] == []
 
     candidate_profiles = {
@@ -93,7 +93,7 @@ def main() -> None:
         "muse-glimmer-30b-mlx-nvfp4",
     }
     assert muse_candidates["muse-glimmer-30b-q4"]["state"] == (
-        "deferred-requires-compatible-runtime-and-hardware-approval"
+        "failed-needs-retest-ollama-0.32.9-task-contract"
     )
     assert muse_candidates["muse-glimmer-30b-mlx-nvfp4"]["state"] == (
         "deferred-owner-hardware-not-available"
@@ -112,6 +112,7 @@ def main() -> None:
         ]
     assert muse_candidates["muse-glimmer-30b-q4"]["plannedTest"] == {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-q4",
+        "negativeEvidenceReference": "examples/nvidia-v100-ollama0329-task-contract-retry.md",
         "minimumOllamaVersion": "0.32.8",
         "exactRuntimeVersionRequiredAtExecution": True,
         "admissionFloor": {

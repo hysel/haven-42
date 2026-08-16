@@ -109,7 +109,10 @@
         {
           "engine": "ollama",
           "minimumRuntimeVersion": "0.32.8",
-          "admissionState": "candidate-runtime-evidence-required",
+          "admissionState": "failed-task-contract-retest-required",
+          "evidenceReferences": [
+            "examples/nvidia-v100-ollama0329-task-contract-retry.md"
+          ],
           "modelArtifact": {
             "kind": "ollama-registry-manifest",
             "exactTag": "muse-glimmer:30b",

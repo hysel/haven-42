@@ -572,10 +572,12 @@ Engineering evidence is narrower than availability by default. None of these
 qualification results changes the automatic model ladder or downloads a model
 for an end user.
 
-## Models queued for testing
+## Models queued for testing or retest
 
-These models are planned, not verified. Adding a model here does not download
-it, start a test machine, or make it an automatic Haven 42 choice.
+These models are planned, partially tested, or awaiting a controlled retest.
+Adding a model here does not download it, start a test machine, or make it an
+automatic Haven 42 choice. A failed route stays visibly failed; evidence from
+another engine cannot clear it.
 
 To suggest another model, use the
 [model test request form](https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml).
@@ -585,7 +587,7 @@ addresses, usernames, paths, logs, or credentials.
 
 | Model | Planned test | What must happen first | Status |
 | --- | --- | --- | --- |
-| [**Muse Glimmer 30B, Q4_K_M**](https://ollama.com/library/muse-glimmer) | Chat, writing, summarization, image understanding, tool use, failure recovery, and a 30-minute soak on a high-memory NVIDIA computer | Use an exact compatible Ollama version (at least 0.32.8), verify the pinned artifact again, meet the conservative 32 GiB system-memory and 24 GiB usable-GPU-memory test floor, and receive an explicit start prompt | ⬜ Not tested |
+| [**Muse Glimmer 30B, Q4_K_M**](https://ollama.com/library/muse-glimmer) | Retry Chat, Writing, and Summarization before attempting image understanding, tool use, failure recovery, or a 30-minute soak | The exact Ollama 0.32.9 artifact failed the mandatory task-contract gate on the dual-V100 profile. Keep that Ollama route blocked until a changed exact runtime/artifact or an independently reviewed control change receives a new explicit test start. The separate llama.cpp route remains untested. | ❌ Ollama 0.32.9 task contract did not pass; retest required |
 | [**Muse Glimmer 30B, MLX NVFP4-DFlash**](https://ollama.com/library/muse-glimmer:30b-mlx) | The same capability and soak checks on Apple silicon | **Owner-deferred until suitable Apple Silicon hardware is available.** After that, use an exact compatible Ollama version (at least 0.32.7), verify the pinned artifact again, meet the conservative 48 GiB unified-memory test floor, and receive an explicit start prompt | ⬜ Not tested |
 | [**NVIDIA Nemotron 3.5 Lightning 30B-A3B, Q4_K_M**](https://ollama.com/library/nemotron-3.5-lightning:30b-a3b-q4_K_M) | Tool use, thinking-mode behavior, failure recovery, and bounded-context checks | Keep the exact Ollama 0.32.9 and manifest binding, prove the remaining capabilities and exact multi-GPU distribution, and complete human review | 🧪 Chat, writing, summarization, GPU residency, a 30-minute soak, and exact GPU-board energy passed; 81 samples across nine cycles at 62.067 tokens/s |
 | [**NVIDIA Nemotron 3.5 Lightning 30B-A3B, Q8_0**](https://ollama.com/library/nemotron-3.5-lightning:30b-a3b-q8_0) | The same remaining checks, plus a quality, speed, memory, and energy comparison with Q4_K_M | Keep the exact Ollama 0.32.9 and manifest binding, prove the remaining capabilities and exact multi-GPU distribution, and complete human review | 🧪 Chat, writing, summarization, GPU residency, and a 30-minute soak passed; 72 samples across eight cycles at 47.574 tokens/s |

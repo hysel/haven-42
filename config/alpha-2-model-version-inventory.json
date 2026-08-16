@@ -319,7 +319,7 @@
           "version": "30B",
           "artifactStatus": "local-artifacts-verified",
           "officialSource": "https://ollama.com/library/muse-glimmer/tags",
-          "qualificationState": "planned-awaiting-compatible-runtime-and-hardware",
+          "qualificationState": "ollama-0.32.9-task-contract-failed-other-routes-untested",
           "candidates": [
             {
               "id": "muse-glimmer-30b-q4",
