@@ -5452,7 +5452,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($imageEvidenceOutput.Output -match "9 hostile checks") -Message "Image-runtime inventory, notices, checksums, and SBOM evidence must remain deterministic, mutually consistent, path-safe, non-overwriting, and explicitly unfit for distribution."
     $roadmapLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-roadmap-closure-ledger.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Roadmap closure ledger tests should pass."
-    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "47 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
+    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "46 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
     $localBatchLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-batch-task-ledger.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Recovered local-batch task ledger tests should pass."
     Assert-True -Condition (($localBatchLedgerOutput -join "`n") -match "374 exact tasks across 18 phases") -Message "The recovered conversation plan must retain all 374 stable task records."
@@ -5561,6 +5561,9 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $researchSynthesisOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-cited-synthesis.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline cited-synthesis hostile tests should pass."
     Assert-True -Condition (($researchSynthesisOutput -join "`n") -match "26 checks") -Message "Research synthesis must remain source-bound, exactly cited, link-free, effect-free, and runtime-unadmitted."
+    $trustedCitationOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-web-research-trusted-citation-renderer.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Trusted citation renderer foundation tests should pass."
+    Assert-True -Condition (($trustedCitationOutput -join "`n") -match "39 checks") -Message "Trusted citations must remain exact, text-only, destination-disclosed, accessible, memory-only, inactive, and unable to gain network, navigation, model-tool, or persistence authority."
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/local-image-runtime-license-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, image-runtime license, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
 }
 

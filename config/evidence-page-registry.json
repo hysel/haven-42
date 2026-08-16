@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "691710c8b3756a88966af49511e81d96450faf5746a477578075aad65c1d726b",
-  "recordCount": 126,
+  "catalogSha256": "a02251081ad4969fed5d6baad2dbdbdaa3c1165801e0359dcbba1305863222de",
+  "recordCount": 127,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -375,6 +375,30 @@
         "repositorySource": "docs/evidence-records/evidence-ef3643c281067618.md",
         "wikiPage": "Evidence-Record-ef3643c281067618.md",
         "title": "Shared agent CLI model test harness"
+      }
+    },
+    {
+      "id": "evidence-87f09934d8d4353a",
+      "claim": {
+        "schema_version": "2",
+        "area": "controlled-research",
+        "subject": "Dormant trusted citation renderer",
+        "surface": "Haven 42 web UI",
+        "surface_version": "1",
+        "provider": "Fixed English Wikipedia citation shape",
+        "os": "Headless browser source",
+        "model": "no-model",
+        "operation": "inert-destination-disclosure",
+        "validation_mode": "browser-and-static",
+        "status": "static-validated",
+        "evidence": "docs/controlled-web-research-foundation.md",
+        "notes": "The renderer passed 39 static checks and a 19-check slice of the 548-check real-browser flow for exact engine-accounted input, text-only output, full inactive destination disclosure, accessible status, hostile refusal, and New task cleanup; no runtime invocation, network, model-tool, active-navigation, persistence, telemetry, or follow-up authority is granted."
+      },
+      "sourceEvidence": "docs/controlled-web-research-foundation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-87f09934d8d4353a.md",
+        "wikiPage": "Evidence-Record-87f09934d8d4353a.md",
+        "title": "Dormant trusted citation renderer"
       }
     },
     {

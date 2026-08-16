@@ -2681,7 +2681,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-build-local-image-runtime-review-evidence.py" |
     grep -q "9 hostile checks" || return 1
   python3 "$REPO_ROOT/scripts/test-roadmap-closure-ledger.py" |
-    grep -q "47 exact open-item classifications" || return 1
+    grep -q "46 exact open-item classifications" || return 1
   python3 "$REPO_ROOT/scripts/test-local-batch-task-ledger.py" |
     grep -q "374 exact tasks across 18 phases" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" |
@@ -2754,6 +2754,8 @@ PY
     grep -q "26 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-cited-synthesis.py" |
     grep -q "26 checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-web-research-trusted-citation-renderer.py" |
+    grep -q "39 checks" || return 1
 }
 
 test_task_composition_and_repository_privacy() {

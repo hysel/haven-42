@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "750255e9f443c4b934c91631e6679223af8838f4fccbe8bcda2a560b163944a2",
-      "sizeBytes": 59566
+      "sha256": "eda39af640083feace95eb6d371dc1b19f5fb2e90eb0ab8fc7cc4523f5b21a83",
+      "sizeBytes": 60292
     },
     {
       "path": "web/static/accessibility.html",
@@ -13,13 +13,13 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "bfb3b44bc92199321acd3bddc76da57cb76d1beb584effbb8b7f70d008c6a2d1",
-      "sizeBytes": 207850
+      "sha256": "bd70493ceec802fd7a98d674335950477ff7f92df1ccea6c5bd20f390cac232a",
+      "sizeBytes": 211485
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "8ea696174420c5c63733293583788b76375e8c12713b2126cbcefae2d7194c39",
-      "sizeBytes": 63966
+      "sha256": "4a82d51ff1446004fbd43b39f8152dde17b15daec7cee020872b1349079d1a38",
+      "sizeBytes": 64927
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -28,8 +28,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "691710c8b3756a88966af49511e81d96450faf5746a477578075aad65c1d726b",
-      "sizeBytes": 51119
+      "sha256": "a02251081ad4969fed5d6baad2dbdbdaa3c1165801e0359dcbba1305863222de",
+      "sizeBytes": 51736
     },
     {
       "path": "config/agent-surface-capabilities.json",
