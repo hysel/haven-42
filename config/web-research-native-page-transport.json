@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.native-selected-page-transport",
+  "status": "development-owner-approved-selected-page-only",
+  "queryTransportContract": "config/web-research-native-query-transport.json",
+  "pageFoundationContract": "config/web-research-page-foundation.json",
+  "providerId": "wikipedia-page-extract",
+  "network": {
+    "fixedHost": "en.wikipedia.org",
+    "fixedPort": 443,
+    "fixedPath": "/w/api.php",
+    "fixedParameters": {
+      "action": "query",
+      "exintro": "1",
+      "explaintext": "1",
+      "format": "json",
+      "formatversion": "2",
+      "prop": "extracts",
+      "redirects": "0"
+    },
+    "pageIdParameter": "pageids",
+    "systemTrustStoreRequired": true,
+    "dnsPassesRequired": 2,
+    "publicIpOnly": true,
+    "selectedIpPinnedForConnection": true,
+    "redirectsAllowed": false,
+    "responseCompressionAllowed": false,
+    "proxyEnvironmentInherited": false,
+    "credentialsAllowed": false,
+    "cookiesAllowed": false,
+    "timeoutSeconds": 10,
+    "maximumResponseBytes": 262144,
+    "maximumJsonDepth": 8,
+    "maximumJsonNodes": 2048,
+    "requiredContentType": "application/json"
+  },
+  "selection": {
+    "exactNormalizedQueryRequired": true,
+    "trustedCitationIdRequired": true,
+    "exactEngineDerivedDestinationRequired": true,
+    "queryIsRevalidatedBeforePageRetrieval": true,
+    "oneSelectedPagePerProcess": true,
+    "modelCannotApprove": true
+  },
+  "authority": {
+    "explicitDevelopmentCliAllowed": true,
+    "selectedPageNetworkAllowed": true,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "modelToolAllowed": false,
+    "activeNavigationAllowed": false,
+    "persistenceAllowed": false,
+    "automaticFollowUpAllowed": false,
+    "pageExecutionAllowed": false,
+    "downloadAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}

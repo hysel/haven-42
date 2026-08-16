@@ -169,6 +169,7 @@ docs/windows-alpha-release.md	Eng-Windows-Alpha-Release.md	Windows Alpha Release
 docs/wiki-coding-tools.md	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models
 docs/engineering-index.md	Engineering-Index.md	Engineering and Validation Index
 examples/windows-native-web-research-query-validation.md	Eng-Windows-Native-Web-Research-Query-Validation.md	Windows Native Web Research Query Validation
+examples/native-web-research-selected-page-validation.md	Eng-Native-Web-Research-Selected-Page-Validation.md	Native Web Research Selected Page Validation
 docs/wiki-evidence-record-index.md	Evidence-Record-Index.md	Evidence Record Index
 docs/evidence-records/evidence-2853e8649d47ac07.md	Evidence-Record-2853e8649d47ac07.md	Aider CLI disposable write-smoke validation
 docs/evidence-records/evidence-ef5cd44e633c9e80.md	Evidence-Record-ef5cd44e633c9e80.md	Aider CLI model test harness
@@ -294,3 +295,4 @@ docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ed
 docs/evidence-records/evidence-22701a5715776e0d.md	Evidence-Record-22701a5715776e0d.md	TypeScript frontend generated sample
 docs/evidence-records/evidence-01b01f98b537ca75.md	Evidence-Record-01b01f98b537ca75.md	Native fixed-provider metadata query
 docs/evidence-records/evidence-7207da1f9eca0995.md	Evidence-Record-7207da1f9eca0995.md	Native fixed-provider metadata query on Linux
+docs/evidence-records/evidence-f36876d9cc12face.md	Evidence-Record-f36876d9cc12face.md	Native selected-page transport on Windows and Linux

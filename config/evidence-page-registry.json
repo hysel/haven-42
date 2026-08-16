@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "ec4127907ef5aa9b976a7e4ec3e6b3903cef79caa37325779b9ea58f6d7365bc",
-  "recordCount": 124,
+  "catalogSha256": "c42c7df1bf40f7884ae22dd7b6775a3c6e6d9df9e9159a0defffd7d86b63fb02",
+  "recordCount": 125,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -2991,6 +2991,30 @@
         "repositorySource": "docs/evidence-records/evidence-7207da1f9eca0995.md",
         "wikiPage": "Evidence-Record-7207da1f9eca0995.md",
         "title": "Native fixed-provider metadata query on Linux"
+      }
+    },
+    {
+      "id": "evidence-f36876d9cc12face",
+      "claim": {
+        "schema_version": "2",
+        "area": "web-research",
+        "subject": "Native selected-page transport on Windows and Linux",
+        "surface": "Haven 42 development selected-page transport",
+        "surface_version": "1",
+        "provider": "Wikipedia query and extracts APIs",
+        "os": "Windows and native headless Linux",
+        "model": "none",
+        "operation": "selected-page-text-transport-integrity-cleanup",
+        "validation_mode": "development-network",
+        "status": "partial-pass",
+        "evidence": "examples/native-web-research-selected-page-validation.md",
+        "notes": "One exact selected source passed fresh engine citation and destination binding, public-DNS revalidation, pinned TLS, bounded plain-text extraction, 41 hostile checks, matching cross-platform content digests, and residue-free Linux cleanup; runtime, UI, model-tool, navigation, persistence, follow-up, package, hostile-local-server, macOS, and promotion gates remain open."
+      },
+      "sourceEvidence": "examples/native-web-research-selected-page-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-f36876d9cc12face.md",
+        "wikiPage": "Evidence-Record-f36876d9cc12face.md",
+        "title": "Native selected-page transport on Windows and Linux"
       }
     }
   ]

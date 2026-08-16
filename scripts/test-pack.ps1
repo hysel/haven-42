@@ -5468,6 +5468,9 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $webNativeTransportOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-native-transport.py"))
     Assert-Equal -Actual $webNativeTransportOutput.ExitCode -Expected 0 -Message "Native web-research transport security tests should pass. Output: $($webNativeTransportOutput.Output)"
     Assert-True -Condition ($webNativeTransportOutput.Output -match "21 offline security checks") -Message "The development query transport must remain fixed-host, TLS-validated, DNS-revalidated, public-address-pinned, uncompressed, bounded, and outside runtime and package authority."
+    $webNativePageOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-native-page-transport.py"))
+    Assert-Equal -Actual $webNativePageOutput.ExitCode -Expected 0 -Message "Native selected-page transport security tests should pass. Output: $($webNativePageOutput.Output)"
+    Assert-True -Condition ($webNativePageOutput.Output -match "41 offline security checks") -Message "The development selected-page transport must remain citation-bound, fixed-host, DNS-revalidated, pinned, bounded, inert, and outside runtime, model-tool, UI, file, follow-up, and package authority."
     $webTransportGuardOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-transport-guard.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research transport-guard tests should pass."
     Assert-True -Condition (($webTransportGuardOutput -join "`n") -match "25 hostile and exclusion checks") -Message "Future transport receipts must enforce destination, DNS, rebinding, redirect, content, time, and size boundaries without network authority."

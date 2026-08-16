@@ -53,6 +53,22 @@ It imports no network library, cannot fetch a URL, executes no page content,
 writes no file, and remains absent from the application and package. This
 tests extraction behavior without implementing selected-page retrieval.
 
+A separate development-only selected-page command now binds that extractor to
+one fresh engine-issued Wikipedia citation. The command requires an exact
+normalized query, citation identifier, and disclosed destination, repeats the
+fixed metadata query before retrieval, derives the numeric page identity from
+the validated destination, performs the same two-pass public DNS and pinned
+TLS connection controls, and accepts only a strict bounded JSON plain-text
+extract from the fixed API. It follows no redirects, sends no credentials or
+cookies, ignores proxy environment settings, writes no file, and exposes no
+active navigation. Forty-one hostile offline checks cover stale or forged
+citations, destination changes, private addresses, response identity, encoding,
+type, size, structure, and package/runtime exclusion. Sanitized source runs on
+Windows and native headless Linux produced the same content digest; the Linux
+run used a hash-listed disposable bundle and left no matching temporary
+directory. This is development source evidence only, not a product route,
+model tool, UI, package feature, or correctness claim.
+
 A separate 26-check cited-synthesis foundation accepts only the validated
 result bundle and optional inert page segments from those two boundaries. It
 builds a bounded, digest-accounted, URL-free source envelope and validates
@@ -72,12 +88,12 @@ self-contained bundle then passed. This establishes source-test parity only.
 The boundary remains deliberately absent from the product runtime and portable
 package, and macOS source evidence plus all native package smoke remain open.
 
-Future product work still requires explicit per-query user action and
-cancellation, trusted citation rendering, transport-to-extractor binding for
-separately approved pages, residue-free cleanup, source/package parity, and
-native evidence on each supported platform. Citation navigation remains a
-user-reviewed UI decision. The live development query pass grants none of
-those authorities.
+Future product work still requires explicit accessible per-query and per-page
+review and cancellation, trusted citation rendering, runtime lifecycle
+cleanup, hostile local-server evidence, source/package parity, and native
+evidence on every supported platform. Citation navigation remains a
+user-reviewed UI decision. The live development source passes grant none of
+those product authorities.
 
 `config/web-research-expansion-evaluation.json` records two later gates without
 activating either: a self-hosted provider must meet the same public-destination
