@@ -254,6 +254,8 @@ docs/evidence-records/evidence-4e44f89b53777abb.md	Evidence-Record-4e44f89b53777
 docs/evidence-records/evidence-749f44fc9f8604f4.md	Evidence-Record-749f44fc9f8604f4.md	Laguna XS 2.1 Ollama conformance
 docs/evidence-records/evidence-b1e852d6e517e410.md	Evidence-Record-b1e852d6e517e410.md	Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-739440533a3f6c7a.md	Evidence-Record-739440533a3f6c7a.md	Granite 4.1 8B on Intel Arc B580
+docs/evidence-records/evidence-14e2d57e6336807d.md	Evidence-Record-14e2d57e6336807d.md	Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA
+docs/evidence-records/evidence-83b23ecb83be18a7.md	Evidence-Record-83b23ecb83be18a7.md	Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-999c817bcb50d175.md	Evidence-Record-999c817bcb50d175.md	Nemotron 3.5 Lightning Q4 on dual Tesla V100
 docs/evidence-records/evidence-b4871f9bcbf09daa.md	Evidence-Record-b4871f9bcbf09daa.md	Nemotron 3.5 Lightning Q8 on dual Tesla V100
 docs/evidence-records/evidence-029248b547774d8a.md	Evidence-Record-029248b547774d8a.md	Ollama 0.32.9 five-model task-contract retry on dual Tesla V100
