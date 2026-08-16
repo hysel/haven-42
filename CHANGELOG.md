@@ -11,6 +11,11 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a dormant, fail-closed trusted-citation renderer for the future
+  controlled web-research flow. It accepts only exact engine-accounted fixed-
+  provider data, renders inert text with full destination disclosure, clears on
+  New task, and grants no search, navigation, model-tool, or persistence access.
+
 - Added a sanitized, exact-profile Quadro RTX 5000 power measurement and a
   machine-readable coverage ledger that keeps every physical Alpha 2 graphics
   card visible until it has an individual reference measurement.

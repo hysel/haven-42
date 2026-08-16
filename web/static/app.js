@@ -532,6 +532,7 @@ function validateAssuranceSummary(result) {
     value
     && typeof value === "object"
     && !Array.isArray(value)
+    && Object.getPrototypeOf(value) === Object.prototype
     && Object.keys(value).sort().join(",") === [...fields].sort().join(",")
   );
   const effects = [
@@ -2961,6 +2962,102 @@ function addMessage(role, content, label, answerReportIdentity = null) {
   return article;
 }
 
+const TRUSTED_CITATION_FIELDS = Object.freeze([
+  "activeNavigationAllowed", "citationId", "destination",
+  "destinationDisclosureRequired", "displayDomain", "title",
+]);
+const TRUSTED_CITATION_BUNDLE_FIELDS = Object.freeze([
+  "citations", "exactSourceAccounting", "modelSuppliedLinksAccepted",
+  "runtimeAdmissionGranted", "schemaVersion",
+]);
+
+function hasExactObjectKeys(value, fields) {
+  return Boolean(
+    value
+    && typeof value === "object"
+    && !Array.isArray(value)
+    && Object.keys(value).sort().join("\u0000") === [...fields].sort().join("\u0000")
+  );
+}
+
+function isTrustedCitationText(value, maximum) {
+  return (
+    typeof value === "string"
+    && value.length > 0
+    && value.length <= maximum
+    && value === value.trim()
+    && !/[\u0000-\u001f\u007f-\u009f\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff<>]/u.test(value)
+  );
+}
+
+function validateTrustedCitationBundle(bundle) {
+  if (
+    !hasExactObjectKeys(bundle, TRUSTED_CITATION_BUNDLE_FIELDS)
+    || bundle.schemaVersion !== 1
+    || bundle.exactSourceAccounting !== true
+    || bundle.modelSuppliedLinksAccepted !== false
+    || bundle.runtimeAdmissionGranted !== false
+    || !Array.isArray(bundle.citations)
+    || bundle.citations.length < 1
+    || bundle.citations.length > 10
+  ) return null;
+  const citationIds = new Set();
+  const destinations = new Set();
+  const accepted = [];
+  for (const citation of bundle.citations) {
+    if (
+      !hasExactObjectKeys(citation, TRUSTED_CITATION_FIELDS)
+      || !/^source-[0-9a-f]{20}$/u.test(citation.citationId)
+      || !isTrustedCitationText(citation.title, 200)
+      || citation.displayDomain !== "en.wikipedia.org"
+      || !/^https:\/\/en\.wikipedia\.org\/\?curid=[1-9][0-9]{0,19}$/u.test(citation.destination)
+      || citation.destinationDisclosureRequired !== true
+      || citation.activeNavigationAllowed !== false
+      || citationIds.has(citation.citationId)
+      || destinations.has(citation.destination)
+    ) return null;
+    citationIds.add(citation.citationId);
+    destinations.add(citation.destination);
+    accepted.push(citation);
+  }
+  return accepted;
+}
+
+function clearTrustedCitations() {
+  byId("research-source-list").replaceChildren();
+  byId("research-sources-status").textContent = "";
+  byId("research-sources").classList.add("hidden");
+}
+
+function renderTrustedCitations(bundle) {
+  const citations = validateTrustedCitationBundle(bundle);
+  if (!citations) {
+    clearTrustedCitations();
+    return Object.freeze({ accepted: false, rendered: 0 });
+  }
+  const items = citations.map((citation) => {
+    const item = document.createElement("li");
+    item.className = "trusted-citation";
+    const title = document.createElement("strong");
+    title.textContent = citation.title;
+    const domain = document.createElement("span");
+    domain.textContent = `Source: ${citation.displayDomain}`;
+    const destination = document.createElement("code");
+    destination.textContent = `Destination: ${citation.destination}`;
+    item.append(title, domain, destination);
+    return item;
+  });
+  byId("research-source-list").replaceChildren(...items);
+  byId("research-sources").classList.remove("hidden");
+  byId("research-sources-status").textContent = `${citations.length} trusted research source${citations.length === 1 ? "" : "s"} shown. Destinations are disclosed but inactive.`;
+  return Object.freeze({ accepted: true, rendered: citations.length });
+}
+
+window.Haven42TrustedCitationRenderer = Object.freeze({
+  clear: clearTrustedCitations,
+  render: renderTrustedCitations,
+});
+
 function updatePromptHistoryStatus() {
   const count = state.promptHistory.length;
   byId("prompt-history-status").textContent = `${count} of ${state.promptHistoryLimit} prompt${count === 1 ? "" : "s"} retained · memory only · cleared with New task`;
@@ -3469,6 +3566,7 @@ function resetTask() {
   hideModelSwitchPrompt();
   clearPromptHistory();
   clearContextFiles();
+  clearTrustedCitations();
   resetContextImageLimit();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");

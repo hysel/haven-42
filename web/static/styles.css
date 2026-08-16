@@ -1040,6 +1040,35 @@ body::before { opacity: 0.045; }
 .message-content { color: #d0d8d6; }
 .message-content p { line-height: 1.72; }
 
+.trusted-citations {
+  width: min(calc(100% - 36px), 814px);
+  margin: 0 auto 18px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  background: rgba(98, 230, 198, 0.055);
+  box-shadow: inset 0 0 0 1px rgba(164, 185, 181, 0.12);
+}
+.trusted-citations header { display: grid; gap: 4px; }
+.trusted-citations h3 { margin: 0; font-size: 1rem; }
+.trusted-citations > p { margin: 8px 0 0; color: #a8b8b5; line-height: 1.55; }
+.trusted-citations ol { display: grid; gap: 12px; margin: 14px 0 0; padding-left: 22px; }
+.trusted-citation { padding-left: 4px; }
+.trusted-citation strong,
+.trusted-citation span,
+.trusted-citation code { display: block; }
+.trusted-citation span { margin-top: 2px; color: #a8b8b5; font-size: 0.84rem; }
+.trusted-citation code {
+  margin-top: 5px;
+  color: #c8d5d2;
+  font: inherit;
+  font-size: 0.78rem;
+  overflow-wrap: anywhere;
+}
+
+@media (forced-colors: active) {
+  .trusted-citations { border: 1px solid CanvasText; box-shadow: none; }
+}
+
 .task-event,
 .model-switch-prompt,
 .run-details {

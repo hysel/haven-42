@@ -11,6 +11,25 @@ Milestone 28 remains runtime-unadmitted. Haven 42 has no general internet model
 tool, research UI route, DNS authority, URL fetcher, browser automation, page
 renderer, download path, or autonomous follow-up search.
 
+A dormant trusted-citation region is now present in the chat source and portable
+package, but no product route can show it. The renderer accepts only the exact
+engine-accounted bundle shape for the currently fixed English Wikipedia
+provider. It rejects unknown fields, model-supplied links, active-navigation
+flags, wrong domains or destination patterns, duplicate identifiers or
+destinations, markup, control and direction-changing characters, empty sets,
+and more than ten sources. Accepted titles, domains, and full destinations are
+created with `textContent`; the component creates no anchor, image, script,
+style, frame, object, embed, or download surface. The region has an accessible
+name and description, announces its source count, wraps long destination text,
+supports forced colors, stays memory-only, and clears on New task.
+
+The renderer contract passes 39 static checks. The full real-browser flow now
+passes 548 checks, including a 19-check renderer slice that proves valid inert
+output, hostile-bundle refusal, no active child elements, status announcement,
+and New task cleanup. This is a packaged dormant component, not a research UI:
+automatic invocation, queries, page retrieval, model tools, navigation,
+persistence, telemetry, and follow-up all remain denied.
+
 The offline adapter foundation validates caller-supplied fixtures only. It:
 
 - accepts one explicit bounded query for a fixed offline fixture provider;
@@ -89,11 +108,11 @@ The boundary remains deliberately absent from the product runtime and portable
 package, and macOS source evidence plus all native package smoke remain open.
 
 Future product work still requires explicit accessible per-query and per-page
-review and cancellation, trusted citation rendering, runtime lifecycle
-cleanup, hostile local-server evidence, source/package parity, and native
-evidence on every supported platform. Citation navigation remains a
-user-reviewed UI decision. The live development source passes grant none of
-those product authorities.
+review and cancellation, runtime invocation and lifecycle cleanup, hostile
+local-server evidence, source/package parity, and native evidence on every
+supported platform. Citation navigation remains a separate user-reviewed UI
+decision. The dormant renderer and live development source passes grant none
+of those product authorities.
 
 `config/web-research-expansion-evaluation.json` records two later gates without
 activating either: a self-hosted provider must meet the same public-destination

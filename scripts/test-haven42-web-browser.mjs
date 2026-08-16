@@ -2937,6 +2937,93 @@ try {
   ) throw new Error(`managed-default-handoff:${JSON.stringify(managedDefaultHandoff)}`);
   checks += 5;
   trace("managed-default-handoff-verified");
+  const trustedCitationRendering = await cdp.evaluate(`(() => {
+    const citation = (suffix, title, page) => ({
+      citationId: 'source-' + suffix.repeat(20),
+      title,
+      displayDomain: 'en.wikipedia.org',
+      destination: 'https://en.wikipedia.org/?curid=' + page,
+      destinationDisclosureRequired: true,
+      activeNavigationAllowed: false,
+    });
+    const bundle = (citations) => ({
+      schemaVersion: 1,
+      citations,
+      exactSourceAccounting: true,
+      modelSuppliedLinksAccepted: false,
+      runtimeAdmissionGranted: false,
+    });
+    const valid = bundle([
+      citation('a', 'Local artificial intelligence', 12345),
+      citation('b', 'Private computing & safety', 67890),
+    ]);
+    const accepted = window.Haven42TrustedCitationRenderer.render(valid);
+    const region = document.querySelector('#research-sources');
+    const first = region.querySelector('.trusted-citation');
+    const validState = {
+      frozenApi: Object.isFrozen(window.Haven42TrustedCitationRenderer),
+      accepted,
+      hidden: region.classList.contains('hidden'),
+      role: region.getAttribute('role'),
+      labelledBy: region.getAttribute('aria-labelledby'),
+      describedBy: region.getAttribute('aria-describedby'),
+      itemCount: region.querySelectorAll('.trusted-citation').length,
+      activeElements: region.querySelectorAll('a,button,img,script,style,iframe,object,embed').length,
+      firstText: first.textContent,
+      firstDestination: first.querySelector('code').textContent,
+      status: document.querySelector('#research-sources-status').textContent,
+    };
+    const invalidBundles = [
+      {...valid, unexpected: true},
+      {...valid, modelSuppliedLinksAccepted: true},
+      {...valid, runtimeAdmissionGranted: true},
+      bundle([]),
+      bundle(Array.from({length: 11}, (_, index) => citation((index % 10).toString(16), 'Source ' + index, index + 1))),
+      bundle([{...citation('c', 'Active', 3), activeNavigationAllowed: true}]),
+      bundle([{...citation('c', 'Wrong domain', 3), displayDomain: 'example.com'}]),
+      bundle([{...citation('c', 'Wrong destination', 3), destination: 'https://example.com/'}]),
+      bundle([citation('c', '<img src=x onerror=alert(1)>', 3)]),
+      bundle([citation('c', 'Direction \\u202e confusion', 3)]),
+      bundle([citation('c', 'Duplicate', 3), citation('c', 'Duplicate again', 4)]),
+      bundle([citation('c', 'Same destination', 3), citation('d', 'Same destination again', 3)]),
+    ];
+    const rejected = invalidBundles.map((candidate) => window.Haven42TrustedCitationRenderer.render(candidate));
+    const rejectedState = {
+      rejected: rejected.every((result) => result.accepted === false && result.rendered === 0),
+      hidden: region.classList.contains('hidden'),
+      itemCount: region.querySelectorAll('.trusted-citation').length,
+      status: document.querySelector('#research-sources-status').textContent,
+    };
+    window.Haven42TrustedCitationRenderer.render(valid);
+    resetTask();
+    const clearedByNewTask = region.classList.contains('hidden')
+      && region.querySelectorAll('.trusted-citation').length === 0
+      && document.querySelector('#research-sources-status').textContent === '';
+    return {validState, rejectedState, clearedByNewTask};
+  })()`);
+  if (
+    !trustedCitationRendering.validState.frozenApi
+    || trustedCitationRendering.validState.accepted.accepted !== true
+    || trustedCitationRendering.validState.accepted.rendered !== 2
+    || trustedCitationRendering.validState.hidden
+    || trustedCitationRendering.validState.role !== "region"
+    || trustedCitationRendering.validState.labelledBy !== "research-sources-title"
+    || trustedCitationRendering.validState.describedBy !== "research-sources-disclosure"
+    || trustedCitationRendering.validState.itemCount !== 2
+    || trustedCitationRendering.validState.activeElements !== 0
+    || !trustedCitationRendering.validState.firstText.includes("Local artificial intelligence")
+    || !trustedCitationRendering.validState.firstText.includes("Source: en.wikipedia.org")
+    || trustedCitationRendering.validState.firstDestination !== "Destination: https://en.wikipedia.org/?curid=12345"
+    || !trustedCitationRendering.validState.status.includes("2 trusted research sources")
+    || !trustedCitationRendering.validState.status.includes("inactive")
+    || !trustedCitationRendering.rejectedState.rejected
+    || !trustedCitationRendering.rejectedState.hidden
+    || trustedCitationRendering.rejectedState.itemCount !== 0
+    || trustedCitationRendering.rejectedState.status !== ""
+    || !trustedCitationRendering.clearedByNewTask
+  ) throw new Error(`trusted-citation-renderer:${JSON.stringify(trustedCitationRendering)}`);
+  checks += 19;
+  trace("trusted-citation-renderer-verified");
   const aboutAccessibilityLink = await cdp.evaluate(`(() => {
     const link = document.querySelector('#about-panel a[href="/accessibility"]');
     return link ? {text: link.textContent.trim(), href: link.getAttribute('href')} : null;

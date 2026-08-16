@@ -55,10 +55,10 @@ def main() -> None:
     assert len(recorded) == len(set(recorded)), "an open item has multiple classifications"
     actual = open_item_hashes()
     assert set(recorded) == actual, "the closure ledger does not exactly cover open TODO items"
-    assert len(actual) == 47
+    assert len(actual) == 46
     authority = ledger["authority"]
     assert authority and all(value is False for value in authority.values())
-    print("Roadmap closure ledger passed 47 exact open-item classifications.")
+    print("Roadmap closure ledger passed 46 exact open-item classifications.")
 
 
 if __name__ == "__main__":
