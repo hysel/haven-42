@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "policyId": "haven42.conversation-history.activation-readiness",
+  "status": "blocked-private-session-only",
+  "defaultMode": "private-session",
+  "activationAllowed": false,
+  "requiredPlatforms": ["windows", "linux", "macos"],
+  "requiredGates": [
+    {
+      "id": "encrypted-database-dependency",
+      "status": "open",
+      "evidence": "config/conversation-history-encryption-dependency-review.json",
+      "reason": "No version-aligned, provenance-verified encrypted SQLite dependency is admitted."
+    },
+    {
+      "id": "credential-store-lifecycle",
+      "status": "open",
+      "evidence": "docs/conversation-history-encryption-review.md",
+      "reason": "Windows has bounded synthetic proofs; Linux and macOS have availability-only evidence."
+    },
+    {
+      "id": "per-user-storage-permissions",
+      "status": "open",
+      "evidence": "examples/windows-conversation-history-per-user-acl-validation.md",
+      "reason": "A temporary Windows ACL primitive passed, but production locations and other platforms remain unproved."
+    },
+    {
+      "id": "atomic-database-and-key-lifecycle",
+      "status": "open",
+      "evidence": "docs/conversation-history-encryption-review.md",
+      "reason": "Atomic create, rekey, rotation, interruption recovery, and secure shutdown remain unproved."
+    },
+    {
+      "id": "encrypted-backup-restore-and-delete",
+      "status": "open",
+      "evidence": "docs/conversation-history-encryption-review.md",
+      "reason": "Encrypted backup, staged restore, complete deletion, and uninstall choice remain unproved."
+    },
+    {
+      "id": "native-source-package-parity",
+      "status": "open",
+      "evidence": "docs/conversation-history-database.md",
+      "reason": "The complete Windows, Linux, and macOS source-versus-package matrix has not passed."
+    },
+    {
+      "id": "accessible-opt-in-and-recovery-ui",
+      "status": "open",
+      "evidence": "docs/conversation-history-database.md",
+      "reason": "No saved-history opt-in, locked-store recovery, deletion, or export UI is admitted."
+    },
+    {
+      "id": "privacy-and-data-flow-review",
+      "status": "open",
+      "evidence": "docs/conversation-history-database.md",
+      "reason": "Runtime data-flow, retention, attachment, diagnostics, and provider-boundary review remains open."
+    }
+  ],
+  "effects": {
+    "databaseOpened": false,
+    "databaseCreated": false,
+    "filesystemRead": false,
+    "filesystemWrite": false,
+    "credentialStoreAccessed": false,
+    "browserStorageUsed": false,
+    "runtimeRouteEnabled": false,
+    "uiControlEnabled": false,
+    "providerInvoked": false,
+    "networkAccessed": false
+  }
+}

@@ -122,6 +122,7 @@ docs/security-threat-model.md	Eng-Security-Threat-Model.md	Security Threat Model
 docs/local-data-lifecycle.md	Eng-Local-Data-Lifecycle.md	Local Data Lifecycle
 docs/conversation-history-database.md	Eng-Conversation-History-Database.md	Conversation History Database Foundation
 docs/conversation-history-encryption-review.md	Eng-Conversation-History-Encryption-Review.md	Conversation History Encryption And Key-Management Review
+examples/conversation-history-activation-readiness.md	Eng-Conversation-History-Activation-Readiness.md	Conversation History Activation Readiness
 examples/laguna-xs-2.1-validation.md	Eng-Laguna-XS-2.1-Validation.md	Laguna XS 2.1 Validation
 examples/local-audio-provider-validation.md	Eng-Local-Audio-Provider-Validation.md	Local Audio Provider Validation
 examples/windows-amd-image-provider-validation.md	Eng-Windows-AMD-Image-Provider-Validation.md	Windows AMD Image Provider Validation
@@ -186,6 +187,7 @@ docs/evidence-records/evidence-b7a23e13a579dff1.md	Evidence-Record-b7a23e13a579d
 docs/evidence-records/evidence-ef3643c281067618.md	Evidence-Record-ef3643c281067618.md	Shared agent CLI model test harness
 docs/evidence-records/evidence-03d2a694b6d22720.md	Evidence-Record-03d2a694b6d22720.md	Offline cited-synthesis source parity
 docs/evidence-records/evidence-1c20a3dfac18ae0a.md	Evidence-Record-1c20a3dfac18ae0a.md	Offline transport and approval guards
+docs/evidence-records/evidence-91e7db3d8cf9310d.md	Evidence-Record-91e7db3d8cf9310d.md	Conversation-history activation readiness policy
 docs/evidence-records/evidence-afdeb35698fc13c1.md	Evidence-Record-afdeb35698fc13c1.md	Conversation-history encryption dependency review
 docs/evidence-records/evidence-3032fff46e49e400.md	Evidence-Record-3032fff46e49e400.md	Linux credential-store availability boundary
 docs/evidence-records/evidence-56ca94fba5185607.md	Evidence-Record-56ca94fba5185607.md	Linux credential-store native headless availability

@@ -50,6 +50,12 @@ application behavior.
   runtime, UI, or package authority. The exact source probe passed a
   GitHub-hosted macOS 15 cell; physical Mac, packaged parity, and key operations
   remain open.
+- A separate activation-readiness policy now lists eight mandatory gates and
+  evaluates them without side effects. All eight are open, so its only current
+  result is `blocked` with **Private session** effective. Even a synthetic
+  all-passed policy can become only `candidate-ready-not-activated`; it cannot
+  enable a route, UI control, database, credential operation, or write. See
+  [Conversation History Activation Readiness](../examples/conversation-history-activation-readiness.md).
 
 `config/conversation-history-schema.json` describes a bounded logical schema
 for conversations, ordered messages, validated local summaries, sanitized

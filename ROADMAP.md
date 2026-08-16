@@ -1431,6 +1431,14 @@ probe also passed a GitHub-hosted macOS 15 cell. Physical Mac evidence, actual
 Keychain operations, lock/deny/corruption behavior, and source-versus-package
 parity remain open.
 
+An eight-gate activation-readiness policy now makes the remaining admission
+work machine-checkable without granting authority. Its 31 hostile checks keep
+Private session effective, require fixed in-repository evidence references,
+reject reordered or overstated gate states, and keep every database,
+credential-store, filesystem-write, runtime, UI, provider, and network effect
+false. All eight gates are currently open; even an all-passed candidate still
+requires a separate reviewed activation decision.
+
 - Use an embedded SQLite-compatible database as the initial architecture
   candidate; require no database server, administrator access, system service,
   global runtime, or browser-owned database. The trusted loopback service owns

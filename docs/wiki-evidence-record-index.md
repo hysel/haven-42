@@ -36,6 +36,7 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Conversation-history activation readiness policy](https://github.com/hysel/haven-42/wiki/Evidence-Record-91e7db3d8cf9310d) | `static-validated` | Cross-platform · No runtime · none |
 | [Conversation-history encryption dependency review](https://github.com/hysel/haven-42/wiki/Evidence-Record-afdeb35698fc13c1) | `candidate-only` | Cross-platform · SQLCipher Community and Python bindings · none |
 | [Linux credential-store availability boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-3032fff46e49e400) | `candidate-only` | Linux · freedesktop credential-store candidate · none |
 | [Linux credential-store native headless availability](https://github.com/hysel/haven-42/wiki/Evidence-Record-56ca94fba5185607) | `partial-pass` | Linux headless container session · freedesktop credential-store candidate · none |

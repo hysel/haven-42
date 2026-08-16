@@ -6,6 +6,14 @@ and macOS Keychain candidates have operation-free availability boundaries only.
 Storage dependency, production application-directory binding, application
 persistence, and runtime activation are not admitted.
 
+The checked-in activation-readiness policy converts the remaining work into
+eight exact, evidence-linked gates. Its 31-check hostile suite rejects missing,
+reordered, traversing, effect-bearing, or overstated policy states. All gates
+remain open and the evaluator always preserves Private session; it has no
+database, credential-store, filesystem-write, runtime, UI, provider, or
+network authority. See
+[Conversation History Activation Readiness](../examples/conversation-history-activation-readiness.md).
+
 Haven 42's optional conversation history remains simulation-only. No database
 is opened or created, and Private session remains the write-free default. This
 review narrows the acceptable future design; it does not authorize storage,
