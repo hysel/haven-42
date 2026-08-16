@@ -1,9 +1,10 @@
 # Conversation History Encryption And Key-Management Review
 
 Status: architecture reviewed; Windows current-user DPAPI, temporary wrapped-
-key persistence, and synthetic per-user ACL proofs passed. Storage dependency,
-production application-directory binding, application persistence, and runtime
-activation are not admitted.
+key persistence, and synthetic per-user ACL proofs passed. Linux Secret Service
+and macOS Keychain candidates have operation-free availability boundaries only.
+Storage dependency, production application-directory binding, application
+persistence, and runtime activation are not admitted.
 
 Haven 42's optional conversation history remains simulation-only. No database
 is opened or created, and Private session remains the write-free default. This
@@ -34,7 +35,7 @@ group. It still grants no production application-directory or persistence
 authority. See
 [Windows per-user ACL validation](../examples/windows-conversation-history-per-user-acl-validation.md).
 
-The Linux candidate has a separate 24-check offline availability boundary. It
+The Linux candidate has a separate 27-check offline availability boundary. It
 uses one fixed user-bus listing command and reports only whether a session bus
 and already-active `org.freedesktop.secrets` name were observed. It cannot
 activate the service or read/write a secret, and it is excluded from the
@@ -43,6 +44,16 @@ cell with a reachable user bus and inactive Secret Service; that is expected
 fail-closed evidence, not desktop or key-storage certification. Native desktop
 evidence remains open. See
 [Linux credential-store availability boundary](../examples/linux-credential-store-availability-boundary.md).
+
+The macOS candidate has a separate 30-check offline availability boundary. It
+invokes only `/usr/bin/security help` through a reviewed absolute system path,
+with disabled stdin, a fixed environment, bounded discarded output, and a
+five-second timeout. It cannot list, open, or unlock a keychain or inspect,
+read, write, or delete an item. Results are exact predeclared public shapes,
+and the probe is excluded from the package. The exact source probe passed a
+GitHub-hosted macOS 15 cell. Physical Mac evidence, packaged parity, actual
+Keychain operations, and lifecycle evidence remain open. See
+[macOS Keychain availability boundary](../examples/macos-keychain-availability-boundary.md).
 
 ## Decision boundary
 
@@ -149,9 +160,9 @@ review, recovery expectations, and new approval.
 - Bind the proved Windows ACL primitive to the production application data
   directory and complete atomic database-plus-key creation,
   locked/denied/key-loss handling, rotation,
-  backup, and recovery without a fallback. Prototype the Linux Secret Service
-  and macOS Keychain adapters and prove their locked, absent, denied, corrupted,
-  and headless behavior.
+  backup, and recovery without a fallback. Extend the Linux Secret Service and
+  macOS Keychain availability boundaries into independently reviewed adapters
+  and prove their locked, absent, denied, corrupted, and headless behavior.
 - Prove per-user locations and permissions, atomic create/rekey/migration,
   bounded growth, backup/restore, complete deletion, and secure shutdown.
 - Add source-versus-packaged parity plus unsigned native Windows, Linux, and

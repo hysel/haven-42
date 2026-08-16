@@ -1,16 +1,16 @@
-# Linux credential-store availability boundary
+# macOS Keychain native hosted availability
 
 > Generated evidence page. The canonical machine-readable record is
-> `evidence-3032fff46e49e400` in `config/evidence-page-registry.json`.
+> `evidence-a7fe3f72fe5a759f` in `config/evidence-page-registry.json`.
 
 ## What this record says
 
-A 27-check offline boundary pins the non-activating user-bus listing to reviewed system executable paths, rejects caller-controlled executable paths, and emits exact sanitized public result shapes; no native desktop cell, binding, service activation, method, credential access, runtime, UI, package, or production authority is admitted.
+The exact source probe and contract passed the platform-gated `/usr/bin/security help` availability cell in the PR 91 macOS smoke job while every Keychain-operation and admission flag remained false; physical Mac, package parity, item lifecycle, runtime, UI, database, and production authority remain open.
 
 | Result | Value |
 | --- | --- |
-| Status | `candidate-only` |
-| Validation method | Offline Mocked |
+| Status | `partial-pass` |
+| Validation method | Automated Tests |
 | Area | Data Protection |
 
 ## Tested scope
@@ -19,14 +19,14 @@ A 27-check offline boundary pins the non-activating user-bus listing to reviewed
 | --- | --- |
 | Surface | Haven 42 development availability probe |
 | Surface version | 1 |
-| Provider or runtime | freedesktop credential-store candidate |
-| Operating system | Linux |
+| Provider or runtime | Apple Keychain Services candidate |
+| Operating system | GitHub-hosted macOS 15 |
 | Model | none |
-| Operation | Session Bus Credential Store Presence |
+| Operation | System Tool Presence |
 
 ## Source evidence
 
-[examples/linux-credential-store-availability-boundary.md](https://github.com/hysel/haven-42/blob/main/examples/linux-credential-store-availability-boundary.md)
+[examples/macos-keychain-availability-boundary.md](https://github.com/hysel/haven-42/blob/main/examples/macos-keychain-availability-boundary.md)
 
 ## Boundary of this result
 

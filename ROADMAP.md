@@ -1422,6 +1422,15 @@ without accessing a secret. Native desktop, locked, denied, absent, and
 corrupted evidence is still required before selecting a binding or admitting
 key storage.
 
+The macOS Keychain candidate now has a separate 30-check offline availability
+boundary. It invokes only `/usr/bin/security help` with a fixed environment,
+disabled stdin, bounded discarded output, and a five-second timeout. It cannot
+list, open, or unlock a keychain; inspect, read, write, or delete an item; show
+UI; use the network; or grant runtime or package authority. The exact source
+probe also passed a GitHub-hosted macOS 15 cell. Physical Mac evidence, actual
+Keychain operations, lock/deny/corruption behavior, and source-versus-package
+parity remain open.
+
 - Use an embedded SQLite-compatible database as the initial architecture
   candidate; require no database server, administrator access, system service,
   global runtime, or browser-owned database. The trusted loopback service owns

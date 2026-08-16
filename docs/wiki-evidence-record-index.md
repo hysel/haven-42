@@ -42,6 +42,8 @@ them by hand; update the catalog and run the generator.
 | [Windows conversation-history per-user ACL primitive](https://github.com/hysel/haven-42/wiki/Evidence-Record-0005faabe699fcf7) | `partial-pass` | Windows · Windows protected DACL · none |
 | [Windows conversation-history synthetic key protection](https://github.com/hysel/haven-42/wiki/Evidence-Record-780b76332e1a0df4) | `partial-pass` | Windows · Windows DPAPI current user · none |
 | [Windows wrapped-key temporary persistence](https://github.com/hysel/haven-42/wiki/Evidence-Record-01c8b74c82919604) | `partial-pass` | Windows · Windows DPAPI current user · none |
+| [macOS Keychain availability boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-887cf80b11f5cea2) | `candidate-only` | macOS · Apple Keychain Services candidate · none |
+| [macOS Keychain native hosted availability](https://github.com/hysel/haven-42/wiki/Evidence-Record-a7fe3f72fe5a759f) | `partial-pass` | GitHub-hosted macOS 15 · Apple Keychain Services candidate · none |
 ## Editor Surface
 
 | Evidence | Status | Tested environment |

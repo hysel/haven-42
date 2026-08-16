@@ -192,6 +192,8 @@ docs/evidence-records/evidence-56ca94fba5185607.md	Evidence-Record-56ca94fba5185
 docs/evidence-records/evidence-0005faabe699fcf7.md	Evidence-Record-0005faabe699fcf7.md	Windows conversation-history per-user ACL primitive
 docs/evidence-records/evidence-780b76332e1a0df4.md	Evidence-Record-780b76332e1a0df4.md	Windows conversation-history synthetic key protection
 docs/evidence-records/evidence-01c8b74c82919604.md	Evidence-Record-01c8b74c82919604.md	Windows wrapped-key temporary persistence
+docs/evidence-records/evidence-887cf80b11f5cea2.md	Evidence-Record-887cf80b11f5cea2.md	macOS Keychain availability boundary
+docs/evidence-records/evidence-a7fe3f72fe5a759f.md	Evidence-Record-a7fe3f72fe5a759f.md	macOS Keychain native hosted availability
 docs/evidence-records/evidence-9865b9af8dddb72e.md	Evidence-Record-9865b9af8dddb72e.md	VS Code-compatible Continue Agent
 docs/evidence-records/evidence-3532849d1fcc1eb8.md	Evidence-Record-3532849d1fcc1eb8.md	VSCodium Continue Agent
 docs/evidence-records/evidence-e5ae46fbbffbcb08.md	Evidence-Record-e5ae46fbbffbcb08.md	VSCodium Continue Agent Qwen 3.5 4B MLX strict write smoke
