@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.conversation-history.windows-per-user-acl",
+  "status": "development-synthetic-temporary-only",
+  "platform": "windows",
+  "acl": {
+    "testOwnedTemporaryDirectoryOnly": true,
+    "callerPathAllowed": false,
+    "reparsePointsAllowed": false,
+    "inheritanceMustBeProtected": true,
+    "allowedPrincipalSids": [
+      "current-user",
+      "S-1-5-18"
+    ],
+    "allowedRights": "FullControl",
+    "allowedType": "Allow",
+    "unexpectedPrincipalFailsClosed": true,
+    "unexpectedDenyOrRightsFailsClosed": true,
+    "cleanupRequired": true,
+    "productionApplicationDirectoryProven": false
+  },
+  "authority": {
+    "syntheticTemporaryValidationAllowed": true,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "userContentAllowed": false,
+    "databaseOpenAllowed": false,
+    "databaseCreateAllowed": false,
+    "callerSelectedPathAllowed": false,
+    "persistentApplicationWriteAllowed": false,
+    "packageAdmissionAllowed": false,
+    "productionUseAllowed": false
+  }
+}

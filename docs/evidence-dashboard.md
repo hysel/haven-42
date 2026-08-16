@@ -16,22 +16,22 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 109 |
-| Distinct model-field values | 33 |
+| Evidence records | 121 |
+| Distinct model-field values | 37 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 35 |
+| `partial-pass` | 45 |
 | `validated-by-tests` | 19 |
 | `write-smoke-validated` | 13 |
 | `read-only-tool-validated` | 11 |
 | `read-only-cli-validated` | 9 |
 | `static-validated` | 8 |
+| `candidate-only` | 6 |
 | `approved-write-ready` | 4 |
-| `candidate-only` | 4 |
 | `plan-review-candidate` | 2 |
 | `plan-validated` | 2 |
 | `failed-validation` | 1 |
@@ -41,14 +41,18 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 44 |
+| Local endpoint | 47 |
 | Generated sample | 38 |
 | Editor agent | 9 |
 | Automated tests | 7 |
+| development-native | 5 |
 | offline-fixture | 5 |
 | Static | 3 |
+| development-network | 2 |
 | offline-local | 1 |
 | offline-metadata | 1 |
+| offline-mocked | 1 |
+| offline-primary-source-review | 1 |
 | Online discovery | 1 |
 
 ## Agent Surfaces
@@ -84,6 +88,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | exact-upstream-candidate-records |
 | five exact manifest-pinned models |
 | gemma3:12b |
+| gemma3:1b-it-q4_K_M |
 | granite41-8b-q4_K_M |
 | granite4:7b-a1b-h |
 | laguna-xs-2.1:q4_K_M |
@@ -96,11 +101,14 @@ See [Evidence Catalog](Evidence-Catalog),
 | nemotron-3.5-lightning:30b-a3b-q4_K_M |
 | nemotron-3.5-lightning:30b-a3b-q8_0 |
 | no-model |
+| none |
+| phi4-mini:3.8b-q4_K_M |
 | qwen3-coder:30b |
 | qwen3.5:0.8b Q8_0 |
 | qwen3.5:35b |
 | qwen3.5:9b |
 | qwen3.5:9b Q4_K_M |
+| qwen3.6:27b-q4_K_M |
 | revision-and-sha256-pinned-11-model-corpus |
 | revision-and-sha256-pinned-follow-on-artifacts |
 | serde_json 1.0.140 |

@@ -332,8 +332,13 @@ selector evidence. Failed checks emit the stable violated-constraint code and
 the reviewed model/profile bindings, but no prompt, response, endpoint, or
 private machine identity.
 
-`scripts/alpha2-model-qualification-report.py` validates a directory of these
-task and soak records offline. It reports a model/profile as passed only when
+`scripts/alpha2-model-qualification-report.py` validates these task and soak
+records offline. Supply one `--evidence-dir` for a combined evidence directory,
+or repeat the option when task cells and soak records are deliberately kept in
+separate, non-overlapping directories. The reporter accepts no more than eight
+roots and 1,024 JSON records, and refuses duplicate, nested, or otherwise
+overlapping roots so one record cannot be counted twice. It reports a
+model/profile as passed only when
 all three task gates and a complete 30-minute soak pass with sample/unload
 parity. Missing evidence remains incomplete, and any failed task or soak keeps
 the cell failed. For each passed task, the summary retains only validated
@@ -390,6 +395,10 @@ contract, and qualification of additional model families and newer versions.
 Current-package lifecycle and parity checks passed on all nine planned Linux
 distributions, and the Windows NVIDIA lane passed its package lifecycle checks
 and graceful-shutdown proof. Qwen 3.6 27B also passed its separate Windows CUDA
-task gates and 30-minute qualification soak. These results remain evidence for
-owner review: any automatic-default change, full guided-setup promotion,
-package publication, or support-label promotion requires separate approval.
+task gates and 30-minute qualification soak. On August 15, 2026, the exact
+Gemma 3 1B, Phi 4 Mini 3.8B, and Qwen 3.6 27B Q4 artifacts then passed the
+current three-task contract and separate 30-minute soaks on Ubuntu 24.04.4
+CUDA with Ollama 0.32.13. The sanitized report explicitly denies automatic
+selection and default authority. These results remain evidence for owner
+review: physical memory-tier evidence, full guided-setup promotion, package
+publication, and support-label promotion remain separate gates.

@@ -2681,7 +2681,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-build-local-image-runtime-review-evidence.py" |
     grep -q "9 hostile checks" || return 1
   python3 "$REPO_ROOT/scripts/test-roadmap-closure-ledger.py" |
-    grep -q "48 exact open-item classifications" || return 1
+    grep -q "47 exact open-item classifications" || return 1
   python3 "$REPO_ROOT/scripts/test-local-batch-task-ledger.py" |
     grep -q "374 exact tasks across 18 phases" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" |
@@ -2690,6 +2690,8 @@ PY
     grep -q "16 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-query-adapter.py" |
     grep -q "15 security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-web-research-native-transport.py" |
+    grep -q "21 offline security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-transport-guard.py" |
     grep -q "25 hostile and exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-approval-state.py" |
@@ -2810,12 +2812,22 @@ test_conversation_history_foundation() {
     grep -q "45 bounded, effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-store.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-windows-per-user-acl.py" |
+    grep -q "Windows per-user ACL proof passed" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-encryption-dependency-review.py" |
+    grep -q "20 fail-closed checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-linux-secret-service-availability.py" |
+    grep -q "27 offline checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
 contract = json.loads((root / "config/conversation-history-contract.json").read_text(encoding="utf-8"))
 schema = json.loads((root / "config/conversation-history-schema.json").read_text(encoding="utf-8"))
 policy = json.loads((root / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
+windows_key = json.loads((root / "config/conversation-history-windows-key-protection.json").read_text(encoding="utf-8"))
+windows_persistence = json.loads((root / "config/conversation-history-windows-wrapped-key-persistence.json").read_text(encoding="utf-8"))
+windows_acl = json.loads((root / "config/conversation-history-windows-per-user-acl.json").read_text(encoding="utf-8"))
+linux_secret = json.loads((root / "config/conversation-history-linux-secret-service-availability.json").read_text(encoding="utf-8"))
 foundation = policy["inactiveFoundations"]["conversationHistory"]
 assert contract["status"] == "simulation-only-not-runtime-admitted"
 assert contract["defaultMode"] == "private-session"
@@ -2845,9 +2857,65 @@ assert foundation["databaseOpenAllowed"] is False
 assert foundation["databaseCreateAllowed"] is False
 assert foundation["filesystemWriteAllowed"] is False
 assert foundation["browserStorageAllowed"] is False
+assert windows_key["status"] == "development-synthetic-key-only"
+assert windows_key["mechanism"]["provider"] == "windows-dpapi-current-user"
+assert windows_key["mechanism"]["cryptProtectLocalMachineAllowed"] is False
+assert windows_key["mechanism"]["plaintextFallbackAllowed"] is False
+assert windows_key["authority"]["syntheticDevelopmentValidationAllowed"] is True
+assert not any(
+    value
+    for name, value in windows_key["authority"].items()
+    if name != "syntheticDevelopmentValidationAllowed"
+)
+assert windows_persistence["status"] == "development-synthetic-temporary-only"
+assert windows_persistence["storage"]["testOwnedTemporaryDirectoryOnly"] is True
+assert windows_persistence["storage"]["callerPathAllowed"] is False
+assert windows_persistence["storage"]["atomicNoReplaceRenameRequired"] is True
+assert windows_persistence["storage"]["productionAclAdmissionRequired"] is True
+assert windows_persistence["storage"]["productionAclAdmissionProven"] is False
+assert windows_persistence["recovery"]["automaticResetAllowed"] is False
+assert windows_persistence["recovery"]["plaintextFallbackAllowed"] is False
+assert windows_persistence["authority"]["syntheticTemporaryValidationAllowed"] is True
+assert not any(
+    value
+    for name, value in windows_persistence["authority"].items()
+    if name != "syntheticTemporaryValidationAllowed"
+)
+assert windows_acl["status"] == "development-synthetic-temporary-only"
+assert windows_acl["acl"]["testOwnedTemporaryDirectoryOnly"] is True
+assert windows_acl["acl"]["callerPathAllowed"] is False
+assert windows_acl["acl"]["inheritanceMustBeProtected"] is True
+assert windows_acl["acl"]["unexpectedPrincipalFailsClosed"] is True
+assert windows_acl["acl"]["productionApplicationDirectoryProven"] is False
+assert windows_acl["authority"]["syntheticTemporaryValidationAllowed"] is True
+assert not any(
+    value
+    for name, value in windows_acl["authority"].items()
+    if name != "syntheticTemporaryValidationAllowed"
+)
+assert linux_secret["status"] == "development-availability-probe-only"
+assert linux_secret["probe"]["serviceActivationAllowed"] is False
+assert linux_secret["probe"]["methodCallAllowed"] is False
+assert linux_secret["probe"]["secretReadAllowed"] is False
+assert linux_secret["probe"]["secretWriteAllowed"] is False
+assert linux_secret["probe"]["rawOutputReturned"] is False
+assert linux_secret["authority"]["availabilityProbeAllowed"] is True
+assert not any(
+    value
+    for name, value in linux_secret["authority"].items()
+    if name != "availabilityProbeAllowed"
+)
 planner = (root / "scripts/simulate-conversation-history.py").read_text(encoding="utf-8")
 assert "import sqlite3" not in planner
 assert "sqlite3.connect" not in planner
+windows_key_source = (root / "scripts/conversation-history-windows-key-protection.py").read_text(encoding="utf-8")
+assert "CRYPTPROTECT_LOCAL_MACHINE" not in windows_key_source
+assert "CRYPTPROTECT_UI_FORBIDDEN" in windows_key_source
+package_spec = (root / "package/haven42.spec").read_text(encoding="utf-8")
+assert "conversation-history-windows-key-protection" not in package_spec
+assert "conversation-history-windows-wrapped-key-persistence" not in package_spec
+assert "conversation-history-windows-per-user-acl" not in package_spec
+assert "conversation-history-linux-secret-service-availability" not in package_spec
 assert "docs/conversation-history-database.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 assert "docs/conversation-history-encryption-review.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 PY

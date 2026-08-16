@@ -142,7 +142,7 @@ class RuntimeCompatibilityTests(unittest.TestCase):
                 "core",
             )
 
-    def test_planning_resolution_selects_exact_0329_artifact(self) -> None:
+    def test_planning_resolution_selects_newest_exact_candidate_artifact(self) -> None:
         result = MODULE.resolve(
             "nemotron35-lightning-30b-a3b-q4",
             "linux-x64",
@@ -151,12 +151,16 @@ class RuntimeCompatibilityTests(unittest.TestCase):
         )
         self.assertEqual(result["decision"], "candidate")
         self.assertEqual(result["minimumOllamaVersion"], "0.32.9")
-        self.assertEqual(result["selectedOllamaVersion"], "0.32.9")
+        self.assertEqual(result["selectedOllamaVersion"], "0.32.13")
         self.assertEqual(result["installationRoot"], "Haven42-Data")
         self.assertFalse(result["systemRuntimeModificationAllowed"])
         self.assertEqual(
             [artifact["name"] for artifact in result["artifacts"]],
             ["ollama-linux-amd64.tar.zst"],
+        )
+        self.assertEqual(
+            result["artifacts"][0]["sha256"],
+            "0fd1dece38a1c6242e8013ce20b597345c5de072ae6b320160edb0e729ef1de1",
         )
 
     def test_nemotron_routes_record_partial_evidence_without_admission(self) -> None:

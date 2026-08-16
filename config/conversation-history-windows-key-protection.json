@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.conversation-history.windows-key-protection",
+  "status": "development-synthetic-key-only",
+  "platform": "windows",
+  "mechanism": {
+    "provider": "windows-dpapi-current-user",
+    "cryptProtectLocalMachineAllowed": false,
+    "uiAllowed": false,
+    "optionalEntropyRequired": true,
+    "entropyContext": "haven42.conversation-history.database-key.v1",
+    "databaseKeyBytes": 32,
+    "plaintextFallbackAllowed": false,
+    "automaticResetOnFailureAllowed": false
+  },
+  "memory": {
+    "mutablePlaintextBuffersRequired": true,
+    "plaintextBufferWipeRequired": true,
+    "nativeOutputBufferWipeRequired": true
+  },
+  "authority": {
+    "syntheticDevelopmentValidationAllowed": true,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "userContentAllowed": false,
+    "databaseOpenAllowed": false,
+    "databaseCreateAllowed": false,
+    "persistentKeyWriteAllowed": false,
+    "packageAdmissionAllowed": false,
+    "productionUseAllowed": false
+  }
+}

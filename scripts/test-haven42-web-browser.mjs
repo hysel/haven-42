@@ -2969,7 +2969,7 @@ try {
     || accessibilityStatement.h1 !== 1
     || accessibilityStatement.main !== 1
     || accessibilityStatement.navigation !== 1
-    || !accessibilityStatement.lastReviewed.includes("August 14, 2026")
+    || !accessibilityStatement.lastReviewed.includes("August 15, 2026")
     || !accessibilityStatement.limitation.includes("not yet been manually tested")
     || accessibilityStatement.targetHeight < 44
     || Number.parseFloat(accessibilityStatement.outlineWidth) < 3

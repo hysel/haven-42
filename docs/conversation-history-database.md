@@ -32,8 +32,18 @@ application behavior.
   command, URL, endpoint, credential, or environment value.
 - Standard SQLite is explicitly treated as unencrypted at rest. The
   cross-platform encryption and key-management architecture has been reviewed,
-  but no dependency or storage activation is admitted. See
+  and Windows current-user DPAPI, test-owned temporary wrapped-key, and
+  synthetic per-user ACL proofs passed. The ACL proof limits a protected test
+  directory and inherited key file to the current user and Local System and
+  rejects a deliberately added Users-group rule. These proofs do not cover the
+  production application directory or application persistence. No database
+  dependency or storage activation is admitted.
+  See
   [Conversation History Encryption And Key-Management Review](conversation-history-encryption-review.md).
+- The Linux Secret Service candidate has an offline-tested, non-activating
+  availability probe that returns sanitized booleans only. It does not select a
+  binding or grant credential-store authority; native desktop and headless
+  behavior remain unproved.
 
 `config/conversation-history-schema.json` describes a bounded logical schema
 for conversations, ordered messages, validated local summaries, sanitized
@@ -96,12 +106,19 @@ state.
 No development database may be activated until separately approved work
 completes all of these gates:
 
-1. Select and admit a maintained SQLite-compatible encryption dependency such
-   as SQLCipher, including exact binding, license, hashes, vulnerability
-   posture, SBOM, third-party notices, and native packaging.
-2. Implement and prove the reviewed fail-closed operating-system
-   credential-store key handling for Windows, Linux, and macOS, including lock
-   state, missing service, key loss, rotation, recovery, and uninstall.
+1. Select and admit a maintained SQLite-compatible encryption dependency. The
+   current SQLCipher 4.17.0 and Python-binding review admits nothing because the
+   reviewed cross-platform binding embeds 4.12.0 and its provenance gates are
+   incomplete. A future candidate still requires an exact version-aligned
+   binding, license, hashes, vulnerability posture, SBOM, third-party notices,
+   and native packaging.
+2. Finish the reviewed fail-closed operating-system credential-store key
+   handling for Windows, Linux, and macOS. The Windows current-user DPAPI
+   synthetic round trip, temporary wrapped-key no-replace commit, and the
+   underlying protected per-user ACL primitive are proved; production
+   application-directory binding, atomic database-plus-key creation, lock state, missing
+   service, key loss, rotation, recovery, uninstall, Linux Secret Service, and
+   macOS Keychain evidence remain open.
 3. Prove least-privilege per-user locations and permissions without accepting a
    renderer/model path.
 4. Implement parameterized typed operations, atomic transactions, deterministic

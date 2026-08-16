@@ -56,7 +56,7 @@ def main() -> None:
         "qualificationOnly": True,
     }
     assert len(inventory_sha) == 64 and inventory_sha != policy_sha
-    assert qualification_provider == "0.32.5"
+    assert qualification_provider == "0.32.13"
     refused(
         lambda: MODULE.reviewed_model("granite41-3b-q4"),
         "unreviewed-model-cell",
@@ -115,7 +115,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         original = MODULE.QUALIFICATION_INVENTORY_PATH
         inventory = json.loads(original.read_text(encoding="utf-8"))
-        inventory["qualificationProvider"]["exactVersion"] = "0.32.6"
+        inventory["qualificationProvider"]["exactVersion"] = "0.32.14"
         altered = Path(temporary) / "inventory.json"
         altered.write_text(json.dumps(inventory), encoding="utf-8")
         MODULE.QUALIFICATION_INVENTORY_PATH = altered

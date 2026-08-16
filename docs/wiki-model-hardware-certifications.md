@@ -533,6 +533,9 @@ Every sample must unload cleanly. Raw prompts and responses are not retained.
 | Ministral 3 8B, Q4_K_M on 16 GB CUDA | ❌ Did not pass | Failed writing or summarization; no soak ran. |
 | Qwen 3.6 27B, Q4_K_M on CPU | ⬜ Not tested | This model was not tested on the CPU profile. |
 | Qwen 3.6 27B, Q4_K_M on Windows with at least 31 GB system memory and 16 GB NVIDIA CUDA memory | 🧪 Engineering evidence | Passed task checks and a 30-minute soak on that exact review profile. This result does not apply to Intel Arc or AMD graphics and does not add the model to automatic selection. |
+| Gemma 3 1B, Q4_K_M on Ubuntu 24.04.4 CUDA with Ollama 0.32.13 | 🧪 Engineering evidence | Passed all nine task cells plus 42 soak samples and matching unload proofs at 182.075 tokens/s average on the exact 128 GB-system/64 GB aggregate-GPU dual-V100 review environment. The 16 GB profile floor is not a physical-card test. |
+| Phi 4 Mini 3.8B, Q4_K_M on Ubuntu 24.04.4 CUDA with Ollama 0.32.13 | 🧪 Engineering evidence | Passed all nine task cells plus 42 soak samples and matching unload proofs at 155.504 tokens/s average on the same exact review environment. Earlier runtime-specific evidence remains separately valid. |
+| Qwen 3.6 27B, Q4_K_M on Ubuntu 24.04.4 CUDA with Ollama 0.32.13 | 🧪 Engineering evidence | Passed all nine task cells plus 30 soak samples and matching unload proofs at 33.527 tokens/s average on the exact 128 GB-system/64 GB aggregate-GPU dual-V100 review environment. This does not establish a smaller physical memory tier or automatic selection. |
 | Granite 4.1 8B, Q4_K_M on Ubuntu Linux with Intel Arc B580 12 GB | 🧪 Engineering evidence | Passed 15 task samples, a 30-minute llama.cpp b10375 SYCL soak, full 41-layer offload, cleanup, and card-energy measurement. This does not establish Windows support or automatic selection. |
 | Nemotron 3.5 Lightning 30B-A3B, Q4_K_M on Ubuntu 24.04 with dual Tesla V100 32 GB | 🧪 Engineering evidence | Ollama 0.32.9 passed 81 samples across nine cycles and a 30-minute soak with reported GPU residency. A separate five-minute workload averaged 155.005 W across both GPU boards and produced 1,524.219 output tokens/Wh. Remaining capability, context, recovery, and product gates are open. |
 | Nemotron 3.5 Lightning 30B-A3B, Q8_0 on Ubuntu 24.04 with dual Tesla V100 32 GB | 🧪 Engineering evidence | Ollama 0.32.9 passed 72 samples across eight cycles and a 30-minute soak with reported GPU residency. A separate five-minute workload averaged 141.373 W across both GPU boards and produced 1,274.383 output tokens/Wh. Remaining capability, context, recovery, and product gates are open. |
@@ -543,6 +546,13 @@ Ministral 3 3B and 8B, and Muse Glimmer 30B all retained the
 `soak-task-contract-failed` result. This negative result is kept deliberately:
 a runtime update must not turn an unqualified model into a recommendation
 without new passing evidence.
+
+That required new evidence now exists for Gemma 3 1B and Phi 4 Mini on the
+exact Ollama 0.32.13 Ubuntu/CUDA review profile above. It does not rewrite the
+older Ollama 0.32.9 result or generalize to another runtime, operating system,
+GPU vendor, or physical memory tier. Gemma 3 1B ranked ahead of Phi 4 Mini for
+throughput within their shared lane after both passed; comparative human
+quality review remains open.
 
 Engineering evidence is narrower than availability by default. None of these
 qualification results changes the automatic model ladder or downloads a model

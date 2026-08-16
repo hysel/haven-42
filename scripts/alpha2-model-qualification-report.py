@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parent.parent
 INVENTORY_PATH = ROOT / "config/alpha-2-model-version-inventory.json"
 MATRIX_PATH = ROOT / "config/alpha-2-model-qualification-matrix.json"
 MAX_EVIDENCE_BYTES = 2 * 1024 * 1024
+MAX_EVIDENCE_DIRECTORIES = 8
+MAX_EVIDENCE_FILES = 1024
 CAPABILITIES = ("general.chat", "content.write", "content.summarize")
 LEGACY_LINUX_OPERATING_SYSTEM_IDS = frozenset({"bazzite-44"})
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -302,25 +304,56 @@ def _soak_metrics(
     }
 
 
+def _evidence_roots(evidence_directories: Path | list[Path] | tuple[Path, ...]) -> list[Path]:
+    candidates = (
+        [evidence_directories]
+        if isinstance(evidence_directories, Path)
+        else list(evidence_directories)
+    )
+    if not 1 <= len(candidates) <= MAX_EVIDENCE_DIRECTORIES:
+        raise ReportError("invalid-evidence-directory-count")
+    roots: list[Path] = []
+    for candidate in candidates:
+        if not isinstance(candidate, Path) or candidate.is_symlink():
+            raise ReportError("invalid-evidence-directory")
+        try:
+            resolved = candidate.resolve(strict=True)
+        except OSError as error:
+            raise ReportError("invalid-evidence-directory") from error
+        if not resolved.is_dir():
+            raise ReportError("invalid-evidence-directory")
+        if any(
+            resolved == existing
+            or resolved in existing.parents
+            or existing in resolved.parents
+            for existing in roots
+        ):
+            raise ReportError("overlapping-evidence-directories")
+        roots.append(resolved)
+    return roots
+
+
 def build_report(
-    evidence_directory: Path,
+    evidence_directory: Path | list[Path] | tuple[Path, ...],
     inventory_path: Path = INVENTORY_PATH,
     matrix_path: Path = MATRIX_PATH,
 ) -> dict[str, Any]:
     cells, inventory_sha, matrix_sha = _reviewed_context(
         inventory_path, matrix_path
     )
-    try:
-        base = evidence_directory.resolve(strict=True)
-    except OSError as error:
-        raise ReportError("invalid-evidence-directory") from error
-    if not base.is_dir() or evidence_directory.is_symlink():
-        raise ReportError("invalid-evidence-directory")
+    roots = _evidence_roots(evidence_directory)
 
     tasks: dict[tuple[str, str, str, str], dict[str, dict[str, Any]]] = {}
     soaks: dict[tuple[str, str, str, str], dict[str, Any]] = {}
     recognized = 0
-    for path in sorted(base.rglob("*.json")):
+    evidence_files = [
+        (base, path)
+        for base in roots
+        for path in base.rglob("*.json")
+    ]
+    if len(evidence_files) > MAX_EVIDENCE_FILES:
+        raise ReportError("evidence-file-limit")
+    for base, path in sorted(evidence_files, key=lambda item: str(item[1])):
         if path.is_symlink() or base not in path.resolve().parents:
             raise ReportError("unsafe-evidence-file")
         record = _load(path, "invalid-evidence-file")
@@ -441,7 +474,13 @@ def build_report(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--evidence-dir", type=Path, required=True)
+    parser.add_argument(
+        "--evidence-dir",
+        type=Path,
+        action="append",
+        required=True,
+        help="Evidence root; repeat for separate task and soak directories.",
+    )
     parser.add_argument(
         "--inventory",
         type=Path,

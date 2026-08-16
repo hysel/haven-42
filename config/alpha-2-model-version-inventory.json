@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inventoryId": "haven42.alpha2.model-family-versions",
   "release": "0.4.0-alpha.2",
-  "reviewedAtUtc": "2026-08-12T16:00:00Z",
+  "reviewedAtUtc": "2026-08-15T20:15:00Z",
   "status": "qualification-inventory-not-selection-policy",
   "capabilities": [
     "general.chat",
@@ -11,7 +11,7 @@
   ],
   "qualificationProvider": {
     "name": "ollama",
-    "exactVersion": "0.32.5",
+    "exactVersion": "0.32.13",
     "transport": "ipv4-loopback-only"
   },
   "rules": {

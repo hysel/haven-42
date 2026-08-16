@@ -1,0 +1,107 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-08-15T20:35:00Z",
+  "status": "no-encryption-dependency-admitted",
+  "coreCandidate": {
+    "name": "SQLCipher Community Edition",
+    "version": "4.17.0",
+    "releaseTag": "v4.17.0",
+    "releasePublishedAtUtc": "2026-07-08T14:22:06Z",
+    "tagObjectSha": "f9788efa8ac4dfed75c03e4756b1666a1d0845da",
+    "commitSha": "810db22f575ee7cf94ea96a3e91622b5fcece3dc",
+    "sqliteBaseline": "3.53.3",
+    "source": "https://github.com/sqlcipher/sqlcipher/releases/tag/v4.17.0",
+    "officialAnnouncement": "https://www.zetetic.net/blog/2026/07/08/sqlcipher-4-17-0-release/",
+    "verification": {
+      "annotatedTagVerifiedByGitHub": false,
+      "annotatedTagVerificationReason": "unknown_key",
+      "commitVerifiedByGitHub": false,
+      "commitVerificationReason": "unsigned",
+      "desktopCommunityReleaseAssetsPublished": false,
+      "generatedSourceArchiveDigestTreatedAsStableReleaseIdentity": false
+    },
+    "license": {
+      "expression": "BSD-3-Clause",
+      "copyright": "Copyright (c) 2008-2026, ZETETIC, LLC",
+      "userAccessibleAttributionRequired": true,
+      "integratedDependencyNoticesRequired": true,
+      "communityEditionIsFipsValidated": false,
+      "source": "https://www.zetetic.net/sqlcipher/license/"
+    }
+  },
+  "bindingCandidates": [
+    {
+      "name": "sqlcipher3",
+      "version": "0.6.2",
+      "status": "rejected-for-current-admission",
+      "reasonCodes": [
+        "embedded-sqlcipher-version-behind-reviewed-core",
+        "pypi-upload-not-trusted-publishing",
+        "native-package-provenance-not-yet-independently-verified"
+      ],
+      "repository": "https://github.com/coleifer/sqlcipher3",
+      "releaseTag": "0.6.2",
+      "releaseCommitShort": "14fc263",
+      "pypi": "https://pypi.org/project/sqlcipher3/0.6.2/",
+      "licenseExpression": "MIT",
+      "requiresPython": ">=3.9",
+      "embeddedSqlcipherVersion": "4.12.0",
+      "embeddedSqliteVersion": "3.51.1",
+      "artifacts": [
+        {
+          "filename": "sqlcipher3-0.6.2-cp314-cp314-win_amd64.whl",
+          "platform": "windows-x86_64-cpython314",
+          "sizeBytes": 2556915,
+          "sha256": "7de6133b19aec27b30698267cc2a0ea6e82c21d9a81d349cf0b480439fb549ac",
+          "trustedPublishing": false
+        },
+        {
+          "filename": "sqlcipher3-0.6.2-cp314-cp314-manylinux_2_28_x86_64.whl",
+          "platform": "linux-x86_64-cpython314",
+          "sizeBytes": 7037131,
+          "sha256": "e00988174ecd67ecd4537504c3df55bf8daeb75fce98401f099dff8e22c43ae1",
+          "trustedPublishing": false
+        },
+        {
+          "filename": "sqlcipher3-0.6.2-cp314-cp314-macosx_10_15_universal2.whl",
+          "platform": "macos-universal2-cpython314",
+          "sizeBytes": 4943422,
+          "sha256": "dae7ce66554f2416d9e9012cc78dfe4d4053385e7fa289a8d0bd7772e5f5a702",
+          "trustedPublishing": false
+        },
+        {
+          "filename": "sqlcipher3-0.6.2.tar.gz",
+          "platform": "source",
+          "sizeBytes": 2663213,
+          "sha256": "a2b675289ba8889f389625a21f3a01f1ff159a551b5b88fba8fd92da0e02380a",
+          "trustedPublishing": false
+        }
+      ]
+    },
+    {
+      "name": "pysqlcipher3",
+      "status": "rejected-unmaintained",
+      "repository": "https://github.com/rigglemania/pysqlcipher3",
+      "maintainerWarning": "project-no-longer-actively-maintained-security-vulnerabilities-may-exist"
+    }
+  ],
+  "authority": {
+    "dependencyInstallAllowed": false,
+    "dependencyPackageAllowed": false,
+    "databaseOpenAllowed": false,
+    "databaseCreateAllowed": false,
+    "persistentKeyWriteAllowed": false,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "userContentAllowed": false,
+    "productionUseAllowed": false
+  },
+  "remainingGates": [
+    "select-version-aligned-maintained-binding",
+    "verify-release-signature-or-equivalent-immutable-provenance",
+    "verify-every-native-binary-and-transitive-cryptographic-dependency",
+    "complete-license-notices-sbom-and-vulnerability-review",
+    "pass-windows-linux-macos-source-and-package-parity",
+    "pass-encryption-migration-rekey-recovery-delete-and-backup-tests"
+  ]
+}

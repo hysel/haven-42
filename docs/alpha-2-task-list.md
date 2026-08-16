@@ -607,6 +607,12 @@ promotion:
   default change. Keep Qwen 3.6 35B deferred until a 48 GiB-system machine can
   run it safely, and admit Qwen 3.7/3.8 only after an official local artifact
   is verified.
+- [x] Requalify the exact Gemma 3 1B, Phi 4 Mini 3.8B, and Qwen 3.6 27B Q4
+  artifacts on Ubuntu 24.04.4 CUDA with Ollama 0.32.13. All three passed nine
+  task cells and separate 30-minute soaks with complete unload parity. Keep
+  the evidence bound to the exact 128 GiB-system/64 GiB aggregate-GPU review
+  environment; a profile admission floor is not a physical memory-tier test,
+  and no automatic selection or default change is authorized.
 - [x] Feed only passed exact-profile evidence into the selector and exercise
   low-, medium-, and higher-capacity hardware profiles, including refusal for
   untested memory and accelerator lanes.

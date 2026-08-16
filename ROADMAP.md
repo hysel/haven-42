@@ -5,6 +5,9 @@
 > **Current release:** Windows `0.4.0-alpha.1` is available as an unsigned
 > prerelease for invited testing. It is not signed, installer-backed, stable,
 > or production-ready.
+>
+> **Current development target:** `0.4.0-alpha.2` for separately validated
+> Windows x64 and Linux x64 candidates. Promotion has not occurred.
 
 ### At a glance
 
@@ -22,6 +25,90 @@ Status terms are intentionally strict:
 - **Proposed** means no runtime capability has been admitted.
 - **Blocked** means a named security, owner, hardware, or outside dependency
   must be resolved before work can continue.
+
+## Release stages
+
+The product release stages below describe how Haven 42 moves from invited
+testing to a dependable public release. They are quality gates, not calendar
+promises. A stage advances only when its exit criteria are satisfied and the
+owner explicitly approves promotion.
+
+Roadmap milestone status and release stage are separate concepts. A milestone
+can be complete for its written engineering scope without making the product
+stable. Likewise, experimental image, audio, video, retrieval, or web features
+do not become supported merely because the core application advances to a
+later release stage.
+
+| Stage | Intended audience | Product goal | Required exit gate |
+| --- | --- | --- | --- |
+| Alpha 1 — `0.4.0-alpha.1` | Invited Windows testers | Prove that the local-first product shell, private text workflows, readiness checks, and managed setup can work as one bounded application. | Published historical stage. The exact unsigned Windows archive and its limitations remain recorded; it is not retroactively changed. |
+| Alpha 2 — `0.4.0-alpha.2` | Invited Windows and Linux testers | Make the core text experience repeatable across supported hardware and explicitly named Linux distributions, while improving setup recovery, model/runtime compatibility, accessibility, onboarding, diagnostics, and uninstall behavior. | Separate Windows x64 and Linux x64 candidates pass their release contracts, dependency/license review, source-versus-package parity, supported-platform accessibility checks, clean install/update/recovery/uninstall tests, and evidence-backed model selection. Packages may remain unsigned and must say so clearly. |
+| Alpha 3 — `0.4.0-alpha.3` | Broader technical testers | Reach core feature completeness before public Beta: dependable Chat, Writing, Summarization, attachments admitted for this release, local/external provider management, hardware-aware recommendations, runtime/model version binding, privacy-safe diagnostics, and stable user-data boundaries. | No unresolved blocker in the core user journey; schemas and migrations are defined; interrupted operations recover safely; defaults are justified by exact evidence; supported OS/GPU cells meet their stated coverage; keyboard, screen-reader, zoom, contrast, reduced-motion, forced-colors, and novice-flow reviews pass on the claimed configurations. Optional capabilities remain visibly Preview or unavailable. |
+| Beta 1 — `0.4.0-beta.1` | Public early adopters | Deliver a signed, installable, supportable public preview with stable configuration and data contracts. | Signed Windows and supported Linux packages, trustworthy installer/uninstaller behavior, cryptographically verified update staging with rollback, reproducible release records, SBOM/notices, vulnerability and dependency review, support and accessibility statements, backup/migration tests, and no known release-blocking privacy, security, accessibility, or supported-platform regressions. Automatic update installation remains separately owner-approved. |
+| Beta 2 — `0.4.0-beta.2` | Wider public testing | Stabilize rather than expand: resolve Beta feedback, validate upgrades from earlier supported builds, and prove sustained reliability on the published compatibility matrix. | Core feature freeze; upgrade/rollback and repeated-lifecycle soaks pass; crash and network-loss recovery pass; telemetry remains opt-in and content-free; documentation and in-product guidance match the package; performance and energy guidance is evidence-backed; all release-blocking defects are closed or the affected configuration is removed from support. |
+| Release Candidate — `0.4.0-rc.1` | Final validation cohort | Prove that the exact artifacts intended for Stable need no code or content changes beyond a version/promotion decision. | Release freeze; exact signed artifacts pass clean-install, upgrade, rollback, uninstall, accessibility, security, privacy, compatibility, offline, and recovery matrices; checksums, provenance, SBOM, notices, support policy, known limitations, and rollback procedure are published; no open critical or high-severity release blocker remains. Any change resets the affected RC evidence. |
+| Stable — `0.4.0` | General users on the published support matrix | Provide a dependable local-first release with explicit support boundaries and a recoverable update path. | The RC artifacts and evidence are approved without material change; download, install, update, rollback, support, and incident-response paths are operational; every supported claim is traceable to exact evidence. Experimental capabilities keep their own Preview labels and gates. |
+
+### How the active milestones feed the release train
+
+| Roadmap work | Alpha 2 | Alpha 3 | Beta through Stable |
+| --- | --- | --- | --- |
+| Milestone 22 — Product UI and lifecycle | Stabilize the current core journey and produce separate Windows/Linux candidates. | Finish the admitted core feature set and freeze its data, provider, and recovery contracts. | Sign, install, update, migrate, roll back, support, and repeatedly validate the frozen core. |
+| Milestone 26 — Model and hardware adaptation | Gather exact-profile evidence and correct misleading compatibility or default claims. | Bind every admitted recommendation to compatible model, runtime, driver, quantization, and hardware evidence. | Freeze the supported matrix, retest affected cells after changes, and publish bounded performance, energy, and cost guidance. |
+| Milestone 27 — Local knowledge and files | Preserve the currently admitted bounded attachments and reject unsupported inputs safely. | Admit only the attachment, history, or retrieval features that meet the Alpha 3 core gate; leave the rest unavailable or Preview. | Prove migration, privacy, retention, cleanup, accessibility, and package parity for anything included in the stable core. |
+| Milestone 23 — Images | Continue independent exact-profile validation; inclusion is optional. | May ship as a clearly labeled Preview only after its own admission gates pass. | Does not block core Stable unless the release explicitly promotes it as supported. |
+| Milestones 24–25 — Audio and video | Research and evidence only. | Remain Research, Candidate, or independently admitted Preview capabilities. | Do not block the core train and do not inherit Stable status from the app. |
+| Milestone 28 — Web research | Remains unavailable and default-deny. | Remains unavailable unless its network, source, citation, privacy, and abuse boundaries are independently admitted. | Can enter a later Preview or release only through a separate owner-approved capability gate. |
+
+Before work begins on a release stage, its actionable items must be mapped in
+`TODO.md` or a machine-readable release ledger to exactly one outcome: required
+for that stage, optional capability work, explicitly deferred, or blocked with
+a named dependency. Unmapped work cannot silently become a promotion gate.
+
+### What belongs in the core release train
+
+The `0.4.0` core train is centered on a dependable local text assistant:
+
+- Chat, Writing, and Summarization with clear task and model selection.
+- Local or explicitly configured private-network model providers.
+- Hardware-aware, evidence-backed model and runtime recommendations.
+- Managed setup, version binding, recovery, update staging, rollback, and
+  uninstall within explicit ownership boundaries.
+- The attachment types explicitly admitted for the release.
+- Accessible onboarding, section help, diagnostics, privacy explanations,
+  support reporting, and human-friendly documentation.
+- System, performance, energy, and electricity-cost information only where
+  its source, scope, privacy behavior, and limitations are clear.
+
+Native image generation, music/audio, video, broader retrieval, autonomous
+coding agents, and controlled web research remain independent capability
+tracks. Each may be unavailable, Research, Candidate, or Preview during a
+core Alpha, Beta, RC, or Stable release. Promotion requires its own exact
+runtime, model, hardware, security, privacy, accessibility, packaging,
+cleanup, and rollback evidence. A capability label must never be inferred
+from the overall application version.
+
+### Stage operating rules
+
+- Alpha may change workflows and schemas, but it must fail safely, disclose
+  unsigned or incomplete packaging, and preserve user-owned data.
+- Beta freezes core contracts progressively. Breaking changes require an
+  explicit migration and rollback path rather than an undocumented reset.
+- RC freezes the release candidate. Any material code, dependency, model,
+  runtime, policy, accessibility, or documentation change invalidates the
+  affected evidence and requires a new RC.
+- Stable support applies only to the published operating-system, browser or
+  desktop shell, runtime, model, driver, and hardware combinations. Evidence
+  from one configuration cannot promote another.
+- Security, privacy, accessibility, compatibility, licensing, documentation,
+  package parity, and recovery are promotion gates at every stage—not cleanup
+  tasks reserved for Beta or RC.
+- Apple Silicon and any other unavailable hardware track remain deferred
+  rather than estimated. Their absence does not block a Windows/Linux release
+  unless that release claims the missing platform.
+- Dates are added only when the work and evidence make them credible. No stage
+  is promoted solely to meet a date, and no promotion changes automatic model
+  defaults or release policy without explicit owner approval.
 
 ### Current priority order
 
@@ -260,7 +347,7 @@ admission.
 | Milestone 23: Native Local Image Generation | In progress | External provider engines, models, drivers, and installers are never bundled with Haven; users connect separately acquired compatible providers. The Linux ComfyUI/SDXL profile is live-validated and promoted; a 28-case effect-free lifecycle planner covers lifecycle outcomes without granting machine authority. Windows NVIDIA, AMD, and Intel have exact-profile evidence but remain independently gated. Runtime audits remain compatibility/security evidence and do not grant redistribution or package authority. Consumer onboarding, automatic idle shutdown, complete cleanup/parity, and Apple Silicon remain gated. |
 | Milestone 24: Local Music And Audio Generation | Live feasibility in progress | ACE-Step has partial Linux CUDA evidence across V100 and Quadro profiles. The Quadro cell passes instrumental/vocal-request WAV structure, signal/clipping, cancellation, recovery, GPU-use, isolated retention, and review-only typed evidence. Listening, deletion/uninstall, a production adapter, package parity, and an upstream route-authentication fix remain open. |
 | Milestone 25: Local Video Generation | Research and hardware preflight in progress | Exact HunyuanVideo, Wan2.2, and LTX-2.3 candidate records plus identity/media consent policy are complete. A Quadro RTX 5000 preflight rejected Wan2.2 for VRAM, LTX-2.3 for VRAM/storage, and HunyuanVideo for insufficient safe storage before downloading any runtime or model. No live provider is promoted. |
-| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The same hash-pinned 11-model portable GGUF corpus passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Separate Windows NVIDIA and Windows AMD follow-ons record patch, context, repeated-lifecycle, vision, and direct structured tool-call outcomes without promoting failed quality cells. A 62-check structured tool-transport parser validates exact final Ollama 0.32.5 and normalized OpenAI-compatible candidate shapes while granting no execution, approval, provider, or runtime authority. A bounded manual live run passed four tool-capable installed models and correctly classified one unsupported model; it retained no content and unloaded every tested model. Physical Intel Arc B580 candidate evidence covers Linux llama.cpp SYCL plus Linux and Windows OpenVINO GenAI. A native Windows llama.cpp SYCL cell passed exact artifact preflight but was rejected after zero-free-memory reporting, tensor-load failure, and an OpenCL fallback fast-fail; no engine is promoted. Vulkan failed the patch gate. |
+| Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The exact Gemma 3 1B, Phi 4 Mini 3.8B, and Qwen 3.6 27B Q4 artifacts now also pass the current three-task contract and separate 30-minute soaks on Ubuntu 24.04.4 CUDA with Ollama 0.32.13; this exact high-memory review evidence grants no automatic selection or physical 16 GiB claim. The same hash-pinned 11-model portable GGUF corpus passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Separate Windows NVIDIA and Windows AMD follow-ons record patch, context, repeated-lifecycle, vision, and direct structured tool-call outcomes without promoting failed quality cells. A 62-check structured tool-transport parser validates exact final Ollama 0.32.5 and normalized OpenAI-compatible candidate shapes while granting no execution, approval, provider, or runtime authority. A bounded manual live run passed four tool-capable installed models and correctly classified one unsupported model; it retained no content and unloaded every tested model. Physical Intel Arc B580 candidate evidence covers Linux llama.cpp SYCL plus Linux and Windows OpenVINO GenAI. A native Windows llama.cpp SYCL cell passed exact artifact preflight but was rejected after zero-free-memory reporting, tensor-load failure, and an OpenCL fallback fast-fail; no engine is promoted. Vulkan failed the patch gate. |
 | Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | Explicit bounded text, structured-text, source-code, and PNG attachments are admitted and pass source/native-package browser smoke on Windows, Linux, and macOS. Retrieval, history, PDF, Office, OpenDocument, folder scanning, embeddings, OCR, persistence, physical macOS clipboard evidence, and complex-document UI remain independently gated. |
 | Milestone 28: Controlled Web Research | Proposed; runtime unadmitted | Default-deny contracts plus offline result, page-text, citation, and cited-synthesis hostile suites exist, but no model invocation, model tool, renderer route, DNS, network, page retrieval, active citation, or autonomous follow-up authority is admitted. |
 
@@ -719,6 +806,8 @@ Exit criteria:
 Future evidence expansion:
 
 - Evaluate any future agent successor externally under the admission policy before adding it to the tracked surface list.
+- Evaluate the official DeepSeek Harness (`deepseek-ai/deepseek-harness`, npm package `@deepseek-ai/dsh`) as an optional standalone coding-agent candidate. Pin the exact tested version and keep the first evaluation in an isolated disposable workspace. Before it can enter the tracked or supported surface catalogs, prove local OpenAI-compatible or Ollama endpoint operation, offline and network behavior, plugin/filesystem/credential/approval boundaries, generated-repository read and plan behavior, approved scoped writes with external verification, accessibility of its user-facing surface, and complete cleanup. Keep this evaluation separate from the supported Continue path and from previously failed Cline admission; launching the DSH web UI alone is not compatibility or write-readiness evidence.
+- Evaluate VS Code Native Chat with the official Ollama language-model provider as a high-priority local coding-surface candidate. Pin the exact VS Code, extension, Ollama, and model versions; then validate local and explicitly approved remote endpoints, offline behavior, basic chat, workspace context, read-only analysis, proposed edits, approved scoped writes, tool and terminal approvals, cancellation, rollback, cleanup, accessibility, and source/package parity. Require reliable tool calling before agent-mode admission, keep local-chat evidence distinct from unsupported local inline-completion or GitHub-dependent semantic-search claims, and do not change automatic model defaults from candidate evidence. Continue remains the supported cross-editor path. Keep VSCodium Native Chat deferred until its editor version, chat harness, provider-extension distribution, and proposed-API compatibility are stable enough for the same admission suite.
 - Define a safe OpenHands validation boundary before adding platform-agent validation automation. Done with an isolated generated-sample, sandbox, credential, mount, and network policy.
 - Run explicitly approved non-generated repository validation before any non-Continue surface is promoted to real-project approved-write ready.
 - Promote one non-Continue surface end to end before widening adapter support. Done for the Aider install, local-model configuration, health, and test adapter; real-project approved write remains blocked pending explicitly approved validation.
@@ -1279,7 +1368,7 @@ Exit criteria:
 
 Goal: Let an end user explicitly add selected local documents to a text task without granting Haven 42 general filesystem authority, silently scanning the machine, or obscuring when document content crosses to a private-network provider.
 
-Current status: The explicit bounded `.txt`/`.md`/`.csv`/`.json`, narrow source-text, and browsed-or-pasted PNG attachment slice is implemented with path-free selection, type/content checks, inert previews, compact scrolling, removal, memory-only cleanup, warned private-network transfer, and native Windows plus Ubuntu evidence. The current admitted attachment slice passes source and native packaged browser smoke on Windows, Linux, and macOS. Physical macOS clipboard validation remains owner-parked. The deterministic lexical-retrieval core now reports matching, selected, omitted, and truncation-reason counts; it and the optional conversation-history lifecycle/encryption architecture remain offline and inactive with no route, application database, provider, or persistence authority. A fixed-synthetic-record SQLite development validator now covers parameterized access, backup/read-only restore, cascade deletion, permissions, and residue cleanup only in a fresh temporary directory. A separate explicit-folder development inspector is non-recursive by default, bounded, descriptor-based, link/reparse-safe, and metadata-only. Neither is connected to the runtime, UI, provider, or package; semantic embeddings and an encrypted persistent library remain unselected gates. A 27-case metadata-only parser boundary covers PDF, Office Open XML, and OpenDocument candidate identities. The exact ignored `pypdf` 6.14.2 artifact is exercised only by an offline review worker that passed 61 corpus security, 64 static, and 40 contract-parity/package-exclusion checks with Windows and Ubuntu source evidence. A production-isolation assessment plus a 37-check exact OS-control evidence gate now rejects WSL2 as native Linux evidence and keeps missing sandbox controls explicit. A native Ubuntu KVM availability probe found all five required Linux isolation primitive categories, but implementation, enforcement, hostile escape testing, and source/package parity remain false, so admission remains denied. Metadata-only corpus research still selects no artifact, and the intake/parity gates remain offline and false. The bounded standard-library Office/OpenDocument foundation passes 49 container checks across 24 fixtures, including empty, disguised, whitespace-obscured, or encoded external URI and relationship traversal cases, 62 semantic checks across 19 fixtures, and 33 source/package-exclusion checks with Windows and Ubuntu source evidence, without archive extraction or a dependency. Three deterministic PDF compliance files are generated only beneath ignored local review. No user document, dependency, application route, UI, provider path, package, installer, updater, or release uses either prototype. macOS source evidence, admitted non-synthetic hostile review, implemented production isolation, remaining semantic fidelity, actual package compliance integration, native package parity, and explicit admission remain open. Vision promotion, broader image conversion, runtime folder scans, active retrieval, embeddings, encrypted history, and runtime persistence remain unadmitted.
+Current status: The explicit bounded `.txt`/`.md`/`.csv`/`.json`, narrow source-text, and browsed-or-pasted PNG attachment slice is implemented with path-free selection, type/content checks, inert previews, compact scrolling, removal, memory-only cleanup, warned private-network transfer, and native Windows plus Ubuntu evidence. The current admitted attachment slice passes source and native packaged browser smoke on Windows, Linux, and macOS. Physical macOS clipboard validation remains owner-parked. The deterministic lexical-retrieval core now reports matching, selected, omitted, and truncation-reason counts; it and the optional conversation-history lifecycle/encryption architecture remain offline and inactive with no route, application database, provider, or persistence authority. A fixed-synthetic-record SQLite development validator covers parameterized access, backup/read-only restore, cascade deletion, permissions, and residue cleanup only in a fresh temporary directory. A Windows current-user DPAPI proof passes 16 synthetic-key security checks with mutable plaintext/native buffer wiping, tamper refusal, package exclusion, no machine scope, and no fallback. A separate 23-check proof persists only the wrapped synthetic key in a fresh test-owned temporary directory, proves no-replace commit racing, recovery, fail-closed tamper and missing-key behavior, and cleanup, while explicitly leaving production ACL admission false. Encrypted database selection, atomic database-plus-key creation, production ACLs, Linux Secret Service, macOS Keychain, rotation/recovery, accessible opt-in UI, and native package parity remain open. A separate explicit-folder development inspector is non-recursive by default, bounded, descriptor-based, link/reparse-safe, and metadata-only. Neither is connected to the runtime, UI, provider, or package; semantic embeddings and an encrypted persistent library remain unselected gates. A 27-case metadata-only parser boundary covers PDF, Office Open XML, and OpenDocument candidate identities. The exact ignored `pypdf` 6.14.2 artifact is exercised only by an offline review worker that passed 61 corpus security, 64 static, and 40 contract-parity/package-exclusion checks with Windows and Ubuntu source evidence. A production-isolation assessment plus a 37-check exact OS-control evidence gate now rejects WSL2 as native Linux evidence and keeps missing sandbox controls explicit. A native Ubuntu KVM availability probe found all five required Linux isolation primitive categories, but implementation, enforcement, hostile escape testing, and source/package parity remain false, so admission remains denied. Metadata-only corpus research still selects no artifact, and the intake/parity gates remain offline and false. The bounded standard-library Office/OpenDocument foundation passes 49 container checks across 24 fixtures, including empty, disguised, whitespace-obscured, or encoded external URI and relationship traversal cases, 62 semantic checks across 19 fixtures, and 33 source/package-exclusion checks with Windows and Ubuntu source evidence, without archive extraction or a dependency. Three deterministic PDF compliance files are generated only beneath ignored local review. No user document, dependency, application route, UI, provider path, package, installer, updater, or release uses either prototype. macOS source evidence, admitted non-synthetic hostile review, implemented production isolation, remaining semantic fidelity, actual package compliance integration, native package parity, and explicit admission remain open. Vision promotion, broader image conversion, runtime folder scans, active retrieval, embeddings, encrypted history, and runtime persistence remain unadmitted.
 
 Scope:
 
@@ -1303,6 +1392,35 @@ Scope:
 - Defer any persistent knowledge library until encrypted storage, key handling, migration, corruption recovery, deletion, export, backup, multi-user, and uninstall semantics pass separate approval and native evidence.
 
 ### Optional Local Conversation History Database
+
+Current dependency status: no encryption dependency is admitted. SQLCipher
+Community 4.17.0 is the reviewed current core, but the maintained
+cross-platform `sqlcipher3` 0.6.2 binding embeds 4.12.0 and has not passed
+native/transitive provenance gates; `pysqlcipher3` is explicitly unmaintained.
+The separate Windows current-user DPAPI proof passes 16 synthetic-key security
+checks. A second 23-check proof writes only the wrapped synthetic key in a fresh
+test-owned temporary directory, exercises exclusive creation, flush-before-
+commit, a no-replace rename race, recovery, tamper and missing-key refusal
+without reset, and residue cleanup. A separate 24-check Windows proof validates
+the protected per-user ACL primitive in a synthetic temporary directory and
+rejects a deliberately widened Users-group rule. Neither proof claims the
+production application directory, database persistence, or package inclusion.
+Runtime activation still requires a version-aligned encrypted database binding,
+atomic database-plus-key creation, production application-directory binding,
+rotation and recovery, Linux Secret Service,
+macOS Keychain, accessible opt-in UI, and native source/package parity.
+
+The Linux Secret Service candidate now has a 27-check offline availability
+boundary. It only detects whether `org.freedesktop.secrets` is already present
+on the current user bus using a reviewed system `busctl` path and fixed
+arguments, rejects caller-controlled executable paths, and returns sanitized
+booleans. It cannot activate a service, invoke a method, access a collection or
+secret, install a package, use the network, or grant runtime authority. The
+exact probe also passed a residue-free native headless container cell: its user
+bus was reachable and Secret Service was inactive, so the design failed closed
+without accessing a secret. Native desktop, locked, denied, absent, and
+corrupted evidence is still required before selecting a binding or admitting
+key storage.
 
 - Use an embedded SQLite-compatible database as the initial architecture
   candidate; require no database server, administrator access, system service,
@@ -1423,12 +1541,22 @@ Exit criteria:
 18. Review the encryption and key-management architecture, including
     SQLCipher-equivalent dependency, license, supply-chain, native packaging,
     operating-system credential storage, key rotation/loss, and backup/restore.
-    Done at the architecture boundary: dependency selection and implementation
-    remain separately gated, and unavailable credential storage fails closed to
-    Private session without a plaintext key fallback.
+    Done at the architecture boundary. The Windows current-user DPAPI
+    synthetic-key proof now passes 16 memory/DPAPI checks, and a separate
+    23-check test-owned temporary persistence proof covers no-replace commit,
+    recovery, fail-closed tamper/missing-key behavior, and cleanup without
+    claiming a production ACL or application write. The
+    exact SQLCipher 4.17.0 and Python-binding review admits no dependency due to
+    core/binding version mismatch and incomplete native provenance; atomic
+    database-plus-key creation, production ACLs, rotation/recovery, Linux,
+    macOS, and package implementation remain separately gated. Unavailable
+    credential storage must fail closed to
+    Private session without a plaintext fallback.
 19. Admit an opt-in development history database only after explicit approval
-    and the storage, deletion, recovery, privacy, and cross-platform package
-    gates pass. Keep Private session as the default until a separate product
+    and the storage, deletion, recovery, privacy, accessibility, and
+    cross-platform package gates pass. Owner approval to advance development
+    was received on August 15, 2026; the technical gates still block runtime
+    activation. Keep Private session as the default until a separate product
     decision changes it.
 20. Add conversation list, rename, search, retention, delete, clear-all,
     context-preview, backup, and restore UI only over typed engine operations;
@@ -1441,7 +1569,7 @@ Exit criteria:
 
 Goal: Let an end user explicitly research current public information with a local model while keeping all network authority in a narrow engine-owned search and retrieval broker rather than granting the model, renderer, or browser unrestricted internet access.
 
-Current status: Proposed, security-scoped, and offline-only. A machine-readable foundation plus ten inert hostile fixtures deny runtime routes, model tools, network, DNS, URL fetching, browser automation, page execution, credentials, downloads, persistence, and autonomous follow-up. A separate 28-check caller-fixture boundary validates bounded queries, strict public-HTTPS result metadata, engine-derived inactive citations, and exact source accounting without importing a network stack or entering the application/package. A disabled fixed-Wikipedia metadata-query adapter adds 15 request/response security checks through an injected fixture transport; it has no HTTP client or live destination authority. A 25-check effect-free transport guard validates fixed HTTPS destinations, public DNS snapshots before and at connection, rebinding, redirects, response type, encoding, time, and bytes without performing DNS or network I/O. A 17-check memory-only state proof requires exact single-use query/page approvals and lifecycle cleanup. Self-hosted-provider and at-most-four-query evaluation contracts preserve disclosure, separate approval, cancellation, SSRF, and source-accounting gates without selecting or activating a provider. A 26-check caller-bytes-only page-text foundation strictly converts bounded UTF-8 text or allowlisted HTML into inert untrusted segments while retaining no attributes or remote references and granting no fetch, filesystem, runtime, UI, package, or model authority. A separate 26-check cited-synthesis foundation builds URL-free digest-accounted source envelopes and accepts only bounded claims with exact engine-derived citation IDs; it invokes no model and grants no tool, follow-up, runtime, or network authority. No live search adapter, page transport, or UI control exists. Text models retain no general research authority, and the existing fixed-origin Ollama model-catalog search remains a separate candidate-discovery feature.
+Current status: Proposed and security-scoped. A development-only native fixed-Wikipedia metadata-query command now has sanitized Windows and native headless Linux live-query passes plus 21 hostile offline transport checks. The Linux run used a hash-verified disposable source bundle and left no matching temporary directory. The command uses system TLS trust, two-pass public DNS validation, a pinned public connection address, identity encoding, a fixed host/path, strict JSON and byte/time limits, and no redirects, proxy inheritance, credentials, or cookies. It is deliberately absent from the app runtime and packages and grants no UI, model-tool, page-retrieval, navigation, persistence, or follow-up authority. The wider foundation still includes ten inert hostile fixtures, a 28-check caller-fixture boundary, 15 fixed-adapter request/response checks, a 25-check effect-free transport guard, a 17-check memory-only approval proof, a 26-check caller-bytes-only page-text foundation, and a separate 26-check cited-synthesis boundary. Self-hosted-provider and at-most-four-query evaluation contracts remain inactive. Text models retain no general research authority, and the existing fixed-origin Ollama model-catalog search remains a separate candidate-discovery feature.
 
 Scope:
 
@@ -1471,7 +1599,7 @@ Exit criteria:
 
 1. Define versioned search-query, result, citation, provider-disclosure, research-budget, and memory-lifecycle contracts with network and follow-up effects denied by default. Done for the inactive offline foundation; a future adapter result schema remains separately gated.
 2. Add offline hostile tests for destination confusion, DNS/IP classes, redirects, credentials, malformed responses, oversized content, prompt injection, citation forgery, cancellation, and cleanup. Ten inert contract fixtures plus the effect-free 25-check transport guard and 17-check approval lifecycle are present; executable broker tests remain with a future adapter.
-3. Implement one explicit query-only search adapter returning bounded titles, excerpts, domains, public HTTPS URLs, and retrieval times. The general offline caller-fixture validator passes 28 checks, and a fixed-Wikipedia metadata request adapter passes 15 additional fixture-transport checks. Neither contains a live HTTP transport or runtime/network authority.
+3. Implement one explicit query-only search adapter returning bounded titles, domains, inactive public HTTPS destinations, and retrieval times. Done for a development-only fixed-Wikipedia metadata command: its request/response adapter passes 15 checks, its native transport passes 21 hostile offline checks, and sanitized Windows and native headless Linux live queries passed. The command has narrowly scoped query-network authority only; it remains outside the runtime and package and grants no UI, model-tool, page-fetch, active-navigation, persistence, or follow-up authority. Excerpts require the separate selected-page gate and are not claimed here.
 4. Add trusted citation rendering and per-query disclosure without model-supplied links. The inactive engine-derived citation shape and exact source-accounting validator are done; trusted visual rendering and active user navigation remain unimplemented.
 5. Add explicit user-selected page retrieval with SSRF revalidation, strict content limits, inert text extraction, and no page execution. The 26-check offline caller-bytes extractor establishes strict text/HTML parsing behavior; network transport, destination validation, response binding, runtime integration, and promotion remain unimplemented.
 6. Add cited model synthesis from only the approved result/page set, with exact source accounting and no autonomous follow-up. The offline caller-fixture foundation now validates URL-free source envelopes and claim-level engine-derived citations in 26 hostile/static checks, and the same sanitized source bundle passes on native Windows and Ubuntu Linux. It invokes no model and remains absent from the runtime and package; macOS and native package evidence remain open.
