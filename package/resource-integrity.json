@@ -28,8 +28,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "ec4127907ef5aa9b976a7e4ec3e6b3903cef79caa37325779b9ea58f6d7365bc",
-      "sizeBytes": 49853
+      "sha256": "c42c7df1bf40f7884ae22dd7b6775a3c6e6d9df9e9159a0defffd7d86b63fb02",
+      "sizeBytes": 50549
     },
     {
       "path": "config/agent-surface-capabilities.json",
