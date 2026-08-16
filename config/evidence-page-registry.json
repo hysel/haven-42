@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "82aa8a6f94c246503f5b3743d370b9b0c9f72bb83967e98b64b369f8fc9c93ae",
-  "recordCount": 109,
+  "catalogSha256": "228a9109579254e6a9c375723f1b986c90b8104f57e594b06a57e445279f8848",
+  "recordCount": 121,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -423,6 +423,150 @@
         "repositorySource": "docs/evidence-records/evidence-1c20a3dfac18ae0a.md",
         "wikiPage": "Evidence-Record-1c20a3dfac18ae0a.md",
         "title": "Offline transport and approval guards"
+      }
+    },
+    {
+      "id": "evidence-afdeb35698fc13c1",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Conversation-history encryption dependency review",
+        "surface": "Haven 42 dependency admission",
+        "surface_version": "1",
+        "provider": "SQLCipher Community and Python bindings",
+        "os": "Cross-platform",
+        "model": "none",
+        "operation": "dependency-provenance-license-fit",
+        "validation_mode": "offline-primary-source-review",
+        "status": "candidate-only",
+        "evidence": "examples/conversation-history-encryption-dependency-review.md",
+        "notes": "SQLCipher Community 4.17.0 and two Python binding paths were reviewed; no dependency was admitted because the maintained binding embeds 4.12.0 with incomplete native provenance and the legacy binding is unmaintained."
+      },
+      "sourceEvidence": "examples/conversation-history-encryption-dependency-review.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-afdeb35698fc13c1.md",
+        "wikiPage": "Evidence-Record-afdeb35698fc13c1.md",
+        "title": "Conversation-history encryption dependency review"
+      }
+    },
+    {
+      "id": "evidence-3032fff46e49e400",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Linux credential-store availability boundary",
+        "surface": "Haven 42 development availability probe",
+        "surface_version": "1",
+        "provider": "freedesktop credential-store candidate",
+        "os": "Linux",
+        "model": "none",
+        "operation": "session-bus-credential-store-presence",
+        "validation_mode": "offline-mocked",
+        "status": "candidate-only",
+        "evidence": "examples/linux-credential-store-availability-boundary.md",
+        "notes": "A 25-check offline boundary pins the non-activating user-bus listing to reviewed system executable paths, rejects caller-controlled executable paths, and returns sanitized booleans; no native desktop cell, binding, service activation, method, credential access, runtime, UI, package, or production authority is admitted."
+      },
+      "sourceEvidence": "examples/linux-credential-store-availability-boundary.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3032fff46e49e400.md",
+        "wikiPage": "Evidence-Record-3032fff46e49e400.md",
+        "title": "Linux credential-store availability boundary"
+      }
+    },
+    {
+      "id": "evidence-56ca94fba5185607",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Linux credential-store native headless availability",
+        "surface": "Haven 42 development availability probe",
+        "surface_version": "1",
+        "provider": "freedesktop credential-store candidate",
+        "os": "Linux headless container session",
+        "model": "none",
+        "operation": "session-bus-credential-store-presence-cleanup",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/linux-credential-store-availability-boundary.md",
+        "notes": "The exact probe and contract found an available user bus with no active credential-store service, performed no credential operation, and left no temporary residue; this proves expected fail-closed headless behavior only, not desktop key storage or runtime/package admission."
+      },
+      "sourceEvidence": "examples/linux-credential-store-availability-boundary.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-56ca94fba5185607.md",
+        "wikiPage": "Evidence-Record-56ca94fba5185607.md",
+        "title": "Linux credential-store native headless availability"
+      }
+    },
+    {
+      "id": "evidence-0005faabe699fcf7",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Windows conversation-history per-user ACL primitive",
+        "surface": "Haven 42 development ACL proof",
+        "surface_version": "1",
+        "provider": "Windows protected DACL",
+        "os": "Windows",
+        "model": "none",
+        "operation": "protected-directory-inherited-file-unexpected-principal-cleanup",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/windows-conversation-history-per-user-acl-validation.md",
+        "notes": "A synthetic temporary directory passed 24 checks for protected inheritance, current-user and Local System full control, bounded inherited key-file rules, injected Users-group refusal, residue cleanup, and package exclusion; the production application directory, database, user content, runtime, UI, and package authority remain unadmitted."
+      },
+      "sourceEvidence": "examples/windows-conversation-history-per-user-acl-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0005faabe699fcf7.md",
+        "wikiPage": "Evidence-Record-0005faabe699fcf7.md",
+        "title": "Windows conversation-history per-user ACL primitive"
+      }
+    },
+    {
+      "id": "evidence-780b76332e1a0df4",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Windows conversation-history synthetic key protection",
+        "surface": "Haven 42 development key adapter",
+        "surface_version": "1",
+        "provider": "Windows DPAPI current user",
+        "os": "Windows",
+        "model": "none",
+        "operation": "wrap-unwrap-synthetic-key",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/windows-conversation-history-dpapi-validation.md",
+        "notes": "A synthetic 32-byte key passed a current-user DPAPI round trip and 16 security checks with tamper refusal, mutable buffer wiping, and package exclusion; no database, persistent key, user content, runtime route, UI, package, or production authority is admitted."
+      },
+      "sourceEvidence": "examples/windows-conversation-history-dpapi-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-780b76332e1a0df4.md",
+        "wikiPage": "Evidence-Record-780b76332e1a0df4.md",
+        "title": "Windows conversation-history synthetic key protection"
+      }
+    },
+    {
+      "id": "evidence-01c8b74c82919604",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Windows wrapped-key temporary persistence",
+        "surface": "Haven 42 development key persistence adapter",
+        "surface_version": "1",
+        "provider": "Windows DPAPI current user",
+        "os": "Windows",
+        "model": "none",
+        "operation": "atomic-write-recover-tamper-missing-cleanup",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/windows-conversation-history-wrapped-key-persistence-validation.md",
+        "notes": "A wrapped synthetic key passed 23 checks for exclusive temporary creation, flush-before-commit, no-replace rename racing, recovery, tamper and missing-key refusal without reset, residue cleanup, and package exclusion; production ACLs, databases, user content, runtime, UI, and package authority remain unadmitted."
+      },
+      "sourceEvidence": "examples/windows-conversation-history-wrapped-key-persistence-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-01c8b74c82919604.md",
+        "wikiPage": "Evidence-Record-01c8b74c82919604.md",
+        "title": "Windows wrapped-key temporary persistence"
       }
     },
     {
@@ -1674,6 +1818,30 @@
       }
     },
     {
+      "id": "evidence-b1e852d6e517e410",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "gemma3:1b-it-q4_K_M",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-v100-ollama03213-qualification.md",
+        "notes": "The exact artifact passed all nine task cells, 42 soak samples, matching unload proofs, and bounded accelerator-residency reporting on the exact dual-V100 review profile; physical 16 GiB hardware, package lifecycle, recovery, energy, human quality, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/nvidia-v100-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-b1e852d6e517e410.md",
+        "wikiPage": "Evidence-Record-b1e852d6e517e410.md",
+        "title": "Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA"
+      }
+    },
+    {
       "id": "evidence-739440533a3f6c7a",
       "claim": {
         "schema_version": "2",
@@ -1770,6 +1938,30 @@
       }
     },
     {
+      "id": "evidence-d7e3b3eddcb87ab3",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "phi4-mini:3.8b-q4_K_M",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-v100-ollama03213-qualification.md",
+        "notes": "The exact artifact passed all nine task cells, 42 soak samples, matching unload proofs, and bounded accelerator-residency reporting on the exact dual-V100 review profile; physical 16 GiB hardware, package lifecycle, recovery, energy, human quality, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/nvidia-v100-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d7e3b3eddcb87ab3.md",
+        "wikiPage": "Evidence-Record-d7e3b3eddcb87ab3.md",
+        "title": "Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA"
+      }
+    },
+    {
       "id": "evidence-08bad671d73e509b",
       "claim": {
         "schema_version": "2",
@@ -1791,6 +1983,30 @@
         "repositorySource": "docs/evidence-records/evidence-08bad671d73e509b.md",
         "wikiPage": "Evidence-Record-08bad671d73e509b.md",
         "title": "Qwen 3.5 9B synchronized power on Radeon RX 7800 XT"
+      }
+    },
+    {
+      "id": "evidence-f96c1a3dd255db29",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "qwen3.6:27b-q4_K_M",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-v100-ollama03213-qualification.md",
+        "notes": "The exact artifact passed all nine task cells, 30 soak samples, matching unload proofs, and bounded accelerator-residency reporting on the exact dual-V100 review profile; smaller physical hardware, package lifecycle, recovery, context, energy, human quality, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/nvidia-v100-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-f96c1a3dd255db29.md",
+        "wikiPage": "Evidence-Record-f96c1a3dd255db29.md",
+        "title": "Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA"
       }
     },
     {
@@ -2562,6 +2778,30 @@
       }
     },
     {
+      "id": "evidence-2589000e63822b5e",
+      "claim": {
+        "schema_version": "2",
+        "area": "package-parity",
+        "subject": "Windows Alpha 2 current UI package parity",
+        "surface": "Haven 42 unsigned portable development package",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "local web runtime",
+        "os": "Windows 11",
+        "model": "none",
+        "operation": "source-package-lifecycle-browser-accessibility",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/windows-alpha2-current-ui-package-parity.md",
+        "notes": "The current Alpha 2-only build passed protected-resource and API parity, relocation, read-only startup, abrupt-exit recovery, repeated lifecycle, hostile-environment and integrity checks, plus the same 529-check browser flow in source and package; manual assistive-technology testing and signed release evidence remain open."
+      },
+      "sourceEvidence": "examples/windows-alpha2-current-ui-package-parity.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2589000e63822b5e.md",
+        "wikiPage": "Evidence-Record-2589000e63822b5e.md",
+        "title": "Windows Alpha 2 current UI package parity"
+      }
+    },
+    {
       "id": "evidence-77e5fbc983b71597",
       "claim": {
         "schema_version": "2",
@@ -2631,6 +2871,54 @@
         "repositorySource": "docs/evidence-records/evidence-22701a5715776e0d.md",
         "wikiPage": "Evidence-Record-22701a5715776e0d.md",
         "title": "TypeScript frontend generated sample"
+      }
+    },
+    {
+      "id": "evidence-01b01f98b537ca75",
+      "claim": {
+        "schema_version": "2",
+        "area": "web-research",
+        "subject": "Native fixed-provider metadata query",
+        "surface": "Haven 42 development query transport",
+        "surface_version": "1",
+        "provider": "Wikipedia metadata API",
+        "os": "Windows",
+        "model": "none",
+        "operation": "query-metadata",
+        "validation_mode": "development-network",
+        "status": "partial-pass",
+        "evidence": "examples/windows-native-web-research-query-validation.md",
+        "notes": "One explicit three-result fixed-provider query passed the native Windows transport after 21 hostile offline transport checks and 15 adapter checks; runtime, UI, model-tool, page-retrieval, navigation, persistence, follow-up, and package authority remain false."
+      },
+      "sourceEvidence": "examples/windows-native-web-research-query-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-01b01f98b537ca75.md",
+        "wikiPage": "Evidence-Record-01b01f98b537ca75.md",
+        "title": "Native fixed-provider metadata query"
+      }
+    },
+    {
+      "id": "evidence-7207da1f9eca0995",
+      "claim": {
+        "schema_version": "2",
+        "area": "web-research",
+        "subject": "Native fixed-provider metadata query on Linux",
+        "surface": "Haven 42 development query transport",
+        "surface_version": "1",
+        "provider": "Wikipedia metadata API",
+        "os": "Native headless Linux",
+        "model": "none",
+        "operation": "query-metadata-transport-integrity-cleanup",
+        "validation_mode": "development-network",
+        "status": "partial-pass",
+        "evidence": "examples/linux-native-web-research-query-validation.md",
+        "notes": "One explicit three-result fixed-provider query passed from a hash-verified disposable Linux source bundle with system TLS trust, two-pass public DNS validation, pinned connection, no redirects, credentials, cookies, compression or proxy inheritance, and no temporary residue; runtime, UI, model-tool, page-retrieval, navigation, persistence, follow-up, and package authority remain false."
+      },
+      "sourceEvidence": "examples/linux-native-web-research-query-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-7207da1f9eca0995.md",
+        "wikiPage": "Evidence-Record-7207da1f9eca0995.md",
+        "title": "Native fixed-provider metadata query on Linux"
       }
     }
   ]

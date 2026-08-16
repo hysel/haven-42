@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.conversation-history.windows-wrapped-key-persistence",
+  "status": "development-synthetic-temporary-only",
+  "platform": "windows",
+  "storage": {
+    "testOwnedTemporaryDirectoryOnly": true,
+    "callerPathAllowed": false,
+    "directoryMustStartEmpty": true,
+    "symlinksOrReparsePointsAllowed": false,
+    "wrappedKeyFilename": "history-key.dpapi",
+    "temporaryFilename": "history-key.dpapi.tmp",
+    "maximumWrappedKeyBytes": 16384,
+    "exclusiveTemporaryCreateRequired": true,
+    "flushBeforeRenameRequired": true,
+    "atomicNoReplaceRenameRequired": true,
+    "productionAclAdmissionRequired": true,
+    "productionAclAdmissionProven": false,
+    "cleanupRequired": true
+  },
+  "recovery": {
+    "missingKeyFailsClosed": true,
+    "emptyKeyFailsClosed": true,
+    "oversizedKeyFailsClosed": true,
+    "tamperedKeyFailsClosed": true,
+    "preexistingKeyNeverOverwritten": true,
+    "automaticResetAllowed": false,
+    "plaintextFallbackAllowed": false
+  },
+  "authority": {
+    "syntheticTemporaryValidationAllowed": true,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "userContentAllowed": false,
+    "databaseOpenAllowed": false,
+    "databaseCreateAllowed": false,
+    "callerSelectedPathAllowed": false,
+    "persistentApplicationWriteAllowed": false,
+    "packageAdmissionAllowed": false,
+    "productionUseAllowed": false
+  }
+}

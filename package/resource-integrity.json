@@ -8,7 +8,7 @@
     },
     {
       "path": "web/static/accessibility.html",
-      "sha256": "922999f5438f1c1f8a4bf2b72665090a2219fbfd221ceba63d56281c9c56daba",
+      "sha256": "7ec395fadc59840fa183ccf86a7c1a22c08c1781e8caa3963cd41eabfa8da495",
       "sizeBytes": 6293
     },
     {
@@ -28,8 +28,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "82aa8a6f94c246503f5b3743d370b9b0c9f72bb83967e98b64b369f8fc9c93ae",
-      "sizeBytes": 41362
+      "sha256": "228a9109579254e6a9c375723f1b986c90b8104f57e594b06a57e445279f8848",
+      "sizeBytes": 48185
     },
     {
       "path": "config/agent-surface-capabilities.json",
@@ -108,8 +108,8 @@
     },
     {
       "path": "config/alpha-2-model-version-inventory.json",
-      "sha256": "46c0630962b6fa5d46facaf6f540d7b549b391ec81490e37adffd2e8fb0813c5",
-      "sizeBytes": 20970
+      "sha256": "2eb5b6b1dbd109003a5ee27bb69b8ee4c8b0717e40233943f93d6521dc1f5183",
+      "sizeBytes": 20971
     },
     {
       "path": "config/alpha-2-model-runtime-requirements.json",
@@ -118,8 +118,8 @@
     },
     {
       "path": "config/alpha-2-runtime-compatibility.json",
-      "sha256": "0f3775a92feb36de4ac9ec7b36036ec3d5d143642c39e8a91d38bf485e064668",
-      "sizeBytes": 9815
+      "sha256": "1aaab7d27a3263afd222be8280d023d6089e18a9a76919360efc8f2b14908146",
+      "sizeBytes": 11651
     },
     {
       "path": "config/linux-runtime-artifact-review.json",

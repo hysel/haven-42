@@ -23,10 +23,8 @@ def response(**changes) -> bytes:
     item = {
         "ns": 0,
         "pageid": 42,
-        "size": 100,
         "timestamp": "2026-01-01T00:00:00Z",
         "title": "Safe result",
-        "wordcount": 20,
     }
     item.update(changes)
     return json.dumps({"batchcomplete": True, "query": {"searchinfo": {"totalhits": 1}, "search": [item]}}).encode()
@@ -100,7 +98,7 @@ class QueryAdapterTests(unittest.TestCase):
 
     def test_non_finite_json_number_is_rejected(self):
         request = MODULE.build_request("safe", 1)
-        hostile = response().replace(b'"size": 100', b'"size": NaN')
+        hostile = response().replace(b'"pageid": 42', b'"pageid": NaN')
         with self.assertRaisesRegex(MODULE.QueryAdapterError, "response-json"):
             MODULE.validate_response(request, hostile)
 

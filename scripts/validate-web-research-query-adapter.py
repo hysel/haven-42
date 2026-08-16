@@ -140,8 +140,22 @@ def validate_response(request: dict, response: object, contract_path: Path = CON
     except (UnicodeError, json.JSONDecodeError, ValueError) as error:
         raise QueryAdapterError("response-json") from error
     _validate_json_shape(payload, limits["maximumJsonDepth"], limits["maximumJsonNodes"])
-    if not isinstance(payload, dict) or set(payload) != {"batchcomplete", "query"} or payload["batchcomplete"] is not True:
+    if (
+        not isinstance(payload, dict)
+        or set(payload) not in ({"batchcomplete", "query"}, {"batchcomplete", "continue", "query"})
+        or payload["batchcomplete"] is not True
+    ):
         raise QueryAdapterError("response-fields")
+    continuation = payload.get("continue")
+    if continuation is not None and (
+        not isinstance(continuation, dict)
+        or set(continuation) != {"continue", "sroffset"}
+        or continuation["continue"] != "-||"
+        or isinstance(continuation["sroffset"], bool)
+        or not isinstance(continuation["sroffset"], int)
+        or not 1 <= continuation["sroffset"] <= 2**63 - 1
+    ):
+        raise QueryAdapterError("response-continuation")
     query = payload.get("query")
     if not isinstance(query, dict) or set(query) != {"searchinfo", "search"}:
         raise QueryAdapterError("response-query-fields")
@@ -161,7 +175,7 @@ def validate_response(request: dict, response: object, contract_path: Path = CON
     results = []
     seen: set[int] = set()
     for index, item in enumerate(raw_results, 1):
-        if not isinstance(item, dict) or set(item) != {"ns", "pageid", "size", "timestamp", "title", "wordcount"}:
+        if not isinstance(item, dict) or set(item) != {"ns", "pageid", "timestamp", "title"}:
             raise QueryAdapterError("response-result-fields")
         page_id = item["pageid"]
         if isinstance(page_id, bool) or not isinstance(page_id, int) or not 1 <= page_id <= 2**63 - 1 or page_id in seen:
@@ -174,12 +188,6 @@ def validate_response(request: dict, response: object, contract_path: Path = CON
         if (
             isinstance(item["ns"], bool)
             or item["ns"] != 0
-            or isinstance(item["size"], bool)
-            or not isinstance(item["size"], int)
-            or not 0 <= item["size"] <= 2**63 - 1
-            or isinstance(item["wordcount"], bool)
-            or not isinstance(item["wordcount"], int)
-            or not 0 <= item["wordcount"] <= 2**63 - 1
         ):
             raise QueryAdapterError("response-result-values")
         if not isinstance(item["timestamp"], str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", item["timestamp"]):
@@ -205,6 +213,7 @@ def validate_response(request: dict, response: object, contract_path: Path = CON
         "status": "development-transport-shape-validated",
         "queryDigest": hashlib.sha256(request["parameters"]["srsearch"].encode()).hexdigest(),
         "results": results,
+        "additionalResultsAvailable": continuation is not None,
         "networkAuthorityGranted": False,
         "runtimeAdmissionGranted": False,
         "pageRetrievalAllowed": False,

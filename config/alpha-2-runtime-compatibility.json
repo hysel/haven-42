@@ -93,6 +93,49 @@
           "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.9/ollama-linux-amd64-rocm.tar.zst"
         }
       ]
+    },
+    {
+      "version": "0.32.13",
+      "release": "https://github.com/ollama/ollama/releases/tag/v0.32.13",
+      "publishedAtUtc": "2026-08-14T19:16:07Z",
+      "admissionState": "candidate-native-lifecycle-evidence-required",
+      "releaseNotes": [
+        "qwen3.8-developer-instruction-support"
+      ],
+      "artifacts": [
+        {
+          "platform": "windows-x64",
+          "backend": "core",
+          "name": "ollama-windows-amd64.zip",
+          "byteLength": 1459437863,
+          "sha256": "20d61a8075038694f5b6db1e937551dbc79d470e85217003facf6ecaac394258",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.13/ollama-windows-amd64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "rocm",
+          "name": "ollama-windows-amd64-rocm.zip",
+          "byteLength": 245726592,
+          "sha256": "db7ba356fb2d6479ef1420be72654a7164ea2ecfccf955ff0e267d571cbcef38",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.13/ollama-windows-amd64-rocm.zip"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "core",
+          "name": "ollama-linux-amd64.tar.zst",
+          "byteLength": 1421793186,
+          "sha256": "0fd1dece38a1c6242e8013ce20b597345c5de072ae6b320160edb0e729ef1de1",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.13/ollama-linux-amd64.tar.zst"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "rocm",
+          "name": "ollama-linux-amd64-rocm.tar.zst",
+          "byteLength": 1046865127,
+          "sha256": "cc8e1c1f4d9db9a299e38b2e238eb55be419dbc06223ea5d759bc480ddb48b85",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.13/ollama-linux-amd64-rocm.tar.zst"
+        }
+      ]
     }
   ],
   "llamaCppRuntimes": [

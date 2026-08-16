@@ -5,11 +5,11 @@
   "status": "qualification-only-no-product-promotion",
   "inventoryBinding": {
     "path": "config/alpha-2-model-version-inventory.json",
-    "canonicalSha256": "6e64f69ebc2a5dd6f730d52c36d16b8d64bf61457896ef9079c09f2227fc1161"
+    "canonicalSha256": "f64cab0a719b4655fe4ce9acc6f2373f1ec8aab2ce56323e5b14260b0d09f09b"
   },
   "provider": {
     "name": "ollama",
-    "exactVersion": "0.32.5",
+    "exactVersion": "0.32.13",
     "transport": "ipv4-loopback-only"
   },
   "taskChecks": [

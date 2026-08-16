@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.web-research.native-query-transport",
+  "status": "development-owner-approved-query-only",
+  "adapterContract": "config/web-research-query-adapter.json",
+  "providerId": "wikipedia-query",
+  "network": {
+    "fixedHost": "en.wikipedia.org",
+    "fixedPort": 443,
+    "fixedPath": "/w/api.php",
+    "systemTrustStoreRequired": true,
+    "dnsPassesRequired": 2,
+    "publicIpOnly": true,
+    "selectedIpPinnedForConnection": true,
+    "redirectsAllowed": false,
+    "responseCompressionAllowed": false,
+    "proxyEnvironmentInherited": false,
+    "credentialsAllowed": false,
+    "cookiesAllowed": false,
+    "timeoutSeconds": 10,
+    "maximumResponseBytes": 65536,
+    "requiredContentType": "application/json"
+  },
+  "authority": {
+    "explicitDevelopmentCliAllowed": true,
+    "queryNetworkAllowed": true,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "modelToolAllowed": false,
+    "pageRetrievalAllowed": false,
+    "activeNavigationAllowed": false,
+    "persistenceAllowed": false,
+    "automaticFollowUpAllowed": false,
+    "packageAdmissionAllowed": false
+  }
+}

@@ -643,7 +643,7 @@ def main() -> int:
         assert accessibility_page.count("<h1") == 1
         assert "(WCAG) 2.1 Level AA" in accessibility_page
         assert "self-assessed target" in accessibility_page
-        assert "Last reviewed:</strong> August 14, 2026" in accessibility_page
+        assert "Last reviewed:</strong> August 15, 2026" in accessibility_page
         assert "open once for each new section-tour revision" in accessibility_page
         assert "haven42localai@gmail.com" in accessibility_page
         assert "has not yet been manually tested across NVDA, JAWS, VoiceOver, TalkBack" in accessibility_page

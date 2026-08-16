@@ -54,6 +54,8 @@ def passing_cell(**arguments):
 
 def passing_qualification_cell(**arguments):
     assert arguments.pop("qualification_inventory") is True
+    assert arguments.pop("provider_version") == "0.32.13"
+    arguments["provider_version"] = "0.32.5"
     return passing_cell(**arguments)
 
 

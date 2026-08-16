@@ -5452,7 +5452,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($imageEvidenceOutput.Output -match "9 hostile checks") -Message "Image-runtime inventory, notices, checksums, and SBOM evidence must remain deterministic, mutually consistent, path-safe, non-overwriting, and explicitly unfit for distribution."
     $roadmapLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-roadmap-closure-ledger.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Roadmap closure ledger tests should pass."
-    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "48 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
+    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "47 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
     $localBatchLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-batch-task-ledger.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Recovered local-batch task ledger tests should pass."
     Assert-True -Condition (($localBatchLedgerOutput -join "`n") -match "374 exact tasks across 18 phases") -Message "The recovered conversation plan must retain all 374 stable task records."
@@ -5464,7 +5464,10 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($folderSelectionOutput.Output -match "16 security checks") -Message "Folder inspection must remain explicit, bounded, content-free, link-safe, type-safe, and unadmitted."
     $webQueryAdapterOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-query-adapter.py"))
     Assert-Equal -Actual $webQueryAdapterOutput.ExitCode -Expected 0 -Message "Web-research query-adapter security tests should pass. Output: $($webQueryAdapterOutput.Output)"
-    Assert-True -Condition ($webQueryAdapterOutput.Output -match "15 security checks") -Message "The query adapter must remain fixed-provider, fixture-transport-only, bounded, inactive, and unable to accept model links."
+    Assert-True -Condition ($webQueryAdapterOutput.Output -match "15 security checks") -Message "The query adapter must remain fixed-provider, bounded, runtime-inactive, and unable to accept model links."
+    $webNativeTransportOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-native-transport.py"))
+    Assert-Equal -Actual $webNativeTransportOutput.ExitCode -Expected 0 -Message "Native web-research transport security tests should pass. Output: $($webNativeTransportOutput.Output)"
+    Assert-True -Condition ($webNativeTransportOutput.Output -match "21 offline security checks") -Message "The development query transport must remain fixed-host, TLS-validated, DNS-revalidated, public-address-pinned, uncompressed, bounded, and outside runtime and package authority."
     $webTransportGuardOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-transport-guard.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research transport-guard tests should pass."
     Assert-True -Condition (($webTransportGuardOutput -join "`n") -match "25 hostile and exclusion checks") -Message "Future transport receipts must enforce destination, DNS, rebinding, redirect, content, time, and size boundaries without network authority."
@@ -5607,6 +5610,21 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
         $historyOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot $historyTest))
         Assert-Equal -Actual $historyOutput.ExitCode -Expected 0 -Message "Conversation-history development test should pass: $historyTest. Output: $($historyOutput.Output)"
     }
+    $windowsKeyOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-windows-key-protection.py"))
+    Assert-Equal -Actual $windowsKeyOutput.ExitCode -Expected 0 -Message "Windows current-user DPAPI synthetic-key checks should pass. Output: $($windowsKeyOutput.Output)"
+    Assert-True -Condition ($windowsKeyOutput.Output -match "16 security checks") -Message "Windows key protection must cover current-user scope, fail-closed behavior, tamper refusal, mutable plaintext handling, and package exclusion."
+    $windowsPersistenceOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-windows-wrapped-key-persistence.py"))
+    Assert-Equal -Actual $windowsPersistenceOutput.ExitCode -Expected 0 -Message "Windows wrapped-key temporary persistence checks should pass. Output: $($windowsPersistenceOutput.Output)"
+    Assert-True -Condition ($windowsPersistenceOutput.Output -match "23 security checks") -Message "Windows temporary persistence must cover exclusive creation, no-replace racing, recovery, fail-closed tamper/missing-key behavior, cleanup, deferred ACL admission, and package exclusion."
+    $windowsAclOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-windows-per-user-acl.py"))
+    Assert-Equal -Actual $windowsAclOutput.ExitCode -Expected 0 -Message "Windows per-user ACL primitive checks should pass. Output: $($windowsAclOutput.Output)"
+    Assert-True -Condition ($windowsAclOutput.Output -match "24 checks") -Message "Windows ACL proof must cover protected inheritance, exact user/System principals, widened-rule refusal, cleanup, and package exclusion."
+    $encryptionReviewOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-encryption-dependency-review.py"))
+    Assert-Equal -Actual $encryptionReviewOutput.ExitCode -Expected 0 -Message "Conversation-history encryption dependency review should fail closed. Output: $($encryptionReviewOutput.Output)"
+    Assert-True -Condition ($encryptionReviewOutput.Output -match "20 fail-closed checks") -Message "Encryption dependency review must preserve exact version, provenance, license, binding, package, and authority gates."
+    $linuxSecretOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-linux-secret-service-availability.py"))
+    Assert-Equal -Actual $linuxSecretOutput.ExitCode -Expected 0 -Message "Linux Secret Service availability boundary checks should pass. Output: $($linuxSecretOutput.Output)"
+    Assert-True -Condition ($linuxSecretOutput.Output -match "27 offline checks") -Message "Linux Secret Service boundary must remain system-path pinned, non-activating, sanitized, bounded, and package-excluded."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-contract.json") | ConvertFrom-Json
     $schema = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-schema.json") | ConvertFrom-Json
     $policy = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/local-web-runtime-policy.json") | ConvertFrom-Json
@@ -5625,6 +5643,35 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
     Assert-True -Condition (-not $foundation.runtimeRouteAllowed -and -not $foundation.databaseOpenAllowed -and -not $foundation.databaseCreateAllowed -and -not $foundation.filesystemWriteAllowed -and -not $foundation.browserStorageAllowed) -Message "The local web policy must expose no conversation-history storage authority."
     $planner = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "scripts/simulate-conversation-history.py")
     Assert-True -Condition ($planner -notmatch "import sqlite3|sqlite3\.connect") -Message "The simulation-only planner must not import or connect to SQLite."
+    $windowsKeyContract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-windows-key-protection.json") | ConvertFrom-Json
+    Assert-True -Condition ($windowsKeyContract.status -eq "development-synthetic-key-only" -and $windowsKeyContract.mechanism.provider -eq "windows-dpapi-current-user" -and -not $windowsKeyContract.mechanism.cryptProtectLocalMachineAllowed -and -not $windowsKeyContract.mechanism.plaintextFallbackAllowed) -Message "Windows key protection must stay current-user scoped with no machine scope or plaintext fallback."
+    foreach ($property in $windowsKeyContract.authority.PSObject.Properties) {
+        if ($property.Name -ne "syntheticDevelopmentValidationAllowed") {
+            Assert-True -Condition (-not [bool]$property.Value) -Message "Windows key-protection authority must remain inactive: $($property.Name)"
+        }
+    }
+    $windowsPersistenceContract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-windows-wrapped-key-persistence.json") | ConvertFrom-Json
+    Assert-True -Condition ($windowsPersistenceContract.status -eq "development-synthetic-temporary-only" -and $windowsPersistenceContract.storage.testOwnedTemporaryDirectoryOnly -and -not $windowsPersistenceContract.storage.callerPathAllowed -and $windowsPersistenceContract.storage.atomicNoReplaceRenameRequired -and $windowsPersistenceContract.storage.productionAclAdmissionRequired -and -not $windowsPersistenceContract.storage.productionAclAdmissionProven) -Message "Windows wrapped-key persistence must remain temporary, path-free, no-replace, and explicit that production ACL admission is unproved."
+    Assert-True -Condition (-not $windowsPersistenceContract.recovery.automaticResetAllowed -and -not $windowsPersistenceContract.recovery.plaintextFallbackAllowed) -Message "Wrapped-key recovery must neither reset nor fall back to plaintext."
+    foreach ($property in $windowsPersistenceContract.authority.PSObject.Properties) {
+        if ($property.Name -ne "syntheticTemporaryValidationAllowed") {
+            Assert-True -Condition (-not [bool]$property.Value) -Message "Windows wrapped-key persistence authority must remain inactive: $($property.Name)"
+        }
+    }
+    $windowsAclContract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-windows-per-user-acl.json") | ConvertFrom-Json
+    Assert-True -Condition ($windowsAclContract.status -eq "development-synthetic-temporary-only" -and $windowsAclContract.acl.testOwnedTemporaryDirectoryOnly -and -not $windowsAclContract.acl.callerPathAllowed -and $windowsAclContract.acl.inheritanceMustBeProtected -and $windowsAclContract.acl.unexpectedPrincipalFailsClosed -and -not $windowsAclContract.acl.productionApplicationDirectoryProven) -Message "Windows ACL proof must remain path-free, synthetic, protected, fail closed, and explicit that the application directory is unproved."
+    foreach ($property in $windowsAclContract.authority.PSObject.Properties) {
+        if ($property.Name -ne "syntheticTemporaryValidationAllowed") {
+            Assert-True -Condition (-not [bool]$property.Value) -Message "Windows ACL proof authority must remain inactive: $($property.Name)"
+        }
+    }
+    $linuxSecretContract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-linux-secret-service-availability.json") | ConvertFrom-Json
+    Assert-True -Condition ($linuxSecretContract.status -eq "development-availability-probe-only" -and -not $linuxSecretContract.probe.serviceActivationAllowed -and -not $linuxSecretContract.probe.methodCallAllowed -and -not $linuxSecretContract.probe.secretReadAllowed -and -not $linuxSecretContract.probe.secretWriteAllowed -and -not $linuxSecretContract.probe.rawOutputReturned) -Message "Linux Secret Service probing must remain non-activating, method-free, secret-free, and sanitized."
+    foreach ($property in $linuxSecretContract.authority.PSObject.Properties) {
+        if ($property.Name -ne "availabilityProbeAllowed") {
+            Assert-True -Condition (-not [bool]$property.Value) -Message "Linux Secret Service authority must remain inactive: $($property.Name)"
+        }
+    }
 }
 
 Invoke-PackTest "system readiness and setup planning remain effect free" {

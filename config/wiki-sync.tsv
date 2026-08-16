@@ -167,6 +167,7 @@ docs/linux-runtime-supply-chain.md	Eng-Linux-Runtime-Supply-Chain.md	Linux Runti
 docs/windows-alpha-release.md	Eng-Windows-Alpha-Release.md	Windows Alpha Release
 docs/wiki-coding-tools.md	Coding-Tools-For-Local-Models.md	Coding Tools for Local Models
 docs/engineering-index.md	Engineering-Index.md	Engineering and Validation Index
+examples/windows-native-web-research-query-validation.md	Eng-Windows-Native-Web-Research-Query-Validation.md	Windows Native Web Research Query Validation
 docs/wiki-evidence-record-index.md	Evidence-Record-Index.md	Evidence Record Index
 docs/evidence-records/evidence-2853e8649d47ac07.md	Evidence-Record-2853e8649d47ac07.md	Aider CLI disposable write-smoke validation
 docs/evidence-records/evidence-ef5cd44e633c9e80.md	Evidence-Record-ef5cd44e633c9e80.md	Aider CLI model test harness
@@ -185,6 +186,12 @@ docs/evidence-records/evidence-b7a23e13a579dff1.md	Evidence-Record-b7a23e13a579d
 docs/evidence-records/evidence-ef3643c281067618.md	Evidence-Record-ef3643c281067618.md	Shared agent CLI model test harness
 docs/evidence-records/evidence-03d2a694b6d22720.md	Evidence-Record-03d2a694b6d22720.md	Offline cited-synthesis source parity
 docs/evidence-records/evidence-1c20a3dfac18ae0a.md	Evidence-Record-1c20a3dfac18ae0a.md	Offline transport and approval guards
+docs/evidence-records/evidence-afdeb35698fc13c1.md	Evidence-Record-afdeb35698fc13c1.md	Conversation-history encryption dependency review
+docs/evidence-records/evidence-3032fff46e49e400.md	Evidence-Record-3032fff46e49e400.md	Linux credential-store availability boundary
+docs/evidence-records/evidence-56ca94fba5185607.md	Evidence-Record-56ca94fba5185607.md	Linux credential-store native headless availability
+docs/evidence-records/evidence-0005faabe699fcf7.md	Evidence-Record-0005faabe699fcf7.md	Windows conversation-history per-user ACL primitive
+docs/evidence-records/evidence-780b76332e1a0df4.md	Evidence-Record-780b76332e1a0df4.md	Windows conversation-history synthetic key protection
+docs/evidence-records/evidence-01c8b74c82919604.md	Evidence-Record-01c8b74c82919604.md	Windows wrapped-key temporary persistence
 docs/evidence-records/evidence-9865b9af8dddb72e.md	Evidence-Record-9865b9af8dddb72e.md	VS Code-compatible Continue Agent
 docs/evidence-records/evidence-3532849d1fcc1eb8.md	Evidence-Record-3532849d1fcc1eb8.md	VSCodium Continue Agent
 docs/evidence-records/evidence-e5ae46fbbffbcb08.md	Evidence-Record-e5ae46fbbffbcb08.md	VSCodium Continue Agent Qwen 3.5 4B MLX strict write smoke
@@ -237,11 +244,14 @@ docs/evidence-records/evidence-9144ebf0180b2118.md	Evidence-Record-9144ebf0180b2
 docs/evidence-records/evidence-dda5053a14f25d32.md	Evidence-Record-dda5053a14f25d32.md	ComfyUI SDXL on Radeon RX 7800 XT
 docs/evidence-records/evidence-4e44f89b53777abb.md	Evidence-Record-4e44f89b53777abb.md	Local video candidate hardware preflight
 docs/evidence-records/evidence-749f44fc9f8604f4.md	Evidence-Record-749f44fc9f8604f4.md	Laguna XS 2.1 Ollama conformance
+docs/evidence-records/evidence-b1e852d6e517e410.md	Evidence-Record-b1e852d6e517e410.md	Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-739440533a3f6c7a.md	Evidence-Record-739440533a3f6c7a.md	Granite 4.1 8B on Intel Arc B580
 docs/evidence-records/evidence-999c817bcb50d175.md	Evidence-Record-999c817bcb50d175.md	Nemotron 3.5 Lightning Q4 on dual Tesla V100
 docs/evidence-records/evidence-b4871f9bcbf09daa.md	Evidence-Record-b4871f9bcbf09daa.md	Nemotron 3.5 Lightning Q8 on dual Tesla V100
 docs/evidence-records/evidence-029248b547774d8a.md	Evidence-Record-029248b547774d8a.md	Ollama 0.32.9 five-model task-contract retry on dual Tesla V100
+docs/evidence-records/evidence-d7e3b3eddcb87ab3.md	Evidence-Record-d7e3b3eddcb87ab3.md	Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-08bad671d73e509b.md	Evidence-Record-08bad671d73e509b.md	Qwen 3.5 9B synchronized power on Radeon RX 7800 XT
+docs/evidence-records/evidence-f96c1a3dd255db29.md	Evidence-Record-f96c1a3dd255db29.md	Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
 docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
 docs/evidence-records/evidence-8a4966fb74923f8b.md	Evidence-Record-8a4966fb74923f8b.md	Devstral Small 2 MLX endpoint tool call
@@ -274,6 +284,9 @@ docs/evidence-records/evidence-ddd493cef4288ac4.md	Evidence-Record-ddd493cef4288
 docs/evidence-records/evidence-588241e349f32b95.md	Evidence-Record-588241e349f32b95.md	Generated TypeScript sample workflows
 docs/evidence-records/evidence-dff8d8e0aff407ab.md	Evidence-Record-dff8d8e0aff407ab.md	Generated TypeScript sample workflows
 docs/evidence-records/evidence-2de3f0726ddaba91.md	Evidence-Record-2de3f0726ddaba91.md	Online model discovery
+docs/evidence-records/evidence-2589000e63822b5e.md	Evidence-Record-2589000e63822b5e.md	Windows Alpha 2 current UI package parity
 docs/evidence-records/evidence-77e5fbc983b71597.md	Evidence-Record-77e5fbc983b71597.md	Remote hardware profiling
 docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ede9d.md	Python API generated sample
 docs/evidence-records/evidence-22701a5715776e0d.md	Evidence-Record-22701a5715776e0d.md	TypeScript frontend generated sample
+docs/evidence-records/evidence-01b01f98b537ca75.md	Evidence-Record-01b01f98b537ca75.md	Native fixed-provider metadata query
+docs/evidence-records/evidence-7207da1f9eca0995.md	Evidence-Record-7207da1f9eca0995.md	Native fixed-provider metadata query on Linux

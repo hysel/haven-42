@@ -32,6 +32,16 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Offline cited-synthesis source parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-03d2a694b6d22720) | `static-validated` | Windows and Linux · Caller-supplied fixtures · synthetic-bounded-source-envelope |
 | [Offline transport and approval guards](https://github.com/hysel/haven-42/wiki/Evidence-Record-1c20a3dfac18ae0a) | `static-validated` | Cross-platform · Caller-supplied receipts · no-model |
+## Data Protection
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Conversation-history encryption dependency review](https://github.com/hysel/haven-42/wiki/Evidence-Record-afdeb35698fc13c1) | `candidate-only` | Cross-platform · SQLCipher Community and Python bindings · none |
+| [Linux credential-store availability boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-3032fff46e49e400) | `candidate-only` | Linux · freedesktop credential-store candidate · none |
+| [Linux credential-store native headless availability](https://github.com/hysel/haven-42/wiki/Evidence-Record-56ca94fba5185607) | `partial-pass` | Linux headless container session · freedesktop credential-store candidate · none |
+| [Windows conversation-history per-user ACL primitive](https://github.com/hysel/haven-42/wiki/Evidence-Record-0005faabe699fcf7) | `partial-pass` | Windows · Windows protected DACL · none |
+| [Windows conversation-history synthetic key protection](https://github.com/hysel/haven-42/wiki/Evidence-Record-780b76332e1a0df4) | `partial-pass` | Windows · Windows DPAPI current user · none |
+| [Windows wrapped-key temporary persistence](https://github.com/hysel/haven-42/wiki/Evidence-Record-01c8b74c82919604) | `partial-pass` | Windows · Windows DPAPI current user · none |
 ## Editor Surface
 
 | Evidence | Status | Tested environment |
@@ -136,11 +146,14 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-b1e852d6e517e410) | `partial-pass` | Ubuntu 24.04.4 · Ollama · gemma3:1b-it-q4_K_M |
 | [Granite 4.1 8B on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-739440533a3f6c7a) | `partial-pass` | Ubuntu Linux · direct process · granite41-8b-q4_K_M |
 | [Nemotron 3.5 Lightning Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-999c817bcb50d175) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q4_K_M |
 | [Nemotron 3.5 Lightning Q8 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-b4871f9bcbf09daa) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q8_0 |
 | [Ollama 0.32.9 five-model task-contract retry on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-029248b547774d8a) | `failed-validation` | Ubuntu 24.04.4 · Ollama · five exact manifest-pinned models |
+| [Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-d7e3b3eddcb87ab3) | `partial-pass` | Ubuntu 24.04.4 · Ollama · phi4-mini:3.8b-q4_K_M |
 | [Qwen 3.5 9B synchronized power on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-08bad671d73e509b) | `partial-pass` | Windows 11 · Ollama · qwen3.5:9b Q4_K_M |
+| [Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-f96c1a3dd255db29) | `partial-pass` | Ubuntu 24.04.4 · Ollama · qwen3.6:27b-q4_K_M |
 ## Model Quantization
 
 | Evidence | Status | Tested environment |
@@ -189,6 +202,11 @@ them by hand; update the catalog and run the generator.
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
 | [Online model discovery](https://github.com/hysel/haven-42/wiki/Evidence-Record-2de3f0726ddaba91) | `candidate-only` | Cross-platform · N/A · N/A |
+## Package Parity
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Windows Alpha 2 current UI package parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-2589000e63822b5e) | `partial-pass` | Windows 11 · local web runtime · none |
 ## Remote Profile
 
 | Evidence | Status | Tested environment |
@@ -200,6 +218,12 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Python API generated sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-32bd4f913b5ede9d) | `read-only-cli-validated` | Windows · Ollama · local-config |
 | [TypeScript frontend generated sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-22701a5715776e0d) | `read-only-cli-validated` | Windows · Ollama · local-config |
+## Web Research
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Native fixed-provider metadata query](https://github.com/hysel/haven-42/wiki/Evidence-Record-01b01f98b537ca75) | `partial-pass` | Windows · Wikipedia metadata API · none |
+| [Native fixed-provider metadata query on Linux](https://github.com/hysel/haven-42/wiki/Evidence-Record-7207da1f9eca0995) | `partial-pass` | Native headless Linux · Wikipedia metadata API · none |
 
 ## Automatic-update boundary
 

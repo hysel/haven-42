@@ -1,12 +1,48 @@
 # Conversation History Encryption And Key-Management Review
 
-Status: architecture reviewed; storage dependency and runtime activation are
-not admitted.
+Status: architecture reviewed; Windows current-user DPAPI, temporary wrapped-
+key persistence, and synthetic per-user ACL proofs passed. Storage dependency,
+production application-directory binding, application persistence, and runtime
+activation are not admitted.
 
 Haven 42's optional conversation history remains simulation-only. No database
 is opened or created, and Private session remains the write-free default. This
 review narrows the acceptable future design; it does not authorize storage,
 add a dependency, or make a product-readiness claim.
+
+On August 15, 2026, the Windows source proof wrapped and unwrapped one
+synthetic 32-byte key with current-user DPAPI. Its 16 checks cover the forbidden
+machine-scope flag, UI denial, required entropy, tamper refusal, mutable
+plaintext buffers, explicit buffer wiping, and package exclusion. It performed no persistent
+write and grants no database, runtime, UI, user-content, package, or production
+authority. See
+[Windows conversation-history key-protection validation](../examples/windows-conversation-history-dpapi-validation.md).
+
+A second Windows proof writes only the wrapped synthetic key inside a fresh
+test-owned temporary directory. Its 23 checks cover exclusive temporary-file
+creation, flush-before-commit, a no-replace rename race, recovery, tamper and
+missing-key refusal without reset, cleanup, and package exclusion. It does not
+claim a production per-user ACL and never opens a database or handles user
+content. See
+[Windows wrapped-key temporary persistence validation](../examples/windows-conversation-history-wrapped-key-persistence-validation.md).
+
+A third Windows proof validates the ACL primitive without using an application
+data directory. Its 24 checks create a protected test-owned directory, permit
+only the current user and Local System, verify the synthetic key file inherits
+only those rules, and fail closed after deliberately adding the built-in Users
+group. It still grants no production application-directory or persistence
+authority. See
+[Windows per-user ACL validation](../examples/windows-conversation-history-per-user-acl-validation.md).
+
+The Linux candidate has a separate 24-check offline availability boundary. It
+uses one fixed user-bus listing command and reports only whether a session bus
+and already-active `org.freedesktop.secrets` name were observed. It cannot
+activate the service or read/write a secret, and it is excluded from the
+package. The exact probe also passed a residue-free native headless container
+cell with a reachable user bus and inactive Secret Service; that is expected
+fail-closed evidence, not desktop or key-storage certification. Native desktop
+evidence remains open. See
+[Linux credential-store availability boundary](../examples/linux-credential-store-availability-boundary.md).
 
 ## Decision boundary
 
@@ -28,8 +64,18 @@ or downgrade to plaintext SQLite. If the platform facility is unavailable,
 locked, corrupted, or denies access, Haven 42 must preserve the database and
 continue in Private session without writing history.
 
-SQLCipher Community Edition is a candidate, not a selected dependency. Zetetic
-documents full-database encryption and a BSD-style license whose copyright,
+SQLCipher Community Edition is a candidate, not a selected dependency. The
+August 15, 2026 review records 4.17.0 as the current official core, but does not
+admit it: GitHub reports the annotated tag signature as `unknown_key` and the
+target commit as unsigned, and the Community release provides no official
+prebuilt desktop packages. The cross-platform `sqlcipher3` 0.6.2 binding embeds
+the older SQLCipher 4.12.0 core, its reviewed PyPI uploads did not use Trusted
+Publishing, and its native/transitive provenance has not passed Haven 42's
+package gates. The legacy `pysqlcipher3` project is explicitly unmaintained.
+See
+[Conversation-history encryption dependency review](../examples/conversation-history-encryption-dependency-review.md).
+
+Zetetic documents full-database encryption and a BSD-style license whose copyright,
 conditions, disclaimer, and integrated dependency notices must be accessible
 to users. Before admission, the exact core version, Python/native binding,
 source and wheel provenance, hashes, signatures, vulnerability posture,
@@ -95,13 +141,22 @@ review, recovery expectations, and new approval.
 ## Remaining admission gates
 
 - Select and pin the database engine, binding, and cryptographic provider.
+- Resolve the current core/binding version mismatch and obtain immutable,
+  independently verifiable native provenance; do not use the rejected
+  unmaintained binding.
 - Complete dependency, license, vulnerability, provenance, SBOM, and notices
   review for all three operating systems.
-- Prototype each credential-store adapter without a fallback and prove locked,
-  absent, denied, corrupted, and headless behavior.
+- Bind the proved Windows ACL primitive to the production application data
+  directory and complete atomic database-plus-key creation,
+  locked/denied/key-loss handling, rotation,
+  backup, and recovery without a fallback. Prototype the Linux Secret Service
+  and macOS Keychain adapters and prove their locked, absent, denied, corrupted,
+  and headless behavior.
 - Prove per-user locations and permissions, atomic create/rekey/migration,
   bounded growth, backup/restore, complete deletion, and secure shutdown.
 - Add source-versus-packaged parity plus unsigned native Windows, Linux, and
   macOS tests.
-- Obtain separate approval before any route, UI control, database access, or
-  filesystem write is activated.
+- Owner approval to advance development was received on August 15, 2026. Do
+  not activate a route, UI control, database access, or filesystem write until
+  the remaining technical, privacy, native, accessibility, and package gates
+  above pass.

@@ -35,7 +35,9 @@ def main() -> None:
     assert ("qwen36-27b-q4", "cuda-32gib-system-16gib") in cells
     assert ("qwen36-35b-a3b-q4", "cuda-32gib-system-16gib") not in cells
     with tempfile.TemporaryDirectory() as temporary:
-        base = Path(temporary)
+        root = Path(temporary)
+        base = root / "evidence"
+        base.mkdir()
         common = {
             "qualificationInventoryCanonicalSha256": inventory_sha,
             "qualificationMatrixCanonicalSha256": matrix_sha,
@@ -48,7 +50,9 @@ def main() -> None:
             "operatingSystemId": "test-linux",
             "backendMode": "cpu",
             "provider": "ollama",
-            "providerVersion": "0.32.5",
+            "providerVersion": context[("gemma3-4b-q4", "cpu-16gib")][
+                "providerVersion"
+            ],
             "systemMemoryGiB": 16,
             "usableGpuMemoryGiB": 0,
             "automaticPromotionAllowed": False,
@@ -115,6 +119,22 @@ def main() -> None:
         assert report["automaticDefaultChangeAllowed"] is False
         assert report["results"][0]["platformFamily"] == "linux"
         assert "test-linux" in str(report)
+        soak_base = root / "soaks"
+        soak_base.mkdir()
+        (base / "soak.json").replace(soak_base / "soak.json")
+        separated_roots = MODULE.build_report([base, soak_base])
+        assert separated_roots["results"][0]["status"] == "passed"
+        (soak_base / "soak.json").replace(base / "soak.json")
+        refused(
+            lambda: MODULE.build_report([base, base]),
+            "overlapping-evidence-directories",
+        )
+        nested = base / "nested"
+        nested.mkdir()
+        refused(
+            lambda: MODULE.build_report([base, nested]),
+            "overlapping-evidence-directories",
+        )
         task_with_bom = (base / "task-0.json").read_text(encoding="utf-8")
         (base / "task-0.json").write_text(task_with_bom, encoding="utf-8-sig")
         assert MODULE.build_report(base)["results"][0]["status"] == "passed"
