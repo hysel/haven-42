@@ -3024,6 +3024,231 @@ try {
   ) throw new Error(`trusted-citation-renderer:${JSON.stringify(trustedCitationRendering)}`);
   checks += 19;
   trace("trusted-citation-renderer-verified");
+  const researchReviewInitial = await cdp.evaluate(`(() => {
+    if (!document.querySelector('#section-tour-layer').classList.contains('hidden')) {
+      document.querySelector('#section-tour-close').click();
+    }
+    document.querySelector('#setup-wizard').classList.add('hidden');
+    const passiveTrigger = document.createElement('button');
+    passiveTrigger.type = 'button';
+    passiveTrigger.textContent = 'Passive cleanup focus target';
+    document.body.append(passiveTrigger);
+    passiveTrigger.focus();
+    window.Haven42ResearchApprovalReview.clear();
+    const passiveFocusPreserved = document.activeElement === passiveTrigger;
+    passiveTrigger.remove();
+    const trigger = document.querySelector('#home-nav');
+    trigger.focus();
+    const queryReview = {
+      schemaVersion: 1,
+      reviewId: 'review-' + 'a'.repeat(20),
+      kind: 'query',
+      normalizedQuery: 'local artificial intelligence',
+      providerId: 'wikipedia',
+      citation: null,
+      exactReviewRequired: true,
+      modelApprovalAccepted: false,
+      networkAuthorityGranted: false,
+      runtimeAdmissionGranted: false,
+      persistenceAllowed: false,
+      automaticFollowUpAllowed: false,
+    };
+    const opened = window.Haven42ResearchApprovalReview.open(queryReview, trigger);
+    const layer = document.querySelector('#research-review-layer');
+    const dialog = document.querySelector('#research-review-dialog');
+    document.querySelector('#research-review-approve').click();
+    return {
+      frozenApi: Object.isFrozen(window.Haven42ResearchApprovalReview),
+      passiveFocusPreserved,
+      opened,
+      visible: !layer.classList.contains('hidden'),
+      ariaHidden: layer.getAttribute('aria-hidden'),
+      role: dialog.getAttribute('role'),
+      ariaModal: dialog.getAttribute('aria-modal'),
+      labelledBy: dialog.getAttribute('aria-labelledby'),
+      describedBy: dialog.getAttribute('aria-describedby'),
+      focused: document.activeElement === dialog,
+      backgroundInert: [...document.body.children]
+        .filter((element) => element.id !== 'research-review-layer' && element.tagName !== 'SCRIPT')
+        .every((element) => element.inert),
+      kind: document.querySelector('#research-review-kind').textContent,
+      query: document.querySelector('#research-review-query').textContent,
+      pageRowsHidden: document.querySelector('#research-review-source-row').classList.contains('hidden')
+        && document.querySelector('#research-review-destination-row').classList.contains('hidden'),
+      status: document.querySelector('#research-review-status').textContent,
+      syntheticDecision: window.Haven42ResearchApprovalReview.consumeDecision(),
+    };
+  })()`);
+  if (
+    !researchReviewInitial.frozenApi
+    || !researchReviewInitial.passiveFocusPreserved
+    || researchReviewInitial.opened.accepted !== true
+    || researchReviewInitial.opened.opened !== true
+    || !researchReviewInitial.visible
+    || researchReviewInitial.ariaHidden !== "false"
+    || researchReviewInitial.role !== "dialog"
+    || researchReviewInitial.ariaModal !== "true"
+    || researchReviewInitial.labelledBy !== "research-review-title"
+    || researchReviewInitial.describedBy !== "research-review-description research-review-privacy"
+    || !researchReviewInitial.focused
+    || !researchReviewInitial.backgroundInert
+    || researchReviewInitial.kind !== "Search Wikipedia"
+    || researchReviewInitial.query !== "local artificial intelligence"
+    || !researchReviewInitial.pageRowsHidden
+    || !researchReviewInitial.status.includes("direct user action")
+    || researchReviewInitial.syntheticDecision !== null
+  ) throw new Error(`research-review-initial:${JSON.stringify(researchReviewInitial)}`);
+  checks += 17;
+  await cdp.call("Input.dispatchKeyEvent", {
+    type: "keyDown", key: "Tab", code: "Tab", modifiers: 8,
+  });
+  await cdp.call("Input.dispatchKeyEvent", {
+    type: "keyUp", key: "Tab", code: "Tab", modifiers: 8,
+  });
+  const researchReviewReverseTrap = await cdp.evaluate(
+    `document.activeElement === document.querySelector('#research-review-approve')`,
+  );
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyDown", key: "Tab", code: "Tab"});
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyUp", key: "Tab", code: "Tab"});
+  const researchReviewForwardTrap = await cdp.evaluate(
+    `document.activeElement === document.querySelector('#research-review-close')`,
+  );
+  if (!researchReviewReverseTrap || !researchReviewForwardTrap) {
+    throw new Error(`research-review-focus-trap:${JSON.stringify({researchReviewReverseTrap, researchReviewForwardTrap})}`);
+  }
+  checks += 2;
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyDown", key: "Escape", code: "Escape"});
+  await cdp.call("Input.dispatchKeyEvent", {type: "keyUp", key: "Escape", code: "Escape"});
+  const researchReviewEscape = await cdp.evaluate(`(() => {
+    const decision = window.Haven42ResearchApprovalReview.consumeDecision();
+    const second = window.Haven42ResearchApprovalReview.consumeDecision();
+    return {
+      hidden: document.querySelector('#research-review-layer').classList.contains('hidden'),
+      ariaHidden: document.querySelector('#research-review-layer').getAttribute('aria-hidden'),
+      backgroundRestored: [...document.body.children]
+        .filter((element) => element.id !== 'research-review-layer' && element.tagName !== 'SCRIPT')
+        .every((element) => !element.inert),
+      focusReturned: document.activeElement === document.querySelector('#home-nav'),
+      decision,
+      second,
+    };
+  })()`);
+  if (
+    !researchReviewEscape.hidden
+    || researchReviewEscape.ariaHidden !== "true"
+    || !researchReviewEscape.backgroundRestored
+    || !researchReviewEscape.focusReturned
+    || researchReviewEscape.decision?.decision !== "cancelled"
+    || researchReviewEscape.decision?.networkStarted !== false
+    || researchReviewEscape.decision?.singleUse !== true
+    || researchReviewEscape.second !== null
+  ) throw new Error(`research-review-escape:${JSON.stringify(researchReviewEscape)}`);
+  checks += 8;
+  const researchPageReview = await cdp.evaluate(`(() => {
+    const trigger = document.querySelector('#home-nav');
+    const citation = {
+      citationId: 'source-' + 'b'.repeat(20),
+      title: 'Local artificial intelligence',
+      displayDomain: 'en.wikipedia.org',
+      destination: 'https://en.wikipedia.org/?curid=42',
+      destinationDisclosureRequired: true,
+      activeNavigationAllowed: false,
+    };
+    const pageReview = {
+      schemaVersion: 1,
+      reviewId: 'review-' + 'c'.repeat(20),
+      kind: 'page',
+      normalizedQuery: 'local artificial intelligence',
+      providerId: 'wikipedia',
+      citation,
+      exactReviewRequired: true,
+      modelApprovalAccepted: false,
+      networkAuthorityGranted: false,
+      runtimeAdmissionGranted: false,
+      persistenceAllowed: false,
+      automaticFollowUpAllowed: false,
+    };
+    const rejected = window.Haven42ResearchApprovalReview.open({...pageReview, unexpected: true}, trigger);
+    const opened = window.Haven42ResearchApprovalReview.open(pageReview, trigger);
+    pageReview.reviewId = 'review-' + 'f'.repeat(20);
+    pageReview.kind = 'query';
+    pageReview.citation.title = 'Mutated after review opened';
+    const button = document.querySelector('#research-review-approve');
+    button.focus();
+    const rect = button.getBoundingClientRect();
+    return {
+      rejected,
+      opened,
+      source: document.querySelector('#research-review-source').textContent,
+      destination: document.querySelector('#research-review-destination').textContent,
+      pageRowsVisible: !document.querySelector('#research-review-source-row').classList.contains('hidden')
+        && !document.querySelector('#research-review-destination-row').classList.contains('hidden'),
+      approveFocused: document.activeElement === button,
+      x: rect.left + rect.width / 2,
+      y: rect.top + rect.height / 2,
+    };
+  })()`);
+  if (
+    researchPageReview.rejected.accepted !== false
+    || researchPageReview.rejected.opened !== false
+    || researchPageReview.opened.accepted !== true
+    || researchPageReview.source !== "Local artificial intelligence"
+    || researchPageReview.destination !== "https://en.wikipedia.org/?curid=42"
+    || !researchPageReview.pageRowsVisible
+    || !researchPageReview.approveFocused
+  ) throw new Error(`research-page-review:${JSON.stringify(researchPageReview)}`);
+  checks += 7;
+  await cdp.call("Input.dispatchMouseEvent", {
+    type: "mouseMoved", x: researchPageReview.x, y: researchPageReview.y,
+    button: "none", buttons: 0, pointerType: "mouse",
+  });
+  await cdp.call("Input.dispatchMouseEvent", {
+    type: "mousePressed", x: researchPageReview.x, y: researchPageReview.y,
+    button: "left", buttons: 1, clickCount: 1, pointerType: "mouse",
+  });
+  await cdp.call("Input.dispatchMouseEvent", {
+    type: "mouseReleased", x: researchPageReview.x, y: researchPageReview.y,
+    button: "left", buttons: 0, clickCount: 1, pointerType: "mouse",
+  });
+  const researchReviewApproval = await cdp.evaluate(`(() => {
+    const before = {
+      hidden: document.querySelector('#research-review-layer').classList.contains('hidden'),
+      status: document.querySelector('#research-review-status').textContent,
+      activeId: document.activeElement?.id || document.activeElement?.tagName,
+    };
+    const decision = window.Haven42ResearchApprovalReview.consumeDecision();
+    const singleUse = window.Haven42ResearchApprovalReview.consumeDecision();
+    const queryReview = {
+      schemaVersion: 1, reviewId: 'review-' + 'd'.repeat(20), kind: 'query',
+      normalizedQuery: 'privacy preserving local AI', providerId: 'wikipedia', citation: null,
+      exactReviewRequired: true, modelApprovalAccepted: false,
+      networkAuthorityGranted: false, runtimeAdmissionGranted: false,
+      persistenceAllowed: false, automaticFollowUpAllowed: false,
+    };
+    window.Haven42ResearchApprovalReview.open(queryReview, document.querySelector('#home-nav'));
+    resetTask();
+    return {
+      before,
+      decision,
+      singleUse,
+      hiddenAfterNewTask: document.querySelector('#research-review-layer').classList.contains('hidden'),
+      decisionClearedByNewTask: window.Haven42ResearchApprovalReview.consumeDecision() === null,
+      noWikipediaResources: performance.getEntriesByType('resource').every((entry) => !entry.name.includes('wikipedia.org')),
+    };
+  })()`);
+  if (
+    researchReviewApproval.decision?.decision !== "approved"
+    || researchReviewApproval.decision?.reviewId !== `review-${"c".repeat(20)}`
+    || researchReviewApproval.decision?.kind !== "page"
+    || researchReviewApproval.decision?.networkStarted !== false
+    || researchReviewApproval.decision?.singleUse !== true
+    || researchReviewApproval.singleUse !== null
+    || !researchReviewApproval.hiddenAfterNewTask
+    || !researchReviewApproval.decisionClearedByNewTask
+    || !researchReviewApproval.noWikipediaResources
+  ) throw new Error(`research-review-approval:${JSON.stringify(researchReviewApproval)}`);
+  checks += 9;
+  trace("research-approval-review-verified");
   const aboutAccessibilityLink = await cdp.evaluate(`(() => {
     const link = document.querySelector('#about-panel a[href="/accessibility"]');
     return link ? {text: link.textContent.trim(), href: link.getAttribute('href')} : null;

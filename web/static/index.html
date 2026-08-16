@@ -816,6 +816,28 @@
       </div>
     </main>
   </div>
+  <div class="research-review-layer hidden" id="research-review-layer" aria-hidden="true">
+    <section class="research-review-dialog" id="research-review-dialog" role="dialog" aria-modal="true" aria-labelledby="research-review-title" aria-describedby="research-review-description research-review-privacy" tabindex="-1">
+      <header class="research-review-header">
+        <p class="eyebrow">REVIEW BEFORE CONNECTING</p>
+        <button class="research-review-close" id="research-review-close" type="button" aria-label="Cancel this web research request">×</button>
+      </header>
+      <h2 id="research-review-title">Review web research request</h2>
+      <p id="research-review-description">Haven 42 will not contact Wikipedia unless you approve this exact request.</p>
+      <dl class="research-review-details">
+        <div><dt>Request</dt><dd id="research-review-kind"></dd></div>
+        <div><dt>Search words</dt><dd id="research-review-query"></dd></div>
+        <div class="hidden" id="research-review-source-row"><dt>Selected source</dt><dd id="research-review-source"></dd></div>
+        <div class="hidden" id="research-review-destination-row"><dt>Destination</dt><dd><code id="research-review-destination"></code></dd></div>
+      </dl>
+      <p class="research-review-privacy" id="research-review-privacy"><strong>Nothing is sent yet.</strong> This review stays in memory, is used once, and is cleared when you start a New task.</p>
+      <p class="sr-only" id="research-review-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <footer class="research-review-actions">
+        <button class="button secondary" id="research-review-cancel" type="button">Cancel</button>
+        <button class="button primary" id="research-review-approve" type="button">Approve once</button>
+      </footer>
+    </section>
+  </div>
   <div class="section-tour-layer hidden" id="section-tour-layer" aria-hidden="true">
     <div class="section-tour-spotlight" id="section-tour-spotlight" aria-hidden="true"></div>
     <section class="section-tour-dialog" id="section-tour-dialog" role="dialog" aria-modal="true" aria-labelledby="section-tour-title" aria-describedby="section-tour-description" tabindex="-1">

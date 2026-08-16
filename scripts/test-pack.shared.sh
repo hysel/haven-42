@@ -2756,6 +2756,8 @@ PY
     grep -q "26 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-trusted-citation-renderer.py" |
     grep -q "39 checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-web-research-approval-review.py" |
+    grep -q "Research approval review foundation passed" || return 1
 }
 
 test_task_composition_and_repository_privacy() {
