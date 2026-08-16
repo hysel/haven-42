@@ -18,8 +18,8 @@
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "1ce1b973facdb193f615a42b82ed80e5283068a1f5d7eb17bec65fa202a03d61",
-      "sizeBytes": 70242
+      "sha256": "39058f5846b9cf7635ab089061846e72fc927fb06b5ed1365d45806ae4532b19",
+      "sizeBytes": 70427
     },
     {
       "path": "config/text-capability-model-recommendations.json",

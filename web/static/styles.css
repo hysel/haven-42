@@ -1483,8 +1483,11 @@ textarea[aria-invalid="true"] {
 /* Keep the accessible 44px controls inside the chat surface on short
    desktop displays without reducing their target size. */
 @media (max-height: 700px) and (min-width: 1181px) {
-  .chat-panel > .panel-heading { padding-bottom: 8px; }
-  .context-panel { max-height: 56px; }
+  .chat-panel > .panel-heading { gap: 8px; padding-bottom: 8px; }
+  .research-tools { margin-bottom: 4px; }
+  .research-tools > summary { min-height: 44px; padding-block: 6px; }
+  .context-panel { max-height: 44px; padding-block: 4px; }
+  .composer textarea { min-height: 44px; }
   .chat-footer { padding-block: 4px 8px; }
 }
 
