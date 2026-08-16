@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "c42c7df1bf40f7884ae22dd7b6775a3c6e6d9df9e9159a0defffd7d86b63fb02",
-  "recordCount": 125,
+  "catalogSha256": "691710c8b3756a88966af49511e81d96450faf5746a477578075aad65c1d726b",
+  "recordCount": 126,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -2079,6 +2079,30 @@
         "repositorySource": "docs/evidence-records/evidence-f96c1a3dd255db29.md",
         "wikiPage": "Evidence-Record-f96c1a3dd255db29.md",
         "title": "Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA"
+      }
+    },
+    {
+      "id": "evidence-ad991e5601c892ec",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification",
+        "surface": "Ollama",
+        "surface_version": "0.32.9",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "17 exact manifest-pinned models",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/windows-amd-rx7800xt-ollama0329-recertification.md",
+        "notes": "Fourteen exact artifacts completed 30-minute Chat, Writing, and Summarization soaks with full ROCm offload; Granite 4 7B and Ministral 3 3B/8B failed the mandatory Summarization control before soak. The sanitized result does not independently attest firmware or driver identity and grants no automatic promotion."
+      },
+      "sourceEvidence": "examples/windows-amd-rx7800xt-ollama0329-recertification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ad991e5601c892ec.md",
+        "wikiPage": "Evidence-Record-ad991e5601c892ec.md",
+        "title": "Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification"
       }
     },
     {

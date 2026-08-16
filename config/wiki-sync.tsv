@@ -9,6 +9,7 @@ docs/wiki-tested-hardware.md	Tested-Hardware-And-AI-Engines.md	Tested Hardware a
 docs/wiki-model-hardware-certifications.md	Model-And-Hardware-Test-Status.md	Model and Hardware Test Status
 docs/wiki-model-power-evidence.md	Model-Power-And-Electricity-Evidence.md	Model Power and Electricity Evidence
 examples/windows-amd-rx7800xt-power-validation.md	Windows-AMD-RX7800XT-Power-Validation.md	Radeon RX 7800 XT Model Power Validation
+examples/windows-amd-rx7800xt-ollama0329-recertification.md	Windows-AMD-RX7800XT-Ollama-0329-Recertification.md	Radeon RX 7800 XT Ollama 0.32.9 Recertification
 examples/nvidia-v100-nemotron-validation.md	NVIDIA-V100-Nemotron-Validation.md	NVIDIA V100 Nemotron Validation
 examples/nvidia-tesla-v100-single-power-validation.md	NVIDIA-Tesla-V100-Single-Power-Validation.md	NVIDIA Tesla V100 Single-Card Power Validation
 examples/nvidia-quadro-rtx5000-power-validation.md	NVIDIA-Quadro-RTX5000-Power-Validation.md	NVIDIA Quadro RTX 5000 Model Power Validation
@@ -257,6 +258,7 @@ docs/evidence-records/evidence-029248b547774d8a.md	Evidence-Record-029248b547774
 docs/evidence-records/evidence-d7e3b3eddcb87ab3.md	Evidence-Record-d7e3b3eddcb87ab3.md	Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-08bad671d73e509b.md	Evidence-Record-08bad671d73e509b.md	Qwen 3.5 9B synchronized power on Radeon RX 7800 XT
 docs/evidence-records/evidence-f96c1a3dd255db29.md	Evidence-Record-f96c1a3dd255db29.md	Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA
+docs/evidence-records/evidence-ad991e5601c892ec.md	Evidence-Record-ad991e5601c892ec.md	Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification
 docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
 docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
 docs/evidence-records/evidence-8a4966fb74923f8b.md	Evidence-Record-8a4966fb74923f8b.md	Devstral Small 2 MLX endpoint tool call

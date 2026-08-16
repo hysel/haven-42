@@ -16,15 +16,15 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 125 |
-| Distinct model-field values | 37 |
+| Evidence records | 126 |
+| Distinct model-field values | 38 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 47 |
+| `partial-pass` | 48 |
 | `validated-by-tests` | 19 |
 | `write-smoke-validated` | 13 |
 | `read-only-tool-validated` | 11 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 47 |
+| Local endpoint | 48 |
 | Generated sample | 38 |
 | Editor agent | 9 |
 | Automated tests | 8 |
@@ -77,6 +77,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Model |
 | --- |
+| 17 exact manifest-pinned models |
 | Click 8.2.1 |
 | Express 5.1.0 |
 | OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |

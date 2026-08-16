@@ -168,7 +168,35 @@ def parse_result(path: Path, profile: dict[str, Any]) -> dict[str, Any] | None:
     model_id, model, digest = value.get("modelId"), value.get("model"), value.get("manifestDigest")
     if not isinstance(model_id, str) or not SAFE_ID.fullmatch(model_id) or not isinstance(digest, str) or not SAFE_DIGEST.fullmatch(digest):
         raise ComparisonError("invalid-comparison-evidence")
-    model = safe_text(model)
+    outcome = value.get("outcome")
+    if outcome not in {"passed", "failed"}:
+        raise ComparisonError("invalid-comparison-evidence")
+    model = safe_text(model if model is not None else model_id)
+    if outcome == "failed":
+        failure_code = safe_text(value.get("failureCode", "unspecified-evidence-failure"))
+        return {
+            "modelId": model_id,
+            "model": model,
+            "manifestDigest": digest,
+            "outcome": outcome,
+            "failureCode": failure_code,
+            "taskCoverage": {task: False for task in TASKS},
+            "averageTokensPerSecond": None,
+            "peakAcceleratorMemoryBytes": None,
+            "memoryHeadroomBytes": None,
+            "memoryHeadroomPercent": None,
+            "fitStatus": "not-assessed",
+            "backend": "not-observed",
+            "fullAcceleratorOffload": None,
+            "averagePowerWatts": None,
+            "eligibilityBlockers": [
+                "soak-not-passed",
+                "task-coverage-incomplete",
+                "full-offload-proof-missing",
+                "fit-not-assessed",
+            ],
+            "eligibleForRecommendationReview": False,
+        }
     metrics = value.get("metrics")
     if not isinstance(metrics, dict):
         raise ComparisonError("invalid-comparison-evidence")
@@ -213,7 +241,8 @@ def parse_result(path: Path, profile: dict[str, Any]) -> dict[str, Any] | None:
         "modelId": model_id,
         "model": model,
         "manifestDigest": digest,
-        "outcome": value.get("outcome"),
+        "outcome": outcome,
+        "failureCode": None,
         "taskCoverage": coverage,
         "averageTokensPerSecond": rate,
         "peakAcceleratorMemoryBytes": peak_bytes,
@@ -275,7 +304,7 @@ def build_report(request_path: Path, evidence_root: Path) -> dict[str, Any]:
                 raise ComparisonError("duplicate-model-hardware-evidence")
             seen.add(result["modelId"])
             results.append(result)
-        results.sort(key=lambda item: (item["peakAcceleratorMemoryBytes"], item["modelId"]))
+        results.sort(key=lambda item: (item["peakAcceleratorMemoryBytes"] is None, item["peakAcceleratorMemoryBytes"] or 0, item["modelId"]))
         for result in results:
             model_hardware.setdefault(result["modelId"], []).append({
                 "hardwareId": profile["id"], "hardwareLabel": profile["label"],
@@ -331,7 +360,11 @@ def markdown(report: dict[str, Any]) -> str:
             tasks = ", ".join(task.split(".")[-1] for task, passed in item["taskCoverage"].items() if passed) or "incomplete"
             offload = "Full" if item["fullAcceleratorOffload"] is True else "Partial" if item["fullAcceleratorOffload"] is False else "Not proven"
             status = "Eligible" if item["eligibleForRecommendationReview"] else ", ".join(item["eligibilityBlockers"])
-            lines.append(f"| {item['model']} | {tasks} | {item['fitStatus']} | {offload} | {item['averageTokensPerSecond']:.1f} tok/s | {item['memoryHeadroomPercent']:.1f}% | {status} |")
+            speed = f"{item['averageTokensPerSecond']:.1f} tok/s" if item["averageTokensPerSecond"] is not None else "Not measured"
+            headroom = f"{item['memoryHeadroomPercent']:.1f}%" if item["memoryHeadroomPercent"] is not None else "Not assessed"
+            if item["failureCode"]:
+                status = f"{status}; {item['failureCode']}"
+            lines.append(f"| {item['model']} | {tasks} | {item['fitStatus']} | {offload} | {speed} | {headroom} | {status} |")
         fallback = hardware["fallbackCandidate"]
         lines.extend(["", f"Fallback candidate: **{fallback['model']}** ({fallback['basis']})." if fallback else "Fallback candidate: **none yet**; required fit or offload evidence is incomplete.", ""])
         for task, proposal in hardware["taskRecommendationProposals"].items():

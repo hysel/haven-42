@@ -36,6 +36,7 @@ tables so each result can be read without matching rows by hand.
 | Operating system and environment | Hardware | AI engine | Status | Notes |
 | --- | --- | --- | --- | --- |
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | Ollama with ROCm | ✅ Verified | Passed the bounded Windows Alpha checks. |
+| Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | Ollama 0.32.9 with ROCm, 17-model recertification | ⚠️ Partial | Fourteen exact models passed full-offload three-task soaks; Granite 4 7B and Ministral 3 3B/8B failed Summarization before soak. No final recommendation is made. |
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | llama.cpp with HIP and ROCm | ✅ Verified | Passed engine and tool-call checks. |
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | llama.cpp with Vulkan | ⚠️ Partial | Runtime checks ran, but the patch-quality gate failed. |
 | Ubuntu 24.04 under WSL2 | AMD Radeon RX 7800 XT, 16 GB through DXG | llama.cpp with HIP and DXG | 🧪 Engineering evidence | Passed the model matrix as candidate evidence; this is not a supported product route. |

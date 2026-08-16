@@ -157,6 +157,7 @@ them by hand; update the catalog and run the generator.
 | [Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-d7e3b3eddcb87ab3) | `partial-pass` | Ubuntu 24.04.4 · Ollama · phi4-mini:3.8b-q4_K_M |
 | [Qwen 3.5 9B synchronized power on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-08bad671d73e509b) | `partial-pass` | Windows 11 · Ollama · qwen3.5:9b Q4_K_M |
 | [Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-f96c1a3dd255db29) | `partial-pass` | Ubuntu 24.04.4 · Ollama · qwen3.6:27b-q4_K_M |
+| [Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad991e5601c892ec) | `partial-pass` | Windows 11 · Ollama · 17 exact manifest-pinned models |
 ## Model Quantization
 
 | Evidence | Status | Tested environment |

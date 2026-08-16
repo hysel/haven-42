@@ -44,6 +44,20 @@ def result(model_id: str, model: str, *, rate: float, peak: int, full: bool = Tr
     }
 
 
+def failed_result(model_id: str) -> dict:
+    return {
+        "schemaVersion": 1,
+        "kind": "haven42-amd-common-baseline-soak",
+        "outcome": "failed",
+        "modelId": model_id,
+        "manifestDigest": "c" * 64,
+        "failureCode": "task-control-failed:content.summarize",
+        "containsRawPromptsOrResponses": False,
+        "containsPrivateMachineIdentity": False,
+        "automaticPromotionAllowed": False,
+    }
+
+
 def request(reviews: list[dict]) -> dict:
     return {
         "schemaVersion": 1,
@@ -82,6 +96,7 @@ def main() -> int:
         write(root / "gpu-a/model-a.json", result("model-a", "Model A", rate=100, peak=2 * 1024**3))
         write(root / "gpu-a/model-b.json", result("model-b", "Model B", rate=200, peak=5 * 1024**3))
         write(root / "gpu-b/model-a.json", result("model-a", "Model A", rate=80, peak=2 * 1024**3))
+        write(root / "gpu-b/model-c.json", failed_result("model-c"))
         write(root / "reviews/a.json", {"sanitized": True})
         write(root / "reviews/b.json", {"sanitized": True})
         request_path = root / "request.json"
@@ -94,6 +109,13 @@ def main() -> int:
         assert gpu_a["fallbackCandidate"]["modelId"] == "model-a"
         assert gpu_a["taskRecommendationProposals"]["general.chat"]["proposedModelId"] is None
         assert report["crossHardwareModels"][0]["modelId"] == "model-a"
+        gpu_b = next(item for item in report["hardware"] if item["id"] == "gpu-b")
+        failed = next(item for item in gpu_b["results"] if item["modelId"] == "model-c")
+        assert failed["failureCode"] == "task-control-failed:content.summarize"
+        assert failed["fitStatus"] == "not-assessed"
+        assert failed["averageTokensPerSecond"] is None
+        assert failed["eligibleForRecommendationReview"] is False
+        assert "model-c | incomplete | not-assessed" in module.markdown(report)
 
         reviews = []
         for model_id, score, reference in (("model-a", 95, "reviews/a.json"), ("model-b", 80, "reviews/b.json")):
