@@ -3058,6 +3058,174 @@ window.Haven42TrustedCitationRenderer = Object.freeze({
   render: renderTrustedCitations,
 });
 
+const RESEARCH_REVIEW_FIELDS = Object.freeze([
+  "schemaVersion", "reviewId", "kind", "normalizedQuery", "providerId",
+  "citation", "exactReviewRequired", "modelApprovalAccepted",
+  "networkAuthorityGranted", "runtimeAdmissionGranted", "persistenceAllowed",
+  "automaticFollowUpAllowed",
+]);
+let pendingResearchReview = null;
+let pendingResearchDecision = null;
+let researchReviewReturnFocus = null;
+let researchReviewInertState = [];
+
+function validateResearchReviewBundle(bundle) {
+  if (
+    !hasExactObjectKeys(bundle, RESEARCH_REVIEW_FIELDS)
+    || bundle.schemaVersion !== 1
+    || !/^review-[0-9a-f]{20}$/u.test(bundle.reviewId)
+    || !["query", "page"].includes(bundle.kind)
+    || !isTrustedCitationText(bundle.normalizedQuery, 256)
+    || bundle.providerId !== "wikipedia"
+    || bundle.exactReviewRequired !== true
+    || bundle.modelApprovalAccepted !== false
+    || bundle.networkAuthorityGranted !== false
+    || bundle.runtimeAdmissionGranted !== false
+    || bundle.persistenceAllowed !== false
+    || bundle.automaticFollowUpAllowed !== false
+  ) return null;
+  if (bundle.kind === "query" && bundle.citation !== null) return null;
+  if (bundle.kind === "page") {
+    const citations = validateTrustedCitationBundle({
+      schemaVersion: 1,
+      citations: [bundle.citation],
+      exactSourceAccounting: true,
+      modelSuppliedLinksAccepted: false,
+      runtimeAdmissionGranted: false,
+    });
+    if (!citations) return null;
+  }
+  return Object.freeze({
+    ...bundle,
+    citation: bundle.citation === null ? null : Object.freeze({ ...bundle.citation }),
+  });
+}
+
+function setResearchReviewBackgroundInert(active) {
+  if (active) {
+    researchReviewInertState = [...document.body.children]
+      .filter((element) => element.id !== "research-review-layer" && element.tagName !== "SCRIPT")
+      .map((element) => [element, element.inert]);
+    researchReviewInertState.forEach(([element]) => { element.inert = true; });
+    return;
+  }
+  researchReviewInertState.forEach(([element, wasInert]) => { element.inert = wasInert; });
+  researchReviewInertState = [];
+}
+
+function closeResearchApprovalReview(decision = null) {
+  const review = pendingResearchReview;
+  const layer = byId("research-review-layer");
+  const wasOpen = review !== null || !layer.classList.contains("hidden");
+  if (review && decision) {
+    pendingResearchDecision = Object.freeze({
+      schemaVersion: 1,
+      reviewId: review.reviewId,
+      kind: review.kind,
+      decision,
+      singleUse: true,
+      networkStarted: false,
+    });
+  }
+  pendingResearchReview = null;
+  layer.classList.add("hidden");
+  layer.setAttribute("aria-hidden", "true");
+  byId("research-review-status").textContent = "";
+  setResearchReviewBackgroundInert(false);
+  if (!wasOpen) {
+    researchReviewReturnFocus = null;
+    return;
+  }
+  const target = researchReviewReturnFocus instanceof HTMLElement
+    && researchReviewReturnFocus.isConnected
+    && researchReviewReturnFocus.matches('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')
+    && !researchReviewReturnFocus.closest(".hidden")
+    ? researchReviewReturnFocus
+    : byId("home-nav");
+  researchReviewReturnFocus = null;
+  if (!target.inert) target.focus({ preventScroll: true });
+}
+
+function clearResearchApprovalReview() {
+  pendingResearchDecision = null;
+  closeResearchApprovalReview();
+}
+
+function openResearchApprovalReview(bundle, returnFocus = document.activeElement) {
+  const review = validateResearchReviewBundle(bundle);
+  if (
+    !review
+    || !byId("setup-wizard").classList.contains("hidden")
+    || !byId("section-tour-layer").classList.contains("hidden")
+    || !byId("research-review-layer").classList.contains("hidden")
+  ) {
+    clearResearchApprovalReview();
+    return Object.freeze({ accepted: false, opened: false });
+  }
+  pendingResearchDecision = null;
+  pendingResearchReview = review;
+  researchReviewReturnFocus = returnFocus instanceof HTMLElement ? returnFocus : byId("home-nav");
+  byId("research-review-kind").textContent = review.kind === "query"
+    ? "Search Wikipedia"
+    : "Read one selected Wikipedia page";
+  byId("research-review-query").textContent = review.normalizedQuery;
+  const pageReview = review.kind === "page";
+  byId("research-review-source-row").classList.toggle("hidden", !pageReview);
+  byId("research-review-destination-row").classList.toggle("hidden", !pageReview);
+  byId("research-review-source").textContent = pageReview ? review.citation.title : "";
+  byId("research-review-destination").textContent = pageReview ? review.citation.destination : "";
+  const layer = byId("research-review-layer");
+  setResearchReviewBackgroundInert(true);
+  layer.classList.remove("hidden");
+  layer.setAttribute("aria-hidden", "false");
+  byId("research-review-status").textContent = `${pageReview ? "Page" : "Search"} request ready for your review. Nothing has been sent.`;
+  byId("research-review-dialog").focus({ preventScroll: true });
+  return Object.freeze({ accepted: true, opened: true });
+}
+
+function consumeResearchApprovalDecision() {
+  const decision = pendingResearchDecision;
+  pendingResearchDecision = null;
+  return decision;
+}
+
+byId("research-review-close").addEventListener("click", () => closeResearchApprovalReview("cancelled"));
+byId("research-review-cancel").addEventListener("click", () => closeResearchApprovalReview("cancelled"));
+byId("research-review-approve").addEventListener("click", (event) => {
+  if (!event.isTrusted) {
+    byId("research-review-status").textContent = "Approval requires a direct user action.";
+    return;
+  }
+  closeResearchApprovalReview("approved");
+});
+byId("research-review-layer").addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeResearchApprovalReview("cancelled");
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const controls = [...byId("research-review-dialog").querySelectorAll(
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )].filter((element) => !element.closest(".hidden"));
+  if (controls.length === 0) return;
+  const first = controls[0];
+  const last = controls[controls.length - 1];
+  if (event.shiftKey && [first, byId("research-review-dialog")].includes(document.activeElement)) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+});
+
+window.Haven42ResearchApprovalReview = Object.freeze({
+  clear: clearResearchApprovalReview,
+  consumeDecision: consumeResearchApprovalDecision,
+  open: openResearchApprovalReview,
+});
+
 function updatePromptHistoryStatus() {
   const count = state.promptHistory.length;
   byId("prompt-history-status").textContent = `${count} of ${state.promptHistoryLimit} prompt${count === 1 ? "" : "s"} retained · memory only · cleared with New task`;
@@ -3567,6 +3735,7 @@ function resetTask() {
   clearPromptHistory();
   clearContextFiles();
   clearTrustedCitations();
+  clearResearchApprovalReview();
   resetContextImageLimit();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");

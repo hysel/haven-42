@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "dormant-effect-free-explicit-review-ui",
+  "provider": {
+    "id": "wikipedia",
+    "displayName": "Wikipedia",
+    "fixedDisplayDomain": "en.wikipedia.org"
+  },
+  "input": {
+    "exactTopLevelFieldsRequired": true,
+    "reviewKinds": [
+      "query",
+      "page"
+    ],
+    "maximumQueryCharacters": 256,
+    "pageReviewRequiresTrustedCitation": true,
+    "queryReviewRequiresNullCitation": true,
+    "modelSuppliedApprovalAccepted": false
+  },
+  "interaction": {
+    "explicitTrustedUserActionRequired": true,
+    "cancelAndCloseAlwaysAvailable": true,
+    "escapeCancels": true,
+    "focusMovesIntoDialog": true,
+    "focusIsTrapped": true,
+    "focusReturnsAfterClose": true,
+    "backgroundIsInert": true,
+    "singleUseDecision": true,
+    "decisionStartsNetwork": false
+  },
+  "accessibility": {
+    "role": "dialog",
+    "ariaModal": true,
+    "accessibleNameRequired": true,
+    "accessibleDescriptionRequired": true,
+    "statusAnnouncementRequired": true,
+    "forcedColorsSupported": true,
+    "reducedMotionSupported": true,
+    "minimumTargetPixels": 44,
+    "destinationWrapsAtZoom": true
+  },
+  "lifecycle": {
+    "memoryOnly": true,
+    "clearOnNewTask": true,
+    "clearOnInvalidInput": true,
+    "persistenceAllowed": false,
+    "telemetryAllowed": false
+  },
+  "authority": {
+    "productRouteAllowed": false,
+    "networkAllowed": false,
+    "runtimeAdmissionAllowed": false,
+    "modelToolAllowed": false,
+    "activeNavigationAllowed": false,
+    "pageExecutionAllowed": false,
+    "automaticFollowUpAllowed": false,
+    "downloadAllowed": false,
+    "persistenceAllowed": false
+  }
+}

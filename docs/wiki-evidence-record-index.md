@@ -30,6 +30,7 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Dormant explicit research approval review](https://github.com/hysel/haven-42/wiki/Evidence-Record-a102c154641b98c3) | `static-validated` | Headless browser source · Fixed English Wikipedia review shape · no-model |
 | [Dormant trusted citation renderer](https://github.com/hysel/haven-42/wiki/Evidence-Record-87f09934d8d4353a) | `static-validated` | Headless browser source · Fixed English Wikipedia citation shape · no-model |
 | [Offline cited-synthesis source parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-03d2a694b6d22720) | `static-validated` | Windows and Linux · Caller-supplied fixtures · synthetic-bounded-source-envelope |
 | [Offline transport and approval guards](https://github.com/hysel/haven-42/wiki/Evidence-Record-1c20a3dfac18ae0a) | `static-validated` | Cross-platform · Caller-supplied receipts · no-model |

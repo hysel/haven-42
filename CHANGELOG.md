@@ -11,6 +11,12 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added a dormant, effect-free controlled-research approval dialog for exact
+  query and selected-page review. It discloses what would leave the device,
+  supports keyboard and assistive-technology interaction, keeps decisions
+  memory-only and single-use, and remains unreachable from product routes with
+  no network, navigation, runtime, model-tool, persistence, or follow-up access.
+
 - Added a dormant, fail-closed trusted-citation renderer for the future
   controlled web-research flow. It accepts only exact engine-accounted fixed-
   provider data, renders inert text with full destination disclosure, clears on

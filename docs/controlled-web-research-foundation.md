@@ -23,12 +23,34 @@ style, frame, object, embed, or download surface. The region has an accessible
 name and description, announces its source count, wraps long destination text,
 supports forced colors, stays memory-only, and clears on New task.
 
-The renderer contract passes 39 static checks. The full real-browser flow now
-passes 548 checks, including a 19-check renderer slice that proves valid inert
+A separate dormant review dialog now accepts only one exact engine-shaped query
+or page-review request for the same fixed provider. It shows the complete query
+and provider before a query decision, and the complete source title and
+destination before a page decision. It tells the user that nothing has been
+sent and that the request is kept only in memory. Cancel, close, and Escape all
+dismiss the request. Approve once accepts only a trusted user event, creates one
+frozen single-use decision, and starts no network or navigation. The dialog
+moves and contains keyboard focus, returns focus when it closes, makes the rest
+of the page inert, uses 44-pixel controls, wraps long text, and supports forced
+colors and reduced motion. New task clears any pending request or decision.
+
+The renderer contract passes 39 static checks. The explicit review contract
+passes 63 static checks. The full real-browser flow now passes 591 checks,
+including a 19-check renderer slice and a 43-check review slice that prove valid inert
 output, hostile-bundle refusal, no active child elements, status announcement,
-and New task cleanup. This is a packaged dormant component, not a research UI:
-automatic invocation, queries, page retrieval, model tools, navigation,
-persistence, telemetry, and follow-up all remain denied.
+New task cleanup, exact disclosure, focus behavior, background inertness,
+trusted approval, single-use decisions, caller-mutation resistance, and no
+Wikipedia network request. These are packaged dormant components, not an
+admitted research feature: automatic product invocation, queries, page
+retrieval, model tools, navigation, persistence, telemetry, and follow-up all
+remain denied.
+
+The same 591-check browser flow passes against the unsigned Windows Alpha 2
+portable package. The package also passes protected-resource and API parity,
+relocation, read-only startup, abrupt-exit recovery, repeated lifecycle,
+port-collision, shutdown-authority, hostile-environment, and integrity-tamper
+checks. This is development package evidence only; manual assistive-technology
+testing, signing, and release promotion remain open.
 
 The offline adapter foundation validates caller-supplied fixtures only. It:
 
@@ -107,12 +129,12 @@ self-contained bundle then passed. This establishes source-test parity only.
 The boundary remains deliberately absent from the product runtime and portable
 package, and macOS source evidence plus all native package smoke remain open.
 
-Future product work still requires explicit accessible per-query and per-page
-review and cancellation, runtime invocation and lifecycle cleanup, hostile
-local-server evidence, source/package parity, and native evidence on every
-supported platform. Citation navigation remains a separate user-reviewed UI
-decision. The dormant renderer and live development source passes grant none
-of those product authorities.
+Future product work still requires safely connecting the dormant accessible
+per-query and per-page review to a runtime approval lifecycle, plus runtime
+invocation and cleanup, hostile local-server evidence, source/package parity,
+and native evidence on every supported platform. Citation navigation remains a
+separate user-reviewed UI decision. The dormant review, renderer, and live
+development source passes grant none of those product authorities.
 
 `config/web-research-expansion-evaluation.json` records two later gates without
 activating either: a self-hosted provider must meet the same public-destination
