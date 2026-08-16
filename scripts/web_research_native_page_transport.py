@@ -6,20 +6,21 @@ from __future__ import annotations
 import argparse
 import hashlib
 import http.client
-import importlib.util
 import json
 from pathlib import Path
 import re
 import socket
 import ssl
+import sys
 import urllib.parse
 from typing import Callable
 
+import offline_research_page_text as PAGE_TEXT
+import web_research_native_transport as QUERY
 
-ROOT = Path(__file__).resolve().parents[1]
+
+ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))
 CONTRACT_PATH = ROOT / "config" / "web-research-native-page-transport.json"
-QUERY_TRANSPORT_PATH = ROOT / "scripts" / "web_research_native_transport.py"
-PAGE_TEXT_PATH = ROOT / "scripts" / "offline_research_page_text.py"
 DESTINATION = re.compile(r"^https://en\.wikipedia\.org/\?curid=([1-9][0-9]{0,18})$")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 CITATION = re.compile(r"^source-[0-9a-f]{20}$")
@@ -27,19 +28,6 @@ CITATION = re.compile(r"^source-[0-9a-f]{20}$")
 
 class NativePageError(ValueError):
     pass
-
-
-def _load(name: str, path: Path):
-    spec = importlib.util.spec_from_file_location(name, path)
-    if spec is None or spec.loader is None:
-        raise NativePageError("required-module-unavailable")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-QUERY = _load("haven42_native_query_transport_for_page", QUERY_TRANSPORT_PATH)
-PAGE_TEXT = _load("haven42_offline_page_text_for_transport", PAGE_TEXT_PATH)
 
 
 def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict:
@@ -83,7 +71,7 @@ def load_contract(path: Path = CONTRACT_PATH) -> dict:
     }
     if (
         value.get("schemaVersion") != 1
-        or value.get("status") != "development-owner-approved-selected-page-only"
+        or value.get("status") != "owner-approved-fixed-provider-runtime"
         or value.get("providerId") != "wikipedia-page-extract"
         or network.get("fixedHost") != "en.wikipedia.org"
         or network.get("fixedPort") != 443
@@ -114,12 +102,18 @@ def load_contract(path: Path = CONTRACT_PATH) -> dict:
         or authority.get("explicitDevelopmentCliAllowed") is not True
         or authority.get("selectedPageNetworkAllowed") is not True
         or any(
+            authority.get(name) is not True
+            for name in (
+                "runtimeRouteAllowed", "uiControlAllowed",
+                "packageAdmissionAllowed",
+            )
+        )
+        or any(
             authority.get(name) is not False
             for name in (
-                "runtimeRouteAllowed", "uiControlAllowed", "modelToolAllowed",
-                "activeNavigationAllowed", "persistenceAllowed",
-                "automaticFollowUpAllowed", "pageExecutionAllowed",
-                "downloadAllowed", "packageAdmissionAllowed",
+                "modelToolAllowed", "activeNavigationAllowed",
+                "persistenceAllowed", "automaticFollowUpAllowed",
+                "pageExecutionAllowed", "downloadAllowed",
             )
         )
     ):

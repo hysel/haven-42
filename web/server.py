@@ -96,6 +96,8 @@ from electricity_rate_service import (  # noqa: E402
     ElectricityRateError,
     lookup_official_rate,
 )
+import web_research_native_transport as web_research_query  # noqa: E402
+import web_research_native_page_transport as web_research_page  # noqa: E402
 from alpha2_runtime_compatibility import (  # noqa: E402
     CompatibilityError as RuntimeCompatibilityError,
     resolve as resolve_alpha2_runtime,
@@ -130,6 +132,12 @@ MAX_MESSAGE_BYTES = 32 * 1024
 MAX_CHAT_RESPONSE_BYTES = 1024 * 1024
 MAX_PENDING_ANSWER_REPORTS = 20
 ANSWER_REPORT_TOKEN = re.compile(r"[a-f0-9]{32}")
+RESEARCH_APPROVAL_TOKEN = re.compile(r"[a-f0-9]{32}")
+RESEARCH_RESULT_ID = re.compile(r"result-[a-f0-9]{20}")
+RESEARCH_CITATION_ID = re.compile(r"source-[a-f0-9]{20}")
+MAX_PENDING_RESEARCH_APPROVALS = 8
+MAX_RESEARCH_RESULTS = 8
+RESEARCH_APPROVAL_SECONDS = 300
 MAX_WEB_IMAGE_BYTES = 16 * 1024 * 1024
 MAX_IMAGE_PROMPT_BYTES = 8 * 1024
 MAX_CONVERSATION_MESSAGES = 20
@@ -497,7 +505,9 @@ def verify_packaged_resources(path: Path = INTEGRITY_MANIFEST_PATH) -> dict[str,
             raise ValueError("empty-manifest")
         actual = {
             target.relative_to(ROOT).as_posix()
-            for parent in (ROOT / "web" / "static", ROOT / "config")
+            for parent in (
+                ROOT / "web" / "static", ROOT / "config", ROOT / "scripts",
+            )
             if parent.is_dir()
             for target in parent.rglob("*")
             if target.is_file()
@@ -845,6 +855,8 @@ class HavenState:
         readiness_provider: Callable[[], dict[str, Any]] = inspect_system,
         model_catalog_provider: Callable[[str], list[str]] = search_ollama_catalog,
         assurance_provider: Callable[[], dict[str, Any]] | None = None,
+        research_query_provider: Callable[[object, object], dict[str, Any]] | None = None,
+        research_page_provider: Callable[[object, object, object, object], dict[str, Any]] | None = None,
         diagnostic_root: Path | None = None,
     ) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
@@ -872,6 +884,11 @@ class HavenState:
         self.image_timeout_seconds = 300
         self.readiness_provider = readiness_provider
         self.model_catalog_provider = model_catalog_provider
+        self.research_query_provider = research_query_provider or web_research_query.execute_query
+        self.research_page_provider = research_page_provider or web_research_page.execute_selected_page
+        self.research_lock = threading.Lock()
+        self.pending_research_approvals: dict[str, dict[str, Any]] = {}
+        self.research_results: dict[str, dict[str, Any]] = {}
         self.assurance_provider = assurance_provider or (
             lambda: build_public_assurance_summary(
                 EVIDENCE_CATALOG_PATH,
@@ -894,6 +911,304 @@ class HavenState:
         )
         self.alpha_runtime_binding: dict[str, Any] | None = None
         self.alpha_runtime_plan_id: str | None = None
+
+    @staticmethod
+    def _research_citation(value: object) -> dict[str, Any]:
+        fields = {
+            "citationId", "title", "displayDomain", "destination", "retrievedAt",
+            "contentTrust", "destinationDisclosureRequired", "activeNavigationAllowed",
+        }
+        if (
+            not isinstance(value, dict)
+            or set(value) != fields
+            or not isinstance(value.get("citationId"), str)
+            or not RESEARCH_CITATION_ID.fullmatch(value["citationId"])
+            or not isinstance(value.get("title"), str)
+            or not 1 <= len(value["title"]) <= 200
+            or any(character in value["title"] for character in "<>")
+            or any(ord(character) < 32 or 127 <= ord(character) <= 159 for character in value["title"])
+            or value.get("displayDomain") != "en.wikipedia.org"
+            or not isinstance(value.get("destination"), str)
+            or not re.fullmatch(
+                r"https://en\.wikipedia\.org/\?curid=[1-9][0-9]{0,18}",
+                value["destination"],
+            )
+            or value.get("contentTrust") != "untrusted-metadata-only"
+            or not isinstance(value.get("retrievedAt"), str)
+            or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z", value["retrievedAt"])
+            or value.get("destinationDisclosureRequired") is not True
+            or value.get("activeNavigationAllowed") is not False
+        ):
+            raise WebRequestError("research-provider-response-invalid", HTTPStatus.BAD_GATEWAY)
+        return {
+            "citationId": value["citationId"],
+            "title": value["title"],
+            "displayDomain": value["displayDomain"],
+            "destination": value["destination"],
+            "destinationDisclosureRequired": True,
+            "activeNavigationAllowed": False,
+        }
+
+    @staticmethod
+    def _research_review(kind: str, normalized_query: str, citation: dict[str, Any] | None) -> dict[str, Any]:
+        return {
+            "schemaVersion": 1,
+            "reviewId": f"review-{secrets.token_hex(10)}",
+            "kind": kind,
+            "normalizedQuery": normalized_query,
+            "providerId": "wikipedia",
+            "citation": citation,
+            "exactReviewRequired": True,
+            "modelApprovalAccepted": False,
+            "networkAuthorityGranted": False,
+            "runtimeAdmissionGranted": False,
+            "persistenceAllowed": False,
+            "automaticFollowUpAllowed": False,
+        }
+
+    def _prune_research_locked(self) -> None:
+        now = time.monotonic()
+        self.pending_research_approvals = {
+            token: value for token, value in self.pending_research_approvals.items()
+            if value["expiresAt"] > now
+        }
+        while len(self.pending_research_approvals) >= MAX_PENDING_RESEARCH_APPROVALS:
+            self.pending_research_approvals.pop(next(iter(self.pending_research_approvals)))
+        while len(self.research_results) >= MAX_RESEARCH_RESULTS:
+            self.research_results.pop(next(iter(self.research_results)))
+
+    def _store_research_approval(self, value: dict[str, Any]) -> str:
+        token = secrets.token_hex(16)
+        with self.research_lock:
+            self._prune_research_locked()
+            self.pending_research_approvals[token] = {
+                **value,
+                "expiresAt": time.monotonic() + RESEARCH_APPROVAL_SECONDS,
+            }
+        return token
+
+    def prepare_research_query(self, query: object, result_limit: object) -> dict[str, Any]:
+        try:
+            request = web_research_query.ADAPTER.build_request(query, result_limit)
+        except web_research_query.ADAPTER.QueryAdapterError as error:
+            raise WebRequestError(f"research-{error}") from error
+        normalized_query = request["parameters"]["srsearch"]
+        token = self._store_research_approval({
+            "kind": "query", "query": normalized_query, "resultLimit": result_limit,
+        })
+        return {
+            "schemaVersion": 1,
+            "kind": "research-approval-preparation",
+            "approvalToken": token,
+            "expiresInSeconds": RESEARCH_APPROVAL_SECONDS,
+            "singleUse": True,
+            "persisted": False,
+            "review": self._research_review("query", normalized_query, None),
+        }
+
+    def _consume_research_approval(self, token: object, kind: str) -> dict[str, Any]:
+        if not isinstance(token, str) or not RESEARCH_APPROVAL_TOKEN.fullmatch(token):
+            raise WebRequestError("research-approval-invalid", HTTPStatus.CONFLICT)
+        with self.research_lock:
+            self._prune_research_locked()
+            approval = self.pending_research_approvals.pop(token, None)
+        if approval is None or approval.get("kind") != kind:
+            raise WebRequestError("research-approval-invalid", HTTPStatus.CONFLICT)
+        return approval
+
+    def execute_research_query(self, approval_token: object) -> dict[str, Any]:
+        approval = self._consume_research_approval(approval_token, "query")
+        try:
+            raw = self.research_query_provider(approval["query"], approval["resultLimit"])
+        except (
+            web_research_query.NativeQueryError,
+            web_research_query.ADAPTER.QueryAdapterError,
+        ) as error:
+            raise WebRequestError(f"research-{error}", HTTPStatus.BAD_GATEWAY) from error
+        expected_transport = {
+            "providerId": "wikipedia-query",
+            "tlsSystemTrust": True,
+            "dnsRevalidated": True,
+            "connectionPinnedToReviewedPublicIp": True,
+            "redirectsFollowed": False,
+            "credentialsSent": False,
+            "cookiesSent": False,
+            "proxyEnvironmentInherited": False,
+        }
+        if (
+            not isinstance(raw, dict)
+            or set(raw) != {
+                "schemaVersion", "status", "queryDigest", "results",
+                "additionalResultsAvailable", "networkAuthorityGranted",
+                "runtimeAdmissionGranted", "pageRetrievalAllowed", "transport",
+            }
+            or raw.get("schemaVersion") != 1
+            or raw.get("status") != "development-live-query-validated"
+            or not isinstance(raw.get("queryDigest"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", raw["queryDigest"])
+            or raw["queryDigest"] != hashlib.sha256(approval["query"].encode("utf-8")).hexdigest()
+            or not isinstance(raw.get("results"), list)
+            or len(raw["results"]) > approval["resultLimit"]
+            or not isinstance(raw.get("additionalResultsAvailable"), bool)
+            or raw.get("networkAuthorityGranted") is not False
+            or raw.get("runtimeAdmissionGranted") is not False
+            or raw.get("pageRetrievalAllowed") is not False
+            or raw.get("transport") != expected_transport
+        ):
+            raise WebRequestError("research-provider-response-invalid", HTTPStatus.BAD_GATEWAY)
+        citations = [self._research_citation(item) for item in raw["results"]]
+        if len({item["citationId"] for item in citations}) != len(citations):
+            raise WebRequestError("research-provider-response-invalid", HTTPStatus.BAD_GATEWAY)
+        result_id = f"result-{secrets.token_hex(10)}"
+        with self.research_lock:
+            self._prune_research_locked()
+            self.research_results[result_id] = {
+                "query": approval["query"],
+                "resultLimit": approval["resultLimit"],
+                "citations": citations,
+            }
+        return {
+            "schemaVersion": 1,
+            "kind": "wikipedia-research-query-result",
+            "status": "succeeded",
+            "resultId": result_id,
+            "normalizedQuery": approval["query"],
+            "citations": {
+                "schemaVersion": 1,
+                "citations": citations,
+                "exactSourceAccounting": True,
+                "modelSuppliedLinksAccepted": False,
+                "runtimeAdmissionGranted": True,
+            },
+            "additionalResultsAvailable": raw.get("additionalResultsAvailable") is True,
+            "networkUsed": True,
+            "queryPersisted": False,
+            "contentPersisted": False,
+            "modelToolAllowed": False,
+            "automaticFollowUpAllowed": False,
+        }
+
+    def prepare_research_page(self, result_id: object, citation_id: object) -> dict[str, Any]:
+        if (
+            not isinstance(result_id, str)
+            or not RESEARCH_RESULT_ID.fullmatch(result_id)
+            or not isinstance(citation_id, str)
+            or not RESEARCH_CITATION_ID.fullmatch(citation_id)
+        ):
+            raise WebRequestError("research-selection-invalid", HTTPStatus.CONFLICT)
+        with self.research_lock:
+            result = self.research_results.get(result_id)
+            selected = None if result is None else next(
+                (item for item in result["citations"] if item["citationId"] == citation_id),
+                None,
+            )
+        if result is None or selected is None:
+            raise WebRequestError("research-selection-invalid", HTTPStatus.CONFLICT)
+        token = self._store_research_approval({
+            "kind": "page",
+            "query": result["query"],
+            "resultLimit": result["resultLimit"],
+            "citation": selected,
+        })
+        return {
+            "schemaVersion": 1,
+            "kind": "research-approval-preparation",
+            "approvalToken": token,
+            "expiresInSeconds": RESEARCH_APPROVAL_SECONDS,
+            "singleUse": True,
+            "persisted": False,
+            "review": self._research_review("page", result["query"], selected),
+        }
+
+    def execute_research_page(self, approval_token: object) -> dict[str, Any]:
+        approval = self._consume_research_approval(approval_token, "page")
+        citation = approval["citation"]
+        try:
+            raw = self.research_page_provider(
+                approval["query"], approval["resultLimit"],
+                citation["citationId"], citation["destination"],
+            )
+        except (
+            web_research_page.NativePageError,
+            web_research_query.NativeQueryError,
+            web_research_query.ADAPTER.QueryAdapterError,
+        ) as error:
+            raise WebRequestError(f"research-{error}", HTTPStatus.BAD_GATEWAY) from error
+        segments = raw.get("segments") if isinstance(raw, dict) else None
+        if (
+            not isinstance(raw, dict)
+            or set(raw) != {
+                "schemaVersion", "status", "queryDigest", "source", "contentDigest",
+                "segments", "contentCharacters", "developmentNetworkUsed",
+                "dnsRevalidated", "connectionPinnedToReviewedPublicIp",
+                "redirectsFollowed", "credentialsSent", "cookiesSent",
+                "proxyEnvironmentInherited", "activeNavigationAllowed",
+                "pageExecutionAllowed", "automaticFollowUpAllowed", "filesWritten",
+                "runtimeAdmissionGranted", "packageAdmissionGranted",
+            }
+            or raw.get("schemaVersion") != 1
+            or raw.get("status") != "development-live-selected-page-validated"
+            or raw.get("queryDigest") != hashlib.sha256(approval["query"].encode("utf-8")).hexdigest()
+            or not isinstance(raw.get("contentDigest"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", raw["contentDigest"])
+            or self._research_citation(raw.get("source")) != citation
+            or not isinstance(segments, list)
+            or not 1 <= len(segments) <= 500
+            or any(
+                not isinstance(item, dict)
+                or set(item) != {"index", "text", "trust"}
+                or item.get("index") != index
+                or not isinstance(item.get("text"), str)
+                or not item["text"]
+                or item.get("trust") != "untrusted-inert-text"
+                for index, item in enumerate(segments, 1)
+            )
+            or sum(len(item["text"]) for item in segments) > 100000
+            or raw.get("contentCharacters") != sum(len(item["text"]) for item in segments)
+            or raw["contentDigest"] != hashlib.sha256(
+                "\n".join(item["text"] for item in segments).encode("utf-8")
+            ).hexdigest()
+            or raw.get("developmentNetworkUsed") is not True
+            or raw.get("dnsRevalidated") is not True
+            or raw.get("connectionPinnedToReviewedPublicIp") is not True
+            or raw.get("redirectsFollowed") is not False
+            or raw.get("credentialsSent") is not False
+            or raw.get("cookiesSent") is not False
+            or raw.get("proxyEnvironmentInherited") is not False
+            or raw.get("activeNavigationAllowed") is not False
+            or raw.get("pageExecutionAllowed") is not False
+            or raw.get("automaticFollowUpAllowed") is not False
+            or raw.get("filesWritten") is not False
+            or raw.get("runtimeAdmissionGranted") is not False
+            or raw.get("packageAdmissionGranted") is not False
+        ):
+            raise WebRequestError("research-provider-response-invalid", HTTPStatus.BAD_GATEWAY)
+        return {
+            "schemaVersion": 1,
+            "kind": "wikipedia-research-page-result",
+            "status": "succeeded",
+            "normalizedQuery": approval["query"],
+            "source": citation,
+            "segments": segments,
+            "contentCharacters": sum(len(item["text"]) for item in segments),
+            "networkUsed": True,
+            "contentPersisted": False,
+            "activeNavigationAllowed": False,
+            "pageExecutionAllowed": False,
+            "modelToolAllowed": False,
+            "automaticFollowUpAllowed": False,
+        }
+
+    def clear_research(self) -> dict[str, Any]:
+        with self.research_lock:
+            self.pending_research_approvals.clear()
+            self.research_results.clear()
+        return {
+            "schemaVersion": 1,
+            "kind": "research-memory-clear",
+            "cleared": True,
+            "persisted": False,
+        }
 
     def _validate_alpha2_runtime_binding(self, plan_id: str | None = None) -> None:
         if APP_VERSION != ALPHA_2_VERSION:
@@ -2369,6 +2684,7 @@ class HavenWebServer(ThreadingHTTPServer):
 
     def server_close(self) -> None:
         self.state.unload_used_models()
+        self.state.clear_research()
         if self.state.alpha_setup is not None:
             self.state.alpha_setup.close()
         self.state.diagnostics.close()
@@ -2572,6 +2888,63 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                     HTTPStatus.OK,
                     self.server.state.search_models(body["query"], body["online"]),
                 )
+                return
+            if self.path == "/api/research/query/prepare":
+                if (
+                    set(body) != {"query", "resultLimit"}
+                    or not isinstance(body["query"], str)
+                    or type(body["resultLimit"]) is not int
+                ):
+                    raise WebRequestError("invalid-research-query-preparation-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.prepare_research_query(
+                        body["query"], body["resultLimit"]
+                    ),
+                )
+                return
+            if self.path == "/api/research/query/execute":
+                if (
+                    set(body) != {"approvalToken", "confirmed"}
+                    or not isinstance(body["approvalToken"], str)
+                    or body["confirmed"] is not True
+                ):
+                    raise WebRequestError("invalid-research-query-execution-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.execute_research_query(body["approvalToken"]),
+                )
+                return
+            if self.path == "/api/research/page/prepare":
+                if (
+                    set(body) != {"resultId", "citationId"}
+                    or not isinstance(body["resultId"], str)
+                    or not isinstance(body["citationId"], str)
+                ):
+                    raise WebRequestError("invalid-research-page-preparation-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.prepare_research_page(
+                        body["resultId"], body["citationId"]
+                    ),
+                )
+                return
+            if self.path == "/api/research/page/execute":
+                if (
+                    set(body) != {"approvalToken", "confirmed"}
+                    or not isinstance(body["approvalToken"], str)
+                    or body["confirmed"] is not True
+                ):
+                    raise WebRequestError("invalid-research-page-execution-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.execute_research_page(body["approvalToken"]),
+                )
+                return
+            if self.path == "/api/research/clear":
+                if body:
+                    raise WebRequestError("invalid-research-clear-fields")
+                self._send_json(HTTPStatus.OK, self.server.state.clear_research())
                 return
             if self.path == "/api/electricity-rate":
                 try:

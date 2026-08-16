@@ -96,10 +96,13 @@ def main() -> int:
         if path.is_file() and path.suffix in {".py", ".js", ".html", ".css", ".json"}
     )
     assert "offline_research_page_text" not in runtime
-    assert "offline_research_page_text" not in (
-        ROOT / "package/haven42.spec"
+    package_spec = (ROOT / "package/haven42.spec").read_text(encoding="utf-8")
+    assert package_spec.count('"offline_research_page_text"') == 1
+    page_transport = (
+        ROOT / "scripts/web_research_native_page_transport.py"
     ).read_text(encoding="utf-8")
-    checks += 4
+    assert "import offline_research_page_text as PAGE_TEXT" in page_transport
+    checks += 5
     print(f"Offline research page-text foundation passed: {checks} checks.")
     return 0
 

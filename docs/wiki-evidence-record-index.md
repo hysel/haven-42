@@ -30,10 +30,12 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
-| [Dormant explicit research approval review](https://github.com/hysel/haven-42/wiki/Evidence-Record-a102c154641b98c3) | `static-validated` | Headless browser source · Fixed English Wikipedia review shape · no-model |
-| [Dormant trusted citation renderer](https://github.com/hysel/haven-42/wiki/Evidence-Record-87f09934d8d4353a) | `static-validated` | Headless browser source · Fixed English Wikipedia citation shape · no-model |
+| [Explicit research approval review](https://github.com/hysel/haven-42/wiki/Evidence-Record-6fe6a89227168b12) | `validated-by-tests` | Headless browser source · Fixed English Wikipedia review shape · no-model |
+| [Live fixed-Wikipedia Alpha 2 package runtime](https://github.com/hysel/haven-42/wiki/Evidence-Record-2403d4a9edd19c95) | `partial-pass` | Windows · Fixed English Wikipedia · no-model |
+| [Live fixed-Wikipedia product runtime](https://github.com/hysel/haven-42/wiki/Evidence-Record-db792ade22a7c3ad) | `partial-pass` | Windows · Fixed English Wikipedia · no-model |
 | [Offline cited-synthesis source parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-03d2a694b6d22720) | `static-validated` | Windows and Linux · Caller-supplied fixtures · synthetic-bounded-source-envelope |
 | [Offline transport and approval guards](https://github.com/hysel/haven-42/wiki/Evidence-Record-1c20a3dfac18ae0a) | `static-validated` | Cross-platform · Caller-supplied receipts · no-model |
+| [Trusted citation renderer](https://github.com/hysel/haven-42/wiki/Evidence-Record-19165579f9181386) | `validated-by-tests` | Headless browser source · Fixed English Wikipedia citation shape · no-model |
 ## Data Protection
 
 | Evidence | Status | Tested environment |

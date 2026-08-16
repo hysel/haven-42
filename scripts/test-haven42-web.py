@@ -643,7 +643,8 @@ def main() -> int:
         assert accessibility_page.count("<h1") == 1
         assert "(WCAG) 2.1 Level AA" in accessibility_page
         assert "self-assessed target" in accessibility_page
-        assert "Last reviewed:</strong> August 15, 2026" in accessibility_page
+        assert "Last reviewed:</strong> August 16, 2026" in accessibility_page
+        assert "Wikipedia research uses a labeled modal review" in accessibility_page
         assert "open once for each new section-tour revision" in accessibility_page
         assert "haven42localai@gmail.com" in accessibility_page
         assert "has not yet been manually tested across NVDA, JAWS, VoiceOver, TalkBack" in accessibility_page
@@ -2589,8 +2590,24 @@ def main() -> int:
         research_contract = json.loads(
             (ROOT / "config/web-research-contract.json").read_text(encoding="utf-8")
         )
-        assert research_contract["status"] == "proposed-offline-fixtures-only"
-        assert not any(research_contract["activation"].values())
+        assert research_contract["status"] == "owner-approved-manual-fixed-provider-runtime"
+        assert research_contract["activation"] == {
+            "runtimeRouteAllowed": True,
+            "uiControlAllowed": True,
+            "modelToolAllowed": False,
+            "networkAllowed": True,
+            "dnsResolutionAllowed": True,
+            "urlFetchAllowed": True,
+            "fixedWikipediaProviderOnly": True,
+            "pageRetrievalAllowed": True,
+            "packageAdmissionAllowed": True,
+            "automaticFollowUpAllowed": False,
+            "activeNavigationAllowed": False,
+            "persistenceAllowed": False,
+            "browserAutomationAllowed": False,
+            "pageExecutionAllowed": False,
+            "downloadAllowed": False,
+        }
         assert research_contract["query"]["explicitUserActionRequired"] is True
         assert research_contract["query"]["repositoryContentAllowed"] is False
         assert research_contract["futureBrokerBoundary"]["privateNetworkDestinationsAllowed"] is False
@@ -2603,7 +2620,20 @@ def main() -> int:
         assert len({case["id"] for case in research_fixtures["cases"]}) == 10
         assert all(case["expected"] in {"rejected", "inert-rejected", "inert-data", "inactive-rejected", "cleaned"} for case in research_fixtures["cases"])
         assert policy["inactiveFoundations"]["lexicalRetrieval"]["runtimeRouteAllowed"] is False
-        assert policy["inactiveFoundations"]["webResearch"]["networkAllowed"] is False
+        assert policy["webResearch"] == {
+            "contract": "config/web-research-contract.json",
+            "status": "owner-approved-manual-fixed-provider-runtime",
+            "providerId": "wikipedia",
+            "runtimeRouteAllowed": True,
+            "uiControlAllowed": True,
+            "networkAllowed": True,
+            "pageRetrievalAllowed": True,
+            "packageAdmissionAllowed": True,
+            "modelToolAllowed": False,
+            "activeNavigationAllowed": False,
+            "automaticFollowUpAllowed": False,
+            "persistenceAllowed": False,
+        }
         assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
         assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
         assert policy["executionEvents"]["automaticRetryAllowed"] is False
@@ -2628,7 +2658,7 @@ def main() -> int:
         assert "This is a self-assessed target, not a claim of third-party certification." in accessibility_html
         assert "No complete manual screen-reader and browser matrix has been recorded yet" in accessibility_html
         assert "Section help tours use labeled modal dialogs" in accessibility_html
-        assert "section help tours, chat, models, system" in accessibility_html
+        assert "section help tours, chat and its manual Wikipedia research controls, models, system" in accessibility_html
         assert "<script" not in accessibility_html
         assert ".statement-page" in styles and ".statement-content" in styles
         checks += 6

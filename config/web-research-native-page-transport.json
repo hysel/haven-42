@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractId": "haven42.web-research.native-selected-page-transport",
-  "status": "development-owner-approved-selected-page-only",
+  "status": "owner-approved-fixed-provider-runtime",
   "queryTransportContract": "config/web-research-native-query-transport.json",
   "pageFoundationContract": "config/web-research-page-foundation.json",
   "providerId": "wikipedia-page-extract",
@@ -45,14 +45,14 @@
   "authority": {
     "explicitDevelopmentCliAllowed": true,
     "selectedPageNetworkAllowed": true,
-    "runtimeRouteAllowed": false,
-    "uiControlAllowed": false,
+    "runtimeRouteAllowed": true,
+    "uiControlAllowed": true,
     "modelToolAllowed": false,
     "activeNavigationAllowed": false,
     "persistenceAllowed": false,
     "automaticFollowUpAllowed": false,
     "pageExecutionAllowed": false,
     "downloadAllowed": false,
-    "packageAdmissionAllowed": false
+    "packageAdmissionAllowed": true
   }
 }

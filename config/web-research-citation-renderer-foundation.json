@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractId": "haven42.web-research.trusted-citation-renderer-foundation",
-  "status": "dormant-fixed-provider-renderer-no-navigation-authority",
+  "status": "product-fixed-provider-renderer-no-navigation-authority",
   "input": {
     "sourceAccountingContract": "scripts/offline_web_research_boundary.py#account_synthesis",
     "exactTopLevelFieldsRequired": true,
@@ -10,7 +10,7 @@
     "maximumTitleCharacters": 200,
     "citationIdPattern": "^source-[0-9a-f]{20}$",
     "fixedDisplayDomain": "en.wikipedia.org",
-    "fixedDestinationPattern": "^https://en\\.wikipedia\\.org/\\?curid=[1-9][0-9]{0,19}$",
+    "fixedDestinationPattern": "^https://en\\.wikipedia\\.org/\\?curid=[1-9][0-9]{0,18}$",
     "duplicateCitationIdsAllowed": false,
     "duplicateDestinationsAllowed": false
   },
@@ -27,7 +27,7 @@
     "trackingAllowed": false,
     "screenReaderStatusRequired": true,
     "forcedColorsSupported": true,
-    "packageIncludedAsDormantComponent": true
+    "packageIncludedAsDormantComponent": false
   },
   "lifecycle": {
     "memoryOnly": true,
@@ -37,7 +37,7 @@
   },
   "authority": {
     "automaticInvocationAllowed": false,
-    "runtimeRouteAllowed": false,
+    "runtimeRouteAllowed": true,
     "modelToolAllowed": false,
     "networkAllowed": false,
     "dnsAllowed": false,

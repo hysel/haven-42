@@ -174,7 +174,7 @@ def validate_response(request: dict, response: object, contract_path: Path = CON
         raise QueryAdapterError("response-result-count")
     results = []
     seen: set[int] = set()
-    for index, item in enumerate(raw_results, 1):
+    for item in raw_results:
         if not isinstance(item, dict) or set(item) != {"ns", "pageid", "timestamp", "title"}:
             raise QueryAdapterError("response-result-fields")
         page_id = item["pageid"]
@@ -197,7 +197,12 @@ def validate_response(request: dict, response: object, contract_path: Path = CON
         except ValueError as error:
             raise QueryAdapterError("response-timestamp") from error
         seen.add(page_id)
-        citation = hashlib.sha256(f"{request['parameters']['srsearch']}\0{index}\0{page_id}".encode()).hexdigest()[:20]
+        # Search ranking may legitimately change between the reviewed query and
+        # the fresh query used to bind a selected page.  Bind the opaque ID to
+        # the normalized query and provider page ID, not the mutable rank.
+        citation = hashlib.sha256(
+            f"{request['parameters']['srsearch']}\0{page_id}".encode()
+        ).hexdigest()[:20]
         results.append({
             "citationId": f"source-{citation}",
             "title": title,

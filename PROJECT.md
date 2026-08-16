@@ -209,26 +209,26 @@ metadata and rejects links, hidden or unsupported entries, binaries,
 executables, archives, encoding failures, resource overruns, and files changed
 during read. Neither foundation is connected to the runtime, UI, provider, or
 package.
-Milestone 28 defines proposed controlled web research with inactive offline
-contracts and hostile fixtures. A 28-check caller-fixture boundary validates
-bounded queries, strict public-HTTPS result metadata, engine-derived inactive
-citations, and exact source accounting without importing a network stack or
-entering the runtime/package. A 26-check caller-bytes-only foundation converts
-bounded UTF-8 text or strict allowlisted HTML into inert untrusted segments
-without retaining attributes or remote references and without network,
-filesystem, runtime, package, UI, or model authority. Live transport, DNS,
-page retrieval, trusted UI
-navigation, actual DNS/network execution, and autonomous
-follow-up remain unadmitted; no model or renderer internet tool exists. Broader
-surface and provider parity remains evidence-gated.
+Milestone 28 now admits one manual fixed-Wikipedia query and selected-page path
+in the development source. Separate exact review dialogs issue server-owned
+five-minute single-use approvals; the engine owns the fixed host, public-DNS
+revalidation, pinned TLS connection, strict response validation, citations,
+inert text rendering, and memory cleanup. Models cannot invoke or approve
+research, choose a URL, navigate, persist results, download content, or trigger
+follow-up searches. The product runtime passes 40 hostile API checks and the
+complete Windows headless Chromium flow passes 622 checks. Exact native package
+parity, the manual assistive-technology matrix, cited model synthesis, active
+navigation, broader providers, and multi-query research remain independently
+gated.
 
-A fixed-provider development query adapter now validates the exact Wikipedia
-metadata-search request and response shape through an injected fixture
-transport. Fifteen security checks cover request tampering, duplicate keys,
+A fixed-provider query adapter validates the exact Wikipedia metadata-search
+request and response shape through an injected fixture transport. Fifteen
+security checks cover request tampering, duplicate keys,
 strict unused metadata, Unicode controls, credential-like and
 active queries, result and response budgets, non-finite JSON, model-supplied
-links, duplicate identifiers, timestamps, and disabled authority. It imports
-no network client. Separate contracts now preserve self-hosted, bounded
+links, duplicate identifiers, timestamps, and disabled model authority. The
+server invokes it only through the approved native transport. Separate
+contracts preserve self-hosted, bounded
 multi-query, semantic-embedding, encrypted-library, audio, and video gates
 without selecting or admitting an implementation.
 

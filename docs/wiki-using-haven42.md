@@ -41,6 +41,23 @@ Haven 42 recommends only choices that match its safety and compatibility
 records. Advanced users can still try another installed model. See [[Choose a
 Model|Local-Model-Selection]].
 
+## Research Wikipedia
+
+Chat includes a manual **Research Wikipedia** disclosure. Enter search words,
+then review the exact words and provider before choosing **Approve once**.
+Nothing is sent before that approval. Results show source titles and complete
+destinations as inactive text; Haven 42 does not open them.
+
+Reading a result requires a second review showing the selected title and exact
+destination. If approved, Haven 42 displays only bounded inert page text. The
+page cannot run code, load remote media, create a link, download a file, or
+start another search. The local model cannot invoke or approve either request,
+and retrieved text is not yet sent to the model.
+
+Research state stays in memory. **New task** clears its approvals, results,
+page text, and citations. See [[Privacy|Privacy-Policy]] for the network and
+retention boundary.
+
 ## AI server and computer settings
 
 The AI server panel shows where Ollama is running and warns when a

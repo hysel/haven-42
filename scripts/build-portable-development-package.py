@@ -56,6 +56,11 @@ RESOURCE_PATHS = (
     "config/alpha-2-runtime-compatibility.json",
     "config/linux-runtime-artifact-review.json",
     "config/linux-model-artifact-review.json",
+    "config/web-research-query-adapter.json",
+    "config/web-research-native-query-transport.json",
+    "config/web-research-native-page-transport.json",
+    "config/web-research-page-foundation.json",
+    "scripts/validate-web-research-query-adapter.py",
 )
 ALLOWED_PACKAGE_ENTRIES = {
     "haven42",

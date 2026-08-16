@@ -151,11 +151,15 @@ ranking, source/chunk disclosure, removal, and failure cleanup. It has no
 runtime route, UI control, provider payload, path access, parser, network
 operation, embedding, temporary file, or persistent index.
 
-Controlled web research is also inactive. Its offline contract and hostile
-fixtures deny runtime routes, model tools, DNS, URL fetching, browser
-automation, page execution, downloads, persistence, and follow-up queries.
-The admitted fixed-origin model-catalog search does not grant general research
-authority.
+Chat now includes one manual, fixed-provider research path. A person can review
+and approve one exact English Wikipedia metadata search, inspect inactive source
+destinations, and separately approve reading one selected page as inert text.
+The engine owns the fixed destination, DNS revalidation, pinned TLS connection,
+response limits, citation identity, and memory cleanup. Models cannot invoke or
+approve research, choose URLs, navigate, download, persist results, or trigger
+follow-up searches. Retrieved text is not yet sent to a model. See
+`docs/controlled-web-research-foundation.md` for the exact boundary and open
+package and assistive-technology gates.
 
 Conversation history is inactive as well. Its default-deny contract,
 non-executable logical SQLite-compatible schema, pure planners, and hostile

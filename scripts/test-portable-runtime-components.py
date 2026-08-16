@@ -65,6 +65,8 @@ def main() -> int:
         record("DEVELOPMENT-BUILD.txt"),
         record("_internal/package/resource-integrity.json"),
         record("_internal/config/windows-alpha-2-contract.json"),
+        record("_internal/config/web-research-native-page-transport.json"),
+        record("_internal/scripts/validate-web-research-query-adapter.py"),
         record("_internal/python314.dll"),
         record("_internal/_ssl.pyd"),
         record("_internal/base_library.zip"),

@@ -29,7 +29,7 @@
     "25": "research",
     "26": "evidence-expanded",
     "27": "in-progress",
-    "28": "proposed"
+    "28": "in-progress"
   },
   "documents": {
     "ROADMAP.md": {
@@ -76,7 +76,7 @@
       "Milestone 24 has partial external Linux CUDA audio evidence",
       "Milestone 26 now has",
       "Milestone 27 now",
-      "Milestone 28 defines proposed"
+      "Milestone 28 now admits"
     ],
     "ROADMAP.md": [
       "The current admitted attachment slice passes source and native packaged browser smoke on Windows, Linux, and macOS.",

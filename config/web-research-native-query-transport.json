@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "contractId": "haven42.web-research.native-query-transport",
-  "status": "development-owner-approved-query-only",
+  "status": "owner-approved-fixed-provider-runtime",
   "adapterContract": "config/web-research-query-adapter.json",
   "providerId": "wikipedia-query",
   "network": {
@@ -24,13 +24,13 @@
   "authority": {
     "explicitDevelopmentCliAllowed": true,
     "queryNetworkAllowed": true,
-    "runtimeRouteAllowed": false,
-    "uiControlAllowed": false,
+    "runtimeRouteAllowed": true,
+    "uiControlAllowed": true,
     "modelToolAllowed": false,
-    "pageRetrievalAllowed": false,
+    "pageRetrievalAllowed": true,
     "activeNavigationAllowed": false,
     "persistenceAllowed": false,
     "automaticFollowUpAllowed": false,
-    "packageAdmissionAllowed": false
+    "packageAdmissionAllowed": true
   }
 }

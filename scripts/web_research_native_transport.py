@@ -5,35 +5,24 @@ from __future__ import annotations
 
 import argparse
 import http.client
-import importlib.util
 import ipaddress
 import json
 from pathlib import Path
 import socket
 import ssl
+import sys
 import urllib.parse
 from typing import Callable
 
+import web_research_query_adapter as ADAPTER
 
-ROOT = Path(__file__).resolve().parents[1]
+
+ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))
 CONTRACT_PATH = ROOT / "config" / "web-research-native-query-transport.json"
-ADAPTER_PATH = ROOT / "scripts" / "validate-web-research-query-adapter.py"
 
 
 class NativeQueryError(ValueError):
     pass
-
-
-def _load_adapter():
-    spec = importlib.util.spec_from_file_location("haven42_web_query_adapter", ADAPTER_PATH)
-    if spec is None or spec.loader is None:
-        raise NativeQueryError("query-adapter-unavailable")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-ADAPTER = _load_adapter()
 
 
 def load_contract(path: Path = CONTRACT_PATH) -> dict:
@@ -45,17 +34,22 @@ def load_contract(path: Path = CONTRACT_PATH) -> dict:
     network = value.get("network", {})
     if (
         value.get("schemaVersion") != 1
-        or value.get("status") != "development-owner-approved-query-only"
+        or value.get("status") != "owner-approved-fixed-provider-runtime"
         or value.get("providerId") != "wikipedia-query"
         or authority.get("explicitDevelopmentCliAllowed") is not True
         or authority.get("queryNetworkAllowed") is not True
         or any(
+            authority.get(name) is not True
+            for name in (
+                "runtimeRouteAllowed", "uiControlAllowed",
+                "pageRetrievalAllowed", "packageAdmissionAllowed",
+            )
+        )
+        or any(
             authority.get(name) is not False
             for name in (
-                "runtimeRouteAllowed", "uiControlAllowed", "modelToolAllowed",
-                "pageRetrievalAllowed", "activeNavigationAllowed",
+                "modelToolAllowed", "activeNavigationAllowed",
                 "persistenceAllowed", "automaticFollowUpAllowed",
-                "packageAdmissionAllowed",
             )
         )
         or network.get("fixedHost") != "en.wikipedia.org"
