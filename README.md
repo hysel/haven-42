@@ -34,10 +34,12 @@ section is the authoritative capability list.
 | Models | A suitable local model is recommended from tested evidence; advanced users can choose another installed model. Public catalog search does not download a model. |
 | Context | Selected, bounded text, source-code, structured-text, and PNG screenshot attachments. Haven 42 never executes an attachment. |
 | Local providers | A managed local Ollama setup or a private Ollama server. One Linux ComfyUI/SDXL image path has passed testing; other media paths remain gated. |
+| Web research | The development source has a manual fixed-Wikipedia search and separately approved inert page read. Models cannot browse, follow links, or start searches. Exact package parity remains open. |
 
 Music and video are not available in the product. Persistent conversation
-history, PDF and Office parsing, folder scanning, web research, signed
-installers, and active online updates are not shipped.
+history, PDF and Office parsing, folder scanning, general model browsing,
+signed installers, and active online updates are not shipped. The published
+Alpha 1 package predates the development web-research slice above.
 
 ## Quick start
 

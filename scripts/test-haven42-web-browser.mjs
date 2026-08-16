@@ -287,6 +287,26 @@ class Cdp {
   close() { this.socket.close(); }
 }
 
+async function trustedClick(cdp, selector) {
+  const point = await cdp.evaluate(`(() => {
+    const element = document.querySelector(${JSON.stringify(selector)});
+    const rect = element.getBoundingClientRect();
+    return {x: rect.left + rect.width / 2, y: rect.top + rect.height / 2};
+  })()`);
+  await cdp.call("Input.dispatchMouseEvent", {
+    type: "mouseMoved", x: point.x, y: point.y,
+    button: "none", buttons: 0, pointerType: "mouse",
+  });
+  await cdp.call("Input.dispatchMouseEvent", {
+    type: "mousePressed", x: point.x, y: point.y,
+    button: "left", buttons: 1, clickCount: 1, pointerType: "mouse",
+  });
+  await cdp.call("Input.dispatchMouseEvent", {
+    type: "mouseReleased", x: point.x, y: point.y,
+    button: "left", buttons: 0, clickCount: 1, pointerType: "mouse",
+  });
+}
+
 async function connectPageCdp(debugPort, origin, browser, browserLaunchError) {
   return waitFor(async () => {
     if (browserLaunchError()) throw browserLaunchError();
@@ -962,7 +982,7 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== 1 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 2 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
   const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
@@ -995,7 +1015,11 @@ try {
   })()`);
   if (!manualTour.visible || !manualTour.focused) throw new Error(`manual-section-tour:${JSON.stringify(manualTour)}`);
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
-  if (Object.values(allTourState).length !== 5 || Object.values(allTourState).some((value) => value !== 1)) {
+  if (
+    Object.values(allTourState).length !== 5
+    || allTourState.chat !== 2
+    || Object.entries(allTourState).some(([section, value]) => section !== "chat" && value !== 1)
+  ) {
     throw new Error(`section-tour-state:${JSON.stringify(allTourState)}`);
   }
   const helpAlignment = await cdp.evaluate(`(() => {
@@ -1036,7 +1060,7 @@ try {
       stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
     };
   })()`);
-  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 1) {
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 2) {
     throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
   }
   checks += 41;
@@ -2951,7 +2975,7 @@ try {
       citations,
       exactSourceAccounting: true,
       modelSuppliedLinksAccepted: false,
-      runtimeAdmissionGranted: false,
+      runtimeAdmissionGranted: true,
     });
     const valid = bundle([
       citation('a', 'Local artificial intelligence', 12345),
@@ -2976,7 +3000,7 @@ try {
     const invalidBundles = [
       {...valid, unexpected: true},
       {...valid, modelSuppliedLinksAccepted: true},
-      {...valid, runtimeAdmissionGranted: true},
+      {...valid, runtimeAdmissionGranted: false},
       bundle([]),
       bundle(Array.from({length: 11}, (_, index) => citation((index % 10).toString(16), 'Source ' + index, index + 1))),
       bundle([{...citation('c', 'Active', 3), activeNavigationAllowed: true}]),
@@ -3249,6 +3273,130 @@ try {
   ) throw new Error(`research-review-approval:${JSON.stringify(researchReviewApproval)}`);
   checks += 9;
   trace("research-approval-review-verified");
+  if (!packagedExecutable) {
+    await cdp.evaluate(`(() => {
+      document.querySelector('#home-nav').click();
+      document.querySelector('#research-tools').open = true;
+      document.querySelector('#research-query').value = 'local artificial intelligence';
+      document.querySelector('#research-query-form').requestSubmit();
+    })()`);
+    await waitFor(() => cdp.evaluate("!document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    const preparedResearch = await cdp.evaluate(`({
+      kind: document.querySelector('#research-review-kind').textContent,
+      query: document.querySelector('#research-review-query').textContent,
+      focused: document.activeElement.id,
+      backgroundInert: document.querySelector('.shell').inert,
+      status: document.querySelector('#research-review-status').textContent,
+      resultsHidden: document.querySelector('#research-results').classList.contains('hidden'),
+    })`);
+    if (
+      preparedResearch.kind !== "Search Wikipedia"
+      || preparedResearch.query !== "local artificial intelligence"
+      || preparedResearch.focused !== "research-review-dialog"
+      || !preparedResearch.backgroundInert
+      || !preparedResearch.status.includes("Nothing has been sent")
+      || !preparedResearch.resultsHidden
+    ) throw new Error(`product-research-preparation:${JSON.stringify(preparedResearch)}`);
+    await cdp.evaluate("document.querySelector('#research-review-cancel').click()");
+    await waitFor(() => cdp.evaluate("document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    const cancelledResearch = await cdp.evaluate(`({
+      status: document.querySelector('#research-query-status').textContent,
+      resultsHidden: document.querySelector('#research-results').classList.contains('hidden'),
+    })`);
+    if (!cancelledResearch.status.includes("cancelled") || !cancelledResearch.resultsHidden) {
+      throw new Error(`product-research-cancel:${JSON.stringify(cancelledResearch)}`);
+    }
+    await cdp.evaluate("document.querySelector('#research-query-form').requestSubmit()");
+    await waitFor(() => cdp.evaluate("!document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    await trustedClick(cdp, "#research-review-approve");
+    await waitFor(() => cdp.evaluate("!document.querySelector('#research-results').classList.contains('hidden')"));
+    const queryResearch = await cdp.evaluate(`({
+      resultCount: document.querySelectorAll('#research-result-list .research-result').length,
+      activeLinks: document.querySelectorAll('#research-results a').length,
+      reviewButtons: document.querySelectorAll('#research-result-list button').length,
+      title: document.querySelector('#research-result-list strong').textContent,
+      destination: document.querySelector('#research-result-list code').textContent,
+      status: document.querySelector('#research-query-status').textContent,
+      sourceCount: document.querySelectorAll('#research-source-list .trusted-citation').length,
+      pageHidden: document.querySelector('#research-page').classList.contains('hidden'),
+    })`);
+    if (
+      queryResearch.resultCount !== 1
+      || queryResearch.activeLinks !== 0
+      || queryResearch.reviewButtons !== 1
+      || queryResearch.title !== "Local artificial intelligence"
+      || queryResearch.destination !== "Destination: https://en.wikipedia.org/?curid=42"
+      || !queryResearch.status.includes("Page contents have not been requested")
+      || queryResearch.sourceCount !== 1
+      || !queryResearch.pageHidden
+    ) throw new Error(`product-research-query:${JSON.stringify(queryResearch)}`);
+    await cdp.evaluate("document.querySelector('#research-result-list button').click()");
+    await waitFor(() => cdp.evaluate("!document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    const preparedPage = await cdp.evaluate(`({
+      kind: document.querySelector('#research-review-kind').textContent,
+      source: document.querySelector('#research-review-source').textContent,
+      destination: document.querySelector('#research-review-destination').textContent,
+      rowsVisible: !document.querySelector('#research-review-source-row').classList.contains('hidden')
+        && !document.querySelector('#research-review-destination-row').classList.contains('hidden'),
+    })`);
+    if (
+      preparedPage.kind !== "Read one selected Wikipedia page"
+      || preparedPage.source !== "Local artificial intelligence"
+      || preparedPage.destination !== "https://en.wikipedia.org/?curid=42"
+      || !preparedPage.rowsVisible
+    ) throw new Error(`product-research-page-preparation:${JSON.stringify(preparedPage)}`);
+    const pageApprovalTarget = await cdp.evaluate(`(() => {
+      const element = document.querySelector('#research-review-approve');
+      const rect = element.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      return {
+        disabled: element.disabled,
+        inert: element.inert,
+        rect: {left: rect.left, top: rect.top, width: rect.width, height: rect.height},
+        topElement: document.elementFromPoint(x, y)?.id || null,
+        viewport: {width: innerWidth, height: innerHeight},
+      };
+    })()`);
+    if (
+      pageApprovalTarget.disabled
+      || pageApprovalTarget.inert
+      || pageApprovalTarget.topElement !== "research-review-approve"
+    ) throw new Error(`product-research-page-approval-target:${JSON.stringify(pageApprovalTarget)}`);
+    await trustedClick(cdp, "#research-review-approve");
+    await waitFor(() => cdp.evaluate("document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    await waitFor(() => cdp.evaluate(`(
+      !document.querySelector('#research-page').classList.contains('hidden')
+      || document.querySelector('#research-query-status').dataset.state === 'error'
+    )`));
+    const pageResearch = await cdp.evaluate(`({
+      hidden: document.querySelector('#research-page').classList.contains('hidden'),
+      title: document.querySelector('#research-page-title').textContent,
+      focused: document.activeElement.id,
+      paragraphs: [...document.querySelectorAll('#research-page-content p')].map((item) => item.textContent),
+      activeElements: document.querySelectorAll('#research-page-content :is(a, img, script, style, iframe, object, embed)').length,
+      destination: document.querySelector('#research-page-destination').textContent,
+      status: document.querySelector('#research-query-status').textContent,
+    })`);
+    if (
+      pageResearch.hidden
+      || pageResearch.title !== "Local artificial intelligence"
+      || pageResearch.focused !== "research-page-title"
+      || pageResearch.paragraphs.length !== 2
+      || !pageResearch.paragraphs[0].includes("user's device")
+      || pageResearch.activeElements !== 0
+      || !pageResearch.destination.includes("https://en.wikipedia.org/?curid=42")
+      || !pageResearch.status.includes("remain in memory")
+    ) throw new Error(`product-research-page:${JSON.stringify(pageResearch)}`);
+    await cdp.evaluate("document.querySelector('#new-task-button').click()");
+    await waitFor(() => cdp.evaluate(`(
+      document.querySelector('#research-results').classList.contains('hidden')
+      && document.querySelector('#research-page').classList.contains('hidden')
+      && document.querySelector('#research-query').value === ''
+    )`));
+    checks += 31;
+    trace("product-research-runtime-verified");
+  }
   const aboutAccessibilityLink = await cdp.evaluate(`(() => {
     const link = document.querySelector('#about-panel a[href="/accessibility"]');
     return link ? {text: link.textContent.trim(), href: link.getAttribute('href')} : null;
@@ -3281,7 +3429,7 @@ try {
     || accessibilityStatement.h1 !== 1
     || accessibilityStatement.main !== 1
     || accessibilityStatement.navigation !== 1
-    || !accessibilityStatement.lastReviewed.includes("August 15, 2026")
+    || !accessibilityStatement.lastReviewed.includes("August 16, 2026")
     || !accessibilityStatement.limitation.includes("not yet been manually tested")
     || accessibilityStatement.targetHeight < 44
     || Number.parseFloat(accessibilityStatement.outlineWidth) < 3

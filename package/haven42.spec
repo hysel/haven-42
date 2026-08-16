@@ -48,6 +48,11 @@ resources = [
     ("config/alpha-2-runtime-compatibility.json", "config"),
     ("config/linux-runtime-artifact-review.json", "config"),
     ("config/linux-model-artifact-review.json", "config"),
+    ("config/web-research-query-adapter.json", "config"),
+    ("config/web-research-native-query-transport.json", "config"),
+    ("config/web-research-native-page-transport.json", "config"),
+    ("config/web-research-page-foundation.json", "config"),
+    ("scripts/validate-web-research-query-adapter.py", "scripts"),
     ("package/resource-integrity.json", "package"),
 ]
 
@@ -59,7 +64,9 @@ a = Analysis(
     hiddenimports=[
         "alpha2_model_selector", "alpha2_runtime_compatibility", "alpha_platform", "diagnostic_logging", "electricity_rate_service", "linux_alpha",
         "linux_alpha_runtime", "linux_alpha_setup", "windows_alpha",
-        "windows_alpha_setup",
+        "windows_alpha_setup", "web_research_query_adapter",
+        "web_research_native_transport", "web_research_native_page_transport",
+        "offline_research_page_text",
     ],
     hookspath=[],
     hooksconfig={},

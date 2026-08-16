@@ -915,9 +915,9 @@ Invoke-PackTest "first-party text files end with exactly one newline" {
     Assert-True -Condition ($editorConfig -match '(?m)^insert_final_newline = true\r?$') -Message ".editorconfig should require a final newline."
 
     $textExtensions = @(".cfg", ".css", ".html", ".ini", ".js", ".json", ".md", ".mjs", ".ps1", ".py", ".sh", ".toml", ".tsv", ".txt", ".yaml", ".yml")
-    $trackedFiles = @(& git -C $repoRoot ls-files)
-    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Tracked-file discovery should succeed."
-    foreach ($relativePath in $trackedFiles) {
+    $firstPartyFiles = @(& git -C $repoRoot ls-files --cached --others --exclude-standard)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "First-party file discovery should succeed."
+    foreach ($relativePath in $firstPartyFiles) {
         if ($relativePath -like "package/licenses/*") {
             continue
         }
@@ -925,7 +925,11 @@ Invoke-PackTest "first-party text files end with exactly one newline" {
             continue
         }
 
-        $content = [System.IO.File]::ReadAllText((Join-Path $repoRoot $relativePath))
+        $absolutePath = Join-Path $repoRoot $relativePath
+        if (-not (Test-Path -LiteralPath $absolutePath -PathType Leaf)) {
+            continue
+        }
+        $content = [System.IO.File]::ReadAllText($absolutePath)
         Assert-True -Condition ($content.EndsWith("`n")) -Message "$relativePath should end with a newline."
         Assert-True -Condition ($content -notmatch '(\r?\n){2}$') -Message "$relativePath should not contain trailing blank lines."
     }
@@ -5409,7 +5413,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     $sourceReviewOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-source-attachment-review-fixtures.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Source-attachment review fixtures should be generated safely. Output: $($sourceReviewOutput -join ' ')"
     Assert-True -Condition (($sourceReviewOutput -join "`n") -match "25 checks") -Message "Source-attachment review fixture coverage should remain complete."
-    Assert-True -Condition ($researchContract.status -eq "proposed-offline-fixtures-only" -and -not $researchContract.activation.runtimeRouteAllowed -and -not $researchContract.activation.modelToolAllowed -and -not $researchContract.activation.networkAllowed -and -not $researchContract.activation.dnsResolutionAllowed -and -not $researchContract.activation.urlFetchAllowed -and -not $researchContract.activation.browserAutomationAllowed) -Message "Controlled web research must remain an offline contract with no route, model tool, or network authority."
+    Assert-True -Condition ($researchContract.status -eq "owner-approved-manual-fixed-provider-runtime" -and $researchContract.activation.runtimeRouteAllowed -and $researchContract.activation.uiControlAllowed -and $researchContract.activation.networkAllowed -and $researchContract.activation.dnsResolutionAllowed -and $researchContract.activation.urlFetchAllowed -and $researchContract.activation.fixedWikipediaProviderOnly -and $researchContract.activation.pageRetrievalAllowed -and $researchContract.activation.packageAdmissionAllowed -and -not $researchContract.activation.modelToolAllowed -and -not $researchContract.activation.automaticFollowUpAllowed -and -not $researchContract.activation.activeNavigationAllowed -and -not $researchContract.activation.persistenceAllowed -and -not $researchContract.activation.browserAutomationAllowed -and -not $researchContract.activation.pageExecutionAllowed -and -not $researchContract.activation.downloadAllowed) -Message "Controlled web research must admit only the manual fixed-Wikipedia query/page runtime while denying model tools, autonomous follow-up, active navigation, persistence, browser automation, page execution, and downloads."
     Assert-True -Condition ($policy.readiness.explicitUserActionRequired -and $policy.readiness.registeredReadOnlyProbesOnly -and -not $policy.readiness.rendererHardwareFactsAccepted -and -not $policy.readiness.setupPlansMayInstall) -Message "Readiness scanning and setup planning must remain explicit, engine-owned, and effect free."
     Assert-Equal -Actual (($policy.text.capabilityIds | Sort-Object) -join ",") -Expected "content.summarize,content.write,general.chat" -Message "Only the three admitted local text capabilities should be exposed."
     foreach ($wrapper in @("scripts/start-haven42-web.ps1", "scripts/start-haven42-web.linux.sh", "scripts/start-haven42-web.macos.sh", "scripts/start-haven42-web.shared.sh")) {
@@ -5452,7 +5456,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($imageEvidenceOutput.Output -match "9 hostile checks") -Message "Image-runtime inventory, notices, checksums, and SBOM evidence must remain deterministic, mutually consistent, path-safe, non-overwriting, and explicitly unfit for distribution."
     $roadmapLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-roadmap-closure-ledger.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Roadmap closure ledger tests should pass."
-    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "46 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
+    Assert-True -Condition (($roadmapLedgerOutput -join "`n") -match "45 exact open-item classifications") -Message "Every open roadmap item must have exactly one dependency classification."
     $localBatchLedgerOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-local-batch-task-ledger.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Recovered local-batch task ledger tests should pass."
     Assert-True -Condition (($localBatchLedgerOutput -join "`n") -match "374 exact tasks across 18 phases") -Message "The recovered conversation plan must retain all 374 stable task records."
@@ -5464,13 +5468,16 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($folderSelectionOutput.Output -match "16 security checks") -Message "Folder inspection must remain explicit, bounded, content-free, link-safe, type-safe, and unadmitted."
     $webQueryAdapterOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-query-adapter.py"))
     Assert-Equal -Actual $webQueryAdapterOutput.ExitCode -Expected 0 -Message "Web-research query-adapter security tests should pass. Output: $($webQueryAdapterOutput.Output)"
-    Assert-True -Condition ($webQueryAdapterOutput.Output -match "15 security checks") -Message "The query adapter must remain fixed-provider, bounded, runtime-inactive, and unable to accept model links."
+    Assert-True -Condition ($webQueryAdapterOutput.Output -match "16 security checks") -Message "The query adapter must remain fixed-provider, bounded, stable across provider ranking changes, and unable to accept model links."
     $webNativeTransportOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-native-transport.py"))
     Assert-Equal -Actual $webNativeTransportOutput.ExitCode -Expected 0 -Message "Native web-research transport security tests should pass. Output: $($webNativeTransportOutput.Output)"
-    Assert-True -Condition ($webNativeTransportOutput.Output -match "21 offline security checks") -Message "The development query transport must remain fixed-host, TLS-validated, DNS-revalidated, public-address-pinned, uncompressed, bounded, and outside runtime and package authority."
+    Assert-True -Condition ($webNativeTransportOutput.Output -match "23 offline security checks") -Message "The fixed-provider query transport must remain fixed-host, TLS-validated, DNS-revalidated, public-address-pinned, uncompressed, bounded, package-admitted, and unavailable to models or automatic follow-up."
     $webNativePageOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-native-page-transport.py"))
     Assert-Equal -Actual $webNativePageOutput.ExitCode -Expected 0 -Message "Native selected-page transport security tests should pass. Output: $($webNativePageOutput.Output)"
-    Assert-True -Condition ($webNativePageOutput.Output -match "41 offline security checks") -Message "The development selected-page transport must remain citation-bound, fixed-host, DNS-revalidated, pinned, bounded, inert, and outside runtime, model-tool, UI, file, follow-up, and package authority."
+    Assert-True -Condition ($webNativePageOutput.Output -match "41 offline security checks") -Message "The fixed-provider selected-page transport must remain citation-bound, fixed-host, DNS-revalidated, pinned, bounded, inert, package-admitted, and unable to grant model-tool, active-navigation, file, page-execution, or follow-up authority."
+    $webRuntimeOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-runtime.py"))
+    Assert-Equal -Actual $webRuntimeOutput.ExitCode -Expected 0 -Message "Product web-research runtime hostile tests should pass. Output: $($webRuntimeOutput.Output)"
+    Assert-True -Condition ($webRuntimeOutput.Output -match "40 hostile offline checks") -Message "The product research runtime must keep exact review, single-use approval, fixed-provider validation, inert content, memory cleanup, and protected local API gates fail closed."
     $webTransportGuardOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-transport-guard.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research transport-guard tests should pass."
     Assert-True -Condition (($webTransportGuardOutput -join "`n") -match "25 hostile and exclusion checks") -Message "Future transport receipts must enforce destination, DNS, rebinding, redirect, content, time, and size boundaries without network authority."
@@ -5557,16 +5564,16 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($researchBoundaryOutput -join "`n") -match "28 checks") -Message "Research query/result/citation validation must remain fixed-provider, inert, network-free, and runtime-unadmitted."
     $researchPageOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-page-text.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research page-text hostile tests should pass."
-    Assert-True -Condition (($researchPageOutput -join "`n") -match "26 checks") -Message "Research page text must remain caller-bytes-only, structurally bounded, inert, network-free, and runtime-unadmitted."
+    Assert-True -Condition (($researchPageOutput -join "`n") -match "27 checks") -Message "Research page text must remain structurally bounded, inert, network-free by itself, and packaged only through the fixed selected-page transport."
     $researchSynthesisOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-cited-synthesis.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline cited-synthesis hostile tests should pass."
     Assert-True -Condition (($researchSynthesisOutput -join "`n") -match "26 checks") -Message "Research synthesis must remain source-bound, exactly cited, link-free, effect-free, and runtime-unadmitted."
     $trustedCitationOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-web-research-trusted-citation-renderer.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Trusted citation renderer foundation tests should pass."
-    Assert-True -Condition (($trustedCitationOutput -join "`n") -match "39 checks") -Message "Trusted citations must remain exact, text-only, destination-disclosed, accessible, memory-only, inactive, and unable to gain network, navigation, model-tool, or persistence authority."
+    Assert-True -Condition (($trustedCitationOutput -join "`n") -match "40 checks") -Message "Trusted citations must remain exact, text-only, destination-disclosed, accessible, memory-only, runtime-admitted only from the fixed provider, and unable to gain navigation, model-tool, or persistence authority."
     $researchReviewOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-web-research-approval-review.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Research approval review foundation tests should pass."
-    Assert-True -Condition (($researchReviewOutput -join "`n") -match "checks") -Message "Research review must remain explicit, accessible, single-use, memory-only, effect-free, dormant, and unable to gain network, model-tool, navigation, or persistence authority."
+    Assert-True -Condition (($researchReviewOutput -join "`n") -match "64 checks") -Message "Research review must remain explicit, accessible, single-use, memory-only, and able to start only the exact approved fixed-provider request while denying model-tool, navigation, download, follow-up, and persistence authority."
     Assert-True -Condition ($wikiMap -match "docs/local-web-mvp\.md" -and $wikiMap -match "docs/writing-model-evaluation\.md" -and $wikiMap -match "examples/blind-writing-quality-review\.md" -and $wikiMap -match "docs/local-image-runtime-license-review\.md" -and $wikiMap -match "docs/restricted-parser-worker-foundation\.md" -and $wikiMap -match "docs/pdf-production-isolation\.md" -and $wikiMap -match "examples/restricted-pdf-worker-validation\.md" -and $wikiMap -match "examples/complex-document-container-validation\.md" -and $wikiMap -match "examples/complex-document-semantic-validation\.md" -and $wikiMap -match "examples/restricted-pdf-native-validation\.md" -and $wikiMap -match "docs/project-status-consistency\.md" -and $wikiMap -match "docs/controlled-web-research-foundation\.md") -Message "Local-web, writing-model, image-runtime license, restricted-parser, status-consistency, and controlled-research guidance and evidence should be mapped to the wiki."
 }
 

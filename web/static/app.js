@@ -79,7 +79,7 @@ const SECTION_TOUR_STORAGE_KEY = "haven42.section-tours.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
-    revision: 1,
+    revision: 2,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
@@ -87,8 +87,8 @@ const SECTION_TOURS = Object.freeze({
       { target: ".task-mode-select", title: "Choose what you want to do", description: "Leave this on Recommended and Haven 42 will choose Chat, Write, or Summarize from your request. You can also choose a task yourself." },
       { target: ".model-select", title: "Choose an AI model", description: "Haven 42 recommends a compatible installed model for each task. Warnings here explain when another model has not been tested for the selected task." },
       { target: ".composer-surface", title: "Write and attach files", description: "Type your request here, press Enter to send, or use Shift+Enter for a new line. Attachments stay in memory for the current task, and the Keep setting controls prompt recall for this session." },
-      { target: ".status-glance-stats", title: "See live resource use", description: "This compact strip shows CPU, memory, graphics, and response speed while Haven 42 is open. It is session information, not billing data." },
-      { target: ".status-glance-connection", title: "Check your connection", description: "This status shows which AI server and model are active. “This computer” means requests stay on this device; a private-network server is a separate computer you chose." },
+      { target: "#research-tools", title: "Research with explicit approval", description: "Search Wikipedia without giving the AI permission to browse. Haven 42 shows exactly what will be sent before every search or page request, and keeps the returned text only in memory." },
+      { target: ".status-glance", title: "Check connection and resources", description: "This quiet status area shows the active AI server, model, CPU, memory, graphics, and response speed. “This computer” means AI requests stay on this device." },
     ]),
   }),
   models: Object.freeze({
@@ -192,6 +192,7 @@ const state = {
   lastMetricsAnnouncementAt: 0,
   electricityRateProfile: null,
   energyEstimate: null,
+  researchResultId: null,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -993,6 +994,18 @@ function humanError(error) {
     "invalid-model-search-query": "Enter a short model name using letters, numbers, spaces, dots, dashes, underscores, or colons.",
     "model-catalog-search-failed": "The public Ollama catalog could not be reached.",
     "invalid-model-catalog-response": "The public catalog returned an invalid response, so Haven 42 rejected it.",
+    "research-query-size": "Enter between 1 and 256 characters to research.",
+    "research-query-active-content": "Remove markup or control characters from the research words.",
+    "research-query-credential-like": "Remove passwords, tokens, or API-key-like text before researching.",
+    "research-approval-invalid": "That one-time approval expired or was already used. Review the request again.",
+    "research-selection-invalid": "That result is no longer available in memory. Run the search again.",
+    "research-provider-transport-failed": "Wikipedia could not be reached securely. Nothing was saved; try again later.",
+    "research-page-provider-transport-failed": "The approved Wikipedia page could not be reached securely. Nothing was saved.",
+    "research-provider-response-invalid": "Wikipedia returned an unexpected response, so Haven 42 rejected it.",
+    "research-review-unavailable": "Close the open setup, help, or review window before starting web research.",
+    "invalid-research-preparation": "Haven 42 could not verify the research approval request, so nothing was sent.",
+    "invalid-research-query-result": "Haven 42 rejected an unexpected research result. Nothing was saved.",
+    "invalid-research-page-result": "Haven 42 rejected unexpected page content. Nothing was saved.",
     "private-context-confirmation-required": "Confirm that the attached content may be sent to your private-network Ollama server.",
     "invalid-context-file-count": "Attach no more than five text files.",
     "invalid-context-file-name": "A selected filename is not supported.",
@@ -2996,7 +3009,7 @@ function validateTrustedCitationBundle(bundle) {
     || bundle.schemaVersion !== 1
     || bundle.exactSourceAccounting !== true
     || bundle.modelSuppliedLinksAccepted !== false
-    || bundle.runtimeAdmissionGranted !== false
+    || bundle.runtimeAdmissionGranted !== true
     || !Array.isArray(bundle.citations)
     || bundle.citations.length < 1
     || bundle.citations.length > 10
@@ -3010,7 +3023,7 @@ function validateTrustedCitationBundle(bundle) {
       || !/^source-[0-9a-f]{20}$/u.test(citation.citationId)
       || !isTrustedCitationText(citation.title, 200)
       || citation.displayDomain !== "en.wikipedia.org"
-      || !/^https:\/\/en\.wikipedia\.org\/\?curid=[1-9][0-9]{0,19}$/u.test(citation.destination)
+      || !/^https:\/\/en\.wikipedia\.org\/\?curid=[1-9][0-9]{0,18}$/u.test(citation.destination)
       || citation.destinationDisclosureRequired !== true
       || citation.activeNavigationAllowed !== false
       || citationIds.has(citation.citationId)
@@ -3066,6 +3079,7 @@ const RESEARCH_REVIEW_FIELDS = Object.freeze([
 ]);
 let pendingResearchReview = null;
 let pendingResearchDecision = null;
+let pendingResearchExecution = null;
 let researchReviewReturnFocus = null;
 let researchReviewInertState = [];
 
@@ -3091,7 +3105,7 @@ function validateResearchReviewBundle(bundle) {
       citations: [bundle.citation],
       exactSourceAccounting: true,
       modelSuppliedLinksAccepted: false,
-      runtimeAdmissionGranted: false,
+      runtimeAdmissionGranted: true,
     });
     if (!citations) return null;
   }
@@ -3115,6 +3129,7 @@ function setResearchReviewBackgroundInert(active) {
 
 function closeResearchApprovalReview(decision = null) {
   const review = pendingResearchReview;
+  const execution = pendingResearchExecution;
   const layer = byId("research-review-layer");
   const wasOpen = review !== null || !layer.classList.contains("hidden");
   if (review && decision) {
@@ -3124,10 +3139,11 @@ function closeResearchApprovalReview(decision = null) {
       kind: review.kind,
       decision,
       singleUse: true,
-      networkStarted: false,
+      networkStarted: decision === "approved" && execution !== null,
     });
   }
   pendingResearchReview = null;
+  pendingResearchExecution = null;
   layer.classList.add("hidden");
   layer.setAttribute("aria-hidden", "true");
   byId("research-review-status").textContent = "";
@@ -3144,17 +3160,31 @@ function closeResearchApprovalReview(decision = null) {
     : byId("home-nav");
   researchReviewReturnFocus = null;
   if (!target.inert) target.focus({ preventScroll: true });
+  if (decision === "cancelled" && execution) {
+    byId("research-query-status").textContent = "Research request cancelled. Nothing was sent.";
+    byId("research-query-status").removeAttribute("data-state");
+  }
 }
 
 function clearResearchApprovalReview() {
   pendingResearchDecision = null;
+  pendingResearchExecution = null;
   closeResearchApprovalReview();
 }
 
-function openResearchApprovalReview(bundle, returnFocus = document.activeElement) {
+function openResearchApprovalReview(bundle, returnFocus = document.activeElement, execution = null) {
   const review = validateResearchReviewBundle(bundle);
   if (
     !review
+    || (
+      execution !== null
+      && (
+        !hasExactObjectKeys(execution, ["approvalToken", "kind"])
+        || !["query", "page"].includes(execution.kind)
+        || !/^[0-9a-f]{32}$/u.test(execution.approvalToken)
+        || execution.kind !== review.kind
+      )
+    )
     || !byId("setup-wizard").classList.contains("hidden")
     || !byId("section-tour-layer").classList.contains("hidden")
     || !byId("research-review-layer").classList.contains("hidden")
@@ -3164,6 +3194,7 @@ function openResearchApprovalReview(bundle, returnFocus = document.activeElement
   }
   pendingResearchDecision = null;
   pendingResearchReview = review;
+  pendingResearchExecution = execution === null ? null : Object.freeze({ ...execution });
   researchReviewReturnFocus = returnFocus instanceof HTMLElement ? returnFocus : byId("home-nav");
   byId("research-review-kind").textContent = review.kind === "query"
     ? "Search Wikipedia"
@@ -3196,7 +3227,9 @@ byId("research-review-approve").addEventListener("click", (event) => {
     byId("research-review-status").textContent = "Approval requires a direct user action.";
     return;
   }
+  const execution = pendingResearchExecution;
   closeResearchApprovalReview("approved");
+  if (execution) void executeResearchApproval(execution);
 });
 byId("research-review-layer").addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
@@ -3224,6 +3257,253 @@ window.Haven42ResearchApprovalReview = Object.freeze({
   clear: clearResearchApprovalReview,
   consumeDecision: consumeResearchApprovalDecision,
   open: openResearchApprovalReview,
+});
+
+const RESEARCH_PREPARATION_FIELDS = Object.freeze([
+  "approvalToken", "expiresInSeconds", "kind", "persisted",
+  "review", "schemaVersion", "singleUse",
+]);
+const RESEARCH_QUERY_RESULT_FIELDS = Object.freeze([
+  "additionalResultsAvailable", "automaticFollowUpAllowed", "citations",
+  "contentPersisted", "kind", "modelToolAllowed", "networkUsed",
+  "normalizedQuery", "queryPersisted", "resultId", "schemaVersion", "status",
+]);
+const RESEARCH_PAGE_RESULT_FIELDS = Object.freeze([
+  "activeNavigationAllowed", "automaticFollowUpAllowed", "contentCharacters",
+  "contentPersisted", "kind", "modelToolAllowed", "networkUsed",
+  "normalizedQuery", "pageExecutionAllowed", "schemaVersion", "segments",
+  "source", "status",
+]);
+
+function validateResearchPreparation(value, kind) {
+  const review = hasExactObjectKeys(value, RESEARCH_PREPARATION_FIELDS)
+    ? validateResearchReviewBundle(value.review)
+    : null;
+  if (
+    value?.schemaVersion !== 1
+    || value?.kind !== "research-approval-preparation"
+    || !/^[0-9a-f]{32}$/u.test(value?.approvalToken || "")
+    || value?.expiresInSeconds !== 300
+    || value?.singleUse !== true
+    || value?.persisted !== false
+    || !review
+    || review.kind !== kind
+  ) throw new Error("invalid-research-preparation");
+  return Object.freeze({ ...value, review });
+}
+
+function validateResearchCitationBundleAllowEmpty(bundle) {
+  if (
+    !hasExactObjectKeys(bundle, TRUSTED_CITATION_BUNDLE_FIELDS)
+    || bundle?.schemaVersion !== 1
+    || bundle?.exactSourceAccounting !== true
+    || bundle?.modelSuppliedLinksAccepted !== false
+    || bundle?.runtimeAdmissionGranted !== true
+    || !Array.isArray(bundle?.citations)
+    || bundle.citations.length > 10
+  ) return null;
+  return bundle.citations.length === 0 ? [] : validateTrustedCitationBundle(bundle);
+}
+
+function clearResearchWorkspace() {
+  state.researchResultId = null;
+  byId("research-query").value = "";
+  byId("research-query-status").textContent = "";
+  byId("research-query-status").removeAttribute("data-state");
+  byId("research-result-list").replaceChildren();
+  byId("research-results").classList.add("hidden");
+  byId("research-page-title").textContent = "";
+  byId("research-page-destination").textContent = "";
+  byId("research-page-content").replaceChildren();
+  byId("research-page").classList.add("hidden");
+  byId("research-tools").removeAttribute("aria-busy");
+  clearTrustedCitations();
+  clearResearchApprovalReview();
+}
+
+function renderResearchQueryResult(result) {
+  const citations = hasExactObjectKeys(result, RESEARCH_QUERY_RESULT_FIELDS)
+    ? validateResearchCitationBundleAllowEmpty(result.citations)
+    : null;
+  if (
+    citations === null
+    || result.schemaVersion !== 1
+    || result.kind !== "wikipedia-research-query-result"
+    || result.status !== "succeeded"
+    || !/^result-[0-9a-f]{20}$/u.test(result.resultId)
+    || !isTrustedCitationText(result.normalizedQuery, 256)
+    || typeof result.additionalResultsAvailable !== "boolean"
+    || result.networkUsed !== true
+    || result.queryPersisted !== false
+    || result.contentPersisted !== false
+    || result.modelToolAllowed !== false
+    || result.automaticFollowUpAllowed !== false
+  ) throw new Error("invalid-research-query-result");
+  state.researchResultId = result.resultId;
+  const list = byId("research-result-list");
+  list.replaceChildren();
+  byId("research-page").classList.add("hidden");
+  byId("research-page-content").replaceChildren();
+  if (citations.length === 0) {
+    clearTrustedCitations();
+    byId("research-results").classList.add("hidden");
+    byId("research-query-status").textContent = "No matching Wikipedia pages were found. Try different search words.";
+    return;
+  }
+  citations.forEach((citation) => {
+    const item = document.createElement("li");
+    item.className = "research-result";
+    const details = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = citation.title;
+    const domain = document.createElement("span");
+    domain.textContent = `Source: ${citation.displayDomain}`;
+    const destination = document.createElement("code");
+    destination.textContent = `Destination: ${citation.destination}`;
+    const review = document.createElement("button");
+    review.type = "button";
+    review.className = "button text-button";
+    review.textContent = "Review page request";
+    review.setAttribute("aria-label", `Review request to read ${citation.title}`);
+    review.addEventListener("click", () => {
+      void prepareResearchPage(citation.citationId, review);
+    });
+    details.append(title, domain, destination, review);
+    item.append(details);
+    list.append(item);
+  });
+  renderTrustedCitations(result.citations);
+  byId("research-results").classList.remove("hidden");
+  byId("research-query-status").textContent = `${citations.length} result${citations.length === 1 ? "" : "s"} received. Page contents have not been requested.`;
+  byId("research-results-title").focus({ preventScroll: true });
+}
+
+function renderResearchPageResult(result) {
+  const sources = hasExactObjectKeys(result, RESEARCH_PAGE_RESULT_FIELDS)
+    ? validateTrustedCitationBundle({
+      schemaVersion: 1,
+      citations: [result.source],
+      exactSourceAccounting: true,
+      modelSuppliedLinksAccepted: false,
+      runtimeAdmissionGranted: true,
+    })
+    : null;
+  if (
+    !sources
+    || result.schemaVersion !== 1
+    || result.kind !== "wikipedia-research-page-result"
+    || result.status !== "succeeded"
+    || !isTrustedCitationText(result.normalizedQuery, 256)
+    || !Array.isArray(result.segments)
+    || result.segments.length < 1
+    || result.segments.length > 500
+    || result.segments.some((item, index) => (
+      !hasExactObjectKeys(item, ["index", "text", "trust"])
+      || item.index !== index + 1
+      || !isTrustedCitationText(item.text, 100000)
+      || item.trust !== "untrusted-inert-text"
+    ))
+    || result.contentCharacters !== result.segments.reduce((sum, item) => sum + item.text.length, 0)
+    || result.contentCharacters > 100000
+    || result.networkUsed !== true
+    || result.contentPersisted !== false
+    || result.activeNavigationAllowed !== false
+    || result.pageExecutionAllowed !== false
+    || result.modelToolAllowed !== false
+    || result.automaticFollowUpAllowed !== false
+  ) throw new Error("invalid-research-page-result");
+  const content = byId("research-page-content");
+  content.replaceChildren(...result.segments.map((segment) => {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = segment.text;
+    return paragraph;
+  }));
+  byId("research-page-title").textContent = result.source.title;
+  byId("research-page-destination").textContent = `Source: ${result.source.displayDomain} · Destination: ${result.source.destination}`;
+  renderTrustedCitations({
+    schemaVersion: 1,
+    citations: [result.source],
+    exactSourceAccounting: true,
+    modelSuppliedLinksAccepted: false,
+    runtimeAdmissionGranted: true,
+  });
+  byId("research-page").classList.remove("hidden");
+  byId("research-query-status").textContent = `Selected page read. ${result.contentCharacters.toLocaleString()} characters remain in memory for this task.`;
+  byId("research-page-title").focus({ preventScroll: true });
+}
+
+async function executeResearchApproval(execution) {
+  const status = byId("research-query-status");
+  byId("research-tools").setAttribute("aria-busy", "true");
+  status.removeAttribute("data-state");
+  status.textContent = execution.kind === "query"
+    ? "Searching Wikipedia…"
+    : "Reading the approved Wikipedia page…";
+  try {
+    const result = await api(
+      execution.kind === "query"
+        ? "/api/research/query/execute"
+        : "/api/research/page/execute",
+      { approvalToken: execution.approvalToken, confirmed: true },
+    );
+    if (execution.kind === "query") renderResearchQueryResult(result);
+    else renderResearchPageResult(result);
+  } catch (error) {
+    status.dataset.state = "error";
+    status.textContent = humanError(error);
+  } finally {
+    byId("research-tools").removeAttribute("aria-busy");
+  }
+}
+
+async function prepareResearchPage(citationId, returnFocus) {
+  const status = byId("research-query-status");
+  status.removeAttribute("data-state");
+  status.textContent = "Preparing an exact page request for review…";
+  try {
+    const preparation = validateResearchPreparation(
+      await api("/api/research/page/prepare", {
+        resultId: state.researchResultId,
+        citationId,
+      }),
+      "page",
+    );
+    if (!openResearchApprovalReview(
+      preparation.review,
+      returnFocus,
+      { kind: "page", approvalToken: preparation.approvalToken },
+    ).opened) throw new Error("research-review-unavailable");
+  } catch (error) {
+    status.dataset.state = "error";
+    status.textContent = humanError(error);
+  }
+}
+
+byId("research-query-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const query = byId("research-query").value.trim();
+  const button = byId("research-query-button");
+  const status = byId("research-query-status");
+  if (!query) return;
+  button.disabled = true;
+  status.removeAttribute("data-state");
+  status.textContent = "Preparing the exact search words for review…";
+  try {
+    const preparation = validateResearchPreparation(
+      await api("/api/research/query/prepare", { query, resultLimit: 5 }),
+      "query",
+    );
+    if (!openResearchApprovalReview(
+      preparation.review,
+      button,
+      { kind: "query", approvalToken: preparation.approvalToken },
+    ).opened) throw new Error("research-review-unavailable");
+  } catch (error) {
+    status.dataset.state = "error";
+    status.textContent = humanError(error);
+  } finally {
+    button.disabled = false;
+  }
 });
 
 function updatePromptHistoryStatus() {
@@ -3734,8 +4014,7 @@ function resetTask() {
   hideModelSwitchPrompt();
   clearPromptHistory();
   clearContextFiles();
-  clearTrustedCitations();
-  clearResearchApprovalReview();
+  clearResearchWorkspace();
   resetContextImageLimit();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");
@@ -4368,7 +4647,10 @@ byId("new-task-button").addEventListener("click", async () => {
         ? "New task · active model unloaded"
         : "New task · model cleanup needs attention";
     }
-    await api("/api/alpha/session-reset", {});
+    await Promise.all([
+      api("/api/alpha/session-reset", {}),
+      api("/api/research/clear", {}),
+    ]);
     byId("alpha-tokens").textContent = "0";
     byId("alpha-speed").textContent = "Waiting";
   } catch (error) {

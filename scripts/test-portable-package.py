@@ -411,6 +411,10 @@ def test_hostile_packages(executable: Path) -> None:
         executable,
         lambda root: (root / "config/unexpected.json").write_text("{}", encoding="utf-8"),
     )
+    assert_integrity_failure(
+        executable,
+        lambda root: (root / "scripts/unexpected.py").write_text("pass\n", encoding="utf-8"),
+    )
 
     def traversal(root: Path) -> None:
         path = root / "package/resource-integrity.json"

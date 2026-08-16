@@ -16,8 +16,11 @@ The current admitted browser runtime keeps provider settings, optional
 provider API keys,
 prompts,
 conversation text, selected attachments, model responses, run metrics, and
-generated image bytes in process or browser memory. It does not persist them as
-Haven 42 configuration or conversation history. Closing Haven 42 clears that
+generated image bytes in process or browser memory. Manually approved Wikipedia
+search words, result metadata, selected-page text, citations, and single-use
+approval state also remain only in process or browser memory. Haven 42 does not
+persist them as configuration, conversation history, browser storage, logs, or
+telemetry. New task clears research state; closing Haven 42 clears all of this
 state.
 
 An API key is accepted only through the password field for a fixed Bearer or
@@ -52,14 +55,16 @@ Network access occurs only for an explicit feature the user activates:
 - sending a prompt or deliberately selected text/PNG attachment to that
   provider;
 - explicitly searching the fixed public Ollama model catalog;
+- separately reviewing and approving one exact fixed-provider English
+  Wikipedia search and one selected-page text request;
 - connecting to the admitted loopback ComfyUI image provider;
 - opening the fixed Haven 42 GitHub wiki link in the default browser; or
 - developer and maintainer operations such as GitHub Actions, dependency
   acquisition, or repository synchronization outside the end-user runtime.
 
 Haven 42 does not automatically download models, activate online updates,
-submit crash reports, browse arbitrary websites, or send prompts to Haven 42's
-maintainers.
+submit crash reports, browse arbitrary websites, follow research links, send
+retrieved page text to a model, or send prompts to Haven 42's maintainers.
 
 ## Files And Repositories
 
@@ -103,9 +108,10 @@ include credentials, private prompts, or personal files in a public issue.
 
 ## Future Features
 
-Persistent conversation storage, online updates, installers, controlled web
-research, and additional providers remain separately gated. Before activation,
-each feature requires an updated privacy review, explicit user controls,
-retention and deletion behavior, security testing, and documentation.
-The disabled research query prototype uses injected fixtures only and performs
-no network request.
+Persistent conversation storage, online updates, installers, cited model
+synthesis, additional research providers, multi-query research, and active
+citation navigation remain separately gated. Before activation, each feature
+requires an updated privacy review, explicit user controls, retention and
+deletion behavior, security testing, and documentation. The currently admitted
+research slice is limited to separately approved fixed-Wikipedia query and
+selected-page requests with memory-only results and no model-tool authority.

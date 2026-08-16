@@ -6,9 +6,10 @@ from __future__ import annotations
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import sys
 
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parents[1]))
 CONTRACT = json.loads(
     (ROOT / "config/web-research-page-foundation.json").read_text(encoding="utf-8")
 )

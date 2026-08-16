@@ -77,6 +77,24 @@ class QueryAdapterTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.QueryAdapterError, "response-page-id"):
             MODULE.validate_response(request, json.dumps(payload).encode())
 
+    def test_citation_identity_survives_provider_ranking_changes(self):
+        first = json.loads(response())
+        second_item = dict(first["query"]["search"][0])
+        second_item.update({"pageid": 43, "title": "Another safe result"})
+        first["query"]["searchinfo"]["totalhits"] = 2
+        first["query"]["search"] = [first["query"]["search"][0], second_item]
+        request = MODULE.build_request("safe", 2)
+        first_result = MODULE.validate_response(request, json.dumps(first).encode())
+        first["query"]["search"].reverse()
+        second_result = MODULE.validate_response(request, json.dumps(first).encode())
+        first_ids = {
+            item["destination"]: item["citationId"] for item in first_result["results"]
+        }
+        second_ids = {
+            item["destination"]: item["citationId"] for item in second_result["results"]
+        }
+        self.assertEqual(first_ids, second_ids)
+
     def test_transport_must_be_explicitly_injected(self):
         with self.assertRaisesRegex(MODULE.QueryAdapterError, "fixture-transport-required"):
             MODULE.exercise_fixture_transport("safe", 1, None)

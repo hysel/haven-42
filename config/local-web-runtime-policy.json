@@ -171,6 +171,20 @@
     "separateConfirmationControlRequired": false,
     "publicProviderAllowed": false
   },
+  "webResearch": {
+    "contract": "config/web-research-contract.json",
+    "status": "owner-approved-manual-fixed-provider-runtime",
+    "providerId": "wikipedia",
+    "runtimeRouteAllowed": true,
+    "uiControlAllowed": true,
+    "networkAllowed": true,
+    "pageRetrievalAllowed": true,
+    "packageAdmissionAllowed": true,
+    "modelToolAllowed": false,
+    "activeNavigationAllowed": false,
+    "automaticFollowUpAllowed": false,
+    "persistenceAllowed": false
+  },
   "inactiveFoundations": {
     "lexicalRetrieval": {
       "contract": "config/lexical-retrieval-contract.json",
@@ -178,13 +192,6 @@
       "runtimeRouteAllowed": false,
       "uiControlAllowed": false,
       "providerPayloadAllowed": false
-    },
-    "webResearch": {
-      "contract": "config/web-research-contract.json",
-      "status": "proposed-offline-fixtures-only",
-      "runtimeRouteAllowed": false,
-      "modelToolAllowed": false,
-      "networkAllowed": false
     },
     "conversationHistory": {
       "contract": "config/conversation-history-contract.json",

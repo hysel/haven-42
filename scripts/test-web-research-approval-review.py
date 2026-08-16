@@ -47,7 +47,7 @@ def main() -> None:
 
     require(contract["schemaVersion"] == 1, "schema")
     checks += 1
-    require(contract["status"] == "dormant-effect-free-explicit-review-ui", "status")
+    require(contract["status"] == "product-explicit-single-use-review-ui", "status")
     checks += 1
     require(contract["provider"] == {
         "id": "wikipedia",
@@ -72,7 +72,7 @@ def main() -> None:
     ):
         require(contract["interaction"][field] is True, f"interaction: {field}")
         checks += 1
-    require(contract["interaction"]["decisionStartsNetwork"] is False, "decision has no network effect")
+    require(contract["interaction"]["decisionStartsNetwork"] is True, "approved decision starts one request")
     checks += 1
     require(contract["accessibility"]["role"] == "dialog", "dialog role contract")
     checks += 1
@@ -92,7 +92,14 @@ def main() -> None:
         "telemetryAllowed": False,
     }, "lifecycle")
     checks += 1
-    require(all(value is False for value in contract["authority"].values()), "authority denied")
+    require(all(contract["authority"][name] is True for name in (
+        "productRouteAllowed", "networkAllowed", "runtimeAdmissionAllowed",
+    )), "product authority admitted")
+    checks += 1
+    require(all(contract["authority"][name] is False for name in (
+        "modelToolAllowed", "activeNavigationAllowed", "pageExecutionAllowed",
+        "automaticFollowUpAllowed", "downloadAllowed", "persistenceAllowed",
+    )), "dangerous authority denied")
     checks += 1
 
     parser = ReviewParser()
@@ -138,7 +145,7 @@ def main() -> None:
         "consumeResearchApprovalDecision", "clearResearchApprovalReview",
         "event.isTrusted", "element.inert = true", 'event.key === "Escape"',
         'event.key !== "Tab"', "focus({ preventScroll: true })",
-        "singleUse: true", "networkStarted: false",
+        "singleUse: true", 'networkStarted: decision === "approved" && execution !== null',
         "const wasOpen = review !== null", "if (!wasOpen)",
         '[first, byId("research-review-dialog")].includes(document.activeElement)',
         "citation: bundle.citation === null ? null : Object.freeze",
@@ -152,9 +159,9 @@ def main() -> None:
     checks += 1
     require("innerHTML" not in implementation, "no HTML injection")
     checks += 1
-    require(app.count("openResearchApprovalReview(") == 1, "no product invocation")
+    require(app.count("openResearchApprovalReview(") >= 3, "product invocation")
     checks += 1
-    require("clearTrustedCitations();\n  clearResearchApprovalReview();" in app, "new task cleanup")
+    require('api("/api/research/clear", {})' in app and "clearResearchWorkspace();" in app, "new task cleanup")
     checks += 1
 
     require(".research-review-layer" in styles and ".research-review-dialog" in styles, "dialog styles")

@@ -126,10 +126,12 @@ def refused(callable_, code: str) -> None:
 def main() -> int:
     checks = 0
     contract = MODULE.load_contract()
+    for name in ("runtimeRouteAllowed", "uiControlAllowed", "packageAdmissionAllowed"):
+        assert contract["authority"][name] is True
+        checks += 1
     for name in (
-        "runtimeRouteAllowed", "uiControlAllowed", "modelToolAllowed",
-        "persistenceAllowed", "automaticFollowUpAllowed", "pageExecutionAllowed",
-        "downloadAllowed", "packageAdmissionAllowed",
+        "modelToolAllowed", "persistenceAllowed", "automaticFollowUpAllowed",
+        "pageExecutionAllowed", "downloadAllowed",
     ):
         assert contract["authority"][name] is False
         checks += 1
@@ -272,8 +274,8 @@ def main() -> int:
         for path in (ROOT / "web").rglob("*")
         if path.is_file() and path.suffix in {".py", ".js", ".html", ".css", ".json"}
     )
-    assert "web_research_native_page_transport" not in runtime; checks += 1
-    assert "web_research_native_page_transport" not in (
+    assert "web_research_native_page_transport" in runtime; checks += 1
+    assert "web_research_native_page_transport" in (
         ROOT / "package/haven42.spec"
     ).read_text(encoding="utf-8"); checks += 1
 

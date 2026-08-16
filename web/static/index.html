@@ -209,6 +209,32 @@
             <ol id="research-source-list"></ol>
             <p class="sr-only" id="research-sources-status" role="status" aria-live="polite" aria-atomic="true"></p>
           </section>
+          <details class="research-tools" id="research-tools">
+            <summary><span>Research Wikipedia</span><small>Explicit approval required before every request</small></summary>
+            <div class="research-tools-body">
+              <p>Search one fixed public source without giving the AI permission to browse. Only the exact search words shown in the approval window are sent, and results stay in memory for this task.</p>
+              <form class="research-query-form" id="research-query-form">
+                <label for="research-query">What do you want to research?</label>
+                <div class="field-row">
+                  <input class="grow" id="research-query" maxlength="256" autocomplete="off" spellcheck="true" required aria-describedby="research-query-privacy">
+                  <button class="button secondary" id="research-query-button" type="submit">Review search</button>
+                </div>
+                <small id="research-query-privacy">Nothing is sent until you review and approve. Haven 42 does not save the search or page text.</small>
+              </form>
+              <p class="research-status" id="research-query-status" role="status" aria-live="polite" aria-atomic="true"></p>
+              <section class="research-results hidden" id="research-results" aria-labelledby="research-results-title">
+                <h3 id="research-results-title" tabindex="-1">Wikipedia results</h3>
+                <p>Selecting a result opens another approval window before Haven 42 reads that page.</p>
+                <ol id="research-result-list"></ol>
+              </section>
+              <article class="research-page hidden" id="research-page" aria-labelledby="research-page-title">
+                <p class="eyebrow">SELECTED SOURCE · UNTRUSTED TEXT</p>
+                <h3 id="research-page-title" tabindex="-1"></h3>
+                <p id="research-page-destination"></p>
+                <div class="research-page-content" id="research-page-content"></div>
+              </article>
+            </div>
+          </details>
           <div class="task-event hidden" id="task-event" role="status" aria-live="polite" aria-atomic="true"></div>
           <section class="alpha-metrics" aria-label="Local session resources" id="alpha-metrics">
             <span><strong>CPU</strong> <output id="alpha-cpu">Checking…</output></span>

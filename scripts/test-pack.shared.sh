@@ -2681,7 +2681,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-build-local-image-runtime-review-evidence.py" |
     grep -q "9 hostile checks" || return 1
   python3 "$REPO_ROOT/scripts/test-roadmap-closure-ledger.py" |
-    grep -q "46 exact open-item classifications" || return 1
+    grep -q "45 exact open-item classifications" || return 1
   python3 "$REPO_ROOT/scripts/test-local-batch-task-ledger.py" |
     grep -q "374 exact tasks across 18 phases" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" |
@@ -2689,11 +2689,13 @@ PY
   python3 "$REPO_ROOT/scripts/test-folder-selection-foundation.py" |
     grep -q "16 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-query-adapter.py" |
-    grep -q "15 security checks" || return 1
+    grep -q "16 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-native-transport.py" |
-    grep -q "21 offline security checks" || return 1
+    grep -q "23 offline security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-native-page-transport.py" |
     grep -q "41 offline security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-web-research-runtime.py" |
+    grep -q "40 hostile offline checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-transport-guard.py" |
     grep -q "25 hostile and exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-approval-state.py" |
@@ -2751,13 +2753,13 @@ PY
   python3 "$REPO_ROOT/scripts/test-offline-web-research-boundary.py" |
     grep -q "28 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-page-text.py" |
-    grep -q "26 checks" || return 1
+    grep -q "27 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-cited-synthesis.py" |
     grep -q "26 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-trusted-citation-renderer.py" |
-    grep -q "39 checks" || return 1
+    grep -q "40 checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-approval-review.py" |
-    grep -q "Research approval review foundation passed" || return 1
+    grep -q "64 checks" || return 1
 }
 
 test_task_composition_and_repository_privacy() {

@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "f62a1f2c9c29f3de84c69b49b4f79a7fda3bdda04b79f35827ab5737fdcf03ce",
-  "recordCount": 130,
+  "catalogSha256": "c02d83fcd318b683517cce6ccd28a84473a39a3f10e044f2d59fbe71732b1788",
+  "recordCount": 132,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -378,11 +378,11 @@
       }
     },
     {
-      "id": "evidence-a102c154641b98c3",
+      "id": "evidence-6fe6a89227168b12",
       "claim": {
         "schema_version": "2",
         "area": "controlled-research",
-        "subject": "Dormant explicit research approval review",
+        "subject": "Explicit research approval review",
         "surface": "Haven 42 web UI",
         "surface_version": "1",
         "provider": "Fixed English Wikipedia review shape",
@@ -390,39 +390,63 @@
         "model": "no-model",
         "operation": "explicit-query-page-review",
         "validation_mode": "browser-and-static",
-        "status": "static-validated",
+        "status": "validated-by-tests",
         "evidence": "docs/controlled-web-research-foundation.md",
-        "notes": "The exact query/page review dialog passed 63 static checks and a 43-check slice of the 591-check real-browser flow for full disclosure, trusted single-use approval, cancellation, Escape, focus containment and return, inert background, passive-cleanup focus preservation, caller-mutation resistance, New task cleanup, and zero Wikipedia network requests; no product invocation, network, navigation, runtime, model-tool, persistence, telemetry, or follow-up authority is granted."
+        "notes": "The exact query/page review dialog passed 64 static checks and the 622-check real-browser flow for full disclosure, trusted single-use approval, cancellation, Escape, focus containment and return, inert background, New task cleanup, and the separately reviewed query and selected-page requests. Only the approved fixed-Wikipedia request may start; model-tool use, active navigation, downloads, persistence, and automatic follow-up remain denied."
       },
       "sourceEvidence": "docs/controlled-web-research-foundation.md",
       "page": {
-        "repositorySource": "docs/evidence-records/evidence-a102c154641b98c3.md",
-        "wikiPage": "Evidence-Record-a102c154641b98c3.md",
-        "title": "Dormant explicit research approval review"
+        "repositorySource": "docs/evidence-records/evidence-6fe6a89227168b12.md",
+        "wikiPage": "Evidence-Record-6fe6a89227168b12.md",
+        "title": "Explicit research approval review"
       }
     },
     {
-      "id": "evidence-87f09934d8d4353a",
+      "id": "evidence-2403d4a9edd19c95",
       "claim": {
         "schema_version": "2",
         "area": "controlled-research",
-        "subject": "Dormant trusted citation renderer",
-        "surface": "Haven 42 web UI",
-        "surface_version": "1",
-        "provider": "Fixed English Wikipedia citation shape",
-        "os": "Headless browser source",
+        "subject": "Live fixed-Wikipedia Alpha 2 package runtime",
+        "surface": "Haven 42 unsigned portable development package",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Fixed English Wikipedia",
+        "os": "Windows",
         "model": "no-model",
-        "operation": "inert-destination-disclosure",
-        "validation_mode": "browser-and-static",
-        "status": "static-validated",
-        "evidence": "docs/controlled-web-research-foundation.md",
-        "notes": "The renderer passed 39 static checks and a 19-check slice of the 548-check real-browser flow for exact engine-accounted input, text-only output, full inactive destination disclosure, accessible status, hostile refusal, and New task cleanup; no runtime invocation, network, model-tool, active-navigation, persistence, telemetry, or follow-up authority is granted."
+        "operation": "explicit-query-and-selected-page",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/live-wikipedia-runtime-validation.md",
+        "notes": "The integrity-verified exact Alpha 2 package completed one explicitly reviewed query and one separately reviewed selected page with single-use approvals, three engine-accounted citations, 444 inert characters, and no navigation, page execution, persistence, model-tool access, or automatic follow-up; signing, Linux, macOS, and manual assistive-technology evidence remain open."
       },
-      "sourceEvidence": "docs/controlled-web-research-foundation.md",
+      "sourceEvidence": "examples/live-wikipedia-runtime-validation.md",
       "page": {
-        "repositorySource": "docs/evidence-records/evidence-87f09934d8d4353a.md",
-        "wikiPage": "Evidence-Record-87f09934d8d4353a.md",
-        "title": "Dormant trusted citation renderer"
+        "repositorySource": "docs/evidence-records/evidence-2403d4a9edd19c95.md",
+        "wikiPage": "Evidence-Record-2403d4a9edd19c95.md",
+        "title": "Live fixed-Wikipedia Alpha 2 package runtime"
+      }
+    },
+    {
+      "id": "evidence-db792ade22a7c3ad",
+      "claim": {
+        "schema_version": "2",
+        "area": "controlled-research",
+        "subject": "Live fixed-Wikipedia product runtime",
+        "surface": "Haven 42 source web runtime",
+        "surface_version": "1",
+        "provider": "Fixed English Wikipedia",
+        "os": "Windows",
+        "model": "no-model",
+        "operation": "explicit-query-and-selected-page",
+        "validation_mode": "live-fixed-provider",
+        "status": "partial-pass",
+        "evidence": "examples/live-wikipedia-runtime-validation.md",
+        "notes": "One explicitly reviewed query and one separately reviewed selected page completed through the product runtime with stable source rebinding, single-use approvals, three engine-accounted citations, 1,307 inert characters, and no navigation, page execution, persistence, model-tool access, or automatic follow-up; Linux, macOS, and manual assistive-technology evidence remain open."
+      },
+      "sourceEvidence": "examples/live-wikipedia-runtime-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-db792ade22a7c3ad.md",
+        "wikiPage": "Evidence-Record-db792ade22a7c3ad.md",
+        "title": "Live fixed-Wikipedia product runtime"
       }
     },
     {
@@ -471,6 +495,30 @@
         "repositorySource": "docs/evidence-records/evidence-1c20a3dfac18ae0a.md",
         "wikiPage": "Evidence-Record-1c20a3dfac18ae0a.md",
         "title": "Offline transport and approval guards"
+      }
+    },
+    {
+      "id": "evidence-19165579f9181386",
+      "claim": {
+        "schema_version": "2",
+        "area": "controlled-research",
+        "subject": "Trusted citation renderer",
+        "surface": "Haven 42 web UI",
+        "surface_version": "1",
+        "provider": "Fixed English Wikipedia citation shape",
+        "os": "Headless browser source",
+        "model": "no-model",
+        "operation": "inert-destination-disclosure",
+        "validation_mode": "browser-and-static",
+        "status": "validated-by-tests",
+        "evidence": "docs/controlled-web-research-foundation.md",
+        "notes": "The renderer passed 40 static checks and the 622-check real-browser flow for exact engine-accounted input, text-only output, full inactive destination disclosure, accessible status, hostile refusal, and New task cleanup. It is admitted only for results returned by the fixed Wikipedia runtime; model-tool use, active navigation, persistence, telemetry, and automatic follow-up remain denied."
+      },
+      "sourceEvidence": "docs/controlled-web-research-foundation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-19165579f9181386.md",
+        "wikiPage": "Evidence-Record-19165579f9181386.md",
+        "title": "Trusted citation renderer"
       }
     },
     {

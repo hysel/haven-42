@@ -38,6 +38,11 @@ PROJECT_FILES = {
     "_internal/config/alpha-2-runtime-compatibility.json",
     "_internal/config/linux-runtime-artifact-review.json",
     "_internal/config/linux-model-artifact-review.json",
+    "_internal/config/web-research-query-adapter.json",
+    "_internal/config/web-research-native-query-transport.json",
+    "_internal/config/web-research-native-page-transport.json",
+    "_internal/config/web-research-page-foundation.json",
+    "_internal/scripts/validate-web-research-query-adapter.py",
 }
 DISTRIBUTION_EVIDENCE_HASHES = {
     "LICENSE.txt": (

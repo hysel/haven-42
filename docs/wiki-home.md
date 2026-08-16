@@ -34,6 +34,9 @@ If something does not work, begin with [[Troubleshooting]].
 - Bounded text, source-code, structured-text, and PNG screenshot attachments.
 - Safe response formatting for headings, lists, code, quotations, and emoji.
 - Token totals, response timing, and tokens per second.
+- A development-source manual Wikipedia search with exact per-search and
+  per-page review, inactive destinations, inert page text, and memory-only
+  cleanup. It is not general model browsing and exact package parity is open.
 - A promoted loopback Linux ComfyUI/SDXL image workflow.
 - Read-only system readiness, software plans, and bundled evidence views.
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "status": "dormant-effect-free-explicit-review-ui",
+  "status": "product-explicit-single-use-review-ui",
   "provider": {
     "id": "wikipedia",
     "displayName": "Wikipedia",
@@ -26,7 +26,7 @@
     "focusReturnsAfterClose": true,
     "backgroundIsInert": true,
     "singleUseDecision": true,
-    "decisionStartsNetwork": false
+    "decisionStartsNetwork": true
   },
   "accessibility": {
     "role": "dialog",
@@ -47,9 +47,9 @@
     "telemetryAllowed": false
   },
   "authority": {
-    "productRouteAllowed": false,
-    "networkAllowed": false,
-    "runtimeAdmissionAllowed": false,
+    "productRouteAllowed": true,
+    "networkAllowed": true,
+    "runtimeAdmissionAllowed": true,
     "modelToolAllowed": false,
     "activeNavigationAllowed": false,
     "pageExecutionAllowed": false,

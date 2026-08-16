@@ -54,7 +54,7 @@ def main() -> None:
 
     require(contract["schemaVersion"] == 1, "schema")
     checks += 1
-    require(contract["status"] == "dormant-fixed-provider-renderer-no-navigation-authority", "status")
+    require(contract["status"] == "product-fixed-provider-renderer-no-navigation-authority", "status")
     checks += 1
     require(contract["input"]["maximumCitations"] == 10, "citation limit")
     checks += 1
@@ -79,7 +79,7 @@ def main() -> None:
     checks += 1
     require(contract["rendering"]["forcedColorsSupported"] is True, "forced colors")
     checks += 1
-    require(contract["rendering"]["packageIncludedAsDormantComponent"] is True, "dormant package component")
+    require(contract["rendering"]["packageIncludedAsDormantComponent"] is False, "active package component")
     checks += 1
     require(contract["lifecycle"] == {
         "memoryOnly": True,
@@ -88,7 +88,12 @@ def main() -> None:
         "telemetryAllowed": False,
     }, "lifecycle")
     checks += 1
-    require(all(value is False for value in contract["authority"].values()), "authority denied")
+    require(contract["authority"]["runtimeRouteAllowed"] is True, "runtime renderer admitted")
+    checks += 1
+    require(all(
+        value is False for name, value in contract["authority"].items()
+        if name != "runtimeRouteAllowed"
+    ), "renderer grants no network or navigation authority")
     checks += 1
 
     parser = SourceRegionParser()

@@ -90,9 +90,11 @@ def refused(callable_, code: str) -> None:
 def main() -> int:
     checks = 0
     contract = MODULE.load_contract()
-    assert contract["authority"]["runtimeRouteAllowed"] is False; checks += 1
+    assert contract["authority"]["runtimeRouteAllowed"] is True; checks += 1
+    assert contract["authority"]["uiControlAllowed"] is True; checks += 1
+    assert contract["authority"]["packageAdmissionAllowed"] is True; checks += 1
     assert contract["authority"]["modelToolAllowed"] is False; checks += 1
-    assert contract["authority"]["pageRetrievalAllowed"] is False; checks += 1
+    assert contract["authority"]["pageRetrievalAllowed"] is True; checks += 1
     assert contract["authority"]["persistenceAllowed"] is False; checks += 1
 
     refused(lambda: MODULE.resolve_pinned_address("en.wikipedia.org", 443, resolver_for("127.0.0.1")), "dns-result-not-public"); checks += 1
