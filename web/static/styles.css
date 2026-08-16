@@ -451,6 +451,18 @@ input, select, textarea {
   font: inherit;
   outline: none;
 }
+select {
+  color-scheme: dark;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+select option,
+select optgroup {
+  color: var(--ink);
+  background: #101a19;
+  font: 500 1rem/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+select optgroup { color: var(--accent); font-weight: 750; }
 .compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }
 .advanced-grid select, .advanced-grid input { height: 36px; padding: 8px 10px; font-size: 13px; }
 input:disabled, select:disabled { opacity: 0.55; cursor: default; }
@@ -458,6 +470,16 @@ input:focus, select:focus, textarea:focus { border-color: rgba(98, 230, 198, 0.6
 .field-help { color: var(--muted); margin: 7px 0 0; font-size: 11px; }
 .model-search-status { margin: 12px 0 8px; color: var(--muted); font-size: 11px; }
 .model-search-results { display: grid; gap: 6px; }
+.advanced-model-install { margin-top: 6px; }
+.advanced-model-install code { display: block; margin: 8px 0; overflow-wrap: anywhere; }
+.research-answer {
+  margin-top: 16px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(132, 190, 180, 0.16);
+}
+.research-answer h3 { margin: 4px 0 12px; }
+.research-answer p { max-width: 78ch; }
+.research-claim-citations { color: var(--accent); font-weight: 750; white-space: nowrap; }
 .model-search-result { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(132, 190, 180, 0.09); }
 .model-search-result strong, .model-search-result small { display: block; overflow-wrap: anywhere; }
 .model-search-result strong { font-size: 12px; }

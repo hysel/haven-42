@@ -66,6 +66,7 @@ a = Analysis(
         "linux_alpha_runtime", "linux_alpha_setup", "windows_alpha",
         "windows_alpha_setup", "web_research_query_adapter",
         "web_research_native_transport", "web_research_native_page_transport",
+        "web_research_general_transport",
         "offline_research_page_text",
     ],
     hookspath=[],

@@ -38,7 +38,8 @@
         <li>Status information is provided with text as well as color. Connection errors identify and describe the affected field.</li>
         <li>Reduced-motion and Windows forced-color preferences are supported.</li>
         <li>Section help tours use labeled modal dialogs, keep focus within their controls, support Back, Next, Skip, close, and Escape, and return focus when dismissed. They open once for each new section-tour revision.</li>
-        <li>Wikipedia research uses a labeled modal review before each search and selected-page request. The dialog keeps its actions visible in small windows, traps and returns focus, makes the background inert, discloses the exact destination, and renders retrieved text without active links or page content.</li>
+        <li>Research uses a labeled modal review before each request. Wikipedia results, multi-source cited answers, and citations are rendered as inert text; the browser fallback opens only the exact approved search. Review dialogs trap and return focus, make the background inert, and disclose the destination.</li>
+        <li>Model installation uses a labeled review dialog before any download. It keeps focus inside the dialog, returns focus on dismissal, identifies the exact model and destination, and selects only the model the user explicitly approved.</li>
         <li>Live resource information remains visible but screen-reader announcements are limited to no more than once per minute.</li>
       </ul>
     </section>
@@ -51,7 +52,9 @@
         <li>Automated keyboard and responsive-layout checks do not replace a complete manual keyboard, zoom, and screen-reader review.</li>
         <li>The setup wizard keeps keyboard focus within its visible controls while open. Escape closes it and returns focus to the application.</li>
         <li>The section help tours have automated keyboard, focus, reduced-motion, and responsive-positioning coverage, but have not yet been manually verified with the full screen-reader matrix above.</li>
-        <li>The Wikipedia research review and inert result regions have automated keyboard, focus, small-window, forced-color, and reduced-motion coverage. They have not yet been manually verified with the full screen-reader and browser matrix above.</li>
+        <li>The research review, inert Wikipedia and multi-source citation regions, wider-web browser handoff, and model-install review have automated checks but have not yet been manually verified with the full screen-reader and browser matrix above.</li>
+        <li>Native dropdown popup appearance varies by operating system and browser. Haven 42 styles the control and options where supported, but the operating system may override part of that presentation.</li>
+        <li>Model downloads currently announce started, failed, or completed states but do not expose byte-level progress. Large downloads may therefore appear unchanged while Ollama is still working.</li>
       </ul>
       <p>Testing is ongoing. This section will be updated when additional barriers or validation results are identified.</p>
     </section>
@@ -60,7 +63,7 @@
       <h2 id="technical-scope">Technical scope</h2>
       <dl class="statement-facts">
         <div><dt>Covered version</dt><dd>Haven 42 0.4 Alpha series; the exact build version appears in the app's About section</dd></div>
-        <div><dt>Covered interface</dt><dd>The bundled local web interface, setup wizard, section help tours, chat and its manual Wikipedia research controls, models, system, technical details, About page, and this statement</dd></div>
+        <div><dt>Covered interface</dt><dd>The bundled local web interface, setup wizard, section help tours, chat and its manual research controls, model discovery and install review, system, technical details, About page, and this statement</dd></div>
         <div><dt>Automated browser coverage</dt><dd>A locally installed Chromium-family browser in headless mode on Windows, including narrow viewport and reduced-motion checks</dd></div>
         <div><dt>Screen-reader coverage</dt><dd>No complete manual screen-reader and browser matrix has been recorded yet</dd></div>
       </dl>
@@ -68,7 +71,7 @@
 
     <section aria-labelledby="assessment-approach">
       <h2 id="assessment-approach">Assessment approach</h2>
-      <p>This statement is based on a repository self-assessment. The current checks include deterministic contrast calculations, static semantic and security checks, and a real-browser flow covering landmarks, focus visibility, control sizes, dialog dismissal, responsive behavior, reduced motion, and the two-step Wikipedia research review. Manual testing with named screen readers has not yet been completed, so this statement does not claim that coverage.</p>
+      <p>This statement is based on a repository self-assessment. The current checks include deterministic contrast calculations, static semantic and security checks, and a real-browser flow covering landmarks, focus visibility, control sizes, dialog dismissal, responsive behavior, reduced motion, and explicit research review. Manual testing with named screen readers has not yet been completed, so this statement does not claim that coverage.</p>
     </section>
 
     <section aria-labelledby="accessibility-feedback">

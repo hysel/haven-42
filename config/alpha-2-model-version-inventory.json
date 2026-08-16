@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inventoryId": "haven42.alpha2.model-family-versions",
   "release": "0.4.0-alpha.2",
-  "reviewedAtUtc": "2026-08-15T20:15:00Z",
+  "reviewedAtUtc": "2026-08-16T18:30:00Z",
   "status": "qualification-inventory-not-selection-policy",
   "capabilities": [
     "general.chat",
@@ -69,13 +69,13 @@
           "qualificationState": "hosted-api-review-pending",
           "candidates": []
         },
-        {
-          "version": "3.8",
-          "artifactStatus": "official-local-artifact-not-found",
-          "officialSource": "https://github.com/QwenLM",
-          "qualificationState": "announced-or-preview-only-do-not-infer-local-availability",
-          "candidates": []
-        }
+      {
+        "version": "3.8",
+        "artifactStatus": "official-local-weights-released-runtime-artifact-pending",
+        "officialSource": "https://huggingface.co/Qwen/Qwen3.8-27B",
+        "qualificationState": "candidate-only-runtime-hardware-and-task-validation-not-started",
+        "candidates": []
+      }
       ]
     },
     {

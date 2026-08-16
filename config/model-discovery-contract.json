@@ -22,7 +22,7 @@
     "Reason",
     "NextStep"
   ],
-  "sourceTypes": ["ollama-library", "huggingface-hub"],
+  "sourceTypes": ["ollama-library", "ollama-newest-index", "huggingface-hub", "huggingface-publisher-feed"],
   "provenanceStatuses": ["catalog-recorded", "publisher-identity-unverified", "immutable-revision-recorded"],
   "validationStatuses": ["candidate-only"],
   "rules": {
@@ -36,6 +36,11 @@
     "changesAutomaticModelSelection": false,
     "sourceClaimsDoNotPromote": true,
     "communityArtifactsRequireIndependentReview": true,
-    "missingLicenseBlocksAutomaticPromotion": true
+    "missingLicenseBlocksAutomaticPromotion": true,
+    "publisherFeedsRequireImmutableRevision": true,
+    "publisherFeedsArePolledByModificationTime": true,
+    "publisherLookbackCannotBeNarrowedByManualOverride": true,
+    "newRegistryFamiliesAreDiscoveredWithoutSeedQueries": true,
+    "searchRankingIsNotReleaseEvidence": true
   }
 }

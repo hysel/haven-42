@@ -3,23 +3,23 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "9d9713fc47a418a1e70001ce63e60ce62440ffa6be36af9aab6c0a3852bee344",
-      "sizeBytes": 64217
+      "sha256": "ab19f941e8ce559099c15d9557b9b1b61351eca4ffd40daf5aa8b6d2b8eeadd2",
+      "sizeBytes": 68529
     },
     {
       "path": "web/static/accessibility.html",
-      "sha256": "b4c75072f9821abbb9f4418fdb434fab1eab29189866207c45d03a6b8ea2995c",
-      "sizeBytes": 6948
+      "sha256": "874319aeb8b0c51cdbf89481915192ee1762bc5bc33dd07e9527725646e1a9fd",
+      "sizeBytes": 7622
     },
     {
       "path": "web/static/app.js",
-      "sha256": "f13a4360f190ff020fcdaa88ef0c4d737ec08b1bae5276abd3ff8a81ad28139f",
-      "sizeBytes": 230387
+      "sha256": "35d7e3ac6351ac43f84480236dbb95474148f027b54b4dbbc45c161cd1b470cf",
+      "sizeBytes": 251015
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "39058f5846b9cf7635ab089061846e72fc927fb06b5ed1365d45806ae4532b19",
-      "sizeBytes": 70427
+      "sha256": "204cf638e1b94d84bf210efa7457444c785f651667ba9ad0d0f6336b1ba632ca",
+      "sizeBytes": 71166
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -108,8 +108,8 @@
     },
     {
       "path": "config/alpha-2-model-version-inventory.json",
-      "sha256": "6e71be02c19804f357ee9f3002218b30f6b675f678e5c00d013234a04db06256",
-      "sizeBytes": 20979
+      "sha256": "a69062dca495e90e178f7d2dc69ccec53528cf8e4e6e48116c7450507350acd2",
+      "sizeBytes": 21008
     },
     {
       "path": "config/alpha-2-model-runtime-requirements.json",
@@ -133,8 +133,8 @@
     },
     {
       "path": "config/web-research-query-adapter.json",
-      "sha256": "0a2af8f7048a4d2c1da2eca773e04ce37750a2e46a27a9f5bd1bb5c0827467ae",
-      "sizeBytes": 1481
+      "sha256": "be499ea3c6413468e5d2343273ee25497da5014a921fd9d8f36fab14d9a4071c",
+      "sizeBytes": 1510
     },
     {
       "path": "config/web-research-native-query-transport.json",

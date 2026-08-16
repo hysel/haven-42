@@ -20,6 +20,7 @@
         "https://ollama.com/download/linux"
       ],
     "fixedExternalNavigationRequiresExplicitClick": true,
+    "approvedParameterizedNavigationOrigins": ["https://search.brave.com/search"],
     "rendererSuppliedExternalNavigationAllowed": false,
     "environmentOverrideAllowed": false,
     "shellLaunchAllowed": false,
@@ -38,6 +39,14 @@
     "attachmentInformationAllowed": false,
     "modelOrProviderInformationAllowed": false,
     "systemOrIdentityInformationAllowed": false,
+    "credentialsAllowed": false
+  },
+  "lastSectionPreference": {
+    "storageKey": "haven42.last-section.v1",
+    "allowedValues": ["text-panel", "models-panel", "system-panel", "assurance-panel", "about-panel"],
+    "defaultValue": "text-panel",
+    "conversationContentAllowed": false,
+    "providerConfigurationAllowed": false,
     "credentialsAllowed": false
   },
   "providerConnections": {
@@ -81,7 +90,11 @@
     "redirectsAllowed": false,
     "candidateExecutionRequiresInstalledInventoryMatch": true,
     "automaticDownloadsAllowed": false,
-    "pullApiAllowed": false,
+    "pullApiAllowed": true,
+    "explicitInstallApprovalRequired": true,
+    "installCandidateMustComeFromCurrentSessionSearch": true,
+    "providerCatalogVerificationRequiredAfterPull": true,
+    "automaticSelectionAfterInstallAllowed": false,
     "commandExecutionAllowed": false,
     "copyableInstructionAllowed": true
   },
@@ -184,6 +197,17 @@
     "activeNavigationAllowed": false,
     "automaticFollowUpAllowed": false,
     "persistenceAllowed": false
+  },
+  "externalBrowserSearch": {
+    "status": "owner-approved-manual-browser-handoff",
+    "providerId": "brave-browser-search",
+    "fixedOrigin": "https://search.brave.com/search",
+    "exactQueryReviewRequired": true,
+    "singleUseApprovalRequired": true,
+    "automaticNavigationAllowed": false,
+    "modelToolAllowed": false,
+    "resultIngestionAllowed": false,
+    "queryPersistenceAllowed": false
   },
   "inactiveFoundations": {
     "lexicalRetrieval": {

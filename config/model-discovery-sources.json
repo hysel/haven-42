@@ -1,8 +1,48 @@
 {
   "schemaVersion": 1,
   "description": "Public metadata sources and source-specific seed queries for optional model discovery.",
-  "defaultSources": ["ollama", "huggingface"],
+  "defaultSources": ["official-publishers", "ollama-newest", "ollama", "huggingface"],
   "sources": [
+    {
+      "id": "official-publishers",
+      "type": "huggingface-publisher-feed",
+      "baseUrl": "https://huggingface.co",
+      "lookbackDays": 45,
+      "eligiblePipelineTags": [
+        "text-generation",
+        "image-text-to-text",
+        "feature-extraction",
+        "sentence-similarity",
+        "automatic-speech-recognition",
+        "text-to-audio"
+      ],
+      "publisherNamespaces": [
+        "Qwen",
+        "google",
+        "mistralai",
+        "nvidia",
+        "microsoft",
+        "ibm-granite",
+        "CohereLabs",
+        "LiquidAI",
+        "zai-org",
+        "allenai",
+        "moonshotai",
+        "MiniMaxAI",
+        "openai",
+        "deepseek-ai",
+        "meta-llama",
+        "ByteDance-Seed",
+        "OpenGVLab"
+      ]
+    },
+    {
+      "id": "ollama-newest",
+      "type": "ollama-newest-index",
+      "baseUrl": "https://ollama.com/library?sort=newest",
+      "detailBaseUrl": "https://ollama.com/library",
+      "description": "Newest-first registry index used to discover family names that are absent from seed queries."
+    },
     {
       "id": "ollama",
       "type": "ollama-library",
@@ -10,6 +50,7 @@
       "defaultQueries": [
         "qwen3.5",
         "qwen3.6",
+        "qwen3.8",
         "qwen3-coder",
         "gemma3",
         "gemma4",

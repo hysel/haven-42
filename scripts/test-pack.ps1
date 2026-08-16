@@ -2916,6 +2916,15 @@ Invoke-PackTest "online model discovery scripts are candidate-only and cross-pla
     }
 }
 
+Invoke-PackTest "runtime release discovery is official-source-only and fail closed" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for runtime certification hostile tests."
+
+    $output = @(& $python.Source (Join-Path $repoRoot "scripts/test-runtime-certification-candidates.py") 2>&1)
+    Assert-True -Condition ($LASTEXITCODE -eq 0) -Message "Runtime certification hostile tests should pass: $($output -join [Environment]::NewLine)"
+    Assert-True -Condition (($output -join "`n") -match "passed 23 checks") -Message "Runtime certification should report its complete hostile-test count."
+}
+
 Invoke-PackTest "online model discovery parses a local fixture without network" {
     $tempRoot = Join-Path ([System.IO.Path]::GetTempPath()) "online-model-discovery-test-$([guid]::NewGuid())"
 
@@ -2982,8 +2991,9 @@ Invoke-PackTest "online model discovery normalizes Ollama and Hugging Face fixtu
         $sources = Get-Content -LiteralPath (Join-Path $repoRoot "config/model-discovery-sources.json") -Raw | ConvertFrom-Json
         Assert-Equal -Actual $report.SchemaVersion -Expected 2 -Message "Discovery report should use normalized schema v2."
         Assert-True -Condition (@($report.Sources) -contains "ollama" -and @($report.Sources) -contains "huggingface") -Message "Report should identify both source adapters."
-        Assert-True -Condition (@($sources.defaultSources) -contains "ollama" -and @($sources.defaultSources) -contains "huggingface") -Message "Source catalog should enable independent Ollama and Hugging Face discovery."
+        Assert-True -Condition (@($sources.defaultSources) -contains "ollama" -and @($sources.defaultSources) -contains "ollama-newest" -and @($sources.defaultSources) -contains "official-publishers" -and @($sources.defaultSources) -contains "huggingface") -Message "Source catalog should enable seeded, newest-index, official-publisher, and general Hub discovery."
         Assert-True -Condition (@($contract.candidateRequiredFields) -contains "Revision" -and @($contract.candidateRequiredFields) -contains "License" -and @($contract.candidateRequiredFields) -contains "QuantizationSignals") -Message "Contract should require provenance, licensing, and quantization metadata."
+        Assert-True -Condition ($contract.rules.publisherLookbackCannotBeNarrowedByManualOverride -eq $true -and $contract.rules.newRegistryFamiliesAreDiscoveredWithoutSeedQueries -eq $true) -Message "Discovery must protect the publisher lookback floor and discover unfamiliar registry families."
         $hub = @($report.Candidates | Where-Object { $_.SourceId -eq "huggingface" })
         Assert-Equal -Actual $hub.Count -Expected 2 -Message "Hugging Face fixture candidates should be normalized and deduplicated."
         $gguf = @($hub | Where-Object { $_.Formats -contains "gguf" }) | Select-Object -First 1
@@ -5393,7 +5403,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (-not $portablePolicy.security.linuxBrowserApplicationDataDirectoriesInherited) -Message "Linux browser application discovery must not inherit caller-controlled XDG_DATA_DIRS."
     Assert-True -Condition ($policy.text.modelResidency -eq "bounded-idle-timeout" -and $policy.text.defaultIdleUnloadSeconds -eq 300 -and $policy.text.unloadOnFailure -and $policy.text.unloadOnShutdown -and $policy.text.unloadOnNewTask) -Message "Model cleanup should balance bounded reuse with mandatory lifecycle cleanup."
     Assert-True -Condition (-not $policy.text.automaticUnknownModelSelectionAllowed -and -not $policy.text.missingModelDownloadsAllowed -and $policy.text.recommendationAuthority -eq "server-owned-static-catalog") -Message "Automatic model choice must stay engine-owned, evidence-gated, and non-downloading."
-    Assert-True -Condition ($policy.modelDiscovery.explicitOnlineConsentRequired -and -not $policy.modelDiscovery.redirectsAllowed -and -not $policy.modelDiscovery.automaticDownloadsAllowed -and -not $policy.modelDiscovery.pullApiAllowed -and -not $policy.modelDiscovery.commandExecutionAllowed) -Message "Public model discovery must stay explicit, fixed-origin, candidate-only, and non-installing."
+    Assert-True -Condition ($policy.modelDiscovery.explicitOnlineConsentRequired -and -not $policy.modelDiscovery.redirectsAllowed -and -not $policy.modelDiscovery.automaticDownloadsAllowed -and $policy.modelDiscovery.pullApiAllowed -and $policy.modelDiscovery.explicitInstallApprovalRequired -and $policy.modelDiscovery.installCandidateMustComeFromCurrentSessionSearch -and $policy.modelDiscovery.providerCatalogVerificationRequiredAfterPull -and -not $policy.modelDiscovery.automaticSelectionAfterInstallAllowed -and -not $policy.modelDiscovery.commandExecutionAllowed) -Message "Public model discovery must stay explicit and fixed-origin; model pulls require a current-session candidate, one-time user approval, and provider-catalog verification without automatic selection."
     Assert-True -Condition ($lexicalContract.status -eq "offline-engine-implemented-not-runtime-admitted" -and -not $lexicalContract.activation.runtimeRouteAllowed -and -not $lexicalContract.activation.uiControlAllowed -and -not $lexicalContract.activation.providerPayloadAllowed -and -not $lexicalContract.inputBoundary.filesystemPathsAllowed -and -not $lexicalContract.determinism.semanticEmbeddingsAllowed -and -not $lexicalContract.lifecycle.persistentIndexAllowed) -Message "Lexical retrieval must remain an inactive, memory-only, path-free, non-embedding engine."
     $lexicalOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-memory-lexical-retrieval.py"))
     Assert-Equal -Actual $lexicalOutput.ExitCode -Expected 0 -Message "Memory-only lexical retrieval hostile tests should pass. Output: $($lexicalOutput.Output)"
@@ -5477,7 +5487,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($webNativePageOutput.Output -match "41 offline security checks") -Message "The fixed-provider selected-page transport must remain citation-bound, fixed-host, DNS-revalidated, pinned, bounded, inert, package-admitted, and unable to grant model-tool, active-navigation, file, page-execution, or follow-up authority."
     $webRuntimeOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-web-research-runtime.py"))
     Assert-Equal -Actual $webRuntimeOutput.ExitCode -Expected 0 -Message "Product web-research runtime hostile tests should pass. Output: $($webRuntimeOutput.Output)"
-    Assert-True -Condition ($webRuntimeOutput.Output -match "40 hostile offline checks") -Message "The product research runtime must keep exact review, single-use approval, fixed-provider validation, inert content, memory cleanup, and protected local API gates fail closed."
+    Assert-True -Condition ($webRuntimeOutput.Output -match "48 hostile offline checks") -Message "The product research runtime must keep exact review, single-use approval, fixed-provider validation, inert content, memory cleanup, and protected local API gates fail closed."
     $webTransportGuardOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-offline-research-transport-guard.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Offline research transport-guard tests should pass."
     Assert-True -Condition (($webTransportGuardOutput -join "`n") -match "25 hostile and exclusion checks") -Message "Future transport receipts must enforce destination, DNS, rebinding, redirect, content, time, and size boundaries without network authority."

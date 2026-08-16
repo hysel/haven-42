@@ -35,28 +35,50 @@ scanning remain research or roadmap work rather than admitted upload features.
 ## Models
 
 The Models page shows AI models already available on your server. **Search
-public catalog** looks for other model names online but does not download them.
+public catalog** looks for other model names online. Choosing a result does not
+start a download: Haven 42 first shows the exact model and destination. Choose
+**Approve and install** to ask the connected Ollama server to download it.
+Haven 42 verifies that Ollama lists the exact model afterward, then makes it
+available for you to choose. It never silently downloads or selects a model.
+
+An advanced manual command remains available as a fallback for server owners,
+but it is no longer the normal beginner path. Large downloads currently show
+started/completed status rather than byte-by-byte progress.
 
 Haven 42 recommends only choices that match its safety and compatibility
 records. Advanced users can still try another installed model. See [[Choose a
 Model|Local-Model-Selection]].
 
-## Research Wikipedia
+## Research the web
 
-Chat includes a manual **Research Wikipedia** disclosure. Enter search words,
-then review the exact words and provider before choosing **Approve once**.
-Nothing is sent before that approval. Results show source titles and complete
-destinations as inactive text; Haven 42 does not open them.
+Chat includes a manual **Research the web** disclosure. Choose one of three
+clearly separated paths, enter search words, and review the exact words and
+destination before choosing **Approve once**. Nothing is sent before approval.
 
-Reading a result requires a second review showing the selected title and exact
-destination. If approved, Haven 42 displays only bounded inert page text. The
-page cannot run code, load remote media, create a link, download a file, or
-start another search. The local model cannot invoke or approve either request,
-and retrieved text is not yet sent to the model.
+- **Wikipedia** returns bounded titles inside Haven 42. Reading one result
+  requires a second approval and displays only inert page text.
+- **Wider web with a cited answer** sends the approved words to Brave Search,
+  reads at most five returned public HTTPS pages under strict limits, and asks
+  the selected local model for a citation-bound answer. It requires a Brave
+  Search API key for that request. The key stays in memory, is never saved, is
+  cleared after use, cancellation, failure, or expiry, and is never sent to the
+  model.
+- **Private browser search** opens the exact approved search on Brave Search in your normal
+  browser. Haven 42 does not read those results, send them to the model, or
+  follow links for you.
+
+Retrieved pages cannot run code, load remote media, create links, download
+files, or start another search. The local model cannot invoke or approve any
+research path, choose a URL, receive the search key, or request a follow-up.
+Only the cited-answer path sends bounded untrusted page text to the selected
+local model.
 
 Research state stays in memory. **New task** clears its approvals, results,
 page text, and citations. See [[Privacy|Privacy-Policy]] for the network and
 retention boundary.
+
+When a research request is rejected, use the visible **Open troubleshooting
+logs** button beside the message. You do not need to hunt through System.
 
 ## AI server and computer settings
 

@@ -14,6 +14,7 @@
       "format": "json",
       "formatversion": "2",
       "list": "search",
+      "srinfo": "totalhits",
       "srnamespace": "0",
       "srprop": "timestamp",
       "utf8": "1"

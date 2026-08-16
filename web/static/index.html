@@ -210,10 +210,22 @@
             <p class="sr-only" id="research-sources-status" role="status" aria-live="polite" aria-atomic="true"></p>
           </section>
           <details class="research-tools" id="research-tools">
-            <summary><span>Research Wikipedia</span><small>Explicit approval required before every request</small></summary>
+            <summary><span>Research the web</span><small>You approve every search before it leaves this computer</small></summary>
             <div class="research-tools-body">
-              <p>Search one fixed public source without giving the AI permission to browse. Only the exact search words shown in the approval window are sent, and results stay in memory for this task.</p>
+              <p>Search a reviewed public source without giving the AI permission to browse on its own. Only the exact search words shown in the approval window are sent, and results stay in memory for this task.</p>
               <form class="research-query-form" id="research-query-form">
+                <label for="research-source">Where should Haven 42 search?
+                  <select id="research-source" aria-describedby="research-source-help">
+                    <option value="wikipedia">Wikipedia · results shown in Haven 42</option>
+                    <option value="general-web">Wider web with a cited answer · recommended</option>
+                    <option value="web">The wider web · opens a private browser search</option>
+                  </select>
+                </label>
+                <small id="research-source-help">Haven 42 never lets the AI start a search. For a cited answer, it reads a small, bounded set of public pages only after you approve the exact query.</small>
+                <label class="hidden" id="research-api-key-row" for="research-api-key">Web search key · session only
+                  <input id="research-api-key" type="password" maxlength="512" autocomplete="off" aria-describedby="research-api-key-help">
+                </label>
+                <small class="hidden" id="research-api-key-help">A Brave Search API key is sent only to Brave for this approved search. Haven 42 never saves it, includes it in logs, or sends it to the AI model.</small>
                 <label for="research-query">What do you want to research?</label>
                 <div class="field-row">
                   <input class="grow" id="research-query" maxlength="256" autocomplete="off" spellcheck="true" required aria-describedby="research-query-privacy">
@@ -222,11 +234,19 @@
                 <small id="research-query-privacy">Nothing is sent until you review and approve. Haven 42 does not save the search or page text.</small>
               </form>
               <p class="research-status" id="research-query-status" role="status" aria-live="polite" aria-atomic="true"></p>
+              <a class="button primary hidden" id="research-web-link" href="about:blank" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Open approved web search</a>
+              <button class="button secondary hidden" id="research-open-troubleshooting" type="button">Open troubleshooting logs</button>
               <section class="research-results hidden" id="research-results" aria-labelledby="research-results-title">
                 <h3 id="research-results-title" tabindex="-1">Wikipedia results</h3>
                 <p>Selecting a result opens another approval window before Haven 42 reads that page.</p>
                 <ol id="research-result-list"></ol>
               </section>
+              <article class="research-answer hidden" id="research-answer" aria-labelledby="research-answer-title">
+                <p class="eyebrow">CITED WEB ANSWER</p>
+                <h3 id="research-answer-title" tabindex="-1">Research answer</h3>
+                <div id="research-answer-claims"></div>
+                <p class="field-help">Generated from the approved sources shown below. Web text is untrusted and cannot start tools, searches, downloads, or follow-up requests.</p>
+              </article>
               <article class="research-page hidden" id="research-page" aria-labelledby="research-page-title">
                 <p class="eyebrow">SELECTED SOURCE · UNTRUSTED TEXT</p>
                 <h3 id="research-page-title" tabindex="-1"></h3>
@@ -406,12 +426,12 @@
               <h2 id="models-title" tabindex="-1">Choose or find a model</h2>
             </div>
             <div class="panel-heading-actions">
-              <span class="badge">No automatic downloads</span>
+              <span class="badge">Downloads only after you approve</span>
               <button class="button text-button section-tour-help" type="button" data-tour-section="models" aria-label="Show help for Models">? Help</button>
             </div>
           </div>
           <div class="workflow-planner model-workspace">
-            <p>A model is the AI that answers you. Choose one already on your server, or search for another model. Searching does not download anything.</p>
+            <p>A model is the AI that answers you. Choose one already on your server, or search for another model. Haven 42 asks before downloading anything.</p>
             <label for="model-search-capability">Configure model for
               <select id="model-search-capability">
                 <option value="general.chat">Chat</option>
@@ -422,7 +442,7 @@
             <div class="model-choice-status" id="model-choice-status" role="status" aria-live="polite">Connect Ollama to discover installed models.</div>
             <div class="model-discovery" id="model-discovery">
               <h3>Find another model</h3>
-              <p class="field-help">Your installed models are searched on this device. A public search sends only the words you type to Ollama's model catalog. It does not download a model.</p>
+              <p class="field-help">Your installed models are searched on this device. A public search sends only the words you type to Ollama's model catalog. Selecting a new model opens a review before Haven 42 downloads it to your connected AI server.</p>
               <form id="model-search-form">
                 <label for="model-search-query">Model name or capability</label>
                 <div class="field-row">
@@ -435,9 +455,13 @@
               <article class="desired-model hidden" id="desired-model" aria-live="polite">
                 <strong id="desired-model-name"></strong>
                 <span id="desired-model-state"></span>
-                <code id="desired-model-command"></code>
-                <button class="button secondary" id="copy-model-command" type="button">Copy installation command</button>
-                <small>Haven 42 will not run this advanced command. After you install the model yourself, reconnect so Haven 42 can check the exact model files.</small>
+                <button class="button primary" id="install-model-button" type="button">Review and install model</button>
+                <details class="advanced-model-install">
+                  <summary>Advanced manual option</summary>
+                  <code id="desired-model-command"></code>
+                  <button class="button secondary" id="copy-model-command" type="button">Copy installation command</button>
+                </details>
+                <small id="model-install-status" role="status" aria-live="polite">Nothing will be downloaded until you review and approve the model and destination.</small>
               </article>
             </div>
           </div>
@@ -649,6 +673,7 @@
             </form>
             <button class="button secondary full-width" id="scan-system-button" type="button">Check this computer</button>
             <div class="readiness-dashboard compact hidden" id="system-readiness" aria-live="polite"></div>
+            <button class="button secondary full-width" id="open-diagnostics" type="button">Open troubleshooting logs</button>
             <details class="portable-storage-control" id="diagnostics-control">
               <summary><strong>Troubleshooting logs</strong></summary>
               <p class="field-help">Haven 42 keeps bounded, sanitized technical events in Haven42-Logs inside this extracted folder. Chats, responses, attachment details, credentials, addresses, identity, personal paths, commands, and raw program output are never recorded or uploaded.</p>
@@ -861,6 +886,27 @@
       <footer class="research-review-actions">
         <button class="button secondary" id="research-review-cancel" type="button">Cancel</button>
         <button class="button primary" id="research-review-approve" type="button">Approve once</button>
+      </footer>
+    </section>
+  </div>
+  <div class="research-review-layer hidden" id="model-install-review-layer" aria-hidden="true">
+    <section class="research-review-dialog" id="model-install-review-dialog" role="dialog" aria-modal="true" aria-labelledby="model-install-review-title" aria-describedby="model-install-review-description model-install-review-privacy" tabindex="-1">
+      <header class="research-review-header">
+        <p class="eyebrow">REVIEW BEFORE DOWNLOADING</p>
+        <button class="research-review-close" id="model-install-review-close" type="button" aria-label="Cancel this model download">×</button>
+      </header>
+      <h2 id="model-install-review-title">Install this AI model?</h2>
+      <p id="model-install-review-description">Haven 42 will ask your connected Ollama server to download this model.</p>
+      <dl class="research-review-details">
+        <div><dt>Model</dt><dd id="model-install-review-name"></dd></div>
+        <div><dt>Destination</dt><dd id="model-install-review-destination"></dd></div>
+        <div><dt>Evidence</dt><dd>Candidate only · compatibility and license still need review</dd></div>
+      </dl>
+      <p class="research-review-privacy" id="model-install-review-privacy"><strong>No download has started.</strong> Download time and storage use depend on the model. You can keep using Haven 42 while Ollama downloads it.</p>
+      <p id="model-install-review-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <footer class="research-review-actions">
+        <button class="button secondary" id="model-install-review-cancel" type="button">Cancel</button>
+        <button class="button primary" id="model-install-review-approve" type="button">Approve download</button>
       </footer>
     </section>
   </div>

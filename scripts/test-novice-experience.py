@@ -215,6 +215,17 @@ def main() -> int:
     assert "installation-component-check" in app
     assert "The model download was interrupted" in app
     assert "System → Troubleshooting logs" in app
+    assert 'window.localStorage.setItem(LAST_SECTION_STORAGE_KEY, panelId)' in app
+    assert 'await api("/api/resume-provider", {})' in app
+    assert 'id="research-open-troubleshooting"' in html
+    assert 'id="research-source"' in html
+    assert "Wikipedia · results shown in Haven 42" in html
+    assert "The wider web · opens a private browser search" in html
+    assert "Downloads only after you approve" in html
+    assert 'id="install-model-button"' in html
+    assert "Review and install model" in html
+    assert "Advanced manual option" in html
+    assert "No automatic downloads" not in html
     assert "View troubleshooting logs" in app
     assert "Cancel model download" in app
     assert "Calculating speed" in app

@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "reviewedAtUtc": "2026-08-16T19:15:00Z",
+  "status": "prepared-effect-free-owner-start-required",
+  "authority": {
+    "downloadsAuthorizedByThisFile": false,
+    "executionAuthorizedByThisFile": false,
+    "hardwareChangesAuthorizedByThisFile": false,
+    "promotionAuthorizedByThisFile": false,
+    "freshOwnerPromptRequiredToStart": true
+  },
+  "commonGates": [
+    "official-primary-source-and-license-recorded",
+    "immutable-model-revision-or-registry-manifest-recorded",
+    "exact-artifact-name-size-and-sha256-recorded",
+    "exact-runtime-version-and-minimum-version-recorded",
+    "hardware-memory-and-storage-admission-passes",
+    "network-effects-disabled-after-acquisition",
+    "task-fixtures-contain-no-user-content-or-private-lab-data",
+    "cleanup-and-residue-check-defined",
+    "repeat-run-and-cold-start-check-defined",
+    "automatic-default-and-support-label-remain-unchanged"
+  ],
+  "lanes": [
+    {
+      "id": "assistant-and-coding",
+      "candidateIds": ["qwen38-27b", "gemma4-local-family", "ornith-10-9b-q4", "north-mini-code-10-30b-a3b-q4", "lfm25-8b-a1b-q4", "lfm25-26b-gguf", "tiny-aya-global-335b"],
+      "requiredBeforeStart": ["resolve-one-exact-consumer-runtime-artifact", "pin-context-and-gpu-offload-settings", "record-tool-call-format-and-parser-contract"],
+      "fixtures": ["chat-instruction-following-and-refusal", "writing-and-summarization-fidelity", "coding-read-only-analysis", "coding-proposed-edit-and-explicit-scoped-write", "structured-tool-call-validity-and-unknown-tool-refusal", "long-context-truncation-and-citation-accounting"],
+      "failClosedOn": ["artifact-identity-drift", "runtime-version-drift", "invalid-tool-call", "unapproved-effect", "oom", "timeout", "residue"]
+    },
+    {
+      "id": "vision-and-document-vision",
+      "candidateIds": ["north-micro-vision-instruct-24b", "lfm25-vl-3b-gguf", "granite-vision-41-4b", "glm41v-9b-thinking", "mage-vl-5b", "nemotron-parse-20"],
+      "requiredBeforeStart": ["select-synthetic-or-permissively-licensed-image-corpus", "pin-image-size-count-and-context-envelope", "disable-remote-image-loading", "isolate-and-review-custom-model-and-codec-code", "admit-video-boundary-before-video-fixtures"],
+      "fixtures": ["image-description-grounding", "text-and-table-extraction", "chart-reading", "missing-evidence-refusal", "malformed-image-and-resource-limit-rejection", "bounded-offline-video-only-after-boundary-admission"],
+      "failClosedOn": ["remote-reference", "unreviewed-custom-code", "unsupported-media", "fabricated-extraction", "oom", "timeout", "residue"]
+    },
+    {
+      "id": "safety-classification",
+      "candidateIds": ["shieldstral-10-3b"],
+      "requiredBeforeStart": ["freeze-versioned-policy-taxonomy", "define-human-reviewed-positive-and-negative-fixtures", "declare-model-is-not-sole-safety-authority"],
+      "fixtures": ["text-risk-true-positive-and-true-negative", "image-risk-true-positive-and-true-negative", "policy-variant-consistency", "ambiguous-case-abstention"],
+      "failClosedOn": ["schema-drift", "silent-policy-change", "unbounded-false-positive-rate", "unbounded-false-negative-rate", "timeout"]
+    },
+    {
+      "id": "embeddings-and-retrieval",
+      "candidateIds": ["nemotron3-embed-1b", "nemotron3-embed-8b", "llama-nemotron-embed-vl-1b-v2"],
+      "requiredBeforeStart": ["complete-openmdw-license-review", "pin-vector-dimension-normalization-and-query-prefix", "use-only-synthetic-retrieval-corpus"],
+      "fixtures": ["deterministic-vector-shape", "semantic-recall-and-precision", "multilingual-retrieval-if-claimed", "image-text-and-document-retrieval-if-claimed", "empty-oversize-and-malformed-input", "batch-memory-envelope"],
+      "failClosedOn": ["dimension-drift", "nan-or-infinite-vector", "quality-floor-miss", "oom", "residue"]
+    },
+    {
+      "id": "speech-recognition",
+      "candidateIds": ["qwen3-asr-06b", "qwen3-asr-17b", "nemotron35-asr-streaming-06b", "vibevoice-asr-bitnet"],
+      "requiredBeforeStart": ["audio-capability-boundary-admitted", "select-synthetic-or-permissively-licensed-audio", "disable-microphone-and-live-capture"],
+      "fixtures": ["word-error-rate", "language-identification", "silence-noise-and-unsupported-format", "duration-and-memory-limits"],
+      "failClosedOn": ["microphone-access", "unapproved-file", "quality-floor-miss", "oom", "timeout", "residue"]
+    },
+    {
+      "id": "translation",
+      "candidateIds": ["riva-translate-4b-v2"],
+      "requiredBeforeStart": ["resolve-license-metadata", "select-permissively-licensed-parallel-text", "pin-language-pairs-and-document-length", "disable-network-and-remote-document-loading"],
+      "fixtures": ["sentence-translation-fidelity", "document-structure-preservation", "terminology-and-number-preservation", "unsupported-language-and-malformed-input", "round-trip-diagnostic-not-used-as-sole-quality-score"],
+      "failClosedOn": ["license-unresolved", "remote-reference", "fabricated-content", "quality-floor-miss", "oom", "timeout", "residue"]
+    },
+    {
+      "id": "computer-use",
+      "candidateIds": ["fara15-4b"],
+      "requiredBeforeStart": ["production-grade-sandbox-design-reviewed", "disposable-offline-test-site-prepared", "credentials-filesystem-network-and-host-controls-denied"],
+      "fixtures": ["visual-target-identification", "proposed-action-without-execution", "explicit-approved-action-in-disposable-sandbox", "prompt-injection-and-hidden-instruction-refusal", "cancel-rollback-and-cleanup"],
+      "failClosedOn": ["host-effect", "network-effect", "credential-access", "sandbox-escape", "unapproved-action", "residue"]
+    }
+  ]
+}

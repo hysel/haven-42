@@ -982,7 +982,7 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== 2 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 3 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
   const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
@@ -1017,8 +1017,11 @@ try {
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
   if (
     Object.values(allTourState).length !== 5
-    || allTourState.chat !== 2
-    || Object.entries(allTourState).some(([section, value]) => section !== "chat" && value !== 1)
+    || allTourState.chat !== 3
+    || allTourState.models !== 2
+    || allTourState.system !== 2
+    || allTourState.technical !== 1
+    || allTourState.about !== 1
   ) {
     throw new Error(`section-tour-state:${JSON.stringify(allTourState)}`);
   }
@@ -1060,7 +1063,7 @@ try {
       stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
     };
   })()`);
-  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 2) {
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 3) {
     throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
   }
   checks += 41;
@@ -1333,8 +1336,8 @@ try {
   await cdp.evaluate(`(() => {
     const original = window.fetch;
     window.__havenOriginalFetch = original;
-    window.fetch = (input, init) => input === "/api/model-search"
-      ? Promise.resolve(new Response(JSON.stringify({
+    window.fetch = (input, init) => {
+      if (input === "/api/model-search") return Promise.resolve(new Response(JSON.stringify({
           schemaVersion: 1,
           kind: "model-catalog-search",
           query: "writing",
@@ -1356,8 +1359,35 @@ try {
             executionAllowed: false,
             installCommand: "ollama pull candidate-writing:7b"
           }]
-        }), {status: 200, headers: {"Content-Type": "application/json"}}))
-      : original(input, init);
+        }), {status: 200, headers: {"Content-Type": "application/json"}}));
+      if (input === "/api/model-install/prepare") return Promise.resolve(new Response(JSON.stringify({
+        schemaVersion: 1,
+        kind: "model-install-approval",
+        approvalToken: "a".repeat(32),
+        expiresInSeconds: 300,
+        singleUse: true,
+        persisted: false,
+        model: "candidate-writing:7b",
+        destination: "This computer",
+        downloadStarted: false,
+        licenseStatus: "review-required",
+        hardwareFit: "unknown"
+      }), {status: 200, headers: {"Content-Type": "application/json"}}));
+      if (input === "/api/model-install/execute") return Promise.resolve(new Response(JSON.stringify({
+        schemaVersion: 1,
+        kind: "model-install-result",
+        status: "installed",
+        model: "candidate-writing:7b",
+        verifiedByProviderCatalog: true,
+        selectedAutomatically: false,
+        modelOption: {
+          name: "candidate-writing:7b",
+          digestVerified: false,
+          capabilityStatus: Object.fromEntries(Object.keys(CAPABILITIES).map((id) => [id, "unverified"]))
+        }
+      }), {status: 200, headers: {"Content-Type": "application/json"}}));
+      return original(input, init);
+    };
     const query = document.querySelector('#model-search-query');
     query.value = "writing";
     query.dispatchEvent(new Event('input', {bubbles: true}));
@@ -1382,6 +1412,58 @@ try {
     || discovery.currentModel !== "manual:unknown-model:latest"
   ) throw new Error("candidate-only-model-discovery");
   checks += 6;
+
+  await cdp.evaluate("document.querySelector('#install-model-button').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
+  const installReview = await cdp.evaluate(`({
+    role: document.querySelector('#model-install-review-dialog').getAttribute('role'),
+    modal: document.querySelector('#model-install-review-dialog').getAttribute('aria-modal'),
+    model: document.querySelector('#model-install-review-name').textContent,
+    destination: document.querySelector('#model-install-review-destination').textContent,
+    focused: document.activeElement.id,
+    backgroundInert: document.querySelector('.shell').inert,
+  })`);
+  if (
+    installReview.role !== "dialog"
+    || installReview.modal !== "true"
+    || installReview.model !== "candidate-writing:7b"
+    || installReview.destination !== "This computer"
+    || installReview.focused !== "model-install-review-dialog"
+    || !installReview.backgroundInert
+  ) throw new Error(`model-install-review:${JSON.stringify(installReview)}`);
+  await cdp.evaluate("document.querySelector('#model-install-review-dialog').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))");
+  await waitFor(() => cdp.evaluate("document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
+  const installCancel = await cdp.evaluate(`({
+    focused: document.activeElement.id,
+    backgroundInert: document.querySelector('.shell').inert,
+    status: document.querySelector('#model-install-status').textContent,
+  })`);
+  if (installCancel.focused !== "install-model-button" || installCancel.backgroundInert || !installCancel.status.includes("Nothing was downloaded")) {
+    throw new Error(`model-install-cancel:${JSON.stringify(installCancel)}`);
+  }
+  await cdp.evaluate("document.querySelector('#install-model-button').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
+  await trustedClick(cdp, "#model-install-review-approve");
+  await waitFor(() => cdp.evaluate("document.querySelector('#desired-model').classList.contains('hidden')"));
+  const installedCandidate = await cdp.evaluate(`({
+    selected: document.querySelector('#model').value,
+    status: document.querySelector('#model-search-status').textContent,
+    reviewHidden: document.querySelector('#model-install-review-layer').classList.contains('hidden'),
+    backgroundInert: document.querySelector('.shell').inert,
+  })`);
+  if (
+    installedCandidate.selected !== "manual:candidate-writing:7b"
+    || !installedCandidate.status.includes("downloaded and verified")
+    || !installedCandidate.reviewHidden
+    || installedCandidate.backgroundInert
+  ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
+  checks += 16;
+  await cdp.evaluate(`(() => {
+    state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
+    state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
+    state.modelSearchResults = [];
+    renderModelSelect();
+  })()`);
 
   const capabilityReset = await cdp.evaluate(`(() => {
     const capability = document.querySelector('#model-search-capability');
@@ -3394,9 +3476,134 @@ try {
       && document.querySelector('#research-page').classList.contains('hidden')
       && document.querySelector('#research-query').value === ''
     )`));
-    checks += 31;
+    await cdp.evaluate(`(() => {
+      document.querySelector('#research-tools').open = true;
+      const source = document.querySelector('#research-source');
+      source.value = 'general-web';
+      source.dispatchEvent(new Event('change', {bubbles: true}));
+      state.modelOptions.push({name: 'qwen3.5:9b'});
+      state.modelSelections['general.chat'] = {mode: 'manual', model: 'qwen3.5:9b'};
+      document.querySelector('#research-api-key').value = '${"g".repeat(32)}';
+      document.querySelector('#research-query').value = 'recent local AI models';
+      document.querySelector('#research-query-form').requestSubmit();
+    })()`);
+    await waitFor(() => cdp.evaluate(`(
+      !document.querySelector('#research-review-layer').classList.contains('hidden')
+      || document.querySelector('#research-query-status').dataset.state === 'error'
+    )`));
+    const citedWebPreparation = await cdp.evaluate(`({
+      reviewHidden: document.querySelector('#research-review-layer').classList.contains('hidden'),
+      status: document.querySelector('#research-query-status').textContent,
+      model: document.querySelector('#model').value,
+      selectedModel: selectedModel('general.chat'),
+      modelOptions: state.modelOptions.map((item) => item.name),
+    })`);
+    if (citedWebPreparation.reviewHidden) {
+      throw new Error(`cited-web-preparation:${JSON.stringify(citedWebPreparation)}`);
+    }
+    const citedWebReview = await cdp.evaluate(`({
+      keyVisible: !document.querySelector('#research-api-key-row').classList.contains('hidden'),
+      keyRequired: document.querySelector('#research-api-key').required,
+      kind: document.querySelector('#research-review-kind').textContent,
+      query: document.querySelector('#research-review-query').textContent,
+      source: document.querySelector('#research-review-source').textContent,
+      destination: document.querySelector('#research-review-destination').textContent,
+      description: document.querySelector('#research-review-description').textContent,
+    })`);
+    if (
+      !citedWebReview.keyVisible
+      || !citedWebReview.keyRequired
+      || citedWebReview.kind !== 'Search selected public pages and create a cited local answer'
+      || citedWebReview.query !== 'recent local AI models'
+      || citedWebReview.source !== 'Brave Search API and selected public pages'
+      || citedWebReview.destination !== 'https://api.search.brave.com/res/v1/web/search'
+      || !citedWebReview.description.includes('selected local model')
+    ) throw new Error(`cited-web-review:${JSON.stringify(citedWebReview)}`);
+    await cdp.evaluate("document.querySelector('#research-review-cancel').click()");
+    await waitFor(() => cdp.evaluate("document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    const citedWebCancelled = await cdp.evaluate(`({
+      status: document.querySelector('#research-query-status').textContent,
+      keyCleared: document.querySelector('#research-api-key').value === '',
+      answerHidden: document.querySelector('#research-answer').classList.contains('hidden'),
+      sourcesHidden: document.querySelector('#research-sources').classList.contains('hidden'),
+    })`);
+    if (
+      !citedWebCancelled.status.includes('cancelled')
+      || !citedWebCancelled.keyCleared
+      || !citedWebCancelled.answerHidden
+      || !citedWebCancelled.sourcesHidden
+    ) throw new Error(`cited-web-cancel:${JSON.stringify(citedWebCancelled)}`);
+    checks += 11;
+    await cdp.evaluate(`(() => {
+      document.querySelector('#research-tools').open = true;
+      const source = document.querySelector('#research-source');
+      source.value = 'web';
+      source.dispatchEvent(new Event('change', {bubbles: true}));
+      document.querySelector('#research-query').value = 'local GPU models';
+      document.querySelector('#research-query-form').requestSubmit();
+    })()`);
+    await waitFor(() => cdp.evaluate("!document.querySelector('#research-review-layer').classList.contains('hidden')"));
+    const webReview = await cdp.evaluate(`({
+      kind: document.querySelector('#research-review-kind').textContent,
+      query: document.querySelector('#research-review-query').textContent,
+      source: document.querySelector('#research-review-source').textContent,
+      destination: document.querySelector('#research-review-destination').textContent,
+    })`);
+    if (
+      webReview.kind !== 'Open a wider-web search in your browser'
+      || webReview.query !== 'local GPU models'
+      || webReview.source !== 'Brave Search'
+      || webReview.destination !== 'https://search.brave.com/search?q=local+GPU+models'
+    ) throw new Error(`wider-web-review:${JSON.stringify(webReview)}`);
+    await trustedClick(cdp, '#research-review-approve');
+    await waitFor(() => cdp.evaluate("!document.querySelector('#research-web-link').classList.contains('hidden')"));
+    const widerWeb = await cdp.evaluate(`(() => {
+      const link = document.querySelector('#research-web-link');
+      const before = {
+        href: link.href,
+        target: link.target,
+        rel: link.rel,
+        referrerPolicy: link.referrerPolicy,
+        status: document.querySelector('#research-query-status').textContent,
+      };
+      link.addEventListener('click', (event) => event.preventDefault(), {once: true});
+      link.click();
+      return {...before, researchOpen: document.querySelector('#research-tools').open};
+    })()`);
+    if (
+      widerWeb.href !== 'https://search.brave.com/search?q=local+GPU+models'
+      || widerWeb.target !== '_blank'
+      || !widerWeb.rel.includes('noopener')
+      || widerWeb.referrerPolicy !== 'no-referrer'
+      || !widerWeb.status.includes('Haven 42 will not read')
+      || widerWeb.researchOpen
+    ) throw new Error(`wider-web-handoff:${JSON.stringify(widerWeb)}`);
+    checks += 43;
     trace("product-research-runtime-verified");
   }
+  await cdp.evaluate(`connectProvider('http://127.0.0.1:${fakePort}', 30, 300, 'bearer', '${browserAuthSecret}')`);
+  await cdp.evaluate("document.querySelector('#models-nav').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#models-panel').classList.contains('hidden')"));
+  await cdp.evaluate("location.reload()");
+  await waitFor(() => cdp.evaluate("document.readyState === 'complete' && Boolean(document.querySelector('#models-panel'))"));
+  await delay(1000);
+  const restoredSection = await cdp.evaluate(`({
+    stored: localStorage.getItem('haven42.last-section.v1'),
+    modelsActive: document.querySelector('#models-nav').classList.contains('active'),
+    modelsHidden: document.querySelector('#models-panel').classList.contains('hidden'),
+    setupHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+    conversationPersisted: localStorage.getItem('haven42.conversation'),
+    visibleError: document.querySelector('#connection-error').textContent,
+    wizardDescription: document.querySelector('#wizard-description').textContent,
+  })`);
+  if (
+    restoredSection.stored !== 'models-panel'
+    || !restoredSection.modelsActive
+    || restoredSection.modelsHidden
+    || !restoredSection.setupHidden
+    || restoredSection.conversationPersisted !== null
+  ) throw new Error(`last-section-restore:${JSON.stringify(restoredSection)}`);
+  checks += 4;
   const aboutAccessibilityLink = await cdp.evaluate(`(() => {
     const link = document.querySelector('#about-panel a[href="/accessibility"]');
     return link ? {text: link.textContent.trim(), href: link.getAttribute('href')} : null;
