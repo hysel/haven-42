@@ -2692,6 +2692,8 @@ PY
     grep -q "15 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-native-transport.py" |
     grep -q "21 offline security checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-web-research-native-page-transport.py" |
+    grep -q "41 offline security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-transport-guard.py" |
     grep -q "25 hostile and exclusion checks" || return 1
   python3 "$REPO_ROOT/scripts/test-offline-research-approval-state.py" |

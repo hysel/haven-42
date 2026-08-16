@@ -227,6 +227,7 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Native fixed-provider metadata query](https://github.com/hysel/haven-42/wiki/Evidence-Record-01b01f98b537ca75) | `partial-pass` | Windows · Wikipedia metadata API · none |
 | [Native fixed-provider metadata query on Linux](https://github.com/hysel/haven-42/wiki/Evidence-Record-7207da1f9eca0995) | `partial-pass` | Native headless Linux · Wikipedia metadata API · none |
+| [Native selected-page transport on Windows and Linux](https://github.com/hysel/haven-42/wiki/Evidence-Record-f36876d9cc12face) | `partial-pass` | Windows and native headless Linux · Wikipedia query and extracts APIs · none |
 
 ## Automatic-update boundary
 
