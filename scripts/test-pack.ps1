@@ -5625,6 +5625,9 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
     $linuxSecretOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-linux-secret-service-availability.py"))
     Assert-Equal -Actual $linuxSecretOutput.ExitCode -Expected 0 -Message "Linux Secret Service availability boundary checks should pass. Output: $($linuxSecretOutput.Output)"
     Assert-True -Condition ($linuxSecretOutput.Output -match "27 offline checks") -Message "Linux Secret Service boundary must remain system-path pinned, non-activating, sanitized, bounded, and package-excluded."
+    $macosKeychainOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-macos-keychain-availability.py"))
+    Assert-Equal -Actual $macosKeychainOutput.ExitCode -Expected 0 -Message "macOS Keychain availability boundary checks should pass. Output: $($macosKeychainOutput.Output)"
+    Assert-True -Condition ($macosKeychainOutput.Output -match "30 offline checks") -Message "macOS Keychain boundary must remain system-path pinned, operation-free, sanitized, bounded, and package-excluded."
     $contract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-contract.json") | ConvertFrom-Json
     $schema = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-schema.json") | ConvertFrom-Json
     $policy = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/local-web-runtime-policy.json") | ConvertFrom-Json
@@ -5670,6 +5673,13 @@ Invoke-PackTest "conversation history foundation is typed bounded and effect fre
     foreach ($property in $linuxSecretContract.authority.PSObject.Properties) {
         if ($property.Name -ne "availabilityProbeAllowed") {
             Assert-True -Condition (-not [bool]$property.Value) -Message "Linux Secret Service authority must remain inactive: $($property.Name)"
+        }
+    }
+    $macosKeychainContract = Get-Content -Raw -LiteralPath (Join-Path $repoRoot "config/conversation-history-macos-keychain-availability.json") | ConvertFrom-Json
+    Assert-True -Condition ($macosKeychainContract.status -eq "development-availability-probe-only" -and -not $macosKeychainContract.probe.keychainListAllowed -and -not $macosKeychainContract.probe.keychainOpenAllowed -and -not $macosKeychainContract.probe.itemReadAllowed -and -not $macosKeychainContract.probe.itemWriteAllowed -and -not $macosKeychainContract.probe.rawOutputReturned) -Message "macOS Keychain probing must remain operation-free and sanitized."
+    foreach ($property in $macosKeychainContract.authority.PSObject.Properties) {
+        if ($property.Name -ne "availabilityProbeAllowed") {
+            Assert-True -Condition (-not [bool]$property.Value) -Message "macOS Keychain authority must remain inactive: $($property.Name)"
         }
     }
 }

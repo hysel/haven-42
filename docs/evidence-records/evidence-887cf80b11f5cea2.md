@@ -1,11 +1,11 @@
-# Linux credential-store availability boundary
+# macOS Keychain availability boundary
 
 > Generated evidence page. The canonical machine-readable record is
-> `evidence-3032fff46e49e400` in `config/evidence-page-registry.json`.
+> `evidence-887cf80b11f5cea2` in `config/evidence-page-registry.json`.
 
 ## What this record says
 
-A 27-check offline boundary pins the non-activating user-bus listing to reviewed system executable paths, rejects caller-controlled executable paths, and emits exact sanitized public result shapes; no native desktop cell, binding, service activation, method, credential access, runtime, UI, package, or production authority is admitted.
+A 30-check offline boundary pins an operation-free help probe to `/usr/bin/security`, rejects caller-controlled executable paths, bounds and discards output, and emits exact sanitized public result shapes; no Keychain, credential, database, runtime, UI, package, or production authority is admitted.
 
 | Result | Value |
 | --- | --- |
@@ -19,14 +19,14 @@ A 27-check offline boundary pins the non-activating user-bus listing to reviewed
 | --- | --- |
 | Surface | Haven 42 development availability probe |
 | Surface version | 1 |
-| Provider or runtime | freedesktop credential-store candidate |
-| Operating system | Linux |
+| Provider or runtime | Apple Keychain Services candidate |
+| Operating system | macOS |
 | Model | none |
-| Operation | Session Bus Credential Store Presence |
+| Operation | System Tool Presence |
 
 ## Source evidence
 
-[examples/linux-credential-store-availability-boundary.md](https://github.com/hysel/haven-42/blob/main/examples/linux-credential-store-availability-boundary.md)
+[examples/macos-keychain-availability-boundary.md](https://github.com/hysel/haven-42/blob/main/examples/macos-keychain-availability-boundary.md)
 
 ## Boundary of this result
 

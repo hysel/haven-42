@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "228a9109579254e6a9c375723f1b986c90b8104f57e594b06a57e445279f8848",
-  "recordCount": 121,
+  "catalogSha256": "9db999bbb25e9efb05a8613a7bee3f6efc8704365463dd34519d2376085c67af",
+  "recordCount": 123,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -464,7 +464,7 @@
         "validation_mode": "offline-mocked",
         "status": "candidate-only",
         "evidence": "examples/linux-credential-store-availability-boundary.md",
-        "notes": "A 25-check offline boundary pins the non-activating user-bus listing to reviewed system executable paths, rejects caller-controlled executable paths, and returns sanitized booleans; no native desktop cell, binding, service activation, method, credential access, runtime, UI, package, or production authority is admitted."
+        "notes": "A 27-check offline boundary pins the non-activating user-bus listing to reviewed system executable paths, rejects caller-controlled executable paths, and emits exact sanitized public result shapes; no native desktop cell, binding, service activation, method, credential access, runtime, UI, package, or production authority is admitted."
       },
       "sourceEvidence": "examples/linux-credential-store-availability-boundary.md",
       "page": {
@@ -567,6 +567,54 @@
         "repositorySource": "docs/evidence-records/evidence-01c8b74c82919604.md",
         "wikiPage": "Evidence-Record-01c8b74c82919604.md",
         "title": "Windows wrapped-key temporary persistence"
+      }
+    },
+    {
+      "id": "evidence-887cf80b11f5cea2",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "macOS Keychain availability boundary",
+        "surface": "Haven 42 development availability probe",
+        "surface_version": "1",
+        "provider": "Apple Keychain Services candidate",
+        "os": "macOS",
+        "model": "none",
+        "operation": "system-tool-presence",
+        "validation_mode": "offline-mocked",
+        "status": "candidate-only",
+        "evidence": "examples/macos-keychain-availability-boundary.md",
+        "notes": "A 30-check offline boundary pins an operation-free help probe to `/usr/bin/security`, rejects caller-controlled executable paths, bounds and discards output, and emits exact sanitized public result shapes; no Keychain, credential, database, runtime, UI, package, or production authority is admitted."
+      },
+      "sourceEvidence": "examples/macos-keychain-availability-boundary.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-887cf80b11f5cea2.md",
+        "wikiPage": "Evidence-Record-887cf80b11f5cea2.md",
+        "title": "macOS Keychain availability boundary"
+      }
+    },
+    {
+      "id": "evidence-a7fe3f72fe5a759f",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "macOS Keychain native hosted availability",
+        "surface": "Haven 42 development availability probe",
+        "surface_version": "1",
+        "provider": "Apple Keychain Services candidate",
+        "os": "GitHub-hosted macOS 15",
+        "model": "none",
+        "operation": "system-tool-presence",
+        "validation_mode": "automated-tests",
+        "status": "partial-pass",
+        "evidence": "examples/macos-keychain-availability-boundary.md",
+        "notes": "The exact source probe and contract passed the platform-gated `/usr/bin/security help` availability cell in the PR 91 macOS smoke job while every Keychain-operation and admission flag remained false; physical Mac, package parity, item lifecycle, runtime, UI, database, and production authority remain open."
+      },
+      "sourceEvidence": "examples/macos-keychain-availability-boundary.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a7fe3f72fe5a759f.md",
+        "wikiPage": "Evidence-Record-a7fe3f72fe5a759f.md",
+        "title": "macOS Keychain native hosted availability"
       }
     },
     {

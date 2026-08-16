@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.conversation-history.macos-keychain-availability",
+  "status": "development-availability-probe-only",
+  "platform": "macos",
+  "probe": {
+    "tool": "security",
+    "arguments": ["help"],
+    "keychainListAllowed": false,
+    "keychainOpenAllowed": false,
+    "keychainUnlockAllowed": false,
+    "itemLookupAllowed": false,
+    "itemReadAllowed": false,
+    "itemWriteAllowed": false,
+    "itemDeleteAllowed": false,
+    "userInterfaceAllowed": false,
+    "networkAllowed": false,
+    "packageInstallAllowed": false,
+    "timeoutSeconds": 5,
+    "maximumOutputBytes": 262144,
+    "rawOutputReturned": false
+  },
+  "result": {
+    "booleansOnly": true,
+    "keychainNamesReturned": false,
+    "keychainPathsReturned": false,
+    "itemMetadataReturned": false,
+    "stdoutReturned": false,
+    "stderrReturned": false
+  },
+  "authority": {
+    "availabilityProbeAllowed": true,
+    "runtimeRouteAllowed": false,
+    "uiControlAllowed": false,
+    "userContentAllowed": false,
+    "credentialStoreOpenAllowed": false,
+    "credentialReadAllowed": false,
+    "credentialWriteAllowed": false,
+    "databaseOpenAllowed": false,
+    "databaseCreateAllowed": false,
+    "packageAdmissionAllowed": false,
+    "productionUseAllowed": false
+  }
+}

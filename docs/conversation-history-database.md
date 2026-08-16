@@ -42,8 +42,14 @@ application behavior.
   [Conversation History Encryption And Key-Management Review](conversation-history-encryption-review.md).
 - The Linux Secret Service candidate has an offline-tested, non-activating
   availability probe that returns sanitized booleans only. It does not select a
-  binding or grant credential-store authority; native desktop and headless
-  behavior remain unproved.
+  binding or grant credential-store authority; its native headless cell proved
+  only expected fail-closed behavior and native desktop behavior remains open.
+- The macOS Keychain candidate has an offline-tested, operation-free
+  availability probe pinned to `/usr/bin/security help`. It returns only an
+  exact public status shape and grants no Keychain, credential, database,
+  runtime, UI, or package authority. The exact source probe passed a
+  GitHub-hosted macOS 15 cell; physical Mac, packaged parity, and key operations
+  remain open.
 
 `config/conversation-history-schema.json` describes a bounded logical schema
 for conversations, ordered messages, validated local summaries, sanitized

@@ -2818,6 +2818,8 @@ test_conversation_history_foundation() {
     grep -q "20 fail-closed checks" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-linux-secret-service-availability.py" |
     grep -q "27 offline checks" || return 1
+  python3 "$REPO_ROOT/scripts/test-conversation-history-macos-keychain-availability.py" |
+    grep -q "30 offline checks" || return 1
   python3 - "$REPO_ROOT" <<'PY'
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2828,6 +2830,7 @@ windows_key = json.loads((root / "config/conversation-history-windows-key-protec
 windows_persistence = json.loads((root / "config/conversation-history-windows-wrapped-key-persistence.json").read_text(encoding="utf-8"))
 windows_acl = json.loads((root / "config/conversation-history-windows-per-user-acl.json").read_text(encoding="utf-8"))
 linux_secret = json.loads((root / "config/conversation-history-linux-secret-service-availability.json").read_text(encoding="utf-8"))
+macos_keychain = json.loads((root / "config/conversation-history-macos-keychain-availability.json").read_text(encoding="utf-8"))
 foundation = policy["inactiveFoundations"]["conversationHistory"]
 assert contract["status"] == "simulation-only-not-runtime-admitted"
 assert contract["defaultMode"] == "private-session"
@@ -2905,6 +2908,18 @@ assert not any(
     for name, value in linux_secret["authority"].items()
     if name != "availabilityProbeAllowed"
 )
+assert macos_keychain["status"] == "development-availability-probe-only"
+assert macos_keychain["probe"]["keychainListAllowed"] is False
+assert macos_keychain["probe"]["keychainOpenAllowed"] is False
+assert macos_keychain["probe"]["itemReadAllowed"] is False
+assert macos_keychain["probe"]["itemWriteAllowed"] is False
+assert macos_keychain["probe"]["rawOutputReturned"] is False
+assert macos_keychain["authority"]["availabilityProbeAllowed"] is True
+assert not any(
+    value
+    for name, value in macos_keychain["authority"].items()
+    if name != "availabilityProbeAllowed"
+)
 planner = (root / "scripts/simulate-conversation-history.py").read_text(encoding="utf-8")
 assert "import sqlite3" not in planner
 assert "sqlite3.connect" not in planner
@@ -2916,6 +2931,7 @@ assert "conversation-history-windows-key-protection" not in package_spec
 assert "conversation-history-windows-wrapped-key-persistence" not in package_spec
 assert "conversation-history-windows-per-user-acl" not in package_spec
 assert "conversation-history-linux-secret-service-availability" not in package_spec
+assert "conversation-history-macos-keychain-availability" not in package_spec
 assert "docs/conversation-history-database.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 assert "docs/conversation-history-encryption-review.md" in (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 PY
