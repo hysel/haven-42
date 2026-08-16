@@ -16,8 +16,8 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 128 |
-| Distinct model-field values | 38 |
+| Evidence records | 130 |
+| Distinct model-field values | 40 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
@@ -32,16 +32,16 @@ See [Evidence Catalog](Evidence-Catalog),
 | `read-only-cli-validated` | 9 |
 | `candidate-only` | 7 |
 | `approved-write-ready` | 4 |
+| `failed-validation` | 3 |
 | `plan-review-candidate` | 2 |
 | `plan-validated` | 2 |
-| `failed-validation` | 1 |
 | `review-validated` | 1 |
 
 ## Validation Modes
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 48 |
+| Local endpoint | 50 |
 | Generated sample | 38 |
 | Editor agent | 9 |
 | Automated tests | 8 |
@@ -95,6 +95,8 @@ See [Evidence Catalog](Evidence-Catalog),
 | granite4:7b-a1b-h |
 | laguna-xs-2.1:q4_K_M |
 | local-config |
+| ministral-3:3b-instruct-2512-q4_K_M |
+| ministral-3:8b-instruct-2512-q4_K_M |
 | mistral-small3.2:24b-instruct-2506-q4_K_M |
 | mlx-community/Devstral-Small-2-24B-Instruct-2512-4bit |
 | mlx-community/Qwen3.5-4B-4bit |

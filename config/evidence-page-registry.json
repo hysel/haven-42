@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "a962fa75a0f34609e287d4873c5a46164d605c4927c9f65b9941b03e3f14aefc",
-  "recordCount": 128,
+  "catalogSha256": "f62a1f2c9c29f3de84c69b49b4f79a7fda3bdda04b79f35827ab5737fdcf03ce",
+  "recordCount": 130,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -1983,6 +1983,54 @@
         "repositorySource": "docs/evidence-records/evidence-739440533a3f6c7a.md",
         "wikiPage": "Evidence-Record-739440533a3f6c7a.md",
         "title": "Granite 4.1 8B on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-14e2d57e6336807d",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "ministral-3:3b-instruct-2512-q4_K_M",
+        "operation": "chat-writing-summary-gate",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/nvidia-v100-ollama03213-ministral-retry.md",
+        "notes": "Chat and Summarization passed three samples, three unload proofs, and CUDA residency; Writing failed the one-sentence constraint, so the mandatory gate started no soak and grants no automatic promotion."
+      },
+      "sourceEvidence": "examples/nvidia-v100-ollama03213-ministral-retry.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-14e2d57e6336807d.md",
+        "wikiPage": "Evidence-Record-14e2d57e6336807d.md",
+        "title": "Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA"
+      }
+    },
+    {
+      "id": "evidence-83b23ecb83be18a7",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama",
+        "os": "Ubuntu 24.04.4",
+        "model": "ministral-3:8b-instruct-2512-q4_K_M",
+        "operation": "chat-writing-summary-gate",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/nvidia-v100-ollama03213-ministral-retry.md",
+        "notes": "Chat passed three samples, three unload proofs, and CUDA residency; Writing and Summarization failed the one-sentence constraint, so the mandatory gate started no soak and grants no automatic promotion."
+      },
+      "sourceEvidence": "examples/nvidia-v100-ollama03213-ministral-retry.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-83b23ecb83be18a7.md",
+        "wikiPage": "Evidence-Record-83b23ecb83be18a7.md",
+        "title": "Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA"
       }
     },
     {

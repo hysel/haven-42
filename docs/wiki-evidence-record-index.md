@@ -153,6 +153,8 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-b1e852d6e517e410) | `partial-pass` | Ubuntu 24.04.4 · Ollama · gemma3:1b-it-q4_K_M |
 | [Granite 4.1 8B on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-739440533a3f6c7a) | `partial-pass` | Ubuntu Linux · direct process · granite41-8b-q4_K_M |
+| [Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-14e2d57e6336807d) | `failed-validation` | Ubuntu 24.04.4 · Ollama · ministral-3:3b-instruct-2512-q4_K_M |
+| [Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-83b23ecb83be18a7) | `failed-validation` | Ubuntu 24.04.4 · Ollama · ministral-3:8b-instruct-2512-q4_K_M |
 | [Nemotron 3.5 Lightning Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-999c817bcb50d175) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q4_K_M |
 | [Nemotron 3.5 Lightning Q8 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-b4871f9bcbf09daa) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q8_0 |
 | [Ollama 0.32.9 five-model task-contract retry on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-029248b547774d8a) | `failed-validation` | Ubuntu 24.04.4 · Ollama · five exact manifest-pinned models |

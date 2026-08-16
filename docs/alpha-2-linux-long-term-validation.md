@@ -402,3 +402,11 @@ CUDA with Ollama 0.32.13. The sanitized report explicitly denies automatic
 selection and default authority. These results remain evidence for owner
 review: physical memory-tier evidence, full guided-setup promotion, package
 publication, and support-label promotion remain separate gates.
+
+On August 16, the exact Ministral 3 3B and 8B Q4 artifacts were retried on the
+same Ollama 0.32.13 Ubuntu/CUDA review environment. Both passed Chat with three
+samples, three unload proofs, and nonzero CUDA residency. The 3B artifact also
+passed Summarization, but both failed Writing's one-sentence constraint and the
+8B artifact also failed the same Summarization constraint. The fail-closed
+runner therefore started no soak. This newer negative result remains bound to
+the exact runtime, task contract, artifacts, and profile.

@@ -613,6 +613,11 @@ promotion:
   the evidence bound to the exact 128 GiB-system/64 GiB aggregate-GPU review
   environment; a profile admission floor is not a physical memory-tier test,
   and no automatic selection or default change is authorized.
+- [x] Retry the exact Ministral 3 3B and 8B Q4 artifacts on the same Ollama
+  0.32.13 Ubuntu/CUDA review environment. Both passed Chat; 3B also passed
+  Summarization. Both failed Writing's one-sentence constraint, and 8B also
+  failed the same Summarization constraint. No soak ran, and the exact-profile
+  negative result grants no automatic selection or default authority.
 - [x] Feed only passed exact-profile evidence into the selector and exercise
   low-, medium-, and higher-capacity hardware profiles, including refusal for
   untested memory and accelerator lanes.
