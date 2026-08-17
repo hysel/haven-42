@@ -1,6 +1,6 @@
 # Tested Hardware and AI Engines
 
-_Last reviewed: August 13, 2026._
+_Last reviewed: August 17, 2026._
 
 This page summarizes the real operating systems, hardware, and AI engines used
 during Haven 42 development. A result applies only to the row shown. It does
@@ -40,6 +40,7 @@ tables so each result can be read without matching rows by hand.
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | llama.cpp with HIP and ROCm | ✅ Verified | Passed engine and tool-call checks. |
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | llama.cpp with Vulkan | ⚠️ Partial | Runtime checks ran, but the patch-quality gate failed. |
 | Ubuntu 24.04 under WSL2 | AMD Radeon RX 7800 XT, 16 GB through DXG | llama.cpp with HIP and DXG | 🧪 Engineering evidence | Passed the model matrix as candidate evidence; this is not a supported product route. |
+| Ubuntu 26.04 LTS, physical machine | AMD Radeon RX 5700 XT, 8 GB | Ollama 0.32.13 with Vulkan and Mesa RADV | 🧪 Engineering evidence | Nine exact profiles passed the core task gate, three oversized candidates were refused before download, full-residency checks passed where requested, and a bounded current-boot stability and board-power profile completed. Seven profiles failed required task contracts; final-profile full-memory and packaged lifecycle testing remain open. |
 | Windows 11 x64, physical and Windows-to-Go profiles | Intel Arc B580, 12 GB | Ollama with experimental Vulkan | ✅ Verified | Passed the exact bounded Intel Alpha profile. |
 | Windows 11 x64, physical machine | Intel Arc B580, 12 GB | llama.cpp with SYCL | ❌ Did not pass | Failed the native model-loading gate. |
 | Ubuntu 26.04 Desktop, physical machine | Intel Arc B580, 12 GB | llama.cpp with SYCL | ⚠️ Partial | Functional checks passed, but three upstream tests failed. |

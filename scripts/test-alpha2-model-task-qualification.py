@@ -61,6 +61,17 @@ def main() -> None:
         "minimumUsableGpuMemoryGiB": 16,
     }
     assert len(qwen_matrix_sha) == 64
+    vulkan_profile, vulkan_matrix_sha = MODULE._review_matrix(
+        "granite41-3b-q4", "vulkan-8gib-system-16gib"
+    )
+    assert vulkan_profile == {
+        "id": "vulkan-8gib-system-16gib",
+        "backend": "vulkan",
+        "minimumSystemMemoryGiB": 15,
+        "minimumUsableGpuMemoryGiB": 8,
+        "minimumFreeGpuMemoryGiB": 2,
+    }
+    assert len(vulkan_matrix_sha) == 64
     refused(
         lambda: MODULE._review_matrix("qwen36-27b-q4", "cpu-16gib"),
         "unreviewed-qualification-cell",
@@ -129,6 +140,32 @@ def main() -> None:
         assert result["evidence"]["automaticPromotionAllowed"] is False
         assert result["evidence"]["platformFamily"] == "linux"
         assert unloads == [True, True, True]
+        runner._verify_residency = lambda *_args: 4 * MODULE.GIB_BYTES
+        vulkan_result = MODULE.run_qualification(
+            origin="http://127.0.0.1:11434",
+            model_id="granite41-3b-q4",
+            capability="general.chat",
+            profile_id="vulkan-8gib-system-16gib",
+            operating_system_id="test-linux",
+            system_memory_gib=16,
+            usable_gpu_memory_gib=8,
+        )
+        assert vulkan_result["outcome"] == "passed"
+        assert vulkan_result["evidence"]["backendMode"] == "vulkan"
+        runner._verify_residency = lambda *_args: 7 * MODULE.GIB_BYTES
+        refused(
+            lambda: MODULE.run_qualification(
+                origin="http://127.0.0.1:11434",
+                model_id="granite41-3b-q4",
+                capability="general.chat",
+                profile_id="vulkan-8gib-system-16gib",
+                operating_system_id="test-linux",
+                system_memory_gib=16,
+                usable_gpu_memory_gib=8,
+            ),
+            "insufficient-gpu-headroom",
+        )
+        runner._verify_residency = lambda *_args: 0
         windows_result = MODULE.run_qualification(
             origin="http://127.0.0.1:11434",
             model_id="granite41-3b-q4",
@@ -140,7 +177,7 @@ def main() -> None:
             platform_family="windows",
         )
         assert windows_result["evidence"]["platformFamily"] == "windows"
-        assert unloads == [True] * 6
+        assert unloads == [True] * 12
         refused(
             lambda: MODULE.run_qualification(
                 origin="http://127.0.0.1:11434",
@@ -173,7 +210,7 @@ def main() -> None:
             ),
             "chat-exact-response-failed",
         )
-        assert len(unloads) == 7
+        assert len(unloads) == 13
     finally:
         for name, value in originals.items():
             setattr(runner, name, value)

@@ -33,6 +33,8 @@ MIN_INTERVAL_SECONDS = 30
 MAX_INTERVAL_SECONDS = 300
 MAX_CELLS = 1_500
 CAPABILITIES = ("general.chat", "content.write", "content.summarize")
+ACCELERATED_BACKENDS = {"cuda", "rocm", "vulkan"}
+GIB_BYTES = 1024 ** 3
 
 
 def _load_model_runner():
@@ -202,7 +204,7 @@ def run_soak(
         model, binding_digest, provider_version = resolver(model_id)
     except MODEL_RUNNER.ValidationError as error:
         raise SoakError(str(error)) from error
-    if backend not in {"cpu", "cuda"}:
+    if backend not in {"cpu", *ACCELERATED_BACKENDS}:
         raise SoakError("unreviewed-backend")
     if platform_family not in {"linux", "windows"}:
         raise SoakError("unreviewed-platform-family")
@@ -281,8 +283,24 @@ def run_soak(
             raise SoakError("invalid-cell-result")
         if backend == "cpu" and cell_vram != 0:
             raise SoakError("cpu-cell-used-gpu")
-        if backend == "cuda" and cell_vram <= 0:
-            raise SoakError("cuda-residency-not-observed")
+        if backend in ACCELERATED_BACKENDS and cell_vram <= 0:
+            raise SoakError(f"{backend}-residency-not-observed")
+        if qualification_profile is not None:
+            minimum_free_gpu_memory_gib = qualification_profile.get(
+                "minimumFreeGpuMemoryGiB", 0
+            )
+            if (
+                isinstance(minimum_free_gpu_memory_gib, bool)
+                or not isinstance(minimum_free_gpu_memory_gib, (int, float))
+                or not 0 <= minimum_free_gpu_memory_gib <= gpu_memory
+            ):
+                raise SoakError("invalid-qualification-matrix")
+            if (
+                backend in ACCELERATED_BACKENDS
+                and gpu_memory * GIB_BYTES - cell_vram
+                < minimum_free_gpu_memory_gib * GIB_BYTES
+            ):
+                raise SoakError("insufficient-gpu-headroom")
         cells += 1
         samples += 3
         unloads += 3
@@ -356,7 +374,9 @@ def main() -> int:
     parser.add_argument(
         "--platform-family", choices=("linux", "windows"), default="linux"
     )
-    parser.add_argument("--backend", choices=("cpu", "cuda"), required=True)
+    parser.add_argument(
+        "--backend", choices=("cpu", "cuda", "rocm", "vulkan"), required=True
+    )
     parser.add_argument("--system-memory-gib", type=float, required=True)
     parser.add_argument("--usable-gpu-memory-gib", type=float, required=True)
     parser.add_argument("--duration-minutes", type=float, required=True)

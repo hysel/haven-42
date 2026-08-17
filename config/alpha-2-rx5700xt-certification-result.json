@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-exact-hardware-certification-result",
+  "release": "0.4.0-alpha.2",
+  "observedAtUtc": "2026-08-17T04:00:00Z",
+  "status": "exact-profile-engineering-evidence-complete",
+  "hardwareProfile": {
+    "vendor": "AMD",
+    "model": "Radeon RX 5700 XT",
+    "architecture": "RDNA 1",
+    "memoryGiB": 8,
+    "operatingSystem": "Ubuntu 26.04 LTS",
+    "backend": "vulkan-radv"
+  },
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.13"
+  },
+  "bindings": {
+    "plan": {
+      "path": "config/alpha-2-rx5700xt-certification-plan.json",
+      "canonicalSha256": "84741eea3ad5a54ec0732030bc809aee7b23abaab91078acf9ac4dcdc5222ed0"
+    },
+    "inventoryCanonicalSha256": "76e01a821f1610bfed91e0fc6e8758b00aab4c6f5ea5715c5c572eec88309137",
+    "matrixCanonicalSha256": "ce61deccfc375383d48c7659e105255f7841aad1783f6960fa798354e649322d"
+  },
+  "coreQualification": {
+    "passed": [
+      "gemma3-4b-q4",
+      "gemma4-e2b-qat",
+      "gemma4-e4b-qat",
+      "granite41-3b-q4",
+      "granite41-8b-q4",
+      "llama32-3b-q4",
+      "ornith-10-9b-q4",
+      "phi4-mini-38b-q4",
+      "qwen35-4b-q4"
+    ],
+    "failedTaskGate": [
+      "gemma3-1b-q4",
+      "lfm25-8b-a1b-q4",
+      "minicpm-v46-1b-q4",
+      "ministral3-3b-q4",
+      "ministral3-8b-q4",
+      "qwen35-08b-q8",
+      "qwen35-2b-q8"
+    ]
+  },
+  "additionalCapabilities": {
+    "ornith-10-9b-q4": {
+      "passed": ["coding", "tools", "failure-recovery"],
+      "failed": []
+    },
+    "minicpm-v46-1b-q4": {
+      "passed": ["failure-recovery", "full-gpu-residency"],
+      "failed": ["general.chat", "vision"]
+    }
+  },
+  "safeRefusalsBeforeDownload": [
+    "gemma3-12b-q4",
+    "gemma4-12b-qat",
+    "qwen35-9b-q4"
+  ],
+  "stability": {
+    "outcome": "passed",
+    "currentBootCpuSmokeSeconds": 600,
+    "workerCount": 4,
+    "currentBootHardwareIncidentCount": 0,
+    "finalProfileMemoryTestComplete": false,
+    "scope": "current-boot-engineering-evidence-not-general-hardware-certification"
+  },
+  "power": {
+    "modelId": "llama32-3b-q4",
+    "scope": "gpu-board-sysfs-power1-average",
+    "idleAverageWatts": 7.575,
+    "activeAverageWatts": 122.118,
+    "peakWatts": 242.0,
+    "activeEnergyWattHours": 20.350129,
+    "outputTokensPerWattHour": 2134.188
+  },
+  "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+  "containsPrivateMachineIdentity": false,
+  "containsNetworkIdentity": false,
+  "containsRawPromptsOrResponses": false,
+  "automaticDefaultChangeAllowed": false,
+  "automaticSupportChangeAllowed": false
+}

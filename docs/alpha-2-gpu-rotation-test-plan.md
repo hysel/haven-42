@@ -44,15 +44,17 @@ ladder change remains a separate owner-approved product decision.
 | NVIDIA mainstream | GeForce RTX 3060 | 12 GiB | Proxmox rotation | Purchased; not yet tested |
 | NVIDIA workstation | Quadro RTX 5000 | 16 GiB | Proxmox baseline | Existing evidence |
 | NVIDIA datacenter | Tesla V100 | 32 GiB each | Proxmox baseline, two cards | Existing evidence |
-| AMD RDNA 1 | Radeon RX 5700 XT | 8 GiB | Separate physical dual-boot computer | Installed; not yet Alpha 2 certified |
+| AMD RDNA 1 | Radeon RX 5700 XT | 8 GiB | Separate physical dual-boot computer | Ubuntu Vulkan exact-profile engineering evidence complete; package, Windows, and final-profile memory gates remain open |
 | AMD RDNA 2 | Radeon RX 6800, non-XT | 16 GiB | Proxmox rotation | Purchased; not yet tested |
 | AMD RDNA 3 | Radeon RX 7800 XT | 16 GiB | This Windows computer | Existing bounded evidence; new soak required |
 | Intel | Arc B580 | 12 GiB | Separate physical dual-boot computer | Campaign already in progress |
 
-The RX 5700 XT is the 8 GiB RDNA 1 lane. Ollama's current Linux GPU list names
-this exact card for its ROCm route; Windows and Vulkan remain separate test
-cells and inherit no Linux result. Every cell must still prove GPU execution
-and keep CPU fallback as a separately labelled comparison only.
+The RX 5700 XT is the 8 GiB RDNA 1 lane. The Ubuntu 26.04 Ollama 0.32.13
+Vulkan/RADV campaign now has bounded exact-profile evidence, including positive
+GPU residency, safe oversized-candidate refusal, current-boot stability, and
+one board-power measurement. Windows and ROCm remain separate test cells and
+inherit no Vulkan result. The final-profile full-memory and complete packaged
+lifecycle gates also remain open.
 
 ## Rules shared by every phase
 
@@ -298,16 +300,56 @@ Other test GPUs         none active in this test cell
 
 ### Test boundary
 
+- Use the machine-readable plan in
+  `config/alpha-2-rx5700xt-certification-plan.json`. It pins the runtime cells,
+  candidate tiers, headroom rule, accelerator proof, and evidence outputs. A
+  prepared plan is not authorization to download artifacts or start the soak.
 - Pin the exact AMD driver, operating system, runtime, backend, and model
   artifact independently for Windows and Linux.
-- Test the officially listed Linux Ollama ROCm route without generalizing it to
-  Windows, llama.cpp, Vulkan, or another RDNA generation.
-- Test Windows Vulkan and any separately admitted llama.cpp route as distinct
-  cells; prove that the RX 5700 XT, not the CPU, executes each workload.
+- Use Vulkan as the primary route. Current Ollama ROCm support tables do not
+  list the RX 5700 XT on Linux or Windows, while Ollama documents Vulkan as an
+  additional AMD route on both systems.
+- Keep any ROCm/HIP attempt explicitly experimental. Test Windows and Linux,
+  Ollama and llama.cpp, and Vulkan and ROCm as distinct cells; prove that the
+  RX 5700 XT, not the CPU, executes each workload.
 - Run only model sizes that leave measured headroom inside 8 GiB.
 - Test clear refusal and recovery for oversized candidates.
 - Record driver stability, unload/reload behavior, power telemetry availability,
   and clean shutdown on both operating systems.
+
+### Admission order
+
+1. Prove stability with the final firmware settings, DIMMs, and memory profile.
+   A freeze, reset, machine-check event, EDAC error, or AMD GPU reset makes the
+   cell inconclusive rather than a model failure.
+2. Use the reviewed AMD Vulkan identity now admitted by the bounded
+   qualification runners. The runner requires positive RX 5700 XT residency
+   and rejects CPU fallback; ROCm/HIP remains a separate experimental route.
+3. Start with the pinned Ubuntu Ollama Vulkan cell. Require the RX 5700 XT
+   device identity, VRAM residency, and requested layer-offload proof; reject
+   CPU fallback.
+4. Run the small-to-medium model ladder. A model must pass three task samples
+   before its 30-minute soak.
+5. Admit boundary models only when at least 2 GiB and 25% of physical VRAM
+   remain after context allocation. Test oversized candidates as refusal paths,
+   without downloading or executing them automatically.
+6. Exercise cancellation, unload/reload, runtime restart, and repeat-request
+   recovery before collecting synchronized power evidence.
+7. Repeat the Windows Vulkan route independently. ROCm/HIP experiments remain
+   separate and cannot promote the card into a supported ROCm class. Do not
+   inherit a Linux result, even on the same card.
+
+### Planned model tiers
+
+| Tier | Purpose | Exact candidate IDs |
+| --- | --- | --- |
+| Expected fit | Correctness and useful 8 GiB recommendations | `qwen35-08b-q8`, `gemma3-1b-q4`, `llama32-3b-q4`, `granite41-3b-q4`, `qwen35-2b-q8`, `phi4-mini-38b-q4`, `ministral3-3b-q4`, `gemma3-4b-q4`, `gemma4-e2b-qat`, `qwen35-4b-q4` |
+| Measured boundary | Continue only if the headroom gate passes | `gemma4-e4b-qat`, `granite41-8b-q4`, `ministral3-8b-q4` |
+| Oversized refusal | Prove a novice is stopped before unsafe download or execution | `qwen35-9b-q4`, `gemma3-12b-q4`, `gemma4-12b-qat` |
+
+Candidate IDs resolve through the pinned model inventory and catalog. Newer
+27B-and-larger Qwen candidates remain outside this card's full-offload envelope;
+their availability is not evidence that they fit 8 GiB.
 
 ### Exit gate
 

@@ -42,6 +42,8 @@ TASKS = {
         "check": "single-sentence-required-facts-no-invented-number",
     },
 }
+ACCELERATED_BACKENDS = {"cuda", "rocm", "vulkan"}
+GIB_BYTES = 1024 ** 3
 
 
 class QualificationError(ValueError):
@@ -184,7 +186,7 @@ def run_qualification(
     if platform_family not in {"linux", "windows"}:
         raise QualificationError("unreviewed-platform-family")
     backend = profile.get("backend")
-    if backend not in {"cpu", "cuda"}:
+    if backend not in {"cpu", *ACCELERATED_BACKENDS}:
         raise QualificationError("invalid-qualification-matrix")
     for value in (system_memory_gib, usable_gpu_memory_gib):
         if (
@@ -249,8 +251,21 @@ def run_qualification(
             raise QualificationError(str(sample_error)) from sample_error
     if backend == "cpu" and peak_vram != 0:
         raise QualificationError("cpu-cell-used-gpu")
-    if backend == "cuda" and peak_vram <= 0:
-        raise QualificationError("cuda-residency-not-observed")
+    if backend in ACCELERATED_BACKENDS and peak_vram <= 0:
+        raise QualificationError(f"{backend}-residency-not-observed")
+    minimum_free_gpu_memory_gib = profile.get("minimumFreeGpuMemoryGiB", 0)
+    if (
+        isinstance(minimum_free_gpu_memory_gib, bool)
+        or not isinstance(minimum_free_gpu_memory_gib, (int, float))
+        or not 0 <= minimum_free_gpu_memory_gib <= usable_gpu_memory_gib
+    ):
+        raise QualificationError("invalid-qualification-matrix")
+    if (
+        backend in ACCELERATED_BACKENDS
+        and usable_gpu_memory_gib * GIB_BYTES - peak_vram
+        < minimum_free_gpu_memory_gib * GIB_BYTES
+    ):
+        raise QualificationError("insufficient-gpu-headroom")
     return {
         "schemaVersion": 1,
         "kind": "alpha2-model-task-qualification-evidence",

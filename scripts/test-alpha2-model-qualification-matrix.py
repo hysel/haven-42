@@ -60,14 +60,21 @@ def main() -> None:
         candidate["modelId"]: candidate["requiredProfiles"]
         for candidate in matrix["candidates"]
     }
-    assert candidate_profiles["gemma4-e2b-qat"] == ["cpu-16gib", "cuda-16gib"]
-    assert candidate_profiles["gemma4-e4b-qat"] == ["cpu-16gib", "cuda-16gib"]
+    accelerated_8gib_profiles = [
+        "cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"
+    ]
+    assert candidate_profiles["gemma4-e2b-qat"] == accelerated_8gib_profiles
+    assert candidate_profiles["gemma4-e4b-qat"] == accelerated_8gib_profiles
     assert candidate_profiles["gemma4-12b-qat"] == ["cuda-16gib"]
     assert candidate_profiles["qwen36-27b-q4"] == [
         "cuda-32gib-system-16gib"
     ]
-    assert candidate_profiles["qwen36-35b-a3b-q4"] == []
-    assert candidate_profiles["muse-glimmer-30b-q4"] == []
+    assert candidate_profiles["qwen36-35b-a3b-q4"] == [
+        "cuda-32gib-system-64gib"
+    ]
+    assert candidate_profiles["muse-glimmer-30b-q4"] == [
+        "cuda-32gib-system-64gib"
+    ]
     assert candidate_profiles["muse-glimmer-30b-mlx-nvfp4"] == []
     assert profile_records["cuda-32gib-system-16gib"] == {
         "id": "cuda-32gib-system-16gib",
@@ -75,13 +82,56 @@ def main() -> None:
         "minimumSystemMemoryGiB": 31,
         "minimumUsableGpuMemoryGiB": 16,
     }
+    assert profile_records["vulkan-8gib-system-16gib"] == {
+        "id": "vulkan-8gib-system-16gib",
+        "backend": "vulkan",
+        "minimumSystemMemoryGiB": 15,
+        "minimumUsableGpuMemoryGiB": 8,
+        "minimumFreeGpuMemoryGiB": 2,
+    }
+    assert profile_records["cuda-32gib-system-64gib"] == {
+        "id": "cuda-32gib-system-64gib",
+        "backend": "cuda",
+        "minimumSystemMemoryGiB": 63,
+        "minimumUsableGpuMemoryGiB": 32,
+        "minimumFreeGpuMemoryGiB": 4,
+    }
+    assert profile_records["cuda-64gib-system-96gib"] == {
+        "id": "cuda-64gib-system-96gib",
+        "backend": "cuda",
+        "minimumSystemMemoryGiB": 95,
+        "minimumUsableGpuMemoryGiB": 64,
+        "minimumFreeGpuMemoryGiB": 8,
+    }
     for model_id in (
         "phi4-mini-38b-q4",
         "llama32-3b-q4",
         "ministral3-3b-q4",
         "ministral3-8b-q4",
     ):
-        assert candidate_profiles[model_id] == ["cpu-16gib", "cuda-16gib"]
+        assert candidate_profiles[model_id] == accelerated_8gib_profiles
+
+    assert candidate_profiles["ornith-10-9b-q4"] == [
+        "vulkan-8gib-system-16gib",
+        "cuda-16gib",
+    ]
+    assert candidate_profiles["lfm25-8b-a1b-q4"] == [
+        "vulkan-8gib-system-16gib",
+        "cuda-16gib",
+    ]
+    assert candidate_profiles["north-mini-code-10-30b-a3b-q4"] == [
+        "cuda-32gib-system-64gib"
+    ]
+    assert candidate_profiles["granite41-30b-q4"] == [
+        "cuda-32gib-system-64gib"
+    ]
+    assert candidate_profiles["minicpm-v46-1b-q4"] == [
+        "vulkan-8gib-system-16gib",
+        "cuda-16gib",
+    ]
+    assert candidate_profiles["nemotron3-nano-omni-33b-q4"] == [
+        "cuda-64gib-system-96gib"
+    ]
 
     muse_candidates = {
         candidate["modelId"]: candidate
@@ -93,7 +143,7 @@ def main() -> None:
         "muse-glimmer-30b-mlx-nvfp4",
     }
     assert muse_candidates["muse-glimmer-30b-q4"]["state"] == (
-        "failed-needs-retest-ollama-0.32.9-task-contract"
+        "ready-for-qualification"
     )
     assert muse_candidates["muse-glimmer-30b-mlx-nvfp4"]["state"] == (
         "deferred-owner-hardware-not-available"
@@ -130,6 +180,23 @@ def main() -> None:
         ],
         "explicitOwnerStartPromptRequired": True,
     }
+    nemotron_candidates = {
+        candidate["modelId"]: candidate
+        for candidate in matrix["candidates"]
+        if candidate["modelId"].startswith("nemotron35-lightning-")
+    }
+    assert nemotron_candidates["nemotron35-lightning-30b-a3b-q4"]["state"] == (
+        "ready-for-qualification"
+    )
+    assert nemotron_candidates["nemotron35-lightning-30b-a3b-q8"]["state"] == (
+        "ready-for-qualification"
+    )
+    assert nemotron_candidates["nemotron35-lightning-30b-a3b-q4"]["requiredProfiles"] == [
+        "cuda-64gib-system-96gib"
+    ]
+    assert nemotron_candidates["nemotron35-lightning-30b-a3b-q8"]["requiredProfiles"] == [
+        "cuda-64gib-system-96gib"
+    ]
     assert muse_candidates["muse-glimmer-30b-mlx-nvfp4"]["plannedTest"] == {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#muse-glimmer-30b-mlx-nvfp4",
         "minimumOllamaVersion": "0.32.7",
@@ -164,14 +231,22 @@ def main() -> None:
         "nemotron35-lightning-30b-a3b-mlx-bf16",
     }
     assert all(
-        candidate["requiredProfiles"] == []
-        and candidate["state"].startswith("deferred-")
-        and candidate["plannedTest"]["explicitOwnerStartPromptRequired"] is True
+        candidate["plannedTest"]["explicitOwnerStartPromptRequired"] is True
         and candidate["plannedTest"][
             "exactRuntimeCompatibilityRequiredAtExecution"
         ]
         is True
         for candidate in nemotron_candidates.values()
+    )
+    assert all(
+        nemotron_candidates[model_id]["requiredProfiles"] == []
+        and nemotron_candidates[model_id]["state"].startswith("deferred-")
+        for model_id in (
+            "nemotron35-lightning-30b-a3b-bf16",
+            "nemotron35-lightning-30b-a3b-mlx-nvfp4",
+            "nemotron35-lightning-30b-a3b-mlx-mxfp8",
+            "nemotron35-lightning-30b-a3b-mlx-bf16",
+        )
     )
     assert nemotron_candidates[
         "nemotron35-lightning-30b-a3b-q4"
@@ -188,7 +263,7 @@ def main() -> None:
         "nemotron35-lightning-30b-a3b-q8",
     ):
         candidate = nemotron_candidates[model_id]
-        assert candidate["state"] == "deferred-partial-qualification-remaining-gates"
+        assert candidate["state"] == "ready-for-qualification"
         assert candidate["plannedTest"]["completedEvidence"] == {
             "path": "examples/nvidia-v100-nemotron-validation.md",
             "profile": "ubuntu-24.04-dual-tesla-v100-32gib",

@@ -78,6 +78,26 @@ class ModelVersionInventoryTests(unittest.TestCase):
             [version["version"] for version in qwen["versions"]],
             ["3.5", "3.6", "3.7", "3.8"],
         )
+        qwen38 = next(item for item in qwen["versions"] if item["version"] == "3.8")
+        self.assertEqual(qwen38["artifactStatus"], "local-artifact-verified")
+        self.assertEqual(
+            qwen38["candidates"],
+            [
+                {
+                    "id": "qwen38-27b-q4",
+                    "model": "qwen3.8:27b",
+                    "manifestDigest": "22130167c4c20e20c7b71454612966ca8e8171e9b3cc8ab6ce8aa6cbfec79643",
+                    "modelLayerDigest": "f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d",
+                    "projectorLayerDigest": "ac3714bfdddeca31351f2752bf1a63f266f4df87c0b68c895e44945ca704448e",
+                    "modelBytes": 16810714464,
+                    "downloadBytes": 17741871939,
+                    "quantization": "Q4_K_M",
+                    "hardwareClass": "high-memory",
+                    "minimumOllamaVersion": "0.32.12",
+                    "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen38-27b-q4",
+                }
+            ],
+        )
 
     def test_gemma_four_local_candidates_are_exact(self) -> None:
         gemma = next(
@@ -109,6 +129,59 @@ class ModelVersionInventoryTests(unittest.TestCase):
         }
         actual = {
             candidate["id"]: candidate["manifestDigest"]
+            for family in self.inventory["families"]
+            for version in family["versions"]
+            for candidate in version.get("candidates", [])
+            if candidate["id"] in expected
+        }
+        self.assertEqual(actual, expected)
+
+    def test_new_release_candidates_are_exact_and_runtime_pinned(self) -> None:
+        expected = {
+            "ornith-10-9b-q4": (
+                "ornith:9b",
+                "a75697c145891910e312c95e4a9fc1ccb8653e5ef543b23b0403a4665b82fd91",
+                "0.30.11",
+                5629110020,
+            ),
+            "north-mini-code-10-30b-a3b-q4": (
+                "north-mini-code-1.0:q4_K_M",
+                "d8b269ad5c7c7144ce104b83ce93bc3efb85e0f74e01be6be5f5d6f7ca90b60f",
+                "0.30.10",
+                18593966525,
+            ),
+            "lfm25-8b-a1b-q4": (
+                "lfm2.5:8b",
+                "9cf756159fc2f3b9128c6a3f544ec90c5e9b8afdbb4179a57b8aea9de589cfb2",
+                "0.30.0",
+                5156075045,
+            ),
+            "granite41-30b-q4": (
+                "granite4.1:30b",
+                "3f3e5df8a021439fd6f867a0e526bdc303cac79c811201cb6bac193298cb9fcd",
+                "0.32.13",
+                17490258936,
+            ),
+            "minicpm-v46-1b-q4": (
+                "minicpm-v4.6:1b",
+                "e95583acac773b45d95469c069db44808c87295f924183f4c942d52616b2d132",
+                "0.30.0",
+                1637848448,
+            ),
+            "nemotron3-nano-omni-33b-q4": (
+                "nemotron3:33b",
+                "f6d8b7ff496ccc53429cc480ad53971d522b443ee4a5aa58a6da49e57acf42cf",
+                "0.32.13",
+                27638631216,
+            ),
+        }
+        actual = {
+            candidate["id"]: (
+                candidate["model"],
+                candidate["manifestDigest"],
+                candidate["minimumOllamaVersion"],
+                candidate["downloadBytes"],
+            )
             for family in self.inventory["families"]
             for version in family["versions"]
             for candidate in version.get("candidates", [])

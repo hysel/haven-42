@@ -42,6 +42,7 @@ SAFE_MODEL_NAME = re.compile(
     r"^[a-z0-9][a-z0-9._/-]{0,79}:[0-9A-Za-z][0-9A-Za-z._-]{0,79}$"
 )
 MAX_RESPONSE_BYTES = 4 * 1024 * 1024
+ACCELERATED_BACKENDS = {"cuda", "rocm", "vulkan"}
 
 
 class ValidationError(ValueError):
@@ -316,11 +317,20 @@ def _verify_residency(origin: str, model: dict[str, Any], backend: str) -> int:
     matches = [item for item in processes if isinstance(item, dict) and item.get("name") == model["name"]] if isinstance(processes, list) else []
     if len(matches) != 1:
         raise ValidationError("model-residency-not-observed")
+    size = matches[0].get("size")
     size_vram = matches[0].get("size_vram")
-    if isinstance(size_vram, bool) or not isinstance(size_vram, int) or size_vram < 0:
+    if (
+        isinstance(size, bool)
+        or not isinstance(size, int)
+        or size <= 0
+        or isinstance(size_vram, bool)
+        or not isinstance(size_vram, int)
+        or size_vram < 0
+        or size_vram > size
+    ):
         raise ValidationError("model-residency-invalid")
-    if backend == "cuda" and size_vram <= 0:
-        raise ValidationError("cuda-residency-not-observed")
+    if backend in ACCELERATED_BACKENDS and size_vram != size:
+        raise ValidationError(f"{backend}-full-residency-not-observed")
     if backend == "cpu" and size_vram != 0:
         raise ValidationError("cpu-cell-used-gpu")
     return size_vram
@@ -363,7 +373,7 @@ def run_cell(
         raise ValidationError("invalid-operating-system-id")
     if platform_family not in {"linux", "windows"}:
         raise ValidationError("unreviewed-platform-family")
-    if backend not in {"cpu", "cuda"}:
+    if backend not in {"cpu", *ACCELERATED_BACKENDS}:
         raise ValidationError("unreviewed-backend")
     if (
         not isinstance(provider_version, str)
@@ -466,7 +476,9 @@ def main() -> int:
     parser.add_argument(
         "--platform-family", choices=["linux", "windows"], default="linux"
     )
-    parser.add_argument("--backend", choices=["cpu", "cuda"], required=True)
+    parser.add_argument(
+        "--backend", choices=["cpu", "cuda", "rocm", "vulkan"], required=True
+    )
     parser.add_argument("--system-memory-gib", type=float, required=True)
     parser.add_argument("--usable-gpu-memory-gib", type=float, required=True)
     parser.add_argument("--qualification-inventory", action="store_true")

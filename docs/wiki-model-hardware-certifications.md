@@ -1,6 +1,6 @@
 # Model and Hardware Test Status
 
-_Last reviewed: August 16, 2026._
+_Last reviewed: August 17, 2026._
 
 This page shows which model and computer combinations Haven 42 has actually
 tested. It records bounded tests, not a promise that every similar computer
@@ -57,7 +57,7 @@ of failure.
 | --- | --- | --- |
 | CPU-only | Real low-, medium-, and high-memory computers | Find a usable fallback and refusal floor. |
 | 4 GiB graphics | The purchased GTX 1650 Super after it arrives | Validate only the best small candidates with safe overhead. No result exists yet. |
-| 8 GiB graphics | The installed Radeon RX 5700 XT RDNA 1 profile | Validate small candidates and safe fallback behavior on separate Windows and Linux cells. Linux ROCm, Windows, and Vulkan results remain distinct. |
+| 8 GiB graphics | The installed Radeon RX 5700 XT RDNA 1 profile | The Ubuntu 26.04 Ollama 0.32.13 Vulkan/RADV engineering campaign is complete: nine profiles passed the core gate, seven failed it, and three oversized candidates were refused before download. Windows, ROCm, final-profile full-memory, and packaged lifecycle results remain distinct and open. |
 | 12 GiB graphics | The purchased RTX 3060 12 GB and current Intel Arc B580 | Validate the 8B-to-14B range on NVIDIA and Intel without relying on a larger card. The RTX 3060 has not arrived yet. |
 | 16 GiB graphics | Quadro RTX 5000, Radeon RX 6800 non-XT, and Radeon RX 7800 XT | Compare NVIDIA Turing, AMD RDNA 2, and AMD RDNA 3. The RX 6800 has not arrived yet. |
 | 24 GiB graphics | A physical 24 GiB consumer accelerator | Validate 24B-to-35B candidates and runtime overhead. |
@@ -600,6 +600,29 @@ addresses, usernames, paths, logs, or credentials.
 | [**NVIDIA Nemotron 3.5 Lightning 30B-A3B, Q4_K_M**](https://ollama.com/library/nemotron-3.5-lightning:30b-a3b-q4_K_M) | Tool use, thinking-mode behavior, failure recovery, and bounded-context checks | Keep the exact Ollama 0.32.9 and manifest binding, prove the remaining capabilities and exact multi-GPU distribution, and complete human review | 🧪 Chat, writing, summarization, GPU residency, a 30-minute soak, and exact GPU-board energy passed; 81 samples across nine cycles at 62.067 tokens/s |
 | [**NVIDIA Nemotron 3.5 Lightning 30B-A3B, Q8_0**](https://ollama.com/library/nemotron-3.5-lightning:30b-a3b-q8_0) | The same remaining checks, plus a quality, speed, memory, and energy comparison with Q4_K_M | Keep the exact Ollama 0.32.9 and manifest binding, prove the remaining capabilities and exact multi-GPU distribution, and complete human review | 🧪 Chat, writing, summarization, GPU residency, and a 30-minute soak passed; 72 samples across eight cycles at 47.574 tokens/s |
 
+## August 2026 new-model qualification
+
+The version-pinned Ollama 0.32.13 campaign evaluated the new local candidates
+on the exact 8 GiB Radeon RX 5700 XT Vulkan profile and the exact dual-Tesla
+V100 CUDA review profile. It did not change Haven 42's automatic model ladder
+or support labels.
+
+- Granite 4.1 30B, Ornith 10 9B, Qwen 3.5 4B, Qwen 3.6 27B and 35B-A3B,
+  Gemma 4 E2B/E4B, and several established small-model controls passed their
+  requested core and soak gates on the profiles that fit them.
+- Qwen 3.8 27B, North Mini Code 10 30B-A3B, and Nemotron 3 Nano Omni 33B
+  passed the core gate but each failed at least one separately requested
+  capability. Those failures remain visible and block broad promotion.
+- Muse Glimmer, LFM 2.5 8B-A1B, MiniCPM V 4.6 1B, Ministral 3 3B/8B, and two
+  small Qwen 3.5 profiles failed one or more required task contracts on the
+  tested route. A runnable model is not automatically a suitable model.
+- Apple MLX variants and the oversized Nemotron BF16 artifact were deferred
+  without execution; no result is inferred for them.
+
+See [[August 2026 New Model Qualification|Eng-August-2026-New-Model-Qualification]]
+and [[AMD RX 5700 XT Ollama 0.32.13 Qualification|Eng-AMD-RX5700XT-Ollama-03213-Qualification]]
+for exact artifacts, throughput, failures, residency evidence, and open gates.
+
 The memory figures above are fail-closed admission floors for Haven 42's first
 test. They are not claims about the model's absolute minimum requirements.
 Nemotron's published one-million-token GGUF context is not treated as tested;
@@ -632,13 +655,15 @@ do not certify an end-user hardware profile.
 - Build a new Linux candidate containing the Pop!_OS identity-path fix and
   repeat its native package/readiness sequence.
 - Complete CPU-only desktop sequences on the remaining Linux distributions.
-- Run native Alpha 2 AMD on Linux and finish the complete package flow on the
-  partially validated Intel Linux route.
+- Finish the complete native Alpha 2 package lifecycle on the bounded RX 5700
+  XT Ubuntu Vulkan route and on the partially validated Intel Linux route.
 - Requalify a newer llama.cpp HIP/DXG build before replacing the passing b10088
   WSL2 AMD candidate pin.
 - Test constrained-memory and mixed-GPU computers before assigning labels.
-- Test Qwen 3.6 35B only on a computer with at least 48 GB system memory.
-- Admit Qwen 3.7 or 3.8 only after an official local artifact is verified.
+- Repeat Qwen 3.6 35B-A3B on a smaller physical memory tier before assigning a
+  broad hardware label; its dual-V100 engineering run does not prove one.
+- Resolve Qwen 3.8 27B's failed vision check and finish package lifecycle and
+  smaller-hardware evidence before considering admission.
 
 ## Detailed evidence
 

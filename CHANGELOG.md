@@ -11,6 +11,16 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Added version-pinned August 2026 qualification evidence for newly discovered
+  local model candidates on Ollama 0.32.13, preserving task and capability
+  failures, deferred artifacts, license gates, and the rule that evidence does
+  not automatically change support labels or model defaults.
+
+- Added bounded Ubuntu 26.04 Vulkan/RADV engineering evidence for the 8 GiB
+  Radeon RX 5700 XT, including fail-closed GPU-residency checks, oversized-model
+  refusal, current-boot stability, and GPU-board power measurements. Windows,
+  ROCm, final-profile full-memory, and packaged lifecycle gates remain open.
+
 - Added a dormant, effect-free controlled-research approval dialog for exact
   query and selected-page review. It discloses what would leave the device,
   supports keyboard and assistive-technology interaction, keeps decisions

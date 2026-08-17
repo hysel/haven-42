@@ -24,14 +24,14 @@
   "lanes": [
     {
       "id": "assistant-and-coding",
-      "candidateIds": ["qwen38-27b", "gemma4-local-family", "ornith-10-9b-q4", "north-mini-code-10-30b-a3b-q4", "lfm25-8b-a1b-q4", "lfm25-26b-gguf", "tiny-aya-global-335b"],
+      "candidateIds": ["qwen38-27b", "gemma4-local-family", "ornith-10-9b-q4", "north-mini-code-10-30b-a3b-q4", "lfm25-8b-a1b-q4", "granite41-30b-q4", "lfm25-26b-gguf", "tiny-aya-global-335b"],
       "requiredBeforeStart": ["resolve-one-exact-consumer-runtime-artifact", "pin-context-and-gpu-offload-settings", "record-tool-call-format-and-parser-contract"],
       "fixtures": ["chat-instruction-following-and-refusal", "writing-and-summarization-fidelity", "coding-read-only-analysis", "coding-proposed-edit-and-explicit-scoped-write", "structured-tool-call-validity-and-unknown-tool-refusal", "long-context-truncation-and-citation-accounting"],
       "failClosedOn": ["artifact-identity-drift", "runtime-version-drift", "invalid-tool-call", "unapproved-effect", "oom", "timeout", "residue"]
     },
     {
       "id": "vision-and-document-vision",
-      "candidateIds": ["north-micro-vision-instruct-24b", "lfm25-vl-3b-gguf", "granite-vision-41-4b", "glm41v-9b-thinking", "mage-vl-5b", "nemotron-parse-20"],
+      "candidateIds": ["north-micro-vision-instruct-24b", "lfm25-vl-3b-gguf", "granite-vision-41-4b", "glm41v-9b-thinking", "mage-vl-5b", "nemotron-parse-20", "minicpm-v46-1b-q4", "nemotron3-nano-omni-33b-q4"],
       "requiredBeforeStart": ["select-synthetic-or-permissively-licensed-image-corpus", "pin-image-size-count-and-context-envelope", "disable-remote-image-loading", "isolate-and-review-custom-model-and-codec-code", "admit-video-boundary-before-video-fixtures"],
       "fixtures": ["image-description-grounding", "text-and-table-extraction", "chart-reading", "missing-evidence-refusal", "malformed-image-and-resource-limit-rejection", "bounded-offline-video-only-after-boundary-admission"],
       "failClosedOn": ["remote-reference", "unreviewed-custom-code", "unsupported-media", "fabricated-extraction", "oom", "timeout", "residue"]

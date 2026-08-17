@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-multi-model-qualification-result",
+  "release": "0.4.0-alpha.2",
+  "observedThroughUtc": "2026-08-17T04:00:00Z",
+  "status": "exact-profile-engineering-evidence-complete",
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.13"
+  },
+  "metadata": {
+    "snapshotRegistry": "config/alpha-2-qualification-campaign-snapshots.json",
+    "snapshotCount": 4,
+    "modelProfileResultCount": 26,
+    "fullGpuResidencyResultCount": 8
+  },
+  "outcomes": {
+    "passedCoreAndRequestedChecks": [
+      "granite41-30b-q4",
+      "ornith-10-9b-q4",
+      "qwen35-4b-q4",
+      "qwen36-27b-q4",
+      "qwen36-35b-a3b-q4"
+    ],
+    "passedCoreWithFailedAdditionalChecks": [
+      "nemotron3-nano-omni-33b-q4",
+      "north-mini-code-10-30b-a3b-q4",
+      "qwen38-27b-q4"
+    ],
+    "passedCoreWithIncompleteAdditionalChecks": [
+      "nemotron35-lightning-30b-a3b-q4",
+      "nemotron35-lightning-30b-a3b-q8"
+    ],
+    "failedRequiredCoreTaskGate": [
+      "gemma3-1b-q4",
+      "lfm25-8b-a1b-q4",
+      "minicpm-v46-1b-q4",
+      "ministral3-3b-q4",
+      "ministral3-8b-q4",
+      "muse-glimmer-30b-q4",
+      "qwen35-08b-q8",
+      "qwen35-2b-q8"
+    ],
+    "deferredWithoutExecution": [
+      "muse-glimmer-30b-mlx-nvfp4",
+      "nemotron35-lightning-30b-a3b-bf16",
+      "nemotron35-lightning-30b-a3b-mlx-nvfp4",
+      "nemotron35-lightning-30b-a3b-mlx-mxfp8",
+      "nemotron35-lightning-30b-a3b-mlx-bf16"
+    ]
+  },
+  "additionalCapabilityFailures": {
+    "minicpm-v46-1b-q4": ["general.chat", "vision"],
+    "nemotron3-nano-omni-33b-q4": ["tools", "vision"],
+    "north-mini-code-10-30b-a3b-q4": ["coding"],
+    "qwen38-27b-q4": ["vision"]
+  },
+  "promotionBlocks": {
+    "lfm25-8b-a1b-q4": ["required-core-task-gate", "license-review"],
+    "nemotron3-nano-omni-33b-q4": ["additional-capability-failures", "license-review"],
+    "nemotron35-lightning-30b-a3b-q4": ["additional-capability-evidence-incomplete", "license-review"],
+    "nemotron35-lightning-30b-a3b-q8": ["additional-capability-evidence-incomplete", "license-review"]
+  },
+  "evidence": "examples/august-2026-new-model-qualification.md",
+  "containsPrivateMachineIdentity": false,
+  "containsNetworkIdentity": false,
+  "containsRawPromptsOrResponses": false,
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false
+}

@@ -76,11 +76,21 @@ them by hand; update the catalog and run the generator.
 | [Mistral Small 3.2 writing constraint matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-9160baf776098a16) | `validated-by-tests` | Linux · Ollama · mistral-small3.2:24b-instruct-2506-q4_K_M |
 | [Optional local LLM capability suggestion](https://github.com/hysel/haven-42/wiki/Evidence-Record-e868714f9f8c5344) | `validated-by-tests` | Windows · Ollama · qwen3.5:9b |
 | [Qwen 3.5 9B writing constraint matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-b91e58b8e387a4cc) | `validated-by-tests` | Linux · Ollama · qwen3.5:9b |
+## Hardware Qualification
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Radeon RX 5700 XT exact Ubuntu Vulkan profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-07a5bd4578f3108f) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · 16 exact manifest-pinned model profiles |
 ## Hardware Recommendation
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
 | [Script-level recommendation and config generation](https://github.com/hysel/haven-42/wiki/Evidence-Record-7c544083b952b24c) | `validated-by-tests` | Cross-platform · N/A · qwen3.5:9b |
+## Hardware Stability
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Radeon RX 5700 XT current-boot host stability](https://github.com/hysel/haven-42/wiki/Evidence-Record-30fc24f8aa3ddc2b) | `partial-pass` | Ubuntu 26.04 LTS · Linux kernel and amdgpu · no-model |
 ## Inference Engine
 
 | Evidence | Status | Tested environment |
@@ -154,15 +164,29 @@ them by hand; update the catalog and run the generator.
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
 | [Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-b1e852d6e517e410) | `partial-pass` | Ubuntu 24.04.4 · Ollama · gemma3:1b-it-q4_K_M |
+| [Gemma 4 E2B QAT on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-9ee9709513adee19) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · gemma4:e2b-qat |
+| [Gemma 4 E4B QAT on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-be0a1992c6629cd9) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · gemma4:e4b-qat |
+| [Granite 4.1 30B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-16a3a4e63dfc72ca) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · granite4.1:30b-q4_K_M |
 | [Granite 4.1 8B on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-739440533a3f6c7a) | `partial-pass` | Ubuntu Linux · direct process · granite41-8b-q4_K_M |
+| [LFM 2.5 8B-A1B Q4 on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-65346575aa772f5d) | `failed-validation` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · lfm2.5:8b-a1b-q4_K_M |
+| [MiniCPM V 4.6 1B Q4 on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-c3662ac9bec5b4b8) | `failed-validation` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · minicpm-v:4.6-1b-q4_K_M |
 | [Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-14e2d57e6336807d) | `failed-validation` | Ubuntu 24.04.4 · Ollama · ministral-3:3b-instruct-2512-q4_K_M |
 | [Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-83b23ecb83be18a7) | `failed-validation` | Ubuntu 24.04.4 · Ollama · ministral-3:8b-instruct-2512-q4_K_M |
+| [Muse Glimmer 30B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-9374faea1e5a9476) | `failed-validation` | Ubuntu 24.04.4 · Ollama CUDA · muse-glimmer:30b-q4_K_M |
+| [Nemotron 3 Nano Omni 33B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-d25ff2272d76e84f) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · nemotron-3-nano-omni:33b-q4_K_M |
+| [Nemotron 3.5 Lightning Q4 on Ollama 0.32.13 dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-3cde6c27785c5e96) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · nemotron-3.5-lightning:30b-a3b-q4_K_M |
 | [Nemotron 3.5 Lightning Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-999c817bcb50d175) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q4_K_M |
+| [Nemotron 3.5 Lightning Q8 on Ollama 0.32.13 dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-cb0f0c4481e7b7f9) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · nemotron-3.5-lightning:30b-a3b-q8_0 |
 | [Nemotron 3.5 Lightning Q8 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-b4871f9bcbf09daa) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q8_0 |
+| [North Mini Code 10 30B-A3B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-7180c239d7cf4e2e) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · north-mini-code:10-30b-a3b-q4_K_M |
 | [Ollama 0.32.9 five-model task-contract retry on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-029248b547774d8a) | `failed-validation` | Ubuntu 24.04.4 · Ollama · five exact manifest-pinned models |
+| [Ornith 10 9B Q4 on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-48e4f4c41b8289de) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · ornith-10:9b-q4_K_M |
 | [Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-d7e3b3eddcb87ab3) | `partial-pass` | Ubuntu 24.04.4 · Ollama · phi4-mini:3.8b-q4_K_M |
+| [Qwen 3.5 4B Q4 on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-5647918854ef19ab) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · qwen3.5:4b-q4_K_M |
 | [Qwen 3.5 9B synchronized power on Radeon RX 7800 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-08bad671d73e509b) | `partial-pass` | Windows 11 · Ollama · qwen3.5:9b Q4_K_M |
 | [Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-f96c1a3dd255db29) | `partial-pass` | Ubuntu 24.04.4 · Ollama · qwen3.6:27b-q4_K_M |
+| [Qwen 3.6 35B-A3B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c0d4b52091120fa) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · qwen3.6:35b-a3b-q4_K_M |
+| [Qwen 3.8 27B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c09cdefc61c0f82) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · qwen3.8:27b-q4_K_M |
 | [Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad991e5601c892ec) | `partial-pass` | Windows 11 · Ollama · 17 exact manifest-pinned models |
 ## Model Quantization
 
@@ -217,6 +241,11 @@ them by hand; update the catalog and run the generator.
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
 | [Windows Alpha 2 current UI package parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-2589000e63822b5e) | `partial-pass` | Windows 11 · local web runtime · none |
+## Power Evidence
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Radeon RX 5700 XT Llama 3.2 3B board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-9a9906ccfd247313) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · llama3.2:3b-instruct-q4_K_M |
 ## Remote Profile
 
 | Evidence | Status | Tested environment |
