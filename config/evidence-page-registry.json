@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "c02d83fcd318b683517cce6ccd28a84473a39a3f10e044f2d59fbe71732b1788",
-  "recordCount": 132,
+  "catalogSha256": "d02a826cf6f84fd561b1439e812a82e1b323b16902fb3e34997ba8b85eee10d6",
+  "recordCount": 149,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -1098,6 +1098,30 @@
       }
     },
     {
+      "id": "evidence-07a5bd4578f3108f",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Radeon RX 5700 XT exact Ubuntu Vulkan profile",
+        "surface": "Haven 42 Alpha 2 qualification harness",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.13 Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "16 exact manifest-pinned model profiles",
+        "operation": "admission-core-tasks-residency-stability-power",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "Nine profiles passed the required core gate, seven failed at least one required task contract, and three larger candidates were refused before download; current-boot CPU smoke, accelerator residency, cleanup, and one exact board-power profile passed, while final-profile full-memory and packaged lifecycle evidence remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-07a5bd4578f3108f.md",
+        "wikiPage": "Evidence-Record-07a5bd4578f3108f.md",
+        "title": "Radeon RX 5700 XT exact Ubuntu Vulkan profile"
+      }
+    },
+    {
       "id": "evidence-7c544083b952b24c",
       "claim": {
         "schema_version": "2",
@@ -1119,6 +1143,30 @@
         "repositorySource": "docs/evidence-records/evidence-7c544083b952b24c.md",
         "wikiPage": "Evidence-Record-7c544083b952b24c.md",
         "title": "Script-level recommendation and config generation"
+      }
+    },
+    {
+      "id": "evidence-30fc24f8aa3ddc2b",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-stability",
+        "subject": "Radeon RX 5700 XT current-boot host stability",
+        "surface": "Haven 42 Linux host-stability harness",
+        "surface_version": "1",
+        "provider": "Linux kernel and amdgpu",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "no-model",
+        "operation": "600-second-four-worker-cpu-smoke-and-hardware-log-review",
+        "validation_mode": "development-native",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact current boot completed 5,122,375 work units with zero detected machine-check, ECC, GPU-reset, CPU-lockup, thermal, or fatal-PCIe incidents; this is bounded engineering evidence and not a substitute for the still-open final-profile full-memory test."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-30fc24f8aa3ddc2b.md",
+        "wikiPage": "Evidence-Record-30fc24f8aa3ddc2b.md",
+        "title": "Radeon RX 5700 XT current-boot host stability"
       }
     },
     {
@@ -2010,6 +2058,78 @@
       }
     },
     {
+      "id": "evidence-9ee9709513adee19",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Gemma 4 E2B QAT on Radeon RX 5700 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "gemma4:e2b-qat",
+        "operation": "chat-writing-summary-soak-residency",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact artifact passed the required core gate and 42 soak samples at a measured output rate of 146.822 per second on the exact 8 GiB RX 5700 XT profile; packaged lifecycle, broader capabilities, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9ee9709513adee19.md",
+        "wikiPage": "Evidence-Record-9ee9709513adee19.md",
+        "title": "Gemma 4 E2B QAT on Radeon RX 5700 XT"
+      }
+    },
+    {
+      "id": "evidence-be0a1992c6629cd9",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Gemma 4 E4B QAT on Radeon RX 5700 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "gemma4:e4b-qat",
+        "operation": "chat-writing-summary-soak-residency",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact artifact passed the required core gate and 42 soak samples at a measured output rate of 87.342 per second on the exact 8 GiB RX 5700 XT profile; packaged lifecycle, broader capabilities, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-be0a1992c6629cd9.md",
+        "wikiPage": "Evidence-Record-be0a1992c6629cd9.md",
+        "title": "Gemma 4 E4B QAT on Radeon RX 5700 XT"
+      }
+    },
+    {
+      "id": "evidence-16a3a4e63dfc72ca",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Granite 4.1 30B Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "granite4.1:30b-q4_K_M",
+        "operation": "chat-writing-summary-soak-coding-tools-recovery-residency",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate, 39 soak samples at a measured output rate of 35.173 per second, coding, tool-use, recovery, full GPU residency, and unload checks on the exact dual-V100 review profile; smaller hardware, package lifecycle, energy, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-16a3a4e63dfc72ca.md",
+        "wikiPage": "Evidence-Record-16a3a4e63dfc72ca.md",
+        "title": "Granite 4.1 30B Q4 on dual Tesla V100"
+      }
+    },
+    {
       "id": "evidence-739440533a3f6c7a",
       "claim": {
         "schema_version": "2",
@@ -2031,6 +2151,54 @@
         "repositorySource": "docs/evidence-records/evidence-739440533a3f6c7a.md",
         "wikiPage": "Evidence-Record-739440533a3f6c7a.md",
         "title": "Granite 4.1 8B on Intel Arc B580"
+      }
+    },
+    {
+      "id": "evidence-65346575aa772f5d",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "LFM 2.5 8B-A1B Q4 on Radeon RX 5700 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "lfm2.5:8b-a1b-q4_K_M",
+        "operation": "chat-writing-summary-gate-residency",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact artifact achieved full GPU residency but failed all three required core task contracts; license review also remains open, so no soak, support label, or automatic promotion is admitted."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-65346575aa772f5d.md",
+        "wikiPage": "Evidence-Record-65346575aa772f5d.md",
+        "title": "LFM 2.5 8B-A1B Q4 on Radeon RX 5700 XT"
+      }
+    },
+    {
+      "id": "evidence-c3662ac9bec5b4b8",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "MiniCPM V 4.6 1B Q4 on Radeon RX 5700 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "minicpm-v:4.6-1b-q4_K_M",
+        "operation": "chat-vision-recovery-residency",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "Full GPU residency and failure recovery passed, but the required general-chat contract and the separately requested vision grounding contract failed; no soak or automatic promotion is admitted."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-c3662ac9bec5b4b8.md",
+        "wikiPage": "Evidence-Record-c3662ac9bec5b4b8.md",
+        "title": "MiniCPM V 4.6 1B Q4 on Radeon RX 5700 XT"
       }
     },
     {
@@ -2082,6 +2250,78 @@
       }
     },
     {
+      "id": "evidence-9374faea1e5a9476",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Muse Glimmer 30B Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "muse-glimmer:30b-q4_K_M",
+        "operation": "chat-writing-summary-gate",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "Chat passed, but Writing and Summarization failed the required core contracts, so the fail-closed gate started no soak and grants no support label or automatic promotion."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9374faea1e5a9476.md",
+        "wikiPage": "Evidence-Record-9374faea1e5a9476.md",
+        "title": "Muse Glimmer 30B Q4 on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-d25ff2272d76e84f",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Nemotron 3 Nano Omni 33B Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "nemotron-3-nano-omni:33b-q4_K_M",
+        "operation": "chat-writing-summary-soak-thinking-recovery-tools-vision",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate, 33 soak samples at a measured output rate of 140.733 per second, thinking, recovery, and full GPU residency, but failed requested tool-call-count and vision-grounding contracts; license review, package lifecycle, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d25ff2272d76e84f.md",
+        "wikiPage": "Evidence-Record-d25ff2272d76e84f.md",
+        "title": "Nemotron 3 Nano Omni 33B Q4 on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-3cde6c27785c5e96",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Nemotron 3.5 Lightning Q4 on Ollama 0.32.13 dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate at a measured output rate of 78.317 per second on the exact dual-V100 review profile; additional capability evidence and license review remain incomplete, so no support label or automatic promotion is admitted."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3cde6c27785c5e96.md",
+        "wikiPage": "Evidence-Record-3cde6c27785c5e96.md",
+        "title": "Nemotron 3.5 Lightning Q4 on Ollama 0.32.13 dual Tesla V100"
+      }
+    },
+    {
       "id": "evidence-999c817bcb50d175",
       "claim": {
         "schema_version": "2",
@@ -2103,6 +2343,30 @@
         "repositorySource": "docs/evidence-records/evidence-999c817bcb50d175.md",
         "wikiPage": "Evidence-Record-999c817bcb50d175.md",
         "title": "Nemotron 3.5 Lightning Q4 on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-cb0f0c4481e7b7f9",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Nemotron 3.5 Lightning Q8 on Ollama 0.32.13 dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "nemotron-3.5-lightning:30b-a3b-q8_0",
+        "operation": "chat-writing-summary-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate at a measured output rate of 58.232 per second on the exact dual-V100 review profile; additional capability evidence and license review remain incomplete, so no support label or automatic promotion is admitted."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-cb0f0c4481e7b7f9.md",
+        "wikiPage": "Evidence-Record-cb0f0c4481e7b7f9.md",
+        "title": "Nemotron 3.5 Lightning Q8 on Ollama 0.32.13 dual Tesla V100"
       }
     },
     {
@@ -2130,6 +2394,30 @@
       }
     },
     {
+      "id": "evidence-7180c239d7cf4e2e",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "North Mini Code 10 30B-A3B Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "north-mini-code:10-30b-a3b-q4_K_M",
+        "operation": "chat-writing-summary-soak-tools-context-recovery-coding",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate at a measured output rate of 114.288 per second plus tools, bounded long-context, recovery, and accelerator-residency checks, but failed the requested coding JSON contract; package lifecycle, smaller hardware, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-7180c239d7cf4e2e.md",
+        "wikiPage": "Evidence-Record-7180c239d7cf4e2e.md",
+        "title": "North Mini Code 10 30B-A3B Q4 on dual Tesla V100"
+      }
+    },
+    {
       "id": "evidence-029248b547774d8a",
       "claim": {
         "schema_version": "2",
@@ -2154,6 +2442,30 @@
       }
     },
     {
+      "id": "evidence-48e4f4c41b8289de",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Ornith 10 9B Q4 on Radeon RX 5700 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "ornith-10:9b-q4_K_M",
+        "operation": "chat-writing-summary-soak-coding-tools-recovery-residency",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact artifact passed the required core gate, 42 soak samples at a measured output rate of 61.112 per second, coding, tool-use, recovery, full GPU residency, and unload checks on the exact 8 GiB profile; packaged lifecycle, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-48e4f4c41b8289de.md",
+        "wikiPage": "Evidence-Record-48e4f4c41b8289de.md",
+        "title": "Ornith 10 9B Q4 on Radeon RX 5700 XT"
+      }
+    },
+    {
       "id": "evidence-d7e3b3eddcb87ab3",
       "claim": {
         "schema_version": "2",
@@ -2175,6 +2487,30 @@
         "repositorySource": "docs/evidence-records/evidence-d7e3b3eddcb87ab3.md",
         "wikiPage": "Evidence-Record-d7e3b3eddcb87ab3.md",
         "title": "Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA"
+      }
+    },
+    {
+      "id": "evidence-5647918854ef19ab",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Qwen 3.5 4B Q4 on Radeon RX 5700 XT",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "qwen3.5:4b-q4_K_M",
+        "operation": "chat-writing-summary-soak-residency",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact artifact passed the required core gate, 42 soak samples at a measured output rate of 93.501 per second, full GPU residency, and unload checks on the exact 8 GiB profile; packaged lifecycle, broader capabilities, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5647918854ef19ab.md",
+        "wikiPage": "Evidence-Record-5647918854ef19ab.md",
+        "title": "Qwen 3.5 4B Q4 on Radeon RX 5700 XT"
       }
     },
     {
@@ -2223,6 +2559,54 @@
         "repositorySource": "docs/evidence-records/evidence-f96c1a3dd255db29.md",
         "wikiPage": "Evidence-Record-f96c1a3dd255db29.md",
         "title": "Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA"
+      }
+    },
+    {
+      "id": "evidence-6c0d4b52091120fa",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Qwen 3.6 35B-A3B Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "qwen3.6:35b-a3b-q4_K_M",
+        "operation": "chat-writing-summary-soak-residency",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate and bounded soak at a measured output rate of 82.668 per second with accelerator residency on the exact dual-V100 review profile; smaller hardware, package lifecycle, broader capabilities, energy, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6c0d4b52091120fa.md",
+        "wikiPage": "Evidence-Record-6c0d4b52091120fa.md",
+        "title": "Qwen 3.6 35B-A3B Q4 on dual Tesla V100"
+      }
+    },
+    {
+      "id": "evidence-6c09cdefc61c0f82",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Qwen 3.8 27B Q4 on dual Tesla V100",
+        "surface": "Ollama",
+        "surface_version": "0.32.13",
+        "provider": "Ollama CUDA",
+        "os": "Ubuntu 24.04.4",
+        "model": "qwen3.8:27b-q4_K_M",
+        "operation": "chat-writing-summary-soak-tools-thinking-recovery-vision",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-new-model-qualification.md",
+        "notes": "The exact artifact passed the required core gate at a measured output rate of 38.789 per second plus tools, thinking, recovery, and accelerator-residency checks, but failed the requested vision check; package lifecycle, smaller hardware, human-quality review, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-new-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6c09cdefc61c0f82.md",
+        "wikiPage": "Evidence-Record-6c09cdefc61c0f82.md",
+        "title": "Qwen 3.8 27B Q4 on dual Tesla V100"
       }
     },
     {
@@ -3039,6 +3423,30 @@
         "repositorySource": "docs/evidence-records/evidence-2589000e63822b5e.md",
         "wikiPage": "Evidence-Record-2589000e63822b5e.md",
         "title": "Windows Alpha 2 current UI package parity"
+      }
+    },
+    {
+      "id": "evidence-9a9906ccfd247313",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Radeon RX 5700 XT Llama 3.2 3B board power",
+        "surface": "Haven 42 Linux AMD power profiler",
+        "surface_version": "1",
+        "provider": "Ollama 0.32.13 Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "llama3.2:3b-instruct-q4_K_M",
+        "operation": "idle-active-peak-energy-throughput-unload",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The GPU-board sysfs sensor reported 7.575 W idle average, 122.118 W active average, 242 W peak, 20.350129 Wh active energy, and 2,134.188 generated units per Wh with verified unload; this is board-sensor evidence, not whole-system wall power."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9a9906ccfd247313.md",
+        "wikiPage": "Evidence-Record-9a9906ccfd247313.md",
+        "title": "Radeon RX 5700 XT Llama 3.2 3B board power"
       }
     },
     {

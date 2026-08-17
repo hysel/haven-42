@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Reconstruct the exact non-private inventory and matrix generations bound to the August 2026 qualification campaign. This is evidence provenance, not model-selection policy.",
+  "snapshots": [
+    {
+      "id": "campaign-initial",
+      "inventorySource": {
+        "kind": "git-commit",
+        "commit": "a8b9823cfc55ee8008a06c442d8fd8dd49162280",
+        "path": "config/alpha-2-model-version-inventory.json"
+      },
+      "matrixSource": {
+        "kind": "current-minus-candidates",
+        "removedCandidateIds": [
+          "qwen38-27b-q4",
+          "ornith-10-9b-q4",
+          "north-mini-code-10-30b-a3b-q4",
+          "lfm25-8b-a1b-q4",
+          "granite41-30b-q4",
+          "minicpm-v46-1b-q4",
+          "nemotron3-nano-omni-33b-q4",
+          "qwen35-08b-q8",
+          "qwen35-2b-q8",
+          "qwen35-4b-q4"
+        ]
+      },
+      "inventoryCanonicalSha256": "10d05b2f1d7209470dc3bd19e46910ef4c4013417bf63e4f0b7b5935d633074e",
+      "matrixCanonicalSha256": "c2e32c1b6823050ab2a2e2e754979511bf0e1478f4cf993c4b6db3847453a085"
+    },
+    {
+      "id": "campaign-release-expansion",
+      "inventorySource": {
+        "kind": "current-minus-release-additions",
+        "removedCandidateIds": [
+          "granite41-30b-q4",
+          "qwen35-08b-q8",
+          "qwen35-2b-q8",
+          "qwen35-4b-q4"
+        ],
+        "removedEmptyCandidateVersions": ["Qwen/3.5"],
+        "removedFamilies": ["MiniCPM-V", "NVIDIA Nemotron 3 Nano Omni"]
+      },
+      "matrixSource": {
+        "kind": "current-minus-candidates",
+        "removedCandidateIds": [
+          "granite41-30b-q4",
+          "minicpm-v46-1b-q4",
+          "nemotron3-nano-omni-33b-q4",
+          "qwen35-08b-q8",
+          "qwen35-2b-q8",
+          "qwen35-4b-q4"
+        ]
+      },
+      "inventoryCanonicalSha256": "19b3bb181524f9bcb5d213ac4b019df22b6502f3b9f503098e9c9f60c5646a6f",
+      "matrixCanonicalSha256": "b25e1450650fd3b1e6f30c47f914a86db41dd64b1796acd2f394559dd737878a"
+    },
+    {
+      "id": "campaign-pre-qwen35-rx-ladder",
+      "inventorySource": {
+        "kind": "current-minus-candidates",
+        "removedCandidateIds": [
+          "qwen35-08b-q8",
+          "qwen35-2b-q8",
+          "qwen35-4b-q4"
+        ],
+        "removedEmptyCandidateVersions": ["Qwen/3.5"]
+      },
+      "matrixSource": {
+        "kind": "current-minus-candidates",
+        "removedCandidateIds": [
+          "qwen35-08b-q8",
+          "qwen35-2b-q8",
+          "qwen35-4b-q4"
+        ]
+      },
+      "inventoryCanonicalSha256": "61f0c670f49304a20c7701c3c53fb503d90f1c0abfaac84307a57c710cdb5ac9",
+      "matrixCanonicalSha256": "6d45244100771b03d91fc4c9307d296ea2f18ef52441083fe8b8fba3dc6403bc"
+    },
+    {
+      "id": "campaign-current",
+      "inventorySource": {"kind": "current"},
+      "matrixSource": {"kind": "current"},
+      "inventoryCanonicalSha256": "76e01a821f1610bfed91e0fc6e8758b00aab4c6f5ea5715c5c572eec88309137",
+      "matrixCanonicalSha256": "ce61deccfc375383d48c7659e105255f7841aad1783f6960fa798354e649322d"
+    }
+  ],
+  "containsPrivateInfrastructure": false,
+  "automaticPromotionAllowed": false
+}

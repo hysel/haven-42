@@ -14,6 +14,8 @@ examples/nvidia-v100-nemotron-validation.md	NVIDIA-V100-Nemotron-Validation.md	N
 examples/nvidia-tesla-v100-single-power-validation.md	NVIDIA-Tesla-V100-Single-Power-Validation.md	NVIDIA Tesla V100 Single-Card Power Validation
 examples/nvidia-quadro-rtx5000-power-validation.md	NVIDIA-Quadro-RTX5000-Power-Validation.md	NVIDIA Quadro RTX 5000 Model Power Validation
 examples/intel-b580-granite41-8b-validation.md	Intel-B580-Granite41-8B-Validation.md	Intel Arc B580 Granite 4.1 Validation
+examples/august-2026-new-model-qualification.md	Eng-August-2026-New-Model-Qualification.md	August 2026 New Model Qualification
+examples/amd-rx5700xt-ollama03213-qualification.md	Eng-AMD-RX5700XT-Ollama-03213-Qualification.md	AMD Radeon RX 5700 XT Ollama 0.32.13 Qualification
 docs/alpha-2-linux-long-term-validation.md	Eng-Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
 docs/wiki-documentation-index.md	Eng-Documentation-Index.md	Documentation Index
 docs/beginner-setup-mode.md	Eng-Beginner-Setup-Mode.md	Beginner Setup Mode
@@ -219,7 +221,9 @@ docs/evidence-records/evidence-91816f73fe0522a8.md	Evidence-Record-91816f73fe052
 docs/evidence-records/evidence-9160baf776098a16.md	Evidence-Record-9160baf776098a16.md	Mistral Small 3.2 writing constraint matrix
 docs/evidence-records/evidence-e868714f9f8c5344.md	Evidence-Record-e868714f9f8c5344.md	Optional local LLM capability suggestion
 docs/evidence-records/evidence-b91e58b8e387a4cc.md	Evidence-Record-b91e58b8e387a4cc.md	Qwen 3.5 9B writing constraint matrix
+docs/evidence-records/evidence-07a5bd4578f3108f.md	Evidence-Record-07a5bd4578f3108f.md	Radeon RX 5700 XT exact Ubuntu Vulkan profile
 docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b24c.md	Script-level recommendation and config generation
+docs/evidence-records/evidence-30fc24f8aa3ddc2b.md	Evidence-Record-30fc24f8aa3ddc2b.md	Radeon RX 5700 XT current-boot host stability
 docs/evidence-records/evidence-05d02ca020d00629.md	Evidence-Record-05d02ca020d00629.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-13d3451c24d5c713.md	Evidence-Record-13d3451c24d5c713.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-d2ac550dc4f53937.md	Evidence-Record-d2ac550dc4f53937.md	llama.cpp 11-model identical-byte AMD/NVIDIA matrix
@@ -257,15 +261,29 @@ docs/evidence-records/evidence-dda5053a14f25d32.md	Evidence-Record-dda5053a14f25
 docs/evidence-records/evidence-4e44f89b53777abb.md	Evidence-Record-4e44f89b53777abb.md	Local video candidate hardware preflight
 docs/evidence-records/evidence-749f44fc9f8604f4.md	Evidence-Record-749f44fc9f8604f4.md	Laguna XS 2.1 Ollama conformance
 docs/evidence-records/evidence-b1e852d6e517e410.md	Evidence-Record-b1e852d6e517e410.md	Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA
+docs/evidence-records/evidence-9ee9709513adee19.md	Evidence-Record-9ee9709513adee19.md	Gemma 4 E2B QAT on Radeon RX 5700 XT
+docs/evidence-records/evidence-be0a1992c6629cd9.md	Evidence-Record-be0a1992c6629cd9.md	Gemma 4 E4B QAT on Radeon RX 5700 XT
+docs/evidence-records/evidence-16a3a4e63dfc72ca.md	Evidence-Record-16a3a4e63dfc72ca.md	Granite 4.1 30B Q4 on dual Tesla V100
 docs/evidence-records/evidence-739440533a3f6c7a.md	Evidence-Record-739440533a3f6c7a.md	Granite 4.1 8B on Intel Arc B580
+docs/evidence-records/evidence-65346575aa772f5d.md	Evidence-Record-65346575aa772f5d.md	LFM 2.5 8B-A1B Q4 on Radeon RX 5700 XT
+docs/evidence-records/evidence-c3662ac9bec5b4b8.md	Evidence-Record-c3662ac9bec5b4b8.md	MiniCPM V 4.6 1B Q4 on Radeon RX 5700 XT
 docs/evidence-records/evidence-14e2d57e6336807d.md	Evidence-Record-14e2d57e6336807d.md	Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-83b23ecb83be18a7.md	Evidence-Record-83b23ecb83be18a7.md	Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA
+docs/evidence-records/evidence-9374faea1e5a9476.md	Evidence-Record-9374faea1e5a9476.md	Muse Glimmer 30B Q4 on dual Tesla V100
+docs/evidence-records/evidence-d25ff2272d76e84f.md	Evidence-Record-d25ff2272d76e84f.md	Nemotron 3 Nano Omni 33B Q4 on dual Tesla V100
+docs/evidence-records/evidence-3cde6c27785c5e96.md	Evidence-Record-3cde6c27785c5e96.md	Nemotron 3.5 Lightning Q4 on Ollama 0.32.13 dual Tesla V100
 docs/evidence-records/evidence-999c817bcb50d175.md	Evidence-Record-999c817bcb50d175.md	Nemotron 3.5 Lightning Q4 on dual Tesla V100
+docs/evidence-records/evidence-cb0f0c4481e7b7f9.md	Evidence-Record-cb0f0c4481e7b7f9.md	Nemotron 3.5 Lightning Q8 on Ollama 0.32.13 dual Tesla V100
 docs/evidence-records/evidence-b4871f9bcbf09daa.md	Evidence-Record-b4871f9bcbf09daa.md	Nemotron 3.5 Lightning Q8 on dual Tesla V100
+docs/evidence-records/evidence-7180c239d7cf4e2e.md	Evidence-Record-7180c239d7cf4e2e.md	North Mini Code 10 30B-A3B Q4 on dual Tesla V100
 docs/evidence-records/evidence-029248b547774d8a.md	Evidence-Record-029248b547774d8a.md	Ollama 0.32.9 five-model task-contract retry on dual Tesla V100
+docs/evidence-records/evidence-48e4f4c41b8289de.md	Evidence-Record-48e4f4c41b8289de.md	Ornith 10 9B Q4 on Radeon RX 5700 XT
 docs/evidence-records/evidence-d7e3b3eddcb87ab3.md	Evidence-Record-d7e3b3eddcb87ab3.md	Phi 4 Mini 3.8B Q4 on Ollama 0.32.13 Linux CUDA
+docs/evidence-records/evidence-5647918854ef19ab.md	Evidence-Record-5647918854ef19ab.md	Qwen 3.5 4B Q4 on Radeon RX 5700 XT
 docs/evidence-records/evidence-08bad671d73e509b.md	Evidence-Record-08bad671d73e509b.md	Qwen 3.5 9B synchronized power on Radeon RX 7800 XT
 docs/evidence-records/evidence-f96c1a3dd255db29.md	Evidence-Record-f96c1a3dd255db29.md	Qwen 3.6 27B Q4 on Ollama 0.32.13 Linux CUDA
+docs/evidence-records/evidence-6c0d4b52091120fa.md	Evidence-Record-6c0d4b52091120fa.md	Qwen 3.6 35B-A3B Q4 on dual Tesla V100
+docs/evidence-records/evidence-6c09cdefc61c0f82.md	Evidence-Record-6c09cdefc61c0f82.md	Qwen 3.8 27B Q4 on dual Tesla V100
 docs/evidence-records/evidence-ad991e5601c892ec.md	Evidence-Record-ad991e5601c892ec.md	Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification
 docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
 docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
@@ -300,6 +318,7 @@ docs/evidence-records/evidence-588241e349f32b95.md	Evidence-Record-588241e349f32
 docs/evidence-records/evidence-dff8d8e0aff407ab.md	Evidence-Record-dff8d8e0aff407ab.md	Generated TypeScript sample workflows
 docs/evidence-records/evidence-2de3f0726ddaba91.md	Evidence-Record-2de3f0726ddaba91.md	Online model discovery
 docs/evidence-records/evidence-2589000e63822b5e.md	Evidence-Record-2589000e63822b5e.md	Windows Alpha 2 current UI package parity
+docs/evidence-records/evidence-9a9906ccfd247313.md	Evidence-Record-9a9906ccfd247313.md	Radeon RX 5700 XT Llama 3.2 3B board power
 docs/evidence-records/evidence-77e5fbc983b71597.md	Evidence-Record-77e5fbc983b71597.md	Remote hardware profiling
 docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ede9d.md	Python API generated sample
 docs/evidence-records/evidence-22701a5715776e0d.md	Evidence-Record-22701a5715776e0d.md	TypeScript frontend generated sample

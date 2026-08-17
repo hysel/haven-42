@@ -93,7 +93,10 @@ def expect_http_error(
         )
     except urllib.error.HTTPError as error:
         assert error.code == expected_status
-        assert json.load(error)["error"] == expected_code
+        actual_code = json.load(error)["error"]
+        assert actual_code == expected_code, (
+            f"expected HTTP error {expected_code!r}, received {actual_code!r}"
+        )
         return
     raise AssertionError(f"request unexpectedly succeeded: {expected_code}")
 
@@ -317,7 +320,11 @@ def probe(
                 authority,
                 rejected_approval,
                 409,
-                "approval-does-not-match-plan",
+                (
+                    "approval-does-not-match-plan"
+                    if expected_managed or expected_version != "0.4.0-alpha.2"
+                    else "alpha2-runtime-binding-unavailable"
+                ),
             )
             with request(origin + "/api/alpha/setup-status") as response:
                 assert json.load(response)["phase"] == "idle"

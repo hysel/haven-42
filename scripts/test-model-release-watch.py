@@ -13,19 +13,27 @@ from urllib.parse import urlparse
 ROOT = Path(__file__).resolve().parents[1]
 WATCH = json.loads((ROOT / "config" / "model-release-watch.json").read_text(encoding="utf-8"))
 SHA1 = re.compile(r"^[0-9a-f]{40}$")
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
 ALLOWED_HOSTS = {"huggingface.co", "ollama.com"}
 
 
 class ModelReleaseWatchTests(unittest.TestCase):
     def test_watch_is_candidate_only_and_effect_free(self) -> None:
         self.assertEqual(WATCH["schemaVersion"], 1)
-        self.assertEqual(WATCH["status"], "candidate-only-no-download-no-execution-no-promotion")
+        self.assertIn(WATCH["status"], {
+            "candidate-only-no-download-no-execution-no-promotion",
+            "approved-qualification-in-progress-no-promotion",
+        })
         rules = WATCH["rules"]
         self.assertTrue(rules["officialPrimaryReleaseSourceRequired"])
         self.assertTrue(rules["immutableRevisionRequiredBeforeTestPlanning"])
         self.assertTrue(rules["exactRuntimeAndArtifactRequiredBeforeExecution"])
-        self.assertFalse(rules["newModelDownloadStarted"])
-        self.assertFalse(rules["newSoakStarted"])
+        if WATCH["status"] == "candidate-only-no-download-no-execution-no-promotion":
+            self.assertFalse(rules["newModelDownloadStarted"])
+            self.assertFalse(rules["newSoakStarted"])
+        else:
+            self.assertTrue(rules["newModelDownloadStarted"])
+            self.assertTrue(rules["newSoakStarted"])
         self.assertFalse(rules["automaticDefaultChanged"])
         self.assertFalse(rules["supportLabelChanged"])
 
@@ -38,7 +46,10 @@ class ModelReleaseWatchTests(unittest.TestCase):
             self.assertEqual(parsed.scheme, "https")
             self.assertIn(parsed.hostname, ALLOWED_HOSTS)
             if item["revision"] is not None:
-                self.assertRegex(item["revision"], SHA1)
+                self.assertTrue(
+                    SHA1.fullmatch(item["revision"])
+                    or SHA256.fullmatch(item["revision"])
+                )
             self.assertGreater(item["repositorySizeGiBApprox"], 0)
             self.assertTrue(item["capabilityLanes"])
             self.assertIn(item["priority"], {"highest", "high", "medium", "low"})

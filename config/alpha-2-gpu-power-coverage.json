@@ -60,8 +60,10 @@
       "vendor": "AMD",
       "model": "Radeon RX 5700 XT",
       "memoryGiB": 8,
-      "status": "pending",
-      "measurementEvidence": []
+      "status": "measured",
+      "measurementEvidence": [
+        "examples/amd-rx5700xt-ollama03213-qualification.md"
+      ]
     },
     {
       "id": "amd-radeon-rx-6800-16g",

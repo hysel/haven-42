@@ -34,6 +34,7 @@ def main() -> None:
     assert ("gemma3-4b-q4", "cpu-16gib") in cells
     assert ("qwen36-27b-q4", "cuda-32gib-system-16gib") in cells
     assert ("qwen36-35b-a3b-q4", "cuda-32gib-system-16gib") not in cells
+    assert ("minicpm-v46-1b-q4", "vulkan-8gib-system-16gib") in cells
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
         base = root / "evidence"
@@ -224,6 +225,65 @@ def main() -> None:
                 historical_inventory_path, MODULE.MATRIX_PATH
             ),
             "stale-qualification-matrix",
+        )
+    with tempfile.TemporaryDirectory() as temporary:
+        base = Path(temporary)
+        expected = context[(
+            "minicpm-v46-1b-q4", "vulkan-8gib-system-16gib"
+        )]
+        common_extended = {
+            "schemaVersion": 1,
+            "kind": "haven42-alpha2-extended-model-qualification",
+            "modelId": "minicpm-v46-1b-q4",
+            "outcome": "passed",
+            "platformFamily": "linux",
+            "operatingSystemId": "test-rx-linux",
+            "backend": "vulkan",
+            "profileId": "vulkan-8gib-system-16gib",
+            "provider": "ollama",
+            "providerVersion": expected["providerVersion"],
+            "manifestDigest": expected["manifestDigest"],
+            "systemMemoryGiB": 32,
+            "usableGpuMemoryGiB": 8,
+            "inventorySha256": inventory_sha,
+            "matrixSha256": matrix_sha,
+            "peakObservedGpuResidencyBytes": 1024,
+            "durationMilliseconds": 1000,
+            "rawPromptRecorded": False,
+            "rawResponseRecorded": False,
+            "containsRawPromptsOrResponses": False,
+            "containsPrivateMachineIdentity": False,
+            "automaticPromotionAllowed": False,
+        }
+        vision = {
+            **common_extended,
+            "capability": "vision",
+            "details": {"syntheticImages": 2, "groundedAnswers": 2},
+        }
+        recovery = {
+            **common_extended,
+            "capability": "failure-recovery",
+            "details": {
+                "timeoutObserved": True,
+                "postTimeoutRequestPassed": True,
+            },
+        }
+        (base / "vision.json").write_text(json.dumps(vision), encoding="utf-8")
+        (base / "recovery.json").write_text(
+            json.dumps(recovery), encoding="utf-8"
+        )
+        extended_report = MODULE.build_report(base)
+        result = extended_report["results"][0]
+        assert result["status"] == "incomplete"
+        assert result["extendedStatus"] == "passed"
+        assert result["extendedCapabilities"]["vision"]["metrics"][
+            "groundedAnswers"
+        ] == 2
+        vision["containsRawPromptsOrResponses"] = True
+        (base / "vision.json").write_text(json.dumps(vision), encoding="utf-8")
+        refused(
+            lambda: MODULE.build_report(base),
+            "invalid-extended-qualification-evidence",
         )
     source = (ROOT / "scripts/alpha2-model-qualification-report.py").read_text(encoding="utf-8")
     assert '.get("response")' not in source and '["response"]' not in source

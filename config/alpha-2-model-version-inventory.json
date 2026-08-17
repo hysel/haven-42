@@ -34,7 +34,42 @@
           "artifactStatus": "local-artifacts-tested",
           "officialSource": "https://ollama.com/library/qwen3.5",
           "evidenceReference": "config/alpha-2-model-catalog.json",
-          "qualificationState": "native-evidence-in-progress"
+          "qualificationState": "native-evidence-in-progress",
+          "candidates": [
+            {
+              "id": "qwen35-08b-q8",
+              "model": "qwen3.5:0.8b",
+              "manifestDigest": "f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4",
+              "modelLayerDigest": "afb707b6b8fac6e475acc42bc8380fc0b8d2e0e4190be5a969fbf62fcc897db5",
+              "modelBytes": 1036034688,
+              "quantization": "Q8_0",
+              "hardwareClass": "constrained",
+              "minimumOllamaVersion": "0.32.5",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen35-08b-q8"
+            },
+            {
+              "id": "qwen35-2b-q8",
+              "model": "qwen3.5:2b",
+              "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+              "modelLayerDigest": "b709d81508a078a686961de6ca07a953b895d9b286c46e17f00fb267f4f2d297",
+              "modelBytes": 2741180928,
+              "quantization": "Q8_0",
+              "hardwareClass": "constrained",
+              "minimumOllamaVersion": "0.32.5",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen35-2b-q8"
+            },
+            {
+              "id": "qwen35-4b-q4",
+              "model": "qwen3.5:4b",
+              "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+              "modelLayerDigest": "81fb60c7daa80fc1123380b98970b320ae233409f0f71a72ed7b9b0d62f40490",
+              "modelBytes": 3389971840,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "mainstream",
+              "minimumOllamaVersion": "0.32.5",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen35-4b-q4"
+            }
+          ]
         },
         {
           "version": "3.6",
@@ -69,13 +104,27 @@
           "qualificationState": "hosted-api-review-pending",
           "candidates": []
         },
-      {
-        "version": "3.8",
-        "artifactStatus": "official-local-weights-released-runtime-artifact-pending",
-        "officialSource": "https://huggingface.co/Qwen/Qwen3.8-27B",
-        "qualificationState": "candidate-only-runtime-hardware-and-task-validation-not-started",
-        "candidates": []
-      }
+        {
+          "version": "3.8",
+          "artifactStatus": "local-artifact-verified",
+          "officialSource": "https://ollama.com/library/qwen3.8:27b",
+          "qualificationState": "approved-qualification-queued",
+          "candidates": [
+            {
+              "id": "qwen38-27b-q4",
+              "model": "qwen3.8:27b",
+              "manifestDigest": "22130167c4c20e20c7b71454612966ca8e8171e9b3cc8ab6ce8aa6cbfec79643",
+              "modelLayerDigest": "f5f1dd8920d417aac2718b0bda3403da274301efdd6760b4f0f4b864ff2ad57d",
+              "projectorLayerDigest": "ac3714bfdddeca31351f2752bf1a63f266f4df87c0b68c895e44945ca704448e",
+              "modelBytes": 16810714464,
+              "downloadBytes": 17741871939,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "high-memory",
+              "minimumOllamaVersion": "0.32.12",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen38-27b-q4"
+            }
+          ]
+        }
       ]
     },
     {
@@ -190,16 +239,31 @@
               "quantization": "Q4_K_M",
               "hardwareClass": "constrained"
             },
-            {
-              "id": "granite41-8b-q4",
+        {
+          "id": "granite41-8b-q4",
               "model": "granite4.1:8b-q4_K_M",
               "manifestDigest": "444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852",
               "modelLayerDigest": "ed902ac9eb6adce5a90c6a08c8ea201b50e23fdc5976d1cd0362006afac5309e",
               "modelBytes": 5347914400,
               "downloadBytes": 5347932600,
-              "quantization": "Q4_K_M",
-              "hardwareClass": "mainstream"
-            }
+          "quantization": "Q4_K_M",
+          "hardwareClass": "mainstream"
+        },
+        {
+          "id": "granite41-30b-q4",
+          "model": "granite4.1:30b",
+          "manifestDigest": "3f3e5df8a021439fd6f867a0e526bdc303cac79c811201cb6bac193298cb9fcd",
+          "configDigest": "b3d67cae8cf7a6ffd6001c3e4620745c1a3eb793f8748c8a261a5e31f14fd33e",
+          "modelLayerDigest": "b33e4376e3581d11236ea53ced6b38399f6e91c0a391488486dc0827972f23f6",
+          "modelBytes": 17490240736,
+          "downloadBytes": 17490258936,
+          "quantization": "Q4_K_M",
+          "minimumOllamaVersion": "0.32.13",
+          "minimumOllamaVersionBasis": "exact-qualification-provider-version-upstream-minimum-not-declared",
+          "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#granite41-30b-q4",
+          "capabilities": ["general.chat", "content.write", "content.summarize", "coding", "tools"],
+          "hardwareClass": "24gib-or-greater"
+        }
           ]
         }
       ]
@@ -496,6 +560,153 @@
                 "thinking"
               ],
               "hardwareClass": "apple-silicon-ultra-high-unified-memory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "Ornith",
+      "license": "MIT",
+      "licenseSource": "https://ollama.com/library/ornith",
+      "versions": [
+        {
+          "version": "1.0",
+          "artifactStatus": "official-local-artifact-verified",
+          "officialSource": "https://ollama.com/library/ornith:9b",
+          "qualificationState": "approved-qualification-download-queued",
+          "candidates": [
+            {
+              "id": "ornith-10-9b-q4",
+              "model": "ornith:9b",
+              "manifestDigest": "a75697c145891910e312c95e4a9fc1ccb8653e5ef543b23b0403a4665b82fd91",
+              "configDigest": "df2252e2f5bd8b3f775df45ab3b3ddb962fee733f09f8fa71683b66e736986d9",
+              "modelLayerDigest": "af63361d2ac3ba2cb454f440842e345b926a50fe89cbdbe6a55160f32fc28e93",
+              "modelBytes": 5629108640,
+              "downloadBytes": 5629110020,
+              "quantization": "Q4_K_M",
+              "minimumOllamaVersion": "0.30.11",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#ornith-10-9b-q4",
+              "capabilities": ["coding", "tools"],
+              "hardwareClass": "8gib-or-greater"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "North Mini Code",
+      "license": "Apache-2.0-with-Cohere-acceptable-use-policy",
+      "licenseSource": "https://ollama.com/library/north-mini-code-1.0",
+      "versions": [
+        {
+          "version": "1.0",
+          "artifactStatus": "official-local-artifact-verified",
+          "officialSource": "https://ollama.com/library/north-mini-code-1.0:q4_K_M",
+          "qualificationState": "approved-qualification-download-queued",
+          "candidates": [
+            {
+              "id": "north-mini-code-10-30b-a3b-q4",
+              "model": "north-mini-code-1.0:q4_K_M",
+              "manifestDigest": "d8b269ad5c7c7144ce104b83ce93bc3efb85e0f74e01be6be5f5d6f7ca90b60f",
+              "configDigest": "d7d22779fb87ed760b8b256143d423ccbbf760020d5277b9949759f67afbab12",
+              "modelLayerDigest": "2e6b0d32b7ff9d61f77d6808307db4791f487a72b22da0b28f5d4293b5729282",
+              "modelBytes": 18593955136,
+              "downloadBytes": 18593966525,
+              "quantization": "Q4_K_M",
+              "minimumOllamaVersion": "0.30.10",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#north-mini-code-10-30b-a3b-q4",
+              "capabilities": ["coding", "tools", "long-context"],
+              "hardwareClass": "24gib-or-greater"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "LFM",
+      "license": "LFM-Open-License-1.0-review-required",
+      "licenseSource": "https://ollama.com/library/lfm2.5",
+      "versions": [
+        {
+          "version": "2.5",
+          "artifactStatus": "official-local-artifact-verified-license-review-open",
+          "officialSource": "https://ollama.com/library/lfm2.5:8b",
+          "qualificationState": "approved-research-qualification-download-queued",
+          "candidates": [
+            {
+              "id": "lfm25-8b-a1b-q4",
+              "model": "lfm2.5:8b",
+              "manifestDigest": "9cf756159fc2f3b9128c6a3f544ec90c5e9b8afdbb4179a57b8aea9de589cfb2",
+              "configDigest": "18c8fd148a015b57c7322a4a76185668c1f4fbfaeac52234f3102a1e48cd3087",
+              "modelLayerDigest": "63c9be0cc3d5d7b0377161064a74c82b1a5a6ee9ba4a9a3cf034293d6dd09282",
+              "modelBytes": 5156064416,
+              "downloadBytes": 5156075045,
+              "quantization": "Q4_K_M",
+              "minimumOllamaVersion": "0.30.0",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#lfm25-8b-a1b-q4",
+              "capabilities": ["general.chat", "tools", "thinking"],
+              "hardwareClass": "8gib-or-greater"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "MiniCPM-V",
+      "license": "Apache-2.0",
+      "licenseSource": "https://huggingface.co/openbmb/MiniCPM-V-4.6",
+      "versions": [
+        {
+          "version": "4.6",
+          "artifactStatus": "official-local-artifact-verified",
+          "officialSource": "https://ollama.com/library/minicpm-v4.6:1b",
+          "qualificationState": "approved-qualification-queued",
+          "candidates": [
+            {
+              "id": "minicpm-v46-1b-q4",
+              "model": "minicpm-v4.6:1b",
+              "manifestDigest": "e95583acac773b45d95469c069db44808c87295f924183f4c942d52616b2d132",
+              "configDigest": "7ff7e70edbb9a487fe83502ebcdfd8afcbdcd402e58cd345ef96f0f6a4b2c334",
+              "modelLayerDigest": "6b0c74962c44bc6bf4b655b9b02c13eda9d5a0491543ae976d1ac18e4b7892e2",
+              "projectorLayerDigest": "ca931d861d0801d9003e50697cd764721a334107c0e0415a51168ee1938462de",
+              "modelBytes": 529101504,
+              "downloadBytes": 1637848448,
+              "quantization": "Q4_K_M",
+              "minimumOllamaVersion": "0.30.0",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#minicpm-v46-1b-q4",
+              "capabilities": ["vision", "multimodal-chat"],
+              "hardwareClass": "4gib-or-greater"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "NVIDIA Nemotron 3 Nano Omni",
+      "license": "NVIDIA-Open-Model-Agreement-review-required",
+      "licenseSource": "https://ollama.com/library/nemotron3",
+      "versions": [
+        {
+          "version": "3",
+          "artifactStatus": "official-local-artifact-verified-license-review-open",
+          "officialSource": "https://ollama.com/library/nemotron3:33b",
+          "qualificationState": "approved-research-qualification-queued",
+          "candidates": [
+            {
+              "id": "nemotron3-nano-omni-33b-q4",
+              "model": "nemotron3:33b",
+              "manifestDigest": "f6d8b7ff496ccc53429cc480ad53971d522b443ee4a5aa58a6da49e57acf42cf",
+              "configDigest": "de7e7edd5b20aa0138ae6878435fad270beedc5162e2eaeeeed58068fac10267",
+              "modelLayerDigest": "02025860dddec7ec009768f05966d941e0a89b470e805e136018149d1dabcf26",
+              "modelBytes": 27638621088,
+              "downloadBytes": 27638631216,
+              "quantization": "Q4_K_M",
+              "minimumOllamaVersion": "0.32.13",
+              "minimumOllamaVersionBasis": "exact-qualification-provider-version-upstream-minimum-not-declared",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#nemotron3-nano-omni-33b-q4",
+              "capabilities": ["general.chat", "content.write", "content.summarize", "vision", "tools", "thinking"],
+              "hardwareClass": "32gib-or-greater"
             }
           ]
         }

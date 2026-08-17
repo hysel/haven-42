@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "planId": "haven42.alpha2.amd-radeon-rx5700xt-8g",
+  "release": "0.4.0-alpha.2",
+  "state": "ubuntu-ollama-vulkan-qualification-running",
+  "purpose": "Produce fail-closed, operating-system-specific evidence for the Radeon RX 5700 XT without treating CPU fallback as GPU support.",
+  "hardwareClass": {
+    "vendor": "AMD",
+    "model": "Radeon RX 5700 XT",
+    "architecture": "RDNA 1",
+    "gfxTarget": "gfx1010",
+    "pciVendorId": "0x1002",
+    "pciDeviceId": "0x731f",
+    "kernelDriver": "amdgpu",
+    "vulkanDriver": "radv",
+    "memoryGiB": 8
+  },
+  "privacy": {
+    "privateLabAddressesAllowed": false,
+    "hostNamesAllowed": false,
+    "credentialsOrKeysAllowed": false,
+    "rawPromptsOrResponsesAllowed": false
+  },
+  "authority": {
+    "preparationDoesNotAuthorizeExecution": true,
+    "modelDownloadsRequireExplicitStartPrompt": true,
+    "runtimeOrDriverChangesRequireExplicitStartPrompt": true,
+    "automaticDefaultOrSupportPolicyChangesAllowed": false
+  },
+  "sourceBindings": {
+    "modelInventory": {
+      "path": "config/alpha-2-model-version-inventory.json",
+      "sha256": "8f5e59398636317e17a40e4ceecd2dd3802670064340f478eb53d7f866c8d700"
+    },
+    "qwenCatalog": "config/alpha-2-model-catalog.json",
+    "runtimeCompatibility": "config/alpha-2-runtime-compatibility.json",
+    "officialRuntimeSupport": [
+      "https://docs.ollama.com/gpu",
+      "https://docs.ollama.com/linux",
+      "https://github.com/ggml-org/llama.cpp/releases/tag/b10375"
+    ],
+    "supportBoundary": "Ollama's current ROCm tables do not list the RX 5700 XT on Linux or Windows. Ollama documents Vulkan as an additional AMD route on both systems. Vulkan is therefore the primary certification path; ROCm/HIP cells are experimental and cannot establish general supported status. Every runtime and operating-system cell must stand on its own evidence."
+  },
+  "prerequisites": {
+    "hostStability": [
+      "Record the final sanitized firmware settings used for the run.",
+      "Complete a memory test with the final installed DIMMs and memory profile.",
+      "Complete separate CPU-only and GPU smoke loads without a freeze, reset, machine-check event, EDAC error, or amdgpu reset.",
+      "Treat any host freeze or unexplained reset as an inconclusive hardware cell, not a model failure."
+    ],
+    "runnerReadiness": [
+      "Use the reviewed Vulkan backend identity now implemented in the qualification and soak runners; ROCm/HIP remains a separate experimental route.",
+      "Require runtime evidence of gfx1010 execution, positive VRAM residency, and full requested layer offload before a GPU result can pass.",
+      "Fail closed when accelerator identity, residency, runtime version, model digest, or cleanup cannot be verified."
+    ],
+    "storage": [
+      "Calculate required bytes for the exact selected artifacts plus temporary download space before starting.",
+      "Do not delete an existing model automatically to make room."
+    ]
+  },
+  "runtimeCells": [
+    {
+      "id": "ubuntu-26.04-ollama-0.32.13-vulkan",
+      "priority": 1,
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "runtime": "Ollama",
+      "version": "0.32.13",
+      "backend": "vulkan",
+      "artifact": "ollama-linux-amd64.tar.zst",
+      "sha256": "0fd1dece38a1c6242e8013ce20b597345c5de072ae6b320160edb0e729ef1de1",
+      "state": "qualification-running"
+    },
+    {
+      "id": "ubuntu-26.04-llamacpp-b10375-vulkan",
+      "priority": 2,
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "runtime": "llama.cpp",
+      "version": "b10375",
+      "commit": "ba360efe1f574ebae727aad64112d18ecedca85a",
+      "backend": "vulkan",
+      "artifact": "llama-b10375-bin-ubuntu-vulkan-x64.tar.gz",
+      "sha256": "cbf7354e70f9bcda5a389e1f02e2293414d47fe525b271c3a8063327754e3ef9",
+      "state": "candidate-not-started"
+    },
+    {
+      "id": "windows-ollama-0.32.13-vulkan",
+      "priority": 3,
+      "operatingSystem": "Windows",
+      "runtime": "Ollama",
+      "version": "0.32.13",
+      "backend": "vulkan",
+      "artifact": "ollama-windows-amd64.zip",
+      "sha256": "20d61a8075038694f5b6db1e937551dbc79d470e85217003facf6ecaac394258",
+      "state": "candidate-not-started"
+    },
+    {
+      "id": "windows-llamacpp-b10375-vulkan",
+      "priority": 4,
+      "operatingSystem": "Windows",
+      "runtime": "llama.cpp",
+      "version": "b10375",
+      "commit": "ba360efe1f574ebae727aad64112d18ecedca85a",
+      "backend": "vulkan",
+      "artifact": "llama-b10375-bin-win-vulkan-x64.zip",
+      "sha256": "1fef77a8b7742485c3f9f0acd16b68330ca9d5f447b73eb80d32862e4b2c7cfa",
+      "state": "candidate-not-started"
+    },
+    {
+      "id": "ubuntu-26.04-llamacpp-b10375-rocm-7.14-experimental",
+      "priority": 5,
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "runtime": "llama.cpp",
+      "version": "b10375",
+      "commit": "ba360efe1f574ebae727aad64112d18ecedca85a",
+      "backend": "rocm-7.14",
+      "artifact": "llama-b10375-bin-ubuntu-rocm-7.14-x64.tar.gz",
+      "sha256": "712cee42f49d4ae627f621eaa352ccfcacf51547d0afc58ef4d1873c0d9d1e25",
+      "state": "experimental-not-listed-by-current-rocm-support-tables"
+    },
+    {
+      "id": "windows-llamacpp-b10375-rocm-7.14-experimental",
+      "priority": 6,
+      "operatingSystem": "Windows",
+      "runtime": "llama.cpp",
+      "version": "b10375",
+      "commit": "ba360efe1f574ebae727aad64112d18ecedca85a",
+      "backend": "rocm-7.14",
+      "artifact": "llama-b10375-bin-win-rocm-7.14-x64.zip",
+      "sha256": "46464da654280440970ea8e742d3b9294291a1bcf6adb88c5160734082250334",
+      "state": "experimental-not-listed-by-current-rocm-support-tables"
+    }
+  ],
+  "modelLadder": {
+    "expectedFit": [
+      "qwen35-08b-q8",
+      "gemma3-1b-q4",
+      "llama32-3b-q4",
+      "granite41-3b-q4",
+      "qwen35-2b-q8",
+      "phi4-mini-38b-q4",
+      "ministral3-3b-q4",
+      "gemma3-4b-q4",
+      "gemma4-e2b-qat",
+      "qwen35-4b-q4"
+    ],
+    "measuredBoundaryOnly": [
+      "gemma4-e4b-qat",
+      "granite41-8b-q4",
+      "ministral3-8b-q4"
+    ],
+    "oversizedRefusal": [
+      "qwen35-9b-q4",
+      "gemma3-12b-q4",
+      "gemma4-12b-qat"
+    ],
+    "rules": [
+      "Resolve every ID to an exact immutable manifest and model-layer digest before execution.",
+      "A boundary model may continue beyond admission only if measured free VRAM remains at least 2 GiB and at least 25 percent of physical VRAM after the requested context is allocated.",
+      "An oversized-refusal candidate must be rejected before download or execution on the automatic 8 GiB path.",
+      "Qwen 3.6 27B, Qwen 3.8 27B, and other high-memory candidates remain outside this full-offload hardware envelope."
+    ]
+  },
+  "execution": {
+    "order": [
+      "host-stability-admission",
+      "vulkan-runtime-integrity-and-accelerator-proof",
+      "three-repeat-task-gate",
+      "thirty-minute-bounded-soak-for-task-gate-passes",
+      "cancellation-unload-reload-and-recovery",
+      "oversized-refusal",
+      "power-capture",
+      "sanitized-evidence-review"
+    ],
+    "tasks": [
+      "general.chat",
+      "content.write",
+      "content.summarize"
+    ],
+    "sampleRepetitions": 3,
+    "soakMinutes": 30,
+    "requiredHeadroomGiB": 2,
+    "requiredHeadroomPercent": 25,
+    "unloadAfterEverySample": true,
+    "passRequirements": [
+      "Exact runtime artifact and model digests match the plan bindings.",
+      "The requested AMD device and backend are observed; CPU fallback is absent.",
+      "All task samples pass structure, safety, latency, and cancellation gates.",
+      "The soak completes without runtime crash, GPU reset, host freeze, thermal failure, or memory admission violation.",
+      "Model unload, runtime restart, and a repeat smoke request succeed."
+    ]
+  },
+  "powerEvidence": {
+    "windows": "Use AMD Software Adrenalin CSV logging synchronized to idle, load, and cooldown markers.",
+    "linux": "Use supported AMD telemetry when it exposes trustworthy board power; otherwise use a wall-power meter and label the result whole-system.",
+    "requiredMetrics": [
+      "idle-average-watts",
+      "active-average-watts",
+      "peak-watts",
+      "energy-watt-hours",
+      "tokens-per-watt-hour"
+    ],
+    "gpuOnlyAndWholeSystemMayBeMerged": false
+  },
+  "evidenceOutputs": [
+    "A sanitized machine-readable result for every exact OS, driver, runtime, backend, and model cell.",
+    "A human-readable RX 5700 XT validation page with pass, partial, unsupported, failed, and not-tested states kept distinct.",
+    "An update to the GPU power coverage registry only after reviewed measurements exist.",
+    "An update to the model/hardware certification wiki sources only after repository and wiki synchronization checks pass."
+  ],
+  "exitGate": [
+    "Linux and Windows results are reported separately.",
+    "No passing result relies on unverified CPU fallback or partial offload.",
+    "Every boundary and refusal candidate has an explicit outcome.",
+    "Power scope and telemetry source are stated.",
+    "Any recommendation or support-label change remains a separate owner decision."
+  ]
+}

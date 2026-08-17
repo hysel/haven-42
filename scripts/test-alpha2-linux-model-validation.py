@@ -61,10 +61,13 @@ def main() -> None:
         lambda: MODULE.reviewed_model("granite41-3b-q4"),
         "unreviewed-model-cell",
     )
-    refused(
-        lambda: MODULE.reviewed_qualification_model("qwen35-08b-q8"),
-        "unreviewed-qualification-model",
+    qwen_qualification, qwen_inventory_sha, qwen_provider = (
+        MODULE.reviewed_qualification_model("qwen35-08b-q8")
     )
+    assert qwen_qualification["name"] == "qwen3.5:0.8b"
+    assert qwen_qualification["manifestDigest"] == "f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4"
+    assert len(qwen_inventory_sha) == 64
+    assert qwen_provider == "0.32.13"
     refused(
         lambda: MODULE.run_cell(
             origin="http://127.0.0.1:11435",
@@ -139,6 +142,32 @@ def main() -> None:
         {"done": True, "response": "ready", "eval_count": 2, "prompt_eval_count": 3, "eval_duration": 0},
     ):
         refused(lambda v=hostile: MODULE._validate_generate(v), "inference-response-contract-failed")
+
+    original_json_request = MODULE._json_request
+    try:
+        MODULE._json_request = lambda *_args, **_kwargs: {
+            "models": [{"name": "exact:model", "size": 100, "size_vram": 100}]
+        }
+        assert MODULE._verify_residency(
+            "http://127.0.0.1:11435", {"name": "exact:model"}, "vulkan"
+        ) == 100
+        MODULE._json_request = lambda *_args, **_kwargs: {
+            "models": [{"name": "exact:model", "size": 100, "size_vram": 99}]
+        }
+        refused(
+            lambda: MODULE._verify_residency(
+                "http://127.0.0.1:11435", {"name": "exact:model"}, "vulkan"
+            ),
+            "vulkan-full-residency-not-observed",
+        )
+        MODULE._json_request = lambda *_args, **_kwargs: {
+            "models": [{"name": "exact:model", "size": 100, "size_vram": 0}]
+        }
+        assert MODULE._verify_residency(
+            "http://127.0.0.1:11435", {"name": "exact:model"}, "cpu"
+        ) == 0
+    finally:
+        MODULE._json_request = original_json_request
 
     originals = {
         "reviewed_model": MODULE.reviewed_model,

@@ -14,6 +14,7 @@ local model may fit their computer and electricity budget.
 | NVIDIA Quadro RTX 5000 16 GiB | Qwen 3.5 4B Q4_K_M · Ollama 0.32.5 | Board power during a two-minute idle baseline and five-minute three-task workload | 151.060 W active average, 192.24 W peak, 12.595845 Wh; 131.018 W idle-adjusted average | Accepted exact-profile energy measurement |
 | Intel Arc B580 12 GiB | Granite 4.1 8B Q4_K_M · llama.cpp b10375 SYCL | Card energy during active inference; broader soak average includes idle time | 463.334 J active energy; 34.933 W broader-run average | Exact-profile engineering evidence |
 | AMD Radeon RX 7800 XT 16 GiB | Qwen 3.5 9B Q4_K_M · Ollama 0.32.5 | Adrenalin GPU board power across a 30-minute soak | 40.084 W average, 261 W peak, 20.142 Wh; 15.882 W idle-adjusted average | Accepted exact-profile energy measurement |
+| AMD Radeon RX 5700 XT 8 GiB | Llama 3.2 3B Q4_K_M · Ollama 0.32.13 Vulkan on Ubuntu 26.04 | Linux `power1_average` GPU-board sensor across two-minute idle, ten-minute active, and two-minute cooldown windows | 7.575 W idle average, 122.118 W active average, 242 W peak, 20.350129 Wh active; 2,134.188 output tokens/Wh | Exact-profile engineering evidence |
 
 ## Measurement coverage
 
@@ -29,7 +30,7 @@ the campaign. The machine-readable coverage source is
 | GeForce RTX 3060 12 GiB | Pending | Measure the fixed idle and active workload after the purchased card is installed. |
 | Quadro RTX 5000 16 GiB | Measured | Add another exact-profile record when the model, runtime, driver, workload, or operating system changes. |
 | Tesla V100 32 GiB | Measured | Single-card and two-card records are available and remain separate exact-profile measurements. |
-| Radeon RX 5700 XT 8 GiB | Pending | Measure the fixed workload after Windows and Linux prove their exact GPU routes; keep CPU-fallback results separately labelled. |
+| Radeon RX 5700 XT 8 GiB | Measured | The Ubuntu 26.04 Vulkan lane has a reference GPU-board measurement. Windows, ROCm, another driver, or another workload remains a separate cell. |
 | Radeon RX 6800 non-XT 16 GiB | Pending | Measure the fixed workload after the purchased card is installed and its exact AMD route passes. |
 | Radeon RX 7800 XT 16 GiB | Measured | Repeat only when a runtime, driver, workload, or measurement-method change requires a new exact-profile record. |
 | Intel Arc B580 12 GiB | Measured | Add another exact-profile record when the runtime, driver, workload, or operating system changes. |
@@ -85,6 +86,7 @@ fixed charges, and the rest of the computer may change the actual cost.
 - [NVIDIA Quadro RTX 5000 power evidence](NVIDIA-Quadro-RTX5000-Power-Validation)
 - [Intel Arc B580 Granite evidence](Intel-B580-Granite41-8B-Validation)
 - [AMD RX 7800 XT power evidence](Windows-AMD-RX7800XT-Power-Validation)
+- [AMD RX 5700 XT Ubuntu qualification and power evidence](Eng-AMD-RX5700XT-Ollama-03213-Qualification)
 - [Full model and hardware test status](Model-And-Hardware-Test-Status)
 
 No measurement on this page changes Haven 42's automatic model selection.

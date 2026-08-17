@@ -28,8 +28,8 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "c02d83fcd318b683517cce6ccd28a84473a39a3f10e044f2d59fbe71732b1788",
-      "sizeBytes": 54648
+      "sha256": "d02a826cf6f84fd561b1439e812a82e1b323b16902fb3e34997ba8b85eee10d6",
+      "sizeBytes": 63659
     },
     {
       "path": "config/agent-surface-capabilities.json",
@@ -108,13 +108,13 @@
     },
     {
       "path": "config/alpha-2-model-version-inventory.json",
-      "sha256": "a69062dca495e90e178f7d2dc69ccec53528cf8e4e6e48116c7450507350acd2",
-      "sizeBytes": 21008
+      "sha256": "880cd3b869443a106b0d2a32345085b517d15d6331bc730e6c7b56c1ccc9686e",
+      "sizeBytes": 31181
     },
     {
       "path": "config/alpha-2-model-runtime-requirements.json",
-      "sha256": "cabf60a6835c1518409c608ad4cd1a34847f86dd1be23206b01f2542c426019a",
-      "sizeBytes": 9138
+      "sha256": "b66841f1de3e85a1e3ed8b289c67553028bc79d8edc9b4caa1c4409994897bdd",
+      "sizeBytes": 12610
     },
     {
       "path": "config/alpha-2-runtime-compatibility.json",

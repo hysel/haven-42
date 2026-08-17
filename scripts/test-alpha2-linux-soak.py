@@ -59,6 +59,12 @@ def passing_qualification_cell(**arguments):
     return passing_cell(**arguments)
 
 
+def passing_vulkan_qualification_cell(**arguments):
+    value = passing_qualification_cell(**arguments)
+    value["metrics"]["peakGpuMemoryBytes"] = 4 * MODULE.GIB_BYTES
+    return value
+
+
 def run(**overrides):
     clock = Clock()
     arguments = {
@@ -158,9 +164,38 @@ def main() -> None:
         lambda: run(origin="http://localhost:11435"), "invalid-loopback-origin"
     )
     refused(lambda: run(model_id="qwen35-9b-q4"), "unreviewed-model-cell")
-    refused(lambda: run(backend="rocm"), "unreviewed-backend")
+    refused(lambda: run(backend="metal"), "unreviewed-backend")
     refused(
         lambda: run(usable_gpu_memory_gib=1), "cpu-cell-gpu-memory-mismatch"
+    )
+    vulkan = run(
+        model_id="granite41-3b-q4",
+        qualification_inventory=True,
+        qualification_profile_id="vulkan-8gib-system-16gib",
+        backend="vulkan",
+        system_memory_gib=16,
+        usable_gpu_memory_gib=8,
+        cell_runner=passing_vulkan_qualification_cell,
+    )
+    assert vulkan["outcome"] == "passed"
+    assert vulkan["evidence"]["backendMode"] == "vulkan"
+
+    def low_headroom_vulkan_cell(**arguments):
+        value = passing_vulkan_qualification_cell(**arguments)
+        value["metrics"]["peakGpuMemoryBytes"] = 7 * MODULE.GIB_BYTES
+        return value
+
+    refused(
+        lambda: run(
+            model_id="granite41-3b-q4",
+            qualification_inventory=True,
+            qualification_profile_id="vulkan-8gib-system-16gib",
+            backend="vulkan",
+            system_memory_gib=16,
+            usable_gpu_memory_gib=8,
+            cell_runner=low_headroom_vulkan_cell,
+        ),
+        "insufficient-gpu-headroom",
     )
     refused(
         lambda: run(operating_system_id="private host"),

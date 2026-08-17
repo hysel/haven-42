@@ -19,6 +19,14 @@ MAX_EVIDENCE_BYTES = 2 * 1024 * 1024
 MAX_EVIDENCE_DIRECTORIES = 8
 MAX_EVIDENCE_FILES = 1024
 CAPABILITIES = ("general.chat", "content.write", "content.summarize")
+EXTENDED_CAPABILITIES = (
+    "coding",
+    "tools",
+    "thinking",
+    "vision",
+    "long-context",
+    "failure-recovery",
+)
 LEGACY_LINUX_OPERATING_SYSTEM_IDS = frozenset({"bazzite-44"})
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -99,7 +107,7 @@ def _reviewed_context(
         if (
             not isinstance(profile, dict)
             or not isinstance(profile.get("id"), str)
-            or profile.get("backend") not in {"cpu", "cuda"}
+            or profile.get("backend") not in {"cpu", "cuda", "rocm", "vulkan"}
             or isinstance(profile.get("minimumSystemMemoryGiB"), bool)
             or not isinstance(profile.get("minimumSystemMemoryGiB"), (int, float))
             or isinstance(profile.get("minimumUsableGpuMemoryGiB"), bool)
@@ -132,7 +140,23 @@ def _reviewed_context(
         model_id = candidate.get("modelId")
         inventory_candidate = inventory_candidates.get(model_id)
         required_profiles = candidate.get("requiredProfiles")
+        planned_test = candidate.get("plannedTest", {})
+        capability_checks = (
+            planned_test.get("capabilityChecks", [])
+            if isinstance(planned_test, dict)
+            else None
+        )
         if inventory_candidate is None or not isinstance(required_profiles, list):
+            raise ReportError("invalid-qualification-matrix")
+        if (
+            not isinstance(capability_checks, list)
+            or any(
+                not isinstance(value, str)
+                or value not in {*CAPABILITIES, *EXTENDED_CAPABILITIES}
+                for value in capability_checks
+            )
+            or len(capability_checks) != len(set(capability_checks))
+        ):
             raise ReportError("invalid-qualification-matrix")
         for profile_id in required_profiles:
             profile = reviewed_profiles.get(profile_id)
@@ -147,6 +171,11 @@ def _reviewed_context(
                 "minimumSystemMemoryGiB": float(profile["minimumSystemMemoryGiB"]),
                 "minimumUsableGpuMemoryGiB": float(profile["minimumUsableGpuMemoryGiB"]),
                 "checks": reviewed_checks,
+                "extendedChecks": tuple(
+                    value
+                    for value in EXTENDED_CAPABILITIES
+                    if value in capability_checks
+                ),
             }
     if not cells:
         raise ReportError("invalid-qualification-matrix")
@@ -236,7 +265,7 @@ def _task_metrics(
         or integers["outputTokens"] <= 0
         or integers["peakGpuMemoryBytes"] < 0
         or (backend == "cpu" and integers["peakGpuMemoryBytes"] != 0)
-        or (backend == "cuda" and integers["peakGpuMemoryBytes"] <= 0)
+        or (backend != "cpu" and integers["peakGpuMemoryBytes"] <= 0)
     ):
         raise ReportError("invalid-task-qualification-evidence")
     rate = metrics.get("tokensPerSecond")
@@ -283,7 +312,7 @@ def _soak_metrics(
         or integers["outputTokens"] <= 0
         or integers["peakGpuMemoryBytes"] < 0
         or (backend == "cpu" and integers["peakGpuMemoryBytes"] != 0)
-        or (backend == "cuda" and integers["peakGpuMemoryBytes"] <= 0)
+        or (backend != "cpu" and integers["peakGpuMemoryBytes"] <= 0)
         or not isinstance(capability_cells, dict)
         or set(capability_cells) != set(CAPABILITIES)
         or any(
@@ -301,6 +330,87 @@ def _soak_metrics(
         "durationSeconds": float(duration),
         **integers,
         "averageTokensPerSecond": float(rate),
+    }
+
+
+def _extended_metrics(
+    record: dict[str, Any], expected: dict[str, Any], inventory_sha: str,
+    matrix_sha: str,
+) -> dict[str, int | float | bool] | None:
+    if (
+        record.get("containsRawPromptsOrResponses") is not False
+        or record.get("containsPrivateMachineIdentity") is not False
+        or record.get("rawPromptRecorded") is not False
+        or record.get("rawResponseRecorded") is not False
+        or record.get("automaticPromotionAllowed") is not False
+        or record.get("inventorySha256") != inventory_sha
+        or record.get("matrixSha256") != matrix_sha
+        or record.get("manifestDigest") != expected["manifestDigest"]
+        or record.get("provider") != expected["provider"]
+        or record.get("providerVersion") != expected["providerVersion"]
+        or record.get("backend") != expected["backendMode"]
+        or record.get("bindingComplete") is False
+    ):
+        raise ReportError("invalid-extended-qualification-evidence")
+    _validate_binding(
+        {
+            "manifestDigest": record.get("manifestDigest"),
+            "provider": record.get("provider"),
+            "providerVersion": record.get("providerVersion"),
+            "backendMode": record.get("backend"),
+            "systemMemoryGiB": record.get("systemMemoryGiB"),
+            "usableGpuMemoryGiB": record.get("usableGpuMemoryGiB"),
+        },
+        expected,
+        record.get("outcome"),
+    )
+    if record.get("outcome") != "passed":
+        return None
+    peak = record.get("peakObservedGpuResidencyBytes")
+    duration = record.get("durationMilliseconds")
+    details = record.get("details")
+    if (
+        isinstance(peak, bool)
+        or not isinstance(peak, int)
+        or peak < 0
+        or (expected["backendMode"] == "cpu" and peak != 0)
+        or (expected["backendMode"] != "cpu" and peak <= 0)
+        or isinstance(duration, bool)
+        or not isinstance(duration, (int, float))
+        or not math.isfinite(float(duration))
+        or duration <= 0
+        or not isinstance(details, dict)
+    ):
+        raise ReportError("invalid-extended-qualification-evidence")
+    capability = record.get("capability")
+    valid_details = {
+        "coding": details.get("structuredOutput") is True,
+        "tools": (
+            details.get("toolCallCount") == 1
+            and details.get("toolArgumentsValidated") is True
+        ),
+        "thinking": details.get("thinkingObserved") is True,
+        "vision": (
+            details.get("syntheticImages") == 2
+            and details.get("groundedAnswers") == 2
+        ),
+        "long-context": (
+            isinstance(details.get("inputCharacters"), int)
+            and details["inputCharacters"] >= 30000
+            and details.get("contextWindowRequested") == 16384
+            and details.get("sentinelsRecalled") == 3
+        ),
+        "failure-recovery": (
+            details.get("timeoutObserved") is True
+            and details.get("postTimeoutRequestPassed") is True
+        ),
+    }
+    if valid_details.get(capability) is not True:
+        raise ReportError("invalid-extended-qualification-evidence")
+    return {
+        "durationMilliseconds": float(duration),
+        "peakGpuMemoryBytes": peak,
+        **details,
     }
 
 
@@ -345,6 +455,7 @@ def build_report(
 
     tasks: dict[tuple[str, str, str, str], dict[str, dict[str, Any]]] = {}
     soaks: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+    extended: dict[tuple[str, str, str, str], dict[str, dict[str, Any]]] = {}
     recognized = 0
     evidence_files = [
         (base, path)
@@ -362,14 +473,24 @@ def build_report(
             "alpha2-model-task-qualification-evidence",
             "alpha2-linux-model-soak-evidence",
             "alpha2-windows-model-soak-evidence",
+            "haven42-alpha2-extended-model-qualification",
         }:
             continue
         recognized += 1
-        evidence = _common_evidence(record, inventory_sha)
-        model_id = evidence.get("modelId")
-        profile_id = evidence.get("profileId", evidence.get("qualificationProfileId"))
-        operating_system_id = evidence.get("operatingSystemId")
-        platform_family = evidence.get("platformFamily")
+        if kind == "haven42-alpha2-extended-model-qualification":
+            evidence = record
+            model_id = record.get("modelId")
+            profile_id = record.get("profileId")
+            operating_system_id = record.get("operatingSystemId")
+            platform_family = record.get("platformFamily")
+        else:
+            evidence = _common_evidence(record, inventory_sha)
+            model_id = evidence.get("modelId")
+            profile_id = evidence.get(
+                "profileId", evidence.get("qualificationProfileId")
+            )
+            operating_system_id = evidence.get("operatingSystemId")
+            platform_family = evidence.get("platformFamily")
         if kind == "alpha2-model-task-qualification-evidence" and platform_family is None:
             # Only the exact pre-Windows Bazzite record set may omit this field.
             if operating_system_id not in LEGACY_LINUX_OPERATING_SYSTEM_IDS:
@@ -391,9 +512,23 @@ def build_report(
         ):
             raise ReportError("unreviewed-qualification-evidence")
         expected = cells[(model_id, profile_id)]
-        _validate_binding(evidence, expected, record.get("outcome"))
         key = (model_id, profile_id, platform_family, operating_system_id)
-        if kind == "alpha2-model-task-qualification-evidence":
+        if kind == "haven42-alpha2-extended-model-qualification":
+            capability = record.get("capability")
+            if capability not in expected["extendedChecks"]:
+                raise ReportError("unreviewed-qualification-evidence")
+            bucket = extended.setdefault(key, {})
+            if capability in bucket:
+                raise ReportError("duplicate-qualification-evidence")
+            bucket[capability] = {
+                "outcome": record.get("outcome"),
+                "errorCode": record.get("errorCode"),
+                "metrics": _extended_metrics(
+                    record, expected, inventory_sha, matrix_sha
+                ),
+            }
+        elif kind == "alpha2-model-task-qualification-evidence":
+            _validate_binding(evidence, expected, record.get("outcome"))
             if evidence.get("qualificationMatrixCanonicalSha256") != matrix_sha:
                 raise ReportError("stale-qualification-evidence")
             capability = evidence.get("capability")
@@ -411,6 +546,7 @@ def build_report(
                 "metrics": _task_metrics(record, expected["backendMode"]),
             }
         else:
+            _validate_binding(evidence, expected, record.get("outcome"))
             if evidence.get("qualificationOnly") is not True or key in soaks:
                 raise ReportError("invalid-soak-evidence")
             metrics = _soak_metrics(record, expected["backendMode"])
@@ -423,9 +559,11 @@ def build_report(
     if recognized == 0:
         raise ReportError("no-qualification-evidence")
     results = []
-    for key in sorted(set(tasks) | set(soaks)):
+    for key in sorted(set(tasks) | set(soaks) | set(extended)):
         task_results = tasks.get(key, {})
         soak = soaks.get(key)
+        extended_results = extended.get(key, {})
+        expected_extended = cells[(key[0], key[1])]["extendedChecks"]
         all_tasks_present = set(task_results) == set(CAPABILITIES)
         all_tasks_passed = all_tasks_present and all(
             value["outcome"] == "passed" for value in task_results.values()
@@ -442,6 +580,22 @@ def build_report(
             status = "passed"
         else:
             status = "incomplete"
+        if not expected_extended:
+            extended_status = "not-applicable"
+        elif any(
+            value["outcome"] == "failed" for value in extended_results.values()
+        ):
+            extended_status = "failed"
+        elif (
+            set(extended_results) == set(expected_extended)
+            and all(
+                value["outcome"] == "passed"
+                for value in extended_results.values()
+            )
+        ):
+            extended_status = "passed"
+        else:
+            extended_status = "incomplete"
         results.append(
             {
                 "modelId": key[0],
@@ -457,6 +611,14 @@ def build_report(
                     for capability in CAPABILITIES
                 },
                 "soak": soak or {"outcome": "missing", "errorCode": None},
+                "extendedStatus": extended_status,
+                "extendedCapabilities": {
+                    capability: extended_results.get(
+                        capability,
+                        {"outcome": "missing", "errorCode": None, "metrics": None},
+                    )
+                    for capability in expected_extended
+                },
             }
         )
     return {
