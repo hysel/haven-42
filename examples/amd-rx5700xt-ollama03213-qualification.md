@@ -1,8 +1,10 @@
-# Radeon RX 5700 XT on Ubuntu 26.04
+# Radeon RX 5700 XT qualification evidence
 
-This report covers one Radeon RX 5700 XT 8 GiB running Ollama 0.32.13 through
-the Vulkan backend on Ubuntu 26.04. It answers a narrow question: can this exact
-RDNA 1 setup run useful local models without quietly falling back to the CPU?
+This report covers one Radeon RX 5700 XT 8 GiB on Ubuntu 26.04 and Windows.
+The Ubuntu cells use Ollama 0.32.13 and llama.cpp through Vulkan RADV. The
+Windows cell uses a hash-pinned llama.cpp Vulkan build with the AMD proprietary
+driver. It answers a narrow question: can these exact RDNA 1 configurations run
+the tested local models without quietly falling back to the CPU?
 
 ## Hardware and runtime proof
 
@@ -57,17 +59,74 @@ task-gate model entered a soak. Qwen 3.5 9B, Gemma 3 12B, and Gemma 4 12B
 were safely refused before download because their exact model layers alone
 exceeded the reviewed 8 GiB headroom envelope.
 
+## llama.cpp Vulkan engine smoke
+
+A separate engine cell used upstream llama.cpp `b10375` at commit
+`ba360efe1`. The 31.10 MiB Ubuntu Vulkan archive matched the plan-pinned
+SHA-256 before extraction. The test used the already-present Qwen 3.5 0.8B
+Q4_0 GGUF with SHA-256
+`57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf`.
+
+The runtime identified `AMD Radeon RX 5700 XT (RADV NAVI10)`, assigned all 25
+model layers to `Vulkan0`, and returned the exact bounded response at 277.092
+generated tokens per second. Board VRAM rose from 109,457,408 bytes to
+756,559,872 bytes and returned to exactly 109,457,408 bytes after exit. No
+llama.cpp process remained, and the existing Ollama process stayed active.
+
+An initial invocation generated successfully but reached its timeout because
+llama.cpp automatically entered interactive conversation mode and waited for
+another prompt. The corrected run used explicit single-turn mode and disabled
+reasoning. The initial timeout is retained as harness evidence and is not
+classified as a model or GPU failure.
+
+This Ubuntu result is a bounded engine smoke only. It does not certify the full
+llama.cpp model ladder, package lifecycle, server adapter, sustained operation,
+ROCm, or automatic runtime selection.
+
+## Windows llama.cpp Vulkan task and soak
+
+A separate Windows cell used upstream llama.cpp `b10375` at commit `ba360efe1`
+and the same hash-pinned Qwen 3.5 0.8B Q4_0 GGUF. The Windows Vulkan archive
+matched SHA-256
+`1fef77a8b7742485c3f9f0acd16b68330ca9d5f447b73eb80d32862e4b2c7cfa`
+before extraction. The runtime identified the RX 5700 XT through AMD's
+proprietary Vulkan driver 26.7.1 and assigned all 25 model layers to the GPU.
+
+The task gate passed all nine required samples: three Chat, three Writing, and
+three Summarization. No reasoning leakage was detected. The following
+30-minute soak passed 1,602 of 1,602 requests, evenly split across the three
+tasks, and produced 31,506 completion units. Device proof, full offload, and
+process cleanup all passed.
+
+Two earlier launch attempts are retained as harness findings, not model or GPU
+failures. One detached process ended when its SSH session closed; one
+interactive-only scheduled task never launched. The valid soak used a
+persistent foreground process and ended cleanly.
+
+This is an exact Windows engine-and-model cell. It does not establish Windows
+Ollama behavior, managed installation or update behavior, other models,
+automatic model selection, or the full packaged Haven 42 lifecycle.
+
 ## Stability boundary
 
 The machine previously had unexplained freezes before its final firmware and
-memory configuration. The certification campaign therefore includes a
-current-boot hardware-error review and a bounded CPU smoke after model testing.
-That cell completed 600 seconds across four workers and found no machine-check,
+memory configuration. The owner reports that disabling Global C-state control
+resolved the freezes and has accepted the current exact profile as
+operationally stable. This firmware setting is owner-reported because the
+running operating system cannot independently attest the BIOS value.
+
+At the evidence review, the current boot reported 78,782 seconds of uptime
+(21 hours 53 minutes), zero failed systemd units, and no matching machine-check,
 uncorrected-memory, GPU-reset, CPU-lockup, critical-thermal, or fatal-PCIe
-incident in the current boot. The report does not turn an earlier memory-test
-result into proof for a later firmware profile. A complete final-profile memory
-test is still open, so this remains exact-profile engineering evidence rather
-than a general RX 5700 XT support claim.
+incident. A separate bounded CPU smoke had already completed 600 seconds across
+four workers with no detected incident. The machine-reported current boot had
+not yet reached 24 hours, so this report does not claim a verified 24-hour
+current-boot duration.
+
+The report also does not turn an earlier memory-test result into proof for a
+later firmware profile. A complete final-profile memory test remains open.
+Accordingly, the profile is accepted as exact-profile operationally stable,
+not as a general certification of every RX 5700 XT system or firmware setting.
 
 ## Power boundary
 
@@ -80,8 +139,43 @@ average, 242 W peak, and 20.350129 Wh across the 600-second active window. It
 produced 43,431 output tokens, or 2,134.188 tokens per active Wh, and verified
 model unload. These are GPU-board sensor readings, not whole-computer power.
 
+A separate hash-pinned llama.cpp `b10375` Vulkan profile used Qwen 3.5 0.8B
+Q4_0. It measured 6.448 W idle average, 167.242 W active average, 180 W peak,
+and 27.931213 Wh across 601.238 active seconds. The server completed 1,195
+bounded requests and produced 152,960 output tokens, or 5,476.311 tokens per
+active Wh. All 25 model layers were assigned to the GPU. VRAM rose from
+107,360,256 bytes to 821,579,776 bytes and returned exactly to baseline after
+exit. An independent post-run check found no test-process residue, no failed
+systemd units, and no matching recent GPU-reset, machine-check, uncorrected
+hardware, critical-thermal, or lockup incident; the existing Ollama service
+remained active.
+
+The two power profiles use different models, request shapes, and output sizes.
+They are useful reference measurements for their exact cells, but they are not
+a controlled Ollama-versus-llama.cpp efficiency comparison. Neither result is
+whole-system wall power or an electricity-bill estimate.
+
+The Windows soak also captured HWiNFO64 software sensors across 898 valid
+samples at an observed interval of about two seconds. Across the full paced
+30-minute workload, `GPU ASIC Power` averaged 23.322 W on a time-weighted basis
+and integrated to 11.666022 Wh; its median was 7 W, 95th percentile was 154 W,
+and maximum was 168 W. A five-minute post-soak idle window averaged 6.322 W.
+When GPU utilization exceeded 10 percent, the conditional ASIC-power samples
+averaged 113.633 W and reached 168 W. This conditional number is not a
+time-integrated workload average.
+
+The GPU reached 58 C, the hotspot reached 65 C, and memory junction reached
+54 C. The raw CSV is retained outside version control and is bound by SHA-256
+`3ad7633999e0b9434b80f3672e4cac8a0289088ff03a4622c5163792cf14e1d0`.
+The exact HWiNFO executable version was not independently captured, so the
+telemetry remains partial evidence. These are software-reported ASIC and PPT
+sensors, not wall power and not necessarily total board input. The roughly
+two-second sampling interval may miss short peaks.
+
 ## What this does not approve
 
-This result does not establish Windows support, ROCm support, every RX 5700 XT
+This result does not establish broad Windows or ROCm support, every RX 5700 XT
 board design, every driver version, package lifecycle behavior, or an automatic
-model default. Those are separate evidence cells and decisions.
+model default. The Windows result applies only to the exact llama.cpp runtime,
+driver, model artifact, task gate, and soak described above. Those broader
+claims remain separate evidence cells and decisions.

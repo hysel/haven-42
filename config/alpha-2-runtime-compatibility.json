@@ -136,6 +136,46 @@
           "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.13/ollama-linux-amd64-rocm.tar.zst"
         }
       ]
+    },
+    {
+      "version": "0.32.14",
+      "release": "https://github.com/ollama/ollama/releases/tag/v0.32.14",
+      "publishedAtUtc": "2026-08-15T19:41:23Z",
+      "admissionState": "admitted",
+      "artifacts": [
+        {
+          "platform": "windows-x64",
+          "backend": "core",
+          "name": "ollama-windows-amd64.zip",
+          "byteLength": 1459874325,
+          "sha256": "5ae5bca5f0d297f5e35665e01db399a69a8eac3f8fad89cd9d2531fd495c9457",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.14/ollama-windows-amd64.zip"
+        },
+        {
+          "platform": "windows-x64",
+          "backend": "rocm",
+          "name": "ollama-windows-amd64-rocm.zip",
+          "byteLength": 245725475,
+          "sha256": "23592c38a8fb5c5f094e334ed42e5f3b9b05857d70672dfd733ab538c3250f24",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.14/ollama-windows-amd64-rocm.zip"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "core",
+          "name": "ollama-linux-amd64.tar.zst",
+          "byteLength": 1421191399,
+          "sha256": "c620917a71e146ab3a7f893084f066069c4c65d144ef8379a91c3cbe8b27de8f",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.14/ollama-linux-amd64.tar.zst"
+        },
+        {
+          "platform": "linux-x64",
+          "backend": "rocm",
+          "name": "ollama-linux-amd64-rocm.tar.zst",
+          "byteLength": 1048151889,
+          "sha256": "2f693fe9deccec6da12651802c3f96930b109dc3ebfadd69dd9cae500008aad1",
+          "sourceUrl": "https://github.com/ollama/ollama/releases/download/v0.32.14/ollama-linux-amd64-rocm.tar.zst"
+        }
+      ]
     }
   ],
   "llamaCppRuntimes": [

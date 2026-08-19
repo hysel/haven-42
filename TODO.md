@@ -33,7 +33,16 @@ checkbox totals below.
 - [x] Add temporary license status.
 - [x] Choose final license terms.
 
-### Continue Configuration
+### Legacy Continue Evidence
+
+The items marked complete below describe historical contributor validation,
+not an end-user installation promise. Project/global Continue configuration
+was removed from the shipped IDE package. Continue is now legacy and
+evidence-only; no new Continue development or qualification is planned.
+
+- [x] Retire Continue as an active integration while preserving sanitized
+  historical evidence and excluding it from setup, recommendations, packaging,
+  and future qualification work.
 
 - [x] Identify target Continue configuration schema.
 - [x] Define local Ollama model assumptions.
@@ -312,7 +321,7 @@ checkbox totals below.
 - [x] Validate Aider against a generated sample repository in plan or patch mode.
 - [x] Add Continue CLI automation scripts for future read-only and disposable write-smoke model screening.
 - [x] Keep real-project approved-write status blocked until generated-sample scoped edit validation passes; continue blocking real-project approval until explicitly approved non-generated repository validation passes.
-- [x] Complete Milestone 17 for the promoted supported-surface set: Continue, Aider, and OpenCode have explicit validation positions; documentation-only candidates do not count as supported parity.
+- [x] Complete Milestone 17 for the promoted supported-surface set: Aider and OpenCode have explicit validation positions; Continue is legacy evidence only, and documentation-only candidates do not count as supported parity.
 - [x] Promote Aider as the first end-to-end non-Continue adapter by completing install, local-model configuration, health, and test automation with sanitized deterministic coverage; keep real-project approved write blocked.
 
 ## Future Agent Surface Evidence Expansion
@@ -348,7 +357,7 @@ checkbox totals below.
 - [x] Add installer profile options for read-only review and approved-write workflows.
 - [x] Add a sanitized evidence catalog for model, surface, OS, language, and write-readiness results.
 - [x] Add release archive, checksum, and install-command guidance.
-- [x] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria.
+- [x] Complete Milestone 19 installer profiles, evidence catalog, and release packaging exit criteria for the promoted Aider and OpenCode surface set; retain Continue as legacy evidence only.
 - [x] Define Capability Evidence Contract v2 keyed by surface, model, provider, OS, surface version, operation, and validation mode.
 - [x] Migrate evidence lookup away from first-row-per-model behavior and aggregate duplicate evidence conservatively with provenance.
 - [x] Prevent write-readiness evidence from one agent surface from being inherited by another surface.

@@ -1,16 +1,36 @@
 # Continue CLI Model Testing
 
+> **Legacy evidence only:** Haven 42 no longer develops, configures,
+> recommends, packages, or runs qualification work for Continue. The procedure
+> below is preserved solely to explain how the existing sanitized evidence was
+> collected. Do not treat it as a current setup or testing instruction.
+
 ## Purpose
 
 Use these scripts when you want CLI-first evidence that a local model can work with the Continue command-line surface before you spend time testing the editor extension.
 
 This is a focused model-screening harness. It does not replace the full runtime validation runner, and it does not prove that VS Code or VSCodium Apply behavior works. Editor Apply still needs separate manual validation because the editor approval flow can behave differently from the CLI.
 
+## Required New-Model Coding Gate
+
+Every executable local-model candidate receives a coding-agent screen, including models marketed primarily for chat or reasoning. The required policy is `config/model-coding-agent-qualification-policy.json`.
+
+The current 18-artifact result is recorded in
+`config/model-coding-agent-qualification-result.json`; the corresponding
+plain-language evidence is
+`examples/august-2026-coding-agent-qualification.md`.
+
+The screen is broader than code generation. It checks repository reading and planning, defect review, exact filename fidelity, schema-valid tool calls, explicitly approved scoped edits, external Git diff verification, bounded context, recovery, and unload. Each gate is recorded as `passed`, `failed`, `blocked`, or `not-run`; missing evidence blocks a coding recommendation.
+
+A model may become a coding candidate only after the API gates and the Continue CLI disposable-repository read, review, and scoped-write gates pass. VS Code, VSCodium, native chat, and extension versions remain separate evidence cells and never inherit a Continue CLI result.
+
 ## What This Tests
 
 - Continue CLI can run against a generated disposable sample repository.
 - A model can return useful read-only repository inspection output.
+- A separate review prompt verifies exact filename and function-name fidelity without allowing writes.
 - Optional write smoke testing changes only `README.md` in a generated sample repository.
+- Optional scoped-edit testing changes exactly `app/settings.py` and `tests/test_main.py`, then restores both files.
 - The report is sanitized and omits raw prompts, raw model output, local paths, and private endpoints.
 
 ## Prerequisites
@@ -18,6 +38,16 @@ This is a focused model-screening harness. It does not replace the full runtime 
 - Node.js with `npx` available, or another Continue CLI command you pass explicitly.
 - A Continue config file that points at the model server you want to test.
 - A generated disposable sample repository. The scripts create the default sample if it is missing and initialize a standalone Git baseline for external diff verification.
+
+Create an ignored, model-specific test config without changing the user's normal Continue config:
+
+```powershell
+$TestConfig = .\scripts\new-continue-model-test-config.ps1 `
+  -Model "qwen3.5:9b" `
+  -OllamaBaseUrl "http://127.0.0.1:11434"
+```
+
+The helper refuses to write outside `runtime-validation-output`. Its output may contain a private endpoint and must never be committed.
 
 ## Read-Only Screening
 
@@ -58,7 +88,8 @@ Run write smoke tests only against generated disposable samples. The script bloc
 ```powershell
 .\scripts\test-continue-cli-models.ps1 `
   -Models "qwen3.5:9b" `
-  -IncludeWriteSmoke
+  -IncludeWriteSmoke `
+  -IncludeScopedEdit
 ```
 
 The expected write smoke result is exactly one changed file, `README.md`, with this final line:
@@ -69,6 +100,8 @@ Continue CLI approved-write smoke test passed.
 
 After checking the result, the script restores the generated sample `README.md` so repeated runs stay clean.
 
+The scoped-edit gate uses Continue CLI auto mode only inside the generated sample. External Git verification requires exactly two expected files, the requested field and assertion, a clean `git diff --check`, no new files, and restoration after the check.
+
 ## Command-Template Flexibility
 
 The default command is `npx` with this command-template:
@@ -78,6 +111,8 @@ The default command is `npx` with this command-template:
 ```
 
 Use `-ContinueCommand` and `-ContinueArgumentsTemplate` when your Continue CLI command differs. Use `-ModelArgumentTemplate` only when your CLI supports a model flag.
+
+Read and review phases use `-ContinueArgumentsTemplate` and default to `--readonly`. Write and scoped-edit phases use `-WriteContinueArgumentsTemplate` and default to `--auto`; this separation prevents a write test from accidentally inheriting read-only behavior.
 
 Available placeholders:
 
@@ -132,5 +167,7 @@ Common failure signals:
 - `READ_VALIDATION_FAILED`: the CLI ran but did not produce enough repository evidence.
 - `UNEXPECTED_WRITE_DURING_READ`: the read-only prompt changed files.
 - `WRITE_VALIDATION_FAILED`: write smoke testing did not produce exactly the expected README-only change.
+- `REVIEW_VALIDATION_FAILED`: the model did not preserve the exact review filenames, function name, and completion marker.
+- `SCOPED_EDIT_VALIDATION_FAILED`: the model did not make exactly the requested two-file change.
 - `TARGET_REPO_NOT_CLEAN`: the disposable sample had existing changes before the test.
 - `SCRIPT_EXCEPTION`: the harness itself hit an unexpected error.

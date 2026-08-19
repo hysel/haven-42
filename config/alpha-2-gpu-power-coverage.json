@@ -29,8 +29,11 @@
       "vendor": "NVIDIA",
       "model": "GeForce RTX 3060",
       "memoryGiB": 12,
-      "status": "pending",
-      "measurementEvidence": []
+      "status": "measured",
+      "measurementEvidence": [
+        "examples/nvidia-rtx3060-model-qualification.md",
+        "examples/nvidia-rtx3060-linux-model-qualification.md"
+      ]
     },
     {
       "id": "nvidia-quadro-rtx-5000-16g",

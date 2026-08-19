@@ -9,10 +9,12 @@ OUTPUT_PATH=""
 OLLAMA_BASE_URL="http://127.0.0.1:11434"
 CONTINUE_COMMAND="npx"
 CONTINUE_ARGS_TEMPLATE='-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --readonly -p "{Prompt}"'
+WRITE_CONTINUE_ARGS_TEMPLATE='-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --auto -p "{Prompt}"'
 MODEL_ARGS_TEMPLATE=""
 TIMEOUT_SECONDS=600
 PRELOAD_TIMEOUT_SECONDS=900
 INCLUDE_WRITE_SMOKE=false
+INCLUDE_SCOPED_EDIT=false
 ALLOW_NON_GENERATED_TARGET=false
 DRY_RUN=false
 UNLOAD_AFTER_EACH=false
@@ -26,10 +28,12 @@ while [ "$#" -gt 0 ]; do
     --ollama-base-url|-OllamaBaseUrl) OLLAMA_BASE_URL="$2"; shift 2 ;;
     --continue-command|-ContinueCommand) CONTINUE_COMMAND="$2"; shift 2 ;;
     --continue-arguments-template|-ContinueArgumentsTemplate) CONTINUE_ARGS_TEMPLATE="$2"; shift 2 ;;
+    --write-continue-arguments-template|-WriteContinueArgumentsTemplate) WRITE_CONTINUE_ARGS_TEMPLATE="$2"; shift 2 ;;
     --model-argument-template|-ModelArgumentTemplate) MODEL_ARGS_TEMPLATE="$2"; shift 2 ;;
     --timeout-seconds|-TimeoutSeconds) TIMEOUT_SECONDS="$2"; shift 2 ;;
     --preload-timeout-seconds|-PreloadTimeoutSeconds) PRELOAD_TIMEOUT_SECONDS="$2"; shift 2 ;;
     --include-write-smoke|-IncludeWriteSmoke) INCLUDE_WRITE_SMOKE=true; shift ;;
+    --include-scoped-edit|-IncludeScopedEdit) INCLUDE_SCOPED_EDIT=true; shift ;;
     --allow-non-generated-target|-AllowNonGeneratedTarget) ALLOW_NON_GENERATED_TARGET=true; shift ;;
     --dry-run|-DryRun) DRY_RUN=true; shift ;;
     --unload-after-each|-UnloadAfterEach) UNLOAD_AFTER_EACH=true; shift ;;
@@ -53,7 +57,7 @@ if [ -z "$OUTPUT_PATH" ]; then OUTPUT_PATH="$REPO_ROOT/runtime-validation-output
 if [ ! -d "$TARGET_REPO" ]; then "$REPO_ROOT/scripts/generate-sample-repositories.shared.sh" --force >/dev/null; fi
 if [ ! -d "$TARGET_REPO" ]; then printf 'TargetRepo does not exist: %s\n' "$TARGET_REPO" >&2; exit 1; fi
 if [ ! -f "$CONFIG_PATH" ]; then printf 'ConfigPath does not exist: %s\n' "$CONFIG_PATH" >&2; exit 1; fi
-if [ "$INCLUDE_WRITE_SMOKE" = true ] && [ "$ALLOW_NON_GENERATED_TARGET" != true ]; then
+if { [ "$INCLUDE_WRITE_SMOKE" = true ] || [ "$INCLUDE_SCOPED_EDIT" = true ]; } && [ "$ALLOW_NON_GENERATED_TARGET" != true ]; then
   case "$TARGET_REPO" in *runtime-validation-output/sample-repositories*) ;; *) printf 'Write smoke tests are allowed only for generated disposable samples unless --allow-non-generated-target is set.\n' >&2; exit 1 ;; esac
 fi
 if [ "$DRY_RUN" != true ] && ! command -v "$CONTINUE_COMMAND" >/dev/null 2>&1; then printf 'Continue CLI command was not found: %s. Install Node.js/npx or pass --continue-command.\n' "$CONTINUE_COMMAND" >&2; exit 1; fi
@@ -62,9 +66,9 @@ unload_model() {
   model_name="$1"
   base_url="${OLLAMA_BASE_URL%/}"
   if command -v curl >/dev/null 2>&1; then
-    curl -fsS -X POST "$base_url/api/chat" \
+    curl -fsS -X POST "$base_url/api/generate" \
       -H 'Content-Type: application/json' \
-      -d "{\"model\":\"$model_name\",\"messages\":[],\"keep_alive\":0,\"stream\":false}" >/dev/null
+      -d "{\"model\":\"$model_name\",\"prompt\":\"\",\"keep_alive\":0,\"stream\":false}" >/dev/null
   else
     return 1
   fi
@@ -75,7 +79,7 @@ preload_model() {
   other_count="$(printf '%s' "$running" | python3 -c 'import json,sys; model=sys.argv[1]; print(sum(1 for item in json.load(sys.stdin).get("models", []) if item.get("name") != model and item.get("model") != model))' "$model_name")"
   if [ "$other_count" -ge "$MAX_RESIDENT_MODELS" ]; then printf 'Runtime policy blocks loading %s: %s other model(s) are resident.\n' "$model_name" "$other_count" >&2; return 1; fi
   if [ "$other_count" -gt 0 ]; then printf 'Runtime policy warning: another model is resident before loading %s.\n' "$model_name" >&2; fi
-  curl -fsS --max-time "$PRELOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/chat" -H 'Content-Type: application/json' -d "{\"model\":\"$model_name\",\"messages\":[],\"keep_alive\":\"${PRELOAD_KEEP_ALIVE_MINUTES}m\",\"stream\":false}" >/dev/null
+  curl -fsS --max-time "$PRELOAD_TIMEOUT_SECONDS" -X POST "$base_url/api/generate" -H 'Content-Type: application/json' -d "{\"model\":\"$model_name\",\"prompt\":\"\",\"keep_alive\":\"${PRELOAD_KEEP_ALIVE_MINUTES}m\",\"stream\":false}" >/dev/null
   curl -fsS --max-time 30 "$base_url/api/ps" | grep -Fq "\"$model_name\""
 }
 initialize_disposable_git_baseline() {
@@ -95,7 +99,7 @@ initialize_disposable_git_baseline() {
   fi
 }
 mkdir -p "$(dirname "$OUTPUT_PATH")"
-initialize_disposable_git_baseline "$TARGET_REPO"
+if [ "$DRY_RUN" != true ]; then initialize_disposable_git_baseline "$TARGET_REPO"; fi
 
 run_structured_continue() {
   local model_arguments="$1" continue_arguments="$2"
@@ -121,39 +125,56 @@ printf '[3/7] Candidate models: %s\n' "${MODELS[*]}" >&2
 printf '[4/7] Continue command: %s\n' "$CONTINUE_COMMAND" >&2
 
 read_prompt='Use the repository context available to Continue CLI. Do not modify files. Do not create files. Do not run package installation. Return only actual top-level files/folders inspected, project type, key source/test files, risks or missing info, and failure signal. If tools or context are unavailable, say TOOLS_UNAVAILABLE.'
+review_prompt='Review app/main.py and tests/test_main.py without modifying anything. Name both exact files, identify the function under test, explain one concrete missing edge-case test, and end with REVIEW_COMPLETE. If either file cannot be read, say TOOLS_UNAVAILABLE.'
 write_prompt='Use approved write mode for this disposable smoke test only. Modify the existing README.md by adding exactly this final line: Continue CLI approved-write smoke test passed. Do not modify any other files. Do not create new files. After editing, report the changed file and stop. Do not commit.'
+scoped_prompt='Use approved write mode for this disposable Python sample only. Modify only app/settings.py and tests/test_main.py. Add a Settings validation_label field with the exact default value local-agent-validation, then update the existing test to assert that Settings().validation_label equals local-agent-validation. Do not modify any other files. Do not create files. Do not commit. Run the existing tests if practical, then report the changed files and stop.'
 json_results=()
 index=0
 for model in "${MODELS[@]}"; do
   index=$((index + 1))
   printf '[5/7] Testing model %s/%s: %s\n' "$index" "${#MODELS[@]}" "$model" >&2
-  read_status='failed'; write_status='not-run'; failures='none'
+  read_status='failed'; review_status='failed'; write_status='not-run'; scoped_status='not-run'; failures='none'
   if [ "$DRY_RUN" != true ]; then printf '[5/7] Preloading %s before starting the phase timer...\n' "$model" >&2; preload_model "$model"; fi
   prompt="$read_prompt"
   args="${CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
   model_args="${MODEL_ARGS_TEMPLATE//\{Model\}/$model}"
   if [ "$DRY_RUN" = true ]; then output='DRY_RUN README.md pyproject.toml app/main.py'; exit_code=0; else set +e; output=$(run_structured_continue "$model_args" "$args" 2>&1); exit_code=$?; set -e; fi
   if [ "$exit_code" -eq 0 ] && printf '%s' "$output" | grep -q 'README.md' && printf '%s' "$output" | grep -q 'pyproject.toml'; then read_status='read-only-cli-validated'; else failures='READ_VALIDATION_FAILED'; fi
+  prompt="$review_prompt"
+  args="${CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
+  if [ "$DRY_RUN" = true ]; then review_output='app/main.py tests/test_main.py build_health_response REVIEW_COMPLETE'; review_exit=0; else set +e; review_output=$(run_structured_continue "$model_args" "$args" 2>&1); review_exit=$?; set -e; fi
+  if [ "$review_exit" -eq 0 ] && printf '%s' "$review_output" | grep -q 'app/main.py' && printf '%s' "$review_output" | grep -q 'tests/test_main.py' && printf '%s' "$review_output" | grep -q 'build_health_response' && printf '%s' "$review_output" | grep -q 'REVIEW_COMPLETE'; then review_status='review-cli-validated'; else failures="${failures},REVIEW_VALIDATION_FAILED"; fi
+  if [ "$DRY_RUN" != true ] && [ -n "$(git -C "$TARGET_REPO" status --short)" ]; then failures="${failures},UNEXPECTED_WRITE_DURING_REVIEW"; fi
   if [ "$INCLUDE_WRITE_SMOKE" = true ]; then
     if [ "$DRY_RUN" = true ]; then write_status='write-smoke-validated'; else
       prompt="$write_prompt"
-      args="${CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
+      args="${WRITE_CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
       set +e; run_structured_continue "$model_args" "$args" >/tmp/continue-cli-write.out 2>&1; write_exit=$?; set -e
       changed_files="$(cd "$TARGET_REPO" && git diff --name-only)"
       if [ "$write_exit" -eq 0 ] && [ "$changed_files" = 'README.md' ] && (cd "$TARGET_REPO" && git diff --check >/dev/null) && tail -n 1 "$TARGET_REPO/README.md" | grep -qx 'Continue CLI approved-write smoke test passed.'; then write_status='write-smoke-validated'; else failures='WRITE_VALIDATION_FAILED'; fi
       (cd "$TARGET_REPO" && git restore README.md >/dev/null 2>&1 || true)
     fi
   fi
+  if [ "$INCLUDE_SCOPED_EDIT" = true ]; then
+    if [ "$DRY_RUN" = true ]; then scoped_status='scoped-edit-validated'; else
+      prompt="$scoped_prompt"
+      args="${WRITE_CONTINUE_ARGS_TEMPLATE//\{Prompt\}/$prompt}"; args="${args//\{Model\}/$model}"; args="${args//\{TargetRepo\}/$TARGET_REPO}"; args="${args//\{ConfigPath\}/$CONFIG_PATH}"
+      set +e; run_structured_continue "$model_args" "$args" >/tmp/continue-cli-scoped.out 2>&1; scoped_exit=$?; set -e
+      changed_files="$(git -C "$TARGET_REPO" diff --name-only | sort | paste -sd, -)"
+      if [ "$scoped_exit" -eq 0 ] && [ "$changed_files" = 'app/settings.py,tests/test_main.py' ] && git -C "$TARGET_REPO" diff --check >/dev/null && grep -Eq 'validation_label:[[:space:]]*str' "$TARGET_REPO/app/settings.py" && grep -q 'local-agent-validation' "$TARGET_REPO/app/settings.py" && grep -q 'Settings().validation_label' "$TARGET_REPO/tests/test_main.py" && grep -q 'local-agent-validation' "$TARGET_REPO/tests/test_main.py"; then scoped_status='scoped-edit-validated'; else failures="${failures},SCOPED_EDIT_VALIDATION_FAILED"; fi
+      git -C "$TARGET_REPO" restore app/settings.py tests/test_main.py >/dev/null 2>&1 || true
+    fi
+  fi
   if [ "$UNLOAD_AFTER_EACH" = true ] && [ "$DRY_RUN" != true ]; then
     printf '[6/7] Unloading %s from Ollama...\n' "$model" >&2
     unload_model "$model" || failures="${failures},UNLOAD_FAILED"
   fi
-  json_results+=("{\"Model\":\"$model\",\"Surface\":\"Continue CLI\",\"Target\":\"generated-sample\",\"ReadStatus\":\"$read_status\",\"WriteStatus\":\"$write_status\",\"FailureSignal\":\"$failures\"}")
-  printf '%s: read=%s, write=%s, failures=%s\n' "$model" "$read_status" "$write_status" "$failures" >&2
+  json_results+=("{\"Model\":\"$model\",\"Surface\":\"Continue CLI\",\"Target\":\"generated-sample\",\"ReadStatus\":\"$read_status\",\"ReviewStatus\":\"$review_status\",\"WriteStatus\":\"$write_status\",\"ScopedEditStatus\":\"$scoped_status\",\"FailureSignal\":\"$failures\"}")
+  printf '%s: read=%s, review=%s, write=%s, scoped=%s, failures=%s\n' "$model" "$read_status" "$review_status" "$write_status" "$scoped_status" "$failures" >&2
 done
 printf '[6/7] Writing sanitized report...\n' >&2
 {
-  printf '{\n  "Surface": "Continue CLI",\n  "Target": "generated-sample",\n  "IncludeWriteSmoke": %s,\n  "UnloadAfterEach": %s,\n  "DryRun": %s,\n  "Results": [\n' "$INCLUDE_WRITE_SMOKE" "$UNLOAD_AFTER_EACH" "$DRY_RUN"
+  printf '{\n  "Surface": "Continue CLI",\n  "Target": "generated-sample",\n  "IncludeWriteSmoke": %s,\n  "IncludeScopedEdit": %s,\n  "UnloadAfterEach": %s,\n  "DryRun": %s,\n  "Results": [\n' "$INCLUDE_WRITE_SMOKE" "$INCLUDE_SCOPED_EDIT" "$UNLOAD_AFTER_EACH" "$DRY_RUN"
   for i in "${!json_results[@]}"; do comma=','; [ "$i" -eq $((${#json_results[@]} - 1)) ] && comma=''; printf '    %s%s\n' "${json_results[$i]}" "$comma"; done
   printf '  ],\n  "Notes": "Report is sanitized: target paths, raw prompts, stdout, stderr, and private endpoints are intentionally omitted."\n}\n'
 } > "$OUTPUT_PATH"

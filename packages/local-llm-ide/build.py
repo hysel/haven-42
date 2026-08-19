@@ -14,7 +14,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = Path(__file__).resolve().parent
-VERSION = "0.1.0-development"
+VERSION = "0.1.1-development"
 PACKAGE_NAME = "haven42-local-llm-ide-tools"
 SOURCE_FILES = ("README.md", "haven42_ide.py", "setup.ps1", "setup.sh")
 MAX_FILE_BYTES = 5 * 1024 * 1024
@@ -51,14 +51,6 @@ def source_entries() -> list[tuple[Path, Path]]:
     if not license_file.is_file() or license_file.is_symlink():
         raise SystemExit("Project license is missing or unsafe.")
     entries.append((license_file, Path("LICENSE.txt")))
-    continue_root = ROOT / ".continue"
-    for source in sorted(continue_root.rglob("*")):
-        if source.is_symlink():
-            raise SystemExit("The Continue source bundle contains an unsafe link.")
-        if source.is_file() and not source.name.startswith("config.local"):
-            entries.append((source, Path("assets/continue") / source.relative_to(continue_root)))
-    if len(entries) <= len(SOURCE_FILES) + 1:
-        raise SystemExit("No Continue assets were selected.")
     if any(source.stat().st_size > MAX_FILE_BYTES for source, _ in entries):
         raise SystemExit("An IDE package source file is unexpectedly large.")
     if sum(source.stat().st_size for source, _ in entries) > MAX_TOTAL_BYTES:

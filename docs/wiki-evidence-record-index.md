@@ -20,11 +20,39 @@ them by hand; update the catalog and run the generator.
 | [Aider CLI richer disposable scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-c836e3b6f82ceb6c) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
 | [Aider and OpenCode candidate lifecycle plans](https://github.com/hysel/haven-42/wiki/Evidence-Record-4c8889255c609520) | `static-validated` | Cross-platform · No provider invocation · no-model |
 | [Continue CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-c48f68ae267ddaeb) | `validated-by-tests` | Cross-platform · N/A · N/A |
+| [Gemma 3 1B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-23ddebcd60acad2e) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · gemma3:1b-it-q4_K_M |
+| [Granite 4.1 30B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-0c002ac81e91a029) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · granite4.1:30b |
+| [LFM 2.5 8B-A1B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-a108eefa61d6f8db) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · lfm2.5:8b |
+| [MiniCPM V 4.6 1B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-9f4ed4080a80264a) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · minicpm-v4.6:1b |
+| [Ministral 3 3B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-46cf85b53624763d) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · ministral-3:3b-instruct-2512-q4_K_M |
+| [Ministral 3 8B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-cec3d35c28ceb7dd) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · ministral-3:8b-instruct-2512-q4_K_M |
+| [Muse Glimmer 30B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-864cfafcaa524a47) | `partial-pass` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · muse-glimmer:30b |
+| [Nemotron 3 Nano Omni 33B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-17626c4549c81ab9) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · nemotron3:33b |
+| [Nemotron 3.5 Lightning Q4 coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-e09950a8ffba61a0) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · nemotron-3.5-lightning:30b-a3b-q4_K_M |
+| [Nemotron 3.5 Lightning Q8 coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-5fbb9a96f1c4a37d) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · nemotron-3.5-lightning:30b-a3b-q8_0 |
+| [North Mini Code 1.0 30B-A3B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-fd18a0f49cec996b) | `partial-pass` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · north-mini-code-1.0:q4_K_M |
+| [OpenCode 1.18.11 19-model disposable-repository screen on RTX 3060](https://github.com/hysel/haven-42/wiki/Evidence-Record-7148c5d475b46ccd) | `partial-pass` | Windows 11 · Ollama 0.32.14 · digest-pinned-19-model-corpus |
 | [OpenCode CLI Devstral Small 2 generated-sample scoped edit](https://github.com/hysel/haven-42/wiki/Evidence-Record-1e2f129e7b81d26f) | `write-smoke-validated` | Windows · Ollama · devstral-small-2:24b |
 | [OpenCode CLI Devstral Small 2 generated-sample validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-3a97cf812d7ead4b) | `partial-pass` | Windows · Ollama · devstral-small-2:24b |
 | [OpenCode CLI qwen3.5 35B write smoke](https://github.com/hysel/haven-42/wiki/Evidence-Record-cba49f1efb99951d) | `write-smoke-validated` | Windows · Ollama · qwen3.5:35b |
 | [OpenCode CLI qwen3.5 9B read validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-0077a93bb585cbc8) | `read-only-tool-validated` | Windows · Ollama · qwen3.5:9b |
 | [OpenCode CLI wrapper scaffold](https://github.com/hysel/haven-42/wiki/Evidence-Record-b7a23e13a579dff1) | `validated-by-tests` | Cross-platform · N/A · N/A |
+| [Ornith 1.0 9B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-fdfbebccf314f75a) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · ornith:9b |
+| [Qwen 3.5 0.8B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-5744f686ee69ee9f) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · qwen3.5:0.8b |
+| [Qwen 3.5 2B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-3f07eddd1d3c4c51) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · qwen3.5:2b |
+| [Qwen 3.5 4B VS Code Continue active-file recovery retest on Radeon RX 5700 XT 8 GiB](https://github.com/hysel/haven-42/wiki/Evidence-Record-fe50ca6d08f51589) | `partial-pass` | Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B VS Code Continue controlled editor retest with Python extension](https://github.com/hysel/haven-42/wiki/Evidence-Record-bcc43e041506855b) | `failed-validation` | Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B VS Code Continue editor workflow on Radeon RX 5700 XT 8 GiB](https://github.com/hysel/haven-42/wiki/Evidence-Record-8bad8490965fc6d2) | `partial-pass` | Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B VS Code Continue explicit two-file retest on Radeon RX 5700 XT 8 GiB](https://github.com/hysel/haven-42/wiki/Evidence-Record-3208bee0b01e1ddd) | `failed-validation` | Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B VSCodium Continue editor comparison on Radeon RX 5700 XT 8 GiB](https://github.com/hysel/haven-42/wiki/Evidence-Record-6550349b706f26e4) | `failed-validation` | Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B coding reliability soak on Radeon RX 5700 XT 8 GiB](https://github.com/hysel/haven-42/wiki/Evidence-Record-492ea3ff6c97b8c5) | `partial-pass` | Windows controller and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B coding workflow on Radeon RX 5700 XT 8 GiB](https://github.com/hysel/haven-42/wiki/Evidence-Record-93e8cb104f42daa6) | `partial-pass` | Windows controller and Ubuntu 26.04 AMD Radeon RX 5700 XT model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-841c8bfeebc76fb4) | `partial-pass` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · qwen3.5:4b |
+| [Qwen 3.5 4B native VS Code Chat read-only repository inspection](https://github.com/hysel/haven-42/wiki/Evidence-Record-9bfaa61b1508e210) | `read-only-tool-validated` | Windows · Ollama · qwen3.5:4b |
+| [Qwen 3.6 27B Q4 coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-deb665f24d7374ee) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · qwen3.6:27b-q4_K_M |
+| [Qwen 3.6 35B-A3B Q4 coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-993d371eb43c7b6d) | `partial-pass` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · qwen3.6:35b-a3b-q4_K_M |
+| [Qwen 3.8 27B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-743034b6d1e30dc9) | `partial-pass` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · qwen3.8:27b |
+| [Qwen 3.8 27B native VS Code Chat read-only repository inspection](https://github.com/hysel/haven-42/wiki/Evidence-Record-cfa90771bd9c89a4) | `read-only-tool-validated` | Windows · Ollama · qwen3.8:27b |
 | [Shared agent CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-ef3643c281067618) | `validated-by-tests` | Cross-platform · N/A · N/A |
 ## Controlled Research
 
@@ -90,7 +118,7 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
-| [Radeon RX 5700 XT current-boot host stability](https://github.com/hysel/haven-42/wiki/Evidence-Record-30fc24f8aa3ddc2b) | `partial-pass` | Ubuntu 26.04 LTS · Linux kernel and amdgpu · no-model |
+| [Radeon RX 5700 XT current-boot host stability](https://github.com/hysel/haven-42/wiki/Evidence-Record-27f4eaa91d0b896d) | `partial-pass` | Ubuntu 26.04 LTS · Linux kernel and amdgpu · no-model |
 ## Inference Engine
 
 | Evidence | Status | Tested environment |
@@ -104,6 +132,8 @@ them by hand; update the catalog and run the generator.
 | [llama.cpp SYCL on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-3d02244dab060bc7) | `candidate-only` | Windows · direct process · unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
 | [llama.cpp SYCL on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-a43711f9d74d1e5f) | `partial-pass` | Linux · OpenAI-compatible loopback API · unsloth/Qwen3.5-9B-GGUF@3885219b6810b007914f3a7950a8d1b469d598a5 |
 | [llama.cpp Windows NVIDIA and AMD follow-on matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-d535eb939e00de72) | `partial-pass` | Windows · direct process · revision-and-sha256-pinned-follow-on-artifacts |
+| [llama.cpp b10375 Vulkan smoke on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-ded5fc576317be66) | `partial-pass` | Ubuntu 26.04 LTS · Vulkan RADV · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
+| [llama.cpp b10375 Vulkan task and soak on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-2ee5449c5143bfd7) | `partial-pass` | Windows 10.0.26200.8973 · Vulkan AMD proprietary 26.7.1 · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
 ## Installer Profile
 
 | Evidence | Status | Tested environment |
@@ -173,6 +203,7 @@ them by hand; update the catalog and run the generator.
 | [Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-14e2d57e6336807d) | `failed-validation` | Ubuntu 24.04.4 · Ollama · ministral-3:3b-instruct-2512-q4_K_M |
 | [Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-83b23ecb83be18a7) | `failed-validation` | Ubuntu 24.04.4 · Ollama · ministral-3:8b-instruct-2512-q4_K_M |
 | [Muse Glimmer 30B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-9374faea1e5a9476) | `failed-validation` | Ubuntu 24.04.4 · Ollama CUDA · muse-glimmer:30b-q4_K_M |
+| [NVIDIA GeForce RTX 3060 12 GB 19-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-7f16789ca3e3811c) | `partial-pass` | Windows 11 · Ollama · digest-pinned-19-model-corpus |
 | [Nemotron 3 Nano Omni 33B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-d25ff2272d76e84f) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · nemotron-3-nano-omni:33b-q4_K_M |
 | [Nemotron 3.5 Lightning Q4 on Ollama 0.32.13 dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-3cde6c27785c5e96) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · nemotron-3.5-lightning:30b-a3b-q4_K_M |
 | [Nemotron 3.5 Lightning Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-999c817bcb50d175) | `partial-pass` | Ubuntu 24.04.4 · Ollama · nemotron-3.5-lightning:30b-a3b-q4_K_M |
@@ -188,6 +219,7 @@ them by hand; update the catalog and run the generator.
 | [Qwen 3.6 35B-A3B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c0d4b52091120fa) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · qwen3.6:35b-a3b-q4_K_M |
 | [Qwen 3.8 27B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c09cdefc61c0f82) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · qwen3.8:27b-q4_K_M |
 | [Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad991e5601c892ec) | `partial-pass` | Windows 11 · Ollama · 17 exact manifest-pinned models |
+| [Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-f5989f6fc215258e) | `partial-pass` | Ubuntu 26.04 LTS · Ollama · digest-pinned-19-model-corpus |
 ## Model Quantization
 
 | Evidence | Status | Tested environment |
@@ -245,7 +277,11 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-58d8481eef7a394b) | `partial-pass` | Windows 11 · Ollama 0.32.14 CUDA · 14-model-passed-soak-corpus |
 | [Radeon RX 5700 XT Llama 3.2 3B board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-9a9906ccfd247313) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · llama3.2:3b-instruct-q4_K_M |
+| [Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-0b86ce2eeb867f1f) | `partial-pass` | Windows 10.0.26200.8973 · llama.cpp b10375 Vulkan AMD proprietary 26.7.1 · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
+| [Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-2aa29208b11bc71d) | `partial-pass` | Ubuntu 26.04 LTS · llama.cpp b10375 Vulkan RADV · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
+| [Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad94c1f53c81365c) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 CUDA · 19-model-passed-soak-corpus |
 ## Remote Profile
 
 | Evidence | Status | Tested environment |

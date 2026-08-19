@@ -12,7 +12,7 @@
     "8": "complete",
     "9": "complete",
     "10": "complete",
-    "11": "complete",
+    "11": "reopened",
     "12": "complete",
     "13": "complete",
     "14": "complete",
@@ -54,6 +54,7 @@
   },
   "classificationPatterns": {
     "complete": "(?i)^complete$",
+    "reopened": "(?i)^reopened$",
     "in-progress": "(?i)\\bin progress\\b",
     "research": "(?i)\\bresearch\\b",
     "evidence-expanded": "(?i)(\\bevidence expanded\\b|\\bmore hardware tests complete\\b)",
@@ -70,7 +71,7 @@
       "## Milestone 28: Controlled Web Research"
     ],
     "PROJECT.md": [
-      "Milestones 1 through 21 are complete for their defined scopes.",
+      "Milestones 1 through 10 and 12 through 21 are complete for their defined scopes.",
       "Milestone 22A now has",
       "Milestone 23 owns native",
       "Milestone 24 has partial external Linux CUDA audio evidence",

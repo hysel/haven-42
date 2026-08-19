@@ -78,12 +78,38 @@ def research_page(query: str, _limit: int, _citation_id: str, _destination: str)
     }
 
 
+def software_updates() -> dict:
+    return {
+        "schemaVersion": 1,
+        "kind": "haven42-managed-software-update-check",
+        "checkedBecauseUserRequested": True,
+        "automaticChecksEnabled": False,
+        "configurationPersisted": False,
+        "userContentSent": False,
+        "components": [{
+            "id": "ollama-runtime",
+            "displayName": "Ollama local AI engine",
+            "managedVersion": "0.32.14",
+            "latestStableVersion": "0.32.14",
+            "newerOfficialVersionAvailable": False,
+            "managedVersionIsLatest": True,
+            "availableForManagedSetup": True,
+            "releaseUrl": "https://github.com/ollama/ollama/releases/tag/v0.32.14",
+            "artifactName": "ollama-windows-amd64.zip",
+            "downloadBytes": 1459874325,
+            "sha256": "5ae5bca5f0d297f5e35665e01db399a69a8eac3f8fad89cd9d2531fd495c9457",
+        }],
+    }
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="haven42-browser-diagnostics-") as temporary:
         state = haven_web.HavenState(
             diagnostic_root=Path(temporary) / "Haven42-Logs",
+            managed_setup_state_root=Path(temporary) / "Haven42-Data",
             research_query_provider=research_query,
             research_page_provider=research_page,
+            software_update_provider=software_updates,
         )
         try:
             app = haven_web.HavenWebServer(("127.0.0.1", 0), state)

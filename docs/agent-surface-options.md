@@ -4,7 +4,13 @@
 
 This document tracks possible engineering agent surfaces for Haven 42.
 
-Continue is the first supported surface because it is the current validated path for local Ollama workflows, prompt loading, rule loading, shared asset installation, and approved-write testing. Other open-source tools may become useful targets, but they must be validated before they are recommended for real project changes.
+Continue is a legacy, evidence-only surface. Current VS Code and VSCodium
+evidence includes configuration-loading failures, unavailable edit tools, and
+an unintended write. Haven 42 preserves those sanitized records but performs no
+new Continue configuration, packaging, qualification, recommendation, or
+repair work. Aider and OpenCode retain their bounded generated-sample support
+positions; every maintained surface must still be validated before it is
+recommended for real project changes.
 
 ## What Counts As An Agent Surface
 
@@ -24,7 +30,7 @@ The install/configure/test parity view is tracked separately in `config/agent-su
 
 ## Milestone 14 Positioning Completion Basis
 
-Milestone 14 is complete for positioning and support-boundary documentation because Haven 42 serves a broader local-first AI audience rather than presenting itself as a Continue-only or enterprise-only bundle. Continue is the first supported surface, while every other surface stays evidence-gated through the compatibility matrix, `docs/agent-surface-promotion-gates.md`, `docs/surface-specific-config-bundles.md`, and `config/agent-surface-capabilities.json`.
+Milestone 14 remains complete for positioning and support-boundary documentation because Haven 42 serves a broader local-first AI audience rather than presenting itself as a Continue-only or enterprise-only bundle. Continue is legacy evidence only, while every maintained surface stays evidence-gated through the compatibility matrix, `docs/agent-surface-promotion-gates.md`, `docs/surface-specific-config-bundles.md`, and `config/agent-surface-capabilities.json`.
 
 Milestone 14 is complete for its portability and audience scope. It defines the support boundary, records comparable status visibility for tracked surfaces, and keeps non-Continue support evidence-gated. Full live validation parity belongs to Milestone 17, and full install/configure/test implementation parity belongs to Milestone 19.
 
@@ -32,7 +38,7 @@ The non-Continue validation requirement is satisfied by Aider and OpenCode gener
 
 | Surface | Surface type | Current validation level | Current pack support | Approved-write position | Notes |
 | --- | --- | --- | --- | --- | --- |
-| Continue | VS Code-compatible extension, VSCodium extension, and CLI | Approved-write ready for the validated local editor setup; CLI harness validated by tests | Supported first path plus CLI automation harness | Allowed only after the read-only, read-content, current-folder, and scoped write smoke tests pass in the user's actual setup | Existing config, install scripts, shared asset mode, validation docs, model testing, approved-write guidance, and `docs/continue-cli-model-testing.md` target Continue today. |
+| Continue | VS Code-compatible extension, VSCodium extension, and CLI | Editor integration reopened; CLI harness retains bounded validation evidence | Hidden candidate plus contributor CLI automation harness | Not allowed for end-user project configuration or approved multi-file writes | Disposable config, validation scripts, model testing, and `docs/continue-cli-model-testing.md` remain for contributor evidence only. |
 | Aider | Git-aware CLI coding assistant | Generated-sample read-only, plan, write-smoke, and scoped-edit evidence; adapter tests validated | Supported isolated install, local-only Ollama config, health, and CLI test adapter | Blocked for real-project approved write | Use `scripts/setup-agent-surface.*`, `docs/aider-cli-model-testing.md`, and `examples/aider-validation.md`; explicitly approved non-generated-repository validation remains pending. |
 | OpenCode | Terminal or IDE-oriented coding agent | Generated-sample read, write-smoke, and scoped-edit validated | Supported install, local-only configuration, health, and test adapter | Real-project approved write blocked | Requires explicitly approved non-generated-repository validation before real-project promotion. |
 | OpenHands | Self-hosted/platform-style agent runtime | Candidate with a defined isolation boundary | Not packaged and excluded from default setup | Blocked | Requires an explicitly approved rootless isolated runtime implementation before generated-sample validation. |
@@ -85,7 +91,7 @@ Every surface validation record should capture:
 ## Portability Rules
 
 - Keep reusable prompts, rules, templates, examples, and validation evidence independent of Continue-specific syntax where practical.
-- Keep Continue-specific configuration in `.continue` until another surface has a tested packaging format.
+- Treat `.continue` content as frozen historical material, not a maintained configuration format.
 - Do not weaken safety rules to support another tool.
 - Do not commit private endpoints, local paths, tokens, raw transcripts, or customer/project names when recording validation evidence.
 - Treat local model behavior as surface-specific. A model that works in one editor or CLI may fail in another.
@@ -99,7 +105,7 @@ Start with Aider or OpenCode in a generated repository and read-only mode. OpenH
 
 Cline and Kilo Code were evaluated and did not pass the pack's required write and scoped-edit gates. Roo Code was retired upstream before admission. Their scripts, adapters, wrappers, active catalog entries, and detailed evidence files are absent to keep the maintained solution narrow. Adding any of them later is a fresh external evaluation under `docs/agent-integration-admission-policy.md`.
 
-Use `docs/agent-surface-promotion-gates.md` before changing support status for any non-Continue surface.
+Use `docs/agent-surface-promotion-gates.md` before changing support status for any maintained surface.
 
 Suggested order:
 

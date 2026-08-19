@@ -1,5 +1,17 @@
 # Editor Compatibility
 
+> **Legacy Continue evidence:** Continue is no longer an active Haven 42
+> integration. Continue-specific instructions below are retained only to make
+> historical results understandable; they are not a supported setup or future
+> qualification path. New editor work must use a separately admitted surface.
+
+> **Experimental contributor workflow:** Haven 42 does not currently ship or
+> automatically install project-level Continue configuration for end users.
+> VS Code and VSCodium testing found inconsistent workspace-config loading,
+> unavailable edit tools, and an unintended out-of-scope write. The commands
+> below are retained for isolated evidence collection only; they are not a
+> novice setup path or an approved-write recommendation.
+
 ## Purpose
 
 Use this guide to test whether Continue is using this pack correctly in VS Code, VSCodium, or the Continue CLI.
@@ -8,19 +20,21 @@ For a beginner-friendly Windows VS Code installation sequence, use
 `docs/vscode-continue-setup.md` first. This document remains the reference for
 cross-editor compatibility and diagnostics.
 
-The pack should stay editor-neutral. The committed `.continue/config.yaml` should work as a project-local config, while editor-specific paths, private endpoints, and local model experiments stay in local-only config files.
+The committed `.continue/config.yaml` is an internal validation fixture. It is
+not shipped into end-user projects. Editor-specific paths, private endpoints,
+and local model experiments stay in ignored test configuration.
 
 ## Supported Surfaces
 
 | Surface | What to expect | What to verify |
 | --- | --- | --- |
-| VS Code | Usually installs extensions from Microsoft's Marketplace. | Continue can load the project-local `.continue/config.yaml`, show the configured model, and run prompts. |
-| VSCodium | Usually installs extensions from Open VSX. Extension versions and command names may differ from VS Code. | Continue can load the project-local `.continue/config.yaml`, show the configured model, and run prompts without duplicate global rules. |
+| VS Code | Experimental contributor surface. | Record whether Continue loads the isolated config, uses the exact selected model, and keeps every approved edit in scope. |
+| VSCodium | Experimental contributor surface; extension versions and command names may differ. | Record config loading, exact model identity, tool availability, and external diff results independently from VS Code. |
 | Continue CLI | Useful fallback when editor behavior is unclear. | `npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml` uses the exact validated CLI identity. |
 
-## Project-Local Config Rule
+## Isolated Project-Local Test Config
 
-After installing this pack into a target repository, use the target repository's config:
+For a disposable contributor test only, use the fixture repository's config:
 
 ```text
 target-repository/
@@ -172,6 +186,19 @@ Fix:
 6. Reopen Continue and confirm the warnings are gone.
 
 ## Read-Only Editor Test
+
+### Project-language prerequisites
+
+Editor language extensions improve diagnostics, navigation, and test discovery,
+but they are not evidence that Continue can read or edit repository files. For
+example, the Microsoft Python extension is recommended for a Python project;
+basic Continue file-tool validation must still work without it.
+
+Future setup should detect the opened project's language tooling, distinguish
+required tools from recommendations, explain the reason for each suggestion,
+and ask before installation. Record the exact accepted extension version in
+surface evidence. If the user declines, retain a manual test command and do not
+misclassify missing optional tooling as a model failure.
 
 Use this first test in VS Code or VSCodium:
 

@@ -14,9 +14,15 @@ The release process is intentionally lightweight because this repository is conf
 
 ## Milestone 19 Completion Basis
 
-Milestone 19 is complete for the Continue release-packaging scope because Continue installer profiles cover default, read-only, and approved-write workflows; `config/evidence-catalog.tsv` provides the structured sanitized evidence index; and the release packaging scripts generate archives plus checksums on Windows, Linux, and macOS.
-
-Milestone 19 is complete for the promoted supported-surface set. Continue, Aider, and OpenCode have evidence-backed install/configure/test positions and deterministic cross-platform contracts. Failed and retired integrations are excluded from active catalogs and executable assets, while OpenHands remains a documentation-only candidate under a defined but unimplemented isolation boundary. Real-project approved write for non-Continue surfaces remains separately evidence-gated.
+Milestone 19 is complete for the promoted supported-surface set. Aider and
+OpenCode have evidence-backed install/configure/test positions and
+deterministic cross-platform contracts. Continue is retained only as sanitized
+historical evidence and is excluded from current packaging and release claims.
+Other failed and retired integrations are excluded from active catalogs and
+executable assets, while OpenHands remains a documentation-only candidate
+under a defined but unimplemented isolation boundary. Real-project approved
+write remains separately evidence-gated. The sanitized evidence source for
+these release claims is `config/evidence-catalog.tsv`.
 
 Additional surface-specific installer profiles remain evidence-gated until each surface has install, configure, and test evidence that can be represented safely in `config/agent-surface-solutions.json`.
 
@@ -28,7 +34,7 @@ Use semantic versioning while the pack matures:
 
 - Patch: documentation fixes, prompt refinements, validation improvements, examples, and non-breaking config updates.
 - Minor: new workflows, new rule groups, new optional integrations, or meaningful pack capability additions.
-- Major: breaking config changes, incompatible Continue schema changes, or default integration/model posture changes.
+- Major: breaking config changes or default integration/model posture changes.
 
 The latest stable release line is `0.3.0`. The latest public test build is the
 unsigned Windows `0.4.0-alpha.1` prerelease. The optional coding tools are a
@@ -133,7 +139,9 @@ the exact SHA, run URL, and one of `Pushed`, `CI running`, `CI passed`, or
 The Haven 42 app and the optional coding tools are different packages. Do not
 ship the full source repository to an app user.
 
-Build the development Local LLM IDE Tools ZIP with:
+Build the development Local LLM IDE Tools ZIP with the command below. The
+current package contains Aider/OpenCode configuration only; do not restore or
+publish the retired Continue project bundle.
 
 ```text
 python packages/local-llm-ide/build.py

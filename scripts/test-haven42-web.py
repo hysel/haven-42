@@ -538,7 +538,29 @@ def main() -> int:
             "unsafe model<script>",
             "qwen3.5",
         ] if query == "writing" else [],
+        software_update_provider=lambda: {
+            "schemaVersion": 1,
+            "kind": "haven42-managed-software-update-check",
+            "checkedBecauseUserRequested": True,
+            "automaticChecksEnabled": False,
+            "configurationPersisted": False,
+            "userContentSent": False,
+            "components": [{
+                "id": "ollama-runtime",
+                "displayName": "Ollama local AI engine",
+                "managedVersion": "0.32.14",
+                "latestStableVersion": "0.32.14",
+                "newerOfficialVersionAvailable": False,
+                "managedVersionIsLatest": True,
+                "availableForManagedSetup": True,
+                "releaseUrl": "https://github.com/ollama/ollama/releases/tag/v0.32.14",
+                "artifactName": "ollama-windows-amd64.zip",
+                "downloadBytes": 1459874325,
+                "sha256": "5ae5bca5f0d297f5e35665e01db399a69a8eac3f8fad89cd9d2531fd495c9457",
+            }],
+        },
         diagnostic_root=DIAGNOSTIC_TEST_ROOT,
+        managed_setup_state_root=(DIAGNOSTIC_TEST_PARENT / "Haven42-Data").resolve(),
     )
     if state.alpha_setup is None:
         # This suite supplies a synthetic Windows readiness snapshot on every
@@ -614,10 +636,11 @@ def main() -> int:
         assert bootstrap["privacy"]["modelResidency"] == "idle-timeout"
         assert bootstrap["privacy"]["idleUnloadSeconds"] == 300
         assert bootstrap["updates"] == {
-            "mode": "disabled",
+            "mode": "user-initiated-only",
             "networkCheckPerformed": False,
-            "downloadAllowed": False,
-            "activationAllowed": False,
+            "automaticCheckEnabled": False,
+            "downloadRequiresApproval": True,
+            "activationRequiresApproval": True,
         }
         assert [item["id"] for item in bootstrap["capabilities"]] == [
             "general.chat", "content.write", "content.summarize", "software", "media.image.create"
@@ -637,6 +660,20 @@ def main() -> int:
         assert "default-src 'self'" in headers["Content-Security-Policy"]
         token = bootstrap["sessionToken"]
         checks += 6
+
+        status, error, _ = request_json(
+            origin + "/api/software-updates/check", "POST", {}, token, origin,
+        )
+        assert status == 400 and error["error"] == "software-update-check-confirmation-required"
+        status, software_updates, _ = request_json(
+            origin + "/api/software-updates/check", "POST", {"confirmed": True}, token, origin,
+        )
+        assert status == 200
+        assert software_updates["checkedBecauseUserRequested"] is True
+        assert software_updates["automaticChecksEnabled"] is False
+        assert software_updates["userContentSent"] is False
+        assert software_updates["components"][0]["managedVersion"] == "0.32.14"
+        checks += 2
 
         with urllib.request.urlopen(origin + "/accessibility", timeout=5) as response:
             accessibility_page = response.read().decode("utf-8")
@@ -2696,6 +2733,7 @@ def main() -> int:
         assert policy["browser"]["fixedExternalNavigationUrls"] == [
             "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
             "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
+            "https://github.com/ollama/ollama/releases",
             "https://ollama.com/download/windows",
             "https://ollama.com/download/linux",
         ]
@@ -2730,7 +2768,14 @@ def main() -> int:
         assert "Does not use Program Files or AppData" in javascript
         assert "validAlphaSetupProgress" in javascript
         assert "document.createElement(\"progress\")" in javascript
+        assert 'setTaskEvent("Local AI setup complete · ready to chat", "result")' in javascript
+        assert 'byId("wizard-readiness-next").textContent = "Open chat"' not in javascript
         assert 'id="models-panel"' in html and 'id="model-search-capability"' in html
+        assert 'id="open-models-from-chat"' in html
+        assert '<label id="model-label" for="model">Conversation model</label>' in html
+        assert "Browse models" in html
+        assert 'byId("open-models-from-chat").addEventListener("click", openModels)' in javascript
+        assert 'revision: 5' in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
         assert "Not on your server yet · searching does not download it" in javascript
@@ -2739,8 +2784,16 @@ def main() -> int:
         assert 'byId("system-idle-unload").value = String(idleUnloadSeconds)' in javascript
         assert 'state.desiredModel = null' in javascript and 'Showing installed models ranked for' in javascript
         assert html.count('class="field-row compact-control-row"') == 3
-        assert ".compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
-        assert ".advanced-grid select, .advanced-grid input { height: 36px; padding: 8px 10px; font-size: 13px; }" in styles
+        assert "--select-font-size: 0.875rem;" in styles
+        assert "--type-display: clamp(2rem, 3vw, 2.75rem);" in styles
+        assert "--type-section: 1.125rem;" in styles
+        assert "--type-body: 0.9375rem;" in styles
+        assert "--type-meta: 0.75rem;" in styles
+        assert "--type-label: 0.6875rem;" in styles
+        assert "font-size: var(--select-font-size);" in styles
+        assert "font: 500 var(--select-font-size)/1.45" in styles
+        assert ".compact-control-row select { font-size: var(--select-font-size); }" in styles
+        assert ".advanced-grid select { font-size: var(--select-font-size); }" in styles
         assert ".model-select select { min-width: 190px; height: 36px;" in styles
         assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
         assert html.count('type="password" maxlength="4096" autocomplete="new-password"') == 2
@@ -2873,8 +2926,8 @@ def main() -> int:
         assert "supportedActivities} supported" in javascript and "blockedActivities} blocked" in javascript
         assert html.count('href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"') == 1
         assert html.count('href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"') == 1
-        assert html.count('href="http') == 2
-        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 3
+        assert html.count('href="http') == 3
+        assert html.count('target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer"') == 4
         assert "read-only-assurance-summary" in javascript and "providerInvocation" in javascript
         assert "This page shows test records included with Haven 42" in html
         assert ".assurance-list {" in styles and ".assurance-item {" in styles

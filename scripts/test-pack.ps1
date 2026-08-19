@@ -695,7 +695,7 @@ Invoke-PackTest "release packaging scripts define archives, checksums, and sanit
     Assert-True -Condition ($releaseDoc -match "GitHub Release") -Message "Release docs should explain GitHub release uploads."
     Assert-True -Condition ($roadmap -match "\| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging \| Complete \|") -Message "Roadmap should mark Milestone 19 complete for supported-surface parity."
     Assert-True -Condition ($roadmap -match "Future candidate expansion") -Message "Roadmap should preserve non-supported surface expansion separately."
-    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria") -Message "TODO should mark Continue-scoped Milestone 19 completion complete."
+    Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 installer profiles, evidence catalog, and release packaging exit criteria for the promoted Aider and OpenCode surface set") -Message "TODO should record the promoted-surface Milestone 19 completion boundary."
     Assert-True -Condition ($todo -match "\[x\] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters") -Message "TODO should record completed adapter parity without promoting blocked surfaces."
     Assert-True -Condition ($todo -match "Solution Architecture Review Backlog") -Message "TODO should keep future surface profile work in the architecture backlog."
     Assert-True -Condition ($todo -match "\[ \] Add future surface-specific profile generation after non-Continue validation") -Message "TODO should keep future surface-specific profile generation pending."
@@ -712,7 +712,7 @@ Invoke-PackTest "standalone local LLM IDE package is narrow and safe" {
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for coding-tools package validation."
     $output = @(& $python.Source (Join-Path $repoRoot "packages/local-llm-ide/test_package.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "The standalone IDE package tests should pass."
-    Assert-True -Condition (($output -join "`n") -match "30 checks") -Message "The IDE package must keep its narrow file set, preview-first writes, backups, local endpoint policy, reproducible archive, native wrapper smoke, and integrity tests."
+    Assert-True -Condition (($output -join "`n") -match "27 checks") -Message "The IDE package must omit Continue project configuration while retaining its narrow file set, preview-first writes, backups, local endpoint policy, reproducible archive, native wrapper smoke, and integrity tests."
 }
 Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
@@ -758,7 +758,7 @@ Invoke-PackTest "evidence catalog has valid schema and sanitized links" {
         Assert-True -Condition ($evidence -notmatch "^[A-Za-z]:|^/|\\") -Message "Evidence path should be repository-relative: $line"
         Assert-True -Condition ($evidence -notmatch "\.\.") -Message "Evidence path should not traverse directories: $line"
         Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "Evidence path should exist: $evidence"
-        Assert-True -Condition ($line -notmatch "192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|itama|Users\\|OneDrive|customer|token|secret") -Message "Evidence catalog row should stay sanitized: $line"
+        Assert-True -Condition ($line -notmatch "\b(10\.\d{1,3}\.\d{1,3}\.\d{1,3}|192\.168\.\d{1,3}\.\d{1,3}|172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})\b|localhost|itama|Users\\|OneDrive|customer|token|secret") -Message "Evidence catalog row should stay sanitized: $line"
 
         if ($status -eq "approved-write-ready") { $seenApprovedWrite = $true }
         if ($status -eq "candidate-only") { $seenCandidateOnly = $true }
@@ -1232,7 +1232,7 @@ Invoke-PackTest "agent surface docs define portability boundary" {
     $roadmap = Get-Content -LiteralPath $roadmapPath -Raw
     $todo = Get-Content -LiteralPath $todoPath -Raw
 
-    Assert-True -Condition ($doc -match "Continue is the first supported surface") -Message "Agent surface doc should keep Continue as the current supported surface."
+    Assert-True -Condition ($doc -match "Continue is a legacy, evidence-only surface") -Message "Agent surface docs should expose the retired Continue boundary."
     Assert-True -Condition ($doc -match "Compatibility Matrix") -Message "Agent surface doc should include an explicit compatibility matrix."
     Assert-True -Condition ($doc -match "Milestone 14 Positioning Completion Basis") -Message "Agent surface doc should record scoped Milestone 14 completion basis."
     Assert-True -Condition ($doc -match "Full live validation parity belongs to Milestone 17") -Message "Agent surface doc should keep full validation parity gap visible."
@@ -1406,25 +1406,39 @@ Invoke-PackTest "agent CLI surface testing docs define shared automation workflo
     }
     foreach ($wrapper in Get-ChildItem -LiteralPath (Join-Path $repoRoot "scripts") -Filter "test-*-cli-models.ps1") {
         if ($wrapper.Name -match '^test-(.+)-cli-models\.ps1$') {
-            Assert-True -Condition ($supportedIds -contains $Matches[1]) -Message "Agent-specific wrappers may ship only for supported surfaces: $($wrapper.Name)"
+            $surfaceId = $Matches[1]
+            $isContributorOnlyContinueHarness = $surfaceId -eq "continue"
+            Assert-True -Condition (($supportedIds -contains $surfaceId) -or $isContributorOnlyContinueHarness) -Message "Agent-specific wrappers may ship only for supported surfaces or the contributor-only Continue evidence harness: $($wrapper.Name)"
         }
     }
 }
 Invoke-PackTest "Continue CLI model testing docs define automation workflow" {
     $docPath = Join-Path $repoRoot "docs/continue-cli-model-testing.md"
+    $policyPath = Join-Path $repoRoot "config/model-coding-agent-qualification-policy.json"
+    $resultPath = Join-Path $repoRoot "config/model-coding-agent-qualification-result.json"
+    $evidencePath = Join-Path $repoRoot "examples/august-2026-coding-agent-qualification.md"
     $psScriptPath = Join-Path $repoRoot "scripts/test-continue-cli-models.ps1"
     $bashScriptPath = Join-Path $repoRoot "scripts/test-continue-cli-models.shared.sh"
+    $configHelperPath = Join-Path $repoRoot "scripts/new-continue-model-test-config.ps1"
     $catalogPath = Join-Path $repoRoot "config/evidence-catalog.tsv"
     $readmePath = Join-Path $repoRoot "README.md"
     $surfaceDocPath = Join-Path $repoRoot "docs/agent-surface-options.md"
 
     Assert-True -Condition (Test-Path -LiteralPath $docPath) -Message "Continue CLI testing doc should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $policyPath) -Message "Coding-agent qualification policy should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $resultPath) -Message "Coding-agent qualification result should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $evidencePath) -Message "Coding-agent qualification evidence should exist."
     Assert-True -Condition (Test-Path -LiteralPath $psScriptPath) -Message "PowerShell Continue CLI tester should exist."
     Assert-True -Condition (Test-Path -LiteralPath $bashScriptPath) -Message "Bash Continue CLI tester should exist."
+    Assert-True -Condition (Test-Path -LiteralPath $configHelperPath) -Message "Model-specific Continue test config helper should exist."
 
     $doc = Get-Content -LiteralPath $docPath -Raw
+    $policy = Get-Content -LiteralPath $policyPath -Raw | ConvertFrom-Json
+    $result = Get-Content -LiteralPath $resultPath -Raw | ConvertFrom-Json
+    $evidence = Get-Content -LiteralPath $evidencePath -Raw
     $psScript = Get-Content -LiteralPath $psScriptPath -Raw
     $bashScript = Get-Content -LiteralPath $bashScriptPath -Raw
+    $configHelper = Get-Content -LiteralPath $configHelperPath -Raw
     $catalog = Get-Content -LiteralPath $catalogPath -Raw
     $readme = Get-Content -LiteralPath $readmePath -Raw
     $surfaceDoc = Get-Content -LiteralPath $surfaceDocPath -Raw
@@ -1433,16 +1447,38 @@ Invoke-PackTest "Continue CLI model testing docs define automation workflow" {
     Assert-True -Condition ($doc -match "test-continue-cli-models") -Message "Continue CLI testing doc should mention automation scripts."
     Assert-True -Condition ($doc -match "command-template") -Message "Continue CLI testing doc should describe command-template flexibility."
     Assert-True -Condition ($doc -match "Write Smoke Test") -Message "Continue CLI testing doc should define write smoke test flow."
+    Assert-True -Condition ($doc -match "scoped-edit") -Message "Continue CLI testing doc should define scoped-edit validation."
     Assert-True -Condition ($doc -match "editor Apply") -Message "Continue CLI testing doc should distinguish CLI from editor Apply validation."
+    Assert-True -Condition ($doc -match "Required New-Model Coding Gate") -Message "Continue CLI testing doc should require coding screening for new models."
+    Assert-Equal -Actual $policy.kind -Expected "haven42-model-coding-agent-qualification-policy" -Message "Coding-agent policy kind should be exact."
+    Assert-Equal -Actual $policy.scope.appliesTo -Expected "every-new-executable-local-model-candidate" -Message "Coding-agent policy should apply to every executable local model."
+    Assert-Equal -Actual @($policy.requiredGates).Count -Expected 5 -Message "Coding-agent policy should define all five required gate groups."
+    Assert-True -Condition (@($policy.requiredGates.id) -contains "scoped-edit") -Message "Coding-agent policy should require scoped edit validation."
+    Assert-Equal -Actual $policy.surfaceAdmission.crossSurfaceInheritance -Expected "forbidden" -Message "Coding evidence must not cross surfaces."
+    Assert-True -Condition ([bool]$policy.evidenceRules.missingGateBlocksRecommendation) -Message "Missing coding evidence should block recommendation."
+    Assert-Equal -Actual $result.kind -Expected "haven42-model-coding-agent-qualification-result" -Message "Coding-agent result kind should be exact."
+    Assert-Equal -Actual @($result.results).Count -Expected 18 -Message "Coding-agent result should cover all executed August candidates."
+    Assert-Equal -Actual @($result.workflowScreenPassed).Count -Expected 5 -Message "Coding-agent result should preserve the five exact workflow passes."
+    Assert-Equal -Actual $result.admission.status -Expected "blocked" -Message "Incomplete reliability and editor cells must block admission."
+    Assert-True -Condition (-not [bool]$result.automaticDefaultChangeAllowed) -Message "Coding evidence must not change defaults."
+    Assert-True -Condition ($evidence -match "No model is admitted as production coding-agent-ready") -Message "Human evidence should state the admission boundary."
     Assert-True -Condition ($psScript -match "ContinueArgumentsTemplate") -Message "PowerShell Continue CLI tester should support argument templates."
     Assert-True -Condition ($psScript -match "ConfigPath") -Message "PowerShell Continue CLI tester should support config paths."
     Assert-True -Condition ($psScript -match "IncludeWriteSmoke") -Message "PowerShell Continue CLI tester should support write-smoke tests."
+    Assert-True -Condition ($psScript -match "IncludeScopedEdit") -Message "PowerShell Continue CLI tester should support scoped-edit tests."
+    Assert-True -Condition ($psScript -match "WriteContinueArgumentsTemplate") -Message "PowerShell Continue CLI tester should separate write authority from read-only arguments."
+    Assert-True -Condition ($psScript -match "ReviewStatus") -Message "PowerShell Continue CLI tester should record repository review status."
     Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell Continue CLI tester should support model unload after each run."
     Assert-True -Condition ($psScript -match "UnloadAfterEach") -Message "PowerShell Continue CLI tester should support model unload after each run."
     Assert-True -Condition ($psScript -match "runtime-validation-output/sample-repositories") -Message "PowerShell Continue CLI tester should default to disposable generated samples."
     Assert-True -Condition ($psScript -match "Initialize-DisposableGitBaseline") -Message "PowerShell Continue CLI tester should initialize a disposable Git baseline."
     Assert-True -Condition ($bashScript -match "CONTINUE_ARGS_TEMPLATE") -Message "Bash Continue CLI tester should support argument templates."
     Assert-True -Condition ($bashScript -match "INCLUDE_WRITE_SMOKE") -Message "Bash Continue CLI tester should support write-smoke tests."
+    Assert-True -Condition ($bashScript -match "INCLUDE_SCOPED_EDIT") -Message "Bash Continue CLI tester should support scoped-edit tests."
+    Assert-True -Condition ($bashScript -match "WRITE_CONTINUE_ARGS_TEMPLATE") -Message "Bash Continue CLI tester should separate write authority from read-only arguments."
+    Assert-True -Condition ($bashScript -match "ReviewStatus") -Message "Bash Continue CLI tester should record repository review status."
+    Assert-True -Condition ($configHelper -match "runtime-validation-output") -Message "Continue test config should remain local-only."
+    Assert-True -Condition ($configHelper -match "OutputPath must remain under") -Message "Continue test config helper should reject committed destinations."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Continue CLI tester should support model unload after each run."
     Assert-True -Condition ($bashScript -match "UNLOAD_AFTER_EACH") -Message "Bash Continue CLI tester should support model unload after each run."
     Assert-True -Condition ($catalog -match "Continue CLI model test harness") -Message "Evidence catalog should track Continue CLI harness validation."
@@ -3221,6 +3257,7 @@ Invoke-PackTest "local agent model tests support explicit failed-model cleanup" 
     Assert-True -Condition ($bashScript -match "MODEL_SKIPPED_FOR_VRAM") -Message "Bash model test script should skip oversized models before pull."
     Assert-True -Condition ($bashScript -match "--include-oversized-models") -Message "Bash model test script should allow explicit oversized testing override."
     Assert-True -Condition ($psScript -match "MODEL_SKIPPED_FOR_PLATFORM") -Message "PowerShell model test script should skip platform-incompatible models before pull."
+    Assert-True -Condition ($psScript -match 'Where-Object \{ \$null -ne \$_ \}') -Message "PowerShell model test script should not treat an empty Ollama ps response as a resident model."
     Assert-True -Condition ($bashScript -match "MODEL_SKIPPED_FOR_PLATFORM") -Message "Bash model test script should skip platform-incompatible models before pull."
     Assert-True -Condition ($psScript -match "Get-TestRecommendation") -Message "PowerShell model test script should produce a recommendation object."
     Assert-True -Condition ($bashScript -match "test_recommendation") -Message "Bash model test script should produce a recommendation object."
@@ -3962,7 +3999,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition (@($solutions.supportTiers) -notcontains "quarantined") -Message "Solution catalog should not retain a quarantine tier after failed integrations are removed."
     Assert-True -Condition (@($solutions.supportTiers) -notcontains "historical") -Message "Solution catalog should not retain retired integrations as active metadata."
     Assert-True -Condition ($null -ne $solutions.configBundlePolicy) -Message "Solution catalog should define config bundle policy."
-    Assert-Equal -Actual $solutions.configBundlePolicy.defaultSurface -Expected "continue" -Message "Continue should remain the default generated bundle surface."
+    Assert-Equal -Actual $solutions.configBundlePolicy.defaultSurface -Expected "aider" -Message "Aider should be the default generated bundle surface while Continue editor integration is reopened."
     Assert-True -Condition ($solutions.configBundlePolicy.decision -match "only after compatibility evidence") -Message "Config bundle policy should be evidence-gated."
     Assert-True -Condition (@($solutions.configBundlePolicy.evidence) -contains "docs/surface-specific-config-bundles.md") -Message "Config bundle policy should cite policy docs."
     Assert-Equal -Actual @($solutions.surfaces).Count -Expected @($matrix.surfaces).Count -Message "Solution catalog should cover every capability matrix surface."
@@ -3988,9 +4025,12 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
             Assert-True -Condition (Test-Path -LiteralPath (Join-Path $repoRoot $evidence)) -Message "$($surface.id) config bundle evidence should exist: $evidence"
         }
 
-        if ($surface.id -in @("continue", "aider", "opencode")) {
+        if ($surface.id -in @("aider", "opencode")) {
             Assert-Equal -Actual $surface.configBundle.status -Expected "supported" -Message "$($surface.id) config bundle should be supported after evidence gates pass."
             Assert-True -Condition ($surface.supportTier -eq "supported" -and $surface.showInDefaultMenu) -Message "$($surface.id) should be visible as supported."
+        } elseif ($surface.id -eq "continue") {
+            Assert-Equal -Actual $surface.configBundle.status -Expected "retired" -Message "Continue config generation should be retired."
+            Assert-True -Condition ($surface.supportTier -eq "candidate" -and -not $surface.showInDefaultMenu) -Message "Continue should remain a hidden contributor candidate."
         } else {
             Assert-True -Condition ($surface.configBundle.status -ne "supported") -Message "$($surface.id) config bundle should not be supported before evidence gates pass."
             Assert-True -Condition (-not $surface.showInDefaultMenu) -Message "$($surface.id) should stay out of the default menu."
@@ -4035,7 +4075,7 @@ Invoke-PackTest "agent surface solutions define install configure and test" {
     Assert-True -Condition ($doc -match "surface-specific-config-bundles\.md") -Message "Solution docs should link config bundle policy."
     Assert-True -Condition ($doc -match "agent-surface-promotion-gates\.md") -Message "Solution docs should link promotion gates."
     Assert-True -Condition ($doc -match "Failed integrations are removed") -Message "Solution docs should explain the narrow removal boundary."
-    Assert-True -Condition ($bundleDoc -match "Continue, Aider, and OpenCode") -Message "Config bundle docs should identify the supported generated config surfaces."
+    Assert-True -Condition ($bundleDoc -match "Aider and OpenCode have supported generated local configuration paths" -and $bundleDoc -match "Continue config generation is retired") -Message "Config bundle docs should identify supported generated surfaces and the retired Continue boundary."
     Assert-True -Condition ($bundleDoc -match "Scoped write validation") -Message "Config bundle docs should require write validation before promotion."
     Assert-True -Condition ($promotionGates -match "Install supported") -Message "Promotion gates should define install promotion."
     Assert-True -Condition ($promotionGates -match "Configure supported") -Message "Promotion gates should define configure promotion."
@@ -4445,7 +4485,8 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-Equal -Actual $legacyIdentity.Count -Expected 0 -Message "Tracked files must not retain the former product identity or slug."
     $idePackageReadme = Get-Content -LiteralPath (Join-Path $repoRoot "packages/local-llm-ide/README.md") -Raw
     Assert-True -Condition ($readme -match "application for private AI chat, writing, and summarization") -Message "README should explain the app in plain language."
-    Assert-True -Condition ($readme -match "Continue, Aider, and OpenCode support is distributed as the optional") -Message "README should keep coding tools outside the everyday app flow."
+    Assert-True -Condition ($readme -match "Aider and OpenCode configuration is developed separately in the optional") -Message "README should keep supported coding tools outside the everyday app flow."
+    Assert-True -Condition ($readme -match "Continue is a\s+legacy, evidence-only integration") -Message "README should identify Continue as legacy evidence rather than an end-user-supported configuration."
     foreach ($tool in @("Continue", "Aider", "OpenCode")) {
         Assert-True -Condition ($idePackageReadme -match [regex]::Escape($tool)) -Message "The separate coding-tools package should document $tool."
     }
@@ -4652,10 +4693,10 @@ Invoke-PackTest "evidence dashboard summarizes catalog and surface status" {
         Assert-True -Condition (@($report.StatusCounts | Where-Object { $_.Status -eq "validated-by-tests" }).Count -eq 1) -Message "Evidence dashboard should include validated-by-tests counts."
         Assert-True -Condition (@($report.OperationCounts | Where-Object { $_.Operation -eq "scoped-write" }).Count -eq 1) -Message "Evidence dashboard should summarize operation-specific evidence."
         Assert-True -Condition (@($report.ValidationModeCounts | Where-Object { $_.ValidationMode -eq "editor-agent" }).Count -eq 1) -Message "Evidence dashboard should summarize validation modes."
-        Assert-True -Condition (@($report.SurfaceReadiness | Where-Object { $_.Id -eq "continue" -and $_.SupportedActivities -ge 5 }).Count -eq 1) -Message "Evidence dashboard should summarize Continue readiness."
+        Assert-True -Condition (@($report.SurfaceReadiness | Where-Object { $_.Id -eq "continue" -and $_.SupportTier -eq "candidate" -and $_.ValidationLevel -eq "legacy-evidence-only" -and $_.SupportedActivities -eq 0 -and $_.ValidatedActivities -eq 1 }).Count -eq 1) -Message "Evidence dashboard should preserve Continue as legacy evidence only."
         Assert-Equal -Actual $report.SourceSurfaceSolutions -Expected "config/agent-surface-solutions.json" -Message "Evidence dashboard should identify the surface solution catalog."
         Assert-True -Condition ($report.SurfaceSolutionCount -ge 4) -Message "Evidence dashboard should include active surface solution statuses."
-        Assert-True -Condition (@($report.SurfaceSolutionReadiness | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Evidence dashboard should summarize Continue install/configure/test status."
+        Assert-True -Condition (@($report.SurfaceSolutionReadiness | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "retired" -and $_.ConfigureStatus -eq "retired" -and $_.TestStatus -eq "retired" }).Count -eq 1) -Message "Evidence dashboard should preserve the legacy Continue boundary."
         Assert-True -Condition (@($report.SurfaceSolutionReadiness | Where-Object { $_.Id -eq "openhands" -and $_.InstallStatus -eq "blocked" -and $_.ConfigureStatus -eq "blocked" }).Count -eq 1) -Message "Evidence dashboard should preserve blocked surface status."
         Assert-True -Condition ($markdown -match "Evidence Dashboard") -Message "Markdown dashboard should include title."
         Assert-True -Condition ($markdown -match "Install Configure Test") -Message "Markdown dashboard should include install/configure/test status."
@@ -4760,12 +4801,12 @@ Invoke-PackTest "Haven 42 menu groups workflows by user intent" {
         }
         Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "get-beginner-setup-plan" -and $_.BeginnerRecommended -eq $true }).Count -eq 1) -Message "Haven 42 menu should recommend the beginner setup plan."
         Assert-True -Condition (@($report.MenuItems | Where-Object { $_.PrimaryWorkflowId -eq "install-pack-assets" -and $_.Command -match "-DryRun" }).Count -eq 1) -Message "Haven 42 menu should keep install/configure dry-run first."
-        Assert-Equal -Actual $report.SurfaceCount -Expected 3 -Message "Haven 42 menu should include only promoted supported surfaces."
+        Assert-Equal -Actual $report.SurfaceCount -Expected 2 -Message "Haven 42 menu should include only promoted supported surfaces."
         Assert-Equal -Actual $report.SourceSolutionCatalog -Expected "config/agent-surface-solutions.json" -Message "Haven 42 menu should identify the solution catalog."
-        Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "continue" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" -and $_.InstallSolution }).Count -eq 1) -Message "Haven 42 menu should use solution catalog status for Continue."
-        foreach ($hiddenSurface in @("openhands")) {
+        foreach ($hiddenSurface in @("continue", "openhands")) {
             Assert-Equal -Actual @($report.AgentSurfaces | Where-Object { $_.Id -eq $hiddenSurface }).Count -Expected 0 -Message "$hiddenSurface should be excluded from the default agent menu."
         }
+        Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "aider" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Haven 42 menu should include supported Aider status."
         Assert-True -Condition (@($report.AgentSurfaces | Where-Object { $_.Id -eq "opencode" -and $_.InstallStatus -eq "supported" -and $_.ConfigureStatus -eq "supported" -and $_.TestStatus -eq "validated" }).Count -eq 1) -Message "Haven 42 menu should include supported OpenCode status."
         Assert-Equal -Actual $report.Appendix -Expected "docs/script-reference-appendix.md" -Message "Haven 42 menu should point at the script appendix."
         Assert-True -Condition ($markdown -match "Haven 42 Menu") -Message "Haven 42 menu markdown should include title."
@@ -5154,13 +5195,46 @@ Invoke-PackTest "native bridge authority model rejects hostile boundaries" {
     Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for native-boundary policy validation."
     $output = @(& $python.Source $scriptPath --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Native bridge boundary policy self-test should pass."
-    Assert-True -Condition (($output -join "`n") -match "passed: 55 cases") -Message "Native bridge boundary policy should execute all 55 cases."
+    Assert-True -Condition (($output -join "`n") -match "passed: 65 cases") -Message "Native bridge boundary policy should execute all 65 cases."
+    Assert-Equal -Actual $contract.messageEnvelope.maximumUtf8Bytes -Expected 65536 -Message "Renderer envelopes must remain bounded."
+    Assert-True -Condition ($contract.messageEnvelope.forbiddenPayloadKeys -contains "command") -Message "Renderer payloads must reject raw command authority."
+    Assert-Equal -Actual $contract.messageEnvelope.operations."filesystem.write".approvalTokenId -Expected "required" -Message "Filesystem writes require an approval token."
     $evidence = Get-Content -LiteralPath $evidencePath -Raw
     Assert-True -Condition ($evidence -match "policy model passed; native runtime remains blocked and unadmitted") -Message "Evidence must preserve the non-admission decision."
     Assert-True -Condition ($evidence -match "does not prove Tauri command registration") -Message "Evidence must distinguish policy from native implementation."
     Assert-True -Condition ((Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw) -match "docs/native-bridge-boundary-evidence\.md") -Message "Native boundary evidence should be mapped to the wiki."
     foreach ($runtimeFile in @("package.json", "package-lock.json", "Cargo.toml", "Cargo.lock", "tauri.conf.json")) {
         Assert-True -Condition (-not (Test-Path -LiteralPath (Join-Path $repoRoot $runtimeFile))) -Message "Blocked desktop runtime file must remain absent: $runtimeFile"
+    }
+}
+
+Invoke-PackTest "qualification evidence recommendation and coding screens fail closed" {
+    $python = Get-Command python -ErrorAction SilentlyContinue
+    if (-not $python) { $python = Get-Command python3 -ErrorAction SilentlyContinue }
+    Assert-True -Condition ($null -ne $python) -Message "Python 3 is required for qualification boundary tests."
+    $tests = @(
+        "test-alpha2-evidence-binding.py",
+        "test-alpha2-evidence-freshness.py",
+        "test-alpha2-hardware-qualification-evidence.py",
+        "test-alpha2-hardware-report-preflight.py",
+        "test-alpha2-model-recommendation-matrix.py",
+        "test-alpha2-model-recommendation-report.py",
+        "test-model-coding-agent-history-audit.py",
+        "test-model-coding-agent-screen.py"
+    )
+    foreach ($test in $tests) {
+        $output = @(& $python.Source (Join-Path $repoRoot "scripts/$test") 2>&1)
+        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Qualification boundary test should pass: $test. Output: $($output -join ' ')"
+    }
+    $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
+    foreach ($document in @(
+        "docs/evidence-input-binding.md",
+        "docs/hardware-qualification-evidence-template.md",
+        "docs/hardware-qualification-publication-workflow.md",
+        "docs/model-coding-agent-screen.md",
+        "docs/model-recommendation-explanations.md"
+    )) {
+        Assert-True -Condition ($wikiMap -match [regex]::Escape($document)) -Message "Qualification boundary documentation should be mapped to the wiki: $document"
     }
 }
 
@@ -5390,7 +5464,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($policy.softwareWorkflows.executionMode -eq "plan-only" -and -not $policy.softwareWorkflows.rendererArgumentsAllowed -and -not $policy.softwareWorkflows.processStartAllowed) -Message "Software workflows must remain plan-only and unable to start processes."
     Assert-True -Condition ($policy.images.admittedProfile -eq "linux-comfyui-sdxl-promoted" -and $policy.images.endpointTrustScope -eq "loopback" -and -not $policy.images.customNodesAllowed -and -not $policy.images.localFileWritesAllowed) -Message "The promoted image flow must remain the exact loopback, built-in, browser-memory profile."
     Assert-True -Condition (-not $policy.browser.remoteAssetsAllowed -and -not $policy.browser.telemetryAllowed -and $policy.browser.csrfTokenRequiredForEffects -and $policy.browser.automaticLaunchUrlScope -eq "ipv4-loopback-http-origin-only" -and -not $policy.browser.environmentOverrideAllowed -and -not $policy.browser.shellLaunchAllowed) -Message "Browser security and automatic launch should remain local and default-deny."
-    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status,https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml,https://ollama.com/download/windows,https://ollama.com/download/linux" -Message "External navigation must remain fixed to the problem form, model and hardware evidence, and official Ollama Windows and Linux instructions."
+    Assert-Equal -Actual (($policy.browser.fixedExternalNavigationUrls) -join ",") -Expected "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status,https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml,https://github.com/ollama/ollama/releases,https://ollama.com/download/windows,https://ollama.com/download/linux" -Message "External navigation must remain fixed to the problem form, model and hardware evidence, and official Ollama release and download instructions."
     Assert-True -Condition ($policy.browser.fixedExternalNavigationRequiresExplicitClick -and -not $policy.browser.rendererSuppliedExternalNavigationAllowed) -Message "External navigation must require an explicit click and reject renderer-supplied URLs."
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
     Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and -not $portablePolicy.security.pyinstallerUserCacheAllowed -and $portablePolicy.security.buildOutputsRestrictedToRepositoryDist -and -not $portablePolicy.security.packageLinksMayEscapeBundle -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction -and $portablePolicy.security.distributionEvidenceEmbeddedInExtractedPackage -and $portablePolicy.security.distributionEvidenceRequiresExactHashes -and $portablePolicy.security.distributionEvidenceExcludedFromSigningScope) -Message "Portable evidence must cover every runtime file, keep build cache and outputs inside the ignored repository build tree, reject escaping package links, embed exact non-signable distribution evidence, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
@@ -5443,10 +5517,11 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($assets -notmatch '(?i)src\s*=\s*["'']https?://|fetch\(\s*["'']https?://' -and $assets -notmatch 'innerHTML') -Message "Web assets must not load remote content or inject HTML."
     $allowedExternalLinks = @(
         'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
-        'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"'
+        'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
+        'href="https://github.com/ollama/ollama/releases"'
     )
     $observedExternalLinks = @($externalLinks | ForEach-Object Value | Sort-Object)
-    Assert-True -Condition ($externalLinks.Count -eq 2 -and (($observedExternalLinks -join "`n") -eq (($allowedExternalLinks | Sort-Object) -join "`n"))) -Message "Static remote navigation must be limited to the fixed issue form and evidence wiki."
+    Assert-True -Condition ($externalLinks.Count -eq 3 -and (($observedExternalLinks -join "`n") -eq (($allowedExternalLinks | Sort-Object) -join "`n"))) -Message "Static remote navigation must be limited to the fixed issue form, evidence wiki, and official Ollama releases."
     Assert-True -Condition ($assets -match 'link\.href\s*=\s*state\.platformFamily\s*===\s*"linux"\s*\?\s*"https://ollama\.com/download/linux"\s*:\s*"https://ollama\.com/download/windows"') -Message "Manual runtime guidance must choose only the official Ollama Linux or Windows download."
     Assert-True -Condition ($html.IndexOf('id="text-panel"') -lt $html.IndexOf('id="connection-panel"') -and $html -match 'interaction-grid' -and $html -match 'configuration-column') -Message "Chat should be the primary interaction before the compact configuration column."
     Assert-True -Condition ($styles -match '(?s)\.rail\s*\{.*?position:\s*sticky' -and $styles -match '(?s)\.configuration-column\s*\{.*?position:\s*sticky' -and $styles -notmatch '4\.5rem') -Message "Navigation and configuration should stay visible without the oversized hero."

@@ -4,11 +4,14 @@ The pack should generate surface-specific config bundles, but only after each su
 
 The admission sequence is defined in `docs/agent-integration-admission-policy.md`: test candidate software externally first, then add its repository assets only after every pass-to-ship gate succeeds. A failed candidate receives documentation only and no retained bundle code.
 
-Use `docs/config-generation-strategy.md` for the shared decision model that chooses project-local, shared-assets, global Continue, or future surface-specific config output.
+Use `docs/config-generation-strategy.md` for the shared decision model that chooses among maintained surface-specific config outputs.
 
 ## Decision
 
-Continue, Aider, and OpenCode have supported generated local configuration paths today.
+Aider and OpenCode have supported generated local configuration paths today.
+Continue config generation is retired. Existing `.continue` material is
+historical evidence only and must not be presented as setup or a reusable
+contributor workflow.
 
 Future candidate or platform-agent bundles should be added only after the surface has:
 
@@ -35,7 +38,7 @@ Generated config files should stay surface-specific. Continue config does not co
 
 | Surface | Bundle status | Policy |
 | --- | --- | --- |
-| Continue | supported | Generate `.continue` assets and local-only Continue config from recommendation output. |
+| Continue | retired | Preserve sanitized historical evidence only; generate no configuration. |
 | Aider | supported | Generate explicit local-only `.aider.conf.local.yml` through `setup-agent-surface.*`; launch with `aider --config` and keep real-project approved write blocked. |
 | OpenCode | supported | Generate a local-only `.opencode.local.json` through the unified adapter with dry-run-safe install planning, repository-local exclusion, and health checks. Devstral Small 2 24B passed generated-sample read/write-smoke and constrained scoped-edit validation; non-generated-repository validation remains pending for real-project approved-write claims. |
 | OpenHands | blocked | The isolation boundary is defined, but do not generate platform-agent config until a rootless isolated implementation is explicitly approved and validated. |

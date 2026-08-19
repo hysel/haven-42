@@ -11,6 +11,13 @@
   --danger: #ff9a8a;
   --control-border: #829b96;
   --focus-ring: #bdf9ea;
+  --select-font-size: 0.875rem;
+  --type-display: clamp(2rem, 3vw, 2.75rem);
+  --type-section: 1.125rem;
+  --type-body: 0.9375rem;
+  --type-control: 0.875rem;
+  --type-meta: 0.75rem;
+  --type-label: 0.6875rem;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -453,18 +460,22 @@ input, select, textarea {
 }
 select {
   color-scheme: dark;
-  font-size: 1rem;
+  font-size: var(--select-font-size);
   line-height: 1.35;
 }
 select option,
 select optgroup {
   color: var(--ink);
   background: #101a19;
-  font: 500 1rem/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font: 500 var(--select-font-size)/1.45 ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 select optgroup { color: var(--accent); font-weight: 750; }
-.compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; font-size: 13px; }
-.advanced-grid select, .advanced-grid input { height: 36px; padding: 8px 10px; font-size: 13px; }
+.compact-control-row input, .compact-control-row select { height: 36px; padding: 8px 10px; }
+.compact-control-row input { font-size: 13px; }
+.compact-control-row select { font-size: var(--select-font-size); }
+.advanced-grid select, .advanced-grid input { height: 36px; padding: 8px 10px; }
+.advanced-grid input { font-size: 13px; }
+.advanced-grid select { font-size: var(--select-font-size); }
 input:disabled, select:disabled { opacity: 0.55; cursor: default; }
 input:focus, select:focus, textarea:focus { border-color: rgba(98, 230, 198, 0.65); box-shadow: 0 0 0 3px rgba(98, 230, 198, 0.08); }
 .field-help { color: var(--muted); margin: 7px 0 0; font-size: 11px; }
@@ -571,9 +582,13 @@ summary { cursor: pointer; font-size: 12px; }
 .text-size-button:hover:not(:disabled), .text-size-button:focus-visible { color: var(--accent); border-color: rgba(98, 230, 198, 0.45); }
 .text-size-button:disabled { opacity: 0.35; cursor: not-allowed; }
 .text-size-controls output { min-width: 34px; color: var(--muted); text-align: center; font-size: 9px; }
-.model-select { display: grid; grid-template-columns: auto minmax(190px, 1fr); align-items: center; gap: 4px 9px; white-space: nowrap; }
+.model-picker { display: grid; min-width: 0; gap: 4px; }
+.model-picker-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+.model-picker-heading label { min-width: 0; }
+.model-select { display: grid; grid-template-columns: minmax(190px, 1fr); align-items: center; gap: 4px; white-space: nowrap; }
 .model-select select { min-width: 190px; height: 36px; padding: 8px 34px 8px 10px; }
-.model-select small { grid-column: 2; color: var(--muted); font-size: 10px; white-space: normal; }
+.model-select small { grid-column: 1; color: var(--muted); font-size: 10px; white-space: normal; }
+.model-library-link { flex: 0 0 auto; min-height: 44px; text-align: right; white-space: nowrap; }
 .button.text-button { padding: 7px 0; color: var(--accent); background: transparent; font-size: 11px; }
 .messages { flex: 1 1 auto; padding: 10px 24px 24px; min-height: 0; overflow: auto; }
 .model-switch-prompt { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 24px 10px; padding: 12px 14px; border: 1px solid rgba(98, 230, 198, 0.35); border-radius: 12px; background: rgba(98, 230, 198, 0.08); }
@@ -613,7 +628,7 @@ summary { cursor: pointer; font-size: 12px; }
 #text-panel[data-chat-text-size="large"] { --chat-body-size: 16px; --chat-input-size: 18px; }
 #text-panel[data-chat-text-size="extra-large"] { --chat-body-size: 18px; --chat-input-size: 20px; }
 .system-setting { display: grid; gap: 7px; margin: 16px 0; }
-.system-setting select, .context-settings select { height: 36px; padding: 8px 34px 8px 10px; font-size: 13px; }
+.system-setting select, .context-settings select { height: 36px; padding: 8px 34px 8px 10px; font-size: var(--select-font-size); }
 .context-settings label { display: block; margin-top: 10px; }
 .composer-surface { flex: 0 0 auto; margin: auto 24px 0; overflow: hidden; border: 1px solid rgba(132, 190, 180, 0.2); border-radius: 12px; background: rgba(4, 12, 13, 0.5); }
 .composer-surface:focus-within { border-color: rgba(98, 230, 198, 0.6); box-shadow: 0 0 0 3px rgba(98, 230, 198, 0.07); }
@@ -647,7 +662,7 @@ summary { cursor: pointer; font-size: 12px; }
 .composer textarea { min-height: 54px; max-height: 180px; resize: vertical; border: 0; border-radius: 0; background: transparent; padding: 11px 2px 8px; box-shadow: none; font-size: var(--chat-input-size, 16px); }
 .composer-help { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 1px 1px 8px; color: var(--muted); font-size: 10px; }
 .recall-control { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; color: var(--muted); font-size: 10px; }
-.recall-control select { width: auto; height: 26px; padding: 3px 25px 3px 7px; border-radius: 7px; font-size: 10px; }
+.recall-control select { width: auto; height: 26px; padding: 3px 25px 3px 7px; border-radius: 7px; font-size: var(--select-font-size); }
 .button.send { height: 46px; color: #06221b; background: var(--accent); font-size: 22px; }
 .button.stop-generation { grid-column: 2; height: 46px; padding-inline: 7px; border-color: rgba(255, 160, 142, 0.62); color: #ffd0c7; background: rgba(76, 31, 25, 0.72); font-size: 12px; }
 .chat-footer { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); padding: 10px 25px 20px; font-size: 10px; }
@@ -786,6 +801,7 @@ summary { cursor: pointer; font-size: 12px; }
   gap: 5px;
   min-width: 0;
 }
+.model-picker { align-self: stretch; }
 .task-mode-select select,
 .model-select select { min-width: 0; width: 100%; }
 .model-select small { grid-column: 1; }
@@ -1015,7 +1031,7 @@ body::before { opacity: 0.045; }
   background: rgba(28, 34, 33, 0.72);
 }
 .task-mode-select > span,
-.model-select > span {
+.model-picker-heading label {
   padding-left: 2px;
   color: #7f918e;
   font-size: 9px;
@@ -1691,6 +1707,53 @@ textarea[aria-invalid="true"] {
 .status-glance-connection small { color: var(--muted); font-size: 0.6875rem; }
 .configuration-column .field-help,
 .model-select small { color: var(--muted); }
+
+/* One application type scale: display, section, body, control, metadata,
+   and compact labels. Rem units preserve browser and user text scaling. */
+.brand strong { font-size: 1rem; }
+.brand small,
+.privacy-pill,
+.rail-cost-estimate small { font-size: var(--type-meta); }
+.nav-item { font-size: 1rem; }
+.rail-cost-estimate span,
+.rail-note { font-size: var(--type-label); }
+.rail-note strong { font-size: var(--type-meta); }
+
+.hero h1 { font-size: var(--type-display); }
+.hero > p:last-child { font-size: var(--type-body); line-height: 1.55; }
+.eyebrow,
+.hero .eyebrow,
+.configuration-column .eyebrow,
+.task-mode-select > span,
+.model-picker-heading label,
+.alpha-metrics strong,
+.status-glance-stats strong,
+.status-energy-values strong { font-size: var(--type-label); }
+.chat-panel > .panel-heading h2,
+.panel-heading h2 { font-size: var(--type-section); }
+
+.model-select small,
+.field-help,
+.text-size-controls output,
+.composer-help,
+.recall-control,
+.chat-footer,
+.context-toolbar > p,
+.context-policy,
+.research-tools > summary small,
+.status-glance-connection small,
+.status-glance-stats output,
+.status-energy-widget small { font-size: var(--type-meta); }
+.button,
+.button.text-button,
+.model-library-link { font-size: 0.8125rem; }
+.message strong { font-size: 0.8125rem; }
+.status-indicator { font-size: var(--type-meta); }
+.status-glance-connection strong { font-size: var(--type-control); }
+.alpha-metrics output,
+.status-energy-values output { font-size: var(--type-meta); }
+.research-tools > summary,
+.research-query-form label { font-size: var(--type-control); }
 
 /* Plain reference pages reached from About. */
 .statement-page {

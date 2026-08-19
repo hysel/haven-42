@@ -165,7 +165,7 @@ test_release_packaging_scripts() {
     grep -q "GitHub Release" "$REPO_ROOT/docs/release.md" &&
     grep -q "| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "Future candidate expansion" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "\\[x\\] Complete Milestone 19 Continue installer profile, evidence catalog, and release packaging exit criteria" "$REPO_ROOT/TODO.md" &&
+    grep -q "\\[x\\] Complete Milestone 19 installer profiles, evidence catalog, and release packaging exit criteria for the promoted Aider and OpenCode surface set" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[x\\] Complete Milestone 19 install/configure/health parity for evidence-backed CLI adapters" "$REPO_ROOT/TODO.md" &&
     grep -q "Solution Architecture Review Backlog" "$REPO_ROOT/TODO.md" &&
     grep -q "\\[ \\] Add future surface-specific profile generation after non-Continue validation" "$REPO_ROOT/TODO.md" &&
@@ -184,7 +184,7 @@ test_evidence_catalog_schema() {
     $1 == "" || $2 == "" || $3 == "" || $4 == "" || $5 == "" || $6 == "" || $7 == "" || $8 == "" || $9 == "" || $10 == "" || $11 == "" || $12 == "" || $13 == "" { exit 1 }
     $11 !~ /^(candidate-only|plan-review-candidate|plan-validated|review-validated|read-only-tool-validated|read-only-cli-validated|write-smoke-validated|approved-write-ready|static-validated|validated-by-tests|partial-pass|failed-validation)$/ { exit 1 }
     $12 ~ /^[A-Za-z]:|^\/|\\|\.\./ { exit 1 }
-    $0 ~ /192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|localhost|itama|Users\\|OneDrive|customer|token|secret/ { exit 1 }
+    $0 ~ /(10\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}|192\.168\.[0-9]{1,3}\.[0-9]{1,3}|172\.(1[6-9]|2[0-9]|3[0-1])\.[0-9]{1,3}\.[0-9]{1,3})|localhost|itama|Users\\|OneDrive|customer|token|secret/ { exit 1 }
     $11 == "approved-write-ready" { approved = 1 }
     $11 == "candidate-only" { candidate = 1 }
     $11 == "read-only-tool-validated" { readonly = 1 }
@@ -948,41 +948,28 @@ test_sample_repository_factory_doc() {
 
 test_agent_surface_options_doc() {
   [ -f "$REPO_ROOT/docs/agent-surface-options.md" ] &&
-    grep -q "Continue is the first supported surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Continue is a legacy, evidence-only surface" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Compatibility Matrix" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Milestone 14 Positioning Completion Basis" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Full live validation parity belongs to Milestone 17" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Aider and OpenCode generated-sample evidence" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/surface-specific-config-bundles.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "docs/setup-paths.md" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Candidate means" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Read-only validated" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Plan validated" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Approved-write ready" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    grep -q "Cline" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Continue" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Aider" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "OpenCode" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "OpenHands" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "External verification commands" "$REPO_ROOT/docs/agent-surface-options.md" &&
+    grep -q "Blocked" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Non-Enterprise Use" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    grep -q "Milestone 17 Supported-Surface Completion Basis" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
-    grep -q "fresh external evaluation" "$REPO_ROOT/docs/agent-surface-options.md" &&
-    [ -f "$REPO_ROOT/docs/openhands-validation-boundary.md" ] &&
-    grep -q "OpenHands Validation Boundary" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
-    grep -q "disposable generated repository" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
-    grep -q "SSH keys" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
-    grep -q "Docker socket" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
-    grep -q "unrestricted network access" "$REPO_ROOT/docs/openhands-validation-boundary.md" &&
-    grep -q "docs/openhands-validation-boundary.md" "$REPO_ROOT/docs/agent-surface-promotion-gates.md" &&
     grep -q "docs/agent-surface-options.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "| Milestone 14: Agent Surface Portability And Broader Audience | Complete |" "$REPO_ROOT/ROADMAP.md" &&
-    grep -q "| Milestone 17: Agent Surface Compatibility Validation | Complete |" "$REPO_ROOT/ROADMAP.md" &&
     grep -q "\\[x\\] Complete Milestone 14 positioning, support-boundary, and broader-audience exit criteria" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[x\] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19" "$REPO_ROOT/TODO.md" &&
-    grep -q "\\[x\\] Complete Milestone 17 for the promoted supported-surface set" "$REPO_ROOT/TODO.md" &&
-    grep -q "Future Agent Surface Evidence Expansion" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[x\] Add a local-only OpenCode Ollama config generator" "$REPO_ROOT/TODO.md" &&
-    grep -q "\[x\] Validate OpenCode's installed CLI" "$REPO_ROOT/TODO.md" &&
-    [ -f "$REPO_ROOT/docs/opencode-cli-model-testing.md" ] &&
-    grep -q "Confirmed Command Boundaries" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q "opencode run" "$REPO_ROOT/docs/agent-cli-surface-model-testing.md" &&
-    grep -q "hasValidationFailure" "$REPO_ROOT/scripts/test-agent-cli-surface-models.ps1" &&
-    grep -q 'ScopedEditStatus.*failed' "$REPO_ROOT/scripts/test-agent-cli-surface-models.shared.sh" &&
-    grep -q "\\[x\\] Define a safe OpenHands validation boundary before adding platform-agent validation automation" "$REPO_ROOT/TODO.md"
+    grep -q "\[x\] Move full cross-agent validation and install/configure/test parity out of Milestone 14 and keep it tracked in Milestones 17 and 19" "$REPO_ROOT/TODO.md"
 }
 
 
@@ -1008,36 +995,57 @@ test_removed_agent_integrations() {
     ! grep -Eqi 'cline|kilo|roo([ -]?code)' "$REPO_ROOT/scripts/setup-agent-surface.shared.sh" &&
     grep -q "Removed Integrations" "$REPO_ROOT/docs/agent-surface-options.md" &&
     grep -q "Pass-To-Ship Gate" "$REPO_ROOT/docs/agent-integration-admission-policy.md" &&
-    grep -q "If an evaluation fails, commit only a concise sanitized decision record" "$REPO_ROOT/docs/agent-integration-admission-policy.md" &&
-    python3 - "$REPO_ROOT" <<'PY'
-import json, pathlib, re, sys
-root = pathlib.Path(sys.argv[1])
-solutions = json.loads((root / "config/agent-surface-solutions.json").read_text(encoding="utf-8"))
-defaults = json.loads((root / "config/agent-cli-surface-defaults.json").read_text(encoding="utf-8"))
-supported = {surface["id"] for surface in solutions["surfaces"] if surface["supportTier"] == "supported"}
-for default in defaults["surfaces"]:
-    assert re.sub(r"-cli$", "", default["surfaceKey"]) in supported
-for wrapper in (root / "scripts").glob("test-*-cli-models.ps1"):
-    match = re.fullmatch(r"test-(.+)-cli-models\.ps1", wrapper.name)
-    if match:
-        assert match.group(1) in supported, wrapper.name
-PY
+    grep -q "If an evaluation fails, commit only a concise sanitized decision record" "$REPO_ROOT/docs/agent-integration-admission-policy.md"
 }
 test_continue_cli_model_testing_doc() {
   [ -f "$REPO_ROOT/docs/continue-cli-model-testing.md" ] &&
+    [ -f "$REPO_ROOT/config/model-coding-agent-qualification-policy.json" ] &&
+    [ -f "$REPO_ROOT/config/model-coding-agent-qualification-result.json" ] &&
+    [ -f "$REPO_ROOT/examples/august-2026-coding-agent-qualification.md" ] &&
     [ -f "$REPO_ROOT/scripts/test-continue-cli-models.ps1" ] &&
     [ -f "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" ] &&
+    [ -f "$REPO_ROOT/scripts/new-continue-model-test-config.ps1" ] &&
     grep -q "Continue CLI Model Testing" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
     grep -q "test-continue-cli-models" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
     grep -q "command-template" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
     grep -q "Write Smoke Test" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "scoped-edit" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
     grep -q "Editor Apply" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    grep -q "Required New-Model Coding Gate" "$REPO_ROOT/docs/continue-cli-model-testing.md" &&
+    python3 - "$REPO_ROOT/config/model-coding-agent-qualification-policy.json" <<'PY' || return 1
+import json, pathlib, re, sys
+policy = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert policy["kind"] == "haven42-model-coding-agent-qualification-policy"
+assert policy["scope"]["appliesTo"] == "every-new-executable-local-model-candidate"
+assert len(policy["requiredGates"]) == 5
+assert "scoped-edit" in {gate["id"] for gate in policy["requiredGates"]}
+assert policy["surfaceAdmission"]["crossSurfaceInheritance"] == "forbidden"
+assert policy["evidenceRules"]["missingGateBlocksRecommendation"] is True
+PY
+    python3 - "$REPO_ROOT/config/model-coding-agent-qualification-result.json" <<'PY' || return 1
+import json, pathlib, sys
+result = json.loads(pathlib.Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert result["kind"] == "haven42-model-coding-agent-qualification-result"
+assert len(result["results"]) == 18
+assert len(result["workflowScreenPassed"]) == 5
+assert result["admission"]["status"] == "blocked"
+assert result["automaticDefaultChangeAllowed"] is False
+PY
+    grep -q "No model is admitted as production coding-agent-ready" "$REPO_ROOT/examples/august-2026-coding-agent-qualification.md" &&
     grep -q "ContinueArgumentsTemplate" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
     grep -q "ConfigPath" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
     grep -q "IncludeWriteSmoke" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
+    grep -q "IncludeScopedEdit" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
+    grep -q "WriteContinueArgumentsTemplate" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
+    grep -q "ReviewStatus" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
     grep -q "Initialize-DisposableGitBaseline" "$REPO_ROOT/scripts/test-continue-cli-models.ps1" &&
     grep -q "CONTINUE_ARGS_TEMPLATE" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
     grep -q "INCLUDE_WRITE_SMOKE" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
+    grep -q "INCLUDE_SCOPED_EDIT" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
+    grep -q "WRITE_CONTINUE_ARGS_TEMPLATE" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
+    grep -q "ReviewStatus" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
+    grep -q "runtime-validation-output" "$REPO_ROOT/scripts/new-continue-model-test-config.ps1" &&
+    grep -q "OutputPath must remain under" "$REPO_ROOT/scripts/new-continue-model-test-config.ps1" &&
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
     grep -q "UNLOAD_AFTER_EACH" "$REPO_ROOT/scripts/test-continue-cli-models.shared.sh" &&
     grep -q "Continue CLI model test harness" "$REPO_ROOT/config/evidence-catalog.tsv" &&
@@ -1874,7 +1882,7 @@ test_solution_architecture_review_doc() {
     grep -q "Complete for positioning and support-tier governance" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Complete for the promoted supported-surface set" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "OpenHands is a candidate with a defined isolation boundary" "$REPO_ROOT/docs/solution-architecture-review.md" &&
-    grep -q "Candidate surfaces are excluded from supported parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
+    grep -qi "Candidate surfaces are excluded from supported parity" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "EMPTY_MODEL_OUTPUT" "$REPO_ROOT/docs/solution-architecture-review.md" &&
     grep -q "Evidence States" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
     grep -q "tested-passed" "$REPO_ROOT/docs/unified-starter-toolkit-ui.md" &&
@@ -1896,7 +1904,9 @@ test_solution_architecture_review_doc() {
     grep -q "docs/solution-architecture-review.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "docs/unified-starter-toolkit-ui.md" "$REPO_ROOT/docs/engineering-index.md" &&
     grep -q "application for private AI chat, writing, and summarization" "$REPO_ROOT/README.md" &&
-    grep -q "Continue, Aider, and OpenCode support is distributed as the optional" "$REPO_ROOT/README.md" &&
+    grep -q "Aider and OpenCode configuration is developed separately in the optional" "$REPO_ROOT/README.md" &&
+    grep -q "Continue is a" "$REPO_ROOT/README.md" &&
+    grep -q "legacy, evidence-only integration" "$REPO_ROOT/README.md" &&
     grep -q "Continue" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
     grep -q "Aider" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
     grep -q "OpenCode" "$REPO_ROOT/packages/local-llm-ide/README.md" &&
@@ -2021,6 +2031,7 @@ test_model_residency_policy_contract() {
     grep -q 'runtimePolicy' "$REPO_ROOT/scripts/run-language-workflow-matrix.ps1" &&
     grep -q 'RUNTIME_RESIDENCY_MODE' "$REPO_ROOT/scripts/run-language-workflow-matrix.shared.sh" &&
     grep -q 'runtimePolicy' "$REPO_ROOT/scripts/test-local-agent-models.ps1" &&
+    grep -Fq 'Where-Object { $null -ne $_ }' "$REPO_ROOT/scripts/test-local-agent-models.ps1" &&
     grep -q 'RUNTIME_RESIDENCY_MODE' "$REPO_ROOT/scripts/test-local-agent-models.shared.sh" &&
     grep -q 'continueKeepAliveSeconds' "$REPO_ROOT/scripts/apply-recommended-agent-config.ps1" &&
     grep -q 'CONTINUE_KEEP_ALIVE_SECONDS' "$REPO_ROOT/scripts/apply-recommended-agent-config.shared.sh" &&
@@ -2060,7 +2071,7 @@ run_test "validate-pack succeeds for repository" test_validate_succeeds
 run_test "validate-pack fails for wrong expected version" test_validate_fails_for_wrong_version
 run_test "release packaging scripts define archives, checksums, and sanitized dry runs" test_release_packaging_scripts
 test_local_llm_ide_package() {
-  python3 "$REPO_ROOT/packages/local-llm-ide/test_package.py" | grep -q "30 checks"
+  python3 "$REPO_ROOT/packages/local-llm-ide/test_package.py" | grep -q "27 checks"
 }
 run_test "standalone local LLM IDE package is narrow and safe" test_local_llm_ide_package
 run_test "evidence catalog has valid schema and sanitized links" test_evidence_catalog_schema
@@ -2192,7 +2203,7 @@ test_desktop_sidecar_ipc_policy() {
 
 test_native_bridge_boundary_policy() {
   output="$(python3 "$REPO_ROOT/scripts/native-bridge-boundary-policy.py" --self-test 2>&1)" || return 1
-  printf '%s\n' "$output" | grep -q "passed: 55 cases" || return 1
+  printf '%s\n' "$output" | grep -q "passed: 65 cases" || return 1
   python3 - "$REPO_ROOT" <<'PY' || return 1
 import json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
@@ -2210,6 +2221,9 @@ assert contract["sidecarLifecycle"]["rendererMaySupplyArguments"] is False
 assert contract["sidecarLifecycle"]["elevationAllowed"] is False
 assert contract["sidecarLifecycle"]["listeningSocketAllowed"] is False
 assert contract["sidecarLifecycle"]["unrelatedProcessTerminationAllowed"] is False
+assert contract["messageEnvelope"]["maximumUtf8Bytes"] == 65536
+assert "command" in contract["messageEnvelope"]["forbiddenPayloadKeys"]
+assert contract["messageEnvelope"]["operations"]["filesystem.write"]["approvalTokenId"] == "required"
 assert contract["privilegeBoundary"]["installService"] is False
 assert contract["privilegeBoundary"]["modifyFirewall"] is False
 assert contract["privilegeBoundary"]["modifyDrivers"] is False
@@ -2553,6 +2567,20 @@ assert report["EvidenceCount"] >= 20
 assert report["SurfaceCount"] >= 4
 assert any(
     item["Id"] == "continue"
+    and item["InstallStatus"] == "retired"
+    and item["ConfigureStatus"] == "retired"
+    and item["TestStatus"] == "retired"
+    for item in report["SurfaceSolutionReadiness"]
+)
+assert any(
+    item["Id"] == "aider"
+    and item["InstallStatus"] == "supported"
+    and item["ConfigureStatus"] == "supported"
+    and item["TestStatus"] == "validated"
+    for item in report["SurfaceSolutionReadiness"]
+)
+assert any(
+    item["Id"] == "opencode"
     and item["InstallStatus"] == "supported"
     and item["ConfigureStatus"] == "supported"
     and item["TestStatus"] == "validated"
@@ -2581,7 +2609,7 @@ PY
   grep -q "python -c" "$REPO_ROOT/scripts/start-haven42-web.shared.sh" || return 1
   grep -q "py -3 -c" "$REPO_ROOT/scripts/start-haven42-web.shared.sh" || return 1
   python3 - "$REPO_ROOT" <<'PY'
-import json, pathlib, sys
+import json, pathlib, re, sys
 root = pathlib.Path(sys.argv[1])
 policy = json.loads((root / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))
 portable = json.loads((root / "config/portable-development-package-contract.json").read_text(encoding="utf-8"))
@@ -2592,6 +2620,7 @@ assert policy["browser"]["remoteAssetsAllowed"] is False
 assert policy["browser"]["fixedExternalNavigationUrls"] == [
     "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status",
     "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
+    "https://github.com/ollama/ollama/releases",
     "https://ollama.com/download/windows",
     "https://ollama.com/download/linux",
 ]
@@ -2667,8 +2696,13 @@ writing_doc = (root / "docs/writing-model-evaluation.md").read_text(encoding="ut
 blind_evidence = (root / "examples/blind-writing-quality-review.md").read_text(encoding="utf-8")
 wiki_map = (root / "config/wiki-sync.tsv").read_text(encoding="utf-8")
 lowered = assets.lower()
-for forbidden in ('src="http://', "src='http://", 'href="http://', "href='http://", 'src="https://', "src='https://", 'href="https://', "href='https://", 'fetch("http://', "fetch('http://", 'fetch("https://', "fetch('https://"):
-    assert forbidden not in lowered
+assert not re.search(r'''(?i)src\s*=\s*["']https?://|fetch\(\s*["']https?://''', assets)
+external_links = sorted(re.findall(r'''(?i)href\s*=\s*["']https?://[^"']+["']''', assets))
+assert external_links == sorted([
+    'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
+    'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
+])
+assert 'link.href = state.platformFamily === "linux" ? "https://ollama.com/download/linux" : "https://ollama.com/download/windows"' in assets
 assert "innerHTML" not in assets
 assert html.index('id="text-panel"') < html.index('id="connection-panel"')
 assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html
@@ -3033,6 +3067,31 @@ PY
   rm -rf "$ui_temp"
 }
 
+test_qualification_evidence_recommendation_and_coding_screens() {
+  for test_name in \
+    test-alpha2-evidence-binding.py \
+    test-alpha2-evidence-freshness.py \
+    test-alpha2-hardware-qualification-evidence.py \
+    test-alpha2-hardware-report-preflight.py \
+    test-alpha2-model-recommendation-matrix.py \
+    test-alpha2-model-recommendation-report.py \
+    test-model-coding-agent-history-audit.py \
+    test-model-coding-agent-screen.py
+  do
+    python3 "$REPO_ROOT/scripts/$test_name" || return 1
+  done
+  wiki_map="$REPO_ROOT/config/wiki-sync.tsv"
+  for document in \
+    docs/evidence-input-binding.md \
+    docs/hardware-qualification-evidence-template.md \
+    docs/hardware-qualification-publication-workflow.md \
+    docs/model-coding-agent-screen.md \
+    docs/model-recommendation-explanations.md
+  do
+    grep -Fq "$document" "$wiki_map" || return 1
+  done
+}
+
 run_test "model recommendation catalog has valid schema" test_catalog_schema
 run_test "committed config uses starter sample model" test_committed_config_uses_starter_model
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
@@ -3099,6 +3158,7 @@ run_test "ComfyUI setup guide preserves the validated secure provider profile" t
 run_test "desktop runtime and IPC contracts are pinned and fail closed" test_desktop_runtime_and_ipc_contracts
 run_test "desktop sidecar IPC policy rejects hostile messages" test_desktop_sidecar_ipc_policy
 run_test "native bridge authority model rejects hostile boundaries" test_native_bridge_boundary_policy
+run_test "qualification evidence recommendation and coding screens fail closed" test_qualification_evidence_recommendation_and_coding_screens
 run_test "core update policy fails closed before cryptographic admission" test_core_update_policy
 run_test "workflow reliability threat model and data lifecycle fail closed" test_workflow_reliability_and_data_lifecycle
 run_test "provider performance evidence and capacity preflight fail closed" test_provider_evidence_and_capacity

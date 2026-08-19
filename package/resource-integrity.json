@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "ab19f941e8ce559099c15d9557b9b1b61351eca4ffd40daf5aa8b6d2b8eeadd2",
-      "sizeBytes": 68529
+      "sha256": "bcf63a1c2846ff09448cf46a8b06c903a98bdea62b2525b5ea0de23ef72a6e1c",
+      "sizeBytes": 70875
     },
     {
       "path": "web/static/accessibility.html",
@@ -13,13 +13,13 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "35d7e3ac6351ac43f84480236dbb95474148f027b54b4dbbc45c161cd1b470cf",
-      "sizeBytes": 251015
+      "sha256": "00b81c0114227f4c6f4b6add876160aa5e59297fa0b46ca83d8e6fdc271459e4",
+      "sizeBytes": 255579
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "204cf638e1b94d84bf210efa7457444c785f651667ba9ad0d0f6336b1ba632ca",
-      "sizeBytes": 71166
+      "sha256": "34a26129f263e723c8be634bcae619dd8b0a49ba044fab0e8d50650b588a37d7",
+      "sizeBytes": 73574
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -28,18 +28,18 @@
     },
     {
       "path": "config/evidence-catalog.tsv",
-      "sha256": "d02a826cf6f84fd561b1439e812a82e1b323b16902fb3e34997ba8b85eee10d6",
-      "sizeBytes": 63659
+      "sha256": "195dffb629d633360f7c78daa8723daa4e6e2c0e83386000f1b72cd0c517f8f4",
+      "sizeBytes": 83674
     },
     {
       "path": "config/agent-surface-capabilities.json",
-      "sha256": "9e62b8700241a5049c029946a1e47f118b08dd06250d8e447d40e9bd69fb35bb",
-      "sizeBytes": 8320
+      "sha256": "4a3f6b398e7cee711513b940e4cdacf1432075e101da04c1c6538d708496fabf",
+      "sizeBytes": 7789
     },
     {
       "path": "config/agent-surface-solutions.json",
-      "sha256": "cd6cd26b79943127f0cd41f7e27d39d73e7cb2ac02b0c6357d2119845182f3c0",
-      "sizeBytes": 9713
+      "sha256": "344ec5e25a8700924dfac6bd12bbefd7d985c7cff0f97ecc33f02be46d4d53ac",
+      "sizeBytes": 9832
     },
     {
       "path": "config/install-component-registry.json",
@@ -68,8 +68,8 @@
     },
     {
       "path": "config/windows-alpha-component-registry.json",
-      "sha256": "89b3df7d704a4fa87ffeb9e3349bfc41db8901c1839245ff773730dec0c820aa",
-      "sizeBytes": 3091
+      "sha256": "ad9dc558ef1e72b70e2bed4704857c79a8cbb41006dde76a125a091d74ab8b26",
+      "sizeBytes": 3099
     },
     {
       "path": "config/windows-alpha-resource-monitor-contract.json",
@@ -88,8 +88,8 @@
     },
     {
       "path": "config/linux-alpha-component-registry.json",
-      "sha256": "8e9a0c83f70ce6ada91864f69ef74f21836b44d53fa799d302cf2ac2f0e42217",
-      "sizeBytes": 2914
+      "sha256": "2ec37915c0a861568e0d7d9826724711487e3dbb958e4091bae206d9c00ff72c",
+      "sizeBytes": 2922
     },
     {
       "path": "config/alpha-2-model-catalog.json",
@@ -108,8 +108,8 @@
     },
     {
       "path": "config/alpha-2-model-version-inventory.json",
-      "sha256": "880cd3b869443a106b0d2a32345085b517d15d6331bc730e6c7b56c1ccc9686e",
-      "sizeBytes": 31181
+      "sha256": "aff33153e3ec78588e308301582b1212015e6fb8d580b6b8ab5c94150bf7e2a7",
+      "sizeBytes": 31974
     },
     {
       "path": "config/alpha-2-model-runtime-requirements.json",
@@ -118,8 +118,8 @@
     },
     {
       "path": "config/alpha-2-runtime-compatibility.json",
-      "sha256": "1aaab7d27a3263afd222be8280d023d6089e18a9a76919360efc8f2b14908146",
-      "sizeBytes": 11651
+      "sha256": "7e110a2b586fa3374c22e994722a7c927f4b763592b26660fc3effea7bdef50b",
+      "sizeBytes": 13370
     },
     {
       "path": "config/linux-runtime-artifact-review.json",

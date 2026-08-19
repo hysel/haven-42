@@ -129,7 +129,13 @@ def probe(
         except urllib.error.HTTPError as error:
             assert error.code == 403
         assert bootstrap["runtime"]["bindScope"] == "loopback-only"
-        assert bootstrap["updates"]["activationAllowed"] is False
+        assert bootstrap["updates"] == {
+            "mode": "user-initiated-only",
+            "networkCheckPerformed": False,
+            "automaticCheckEnabled": False,
+            "downloadRequiresApproval": True,
+            "activationRequiresApproval": True,
+        }
         assert bootstrap["package"]["required"] is packaged
         assert bootstrap["package"]["verified"] is packaged
         linux_alpha = bootstrap["runtime"]["platform"] == "linux"

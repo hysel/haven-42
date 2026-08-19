@@ -2,13 +2,13 @@
 
 All new agent evaluations also follow `docs/agent-integration-admission-policy.md`. Evaluation happens in an external or ignored disposable workspace. No agent-specific implementation artifact enters the repository until the exact tested version passes every required gate.
 
-This document defines what a non-Continue agent surface must prove before the pack can promote install, configure, test, or approved-write support.
+This document defines what a maintained agent surface must prove before the pack can promote install, configure, test, or approved-write support.
 
-Continue remains the supported first path. Other surfaces can move forward only with sanitized evidence recorded in `config/evidence-catalog.tsv`, `config/agent-surface-solutions.json`, and a surface-specific evidence document.
+Continue is legacy and evidence-only. Maintained surfaces can move forward only with sanitized evidence recorded in `config/evidence-catalog.tsv`, `config/agent-surface-solutions.json`, and a surface-specific evidence document.
 
 ## Milestone 17 Supported-Surface Completion Basis
 
-Milestone 17 is complete for the promoted support set because Continue, Aider, and OpenCode have explicit evidence-backed validation positions, at least one non-Continue surface has passed read-only, write-smoke, and scoped-edit gates, and real-project approved-write remains blocked until explicit non-generated repository validation passes.
+Milestone 17 is complete for the promoted support set because Aider and OpenCode have explicit evidence-backed validation positions, at least one maintained surface has passed read-only, write-smoke, and scoped-edit gates, and real-project approved-write remains blocked until explicit non-generated repository validation passes. Continue remains visible only as historical evidence.
 
 Documentation-only candidates do not count toward supported-surface parity. OpenHands remains a candidate with a defined isolation boundary. Failed and retired software has no scripts, adapters, wrappers, or active catalog entries in the pack. A future proposal must begin as a new external evaluation and pass every shared gate. OpenCode's generated-sample evidence is recorded separately and still requires non-generated-repository validation.
 

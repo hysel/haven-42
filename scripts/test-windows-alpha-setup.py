@@ -285,7 +285,7 @@ def main() -> int:
         )
         assert diagnostic_events == [
             ("setup", "SETUP_BACKEND_CPU_SELECTED", "observed"),
-            ("setup", "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_5_SELECTED", "observed"),
+            ("setup", "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_14_SELECTED", "observed"),
             ("setup", "SETUP_MODEL_QWEN35_08B_Q8_SELECTED", "observed"),
         ]
         coordinator._download_progress("ollama-windows-core", 1, 4)

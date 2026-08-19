@@ -10,13 +10,18 @@ It answers the same three questions for every surface:
 
 The catalog does not make documentation-only candidate or blocked surfaces look ready. It records the support tier, default-menu visibility, current solution, status, evidence, and blocked reason for each tracked agent.
 
-It also records the config-bundle policy. Continue, Aider, and OpenCode have supported generated local config paths; future surface-specific bundles are gated by `docs/surface-specific-config-bundles.md`. Platform-agent validation must also follow `docs/openhands-validation-boundary.md`.
+It also records the config-bundle policy. Aider and OpenCode have supported
+generated local config paths. Continue is retired and retained only as
+sanitized historical evidence
+while editor integration is reopened. Future surface-specific bundles are
+gated by `docs/surface-specific-config-bundles.md`. Platform-agent validation
+must also follow `docs/openhands-validation-boundary.md`.
 
 ## Current Summary
 
 | Surface | Install | Configure | Test |
 | --- | --- | --- | --- |
-| Continue | supported | supported | validated |
+| Continue | retired | retired | retired; historical evidence only |
 | Aider | supported | supported | validated |
 | OpenCode | supported | supported | validated |
 | OpenHands | blocked | blocked | blocked |
@@ -38,7 +43,7 @@ Start with `docs/haven-42-menu.md` for the short user menu.
 
 Use this solution catalog when you need to compare agent surfaces or decide what work remains before a surface can be promoted from planned/scaffolded to supported or validated.
 
-Before changing a non-Continue surface status, use `docs/agent-surface-promotion-gates.md`.
+Before changing a maintained surface status, use `docs/agent-surface-promotion-gates.md`.
 
 Aider is the first non-Continue adapter promoted end to end. Use
 `scripts/setup-agent-surface.*` for install planning/execution, local-only

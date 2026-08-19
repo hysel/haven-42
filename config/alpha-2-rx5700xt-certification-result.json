@@ -56,18 +56,131 @@
       "failed": ["general.chat", "vision"]
     }
   },
+  "inferenceEngineCells": {
+    "llamacpp-b10375-vulkan-qwen35-08b-q4": {
+      "outcome": "partial-pass",
+      "runtimeVersion": "b10375",
+      "runtimeCommit": "ba360efe1",
+      "runtimeArtifactSha256": "cbf7354e70f9bcda5a389e1f02e2293414d47fe525b271c3a8063327754e3ef9",
+      "modelArtifactSha256": "57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+      "modelArtifactBytes": 563036064,
+      "backend": "vulkan-radv",
+      "offloadedLayers": 25,
+      "totalLayers": 25,
+      "baselineVramBytes": 109457408,
+      "peakVramBytes": 756559872,
+      "finalVramBytes": 109457408,
+      "generationTokensPerSecond": 277.092,
+      "exactResponsePassed": true,
+      "processCleanupPassed": true,
+      "existingOllamaServicePreserved": true,
+      "scope": "bounded-engine-smoke-not-full-model-or-package-certification"
+    }
+  },
+  "windowsInferenceEngineCells": {
+    "llamacpp-b10375-vulkan-qwen35-08b-q4": {
+      "outcome": "partial-pass",
+      "observedAtUtc": "2026-08-17T22:28:07Z",
+      "operatingSystem": "Microsoft Windows 10.0.26200.8973",
+      "runtimeVersion": "b10375",
+      "runtimeCommit": "ba360efe1",
+      "runtimeArtifactSha256": "1fef77a8b7742485c3f9f0acd16b68330ca9d5f447b73eb80d32862e4b2c7cfa",
+      "model": "Qwen 3.5 0.8B Q4_0",
+      "modelArtifactSha256": "57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+      "modelArtifactBytes": 563036064,
+      "backend": "vulkan-amd-proprietary",
+      "driverInfo": "26.7.1 (AMD proprietary shader compiler)",
+      "vulkanApiVersion": "1.4.315",
+      "offloadedLayers": 25,
+      "totalLayers": 25,
+      "taskGate": {
+        "chat": { "passed": 3, "attempts": 3 },
+        "writing": { "passed": 3, "attempts": 3 },
+        "summarization": { "passed": 3, "attempts": 3 },
+        "reasoningLeakageDetected": false
+      },
+      "soak": {
+        "durationSeconds": 1801,
+        "attempts": 1602,
+        "passed": 1602,
+        "failed": 0,
+        "completionUnits": 31506,
+        "chat": { "passed": 534, "attempts": 534 },
+        "writing": { "passed": 534, "attempts": 534 },
+        "summarization": { "passed": 534, "attempts": 534 },
+        "fullOffloadPassed": true,
+        "deviceProofPassed": true,
+        "processCleanupPassed": true,
+        "resultSha256": "7178aa422f8f586bfdc4d169e4a47bba3c0c7e54ea06e2f869f734efbddeb287",
+        "serverLogSha256": "6973d9f961a9629a48320eb580e321404974294d7a81436dac9dffb7e6d14aab"
+      },
+      "powerTelemetry": {
+        "source": "HWiNFO64 GPU sensor CSV",
+        "toolVersion": "not-independently-captured",
+        "csvSha256": "3ad7633999e0b9434b80f3672e4cac8a0289088ff03a4622c5163792cf14e1d0",
+        "sampleCount": 898,
+        "observedSamplingIntervalSeconds": 2.0,
+        "coveredSeconds": 1800.779,
+        "gpuAsicPower": {
+          "timeWeightedAverageWatts": 23.322,
+          "arithmeticAverageWatts": 23.337,
+          "medianWatts": 7.0,
+          "p95Watts": 154.0,
+          "maximumWatts": 168.0,
+          "energyWattHours": 11.666022
+        },
+        "gpuPpt": {
+          "timeWeightedAverageWatts": 23.464,
+          "arithmeticAverageWatts": 23.469,
+          "medianWatts": 23.529,
+          "p95Watts": 29.98,
+          "maximumWatts": 31.888,
+          "energyWattHours": 11.736922
+        },
+        "postSoakIdle": {
+          "durationSeconds": 300,
+          "gpuAsicAverageWatts": 6.322,
+          "gpuPptAverageWatts": 6.945
+        },
+        "thermalsCelsius": {
+          "gpuAverage": 51.845,
+          "gpuMaximum": 58.0,
+          "hotspotAverage": 52.237,
+          "hotspotMaximum": 65.0,
+          "memoryJunctionAverage": 49.004,
+          "memoryJunctionMaximum": 54.0
+        },
+        "gpuActiveSamples": {
+          "definition": "GPU utilization greater than 10 percent",
+          "sampleCount": 98,
+          "gpuAsicAverageWatts": 113.633,
+          "gpuAsicMedianWatts": 148.5,
+          "gpuAsicP95Watts": 165.15,
+          "gpuAsicMaximumWatts": 168.0
+        },
+        "rawEvidenceRetainedOutsideVersionControl": true,
+        "measurementBoundary": "Software-reported GPU ASIC and PPT sensors at an observed two-second interval; not wall power, not necessarily total board input, and short peaks may be missed."
+      },
+      "processCleanupPassed": true,
+      "scope": "exact-windows-engine-task-soak-and-software-sensor-power-cell-not-package-or-model-ladder-certification"
+    }
+  },
   "safeRefusalsBeforeDownload": [
     "gemma3-12b-q4",
     "gemma4-12b-qat",
     "qwen35-9b-q4"
   ],
   "stability": {
-    "outcome": "passed",
+    "outcome": "operationally-stable-owner-accepted",
     "currentBootCpuSmokeSeconds": 600,
     "workerCount": 4,
     "currentBootHardwareIncidentCount": 0,
+    "verifiedCurrentBootUptimeSeconds": 78782,
+    "verifiedFailedSystemdUnitCount": 0,
+    "ownerAcceptanceRecorded": true,
+    "firmwareSettingOwnerReported": "global-c-state-control-disabled",
     "finalProfileMemoryTestComplete": false,
-    "scope": "current-boot-engineering-evidence-not-general-hardware-certification"
+    "scope": "exact-profile-operational-stability-not-general-hardware-certification"
   },
   "power": {
     "modelId": "llama32-3b-q4",
@@ -77,6 +190,33 @@
     "peakWatts": 242.0,
     "activeEnergyWattHours": 20.350129,
     "outputTokensPerWattHour": 2134.188
+  },
+  "llamacppPower": {
+    "observedAtUtc": "2026-08-17T20:53:34Z",
+    "runtimeVersion": "b10375",
+    "runtimeCommit": "ba360efe1",
+    "runtimeArtifactSha256": "cbf7354e70f9bcda5a389e1f02e2293414d47fe525b271c3a8063327754e3ef9",
+    "model": "Qwen 3.5 0.8B Q4_0",
+    "modelArtifactSha256": "57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+    "scope": "gpu-board-sysfs-power1-average",
+    "idleAverageWatts": 6.448,
+    "activeAverageWatts": 167.242,
+    "peakWatts": 180.0,
+    "activeDurationSeconds": 601.238,
+    "activeEnergyWattHours": 27.931213,
+    "outputTokens": 152960,
+    "outputTokensPerWattHour": 5476.311,
+    "requests": 1195,
+    "offloadedLayers": 25,
+    "totalLayers": 25,
+    "baselineVramBytes": 107360256,
+    "peakVramBytes": 821579776,
+    "finalVramBytes": 107360256,
+    "processCleanupPassed": true,
+    "existingOllamaServicePreserved": true,
+    "postRunFailedSystemdUnitCount": 0,
+    "postRunMatchingHardwareIncidentCount": 0,
+    "comparisonBoundary": "The earlier Ollama profile used a different model and is not a runtime-only efficiency comparison."
   },
   "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
   "containsPrivateMachineIdentity": false,

@@ -59,9 +59,9 @@ COMPONENT_PROGRESS_STATES = {
     "validating", "complete", "failed", "cancelled",
 }
 COMPONENT_DECISION_CODES = {
-    "ollama-windows-core": "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_5_SELECTED",
+    "ollama-windows-core": "SETUP_COMPONENT_OLLAMA_WINDOWS_CORE_0_32_14_SELECTED",
     "ollama-windows-amd-rocm": (
-        "SETUP_COMPONENT_OLLAMA_WINDOWS_AMD_ROCM_0_32_5_ROCM_7_1_SELECTED"
+        "SETUP_COMPONENT_OLLAMA_WINDOWS_AMD_ROCM_0_32_14_ROCM_7_1_SELECTED"
     ),
 }
 MODEL_DECISION_CODES = {

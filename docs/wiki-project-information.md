@@ -39,7 +39,10 @@ limits, use the [[Evidence Summary|Eng-Evidence-Summary]].
 - Development packages are unsigned.
 - No installer, system service, driver, firewall rule, or administrator access
   is required or enabled by Haven 42.
-- Online updates and real machine-modifying installation remain disabled.
+- Background and unattended updates remain disabled. In the current
+  development source, a person can explicitly check Ollama's official stable
+  release and review a version admitted by that Haven 42 build before approving
+  any managed download or activation.
 - Conversation history is not persisted.
 - PDF, Office, and OpenDocument upload parsing is not admitted to the product.
 - macOS hardware-specific evidence remains incomplete in several areas.

@@ -9,7 +9,8 @@ Local LLM IDE Tools package.
 
 - To use Haven 42, download the app package described in the main
   [README](../README.md).
-- To configure Continue, Aider, or OpenCode, use the
-  [Local LLM IDE Tools package](../packages/local-llm-ide/README.md).
+- To configure Aider or OpenCode, use the [Local LLM IDE Tools
+  package](../packages/local-llm-ide/README.md). Continue scripts in this
+  directory are contributor-only experimental validation tools.
 - To contribute to Haven 42, start with [CONTRIBUTING.md](../CONTRIBUTING.md)
   and [test tiers](../docs/test-tiers.md).

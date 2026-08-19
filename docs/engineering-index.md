@@ -28,6 +28,10 @@ If you are trying to install or use Haven 42, start with the
 ## Models, runtimes, and hardware
 
 - [Hardware-aware recommendations](https://github.com/hysel/haven-42/blob/main/docs/hardware-aware-recommendations.md)
+- [Model recommendation explanations](https://github.com/hysel/haven-42/blob/main/docs/model-recommendation-explanations.md)
+- [Hardware qualification evidence template](https://github.com/hysel/haven-42/blob/main/docs/hardware-qualification-evidence-template.md)
+- [Hardware qualification publication workflow](https://github.com/hysel/haven-42/blob/main/docs/hardware-qualification-publication-workflow.md)
+- [Evidence input binding](https://github.com/hysel/haven-42/blob/main/docs/evidence-input-binding.md)
 - [Model catalog](https://github.com/hysel/haven-42/blob/main/docs/model-catalog.md)
 - [Online model discovery](https://github.com/hysel/haven-42/blob/main/docs/online-model-discovery.md)
 - [Model release radar](https://github.com/hysel/haven-42/blob/main/docs/model-release-radar.md)
@@ -40,6 +44,7 @@ If you are trying to install or use Haven 42, start with the
 
 ## Coding-tool integration
 
+- [Model coding-agent screen](https://github.com/hysel/haven-42/blob/main/docs/model-coding-agent-screen.md)
 - [Agent surface options](https://github.com/hysel/haven-42/blob/main/docs/agent-surface-options.md)
 - [Agent surface solutions](https://github.com/hysel/haven-42/blob/main/docs/agent-surface-solutions.md)
 - [Agent CLI model testing](https://github.com/hysel/haven-42/blob/main/docs/agent-cli-surface-model-testing.md)

@@ -37,6 +37,36 @@ class RuntimeCompatibilityTests(unittest.TestCase):
             )
         )
 
+    def test_duplicate_registry_views_must_describe_the_same_artifact(self) -> None:
+        inventory = {
+            "families": [{
+                "versions": [{
+                    "candidates": [{
+                        "id": "sample-model",
+                        "model": "sample:1b",
+                        "manifestDigest": "a" * 64,
+                        "minimumOllamaVersion": "0.32.14",
+                    }],
+                }],
+            }],
+        }
+        catalog = {
+            "models": [{
+                "id": "sample-model",
+                "name": "sample:1b",
+                "manifestDigest": "a" * 64,
+            }],
+        }
+        merged = MODULE._registered_candidate(inventory, catalog, "sample-model")
+        self.assertEqual(merged["model"], "sample:1b")
+        self.assertEqual(merged["name"], "sample:1b")
+        conflicting = copy.deepcopy(catalog)
+        conflicting["models"][0]["manifestDigest"] = "b" * 64
+        with self.assertRaisesRegex(
+            MODULE.CompatibilityError, "conflicting-model-registration"
+        ):
+            MODULE._registered_candidate(inventory, conflicting, "sample-model")
+
     def test_active_alpha2_qwen_ladder_is_bound_to_admitted_ollama(self) -> None:
         expected = {
             "qwen35-08b-q8": "qwen3.5:0.8b",
@@ -51,7 +81,7 @@ class RuntimeCompatibilityTests(unittest.TestCase):
                 result = MODULE.resolve(model_id, "linux-x64", "core")
                 self.assertEqual(result["decision"], "install")
                 self.assertEqual(result["engine"], "ollama")
-                self.assertEqual(result["selectedRuntimeVersion"], "0.32.5")
+                self.assertEqual(result["selectedRuntimeVersion"], "0.32.14")
                 self.assertEqual(result["modelArtifact"]["exactTag"], tag)
                 self.assertEqual(result["installationRoot"], "Haven42-Data")
 
@@ -74,11 +104,11 @@ class RuntimeCompatibilityTests(unittest.TestCase):
             },
             self.windows_registry(),
         )
-        self.assertEqual(result["runtimeVersion"], "0.32.5")
+        self.assertEqual(result["runtimeVersion"], "0.32.14")
         self.assertEqual(result["backend"], "core")
         self.assertEqual(
             result["artifactSha256"],
-            ["7c941ae084569d298062d29f8139163a3187c76dbca0479c70d085e78fd8c7bb"],
+            ["5ae5bca5f0d297f5e35665e01db399a69a8eac3f8fad89cd9d2531fd495c9457"],
         )
 
     def test_managed_rocm_plan_requires_both_exact_artifacts(self) -> None:
@@ -151,7 +181,7 @@ class RuntimeCompatibilityTests(unittest.TestCase):
         )
         self.assertEqual(result["decision"], "candidate")
         self.assertEqual(result["minimumOllamaVersion"], "0.32.9")
-        self.assertEqual(result["selectedOllamaVersion"], "0.32.13")
+        self.assertEqual(result["selectedOllamaVersion"], "0.32.14")
         self.assertEqual(result["installationRoot"], "Haven42-Data")
         self.assertFalse(result["systemRuntimeModificationAllowed"])
         self.assertEqual(
@@ -160,7 +190,36 @@ class RuntimeCompatibilityTests(unittest.TestCase):
         )
         self.assertEqual(
             result["artifacts"][0]["sha256"],
-            "0fd1dece38a1c6242e8013ce20b597345c5de072ae6b320160edb0e729ef1de1",
+            "c620917a71e146ab3a7f893084f066069c4c65d144ef8379a91c3cbe8b27de8f",
+        )
+
+    def test_ollama_03214_candidate_artifacts_are_exactly_pinned(self) -> None:
+        registry = json.loads(
+            (ROOT / "config" / "alpha-2-runtime-compatibility.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        runtime = next(
+            item for item in registry["runtimes"] if item["version"] == "0.32.14"
+        )
+        self.assertEqual(
+            runtime["admissionState"],
+            "admitted",
+        )
+        self.assertEqual(
+            {(item["platform"], item["backend"]) for item in runtime["artifacts"]},
+            {
+                ("windows-x64", "core"),
+                ("windows-x64", "rocm"),
+                ("linux-x64", "core"),
+                ("linux-x64", "rocm"),
+            },
+        )
+        self.assertTrue(
+            all(
+                len(item["sha256"]) == 64 and item["byteLength"] > 0
+                for item in runtime["artifacts"]
+            )
         )
 
     def test_nemotron_routes_record_partial_evidence_without_admission(self) -> None:

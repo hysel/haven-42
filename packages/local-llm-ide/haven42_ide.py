@@ -16,7 +16,6 @@ from urllib.parse import urlsplit
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parent
-CONTINUE_ASSETS = PACKAGE_ROOT / "assets" / "continue"
 MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 PRIVATE_IPV6_NETWORK = ipaddress.ip_network("fc00::/7")
 
@@ -154,22 +153,6 @@ def verify_package(package_root: Path = PACKAGE_ROOT) -> None:
             raise SetupError(f"Package integrity check failed for {relative}.")
 
 
-def continue_files(package_root: Optional[Path] = None) -> list[tuple[Path, Path]]:
-    package_root = package_root or PACKAGE_ROOT
-    source_root = package_root / "assets" / "continue"
-    if not source_root.is_dir() or source_root.is_symlink():
-        raise SetupError("The Continue assets are missing or unsafe. Download the package again.")
-    files: list[tuple[Path, Path]] = []
-    for source in sorted(source_root.rglob("*")):
-        if source.is_symlink():
-            raise SetupError("The Continue assets contain an unsafe link.")
-        if source.is_file():
-            files.append((source, source.relative_to(source_root)))
-    if not files:
-        raise SetupError("The Continue assets are empty. Download the package again.")
-    return files
-
-
 def ensure_safe_destination(path: Path, target: Path) -> None:
     # A dangling link reports exists() == False even though writes through it
     # can escape the selected project. Check the link itself first.
@@ -179,54 +162,6 @@ def ensure_safe_destination(path: Path, target: Path) -> None:
         path.resolve().relative_to(target)
     except ValueError as error:
         raise SetupError("A setup destination escaped the selected project folder.") from error
-
-
-def validate_existing_tree(path: Path) -> None:
-    count = 0
-    total_size = 0
-    for item in path.rglob("*"):
-        if item.is_symlink():
-            raise SetupError("Existing Continue settings contain a symbolic link. Move them manually.")
-        if item.is_file():
-            count += 1
-            total_size += item.stat().st_size
-            if count > 512 or item.stat().st_size > 5 * 1024 * 1024 or total_size > 32 * 1024 * 1024:
-                raise SetupError("Existing Continue settings are too large to back up safely.")
-        elif not item.is_dir():
-            raise SetupError("Existing Continue settings contain an unsupported item.")
-
-
-def install_continue(target: Path, apply: bool, replace: bool) -> list[str]:
-    destination = target / ".continue"
-    ensure_safe_destination(destination, target)
-    files = continue_files()
-    if destination.exists() and not destination.is_dir():
-        raise SetupError("The project already has a non-folder .continue item.")
-    existing = destination.exists() and any(destination.iterdir())
-    if existing:
-        validate_existing_tree(destination)
-    if existing and not replace:
-        raise SetupError(
-            "This project already has Continue settings. Use --replace only after reviewing the backup plan."
-        )
-    actions = [f"Copy {len(files)} Continue files into {destination}"]
-    backup = target / ".continue.haven42-backup"
-    if existing:
-        ensure_safe_destination(backup, target)
-        if backup.exists():
-            raise SetupError("A .continue.haven42-backup folder already exists. Move it first.")
-        actions.insert(0, f"Back up the current settings to {backup}")
-    if not apply:
-        return actions
-    if existing:
-        destination.rename(backup)
-    destination.mkdir(parents=True, exist_ok=True)
-    for source, relative in files:
-        output = destination / relative
-        ensure_safe_destination(output, target)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, output)
-    return actions
 
 
 def aider_config(model: str, endpoint: str) -> str:
@@ -304,14 +239,10 @@ def configure_tool(
 
 def parser() -> argparse.ArgumentParser:
     result = argparse.ArgumentParser(
-        description="Set up local Ollama settings for Continue, Aider, or OpenCode."
+        description="Set up local Ollama settings for Aider or OpenCode."
     )
     commands = result.add_subparsers(dest="command")
     commands.add_parser("status", help="Show what this package can configure.")
-    install = commands.add_parser("install-continue", help="Add the Continue bundle to a project.")
-    install.add_argument("--target", required=True, help="Existing project folder.")
-    install.add_argument("--apply", action="store_true", help="Make the displayed changes.")
-    install.add_argument("--replace", action="store_true", help="Back up and update existing settings.")
     configure = commands.add_parser("configure", help="Create local Aider or OpenCode settings.")
     configure.add_argument("tool", choices=("aider", "opencode"))
     configure.add_argument("--target", required=True, help="Existing project folder.")
@@ -324,7 +255,7 @@ def parser() -> argparse.ArgumentParser:
 
 def show_status() -> None:
     print("Haven 42 Local LLM IDE Tools")
-    print("- Continue: prompt, rule, and role bundle")
+    print("- Continue: legacy evidence only; this package does not configure or support it")
     print("- Aider: local Ollama configuration")
     print("- OpenCode: local Ollama configuration")
     print("This package does not install an IDE, Ollama, models, or drivers.")
@@ -338,17 +269,14 @@ def main(argv: Optional[list[str]] = None) -> int:
             show_status()
             return 0
         target = safe_target(arguments.target)
-        if arguments.command == "install-continue":
-            actions = install_continue(target, arguments.apply, arguments.replace)
-        else:
-            actions = configure_tool(
-                arguments.tool,
-                target,
-                safe_model(arguments.model),
-                safe_ollama_url(arguments.ollama_url),
-                arguments.apply,
-                arguments.replace,
-            )
+        actions = configure_tool(
+            arguments.tool,
+            target,
+            safe_model(arguments.model),
+            safe_ollama_url(arguments.ollama_url),
+            arguments.apply,
+            arguments.replace,
+        )
     except (OSError, SetupError) as error:
         print(f"Setup stopped: {error}", file=sys.stderr)
         return 2

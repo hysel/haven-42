@@ -6,10 +6,12 @@ param(
     [string]$ConfigPath,
     [string]$ContinueCommand = "npx",
     [string]$ContinueArgumentsTemplate = '-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --readonly -p "{Prompt}"',
+    [string]$WriteContinueArgumentsTemplate = '-y @continuedev/cli@1.5.47 --config "{ConfigPath}" --auto -p "{Prompt}"',
     [string]$ModelArgumentTemplate = "",
     [int]$PreloadTimeoutSeconds = 900,
     [int]$TimeoutSeconds = 600,
     [switch]$IncludeWriteSmoke,
+    [switch]$IncludeScopedEdit,
     [switch]$AllowNonGeneratedTarget,
     [switch]$UnloadAfterEach,
     [switch]$DryRun
@@ -47,12 +49,12 @@ function Invoke-OllamaUnload {
 
     $body = @{
         model = $Model
-        messages = @()
+        prompt = ""
         keep_alive = 0
         stream = $false
     } | ConvertTo-Json -Depth 10
 
-    Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/chat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $TimeoutSeconds | Out-Null
+    Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/generate" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $TimeoutSeconds | Out-Null
 }
 function Invoke-OllamaPreload {
     param([string]$Model)
@@ -60,8 +62,8 @@ function Invoke-OllamaPreload {
     $otherResident = @($running.models | Where-Object { $_.name -ne $Model -and $_.model -ne $Model })
     if ($otherResident.Count -ge [int]$runtimePolicy.maxResidentModels) { throw "Runtime policy blocks loading ${Model}: $($otherResident.Count) other model(s) are resident." }
     if ($otherResident.Count -gt 0) { Write-Warning "Runtime policy warning: another model is resident before loading $Model." }
-    $body = @{ model = $Model; messages = @(); keep_alive = "$($runtimePolicy.preloadKeepAliveMinutes)m"; stream = $false } | ConvertTo-Json -Depth 10
-    Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/chat" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $PreloadTimeoutSeconds | Out-Null
+    $body = @{ model = $Model; prompt = ""; keep_alive = "$($runtimePolicy.preloadKeepAliveMinutes)m"; stream = $false } | ConvertTo-Json -Depth 10
+    Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/generate" -Method Post -Body $body -ContentType "application/json" -TimeoutSec $PreloadTimeoutSeconds | Out-Null
     $running = Invoke-RestMethod -Uri "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/ps" -Method Get -TimeoutSec 30
     if (@($running.models | Where-Object { $_.name -eq $Model -or $_.model -eq $Model }).Count -eq 0) { throw "Ollama did not report $Model as loaded after preflight." }
 }
@@ -110,17 +112,19 @@ function Invoke-ContinueCommand {
     $promptFile = Join-Path ([System.IO.Path]::GetTempPath()) "continue-$Phase-$([guid]::NewGuid()).txt"
     Set-Content -LiteralPath $promptFile -Value $Prompt -Encoding UTF8
 
-    $arguments = ConvertTo-ArgumentText -Template $ContinueArgumentsTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory -ConfigPath $ResolvedConfigPath
+    $template = if ($Phase -match "write|scoped") { $WriteContinueArgumentsTemplate } else { $ContinueArgumentsTemplate }
+    $arguments = ConvertTo-ArgumentText -Template $template -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory -ConfigPath $ResolvedConfigPath
     if (-not [string]::IsNullOrWhiteSpace($ModelArgumentTemplate)) {
         $modelArguments = ConvertTo-ArgumentText -Template $ModelArgumentTemplate -Prompt $Prompt -Model $Model -PromptFile $promptFile -TargetRepo $RunDirectory -ConfigPath $ResolvedConfigPath
         $arguments = "$modelArguments $arguments"
     }
 
     if ($DryRun) {
+        $dryOutput = if ($Phase -eq "review") { "app/main.py tests/test_main.py build_health_response REVIEW_COMPLETE" } else { "DRY_RUN README.md pyproject.toml app/main.py" }
         return [pscustomobject]@{
             ExitCode = 0
             TimedOut = $false
-            Stdout = "DRY_RUN README.md pyproject.toml app/main.py"
+            Stdout = $dryOutput
             Stderr = ""
             Command = "$ContinueCommand $arguments"
         }
@@ -201,13 +205,13 @@ if (-not (Test-Path -LiteralPath $TargetRepo)) {
 if (-not (Test-Path -LiteralPath $TargetRepo)) { throw "TargetRepo does not exist: $TargetRepo" }
 if (-not (Test-Path -LiteralPath $ConfigPath)) { throw "ConfigPath does not exist: $ConfigPath" }
 
-if ($IncludeWriteSmoke -and -not $AllowNonGeneratedTarget -and $TargetRepo -notmatch "runtime-validation-output[\\/]sample-repositories") {
-    throw "Write smoke tests are allowed only for generated disposable samples unless -AllowNonGeneratedTarget is set."
+if (($IncludeWriteSmoke -or $IncludeScopedEdit) -and -not $AllowNonGeneratedTarget -and $TargetRepo -notmatch "runtime-validation-output[\\/]sample-repositories") {
+    throw "Write and scoped-edit tests are allowed only for generated disposable samples unless -AllowNonGeneratedTarget is set."
 }
 
 $resolvedTarget = (Resolve-Path -LiteralPath $TargetRepo).Path
 $resolvedConfig = (Resolve-Path -LiteralPath $ConfigPath).Path
-Initialize-DisposableGitBaseline -RunDirectory $resolvedTarget
+if (-not $DryRun) { Initialize-DisposableGitBaseline -RunDirectory $resolvedTarget }
 $modelsToTest = @($Models | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object { $_.Trim() })
 if ($modelsToTest.Count -eq 0) { $modelsToTest = @(Get-DefaultModels) }
 
@@ -226,14 +230,18 @@ New-Item -ItemType Directory -Force -Path (Split-Path -Parent $OutputPath) | Out
 
 $results = [System.Collections.Generic.List[object]]::new()
 $readPrompt = "Use the repository context available to Continue CLI. Do not modify files. Do not create files. Do not run package installation. Return only actual top-level files/folders inspected, project type, key source/test files, risks or missing info, and failure signal. If tools or context are unavailable, say TOOLS_UNAVAILABLE."
+$reviewPrompt = "Review app/main.py and tests/test_main.py without modifying anything. Name both exact files, identify the function under test, explain one concrete missing edge-case test, and end with REVIEW_COMPLETE. If either file cannot be read, say TOOLS_UNAVAILABLE."
 $writePrompt = "Use approved write mode for this disposable smoke test only. Modify the existing README.md by adding exactly this final line: Continue CLI approved-write smoke test passed. Do not modify any other files. Do not create new files. After editing, report the changed file and stop. Do not commit."
+$scopedPrompt = "Use approved write mode for this disposable Python sample only. Modify only app/settings.py and tests/test_main.py. Add a Settings validation_label field with the exact default value local-agent-validation, then update the existing test to assert that Settings().validation_label equals local-agent-validation. Do not modify any other files. Do not create files. Do not commit. Run the existing tests if practical, then report the changed files and stop."
 
 $index = 0
 foreach ($model in $modelsToTest) {
     $index++
     Write-Host "[5/7] Testing model $index/$($modelsToTest.Count): $model"
     $readStatus = "not-run"
+    $reviewStatus = "not-run"
     $writeStatus = "not-run"
+    $scopedEditStatus = "not-run"
     $failureSignals = [System.Collections.Generic.List[string]]::new()
 
     try {
@@ -254,6 +262,12 @@ foreach ($model in $modelsToTest) {
             if ($postReadStatus) { $failureSignals.Add("UNEXPECTED_WRITE_DURING_READ") }
         }
 
+        $reviewRun = Invoke-ContinueCommand -Model $model -Prompt $reviewPrompt -Phase "review" -RunDirectory $resolvedTarget -ResolvedConfigPath $resolvedConfig
+        $reviewOk = ($reviewRun.ExitCode -eq 0 -and -not $reviewRun.TimedOut -and $reviewRun.Stdout -match "app/main\.py" -and $reviewRun.Stdout -match "tests/test_main\.py" -and $reviewRun.Stdout -match "build_health_response" -and $reviewRun.Stdout -match "REVIEW_COMPLETE")
+        $reviewStatus = if ($reviewOk) { "review-cli-validated" } else { "failed" }
+        if (-not $reviewOk) { $failureSignals.Add("REVIEW_VALIDATION_FAILED") }
+        if (-not $DryRun -and (Invoke-GitText -Arguments @("status", "--short"))) { $failureSignals.Add("UNEXPECTED_WRITE_DURING_REVIEW") }
+
         if ($IncludeWriteSmoke) {
             $writeRun = Invoke-ContinueCommand -Model $model -Prompt $writePrompt -Phase "write" -RunDirectory $resolvedTarget -ResolvedConfigPath $resolvedConfig
             if ($DryRun) {
@@ -268,6 +282,23 @@ foreach ($model in $modelsToTest) {
             $writeStatus = if ($writeOk) { "write-smoke-validated" } else { "failed" }
             if (-not $writeOk) { $failureSignals.Add("WRITE_VALIDATION_FAILED") }
             if (-not $DryRun) { Invoke-GitText -Arguments @("restore", "README.md") | Out-Null }
+        }
+
+        if ($IncludeScopedEdit) {
+            $scopedRun = Invoke-ContinueCommand -Model $model -Prompt $scopedPrompt -Phase "scoped" -RunDirectory $resolvedTarget -ResolvedConfigPath $resolvedConfig
+            if ($DryRun) {
+                $scopedOk = $true
+            } else {
+                $diffNames = Invoke-GitText -Arguments @("diff", "--name-only")
+                $changedFiles = @($diffNames -split "`r?`n" | Where-Object { $_ } | Sort-Object)
+                $diffCheck = Invoke-GitText -Arguments @("diff", "--check")
+                $settings = Get-Content -LiteralPath (Join-Path $resolvedTarget "app/settings.py") -Raw
+                $tests = Get-Content -LiteralPath (Join-Path $resolvedTarget "tests/test_main.py") -Raw
+                $scopedOk = ($scopedRun.ExitCode -eq 0 -and -not $scopedRun.TimedOut -and ($changedFiles -join ",") -eq "app/settings.py,tests/test_main.py" -and -not $diffCheck -and $settings -match 'validation_label:\s*str\s*=\s*["'']local-agent-validation["'']' -and $tests -match 'Settings\(\)\.validation_label' -and $tests -match 'local-agent-validation')
+            }
+            $scopedEditStatus = if ($scopedOk) { "scoped-edit-validated" } else { "failed" }
+            if (-not $scopedOk) { $failureSignals.Add("SCOPED_EDIT_VALIDATION_FAILED") }
+            if (-not $DryRun) { Invoke-GitText -Arguments @("restore", "app/settings.py", "tests/test_main.py") | Out-Null }
         }
     }
     catch {
@@ -291,7 +322,9 @@ foreach ($model in $modelsToTest) {
         Surface = "Continue CLI"
         Target = "generated-sample"
         ReadStatus = $readStatus
+        ReviewStatus = $reviewStatus
         WriteStatus = $writeStatus
+        ScopedEditStatus = $scopedEditStatus
         FailureSignals = @($failureSignals)
     })
 }
@@ -301,6 +334,7 @@ $report = [pscustomobject]@{
     Surface = "Continue CLI"
     Target = "generated-sample"
     IncludeWriteSmoke = [bool]$IncludeWriteSmoke
+    IncludeScopedEdit = [bool]$IncludeScopedEdit
     UnloadAfterEach = [bool]$UnloadAfterEach
     DryRun = [bool]$DryRun
     Results = @($results)
@@ -311,6 +345,6 @@ Write-Host "[6/7] Writing sanitized report..."
 $report | ConvertTo-Json -Depth 20 | Set-Content -LiteralPath $OutputPath -Encoding UTF8
 
 foreach ($result in $results) {
-    Write-Host "$($result.Model): read=$($result.ReadStatus), write=$($result.WriteStatus), failures=$($result.FailureSignals -join ',')"
+    Write-Host "$($result.Model): read=$($result.ReadStatus), review=$($result.ReviewStatus), write=$($result.WriteStatus), scoped=$($result.ScopedEditStatus), failures=$($result.FailureSignals -join ',')"
 }
 Write-Host "[7/7] Report written to $OutputPath"

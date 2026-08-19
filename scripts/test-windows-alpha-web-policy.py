@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import os
 from pathlib import Path
+import tempfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -23,9 +24,11 @@ def main() -> int:
     assert WEB.ALPHA_TEXT_CAPABILITIES == {
         "general.chat", "content.write", "content.summarize",
     }
+    isolated_state = tempfile.TemporaryDirectory()
     state = WEB.HavenState(
         readiness_provider=lambda: {},
         model_catalog_provider=lambda _query: [],
+        managed_setup_state_root=Path(isolated_state.name) / "Haven42-Data",
         assurance_provider=lambda: {
             "kind": "read-only-assurance-summary", "status": "ready",
             "effects": {

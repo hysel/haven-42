@@ -185,7 +185,7 @@ if ($MarkdownOutputPath) {
     if ($parent) {
         New-Item -ItemType Directory -Force -Path $parent | Out-Null
     }
-    ConvertTo-Markdown -Rows $scorecardRows | Set-Content -LiteralPath $MarkdownOutputPath -Encoding utf8
+    ConvertTo-Markdown -Rows $scorecardRows | Set-Content -LiteralPath $MarkdownOutputPath -Encoding utf8 -NoNewline
 }
 
 if ($AsJson -or $OutputPath) {

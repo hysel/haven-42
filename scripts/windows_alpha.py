@@ -324,18 +324,18 @@ def load_component_registry(path: Path = COMPONENT_REGISTRY_PATH) -> dict[str, A
             or component["byteLength"] <= 0
             or not HEX64.fullmatch(str(component.get("sha256", "")))
             or not str(component.get("sourceUrl", "")).startswith(
-                "https://github.com/ollama/ollama/releases/download/v0.32.5/"
+                "https://github.com/ollama/ollama/releases/download/v0.32.14/"
             )
             or not str(component.get("artifactName", "")).endswith(".zip")
         ):
             raise WindowsAlphaError("invalid-alpha-component-entry")
     rocm = next(component for component in components if component["id"] == "ollama-windows-amd-rocm")
     if (
-        rocm.get("version") != "0.32.5"
+        rocm.get("version") != "0.32.14"
         or rocm.get("technologyName") != "ROCm"
         or rocm.get("technologyVersion") != "7.1"
         or rocm.get("technologyVersionSourceUrl")
-        != "https://raw.githubusercontent.com/ollama/ollama/v0.32.5/.github/workflows/release.yaml"
+        != "https://raw.githubusercontent.com/ollama/ollama/v0.32.14/.github/workflows/release.yaml"
     ):
         raise WindowsAlphaError("invalid-alpha-component-entry")
     for guidance in value.get("driverGuidance", []):

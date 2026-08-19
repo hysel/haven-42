@@ -19,15 +19,27 @@ computer and opens in a normal browser.
 
 This repository also contains developer tools that predate the everyday app.
 Those tools are now released separately as **Haven 42 Local LLM IDE Tools**.
-They help configure Continue, Aider, and OpenCode, but they are not required by
-the Haven 42 app and are not included in its package.
+They help configure Aider and OpenCode, but they are not required by the Haven
+42 app and are not included in its package. Continue is legacy and
+evidence-only; its project configuration is not shipped to end users.
 
 The code still uses strict internal checks for network access, file access,
 processes, downloads, and package contents. User instructions should explain
 the result of those checks in normal language rather than exposing internal
 contract terms.
 
-Continue, Aider, and OpenCode are the maintained engineering surfaces. General text capabilities share a provider-neutral adapter: Ollama is live-validated, and llama.cpp's OpenAI-compatible path is live-validated for its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only evidence. Linux Intel Arc B580 has candidate-only llama.cpp SYCL and OpenVINO GenAI evidence, while Windows OpenVINO is separately candidate-only and native Windows llama.cpp SYCL failed its model-load gate; none is selectable or packaged. Every other profile fails closed. Linux image generation has a live-validated ComfyUI/SDXL provider, and all additional providers or surfaces remain pass-before-ship.
+Aider and OpenCode are maintained engineering surfaces within their exact
+evidence limits. Continue CLI and editor results are frozen historical evidence,
+not maintained qualification or end-user integration paths.
+General text capabilities share a provider-neutral adapter: Ollama is
+live-validated, and llama.cpp's OpenAI-compatible path is live-validated for
+its exact Linux NVIDIA/CUDA profile. Windows AMD/HIP retains engine-only
+evidence. Linux Intel Arc B580 has candidate-only llama.cpp SYCL and OpenVINO
+GenAI evidence, while Windows OpenVINO is separately candidate-only and native
+Windows llama.cpp SYCL failed its model-load gate; none is selectable or
+packaged. Every other profile fails closed. Linux image generation has a
+live-validated ComfyUI/SDXL provider, and all additional providers or surfaces
+remain pass-before-ship.
 
 ## Current Stage
 
@@ -144,7 +156,7 @@ macOS 15 runners, one immutable `setup-python` action, and exact official
 Python 3.14.6 archive digests recorded in provenance. Local builds remain
 explicitly unverified for that hosted-source claim.
 
-Milestones 1 through 21 are complete for their defined scopes. Milestone 22A now has
+Milestones 1 through 10 and 12 through 21 are complete for their defined scopes. Milestone 11 is reopened for exact-version editor integration revalidation. Milestone 22A now has
 a runnable Python standard-library local web application with loopback-only serving, sanitized system
 status, automatically classified local/LAN Ollama connection, installed-model discovery, explicit candidate-only public Ollama catalog search, per-capability model choice, bounded chat, writing, summarization, strict typed progress/warning/result/error envelopes, memory-only failed-input recovery with no automatic retry, bounded effect-free composition planning, verified idle/lifecycle model cleanup, and security-hardened unsigned PyInstaller one-folder development packaging for Windows, Linux, and macOS. Public catalog results cannot execute or download a model; the UI only exposes a validated copyable external installation instruction. Packaging now has hash-locked build inputs, strict evidence allowlists, hostile native integrity tests, whole-archive inventories, and unsigned provenance. Windows dependency discovery is path-constrained and fails closed on host-derived API-set/UCRT files after a stale local build exposed unrelated JDK DLL contamination; a clean 31-file local rebuild and native package gate pass, and exact main commit `04baca39b26ec58c189a6ae21ea78b507444e9fa` passed clean hosted Windows/Linux/macOS reproduction and unsigned archive attestation. Applicable redistribution review and any future release-candidate repetition remain open. Milestone 22B now also has a 30-case structural updater-verifier receipt handoff, a 33-case verifier registry/root-transition model, a 37-case inactive post-quantum readiness suite, a 49-case future execution-admission simulator, and a 46-case digest-chained effect-journal simulator. The PQC layer inventories current boundaries and records unselected hybrid-preferred TLS with a visible secure classical fallback plus dual-signature candidates without changing TLS, selecting a parameter set, adding a dependency, handling a key, or verifying a signature. None establishes trust, issues or accepts an executable approval, writes a journal, stages an update, or grants runtime authority. Milestone 22B retains real cryptographic verification, PQC activation, executable capability composition, optional Tauri packaging, activated updates, signed distribution, and remaining native platform gates. Milestone 23 owns native
 local image profiles and now has consumer-local discovery and consent contracts

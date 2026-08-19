@@ -59,7 +59,7 @@ def main() -> int:
     }
     rocm = next(item for item in registry["components"] if item["id"] == "ollama-windows-amd-rocm")
     assert (rocm["version"], rocm["technologyName"], rocm["technologyVersion"]) == (
-        "0.32.5", "ROCm", "7.1",
+        "0.32.14", "ROCm", "7.1",
     )
     assert all(item["automationAllowed"] is False for item in registry["driverGuidance"])
     assert guardrails["schemaVersion"] == 1

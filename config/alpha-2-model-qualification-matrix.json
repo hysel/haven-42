@@ -5,11 +5,11 @@
   "status": "qualification-only-no-product-promotion",
   "inventoryBinding": {
     "path": "config/alpha-2-model-version-inventory.json",
-    "canonicalSha256": "76e01a821f1610bfed91e0fc6e8758b00aab4c6f5ea5715c5c572eec88309137"
+    "canonicalSha256": "3ce33553ff93e8ff8017074d3c19c3960a9b07bb4ecb097a216517b9cd7a75ea"
   },
   "provider": {
     "name": "ollama",
-    "exactVersion": "0.32.13",
+    "exactVersion": "0.32.14",
     "transport": "ipv4-loopback-only"
   },
   "taskChecks": [
@@ -41,6 +41,13 @@
       "backend": "cuda",
       "minimumSystemMemoryGiB": 15,
       "minimumUsableGpuMemoryGiB": 16
+    },
+    {
+      "id": "cuda-12gib-system-32gib",
+      "backend": "cuda",
+      "minimumSystemMemoryGiB": 31,
+      "minimumUsableGpuMemoryGiB": 12,
+      "minimumFreeGpuMemoryGiB": 2
     },
     {
       "id": "cuda-32gib-system-16gib",
@@ -76,6 +83,7 @@
       "requiredProfiles": [
         "cpu-16gib",
         "cuda-16gib",
+        "cuda-12gib-system-32gib",
         "vulkan-8gib-system-16gib"
       ],
       "state": "ready-for-qualification"
@@ -85,6 +93,7 @@
       "requiredProfiles": [
         "cpu-16gib",
         "cuda-16gib",
+        "cuda-12gib-system-32gib",
         "vulkan-8gib-system-16gib"
       ],
       "state": "ready-for-qualification"
@@ -94,63 +103,74 @@
       "requiredProfiles": [
         "cpu-16gib",
         "cuda-16gib",
+        "cuda-12gib-system-32gib",
         "vulkan-8gib-system-16gib"
       ],
       "state": "ready-for-qualification"
     },
     {
+      "modelId": "qwen35-9b-q4",
+      "requiredProfiles": ["cuda-12gib-system-32gib"],
+      "state": "ready-for-qualification"
+    },
+    {
       "modelId": "gemma3-1b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "gemma3-4b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
+      "state": "ready-for-qualification"
+    },
+    {
+      "modelId": "gemma3-12b-q4",
+      "requiredProfiles": ["cuda-12gib-system-32gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "gemma4-e2b-qat",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "gemma4-e4b-qat",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "gemma4-12b-qat",
-      "requiredProfiles": ["cuda-16gib"],
+      "requiredProfiles": ["cuda-16gib", "cuda-12gib-system-32gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "granite41-3b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "granite41-8b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "phi4-mini-38b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "llama32-3b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "ministral3-3b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "ministral3-8b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
@@ -435,7 +455,7 @@
     },
     {
       "modelId": "ornith-10-9b-q4",
-      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib"],
+      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib", "cuda-12gib-system-32gib"],
       "state": "ready-for-qualification",
       "plannedTest": {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#ornith-10-9b-q4",
@@ -463,7 +483,7 @@
     },
     {
       "modelId": "lfm25-8b-a1b-q4",
-      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib"],
+      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib", "cuda-12gib-system-32gib"],
       "state": "ready-for-qualification",
       "plannedTest": {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#lfm25-8b-a1b-q4",
@@ -492,7 +512,7 @@
     },
     {
       "modelId": "minicpm-v46-1b-q4",
-      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib"],
+      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib", "cuda-12gib-system-32gib"],
       "state": "ready-for-qualification",
       "plannedTest": {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#minicpm-v46-1b-q4",

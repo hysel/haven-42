@@ -92,6 +92,6 @@ This is sidecar policy evidence only. It is not a listening service, accepts no 
 
 ## Native Authority Policy Reference
 
-`config/native-bridge-boundary-contract.json` and `scripts/native-bridge-boundary-policy.py` add 55 offline cases for authority that the future native layer must own: path-grant issuance, protected roots, external links, approval binding/replay, sidecar startup and lifecycle, environment filtering, cancellation ownership, and privilege rejection. The evidence and explicit limitations are recorded in `docs/native-bridge-boundary-evidence.md`.
+`config/native-bridge-boundary-contract.json` and `scripts/native-bridge-boundary-policy.py` add 65 offline cases for authority that the future native layer must own: path-grant issuance, protected roots, external links, approval binding/replay, sidecar startup and lifecycle, environment filtering, bounded renderer envelopes, cancellation ownership, and privilege rejection. The evidence and explicit limitations are recorded in `docs/native-bridge-boundary-evidence.md`.
 
 The model opens no link, accesses no selected path, starts no sidecar, and mints no production approval. Passing it cannot promote a Tauri runtime. Actual Rust command registration, operating-system canonicalization and race handling, WebView policy, process groups, packages, and platform behavior remain required.

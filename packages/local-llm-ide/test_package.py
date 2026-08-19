@@ -62,14 +62,14 @@ def main() -> int:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         assert manifest["thirdPartySoftwareBundled"] is False
         assert manifest["version"] == BUILDER.VERSION
-        assert len(manifest["files"]) > 40
+        assert len(manifest["files"]) == len(BUILDER.SOURCE_FILES) + 1
         passed += 1
 
         with zipfile.ZipFile(archive) as package:
             names = package.namelist()
             assert all("../" not in name and not name.startswith("/") for name in names)
             assert any(name.endswith("/haven42_ide.py") for name in names)
-            assert any("/assets/continue/config.yaml" in name for name in names)
+            assert not any("/assets/continue/" in name for name in names)
             assert not any("/scripts/" in name or "/web/" in name or "/tests/" in name for name in names)
             extraction = Path(raw) / "extracted"
             package.extractall(extraction)
@@ -105,26 +105,8 @@ def main() -> int:
             target = Path(target_raw)
             with patch.object(TOOL, "PACKAGE_ROOT", package_root):
                 assert TOOL.safe_target(str(target)) == target.resolve()
-                actions = TOOL.install_continue(target, apply=False, replace=False)
-                assert actions and not (target / ".continue").exists()
-                passed += 1
-
-                TOOL.install_continue(target, apply=True, replace=False)
-                assert (target / ".continue/config.yaml").is_file()
-                assert not (target / ".continue.haven42-backup").exists()
-                passed += 1
-
-                rejected(
-                    lambda: TOOL.install_continue(target, apply=False, replace=False),
-                    "already has Continue settings",
-                )
-                passed += 1
-
-                (target / ".continue/user-note.txt").write_text("keep me\n", encoding="utf-8")
-                TOOL.install_continue(target, apply=True, replace=True)
-                assert (target / ".continue.haven42-backup/config.yaml").is_file()
-                assert (target / ".continue.haven42-backup/user-note.txt").is_file()
-                assert not (target / ".continue/user-note.txt").exists()
+                assert "install-continue" not in TOOL.parser().format_help()
+                assert not (target / ".continue").exists()
                 passed += 1
 
             assert TOOL.safe_model("qwen3.5:9b") == "qwen3.5:9b"

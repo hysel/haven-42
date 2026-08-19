@@ -56,7 +56,8 @@ function Get-OllamaTags {
 
 function Get-OllamaRunningModels {
     $uri = "$(ConvertTo-SafeBaseUrl $OllamaBaseUrl)/api/ps"
-    return @(Invoke-RestMethod -Uri $uri -Method Get -TimeoutSec $TimeoutSeconds).models
+    $models = (Invoke-RestMethod -Uri $uri -Method Get -TimeoutSec $TimeoutSeconds).models
+    return @($models | Where-Object { $null -ne $_ })
 }
 
 function Get-CandidateModels {
@@ -312,9 +313,9 @@ function Set-ModelLoaded {
                 Write-Warning "Runtime policy warning: another model is resident before loading $Model."
             }
         }
-        Invoke-OllamaJson -Path "/api/chat" -Body @{
+        Invoke-OllamaJson -Path "/api/generate" -Body @{
             model = $Model
-            messages = @()
+            prompt = ""
             keep_alive = $KeepAlive
             stream = $false
         } | Out-Null
@@ -709,6 +710,9 @@ foreach ($model in $candidateModels) {
 
     Write-Host "[6/8] Loading $model and running API preflight checks..."
     $loadResult = Set-ModelLoaded -Model $model -KeepAlive "$($runtimePolicy.preloadKeepAliveMinutes)m"
+    if (-not $loadResult.Success) {
+        Write-Warning "Model preload failed before capability checks; the sanitized report will record MODEL_LOAD_FAILED."
+    }
     $toolResult = Invoke-ToolCallTest -Model $model
     $contentResult = Invoke-ExactContentTest -Model $model
     $failureSignal = Get-FailureSignal -LoadResult $loadResult -ToolResult $toolResult -ContentResult $contentResult
