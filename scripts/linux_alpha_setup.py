@@ -52,7 +52,7 @@ SAFE_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_-]{16,128}$")
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 COMPONENT_DECISION_CODES = {
-    "ollama-linux-core": "SETUP_COMPONENT_OLLAMA_LINUX_CORE_0_32_5_SELECTED",
+    "ollama-linux-core": "SETUP_COMPONENT_OLLAMA_LINUX_CORE_0_32_14_SELECTED",
 }
 MODEL_DECISION_CODES = {
     "qwen35-08b-q8": "SETUP_MODEL_QWEN35_08B_Q8_SELECTED",

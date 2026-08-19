@@ -16,8 +16,8 @@
     "retired"
   ],
   "configBundlePolicy": {
-    "decision": "Generate surface-specific config bundles only after compatibility evidence exists for that surface. Continue, Aider, and OpenCode have supported generated local config paths today.",
-    "defaultSurface": "continue",
+    "decision": "Generate end-user config bundles only after compatibility evidence exists for that exact surface and version. Aider and OpenCode retain generated local config paths; Continue is legacy and evidence-only and receives no generated configuration.",
+    "defaultSurface": "aider",
     "sharedAssetStrategy": "Shared prompts, rules, docs, templates, validation scripts, and evidence formats should stay reusable across surfaces; generated surface config files must stay surface-specific.",
     "promotionCriteria": [
       "Documented install behavior for the surface.",
@@ -60,35 +60,35 @@
       "id": "continue",
       "name": "Continue",
       "type": "editor-and-cli",
-      "supportTier": "supported",
-      "showInDefaultMenu": true,
-      "currentValidationLevel": "approved-write-ready",
+      "supportTier": "candidate",
+      "showInDefaultMenu": false,
+      "currentValidationLevel": "legacy-evidence-only",
       "configBundle": {
-        "status": "supported",
-        "strategy": "Generate Continue project-local or shared-asset config from hardware-aware model recommendations.",
-        "outputKind": ".continue assets and local-only Continue config",
+        "status": "retired",
+        "strategy": "Do not generate or ship Continue configuration. Preserve sanitized historical evidence only.",
+        "outputKind": "none",
         "evidence": ["docs/shared-asset-installation.md", "docs/hardware-aware-recommendations.md", "docs/surface-specific-config-bundles.md"]
       },
       "install": {
-        "status": "supported",
-        "solution": "Install project-local or shared Continue assets with dry-run and backup support.",
-        "workflowIds": ["install-pack-assets"],
+        "status": "retired",
+        "solution": "No Continue installation path is maintained.",
+        "workflowIds": [],
         "evidence": ["docs/shared-asset-installation.md", "docs/editor-compatibility.md"],
-        "blockedReason": ""
+        "blockedReason": "Legacy evidence includes inconsistent config loading, unavailable edit tools, and an unintended out-of-scope write; the owner ended further investment."
       },
       "configure": {
-        "status": "supported",
-        "solution": "Generate local-only Continue config from hardware-aware model recommendations.",
-        "workflowIds": ["recommend-agent-config", "apply-agent-config"],
+        "status": "retired",
+        "solution": "No Continue configuration path is maintained.",
+        "workflowIds": [],
         "evidence": ["docs/hardware-aware-recommendations.md"],
-        "blockedReason": ""
+        "blockedReason": "Continue configuration is retained only in historical evidence and is not eligible for requalification without an explicit owner reversal."
       },
       "test": {
-        "status": "validated",
-        "solution": "Use local model tests, Continue CLI checks, runtime validation, and deterministic output verification.",
-        "workflowIds": ["test-local-agent-models", "test-agent-cli-surface", "run-runtime-validation", "verify-runtime-output"],
+        "status": "retired",
+        "solution": "Do not run new Continue tests; consult the existing sanitized evidence.",
+        "workflowIds": [],
         "evidence": ["docs/continue-cli-model-testing.md", "docs/runtime-validation.md"],
-        "blockedReason": ""
+        "blockedReason": "The historical results remain valid only for their exact recorded versions and configurations."
       }
     },
     {

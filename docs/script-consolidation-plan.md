@@ -3,9 +3,9 @@
 ## Purpose
 
 The `scripts` folder is now an internal maintainer area. App users are not sent
-there. Continue, Aider, and OpenCode users receive the separate Local LLM IDE
-Tools package, which exposes one setup helper and keeps its internal file list
-small.
+there. Aider and OpenCode users receive the separate Local LLM IDE Tools
+package, which exposes one setup helper and keeps its internal file list small.
+Continue is legacy evidence only and has no maintained setup path.
 
 The remaining consolidation work reduces maintenance cost; it is not an
 end-user navigation strategy. The goal is to move repeated behavior into

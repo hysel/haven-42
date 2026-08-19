@@ -69,6 +69,20 @@
     "shutdownTimeoutSeconds": 10,
     "environmentAllowlist": ["SystemRoot", "WINDIR", "LANG", "LC_ALL", "NO_COLOR"]
   },
+  "messageEnvelope": {
+    "maximumUtf8Bytes": 65536,
+    "maximumDepth": 5,
+    "maximumListItems": 64,
+    "maximumStringCharacters": 4096,
+    "forbiddenPayloadKeys": ["__proto__", "prototype", "constructor", "command", "shell", "executable", "pid", "signal", "workingDirectory", "environment"],
+    "operations": {
+      "system.status": {"grantIds": "forbidden", "approvalTokenId": "forbidden"},
+      "filesystem.read": {"grantIds": "required", "approvalTokenId": "forbidden"},
+      "filesystem.write": {"grantIds": "required", "approvalTokenId": "required"},
+      "sidecar.request": {"grantIds": "forbidden", "approvalTokenId": "required"},
+      "request.cancel": {"grantIds": "forbidden", "approvalTokenId": "forbidden"}
+    }
+  },
   "cancellation": {
     "activeRequestRequired": true,
     "sameSessionRequired": true,

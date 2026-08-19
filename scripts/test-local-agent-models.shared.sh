@@ -334,7 +334,7 @@ def load_model(model, keep_alive=None):
                 print(f"Runtime policy warning: another model is resident before loading {model}.", file=sys.stderr)
         if keep_alive is None:
             keep_alive = f"{preload_keep_alive_minutes}m"
-        post_json("/api/chat", {"model": model, "messages": [], "keep_alive": keep_alive, "stream": False})
+        post_json("/api/generate", {"model": model, "prompt": "", "keep_alive": keep_alive, "stream": False})
         return {"Success": True, "Error": None}
     except Exception as exc:
         return {"Success": False, "Error": str(exc)}

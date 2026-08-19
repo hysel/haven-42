@@ -80,13 +80,13 @@ const LAST_SECTION_STORAGE_KEY = "haven42.last-section.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
-    revision: 3,
+    revision: 5,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
       { target: ".rail", title: "Move around Haven 42", description: "Use this menu to open Chat, Models, System, Technical details, or About. Each section has its own short help tour." },
       { target: ".task-mode-select", title: "Choose what you want to do", description: "Leave this on Recommended and Haven 42 will choose Chat, Write, or Summarize from your request. You can also choose a task yourself." },
-      { target: ".model-select", title: "Choose an AI model", description: "Haven 42 recommends a compatible installed model for each task. Warnings here explain when another model has not been tested for the selected task." },
+      { target: ".model-picker", title: "Choose or find an AI model", description: "Haven 42 recommends a compatible installed model for each task. Use Browse models to compare installed choices or review a new model before downloading it." },
       { target: ".composer-surface", title: "Write and attach files", description: "Type your request here, press Enter to send, or use Shift+Enter for a new line. Attachments stay in memory for the current task, and the Keep setting controls prompt recall for this session." },
       { target: "#research-tools", title: "Research with explicit approval", description: "Choose Wikipedia or a wider-web browser search. Haven 42 shows the exact search words before every request, never lets the AI browse on its own, and keeps in-app research only in memory." },
       { target: ".status-glance", title: "Check connection and resources", description: "This quiet status area shows the active AI server, model, CPU, memory, graphics, and response speed. “This computer” means AI requests stay on this device." },
@@ -107,14 +107,14 @@ const SECTION_TOURS = Object.freeze({
   }),
   system: Object.freeze({
     label: "System",
-    revision: 2,
+    revision: 3,
     panelId: "system-panel",
     returnId: "system-workspace-title",
     steps: Object.freeze([
       { target: "#system-workspace-title", title: "System settings", description: "Use this page to manage your AI connection, local components, resource information, and troubleshooting tools." },
       { target: "#connection-panel", title: "Connect another AI server", description: "A local setup connects automatically. Advanced users can use this area to switch to another trusted Ollama server." },
       { target: "#open-diagnostics", title: "Open troubleshooting logs", description: "Use this clearly labeled button to see recent sanitized technical events or save a support report. Search words, chats, and responses are not recorded." },
-      { target: "#capability-panel", title: "See available features", description: "This list shows what the current connection can do now and which features still need setup." },
+      { target: "#software-updates", title: "Review software updates", description: "Haven 42 checks Ollama's official releases only when you choose Check now. You review every verified update before any download or activation, and no chat or hardware details are sent." },
       { target: "#evidence-panel", title: "Check connection health", description: "These checks explain whether the AI server, model information, and local files are ready." },
       { target: "#energy-estimator-panel", title: "Estimate graphics-card electricity", description: "Use a measured GPU average and your own electricity rate. Official averages are optional, location is never inferred, and the result is not a whole-computer bill prediction." },
     ]),
@@ -2352,8 +2352,9 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
         validateManagedProviderResume(connection);
         applyProviderConnection(connection, connection.managedResume.endpoint, 120, 300);
         await showManagedLocalReady();
-        byId("wizard-readiness-next").disabled = false;
-        byId("wizard-readiness-next").textContent = "Open chat";
+        byId("setup-wizard").classList.add("hidden");
+        openChat();
+        setTaskEvent("Local AI setup complete · ready to chat", "result");
         return;
       }
       if (["failed", "cancelled"].includes(status.phase)) return;
@@ -4549,9 +4550,9 @@ async function bootstrap() {
     } catch (_error) {
       renderAssuranceUnavailable();
     }
-    byId("update-status").textContent = result.updates?.mode === "disabled"
-      ? "Disabled · no network"
-      : "Unknown";
+    byId("update-status").textContent = result.updates?.mode === "user-initiated-only"
+      ? "Only when you choose Check now"
+      : "Unavailable";
     if (!providerConnected) {
       state.lastFocusBeforeWizard = document.activeElement;
       byId("setup-wizard").querySelector(".wizard-card").focus();
@@ -5087,6 +5088,7 @@ byId("home-nav").addEventListener("click", () => {
 byId("software-nav").addEventListener("click", openSoftware);
 byId("image-nav").addEventListener("click", openImages);
 byId("models-nav").addEventListener("click", openModels);
+byId("open-models-from-chat").addEventListener("click", openModels);
 byId("assurance-nav").addEventListener("click", openAssurance);
 byId("about-nav").addEventListener("click", openAbout);
 byId("workflow-plan-button").addEventListener("click", async () => {
@@ -5326,6 +5328,87 @@ byId("scan-system-button").addEventListener("click", async () => {
     await refreshDiagnosticsQuietly();
   }
 });
+
+function validateSoftwareUpdateCheck(value) {
+  if (
+    !value || value.schemaVersion !== 1
+    || value.kind !== "haven42-managed-software-update-check"
+    || value.checkedBecauseUserRequested !== true
+    || value.automaticChecksEnabled !== false
+    || value.configurationPersisted !== false
+    || value.userContentSent !== false
+    || !Array.isArray(value.components) || value.components.length !== 1
+  ) throw new Error("invalid-software-update-check");
+  const component = value.components[0];
+  if (
+    component.id !== "ollama-runtime"
+    || component.displayName !== "Ollama local AI engine"
+    || !/^\d+\.\d+\.\d+$/.test(component.managedVersion)
+    || !/^\d+\.\d+\.\d+$/.test(component.latestStableVersion)
+    || typeof component.newerOfficialVersionAvailable !== "boolean"
+    || typeof component.managedVersionIsLatest !== "boolean"
+    || typeof component.availableForManagedSetup !== "boolean"
+    || !Number.isSafeInteger(component.downloadBytes)
+    || component.downloadBytes < 1 || component.downloadBytes > 4 * 1024 ** 3
+    || !/^[a-f0-9]{64}$/.test(component.sha256)
+    || component.releaseUrl !== `https://github.com/ollama/ollama/releases/tag/v${component.latestStableVersion}`
+  ) throw new Error("invalid-software-update-component");
+  return component;
+}
+
+byId("software-update-preference").addEventListener("change", () => {
+  const keep = byId("software-update-preference").value === "keep";
+  const updateButton = byId("use-software-update");
+  updateButton.disabled = keep || updateButton.dataset.available !== "true";
+  if (keep) {
+    byId("software-update-result").textContent = "Your current installed version will be kept. You can change this choice at any time during this session.";
+  }
+});
+
+byId("check-software-updates").addEventListener("click", async () => {
+  const button = byId("check-software-updates");
+  const updateButton = byId("use-software-update");
+  const result = byId("software-update-result");
+  const releaseLink = byId("software-update-release-link");
+  button.disabled = true;
+  button.textContent = "Checking official release…";
+  updateButton.disabled = true;
+  updateButton.dataset.available = "false";
+  releaseLink.classList.add("hidden");
+  result.textContent = "Contacting Ollama's official GitHub release service…";
+  try {
+    const component = validateSoftwareUpdateCheck(
+      await api("/api/software-updates/check", { confirmed: true }),
+    );
+    releaseLink.href = component.releaseUrl;
+    releaseLink.classList.remove("hidden");
+    byId("update-status").textContent = `Checked · Ollama ${component.latestStableVersion}`;
+    if (component.managedVersionIsLatest) {
+      result.textContent = `Ollama ${component.managedVersion} is the newest stable version verified for this Haven 42 build. The download is ${formatBytes(component.downloadBytes)} and is used only after setup approval.`;
+      updateButton.textContent = `Review Ollama ${component.managedVersion}`;
+      updateButton.dataset.available = "true";
+      updateButton.disabled = byId("software-update-preference").value === "keep";
+    } else if (component.newerOfficialVersionAvailable) {
+      result.textContent = `Ollama ${component.latestStableVersion} is newer than the verified ${component.managedVersion} runtime in this Haven 42 build. Haven 42 will not install unverified files; you can keep using the current runtime or view the official release.`;
+    } else {
+      result.textContent = `This Haven 42 build verifies Ollama ${component.managedVersion}. The official stable release is ${component.latestStableVersion}; no downgrade will be offered.`;
+    }
+  } catch (error) {
+    result.textContent = `The official release could not be verified. Nothing was downloaded or changed. ${humanError(error)}`;
+    byId("update-status").textContent = "Check failed · no changes";
+  } finally {
+    button.disabled = false;
+    button.textContent = "Check official releases again";
+    await refreshDiagnosticsQuietly();
+  }
+});
+
+byId("use-software-update").addEventListener("click", () => {
+  if (byId("use-software-update").dataset.available !== "true") return;
+  byId("software-update-result").textContent = "Opening guided local setup. Review the version, download, storage location, and effects before approving.";
+  byId("setup-local-components").click();
+});
+
 byId("setup-local-components").addEventListener("click", async () => {
   const button = byId("setup-local-components");
   if (button.disabled) return;

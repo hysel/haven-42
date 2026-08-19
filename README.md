@@ -38,7 +38,9 @@ section is the authoritative capability list.
 
 Music and video are not available in the product. Persistent conversation
 history, PDF and Office parsing, folder scanning, autonomous model browsing,
-signed installers, and active online updates are not shipped. The published
+signed installers and unattended automatic updates are not shipped. The
+development source can check an official runtime release only when the user
+asks and still requires review before any verified managed update. The published
 Alpha 1 package predates the development web-research slice above.
 
 ## Quick start
@@ -89,13 +91,12 @@ change Haven 42's automatic model choices.
 
 ## Coding tools are separate
 
-Continue, Aider, and OpenCode support is distributed as the optional
-[Local LLM IDE Tools package](packages/local-llm-ide/README.md). It is not
-required to use Haven 42 and does not include the app, Ollama, models, IDEs, or
-drivers.
-
-The unsigned package is available from the
-[Local LLM IDE Tools development release](https://github.com/hysel/haven-42/releases/tag/local-llm-ide-tools-v0.1.0-development).
+Aider and OpenCode configuration is developed separately in the optional
+[Local LLM IDE Tools package](packages/local-llm-ide/README.md). Continue is a
+legacy, evidence-only integration. Haven 42 does not ship, configure,
+recommend, or run new qualification work for Continue. Existing sanitized
+records remain available to explain what was tested and why investment ended.
+Continue is not required to use Haven 42.
 
 ## Documentation
 

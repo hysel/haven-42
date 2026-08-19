@@ -67,7 +67,7 @@ class ModelVersionInventoryTests(unittest.TestCase):
             self.inventory["qualificationProvider"],
             {
                 "name": "ollama",
-                "exactVersion": "0.32.13",
+                "exactVersion": "0.32.14",
                 "transport": "ipv4-loopback-only",
             },
         )

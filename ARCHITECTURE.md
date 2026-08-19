@@ -6,8 +6,9 @@ Haven 42 now has two clearly separated deliverables:
 
 1. **Haven 42 app** — the browser-based app for chat, writing, and
    summarization.
-2. **Local LLM IDE Tools** — an optional package for Continue, Aider, and
-   OpenCode.
+2. **Local LLM IDE Tools** — an optional package for Aider and OpenCode.
+   Continue is retained only as legacy evidence and has no maintained setup,
+   configuration, packaging, or qualification path.
 
 The app package never includes IDE settings or engineering test scripts. The
 IDE package never includes the browser app, Ollama, models, drivers, IDEs, or
@@ -29,8 +30,9 @@ Text capability discovery and invocation currently normalize Ollama and OpenAI-c
 
 ```text
 Agent surfaces
-  Continue -> project or shared .continue assets
+  Continue -> frozen historical evidence only
   Aider -> local-only generated Aider config
+  OpenCode -> local-only generated OpenCode config
   future surfaces -> evidence-gated adapters
 
 Reusable pack assets and catalogs
@@ -310,11 +312,14 @@ Top-level markdown files define the product contract, architecture, roadmap, sty
 
 These files explain why the pack exists and how contributors should evolve it.
 
-### Agent Surface Configuration
+### Legacy Continue Assets
 
-`.continue/config.yaml` is the intended entry point for the current Continue integration.
+`.continue` records the structure used by the retired Continue integration.
+It is preserved to keep historical evidence understandable. It is not an
+active entry point, package payload, end-user template, or future development
+target.
 
-It should eventually define:
+The historical configuration covered:
 
 - Local model configuration
 - Context providers
@@ -520,7 +525,7 @@ The project domain is local-first engineering workflow guidance.
 ## Initial Architecture Decisions
 
 - The pack is local-first and should work with Ollama before cloud model assumptions are introduced.
-- Continue remains the first supported agent surface, but the project should avoid coupling reusable guidance to Continue-only behavior when a portable abstraction is practical.
+- Maintained agent surfaces must use portable, surface-neutral guidance where practical; no new work should depend on legacy Continue behavior.
 - The first ecosystem focus is .NET and ASP.NET Core, with enterprise-grade guidance kept useful for smaller projects too.
 - Clean Architecture guidance should be practical and testable, not ceremonial.
 - Security and performance review guidance should be built into early milestones.
@@ -546,10 +551,8 @@ The project domain is local-first engineering workflow guidance.
 
 ## Open Questions
 
-- Should the current local file references in `.continue/config.yaml` be adjusted after validation in Continue?
 - Which Ollama models should be recommended for larger enterprise repositories?
-- Which additional agent surfaces should be validated first after Continue?
-- Should agents be further integrated as native Continue agent files if the target Continue version supports richer agent packaging?
+- Which maintained or new agent surfaces should be validated next?
 - How should SonarQube findings be provided to the assistant: pasted reports, MCP, CLI output, or another integration?
 - Which MCP servers are in scope for the first integration milestone?
 - Should prompt examples be added as committed fixtures or generated on demand during release validation?

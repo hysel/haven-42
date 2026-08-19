@@ -67,9 +67,21 @@ def _registered_candidate(
         for candidate in catalog.get("models", [])
         if candidate.get("id") == model_id
     )
-    if len(matches) != 1:
+    if not matches:
         raise CompatibilityError("model-not-registered")
-    return matches[0]
+    identities = {
+        (
+            candidate.get("model", candidate.get("name")),
+            candidate.get("manifestDigest"),
+        )
+        for candidate in matches
+    }
+    if len(identities) != 1 or None in next(iter(identities)):
+        raise CompatibilityError("conflicting-model-registration")
+    merged: dict[str, Any] = {}
+    for candidate in matches:
+        merged.update(candidate)
+    return merged
 
 
 def _model_route(requirements: dict[str, Any], model_id: str, engine: str) -> dict[str, Any]:

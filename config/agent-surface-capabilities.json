@@ -25,48 +25,48 @@
       "id": "continue",
       "name": "Continue",
       "type": "editor-and-cli",
-      "supportTier": "supported",
-      "showInDefaultMenu": true,
-      "currentValidationLevel": "approved-write-ready",
+      "supportTier": "candidate",
+      "showInDefaultMenu": false,
+      "currentValidationLevel": "legacy-evidence-only",
       "activities": {
         "install": {
-          "status": "supported",
-          "entryPoints": ["install-pack-assets"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["docs/shared-asset-installation.md", "docs/editor-compatibility.md"]
         },
         "configure": {
-          "status": "supported",
-          "entryPoints": ["recommend-agent-config", "apply-agent-config"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["docs/hardware-aware-recommendations.md"]
         },
         "test": {
-          "status": "validated",
-          "entryPoints": ["test-local-agent-models", "test-agent-cli-surface", "run-runtime-validation", "verify-runtime-output"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["docs/continue-cli-model-testing.md", "docs/runtime-validation.md"]
         },
         "health": {
-          "status": "supported",
-          "entryPoints": ["test-local-agent-health"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["config/workflows.json"]
         },
         "cleanup": {
-          "status": "supported",
-          "entryPoints": ["cleanup-local-agent-artifacts"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["config/workflows.json"]
         },
         "release-readiness": {
-          "status": "supported",
-          "entryPoints": ["validate-pack", "test-pack", "test-release-readiness", "build-release-package"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["docs/release.md"]
         },
         "model-selection": {
-          "status": "supported",
-          "entryPoints": ["profile-local-hardware", "profile-remote-hardware", "discover-online-models", "generate-model-scorecard", "pull-local-agent-models"],
+          "status": "retired",
+          "entryPoints": [],
           "evidence": ["docs/local-model-selection.md", "docs/online-model-discovery.md", "docs/model-scorecard.md"]
         },
         "evidence": {
-          "status": "supported",
-          "entryPoints": ["generate-runtime-context", "verify-runtime-output", "generate-evidence-dashboard"],
+          "status": "validated",
+          "entryPoints": [],
           "evidence": ["config/evidence-catalog.tsv", "docs/evidence-catalog.md", "docs/evidence-dashboard.md"]
         }
       }

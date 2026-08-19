@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-nvidia-rtx3060-linux-qualification-result",
+  "release": "0.4.0-alpha.2",
+  "observedThroughUtc": "2026-08-18T23:44:17Z",
+  "status": "exact-profile-engineering-evidence-complete",
+  "environment": {
+    "operatingSystem": "Ubuntu 26.04 LTS",
+    "kernel": "7.0.0-30-generic",
+    "accelerator": "NVIDIA GeForce RTX 3060 12 GB",
+    "driverVersion": "610.43.02",
+    "backend": "cuda",
+    "systemMemoryGiB": 121
+  },
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.14",
+    "artifactSha256": "c620917a71e146ab3a7f893084f066069c4c65d144ef8379a91c3cbe8b27de8f",
+    "releaseAdmission": "admitted"
+  },
+  "qualificationProfileId": "cuda-12gib-system-32gib",
+  "sourceBindings": {
+    "inventory": {
+      "path": "config/alpha-2-model-version-inventory.json",
+      "canonicalSha256": "3ce33553ff93e8ff8017074d3c19c3960a9b07bb4ecb097a216517b9cd7a75ea"
+    },
+    "matrix": {
+      "path": "config/alpha-2-model-qualification-matrix.json",
+      "canonicalSha256": "81d28a2f76b6d0723d7e4d1db209ddb4fde19c2d134315a06973584fd83da690"
+    },
+    "runtimeCompatibility": "config/alpha-2-runtime-compatibility.json"
+  },
+  "counts": {
+    "exactArtifactsChecked": 19,
+    "coreTaskGatePassed": 19,
+    "coreTaskGateFailed": 0,
+    "thirtyMinuteSoaksPassed": 19
+  },
+  "modelsPassed": [
+    "qwen35-08b-q8",
+    "qwen35-2b-q8",
+    "qwen35-4b-q4",
+    "qwen35-9b-q4",
+    "gemma3-1b-q4",
+    "gemma3-4b-q4",
+    "gemma3-12b-q4",
+    "gemma4-e2b-qat",
+    "gemma4-e4b-qat",
+    "gemma4-12b-qat",
+    "granite41-3b-q4",
+    "granite41-8b-q4",
+    "phi4-mini-38b-q4",
+    "llama32-3b-q4",
+    "ministral3-3b-q4",
+    "ministral3-8b-q4",
+    "ornith-10-9b-q4",
+    "lfm25-8b-a1b-q4",
+    "minicpm-v46-1b-q4"
+  ],
+  "coreTaskGate": {
+    "samplesPerCapability": 3,
+    "capabilities": ["general.chat", "content.write", "content.summarize"],
+    "passed": 19,
+    "failed": 0,
+    "unloadRequiredAfterEverySample": true
+  },
+  "soak": {
+    "requestedMinutesPerModel": 30,
+    "intervalSeconds": 30,
+    "startedAtUtc": "2026-08-18T14:08:58Z",
+    "completedAtUtc": "2026-08-18T23:39:17Z",
+    "passed": 19,
+    "failed": 0,
+    "unloadRequiredAfterEverySample": true
+  },
+  "power": {
+    "telemetrySource": "nvidia-smi",
+    "scope": "gpu-board-only",
+    "telemetrySampleCount": 37443,
+    "telemetrySha256": "a382307148d6a376cd30fe7c8d7c6f017ef5db7b8f4582662e587ec189cf9dcb",
+    "preIdle": {"sampleCount": 324, "averageWatts": 13.962},
+    "postIdle": {"sampleCount": 300, "averageWatts": 14.175},
+    "mixedTaskAverageWattsRange": [23.577, 32.876],
+    "mixedTaskPeakWattsRange": [56.54, 139.18],
+    "perModel": {
+      "qwen35-08b-q8": {"averageWatts": 24.704, "peakWatts": 58.15, "energyWh": 12.359},
+      "qwen35-2b-q8": {"averageWatts": 26.965, "peakWatts": 72.82, "energyWh": 13.482},
+      "qwen35-4b-q4": {"averageWatts": 28.193, "peakWatts": 85.14, "energyWh": 14.104},
+      "qwen35-9b-q4": {"averageWatts": 29.998, "peakWatts": 97.60, "energyWh": 15.007},
+      "gemma3-1b-q4": {"averageWatts": 23.577, "peakWatts": 56.54, "energyWh": 11.788},
+      "gemma3-4b-q4": {"averageWatts": 27.449, "peakWatts": 78.29, "energyWh": 13.725},
+      "gemma3-12b-q4": {"averageWatts": 32.876, "peakWatts": 139.18, "energyWh": 16.447},
+      "gemma4-e2b-qat": {"averageWatts": 25.399, "peakWatts": 61.01, "energyWh": 12.742},
+      "gemma4-e4b-qat": {"averageWatts": 27.509, "peakWatts": 73.25, "energyWh": 13.754},
+      "gemma4-12b-qat": {"averageWatts": 30.773, "peakWatts": 103.14, "energyWh": 15.395},
+      "granite41-3b-q4": {"averageWatts": 24.620, "peakWatts": 69.96, "energyWh": 12.317},
+      "granite41-8b-q4": {"averageWatts": 27.816, "peakWatts": 96.72, "energyWh": 13.916},
+      "phi4-mini-38b-q4": {"averageWatts": 25.386, "peakWatts": 69.20, "energyWh": 12.693},
+      "llama32-3b-q4": {"averageWatts": 26.231, "peakWatts": 81.91, "energyWh": 13.115},
+      "ministral3-3b-q4": {"averageWatts": 27.444, "peakWatts": 86.32, "energyWh": 13.730},
+      "ministral3-8b-q4": {"averageWatts": 32.516, "peakWatts": 130.09, "energyWh": 16.258},
+      "ornith-10-9b-q4": {"averageWatts": 29.729, "peakWatts": 104.04, "energyWh": 14.873},
+      "lfm25-8b-a1b-q4": {"averageWatts": 29.147, "peakWatts": 88.92, "energyWh": 14.606},
+      "minicpm-v46-1b-q4": {"averageWatts": 23.636, "peakWatts": 84.45, "energyWh": 11.818}
+    },
+    "includesCpuRamStorageCoolingDisplayOrPsuLosses": false
+  },
+  "evidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+  "containsPrivateMachineIdentity": false,
+  "containsNetworkIdentity": false,
+  "containsRawPromptsOrResponses": false,
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false
+}

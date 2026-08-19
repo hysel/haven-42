@@ -193,6 +193,72 @@ class NativeBridgeBoundaryPolicy:
         allowed = set(self.contract["sidecarLifecycle"]["environmentAllowlist"])
         return {key: value for key, value in environment.items() if key in allowed}
 
+    def validate_renderer_message(self, message: dict[str, Any]) -> dict[str, Any]:
+        required = {"channel", "operation", "requestId", "payload", "approvalTokenId", "grantIds"}
+        if not isinstance(message, dict) or set(message) != required:
+            raise BoundaryError("message-shape-invalid")
+        policy = self.contract["messageEnvelope"]
+        try:
+            encoded = json.dumps(message, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
+        except (TypeError, ValueError) as error:
+            raise BoundaryError("message-not-json") from error
+        if len(encoded) > policy["maximumUtf8Bytes"]:
+            raise BoundaryError("message-too-large")
+        if message["channel"] != "haven42.native.v1":
+            raise BoundaryError("message-channel-invalid")
+        if not isinstance(message["operation"], str) or message["operation"] not in policy["operations"]:
+            raise BoundaryError("message-operation-rejected")
+        if not isinstance(message["requestId"], str) or not ID.fullmatch(message["requestId"]):
+            raise BoundaryError("message-request-id-invalid")
+        if not isinstance(message["payload"], dict):
+            raise BoundaryError("message-payload-invalid")
+        forbidden = {key.casefold() for key in policy["forbiddenPayloadKeys"]}
+
+        def inspect(value: Any, depth: int) -> None:
+            if depth > policy["maximumDepth"]:
+                raise BoundaryError("message-depth-exceeded")
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    if not isinstance(key, str) or not key or len(key) > 128:
+                        raise BoundaryError("message-key-invalid")
+                    if key.casefold() in forbidden:
+                        raise BoundaryError("message-forbidden-field")
+                    if any(ord(character) < 32 or ord(character) == 127 for character in key):
+                        raise BoundaryError("message-key-invalid")
+                    inspect(child, depth + 1)
+            elif isinstance(value, list):
+                if len(value) > policy["maximumListItems"]:
+                    raise BoundaryError("message-list-too-large")
+                for child in value:
+                    inspect(child, depth + 1)
+            elif isinstance(value, str):
+                if len(value) > policy["maximumStringCharacters"] or any(
+                    ord(character) < 32 and character not in "\t\n\r" for character in value
+                ):
+                    raise BoundaryError("message-string-invalid")
+            elif value is not None and not isinstance(value, (bool, int, float)):
+                raise BoundaryError("message-value-invalid")
+
+        inspect(message["payload"], 0)
+        grant_ids = message["grantIds"]
+        if not isinstance(grant_ids, list) or len(grant_ids) > 16 or len(grant_ids) != len(set(grant_ids)):
+            raise BoundaryError("message-grants-invalid")
+        if any(not isinstance(item, str) or not ID.fullmatch(item) for item in grant_ids):
+            raise BoundaryError("message-grants-invalid")
+        approval = message["approvalTokenId"]
+        if approval is not None and (not isinstance(approval, str) or not ID.fullmatch(approval)):
+            raise BoundaryError("message-approval-invalid")
+        operation = policy["operations"][message["operation"]]
+        if operation["grantIds"] == "required" and not grant_ids:
+            raise BoundaryError("message-grant-required")
+        if operation["grantIds"] == "forbidden" and grant_ids:
+            raise BoundaryError("message-grant-unexpected")
+        if operation["approvalTokenId"] == "required" and approval is None:
+            raise BoundaryError("message-approval-required")
+        if operation["approvalTokenId"] == "forbidden" and approval is not None:
+            raise BoundaryError("message-approval-unexpected")
+        return {"decision": "allow", "channel": message["channel"], "operation": message["operation"], "requestId": message["requestId"], "payloadReturned": False}
+
     @staticmethod
     def validate_cancel(request: dict[str, Any], runtime: dict[str, Any]) -> dict[str, Any]:
         if set(request) != {"requestId", "cancelRequestId"}:
@@ -288,6 +354,12 @@ def _start(**updates: Any) -> dict[str, Any]:
     return value
 
 
+def _message(**updates: Any) -> dict[str, Any]:
+    value = {"channel": "haven42.native.v1", "operation": "system.status", "requestId": "request-a", "payload": {}, "approvalTokenId": None, "grantIds": []}
+    value.update(updates)
+    return value
+
+
 def run_self_tests() -> int:
     policy = NativeBridgeBoundaryPolicy()
     runtime = _runtime()
@@ -356,6 +428,18 @@ def run_self_tests() -> int:
     assert set(filtered) == {"SystemRoot", "LANG"}
     deny("environment-invalid", lambda: policy.filter_environment({"LANG": 42}))
 
+    message = allow(lambda: policy.validate_renderer_message(_message()))
+    assert message["payloadReturned"] is False
+    allow(lambda: policy.validate_renderer_message(_message(operation="filesystem.read", grantIds=["grant-a"])))
+    allow(lambda: policy.validate_renderer_message(_message(operation="filesystem.write", grantIds=["grant-a"], approvalTokenId="approval-a")))
+    deny("message-shape-invalid", lambda: policy.validate_renderer_message({**_message(), "command": "whoami"}))
+    deny("message-channel-invalid", lambda: policy.validate_renderer_message(_message(channel="legacy")))
+    deny("message-operation-rejected", lambda: policy.validate_renderer_message(_message(operation="process.spawn")))
+    deny("message-forbidden-field", lambda: policy.validate_renderer_message(_message(payload={"nested": {"command": "whoami"}})))
+    deny("message-depth-exceeded", lambda: policy.validate_renderer_message(_message(payload={"a": {"b": {"c": {"d": {"e": {"f": 1}}}}}})))
+    deny("message-grant-required", lambda: policy.validate_renderer_message(_message(operation="filesystem.read")))
+    deny("message-approval-required", lambda: policy.validate_renderer_message(_message(operation="sidecar.request")))
+
     cancel = allow(lambda: policy.validate_cancel({"requestId": "cancel-a", "cancelRequestId": "active-a"}, runtime))
     assert cancel["osPidUsed"] is False
     deny("cancel-target-inactive", lambda: policy.validate_cancel({"requestId": "cancel-a", "cancelRequestId": "missing"}, runtime))
@@ -374,7 +458,7 @@ def run_self_tests() -> int:
     deny("approval-binding-mismatch", lambda: policy.validate_approval(token, {**request, "effects": ["file write", "network access"]}, runtime))
     deny("approval-shape-invalid", lambda: policy.validate_approval({**token, "remember": True}, request, runtime))
 
-    assert passed == 55
+    assert passed == 65
     print(f"Native bridge boundary policy self-test passed: {passed} cases")
     return passed
 

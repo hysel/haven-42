@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "inventoryId": "haven42.alpha2.model-family-versions",
   "release": "0.4.0-alpha.2",
-  "reviewedAtUtc": "2026-08-16T18:30:00Z",
+  "reviewedAtUtc": "2026-08-17T22:30:00Z",
   "status": "qualification-inventory-not-selection-policy",
   "capabilities": [
     "general.chat",
@@ -11,7 +11,7 @@
   ],
   "qualificationProvider": {
     "name": "ollama",
-    "exactVersion": "0.32.13",
+    "exactVersion": "0.32.14",
     "transport": "ipv4-loopback-only"
   },
   "rules": {
@@ -42,6 +42,7 @@
               "manifestDigest": "f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4",
               "modelLayerDigest": "afb707b6b8fac6e475acc42bc8380fc0b8d2e0e4190be5a969fbf62fcc897db5",
               "modelBytes": 1036034688,
+              "downloadBytes": 1036046583,
               "quantization": "Q8_0",
               "hardwareClass": "constrained",
               "minimumOllamaVersion": "0.32.5",
@@ -53,6 +54,7 @@
               "manifestDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
               "modelLayerDigest": "b709d81508a078a686961de6ca07a953b895d9b286c46e17f00fb267f4f2d297",
               "modelBytes": 2741180928,
+              "downloadBytes": 2741192820,
               "quantization": "Q8_0",
               "hardwareClass": "constrained",
               "minimumOllamaVersion": "0.32.5",
@@ -64,10 +66,23 @@
               "manifestDigest": "2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
               "modelLayerDigest": "81fb60c7daa80fc1123380b98970b320ae233409f0f71a72ed7b9b0d62f40490",
               "modelBytes": 3389971840,
+              "downloadBytes": 3389983735,
               "quantization": "Q4_K_M",
               "hardwareClass": "mainstream",
               "minimumOllamaVersion": "0.32.5",
               "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen35-4b-q4"
+            },
+            {
+              "id": "qwen35-9b-q4",
+              "model": "qwen3.5:9b",
+              "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+              "modelLayerDigest": "dec52a44569a2a25341c4e4d3fee25846eed4f6f0b936278e3a3c900bb99d37c",
+              "modelBytes": 6594462816,
+              "downloadBytes": 6594474711,
+              "quantization": "Q4_K_M",
+              "hardwareClass": "high",
+              "minimumOllamaVersion": "0.32.5",
+              "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#qwen35-9b-q4"
             }
           ]
         },
@@ -164,6 +179,7 @@
               "manifestDigest": "f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a",
               "modelLayerDigest": "e8ad13eff07a78d89926e9e8b882317d082ef5bf9768ad7b50fcdbbcd63748de",
               "modelBytes": 8149180896,
+              "downloadBytes": 8149190253,
               "quantization": "Q4_K_M",
               "hardwareClass": "high"
             }

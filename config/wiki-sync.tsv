@@ -40,6 +40,11 @@ docs/evidence-catalog.md	Eng-Evidence-Catalog.md	Evidence Catalog
 docs/capability-evidence-contract.md	Eng-Capability-Evidence-Contract.md	Capability Evidence Contract
 docs/wiki-evidence-summary.md	Eng-Evidence-Summary.md	Evidence Dashboard
 docs/evidence-dashboard.md	Eng-Evidence-Dashboard.md	Engineering Evidence Dashboard
+docs/evidence-input-binding.md	Eng-Evidence-Input-Binding.md	Evidence Input Binding
+docs/hardware-qualification-evidence-template.md	Eng-Hardware-Qualification-Evidence-Template.md	Hardware Qualification Evidence Template
+docs/hardware-qualification-publication-workflow.md	Eng-Hardware-Qualification-Publication-Workflow.md	Hardware Qualification Publication Workflow
+docs/model-coding-agent-screen.md	Eng-Model-Coding-Agent-Screen.md	Model Coding-Agent Screen
+docs/model-recommendation-explanations.md	Eng-Model-Recommendation-Explanations.md	Model Recommendation Explanations
 docs/solution-architecture-review.md	Eng-Solution-Architecture-Review.md	Solution Architecture Review
 docs/model-scorecard.md	Eng-Model-Scorecard.md	Model Scorecard
 docs/workflow-registry.md	Eng-Workflow-Registry.md	Workflow Registry
@@ -185,11 +190,39 @@ docs/evidence-records/evidence-eee8463c09ed1a53.md	Evidence-Record-eee8463c09ed1
 docs/evidence-records/evidence-c836e3b6f82ceb6c.md	Evidence-Record-c836e3b6f82ceb6c.md	Aider CLI richer disposable scoped-edit validation
 docs/evidence-records/evidence-4c8889255c609520.md	Evidence-Record-4c8889255c609520.md	Aider and OpenCode candidate lifecycle plans
 docs/evidence-records/evidence-c48f68ae267ddaeb.md	Evidence-Record-c48f68ae267ddaeb.md	Continue CLI model test harness
+docs/evidence-records/evidence-23ddebcd60acad2e.md	Evidence-Record-23ddebcd60acad2e.md	Gemma 3 1B coding workflow screen
+docs/evidence-records/evidence-0c002ac81e91a029.md	Evidence-Record-0c002ac81e91a029.md	Granite 4.1 30B coding workflow screen
+docs/evidence-records/evidence-a108eefa61d6f8db.md	Evidence-Record-a108eefa61d6f8db.md	LFM 2.5 8B-A1B coding workflow screen
+docs/evidence-records/evidence-9f4ed4080a80264a.md	Evidence-Record-9f4ed4080a80264a.md	MiniCPM V 4.6 1B coding workflow screen
+docs/evidence-records/evidence-46cf85b53624763d.md	Evidence-Record-46cf85b53624763d.md	Ministral 3 3B coding workflow screen
+docs/evidence-records/evidence-cec3d35c28ceb7dd.md	Evidence-Record-cec3d35c28ceb7dd.md	Ministral 3 8B coding workflow screen
+docs/evidence-records/evidence-864cfafcaa524a47.md	Evidence-Record-864cfafcaa524a47.md	Muse Glimmer 30B coding workflow screen
+docs/evidence-records/evidence-17626c4549c81ab9.md	Evidence-Record-17626c4549c81ab9.md	Nemotron 3 Nano Omni 33B coding workflow screen
+docs/evidence-records/evidence-e09950a8ffba61a0.md	Evidence-Record-e09950a8ffba61a0.md	Nemotron 3.5 Lightning Q4 coding workflow screen
+docs/evidence-records/evidence-5fbb9a96f1c4a37d.md	Evidence-Record-5fbb9a96f1c4a37d.md	Nemotron 3.5 Lightning Q8 coding workflow screen
+docs/evidence-records/evidence-fd18a0f49cec996b.md	Evidence-Record-fd18a0f49cec996b.md	North Mini Code 1.0 30B-A3B coding workflow screen
+docs/evidence-records/evidence-7148c5d475b46ccd.md	Evidence-Record-7148c5d475b46ccd.md	OpenCode 1.18.11 19-model disposable-repository screen on RTX 3060
 docs/evidence-records/evidence-1e2f129e7b81d26f.md	Evidence-Record-1e2f129e7b81d26f.md	OpenCode CLI Devstral Small 2 generated-sample scoped edit
 docs/evidence-records/evidence-3a97cf812d7ead4b.md	Evidence-Record-3a97cf812d7ead4b.md	OpenCode CLI Devstral Small 2 generated-sample validation
 docs/evidence-records/evidence-cba49f1efb99951d.md	Evidence-Record-cba49f1efb99951d.md	OpenCode CLI qwen3.5 35B write smoke
 docs/evidence-records/evidence-0077a93bb585cbc8.md	Evidence-Record-0077a93bb585cbc8.md	OpenCode CLI qwen3.5 9B read validation
 docs/evidence-records/evidence-b7a23e13a579dff1.md	Evidence-Record-b7a23e13a579dff1.md	OpenCode CLI wrapper scaffold
+docs/evidence-records/evidence-fdfbebccf314f75a.md	Evidence-Record-fdfbebccf314f75a.md	Ornith 1.0 9B coding workflow screen
+docs/evidence-records/evidence-5744f686ee69ee9f.md	Evidence-Record-5744f686ee69ee9f.md	Qwen 3.5 0.8B coding workflow screen
+docs/evidence-records/evidence-3f07eddd1d3c4c51.md	Evidence-Record-3f07eddd1d3c4c51.md	Qwen 3.5 2B coding workflow screen
+docs/evidence-records/evidence-fe50ca6d08f51589.md	Evidence-Record-fe50ca6d08f51589.md	Qwen 3.5 4B VS Code Continue active-file recovery retest on Radeon RX 5700 XT 8 GiB
+docs/evidence-records/evidence-bcc43e041506855b.md	Evidence-Record-bcc43e041506855b.md	Qwen 3.5 4B VS Code Continue controlled editor retest with Python extension
+docs/evidence-records/evidence-8bad8490965fc6d2.md	Evidence-Record-8bad8490965fc6d2.md	Qwen 3.5 4B VS Code Continue editor workflow on Radeon RX 5700 XT 8 GiB
+docs/evidence-records/evidence-3208bee0b01e1ddd.md	Evidence-Record-3208bee0b01e1ddd.md	Qwen 3.5 4B VS Code Continue explicit two-file retest on Radeon RX 5700 XT 8 GiB
+docs/evidence-records/evidence-6550349b706f26e4.md	Evidence-Record-6550349b706f26e4.md	Qwen 3.5 4B VSCodium Continue editor comparison on Radeon RX 5700 XT 8 GiB
+docs/evidence-records/evidence-492ea3ff6c97b8c5.md	Evidence-Record-492ea3ff6c97b8c5.md	Qwen 3.5 4B coding reliability soak on Radeon RX 5700 XT 8 GiB
+docs/evidence-records/evidence-93e8cb104f42daa6.md	Evidence-Record-93e8cb104f42daa6.md	Qwen 3.5 4B coding workflow on Radeon RX 5700 XT 8 GiB
+docs/evidence-records/evidence-841c8bfeebc76fb4.md	Evidence-Record-841c8bfeebc76fb4.md	Qwen 3.5 4B coding workflow screen
+docs/evidence-records/evidence-9bfaa61b1508e210.md	Evidence-Record-9bfaa61b1508e210.md	Qwen 3.5 4B native VS Code Chat read-only repository inspection
+docs/evidence-records/evidence-deb665f24d7374ee.md	Evidence-Record-deb665f24d7374ee.md	Qwen 3.6 27B Q4 coding workflow screen
+docs/evidence-records/evidence-993d371eb43c7b6d.md	Evidence-Record-993d371eb43c7b6d.md	Qwen 3.6 35B-A3B Q4 coding workflow screen
+docs/evidence-records/evidence-743034b6d1e30dc9.md	Evidence-Record-743034b6d1e30dc9.md	Qwen 3.8 27B coding workflow screen
+docs/evidence-records/evidence-cfa90771bd9c89a4.md	Evidence-Record-cfa90771bd9c89a4.md	Qwen 3.8 27B native VS Code Chat read-only repository inspection
 docs/evidence-records/evidence-ef3643c281067618.md	Evidence-Record-ef3643c281067618.md	Shared agent CLI model test harness
 docs/evidence-records/evidence-6fe6a89227168b12.md	Evidence-Record-6fe6a89227168b12.md	Explicit research approval review
 docs/evidence-records/evidence-2403d4a9edd19c95.md	Evidence-Record-2403d4a9edd19c95.md	Live fixed-Wikipedia Alpha 2 package runtime
@@ -223,7 +256,7 @@ docs/evidence-records/evidence-e868714f9f8c5344.md	Evidence-Record-e868714f9f8c5
 docs/evidence-records/evidence-b91e58b8e387a4cc.md	Evidence-Record-b91e58b8e387a4cc.md	Qwen 3.5 9B writing constraint matrix
 docs/evidence-records/evidence-07a5bd4578f3108f.md	Evidence-Record-07a5bd4578f3108f.md	Radeon RX 5700 XT exact Ubuntu Vulkan profile
 docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b24c.md	Script-level recommendation and config generation
-docs/evidence-records/evidence-30fc24f8aa3ddc2b.md	Evidence-Record-30fc24f8aa3ddc2b.md	Radeon RX 5700 XT current-boot host stability
+docs/evidence-records/evidence-27f4eaa91d0b896d.md	Evidence-Record-27f4eaa91d0b896d.md	Radeon RX 5700 XT current-boot host stability
 docs/evidence-records/evidence-05d02ca020d00629.md	Evidence-Record-05d02ca020d00629.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-13d3451c24d5c713.md	Evidence-Record-13d3451c24d5c713.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-d2ac550dc4f53937.md	Evidence-Record-d2ac550dc4f53937.md	llama.cpp 11-model identical-byte AMD/NVIDIA matrix
@@ -233,6 +266,8 @@ docs/evidence-records/evidence-1a16a98b5cd40e10.md	Evidence-Record-1a16a98b5cd40
 docs/evidence-records/evidence-3d02244dab060bc7.md	Evidence-Record-3d02244dab060bc7.md	llama.cpp SYCL on Intel Arc B580
 docs/evidence-records/evidence-a43711f9d74d1e5f.md	Evidence-Record-a43711f9d74d1e5f.md	llama.cpp SYCL on Intel Arc B580
 docs/evidence-records/evidence-d535eb939e00de72.md	Evidence-Record-d535eb939e00de72.md	llama.cpp Windows NVIDIA and AMD follow-on matrix
+docs/evidence-records/evidence-ded5fc576317be66.md	Evidence-Record-ded5fc576317be66.md	llama.cpp b10375 Vulkan smoke on Radeon RX 5700 XT
+docs/evidence-records/evidence-2ee5449c5143bfd7.md	Evidence-Record-2ee5449c5143bfd7.md	llama.cpp b10375 Vulkan task and soak on Radeon RX 5700 XT
 docs/evidence-records/evidence-61e94680de9075db.md	Evidence-Record-61e94680de9075db.md	Approved-write install profile
 docs/evidence-records/evidence-fbf3040ee5b605aa.md	Evidence-Record-fbf3040ee5b605aa.md	Read-only install profile
 docs/evidence-records/evidence-c730707485ed58be.md	Evidence-Record-c730707485ed58be.md	Memory lexical retrieval hardening
@@ -270,6 +305,7 @@ docs/evidence-records/evidence-c3662ac9bec5b4b8.md	Evidence-Record-c3662ac9bec5b
 docs/evidence-records/evidence-14e2d57e6336807d.md	Evidence-Record-14e2d57e6336807d.md	Ministral 3 3B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-83b23ecb83be18a7.md	Evidence-Record-83b23ecb83be18a7.md	Ministral 3 8B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-9374faea1e5a9476.md	Evidence-Record-9374faea1e5a9476.md	Muse Glimmer 30B Q4 on dual Tesla V100
+docs/evidence-records/evidence-7f16789ca3e3811c.md	Evidence-Record-7f16789ca3e3811c.md	NVIDIA GeForce RTX 3060 12 GB 19-model qualification
 docs/evidence-records/evidence-d25ff2272d76e84f.md	Evidence-Record-d25ff2272d76e84f.md	Nemotron 3 Nano Omni 33B Q4 on dual Tesla V100
 docs/evidence-records/evidence-3cde6c27785c5e96.md	Evidence-Record-3cde6c27785c5e96.md	Nemotron 3.5 Lightning Q4 on Ollama 0.32.13 dual Tesla V100
 docs/evidence-records/evidence-999c817bcb50d175.md	Evidence-Record-999c817bcb50d175.md	Nemotron 3.5 Lightning Q4 on dual Tesla V100
@@ -285,6 +321,7 @@ docs/evidence-records/evidence-f96c1a3dd255db29.md	Evidence-Record-f96c1a3dd255d
 docs/evidence-records/evidence-6c0d4b52091120fa.md	Evidence-Record-6c0d4b52091120fa.md	Qwen 3.6 35B-A3B Q4 on dual Tesla V100
 docs/evidence-records/evidence-6c09cdefc61c0f82.md	Evidence-Record-6c09cdefc61c0f82.md	Qwen 3.8 27B Q4 on dual Tesla V100
 docs/evidence-records/evidence-ad991e5601c892ec.md	Evidence-Record-ad991e5601c892ec.md	Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification
+docs/evidence-records/evidence-f5989f6fc215258e.md	Evidence-Record-f5989f6fc215258e.md	Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification
 docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
 docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
 docs/evidence-records/evidence-8a4966fb74923f8b.md	Evidence-Record-8a4966fb74923f8b.md	Devstral Small 2 MLX endpoint tool call
@@ -318,7 +355,11 @@ docs/evidence-records/evidence-588241e349f32b95.md	Evidence-Record-588241e349f32
 docs/evidence-records/evidence-dff8d8e0aff407ab.md	Evidence-Record-dff8d8e0aff407ab.md	Generated TypeScript sample workflows
 docs/evidence-records/evidence-2de3f0726ddaba91.md	Evidence-Record-2de3f0726ddaba91.md	Online model discovery
 docs/evidence-records/evidence-2589000e63822b5e.md	Evidence-Record-2589000e63822b5e.md	Windows Alpha 2 current UI package parity
+docs/evidence-records/evidence-58d8481eef7a394b.md	Evidence-Record-58d8481eef7a394b.md	NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power
 docs/evidence-records/evidence-9a9906ccfd247313.md	Evidence-Record-9a9906ccfd247313.md	Radeon RX 5700 XT Llama 3.2 3B board power
+docs/evidence-records/evidence-0b86ce2eeb867f1f.md	Evidence-Record-0b86ce2eeb867f1f.md	Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power
+docs/evidence-records/evidence-2aa29208b11bc71d.md	Evidence-Record-2aa29208b11bc71d.md	Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power
+docs/evidence-records/evidence-ad94c1f53c81365c.md	Evidence-Record-ad94c1f53c81365c.md	Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power
 docs/evidence-records/evidence-77e5fbc983b71597.md	Evidence-Record-77e5fbc983b71597.md	Remote hardware profiling
 docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ede9d.md	Python API generated sample
 docs/evidence-records/evidence-22701a5715776e0d.md	Evidence-Record-22701a5715776e0d.md	TypeScript frontend generated sample

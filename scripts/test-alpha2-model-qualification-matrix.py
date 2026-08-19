@@ -61,11 +61,22 @@ def main() -> None:
         for candidate in matrix["candidates"]
     }
     accelerated_8gib_profiles = [
-        "cpu-16gib", "cuda-16gib", "vulkan-8gib-system-16gib"
+        "cpu-16gib",
+        "cuda-16gib",
+        "cuda-12gib-system-32gib",
+        "vulkan-8gib-system-16gib",
     ]
     assert candidate_profiles["gemma4-e2b-qat"] == accelerated_8gib_profiles
     assert candidate_profiles["gemma4-e4b-qat"] == accelerated_8gib_profiles
-    assert candidate_profiles["gemma4-12b-qat"] == ["cuda-16gib"]
+    assert candidate_profiles["gemma4-12b-qat"] == [
+        "cuda-16gib", "cuda-12gib-system-32gib"
+    ]
+    assert candidate_profiles["qwen35-9b-q4"] == [
+        "cuda-12gib-system-32gib"
+    ]
+    assert candidate_profiles["gemma3-12b-q4"] == [
+        "cuda-12gib-system-32gib"
+    ]
     assert candidate_profiles["qwen36-27b-q4"] == [
         "cuda-32gib-system-16gib"
     ]
@@ -81,6 +92,13 @@ def main() -> None:
         "backend": "cuda",
         "minimumSystemMemoryGiB": 31,
         "minimumUsableGpuMemoryGiB": 16,
+    }
+    assert profile_records["cuda-12gib-system-32gib"] == {
+        "id": "cuda-12gib-system-32gib",
+        "backend": "cuda",
+        "minimumSystemMemoryGiB": 31,
+        "minimumUsableGpuMemoryGiB": 12,
+        "minimumFreeGpuMemoryGiB": 2,
     }
     assert profile_records["vulkan-8gib-system-16gib"] == {
         "id": "vulkan-8gib-system-16gib",
@@ -114,10 +132,12 @@ def main() -> None:
     assert candidate_profiles["ornith-10-9b-q4"] == [
         "vulkan-8gib-system-16gib",
         "cuda-16gib",
+        "cuda-12gib-system-32gib",
     ]
     assert candidate_profiles["lfm25-8b-a1b-q4"] == [
         "vulkan-8gib-system-16gib",
         "cuda-16gib",
+        "cuda-12gib-system-32gib",
     ]
     assert candidate_profiles["north-mini-code-10-30b-a3b-q4"] == [
         "cuda-32gib-system-64gib"
@@ -128,6 +148,7 @@ def main() -> None:
     assert candidate_profiles["minicpm-v46-1b-q4"] == [
         "vulkan-8gib-system-16gib",
         "cuda-16gib",
+        "cuda-12gib-system-32gib",
     ]
     assert candidate_profiles["nemotron3-nano-omni-33b-q4"] == [
         "cuda-64gib-system-96gib"

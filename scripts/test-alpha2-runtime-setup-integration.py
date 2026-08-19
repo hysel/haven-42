@@ -109,7 +109,7 @@ def main() -> None:
         assert candidate["managedSetupCandidateAvailable"] is True
         assert binding["decision"] == "install"
         assert binding["engine"] == "ollama"
-        assert binding["selectedRuntimeVersion"] == "0.32.5"
+        assert binding["selectedRuntimeVersion"] == "0.32.14"
         assert binding["modelArtifact"]["exactTag"] == "qwen3.5:4b"
         assert binding["installationRoot"] == "Haven42-Data"
         assert setup.registered == [candidate["managedPlan"]]
@@ -174,7 +174,7 @@ def main() -> None:
             WEB.bind_managed_model_decisions = original_binding
         assert resumed["managedResume"]["resumed"] is True
         assert setup.resumed == 1
-        assert state.alpha_runtime_binding["selectedRuntimeVersion"] == "0.32.5"
+        assert state.alpha_runtime_binding["selectedRuntimeVersion"] == "0.32.14"
         assert state.alpha_runtime_plan_id == "alpha2-plan-1"
 
     print("Alpha 2 runtime/setup integration passed 26 fail-closed checks.")

@@ -41,7 +41,7 @@ ladder change remains a separate owner-approved product decision.
 | Hardware class | Graphics card | Memory | Location during testing | Initial status |
 | --- | --- | ---: | --- | --- |
 | NVIDIA constrained | GeForce GTX 1650 Super | 4 GiB | Proxmox rotation | Purchased; not yet tested |
-| NVIDIA mainstream | GeForce RTX 3060 | 12 GiB | Proxmox rotation | Purchased; not yet tested |
+| NVIDIA mainstream | GeForce RTX 3060 | 12 GiB | Separate physical dual-boot computer | Windows and Ubuntu 26.04 exact-profile engineering campaigns complete; packaged lifecycle and automatic-selection gates remain open |
 | NVIDIA workstation | Quadro RTX 5000 | 16 GiB | Proxmox baseline | Existing evidence |
 | NVIDIA datacenter | Tesla V100 | 32 GiB each | Proxmox baseline, two cards | Existing evidence |
 | AMD RDNA 1 | Radeon RX 5700 XT | 8 GiB | Separate physical dual-boot computer | Ubuntu Vulkan exact-profile engineering evidence complete; package, Windows, and final-profile memory gates remain open |

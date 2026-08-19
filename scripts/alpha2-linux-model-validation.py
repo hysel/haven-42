@@ -27,7 +27,7 @@ POLICY_PATH = ROOT / "config/alpha-2-model-selection-policy.json"
 COMPARISON_CONTRACT_PATH = ROOT / "config/alpha-2-model-comparison-contract.json"
 QUALIFICATION_INVENTORY_PATH = ROOT / "config/alpha-2-model-version-inventory.json"
 MANAGED_PROVIDER_VERSION = "0.32.5"
-QUALIFICATION_PROVIDER_VERSION = "0.32.13"
+QUALIFICATION_PROVIDER_VERSION = "0.32.14"
 CAPABILITIES = {
     "general.chat": "Answer with one short sentence confirming that a local service is responding.",
     "content.write": "Write one concise sentence encouraging careful software testing.",

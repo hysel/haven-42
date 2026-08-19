@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-hardware-qualification-evidence-contract",
+  "purpose": "Define the sanitized result boundary for one exact operating-system, runtime, driver, and accelerator cell.",
+  "allowedStatuses": [
+    "in-progress-local-review-only",
+    "exact-profile-engineering-evidence-complete"
+  ],
+  "requiredCampaignInputs": [
+    "profile.json",
+    "telemetry/events.tsv",
+    "telemetry/nvidia-smi.csv",
+    "results/core/summary.tsv"
+  ],
+  "telemetryRequirements": {
+    "explicitUtcOffsetForNaiveTimestamps": true,
+    "powerScope": "gpu-board-only-unless-another-source-is-explicitly-proven",
+    "separateWindows": [
+      "per-model core task gate",
+      "per-model thirty-minute soak",
+      "post-campaign idle"
+    ],
+    "wholeSystemPowerMayNotBeInferred": true
+  },
+  "completionRequires": [
+    "all pinned core results",
+    "all core-passing model soaks",
+    "core-complete event",
+    "soak-complete event",
+    "post-idle-complete event",
+    "fresh exact bindings for model inventory, qualification matrix, validators, and campaign orchestrators"
+  ],
+  "forbiddenContent": [
+    "network addresses",
+    "host names",
+    "user names",
+    "machine identifiers",
+    "credentials or keys",
+    "raw prompts or responses"
+  ],
+  "comparisonRules": {
+    "sameAcceleratorRequired": true,
+    "sameQualificationProfileRequired": true,
+    "missingCellsRemainNotRun": true,
+    "crossOperatingSystemInheritanceAllowed": false
+  },
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false
+}

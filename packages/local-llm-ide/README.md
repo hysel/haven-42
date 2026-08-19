@@ -3,11 +3,17 @@
 This is the optional coding-tools package. You do not need it to use the
 Haven 42 chat, writing, or summarization app.
 
-It helps configure three tools to use an Ollama model you already run:
+It helps configure two tools to use an Ollama model you already run:
 
-- **Continue** in VS Code or VSCodium
 - **Aider** in a terminal
 - **OpenCode** in a terminal or supported editor
+
+Continue in VS Code and VSCodium is legacy and evidence-only. This package does
+not copy `.continue/config.yaml`, write global Continue settings, advertise
+Continue setup, or provide a future requalification path. Controlled testing
+found inconsistent workspace configuration loading, unavailable edit tools,
+and an unintended write during a multi-file request. Sanitized historical
+records remain in the source repository so readers can understand that result.
 
 The package does not install those tools, Ollama, models, Python, drivers, or
 system services. The setup helper never downloads software. A configured tool
@@ -15,50 +21,19 @@ may manage its own dependencies when you later run it, so review that tool's
 documentation. Every setup command shows a preview first and changes files
 only when you add `--apply`.
 
-## Download
+## Availability
 
-Download these three files from the
-[Local LLM IDE Tools development prerelease](https://github.com/hysel/haven-42/releases/tag/local-llm-ide-tools-v0.1.0-development):
-
-- [Tools ZIP](https://github.com/hysel/haven-42/releases/download/local-llm-ide-tools-v0.1.0-development/haven42-local-llm-ide-tools-0.1.0-development.zip)
-- [SHA-256 checksum](https://github.com/hysel/haven-42/releases/download/local-llm-ide-tools-v0.1.0-development/haven42-local-llm-ide-tools-0.1.0-development.zip.sha256)
-- [Package manifest](https://github.com/hysel/haven-42/releases/download/local-llm-ide-tools-v0.1.0-development/haven42-local-llm-ide-tools-0.1.0-development.manifest.json)
-
-This is an unsigned development package, not a production release. The
-expected ZIP SHA-256 is:
-
-```text
-da12ab46c26aaf9ea4f4105b927345bfe3d0900a416591ba29b3a33edaf16644
-```
-
-On Windows, put the ZIP and checksum file in the same folder and run:
-
-```powershell
-$expected = (Get-Content .\haven42-local-llm-ide-tools-0.1.0-development.zip.sha256).Split()[0]
-$actual = (Get-FileHash -Algorithm SHA256 .\haven42-local-llm-ide-tools-0.1.0-development.zip).Hash
-$actual -eq $expected
-```
-
-The final command must show `True`. On Linux, run:
-
-```bash
-sha256sum -c haven42-local-llm-ide-tools-0.1.0-development.zip.sha256
-```
-
-On macOS, run:
-
-```bash
-shasum -a 256 -c haven42-local-llm-ide-tools-0.1.0-development.zip.sha256
-```
-
-The command must report `OK`. If verification fails, delete the files and do
-not run the setup helper.
+The earlier `0.1.0-development` package is retired because it included the
+unreliable Continue project bundle. Do not use it for a new setup. The corrected
+`0.1.1-development` package remains source-only until its package tests and
+release review pass; no new public download is claimed here.
 
 ## Start
 
-After verification, extract the ZIP and open a terminal in the extracted
-`haven42-local-llm-ide-tools` folder. You do not need to clone the Haven 42
-repository.
+This section applies after a contributor builds the source package or after a
+future reviewed `0.1.1-development` download is published. Verify its checksum,
+extract the ZIP, and open a terminal in the extracted
+`haven42-local-llm-ide-tools` folder.
 
 Open PowerShell in this folder on Windows:
 
@@ -77,15 +52,11 @@ your project.
 
 ## Continue
 
-Preview adding the Haven 42 prompts and rules to a project:
-
-```powershell
-.\setup.ps1 install-continue --target C:\path\to\project
-```
-
-Run the same command with `--apply` after checking the preview. If the project
-already has Continue settings, the command stops. Add `--replace` only when
-you want Haven 42 to create a `.continue.haven42-backup` and update the files.
+There is no end-user Continue install command. Do not copy the repository's
+`.continue` folder into a personal project and do not replace global Continue
+settings based on this package. The repository's Continue material is retained
+only as historical evidence and must not be presented as a supported setup or
+testing path.
 
 ## Aider or OpenCode
 

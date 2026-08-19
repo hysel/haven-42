@@ -26,10 +26,17 @@ Every agent surface should be tracked against the same activities:
 | `scaffolded` | The pack has wrapper or harness support, but live validation is incomplete. |
 | `planned` | The activity is tracked and intentionally not implemented yet. |
 | `blocked` | The activity requires command-shape, security, platform, or evidence decisions before implementation. |
+| `retired` | The integration is not maintained; only sanitized historical evidence remains. |
 
 ## Current Shape
 
-Continue remains the supported first editor path. Aider and OpenCode are supported non-Continue adapters within their generated-sample evidence limits. Failed and retired integrations are absent from the active capability catalog; OpenHands remains a documentation-only candidate with a defined but unimplemented isolation boundary.
+Continue is a hidden legacy surface. Its install, configure, test, health,
+cleanup, release, and model-selection activities are retired; only sanitized
+historical evidence remains available.
+Aider and OpenCode are supported adapters within their generated-sample
+evidence limits. Failed and retired integrations are absent from the active
+capability catalog; OpenHands remains a documentation-only candidate with a
+defined but unimplemented isolation boundary.
 
 Shared workflows such as health checks, cleanup, model selection, release readiness, and evidence verification apply across surfaces because they operate on the local repository, local model server, generated outputs, or shared validation artifacts rather than a surface-specific configuration format.
 

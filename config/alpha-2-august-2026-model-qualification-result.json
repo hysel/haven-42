@@ -62,6 +62,13 @@
     "nemotron35-lightning-30b-a3b-q8": ["additional-capability-evidence-incomplete", "license-review"]
   },
   "evidence": "examples/august-2026-new-model-qualification.md",
+  "codingAgentQualification": {
+    "policy": "config/model-coding-agent-qualification-policy.json",
+    "result": "config/model-coding-agent-qualification-result.json",
+    "evidence": "examples/august-2026-coding-agent-qualification.md",
+    "workflowScreenPassed": 5,
+    "codingAgentAdmissionStatus": "blocked"
+  },
   "containsPrivateMachineIdentity": false,
   "containsNetworkIdentity": false,
   "containsRawPromptsOrResponses": false,

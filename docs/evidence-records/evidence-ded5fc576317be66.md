@@ -1,28 +1,28 @@
-# Radeon RX 5700 XT current-boot host stability
+# llama.cpp b10375 Vulkan smoke on Radeon RX 5700 XT
 
 > Generated evidence page. The canonical machine-readable record is
-> `evidence-30fc24f8aa3ddc2b` in `config/evidence-page-registry.json`.
+> `evidence-ded5fc576317be66` in `config/evidence-page-registry.json`.
 
 ## What this record says
 
-The exact current boot completed 5,122,375 work units with zero detected machine-check, ECC, GPU-reset, CPU-lockup, thermal, or fatal-PCIe incidents; this is bounded engineering evidence and not a substitute for the still-open final-profile full-memory test.
+The hash-pinned runtime identified the exact RX 5700 XT, offloaded 25 of 25 layers, returned the exact bounded response at 277.092 generated units per second, raised VRAM by 647102464 bytes, returned VRAM to baseline, left no process residue, and preserved the existing Ollama service; the full model ladder, server adapter, sustained operation, package lifecycle, Windows, ROCm, and automatic admission remain open.
 
 | Result | Value |
 | --- | --- |
 | Status | `partial-pass` |
-| Validation method | Development Native |
-| Area | Hardware Stability |
+| Validation method | Local Endpoint |
+| Area | Inference Engine |
 
 ## Tested scope
 
 | Scope | Tested value |
 | --- | --- |
-| Surface | Haven 42 Linux host-stability harness |
-| Surface version | 1 |
-| Provider or runtime | Linux kernel and amdgpu |
+| Surface | llama.cpp CLI |
+| Surface version | b10375 |
+| Provider or runtime | Vulkan RADV |
 | Operating system | Ubuntu 26.04 LTS |
-| Model | no-model |
-| Operation | 600 Second Four Worker Cpu Smoke And Hardware Log Review |
+| Model | Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
+| Operation | Device Discovery Single Turn Full Offload Vram Cleanup |
 
 ## Source evidence
 

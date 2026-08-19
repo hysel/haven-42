@@ -11,6 +11,12 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+- Removed Continue project configuration from the end-user Local LLM IDE Tools
+  package and retired the earlier development ZIP after controlled VS Code and
+  VSCodium tests found unreliable workspace-config loading, unavailable edit
+  tools, and an unintended out-of-scope multi-file write. Contributor-only
+  Continue fixtures remain available for isolated validation.
+
 - Added version-pinned August 2026 qualification evidence for newly discovered
   local model candidates on Ollama 0.32.13, preserving task and capability
   failures, deferred artifacts, license gates, and the rule that evidence does

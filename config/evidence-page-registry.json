@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "d02a826cf6f84fd561b1439e812a82e1b323b16902fb3e34997ba8b85eee10d6",
-  "recordCount": 149,
+  "catalogSha256": "195dffb629d633360f7c78daa8723daa4e6e2c0e83386000f1b72cd0c517f8f4",
+  "recordCount": 185,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -234,6 +234,294 @@
       }
     },
     {
+      "id": "evidence-23ddebcd60acad2e",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Gemma 3 1B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "gemma3:1b-it-q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, read, review, approved write, and scoped edit all failed on the generated fixture; no coding-agent admission is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-23ddebcd60acad2e.md",
+        "wikiPage": "Evidence-Record-23ddebcd60acad2e.md",
+        "title": "Gemma 3 1B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-0c002ac81e91a029",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Granite 4.1 30B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "granite4.1:30b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, read, review, and scoped edit passed, but the approved-write phase failed; no coding-agent admission or cross-surface inheritance is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0c002ac81e91a029.md",
+        "wikiPage": "Evidence-Record-0c002ac81e91a029.md",
+        "title": "Granite 4.1 30B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-a108eefa61d6f8db",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "LFM 2.5 8B-A1B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "lfm2.5:8b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "Repository read passed, but API, review, approved write, and scoped edit failed; license review and all coding-agent admission gates remain open."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a108eefa61d6f8db.md",
+        "wikiPage": "Evidence-Record-a108eefa61d6f8db.md",
+        "title": "LFM 2.5 8B-A1B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-9f4ed4080a80264a",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "MiniCPM V 4.6 1B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "minicpm-v4.6:1b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "The API gate passed, but read, review, approved write, and scoped edit failed; no coding-agent admission is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9f4ed4080a80264a.md",
+        "wikiPage": "Evidence-Record-9f4ed4080a80264a.md",
+        "title": "MiniCPM V 4.6 1B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-46cf85b53624763d",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Ministral 3 3B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "ministral-3:3b-instruct-2512-q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, review, approved write, and scoped edit passed, but repository read and planning failed; no coding-agent admission is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-46cf85b53624763d.md",
+        "wikiPage": "Evidence-Record-46cf85b53624763d.md",
+        "title": "Ministral 3 3B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-cec3d35c28ceb7dd",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Ministral 3 8B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "ministral-3:8b-instruct-2512-q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, read, review, and scoped edit passed, but approved write failed; no coding-agent admission is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-cec3d35c28ceb7dd.md",
+        "wikiPage": "Evidence-Record-cec3d35c28ceb7dd.md",
+        "title": "Ministral 3 8B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-864cfafcaa524a47",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Muse Glimmer 30B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "muse-glimmer:30b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "All generated-repository coding workflow gates passed even though earlier general Writing and Summarization gates failed; conflicting evidence, reliability, human review, editor surfaces, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-864cfafcaa524a47.md",
+        "wikiPage": "Evidence-Record-864cfafcaa524a47.md",
+        "title": "Muse Glimmer 30B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-17626c4549c81ab9",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Nemotron 3 Nano Omni 33B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "nemotron3:33b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, read, and review passed, but approved write and scoped edit failed; license review and all coding-agent admission gates remain open."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-17626c4549c81ab9.md",
+        "wikiPage": "Evidence-Record-17626c4549c81ab9.md",
+        "title": "Nemotron 3 Nano Omni 33B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-e09950a8ffba61a0",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Nemotron 3.5 Lightning Q4 coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "nemotron-3.5-lightning:30b-a3b-q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, review, write, and scoped edit passed, but repository read and planning failed; license review and all coding-agent admission gates remain open."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e09950a8ffba61a0.md",
+        "wikiPage": "Evidence-Record-e09950a8ffba61a0.md",
+        "title": "Nemotron 3.5 Lightning Q4 coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-5fbb9a96f1c4a37d",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Nemotron 3.5 Lightning Q8 coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "nemotron-3.5-lightning:30b-a3b-q8_0",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, read, write, and scoped edit passed, but repository review failed; license review and all coding-agent admission gates remain open."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5fbb9a96f1c4a37d.md",
+        "wikiPage": "Evidence-Record-5fbb9a96f1c4a37d.md",
+        "title": "Nemotron 3.5 Lightning Q8 coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-fd18a0f49cec996b",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "North Mini Code 1.0 30B-A3B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "north-mini-code-1.0:q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "All generated-repository coding workflow gates passed; the earlier narrow coding JSON failure remains separate evidence, and reliability, human review, editor surfaces, and automatic admission remain blocked."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-fd18a0f49cec996b.md",
+        "wikiPage": "Evidence-Record-fd18a0f49cec996b.md",
+        "title": "North Mini Code 1.0 30B-A3B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-7148c5d475b46ccd",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "OpenCode 1.18.11 19-model disposable-repository screen on RTX 3060",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.11",
+        "provider": "Ollama 0.32.14",
+        "os": "Windows 11",
+        "model": "digest-pinned-19-model-corpus",
+        "operation": "repository-read-approved-write-scoped-edit-external-diff-unload",
+        "validation_mode": "generated-sample-agent",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx3060-model-qualification.md",
+        "notes": "Granite 4.1 8B Q4 passed repository read, approved write, scoped edit, external Git-diff, unintended-write, and unload checks; every other model missed at least one required workflow gate. Granite remains a candidate because its remaining policy gates and separate editor surfaces are incomplete, and cross-surface inheritance is forbidden."
+      },
+      "sourceEvidence": "examples/nvidia-rtx3060-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-7148c5d475b46ccd.md",
+        "wikiPage": "Evidence-Record-7148c5d475b46ccd.md",
+        "title": "OpenCode 1.18.11 19-model disposable-repository screen on RTX 3060"
+      }
+    },
+    {
       "id": "evidence-1e2f129e7b81d26f",
       "claim": {
         "schema_version": "2",
@@ -351,6 +639,390 @@
         "repositorySource": "docs/evidence-records/evidence-b7a23e13a579dff1.md",
         "wikiPage": "Evidence-Record-b7a23e13a579dff1.md",
         "title": "OpenCode CLI wrapper scaffold"
+      }
+    },
+    {
+      "id": "evidence-fdfbebccf314f75a",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Ornith 1.0 9B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "ornith:9b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, read, write, and scoped edit passed, but repository review failed; no coding-agent admission or cross-surface inheritance is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-fdfbebccf314f75a.md",
+        "wikiPage": "Evidence-Record-fdfbebccf314f75a.md",
+        "title": "Ornith 1.0 9B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-5744f686ee69ee9f",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 0.8B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "qwen3.5:0.8b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "The API gate passed, but read, review, approved write, and scoped edit failed; no coding-agent admission is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5744f686ee69ee9f.md",
+        "wikiPage": "Evidence-Record-5744f686ee69ee9f.md",
+        "title": "Qwen 3.5 0.8B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-3f07eddd1d3c4c51",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 2B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "qwen3.5:2b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, approved write, and scoped edit passed, but repository read and review failed; no coding-agent admission is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3f07eddd1d3c4c51.md",
+        "wikiPage": "Evidence-Record-3f07eddd1d3c4c51.md",
+        "title": "Qwen 3.5 2B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-fe50ca6d08f51589",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B VS Code Continue active-file recovery retest on Radeon RX 5700 XT 8 GiB",
+        "surface": "VS Code-compatible + Continue",
+        "surface_version": "1.127.0 + 2.1.0 + Python 2026.4.0",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "active-file-single-scoped-edit-external-diff",
+        "validation_mode": "editor-agent",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "After reverting a stale unsaved editor buffer, Continue applied the exact requested change to the active app/main.py file and external Git confirmed one intended tracked change with no unintended writes. The existing test failed because updating tests/test_main.py was explicitly outside this single-file prompt; this recovery does not erase the separate multi-file edit-tool failures."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-fe50ca6d08f51589.md",
+        "wikiPage": "Evidence-Record-fe50ca6d08f51589.md",
+        "title": "Qwen 3.5 4B VS Code Continue active-file recovery retest on Radeon RX 5700 XT 8 GiB"
+      }
+    },
+    {
+      "id": "evidence-bcc43e041506855b",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B VS Code Continue controlled editor retest with Python extension",
+        "surface": "VS Code-compatible + Continue",
+        "surface_version": "1.127.0 + 2.1.0 + Python 2026.4.0",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "exact-file-read-edit-tool-availability-external-diff",
+        "validation_mode": "editor-agent",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "From a clean baseline with the Python extension already installed, Continue read both files but reported its edit tool unavailable, offered manual code, and incorrectly claimed modification; external Git found zero tracked changes, so Python tooling did not resolve the editor write failure."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-bcc43e041506855b.md",
+        "wikiPage": "Evidence-Record-bcc43e041506855b.md",
+        "title": "Qwen 3.5 4B VS Code Continue controlled editor retest with Python extension"
+      }
+    },
+    {
+      "id": "evidence-8bad8490965fc6d2",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B VS Code Continue editor workflow on Radeon RX 5700 XT 8 GiB",
+        "surface": "VS Code-compatible + Continue",
+        "surface_version": "1.127.0 + 2.1.0",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "read-tools-approved-two-file-write-external-test-bounded-patch-recovery",
+        "validation_mode": "editor-agent",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "Repository tools and exact two-file write passed external verification and one Python test after cancelling one stuck patch action and retrying the remaining file; editor-request GPU residency, a clean first-pass apply, blind review, VSCodium, native chat, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-8bad8490965fc6d2.md",
+        "wikiPage": "Evidence-Record-8bad8490965fc6d2.md",
+        "title": "Qwen 3.5 4B VS Code Continue editor workflow on Radeon RX 5700 XT 8 GiB"
+      }
+    },
+    {
+      "id": "evidence-3208bee0b01e1ddd",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B VS Code Continue explicit two-file retest on Radeon RX 5700 XT 8 GiB",
+        "surface": "VS Code-compatible + Continue",
+        "surface_version": "1.127.0 + 2.1.0 + Python 2026.4.0",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "explicit-two-file-read-edit-tool-external-diff-unintended-write",
+        "validation_mode": "editor-agent",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "Continue read both explicitly attached approved files, reported two unavailable edit-tool attempts, changed neither approved file, and wrote the requested test function into the explicitly out-of-scope app/settings.py file. External Git detected the unintended write; this surface must not be recommended for approved multi-file edits."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-3208bee0b01e1ddd.md",
+        "wikiPage": "Evidence-Record-3208bee0b01e1ddd.md",
+        "title": "Qwen 3.5 4B VS Code Continue explicit two-file retest on Radeon RX 5700 XT 8 GiB"
+      }
+    },
+    {
+      "id": "evidence-6550349b706f26e4",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B VSCodium Continue editor comparison on Radeon RX 5700 XT 8 GiB",
+        "surface": "VSCodium + Continue",
+        "surface_version": "1.126.04524 + 2.1.0 + Python 2026.4.0",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows editor and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "exact-file-read-agent-edit-fallback-apply-external-diff",
+        "validation_mode": "editor-agent",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "Continue read both exact files, but two Agent edit actions failed and fallback Apply could not resolve a filepath; external Git confirmed zero tracked changes and no unintended writes."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6550349b706f26e4.md",
+        "wikiPage": "Evidence-Record-6550349b706f26e4.md",
+        "title": "Qwen 3.5 4B VSCodium Continue editor comparison on Radeon RX 5700 XT 8 GiB"
+      }
+    },
+    {
+      "id": "evidence-492ea3ff6c97b8c5",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B coding reliability soak on Radeon RX 5700 XT 8 GiB",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "26-read-review-write-scoped-edit-workflows-cancellation-recovery-residency-unload",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "A 30.2-minute run passed 26 complete coding workflows, three transport cancellation recoveries, 29 full-residency checks, and 30 unload checks; internal application cancellation, the remaining reliability scenarios, human review, editor surfaces, and automatic admission remain blocked."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-492ea3ff6c97b8c5.md",
+        "wikiPage": "Evidence-Record-492ea3ff6c97b8c5.md",
+        "title": "Qwen 3.5 4B coding reliability soak on Radeon RX 5700 XT 8 GiB"
+      }
+    },
+    {
+      "id": "evidence-93e8cb104f42daa6",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B coding workflow on Radeon RX 5700 XT 8 GiB",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 26.04 AMD Radeon RX 5700 XT model host",
+        "model": "qwen3.5:4b",
+        "operation": "api-read-review-write-scoped-edit-full-gpu-residency",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "All generated-repository coding workflow gates passed with the exact 3.14 GB artifact fully resident in 8 GiB GPU memory; the separate bounded coding-reliability result is recorded independently, while human review, editor surfaces, and automatic admission remain blocked."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-93e8cb104f42daa6.md",
+        "wikiPage": "Evidence-Record-93e8cb104f42daa6.md",
+        "title": "Qwen 3.5 4B coding workflow on Radeon RX 5700 XT 8 GiB"
+      }
+    },
+    {
+      "id": "evidence-841c8bfeebc76fb4",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "qwen3.5:4b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "All generated-repository coding workflow gates passed; reliability, human review, editor surfaces, and automatic admission remain blocked."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-841c8bfeebc76fb4.md",
+        "wikiPage": "Evidence-Record-841c8bfeebc76fb4.md",
+        "title": "Qwen 3.5 4B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-9bfaa61b1508e210",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.5 4B native VS Code Chat read-only repository inspection",
+        "surface": "VS Code native Chat + official Ollama extension",
+        "surface_version": "1.133.0 + 0.0.8",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.5:4b",
+        "operation": "read-files-follow-import-explain-test-no-commands",
+        "validation_mode": "generated-sample-editor-chat",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/native-vscode-chat-validation.md",
+        "notes": "The assistant grounded its answer in the three permitted fixture files, correctly explained the exact response and test assertion, made no edits, and correctly declined to claim Git cleanliness without running a prohibited command; plan, review, terminal, write, and approved-write capabilities remain unproven."
+      },
+      "sourceEvidence": "examples/native-vscode-chat-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-9bfaa61b1508e210.md",
+        "wikiPage": "Evidence-Record-9bfaa61b1508e210.md",
+        "title": "Qwen 3.5 4B native VS Code Chat read-only repository inspection"
+      }
+    },
+    {
+      "id": "evidence-deb665f24d7374ee",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.6 27B Q4 coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "qwen3.6:27b-q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "failed-validation",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "API, review, write, and scoped edit passed, but repository read and planning failed; no coding-agent admission or cross-surface inheritance is allowed."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-deb665f24d7374ee.md",
+        "wikiPage": "Evidence-Record-deb665f24d7374ee.md",
+        "title": "Qwen 3.6 27B Q4 coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-993d371eb43c7b6d",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.6 35B-A3B Q4 coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "qwen3.6:35b-a3b-q4_K_M",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "All generated-repository coding workflow gates passed on the exact dual-V100 profile; reliability, human review, editor surfaces, and automatic admission remain blocked."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-993d371eb43c7b6d.md",
+        "wikiPage": "Evidence-Record-993d371eb43c7b6d.md",
+        "title": "Qwen 3.6 35B-A3B Q4 coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-743034b6d1e30dc9",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.8 27B coding workflow screen",
+        "surface": "Continue CLI",
+        "surface_version": "1.5.47",
+        "provider": "Ollama 0.32.13",
+        "os": "Windows controller and Ubuntu 24.04.4 CUDA model host",
+        "model": "qwen3.8:27b",
+        "operation": "api-read-review-write-scoped-edit",
+        "validation_mode": "generated-sample",
+        "status": "partial-pass",
+        "evidence": "examples/august-2026-coding-agent-qualification.md",
+        "notes": "All generated-repository coding workflow gates passed on the exact dual-V100 profile; reliability, human review, editor surfaces, and automatic admission remain blocked."
+      },
+      "sourceEvidence": "examples/august-2026-coding-agent-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-743034b6d1e30dc9.md",
+        "wikiPage": "Evidence-Record-743034b6d1e30dc9.md",
+        "title": "Qwen 3.8 27B coding workflow screen"
+      }
+    },
+    {
+      "id": "evidence-cfa90771bd9c89a4",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Qwen 3.8 27B native VS Code Chat read-only repository inspection",
+        "surface": "VS Code native Chat + official Ollama extension",
+        "surface_version": "1.133.0 + 0.0.8",
+        "provider": "Ollama",
+        "os": "Windows",
+        "model": "qwen3.8:27b",
+        "operation": "read-files-follow-import-explain-test-no-commands",
+        "validation_mode": "generated-sample-editor-chat",
+        "status": "read-only-tool-validated",
+        "evidence": "examples/native-vscode-chat-validation.md",
+        "notes": "The assistant grounded its answer in three exact fixture files, correctly explained the response and equality test, made no edits, and correctly declined to claim Git cleanliness without running a prohibited command; plan, review, terminal, write, and approved-write capabilities remain unproven."
+      },
+      "sourceEvidence": "examples/native-vscode-chat-validation.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-cfa90771bd9c89a4.md",
+        "wikiPage": "Evidence-Record-cfa90771bd9c89a4.md",
+        "title": "Qwen 3.8 27B native VS Code Chat read-only repository inspection"
       }
     },
     {
@@ -1146,7 +1818,7 @@
       }
     },
     {
-      "id": "evidence-30fc24f8aa3ddc2b",
+      "id": "evidence-27f4eaa91d0b896d",
       "claim": {
         "schema_version": "2",
         "area": "hardware-stability",
@@ -1156,16 +1828,16 @@
         "provider": "Linux kernel and amdgpu",
         "os": "Ubuntu 26.04 LTS",
         "model": "no-model",
-        "operation": "600-second-four-worker-cpu-smoke-and-hardware-log-review",
+        "operation": "cpu-smoke-uptime-hardware-log-review-owner-acceptance",
         "validation_mode": "development-native",
         "status": "partial-pass",
         "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
-        "notes": "The exact current boot completed 5,122,375 work units with zero detected machine-check, ECC, GPU-reset, CPU-lockup, thermal, or fatal-PCIe incidents; this is bounded engineering evidence and not a substitute for the still-open final-profile full-memory test."
+        "notes": "The owner accepted the exact profile as operationally stable after disabling Global C-state control. The reviewed boot reported 78782 seconds uptime, zero failed units, and no matching machine-check, memory, GPU-reset, CPU-lockup, critical-thermal, or fatal-PCIe incident; the machine-reported boot had not yet reached 24 hours and the final-profile memory test remains open."
       },
       "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
       "page": {
-        "repositorySource": "docs/evidence-records/evidence-30fc24f8aa3ddc2b.md",
-        "wikiPage": "Evidence-Record-30fc24f8aa3ddc2b.md",
+        "repositorySource": "docs/evidence-records/evidence-27f4eaa91d0b896d.md",
+        "wikiPage": "Evidence-Record-27f4eaa91d0b896d.md",
         "title": "Radeon RX 5700 XT current-boot host stability"
       }
     },
@@ -1383,6 +2055,54 @@
         "repositorySource": "docs/evidence-records/evidence-d535eb939e00de72.md",
         "wikiPage": "Evidence-Record-d535eb939e00de72.md",
         "title": "llama.cpp Windows NVIDIA and AMD follow-on matrix"
+      }
+    },
+    {
+      "id": "evidence-ded5fc576317be66",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp b10375 Vulkan smoke on Radeon RX 5700 XT",
+        "surface": "llama.cpp CLI",
+        "surface_version": "b10375",
+        "provider": "Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+        "operation": "device-discovery-single-turn-full-offload-vram-cleanup",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The hash-pinned runtime identified the exact RX 5700 XT, offloaded 25 of 25 layers, returned the exact bounded response at 277.092 generated units per second, raised VRAM by 647102464 bytes, returned VRAM to baseline, left no process residue, and preserved the existing Ollama service; the full model ladder, server adapter, sustained operation, package lifecycle, Windows, ROCm, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ded5fc576317be66.md",
+        "wikiPage": "Evidence-Record-ded5fc576317be66.md",
+        "title": "llama.cpp b10375 Vulkan smoke on Radeon RX 5700 XT"
+      }
+    },
+    {
+      "id": "evidence-2ee5449c5143bfd7",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "llama.cpp b10375 Vulkan task and soak on Radeon RX 5700 XT",
+        "surface": "llama.cpp server",
+        "surface_version": "b10375",
+        "provider": "Vulkan AMD proprietary 26.7.1",
+        "os": "Windows 10.0.26200.8973",
+        "model": "Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+        "operation": "chat-writing-summary-task-gate-30-minute-soak-full-offload-cleanup",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The exact hash-pinned Windows runtime offloaded all 25 layers, passed nine of nine task-gate samples and 1,602 of 1,602 paced soak requests over 1,801 seconds, produced 31,506 completion units, and passed device proof and cleanup; Windows Ollama, packaged lifecycle, other models, and automatic admission remain open."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2ee5449c5143bfd7.md",
+        "wikiPage": "Evidence-Record-2ee5449c5143bfd7.md",
+        "title": "llama.cpp b10375 Vulkan task and soak on Radeon RX 5700 XT"
       }
     },
     {
@@ -2274,6 +2994,30 @@
       }
     },
     {
+      "id": "evidence-7f16789ca3e3811c",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "NVIDIA GeForce RTX 3060 12 GB 19-model qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "digest-pinned-19-model-corpus",
+        "operation": "exact-artifact-core-task-gate-and-30-minute-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx3060-model-qualification.md",
+        "notes": "All 19 artifacts passed exact identity checks; 14 passed Chat, Writing, and Summarization and then passed independent 30-minute soaks, while five stopped at explicit task-contract failures. This exact driver/runtime/hardware evidence does not change automatic defaults, runtime admission, support labels, or other platform cells."
+      },
+      "sourceEvidence": "examples/nvidia-rtx3060-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-7f16789ca3e3811c.md",
+        "wikiPage": "Evidence-Record-7f16789ca3e3811c.md",
+        "title": "NVIDIA GeForce RTX 3060 12 GB 19-model qualification"
+      }
+    },
+    {
       "id": "evidence-d25ff2272d76e84f",
       "claim": {
         "schema_version": "2",
@@ -2631,6 +3375,30 @@
         "repositorySource": "docs/evidence-records/evidence-ad991e5601c892ec.md",
         "wikiPage": "Evidence-Record-ad991e5601c892ec.md",
         "title": "Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification"
+      }
+    },
+    {
+      "id": "evidence-f5989f6fc215258e",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "digest-pinned-19-model-corpus",
+        "operation": "exact-artifact-core-task-gate-and-30-minute-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+        "notes": "All 19 exact artifacts passed three Chat, Writing, and Summarization samples with unload checks and then passed independent 30-minute soaks. This exact Ubuntu, driver, runtime, and hardware result remains separate from Windows evidence and does not change automatic defaults, runtime admission, support labels, or other platform cells."
+      },
+      "sourceEvidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-f5989f6fc215258e.md",
+        "wikiPage": "Evidence-Record-f5989f6fc215258e.md",
+        "title": "Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification"
       }
     },
     {
@@ -3426,6 +4194,30 @@
       }
     },
     {
+      "id": "evidence-58d8481eef7a394b",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power",
+        "surface": "nvidia-smi",
+        "surface_version": "610.88",
+        "provider": "Ollama 0.32.14 CUDA",
+        "os": "Windows 11",
+        "model": "14-model-passed-soak-corpus",
+        "operation": "one-second-board-telemetry-bounded-soak-idle-baseline",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx3060-model-qualification.md",
+        "notes": "Across 39,327 one-second samples, the five-minute pre/post idle baseline averaged 22.116 W; model-window averages ranged from 25.36 W to 33.54 W and observed peaks ranged from 51.53 W to 140.06 W. The paced safety soak unloads between requests, and these GPU-board readings exclude CPU, memory, storage, cooling, display, PSU losses, and wall power."
+      },
+      "sourceEvidence": "examples/nvidia-rtx3060-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-58d8481eef7a394b.md",
+        "wikiPage": "Evidence-Record-58d8481eef7a394b.md",
+        "title": "NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power"
+      }
+    },
+    {
       "id": "evidence-9a9906ccfd247313",
       "claim": {
         "schema_version": "2",
@@ -3447,6 +4239,78 @@
         "repositorySource": "docs/evidence-records/evidence-9a9906ccfd247313.md",
         "wikiPage": "Evidence-Record-9a9906ccfd247313.md",
         "title": "Radeon RX 5700 XT Llama 3.2 3B board power"
+      }
+    },
+    {
+      "id": "evidence-0b86ce2eeb867f1f",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power",
+        "surface": "HWiNFO64 sensor logger",
+        "surface_version": "version-not-independently-captured",
+        "provider": "llama.cpp b10375 Vulkan AMD proprietary 26.7.1",
+        "os": "Windows 10.0.26200.8973",
+        "model": "Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+        "operation": "idle-paced-soak-conditional-active-peak-energy-thermals",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "Across 898 samples during the paced 30-minute soak, software-reported GPU ASIC power averaged 23.322 W time-weighted, integrated to 11.666022 Wh, and reached 168 W; post-soak idle averaged 6.322 W, conditional GPU-active samples averaged 113.633 W, hotspot reached 65 C, and memory junction reached 54 C. This is not wall power or necessarily total board input, the exact logger version was not independently captured, and the observed two-second interval may miss short peaks."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0b86ce2eeb867f1f.md",
+        "wikiPage": "Evidence-Record-0b86ce2eeb867f1f.md",
+        "title": "Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power"
+      }
+    },
+    {
+      "id": "evidence-2aa29208b11bc71d",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power",
+        "surface": "Haven 42 Linux AMD power profiler",
+        "surface_version": "1",
+        "provider": "llama.cpp b10375 Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+        "operation": "idle-active-peak-energy-throughput-full-offload-cleanup",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+        "notes": "The GPU-board sysfs sensor reported 6.448 W idle average, 167.242 W active average, 180 W peak, 27.931213 Wh active energy, and 5,476.311 generated units per Wh across 1,195 requests; all 25 layers were GPU-offloaded, VRAM returned exactly to baseline, cleanup and post-run health checks passed, and this is not whole-system wall power or a controlled comparison with the different-model Ollama profile."
+      },
+      "sourceEvidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-2aa29208b11bc71d.md",
+        "wikiPage": "Evidence-Record-2aa29208b11bc71d.md",
+        "title": "Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power"
+      }
+    },
+    {
+      "id": "evidence-ad94c1f53c81365c",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power",
+        "surface": "nvidia-smi",
+        "surface_version": "610.43.02",
+        "provider": "Ollama 0.32.14 CUDA",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "19-model-passed-soak-corpus",
+        "operation": "one-second-board-telemetry-bounded-soak-pre-and-post-idle",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+        "notes": "Across 37,443 one-second GPU-board samples, pre-run idle averaged 13.962 W and post-run idle averaged 14.175 W; model-window averages ranged from 23.577 W to 32.876 W and observed peaks ranged from 56.54 W to 139.18 W. These readings exclude the rest of the computer and wall-power losses."
+      },
+      "sourceEvidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ad94c1f53c81365c.md",
+        "wikiPage": "Evidence-Record-ad94c1f53c81365c.md",
+        "title": "Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power"
       }
     },
     {

@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-nvidia-rtx3060-qualification-result",
+  "release": "0.4.0-alpha.2",
+  "observedThroughUtc": "2026-08-18T12:37:51Z",
+  "status": "exact-profile-engineering-evidence-complete",
+  "environment": {
+    "operatingSystem": "Windows 11",
+    "accelerator": "NVIDIA GeForce RTX 3060 12 GB",
+    "driverVersion": "610.88",
+    "backend": "cuda",
+    "systemMemoryGiB": 31.9
+  },
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.14",
+    "releaseAdmission": "admitted"
+  },
+  "qualificationProfileId": "cuda-12gib-system-32gib",
+  "sourceBindings": {
+    "inventory": {
+      "path": "config/alpha-2-model-version-inventory.json",
+      "canonicalSha256": "3ce33553ff93e8ff8017074d3c19c3960a9b07bb4ecb097a216517b9cd7a75ea"
+    },
+    "matrix": {
+      "path": "config/alpha-2-model-qualification-matrix.json",
+      "canonicalSha256": "81d28a2f76b6d0723d7e4d1db209ddb4fde19c2d134315a06973584fd83da690"
+    },
+    "runtimeCompatibility": "config/alpha-2-runtime-compatibility.json"
+  },
+  "counts": {
+    "exactArtifactsChecked": 19,
+    "coreTaskGatePassed": 14,
+    "coreTaskGateFailed": 5,
+    "thirtyMinuteSoaksPassed": 14,
+    "openCodeCandidatesScreened": 19,
+    "openCodeFullWorkflowPassed": 1
+  },
+  "coreTaskGate": {
+    "passed": [
+      "gemma3-12b-q4",
+      "gemma3-4b-q4",
+      "gemma4-12b-qat",
+      "gemma4-e2b-qat",
+      "gemma4-e4b-qat",
+      "granite41-3b-q4",
+      "granite41-8b-q4",
+      "llama32-3b-q4",
+      "minicpm-v46-1b-q4",
+      "ornith-10-9b-q4",
+      "phi4-mini-38b-q4",
+      "qwen35-2b-q8",
+      "qwen35-4b-q4",
+      "qwen35-9b-q4"
+    ],
+    "failed": {
+      "gemma3-1b-q4": ["summary-required-facts-missing"],
+      "lfm25-8b-a1b-q4": [
+        "chat-exact-response-required",
+        "writing-one-sentence-required",
+        "summary-one-sentence-required"
+      ],
+      "ministral3-3b-q4": ["writing-one-sentence-required"],
+      "ministral3-8b-q4": [
+        "writing-one-sentence-required",
+        "summary-one-sentence-required"
+      ],
+      "qwen35-08b-q8": ["writing-word-count-out-of-range"]
+    }
+  },
+  "soak": {
+    "requestedMinutesPerModel": 30,
+    "intervalSeconds": 30,
+    "startedAtUtc": "2026-08-18T01:29:26Z",
+    "completedAtUtc": "2026-08-18T08:29:48Z",
+    "passed": [
+      "gemma3-12b-q4",
+      "gemma3-4b-q4",
+      "gemma4-12b-qat",
+      "gemma4-e2b-qat",
+      "gemma4-e4b-qat",
+      "granite41-3b-q4",
+      "granite41-8b-q4",
+      "llama32-3b-q4",
+      "minicpm-v46-1b-q4",
+      "ornith-10-9b-q4",
+      "phi4-mini-38b-q4",
+      "qwen35-2b-q8",
+      "qwen35-4b-q4",
+      "qwen35-9b-q4"
+    ],
+    "failed": []
+  },
+  "extendedCapabilities": {
+    "ornith-10-9b-q4": {
+      "coding": "passed",
+      "tools": "passed",
+      "failureRecovery": "passed"
+    },
+    "minicpm-v46-1b-q4": {
+      "vision": "failed",
+      "visionErrorCode": "vision-grounding-contract-failed",
+      "failureRecovery": "passed"
+    }
+  },
+  "codingAgent": {
+    "surface": "OpenCode CLI",
+    "surfaceVersion": "1.18.11",
+    "fullWorkflowPassed": ["granite41-8b-q4"],
+    "readAndScopedEditPassedButWriteFailed": ["gemma4-12b-qat"],
+    "allOtherCandidatesMissedOneOrMoreRequiredGates": true,
+    "codingRecommendationAllowed": false,
+    "blockers": [
+      "all-policy-gates-not-complete-for-granite41-8b-q4",
+      "editor-surfaces-require-separate-evidence",
+      "cross-surface-inheritance-forbidden"
+    ]
+  },
+  "power": {
+    "telemetrySource": "nvidia-smi",
+    "scope": "gpu-board-only",
+    "telemetrySampleCount": 39327,
+    "telemetrySha256": "9a297057e686a036cbd89b046550c82290732ab951772a876c8232972e58ace1",
+    "idleSampleCount": 596,
+    "idleAverageWatts": 22.116,
+    "mixedTaskAverageWattsRange": [25.36, 33.54],
+    "mixedTaskPeakWattsRange": [51.53, 140.06],
+    "perModel": {
+      "gemma3-12b-q4": {"averageWatts": 33.54, "peakWatts": 140.06, "energyWh": 16.77},
+      "gemma3-4b-q4": {"averageWatts": 28.52, "peakWatts": 77.92, "energyWh": 14.26},
+      "gemma4-12b-qat": {"averageWatts": 31.33, "peakWatts": 104.40, "energyWh": 15.79},
+      "gemma4-e2b-qat": {"averageWatts": 27.45, "peakWatts": 61.41, "energyWh": 13.73},
+      "gemma4-e4b-qat": {"averageWatts": 29.27, "peakWatts": 73.04, "energyWh": 14.63},
+      "granite41-3b-q4": {"averageWatts": 25.55, "peakWatts": 96.52, "energyWh": 12.78},
+      "granite41-8b-q4": {"averageWatts": 29.24, "peakWatts": 97.28, "energyWh": 14.62},
+      "llama32-3b-q4": {"averageWatts": 27.39, "peakWatts": 83.79, "energyWh": 13.73},
+      "minicpm-v46-1b-q4": {"averageWatts": 25.36, "peakWatts": 51.53, "energyWh": 12.68},
+      "ornith-10-9b-q4": {"averageWatts": 30.60, "peakWatts": 103.56, "energyWh": 15.30},
+      "phi4-mini-38b-q4": {"averageWatts": 26.61, "peakWatts": 69.96, "energyWh": 13.30},
+      "qwen35-2b-q8": {"averageWatts": 28.09, "peakWatts": 73.64, "energyWh": 14.06},
+      "qwen35-4b-q4": {"averageWatts": 29.52, "peakWatts": 83.33, "energyWh": 14.76},
+      "qwen35-9b-q4": {"averageWatts": 31.11, "peakWatts": 97.28, "energyWh": 15.56}
+    },
+    "includesCpuRamStorageCoolingDisplayOrPsuLosses": false
+  },
+  "evidence": "examples/nvidia-rtx3060-model-qualification.md",
+  "containsPrivateMachineIdentity": false,
+  "containsNetworkIdentity": false,
+  "containsRawPromptsOrResponses": false,
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false
+}

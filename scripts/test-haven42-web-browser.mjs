@@ -517,7 +517,7 @@ try {
     || assurance.statusRows < 1
     || assurance.statusTotal !== assurance.records
     || assurance.rows !== assurance.surfaces
-    || assurance.candidateRows !== 1
+    || assurance.candidateRows !== 2
     || !assurance.activityDetails
     || assurance.wikiHref !== "https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"
     || assurance.wikiTarget !== "_blank"
@@ -593,7 +593,7 @@ try {
       || !guided.planText.includes("Required to run the selected text model locally")
       || !guided.planText.includes("Download and safety details")
       || (detectedAmd && !guided.planText.includes("AMD GPU acceleration · ROCm 7.1"))
-      || (detectedAmd && !guided.planText.includes("Ollama 0.32.5 AMD support package"))
+      || (detectedAmd && !guided.planText.includes("Ollama 0.32.14 AMD support package"))
     )
   ) throw new Error(`guided-installation-progress:${JSON.stringify(guided)}`);
   if (!guided.installationPanel && (!guided.nextDisabled || guided.nextText !== "Local setup unavailable")) {
@@ -853,14 +853,26 @@ try {
     || wizardControlSizing.cleanup < 44
     || wizardControlSizing.authentication < 44
     || wizardControlSizing.endpointFont !== "13px"
-    || wizardControlSizing.timeoutFont !== "13px"
-    || wizardControlSizing.cleanupFont !== "13px"
-    || wizardControlSizing.authenticationFont !== "13px"
+    || wizardControlSizing.timeoutFont !== "14px"
+    || wizardControlSizing.cleanupFont !== "14px"
+    || wizardControlSizing.authenticationFont !== "14px"
     || wizardControlSizing.authenticationValue !== "none"
     || wizardControlSizing.authenticationText !== "Automatic (Recommended)"
     || !wizardControlSizing.keyDisabled
   ) throw new Error(`compact-wizard-controls:${JSON.stringify(wizardControlSizing)}`);
   checks += 11;
+
+  const dropdownTypography = await cdp.evaluate(`(() => ({
+    controls: [...document.querySelectorAll('select')].map((item) => getComputedStyle(item).fontSize),
+    choices: [...document.querySelectorAll('select option, select optgroup')].map((item) => getComputedStyle(item).fontSize),
+  }))()`);
+  if (
+    dropdownTypography.controls.length === 0
+    || dropdownTypography.choices.length === 0
+    || dropdownTypography.controls.some((size) => size !== "14px")
+    || dropdownTypography.choices.some((size) => size !== "14px")
+  ) throw new Error(`dropdown-typography:${JSON.stringify(dropdownTypography)}`);
+  checks += 2;
 
   await cdp.evaluate(`(() => {
     const input = document.querySelector('#wizard-endpoint');
@@ -982,7 +994,7 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== 3 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 5 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
   const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
@@ -1017,9 +1029,9 @@ try {
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
   if (
     Object.values(allTourState).length !== 5
-    || allTourState.chat !== 3
+    || allTourState.chat !== 5
     || allTourState.models !== 2
-    || allTourState.system !== 2
+    || allTourState.system !== 3
     || allTourState.technical !== 1
     || allTourState.about !== 1
   ) {
@@ -1063,7 +1075,7 @@ try {
       stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
     };
   })()`);
-  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 3) {
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 5) {
     throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
   }
   checks += 41;
@@ -1129,14 +1141,46 @@ try {
     || Math.abs(compactControls.cleanup - compactControls.endpoint) > 1
     || Math.abs(compactControls.authentication - compactControls.endpoint) > 1
     || compactControls.endpointFont !== "13px"
-    || compactControls.cleanupFont !== "13px"
-    || compactControls.timeoutFont !== "13px"
-    || compactControls.advancedCleanupFont !== "13px"
-    || compactControls.authenticationFont !== "13px"
+    || compactControls.cleanupFont !== "14px"
+    || compactControls.timeoutFont !== "14px"
+    || compactControls.advancedCleanupFont !== "14px"
+    || compactControls.authenticationFont !== "14px"
     || compactControls.authenticationText !== "Automatic (Recommended)"
     || !compactControls.keyDisabled
   ) throw new Error(`compact-provider-controls:${JSON.stringify(compactControls)}`);
   checks += 11;
+
+  await cdp.evaluate("document.querySelector('#check-software-updates').click()");
+  await waitFor(() => cdp.evaluate(`(
+    document.querySelector('#software-update-result').textContent.includes('Ollama 0.32.14')
+    && !document.querySelector('#use-software-update').disabled
+    && !document.querySelector('#software-update-release-link').classList.contains('hidden')
+  )`));
+  const softwareUpdateReview = await cdp.evaluate(`(() => {
+    const preference = document.querySelector('#software-update-preference');
+    const update = document.querySelector('#use-software-update');
+    const initial = {
+      status: document.querySelector('#software-update-result').textContent,
+      updateText: update.textContent,
+      release: document.querySelector('#software-update-release-link').href,
+      persisted: document.querySelector('#software-update-privacy').textContent,
+    };
+    preference.value = 'keep';
+    preference.dispatchEvent(new Event('change', {bubbles: true}));
+    const disabledWhenKeeping = update.disabled;
+    preference.value = 'offer';
+    preference.dispatchEvent(new Event('change', {bubbles: true}));
+    return {...initial, disabledWhenKeeping, enabledWhenOffering: !update.disabled};
+  })()`);
+  if (
+    !softwareUpdateReview.status.includes('newest stable version verified')
+    || softwareUpdateReview.updateText !== 'Review Ollama 0.32.14'
+    || softwareUpdateReview.release !== 'https://github.com/ollama/ollama/releases/tag/v0.32.14'
+    || !softwareUpdateReview.persisted.includes('stay in memory')
+    || !softwareUpdateReview.disabledWhenKeeping
+    || !softwareUpdateReview.enabledWhenOffering
+  ) throw new Error(`software-update-review:${JSON.stringify(softwareUpdateReview)}`);
+  checks += 6;
 
   const connectedControls = await cdp.evaluate(`({
     connectionText: document.querySelector('#connect-button').textContent,
@@ -1310,8 +1354,67 @@ try {
   if (requests.length !== requestsBeforeUnchangedSubmit) throw new Error("unchanged-provider-reconnected");
   checks += 1;
 
+  const modelLibraryAction = await cdp.evaluate(`(() => {
+    const action = document.querySelector('#open-models-from-chat');
+    const label = document.querySelector('label[for="model"]');
+    return {
+      text: action.textContent.trim(),
+      visible: action.getBoundingClientRect().width > 0 && action.getBoundingClientRect().height >= 44,
+      label: label?.textContent.trim() || '',
+      heading: action.closest('.model-picker-heading') !== null,
+    };
+  })()`);
+  if (
+    modelLibraryAction.text !== "Browse models →"
+    || !modelLibraryAction.visible
+    || modelLibraryAction.label !== "Conversation model"
+    || !modelLibraryAction.heading
+  ) throw new Error(`model-library-action:${JSON.stringify(modelLibraryAction)}`);
+  checks += 4;
+
+  const dashboardTypography = await cdp.evaluate(`(() => {
+    const size = (selector) => getComputedStyle(document.querySelector(selector)).fontSize;
+    return {
+      heroCopy: size('.hero > p:last-child'),
+      eyebrow: size('#capability-eyebrow'),
+      sectionTitle: size('#capability-title'),
+      taskLabel: size('.task-mode-select > span'),
+      modelLabel: size('.model-picker-heading label'),
+      modelState: size('#model-state'),
+      modelAction: size('#open-models-from-chat'),
+      telemetryLabel: size('.alpha-metrics strong'),
+      telemetryValue: size('.alpha-metrics output'),
+      researchDisclosure: size('.research-tools > summary small'),
+      composerHelp: size('.composer-help'),
+      footer: size('.chat-footer'),
+      status: size('.status-glance-connection .status-indicator'),
+      statusTitle: size('.status-glance-connection strong'),
+      statusDetail: size('.status-glance-connection small'),
+      statusMetric: size('.status-glance-stats output'),
+    };
+  })()`);
+  if (JSON.stringify(dashboardTypography) !== JSON.stringify({
+    heroCopy: "15px",
+    eyebrow: "11px",
+    sectionTitle: "18px",
+    taskLabel: "11px",
+    modelLabel: "11px",
+    modelState: "12px",
+    modelAction: "13px",
+    telemetryLabel: "11px",
+    telemetryValue: "12px",
+    researchDisclosure: "12px",
+    composerHelp: "12px",
+    footer: "12px",
+    status: "12px",
+    statusTitle: "14px",
+    statusDetail: "12px",
+    statusMetric: "12px",
+  })) throw new Error(`dashboard-typography:${JSON.stringify(dashboardTypography)}`);
+  checks += 16;
+
   const modelsView = await cdp.evaluate(`(() => {
-    document.querySelector('#models-nav').click();
+    document.querySelector('#open-models-from-chat').click();
     return {
       active: document.querySelector('#models-nav').classList.contains('active'),
       visible: !document.querySelector('#models-panel').classList.contains('hidden'),
@@ -2485,7 +2588,7 @@ try {
     || !advancedScreenshotLimit.initial.status.includes("Up to 2 screenshots")
     || JSON.stringify(advancedScreenshotLimit.initial.style) !== JSON.stringify({
       height: "44px",
-      fontSize: "13px",
+      fontSize: "14px",
       paddingLeft: "10px",
       paddingRight: "34px",
     })

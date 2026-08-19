@@ -320,6 +320,9 @@ def select_model(
         "storageAdmittedModelIds": admitted,
         "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
         "provider": "ollama",
+        # Selection evidence remains tied to the exact runtime used by the
+        # recorded model cells. Managed setup performs a fresh bounded
+        # inference check on the newer portable runtime before completing.
         "providerVersion": "0.32.5",
     }
     try:

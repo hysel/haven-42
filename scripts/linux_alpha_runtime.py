@@ -82,11 +82,11 @@ def load_registry(path: Path = REGISTRY_PATH) -> dict[str, Any]:
             or component.get("license") != "MIT"
             or component.get("licenseEvidencePath")
             != "package/licenses/OLLAMA-MIT-LICENSE.txt"
-            or component.get("licenseSourceRef") != "v0.32.5"
+            or component.get("licenseSourceRef") != "v0.32.14"
             or component.get("licenseSourceBlobSha")
             != "8e3dc978a7ca8c53f56bbedc5b558116140fc02e"
             or not str(component.get("sourceUrl", "")).startswith(
-                "https://github.com/ollama/ollama/releases/download/v0.32.5/"
+                "https://github.com/ollama/ollama/releases/download/v0.32.14/"
             )
         ):
             raise LinuxRuntimeError("invalid-linux-component-record")

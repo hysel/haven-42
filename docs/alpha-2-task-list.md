@@ -715,8 +715,10 @@ promotion:
   The fail-closed JSON and Markdown report generator is implemented; actual
   publication remains open until the running campaigns and evidence reviews
   finish.
-- [ ] Test the purchased GTX 1650 Super 4 GB, RTX 3060 12 GB, and Radeon RX
-  6800 non-XT 16 GB after arrival. The main remaining capacity gap is a 24 GB
+- [ ] Test the purchased GTX 1650 Super 4 GB and Radeon RX 6800 non-XT 16 GB
+  after arrival. Preserve the completed Windows and Ubuntu 26.04 RTX 3060
+  exact-profile evidence as separate cells; packaged lifecycle and product
+  promotion remain open. The main remaining capacity gap is a 24 GB
   consumer or workstation card; it is not required for Alpha 2. Broader
   CPU-only systems, Linux AMD and Intel, and Windows release-candidate routes
   remain open. Keep Apple silicon owner-deferred until its hardware is

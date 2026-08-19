@@ -181,12 +181,18 @@
                 <span class="sr-only" id="chat-text-size-status" role="status" aria-live="polite">Default chat text size · session only</span>
               </div>
               <button class="button secondary" id="new-task-button" type="button">New task</button>
-              <label class="model-select"><span id="model-label">Conversation model</span>
-                <select id="model" disabled>
-                  <option>Connect Ollama first</option>
-                </select>
-                <small id="model-state">Automatic selection unavailable</small>
-              </label>
+              <div class="model-picker">
+                <div class="model-picker-heading">
+                  <label id="model-label" for="model">Conversation model</label>
+                  <button class="button text-button model-library-link" id="open-models-from-chat" type="button">Browse models <span aria-hidden="true">→</span></button>
+                </div>
+                <div class="model-select">
+                  <select id="model" aria-describedby="model-state" disabled>
+                    <option>Connect Ollama first</option>
+                  </select>
+                  <small id="model-state">Automatic selection unavailable</small>
+                </div>
+              </div>
               <button class="button text-button hidden" id="reset-model-button" type="button">Use automatic</button>
             </div>
           </div>
@@ -658,6 +664,25 @@
               <p class="field-help">This removes only the Ollama runtime, downloaded models, and working files installed by Haven 42 inside Haven42-Data. It does not remove drivers, another Ollama installation, the Haven 42 application, or troubleshooting logs.</p>
               <p class="field-help">To remove the Haven 42 application afterward, close it and delete this extracted folder.</p>
             </section>
+            <section class="maintenance-control" id="software-updates" aria-labelledby="software-updates-title">
+              <div>
+                <p class="eyebrow">SOFTWARE UPDATES</p>
+                <h3 id="software-updates-title">Keep the local AI engine current</h3>
+              </div>
+              <p class="field-help">Haven 42 does not check in the background. When you choose Check now, it contacts Ollama's official GitHub release service and sends no chats, files, addresses, credentials, or hardware details.</p>
+              <label for="software-update-preference">When a verified update is available</label>
+              <select id="software-update-preference" aria-describedby="software-update-privacy software-update-result">
+                <option value="offer" selected>Let me review and install it · recommended</option>
+                <option value="keep">Keep my current installed version</option>
+              </select>
+              <p class="field-help" id="software-update-privacy">This choice and the check result stay in memory for this session. Downloads and activation always require your approval.</p>
+              <div class="maintenance-actions">
+                <button class="button secondary full-width maintenance-action" id="check-software-updates" type="button">Check official releases now</button>
+                <button class="button primary full-width maintenance-action" id="use-software-update" type="button" disabled>Review newest verified version</button>
+              </div>
+              <p class="field-help" id="software-update-result" role="status" aria-live="polite" aria-atomic="true">No release check has been made.</p>
+              <a class="about-reference hidden" id="software-update-release-link" href="https://github.com/ollama/ollama/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">View the official Ollama release page</a>
+            </section>
             <form id="cleanup-policy-form">
               <label for="system-idle-unload">Unload text model after</label>
               <div class="field-row compact-control-row">
@@ -712,7 +737,7 @@
               <div><dt>AI server</dt><dd id="provider-health">Not connected</dd></div>
               <div><dt>Model check</dt><dd id="evidence-status">Waiting for a connection</dd></div>
               <div><dt>File check</dt><dd id="digest-status">Not checked yet</dd></div>
-              <div><dt>Update checks</dt><dd id="update-status">Disabled · no network</dd></div>
+              <div><dt>Software updates</dt><dd id="update-status">Only when you choose Check now</dd></div>
             </dl>
           </section>
 

@@ -22,7 +22,7 @@ Windows-reachable `rust-unic` advisories.
 
 `config/native-bridge-boundary-contract.json` makes the future native-owned
 authority explicit. `scripts/native-bridge-boundary-policy.py --self-test`
-executes 55 hostile and allowed policy cases without touching a path, opening a
+executes 65 hostile and allowed policy cases without touching a path, opening a
 URL, spawning a process, minting a production token, or changing the machine.
 
 The cases cover:
@@ -65,7 +65,7 @@ When an official Tauri release carries the reviewed remediation:
 1. repeat exact npm and Cargo resolution for each target;
 2. produce checksums, SBOMs, licenses, provenance, and controlled audits;
 3. add the smallest nonvisual native bridge on a review branch;
-4. translate all 55 policy cases plus the existing 46 engine-side cases into
+4. translate all 65 policy cases plus the existing 46 engine-side cases into
    native integration tests;
 5. run Windows x64 first, then bounded Linux targets, with macOS last;
 6. admit runtime files only after every required target gate passes.

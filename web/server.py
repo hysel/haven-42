@@ -96,6 +96,10 @@ from electricity_rate_service import (  # noqa: E402
     ElectricityRateError,
     lookup_official_rate,
 )
+from software_update_service import (  # noqa: E402
+    SoftwareUpdateError,
+    check_for_updates as check_managed_software_updates,
+)
 import web_research_native_transport as web_research_query  # noqa: E402
 import web_research_native_page_transport as web_research_page  # noqa: E402
 import web_research_general_transport as web_research_general  # noqa: E402
@@ -880,7 +884,9 @@ class HavenState:
         general_research_search_provider: Callable[..., dict[str, Any]] | None = None,
         general_research_page_provider: Callable[..., dict[str, Any]] | None = None,
         general_research_synthesis_provider: Callable[..., dict[str, Any]] | None = None,
+        software_update_provider: Callable[[], dict[str, Any]] = check_managed_software_updates,
         diagnostic_root: Path | None = None,
+        managed_setup_state_root: Path | None = None,
     ) -> None:
         self.csrf_token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
@@ -915,6 +921,7 @@ class HavenState:
         self.general_research_search_provider = general_research_search_provider or web_research_general.search
         self.general_research_page_provider = general_research_page_provider or web_research_general.fetch_page
         self.general_research_synthesis_provider = general_research_synthesis_provider or _provider_json
+        self.software_update_provider = software_update_provider
         self.research_lock = threading.Lock()
         self.pending_research_approvals: dict[str, dict[str, Any]] = {}
         self.research_results: dict[str, dict[str, Any]] = {}
@@ -935,7 +942,11 @@ class HavenState:
         self.alpha_resources = ResourceHistory(maximum_samples=30)
         self.answer_report_contexts: dict[str, dict[str, str]] = {}
         self.alpha_setup = (
-            SetupCoordinator(self.csrf_token, event_sink=self.diagnostics.record)
+            SetupCoordinator(
+                self.csrf_token,
+                state_root=managed_setup_state_root,
+                event_sink=self.diagnostics.record,
+            )
             if MANAGED_SETUP_SUPPORTED else None
         )
         self.alpha_runtime_binding: dict[str, Any] | None = None
@@ -1791,10 +1802,11 @@ class HavenState:
                     ),
                 },
                 "updates": {
-                    "mode": "disabled",
+                    "mode": "user-initiated-only",
                     "networkCheckPerformed": False,
-                    "downloadAllowed": False,
-                    "activationAllowed": False,
+                    "automaticCheckEnabled": False,
+                    "downloadRequiresApproval": True,
+                    "activationRequiresApproval": True,
                 },
                 "package": self.package_integrity,
                 "readiness": {
@@ -3379,6 +3391,21 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
         try:
             self._require_post_authority()
             body = self._read_body()
+            if self.path == "/api/software-updates/check":
+                if set(body) != {"confirmed"} or body["confirmed"] is not True:
+                    raise WebRequestError("software-update-check-confirmation-required")
+                try:
+                    result = self.server.state.software_update_provider()
+                except SoftwareUpdateError as error:
+                    self.server.state.diagnostics.record(
+                        "software-update", "SOFTWARE_UPDATE_CHECK_FAILED", "failed",
+                    )
+                    raise WebRequestError(str(error), HTTPStatus.BAD_GATEWAY) from error
+                self.server.state.diagnostics.record(
+                    "software-update", "SOFTWARE_UPDATE_CHECK_COMPLETED", "completed",
+                )
+                self._send_json(HTTPStatus.OK, result)
+                return
             if self.path == "/api/readiness":
                 if set(body) != {"force"} or not isinstance(body["force"], bool):
                     raise WebRequestError("invalid-readiness-fields")

@@ -6,8 +6,14 @@ app. Haven 42 does not install a system package, service, or driver.
 
 ## What is currently approved
 
-Alpha 2 still uses the separately registered Ollama 0.32.5 Linux core runtime.
-This review does not change that version or the automatic model choice.
+New Alpha 2 managed installations use the separately registered Ollama
+0.32.14 Linux x64 core runtime. The exact archive is 1,421,191,399 bytes with
+SHA-256 `c620917a71e146ab3a7f893084f066069c4c65d144ef8379a91c3cbe8b27de8f`.
+It contains 34 regular files, 3 directories, 17 internal links, and
+2,247,201,888 expanded bytes. Those values were rechecked against the official
+release archive on August 18, 2026. Historical model and lifecycle evidence
+continues to identify the exact older runtime used by each test; this change
+does not relabel those records.
 
 ## What was reviewed next
 
@@ -26,8 +32,8 @@ internal links. Haven 42 validates those counts and the expanded byte totals;
 an extra, missing, renamed, or changed entry is rejected.
 
 The upstream archives do not contain a license notice. The portable Haven 42
-package therefore carries the exact Ollama MIT license text from the official
-`v0.32.5` and `v0.32.9` source tags. Both tags point to the same reviewed Git
+package therefore carries the exact Ollama MIT license text. The official
+`v0.32.5`, `v0.32.9`, and `v0.32.14` tags point to the same reviewed Git
 license blob.
 
 ## What Haven 42 rejects
@@ -54,13 +60,14 @@ evidence is required. A manifest or layer mismatch is not treated as the same
 model. Adding this evidence did not change the order or default of the model
 ladder.
 
-## Why 0.32.9 is not installed yet
+## What remains before release promotion
 
-Archive provenance and integrity are only part of admission. Native lifecycle,
-distribution, startup, shutdown, recovery, and model-compatibility evidence is
-still required. The machine-readable review therefore says both
-`managedRuntimeChangeApproved: false` and
-`automaticDefaultChangeAllowed: false`.
+Archive provenance and integrity are only part of admission. The Windows and
+Linux review packages must still pass native download, startup, shutdown,
+recovery, rollback, accessibility, and source-versus-package parity checks with
+0.32.14 before release promotion. Setup also performs a bounded inference check
+with the selected model and fails closed if the newer runtime does not work on
+that device.
 
 Developers can validate the committed record without downloading anything:
 

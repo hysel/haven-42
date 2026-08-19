@@ -58,7 +58,7 @@ of failure.
 | CPU-only | Real low-, medium-, and high-memory computers | Find a usable fallback and refusal floor. |
 | 4 GiB graphics | The purchased GTX 1650 Super after it arrives | Validate only the best small candidates with safe overhead. No result exists yet. |
 | 8 GiB graphics | The installed Radeon RX 5700 XT RDNA 1 profile | The Ubuntu 26.04 Ollama 0.32.13 Vulkan/RADV engineering campaign is complete: nine profiles passed the core gate, seven failed it, and three oversized candidates were refused before download. Windows, ROCm, final-profile full-memory, and packaged lifecycle results remain distinct and open. |
-| 12 GiB graphics | The purchased RTX 3060 12 GB and current Intel Arc B580 | Validate the 8B-to-14B range on NVIDIA and Intel without relying on a larger card. The RTX 3060 has not arrived yet. |
+| 12 GiB graphics | The installed RTX 3060 12 GB and current Intel Arc B580 | Separate Windows and Ubuntu RTX 3060 campaigns checked the same 19 exact artifacts. Windows recorded 14 task-and-soak passes and five task-contract failures; Ubuntu recorded 19 task-and-soak passes. Granite 4.1 8B alone passed the separate Windows OpenCode disposable-repository workflow. Packaged lifecycle, editor surfaces, and automatic selection remain open. |
 | 16 GiB graphics | Quadro RTX 5000, Radeon RX 6800 non-XT, and Radeon RX 7800 XT | Compare NVIDIA Turing, AMD RDNA 2, and AMD RDNA 3. The RX 6800 has not arrived yet. |
 | 24 GiB graphics | A physical 24 GiB consumer accelerator | Validate 24B-to-35B candidates and runtime overhead. |
 | 32 GiB graphics | One physical Tesla V100 32 GB | Validate larger local candidates while clearly labeling the datacenter architecture. |
@@ -468,6 +468,8 @@ model ladder.
 | Fedora 44 with NVIDIA Quadro RTX 5000, 16 GB | 🧪 Engineering evidence | The completion-receipt ordering correction passed the full source-candidate managed lifecycle. A rebuilt package and complete desktop flow remain open. |
 | CachyOS with NVIDIA Quadro RTX 5000, 16 GB | 🧪 Engineering evidence | Package parity, Qwen 3.5 0.8B CPU/CUDA task checks, driver checks, and GPU-use checks passed. The complete desktop flow remains open. |
 | Arch Linux with NVIDIA Quadro RTX 5000, 16 GB | 🧪 Engineering evidence | Package parity, Qwen 3.5 0.8B CPU/CUDA task checks, driver checks, and GPU-use checks passed. The complete desktop flow remains open. |
+| Windows 11 with NVIDIA GeForce RTX 3060, 12 GB | 🧪 Engineering evidence | Ollama 0.32.14 exact-artifact checks covered 19 models; 14 passed core tasks and independent 30-minute soaks. Granite 4.1 8B passed the OpenCode 1.18.11 disposable-repository workflow, but its remaining coding-policy and editor-specific gates are open. No runtime, default, support, or automatic-selection change is granted. |
+| Ubuntu 26.04 with NVIDIA GeForce RTX 3060, 12 GB | 🧪 Engineering evidence | Ollama 0.32.14 exact-artifact checks covered 19 models; all 19 passed three-sample Chat, Writing, and Summarization gates with unload checks and independent 30-minute soaks. One-second GPU-board telemetry was captured. Packaged lifecycle, coding-agent surfaces, automatic selection, and broader RTX 3060 support remain open. |
 | Windows 11 with AMD Radeon RX 7800 XT, 16 GB | 🧪 Engineering evidence | Earlier Alpha Ollama/ROCm and llama.cpp/HIP checks passed. The Alpha 2 hardware-fit campaign completed, but targeted Ollama 0.32.9 summary failures keep release-candidate and recommendation gates open. |
 | Ubuntu Linux with Intel Arc B580, 12 GB | ⚠️ Partial | Granite 4.1 8B passed an exact llama.cpp b10375 SYCL 30-minute soak with full offload, cleanup, and card-energy evidence. Other model routes and the complete Alpha 2 package flow remain open. |
 | Linux with AMD graphics | ⬜ Not tested | No complete native Alpha 2 release-candidate cell exists. |
@@ -555,6 +557,47 @@ Every sample must unload cleanly. Raw prompts and responses are not retained.
 | Granite 4.1 8B, Q4_K_M on Ubuntu Linux with Intel Arc B580 12 GB | 🧪 Engineering evidence | Passed 15 task samples, a 30-minute llama.cpp b10375 SYCL soak, full 41-layer offload, cleanup, and card-energy measurement. This does not establish Windows support or automatic selection. |
 | Nemotron 3.5 Lightning 30B-A3B, Q4_K_M on Ubuntu 24.04 with dual Tesla V100 32 GB | 🧪 Engineering evidence | Ollama 0.32.9 passed 81 samples across nine cycles and a 30-minute soak with reported GPU residency. A separate five-minute workload averaged 155.005 W across both GPU boards and produced 1,524.219 output tokens/Wh. Remaining capability, context, recovery, and product gates are open. |
 | Nemotron 3.5 Lightning 30B-A3B, Q8_0 on Ubuntu 24.04 with dual Tesla V100 32 GB | 🧪 Engineering evidence | Ollama 0.32.9 passed 72 samples across eight cycles and a 30-minute soak with reported GPU residency. A separate five-minute workload averaged 141.373 W across both GPU boards and produced 1,274.383 output tokens/Wh. Remaining capability, context, recovery, and product gates are open. |
+
+### Windows RTX 3060 12 GB campaign
+
+The August 18, 2026 Windows RTX 3060 campaign used NVIDIA driver 610.88 and
+an isolated Ollama 0.32.14 candidate runtime. Fourteen exact artifacts passed
+the Chat, Writing, and Summarization gate and then passed their own 30-minute
+soaks. Qwen 3.5 0.8B, Gemma 3 1B, Ministral 3 3B and 8B, and LFM 2.5 8B-A1B
+stopped at explicit task-contract failures and did not enter soak.
+
+Granite 4.1 8B was the only one of 19 models to pass OpenCode 1.18.11
+repository reading, approved writing, and scoped editing. This is not yet a
+coding recommendation: the remaining structured-code, tool-contract,
+recovery, and editor-specific evidence cells must pass independently.
+
+One-second graphics-board telemetry covered all 14 soaks. The five-minute
+pre/post idle baseline averaged 22.116 W. Pacing and unloads kept mixed-task
+averages between 25.36 W and 33.54 W, with observed peaks between 51.53 W and
+140.06 W. These are GPU-board readings, not wall power, and exclude the rest
+of the computer. See
+[`examples/nvidia-rtx3060-model-qualification.md`](https://github.com/hysel/haven-42/blob/main/examples/nvidia-rtx3060-model-qualification.md)
+for the exact model table and limitations.
+
+### Ubuntu RTX 3060 12 GB campaign
+
+The separate August 18, 2026 Ubuntu 26.04 campaign used Linux kernel
+7.0.0-30, NVIDIA driver 610.43.02, CUDA, and an isolated Ollama 0.32.14
+runtime. All 19 exact artifacts passed three Chat, Writing, and
+Summarization samples with an unload after every response. All 19 then passed
+their own 30-minute soak.
+
+The Ubuntu outcome is not used to rewrite the five Windows task-contract
+failures. Operating system, driver, harness, and runtime behavior remain part
+of each evidence cell. No automatic default, runtime admission, support label,
+or coding-agent recommendation changed.
+
+Across 37,443 one-second `nvidia-smi` board samples, pre-run idle averaged
+13.962 W and post-run idle averaged 14.175 W. Mixed-task model-window averages
+ranged from 23.577 W to 32.876 W; observed peaks ranged from 56.54 W to
+139.18 W. These are not wall-power measurements. See
+[`examples/nvidia-rtx3060-linux-model-qualification.md`](https://github.com/hysel/haven-42/blob/main/examples/nvidia-rtx3060-linux-model-qualification.md)
+for the exact model table and limitations.
 
 The same Ollama 0.32.9 NVIDIA profile also retried five exact artifacts that
 had failed the task-contract gate on 0.32.8. Gemma 3 1B, Phi 4 Mini 3.8B,

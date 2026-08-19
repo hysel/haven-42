@@ -10,10 +10,11 @@ The repository grew from a Continue configuration bundle into an everyday
 local AI application. Keeping both deliverables in one download made the app
 harder to understand and left users facing hundreds of maintainer scripts.
 
-The Haven 42 app and the Local LLM IDE Tools are now separate packages. The
-IDE package contains one dependency-free setup helper and the reviewed
-Continue assets. It can create local settings for Continue, Aider, and
-OpenCode, but it does not install those programs or bundle Ollama, models,
+The Haven 42 app and the Local LLM IDE Tools are now separate packages. This
+decision's original Continue packaging was superseded in August 2026 after
+editor validation exposed unreliable loading and an unintended write. The IDE
+package now contains one dependency-free setup helper for Aider and OpenCode;
+it does not install those programs or bundle Ollama, models,
 drivers, IDEs, or the Haven 42 browser app. Setup is preview-first, existing
 files require an explicit replacement choice, and backups are created before
 replacement.

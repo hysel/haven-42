@@ -14,4 +14,5 @@ Haven42-Logs/
 .venv-build/
 
 __pycache__/
+.pytest_cache/
 *.py[cod]

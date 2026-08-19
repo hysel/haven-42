@@ -126,7 +126,10 @@ from the overall application version.
 4. Complete the staged model-certification funnel: exact-artifact task gates,
    per-model soaks, real hardware tiers, operating-system anchor models,
    comparative quality, recovery evidence, and exact-profile GPU energy and
-   electricity-cost measurements. Lab qualification never changes the
+   electricity-cost measurements. Every executable new-model candidate also
+   receives the version-pinned coding-agent screen, with API, repository read,
+   review, approved-write, scoped-edit, reliability, and surface-specific
+   evidence kept separate. Lab qualification never changes the
    automatic model ladder without explicit owner approval. The offline
    reliability contract, preparation planner, and evidence validator are in
    place; native execution remains separately approval-gated.
@@ -142,11 +145,13 @@ from the overall application version.
 
 ### Product and IDE package split
 
-The everyday Haven 42 app and the optional Local LLM IDE Tools are separate
-downloads. The IDE package contains only its setup helper and the Continue
-prompt/rule files. It configures Continue, Aider, or OpenCode that the user
-already installed. It does not include the app, Ollama, models, drivers, IDEs,
-or maintainer test scripts.
+The everyday Haven 42 app and optional coding tools are separate. The IDE
+package configures Aider or OpenCode that the user already installed. Continue
+project configuration was removed from the shipped package after current VS
+Code and VSCodium tests found unreliable loading and unsafe multi-file behavior;
+Continue is now legacy and evidence-only. Existing sanitized results remain
+available, but no new Continue development, packaging, recommendation, or
+qualification work is planned.
 
 `ROADMAP.md` explains direction and milestone boundaries. `TODO.md` is the
 exact actionable checklist, and `config/roadmap-closure-ledger.json` ensures
@@ -337,15 +342,15 @@ admission.
 | Milestone 8: Real Repository Validation | Complete | The pack repository and one private application-style repository have been validated with the runtime runner; practical MCP workflow examples are documented. |
 | Milestone 9: Distribution And Install Experience | Complete | Install/update workflows are implemented with dry-run, backup, local-config exclusion, duplicate-rule-safe global config generation, install validation, and Windows/Linux/macOS commands. |
 | Milestone 10: ARM And Apple Silicon Model Support | Complete | CPU architecture reporting, ARM model guidance, Linux compatibility assumptions, container caveats, cloud smoke-test guidance, and MLX guidance are documented. A bounded Apple Silicon MLX/Continue CLI validation now records endpoint tool calls plus generated-sample read, plan, review, and scoped-write smoke evidence. |
-| Milestone 11: Editor Surface Compatibility | Complete | VS Code-compatible and VSCodium read-only Agent validation are recorded, duplicate-rule checks are clean, and CLI fallback guidance is documented. |
+| Milestone 11: Editor Surface Compatibility | Reopened | Continue is legacy and evidence-only. Native VS Code Chat and every other maintained editor surface require separate config-loading, tool-availability, scoped-write, recovery, accessibility, and package-parity evidence before end-user promotion. |
 | Milestone 12: Model Tool-Use Validation Evidence | Complete | Starter model defaults, automatic local model config generation, model lanes, local Ollama Agent model preflight tooling, read-only and read-content tool validation guidance, approved-write smoke-test guidance, duplicate approval mitigation, external write verification, platform-aware command rules, sanitized evidence templates, post-validation install flow, and optional online discovery guardrails are in place. |
 | Milestone 13: Broader Multi-Repository Validation | Complete | Sanitized legacy .NET evidence plus generated Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL category evidence satisfy the milestone coverage target; future real-repository runs continue as evidence expansion. |
 | Milestone 14: Agent Surface Portability And Broader Audience | Complete | Haven 42 supports individual, team, and enterprise users through a local-first AI workbench, and non-Continue surfaces are tracked through evidence-gated validation levels, promotion gates, config-bundle limits, and parity catalogs. Full cross-agent validation and install/configure/test implementation remain tracked in Milestones 17 and 19. |
 | Milestone 15: Multi-Language Engineering Support | Complete | .NET remains the most mature path, optional multi-language guidance is evidence-gated, and generated Python plus TypeScript samples have repository-discovery, implementation-planning, and code-review validation evidence. |
 | Milestone 16: Sample Repository Factory | Complete | Disposable sample repositories can be generated on Windows, Linux, and macOS for Python, TypeScript, Node, Java, Go, Rust, Infrastructure as Code, and SQL validation; evidence and tests cover fixture shape, runtime context, and sanitization. |
-| Milestone 17: Agent Surface Compatibility Validation | Complete | Continue, Aider, and OpenCode have explicit evidence-backed validation positions for the supported-surface scope. Failed or retired integrations were removed, OpenHands remains a documentation-only candidate, and real-project approved write stays separately evidence-gated. |
+| Milestone 17: Agent Surface Compatibility Validation | Complete | Aider and OpenCode have explicit evidence-backed validation positions for the supported-surface scope. Continue is legacy evidence only, OpenHands remains a documentation-only candidate, and real-project approved write stays separately evidence-gated. |
 | Milestone 18: Language Rule Packs | Complete | Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs are evidence-gated; deterministic project profiles, project-local activation, medium fixtures, and a 28-cell Continue CLI matrix are implemented. Windows, Linux, and native Apple Silicon macOS evidence is recorded separately, and the language-aware selector consumes each platform's evidence. The macOS matrix completed with Devstral Small 2 in bounded single-model runs with external scoped-write verification. |
-| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Continue profiles plus Aider and OpenCode install/configure/health/test paths satisfy supported-surface parity with deterministic cross-platform contracts. Failed or retired integrations are absent from active catalogs and scripts; OpenHands is documentation-only. |
+| Milestone 19: Installer Profiles, Evidence Catalog, And Release Packaging | Complete | Aider and OpenCode install/configure/health/test paths satisfy supported-surface parity with deterministic cross-platform contracts. Continue is legacy evidence only, failed or retired integrations are absent from active catalogs and scripts, and OpenHands is documentation-only. |
 | Milestone 20: Hardware-Aware Model And Config Automation | Complete | Hardware-aware recommendations, local-only config generation, surface-neutral model lanes, workflow dispatch and envelopes, setup health, cleanup, release readiness, evidence views, cross-platform onboarding, and the stable UI-facing foundation are implemented. Future surface profiles remain separately evidence-gated. |
 | Milestone 21: General-Purpose AI Assistant And Intent Routing | Complete | Repository-optional sessions, deterministic and optional bounded LLM routing, provider-neutral local text, live-validated ComfyUI images, runtime discovery, typed artifacts, and engineering workflow route plans are implemented with cross-platform contracts. Ollama text includes an exact Linux Laguna XS 2.1 conformance cell; llama.cpp transport has a direct exact-profile Linux NVIDIA/CUDA live run. |
 | Milestone 22: Unified Product UI And Task Composition | In progress; Windows Alpha published | The shared local-web application and unsigned PyInstaller one-folder packages provide system status, inferred local/LAN Ollama scope, immutable-digest model selection, provider metrics, a bounded read-only committed-evidence view, accessible chat/writing/summarization recovery, plan-only read-only software workflows, lifecycle-aware effect-free composition, structural updater trust/transition and future execution/journal simulations, promoted loopback ComfyUI/SDXL images, hostile integrity and bounded-archive validation, native source/packaged browser parity on Windows/Linux/macOS, an additional least-privilege physical Windows Intel parity cell, bounded cleanup, and effect-free offline installer/update simulation. The owner-approved Windows `0.4.0-alpha.1` artifact is published as an exact-recorded unsigned prerelease. Broader human review, real cryptographic verification, workflow execution, executable composition, persistence, wider machine effects, signing, stable or production promotion, and Tauri remain gated. |
@@ -656,6 +661,7 @@ Scope:
 - Keep `npx @continuedev/cli --config .continue/config.yaml` as a fallback validation path. Done.
 - Confirm duplicate-rule status in the current VS Code-compatible and VSCodium setup. Done.
 - Add troubleshooting notes for duplicate rules, missing models, missing prompts, and raw JSON tool-call output. Done.
+- Add per-project editor prerequisite detection. Classify language extensions as required or recommended, explain why each is needed, ask before installation, pin the installed version in evidence, and preserve a manual fallback when the user declines. Python extension detection is the first planned profile; it must not be treated as a prerequisite for basic Continue file tools.
 
 Exit criteria:
 
@@ -663,6 +669,7 @@ Exit criteria:
 - Duplicate-rule troubleshooting is documented for both global and project-local config scenarios.
 - Editor-specific behavior is documented without making the default config editor-specific.
 - CLI fallback instructions remain available for confusing editor behavior.
+- Missing optional language tooling is explained without being misreported as a model failure, and no editor extension is installed silently.
 
 ## Milestone 12: Model Tool-Use Validation Evidence
 
@@ -799,21 +806,20 @@ Scope:
 
 - Validate at least one generated sample repository with Aider in plan or patch mode. Done for generated Python read-only, write-smoke, and scoped-edit validation, plus richer disposable Node service scoped-edit validation with `qwen3-coder:30b`.
 - Record surface, model, OS, tool permissions, failure signals, and changed-file verification. Done for current Aider generated-sample scope.
-- Keep Continue as the supported first path until another surface has equivalent validation evidence. Done; no non-Continue surface is promoted to equivalent approved-write support.
-- Add a Continue CLI automation harness for focused read-only and disposable write-smoke model screening. Done for script and documentation scaffolding; model-specific Continue CLI evidence remains separate from editor Apply evidence.
+- Preserve the existing Continue CLI and editor results as version-specific historical evidence. Done; Continue is retired from active setup, recommendation, packaging, and qualification work.
 - Add a shared agent CLI automation harness plus thin wrappers for maintained CLI surfaces. Done for Aider and OpenCode; retired surfaces have no shipped wrapper.
 
 Exit criteria:
 
 - At least one non-Continue surface has sanitized read-only validation evidence. Done with Aider and OpenCode generated-sample evidence.
 - Approved-write recommendations remain blocked until scoped-write and external verification pass. Done through promotion gates and evidence catalog status.
-- Every promoted supported surface has install/configure/test validation status. Done for Continue, Aider, and OpenCode. Documentation-only candidates do not count as supported parity; failed and retired integrations are removed.
+- Every promoted supported surface has install/configure/test validation status. Done for Aider and OpenCode. Legacy Continue evidence does not count as supported parity; documentation-only candidates do not count as supported parity.
 
 Future evidence expansion:
 
 - Evaluate any future agent successor externally under the admission policy before adding it to the tracked surface list.
-- Evaluate the official DeepSeek Harness (`deepseek-ai/deepseek-harness`, npm package `@deepseek-ai/dsh`) as an optional standalone coding-agent candidate. Pin the exact tested version and keep the first evaluation in an isolated disposable workspace. Before it can enter the tracked or supported surface catalogs, prove local OpenAI-compatible or Ollama endpoint operation, offline and network behavior, plugin/filesystem/credential/approval boundaries, generated-repository read and plan behavior, approved scoped writes with external verification, accessibility of its user-facing surface, and complete cleanup. Keep this evaluation separate from the supported Continue path and from previously failed Cline admission; launching the DSH web UI alone is not compatibility or write-readiness evidence.
-- Evaluate VS Code Native Chat with the official Ollama language-model provider as a high-priority local coding-surface candidate. Pin the exact VS Code, extension, Ollama, and model versions; then validate local and explicitly approved remote endpoints, offline behavior, basic chat, workspace context, read-only analysis, proposed edits, approved scoped writes, tool and terminal approvals, cancellation, rollback, cleanup, accessibility, and source/package parity. Require reliable tool calling before agent-mode admission, keep local-chat evidence distinct from unsupported local inline-completion or GitHub-dependent semantic-search claims, and do not change automatic model defaults from candidate evidence. Continue remains the supported cross-editor path. Keep VSCodium Native Chat deferred until its editor version, chat harness, provider-extension distribution, and proposed-API compatibility are stable enough for the same admission suite.
+- Evaluate the official DeepSeek Harness (`deepseek-ai/deepseek-harness`, npm package `@deepseek-ai/dsh`) as an optional standalone coding-agent candidate. Pin the exact tested version and keep the first evaluation in an isolated disposable workspace. Before it can enter the tracked or supported surface catalogs, prove local OpenAI-compatible or Ollama endpoint operation, offline and network behavior, plugin/filesystem/credential/approval boundaries, generated-repository read and plan behavior, approved scoped writes with external verification, accessibility of its user-facing surface, and complete cleanup. Keep this evaluation separate from legacy Continue evidence and from previously failed Cline admission; launching the DSH web UI alone is not compatibility or write-readiness evidence.
+- Evaluate VS Code Native Chat with the official Ollama language-model provider as a high-priority local coding-surface candidate. Pin the exact VS Code, extension, Ollama, and model versions; then validate local and explicitly approved remote endpoints, offline behavior, basic chat, workspace context, read-only analysis, proposed edits, approved scoped writes, tool and terminal approvals, cancellation, rollback, cleanup, accessibility, and source/package parity. Require reliable tool calling before agent-mode admission, keep local-chat evidence distinct from unsupported local inline-completion or GitHub-dependent semantic-search claims, and do not change automatic model defaults from candidate evidence. Continue evidence is historical and grants no status to Native Chat. Keep VSCodium Native Chat deferred until its editor version, chat harness, provider-extension distribution, and proposed-API compatibility are stable enough for the same admission suite.
 - Define a safe OpenHands validation boundary before adding platform-agent validation automation. Done with an isolated generated-sample, sandbox, credential, mount, and network policy.
 - Run explicitly approved non-generated repository validation before any non-Continue surface is promoted to real-project approved-write ready.
 - Promote one non-Continue surface end to end before widening adapter support. Done for the Aider install, local-model configuration, health, and test adapter; real-project approved write remains blocked pending explicitly approved validation.
@@ -848,7 +854,7 @@ Goal: Make adoption easier as the pack grows across surfaces, languages, and val
 
 Scope:
 
-- Add installer profiles for Continue, read-only review, approved-write workflows, and future validated agent surfaces. Done for Continue profiles plus evidence-backed Aider and OpenCode setup adapters; candidate surfaces are excluded from supported setup.
+- Add installer profiles for maintained, validated agent surfaces. Done for evidence-backed Aider and OpenCode setup adapters; legacy Continue and candidate surfaces are excluded from supported setup.
 - Add language-focused install/profile options after language packs are validated. Future evidence-gated expansion; not a current completion blocker.
 - Create a sanitized evidence catalog for model, OS, editor, agent surface, language, and write-readiness results. Done for current scope in `config/evidence-catalog.tsv`.
 - Evolve the catalog to Capability Evidence Contract v2, keyed by surface, model, provider, operating system, surface version, operation, and validation mode. Done with a machine-readable v2 contract and migrated catalog; a model validated for one surface does not inherit write readiness on another surface.
@@ -857,13 +863,13 @@ Scope:
 
 Exit criteria:
 
-- Users can choose the right profile without manually assembling config files. Done for the supported Continue, Aider, and OpenCode set. Documentation-only candidates are excluded from default choices.
+- Users can choose the right profile without manually assembling config files. Done for the supported Aider and OpenCode set. Legacy Continue and documentation-only candidates are excluded from default choices.
 - Validation evidence is structured enough to compare models, surfaces, and languages over time. Done for the v2 catalog and current recommendation and scorecard consumers; new surface adapters must still add exact evidence before promotion.
 - Release artifacts are easy to install and verify. Done with cross-platform package scripts and checksum guidance.
 
 Future candidate expansion:
 
-- Continue, Aider, and OpenCode have supported install, configure, health, and test paths within their documented evidence limits; real-project approved write remains blocked for non-Continue surfaces.
+- Aider and OpenCode have supported install, configure, health, and test paths within their documented evidence limits; real-project approved write remains separately gated. Continue has legacy evidence only.
 - Failed integrations are removed from scripts, adapters, active catalogs, and detailed evidence; reintroduction requires a fresh proposal and full promotion-gate validation.
 - New agent software is evaluated in disposable untracked workspaces. Only fully passing integrations may add repository or release-package assets; failed evaluations receive a concise sanitized decision record only.
 - OpenHands has a defined rootless workspace, credential, sandbox, and network boundary, but remains a candidate until an explicitly approved implementation passes generated-sample validation.
@@ -877,7 +883,7 @@ Scope:
 - Rank candidate models by workflow fit, resource fit, tool-use validation status, and conservative defaults so the user receives a clear recommended model plus alternatives. Done with lane-specific policy version 1 and per-candidate score rationale.
 - Add lane-specific scoring: prioritize reliability and VRAM headroom for WRITE SAFE, while allowing larger validated models for PLAN ONLY and DEEP REVIEW when hardware permits. Done for exact evidence matches on Windows, Linux, and macOS recommendation paths.
 - Include quantization, context target, backend overhead, model architecture or MoE behavior, and a configurable memory reserve rather than estimating fit only from parameter count in the model name. Done for curated model-fit profiles with a labeled low-confidence fallback for unknown tags; runtime-measured metadata remains a future refinement.
-- Generate best-fit local configuration for Continue first, including model lanes, roles, context length, max tokens, keep-alive settings, and local-only endpoint handling. Done for local-only Continue config output.
+- Preserve the surface-neutral model-lane contract while generating configuration only for maintained, evidence-admitted surfaces. Historical Continue config output is no longer offered.
 - Keep the configuration engine surface-neutral enough to support future plugins or agent surfaces after they have compatibility evidence. Done with a reusable `ModelLanes` recommendation contract; generated config remains evidence-gated per surface.
 - Ensure cloud tags, provider-specific tags, MLX tags, oversized models, and unsupported local pulls are filtered or explained before any model download is attempted.
 - Track Moonshot AI's Kimi family as documentation-only experimental and
