@@ -16,15 +16,15 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 185 |
-| Distinct model-field values | 69 |
+| Evidence records | 187 |
+| Distinct model-field values | 71 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 82 |
+| `partial-pass` | 84 |
 | `failed-validation` | 22 |
 | `validated-by-tests` | 21 |
 | `read-only-tool-validated` | 13 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 74 |
+| Local endpoint | 76 |
 | Generated sample | 58 |
 | Editor agent | 14 |
 | Automated tests | 8 |
@@ -95,8 +95,10 @@ See [Evidence Catalog](Evidence-Catalog),
 | devstral-small-2:24b |
 | devstral-small-2:latest |
 | digest-pinned-19-model-corpus |
+| digest-pinned-eight-model-corpus |
 | exact-upstream-candidate-records |
 | five exact manifest-pinned models |
+| five-model-passed-soak-corpus |
 | gemma3:12b |
 | gemma3:1b-it-q4_K_M |
 | gemma4:e2b-qat |

@@ -31,6 +31,13 @@
   ],
   "profiles": [
     {
+      "id": "cuda-4gib-system-16gib",
+      "backend": "cuda",
+      "minimumSystemMemoryGiB": 15,
+      "minimumUsableGpuMemoryGiB": 4,
+      "minimumFreeGpuMemoryGiB": 1
+    },
+    {
       "id": "cpu-16gib",
       "backend": "cpu",
       "minimumSystemMemoryGiB": 15,
@@ -81,6 +88,7 @@
     {
       "modelId": "qwen35-08b-q8",
       "requiredProfiles": [
+        "cuda-4gib-system-16gib",
         "cpu-16gib",
         "cuda-16gib",
         "cuda-12gib-system-32gib",
@@ -91,6 +99,7 @@
     {
       "modelId": "qwen35-2b-q8",
       "requiredProfiles": [
+        "cuda-4gib-system-16gib",
         "cpu-16gib",
         "cuda-16gib",
         "cuda-12gib-system-32gib",
@@ -115,7 +124,7 @@
     },
     {
       "modelId": "gemma3-1b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cuda-4gib-system-16gib", "cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
@@ -145,7 +154,7 @@
     },
     {
       "modelId": "granite41-3b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cuda-4gib-system-16gib", "cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
@@ -155,17 +164,17 @@
     },
     {
       "modelId": "phi4-mini-38b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cuda-4gib-system-16gib", "cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "llama32-3b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cuda-4gib-system-16gib", "cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
       "modelId": "ministral3-3b-q4",
-      "requiredProfiles": ["cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
+      "requiredProfiles": ["cuda-4gib-system-16gib", "cpu-16gib", "cuda-16gib", "cuda-12gib-system-32gib", "vulkan-8gib-system-16gib"],
       "state": "ready-for-qualification"
     },
     {
@@ -512,7 +521,7 @@
     },
     {
       "modelId": "minicpm-v46-1b-q4",
-      "requiredProfiles": ["vulkan-8gib-system-16gib", "cuda-16gib", "cuda-12gib-system-32gib"],
+      "requiredProfiles": ["cuda-4gib-system-16gib", "vulkan-8gib-system-16gib", "cuda-16gib", "cuda-12gib-system-32gib"],
       "state": "ready-for-qualification",
       "plannedTest": {
         "runtimeRequirementReference": "config/alpha-2-model-runtime-requirements.json#minicpm-v46-1b-q4",

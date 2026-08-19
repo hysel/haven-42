@@ -21,8 +21,10 @@
       "vendor": "NVIDIA",
       "model": "GeForce GTX 1650 Super",
       "memoryGiB": 4,
-      "status": "pending",
-      "measurementEvidence": []
+      "status": "measured",
+      "measurementEvidence": [
+        "examples/nvidia-gtx1650-super-linux-model-qualification.md"
+      ]
     },
     {
       "id": "nvidia-geforce-rtx-3060-12g",
