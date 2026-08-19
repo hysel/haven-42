@@ -1151,36 +1151,61 @@ try {
   checks += 11;
 
   await cdp.evaluate("document.querySelector('#check-software-updates').click()");
-  await waitFor(() => cdp.evaluate(`(
-    document.querySelector('#software-update-result').textContent.includes('Ollama 0.32.14')
-    && !document.querySelector('#use-software-update').disabled
-    && !document.querySelector('#software-update-release-link').classList.contains('hidden')
-  )`));
-  const softwareUpdateReview = await cdp.evaluate(`(() => {
-    const preference = document.querySelector('#software-update-preference');
-    const update = document.querySelector('#use-software-update');
-    const initial = {
-      status: document.querySelector('#software-update-result').textContent,
-      updateText: update.textContent,
-      release: document.querySelector('#software-update-release-link').href,
-      persisted: document.querySelector('#software-update-privacy').textContent,
-    };
-    preference.value = 'keep';
-    preference.dispatchEvent(new Event('change', {bubbles: true}));
-    const disabledWhenKeeping = update.disabled;
-    preference.value = 'offer';
-    preference.dispatchEvent(new Event('change', {bubbles: true}));
-    return {...initial, disabledWhenKeeping, enabledWhenOffering: !update.disabled};
-  })()`);
-  if (
-    !softwareUpdateReview.status.includes('newest stable version verified')
-    || softwareUpdateReview.updateText !== 'Review Ollama 0.32.14'
-    || softwareUpdateReview.release !== 'https://github.com/ollama/ollama/releases/tag/v0.32.14'
-    || !softwareUpdateReview.persisted.includes('stay in memory')
-    || !softwareUpdateReview.disabledWhenKeeping
-    || !softwareUpdateReview.enabledWhenOffering
-  ) throw new Error(`software-update-review:${JSON.stringify(softwareUpdateReview)}`);
-  checks += 6;
+  if (packagedExecutable) {
+    await waitFor(() => cdp.evaluate(
+      "document.querySelector('#check-software-updates').textContent === 'Check official releases again'",
+    ));
+    const packagedSoftwareUpdate = await cdp.evaluate(`({
+      result: document.querySelector('#software-update-result').textContent,
+      status: document.querySelector('#update-status').textContent,
+      updateDisabled: document.querySelector('#use-software-update').disabled,
+      releaseHidden: document.querySelector('#software-update-release-link').classList.contains('hidden')
+    })`);
+    const verified = packagedSoftwareUpdate.result.includes('Ollama')
+      && packagedSoftwareUpdate.status.startsWith('Checked · Ollama')
+      && !packagedSoftwareUpdate.releaseHidden;
+    const failedClosed = packagedSoftwareUpdate.result.startsWith(
+      'The official release could not be verified. Nothing was downloaded or changed.',
+    )
+      && packagedSoftwareUpdate.status === 'Check failed · no changes'
+      && packagedSoftwareUpdate.updateDisabled
+      && packagedSoftwareUpdate.releaseHidden;
+    if (!verified && !failedClosed) {
+      throw new Error(`packaged-software-update-review:${JSON.stringify(packagedSoftwareUpdate)}`);
+    }
+    checks += 4;
+  } else {
+    await waitFor(() => cdp.evaluate(`(
+      document.querySelector('#software-update-result').textContent.includes('Ollama 0.32.14')
+      && !document.querySelector('#use-software-update').disabled
+      && !document.querySelector('#software-update-release-link').classList.contains('hidden')
+    )`));
+    const softwareUpdateReview = await cdp.evaluate(`(() => {
+      const preference = document.querySelector('#software-update-preference');
+      const update = document.querySelector('#use-software-update');
+      const initial = {
+        status: document.querySelector('#software-update-result').textContent,
+        updateText: update.textContent,
+        release: document.querySelector('#software-update-release-link').href,
+        persisted: document.querySelector('#software-update-privacy').textContent,
+      };
+      preference.value = 'keep';
+      preference.dispatchEvent(new Event('change', {bubbles: true}));
+      const disabledWhenKeeping = update.disabled;
+      preference.value = 'offer';
+      preference.dispatchEvent(new Event('change', {bubbles: true}));
+      return {...initial, disabledWhenKeeping, enabledWhenOffering: !update.disabled};
+    })()`);
+    if (
+      !softwareUpdateReview.status.includes('newest stable version verified')
+      || softwareUpdateReview.updateText !== 'Review Ollama 0.32.14'
+      || softwareUpdateReview.release !== 'https://github.com/ollama/ollama/releases/tag/v0.32.14'
+      || !softwareUpdateReview.persisted.includes('stay in memory')
+      || !softwareUpdateReview.disabledWhenKeeping
+      || !softwareUpdateReview.enabledWhenOffering
+    ) throw new Error(`software-update-review:${JSON.stringify(softwareUpdateReview)}`);
+    checks += 6;
+  }
 
   const connectedControls = await cdp.evaluate(`({
     connectionText: document.querySelector('#connect-button').textContent,
