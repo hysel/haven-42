@@ -72,6 +72,23 @@ def main() -> None:
         "minimumFreeGpuMemoryGiB": 2,
     }
     assert len(vulkan_matrix_sha) == 64
+    four_gib_profile, four_gib_matrix_sha = MODULE._review_matrix(
+        "granite41-3b-q4", "cuda-4gib-system-16gib"
+    )
+    assert four_gib_profile == {
+        "id": "cuda-4gib-system-16gib",
+        "backend": "cuda",
+        "minimumSystemMemoryGiB": 15,
+        "minimumUsableGpuMemoryGiB": 4,
+        "minimumFreeGpuMemoryGiB": 1,
+    }
+    assert len(four_gib_matrix_sha) == 64
+    refused(
+        lambda: MODULE._review_matrix(
+            "qwen35-4b-q4", "cuda-4gib-system-16gib"
+        ),
+        "unreviewed-qualification-cell",
+    )
     refused(
         lambda: MODULE._review_matrix("qwen36-27b-q4", "cpu-16gib"),
         "unreviewed-qualification-cell",

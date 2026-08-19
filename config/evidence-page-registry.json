@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "195dffb629d633360f7c78daa8723daa4e6e2c0e83386000f1b72cd0c517f8f4",
-  "recordCount": 185,
+  "catalogSha256": "7c821b0ae8112cac99f1b130fb7516bd0c5984fac12ec75114ae0842521efef4",
+  "recordCount": 187,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -3378,6 +3378,30 @@
       }
     },
     {
+      "id": "evidence-65198375e7df9abe",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "digest-pinned-eight-model-corpus",
+        "operation": "exact-artifact-core-task-gate-and-30-minute-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-gtx1650-super-linux-model-qualification.md",
+        "notes": "Five exact small-model artifacts passed three Chat, Writing, and Summarization samples with unload checks and independent 30-minute soaks. Three larger candidates stopped at the full-CUDA-residency gate. This exact profile does not change automatic defaults, runtime admission, support labels, or other 4 GB hardware cells."
+      },
+      "sourceEvidence": "examples/nvidia-gtx1650-super-linux-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-65198375e7df9abe.md",
+        "wikiPage": "Evidence-Record-65198375e7df9abe.md",
+        "title": "Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification"
+      }
+    },
+    {
       "id": "evidence-f5989f6fc215258e",
       "claim": {
         "schema_version": "2",
@@ -4287,6 +4311,30 @@
         "repositorySource": "docs/evidence-records/evidence-2aa29208b11bc71d.md",
         "wikiPage": "Evidence-Record-2aa29208b11bc71d.md",
         "title": "Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power"
+      }
+    },
+    {
+      "id": "evidence-60b8a8cd266e76e3",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power",
+        "surface": "nvidia-smi",
+        "surface_version": "610.43.02",
+        "provider": "Ollama 0.32.14 CUDA",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "five-model-passed-soak-corpus",
+        "operation": "one-second-board-telemetry-bounded-soak-pre-and-post-idle",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-gtx1650-super-linux-model-qualification.md",
+        "notes": "Across 9,879 one-second GPU-board samples, pre-run idle averaged 8.360 W and post-run idle averaged 8.203 W; model-window averages ranged from 12.585 W to 16.208 W and observed peaks ranged from 48.88 W to 103.74 W. These readings exclude the rest of the computer and wall-power losses."
+      },
+      "sourceEvidence": "examples/nvidia-gtx1650-super-linux-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-60b8a8cd266e76e3.md",
+        "wikiPage": "Evidence-Record-60b8a8cd266e76e3.md",
+        "title": "Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power"
       }
     },
     {

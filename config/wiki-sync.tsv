@@ -321,6 +321,7 @@ docs/evidence-records/evidence-f96c1a3dd255db29.md	Evidence-Record-f96c1a3dd255d
 docs/evidence-records/evidence-6c0d4b52091120fa.md	Evidence-Record-6c0d4b52091120fa.md	Qwen 3.6 35B-A3B Q4 on dual Tesla V100
 docs/evidence-records/evidence-6c09cdefc61c0f82.md	Evidence-Record-6c09cdefc61c0f82.md	Qwen 3.8 27B Q4 on dual Tesla V100
 docs/evidence-records/evidence-ad991e5601c892ec.md	Evidence-Record-ad991e5601c892ec.md	Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification
+docs/evidence-records/evidence-65198375e7df9abe.md	Evidence-Record-65198375e7df9abe.md	Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification
 docs/evidence-records/evidence-f5989f6fc215258e.md	Evidence-Record-f5989f6fc215258e.md	Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification
 docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
 docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
@@ -359,6 +360,7 @@ docs/evidence-records/evidence-58d8481eef7a394b.md	Evidence-Record-58d8481eef7a3
 docs/evidence-records/evidence-9a9906ccfd247313.md	Evidence-Record-9a9906ccfd247313.md	Radeon RX 5700 XT Llama 3.2 3B board power
 docs/evidence-records/evidence-0b86ce2eeb867f1f.md	Evidence-Record-0b86ce2eeb867f1f.md	Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power
 docs/evidence-records/evidence-2aa29208b11bc71d.md	Evidence-Record-2aa29208b11bc71d.md	Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power
+docs/evidence-records/evidence-60b8a8cd266e76e3.md	Evidence-Record-60b8a8cd266e76e3.md	Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power
 docs/evidence-records/evidence-ad94c1f53c81365c.md	Evidence-Record-ad94c1f53c81365c.md	Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power
 docs/evidence-records/evidence-77e5fbc983b71597.md	Evidence-Record-77e5fbc983b71597.md	Remote hardware profiling
 docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ede9d.md	Python API generated sample

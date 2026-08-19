@@ -219,6 +219,7 @@ them by hand; update the catalog and run the generator.
 | [Qwen 3.6 35B-A3B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c0d4b52091120fa) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · qwen3.6:35b-a3b-q4_K_M |
 | [Qwen 3.8 27B Q4 on dual Tesla V100](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c09cdefc61c0f82) | `partial-pass` | Ubuntu 24.04.4 · Ollama CUDA · qwen3.8:27b-q4_K_M |
 | [Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad991e5601c892ec) | `partial-pass` | Windows 11 · Ollama · 17 exact manifest-pinned models |
+| [Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-65198375e7df9abe) | `partial-pass` | Ubuntu 26.04 LTS · Ollama · digest-pinned-eight-model-corpus |
 | [Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-f5989f6fc215258e) | `partial-pass` | Ubuntu 26.04 LTS · Ollama · digest-pinned-19-model-corpus |
 ## Model Quantization
 
@@ -281,6 +282,7 @@ them by hand; update the catalog and run the generator.
 | [Radeon RX 5700 XT Llama 3.2 3B board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-9a9906ccfd247313) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · llama3.2:3b-instruct-q4_K_M |
 | [Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-0b86ce2eeb867f1f) | `partial-pass` | Windows 10.0.26200.8973 · llama.cpp b10375 Vulkan AMD proprietary 26.7.1 · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
 | [Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-2aa29208b11bc71d) | `partial-pass` | Ubuntu 26.04 LTS · llama.cpp b10375 Vulkan RADV · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
+| [Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-60b8a8cd266e76e3) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 CUDA · five-model-passed-soak-corpus |
 | [Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad94c1f53c81365c) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 CUDA · 19-model-passed-soak-corpus |
 ## Remote Profile
 

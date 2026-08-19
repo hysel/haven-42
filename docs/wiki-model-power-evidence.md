@@ -15,6 +15,7 @@ local model may fit their computer and electricity budget.
 | Intel Arc B580 12 GiB | Granite 4.1 8B Q4_K_M · llama.cpp b10375 SYCL | Card energy during active inference; broader soak average includes idle time | 463.334 J active energy; 34.933 W broader-run average | Exact-profile engineering evidence |
 | AMD Radeon RX 7800 XT 16 GiB | Qwen 3.5 9B Q4_K_M · Ollama 0.32.5 | Adrenalin GPU board power across a 30-minute soak | 40.084 W average, 261 W peak, 20.142 Wh; 15.882 W idle-adjusted average | Accepted exact-profile energy measurement |
 | AMD Radeon RX 5700 XT 8 GiB | Llama 3.2 3B Q4_K_M · Ollama 0.32.13 Vulkan on Ubuntu 26.04 | Linux `power1_average` GPU-board sensor across two-minute idle, ten-minute active, and two-minute cooldown windows | 7.575 W idle average, 122.118 W active average, 242 W peak, 20.350129 Wh active; 2,134.188 output tokens/Wh | Exact-profile engineering evidence |
+| NVIDIA GeForce GTX 1650 Super 4 GiB | Five exact artifacts · Ollama 0.32.14 CUDA on Ubuntu 26.04 | One-second GPU-board telemetry across pre-idle, five independent 30-minute mixed-task soaks, and post-idle | 8.360 W pre-idle average, 8.203 W post-idle average; model-window averages 12.585–16.208 W and peaks 48.88–103.74 W | Exact-profile engineering evidence |
 | NVIDIA GeForce RTX 3060 12 GiB | 19 exact artifacts · Ollama 0.32.14 CUDA on Ubuntu 26.04 | One-second GPU-board telemetry across pre-idle, 19 independent 30-minute mixed-task soaks, and post-idle | 13.962 W pre-idle average, 14.175 W post-idle average; model-window averages 23.577–32.876 W and peaks 56.54–139.18 W | Exact-profile engineering evidence |
 
 ## Measurement coverage
@@ -27,7 +28,7 @@ the campaign. The machine-readable coverage source is
 
 | Graphics hardware | Reference measurement | What remains |
 | --- | --- | --- |
-| GeForce GTX 1650 Super 4 GiB | Pending | Measure the fixed idle and active workload after the purchased card is installed. |
+| GeForce GTX 1650 Super 4 GiB | Measured | The Ubuntu 26.04 CUDA record covers five passing small-model soak windows. Windows, another driver/runtime, and other 4 GiB NVIDIA cards remain separate cells. |
 | GeForce RTX 3060 12 GiB | Measured | Separate Windows and Ubuntu 26.04 GPU-board records are available; another operating system, driver, runtime, or workload remains a separate cell. |
 | Quadro RTX 5000 16 GiB | Measured | Add another exact-profile record when the model, runtime, driver, workload, or operating system changes. |
 | Tesla V100 32 GiB | Measured | Single-card and two-card records are available and remain separate exact-profile measurements. |

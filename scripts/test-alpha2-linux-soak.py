@@ -54,7 +54,7 @@ def passing_cell(**arguments):
 
 def passing_qualification_cell(**arguments):
     assert arguments.pop("qualification_inventory") is True
-    assert arguments.pop("provider_version") == "0.32.13"
+    assert arguments.pop("provider_version") == "0.32.14"
     arguments["provider_version"] = "0.32.5"
     return passing_cell(**arguments)
 
@@ -62,6 +62,12 @@ def passing_qualification_cell(**arguments):
 def passing_vulkan_qualification_cell(**arguments):
     value = passing_qualification_cell(**arguments)
     value["metrics"]["peakGpuMemoryBytes"] = 4 * MODULE.GIB_BYTES
+    return value
+
+
+def passing_four_gib_cuda_cell(**arguments):
+    value = passing_qualification_cell(**arguments)
+    value["metrics"]["peakGpuMemoryBytes"] = 3 * MODULE.GIB_BYTES
     return value
 
 
@@ -123,6 +129,17 @@ def main() -> None:
     ) == 64
     assert "selectorPolicyCanonicalSha256" not in qualification["evidence"]
     assert qualification["evidence"]["qualificationProfileId"] == "cpu-16gib"
+    four_gib = run(
+        model_id="granite41-3b-q4",
+        qualification_inventory=True,
+        qualification_profile_id="cuda-4gib-system-16gib",
+        backend="cuda",
+        system_memory_gib=16,
+        usable_gpu_memory_gib=4,
+        cell_runner=passing_four_gib_cuda_cell,
+    )
+    assert four_gib["outcome"] == "passed"
+    assert four_gib["evidence"]["qualificationProfileId"] == "cuda-4gib-system-16gib"
     refused(
         lambda: run(
             model_id="granite41-3b-q4",
