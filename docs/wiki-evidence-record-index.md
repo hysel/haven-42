@@ -129,6 +129,7 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Apple M4 16 GB MLX-LM lifecycle](https://github.com/hysel/haven-42/wiki/Evidence-Record-e3d838e6e2d03596) | `partial-pass` | macOS 26.6.2 · MLX 0.32.1 Metal · mlx-community/Qwen3.5-0.8B-OptiQ-4bit@ef605869 |
 | [Apple M4 16 GB llama.cpp lifecycle](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c65da7ee449d0dd) | `partial-pass` | macOS 26.6.2 · llama.cpp Metal · Qwen3.5-0.8B-Q4_0-GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
+| [Apple M4 16 GB official llama.cpp b10520 distribution boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-6f7b8eca3bf0cc89) | `partial-pass` | macOS 26.6.2 · llama.cpp Metal · none |
 | [OpenVINO GenAI on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-05d02ca020d00629) | `partial-pass` | Windows · direct library API · OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
 | [OpenVINO GenAI on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-13d3451c24d5c713) | `partial-pass` | Linux · direct library API · OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
 | [llama.cpp 11-model identical-byte AMD/NVIDIA matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-d2ac550dc4f53937) | `partial-pass` | Windows and Linux · direct process · revision-and-sha256-pinned-11-model-corpus |

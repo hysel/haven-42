@@ -3102,6 +3102,7 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-alpha2-macos-development-update-lifecycle.py \
     test-alpha2-macos-keychain-lifecycle.py \
     test-alpha2-macos-llamacpp-lifecycle.py \
+    test-alpha2-macos-llamacpp-distribution.py \
     test-alpha2-macos-mlx-lifecycle.py \
     test-alpha2-macos-opencode-coding-screen.py \
     test-alpha2-apple-m4-package-result.py \
@@ -3122,7 +3123,8 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-validate-alpha2-macos-keychain-lifecycle-result.py \
     test-validate-alpha2-macos-attended-qualification-result.py \
     test-validate-alpha2-macos-development-update-lifecycle-result.py \
-    test-validate-alpha2-macos-development-app-result.py
+    test-validate-alpha2-macos-development-app-result.py \
+    test-validate-alpha2-macos-llamacpp-distribution-result.py
   do
     python3 "$REPO_ROOT/scripts/$test_name" || return 1
   done

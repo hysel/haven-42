@@ -1,0 +1,59 @@
+{
+  "archive": {
+    "exactOfficialDigest": true,
+    "memberCount": 62,
+    "safeInternalSymlinks": true,
+    "safePaths": true
+  },
+  "authority": {
+    "packageAdmissionGranted": false,
+    "releasePromotionAllowed": false,
+    "runtimeAdmissionGranted": false
+  },
+  "kind": "haven42-sanitized-macos-llamacpp-distribution-result",
+  "officialRelease": {
+    "asset": "llama-b10520-bin-macos-arm64.tar.gz",
+    "assetBytes": 11089815,
+    "assetSha256": "c993962da4fec1cdccb5cb27ce06c8f7db0fb46f188bb156f0e6761233b7fa6d",
+    "assetUrl": "https://github.com/ggml-org/llama.cpp/releases/download/b10520/llama-b10520-bin-macos-arm64.tar.gz",
+    "commit": "cd644c39545aac3dca63261f99a9bfc35956cb25",
+    "project": "ggml-org/llama.cpp",
+    "releaseUrl": "https://github.com/ggml-org/llama.cpp/releases/tag/b10520",
+    "tag": "b10520"
+  },
+  "open": [
+    "developer-id-signing",
+    "notarization",
+    "gatekeeper-public-admission",
+    "maintained-coding-surface"
+  ],
+  "platformTrust": {
+    "adHocSigned": true,
+    "developerIdSigned": false,
+    "gatekeeperAdmitted": false,
+    "notarizationProven": false,
+    "publicDistributionTrusted": false
+  },
+  "privacy": {
+    "privateIdentityRetained": false,
+    "privatePathRetained": false,
+    "rawToolOutputRetained": false
+  },
+  "profile": {
+    "architecture": "arm64",
+    "hardware": "Apple M4",
+    "memoryGiB": 16,
+    "platformFamily": "macos"
+  },
+  "runtime": {
+    "commit": "cd644c39545aac3dca63261f99a9bfc35956cb25",
+    "nativeArchitecture": "arm64",
+    "relocatedLaunchPassed": true,
+    "runtimeLaunchRequiresPackageManager": false,
+    "runtimeLaunchRequiresSystemPython": false,
+    "serverSha256": "d0878274b8d6bd3c8ea26a78eb66cd1ffd943d007c62b9dff31c8aa99922d713",
+    "version": "b10520"
+  },
+  "schemaVersion": 1,
+  "status": "partial-pass"
+}

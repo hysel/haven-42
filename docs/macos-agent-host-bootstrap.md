@@ -286,6 +286,18 @@ python3 scripts/validate-alpha2-macos-llamacpp-lifecycle-result.py \
   /an/isolated/results/apple-silicon-llamacpp-lifecycle.json
 ```
 
+Validate the exact official `b10520` macOS arm64 archive separately. This
+checks release integrity, archive safety, relocation, native launch, and the
+actual macOS trust state; it does not admit the runtime:
+
+```bash
+python3 scripts/alpha2-macos-llamacpp-distribution.py \
+  --archive /an/isolated/llama-b10520-bin-macos-arm64.tar.gz \
+  --output /an/isolated/results/apple-m4-llamacpp-b10520-distribution-result.json
+python3 scripts/validate-alpha2-macos-llamacpp-distribution-result.py \
+  /an/isolated/results/apple-m4-llamacpp-b10520-distribution-result.json
+```
+
 These cells prove only their exact native lifecycle, acceleration, recovery,
 and cleanup boundaries. They do not inherit Ollama task or coding results and
 do not admit a beginner runtime, self-contained package, or public release.
@@ -310,8 +322,13 @@ python3 scripts/summarize-alpha2-apple-m4-qualification.py \
   --keychain config/alpha-2-apple-m4-keychain-lifecycle-result.json \
   --mlx config/alpha-2-apple-m4-mlx-0.31.3-lifecycle-result.json \
   --llamacpp config/alpha-2-apple-m4-llamacpp-b10520-lifecycle-result.json \
+  --llamacpp-distribution config/alpha-2-apple-m4-llamacpp-b10520-distribution-result.json \
   --development-update-plan config/alpha-2-macos-development-update-lifecycle-plan.json \
   --development-update config/alpha-2-apple-m4-development-update-lifecycle-result.json \
+  --addendum-plan config/alpha-2-apple-silicon-16gib-gemma4-12b-addendum-plan.json \
+  --addendum-core config/alpha-2-apple-m4-gemma4-12b-model-qualification-result.json \
+  --addendum-soak config/alpha-2-apple-m4-gemma4-12b-model-soak-result.json \
+  --addendum-coding config/alpha-2-apple-m4-gemma4-12b-opencode-1.18.19-coding-result.json \
   --output config/alpha-2-apple-m4-qualification-status.json \
   --replace
 ```

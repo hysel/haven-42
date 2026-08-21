@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "76d3188c768ce51eb5a2d1db4d6db83bd3fc5c4cc49f288c838303b088da4143",
-  "recordCount": 207,
+  "catalogSha256": "2488b3bcb1bdf8e0a186e80cb0825988cb74772a62b706f98b300686b794a7ba",
+  "recordCount": 208,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -1983,6 +1983,30 @@
         "repositorySource": "docs/evidence-records/evidence-6c65da7ee449d0dd.md",
         "wikiPage": "Evidence-Record-6c65da7ee449d0dd.md",
         "title": "Apple M4 16 GB llama.cpp lifecycle"
+      }
+    },
+    {
+      "id": "evidence-6f7b8eca3bf0cc89",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "Apple M4 16 GB official llama.cpp b10520 distribution boundary",
+        "surface": "llama.cpp macOS arm64 archive",
+        "surface_version": "b10520",
+        "provider": "llama.cpp Metal",
+        "os": "macOS 26.6.2",
+        "model": "none",
+        "operation": "official-digest-safe-extraction-relocation-native-launch-platform-trust",
+        "validation_mode": "physical-package-test",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The exact official arm64 archive passed release-size and SHA-256 checks, bounded safe extraction, fresh-folder relocation, native launch, and launch without a package manager or system Python. The executable is ad-hoc signed, not proven notarized, and rejected by Gatekeeper; no runtime, package, support, default, or release admission was granted."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6f7b8eca3bf0cc89.md",
+        "wikiPage": "Evidence-Record-6f7b8eca3bf0cc89.md",
+        "title": "Apple M4 16 GB official llama.cpp b10520 distribution boundary"
       }
     },
     {

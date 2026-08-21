@@ -20,7 +20,11 @@ The shared local-text discovery and invocation entry points implement this bound
 | llama.cpp SYCL | Candidate | Exact Linux B580 functional, vision, pressure, adapter, and cleanup cells passed; 3 of 53 upstream tests failed, so the backend remains unselectable and unpackaged. |
 | LM Studio | Optional external API | The end user installs it. Haven 42 may call its published loopback API but does not embed or redistribute it. |
 | IPEX-LLM | Retired | Upstream was archived on 2026-01-28. Keep a documentation record only. |
-| llama.cpp Metal | Parked | Physical-Mac validation remains the last hardware step. |
+| llama.cpp Metal | Partial physical-Mac evidence | Exact `b10520` lifecycle, full Metal offload, official-archive integrity, safe extraction, relocation, and dependency-free launch passed on an Apple M4 with 16 GB. The upstream executable is ad-hoc signed and rejected by Gatekeeper; Developer ID signing, notarization, a maintained coding surface, and product admission remain open. |
+
+`Parked` remains the fail-closed status for an engine or backend that has not
+yet earned executable candidate evidence. Moving one exact cell beyond parked
+does not change any other engine, backend, hardware, or package status.
 
 `oneAPI` is a compiler/runtime toolkit rather than a standalone inference engine. It may become a dependency of an admitted Intel backend, but it is not presented as a provider. OpenVINO GenAI remains a separate Intel-focused engine candidate. See `examples/intel-b580-inference-engine-validation.md` for the sanitized exact-host evidence and blockers.
 
@@ -41,7 +45,7 @@ model artifact, and requested capability.
 | Linux NVIDIA | Ollama first; direct llama.cpp CUDA is an exact-profile option | Distribution, libc, driver, device permissions, suspend/resume, and portable user-process behavior remain gates. |
 | Linux AMD | Ollama/ROCm first; llama.cpp HIP remains profile-specific | Kernel driver, ROCm version, device groups, and native-Linux evidence are required; WSL2 evidence does not transfer. |
 | Linux Intel | Compare Ollama Vulkan, llama.cpp SYCL, and OpenVINO | Existing Intel results are candidate-only and cannot select a packaged runtime. |
-| macOS Apple Silicon | Compare Ollama Metal, llama.cpp Metal, and later MLX | Unified-memory headroom, native package lifecycle, signing, and notarization require physical-Mac evidence. |
+| macOS Apple Silicon | Ollama Metal has exact qualification evidence; llama.cpp Metal and MLX remain bounded candidates | Exact M4 lifecycle evidence exists for all three routes. The direct llama.cpp archive is not a trusted public package, and MLX still lacks the production server and package boundaries required for novice use. Evidence does not yet grant an Apple default. |
 | macOS Intel | CPU-only future consideration | Apple Silicon Metal evidence does not transfer; low performance may make the profile unsupported. |
 
 Chat, Writing, and Summarization continue to use one provider-neutral text

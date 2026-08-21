@@ -111,6 +111,14 @@ with a pinned Qwen 3.5 0.8B GGUF. Those results prove their exact Metal,
 timeout-recovery, and cleanup boundaries only; neither runtime is admitted as
 the managed beginner default or as a coding surface.
 
+The official llama.cpp `b10520` macOS arm64 archive was then checked against
+its exact release size and SHA-256, extracted through a path- and link-safe
+boundary, moved to a fresh folder, and launched there without a package manager
+or system Python. Those distribution mechanics passed. The upstream executable
+is only ad-hoc signed, has no proven notarization, and is rejected by
+Gatekeeper, so it is not a trusted public Haven 42 package. A maintained coding
+surface also remains open.
+
 ## Package and repository checks
 
 The exact merged source commit passed the native full tier on the physical Mac:
@@ -135,6 +143,10 @@ for the two exact unsigned archives; it is not the Haven 42 production updater.
 
 - A maintained coding surface that passes every required gate. OpenCode
   1.18.19 completed but all 17 exact candidates failed at least one gate.
+- Developer ID signing, notarization, and Gatekeeper admission for any
+  beginner-facing llama.cpp package. The official archive passed integrity,
+  safe extraction, relocation, and dependency-free launch, but not platform
+  trust.
 - Whole-system wall-power measurement. The retained Apple figures are SoC
   estimates rather than electricity-at-the-outlet measurements.
 - Manual packaged-app screen-reader, keyboard, zoom, reduced-motion, physical
