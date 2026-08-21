@@ -7,7 +7,7 @@
     "systemMemoryGiB": 16.0
   },
   "kind": "haven42-sanitized-physical-macos-native-test-result",
-  "observedAtUtc": "2026-08-21T09:33:22Z",
+  "observedAtUtc": "2026-08-21T12:21:51Z",
   "planCanonicalSha256": "dc051e589d34526f18374666fd2a2a017e60be89c5f792e4a0e8461581d6fe73",
   "privateIdentityRetained": false,
   "privatePathsRetained": false,
@@ -16,15 +16,15 @@
   "releasePublicationAuthorized": false,
   "schemaVersion": 1,
   "source": {
-    "baseCommit": "e718801a37965c7000aed8b29af0c9ed9015b7f8",
-    "commitIsExactSource": false,
-    "snapshotSha256": "4c50e9f972238bed7def68bb2f36b87b674b5b3ae3c9528ee4011d621c39fe91",
-    "treeState": "modified-uncommitted"
+    "baseCommit": "9a03ded82a0a248504f58d65f068ed24f6b05e08",
+    "commitIsExactSource": true,
+    "snapshotSha256": "d0fde8f32f7fa8ce92e44dee100a037bd17c2803fb0203465dd819b7077dd8c5",
+    "treeState": "exact-commit"
   },
   "status": "passed",
   "test": {
-    "durationSeconds": 75,
-    "groupsExecuted": 80,
+    "durationSeconds": 72,
+    "groupsExecuted": 81,
     "groupsSkipped": 0,
     "runner": "native-shell",
     "tier": "full"

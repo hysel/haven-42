@@ -26,7 +26,7 @@ VALIDATOR = load("native_test_validator", ROOT / "scripts/validate-alpha2-macos-
 PLAN = json.loads((ROOT / "config/alpha-2-apple-silicon-16gib-qualification-plan.json").read_text(encoding="utf-8"))
 
 
-def result() -> dict:
+def result(*, exact_source: bool = False) -> dict:
     return SUMMARY.build_report(
         PLAN,
         VALIDATOR.canonical_sha256(PLAN),
@@ -34,6 +34,7 @@ def result() -> dict:
         "b" * 64,
         "a" * 40,
         {"groupsExecuted": 80, "groupsSkipped": 0, "durationSeconds": 900},
+        exact_source=exact_source,
     )
 
 
@@ -44,6 +45,10 @@ class NativeTestResultTests(unittest.TestCase):
         )
         self.assertEqual(measurements["groupsExecuted"], 80)
         VALIDATOR.validate(result(), PLAN)
+        exact = result(exact_source=True)
+        self.assertEqual(exact["source"]["treeState"], "exact-commit")
+        self.assertTrue(exact["source"]["commitIsExactSource"])
+        VALIDATOR.validate(exact, PLAN)
 
     def test_failed_incomplete_or_nonfinal_logs_are_rejected(self) -> None:
         for text in (
@@ -61,6 +66,9 @@ class NativeTestResultTests(unittest.TestCase):
             lambda value: value["test"].__setitem__("groupsSkipped", 1),
             lambda value: value.__setitem__("privatePathsRetained", True),
             lambda value: value["source"].__setitem__("treeState", "/Users/private"),
+            lambda value: value["source"].update(
+                {"treeState": "exact-commit", "commitIsExactSource": False}
+            ),
             lambda value: value.__setitem__("releasePublicationAuthorized", True),
         )
         for mutation in mutations:

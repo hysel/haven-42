@@ -96,12 +96,14 @@ the managed beginner default or as a coding surface.
 
 ## Package and repository checks
 
-The exact modified-source snapshot passed the native full tier on the physical
-Mac: 80 test groups, no skips. A self-contained arm64 development app also
-passed 616 packaged real-browser checks plus relocation, read-only startup,
-recovery, attachment, accessibility-flow, local-privacy, port, shutdown, and
-integrity gates. It remains unsigned, unnotarized, rejected by Gatekeeper, and
-not admitted for public distribution or automatic updates.
+The exact merged source commit passed the native full tier on the physical Mac:
+81 test groups, no skips. A fresh self-contained arm64 development app built
+from that commit passed 619 packaged real-browser checks plus relocation,
+read-only startup, recovery, attachment, accessibility-flow, local-privacy,
+port, shutdown, and integrity gates. Its app metadata now explains the macOS
+Local Network permission without granting device discovery. The app remains
+unsigned, unnotarized, rejected by Gatekeeper, and not admitted for public
+distribution or automatic updates.
 
 ## What remains open
 

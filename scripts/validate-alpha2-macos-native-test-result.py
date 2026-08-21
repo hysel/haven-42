@@ -49,7 +49,14 @@ def validate(value: dict[str, Any], plan: dict[str, Any]) -> None:
     source = value["source"]
     if not isinstance(source, dict) or set(source) != {"baseCommit", "treeState", "commitIsExactSource", "snapshotSha256"}:
         raise NativeTestResultError("source-binding-invalid")
-    if not HEX40.fullmatch(str(source["baseCommit"])) or source["treeState"] != "modified-uncommitted" or source["commitIsExactSource"] is not False or not HEX64.fullmatch(str(source["snapshotSha256"])):
+    valid_source_state = (
+        source["treeState"] == "exact-commit"
+        and source["commitIsExactSource"] is True
+    ) or (
+        source["treeState"] == "modified-uncommitted"
+        and source["commitIsExactSource"] is False
+    )
+    if not HEX40.fullmatch(str(source["baseCommit"])) or not valid_source_state or not HEX64.fullmatch(str(source["snapshotSha256"])):
         raise NativeTestResultError("source-binding-invalid")
     test = value["test"]
     if not isinstance(test, dict) or set(test) != {"tier", "runner", "groupsExecuted", "groupsSkipped", "durationSeconds"}:
