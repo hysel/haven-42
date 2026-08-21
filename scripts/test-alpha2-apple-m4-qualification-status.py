@@ -24,7 +24,7 @@ class AppleM4QualificationStatusTests(unittest.TestCase):
         self.assertEqual(self.value["status"], "in-progress")
         self.assertFalse(self.value["complete"])
         binding_count = len(self.value["evidenceBindings"])
-        self.assertIn(binding_count, {5, 14, 18})
+        self.assertIn(binding_count, {5, 16, 20})
         self.assertEqual(
             len({binding["path"] for binding in self.value["evidenceBindings"]}),
             len(self.value["evidenceBindings"]),
@@ -83,8 +83,13 @@ class AppleM4QualificationStatusTests(unittest.TestCase):
         self.assertLessEqual(coding["eligibleForHumanReview"], coding["candidates"])
         self.assertFalse(gates["codingAgentQualification"]["continueEvidenceAccepted"])
         self.assertIn("synthetic-item-create-denied", gates["keychain"]["blocked"])
-        self.assertEqual(gates["updateRollbackAndUninstall"]["status"], "blocked")
+        self.assertEqual(gates["updateRollbackAndUninstall"]["status"], "partial-pass")
+        self.assertIn(
+            "injected-failure-automatic-rollback",
+            gates["updateRollbackAndUninstall"]["passed"],
+        )
         self.assertIn("signed-native-install", gates["updateRollbackAndUninstall"]["open"])
+        self.assertIn("production-updater-integration", gates["updateRollbackAndUninstall"]["open"])
         self.assertIn("partial-pass", {gate["status"] for gate in gates.values()})
 
     def test_no_implicit_authority_or_private_data(self) -> None:

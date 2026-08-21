@@ -1,0 +1,54 @@
+{
+  "authority": {
+    "automaticUpdateAdmissionGranted": false,
+    "productionUpdaterAdmissionGranted": false,
+    "releasePromotionGranted": false
+  },
+  "bindings": {
+    "baselineArchiveSha256": "e63ef5a7cd0150d21c3a730e50861bcb47f17a955615b338104510c658837a85",
+    "baselineSourceCommit": "9a03ded82a0a248504f58d65f068ed24f6b05e08",
+    "candidateArchiveSha256": "86aaf90a3819741712c74587bca723db3e4ebdf91ce917b566eade23a5bd198f",
+    "candidateSourceCommit": "2a2b3d3a7a01073e7e4a6ccba379ef2ae2476457",
+    "planSha256": "d6d145934de863593e2d4a3324d5a7eba371dfc74cbd4c069e9ed2ad55a3222f"
+  },
+  "failureInjection": {
+    "kind": "post-selection-health-failure",
+    "rawErrorRetained": false
+  },
+  "kind": "haven42-sanitized-physical-macos-development-update-lifecycle-result",
+  "observedAtUtc": "2026-08-21T14:25:25Z",
+  "operations": {
+    "atomic-candidate-selection": true,
+    "automatic-baseline-rollback": true,
+    "baseline-final-selection": true,
+    "baseline-health": true,
+    "baseline-stage": true,
+    "candidate-marker-owned-uninstall": true,
+    "candidate-post-activation-health": true,
+    "candidate-preflight-health": true,
+    "candidate-side-by-side-stage": true,
+    "healthy-candidate-reactivation": true,
+    "injected-post-selection-health-failure": true,
+    "ordinary-managed-uninstall": true,
+    "qualification-cleanup": true,
+    "rollback-health": true,
+    "user-data-preservation": true
+  },
+  "platformTrust": {
+    "developerIdSigned": false,
+    "gatekeeperPublicAdmission": false,
+    "notarized": false
+  },
+  "privacy": {
+    "privateIdentityRetained": false,
+    "privatePathsRetained": false,
+    "rawApplicationOutputRetained": false,
+    "rawTelemetryRetained": false,
+    "rawUserContentRetained": false
+  },
+  "profileId": "apple-m4-16gib-macos26-metal",
+  "release": "0.4.0-alpha.2",
+  "schemaVersion": 1,
+  "scope": "unsigned-development-package-transition-only",
+  "status": "partial-pass"
+}

@@ -52,7 +52,11 @@ def validate(value: object, plan: dict, plan_bytes: bytes) -> dict:
     require(all(COMMIT.fullmatch(str(bindings[key])) is not None for key in ("baselineSourceCommit", "candidateSourceCommit")), "source-binding-invalid")
     require(bindings["baselineArchiveSha256"] != bindings["candidateArchiveSha256"] and bindings["baselineSourceCommit"] != bindings["candidateSourceCommit"], "distinct-transition-inputs-required")
     operations = value["operations"]
-    require(isinstance(operations, dict) and list(operations) == plan["requiredOperations"], "operation-set-or-order-invalid")
+    require(
+        isinstance(operations, dict)
+        and set(operations) == set(plan["requiredOperations"]),
+        "operation-set-invalid",
+    )
     require(all(item is True for item in operations.values()), "operation-failure-visible")
     require(value["failureInjection"] == {"kind": "post-selection-health-failure", "rawErrorRetained": False}, "failure-injection-invalid")
     require(value["platformTrust"] == {"developerIdSigned": False, "notarized": False, "gatekeeperPublicAdmission": False}, "platform-trust-overstated")

@@ -277,6 +277,11 @@ them by hand; update the catalog and run the generator.
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
 | [Online model discovery](https://github.com/hysel/haven-42/wiki/Evidence-Record-2de3f0726ddaba91) | `candidate-only` | Cross-platform · N/A · N/A |
+## Package Lifecycle
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Physical Apple M4 unsigned development update lifecycle](https://github.com/hysel/haven-42/wiki/Evidence-Record-c108ec90b7cbf335) | `partial-pass` | macOS 26.6.2 · two exact self-contained arm64 app archives · none |
 ## Package Parity
 
 | Evidence | Status | Tested environment |

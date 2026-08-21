@@ -108,8 +108,12 @@ from the overall application version.
   core-pass artifacts from the frozen 16-model corpus completed independent
   30-minute Metal soaks with no failures; native repository, power, MLX,
   llama.cpp, OpenCode, and development-app cells are recorded. Signing,
-  notarization, manual accessibility, interactive Keychain, real updater and
-  uninstall, and the late-candidate addendum remain separate gates. Missing platform
+  notarization, manual accessibility, interactive Keychain, and the
+  late-candidate addendum remain separate gates. A physical unsigned
+  side-by-side transition now proves health-gated activation, injected-failure
+  rollback, uninstall, and user-data preservation for two exact development
+  archives; signed installation and production-updater integration remain open.
+  Missing platform
   evidence does not block a release that does not claim that platform.
 - Dates are added only when the work and evidence make them credible. No stage
   is promoted solely to meet a date, and no promotion changes automatic model

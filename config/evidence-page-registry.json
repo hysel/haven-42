@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "9de333f3d566b4a0e951ea86519080cab937659e373d591a242a149b23448346",
-  "recordCount": 203,
+  "catalogSha256": "3b3545ef031f609507378d815ce520a16f6391c016d706218f801773c8d954b2",
+  "recordCount": 204,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -4383,6 +4383,30 @@
         "repositorySource": "docs/evidence-records/evidence-2de3f0726ddaba91.md",
         "wikiPage": "Evidence-Record-2de3f0726ddaba91.md",
         "title": "Online model discovery"
+      }
+    },
+    {
+      "id": "evidence-c108ec90b7cbf335",
+      "claim": {
+        "schema_version": "2",
+        "area": "package-lifecycle",
+        "subject": "Physical Apple M4 unsigned development update lifecycle",
+        "surface": "Haven 42 development lifecycle runner",
+        "surface_version": "1",
+        "provider": "two exact self-contained arm64 app archives",
+        "os": "macOS 26.6.2",
+        "model": "none",
+        "operation": "side-by-side-stage-health-select-injected-failure-rollback-reactivate-uninstall-preserve-cleanup",
+        "validation_mode": "physical-package-test",
+        "status": "partial-pass",
+        "evidence": "docs/portable-development-package.md",
+        "notes": "Two exact unsigned arm64 development apps passed bounded physical side-by-side staging, health-gated selection, injected-failure rollback, healthy reactivation, marker-owned uninstall, user-data preservation, and qualification cleanup. This is not the product updater and grants no signing, notarization, automatic-update, support, or release authority."
+      },
+      "sourceEvidence": "docs/portable-development-package.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-c108ec90b7cbf335.md",
+        "wikiPage": "Evidence-Record-c108ec90b7cbf335.md",
+        "title": "Physical Apple M4 unsigned development update lifecycle"
       }
     },
     {

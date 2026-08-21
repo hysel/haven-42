@@ -18,6 +18,7 @@ SPEC.loader.exec_module(MODULE)
 PLAN_PATH = ROOT / "config/alpha-2-macos-development-update-lifecycle-plan.json"
 PLAN_BYTES = PLAN_PATH.read_bytes()
 PLAN = json.loads(PLAN_BYTES.decode("utf-8"))
+RESULT_PATH = ROOT / "config/alpha-2-apple-m4-development-update-lifecycle-result.json"
 
 
 def result() -> dict:
@@ -45,8 +46,16 @@ def result() -> dict:
 
 
 class MacDevelopmentUpdateLifecycleValidatorTests(unittest.TestCase):
+    def test_committed_physical_result_validates(self) -> None:
+        value = json.loads(RESULT_PATH.read_text(encoding="utf-8"))
+        MODULE.validate(value, PLAN, PLAN_BYTES)
+
     def test_accepts_exact_partial_pass(self) -> None:
         MODULE.validate(result(), PLAN, PLAN_BYTES)
+
+    def test_accepts_result_after_sorted_json_round_trip(self) -> None:
+        value = json.loads(json.dumps(result(), sort_keys=True))
+        MODULE.validate(value, PLAN, PLAN_BYTES)
 
     def test_rejects_missing_operation_and_overclaim(self) -> None:
         value = result()
@@ -56,6 +65,12 @@ class MacDevelopmentUpdateLifecycleValidatorTests(unittest.TestCase):
         value = result()
         value["platformTrust"]["notarized"] = True
         with self.assertRaisesRegex(MODULE.ResultError, "platform-trust-overstated"):
+            MODULE.validate(value, PLAN, PLAN_BYTES)
+
+    def test_rejects_unexpected_operation(self) -> None:
+        value = result()
+        value["operations"]["unexpected-operation"] = True
+        with self.assertRaisesRegex(MODULE.ResultError, "operation-set-invalid"):
             MODULE.validate(value, PLAN, PLAN_BYTES)
 
     def test_rejects_drift_private_data_and_authority(self) -> None:

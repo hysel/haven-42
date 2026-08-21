@@ -262,3 +262,19 @@ portable lifecycle gates above. Its sanitized result is
 `config/alpha-2-apple-m4-development-app-result.json`. That exact app remains
 unsigned and unnotarized, Gatekeeper does not admit it, and manual assistive-
 technology plus clean-machine beginner review remain open.
+
+On August 21, 2026, two different exact arm64 app archives then passed a
+bounded physical development-package transition. The test staged both versions
+side by side, checked each package over loopback, selected the candidate
+atomically, injected a post-selection failure, restored and rechecked the
+baseline, reactivated and rechecked the healthy candidate, returned to the
+baseline, removed only the marker-owned candidate and managed installation,
+preserved separate user data, and removed the qualification workspace. The
+sanitized result is
+`config/alpha-2-apple-m4-development-update-lifecycle-result.json`.
+
+This is useful development evidence, but the runner is not Haven 42's product
+updater. Both inputs were unsigned development archives. Developer ID signing,
+notarization, Gatekeeper public admission, signed installation, immutable
+release discovery and verification, and production-updater integration remain
+open. No automatic-update or release authority was granted.
