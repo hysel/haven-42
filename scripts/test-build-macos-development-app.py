@@ -52,6 +52,10 @@ def main() -> int:
         assert plist["Haven42ReleaseVersion"] == "0.4.0-alpha.2"
         assert plist["LSMultipleInstancesProhibited"] is True
         assert plist["LSUIElement"] is True
+        assert plist["NSLocalNetworkUsageDescription"] == (
+            "Haven 42 connects only to an AI server you choose on your private "
+            "network. It does not scan for nearby devices."
+        )
         if os.name != "nt":
             assert (app / "Contents" / "MacOS" / "haven42").stat().st_mode & stat.S_IXUSR
         assert (app / "Contents" / "Frameworks" / "app.js").is_file()

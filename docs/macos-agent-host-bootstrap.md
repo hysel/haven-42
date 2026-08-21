@@ -20,6 +20,16 @@ compiler, or a command-line model tool. Haven 42 should:
 6. provide visible update, rollback, model removal, and complete uninstall
    controls without requiring Terminal.
 
+When a person connects to Ollama on another computer, macOS displays its
+system **Local Network** permission prompt. The app bundle provides a factual
+usage description: Haven 42 connects only to the AI-server address the person
+entered and does not scan for nearby devices. Same-computer loopback use does
+not require private-LAN authority. If the person declines, Haven 42 must keep
+working for loopback use, explain that the private-network connection was not
+allowed, and point to **System Settings → Privacy & Security → Local Network**
+for recovery. The application must never treat this operating-system grant as
+permission to discover servers or contact a different address.
+
 The current unsigned development package proves that the Haven 42 executable
 can run without a Python installation on the destination Mac. It is not a
 public macOS release: Apple Developer signing, notarization, clean-machine

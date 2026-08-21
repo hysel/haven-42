@@ -817,9 +817,18 @@ try {
   const provider = await cdp.evaluate(`({
     visible: !document.querySelector('[data-wizard-step="provider"]').classList.contains('hidden'),
     focused: document.activeElement.id,
-    backVisible: !document.querySelector('#wizard-provider-back').classList.contains('hidden')
+    backVisible: !document.querySelector('#wizard-provider-back').classList.contains('hidden'),
+    networkHelp: document.querySelector('#wizard-macos-network-help').textContent,
+    describedBy: document.querySelector('#wizard-endpoint').getAttribute('aria-describedby')
   })`);
-  if (!provider.visible || provider.focused !== "wizard-endpoint" || !provider.backVisible) throw new Error("provider-step-focus");
+  if (
+    !provider.visible
+    || provider.focused !== "wizard-endpoint"
+    || !provider.backVisible
+    || !provider.networkHelp.includes("Local Network access")
+    || !provider.networkHelp.includes("does not scan for nearby devices")
+    || !provider.describedBy.split(/\s+/).includes("wizard-macos-network-help")
+  ) throw new Error(`provider-step-focus:${JSON.stringify(provider)}`);
   await cdp.evaluate("document.querySelector('#wizard-provider-back').click()");
   const providerBackTarget = await cdp.evaluate(`({
     progress: document.querySelector('[aria-current="step"]').dataset.wizardProgress,
@@ -830,7 +839,7 @@ try {
   if (!await cdp.evaluate("!document.querySelector('[data-wizard-step=\"provider\"]').classList.contains('hidden')")) {
     throw new Error("provider-reopen-after-back");
   }
-  checks += 2;
+  checks += 5;
   checks += 2;
   trace("provider-step-verified");
 

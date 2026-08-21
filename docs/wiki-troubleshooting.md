@@ -28,6 +28,14 @@ Haven 42 blocks public addresses, credentials in URLs, redirects, and unsupporte
 hostnames. A private-network HTTP connection also displays an encryption warning;
 that warning is expected until you use trusted HTTPS or a loopback tunnel.
 
+### A Mac says Local Network access is not allowed
+
+macOS asks for Local Network access only when Haven 42 connects to an AI server
+on another computer. If you trust that server, open **System Settings → Privacy
+& Security → Local Network** and enable **Haven 42**, then try the connection
+again. Leave it disabled when you use only Ollama on the same Mac. Haven 42
+uses the server address you enter and does not scan for nearby devices.
+
 ## Chat is unavailable
 
 - Connect Ollama first.

@@ -3045,6 +3045,12 @@ def main() -> int:
         assert 'byId(buttonId).setAttribute("aria-current", "page")' in javascript
         assert 'aria-errormessage="connection-error"' in html
         assert 'aria-errormessage="wizard-error"' in html
+        assert 'id="wizard-macos-network-help"' in html
+        assert 'id="connection-macos-network-help"' in html
+        assert "does not scan for nearby devices" in html
+        assert "System Settings → Privacy &amp; Security → Local Network" in html
+        assert 'aria-describedby="wizard-endpoint-help wizard-macos-network-help wizard-transport-warning wizard-error"' in html
+        assert 'aria-describedby="endpoint-help connection-macos-network-help connection-transport-warning connection-error"' in html
         assert 'id="resource-status-announcement" role="status" aria-live="polite" aria-atomic="true"' in html
         assert 'event.setAttribute("role", urgent ? "alert" : "status")' in javascript
         assert 'box.setAttribute("role", "note")' in javascript
