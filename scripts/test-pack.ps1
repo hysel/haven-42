@@ -5220,6 +5220,7 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-alpha2-model-recommendation-matrix.py",
         "test-alpha2-model-recommendation-report.py",
         "test-alpha2-macos-model-qualification.py",
+        "test-alpha2-macos-attended-qualification.py",
         "test-alpha2-macos-keychain-lifecycle.py",
         "test-alpha2-macos-llamacpp-lifecycle.py",
         "test-alpha2-macos-mlx-lifecycle.py",
@@ -5240,6 +5241,7 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-validate-alpha2-macos-model-soak-result.py",
         "test-validate-alpha2-macos-power-result.py",
         "test-validate-alpha2-macos-keychain-lifecycle-result.py",
+        "test-validate-alpha2-macos-attended-qualification-result.py",
         "test-validate-alpha2-macos-development-app-result.py"
     )
     foreach ($test in $tests) {
