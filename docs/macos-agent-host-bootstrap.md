@@ -320,6 +320,41 @@ uninstall cells are satisfied. Aggregation never grants product authority.
 The frozen coding-policy input is required because a later policy revision
 must not be used to reinterpret evidence collected under an earlier contract.
 
+## Attended qualification handoff
+
+The remaining human-observation gates use one fixed, privacy-bounded plan:
+`config/alpha-2-macos-attended-qualification-plan.json`. Run the collector in
+an interactive Terminal on the physical Mac against the exact app artifact
+under review:
+
+```bash
+python3 scripts/alpha2-macos-attended-qualification.py \
+  --plan config/alpha-2-macos-attended-qualification-plan.json \
+  --artifact-sha256 EXACT_APP_ARCHIVE_SHA256 \
+  --source-commit EXACT_40_CHARACTER_COMMIT \
+  --output /an/isolated/results/macos-attended-qualification.json
+```
+
+The collector accepts only `passed`, `failed`, `blocked`, or `not-run` for
+each fixed gate. It has no notes field and does not retain clipboard content,
+user content, paths, account identity, or raw assistive-technology output.
+Skipping a gate remains `not-run`; it never becomes a pass. An interrupted run
+does not publish a partial result.
+
+Validate the result before considering it for the evidence catalog:
+
+```bash
+python3 scripts/validate-alpha2-macos-attended-qualification-result.py \
+  /an/isolated/results/macos-attended-qualification.json \
+  --plan config/alpha-2-macos-attended-qualification-plan.json
+```
+
+This workflow records observation; it does not itself sign, notarize, admit,
+publish, or change a support claim. Keychain gates must use the foreground
+packaged app and its fixed synthetic item. Do not substitute the unattended
+SSH lifecycle result. Whole-system wall power and Apple distribution trust
+remain separate evidence cells.
+
 ## Security and accessibility gates
 
 - Runtime and model listeners stay on `127.0.0.1` unless a separately reviewed

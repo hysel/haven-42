@@ -3098,6 +3098,7 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-alpha2-model-recommendation-matrix.py \
     test-alpha2-model-recommendation-report.py \
     test-alpha2-macos-model-qualification.py \
+    test-alpha2-macos-attended-qualification.py \
     test-alpha2-macos-keychain-lifecycle.py \
     test-alpha2-macos-llamacpp-lifecycle.py \
     test-alpha2-macos-mlx-lifecycle.py \
@@ -3118,6 +3119,7 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-validate-alpha2-macos-model-soak-result.py \
     test-validate-alpha2-macos-power-result.py \
     test-validate-alpha2-macos-keychain-lifecycle-result.py \
+    test-validate-alpha2-macos-attended-qualification-result.py \
     test-validate-alpha2-macos-development-app-result.py
   do
     python3 "$REPO_ROOT/scripts/$test_name" || return 1

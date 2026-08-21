@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-macos-attended-qualification-plan",
+  "release": "0.4.0-alpha.2",
+  "profileId": "apple-m4-16gib-macos26-metal",
+  "privacy": {
+    "freeformNotesAllowed": false,
+    "privateIdentityAllowed": false,
+    "privatePathsAllowed": false,
+    "rawUserContentAllowed": false,
+    "rawClipboardContentAllowed": false
+  },
+  "gates": [
+    {
+      "id": "clean-machine-beginner-review",
+      "title": "Clean-machine beginner review",
+      "instruction": "On a clean supported Mac or clean macOS virtual machine with a standard user account, launch the exact packaged app and complete setup without Terminal, developer tools, or prior Haven 42 state.",
+      "passCondition": "Setup explains downloads and storage, recovers from errors, reaches Chat, and requires no maintainer knowledge."
+    },
+    {
+      "id": "manual-keyboard",
+      "title": "Keyboard-only review",
+      "instruction": "Use Tab, Shift+Tab, Enter, Space, arrow keys, and Escape through setup, navigation, dialogs, model controls, attachments, and Chat.",
+      "passCondition": "Every action is reachable, focus is visible and ordered, dialogs trap focus, and closing a dialog returns focus sensibly."
+    },
+    {
+      "id": "manual-screen-reader",
+      "title": "VoiceOver review",
+      "instruction": "Enable VoiceOver and review setup, navigation, status changes, model controls, attachments, errors, and Chat using keyboard commands.",
+      "passCondition": "Names, roles, states, instructions, errors, and live status changes are understandable without sight."
+    },
+    {
+      "id": "manual-zoom",
+      "title": "Text scaling and zoom review",
+      "instruction": "Review the packaged app at 200% browser zoom and with enlarged macOS text where available.",
+      "passCondition": "Content reflows without loss, overlap, clipping, hidden actions, or two-dimensional scrolling for primary flows."
+    },
+    {
+      "id": "manual-reduced-motion",
+      "title": "Reduced-motion review",
+      "instruction": "Enable Reduce motion in macOS Accessibility settings, relaunch the app, and exercise setup, tours, dialogs, and Chat.",
+      "passCondition": "Nonessential animation and smooth scrolling are removed while state changes remain clear."
+    },
+    {
+      "id": "physical-clipboard",
+      "title": "Physical clipboard image review",
+      "instruction": "Copy a non-sensitive PNG screenshot on the Mac and paste it into the packaged Chat composer.",
+      "passCondition": "The PNG is identified, previewed, removable, bounded by policy, and not sent until the user submits. No clipboard content is retained in evidence."
+    },
+    {
+      "id": "interactive-packaged-keychain-lifecycle",
+      "title": "Interactive packaged Keychain lifecycle",
+      "instruction": "From the foreground packaged app, exercise the fixed synthetic validation item through create, read, update, delete, and confirmed absence.",
+      "passCondition": "The lifecycle completes with expected macOS authorization and leaves no synthetic item or secret behind."
+    },
+    {
+      "id": "locked-keychain-denial-recovery",
+      "title": "Locked Keychain denial and recovery",
+      "instruction": "With the login Keychain locked, attempt the packaged synthetic operation, then unlock and retry through the documented recovery path.",
+      "passCondition": "The locked attempt fails closed without data loss or fallback storage, and the explicit retry succeeds after unlock."
+    }
+  ],
+  "authority": {
+    "automaticPassAllowed": false,
+    "releaseAdmissionAllowed": false,
+    "supportClaimAllowed": false,
+    "productDataWriteAllowed": false
+  }
+}
