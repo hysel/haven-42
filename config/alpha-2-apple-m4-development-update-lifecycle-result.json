@@ -16,7 +16,7 @@
     "rawErrorRetained": false
   },
   "kind": "haven42-sanitized-physical-macos-development-update-lifecycle-result",
-  "observedAtUtc": "2026-08-21T14:25:25Z",
+  "observedAtUtc": "2026-08-21T23:37:06Z",
   "operations": {
     "atomic-candidate-selection": true,
     "automatic-baseline-rollback": true,

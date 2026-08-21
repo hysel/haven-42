@@ -329,6 +329,10 @@ python3 scripts/summarize-alpha2-apple-m4-qualification.py \
   --addendum-core config/alpha-2-apple-m4-gemma4-12b-model-qualification-result.json \
   --addendum-soak config/alpha-2-apple-m4-gemma4-12b-model-soak-result.json \
   --addendum-coding config/alpha-2-apple-m4-gemma4-12b-opencode-1.18.19-coding-result.json \
+  --lfm-addendum-plan config/alpha-2-apple-silicon-16gib-lfm25-addendum-plan.json \
+  --lfm-addendum-core config/alpha-2-apple-m4-lfm25-llamacpp-qualification-result.json \
+  --lfm-addendum-coding config/alpha-2-apple-m4-lfm25-opencode-coding-result.json \
+  --lfm-coding-policy config/model-coding-agent-qualification-policy.json \
   --output config/alpha-2-apple-m4-qualification-status.json \
   --replace
 ```

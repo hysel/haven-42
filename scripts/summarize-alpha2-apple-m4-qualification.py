@@ -73,6 +73,9 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
     addendum_soak = values.get("addendum_soak")
     addendum_coding = values.get("addendum_coding")
     addendum_present = all(value is not None for value in (addendum_core, addendum_soak, addendum_coding))
+    lfm_core = values.get("lfm_addendum_core")
+    lfm_coding = values.get("lfm_addendum_coding")
+    lfm_addendum_present = lfm_core is not None and lfm_coding is not None
     package, keychain = values["package"], values["keychain"]
     llamacpp_distribution = values["llamacpp_distribution"]
     development_update = values["development_update"]
@@ -115,6 +118,15 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
             raise SummaryError("addendum-soak-result-count-invalid")
         if count(addendum_coding.get("results"), "passed") + count(addendum_coding.get("results"), "failed") != 1:
             raise SummaryError("addendum-coding-result-count-invalid")
+    if lfm_addendum_present:
+        lfm_core_count = count(lfm_core.get("results"), "passed") + count(lfm_core.get("results"), "failed")
+        lfm_coding_count = count(lfm_coding.get("results"), "passed") + count(lfm_coding.get("results"), "failed")
+        if lfm_core_count != 2:
+            raise SummaryError("lfm-addendum-core-result-count-invalid")
+        if count(lfm_core.get("results"), "passed") != 0:
+            raise SummaryError("lfm-addendum-passed-core-requires-soak")
+        if lfm_coding_count != lfm_core_count:
+            raise SummaryError("lfm-addendum-coding-result-count-invalid")
     if any(value.get("status") != "passed" for value in power):
         raise SummaryError("power-cell-not-passed")
     development_operations = development_update.get("operations")
@@ -150,17 +162,24 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
     ):
         raise SummaryError("packaged-browser-evidence-invalid")
     coding_records = coding["results"]
-    all_coding_records = coding_records + (addendum_coding["results"] if addendum_present else [])
+    all_coding_records = (
+        coding_records
+        + (addendum_coding["results"] if addendum_present else [])
+        + (lfm_coding["results"] if lfm_addendum_present else [])
+    )
     eligible = sum(record.get("codingRecommendationEligible") is True for record in all_coding_records)
-    core_candidates = 16 + (1 if addendum_present else 0)
-    core_passed = count(core["results"], "passed") + (count(addendum_core["results"], "passed") if addendum_present else 0)
-    core_failed = count(core["results"], "failed") + (count(addendum_core["results"], "failed") if addendum_present else 0)
+    lfm_core_candidates = len(lfm_core["results"]) if lfm_addendum_present else 0
+    lfm_core_passed = count(lfm_core["results"], "passed") if lfm_addendum_present else 0
+    lfm_core_failed = count(lfm_core["results"], "failed") if lfm_addendum_present else 0
+    core_candidates = 16 + (1 if addendum_present else 0) + lfm_core_candidates
+    core_passed = count(core["results"], "passed") + (count(addendum_core["results"], "passed") if addendum_present else 0) + lfm_core_passed
+    core_failed = count(core["results"], "failed") + (count(addendum_core["results"], "failed") if addendum_present else 0) + lfm_core_failed
     soak_candidates = 9 + (len(addendum_soak["results"]) if addendum_present else 0)
     soak_passed = count(soak["results"], "passed") + (count(addendum_soak["results"], "passed") if addendum_present else 0)
     soak_failed = count(soak["results"], "failed") + (count(addendum_soak["results"], "failed") if addendum_present else 0)
-    coding_candidates = 16 + (1 if addendum_present else 0)
-    coding_passed = count(coding_records, "passed") + (count(addendum_coding["results"], "passed") if addendum_present else 0)
-    coding_failed = count(coding_records, "failed") + (count(addendum_coding["results"], "failed") if addendum_present else 0)
+    coding_candidates = 16 + (1 if addendum_present else 0) + lfm_core_candidates
+    coding_passed = count(coding_records, "passed") + (count(addendum_coding["results"], "passed") if addendum_present else 0) + (count(lfm_coding["results"], "passed") if lfm_addendum_present else 0)
+    coding_failed = count(coding_records, "failed") + (count(addendum_coding["results"], "failed") if addendum_present else 0) + (count(lfm_coding["results"], "failed") if lfm_addendum_present else 0)
     return {
         "schemaVersion": 1,
         "kind": "haven42-apple-m4-qualification-status",
@@ -191,6 +210,7 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
                     "developer-id-signing", "notarization",
                     "gatekeeper-public-admission", "maintained-coding-surface",
                 ],
+                "failed": ["lfm25-maintained-coding-surface"] if lfm_addendum_present and count(lfm_coding["results"], "failed") else [],
             },
             "mlxLifecycle": {"status": "partial-pass", "runtimeVersion": values["mlx"]["runtime"]["packages"]["mlx-lm"], "passed": ["pinned-offline-runtime", "native-metal-generation", "timeout-recovery", "process-cleanup"], "open": ["production-suitable-server", "authenticated-boundary", "self-contained-package", "maintained-coding-surface"]},
             "modelCoreQualification": {"status": "partial-pass", "candidates": core_candidates, "passed": core_passed, "failed": core_failed},
@@ -232,6 +252,8 @@ def main() -> int:
         parser.add_argument(f"--{name}", type=Path, required=True)
     for name in ("addendum-plan", "addendum-core", "addendum-soak", "addendum-coding"):
         parser.add_argument(f"--{name}", type=Path)
+    for name in ("lfm-addendum-plan", "lfm-addendum-core", "lfm-addendum-coding", "lfm-coding-policy"):
+        parser.add_argument(f"--{name}", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
@@ -244,6 +266,14 @@ def main() -> int:
         parser.error("addendum-evidence-must-be-complete")
     if all(addendum_paths.values()):
         paths.update(addendum_paths)
+    lfm_addendum_paths = {
+        name.replace("-", "_"): getattr(args, name.replace("-", "_"))
+        for name in ("lfm-addendum-plan", "lfm-addendum-core", "lfm-addendum-coding", "lfm-coding-policy")
+    }
+    if any(lfm_addendum_paths.values()) and not all(lfm_addendum_paths.values()):
+        parser.error("lfm-addendum-evidence-must-be-complete")
+    if all(lfm_addendum_paths.values()):
+        paths.update(lfm_addendum_paths)
     for path in paths.values():
         if not path.is_file() or path.is_symlink():
             parser.error("evidence-file-unavailable")
@@ -255,6 +285,9 @@ def main() -> int:
         run_validator(str(validators / "validate-alpha2-macos-model-qualification-result.py"), str(paths["addendum_core"]), "--plan", str(paths["addendum_plan"]))
         run_validator(str(validators / "validate-alpha2-macos-model-soak-result.py"), str(paths["addendum_soak"]), "--qualification-result", str(paths["addendum_core"]), "--plan", str(paths["addendum_plan"]))
         run_validator(str(validators / "validate-alpha2-macos-opencode-coding-result.py"), str(paths["addendum_coding"]), "--qualification-result", str(paths["addendum_core"]), "--plan", str(paths["addendum_plan"]), "--policy", str(paths["coding_policy"]))
+    if "lfm_addendum_plan" in paths:
+        run_validator(str(validators / "validate-alpha2-macos-llamacpp-model-qualification-result.py"), str(paths["lfm_addendum_core"]), str(paths["lfm_addendum_plan"]))
+        run_validator(str(validators / "validate-alpha2-macos-llamacpp-opencode-coding-result.py"), str(paths["lfm_addendum_coding"]), str(paths["lfm_addendum_plan"]), str(paths["lfm_addendum_core"]), str(paths["lfm_coding_policy"]))
     run_validator(str(validators / "validate-alpha2-macos-native-test-result.py"), str(paths["native_tests"]), "--plan", str(paths["plan"]))
     for name in ("idle_power", "small_power", "medium_power", "large_power"):
         run_validator(str(validators / "validate-alpha2-macos-power-result.py"), str(paths[name]), "--plan", str(paths["plan"]))
@@ -264,7 +297,7 @@ def main() -> int:
     run_validator(str(validators / "validate-alpha2-macos-llamacpp-lifecycle-result.py"), str(paths["llamacpp"]))
     run_validator(str(validators / "validate-alpha2-macos-llamacpp-distribution-result.py"), str(paths["llamacpp_distribution"]))
     run_validator(str(validators / "validate-alpha2-macos-development-update-lifecycle-result.py"), str(paths["development_update"]), "--plan", str(paths["development_update_plan"]))
-    values = {name: load(path) for name, path in paths.items() if name not in {"plan", "addendum_plan", "coding_policy", "development_update_plan"}}
+    values = {name: load(path) for name, path in paths.items() if name not in {"plan", "addendum_plan", "lfm_addendum_plan", "coding_policy", "lfm_coding_policy", "development_update_plan"}}
     bindings = [relative_binding(path) for path in paths.values()]
     status = build_status(values, bindings)
     encoded = json.dumps(status, indent=2, sort_keys=True) + "\n"
