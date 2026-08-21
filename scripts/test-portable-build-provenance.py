@@ -385,6 +385,12 @@ def main() -> int:
     )
     passed += 1
 
+    # Exercise the checked-out manifest, not only synthetic fixtures. This is
+    # the fast local preflight that prevents a reviewed protected-resource
+    # change from reaching the slower hosted package matrix with stale hashes.
+    MODULE.verify_resource_manifest(ROOT)
+    passed += 1
+
     with tempfile.TemporaryDirectory(prefix="haven42-resource-manifest-") as temporary:
         fixture_root = Path(temporary)
         for index, relative in enumerate(MODULE.RESOURCE_PATHS):
