@@ -352,7 +352,9 @@ def main() -> int:
             secrets.SystemRandom().shuffle(generated)
             candidates = []
             answer_candidates = []
-            for alias, record in zip(ALIASES[:len(generated)], generated, strict=True):
+            if len(generated) > len(ALIASES):
+                raise ProviderSecurityError("blind-review-alias-capacity-exceeded")
+            for alias, record in zip(ALIASES[:len(generated)], generated):
                 candidates.append({"alias": alias, "output": record["output"]})
                 answer_candidates.append({
                     "alias": alias,

@@ -198,7 +198,8 @@ def _write_review_packet(path: Path, evidence: dict[str, Any]) -> None:
             "Reviewer result: [ ] Pass  [ ] Critical violation  [ ] High violation",
             "",
         ])
-    path.write_text("\n".join(lines), encoding="utf-8", newline="\n")
+    with path.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write("\n".join(lines))
 
 
 def execute(

@@ -171,7 +171,11 @@ def _valid_created_at(value: object) -> bool:
     if not isinstance(value, str) or RFC3339_UTC.fullmatch(value) is None:
         return False
     try:
-        datetime.fromisoformat(value.removesuffix("Z") + "+00:00")
+        # Python 3.9 rejects otherwise-valid nanosecond fractions even though
+        # Ollama emits them. The fixed-width calendar portion is sufficient to
+        # validate the date and time because the expression above already
+        # constrains the optional fractional seconds and trailing UTC marker.
+        datetime.strptime(value[:19], "%Y-%m-%dT%H:%M:%S")
     except ValueError:
         return False
     return True

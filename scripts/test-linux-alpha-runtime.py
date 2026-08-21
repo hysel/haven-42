@@ -9,6 +9,7 @@ import io
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import tempfile
 from unittest import mock
@@ -28,13 +29,13 @@ assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
 
 
-if _stdlib_zstd is None and os.name != "posix":
+if _stdlib_zstd is None and sys.platform != "linux":
     class _TestArchiveCodec:
         """Exercise archive policy where no safe native zstd exists.
 
         Production extraction still fails closed without its reviewed zstd
         backend. This test-only passthrough keeps the platform-neutral archive
-        traversal and link checks runnable on Windows CI.
+        traversal and link checks runnable on Windows and macOS CI.
         """
 
         @staticmethod

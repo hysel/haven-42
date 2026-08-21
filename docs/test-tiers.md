@@ -30,6 +30,8 @@ Linux or macOS:
 
 The native-shell runner automatically resolves a locally installed Python 3 when Git Bash exposes it as `python`, `python.exe`, or the Windows `py -3` launcher instead of `python3`. The local-web Windows and shared launchers apply the same rule: finding a command name is insufficient; the candidate must successfully execute and identify itself as Python 3 before it is selected. This rejects stale Windows Store aliases and broken `py` launchers.
 
+Source workflows also retain compatibility with the Python 3.9 interpreter bundled by supported macOS systems. A source scan rejects use of newer-only `zip(strict=)`, `Path.write_text(newline=)`, and `Path.stat(follow_symlinks=)` APIs in executable repository Python. Packaged builds continue to use the separately locked Python toolchain.
+
 This compatibility step does not install software, download files, use `eval`, or permanently modify `PATH`. If no valid Python 3 command exists, the suite stops once with a clear prerequisite error instead of producing many misleading script failures. Hosted Linux and macOS jobs continue to use their native `python3` command.
 
 The full suite includes repository validation, so callers should not run `validate-pack` immediately before `test-pack` unless they intentionally want an isolated validation result.

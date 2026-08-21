@@ -99,7 +99,7 @@ def read_events(root: Path) -> list[dict[str, str]]:
         parts = line.split("\t")
         if len(parts) != 3:
             raise EvidenceError("event log must contain three tab-separated fields")
-        rows.append(dict(zip(("timestamp", "subject", "event"), parts, strict=True)))
+        rows.append(dict(zip(("timestamp", "subject", "event"), parts)))
     previous: datetime | None = None
     for row in rows:
         try:

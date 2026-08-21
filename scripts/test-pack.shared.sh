@@ -3134,11 +3134,16 @@ test_qualification_evidence_recommendation_and_coding_screens() {
   done
 }
 
+test_macos_system_python_compatibility() {
+  python3 "$REPO_ROOT/scripts/test-macos-system-python-compatibility.py"
+}
+
 run_test "model recommendation catalog has valid schema" test_catalog_schema
 run_test "committed config uses starter sample model" test_committed_config_uses_starter_model
 run_test "MLX model recommendation catalog has valid schema" test_mlx_catalog_schema
 run_test "shell wrapper scripts and hooks are executable in git" test_shell_scripts_executable
 run_test "native shell resolves and propagates a validated Python 3 command" test_native_shell_python3_resolution
+run_test "source workflows remain compatible with the macOS system Python" test_macos_system_python_compatibility
 run_test "GitHub Actions dependencies are current and monitored" test_github_actions_dependencies
 run_test "test tiers are timed and exact-tree receipt gated" test_test_tier_contract
 run_test "commands and workflows are OS aware" test_os_aware_command_contract

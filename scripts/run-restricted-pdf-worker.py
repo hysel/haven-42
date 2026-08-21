@@ -245,7 +245,7 @@ def directory_snapshot(directory: Path) -> dict[str, tuple[int, str]]:
             or (hasattr(path, "is_junction") and path.is_junction())
         ):
             raise WorkerHarnessError("snapshot-entry-rejected")
-        size = entry.stat(follow_symlinks=False).st_size
+        size = os.lstat(entry.path).st_size
         total_bytes += size
         if total_bytes > 33_554_432:
             raise WorkerHarnessError("snapshot-byte-budget-exceeded")
