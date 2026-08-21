@@ -20,7 +20,7 @@ The shared local-text discovery and invocation entry points implement this bound
 | llama.cpp SYCL | Candidate | Exact Linux B580 functional, vision, pressure, adapter, and cleanup cells passed; 3 of 53 upstream tests failed, so the backend remains unselectable and unpackaged. |
 | LM Studio | Optional external API | The end user installs it. Haven 42 may call its published loopback API but does not embed or redistribute it. |
 | IPEX-LLM | Retired | Upstream was archived on 2026-01-28. Keep a documentation record only. |
-| llama.cpp Metal | Partial physical-Mac evidence | Exact `b10520` lifecycle, full Metal offload, official-archive integrity, safe extraction, relocation, and dependency-free launch passed on an Apple M4 with 16 GB. The upstream executable is ad-hoc signed and rejected by Gatekeeper; Developer ID signing, notarization, a maintained coding surface, and product admission remain open. |
+| llama.cpp Metal | Partial physical-Mac evidence | Exact `b10520` lifecycle, full Metal offload, official-archive integrity, safe extraction, relocation, and dependency-free launch passed on an Apple M4 with 16 GB. Two exact LFM2.5 Q4_K_M candidates also executed with full Metal offload, but both failed bounded core gates and timed out in OpenCode without writes. The upstream executable is ad-hoc signed and rejected by Gatekeeper; Developer ID signing, notarization, a passing maintained coding surface, and product admission remain open. |
 
 `Parked` remains the fail-closed status for an engine or backend that has not
 yet earned executable candidate evidence. Moving one exact cell beyond parked

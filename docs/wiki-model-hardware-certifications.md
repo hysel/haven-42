@@ -51,7 +51,7 @@ successful tests below are candidates, not automatic choices.
 | Intel, 12 GB | Granite 4.1 8B Q4 passed the tested Ubuntu Arc B580 SYCL route. | Narrow tested candidate; no broad Intel default. |
 | NVIDIA, 16 GB | Qwen 3.5 4B Q4 is the approved balanced choice on the exact Ubuntu 26.04 and Bazzite 44 profiles. Several larger candidates also passed controlled tests. | The broadest completed end-user recommendation among current 16 GB profiles. |
 | AMD, 16 GB | Fourteen profiles passed the tested Windows RX 7800 XT task and soak route. | Broad candidate set; comparative quality and complete lifecycle checks remain separate. |
-| Apple M4, 16 GB unified memory | Ten of seventeen exact Ollama artifacts passed the task gates and their own 30-minute Metal soaks, including the separately approved Gemma 4 12B QAT addendum. | Apple Silicon engineering results; no automatic Apple default yet. |
+| Apple M4, 16 GB unified memory | Ten of seventeen exact Ollama artifacts passed the task gates and their own 30-minute Metal soaks, including the separately approved Gemma 4 12B QAT addendum. Two additional exact LFM2.5 GGUF files ran with full llama.cpp Metal offload, but both failed the core and OpenCode coding gates and did not soak. | Apple Silicon engineering results; no automatic Apple default yet. |
 | NVIDIA, 32 GB or more | Large Qwen and Nemotron candidates passed controlled single- or dual-V100 tests. | High-memory engineering results, not consumer-card equivalence. |
 
 For the exact operating systems, engines, versions, and limitations, open

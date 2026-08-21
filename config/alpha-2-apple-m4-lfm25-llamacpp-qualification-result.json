@@ -1,0 +1,89 @@
+{
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "hardwareProfile": {
+    "acceleratorFamily": "M4",
+    "acceleratorVendor": "Apple",
+    "architecture": "arm64",
+    "backend": "metal",
+    "id": "apple-m4-16gib-macos26-metal",
+    "minimumMemoryReserveGiB": 3,
+    "minimumSystemMemoryGiB": 15,
+    "platformFamily": "macos",
+    "systemMemoryGiB": 16.0
+  },
+  "kind": "haven42-apple-silicon-llamacpp-model-qualification-result",
+  "observedAtUtc": "2026-08-21T18:52:08Z",
+  "observedContractDeviations": [
+    {
+      "gate": "structuredCode",
+      "observed": "exact-path-json-ast-validation-no-execution",
+      "outcome": "failed",
+      "planned": "exact-path-json-compile-and-execute"
+    }
+  ],
+  "planCanonicalSha256": "fa3ae5936ba262cad6359fde191951d74f1c8ce7b7f77b640a89365e06a4c091",
+  "privateIdentityRetained": false,
+  "rawPromptsOrResponsesRetained": false,
+  "release": "0.4.0-alpha.2",
+  "results": [
+    {
+      "checks": {
+        "contentSummarize": {"responseRetained": false, "status": "failed"},
+        "contentWrite": {"responseRetained": false, "status": "passed"},
+        "generalChat": {"responseRetained": false, "status": "failed"},
+        "structuredCode": {"errorCode": "planned-execution-not-performed-safety-boundary", "responseRetained": false, "status": "failed"},
+        "structuredTool": {"responseRetained": false, "status": "passed"}
+      },
+      "codingRecommendationEligible": false,
+      "codingSurfaceStatus": "not-run",
+      "corePassed": false,
+      "metrics": {
+        "contentSummarize": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 0.475, "metalDetected": true, "outputTokens": 15, "unloadPassed": true},
+        "contentWrite": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 0.44, "metalDetected": true, "outputTokens": 15, "unloadPassed": true},
+        "generalChat": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 0.856, "metalDetected": true, "outputTokens": 63, "unloadPassed": true},
+        "structuredCode": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 0.618, "metalDetected": true, "modelGeneratedCodeExecuted": false, "outputTokens": 32, "unloadPassed": true, "validationMethod": "ast-only"},
+        "structuredTool": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 0.492, "metalDetected": true, "outputTokens": 14, "unloadPassed": true}
+      },
+      "modelId": "lfm25-1p2b-instruct-q4km",
+      "modelSha256": "b1b3de114215d9507409a662a501a631095a479a419584e8a2ded6304b19b4f5",
+      "promotionBlock": "license-review",
+      "repositoryRevision": "afbd8eaeab5dd94ba0b079ebfb02517d19641e38",
+      "status": "failed"
+    },
+    {
+      "checks": {
+        "contentSummarize": {"responseRetained": false, "status": "failed"},
+        "contentWrite": {"responseRetained": false, "status": "failed"},
+        "generalChat": {"responseRetained": false, "status": "passed"},
+        "structuredCode": {"errorCode": "planned-execution-not-performed-safety-boundary", "responseRetained": false, "status": "failed"},
+        "structuredTool": {"responseRetained": false, "status": "passed"}
+      },
+      "codingRecommendationEligible": false,
+      "codingSurfaceStatus": "not-run",
+      "corePassed": false,
+      "metrics": {
+        "contentSummarize": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 4.364, "metalDetected": true, "outputTokens": 192, "unloadPassed": true},
+        "contentWrite": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 4.175, "metalDetected": true, "outputTokens": 192, "unloadPassed": true},
+        "generalChat": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 2.784, "metalDetected": true, "outputTokens": 115, "unloadPassed": true},
+        "structuredCode": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 4.23, "metalDetected": true, "modelGeneratedCodeExecuted": false, "outputTokens": 192, "unloadPassed": true, "validationMethod": "ast-only"},
+        "structuredTool": {"allLayersOffloaded": true, "authenticationRequired": true, "durationSeconds": 1.661, "metalDetected": true, "outputTokens": 48, "unloadPassed": true}
+      },
+      "modelId": "lfm25-2p6b-q4km",
+      "modelSha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "promotionBlock": "license-review",
+      "repositoryRevision": "f4a289c8a200a5ca71005ba7abc2dad33058a450",
+      "status": "failed"
+    }
+  ],
+  "runtime": {
+    "commit": "cd644c39545aac3dca63261f99a9bfc35956cb25",
+    "provider": "llama.cpp",
+    "releaseTag": "b10520",
+    "serverSha256": "d0878274b8d6bd3c8ea26a78eb66cd1ffd943d007c62b9dff31c8aa99922d713",
+    "transport": "authenticated-ipv4-loopback-only"
+  },
+  "schemaVersion": 1,
+  "status": "completed"
+}

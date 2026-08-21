@@ -191,6 +191,7 @@ docs/evidence-records/evidence-eee8463c09ed1a53.md	Evidence-Record-eee8463c09ed1
 docs/evidence-records/evidence-c836e3b6f82ceb6c.md	Evidence-Record-c836e3b6f82ceb6c.md	Aider CLI richer disposable scoped-edit validation
 docs/evidence-records/evidence-4c8889255c609520.md	Evidence-Record-4c8889255c609520.md	Aider and OpenCode candidate lifecycle plans
 docs/evidence-records/evidence-07f3b51d498ce792.md	Evidence-Record-07f3b51d498ce792.md	Apple M4 16 GB Gemma 4 12B OpenCode coding screen
+docs/evidence-records/evidence-ea75c15e208b2be2.md	Evidence-Record-ea75c15e208b2be2.md	Apple M4 16 GB LFM2.5 OpenCode coding screen
 docs/evidence-records/evidence-713bc8ce611cbfe3.md	Evidence-Record-713bc8ce611cbfe3.md	Apple M4 16 GB OpenCode 1.18.19 16-model coding screen
 docs/evidence-records/evidence-c48f68ae267ddaeb.md	Evidence-Record-c48f68ae267ddaeb.md	Continue CLI model test harness
 docs/evidence-records/evidence-23ddebcd60acad2e.md	Evidence-Record-23ddebcd60acad2e.md	Gemma 3 1B coding workflow screen
@@ -306,6 +307,7 @@ docs/evidence-records/evidence-749f44fc9f8604f4.md	Evidence-Record-749f44fc9f860
 docs/evidence-records/evidence-71fdc1d4cefe7305.md	Evidence-Record-71fdc1d4cefe7305.md	Apple M4 16 GB 16-model bounded qualification
 docs/evidence-records/evidence-058dffd9da155b02.md	Evidence-Record-058dffd9da155b02.md	Apple M4 16 GB Gemma 4 12B QAT bounded addendum
 docs/evidence-records/evidence-58b80062769ba4ad.md	Evidence-Record-58b80062769ba4ad.md	Apple M4 16 GB Gemma 4 12B QAT reliability soak
+docs/evidence-records/evidence-0ef74d64cf30f4b8.md	Evidence-Record-0ef74d64cf30f4b8.md	Apple M4 16 GB LFM2.5 GGUF bounded qualification
 docs/evidence-records/evidence-6a2e6287439189e8.md	Evidence-Record-6a2e6287439189e8.md	Apple M4 16 GB nine-model reliability soak
 docs/evidence-records/evidence-b1e852d6e517e410.md	Evidence-Record-b1e852d6e517e410.md	Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-9ee9709513adee19.md	Evidence-Record-9ee9709513adee19.md	Gemma 4 E2B QAT on Radeon RX 5700 XT

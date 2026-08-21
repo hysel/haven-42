@@ -92,14 +92,30 @@
     {
       "path": "config/alpha-2-apple-m4-gemma4-12b-opencode-1.18.19-coding-result.json",
       "sha256": "c5f54b2400b6ea766afab8b50a55362d594219e2a85ca7eb23a009f6d04b00bb"
+    },
+    {
+      "path": "config/alpha-2-apple-silicon-16gib-lfm25-addendum-plan.json",
+      "sha256": "5ce0019b60d38afab90d8bef16bb213b9b1394b8ae02afb0ef3f6dc20fe47f4c"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-lfm25-llamacpp-qualification-result.json",
+      "sha256": "1c54bd0f545cd48407fb7de99b89d699c0e0e2d48fdee6f89e12250a76840ce8"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-lfm25-opencode-coding-result.json",
+      "sha256": "361368bc26c9232b640889eb3a9715ab41d4643f2e10559595862569d2800795"
+    },
+    {
+      "path": "config/model-coding-agent-qualification-policy.json",
+      "sha256": "cfe30947c4772c46de0a9a73b13060a97cd7921bbba5fcd8260112bc05c1097c"
     }
   ],
   "gates": {
     "codingAgentQualification": {
-      "candidates": 17,
+      "candidates": 19,
       "continueEvidenceAccepted": false,
       "eligibleForHumanReview": 0,
-      "failed": 17,
+      "failed": 19,
       "passed": 0,
       "status": "completed",
       "surface": "opencode-cli",
@@ -138,6 +154,9 @@
         "system-python-not-required",
         "package-manager-not-required"
       ],
+      "failed": [
+        "lfm25-maintained-coding-surface"
+      ],
       "runtimeVersion": "cd644c395",
       "status": "partial-pass"
     },
@@ -165,8 +184,8 @@
       "status": "partial-pass"
     },
     "modelCoreQualification": {
-      "candidates": 17,
-      "failed": 7,
+      "candidates": 19,
+      "failed": 9,
       "passed": 10,
       "status": "partial-pass"
     },

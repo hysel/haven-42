@@ -74,6 +74,22 @@ operating system, and M4 16 GB profile recorded here. It does not prove every
 prompt, longer contexts, another M4 memory tier, or an automatic product
 recommendation.
 
+## LFM2.5 llama.cpp addendum
+
+Two official Liquid AI GGUF files were checked separately with the pinned
+llama.cpp `b10520` arm64 runtime. Both exact files passed checksum verification,
+authenticated IPv4 loopback startup, full Metal offload, per-task shutdown,
+and listener cleanup.
+
+| Exact candidate | Passed core gates | Failed core gates | Coding screen |
+| --- | --- | --- | --- |
+| LFM2.5 1.2B Instruct Q4_K_M | Writing, structured tool | Chat, summarization, structured code (the AST shape matched, but the plan required execution and the safety boundary did not execute model-generated code) | Timed out at the 150-second read-only repository gate; no files changed |
+| LFM2.5 2.6B Q4_K_M | Chat, structured tool | Writing, summarization, structured code | Timed out at the 150-second read-only repository gate; no files changed |
+
+Because neither exact candidate passed every core gate, the fail-closed soak
+runner selected no model and started no soak. Neither candidate is recommended
+for coding or automatic selection. LFM license review also remains open.
+
 ## Power and thermal samples
 
 Four separate `powermetrics` cells covered idle plus small, medium, and large
@@ -142,7 +158,7 @@ for the two exact unsigned archives; it is not the Haven 42 production updater.
 ## What remains open
 
 - A maintained coding surface that passes every required gate. OpenCode
-  1.18.19 completed but all 17 exact candidates failed at least one gate.
+  1.18.19 completed but all 19 exact candidates failed at least one gate.
 - Developer ID signing, notarization, and Gatekeeper admission for any
   beginner-facing llama.cpp package. The official archive passed integrity,
   safe extraction, relocation, and dependency-free launch, but not platform
