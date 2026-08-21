@@ -60,7 +60,7 @@ def parse_pass(log_text: str) -> dict[str, int]:
 
 def build_report(
     plan: dict[str, Any], plan_sha256: str, host: dict[str, Any], source_sha256: str,
-    base_commit: str, measurements: dict[str, int],
+    base_commit: str, measurements: dict[str, int], *, exact_source: bool = False,
 ) -> dict[str, Any]:
     return {
         "schemaVersion": 1,
@@ -72,8 +72,8 @@ def build_report(
         "hardwareProfile": host | {"profileId": plan["hardwareProfile"]["id"]},
         "source": {
             "baseCommit": base_commit,
-            "treeState": "modified-uncommitted",
-            "commitIsExactSource": False,
+            "treeState": "exact-commit" if exact_source else "modified-uncommitted",
+            "commitIsExactSource": exact_source,
             "snapshotSha256": source_sha256,
         },
         "test": {"tier": "full", "runner": "native-shell", **measurements},
@@ -90,6 +90,11 @@ def main() -> int:
     parser.add_argument("--log", type=Path, required=True)
     parser.add_argument("--source-archive", type=Path, required=True)
     parser.add_argument("--base-commit", required=True)
+    parser.add_argument(
+        "--exact-source",
+        action="store_true",
+        help="Assert that the source archive is the exact clean base commit.",
+    )
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     runner = load_module("mac_qualification_runner", RUNNER_PATH)
@@ -106,6 +111,7 @@ def main() -> int:
         report = build_report(
             plan, runner.canonical_sha256(plan), host,
             sha256_file(args.source_archive), args.base_commit, measurements,
+            exact_source=args.exact_source,
         )
         encoded = json.dumps(report, indent=2, sort_keys=True) + "\n"
         args.output.parent.mkdir(parents=True, exist_ok=True)

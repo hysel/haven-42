@@ -31,7 +31,7 @@
     },
     {
       "path": "config/alpha-2-apple-m4-native-test-result.json",
-      "sha256": "2c4aa5da78be5c549c76162f1560fbe1871ba9525bc8695bf8d480cb7bee0193"
+      "sha256": "d1c9b4761c8af015cd5de518552cefced300df0ab71693f4244acbbc7eb08ab5"
     },
     {
       "path": "config/alpha-2-apple-m4-idle-power-result.json",
@@ -51,7 +51,7 @@
     },
     {
       "path": "config/alpha-2-apple-m4-development-app-result.json",
-      "sha256": "9a16aa24d0398515dfaf01f51b3dc2486a65fdad45ea24525ea65765a95ca47c"
+      "sha256": "b0f6579600ba1d54ac57cc5393c092040e5282bc4d10979fe51341aa40176b27"
     },
     {
       "path": "config/alpha-2-apple-m4-keychain-lifecycle-result.json",
@@ -137,9 +137,9 @@
       "status": "partial-pass"
     },
     "nativeRepositoryTests": {
-      "checksPassed": 80,
+      "checksPassed": 81,
       "scope": "exact source snapshot full test tier",
-      "sourceSnapshotSha256": "4c50e9f972238bed7def68bb2f36b87b674b5b3ae3c9528ee4011d621c39fe91",
+      "sourceSnapshotSha256": "d0fde8f32f7fa8ce92e44dee100a037bd17c2803fb0203465dd819b7077dd8c5",
       "status": "passed"
     },
     "noviceSelfContainedPackage": {
@@ -197,7 +197,7 @@
         "manual-reduced-motion",
         "physical-clipboard"
       ],
-      "packagedBrowserChecks": 616,
+      "packagedBrowserChecks": 619,
       "passed": [
         "automated-source-package-parity",
         "packaged-real-browser-flow",

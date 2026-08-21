@@ -1,16 +1,16 @@
 {
   "app": {
-    "archiveSha256": "c916f42d42b23b628459d4d040bacaad00a6dd5cefdd883e968d6ed76e0880a9",
+    "archiveSha256": "e63ef5a7cd0150d21c3a730e50861bcb47f17a955615b338104510c658837a85",
     "bundleIdentifier": "org.haven42.desktop",
     "bundleShortVersion": "0.4.0",
     "bundleVersion": "0.4.2",
     "fileCount": 96,
     "globalPythonRequired": false,
-    "inventoryCanonicalSha256": "dbfa945b9729b4b5a3933e513afa5bca9d7f1eed35fe95e3c2cc078b6cdf3f3f",
+    "inventoryCanonicalSha256": "1f1b6f936b906de1a4e7a9630d4c529fc12f5354297cac41ab7013899b1926b3",
     "minimumSystemVersion": "13.0",
     "nativeArchitecture": "arm64",
-    "portableBuildProvenanceSha256": "43860c71f6909b310164ae3feff73e0535bb5f4851649adce652bce4209e93a7",
-    "portablePackageArchiveSha256": "f20dc23a22d3c07e0479911e27c4820fe18e3098ab9ea2c6de1f02ef546ca0c6"
+    "portableBuildProvenanceSha256": "57a27f015411192156b0a255823b83f3ff93955cba2bedcb5b027d9f6de429f7",
+    "portablePackageArchiveSha256": "8de8634d1c1c83a62bd336dd2e0e1059742b4d47c8d2794027840252661910e9"
   },
   "authority": {
     "automaticUpdateAllowed": false,
@@ -25,7 +25,7 @@
     "systemMemoryGiB": 16.0
   },
   "kind": "haven42-sanitized-physical-macos-development-app-result",
-  "observedAtUtc": "2026-08-21T09:02:48Z",
+  "observedAtUtc": "2026-08-21T12:26:46Z",
   "open": [
     "developer-id-signing",
     "notarization",
@@ -52,11 +52,11 @@
   "release": "0.4.0-alpha.2",
   "schemaVersion": 1,
   "source": {
-    "commit": "e718801a37965c7000aed8b29af0c9ed9015b7f8",
-    "commitIsExactSource": false,
+    "commit": "9a03ded82a0a248504f58d65f068ed24f6b05e08",
+    "commitIsExactSource": true,
     "repository": "https://github.com/hysel/haven-42",
-    "snapshotSha256": "77360a525841ea0a9e075726a76801acd7ac7d0e65e84c8905fb2cee2ea662b4",
-    "treeState": "modified-uncommitted"
+    "snapshotSha256": "",
+    "treeState": "exact-commit"
   },
   "status": "partial-pass",
   "tests": {
@@ -72,7 +72,7 @@
     "localPrivacyBoundary": true,
     "nativeArm64Executable": true,
     "occupiedPortRefusal": true,
-    "packagedBrowserChecks": 616,
+    "packagedBrowserChecks": 619,
     "packagedBrowserFlow": true,
     "readOnlyStartup": true,
     "relocation": true,

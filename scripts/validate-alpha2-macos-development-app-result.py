@@ -56,12 +56,20 @@ def validate(value: object) -> dict:
     source = value["source"]
     if not isinstance(source, dict) or set(source) != {"repository", "commit", "treeState", "commitIsExactSource", "snapshotSha256"}:
         raise ResultError("source-identity-invalid")
+    exact_source = (
+        source["treeState"] == "exact-commit"
+        and source["commitIsExactSource"] is True
+        and source["snapshotSha256"] == ""
+    )
+    modified_source = (
+        source["treeState"] == "modified-uncommitted"
+        and source["commitIsExactSource"] is False
+        and SHA256.fullmatch(str(source["snapshotSha256"])) is not None
+    )
     if (
         source["repository"] != "https://github.com/hysel/haven-42"
         or re.fullmatch(r"[0-9a-f]{40}", str(source["commit"])) is None
-        or source["treeState"] != "modified-uncommitted"
-        or source["commitIsExactSource"] is not False
-        or SHA256.fullmatch(str(source["snapshotSha256"])) is None
+        or not (exact_source or modified_source)
     ):
         raise ResultError("source-identity-invalid")
     app = value["app"]

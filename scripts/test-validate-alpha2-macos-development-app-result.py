@@ -47,10 +47,20 @@ def main() -> int:
     checks = 0
     assert MODULE.validate(fixture())["status"] == "partial-pass"
     checks += 1
+    exact = fixture()
+    exact["source"].update({
+        "treeState": "exact-commit",
+        "commitIsExactSource": True,
+        "snapshotSha256": "",
+    })
+    assert MODULE.validate(exact)["status"] == "partial-pass"
+    checks += 1
     for change in (
         lambda value: value["tests"].__setitem__("packagedBrowserFlow", False),
         lambda value: value["app"].__setitem__("globalPythonRequired", True),
-        lambda value: value["source"].__setitem__("commitIsExactSource", True),
+        lambda value: value["source"].update(
+            {"treeState": "exact-commit", "commitIsExactSource": False}
+        ),
         lambda value: value["platformTrust"].__setitem__("developerIdSigned", True),
         lambda value: value["authority"].__setitem__("productionAdmissionGranted", True),
         lambda value: value["open"].remove("manual-keyboard"),
