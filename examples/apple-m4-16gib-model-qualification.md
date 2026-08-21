@@ -5,6 +5,10 @@ physical Apple M4 Mac with 16 GB of unified memory. The test used the exact
 signed and notarized Ollama 0.32.15 macOS artifact over IPv4 loopback and
 checked 16 exact model manifests with Metal acceleration.
 
+On August 21, an independently approved one-model addendum applied the same
+contract to the exact Gemma 4 12B QAT manifest. The addendum is reported
+separately so the original frozen 16-model result remains reproducible.
+
 This is exact-profile engineering evidence. It does not certify every M4 Mac,
 another memory capacity, another macOS or runtime version, a packaged Haven 42
 release, or any coding editor. It does not change an automatic model default,
@@ -44,6 +48,7 @@ prompt or response text and no private machine identity.
 | Ornith 9B | Passed | 19.466 tokens/s | — |
 | LFM 2.5 8B | Failed | 82.377 tokens/s | Chat, writing, summarization; license review also remains open |
 | MiniCPM V 4.6 1B | Failed | 123.652 tokens/s | Structured code |
+| Gemma 4 12B QAT addendum | Passed | 14.323 tokens/s | — |
 
 A failure here means the exact response missed this strict test contract. It
 does not mean that the model cannot answer ordinary prompts or run on Apple
@@ -58,6 +63,11 @@ cell. Across the nine cells, the runner recorded 392 complete task cycles,
 rates ranged from 19.680 tokens/s for Ornith 9B to 64.010 tokens/s for Gemma 4
 E2B QAT. The runner removed only models downloaded by this campaign and did
 not retain prompt or response text.
+
+The Gemma 4 12B QAT addendum also passed its independent reliability cell:
+1,812.199 measured seconds, 31 complete task cycles, 155 bounded samples, 3,224
+output tokens, 155 unload proofs, and verified temporary-model removal. Its
+average output rate was 14.304 tokens/s.
 
 This proves bounded reliability only for the exact manifests, runtime,
 operating system, and M4 16 GB profile recorded here. It does not prove every
@@ -83,10 +93,17 @@ compared directly with graphics-board measurements from other computers.
 
 ## Coding and runtime comparison results
 
-The version-pinned OpenCode 1.18.19 screen completed for all 16 candidates.
-Every exact cell failed at least one required coding-agent gate, so none is
-eligible for a coding recommendation from this surface. Continue evidence was
-not accepted or extended.
+The version-pinned OpenCode 1.18.19 screen completed for the original 16
+candidates and the Gemma 4 12B QAT addendum. Every exact cell failed at least
+one required coding-agent gate, so none is eligible for a coding recommendation
+from this surface. Continue evidence was not accepted or extended.
+
+Gemma 4 12B passed the deterministic API code contract and tool contract. It
+also honored explicit write approval, the forced-timeout check, and model
+unload. It failed the repository read/plan/review gate, the scoped-edit and
+external-diff checks, bounded-context handling, and post-failure recovery.
+Those failures remain visible rather than being inferred away from its general
+structured-code pass.
 
 Separate native comparison cells passed bounded lifecycle checks for MLX-LM
 0.31.3 with a pinned Qwen 3.5 0.8B artifact and llama.cpp commit `cd644c395`
@@ -117,10 +134,7 @@ for the two exact unsigned archives; it is not the Haven 42 production updater.
 ## What remains open
 
 - A maintained coding surface that passes every required gate. OpenCode
-  1.18.19 completed but all 16 exact candidates failed at least one gate.
-- Gemma 4 12B QAT was identified after this frozen 16-model campaign began.
-  Its exact one-candidate addendum is prepared but has not been run; starting
-  that new hardware-dependent soak requires a separate owner prompt.
+  1.18.19 completed but all 17 exact candidates failed at least one gate.
 - Whole-system wall-power measurement. The retained Apple figures are SoC
   estimates rather than electricity-at-the-outlet measurements.
 - Manual packaged-app screen-reader, keyboard, zoom, reduced-motion, physical

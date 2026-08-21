@@ -72,14 +72,30 @@
     {
       "path": "config/alpha-2-apple-m4-development-update-lifecycle-result.json",
       "sha256": "bc31ebcbea0fc79bfe1450a87bb13c8579373267d1647b46d58cd0f80e9e98bb"
+    },
+    {
+      "path": "config/alpha-2-apple-silicon-16gib-gemma4-12b-addendum-plan.json",
+      "sha256": "15ea679de809ade402f1cb127b91a9773b5e2304e00147de2242572faa2cacd2"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-gemma4-12b-model-qualification-result.json",
+      "sha256": "ce75a066c7b92ff77ac71e5e046ef7d93a9fca7a757e584c29294f774831e14a"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-gemma4-12b-model-soak-result.json",
+      "sha256": "ed662ad73cf7549f1a1c240f56d53864fa8b1f94a7e3039b2e6ea2ea0c00a1d6"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-gemma4-12b-opencode-1.18.19-coding-result.json",
+      "sha256": "c5f54b2400b6ea766afab8b50a55362d594219e2a85ca7eb23a009f6d04b00bb"
     }
   ],
   "gates": {
     "codingAgentQualification": {
-      "candidates": 16,
+      "candidates": 17,
       "continueEvidenceAccepted": false,
       "eligibleForHumanReview": 0,
-      "failed": 16,
+      "failed": 17,
       "passed": 0,
       "status": "completed",
       "surface": "opencode-cli",
@@ -116,10 +132,10 @@
       "status": "partial-pass"
     },
     "longRunReliability": {
-      "eligibleCandidates": 9,
+      "eligibleCandidates": 10,
       "failed": 0,
       "minutesPerCandidate": 30,
-      "passed": 9,
+      "passed": 10,
       "status": "completed"
     },
     "mlxLifecycle": {
@@ -139,9 +155,9 @@
       "status": "partial-pass"
     },
     "modelCoreQualification": {
-      "candidates": 16,
+      "candidates": 17,
       "failed": 7,
-      "passed": 9,
+      "passed": 10,
       "status": "partial-pass"
     },
     "nativeRepositoryTests": {

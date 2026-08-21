@@ -1,17 +1,16 @@
-# Tested Hardware and AI Engines
+# Hardware Compatibility
 
-_Last reviewed: August 17, 2026._
+_Last reviewed: August 21, 2026._
 
-This page summarizes the real operating systems, hardware, and AI engines used
-during Haven 42 development. A result applies only to the row shown. It does
-not prove that every computer with the same GPU family will behave the same
-way.
+Use this page to find configurations similar to your computer. Each row names
+the operating system, graphics hardware, and AI engine that were tested
+together. A result applies only to that row; it does not prove that every
+computer with the same graphics-card family will behave the same way.
 
 Haven 42 does not retain private lab addresses, account names, cloud
 identifiers, keys, or local file paths in this public record.
 
-For model-specific Alpha 2 results, see [[Model and Hardware Test
-Status|Model-And-Hardware-Test-Status]].
+For model choices, see [[Model Compatibility|Model-And-Hardware-Test-Status]].
 
 ## Status labels
 
@@ -25,8 +24,7 @@ Status|Model-And-Hardware-Test-Status]].
 - **⬜ Not tested** — no result should be inferred from a different operating
   system, GPU, runtime, or model.
 
-These are test-result labels. Roadmap labels describe milestone delivery and
-use a different scale.
+These labels describe only the named test result.
 
 ## Tested combinations
 
@@ -58,7 +56,7 @@ tables so each result can be read without matching rows by hand.
 | Ubuntu Linux, controlled server | NVIDIA Quadro RTX 5000, 16 GB | llama.cpp with CUDA | ✅ Verified | Passed the bounded engine and Haven adapter checks. |
 | Ubuntu Linux, Proxmox container and server | Two NVIDIA Tesla V100 GPUs, 32 GB each | Ollama with CUDA | ✅ Verified | Passed external-server and model checks. |
 | Ubuntu Linux, controlled server | NVIDIA Tesla V100, 32 GB | llama.cpp with CUDA | ✅ Verified | Passed the 11-model operational matrix. |
-| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | Ollama 0.32.15 with Metal | 🧪 Engineering evidence | Sixteen exact artifacts completed the bounded five-gate campaign; nine passed and then completed independent 30-minute soaks with no failures. All 16 OpenCode 1.18.19 coding cells failed at least one required gate. Representative power, exact-source native tests, and development-app browser evidence are recorded; no default or support promotion is granted. |
+| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | Ollama 0.32.15 with Metal | 🧪 Engineering evidence | Seventeen exact artifacts completed the bounded five-gate test set; ten passed and then completed independent 30-minute soaks with no failures. All 17 OpenCode 1.18.19 cells failed at least one required coding-agent gate. The separately approved Gemma 4 12B QAT addendum is included; no default or support promotion is granted. |
 | Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | llama.cpp commit cd644c395 with Metal | ⚠️ Partial | The pinned Qwen 3.5 0.8B GGUF passed full-layer Metal offload, authenticated loopback inference, timeout recovery, restart, unload, and listener cleanup. Trusted distribution, self-contained packaging, and a maintained coding surface remain open. |
 | Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | MLX-LM 0.31.3 | ⚠️ Partial | The pinned Qwen 3.5 0.8B artifact passed offline native generation, Metal-memory proof, timeout recovery, and cleanup. A production server boundary, self-contained packaging, and a maintained coding surface remain open. |
 | Proxmox VE 9.2, physical host | Two Tesla V100 32 GB GPUs and one Quadro RTX 5000 16 GB GPU | Virtualization and passthrough host | 🧪 Engineering evidence | Used as test infrastructure; this does not establish an end-user runtime route. |

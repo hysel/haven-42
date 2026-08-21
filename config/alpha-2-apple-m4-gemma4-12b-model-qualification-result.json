@@ -1,0 +1,139 @@
+{
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "cleanup": [
+    {
+      "model": "gemma4:12b-it-qat",
+      "removed": true
+    }
+  ],
+  "hardwareProfile": {
+    "architecture": "arm64",
+    "backend": "metal",
+    "platformFamily": "macos",
+    "profileId": "apple-m4-16gib-macos26-metal",
+    "systemMemoryGiB": 16.0
+  },
+  "inventoryCanonicalSha256": "3ce33553ff93e8ff8017074d3c19c3960a9b07bb4ecb097a216517b9cd7a75ea",
+  "kind": "haven42-apple-silicon-model-qualification-result",
+  "modelsPulled": 1,
+  "modelsRequested": 1,
+  "observedAtUtc": "2026-08-21T16:21:38Z",
+  "planCanonicalSha256": "59172e04a07e4e8190fa160c8820c12a5dc2325748544d413b14aea8934fc191",
+  "privateIdentityRetained": false,
+  "rawPromptsOrResponsesRetained": false,
+  "release": "0.4.0-alpha.2",
+  "results": [
+    {
+      "checks": {
+        "contentSummarize": {
+          "durationSeconds": 6.946,
+          "responseRetained": false,
+          "status": "passed"
+        },
+        "contentWrite": {
+          "durationSeconds": 6.901,
+          "responseRetained": false,
+          "status": "passed"
+        },
+        "generalChat": {
+          "durationSeconds": 2.519,
+          "responseRetained": false,
+          "status": "passed"
+        },
+        "structuredCode": {
+          "durationSeconds": 8.453,
+          "responseRetained": false,
+          "status": "passed"
+        },
+        "structuredTool": {
+          "durationSeconds": 6.55,
+          "responseRetained": false,
+          "status": "passed"
+        }
+      },
+      "codingRecommendationEligible": false,
+      "codingSurfaceStatus": "not-run",
+      "corePassed": true,
+      "manifestDigest": "38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+      "metrics": {
+        "contentSummarize": {
+          "fullMetalResidency": true,
+          "loadDurationMs": 4614.443,
+          "metalResidentBytes": 7640700680,
+          "modelBytes": 7640700680,
+          "outputTokens": 23,
+          "promptTokens": 64,
+          "tokensPerSecond": 13.877,
+          "totalDurationMs": 6916.012,
+          "unloadPassed": true
+        },
+        "contentWrite": {
+          "fullMetalResidency": true,
+          "loadDurationMs": 4922.783,
+          "metalResidentBytes": 7640700680,
+          "modelBytes": 7640700680,
+          "outputTokens": 17,
+          "promptTokens": 35,
+          "tokensPerSecond": 14.121,
+          "totalDurationMs": 6791.439,
+          "unloadPassed": true
+        },
+        "generalChat": {
+          "fullMetalResidency": true,
+          "loadDurationMs": 1665.893,
+          "metalResidentBytes": 7640700680,
+          "modelBytes": 7640700680,
+          "outputTokens": 6,
+          "promptTokens": 21,
+          "tokensPerSecond": 15.857,
+          "totalDurationMs": 2489.176,
+          "unloadPassed": true
+        },
+        "structuredCode": {
+          "fullMetalResidency": true,
+          "loadDurationMs": 4623.434,
+          "metalResidentBytes": 7640700680,
+          "modelBytes": 7640700680,
+          "outputTokens": 41,
+          "promptTokens": 60,
+          "tokensPerSecond": 13.638,
+          "totalDurationMs": 8419.649,
+          "unloadPassed": true
+        },
+        "structuredTool": {
+          "fullMetalResidency": true,
+          "loadDurationMs": 4391.206,
+          "metalResidentBytes": 7640700680,
+          "modelBytes": 7640700680,
+          "outputTokens": 17,
+          "promptTokens": 75,
+          "tokensPerSecond": 14.123,
+          "totalDurationMs": 6452.494,
+          "unloadPassed": true
+        }
+      },
+      "model": "gemma4:12b-it-qat",
+      "modelId": "gemma4-12b-qat",
+      "promotionBlock": null,
+      "status": "passed"
+    }
+  ],
+  "runtime": {
+    "artifactSha256": "6f01ce31e63900437944c6d3d316c34f6c45463a7d4a258ed253a1732e0e6d42",
+    "provider": "ollama",
+    "transport": "ipv4-loopback-only",
+    "version": "0.32.15"
+  },
+  "schemaVersion": 1,
+  "status": "completed",
+  "testContract": {
+    "contentSummarize": "one-sentence-6-to-24-words-exact-fact-labels",
+    "contentWrite": "one-sentence-6-to-18-words-required-word",
+    "generalChat": "exact-token",
+    "structuredCode": "exact-path-json-compile-and-execute",
+    "structuredTool": "exact-single-read-file-call",
+    "version": 2
+  }
+}

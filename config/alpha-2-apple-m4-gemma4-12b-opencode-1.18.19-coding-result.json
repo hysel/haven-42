@@ -1,0 +1,107 @@
+{
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "hardwareProfile": {
+    "architecture": "arm64",
+    "backend": "metal",
+    "platformFamily": "macos",
+    "profileId": "apple-m4-16gib-macos26-metal",
+    "systemMemoryGiB": 16.0
+  },
+  "kind": "haven42-apple-silicon-coding-agent-qualification-result",
+  "observedAtUtc": "2026-08-21T17:09:40Z",
+  "planCanonicalSha256": "59172e04a07e4e8190fa160c8820c12a5dc2325748544d413b14aea8934fc191",
+  "policyCanonicalSha256": "13baa945d158be72ad6d8bd6fe6329258e17db76a2083970d2271704f95a44c6",
+  "privateIdentityRetained": false,
+  "qualificationCanonicalSha256": "6fa5d3aa487e807785682d499fe78590a1491bfdc89bb61fde08da74befc8cf8",
+  "rawPromptsOrResponsesRetained": false,
+  "release": "0.4.0-alpha.2",
+  "results": [
+    {
+      "codingRecommendationEligible": false,
+      "gates": {
+        "api-structured-code": {
+          "checks": {
+            "deterministic-output": "passed",
+            "instruction-fidelity": "passed",
+            "valid-code-contract": "passed"
+          },
+          "status": "passed"
+        },
+        "reliability": {
+          "checks": {
+            "bounded-context": "failed",
+            "model-unload": "passed",
+            "post-failure-recovery": "failed",
+            "timeout-recovery": "passed"
+          },
+          "status": "failed"
+        },
+        "repository-read-plan-review": {
+          "checks": {
+            "defect-review": "failed",
+            "exact-filename-fidelity": "failed",
+            "implementation-plan": "failed",
+            "repository-context-use": "failed"
+          },
+          "status": "failed"
+        },
+        "scoped-edit": {
+          "checks": {
+            "expected-file-only": "failed",
+            "explicit-write-approval": "passed",
+            "external-git-diff": "failed",
+            "no-unintended-writes": "failed"
+          },
+          "status": "failed"
+        },
+        "tool-contract": {
+          "checks": {
+            "exact-tool-name": "passed",
+            "schema-valid-arguments": "passed",
+            "unknown-tool-refusal": "passed"
+          },
+          "status": "passed"
+        }
+      },
+      "manifestDigest": "38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+      "model": "gemma4:12b-it-qat",
+      "modelId": "gemma4-12b-qat",
+      "promotionBlock": null,
+      "responseRetained": false,
+      "status": "failed",
+      "surfaceMetrics": {
+        "editDurationSeconds": 239.797,
+        "editErrorCode": null,
+        "editUnloadPassed": true,
+        "forcedTimeoutDurationSeconds": 0.014,
+        "rawEventsRetained": false,
+        "readDurationSeconds": 260.865,
+        "readErrorCode": null,
+        "readUnloadPassed": true,
+        "recoveryDurationSeconds": 305.0
+      },
+      "surfaceToolObservations": {
+        "read-tool-observed": "blocked",
+        "write-tool-observed": "failed"
+      },
+      "temporaryModelPulled": true,
+      "temporaryModelRemoved": true
+    }
+  ],
+  "runtime": {
+    "artifactSha256": "6f01ce31e63900437944c6d3d316c34f6c45463a7d4a258ed253a1732e0e6d42",
+    "provider": "ollama",
+    "transport": "ipv4-loopback-only",
+    "version": "0.32.15"
+  },
+  "schemaVersion": 1,
+  "status": "completed",
+  "surface": {
+    "archiveSha256": "0026326bd77a3277ab3726be237410b19389f7829e8bb3c82dfaf9044162067c",
+    "binarySha256": "fff10da113acaf6189f1082d64bfe6015a29e4d4c1b2c7ee6f2ac44fa225e099",
+    "id": "opencode-cli",
+    "version": "1.18.19"
+  }
+}
