@@ -1,0 +1,32 @@
+{
+  "hardwareProfile": {
+    "architecture": "arm64",
+    "backend": "metal",
+    "platformFamily": "macos",
+    "profileId": "apple-m4-16gib-macos26-metal",
+    "systemMemoryGiB": 16.0
+  },
+  "kind": "haven42-sanitized-physical-macos-native-test-result",
+  "observedAtUtc": "2026-08-21T09:33:22Z",
+  "planCanonicalSha256": "dc051e589d34526f18374666fd2a2a017e60be89c5f792e4a0e8461581d6fe73",
+  "privateIdentityRetained": false,
+  "privatePathsRetained": false,
+  "rawLogRetained": false,
+  "release": "0.4.0-alpha.2",
+  "releasePublicationAuthorized": false,
+  "schemaVersion": 1,
+  "source": {
+    "baseCommit": "e718801a37965c7000aed8b29af0c9ed9015b7f8",
+    "commitIsExactSource": false,
+    "snapshotSha256": "4c50e9f972238bed7def68bb2f36b87b674b5b3ae3c9528ee4011d621c39fe91",
+    "treeState": "modified-uncommitted"
+  },
+  "status": "passed",
+  "test": {
+    "durationSeconds": 75,
+    "groupsExecuted": 80,
+    "groupsSkipped": 0,
+    "runner": "native-shell",
+    "tier": "full"
+  }
+}

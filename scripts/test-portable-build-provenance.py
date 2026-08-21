@@ -41,6 +41,26 @@ def rejected(target: str, asset: str, digest: str, message: str) -> None:
 
 
 def main() -> int:
+    package_doc = (ROOT / "docs" / "portable-development-package.md").read_text(
+        encoding="utf-8"
+    )
+    assert "python3.14 -m venv --copies .venv-build" in package_doc
+    normalized_package_doc = " ".join(package_doc.split())
+    assert "People running the packaged Haven 42 app do not install" in normalized_package_doc
+    passed = 1
+
+    assert MODULE.resolve_app_version("platform-default", "Darwin") == MODULE.ALPHA_1_VERSION
+    assert MODULE.resolve_app_version("alpha2", "Darwin") == MODULE.ALPHA_2_VERSION
+    assert MODULE.resolve_app_version("platform-default", "Linux") == MODULE.ALPHA_2_VERSION
+    assert MODULE.resolve_app_version("platform-default", "Windows") == MODULE.ALPHA_1_VERSION
+    try:
+        MODULE.resolve_app_version("alpha2", "Unsupported")
+    except SystemExit as error:
+        assert "Windows, Linux, or macOS" in str(error)
+    else:
+        raise AssertionError("Unsupported Alpha 2 build platform was accepted.")
+    passed += 1
+
     with patch.dict("os.environ", {"GITHUB_ACTIONS": "false"}, clear=False):
         local = MODULE.python_distribution_provenance("windows-amd64")
     assert local == {
@@ -51,7 +71,7 @@ def main() -> int:
         "sha256": "",
         "verification": "local-unverified",
     }
-    passed = 1
+    passed += 1
 
     with (
         patch.object(

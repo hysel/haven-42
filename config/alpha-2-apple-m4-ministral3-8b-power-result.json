@@ -1,0 +1,87 @@
+{
+  "appleSocPower": {
+    "gpuActiveResidencyPercent": {
+      "average": 100.0,
+      "maximum": 100.0,
+      "minimum": 100.0,
+      "samples": 10
+    },
+    "kind": "haven42-sanitized-macos-power-summary",
+    "powerMilliwatts": {
+      "ane": {
+        "average": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "samples": 10
+      },
+      "combined": {
+        "average": 13543.3,
+        "maximum": 13642.0,
+        "minimum": 13418.0,
+        "samples": 10
+      },
+      "cpu": {
+        "average": 1267.8,
+        "maximum": 1298.0,
+        "minimum": 1242.0,
+        "samples": 10
+      },
+      "gpu": {
+        "average": 12275.3,
+        "maximum": 12373.0,
+        "minimum": 12175.0,
+        "samples": 10
+      }
+    },
+    "privateIdentityRetained": false,
+    "rawTelemetryRetained": false,
+    "schemaVersion": 1,
+    "thermalPressureLevels": [
+      "nominal"
+    ]
+  },
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "cleanup": {
+    "temporaryModelRemoved": true,
+    "unloadPassed": true
+  },
+  "hardwareProfile": {
+    "architecture": "arm64",
+    "backend": "metal",
+    "platformFamily": "macos",
+    "profileId": "apple-m4-16gib-macos26-metal",
+    "systemMemoryGiB": 16.0
+  },
+  "kind": "haven42-sanitized-macos-model-power-result",
+  "measurementBoundary": "Apple powermetrics CPU/GPU/ANE estimates; not wall-outlet or whole-system energy",
+  "model": {
+    "manifestDigest": "1922accd5827ebe6829e536369195db25eaf664528dc66206d646ea3bb386b71",
+    "model": "ministral-3:8b-instruct-2512-q4_K_M",
+    "modelBytes": 6022221312,
+    "modelId": "ministral3-8b-q4"
+  },
+  "observedAtUtc": "2026-08-21T08:14:39Z",
+  "planCanonicalSha256": "dc051e589d34526f18374666fd2a2a017e60be89c5f792e4a0e8461581d6fe73",
+  "privateIdentityRetained": false,
+  "rawPromptsOrResponsesRetained": false,
+  "rawTelemetryRetained": false,
+  "release": "0.4.0-alpha.2",
+  "runtime": {
+    "artifactSha256": "6f01ce31e63900437944c6d3d316c34f6c45463a7d4a258ed253a1732e0e6d42",
+    "provider": "ollama",
+    "transport": "ipv4-loopback-only",
+    "version": "0.32.15"
+  },
+  "schemaVersion": 1,
+  "status": "passed",
+  "workload": {
+    "durationSeconds": 25.921,
+    "fullMetalResidencyObserved": true,
+    "kind": "bounded-repeat-generation",
+    "outputTokens": 512,
+    "requests": 1,
+    "responseRetained": false
+  }
+}

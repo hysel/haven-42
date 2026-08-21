@@ -62,12 +62,15 @@ def main() -> int:
     checks += 1
 
     ollama_names = [
+        "ollama-darwin.tgz",
+        "Ollama-darwin.zip",
         "ollama-windows-amd64.zip",
         "ollama-windows-amd64-rocm.zip",
         "ollama-linux-amd64.tar.zst",
         "ollama-linux-amd64-rocm.tar.zst",
     ]
     llama_names = [
+        "llama-b10400-bin-macos-arm64.tar.gz",
         "llama-b10400-bin-win-cpu-x64.zip",
         "llama-b10400-bin-win-cuda-12.4-x64.zip",
         "llama-b10400-bin-win-rocm-7.14-x64.zip",
@@ -104,8 +107,8 @@ def main() -> int:
         by_id = {item["runtimeId"]: item for item in report["candidates"]}
         assert by_id["ollama"]["inventoryStatus"] == "already-tracked-exact-version"
         assert by_id["llama-cpp"]["inventoryStatus"] == "new-official-release-candidate"
-        assert len(by_id["ollama"]["matchedArtifacts"]) == 4
-        assert len(by_id["llama-cpp"]["matchedArtifacts"]) == 9
+        assert len(by_id["ollama"]["matchedArtifacts"]) == 6
+        assert len(by_id["llama-cpp"]["matchedArtifacts"]) == 10
         assert not by_id["llama-cpp"]["missingArtifactProfiles"]
         assert all(item["status"] == "pending" for item in by_id["llama-cpp"]["certificationPlan"])
         assert report["summary"] == {

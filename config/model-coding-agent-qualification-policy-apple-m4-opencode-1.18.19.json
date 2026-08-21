@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-model-coding-agent-qualification-policy",
+  "purpose": "Fail-closed coding-agent screening required for every executable local-model candidate evaluated by Haven 42.",
+  "scope": {
+    "appliesTo": "every-new-executable-local-model-candidate",
+    "doesNotChange": [
+      "automatic-model-defaults",
+      "support-labels",
+      "managed-runtime-versions",
+      "release-policy"
+    ],
+    "allowedStatuses": ["passed", "failed", "blocked", "not-run"]
+  },
+  "requiredGates": [
+    {
+      "id": "api-structured-code",
+      "checks": ["valid-code-contract", "instruction-fidelity", "deterministic-output"]
+    },
+    {
+      "id": "repository-read-plan-review",
+      "checks": ["repository-context-use", "exact-filename-fidelity", "implementation-plan", "defect-review"]
+    },
+    {
+      "id": "tool-contract",
+      "checks": ["exact-tool-name", "schema-valid-arguments", "unknown-tool-refusal"]
+    },
+    {
+      "id": "scoped-edit",
+      "checks": ["explicit-write-approval", "expected-file-only", "external-git-diff", "no-unintended-writes"]
+    },
+    {
+      "id": "reliability",
+      "checks": ["bounded-context", "timeout-recovery", "post-failure-recovery", "model-unload"]
+    }
+  ],
+  "surfaceAdmission": {
+    "codingRecommendationRequires": [
+      "all-required-gates-passed",
+      "continue-cli-disposable-repository-read-pass",
+      "continue-cli-disposable-repository-review-pass",
+      "continue-cli-disposable-repository-scoped-write-pass"
+    ],
+    "separateEvidenceCells": [
+      "continue-cli-and-version",
+      "vscode-and-extension-version",
+      "vscodium-and-extension-version",
+      "vscode-native-chat-and-version",
+      "vscodium-native-chat-and-version"
+    ],
+    "crossSurfaceInheritance": "forbidden"
+  },
+  "evidenceRules": {
+    "disposableRepositoriesOnlyForWrites": true,
+    "rawPromptsCommitted": false,
+    "rawResponsesCommitted": false,
+    "privateEndpointsCommitted": false,
+    "exactRuntimeModelDigestHardwareAndSurfaceRequired": true,
+    "missingGateBlocksRecommendation": true
+  }
+}

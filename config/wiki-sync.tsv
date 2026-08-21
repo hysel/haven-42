@@ -16,6 +16,7 @@ examples/nvidia-quadro-rtx5000-power-validation.md	NVIDIA-Quadro-RTX5000-Power-V
 examples/intel-b580-granite41-8b-validation.md	Intel-B580-Granite41-8B-Validation.md	Intel Arc B580 Granite 4.1 Validation
 examples/august-2026-new-model-qualification.md	Eng-August-2026-New-Model-Qualification.md	August 2026 New Model Qualification
 examples/amd-rx5700xt-ollama03213-qualification.md	Eng-AMD-RX5700XT-Ollama-03213-Qualification.md	AMD Radeon RX 5700 XT Ollama 0.32.13 Qualification
+examples/apple-m4-16gib-model-qualification.md	Eng-Apple-M4-16GiB-Model-Qualification.md	Apple M4 16 GB Model Qualification
 docs/alpha-2-linux-long-term-validation.md	Eng-Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
 docs/wiki-documentation-index.md	Eng-Documentation-Index.md	Documentation Index
 docs/beginner-setup-mode.md	Eng-Beginner-Setup-Mode.md	Beginner Setup Mode
@@ -189,6 +190,7 @@ docs/evidence-records/evidence-3bc3e961aa89d354.md	Evidence-Record-3bc3e961aa89d
 docs/evidence-records/evidence-eee8463c09ed1a53.md	Evidence-Record-eee8463c09ed1a53.md	Aider CLI realistic scoped-edit validation
 docs/evidence-records/evidence-c836e3b6f82ceb6c.md	Evidence-Record-c836e3b6f82ceb6c.md	Aider CLI richer disposable scoped-edit validation
 docs/evidence-records/evidence-4c8889255c609520.md	Evidence-Record-4c8889255c609520.md	Aider and OpenCode candidate lifecycle plans
+docs/evidence-records/evidence-713bc8ce611cbfe3.md	Evidence-Record-713bc8ce611cbfe3.md	Apple M4 16 GB OpenCode 1.18.19 16-model coding screen
 docs/evidence-records/evidence-c48f68ae267ddaeb.md	Evidence-Record-c48f68ae267ddaeb.md	Continue CLI model test harness
 docs/evidence-records/evidence-23ddebcd60acad2e.md	Evidence-Record-23ddebcd60acad2e.md	Gemma 3 1B coding workflow screen
 docs/evidence-records/evidence-0c002ac81e91a029.md	Evidence-Record-0c002ac81e91a029.md	Granite 4.1 30B coding workflow screen
@@ -234,6 +236,8 @@ docs/evidence-records/evidence-91e7db3d8cf9310d.md	Evidence-Record-91e7db3d8cf93
 docs/evidence-records/evidence-afdeb35698fc13c1.md	Evidence-Record-afdeb35698fc13c1.md	Conversation-history encryption dependency review
 docs/evidence-records/evidence-3032fff46e49e400.md	Evidence-Record-3032fff46e49e400.md	Linux credential-store availability boundary
 docs/evidence-records/evidence-56ca94fba5185607.md	Evidence-Record-56ca94fba5185607.md	Linux credential-store native headless availability
+docs/evidence-records/evidence-e9f4fda429cdc626.md	Evidence-Record-e9f4fda429cdc626.md	Physical Apple M4 Keychain command availability boundary
+docs/evidence-records/evidence-32a2affd636fbbf9.md	Evidence-Record-32a2affd636fbbf9.md	Physical Apple M4 unattended synthetic Keychain lifecycle
 docs/evidence-records/evidence-0005faabe699fcf7.md	Evidence-Record-0005faabe699fcf7.md	Windows conversation-history per-user ACL primitive
 docs/evidence-records/evidence-780b76332e1a0df4.md	Evidence-Record-780b76332e1a0df4.md	Windows conversation-history synthetic key protection
 docs/evidence-records/evidence-01c8b74c82919604.md	Evidence-Record-01c8b74c82919604.md	Windows wrapped-key temporary persistence
@@ -257,6 +261,8 @@ docs/evidence-records/evidence-b91e58b8e387a4cc.md	Evidence-Record-b91e58b8e387a
 docs/evidence-records/evidence-07a5bd4578f3108f.md	Evidence-Record-07a5bd4578f3108f.md	Radeon RX 5700 XT exact Ubuntu Vulkan profile
 docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b24c.md	Script-level recommendation and config generation
 docs/evidence-records/evidence-27f4eaa91d0b896d.md	Evidence-Record-27f4eaa91d0b896d.md	Radeon RX 5700 XT current-boot host stability
+docs/evidence-records/evidence-e3d838e6e2d03596.md	Evidence-Record-e3d838e6e2d03596.md	Apple M4 16 GB MLX-LM lifecycle
+docs/evidence-records/evidence-6c65da7ee449d0dd.md	Evidence-Record-6c65da7ee449d0dd.md	Apple M4 16 GB llama.cpp lifecycle
 docs/evidence-records/evidence-05d02ca020d00629.md	Evidence-Record-05d02ca020d00629.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-13d3451c24d5c713.md	Evidence-Record-13d3451c24d5c713.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-d2ac550dc4f53937.md	Evidence-Record-d2ac550dc4f53937.md	llama.cpp 11-model identical-byte AMD/NVIDIA matrix
@@ -295,6 +301,8 @@ docs/evidence-records/evidence-9144ebf0180b2118.md	Evidence-Record-9144ebf0180b2
 docs/evidence-records/evidence-dda5053a14f25d32.md	Evidence-Record-dda5053a14f25d32.md	ComfyUI SDXL on Radeon RX 7800 XT
 docs/evidence-records/evidence-4e44f89b53777abb.md	Evidence-Record-4e44f89b53777abb.md	Local video candidate hardware preflight
 docs/evidence-records/evidence-749f44fc9f8604f4.md	Evidence-Record-749f44fc9f8604f4.md	Laguna XS 2.1 Ollama conformance
+docs/evidence-records/evidence-71fdc1d4cefe7305.md	Evidence-Record-71fdc1d4cefe7305.md	Apple M4 16 GB 16-model bounded qualification
+docs/evidence-records/evidence-6a2e6287439189e8.md	Evidence-Record-6a2e6287439189e8.md	Apple M4 16 GB nine-model reliability soak
 docs/evidence-records/evidence-b1e852d6e517e410.md	Evidence-Record-b1e852d6e517e410.md	Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA
 docs/evidence-records/evidence-9ee9709513adee19.md	Evidence-Record-9ee9709513adee19.md	Gemma 4 E2B QAT on Radeon RX 5700 XT
 docs/evidence-records/evidence-be0a1992c6629cd9.md	Evidence-Record-be0a1992c6629cd9.md	Gemma 4 E4B QAT on Radeon RX 5700 XT
@@ -323,6 +331,7 @@ docs/evidence-records/evidence-6c09cdefc61c0f82.md	Evidence-Record-6c09cdefc61c0
 docs/evidence-records/evidence-ad991e5601c892ec.md	Evidence-Record-ad991e5601c892ec.md	Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification
 docs/evidence-records/evidence-65198375e7df9abe.md	Evidence-Record-65198375e7df9abe.md	Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification
 docs/evidence-records/evidence-f5989f6fc215258e.md	Evidence-Record-f5989f6fc215258e.md	Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification
+docs/evidence-records/evidence-a31a3f4055c25ef1.md	Evidence-Record-a31a3f4055c25ef1.md	Windows NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification
 docs/evidence-records/evidence-abbec916eccdc9c2.md	Evidence-Record-abbec916eccdc9c2.md	Qwen 3.5 9B Q4_K_M versus Q8_0
 docs/evidence-records/evidence-66af319217108136.md	Evidence-Record-66af319217108136.md	Qwen 3.5 9B Q4_K_M versus Q8_0 on Radeon RX 7800 XT
 docs/evidence-records/evidence-8a4966fb74923f8b.md	Evidence-Record-8a4966fb74923f8b.md	Devstral Small 2 MLX endpoint tool call
@@ -355,13 +364,21 @@ docs/evidence-records/evidence-ddd493cef4288ac4.md	Evidence-Record-ddd493cef4288
 docs/evidence-records/evidence-588241e349f32b95.md	Evidence-Record-588241e349f32b95.md	Generated TypeScript sample workflows
 docs/evidence-records/evidence-dff8d8e0aff407ab.md	Evidence-Record-dff8d8e0aff407ab.md	Generated TypeScript sample workflows
 docs/evidence-records/evidence-2de3f0726ddaba91.md	Evidence-Record-2de3f0726ddaba91.md	Online model discovery
+docs/evidence-records/evidence-d5ea2428d99b1560.md	Evidence-Record-d5ea2428d99b1560.md	Physical Apple M4 Alpha 2 development app browser flow
+docs/evidence-records/evidence-a3ffc5fb42c08cc4.md	Evidence-Record-a3ffc5fb42c08cc4.md	Physical Apple M4 Alpha 2 portable development package
 docs/evidence-records/evidence-2589000e63822b5e.md	Evidence-Record-2589000e63822b5e.md	Windows Alpha 2 current UI package parity
+docs/evidence-records/evidence-e0ff8b838482c84e.md	Evidence-Record-e0ff8b838482c84e.md	Physical Apple M4 exact-source native full suite
+docs/evidence-records/evidence-0ca29f0fa9fbdcdb.md	Evidence-Record-0ca29f0fa9fbdcdb.md	Apple M4 16 GB Ministral 3 8B bounded power sample
+docs/evidence-records/evidence-157bfe9c7bf20597.md	Evidence-Record-157bfe9c7bf20597.md	Apple M4 16 GB Qwen 3.5 2B bounded power sample
+docs/evidence-records/evidence-f955c93a1ebd4164.md	Evidence-Record-f955c93a1ebd4164.md	Apple M4 16 GB Qwen 3.5 4B bounded power sample
+docs/evidence-records/evidence-cea92a2e0ac35bf8.md	Evidence-Record-cea92a2e0ac35bf8.md	Apple M4 16 GB idle Apple SoC sample
 docs/evidence-records/evidence-58d8481eef7a394b.md	Evidence-Record-58d8481eef7a394b.md	NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power
 docs/evidence-records/evidence-9a9906ccfd247313.md	Evidence-Record-9a9906ccfd247313.md	Radeon RX 5700 XT Llama 3.2 3B board power
 docs/evidence-records/evidence-0b86ce2eeb867f1f.md	Evidence-Record-0b86ce2eeb867f1f.md	Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power
 docs/evidence-records/evidence-2aa29208b11bc71d.md	Evidence-Record-2aa29208b11bc71d.md	Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power
 docs/evidence-records/evidence-60b8a8cd266e76e3.md	Evidence-Record-60b8a8cd266e76e3.md	Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power
 docs/evidence-records/evidence-ad94c1f53c81365c.md	Evidence-Record-ad94c1f53c81365c.md	Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power
+docs/evidence-records/evidence-00b72ba071ebf282.md	Evidence-Record-00b72ba071ebf282.md	Windows NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power
 docs/evidence-records/evidence-77e5fbc983b71597.md	Evidence-Record-77e5fbc983b71597.md	Remote hardware profiling
 docs/evidence-records/evidence-32bd4f913b5ede9d.md	Evidence-Record-32bd4f913b5ede9d.md	Python API generated sample
 docs/evidence-records/evidence-22701a5715776e0d.md	Evidence-Record-22701a5715776e0d.md	TypeScript frontend generated sample

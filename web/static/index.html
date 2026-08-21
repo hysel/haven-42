@@ -165,15 +165,39 @@
               <button class="button text-button section-tour-help" type="button" data-tour-section="chat" aria-label="Show help for Chat">? Help</button>
             </div>
             <div class="text-actions">
-              <label class="task-mode-select"><span>Task</span>
-                <select id="text-mode">
+              <div class="task-mode-select">
+                <span id="text-mode-label">Task</span>
+                <div class="task-mode-picker">
+                  <button class="task-mode-button" id="text-mode-button" type="button"
+                    aria-labelledby="text-mode-label text-mode-button-label"
+                    aria-haspopup="listbox" aria-expanded="false" aria-controls="text-mode-options">
+                    <span id="text-mode-button-label">Choose for me</span>
+                    <span class="task-mode-chevron" aria-hidden="true"></span>
+                  </button>
+                  <div class="task-mode-options hidden" id="text-mode-options" role="listbox"
+                    aria-labelledby="text-mode-label" tabindex="-1">
+                    <button class="task-mode-option" type="button" role="option" data-value="automatic" aria-selected="true">
+                      <span>Choose for me</span><small>Recommended · Haven 42 decides from your request</small>
+                    </button>
+                    <button class="task-mode-option" type="button" role="option" data-value="general.chat" aria-selected="false">
+                      <span>Chat</span><small>Ask questions and explore ideas</small>
+                    </button>
+                    <button class="task-mode-option" type="button" role="option" data-value="content.write" aria-selected="false">
+                      <span>Write</span><small>Draft or rewrite content</small>
+                    </button>
+                    <button class="task-mode-option" type="button" role="option" data-value="content.summarize" aria-selected="false">
+                      <span>Summarize</span><small>Shorten text while keeping key points</small>
+                    </button>
+                  </div>
+                </div>
+                <select id="text-mode" class="hidden" aria-hidden="true" tabindex="-1">
                   <option value="automatic" selected>Choose for me · Recommended</option>
                   <option value="general.chat">Chat</option>
                   <option value="content.write">Write</option>
                   <option value="content.summarize">Summarize</option>
                 </select>
                 <small id="text-mode-status">Haven 42 chooses from your request</small>
-              </label>
+              </div>
               <div class="text-size-controls" role="group" aria-label="Chat text size">
                 <button class="button text-size-button" id="decrease-chat-text" type="button" aria-label="Make chat text smaller" aria-controls="messages prompt" title="Smaller chat text">A&minus;</button>
                 <output id="chat-text-size-value" aria-hidden="true">100%</output>

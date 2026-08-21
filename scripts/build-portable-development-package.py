@@ -165,9 +165,16 @@ def repository_build_python(root: Path = ROOT) -> Path | None:
     )
     for path in (environment, executable.parent, executable):
         if path.is_symlink():
+            remediation = (
+                " On macOS, recreate it with Python 3.14.6 using "
+                "'python3.14 -m venv --copies .venv-build'."
+                if platform.system() == "Darwin"
+                else ""
+            )
             raise SystemExit(
                 "The repository-local portable build environment is unsafe because "
                 "it contains a symbolic link. Recreate .venv-build before building."
+                + remediation
             )
     if not executable.is_file():
         return None
@@ -273,6 +280,18 @@ def pyinstaller_environment(config_dir: Path, app_version: str = APP_VERSION) ->
             if path.is_dir() and path not in admitted[:index]
         )
     return environment
+
+
+def resolve_app_version(release_line: str, system: str) -> str:
+    if release_line == "alpha2":
+        if system not in {"Windows", "Linux", "Darwin"}:
+            raise SystemExit(
+                "--release-line alpha2 requires Windows, Linux, or macOS."
+            )
+        return ALPHA_2_VERSION
+    if release_line != "platform-default":
+        raise SystemExit("Invalid portable build release line.")
+    return ALPHA_2_VERSION if system == "Linux" else ALPHA_1_VERSION
 
 
 def expected_resource_manifest(root: Path = ROOT) -> dict[str, object]:
@@ -621,7 +640,7 @@ def main() -> int:
         default="platform-default",
         help=(
             "Use the existing platform default, or explicitly build Alpha 2. "
-            "The explicit Alpha 2 option is supported only on Windows and Linux."
+            "The explicit Alpha 2 option is supported on Windows, Linux, and macOS."
         ),
     )
     parser.add_argument(
@@ -630,12 +649,10 @@ def main() -> int:
         help="Update only the tracked protected-resource manifest for review.",
     )
     args = parser.parse_args()
-    if args.release_line == "alpha2":
-        if platform.system() not in {"Windows", "Linux"}:
-            parser.error("--release-line alpha2 is supported only on Windows and Linux.")
-        APP_VERSION = ALPHA_2_VERSION
-    else:
-        APP_VERSION = ALPHA_2_VERSION if platform.system() == "Linux" else ALPHA_1_VERSION
+    try:
+        APP_VERSION = resolve_app_version(args.release_line, platform.system())
+    except SystemExit as error:
+        parser.error(str(error))
     if args.update_resource_integrity:
         if args.skip_pyinstaller:
             parser.error(

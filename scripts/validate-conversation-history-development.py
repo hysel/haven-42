@@ -73,7 +73,13 @@ def _connect(path: Path) -> sqlite3.Connection:
     connection.execute("PRAGMA trusted_schema=OFF")
     connection.execute("PRAGMA journal_mode=DELETE")
     connection.execute("PRAGMA temp_store=MEMORY")
-    connection.enable_load_extension(False)
+    # Some vendor Python builds, including Apple's signed arm64 build, compile
+    # SQLite without loadable-extension support and therefore omit this method.
+    # That is already the safer state.  Where the API exists, disable extension
+    # loading explicitly before the connection is returned.
+    disable_extensions = getattr(connection, "enable_load_extension", None)
+    if disable_extensions is not None:
+        disable_extensions(False)
     return connection
 
 

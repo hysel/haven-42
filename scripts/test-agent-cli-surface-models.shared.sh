@@ -109,6 +109,7 @@ if surface:
   [ -z "$MODEL_ARGS_TEMPLATE" ] && MODEL_ARGS_TEMPLATE="$default_model_args_template"
   [ -z "$INSTALL_HINT" ] && INSTALL_HINT="$default_install_hint"
   [ -n "$default_requires_explicit_live_overrides" ] && REQUIRES_EXPLICIT_LIVE_OVERRIDES="$default_requires_explicit_live_overrides"
+  return 0
 }
 
 load_surface_defaults

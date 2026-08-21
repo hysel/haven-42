@@ -37,18 +37,24 @@
   "surfaceAdmission": {
     "codingRecommendationRequires": [
       "all-required-gates-passed",
-      "continue-cli-disposable-repository-read-pass",
-      "continue-cli-disposable-repository-review-pass",
-      "continue-cli-disposable-repository-scoped-write-pass"
+      "same-surface-disposable-repository-read-pass",
+      "same-surface-disposable-repository-review-pass",
+      "same-surface-disposable-repository-scoped-write-pass",
+      "same-surface-unintended-write-check-pass"
     ],
     "separateEvidenceCells": [
-      "continue-cli-and-version",
+      "maintained-cli-agent-and-version",
       "vscode-and-extension-version",
       "vscodium-and-extension-version",
       "vscode-native-chat-and-version",
       "vscodium-native-chat-and-version"
     ],
-    "crossSurfaceInheritance": "forbidden"
+    "crossSurfaceInheritance": "forbidden",
+    "legacyEvidenceOnlySurfaces": [
+      "continue-cli",
+      "vscode-continue-extension",
+      "vscodium-continue-extension"
+    ]
   },
   "evidenceRules": {
     "disposableRepositoriesOnlyForWrites": true,

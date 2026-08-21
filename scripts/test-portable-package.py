@@ -23,6 +23,22 @@ import urllib.request
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def packaged_layout(executable: Path) -> tuple[Path, Path, Path]:
+    """Return package root, executable-relative path, and embedded resource root."""
+    if (
+        executable.parent.name == "MacOS"
+        and executable.parent.parent.name == "Contents"
+        and executable.parent.parent.parent.suffix == ".app"
+    ):
+        root = executable.parent.parent.parent
+        return (
+            root,
+            Path("Contents") / "MacOS" / executable.name,
+            Path("Contents") / "Frameworks",
+        )
+    return executable.parent, Path(executable.name), Path("_internal")
+
+
 def remove_test_diagnostics(parent: Path) -> None:
     root = parent / "Haven42-Logs"
     if not root.exists():
@@ -393,12 +409,12 @@ def probe(
 
 
 def assert_integrity_failure(executable: Path, mutate) -> None:
-    package_dir = executable.parent
+    package_dir, executable_relative, internal_relative = packaged_layout(executable)
     with tempfile.TemporaryDirectory(prefix="haven42-hostile-package-") as temporary:
-        copied = Path(temporary) / "haven42"
+        copied = Path(temporary) / package_dir.name
         shutil.copytree(package_dir, copied)
-        copied_executable = copied / executable.name
-        internal = copied / "_internal"
+        copied_executable = copied / executable_relative
+        internal = copied / internal_relative
         mutate(internal)
         result = subprocess.run(
             [str(copied_executable), "--port", "0", "--no-open"],
@@ -471,10 +487,11 @@ def test_hostile_packages(executable: Path) -> None:
 def test_relocation_and_hostile_environment(
     executable: Path, expected: dict, expected_version: str | None,
 ) -> None:
+    package_dir, executable_relative, _ = packaged_layout(executable)
     with tempfile.TemporaryDirectory(prefix="haven42-relocated-package-") as temporary:
-        relocated = Path(temporary) / "directory with spaces" / "haven42"
-        shutil.copytree(executable.parent, relocated)
-        relocated_executable = relocated / executable.name
+        relocated = Path(temporary) / "directory with spaces" / package_dir.name
+        shutil.copytree(package_dir, relocated)
+        relocated_executable = relocated / executable_relative
         actual = probe(
             [str(relocated_executable)],
             True,
@@ -502,10 +519,11 @@ def restore_writable(root: Path) -> None:
 def test_read_only_package(
     executable: Path, expected: dict, expected_version: str | None,
 ) -> None:
+    package_dir, executable_relative, _ = packaged_layout(executable)
     with tempfile.TemporaryDirectory(prefix="haven42-read-only-package-") as temporary:
-        copied = Path(temporary) / "haven42"
-        shutil.copytree(executable.parent, copied)
-        copied_executable = copied / executable.name
+        copied = Path(temporary) / package_dir.name
+        shutil.copytree(package_dir, copied)
+        copied_executable = copied / executable_relative
         try:
             for path in copied.rglob("*"):
                 mode = path.stat().st_mode
@@ -569,10 +587,16 @@ def main() -> int:
         help="Require this embedded packaged release identity.",
     )
     args = parser.parse_args()
-    source = probe([
+    source_command = [
         sys.executable,
         str(ROOT / "scripts/run-haven42-web-browser-test.py"),
-    ], False)
+    ]
+    if args.expected_version:
+        source_command.extend([
+            "--source-version-for-package-parity",
+            args.expected_version,
+        ])
+    source = probe(source_command, False, expected_version=args.expected_version)
     executable = Path(args.executable).resolve()
     packaged = probe(
         [str(executable)], True, expected_version=args.expected_version,

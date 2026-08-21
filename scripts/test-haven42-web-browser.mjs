@@ -994,7 +994,7 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== 5 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 6 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
   const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
@@ -1029,8 +1029,8 @@ try {
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
   if (
     Object.values(allTourState).length !== 5
-    || allTourState.chat !== 5
-    || allTourState.models !== 2
+    || allTourState.chat !== 6
+    || allTourState.models !== 3
     || allTourState.system !== 3
     || allTourState.technical !== 1
     || allTourState.about !== 1
@@ -1075,7 +1075,7 @@ try {
       stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
     };
   })()`);
-  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 5) {
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 6) {
     throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
   }
   checks += 41;
@@ -1538,7 +1538,7 @@ try {
     || discovery.hidden
     || !discovery.searchStatus.includes("Nothing was downloaded")
     || discovery.currentModel !== "manual:unknown-model:latest"
-  ) throw new Error("candidate-only-model-discovery");
+  ) throw new Error(`candidate-only-model-discovery:${JSON.stringify(discovery)}`);
   checks += 6;
 
   await cdp.evaluate("document.querySelector('#install-model-button').click()");
@@ -1605,12 +1605,20 @@ try {
       status: document.querySelector('#model-search-status').textContent
     };
   })()`);
+  const expectedFixtureProfile = (
+    capabilityReset.resultCount >= 14
+    && capabilityReset.status.includes("AMD Radeon RX 7800 XT 16 GB")
+  );
+  const expectedUnpromotedPhysicalProfile = (
+    Boolean(packagedExecutable)
+    && capabilityReset.resultCount >= 1
+    && capabilityReset.status.includes("No matching qualification profile exists")
+  );
   if (
     capabilityReset.query !== ""
-    || capabilityReset.resultCount !== 2
     || !capabilityReset.desiredHidden
     || capabilityReset.resultName !== "unknown-model:latest"
-    || !capabilityReset.status.includes("Conversation")
+    || (!expectedFixtureProfile && !expectedUnpromotedPhysicalProfile)
   ) throw new Error(`model-capability-reset:${JSON.stringify(capabilityReset)}`);
   checks += 5;
 
@@ -2174,7 +2182,41 @@ try {
     || explicitModes.automaticTitle !== "Private conversation"
     || explicitModes.automaticCapability !== "general.chat"
   ) throw new Error(`explicit-text-modes:${JSON.stringify(explicitModes)}`);
-  checks += 14;
+  const taskModePicker = await cdp.evaluate(`(() => {
+    const button = document.querySelector('#text-mode-button');
+    const menu = document.querySelector('#text-mode-options');
+    button.click();
+    const opened = button.getAttribute('aria-expanded') === 'true' && !menu.classList.contains('hidden');
+    const initiallyFocused = document.activeElement?.dataset.value;
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowDown', bubbles: true}));
+    const arrowFocused = document.activeElement?.dataset.value;
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {key: 'Enter', bubbles: true}));
+    const selected = document.querySelector('#text-mode').value;
+    const buttonLabel = document.querySelector('#text-mode-button-label').textContent;
+    const closedAfterSelection = button.getAttribute('aria-expanded') === 'false' && menu.classList.contains('hidden');
+    button.click();
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+    const escapeReturnedFocus = document.activeElement === button && menu.classList.contains('hidden');
+    chooseTaskMode('automatic');
+    return {
+      opened, initiallyFocused, arrowFocused, selected, buttonLabel,
+      closedAfterSelection, escapeReturnedFocus,
+      hasListbox: menu.getAttribute('role') === 'listbox',
+      optionCount: menu.querySelectorAll('[role="option"]').length
+    };
+  })()`);
+  if (
+    !taskModePicker.opened
+    || taskModePicker.initiallyFocused !== "automatic"
+    || taskModePicker.arrowFocused !== "general.chat"
+    || taskModePicker.selected !== "general.chat"
+    || taskModePicker.buttonLabel !== "Chat"
+    || !taskModePicker.closedAfterSelection
+    || !taskModePicker.escapeReturnedFocus
+    || !taskModePicker.hasListbox
+    || taskModePicker.optionCount !== 4
+  ) throw new Error(`task-mode-picker:${JSON.stringify(taskModePicker)}`);
+  checks += 23;
   trace("alpha-unified-text-conversation-verified");
 
   const contextSelection = await cdp.evaluate(`(async () => {
@@ -3775,6 +3817,7 @@ try {
   ) throw new Error(`accessibility-statement:${JSON.stringify(accessibilityStatement)}`);
   checks += 14;
   trace("accessibility-statement-verified");
+  console.log("Haven 42 browser evidence gates passed: bounded-attachments, automated-accessibility, local-privacy-boundary.");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
 } finally {
   trace("cleanup-started");

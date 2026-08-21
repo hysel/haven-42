@@ -1,0 +1,17 @@
+{
+  "encryptedHistoryAdmissionGranted": false,
+  "errorCode": "synthetic-item-create-denied",
+  "keychainNameOrPathRetained": false,
+  "kind": "haven42-sanitized-physical-macos-keychain-lifecycle-result",
+  "observedAtUtc": "2026-08-21T02:50:01Z",
+  "packageAdmissionGranted": false,
+  "platform": "macos",
+  "privateIdentityRetained": false,
+  "productionAdmissionGranted": false,
+  "rawOutputRetained": false,
+  "release": "0.4.0-alpha.2",
+  "schemaVersion": 1,
+  "scope": "current-user-synthetic-item-only",
+  "secretRetained": false,
+  "status": "blocked"
+}

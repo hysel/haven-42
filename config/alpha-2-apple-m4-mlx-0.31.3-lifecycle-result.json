@@ -1,0 +1,80 @@
+{
+  "authority": {
+    "automaticSelectionAllowed": false,
+    "packageAdmissionGranted": false,
+    "runtimeAdmissionGranted": false,
+    "supportLabelChangeAllowed": false
+  },
+  "hardwareProfile": {
+    "acceleratorFamily": "Apple M4",
+    "architecture": "arm64",
+    "platformFamily": "macos",
+    "systemMemoryGiB": 16
+  },
+  "kind": "haven42-sanitized-physical-macos-mlx-lifecycle-result",
+  "model": {
+    "canonicalSha256": "b23bc316e603182a23f22eb9c045e1a72bf4cdd0c7503766aa3c69c46a01231e",
+    "fileCount": 11,
+    "id": "mlx-community/Qwen3.5-0.8B-OptiQ-4bit@ef605869",
+    "totalBytes": 670394767
+  },
+  "observedAtUtc": "2026-08-21T08:19:30Z",
+  "privacy": {
+    "networkEndpointRetained": false,
+    "privateIdentityRetained": false,
+    "privatePathRetained": false,
+    "rawPromptOrResponseRetained": false
+  },
+  "runtime": {
+    "globalPythonRequiredForFuturePackage": false,
+    "packages": {
+      "mlx": "0.32.1",
+      "mlx-lm": "0.31.3",
+      "mlx-metal": "0.32.1"
+    },
+    "productionServerAdmitted": false,
+    "pythonVersion": "3.14.6",
+    "wheelhouse": {
+      "canonicalSha256": "70da8e40b3386168f482234cb553661746ce62a95d4f5f0f1f92b620f449f02e",
+      "fileCount": 34,
+      "totalBytes": 93966507
+    }
+  },
+  "schemaVersion": 1,
+  "status": "passed",
+  "tests": {
+    "firstGeneration": {
+      "durationSeconds": 1.484,
+      "exitCode": 0,
+      "generationTokensPerSecond": 161.118,
+      "outputCharacters": 141,
+      "outputSha256": "1e6c25aa30a06e9ef35da74e07f66195472bad158dfcca13aa7286de7f261584",
+      "peakMetalMemoryGiB": 0.759,
+      "processExited": true,
+      "requiredTokenObserved": true,
+      "responseRetained": false,
+      "status": "passed"
+    },
+    "forcedTimeout": {
+      "durationSeconds": 0.013,
+      "processExited": true,
+      "responseRetained": false,
+      "status": "timed-out"
+    },
+    "listenerOpened": false,
+    "offlineOnly": true,
+    "processResidueRetained": false,
+    "recoveryGeneration": {
+      "durationSeconds": 1.479,
+      "exitCode": 0,
+      "generationTokensPerSecond": 163.99,
+      "outputCharacters": 141,
+      "outputSha256": "3dcb957be1259ade459539ecc716291c125b59b34437d768e045cd62ed311e35",
+      "peakMetalMemoryGiB": 0.759,
+      "processExited": true,
+      "requiredTokenObserved": true,
+      "responseRetained": false,
+      "status": "passed"
+    }
+  }
+}

@@ -5219,12 +5219,32 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-alpha2-hardware-report-preflight.py",
         "test-alpha2-model-recommendation-matrix.py",
         "test-alpha2-model-recommendation-report.py",
+        "test-alpha2-macos-model-qualification.py",
+        "test-alpha2-macos-keychain-lifecycle.py",
+        "test-alpha2-macos-llamacpp-lifecycle.py",
+        "test-alpha2-macos-mlx-lifecycle.py",
+        "test-alpha2-macos-opencode-coding-screen.py",
+        "test-alpha2-apple-m4-package-result.py",
+        "test-alpha2-apple-m4-qualification-status.py",
+        "test-alpha2-macos-model-power-cell.py",
+        "test-alpha2-macos-idle-power-cell.py",
+        "test-alpha2-macos-native-test-result.py",
+        "test-alpha2-macos-model-soak.py",
         "test-model-coding-agent-history-audit.py",
-        "test-model-coding-agent-screen.py"
+        "test-model-coding-agent-screen.py",
+        "test-summarize-alpha2-apple-m4-qualification.py",
+        "test-summarize-alpha2-macos-model-qualification.py",
+        "test-summarize-macos-powermetrics.py",
+        "test-validate-alpha2-macos-model-qualification-result.py",
+        "test-validate-alpha2-macos-opencode-coding-result.py",
+        "test-validate-alpha2-macos-model-soak-result.py",
+        "test-validate-alpha2-macos-power-result.py",
+        "test-validate-alpha2-macos-keychain-lifecycle-result.py",
+        "test-validate-alpha2-macos-development-app-result.py"
     )
     foreach ($test in $tests) {
-        $output = @(& $python.Source (Join-Path $repoRoot "scripts/$test") 2>&1)
-        Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Qualification boundary test should pass: $test. Output: $($output -join ' ')"
+        $result = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/$test"))
+        Assert-Equal -Actual $result.ExitCode -Expected 0 -Message "Qualification boundary test should pass: $test. Output: $($result.Output)"
     }
     $wikiMap = Get-Content -LiteralPath (Join-Path $repoRoot "config/wiki-sync.tsv") -Raw
     foreach ($document in @(
@@ -5469,6 +5489,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition ($portablePolicy.security.browserUrlIsEngineConstructedLoopbackOnly -and -not $portablePolicy.security.browserEnvironmentOverrideAllowed -and -not $portablePolicy.security.browserLaunchShellAllowed -and $portablePolicy.security.browserLaunchSuccessRequiresZeroExitOrRunningProcess -and $portablePolicy.security.browserLaunchFailureMode -eq "print-loopback-url-and-continue") -Message "Portable browser launch must use only the engine loopback URL, confirm launcher success, and fail safely."
     Assert-True -Condition ($portablePolicy.security.exactRuntimeComponentFileCoverageRequired -and $portablePolicy.security.unknownRuntimeComponentFilesRejected -and -not $portablePolicy.security.windowsApplicationLocalApiSetOrUcrtAllowed -and $portablePolicy.security.windowsVisualCppRuntimeExactHashesRequired -and -not $portablePolicy.security.pyinstallerHostPathInheritanceAllowed -and -not $portablePolicy.security.pyinstallerUserCacheAllowed -and $portablePolicy.security.buildOutputsRestrictedToRepositoryDist -and -not $portablePolicy.security.packageLinksMayEscapeBundle -and $portablePolicy.security.runtimeRedistributionClearanceRequiredForProduction -and $portablePolicy.security.distributionEvidenceEmbeddedInExtractedPackage -and $portablePolicy.security.distributionEvidenceRequiresExactHashes -and $portablePolicy.security.distributionEvidenceExcludedFromSigningScope) -Message "Portable evidence must cover every runtime file, keep build cache and outputs inside the ignored repository build tree, reject escaping package links, embed exact non-signable distribution evidence, reject host-derived Windows runtime inputs, and keep redistribution clearance as a production gate."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "runtime-component-inventory.json") -Message "Portable evidence must include the exact runtime component inventory."
+    Assert-True -Condition ($portablePolicy.macosDevelopmentAppWrapper.status -eq "unsigned-development-only" -and $portablePolicy.macosDevelopmentAppWrapper.bundleIdentifier -eq "org.haven42.desktop" -and $portablePolicy.macosDevelopmentAppWrapper.bundleShortVersion -eq "0.4.0" -and $portablePolicy.macosDevelopmentAppWrapper.alpha2BundleVersion -eq "0.4.2" -and $portablePolicy.macosDevelopmentAppWrapper.multipleInstancesProhibited -and $portablePolicy.macosDevelopmentAppWrapper.browserHostedBackgroundApp -and $portablePolicy.macosDevelopmentAppWrapper.embeddedPythonRuntimeRequired -and -not $portablePolicy.macosDevelopmentAppWrapper.globalPythonRequired -and $portablePolicy.macosDevelopmentAppWrapper.exactFileInventoryRequired -and $portablePolicy.macosDevelopmentAppWrapper.archiveChecksumRequired -and -not $portablePolicy.macosDevelopmentAppWrapper.developerIdSigned -and -not $portablePolicy.macosDevelopmentAppWrapper.notarized -and -not $portablePolicy.macosDevelopmentAppWrapper.gatekeeperAdmissionClaimed -and -not $portablePolicy.macosDevelopmentAppWrapper.publicDistributionAllowed) -Message "The macOS Finder wrapper must remain single-instance, browser-hosted, self-contained, exact-inventory, valid-versioned, and development-only without platform-trust claims."
     Assert-True -Condition ($portablePolicy.supplyChainEvidence -contains "CPYTHON-3.14.6-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "APACHE-2.0.txt" -and $portablePolicy.supplyChainEvidence -contains "LIBFFI-3.4.4-LICENSE.txt" -and $portablePolicy.supplyChainEvidence -contains "OLLAMA-MIT-LICENSE.txt") -Message "Portable evidence must include hash-verified CPython, Apache, libffi, and Ollama license texts."
     $embeddedEvidence = @($portablePolicy.embeddedDistributionEvidence)
     Assert-True -Condition ($embeddedEvidence.Count -eq 6 -and $embeddedEvidence -contains "LICENSE.txt" -and $embeddedEvidence -contains "THIRD-PARTY-NOTICES.txt" -and $embeddedEvidence -contains "licenses/APACHE-2.0.txt" -and $embeddedEvidence -contains "licenses/CPYTHON-3.14.6-LICENSE.txt" -and $embeddedEvidence -contains "licenses/LIBFFI-3.4.4-LICENSE.txt" -and $embeddedEvidence -contains "licenses/OLLAMA-MIT-LICENSE.txt") -Message "Portable packages must embed the exact six-file distribution-evidence set."
@@ -5547,7 +5568,7 @@ Invoke-PackTest "local web text tools are loopback-only and unload models" {
     Assert-True -Condition (($localBatchLedgerOutput -join "`n") -match "374 exact tasks across 18 phases") -Message "The recovered conversation plan must retain all 374 stable task records."
     $historyDevelopmentOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-conversation-history-development.py"))
     Assert-Equal -Actual $historyDevelopmentOutput.ExitCode -Expected 0 -Message "Conversation-history development database security tests should pass. Output: $($historyDevelopmentOutput.Output)"
-    Assert-True -Condition ($historyDevelopmentOutput.Output -match "6 security checks") -Message "The development database must remain synthetic, temporary, residue-free, and outside runtime authority."
+    Assert-True -Condition ($historyDevelopmentOutput.Output -match "7 security checks") -Message "The development database must remain synthetic, temporary, residue-free, and outside runtime authority."
     $folderSelectionOutput = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/test-folder-selection-foundation.py"))
     Assert-Equal -Actual $folderSelectionOutput.ExitCode -Expected 0 -Message "Folder-selection foundation security tests should pass. Output: $($folderSelectionOutput.Output)"
     Assert-True -Condition ($folderSelectionOutput.Output -match "16 security checks") -Message "Folder inspection must remain explicit, bounded, content-free, link-safe, type-safe, and unadmitted."
@@ -5686,7 +5707,16 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
-    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "30 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, protected-resource trust updates, repository-local build-tool selection, build caches, and output confinement must remain explicit and fail closed."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "32 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, protected-resource trust updates, repository-local build-tool selection, build caches, and output confinement must remain explicit and fail closed."
+    $macAppOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-build-macos-development-app.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS development app builder tests should pass."
+    Assert-True -Condition (($macAppOutput -join "`n") -match "3 passed") -Message "The macOS app wrapper must preserve its bounded layout, embedded runtime, inventory, and development-only trust state."
+    $macAppValidatorOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-validate-macos-development-app.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS development app validator tests should pass."
+    Assert-True -Condition (($macAppValidatorOutput -join "`n") -match "4 passed") -Message "The macOS app verifier must reject tampering, unexpected output, and unsafe archive members."
+    $macAppSummaryOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-summarize-alpha2-macos-development-app.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS development app summary tests should pass."
+    Assert-True -Condition (($macAppSummaryOutput -join "`n") -match "4 passed") -Message "Physical macOS app evidence must bind native architecture, package tests, and an exact packaged-browser receipt without retaining private tool output or granting release authority."
     $privacyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Public repository privacy scanner self-test should pass."
     $privacyScan = @(& $python.Source (Join-Path $repoRoot "scripts/verify-public-repository-privacy.py") 2>&1)

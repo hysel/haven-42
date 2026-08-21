@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "7c821b0ae8112cac99f1b130fb7516bd0c5984fac12ec75114ae0842521efef4",
-  "recordCount": 187,
+  "catalogSha256": "9de333f3d566b4a0e951ea86519080cab937659e373d591a242a149b23448346",
+  "recordCount": 203,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -207,6 +207,30 @@
         "repositorySource": "docs/evidence-records/evidence-4c8889255c609520.md",
         "wikiPage": "Evidence-Record-4c8889255c609520.md",
         "title": "Aider and OpenCode candidate lifecycle plans"
+      }
+    },
+    {
+      "id": "evidence-713bc8ce611cbfe3",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Apple M4 16 GB OpenCode 1.18.19 16-model coding screen",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.19",
+        "provider": "Ollama 0.32.15 Metal",
+        "os": "macOS 26.6.2",
+        "model": "16-exact-manifest-corpus",
+        "operation": "structured-code-read-plan-review-scoped-write-tool-timeout-recovery-unload-unintended-write",
+        "validation_mode": "disposable-repository-agent",
+        "status": "failed-validation",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "All 16 version-pinned cells completed, but every candidate failed at least one required coding-agent gate. No model is eligible for a coding recommendation from this surface, and Continue evidence was neither inherited nor extended."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-713bc8ce611cbfe3.md",
+        "wikiPage": "Evidence-Record-713bc8ce611cbfe3.md",
+        "title": "Apple M4 16 GB OpenCode 1.18.19 16-model coding screen"
       }
     },
     {
@@ -1290,6 +1314,54 @@
       }
     },
     {
+      "id": "evidence-e9f4fda429cdc626",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Physical Apple M4 Keychain command availability boundary",
+        "surface": "Haven 42 development availability probe",
+        "surface_version": "1",
+        "provider": "Apple Keychain Services candidate",
+        "os": "macOS 26.6.2",
+        "model": "none",
+        "operation": "fixed-system-tool-operation-free-help-probe",
+        "validation_mode": "physical-source-test",
+        "status": "partial-pass",
+        "evidence": "examples/macos-keychain-availability-boundary.md",
+        "notes": "The exact operation-free probe returned tool-responsive on a physical Apple M4 Mac while all Keychain-open, credential-operation, database, UI, package, and production authority remained false. Interactive item lifecycle, locked or denied behavior, package parity, and encrypted-history integration remain open."
+      },
+      "sourceEvidence": "examples/macos-keychain-availability-boundary.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e9f4fda429cdc626.md",
+        "wikiPage": "Evidence-Record-e9f4fda429cdc626.md",
+        "title": "Physical Apple M4 Keychain command availability boundary"
+      }
+    },
+    {
+      "id": "evidence-32a2affd636fbbf9",
+      "claim": {
+        "schema_version": "2",
+        "area": "data-protection",
+        "subject": "Physical Apple M4 unattended synthetic Keychain lifecycle",
+        "surface": "Haven 42 synthetic lifecycle runner",
+        "surface_version": "1",
+        "provider": "Apple Keychain Services candidate",
+        "os": "macOS 26.6.2",
+        "model": "fixed-validation-item",
+        "operation": "collision-check-create-read-update-delete-absence-cleanup",
+        "validation_mode": "physical-source-test",
+        "status": "failed-validation",
+        "evidence": "examples/macos-keychain-availability-boundary.md",
+        "notes": "The initial collision check passed, but macOS denied synthetic-item creation in the unattended SSH session. The runner retained no sensitive value or raw output and granted no package, encrypted-history, or production admission; interactive packaged-app testing remains required."
+      },
+      "sourceEvidence": "examples/macos-keychain-availability-boundary.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-32a2affd636fbbf9.md",
+        "wikiPage": "Evidence-Record-32a2affd636fbbf9.md",
+        "title": "Physical Apple M4 unattended synthetic Keychain lifecycle"
+      }
+    },
+    {
       "id": "evidence-0005faabe699fcf7",
       "claim": {
         "schema_version": "2",
@@ -1839,6 +1911,54 @@
         "repositorySource": "docs/evidence-records/evidence-27f4eaa91d0b896d.md",
         "wikiPage": "Evidence-Record-27f4eaa91d0b896d.md",
         "title": "Radeon RX 5700 XT current-boot host stability"
+      }
+    },
+    {
+      "id": "evidence-e3d838e6e2d03596",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "Apple M4 16 GB MLX-LM lifecycle",
+        "surface": "MLX-LM direct inference",
+        "surface_version": "0.31.3",
+        "provider": "MLX 0.32.1 Metal",
+        "os": "macOS 26.6.2",
+        "model": "mlx-community/Qwen3.5-0.8B-OptiQ-4bit@ef605869",
+        "operation": "offline-pinned-generation-metal-memory-timeout-recovery-process-cleanup",
+        "validation_mode": "physical-source-test",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The pinned wheelhouse and model passed native Metal generation, timeout recovery, and process cleanup. Production server, authenticated boundary, self-contained package, coding surface, runtime admission, and automatic selection remain open."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e3d838e6e2d03596.md",
+        "wikiPage": "Evidence-Record-e3d838e6e2d03596.md",
+        "title": "Apple M4 16 GB MLX-LM lifecycle"
+      }
+    },
+    {
+      "id": "evidence-6c65da7ee449d0dd",
+      "claim": {
+        "schema_version": "2",
+        "area": "inference-engine",
+        "subject": "Apple M4 16 GB llama.cpp lifecycle",
+        "surface": "llama.cpp server",
+        "surface_version": "cd644c395",
+        "provider": "llama.cpp Metal",
+        "os": "macOS 26.6.2",
+        "model": "Qwen3.5-0.8B-Q4_0-GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf",
+        "operation": "full-layer-offload-authenticated-loopback-inference-timeout-recovery-restart-cleanup",
+        "validation_mode": "physical-source-test",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The exact binary and GGUF passed full-layer Metal offload, authenticated loopback inference, timeout recovery, restart, and listener cleanup. Trusted distribution, self-contained packaging, maintained coding surface, runtime admission, and automatic selection remain open."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6c65da7ee449d0dd.md",
+        "wikiPage": "Evidence-Record-6c65da7ee449d0dd.md",
+        "title": "Apple M4 16 GB llama.cpp lifecycle"
       }
     },
     {
@@ -2754,6 +2874,54 @@
       }
     },
     {
+      "id": "evidence-71fdc1d4cefe7305",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Apple M4 16 GB 16-model bounded qualification",
+        "surface": "Ollama Metal",
+        "surface_version": "0.32.15",
+        "provider": "Ollama",
+        "os": "macOS 26.6.2",
+        "model": "16-exact-manifest-corpus",
+        "operation": "chat-writing-summary-structured-tool-structured-code-metal-residency-unload",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Nine of 16 exact artifacts passed all five bounded endpoint gates with full Metal residency and per-cell unload; seven exact failures remain visible. This exact core result does not grant an automatic recommendation, default, support label, or another-profile claim."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-71fdc1d4cefe7305.md",
+        "wikiPage": "Evidence-Record-71fdc1d4cefe7305.md",
+        "title": "Apple M4 16 GB 16-model bounded qualification"
+      }
+    },
+    {
+      "id": "evidence-6a2e6287439189e8",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Apple M4 16 GB nine-model reliability soak",
+        "surface": "Ollama Metal",
+        "surface_version": "0.32.15",
+        "provider": "Ollama",
+        "os": "macOS 26.6.2",
+        "model": "nine-core-pass-exact-artifacts",
+        "operation": "independent-30-minute-per-model-task-cycle-metal-residency-unload-cleanup",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "All nine core-pass artifacts completed independent 30-minute cells with 392 task cycles, 1,960 samples, 1,960 unload proofs, complete temporary-model cleanup, and no failures. This is exact-profile bounded reliability, not a quality ranking or automatic selection decision."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-6a2e6287439189e8.md",
+        "wikiPage": "Evidence-Record-6a2e6287439189e8.md",
+        "title": "Apple M4 16 GB nine-model reliability soak"
+      }
+    },
+    {
       "id": "evidence-b1e852d6e517e410",
       "claim": {
         "schema_version": "2",
@@ -3423,6 +3591,30 @@
         "repositorySource": "docs/evidence-records/evidence-f5989f6fc215258e.md",
         "wikiPage": "Evidence-Record-f5989f6fc215258e.md",
         "title": "Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification"
+      }
+    },
+    {
+      "id": "evidence-a31a3f4055c25ef1",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Windows NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification",
+        "surface": "Ollama CUDA",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "digest-pinned-eight-model-corpus",
+        "operation": "exact-artifact-core-task-gate-and-30-minute-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+        "notes": "Three exact small-model artifacts passed three Chat, Writing, and Summarization samples with unload checks and independent 30-minute soaks. Five larger candidates stopped at the full-CUDA-residency gate. This exact Windows profile may filter visible model choices but does not change an automatic default, runtime admission, support label, or another 4 GB hardware cell."
+      },
+      "sourceEvidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a31a3f4055c25ef1.md",
+        "wikiPage": "Evidence-Record-a31a3f4055c25ef1.md",
+        "title": "Windows NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification"
       }
     },
     {
@@ -4194,6 +4386,54 @@
       }
     },
     {
+      "id": "evidence-d5ea2428d99b1560",
+      "claim": {
+        "schema_version": "2",
+        "area": "package-parity",
+        "subject": "Physical Apple M4 Alpha 2 development app browser flow",
+        "surface": "Haven 42 development app",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Self-contained PyInstaller runtime",
+        "os": "macOS 26.6.2",
+        "model": "none",
+        "operation": "package-lifecycle-616-real-browser-attachment-accessibility-local-privacy-integrity",
+        "validation_mode": "physical-package-test",
+        "status": "partial-pass",
+        "evidence": "docs/portable-development-package.md",
+        "notes": "The native arm64 modified-source development app passed 616 physical Chrome checks plus package lifecycle and integrity gates. It remains unsigned and unnotarized, Gatekeeper does not admit it, and manual assistive-technology and clean-machine beginner review remain open."
+      },
+      "sourceEvidence": "docs/portable-development-package.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-d5ea2428d99b1560.md",
+        "wikiPage": "Evidence-Record-d5ea2428d99b1560.md",
+        "title": "Physical Apple M4 Alpha 2 development app browser flow"
+      }
+    },
+    {
+      "id": "evidence-a3ffc5fb42c08cc4",
+      "claim": {
+        "schema_version": "2",
+        "area": "package-parity",
+        "subject": "Physical Apple M4 Alpha 2 portable development package",
+        "surface": "Haven 42 portable package",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Self-contained PyInstaller runtime",
+        "os": "macOS 26.6.2",
+        "model": "none",
+        "operation": "source-package-parity-relocation-read-only-recovery-lifecycle-port-authority-hostile-environment-integrity",
+        "validation_mode": "physical-package-test",
+        "status": "partial-pass",
+        "evidence": "docs/portable-development-package.md",
+        "notes": "The native arm64 modified-source-snapshot package passed parity and lifecycle tests on a physical Apple M4 Mac. Its ad-hoc signature structure verifies, but it is not Developer ID signed or notarized and Gatekeeper rejects it; public release and automatic-update admission remain false."
+      },
+      "sourceEvidence": "docs/portable-development-package.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-a3ffc5fb42c08cc4.md",
+        "wikiPage": "Evidence-Record-a3ffc5fb42c08cc4.md",
+        "title": "Physical Apple M4 Alpha 2 portable development package"
+      }
+    },
+    {
       "id": "evidence-2589000e63822b5e",
       "claim": {
         "schema_version": "2",
@@ -4215,6 +4455,126 @@
         "repositorySource": "docs/evidence-records/evidence-2589000e63822b5e.md",
         "wikiPage": "Evidence-Record-2589000e63822b5e.md",
         "title": "Windows Alpha 2 current UI package parity"
+      }
+    },
+    {
+      "id": "evidence-e0ff8b838482c84e",
+      "claim": {
+        "schema_version": "2",
+        "area": "platform-compatibility",
+        "subject": "Physical Apple M4 exact-source native full suite",
+        "surface": "Haven 42 native shell full tier",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Self-contained test toolchain",
+        "os": "macOS 26.6.2",
+        "model": "none",
+        "operation": "exact-modified-source-snapshot-80-test-groups-no-skips",
+        "validation_mode": "physical-source-test",
+        "status": "validated-by-tests",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The checksum-bound modified-source snapshot passed all 80 native full-tier test groups with no skips in 75 seconds. This is source evidence only and grants no package, signing, notarization, support, default, or release authority."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-e0ff8b838482c84e.md",
+        "wikiPage": "Evidence-Record-e0ff8b838482c84e.md",
+        "title": "Physical Apple M4 exact-source native full suite"
+      }
+    },
+    {
+      "id": "evidence-0ca29f0fa9fbdcdb",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Apple M4 16 GB Ministral 3 8B bounded power sample",
+        "surface": "Apple powermetrics",
+        "surface_version": "macOS 26.6.2",
+        "provider": "Ollama 0.32.15 Metal",
+        "os": "macOS 26.6.2",
+        "model": "ministral-3:8b-instruct-2512-q4_K_M@1922accd5827ebe6829e536369195db25eaf664528dc66206d646ea3bb386b71",
+        "operation": "512-unit-generation-apple-soc-power-metal-residency-thermal-pressure-unload",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Ten samples reported 1.268 W CPU average, 12.275 W GPU average, 13.543 W combined CPU/GPU/ANE average, 100 percent GPU-active residency, nominal thermal pressure, unload, and temporary-model removal. This is not wall or whole-system power."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0ca29f0fa9fbdcdb.md",
+        "wikiPage": "Evidence-Record-0ca29f0fa9fbdcdb.md",
+        "title": "Apple M4 16 GB Ministral 3 8B bounded power sample"
+      }
+    },
+    {
+      "id": "evidence-157bfe9c7bf20597",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Apple M4 16 GB Qwen 3.5 2B bounded power sample",
+        "surface": "Apple powermetrics",
+        "surface_version": "macOS 26.6.2",
+        "provider": "Ollama 0.32.15 Metal",
+        "os": "macOS 26.6.2",
+        "model": "qwen3.5:2b@324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+        "operation": "596-unit-generation-apple-soc-power-metal-residency-thermal-pressure-unload",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Ten samples reported 0.916 W CPU average, 8.804 W GPU average, 9.720 W combined CPU/GPU/ANE average, 97.776 percent GPU-active residency, nominal thermal pressure, unload, and temporary-model removal. This is not wall or whole-system power."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-157bfe9c7bf20597.md",
+        "wikiPage": "Evidence-Record-157bfe9c7bf20597.md",
+        "title": "Apple M4 16 GB Qwen 3.5 2B bounded power sample"
+      }
+    },
+    {
+      "id": "evidence-f955c93a1ebd4164",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Apple M4 16 GB Qwen 3.5 4B bounded power sample",
+        "surface": "Apple powermetrics",
+        "surface_version": "macOS 26.6.2",
+        "provider": "Ollama 0.32.15 Metal",
+        "os": "macOS 26.6.2",
+        "model": "qwen3.5:4b@2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd",
+        "operation": "512-unit-generation-apple-soc-power-metal-residency-thermal-pressure-unload",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Ten samples reported 1.835 W CPU average, 11.528 W GPU average, 13.363 W combined CPU/GPU/ANE average, 100 percent GPU-active residency, nominal thermal pressure, unload, and temporary-model removal. This is not wall or whole-system power."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-f955c93a1ebd4164.md",
+        "wikiPage": "Evidence-Record-f955c93a1ebd4164.md",
+        "title": "Apple M4 16 GB Qwen 3.5 4B bounded power sample"
+      }
+    },
+    {
+      "id": "evidence-cea92a2e0ac35bf8",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Apple M4 16 GB idle Apple SoC sample",
+        "surface": "Apple powermetrics",
+        "surface_version": "macOS 26.6.2",
+        "provider": "Ollama 0.32.15 Metal",
+        "os": "macOS 26.6.2",
+        "model": "no-loaded-model",
+        "operation": "ten-sample-idle-apple-soc-power-gpu-residency-thermal-pressure",
+        "validation_mode": "physical-host",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Ten samples reported 0.052 W CPU average, 0.002 W GPU average, 0.054 W combined CPU/GPU/ANE average, 0.481 percent GPU-active residency, and nominal thermal pressure. Background processes and display state were not controlled; this is not wall or whole-system power."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-cea92a2e0ac35bf8.md",
+        "wikiPage": "Evidence-Record-cea92a2e0ac35bf8.md",
+        "title": "Apple M4 16 GB idle Apple SoC sample"
       }
     },
     {
@@ -4359,6 +4719,30 @@
         "repositorySource": "docs/evidence-records/evidence-ad94c1f53c81365c.md",
         "wikiPage": "Evidence-Record-ad94c1f53c81365c.md",
         "title": "Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power"
+      }
+    },
+    {
+      "id": "evidence-00b72ba071ebf282",
+      "claim": {
+        "schema_version": "2",
+        "area": "power-evidence",
+        "subject": "Windows NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power",
+        "surface": "nvidia-smi",
+        "surface_version": "610.88",
+        "provider": "Ollama 0.32.14 CUDA",
+        "os": "Windows 11",
+        "model": "three-model-passed-soak-corpus",
+        "operation": "one-second-board-telemetry-bounded-soak-pre-and-post-idle",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+        "notes": "Across 6,437 one-second GPU-board samples, pre-run idle averaged 8.210 W and post-run idle averaged 8.170 W; model-window averages ranged from 13.058 W to 13.843 W and observed peaks ranged from 50.35 W to 67.28 W. These readings exclude the rest of the computer and wall-power losses."
+      },
+      "sourceEvidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-00b72ba071ebf282.md",
+        "wikiPage": "Evidence-Record-00b72ba071ebf282.md",
+        "title": "Windows NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power"
       }
     },
     {

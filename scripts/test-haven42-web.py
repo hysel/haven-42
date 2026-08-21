@@ -1608,10 +1608,80 @@ def main() -> int:
         assert unavailable_decisions["catalogStatus"] == "unavailable"
         assert unavailable_decisions["recommendations"]["general.chat"]["status"] == "missing"
         assert unavailable_decisions["modelOptions"][0]["capabilityStatus"]["general.chat"] == "unverified"
+        unavailable_catalog.trust_scope = "private-network"
+        unavailable_catalog.models = ("qwen3.5:9b",)
+        unavailable_catalog.ollama_version = "0.32.14"
+        remote_models = unavailable_catalog.tested_models_for_connected_hardware()
+        assert remote_models["status"] == "remote-hardware-not-verifiable"
+        assert remote_models["options"] == [] and remote_models["profile"] is None
         assert WEB.load_model_recommendations(
             ROOT / "config/text-capability-model-recommendations.json",
             ROOT / "config/does-not-exist.tsv",
         ) == {}
+        tested_library = WEB.load_tested_model_library()
+        assert len(tested_library) == 7
+        exact_hardware = WEB.build_tested_model_options(
+            tested_library,
+            ["qwen3.5:9b"],
+            {
+                "platform": {"operatingSystem": "windows", "systemMemoryGiB": 32},
+                "accelerators": [{
+                    "vendor": "AMD", "model": "AMD Radeon RX 7800 XT",
+                    "memoryGiB": 16,
+                }],
+            },
+            "0.32.9",
+        )
+        assert exact_hardware["status"] == "exact-profile"
+        assert exact_hardware["profile"]["hardware"] == "AMD Radeon RX 7800 XT 16 GB"
+        assert len(exact_hardware["options"]) == 14
+        exact_qwen = next(item for item in exact_hardware["options"] if item["name"] == "qwen3.5:9b")
+        assert exact_qwen["status"] == "installed" and exact_qwen["installCommand"] is None
+        runtime_difference = WEB.build_tested_model_options(
+            tested_library,
+            [],
+            {
+                "platform": {"operatingSystem": "linux", "systemMemoryGiB": 32},
+                "accelerators": [{
+                    "vendor": "NVIDIA", "model": "NVIDIA GeForce GTX 1650 SUPER",
+                    "memoryGiB": 4,
+                }],
+            },
+            "0.33.0",
+        )
+        assert runtime_difference["status"] == "runtime-differs"
+        assert all(
+            item["validationStatus"] == "tested-hardware-runtime-differs"
+            for item in runtime_difference["options"]
+        )
+        windows_gtx1650 = WEB.build_tested_model_options(
+            tested_library,
+            ["qwen3.5:0.8b"],
+            {
+                "platform": {"operatingSystem": "windows", "systemMemoryGiB": 31},
+                "accelerators": [{
+                    "vendor": "NVIDIA", "model": "NVIDIA GeForce GTX 1650 SUPER",
+                    "memoryGiB": 4,
+                }],
+            },
+            "0.32.14",
+        )
+        assert windows_gtx1650["status"] == "exact-profile"
+        assert windows_gtx1650["profile"]["operatingSystem"] == "Windows 11"
+        assert [item["name"] for item in windows_gtx1650["options"]] == [
+            "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "minicpm-v4.6:1b",
+        ]
+        assert windows_gtx1650["options"][0]["status"] == "installed"
+        no_profile = WEB.build_tested_model_options(
+            tested_library,
+            [],
+            {
+                "platform": {"operatingSystem": "linux", "systemMemoryGiB": 64},
+                "accelerators": [{"vendor": "Intel", "model": "Arc B580", "memoryGiB": 12}],
+            },
+            "0.32.14",
+        )
+        assert no_profile["status"] == "no-matching-evidence" and no_profile["options"] == []
         valid_catalog = json.loads(
             (ROOT / "config/text-capability-model-recommendations.json").read_text(encoding="utf-8")
         )
@@ -1631,7 +1701,7 @@ def main() -> int:
             unexpected["rendererMayPromote"] = True
             hostile_path.write_text(json.dumps(unexpected), encoding="utf-8")
             assert WEB.load_model_recommendations(hostile_path) == {}
-        checks += 12
+        checks += 23
 
         status, error, _ = request_json(
             origin + "/api/text",
@@ -2775,7 +2845,7 @@ def main() -> int:
         assert '<label id="model-label" for="model">Conversation model</label>' in html
         assert "Browse models" in html
         assert 'byId("open-models-from-chat").addEventListener("click", openModels)' in javascript
-        assert 'revision: 5' in javascript
+        assert 'revision: 6' in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
         assert "Not on your server yet · searching does not download it" in javascript

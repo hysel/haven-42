@@ -33,9 +33,8 @@ class CodingAgentScreenTests(unittest.TestCase):
             "manifestDigest": "1" * 64,
             "runtime": {"engine": "ollama", "version": "0.0.0-fixture", "artifactDigest": "2" * 64},
             "hardwareProfileId": "fixture-gpu-8g",
-            "surface": {"id": "continue-cli", "version": "fixture"},
+            "surface": {"id": "vscode-native-chat", "version": "fixture"},
             "gates": gates,
-            "continueCliPrerequisite": {"read": "passed", "review": "passed", "scopedWrite": "passed"},
             "rawPromptsOrResponsesRetained": False,
             "privateIdentityRetained": False,
         }
@@ -59,12 +58,12 @@ class CodingAgentScreenTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.ScreenError, "gate-summary-inconsistent"):
             MODULE.evaluate(inconsistent, self.policy)
 
-    def test_continue_cli_prerequisite_is_required_for_every_surface(self) -> None:
+    def test_legacy_continue_surface_is_evidence_only(self) -> None:
         cell = self.cell()
-        cell["surface"] = {"id": "vscode-native-chat", "version": "fixture"}
-        cell["continueCliPrerequisite"]["scopedWrite"] = "not-run"
+        cell["surface"] = {"id": "continue-cli", "version": "historical-fixture"}
         result = MODULE.evaluate(cell, self.policy)
         self.assertEqual(result["status"], "blocked")
+        self.assertTrue(result["legacyEvidenceOnlySurface"])
 
     def test_unknown_fields_private_data_and_bad_digests_are_rejected(self) -> None:
         extra = self.cell()

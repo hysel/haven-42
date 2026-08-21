@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+from unittest import mock
 import tempfile
 import unittest
 
@@ -69,6 +70,20 @@ class DevelopmentHistoryTests(unittest.TestCase):
         self.assertFalse(contract["authority"]["userContentAllowed"])
         self.assertFalse(contract["authority"]["persistentDatabaseAllowed"])
         self.assertFalse(contract["database"]["callerPathAllowed"])
+
+    def test_missing_extension_api_is_treated_as_fail_closed(self):
+        class ConnectionWithoutExtensionApi:
+            def __init__(self):
+                self.statements = []
+
+            def execute(self, statement):
+                self.statements.append(statement)
+                return self
+
+        connection = ConnectionWithoutExtensionApi()
+        with mock.patch.object(MODULE.sqlite3, "connect", return_value=connection):
+            self.assertIs(MODULE._connect(Path("unused.sqlite3")), connection)
+        self.assertIn("PRAGMA trusted_schema=OFF", connection.statements)
 
 
 if __name__ == "__main__":

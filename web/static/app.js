@@ -80,7 +80,7 @@ const LAST_SECTION_STORAGE_KEY = "haven42.last-section.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
-    revision: 5,
+    revision: 6,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
@@ -94,14 +94,14 @@ const SECTION_TOURS = Object.freeze({
   }),
   models: Object.freeze({
     label: "Models",
-    revision: 2,
+    revision: 3,
     panelId: "models-panel",
     returnId: "models-title",
     steps: Object.freeze([
       { target: "#models-title", title: "Your AI models", description: "This page helps you understand and choose the models available from your connected Ollama server." },
       { target: "#model-search-capability", title: "Choose the task", description: "Select Chat, Writing, or Summarization to see which installed model Haven 42 recommends for that work." },
       { target: "#model-choice-status", title: "Read the recommendation", description: "This message explains the current model choice and whether Haven 42 has test evidence for the selected task." },
-      { target: "#model-discovery", title: "Find another model", description: "Search installed models or Ollama's public catalog. Haven 42 asks you to review a model and its destination before any download starts." },
+      { target: "#model-discovery", title: "Models matched to this computer", description: "Haven 42 shows installed models and adds evidence-backed choices only when this AI computer's operating system, graphics card, memory, and Ollama runtime match a tested profile." },
       { target: "#model-search-form", title: "Search, review, then install", description: "Enter a model name or capability. If the model is not installed, select it and Haven 42 will guide you through a one-time download approval." },
     ]),
   }),
@@ -171,6 +171,9 @@ const state = {
   modelSelections: {},
   recommendations: {},
   modelOptions: [],
+  testedModelOptions: [],
+  testedModelCatalog: null,
+  testedModelRequestId: 0,
   modelSearchResults: [],
   desiredModel: null,
   idleUnloadSeconds: 300,
@@ -952,6 +955,7 @@ function openModels() {
   updateModelChoiceStatus();
   renderModelDiscovery();
   showPrimaryPanel("models-panel", "models-nav", "models-title");
+  void loadHardwareMatchedModels();
 }
 
 function openAbout() {
@@ -1385,6 +1389,80 @@ function updateModelChoiceStatus() {
       : "Connect Ollama to discover installed models.";
 }
 
+function validateTestedModelCatalog(result) {
+  if (
+    !result
+    || typeof result !== "object"
+    || Array.isArray(result)
+    || !hasExactObjectKeys(result, [
+      "schemaVersion", "kind", "status", "profile", "runtimeVersion", "options",
+    ])
+    || result.schemaVersion !== 1
+    || result.kind !== "hardware-aware-tested-models"
+    || !["exact-profile", "runtime-differs", "no-matching-evidence", "remote-hardware-not-verifiable"].includes(result.status)
+    || typeof result.runtimeVersion !== "string"
+    || !Array.isArray(result.options)
+    || result.options.length > 128
+  ) throw new Error("invalid-tested-model-catalog");
+  if (["no-matching-evidence", "remote-hardware-not-verifiable"].includes(result.status)) {
+    if (result.profile !== null || result.options.length !== 0) throw new Error("invalid-tested-model-catalog");
+    return result;
+  }
+  if (
+    !hasExactObjectKeys(result.profile, [
+      "id", "hardware", "operatingSystem", "testedRuntimeVersion",
+    ])
+    || Object.values(result.profile).some((value) => typeof value !== "string" || value.length === 0)
+  ) throw new Error("invalid-tested-model-catalog");
+  const names = new Set();
+  result.options.forEach((item) => {
+    const installed = item?.status === "installed";
+    if (
+      !hasExactObjectKeys(item, [
+        "name", "status", "validationStatus", "capabilities", "testProfile",
+        "testedRuntimeVersion", "currentRuntimeVersion", "evidence", "installCommand",
+      ])
+      || !/^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$/u.test(item.name)
+      || names.has(item.name)
+      || !["installed", "not-installed"].includes(item.status)
+      || !["tested-exact-profile", "tested-hardware-runtime-differs"].includes(item.validationStatus)
+      || !Array.isArray(item.capabilities)
+      || item.capabilities.some((value) => !Object.hasOwn(CAPABILITIES, value))
+      || typeof item.testProfile !== "string"
+      || typeof item.testedRuntimeVersion !== "string"
+      || item.currentRuntimeVersion !== result.runtimeVersion
+      || typeof item.evidence !== "string"
+      || item.installCommand !== (installed ? null : `ollama pull ${item.name}`)
+    ) throw new Error("invalid-tested-model-catalog");
+    names.add(item.name);
+  });
+  return result;
+}
+
+async function loadHardwareMatchedModels() {
+  const requestId = ++state.testedModelRequestId;
+  state.testedModelOptions = [];
+  state.testedModelCatalog = null;
+  if (!state.connected) {
+    renderModelDiscovery();
+    return;
+  }
+  byId("model-search-status").textContent = "Checking qualification evidence for this AI computer…";
+  try {
+    const result = validateTestedModelCatalog(await api("/api/models/tested", {}));
+    if (requestId !== state.testedModelRequestId) return;
+    state.testedModelCatalog = result;
+    state.testedModelOptions = result.options;
+    renderModelDiscovery();
+  } catch (error) {
+    if (requestId !== state.testedModelRequestId) return;
+    state.testedModelCatalog = { status: "check-failed" };
+    state.testedModelOptions = [];
+    byId("model-search-status").textContent = `Hardware-aware model check stopped safely. ${humanError(error)}`;
+    renderModelDiscovery();
+  }
+}
+
 function renderModelDiscovery() {
   const query = byId("model-search-query").value.trim();
   const capabilityId = byId("model-search-capability").value;
@@ -1397,10 +1475,22 @@ function renderModelDiscovery() {
       installCommand: null,
     }));
   const merged = new Map(installed.map((item) => [item.name, item]));
+  state.testedModelOptions.forEach((item) => {
+    if (!modelMatchesQuery(item.name, query)) return;
+    const existing = merged.get(item.name);
+    merged.set(item.name, existing ? { ...existing, ...item, status: "installed", installCommand: null } : item);
+  });
   state.modelSearchResults.forEach((item) => {
     if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) merged.set(item.name, item);
   });
-  const validationPriority = { recommended: 0, compatible: 1, unverified: 2 };
+  const validationPriority = {
+    recommended: 0,
+    "tested-exact-profile": 1,
+    compatible: 2,
+    "tested-hardware-runtime-differs": 3,
+    unverified: 4,
+    "candidate-only": 5,
+  };
   const configuredModel = selectedModel(capabilityId);
   const results = [...merged.values()].sort((left, right) => {
     const leftConfigured = left.status === "installed" && left.name === configuredModel;
@@ -1421,9 +1511,16 @@ function renderModelDiscovery() {
     name.textContent = item.name;
     const status = document.createElement("small");
     const configured = item.status === "installed" && selectedModel(capabilityId) === item.name;
+    const evidenceLabel = item.validationStatus === "tested-exact-profile"
+      ? "tested on this hardware, operating system, and Ollama version"
+      : item.validationStatus === "tested-hardware-runtime-differs"
+        ? `tested on this hardware with Ollama ${item.testedRuntimeVersion}; connected server uses ${item.currentRuntimeVersion}`
+        : null;
     status.textContent = item.status === "installed"
-      ? `Already available on your server${configured ? " · selected" : ""}`
-      : "Not on your server yet · searching does not download it";
+      ? `Already available on your server${configured ? " · selected" : ""}${evidenceLabel ? ` · ${evidenceLabel}` : ""}`
+      : evidenceLabel
+        ? `Not installed · ${evidenceLabel}`
+        : "Not on your server yet · searching does not download it";
     detail.append(name, status);
     const choose = document.createElement("button");
     choose.className = "button secondary";
@@ -1433,15 +1530,32 @@ function renderModelDiscovery() {
       ? "Selected"
       : item.status === "installed"
         ? `Use for ${capabilityLabel}`
-        : "Select candidate";
+        : evidenceLabel
+          ? "Review and install"
+          : "Select candidate";
+    choose.setAttribute("aria-label", `${choose.textContent} ${item.name}`);
     choose.disabled = configured;
     choose.addEventListener("click", () => chooseDiscoveredModel(item));
     row.append(detail, choose);
     container.append(row);
   });
-  if (results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
+  const testedCatalog = state.testedModelCatalog;
+  const publicMatches = state.modelSearchResults.filter((item) => modelMatchesQuery(item.name, query)).length;
+  if (publicMatches > 0) {
+    // Preserve the explicit public-search result message, including its no-download disclosure.
+  } else if (testedCatalog?.status === "remote-hardware-not-verifiable") {
+    byId("model-search-status").textContent = "This connected AI server does not report enough hardware information for Haven 42 to match a tested profile. Installed models remain available, and you can search the public catalog.";
+  } else if (testedCatalog?.status === "no-matching-evidence") {
+    byId("model-search-status").textContent = "No matching qualification profile exists for this AI computer yet. Installed models remain available without a hardware-tested label.";
+  } else if (["exact-profile", "runtime-differs"].includes(testedCatalog?.status)) {
+    const count = state.testedModelOptions.length;
+    const runtimeNote = testedCatalog.status === "runtime-differs"
+      ? ` The evidence used Ollama ${testedCatalog.profile.testedRuntimeVersion}; this server uses ${testedCatalog.runtimeVersion}.`
+      : "";
+    byId("model-search-status").textContent = `${count} tested choice${count === 1 ? "" : "s"} match ${testedCatalog.profile.hardware} on ${testedCatalog.profile.operatingSystem}.${runtimeNote}`;
+  } else if (results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
     byId("model-search-status").textContent = "No installed or catalog matches yet.";
-  } else if (installed.length > 0) {
+  } else if (installed.length > 0 && testedCatalog?.status !== "check-failed") {
     const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
     byId("model-search-status").textContent = `${installed.length} installed match${installed.length === 1 ? "" : "es"} shown for ${capabilityLabel}, with the most relevant options first.`;
   }
@@ -1478,6 +1592,9 @@ function showPostRemovalExperience() {
   state.connected = false;
   state.providerConfig = null;
   state.modelOptions = [];
+  state.testedModelRequestId += 1;
+  state.testedModelOptions = [];
+  state.testedModelCatalog = null;
   state.modelSearchResults = [];
   state.modelSelections = {};
   state.recommendations = {};
@@ -2429,6 +2546,7 @@ function suggestedCapability(content) {
 
 function renderTextMode() {
   const value = byId("text-mode").value;
+  syncTaskModePicker();
   const capabilityId = value === "automatic" ? "general.chat" : value;
   const capability = CAPABILITIES[capabilityId] || CAPABILITIES["general.chat"];
   state.capabilityId = capabilityId;
@@ -2441,6 +2559,49 @@ function renderTextMode() {
     ? "Haven 42 will choose chat, writing, or summarization"
     : `${capability.title} selected`;
   renderModelSelect();
+}
+
+const TASK_MODE_LABELS = {
+  automatic: "Choose for me",
+  "general.chat": "Chat",
+  "content.write": "Write",
+  "content.summarize": "Summarize",
+};
+
+function taskModeOptions() {
+  return [...document.querySelectorAll(".task-mode-option")];
+}
+
+function syncTaskModePicker() {
+  const value = byId("text-mode").value;
+  byId("text-mode-button-label").textContent = TASK_MODE_LABELS[value] || "Choose for me";
+  taskModeOptions().forEach((option) => {
+    option.setAttribute("aria-selected", String(option.dataset.value === value));
+  });
+}
+
+function closeTaskModePicker({ restoreFocus = false } = {}) {
+  const button = byId("text-mode-button");
+  byId("text-mode-options").classList.add("hidden");
+  button.setAttribute("aria-expanded", "false");
+  if (restoreFocus) button.focus();
+}
+
+function openTaskModePicker() {
+  const menu = byId("text-mode-options");
+  const button = byId("text-mode-button");
+  menu.classList.remove("hidden");
+  button.setAttribute("aria-expanded", "true");
+  const selected = taskModeOptions().find((option) => option.getAttribute("aria-selected") === "true");
+  (selected || taskModeOptions()[0])?.focus();
+}
+
+function chooseTaskMode(value) {
+  const select = byId("text-mode");
+  if (!Object.hasOwn(TASK_MODE_LABELS, value)) return;
+  select.value = value;
+  select.dispatchEvent(new Event("change", { bubbles: true }));
+  closeTaskModePicker({ restoreFocus: true });
 }
 
 function formatBytes(value) {
@@ -4418,6 +4579,9 @@ function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSec
     || result.authentication.persisted !== false
   ) throw new Error("invalid-provider-authentication-status");
   state.connected = true;
+  state.testedModelRequestId += 1;
+  state.testedModelOptions = [];
+  state.testedModelCatalog = null;
   state.providerTrustScope = result.trustScope;
   state.providerTransportScheme = result.transportScheme;
   renderProviderTransportWarning(result.trustScope, result.transportScheme);
@@ -5049,6 +5213,52 @@ byId("text-mode").addEventListener("change", () => {
   hideModelSwitchPrompt();
   state.approvedTextRequest = null;
   renderTextMode();
+});
+byId("text-mode-button").addEventListener("click", () => {
+  if (byId("text-mode-button").getAttribute("aria-expanded") === "true") {
+    closeTaskModePicker({ restoreFocus: true });
+  } else {
+    openTaskModePicker();
+  }
+});
+byId("text-mode-button").addEventListener("keydown", (event) => {
+  if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+  event.preventDefault();
+  openTaskModePicker();
+  const options = taskModeOptions();
+  (event.key === "ArrowUp" || event.key === "End" ? options.at(-1) : options[0])?.focus();
+});
+byId("text-mode-options").addEventListener("click", (event) => {
+  const option = event.target.closest(".task-mode-option");
+  if (option) chooseTaskMode(option.dataset.value);
+});
+byId("text-mode-options").addEventListener("keydown", (event) => {
+  const options = taskModeOptions();
+  const current = options.indexOf(document.activeElement);
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeTaskModePicker({ restoreFocus: true });
+    return;
+  }
+  if (event.key === "Tab") {
+    closeTaskModePicker();
+    return;
+  }
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    chooseTaskMode(document.activeElement?.dataset.value);
+    return;
+  }
+  if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
+  event.preventDefault();
+  const next = event.key === "Home" ? 0
+    : event.key === "End" ? options.length - 1
+      : event.key === "ArrowDown" ? (current + 1) % options.length
+        : (current - 1 + options.length) % options.length;
+  options[next]?.focus();
+});
+document.addEventListener("pointerdown", (event) => {
+  if (!event.target.closest(".task-mode-picker")) closeTaskModePicker();
 });
 byId("reset-model-button").addEventListener("click", () => {
   state.modelSelections[state.capabilityId] = { mode: "automatic", model: null };

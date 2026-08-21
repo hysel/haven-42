@@ -1,6 +1,6 @@
 # Model and Hardware Test Status
 
-_Last reviewed: August 17, 2026._
+_Last reviewed: August 20, 2026._
 
 This page shows which model and computer combinations Haven 42 has actually
 tested. It records bounded tests, not a promise that every similar computer
@@ -56,7 +56,7 @@ of failure.
 | Test tier | What the evidence must use | Current purpose |
 | --- | --- | --- |
 | CPU-only | Real low-, medium-, and high-memory computers | Find a usable fallback and refusal floor. |
-| 4 GiB graphics | The installed GTX 1650 Super on Ubuntu 26.04 | Five small exact artifacts passed the full core task gate and separate 30-minute soaks. Three larger candidates were stopped when full CUDA residency was not observed. Packaged lifecycle, Windows, coding-agent surfaces, and broader 4 GiB coverage remain open. |
+| 4 GiB graphics | The installed GTX 1650 Super on Ubuntu 26.04 and Windows 11 | Ubuntu passed five small exact artifacts and Windows passed three through the full core task gate and separate 30-minute soaks. Candidates without full CUDA residency were stopped before soak. Packaged lifecycle, coding-agent surfaces, and broader 4 GiB coverage remain open. |
 | 8 GiB graphics | The installed Radeon RX 5700 XT RDNA 1 profile | The Ubuntu 26.04 Ollama 0.32.13 Vulkan/RADV engineering campaign is complete: nine profiles passed the core gate, seven failed it, and three oversized candidates were refused before download. Windows, ROCm, final-profile full-memory, and packaged lifecycle results remain distinct and open. |
 | 12 GiB graphics | The installed RTX 3060 12 GB and current Intel Arc B580 | Separate Windows and Ubuntu RTX 3060 campaigns checked the same 19 exact artifacts. Windows recorded 14 task-and-soak passes and five task-contract failures; Ubuntu recorded 19 task-and-soak passes. Granite 4.1 8B alone passed the separate Windows OpenCode disposable-repository workflow. Packaged lifecycle, editor surfaces, and automatic selection remain open. |
 | 16 GiB graphics | Quadro RTX 5000, Radeon RX 6800 non-XT, and Radeon RX 7800 XT | Compare NVIDIA Turing, AMD RDNA 2, and AMD RDNA 3. The RX 6800 has not arrived yet. |
@@ -190,7 +190,7 @@ before they can influence automatic selection.
 | NVIDIA high-memory lab | Qwen 3.5 27B Q4, Qwen 3.5 35B Q4, Qwen3-Next 80B-A3B Q4, and both tested Nemotron 3.5 Lightning quantizations are candidates | Larger-model quality comparison | The exact Nemotron Q4 and Q8 artifacts passed three task contracts and 30-minute soaks on dual V100s. Exact per-model GPU-board energy is now measured. Comparative human review, remaining capabilities, and exact multi-GPU distribution are still open. |
 | AMD Radeon RX 7800 XT 16 GiB | Fourteen models are completed baseline candidates; smaller options include Gemma 3 1B Q4 and Llama 3.2 3B Q4 | Responsive local baseline and hardware-fit comparison | A post-stability-change Ollama 0.32.9 recertification completed all 17 terminal results: 14 passed 30-minute three-task soaks with full ROCm offload, while Granite 4 7B and Ministral 3 3B/8B again failed Summarization before soak. Comparative quality, lifecycle, driver/firmware attestation, and release gates remain open, so no final AMD recommendation is made. |
 | Intel Arc B580 12 GiB | Granite 4.1 8B Q4 is a narrow Linux SYCL candidate | Cross-vendor baseline | The exact artifact passed 15 task samples, a 30-minute soak, full 41-layer offload, cleanup, and card-energy measurement. Other models still have load or task failures, so no final Intel default is proposed. |
-| NVIDIA 4 GiB | Qwen 3.5 0.8B Q8, Gemma 3 1B Q4, Granite 4.1 3B Q4, Llama 3.2 3B Q4, and MiniCPM V 4.6 1B Q4 are exact-profile Linux candidates | Small local baseline | All five passed core tasks and 30-minute soaks on the GTX 1650 Super. This remains engineering evidence, not an automatic default or a blanket 4 GiB support claim. |
+| NVIDIA 4 GiB | Qwen 3.5 0.8B Q8, Gemma 3 1B Q4, and MiniCPM V 4.6 1B Q4 are shared Windows/Ubuntu candidates; Granite 4.1 3B Q4 and Llama 3.2 3B Q4 are Ubuntu-only candidates in this evidence | Small local baseline | Ubuntu passed five and Windows passed three exact artifacts through core tasks and 30-minute soaks on the same GTX 1650 Super. This remains exact-profile engineering evidence, not an automatic default or a blanket 4 GiB support claim. |
 | 8 GiB and AMD RDNA 2 tiers | No recommendation yet | New physical tiers | Continue exact-profile hardware-fit campaigns before making a recommendation. |
 
 The quality suite is being expanded beyond format compliance to cover factual
@@ -472,11 +472,12 @@ model ladder.
 | Windows 11 with NVIDIA GeForce RTX 3060, 12 GB | 🧪 Engineering evidence | Ollama 0.32.14 exact-artifact checks covered 19 models; 14 passed core tasks and independent 30-minute soaks. Granite 4.1 8B passed the OpenCode 1.18.11 disposable-repository workflow, but its remaining coding-policy and editor-specific gates are open. No runtime, default, support, or automatic-selection change is granted. |
 | Ubuntu 26.04 with NVIDIA GeForce RTX 3060, 12 GB | 🧪 Engineering evidence | Ollama 0.32.14 exact-artifact checks covered 19 models; all 19 passed three-sample Chat, Writing, and Summarization gates with unload checks and independent 30-minute soaks. One-second GPU-board telemetry was captured. Packaged lifecycle, coding-agent surfaces, automatic selection, and broader RTX 3060 support remain open. |
 | Ubuntu 26.04 with NVIDIA GeForce GTX 1650 Super, 4 GB | 🧪 Engineering evidence | Ollama 0.32.14 checked eight exact artifacts. Five passed three-sample Chat, Writing, and Summarization gates plus independent 30-minute soaks; three larger candidates were stopped at the full-CUDA-residency gate. GPU-board telemetry was captured. No default or blanket 4 GB support change is granted. |
+| Windows 11 with NVIDIA GeForce GTX 1650 Super, 4 GB | 🧪 Engineering evidence | Ollama 0.32.14 checked the same eight exact artifacts. Qwen 3.5 0.8B Q8, Gemma 3 1B Q4, and MiniCPM V 4.6 1B Q4 passed the three-sample task gate plus independent 30-minute soaks; five larger candidates were stopped at the full-CUDA-residency gate. GPU-board telemetry was captured. No default or blanket 4 GB support change is granted. |
 | Windows 11 with AMD Radeon RX 7800 XT, 16 GB | 🧪 Engineering evidence | Earlier Alpha Ollama/ROCm and llama.cpp/HIP checks passed. The Alpha 2 hardware-fit campaign completed, but targeted Ollama 0.32.9 summary failures keep release-candidate and recommendation gates open. |
 | Ubuntu Linux with Intel Arc B580, 12 GB | ⚠️ Partial | Granite 4.1 8B passed an exact llama.cpp b10375 SYCL 30-minute soak with full offload, cleanup, and card-energy evidence. Other model routes and the complete Alpha 2 package flow remain open. |
 | Linux with AMD graphics | ⬜ Not tested | No complete native Alpha 2 release-candidate cell exists. |
 | Linux with Intel graphics | ⬜ Not tested | No complete native Alpha 2 release-candidate cell exists. |
-| macOS on Apple silicon | 🧪 Engineering evidence | Earlier local-model workflow checks passed. No Alpha 2 package certification exists. |
+| macOS 26.6.2 on Apple M4, 16 GB unified memory | 🧪 Engineering evidence | Ollama 0.32.15 checked 16 exact artifacts with Metal residency and unload gates. Nine passed the bounded Chat, Writing, Summarization, structured-tool, and structured-code contract and all nine completed independent 30-minute soaks without failure. OpenCode 1.18.19 completed all 16 coding screens but none passed every gate. Exact-source native, representative power, MLX, llama.cpp, and development-app browser evidence is retained; signing, manual accessibility, interactive Keychain, updater, and public release gates remain open. No default or support change is granted. |
 
 All nine Linux distributions used the same unsigned candidate archive for the
 package-parity checks. Those checks covered archive integrity, relocation,
