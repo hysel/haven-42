@@ -37,8 +37,8 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Models, providers, and media
 
-- [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]]
-- [[Model Power and Electricity Evidence|Model-Power-And-Electricity-Evidence]]
+- [[Model Compatibility|Model-And-Hardware-Test-Status]]
+- [[Power Use and Electricity Costs|Model-Power-And-Electricity-Evidence]]
 - [[Engineering Model Selection|Engineering-Model-Selection]]
 - [[Image Provider Admission|Image-Provider-Admission]]
 - [[Local Image Runtime License Review|Local-Image-Runtime-License-Review]]

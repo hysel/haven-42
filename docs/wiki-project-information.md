@@ -1,69 +1,63 @@
-# Project Information
+# About Haven 42
 
-_For users, evaluators, and contributors. Haven 42 remains active development
-software and makes no production-readiness claim._
+Haven 42 is a local-first application for people who want useful AI without
+sending every conversation to a hosted chat service. The interface runs in a
+browser, while the application and AI provider stay on hardware you control.
 
-## Current position
+## What Haven 42 is designed to do
 
-Haven 42 has a local browser application, unsigned one-folder development
-packages for Windows, Linux, and macOS, and local AI features that are enabled
-only after their tests pass. The latest public test build is the unsigned Windows
-`0.4.0-alpha.1` prerelease; the latest stable release line is `0.3.0`. Work
-newer than those exact published versions remains unreleased.
+- Make local chat, writing, and summarization approachable for non-experts.
+- Recommend models from results collected on comparable hardware.
+- Explain downloads, storage locations, and network activity before asking for
+  approval.
+- Keep model choice open: recommendations are guidance, not restrictions.
+- Stop safely when a download, model, server, or security check cannot be
+  verified.
 
-See [[Windows Alpha Release|Eng-Windows-Alpha-Release]] for the exact Alpha files,
-checksums, publication record, and boundaries.
+## What it does not do
 
-The project separates three states:
+Haven 42 does not provide a hosted AI account or silently send prompts to a
+cloud service. It does not install drivers, change firewall rules, or grant
+itself administrator access. Current builds do not save conversation history,
+parse PDF or Office documents, install themselves as a system service, or run
+unattended automatic updates.
 
-- **Available:** present in the current app.
-- **Tested only:** demonstrated on a specific recorded setup, but not available
-  to every user.
-- **Planned:** designed or under test, but not enabled in the app.
+Some features shown in engineering documents are experiments rather than
+parts of the current app. A successful test applies only to the named model,
+runtime, operating system, and hardware—not every similar computer.
 
-## Major active areas
+## Releases
 
-- Unified local conversation and bounded attachment context.
-- Portable development packaging and cross-platform native smoke testing.
-- Hardware-aware model and inference-engine evidence.
-- Local image generation and future media-provider evaluation.
-- Restricted document-parser research without runtime admission.
-- Optional encrypted conversation-history architecture without persistence.
-- Controlled web-research transport/approval guards without an active network adapter.
+The latest public test build is the unsigned Windows `0.4.0-alpha.1`
+prerelease. The latest stable release line is `0.3.0`. Changes in the source
+repository are not a release until they are deliberately packaged and
+verified.
 
-For milestone detail, open the [[Roadmap]]. For exact committed outcomes and
-limits, use the [[Evidence Summary|Eng-Evidence-Summary]].
+Current development packages are unsigned. Windows or macOS may show a
+security warning, so use only files from a trusted Haven 42 test source.
 
-## Important limitations
+## Privacy, security, and accessibility
 
-- Development packages are unsigned.
-- No installer, system service, driver, firewall rule, or administrator access
-  is required or enabled by Haven 42.
-- Background and unattended updates remain disabled. In the current
-  development source, a person can explicitly check Ollama's official stable
-  release and review a version admitted by that Haven 42 build before approving
-  any managed download or activation.
-- Conversation history is not persisted.
-- PDF, Office, and OpenDocument upload parsing is not admitted to the product.
-- macOS hardware-specific evidence remains incomplete in several areas.
-- A validation result applies only to its exact recorded artifact, platform,
-  runtime, model, and operation.
+- [[Privacy|Privacy-Policy]] explains what the app keeps in memory and what may
+  leave the computer.
+- [[Connection Security|Provider-Endpoint-Security]] explains safe local and
+  private-network AI-server connections.
+- The app's **About → Accessibility** page describes the current WCAG 2.1 AA
+  target, implemented support, assessment method, and known limitations.
 
-## Governance and safety
+Report a security problem privately through the process in the repository's
+`SECURITY.md`. Do not post passwords, private prompts, personal files, or
+private network details in a public issue.
 
-- [[Privacy|Privacy-Policy]]
-- [[Connection Security|Provider-Endpoint-Security]]
-- [[Security Threat Model|Eng-Security-Threat-Model]]
-- [[Code Signing Policy|Eng-Code-Signing-Policy]]
-- [[GitHub Repository Policy|Eng-GitHub-Repository-Policy]]
+## Questions and feedback
 
-Security issues should be reported privately using the process in the source
-repository's `SECURITY.md`, without posting credentials, private prompts, or
-personal files in a public issue.
+For general or accessibility feedback, email `haven42localai@gmail.com` or use
+the repository's issue forms. Include the operating system and the part of the
+app involved, but do not include secrets or private content.
 
-## Contributing and deeper documentation
+## For contributors
 
-The [[Engineering and Validation Index|Engineering-Index]] organizes
-contributor, architecture, validation, evidence, and research records.
-Maintainers should also read [[Wiki Maintenance|Eng-Wiki-Maintenance]] before
-editing synchronized pages.
+Everyday instructions stay in this wiki. Contributor architecture, validation,
+and research material is organized in the
+[[Engineering and Validation Index|Engineering-Index]]. Planned work is kept
+in the [[Roadmap]] rather than mixed into user instructions.

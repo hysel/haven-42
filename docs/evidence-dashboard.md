@@ -16,16 +16,16 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 204 |
-| Distinct model-field values | 81 |
+| Evidence records | 207 |
+| Distinct model-field values | 82 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 98 |
-| `failed-validation` | 24 |
+| `partial-pass` | 100 |
+| `failed-validation` | 25 |
 | `validated-by-tests` | 22 |
 | `read-only-tool-validated` | 13 |
 | `write-smoke-validated` | 13 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 83 |
+| Local endpoint | 85 |
 | Generated sample | 58 |
 | Editor agent | 14 |
 | Automated tests | 8 |
@@ -52,9 +52,9 @@ See [Evidence Catalog](Evidence-Catalog),
 | physical-package-test | 3 |
 | Static | 3 |
 | browser-and-static | 2 |
+| disposable-repository-agent | 2 |
 | generated-sample-editor-chat | 2 |
 | offline-mocked | 2 |
-| disposable-repository-agent | 1 |
 | generated-sample-agent | 1 |
 | live-fixed-provider | 1 |
 | offline-local | 1 |
@@ -108,6 +108,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | fixed-validation-item |
 | gemma3:12b |
 | gemma3:1b-it-q4_K_M |
+| gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3 |
 | gemma4:e2b-qat |
 | gemma4:e4b-qat |
 | granite4.1:30b |

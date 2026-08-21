@@ -51,6 +51,23 @@ function Resolve-ExternalCommand {
     }
 }
 
+function Resolve-Python3Command {
+    [CmdletBinding()]
+    param()
+
+    $runningOnWindows = if (Get-Variable -Name IsWindows -ErrorAction SilentlyContinue) { [bool]$IsWindows } else { $env:OS -eq 'Windows_NT' }
+    $candidates = if ($runningOnWindows) { @('python', 'python3') } else { @('python3', 'python') }
+    foreach ($candidate in $candidates) {
+        $commandInfo = Get-Command $candidate -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $commandInfo -or [string]::IsNullOrWhiteSpace($commandInfo.Source)) { continue }
+        if ($runningOnWindows -and $commandInfo.Source -match '(?i)\\Microsoft\\WindowsApps\\python3?\.exe$') {
+            continue
+        }
+        return $commandInfo
+    }
+    throw 'Python 3 does not resolve to an executable. Install it for repository engineering, or use the self-contained Haven 42 package.'
+}
+
 function Join-ResolvedCommandArguments {
     [CmdletBinding()]
     param(
@@ -63,4 +80,4 @@ function Join-ResolvedCommandArguments {
     return (@($Resolution.ArgumentPrefix, $Arguments) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) }) -join ' '
 }
 
-Export-ModuleMember -Function Resolve-ExternalCommand,Join-ResolvedCommandArguments
+Export-ModuleMember -Function Resolve-ExternalCommand,Resolve-Python3Command,Join-ResolvedCommandArguments

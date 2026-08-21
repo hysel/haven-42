@@ -16,9 +16,8 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $repoRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
-$python = Get-Command python3 -ErrorAction SilentlyContinue
-if (-not $python) { $python = Get-Command python -ErrorAction SilentlyContinue }
-if (-not $python) { throw "Python 3 is required for hardened provider discovery." }
+Import-Module (Join-Path $PSScriptRoot "CommandResolution.psm1") -Force
+$python = Resolve-Python3Command
 $arguments = @(
     (Join-Path $PSScriptRoot "discover-capability-availability.py"),
     "--capability-registry", (Join-Path $repoRoot "config/capabilities.json"),

@@ -1,8 +1,10 @@
-# Model Power and Electricity Evidence
+# Power Use and Electricity Costs
 
-This page explains what Haven 42 has measured so far and, just as importantly,
-what those numbers do **not** mean. It is written for people deciding which
-local model may fit their computer and electricity budget.
+_Last reviewed: August 21, 2026._
+
+This page helps you estimate the electricity used by local AI. It includes
+measurements from real Haven 42 test computers and explains what those numbers
+do—and do not—include.
 
 ## Current measurements
 
@@ -92,7 +94,7 @@ fixed charges, and the rest of the computer may change the actual cost.
 - [AMD RX 7800 XT power evidence](Windows-AMD-RX7800XT-Power-Validation)
 - [AMD RX 5700 XT Ubuntu qualification and power evidence](Eng-AMD-RX5700XT-Ollama-03213-Qualification)
 - [Apple M4 16 GB model qualification and power evidence](Eng-Apple-M4-16GiB-Model-Qualification)
-- [Full model and hardware test status](Model-And-Hardware-Test-Status)
+- [Model compatibility](Model-And-Hardware-Test-Status)
 
 No measurement on this page changes Haven 42's automatic model selection.
 Automatic recommendations require the remaining task, reliability, package,

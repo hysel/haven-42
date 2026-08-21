@@ -2,120 +2,105 @@
 
 **Your private, local AI station.**
 
-[Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start) ·
-[What works today](https://github.com/hysel/haven-42/wiki#what-works-today) ·
-[Roadmap](ROADMAP.md) ·
-[Common Words](https://github.com/hysel/haven-42/wiki/Glossary) ·
-[Code signing policy](CODE-SIGNING-POLICY.md) ·
+Private AI that runs on hardware you control.
+
+[Get started](https://github.com/hysel/haven-42/wiki/Quick-Start) ·
+[Learn the interface](https://github.com/hysel/haven-42/wiki/Using-Haven-42) ·
+[Choose a model](https://github.com/hysel/haven-42/wiki/Local-Model-Selection) ·
+[Troubleshoot](https://github.com/hysel/haven-42/wiki/Troubleshooting) ·
 [Contact](mailto:haven42localai@gmail.com)
 
-> **Before you start:** Haven 42 is still being tested. Current packages are
-> unsigned, so Windows may display a warning. Use only a package from a trusted
+Haven 42 is an application for private AI chat, writing, and summarization. It
+opens in a browser, while the application and AI model run on your computer or
+on a private Ollama server you choose.
+
+There is no Haven 42 account or hosted chat service. The app does not silently
+download a model: it shows what is needed, where files will be stored, and asks
+before downloading anything.
+
+> **Development notice:** Current packages are unsigned test builds. Windows
+> or macOS may display a security warning. Use only a package from a trusted
 > Haven 42 test source.
 
-Haven 42 is an application for private AI chat, writing, and summarization. It
-opens in your browser, but the application runs on your computer. It can use an
-AI model on the same computer or an Ollama server on a private network.
+Version `0.3.0` is the current stable release line. See the
+[code signing policy](CODE-SIGNING-POLICY.md) for why development packages are
+currently unsigned.
+
+## What you can do
+
+- Chat, draft, and summarize in one private conversation.
+- Let Haven 42 recommend a tested model for your computer and task.
+- Choose another installed model or search Ollama's public model catalog.
+- Attach bounded text, source-code, structured-text, and PNG screenshot files.
+- Connect to Ollama on the same computer or on a private server.
+- In the development source, review and approve a web search before any query
+  leaves your computer. The published Alpha 1 package predates this feature.
+- See response speed and local CPU, memory, and graphics use.
+
+Music and video generation are not part of the current app. Conversation
+history is kept in memory rather than saved. PDF and Office document parsing,
+signed installers, and unattended automatic updates are not shipped.
+One Linux ComfyUI/SDXL image path has passed testing; other media paths remain gated.
+
+## Start using Haven 42
+
+The wiki contains the single maintained setup path:
+
+1. Follow [Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start).
+2. Continue with [Using Haven 42](https://github.com/hysel/haven-42/wiki/Using-Haven-42).
+3. If something goes wrong, open [Troubleshooting](https://github.com/hysel/haven-42/wiki/Troubleshooting).
 
 The latest public test build is the unsigned Windows `0.4.0-alpha.1`
-prerelease. Download it from the
-[Alpha 1 release](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1),
-then follow the [Windows download and feedback guide](docs/windows-alpha-download-and-feedback.md)
-to check the package and report a problem without exposing private data.
-
-## What works today
-
-This is a short summary. The wiki [What works today](https://github.com/hysel/haven-42/wiki#what-works-today)
-section is the authoritative capability list.
-
-| Area | Current capability |
-| --- | --- |
-| Text | Private chat, writing, and summarization with safe response formatting and token-speed details. |
-| Models | A suitable local model is recommended from tested evidence. A person can search the public catalog, review an exact model and destination, and approve a verified Ollama download; Haven 42 never downloads or selects one silently. |
-| Context | Selected, bounded text, source-code, structured-text, and PNG screenshot attachments. Haven 42 never executes an attachment. |
-| Local providers | A managed local Ollama setup or a private Ollama server. One Linux ComfyUI/SDXL image path has passed testing; other media paths remain gated. |
-| Web research | The development source offers reviewed Wikipedia lookup, a bounded multi-source cited answer using a session-only Brave Search key and the selected local model, and a browser-search fallback. Every query needs a person’s one-time approval; models cannot browse, approve, follow links, or start another search. Exact package parity remains open. |
-
-Music and video are not available in the product. Persistent conversation
-history, PDF and Office parsing, folder scanning, autonomous model browsing,
-signed installers and unattended automatic updates are not shipped. The
-development source can check an official runtime release only when the user
-asks and still requires review before any verified managed update. The published
-Alpha 1 package predates the development web-research slice above.
-
-## Quick start
-
-Use the wiki [Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start).
-It is the single maintained setup guide for the portable package and advanced
-source startup. The guide continues to [Using Haven 42](https://github.com/hysel/haven-42/wiki/Using-Haven-42)
-and then [Troubleshooting](https://github.com/hysel/haven-42/wiki/Troubleshooting).
-
-The portable Windows package keeps Haven-managed files beside the app and does
-not install Haven 42 as a Windows service. Guided setup shows every required
-download and asks permission before it continues.
+prerelease. It is available from the
+[Alpha 1 release](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.1).
+The [Windows download guide](docs/windows-alpha-download-and-feedback.md)
+explains how to verify the package and report a problem safely.
 
 ## Privacy and safety
 
 - The Haven 42 page is available only from the computer running the app.
 - Conversation text, selected attachments, provider settings, and generated
-  image bytes remain in process or browser memory. Haven 42 does not save them
-  as conversation history.
-- Haven 42 blocks public AI server addresses, credentials embedded in an
-  address, and unsafe redirects. An authenticated server on another computer
-  requires HTTPS.
-- Attachments are checked, bounded, and treated only as information for the
-  model. They are never run as code or computer commands.
-- Features remain unavailable until their exact security and validation gates
-  pass.
+  image bytes are not stored as Haven 42 conversation history.
+- Public AI-server addresses, credentials embedded in addresses, and unsafe
+  redirects are blocked. Private remote servers should use HTTPS.
+- Attachments are treated as information for the model and are never executed.
+- Downloads, web searches, and managed updates require a clear review and
+  approval step.
 
 Read the [privacy policy](PRIVACY.md), [security policy](SECURITY.md), and
-[connection security guide](https://github.com/hysel/haven-42/wiki/Provider-Endpoint-Security) before
-using sensitive material. Report vulnerabilities privately; never place
-secrets, private prompts, or personal files in a public issue.
+[connection security guide](https://github.com/hysel/haven-42/wiki/Provider-Endpoint-Security)
+before using sensitive material. Never put passwords, private prompts, or
+personal files in a public issue.
 
-## Roadmap
+## Models, hardware, and power
 
-[`ROADMAP.md`](ROADMAP.md) is the authoritative roadmap. Roadmap labels describe
-milestone delivery; evidence labels describe the result of a bounded test.
-`In progress` on the roadmap does not mean `🧪 Engineering evidence` or
-`✅ Verified` on an evidence page.
+Haven 42 keeps recommendations tied to the exact model, runtime, operating
+system, and hardware that were tested. A result on one graphics card does not
+automatically apply to another.
 
-See the human-readable [tested hardware](https://github.com/hysel/haven-42/wiki/Tested-Hardware-And-AI-Engines)
-and [model and hardware status](https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status)
-pages for exact evidence boundaries.
+- [Choose a model](https://github.com/hysel/haven-42/wiki/Local-Model-Selection)
+- [Hardware compatibility](https://github.com/hysel/haven-42/wiki/Tested-Hardware-And-AI-Engines)
+- [Model compatibility](https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status)
+- [Power use and electricity costs](https://github.com/hysel/haven-42/wiki/Model-Power-And-Electricity-Evidence)
 
-Want Haven 42 to evaluate a particular locally runnable model? Submit the
-[short model test request form](https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml).
-You do not need to know the model's technical details, and a request does not
-change Haven 42's automatic model choices.
+To request testing for a locally runnable model, use the
+[model request form](https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml).
+You do not need to know the model's technical details.
 
-## Coding tools are separate
+## Coding tools
 
 Aider and OpenCode configuration is developed separately in the optional
 [Local LLM IDE Tools package](packages/local-llm-ide/README.md). Continue is a
-legacy, evidence-only integration. Haven 42 does not ship, configure,
-recommend, or run new qualification work for Continue. Existing sanitized
-records remain available to explain what was tested and why investment ended.
-Continue is not required to use Haven 42.
+legacy, evidence-only integration retained to explain historical results; it is
+not required or recommended for Haven 42.
 
-## Documentation
+## For contributors
 
-| Need | Start here |
-| --- | --- |
-| Install and use Haven 42 | [Quick Start](https://github.com/hysel/haven-42/wiki/Quick-Start) |
-| Fix a user-facing problem | [Troubleshooting](https://github.com/hysel/haven-42/wiki/Troubleshooting) |
-| Understand a term | [Common Words](https://github.com/hysel/haven-42/wiki/Glossary) |
-| Check hardware or model evidence | [Tested Hardware and AI Engines](https://github.com/hysel/haven-42/wiki/Tested-Hardware-And-AI-Engines) and [Model and Hardware Test Status](https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status) |
-| Review plans and blockers | [Roadmap](ROADMAP.md) and [project status](PROJECT.md) |
-| Contribute or inspect engineering records | [Engineering and Validation Index](docs/engineering-index.md) |
+The repository `docs/` directory contains engineering and contributor
+material. Start with the [Engineering and Validation Index](docs/engineering-index.md)
+or the detailed [Roadmap](ROADMAP.md).
 
-The repository `docs/` files are canonical for contributor and engineering
-material. Wiki pages beginning with `Eng-` are labeled pointers to those files,
-not separately maintained copies.
-
-## Contributor validation
-
-Use the smallest appropriate local gate while developing:
+Run the smallest appropriate test tier while developing:
 
 ```powershell
 .\scripts\test-pack.ps1 -Tier Fast
@@ -124,15 +109,5 @@ Use the smallest appropriate local gate while developing:
 ```bash
 ./scripts/test-pack.linux.sh --tier fast
 ```
-
-Run Integration when a boundary changes and Full near completion. See
-[Test Tiers](docs/test-tiers.md). Hosted checks must pass for the exact proposed
-commit.
-
-## Version and license
-
-The latest public test build is the unsigned Windows `0.4.0-alpha.1`
-prerelease. Version `0.3.0` is the latest stable release line. Later work
-remains under `Unreleased` until deliberately versioned and verified.
 
 Haven 42 is licensed under the [MIT License](LICENSE).

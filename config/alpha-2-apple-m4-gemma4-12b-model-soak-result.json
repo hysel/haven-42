@@ -1,0 +1,49 @@
+{
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "hardwareProfile": {
+    "architecture": "arm64",
+    "backend": "metal",
+    "platformFamily": "macos",
+    "profileId": "apple-m4-16gib-macos26-metal",
+    "systemMemoryGiB": 16.0
+  },
+  "intervalSeconds": 30,
+  "kind": "haven42-apple-silicon-model-soak-result",
+  "modelIdsExpected": [
+    "gemma4-12b-qat"
+  ],
+  "observedAtUtc": "2026-08-21T16:54:08Z",
+  "planCanonicalSha256": "59172e04a07e4e8190fa160c8820c12a5dc2325748544d413b14aea8934fc191",
+  "privateIdentityRetained": false,
+  "qualificationCanonicalSha256": "6fa5d3aa487e807785682d499fe78590a1491bfdc89bb61fde08da74befc8cf8",
+  "rawPromptsOrResponsesRetained": false,
+  "release": "0.4.0-alpha.2",
+  "requestedMinutesPerModel": 30,
+  "results": [
+    {
+      "averageTokensPerSecond": 14.304,
+      "cycles": 31,
+      "durationSeconds": 1812.199,
+      "manifestDigest": "38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+      "model": "gemma4:12b-it-qat",
+      "modelId": "gemma4-12b-qat",
+      "outputTokens": 3224,
+      "responseRetained": false,
+      "samples": 155,
+      "status": "passed",
+      "temporaryModelPulled": true,
+      "temporaryModelRemoved": true,
+      "unloadProofs": 155
+    }
+  ],
+  "runtime": {
+    "artifactSha256": "6f01ce31e63900437944c6d3d316c34f6c45463a7d4a258ed253a1732e0e6d42",
+    "provider": "ollama",
+    "transport": "ipv4-loopback-only",
+    "version": "0.32.15"
+  },
+  "schemaVersion": 1,
+  "status": "completed"
+}

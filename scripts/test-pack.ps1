@@ -571,7 +571,7 @@ Invoke-PackTest "test tiers are timed and exact-tree receipt gated" {
     Assert-True -Condition ($sharedRunner -match 'fast\|integration\|full' -and $sharedRunner -match "RUN_STARTED_SECONDS") -Message "Native tests should expose timed Fast, Integration, and Full tiers."
     Assert-True -Condition ($windowsRunner -match "haven-42-test-receipt-v1" -and $sharedRunner -match "haven-42-test-receipt-v1") -Message "Both runners should write the same receipt contract."
     Assert-True -Condition ($windowsRunner -match '\$receiptModeAtStart = if \(\$NoReceipt\.IsPresent\)' -and $windowsRunner -match '\$script:receiptModeAtStart -eq "selected"' -and $windowsRunner -match '\$gitExitCode = \$LASTEXITCODE' -and $windowsRunner -match "selected tests cannot produce a Full-test receipt" -and $windowsRunner -match "receipt-git-failed:write-tree") -Message "Windows Full receipts must capture their invocation mode, reject selected-test runs, capture native exit status before pipelines, and fail closed on Git metadata errors."
-    Assert-True -Condition ($pushHook -match "Exact content-tree full-test receipt found" -and $pushHook -match "HEAD\^\{tree\}" -and $pushHook -match "schema=3") -Message "Pre-push should require a schema-v3 exact content-tree receipt."
+    Assert-True -Condition ($pushHook -match "Exact content-tree full-test receipt found" -and $pushHook -match "HEAD\^\{tree\}" -and $pushHook -match "schema=3" -and $pushHook -match "ensure-test-python3\.shared\.sh" -and $pushHook -match "ensure_test_python3") -Message "Pre-push should use validated Python 3 and require a schema-v3 exact content-tree receipt."
     Assert-True -Condition ($commitHook -match "ensure-test-python3\.shared\.sh" -and $commitHook -match "security-review-gate\.py" -and $commitHook -match "verify-pre-commit-readiness\.py" -and $commitHook -match "sync-wiki\.ps1" -and $commitHook -match "sync-wiki\.shared\.sh") -Message "Pre-commit should use validated Python 3, require exact staged-tree security and Full receipts, and check an available wiki clone with the native platform runner."
     Assert-True -Condition ($workflow -match "-Tier Full -NoReceipt" -and $workflow -match "--tier full --no-receipt") -Message "Hosted CI should always run Full without trusting local receipts."
     Assert-True -Condition (([regex]::Matches($workflow, "Run pack validation")).Count -eq 0) -Message "Hosted CI should not run validation separately when Full tests already include it."
@@ -621,6 +621,10 @@ Invoke-PackTest "commands and workflows resolve for the active operating system"
         $scriptResolution = Resolve-ExternalCommand -Command $standaloneScript
         Assert-Equal -Actual $scriptResolution.LaunchKind -Expected "powershell-script" -Message "Standalone ps1 scripts should use an explicit PowerShell host."
         Assert-True -Condition ($scriptResolution.ArgumentPrefix -match "-NoProfile -File") -Message "PowerShell script resolution should include an explicit file invocation."
+
+        $pythonResolution = Resolve-Python3Command
+        Assert-True -Condition ($pythonResolution.CommandType -eq "Application") -Message "Python 3 should resolve to an executable application."
+        Assert-True -Condition ($pythonResolution.Source -notmatch '(?i)\\Microsoft\\WindowsApps\\python3?\.exe$') -Message "Python resolution must reject inaccessible Windows Store aliases."
     }
     finally {
         Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -642,6 +646,10 @@ Invoke-PackTest "commands and workflows resolve for the active operating system"
     Assert-True -Condition ($defaults -notmatch '\{TempDir\}\\') -Message "Shared CLI templates must not append Windows-only separators to TempDir."
     $agentHarness = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/test-agent-cli-surface-models.ps1") -Raw
     Assert-True -Condition ($agentHarness -match "Resolve-ExternalCommand") -Message "The shared agent harness should use OS-aware command resolution."
+    foreach ($pythonWrapper in @("discover-capability-availability.ps1", "invoke-local-text-capability.ps1", "invoke-local-image-capability.ps1")) {
+        $wrapperText = Get-Content -LiteralPath (Join-Path $repoRoot "scripts/$pythonWrapper") -Raw
+        Assert-True -Condition ($wrapperText -match "Resolve-Python3Command") -Message "$pythonWrapper should reject inaccessible interpreter aliases through shared resolution."
+    }
 }
 
 
@@ -5711,7 +5719,7 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
-    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "32 cases") -Message "Hosted Python distribution provenance, modified-source snapshot identity, protected-resource trust updates, repository-local build-tool selection, build caches, and output confinement must remain explicit and fail closed."
+    Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "33 cases") -Message "Hosted Python distribution provenance, current protected-resource integrity, modified-source snapshot identity, protected-resource trust updates, repository-local build-tool selection, build caches, and output confinement must remain explicit and fail closed."
     $macAppOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-build-macos-development-app.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS development app builder tests should pass."
     Assert-True -Condition (($macAppOutput -join "`n") -match "3 passed") -Message "The macOS app wrapper must preserve its bounded layout, embedded runtime, inventory, and development-only trust state."

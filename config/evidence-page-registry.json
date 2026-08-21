@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "3b3545ef031f609507378d815ce520a16f6391c016d706218f801773c8d954b2",
-  "recordCount": 204,
+  "catalogSha256": "76d3188c768ce51eb5a2d1db4d6db83bd3fc5c4cc49f288c838303b088da4143",
+  "recordCount": 207,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -207,6 +207,30 @@
         "repositorySource": "docs/evidence-records/evidence-4c8889255c609520.md",
         "wikiPage": "Evidence-Record-4c8889255c609520.md",
         "title": "Aider and OpenCode candidate lifecycle plans"
+      }
+    },
+    {
+      "id": "evidence-07f3b51d498ce792",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Apple M4 16 GB Gemma 4 12B OpenCode coding screen",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.19",
+        "provider": "Ollama 0.32.15 Metal",
+        "os": "macOS 26.6.2",
+        "model": "gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+        "operation": "structured-code-read-plan-review-scoped-write-tool-timeout-recovery-unload-unintended-write",
+        "validation_mode": "disposable-repository-agent",
+        "status": "failed-validation",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The deterministic API code and tool contracts passed, as did explicit write approval, forced-timeout handling, and unload. Repository read, planning, review, scoped-edit, external-diff, bounded-context, and post-failure-recovery requirements did not all pass, so the model is not eligible for a coding recommendation from this surface."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-07f3b51d498ce792.md",
+        "wikiPage": "Evidence-Record-07f3b51d498ce792.md",
+        "title": "Apple M4 16 GB Gemma 4 12B OpenCode coding screen"
       }
     },
     {
@@ -2895,6 +2919,54 @@
         "repositorySource": "docs/evidence-records/evidence-71fdc1d4cefe7305.md",
         "wikiPage": "Evidence-Record-71fdc1d4cefe7305.md",
         "title": "Apple M4 16 GB 16-model bounded qualification"
+      }
+    },
+    {
+      "id": "evidence-058dffd9da155b02",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Apple M4 16 GB Gemma 4 12B QAT bounded addendum",
+        "surface": "Ollama Metal",
+        "surface_version": "0.32.15",
+        "provider": "Ollama",
+        "os": "macOS 26.6.2",
+        "model": "gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+        "operation": "chat-writing-summary-structured-tool-structured-code-metal-residency-unload",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The exact Gemma 4 12B QAT artifact passed all five bounded endpoint gates with full Metal residency and per-cell unload at an average 14.323 generated units per second. This one-model addendum grants no automatic recommendation, default, support label, runtime change, or another-profile claim."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-058dffd9da155b02.md",
+        "wikiPage": "Evidence-Record-058dffd9da155b02.md",
+        "title": "Apple M4 16 GB Gemma 4 12B QAT bounded addendum"
+      }
+    },
+    {
+      "id": "evidence-58b80062769ba4ad",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Apple M4 16 GB Gemma 4 12B QAT reliability soak",
+        "surface": "Ollama Metal",
+        "surface_version": "0.32.15",
+        "provider": "Ollama",
+        "os": "macOS 26.6.2",
+        "model": "gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+        "operation": "independent-30-minute-task-cycle-metal-residency-unload-cleanup",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "The exact artifact completed 1,812.199 measured seconds, 31 cycles, 155 bounded samples, 3,224 generated units, 155 unload proofs, verified temporary-model removal, and no failures at 14.304 generated units per second. This is exact-profile reliability evidence, not automatic selection authority."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-58b80062769ba4ad.md",
+        "wikiPage": "Evidence-Record-58b80062769ba4ad.md",
+        "title": "Apple M4 16 GB Gemma 4 12B QAT reliability soak"
       }
     },
     {

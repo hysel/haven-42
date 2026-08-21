@@ -17,9 +17,8 @@ param(
 )
 $ErrorActionPreference = "Stop"
 $repoRoot = [IO.Path]::GetFullPath((Split-Path -Parent $PSScriptRoot))
-$python = Get-Command python3 -ErrorAction SilentlyContinue
-if (-not $python) { $python = Get-Command python -ErrorAction SilentlyContinue }
-if (-not $python) { throw "Python 3 is required for local image generation." }
+Import-Module (Join-Path $PSScriptRoot "CommandResolution.psm1") -Force
+$python = Resolve-Python3Command
 $arguments = @(
     (Join-Path $PSScriptRoot "invoke-local-image-capability.py"), "--repo-root", $repoRoot,
     "--capability-id", $CapabilityId, "--prompt-stdin", "--model", $Model, "--session-path", $SessionPath,

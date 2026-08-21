@@ -9,5 +9,5 @@ Roadmap labels such as **Complete**, **In progress**, **Research**, and
 labels on the evidence pages. A milestone can be in progress while one exact
 hardware and model combination is verified.
 
-For test results, see [Tested Hardware and AI Engines](Tested-Hardware-And-AI-Engines)
-and [Model and Hardware Test Status](Model-And-Hardware-Test-Status).
+For test results, see [Hardware Compatibility](Tested-Hardware-And-AI-Engines)
+and [Model Compatibility](Model-And-Hardware-Test-Status).

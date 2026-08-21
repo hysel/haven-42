@@ -19,6 +19,7 @@ them by hand; update the catalog and run the generator.
 | [Aider CLI realistic scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-eee8463c09ed1a53) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
 | [Aider CLI richer disposable scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-c836e3b6f82ceb6c) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
 | [Aider and OpenCode candidate lifecycle plans](https://github.com/hysel/haven-42/wiki/Evidence-Record-4c8889255c609520) | `static-validated` | Cross-platform · No provider invocation · no-model |
+| [Apple M4 16 GB Gemma 4 12B OpenCode coding screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-07f3b51d498ce792) | `failed-validation` | macOS 26.6.2 · Ollama 0.32.15 Metal · gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3 |
 | [Apple M4 16 GB OpenCode 1.18.19 16-model coding screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-713bc8ce611cbfe3) | `failed-validation` | macOS 26.6.2 · Ollama 0.32.15 Metal · 16-exact-manifest-corpus |
 | [Continue CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-c48f68ae267ddaeb) | `validated-by-tests` | Cross-platform · N/A · N/A |
 | [Gemma 3 1B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-23ddebcd60acad2e) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · gemma3:1b-it-q4_K_M |
@@ -199,6 +200,8 @@ them by hand; update the catalog and run the generator.
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
 | [Apple M4 16 GB 16-model bounded qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-71fdc1d4cefe7305) | `partial-pass` | macOS 26.6.2 · Ollama · 16-exact-manifest-corpus |
+| [Apple M4 16 GB Gemma 4 12B QAT bounded addendum](https://github.com/hysel/haven-42/wiki/Evidence-Record-058dffd9da155b02) | `partial-pass` | macOS 26.6.2 · Ollama · gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3 |
+| [Apple M4 16 GB Gemma 4 12B QAT reliability soak](https://github.com/hysel/haven-42/wiki/Evidence-Record-58b80062769ba4ad) | `partial-pass` | macOS 26.6.2 · Ollama · gemma4:12b-it-qat@38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3 |
 | [Apple M4 16 GB nine-model reliability soak](https://github.com/hysel/haven-42/wiki/Evidence-Record-6a2e6287439189e8) | `partial-pass` | macOS 26.6.2 · Ollama · nine-core-pass-exact-artifacts |
 | [Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-b1e852d6e517e410) | `partial-pass` | Ubuntu 24.04.4 · Ollama · gemma3:1b-it-q4_K_M |
 | [Gemma 4 E2B QAT on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-9ee9709513adee19) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · gemma4:e2b-qat |
