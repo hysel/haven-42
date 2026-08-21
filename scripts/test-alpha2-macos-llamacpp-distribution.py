@@ -73,6 +73,17 @@ def escaping_symlink(archive: tarfile.TarFile) -> None:
 
 expect_error(escaping_symlink, "unsafe-archive-link")
 
+
+def member_beneath_symlink(archive: tarfile.TarFile) -> None:
+    info = tarfile.TarInfo("llama-b10520/current")
+    info.type = tarfile.SYMTYPE
+    info.linkname = "versions/1"
+    archive.addfile(info)
+    regular(archive, "llama-b10520/current/escape")
+
+
+expect_error(member_beneath_symlink, "archive-member-beneath-link")
+
 with tempfile.TemporaryDirectory() as directory:
     path = Path(directory) / "safe.tar.gz"
     with tarfile.open(path, "w:gz") as archive:
@@ -117,5 +128,5 @@ for mutation, code in (
         raise AssertionError(f"expected {code}")
     checks += 1
 
-assert checks == 10
-print("Apple llama.cpp distribution hostile tests passed: 10 checks.")
+assert checks == 11
+print("Apple llama.cpp distribution hostile tests passed: 11 checks.")

@@ -146,6 +146,28 @@ class MacDevelopmentUpdateLifecycleTests(unittest.TestCase):
                     )
             self.assertFalse(workspace.exists())
 
+    def test_refuses_member_beneath_archive_symlink(self) -> None:
+        for link_first in (True, False):
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                hostile = root / "hostile-link.tar.gz"
+                with tarfile.open(hostile, "w:gz") as archive:
+                    link = tarfile.TarInfo("Haven 42.app/Contents")
+                    link.type = tarfile.SYMTYPE
+                    link.linkname = "safe-target"
+                    payload = tarfile.TarInfo("Haven 42.app/Contents/escape")
+                    payload.size = 1
+                    entries = ((link, None), (payload, io.BytesIO(b"x")))
+                    for info, stream in entries if link_first else reversed(entries):
+                        archive.addfile(info, stream)
+                with self.assertRaisesRegex(MODULE.LifecycleError, "archive-member-beneath-link"):
+                    MODULE.extract_app(
+                        hostile,
+                        root / "extract",
+                        maximum_members=10,
+                        maximum_bytes=100,
+                    )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -11,6 +11,7 @@ from pathlib import Path, PurePosixPath
 import re
 import select
 import shutil
+import stat
 import subprocess
 import sys
 import tarfile
@@ -113,12 +114,43 @@ def extract_app(archive: Path, destination: Path, *, maximum_members: int, maxim
         members = bundle.getmembers()
         require(0 < len(members) <= maximum_members, "archive-member-limit")
         expanded = 0
+        names: set[PurePosixPath] = set()
+        symlinks: set[PurePosixPath] = set()
         for member in members:
             safe_member(member)
+            name = PurePosixPath(member.name)
+            require(name not in names, "duplicate-archive-member")
+            names.add(name)
+            if member.issym():
+                symlinks.add(name)
             if member.isfile():
                 expanded += member.size
                 require(expanded <= maximum_bytes, "archive-expanded-size-limit")
-        bundle.extractall(destination, members=members, filter="data")
+        for name in names:
+            require(
+                not any(parent in symlinks for parent in name.parents),
+                "archive-member-beneath-link",
+            )
+
+        destination.mkdir(parents=True, exist_ok=True)
+        directories: list[tuple[Path, int]] = []
+        for member in members:
+            relative = PurePosixPath(member.name)
+            target = destination.joinpath(*relative.parts)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if member.isdir():
+                target.mkdir(exist_ok=True)
+                directories.append((target, member.mode))
+            elif member.isfile():
+                source = bundle.extractfile(member)
+                require(source is not None, "archive-file-unreadable")
+                with source, target.open("xb") as output:
+                    shutil.copyfileobj(source, output, length=1024 * 1024)
+                os.chmod(target, stat.S_IMODE(member.mode))
+            else:
+                os.symlink(member.linkname, target)
+        for directory, mode in reversed(directories):
+            os.chmod(directory, stat.S_IMODE(mode))
     apps = [item for item in destination.iterdir() if item.is_dir() and item.name == "Haven 42.app"]
     require(len(apps) == 1, "app-bundle-layout-invalid")
     executable = apps[0] / "Contents" / "MacOS" / "haven42"
