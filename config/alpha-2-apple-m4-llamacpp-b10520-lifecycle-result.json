@@ -1,0 +1,48 @@
+{
+  "authority": {
+    "changesDefaults": false,
+    "changesPackaging": false,
+    "changesSupport": false
+  },
+  "checks": {
+    "allLayersOffloaded": true,
+    "authenticationRequired": true,
+    "boundedInference": true,
+    "forcedTimeoutObserved": true,
+    "listenerClosed": true,
+    "loopbackOnly": true,
+    "metalDetected": true,
+    "postTimeoutRecovery": true,
+    "restart": true,
+    "webUiDisabled": true
+  },
+  "kind": "haven42-alpha2-macos-llamacpp-lifecycle-result",
+  "metrics": {
+    "durationSeconds": 1.559,
+    "firstCompletionTokens": 5,
+    "recoveryCompletionTokens": 7
+  },
+  "model": {
+    "id": "Qwen3.5-0.8B-Q4_0-GGUF",
+    "sha256": "57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf"
+  },
+  "outcome": "passed",
+  "privacy": {
+    "containsCredential": false,
+    "containsPrivatePath": false,
+    "containsPrompt": false,
+    "containsResponse": false
+  },
+  "profile": {
+    "architecture": "arm64",
+    "hardware": "Apple M4",
+    "memoryGiB": 16,
+    "os": "macOS"
+  },
+  "runtime": {
+    "commit": "cd644c395",
+    "name": "llama.cpp",
+    "serverSha256": "d0878274b8d6bd3c8ea26a78eb66cd1ffd943d007c62b9dff31c8aa99922d713"
+  },
+  "schemaVersion": 1
+}

@@ -55,7 +55,7 @@ def evaluate(cell: Any, policy: dict[str, Any] | None = None) -> dict[str, Any]:
     policy = policy or load_policy()
     _exact_dict(cell, {
         "schemaVersion", "kind", "modelId", "manifestDigest", "runtime",
-        "hardwareProfileId", "surface", "gates", "continueCliPrerequisite",
+        "hardwareProfileId", "surface", "gates",
         "rawPromptsOrResponsesRetained", "privateIdentityRetained",
     }, "cell-shape-invalid")
     if cell["schemaVersion"] != 1 or cell["kind"] != "haven42-coding-agent-evidence-cell":
@@ -99,14 +99,9 @@ def evaluate(cell: Any, policy: dict[str, Any] | None = None) -> dict[str, Any]:
         gate_results.append({"gateId": gate_id, "status": derived})
         all_gates_passed = all_gates_passed and derived == "passed"
 
-    prerequisite = _exact_dict(
-        cell["continueCliPrerequisite"], {"read", "review", "scopedWrite"},
-        "continue-cli-prerequisite-shape-invalid",
-    )
-    if any(status not in allowed for status in prerequisite.values()):
-        raise ScreenError("continue-cli-prerequisite-status-invalid")
-    prerequisite_passed = all(status == "passed" for status in prerequisite.values())
-    eligible = all_gates_passed and prerequisite_passed
+    legacy_surfaces = set(policy["surfaceAdmission"].get("legacyEvidenceOnlySurfaces", []))
+    legacy_surface = surface["id"] in legacy_surfaces
+    eligible = all_gates_passed and not legacy_surface
     return {
         "schemaVersion": 1,
         "kind": "haven42-coding-agent-screen-result",
@@ -116,7 +111,7 @@ def evaluate(cell: Any, policy: dict[str, Any] | None = None) -> dict[str, Any]:
         "codingRecommendationEligible": eligible,
         "automaticDefaultChangeAllowed": False,
         "gateResults": gate_results,
-        "continueCliPrerequisitePassed": prerequisite_passed,
+        "legacyEvidenceOnlySurface": legacy_surface,
     }
 
 

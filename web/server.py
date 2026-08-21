@@ -425,6 +425,7 @@ ATTACHMENT_SAFETY_PROMPT = (
     "tools, shell, filesystem, or process execution are available."
 )
 MODEL_RECOMMENDATIONS_PATH = ROOT / "config" / "text-capability-model-recommendations.json"
+TESTED_MODEL_LIBRARY_PATH = ROOT / "config" / "tested-model-library.json"
 EVIDENCE_CATALOG_PATH = ROOT / "config" / "evidence-catalog.tsv"
 SURFACE_MATRIX_PATH = ROOT / "config" / "agent-surface-capabilities.json"
 SURFACE_SOLUTIONS_PATH = ROOT / "config" / "agent-surface-solutions.json"
@@ -694,6 +695,139 @@ def build_model_decisions(
     }
 
 
+def load_tested_model_library(path: Path = TESTED_MODEL_LIBRARY_PATH) -> tuple[dict[str, Any], ...]:
+    """Load exact hardware qualification profiles without changing recommendation policy."""
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(value, dict)
+            or set(value) != {"schemaVersion", "catalogId", "updatedAt", "evidenceBoundary", "profiles"}
+            or value.get("schemaVersion") != 2
+            or value.get("catalogId") != "haven42.hardware-aware-tested-model-library"
+            or not isinstance(value.get("profiles"), list)
+            or len(value["profiles"]) > 32
+        ):
+            return ()
+        profiles: list[dict[str, Any]] = []
+        profile_ids: set[str] = set()
+        expected_profile_fields = {
+            "id", "platformFamily", "acceleratorVendor", "acceleratorModelPattern",
+            "minimumAcceleratorCount", "minimumGpuMemoryGiB", "minimumSystemMemoryGiB",
+            "runtimeProvider", "runtimeVersion", "hardware", "operatingSystem", "evidence",
+            "models",
+        }
+        for profile in value["profiles"]:
+            if (
+                not isinstance(profile, dict)
+                or set(profile) != expected_profile_fields
+                or not all(isinstance(profile.get(field), str) and profile[field].strip() for field in (
+                    "id", "platformFamily", "acceleratorVendor", "acceleratorModelPattern",
+                    "runtimeProvider", "runtimeVersion", "hardware", "operatingSystem", "evidence",
+                ))
+                or profile["id"] in profile_ids
+                or profile["platformFamily"] not in {"windows", "linux", "macos"}
+                or profile["runtimeProvider"] != "ollama"
+                or any(
+                    isinstance(profile.get(field), bool)
+                    or not isinstance(profile.get(field), (int, float))
+                    or profile[field] <= 0
+                    or profile[field] > maximum
+                    for field, maximum in (
+                        ("minimumAcceleratorCount", 16),
+                        ("minimumGpuMemoryGiB", 1024),
+                        ("minimumSystemMemoryGiB", 4096),
+                    )
+                )
+                or not profile["evidence"].startswith("examples/")
+                or ".." in Path(profile["evidence"]).parts
+                or not (ROOT / profile["evidence"]).is_file()
+                or not isinstance(profile.get("models"), list)
+                or len(profile["models"]) > 128
+                or len(profile["models"]) == 0
+            ):
+                return ()
+            if any(not isinstance(model, str) or not MODEL_NAME.fullmatch(model) for model in profile["models"]):
+                return ()
+            if len(set(profile["models"])) != len(profile["models"]):
+                return ()
+            profile_ids.add(profile["id"])
+            profiles.append({**profile, "models": tuple(profile["models"])})
+        return tuple(profiles)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return ()
+
+
+def build_tested_model_options(
+    catalog: tuple[dict[str, Any], ...], installed_models: list[str],
+    snapshot: dict[str, Any], runtime_version: str,
+) -> dict[str, Any]:
+    """Return only evidence profiles matching the AI execution computer."""
+    platform = snapshot.get("platform", {})
+    accelerators = snapshot.get("accelerators", [])
+    operating_system = str(platform.get("operatingSystem", "")).casefold()
+    system_memory = platform.get("systemMemoryGiB")
+    matching_profiles: list[dict[str, Any]] = []
+    for profile in catalog:
+        matching_accelerators = [
+            accelerator for accelerator in accelerators
+            if profile["acceleratorVendor"].casefold() in str(accelerator.get("vendor", "")).casefold()
+            and profile["acceleratorModelPattern"].casefold() in str(accelerator.get("model", "")).casefold()
+            and isinstance(accelerator.get("memoryGiB"), (int, float))
+            and not isinstance(accelerator.get("memoryGiB"), bool)
+            and accelerator["memoryGiB"] >= profile["minimumGpuMemoryGiB"]
+        ]
+        if (
+            operating_system == profile["platformFamily"]
+            and isinstance(system_memory, (int, float))
+            and not isinstance(system_memory, bool)
+            and system_memory >= profile["minimumSystemMemoryGiB"]
+            and len(matching_accelerators) >= profile["minimumAcceleratorCount"]
+        ):
+            matching_profiles.append(profile)
+
+    if not matching_profiles:
+        return {
+            "schemaVersion": 1,
+            "kind": "hardware-aware-tested-models",
+            "status": "no-matching-evidence",
+            "profile": None,
+            "runtimeVersion": runtime_version,
+            "options": [],
+        }
+
+    # Profiles describe exact evidence cells; prefer the most demanding match.
+    profile = max(matching_profiles, key=lambda item: (
+        item["minimumAcceleratorCount"], item["minimumGpuMemoryGiB"], item["minimumSystemMemoryGiB"],
+    ))
+    installed = set(installed_models)
+    exact_runtime = secrets.compare_digest(runtime_version, profile["runtimeVersion"])
+    validation_status = "tested-exact-profile" if exact_runtime else "tested-hardware-runtime-differs"
+    options = [{
+        "name": model,
+        "status": "installed" if model in installed else "not-installed",
+        "validationStatus": validation_status,
+        "capabilities": sorted(CAPABILITY_PROMPTS),
+        "testProfile": f'{profile["hardware"]} · {profile["operatingSystem"]}',
+        "testedRuntimeVersion": profile["runtimeVersion"],
+        "currentRuntimeVersion": runtime_version,
+        "evidence": profile["evidence"],
+        "installCommand": None if model in installed else f"ollama pull {model}",
+    } for model in profile["models"]]
+    return {
+        "schemaVersion": 1,
+        "kind": "hardware-aware-tested-models",
+        "status": "exact-profile" if exact_runtime else "runtime-differs",
+        "profile": {
+            "id": profile["id"],
+            "hardware": profile["hardware"],
+            "operatingSystem": profile["operatingSystem"],
+            "testedRuntimeVersion": profile["runtimeVersion"],
+        },
+        "runtimeVersion": runtime_version,
+        "options": options,
+    }
+
+
 def bind_managed_model_decisions(
     connected: dict[str, Any],
     selected: dict[str, Any],
@@ -875,6 +1009,7 @@ class HavenState:
     def __init__(
         self,
         recommendation_path: Path = MODEL_RECOMMENDATIONS_PATH,
+        tested_model_library_path: Path = TESTED_MODEL_LIBRARY_PATH,
         readiness_provider: Callable[[], dict[str, Any]] = inspect_system,
         model_catalog_provider: Callable[[str], list[str]] = search_ollama_catalog,
         model_install_provider: Callable[[str, str, ProviderAuthentication], dict[str, Any]] = install_ollama_model,
@@ -935,6 +1070,7 @@ class HavenState:
         self.readiness_snapshot: dict[str, Any] | None = None
         self.readiness_created = 0.0
         self.model_recommendations = load_model_recommendations(recommendation_path)
+        self.tested_model_library = load_tested_model_library(tested_model_library_path)
         self.read_only_workflows = load_read_only_workflows()
         self.package_integrity = verify_packaged_resources()
         self.diagnostics = DiagnosticLogger(APP_VERSION, diagnostic_root)
@@ -2104,6 +2240,28 @@ class HavenState:
             raise WebRequestError(str(error), HTTPStatus.INTERNAL_SERVER_ERROR) from error
         finally:
             self.readiness_lock.release()
+
+    def tested_models_for_connected_hardware(self) -> dict[str, Any]:
+        """Match qualifications to the machine that actually runs the model."""
+        with self.lock:
+            trust_scope = self.trust_scope
+            models = list(self.models)
+            runtime_version = self.ollama_version
+        if trust_scope is None or runtime_version is None:
+            raise WebRequestError("provider-session-unavailable", HTTPStatus.CONFLICT)
+        if trust_scope != "loopback":
+            return {
+                "schemaVersion": 1,
+                "kind": "hardware-aware-tested-models",
+                "status": "remote-hardware-not-verifiable",
+                "profile": None,
+                "runtimeVersion": runtime_version,
+                "options": [],
+            }
+        snapshot = self.inspect_readiness(False)
+        return build_tested_model_options(
+            self.tested_model_library, models, snapshot, runtime_version,
+        )
 
     def setup_plan(self, snapshot_id: str, intent: str) -> dict[str, Any]:
         for operation_id in (
@@ -3427,6 +3585,14 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if body:
                     raise WebRequestError("invalid-provider-session-fields")
                 self._send_json(HTTPStatus.OK, self.server.state.resume_provider_session())
+                return
+            if self.path == "/api/models/tested":
+                if body:
+                    raise WebRequestError("invalid-tested-model-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.tested_models_for_connected_hardware(),
+                )
                 return
             if self.path == "/api/model-search":
                 if (

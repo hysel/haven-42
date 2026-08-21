@@ -1,0 +1,74 @@
+{
+  "appleSocPower": {
+    "gpuActiveResidencyPercent": {
+      "average": 0.481,
+      "maximum": 2.34,
+      "minimum": 0.0,
+      "samples": 10
+    },
+    "kind": "haven42-sanitized-macos-power-summary",
+    "powerMilliwatts": {
+      "ane": {
+        "average": 0.0,
+        "maximum": 0.0,
+        "minimum": 0.0,
+        "samples": 10
+      },
+      "combined": {
+        "average": 53.6,
+        "maximum": 358.0,
+        "minimum": 12.0,
+        "samples": 10
+      },
+      "cpu": {
+        "average": 52.2,
+        "maximum": 358.0,
+        "minimum": 12.0,
+        "samples": 10
+      },
+      "gpu": {
+        "average": 1.5,
+        "maximum": 9.0,
+        "minimum": 0.0,
+        "samples": 10
+      }
+    },
+    "privateIdentityRetained": false,
+    "rawTelemetryRetained": false,
+    "schemaVersion": 1,
+    "thermalPressureLevels": [
+      "nominal"
+    ]
+  },
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "hardwareProfile": {
+    "architecture": "arm64",
+    "backend": "metal",
+    "platformFamily": "macos",
+    "profileId": "apple-m4-16gib-macos26-metal",
+    "systemMemoryGiB": 16.0
+  },
+  "kind": "haven42-sanitized-macos-idle-power-result",
+  "measurementBoundary": "Apple powermetrics CPU/GPU/ANE estimates; not wall-outlet or whole-system energy",
+  "observedAtUtc": "2026-08-21T08:04:09Z",
+  "planCanonicalSha256": "dc051e589d34526f18374666fd2a2a017e60be89c5f792e4a0e8461581d6fe73",
+  "precondition": {
+    "backgroundProcessStateControlled": false,
+    "displayStateControlled": false,
+    "generationWorkloadActive": false,
+    "loadedModels": 0
+  },
+  "privateIdentityRetained": false,
+  "rawTelemetryRetained": false,
+  "release": "0.4.0-alpha.2",
+  "runtime": {
+    "artifactSha256": "6f01ce31e63900437944c6d3d316c34f6c45463a7d4a258ed253a1732e0e6d42",
+    "provider": "ollama",
+    "transport": "ipv4-loopback-only",
+    "version": "0.32.15"
+  },
+  "schemaVersion": 1,
+  "status": "passed"
+}

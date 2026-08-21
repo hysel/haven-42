@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+import subprocess
 import sys
 from unittest.mock import patch
 
@@ -78,6 +79,50 @@ def main() -> int:
     assert contract["displayVersion"] == "Haven 42 0.4 Alpha 2"
     assert contract["publicationAuthorized"] is False
     checks += 3
+    runner = ROOT / "scripts/run-haven42-web-browser-test.py"
+    loader = (
+        "import importlib.util,sys;"
+        "path=sys.argv.pop(1);"
+        "spec=importlib.util.spec_from_file_location('haven42_release_fixture',path);"
+        "module=importlib.util.module_from_spec(spec);"
+        "spec.loader.exec_module(module);"
+        "print(module.haven_web.APP_VERSION)"
+    )
+    for version in (release.ALPHA_1_VERSION, release.ALPHA_2_VERSION):
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                loader,
+                str(runner),
+                "--source-version-for-package-parity",
+                version,
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=True,
+        )
+        assert result.stdout.strip() == version
+        checks += 1
+    invalid = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            loader,
+            str(runner),
+            "--source-version-for-package-parity",
+            "invalid",
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert invalid.returncode != 0
+    assert "invalid choice" in invalid.stderr
+    checks += 1
     print(f"Alpha release identity isolation passed: {checks} checks.")
     return 0
 

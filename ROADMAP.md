@@ -103,9 +103,14 @@ from the overall application version.
 - Security, privacy, accessibility, compatibility, licensing, documentation,
   package parity, and recovery are promotion gates at every stage—not cleanup
   tasks reserved for Beta or RC.
-- Apple Silicon and any other unavailable hardware track remain deferred
-  rather than estimated. Their absence does not block a Windows/Linux release
-  unless that release claims the missing platform.
+- Unavailable hardware tracks remain deferred rather than estimated. Physical
+  Apple M4 qualification has completed its base unattended campaign: nine
+  core-pass artifacts from the frozen 16-model corpus completed independent
+  30-minute Metal soaks with no failures; native repository, power, MLX,
+  llama.cpp, OpenCode, and development-app cells are recorded. Signing,
+  notarization, manual accessibility, interactive Keychain, real updater and
+  uninstall, and the late-candidate addendum remain separate gates. Missing platform
+  evidence does not block a release that does not claim that platform.
 - Dates are added only when the work and evidence make them credible. No stage
   is promoted solely to meet a date, and no promotion changes automatic model
   defaults or release policy without explicit owner approval.
@@ -1353,8 +1358,10 @@ Exit criteria:
    llama.cpp SYCL evidence plus Linux and Windows OpenVINO GenAI evidence.
    A native Windows llama.cpp SYCL attempt passed exact artifact preflight but
    failed model loading after zero-free-memory reporting; a bounded OpenCL
-   fallback fast-failed, so the profile remains rejected. Physical Apple Silicon is
-   owner-parked until hardware is acquired. WSL2 Ubuntu 24.04 now has
+   fallback fast-failed, so the profile remains rejected. Physical Apple M4
+   model and runtime qualification is active; bounded Ollama/Metal and
+   llama.cpp/Metal cells do not yet promote package or automatic-selection
+   support. WSL2 Ubuntu 24.04 now has
    candidate-only llama.cpp HIP/DXG evidence on the RX 7800 XT: all 11 pinned
    artifacts passed the bounded operational matrix with full model-layer
    offload, while the same four passed the strict exact-output cell. This does

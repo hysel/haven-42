@@ -58,8 +58,9 @@ tables so each result can be read without matching rows by hand.
 | Ubuntu Linux, controlled server | NVIDIA Quadro RTX 5000, 16 GB | llama.cpp with CUDA | ✅ Verified | Passed the bounded engine and Haven adapter checks. |
 | Ubuntu Linux, Proxmox container and server | Two NVIDIA Tesla V100 GPUs, 32 GB each | Ollama with CUDA | ✅ Verified | Passed external-server and model checks. |
 | Ubuntu Linux, controlled server | NVIDIA Tesla V100, 32 GB | llama.cpp with CUDA | ✅ Verified | Passed the 11-model operational matrix. |
-| Native macOS, AWS EC2 Mac system | Apple silicon, 16 GB unified memory | Ollama | ✅ Verified | Passed the bounded local-model workflow checks. |
-| Native macOS | Apple silicon | llama.cpp with Metal | ⬜ Not tested | Hardware-specific validation remains parked. |
+| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | Ollama 0.32.15 with Metal | 🧪 Engineering evidence | Sixteen exact artifacts completed the bounded five-gate campaign; nine passed and then completed independent 30-minute soaks with no failures. All 16 OpenCode 1.18.19 coding cells failed at least one required gate. Representative power, exact-source native tests, and development-app browser evidence are recorded; no default or support promotion is granted. |
+| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | llama.cpp commit cd644c395 with Metal | ⚠️ Partial | The pinned Qwen 3.5 0.8B GGUF passed full-layer Metal offload, authenticated loopback inference, timeout recovery, restart, unload, and listener cleanup. Trusted distribution, self-contained packaging, and a maintained coding surface remain open. |
+| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | MLX-LM 0.31.3 | ⚠️ Partial | The pinned Qwen 3.5 0.8B artifact passed offline native generation, Metal-memory proof, timeout recovery, and cleanup. A production server boundary, self-contained packaging, and a maintained coding surface remain open. |
 | Proxmox VE 9.2, physical host | Two Tesla V100 32 GB GPUs and one Quadro RTX 5000 16 GB GPU | Virtualization and passthrough host | 🧪 Engineering evidence | Used as test infrastructure; this does not establish an end-user runtime route. |
 
 ## Detailed records

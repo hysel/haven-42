@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-apple-silicon-model-qualification-plan",
+  "release": "0.4.0-alpha.2",
+  "status": "qualification-only-no-product-promotion",
+  "inventoryBinding": {
+    "path": "config/alpha-2-model-version-inventory.json",
+    "canonicalSha256": "3ce33553ff93e8ff8017074d3c19c3960a9b07bb4ecb097a216517b9cd7a75ea"
+  },
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.15",
+    "artifact": "Ollama-darwin.zip",
+    "artifactSha256": "6f01ce31e63900437944c6d3d316c34f6c45463a7d4a258ed253a1732e0e6d42",
+    "transport": "ipv4-loopback-only"
+  },
+  "hardwareProfile": {
+    "id": "apple-m4-16gib-macos26-metal",
+    "platformFamily": "macos",
+    "architecture": "arm64",
+    "acceleratorVendor": "Apple",
+    "acceleratorFamily": "M4",
+    "backend": "metal",
+    "minimumSystemMemoryGiB": 15,
+    "minimumMemoryReserveGiB": 3
+  },
+  "testContract": {
+    "version": 2,
+    "generalChat": "exact-token",
+    "contentWrite": "one-sentence-6-to-18-words-required-word",
+    "contentSummarize": "one-sentence-6-to-24-words-exact-fact-labels",
+    "structuredTool": "exact-single-read-file-call",
+    "structuredCode": "exact-path-json-compile-and-execute"
+  },
+  "rules": {
+    "pullOnlyAfterOwnerApproval": true,
+    "ownerApprovalRecorded": true,
+    "unloadAfterEveryCell": true,
+    "removeOnlyModelsPulledByThisRun": true,
+    "rawPromptsOrResponsesRetained": false,
+    "privateIdentityRetained": false,
+    "automaticDefaultChangeAllowed": false,
+    "automaticSelectionEvidenceAllowed": false,
+    "automaticSupportChangeAllowed": false,
+    "maintainedCodingSurfaceEvidenceRequiredForCodingRecommendation": true,
+    "continueEvidenceMayBeUsedForNewRecommendation": false
+  },
+  "candidates": [
+    {
+      "modelId": "gemma4-12b-qat",
+      "model": "gemma4:12b-it-qat",
+      "manifestDigest": "38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+      "modelBytes": 6975877728
+    }
+  ]
+}

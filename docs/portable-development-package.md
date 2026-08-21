@@ -13,8 +13,18 @@ py -3.14 -m venv .venv-build
 python scripts/build-portable-development-package.py
 ```
 
-On Linux or macOS, use `.venv-build/bin/python` in place of the Windows
-executable. The final build command may use the ordinary system `python`: the
+On Linux, use `.venv-build/bin/python` in place of the Windows executable. On
+macOS, create the environment with copies because the builder intentionally
+rejects interpreters reached through symbolic links:
+
+```text
+/path/to/python3.14 -m venv --copies .venv-build
+.venv-build/bin/python -m pip install --require-hashes -r package/requirements-build.txt
+```
+
+These are build-host instructions only. People running the packaged Haven 42
+app do not install or manage Python, PyInstaller, Node.js, or a virtual
+environment. The final build command may use the ordinary system `python`: the
 builder accepts it only when isolated Python 3.14.6 and PyInstaller 6.21.0 are
 both available there. Otherwise it validates and delegates automatically to
 the repository-local `.venv-build`. Stale per-user package metadata cannot
@@ -41,10 +51,16 @@ python scripts/build-portable-development-package.py --update-resource-integrity
 Protected resources and the manifest use repository-enforced LF bytes so
 caller Git line-ending settings cannot silently change packaged identities.
 
-The ordinary Windows command continues to build Alpha 1. The separate,
-explicit Windows Alpha 2 build and candidate-assembly commands are documented
-in [[Windows Alpha 2 Build|Windows-Alpha-2-Build]]. They cannot publish or
-replace a release.
+The ordinary Windows and macOS commands continue to build Alpha 1. They are
+unchanged. An explicit, separate macOS Alpha 2 development build uses:
+
+```text
+.venv-build/bin/python scripts/build-portable-development-package.py --release-line alpha2 --output dist/portable-macos-alpha2
+```
+
+The separate Windows Alpha 2 build and candidate-assembly commands are
+documented in [[Windows Alpha 2 Build|Windows-Alpha-2-Build]]. These explicit
+development builds cannot publish or replace a release.
 
 The native executable is under `dist/portable/bundle/haven42/`. It accepts `--port` and `--no-open`. Port `0` asks the operating system for an unused loopback port. The build also creates a platform archive and evidence in `dist/portable/artifacts/`.
 
@@ -58,6 +74,33 @@ inventory or archive creation, every package link must resolve inside the
 one-folder bundle; an external or missing target fails the build.
 
 These outputs are unsigned development artifacts. They are not installers or production releases. Antivirus and operating-system reputation prompts are possible because signing and notarization are deliberately outside this batch.
+
+On macOS, the exact one-folder build can also be wrapped in a conventional
+`Haven 42.app` development bundle:
+
+```sh
+python3 scripts/build-macos-development-app.py \
+  --source-package dist/portable-macos-alpha2/bundle/haven42 \
+  --output dist/macos-development-app \
+  --version 0.4.0-alpha.2
+```
+
+This wrapper keeps the embedded Python runtime, so the person opening Haven 42
+does not install or manage Python. It adds a Finder-friendly application layout,
+an exact file inventory, archive checksums, and an explicit development-only
+trust record. The bundle is a single-instance background app because the actual
+interface opens in the browser; this avoids a second empty app window or a
+duplicate local server. It does not grant installer, Developer ID signing, notarization,
+Gatekeeper, updater, or public-release approval. Those remain required physical
+Mac and release gates.
+
+Verify the app bundle, its inventory, its archive, and its checksums before any
+physical-Mac test:
+
+```sh
+python3 scripts/validate-macos-development-app.py \
+  dist/macos-development-app
+```
 
 Windows builds also embed deterministic executable identity metadata:
 ProductName and FileDescription `Haven 42`, the explicitly selected Alpha
@@ -195,3 +238,27 @@ candidate are still required before public binary promotion.
 The existing installation broker remains simulation-only and explicitly rejects renderer-supplied package paths and hashes as unknown authority. Install, upgrade, and uninstall planning require compatible simulated current state and an exact promotion-evidence shape, but even complete booleans cannot grant authority. The updater remains offline-only: byte-policy tests include same-size mutation and truncated-package rejection, while the separate 45-case lifecycle simulator covers compatibility, healthy and failed health checks, interrupted phase-specific recovery, candidate-digest replay, retained-version collision, rollback, retention, disabled mode, and hostile journals. Neither policy can query a release, download, write, stage, activate, roll back, clean, install, terminate a process, or modify a machine. The portable package adds no call path to either foundation.
 
 Signing, notarization, installer creation, public release publication, automatic updates, and production-readiness claims remain explicit stop gates.
+
+## Physical Apple M4 development-package result
+
+On August 20, 2026, an exact macOS arm64 Alpha 2 development archive built
+with isolated CPython 3.14.6 and PyInstaller 6.21.0 passed source/package
+parity, relocation, read-only startup, abrupt-exit recovery, repeated
+lifecycle, occupied-port refusal, shutdown-authority, hostile-environment, and
+resource-integrity tests on a physical Apple M4 Mac with 16 GB unified memory.
+
+The evidence binds a modified-source snapshot rather than claiming that the
+base Git commit is the exact source. The Mach-O executable is native arm64 and
+its ad-hoc signature structure verifies, but it is not Developer ID signed or
+notarized and Gatekeeper rejects it. This is development-package evidence, not
+a public macOS release or automatic-update artifact. The sanitized
+machine-readable result is
+`config/alpha-2-apple-m4-portable-package-result.json`.
+
+A later self-contained arm64 development-app build also passed 616 physical
+Chrome checks covering the packaged flow, bounded attachments, automated
+accessibility behavior, and the local privacy boundary, together with the
+portable lifecycle gates above. Its sanitized result is
+`config/alpha-2-apple-m4-development-app-result.json`. That exact app remains
+unsigned and unnotarized, Gatekeeper does not admit it, and manual assistive-
+technology plus clean-machine beginner review remain open.

@@ -41,4 +41,33 @@ This is native hosted-source availability evidence only. It does not prove a
 physical Mac, packaged parity, Keychain access, a locked or unlocked Keychain,
 item lifecycle behavior, or saved conversation history.
 
+## Physical Apple M4 availability result
+
+On August 20, 2026, the same operation-free source probe returned the exact
+`tool-responsive` public result on a physical Apple M4 Mac running macOS
+26.6.2. The probe did not list, open, or unlock a Keychain; read, create,
+change, or delete an item; show a system prompt; open a database; or retain raw
+command output.
+
+This closes only the physical-host command-availability cell. Interactive
+synthetic-item lifecycle, locked/denied behavior, application integration,
+source-versus-package parity, encrypted-history lifecycle, and production
+admission remain open.
+
+## Unattended synthetic-item result
+
+On August 20, 2026, the separately approved synthetic lifecycle runner tried
+the fixed validation-only item from an unattended SSH session. The initial
+collision check confirmed that no such item existed, but macOS denied item
+creation. The runner retained no secret or raw system output, created no
+production admission, and recorded the cell as `blocked` rather than passing
+it. The sanitized result is
+`config/alpha-2-apple-m4-keychain-lifecycle-result.json`.
+
+This is useful fail-closed evidence: an unattended administrative connection
+cannot stand in for the interactive application session an end user will use.
+The create/read/update/delete/absence lifecycle, locked and denied recovery,
+packaged parity, and encrypted-history integration still require an
+interactive physical-Mac test.
+
 Reference: [Apple Keychain Services documentation](https://developer.apple.com/documentation/security/keychain-services).

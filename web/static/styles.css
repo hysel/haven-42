@@ -574,9 +574,34 @@ summary { cursor: pointer; font-size: 12px; }
 .chat-panel > .panel-heading { flex: 0 0 auto; padding: 24px 24px 0; }
 .chat-panel > .workflow-planner { overflow-y: auto; }
 .text-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px; }
-.task-mode-select { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.task-mode-select { position: relative; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .task-mode-select select { min-width: 150px; height: 36px; padding: 8px 34px 8px 10px; }
 .task-mode-select small { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.task-mode-picker { position: relative; min-width: 190px; }
+.task-mode-button {
+  width: 100%; min-height: 44px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 10px 13px; color: var(--ink); border: 1px solid transparent; border-radius: 8px;
+  background: rgba(9, 13, 12, 0.64); font: 650 var(--select-font-size)/1.3 ui-sans-serif, system-ui, sans-serif;
+  text-align: left; cursor: pointer;
+}
+.task-mode-button:hover { border-color: rgba(98, 230, 198, 0.32); background: rgba(15, 25, 23, 0.92); }
+.task-mode-chevron { width: 8px; height: 8px; flex: 0 0 auto; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform 120ms ease; }
+.task-mode-button[aria-expanded="true"] .task-mode-chevron { transform: translateY(2px) rotate(225deg); }
+.task-mode-options {
+  position: absolute; z-index: 40; top: calc(100% + 6px); left: 0; width: min(320px, calc(100vw - 40px));
+  padding: 6px; border: 1px solid rgba(151, 191, 185, 0.28); border-radius: 8px;
+  background: #101918; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.42); white-space: normal;
+}
+.task-mode-option {
+  position: relative; width: 100%; min-height: 52px; display: grid; gap: 3px; padding: 8px 34px 8px 10px;
+  color: var(--ink); border: 0; border-radius: 6px; background: transparent; text-align: left; cursor: pointer;
+}
+.task-mode-option > span { font-size: var(--select-font-size); font-weight: 700; line-height: 1.3; }
+.task-mode-option > small { position: static; width: auto; height: auto; margin: 0; overflow: visible; clip: auto; color: var(--muted); font-size: 0.75rem; font-weight: 500; line-height: 1.35; white-space: normal; }
+.task-mode-option:hover,
+.task-mode-option:focus-visible { background: rgba(98, 230, 198, 0.09); }
+.task-mode-option[aria-selected="true"] { color: var(--accent); background: rgba(98, 230, 198, 0.07); }
+.task-mode-option[aria-selected="true"]::after { content: "✓"; position: absolute; top: 50%; right: 12px; transform: translateY(-50%); font-weight: 800; }
 .text-size-controls { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 4px; }
 .text-size-button { width: 32px; min-height: 32px; padding: 0; color: var(--muted); border-color: rgba(151, 191, 185, 0.18); background: rgba(4, 12, 13, 0.45); font: 700 12px/1 ui-sans-serif, system-ui, sans-serif; }
 .text-size-button:hover:not(:disabled), .text-size-button:focus-visible { color: var(--accent); border-color: rgba(98, 230, 198, 0.45); }

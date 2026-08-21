@@ -109,9 +109,10 @@ def expected_app_version(
         raise ArtifactVerificationError("invalid-build-provenance") from error
     if requested_version is None:
         return default
-    allowed = {default}
-    if operating_system == "windows":
-        allowed.add("0.4.0-alpha.2")
+    # Alpha 2 is an explicit opt-in release line on every supported build
+    # platform.  Keep each platform default unchanged while allowing the
+    # builder's explicit --release-line alpha2 output to verify consistently.
+    allowed = {default, "0.4.0-alpha.2"}
     if requested_version not in allowed:
         raise ArtifactVerificationError("invalid-build-provenance")
     return requested_version
@@ -729,6 +730,7 @@ def run_self_tests() -> None:
         else:
             raise AssertionError("expected unsupported platform rejection")
         assert expected_app_version("windows", "0.4.0-alpha.2") == "0.4.0-alpha.2"
+        assert expected_app_version("darwin", "0.4.0-alpha.2") == "0.4.0-alpha.2"
         try:
             expected_app_version("linux", "0.4.0-alpha.1")
         except ArtifactVerificationError as error:

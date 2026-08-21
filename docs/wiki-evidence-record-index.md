@@ -19,6 +19,7 @@ them by hand; update the catalog and run the generator.
 | [Aider CLI realistic scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-eee8463c09ed1a53) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
 | [Aider CLI richer disposable scoped-edit validation](https://github.com/hysel/haven-42/wiki/Evidence-Record-c836e3b6f82ceb6c) | `write-smoke-validated` | Windows · Ollama · qwen3-coder:30b |
 | [Aider and OpenCode candidate lifecycle plans](https://github.com/hysel/haven-42/wiki/Evidence-Record-4c8889255c609520) | `static-validated` | Cross-platform · No provider invocation · no-model |
+| [Apple M4 16 GB OpenCode 1.18.19 16-model coding screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-713bc8ce611cbfe3) | `failed-validation` | macOS 26.6.2 · Ollama 0.32.15 Metal · 16-exact-manifest-corpus |
 | [Continue CLI model test harness](https://github.com/hysel/haven-42/wiki/Evidence-Record-c48f68ae267ddaeb) | `validated-by-tests` | Cross-platform · N/A · N/A |
 | [Gemma 3 1B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-23ddebcd60acad2e) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · gemma3:1b-it-q4_K_M |
 | [Granite 4.1 30B coding workflow screen](https://github.com/hysel/haven-42/wiki/Evidence-Record-0c002ac81e91a029) | `failed-validation` | Windows controller and Ubuntu 24.04.4 CUDA model host · Ollama 0.32.13 · granite4.1:30b |
@@ -72,6 +73,8 @@ them by hand; update the catalog and run the generator.
 | [Conversation-history encryption dependency review](https://github.com/hysel/haven-42/wiki/Evidence-Record-afdeb35698fc13c1) | `candidate-only` | Cross-platform · SQLCipher Community and Python bindings · none |
 | [Linux credential-store availability boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-3032fff46e49e400) | `candidate-only` | Linux · freedesktop credential-store candidate · none |
 | [Linux credential-store native headless availability](https://github.com/hysel/haven-42/wiki/Evidence-Record-56ca94fba5185607) | `partial-pass` | Linux headless container session · freedesktop credential-store candidate · none |
+| [Physical Apple M4 Keychain command availability boundary](https://github.com/hysel/haven-42/wiki/Evidence-Record-e9f4fda429cdc626) | `partial-pass` | macOS 26.6.2 · Apple Keychain Services candidate · none |
+| [Physical Apple M4 unattended synthetic Keychain lifecycle](https://github.com/hysel/haven-42/wiki/Evidence-Record-32a2affd636fbbf9) | `failed-validation` | macOS 26.6.2 · Apple Keychain Services candidate · fixed-validation-item |
 | [Windows conversation-history per-user ACL primitive](https://github.com/hysel/haven-42/wiki/Evidence-Record-0005faabe699fcf7) | `partial-pass` | Windows · Windows protected DACL · none |
 | [Windows conversation-history synthetic key protection](https://github.com/hysel/haven-42/wiki/Evidence-Record-780b76332e1a0df4) | `partial-pass` | Windows · Windows DPAPI current user · none |
 | [Windows wrapped-key temporary persistence](https://github.com/hysel/haven-42/wiki/Evidence-Record-01c8b74c82919604) | `partial-pass` | Windows · Windows DPAPI current user · none |
@@ -123,6 +126,8 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Apple M4 16 GB MLX-LM lifecycle](https://github.com/hysel/haven-42/wiki/Evidence-Record-e3d838e6e2d03596) | `partial-pass` | macOS 26.6.2 · MLX 0.32.1 Metal · mlx-community/Qwen3.5-0.8B-OptiQ-4bit@ef605869 |
+| [Apple M4 16 GB llama.cpp lifecycle](https://github.com/hysel/haven-42/wiki/Evidence-Record-6c65da7ee449d0dd) | `partial-pass` | macOS 26.6.2 · llama.cpp Metal · Qwen3.5-0.8B-Q4_0-GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
 | [OpenVINO GenAI on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-05d02ca020d00629) | `partial-pass` | Windows · direct library API · OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
 | [OpenVINO GenAI on Intel Arc B580](https://github.com/hysel/haven-42/wiki/Evidence-Record-13d3451c24d5c713) | `partial-pass` | Linux · direct library API · OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
 | [llama.cpp 11-model identical-byte AMD/NVIDIA matrix](https://github.com/hysel/haven-42/wiki/Evidence-Record-d2ac550dc4f53937) | `partial-pass` | Windows and Linux · direct process · revision-and-sha256-pinned-11-model-corpus |
@@ -193,6 +198,8 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Apple M4 16 GB 16-model bounded qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-71fdc1d4cefe7305) | `partial-pass` | macOS 26.6.2 · Ollama · 16-exact-manifest-corpus |
+| [Apple M4 16 GB nine-model reliability soak](https://github.com/hysel/haven-42/wiki/Evidence-Record-6a2e6287439189e8) | `partial-pass` | macOS 26.6.2 · Ollama · nine-core-pass-exact-artifacts |
 | [Gemma 3 1B Q4 on Ollama 0.32.13 Linux CUDA](https://github.com/hysel/haven-42/wiki/Evidence-Record-b1e852d6e517e410) | `partial-pass` | Ubuntu 24.04.4 · Ollama · gemma3:1b-it-q4_K_M |
 | [Gemma 4 E2B QAT on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-9ee9709513adee19) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · gemma4:e2b-qat |
 | [Gemma 4 E4B QAT on Radeon RX 5700 XT](https://github.com/hysel/haven-42/wiki/Evidence-Record-be0a1992c6629cd9) | `partial-pass` | Ubuntu 26.04 LTS · Ollama Vulkan RADV · gemma4:e4b-qat |
@@ -221,6 +228,7 @@ them by hand; update the catalog and run the generator.
 | [Radeon RX 7800 XT 17-model Ollama 0.32.9 recertification](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad991e5601c892ec) | `partial-pass` | Windows 11 · Ollama · 17 exact manifest-pinned models |
 | [Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-65198375e7df9abe) | `partial-pass` | Ubuntu 26.04 LTS · Ollama · digest-pinned-eight-model-corpus |
 | [Ubuntu NVIDIA GeForce RTX 3060 12 GB 19-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-f5989f6fc215258e) | `partial-pass` | Ubuntu 26.04 LTS · Ollama · digest-pinned-19-model-corpus |
+| [Windows NVIDIA GeForce GTX 1650 Super 4 GB eight-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-a31a3f4055c25ef1) | `partial-pass` | Windows 11 · Ollama · digest-pinned-eight-model-corpus |
 ## Model Quantization
 
 | Evidence | Status | Tested environment |
@@ -273,17 +281,29 @@ them by hand; update the catalog and run the generator.
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Physical Apple M4 Alpha 2 development app browser flow](https://github.com/hysel/haven-42/wiki/Evidence-Record-d5ea2428d99b1560) | `partial-pass` | macOS 26.6.2 · Self-contained PyInstaller runtime · none |
+| [Physical Apple M4 Alpha 2 portable development package](https://github.com/hysel/haven-42/wiki/Evidence-Record-a3ffc5fb42c08cc4) | `partial-pass` | macOS 26.6.2 · Self-contained PyInstaller runtime · none |
 | [Windows Alpha 2 current UI package parity](https://github.com/hysel/haven-42/wiki/Evidence-Record-2589000e63822b5e) | `partial-pass` | Windows 11 · local web runtime · none |
+## Platform Compatibility
+
+| Evidence | Status | Tested environment |
+| --- | --- | --- |
+| [Physical Apple M4 exact-source native full suite](https://github.com/hysel/haven-42/wiki/Evidence-Record-e0ff8b838482c84e) | `validated-by-tests` | macOS 26.6.2 · Self-contained test toolchain · none |
 ## Power Evidence
 
 | Evidence | Status | Tested environment |
 | --- | --- | --- |
+| [Apple M4 16 GB Ministral 3 8B bounded power sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-0ca29f0fa9fbdcdb) | `partial-pass` | macOS 26.6.2 · Ollama 0.32.15 Metal · ministral-3:8b-instruct-2512-q4_K_M@1922accd5827ebe6829e536369195db25eaf664528dc66206d646ea3bb386b71 |
+| [Apple M4 16 GB Qwen 3.5 2B bounded power sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-157bfe9c7bf20597) | `partial-pass` | macOS 26.6.2 · Ollama 0.32.15 Metal · qwen3.5:2b@324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df |
+| [Apple M4 16 GB Qwen 3.5 4B bounded power sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-f955c93a1ebd4164) | `partial-pass` | macOS 26.6.2 · Ollama 0.32.15 Metal · qwen3.5:4b@2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd |
+| [Apple M4 16 GB idle Apple SoC sample](https://github.com/hysel/haven-42/wiki/Evidence-Record-cea92a2e0ac35bf8) | `partial-pass` | macOS 26.6.2 · Ollama 0.32.15 Metal · no-loaded-model |
 | [NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-58d8481eef7a394b) | `partial-pass` | Windows 11 · Ollama 0.32.14 CUDA · 14-model-passed-soak-corpus |
 | [Radeon RX 5700 XT Llama 3.2 3B board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-9a9906ccfd247313) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · llama3.2:3b-instruct-q4_K_M |
 | [Radeon RX 5700 XT Qwen 3.5 0.8B Windows llama.cpp paced-soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-0b86ce2eeb867f1f) | `partial-pass` | Windows 10.0.26200.8973 · llama.cpp b10375 Vulkan AMD proprietary 26.7.1 · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
 | [Radeon RX 5700 XT Qwen 3.5 0.8B llama.cpp board power](https://github.com/hysel/haven-42/wiki/Evidence-Record-2aa29208b11bc71d) | `partial-pass` | Ubuntu 26.04 LTS · llama.cpp b10375 Vulkan RADV · Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
 | [Ubuntu NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-60b8a8cd266e76e3) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 CUDA · five-model-passed-soak-corpus |
 | [Ubuntu NVIDIA GeForce RTX 3060 12 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-ad94c1f53c81365c) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 CUDA · 19-model-passed-soak-corpus |
+| [Windows NVIDIA GeForce GTX 1650 Super 4 GB mixed-task model soak power](https://github.com/hysel/haven-42/wiki/Evidence-Record-00b72ba071ebf282) | `partial-pass` | Windows 11 · Ollama 0.32.14 CUDA · three-model-passed-soak-corpus |
 ## Remote Profile
 
 | Evidence | Status | Tested environment |

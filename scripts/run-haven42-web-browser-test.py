@@ -4,13 +4,34 @@
 from __future__ import annotations
 
 import hashlib
+import argparse
 import sys
 import tempfile
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "web"))
+
+
+def select_source_release_for_package_parity(argv: list[str]) -> list[str]:
+    """Select an explicit source release only for the package parity fixture."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument(
+        "--source-version-for-package-parity",
+        choices=("0.4.0-alpha.1", "0.4.0-alpha.2"),
+    )
+    args, remaining = parser.parse_known_args(argv)
+    if args.source_version_for_package_parity:
+        import alpha_release
+
+        selected = args.source_version_for_package_parity
+        alpha_release.application_version = lambda: selected
+    return remaining
+
+
+sys.argv[1:] = select_source_release_for_package_parity(sys.argv[1:])
 import server as haven_web  # noqa: E402
 
 
@@ -102,9 +123,65 @@ def software_updates() -> dict:
     }
 
 
+def readiness() -> dict:
+    """Return a deterministic hardware fixture for browser-only UI coverage."""
+    return {
+        "schemaVersion": 1,
+        "kind": "system-readiness",
+        "snapshotId": "browser-test-snapshot-0001",
+        "platform": {
+            "operatingSystem": "windows",
+            "architecture": "amd64",
+            "logicalProcessors": 16,
+            "systemMemoryGiB": 32.0,
+            "availableStorageGiB": 512.0,
+        },
+        "accelerators": [{
+            "vendor": "AMD",
+            "model": "AMD Radeon RX 7800 XT",
+            "memoryGiB": 16.0,
+            "memoryType": "dedicated",
+            "state": "detected",
+            "source": "fixture",
+            "confidence": "high",
+        }],
+        "software": [
+            {
+                "componentId": "python", "state": "validated", "version": "3.14",
+                "source": "fixture", "confidence": "high",
+            },
+            {
+                "componentId": "ollama", "state": "not-detected", "version": None,
+                "source": "fixture", "confidence": "high",
+            },
+            {
+                "componentId": "amd-runtime", "state": "not-detected", "version": None,
+                "source": "fixture", "confidence": "high",
+            },
+        ],
+        "installedModels": [],
+        "warnings": [],
+        "effects": {
+            "networkUsed": False,
+            "filesWritten": False,
+            "installationPerformed": False,
+            "elevationRequested": False,
+            "servicesChanged": False,
+            "driversChanged": False,
+        },
+        "privacy": {
+            "persisted": False,
+            "rawProbeOutputReturned": False,
+            "hostIdentityIncluded": False,
+            "privatePathsIncluded": False,
+        },
+    }
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory(prefix="haven42-browser-diagnostics-") as temporary:
         state = haven_web.HavenState(
+            readiness_provider=readiness,
             diagnostic_root=Path(temporary) / "Haven42-Logs",
             managed_setup_state_root=Path(temporary) / "Haven42-Data",
             research_query_provider=research_query,

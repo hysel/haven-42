@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-nvidia-gtx1650-super-windows-qualification-result",
+  "release": "0.4.0-alpha.2",
+  "observedThroughUtc": "2026-08-20T01:11:14Z",
+  "status": "exact-profile-engineering-evidence-complete",
+  "environment": {
+    "operatingSystem": "Windows 11",
+    "accelerator": "NVIDIA GeForce GTX 1650 Super 4 GB",
+    "driverVersion": "610.88",
+    "backend": "cuda",
+    "systemMemoryGiB": 31
+  },
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.14",
+    "releaseAdmission": "admitted"
+  },
+  "qualificationProfileId": "cuda-4gib-system-16gib",
+  "sourceBindings": {
+    "inventory": {
+      "path": "config/alpha-2-model-version-inventory.json",
+      "canonicalSha256": "3ce33553ff93e8ff8017074d3c19c3960a9b07bb4ecb097a216517b9cd7a75ea"
+    },
+    "matrix": {
+      "path": "config/alpha-2-model-qualification-matrix.json",
+      "canonicalSha256": "22adfd854f58b77490fd9c7c2b9e303bf419938c8e5082043f09b1a1871f8686"
+    },
+    "coreValidator": {
+      "path": "scripts/alpha2-linux-model-validation.py",
+      "sha256": "fce0deb91b3437f99e9e1986c49f183189e39dfc6b90db6c2c44f1689995bf5e"
+    },
+    "soakValidator": {
+      "path": "scripts/alpha2-linux-soak.py",
+      "sha256": "9b3ceef97b49e1e3b5478c026fbf203f5382614ea7a490b7d724c9f0c2c84002"
+    }
+  },
+  "collectionProtocol": {
+    "executedOrchestrator": "retained-outside-repository",
+    "reason": "The executed controller included private connection material and is not a public reproducibility artifact.",
+    "telemetryIntervalSeconds": 1,
+    "preIdleSeconds": 300,
+    "postIdleSeconds": 300
+  },
+  "counts": {
+    "exactArtifactsChecked": 8,
+    "coreTaskGatePassed": 3,
+    "coreTaskGateFailed": 5,
+    "thirtyMinuteSoaksPassed": 3,
+    "thirtyMinuteSoaksFailed": 0
+  },
+  "modelsPassed": [
+    "qwen35-08b-q8",
+    "gemma3-1b-q4",
+    "minicpm-v46-1b-q4"
+  ],
+  "modelsStoppedAtResidencyGate": [
+    "qwen35-2b-q8",
+    "granite41-3b-q4",
+    "phi4-mini-38b-q4",
+    "llama32-3b-q4",
+    "ministral3-3b-q4"
+  ],
+  "coreTaskGate": {
+    "samplesPerCapability": 3,
+    "capabilities": ["general.chat", "content.write", "content.summarize"],
+    "passed": 3,
+    "failed": 5,
+    "failureReason": "cuda-full-residency-not-observed",
+    "unloadRequiredAfterEverySample": true
+  },
+  "soak": {
+    "requestedMinutesPerModel": 30,
+    "intervalSeconds": 30,
+    "startedAtUtc": "2026-08-19T23:36:13Z",
+    "completedAtUtc": "2026-08-20T01:06:14Z",
+    "passed": 3,
+    "failed": 0,
+    "unloadRequiredAfterEverySample": true
+  },
+  "power": {
+    "telemetrySource": "nvidia-smi",
+    "scope": "gpu-board-only",
+    "telemetrySampleCount": 6437,
+    "telemetrySha256": "b0c0a776b7b9fbc747d4336413c3cf2a1797940b69730ad9fa4a3805f06ebfc1",
+    "preIdle": {"sampleCount": 295, "averageWatts": 8.210},
+    "postIdle": {"sampleCount": 297, "averageWatts": 8.170},
+    "mixedTaskAverageWattsRange": [13.058, 13.843],
+    "mixedTaskPeakWattsRange": [50.35, 67.28],
+    "perModel": {
+      "qwen35-08b-q8": {"sampleCount": 1778, "averageWatts": 13.843, "peakWatts": 67.28, "energyWh": 6.922},
+      "gemma3-1b-q4": {"sampleCount": 1780, "averageWatts": 13.264, "peakWatts": 57.27, "energyWh": 6.633},
+      "minicpm-v46-1b-q4": {"sampleCount": 1778, "averageWatts": 13.058, "peakWatts": 50.35, "energyWh": 6.529}
+    },
+    "includesCpuRamStorageCoolingDisplayOrPsuLosses": false
+  },
+  "evidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+  "containsPrivateMachineIdentity": false,
+  "containsNetworkIdentity": false,
+  "containsRawPromptsOrResponses": false,
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": true,
+  "automaticSupportChangeAllowed": false
+}

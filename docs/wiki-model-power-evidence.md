@@ -16,7 +16,9 @@ local model may fit their computer and electricity budget.
 | AMD Radeon RX 7800 XT 16 GiB | Qwen 3.5 9B Q4_K_M · Ollama 0.32.5 | Adrenalin GPU board power across a 30-minute soak | 40.084 W average, 261 W peak, 20.142 Wh; 15.882 W idle-adjusted average | Accepted exact-profile energy measurement |
 | AMD Radeon RX 5700 XT 8 GiB | Llama 3.2 3B Q4_K_M · Ollama 0.32.13 Vulkan on Ubuntu 26.04 | Linux `power1_average` GPU-board sensor across two-minute idle, ten-minute active, and two-minute cooldown windows | 7.575 W idle average, 122.118 W active average, 242 W peak, 20.350129 Wh active; 2,134.188 output tokens/Wh | Exact-profile engineering evidence |
 | NVIDIA GeForce GTX 1650 Super 4 GiB | Five exact artifacts · Ollama 0.32.14 CUDA on Ubuntu 26.04 | One-second GPU-board telemetry across pre-idle, five independent 30-minute mixed-task soaks, and post-idle | 8.360 W pre-idle average, 8.203 W post-idle average; model-window averages 12.585–16.208 W and peaks 48.88–103.74 W | Exact-profile engineering evidence |
+| NVIDIA GeForce GTX 1650 Super 4 GiB | Three exact artifacts · Ollama 0.32.14 CUDA on Windows 11 | One-second GPU-board telemetry across pre-idle, three independent 30-minute mixed-task soaks, and post-idle | 8.210 W pre-idle average, 8.170 W post-idle average; model-window averages 13.058–13.843 W and peaks 50.35–67.28 W | Exact-profile engineering evidence |
 | NVIDIA GeForce RTX 3060 12 GiB | 19 exact artifacts · Ollama 0.32.14 CUDA on Ubuntu 26.04 | One-second GPU-board telemetry across pre-idle, 19 independent 30-minute mixed-task soaks, and post-idle | 13.962 W pre-idle average, 14.175 W post-idle average; model-window averages 23.577–32.876 W and peaks 56.54–139.18 W | Exact-profile engineering evidence |
+| Apple M4 with 16 GiB unified memory | Idle plus Qwen 3.5 2B Q8, Qwen 3.5 4B Q4, and Ministral 3 8B Q4 · Ollama 0.32.15 Metal on macOS 26.6.2 | Ten Apple `powermetrics` samples per cell; model cells included bounded generation, Metal residency, unload, and cleanup | Combined CPU/GPU/ANE averages: 0.054 W idle, 9.720 W small, 13.363 W medium, and 13.543 W large; every cell reported nominal thermal pressure | Exact-profile Apple SoC estimates; idle background/display state was not controlled; not wall or whole-system power |
 
 ## Measurement coverage
 
@@ -28,7 +30,7 @@ the campaign. The machine-readable coverage source is
 
 | Graphics hardware | Reference measurement | What remains |
 | --- | --- | --- |
-| GeForce GTX 1650 Super 4 GiB | Measured | The Ubuntu 26.04 CUDA record covers five passing small-model soak windows. Windows, another driver/runtime, and other 4 GiB NVIDIA cards remain separate cells. |
+| GeForce GTX 1650 Super 4 GiB | Measured | Separate Ubuntu 26.04 and Windows 11 CUDA records cover five and three passing small-model soak windows respectively. Another driver/runtime and other 4 GiB NVIDIA cards remain separate cells. |
 | GeForce RTX 3060 12 GiB | Measured | Separate Windows and Ubuntu 26.04 GPU-board records are available; another operating system, driver, runtime, or workload remains a separate cell. |
 | Quadro RTX 5000 16 GiB | Measured | Add another exact-profile record when the model, runtime, driver, workload, or operating system changes. |
 | Tesla V100 32 GiB | Measured | Single-card and two-card records are available and remain separate exact-profile measurements. |
@@ -89,6 +91,7 @@ fixed charges, and the rest of the computer may change the actual cost.
 - [Intel Arc B580 Granite evidence](Intel-B580-Granite41-8B-Validation)
 - [AMD RX 7800 XT power evidence](Windows-AMD-RX7800XT-Power-Validation)
 - [AMD RX 5700 XT Ubuntu qualification and power evidence](Eng-AMD-RX5700XT-Ollama-03213-Qualification)
+- [Apple M4 16 GB model qualification and power evidence](Eng-Apple-M4-16GiB-Model-Qualification)
 - [Full model and hardware test status](Model-And-Hardware-Test-Status)
 
 No measurement on this page changes Haven 42's automatic model selection.

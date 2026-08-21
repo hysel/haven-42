@@ -66,7 +66,12 @@ def _connect(path: Path, *, timeout: float = 0.05) -> sqlite3.Connection:
         connection.execute("PRAGMA journal_mode=DELETE")
         connection.execute("PRAGMA temp_store=MEMORY")
         connection.execute("PRAGMA secure_delete=ON")
-        connection.enable_load_extension(False)
+        # A Python build compiled without SQLite loadable-extension support
+        # omits this API entirely. That state is already fail-closed. Builds
+        # exposing the API are hardened explicitly before use.
+        disable_extensions = getattr(connection, "enable_load_extension", None)
+        if disable_extensions is not None:
+            disable_extensions(False)
         return connection
     except Exception:
         connection.close()

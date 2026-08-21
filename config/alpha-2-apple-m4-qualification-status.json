@@ -1,0 +1,237 @@
+{
+  "authority": {
+    "automaticDefaultChangeAllowed": false,
+    "automaticSelectionAllowed": false,
+    "automaticUpdateActivationAllowed": false,
+    "releasePromotionAllowed": false,
+    "runtimePromotionAllowed": false,
+    "supportLabelChangeAllowed": false
+  },
+  "complete": false,
+  "evidenceBindings": [
+    {
+      "path": "config/alpha-2-apple-silicon-16gib-qualification-plan.json",
+      "sha256": "baf81d71cea50c27260186a65c8ac0460b7c8045771cdaea09d06954c723df76"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-16gib-model-qualification-result.json",
+      "sha256": "a573b4e3114a2f59b88b22cd2fc599d0d45766d4ed5b79e51427d95af04a806a"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-16gib-model-soak-result.json",
+      "sha256": "847945fd290c1f74176470af0abe3659050b32ece51b10344579b98294e66f75"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-16gib-opencode-1.18.19-coding-result.json",
+      "sha256": "fd11bfa1ec6b9eb6557c4c9ca3dd651505f82344b9c6995e65698410fca818be"
+    },
+    {
+      "path": "config/model-coding-agent-qualification-policy-apple-m4-opencode-1.18.19.json",
+      "sha256": "d502de5827e60f3b963e59b6985b4c9742af71049b431a7c12c8b2a28384adee"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-native-test-result.json",
+      "sha256": "2c4aa5da78be5c549c76162f1560fbe1871ba9525bc8695bf8d480cb7bee0193"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-idle-power-result.json",
+      "sha256": "3e8ca479e2f04698cee6d7b0b52c50be0aa439d00a7aaa2574028f725b946b7e"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-qwen35-2b-power-result.json",
+      "sha256": "4bbae5f834064a2d4d0113a40194872af2d58242517074fdb9e594dac1387163"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-qwen35-4b-power-result.json",
+      "sha256": "8a96b12f463b7b869b754745db74fb3df424379e3d54b0de6546cb3dd556305f"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-ministral3-8b-power-result.json",
+      "sha256": "7eba1e242eefa87b037f26b1e7e2dffc43781d311e738562c3908a40ee255e1a"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-development-app-result.json",
+      "sha256": "9a16aa24d0398515dfaf01f51b3dc2486a65fdad45ea24525ea65765a95ca47c"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-keychain-lifecycle-result.json",
+      "sha256": "4617f1f860cc9b643f4b29c32438fdf68a1553815935b17fa6a6e8dfa815c9f5"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-mlx-0.31.3-lifecycle-result.json",
+      "sha256": "76a4bdc008d1d0f307621069f91eb28143b40bb5e8569eff53fb3d951c47ebdd"
+    },
+    {
+      "path": "config/alpha-2-apple-m4-llamacpp-b10520-lifecycle-result.json",
+      "sha256": "1e218318e46ae83aee33fbf2dd573e05b1454d94e1e851d11022481083b842e9"
+    }
+  ],
+  "gates": {
+    "codingAgentQualification": {
+      "candidates": 16,
+      "continueEvidenceAccepted": false,
+      "eligibleForHumanReview": 0,
+      "failed": 16,
+      "passed": 0,
+      "status": "completed",
+      "surface": "opencode-cli",
+      "surfaceVersion": "1.18.19"
+    },
+    "keychain": {
+      "blocked": [
+        "synthetic-item-create-denied"
+      ],
+      "open": [
+        "interactive-packaged-item-lifecycle",
+        "locked-denied-recovery",
+        "encrypted-history-integration"
+      ],
+      "passed": [],
+      "status": "blocked"
+    },
+    "llamaCppLifecycle": {
+      "open": [
+        "trusted-distribution",
+        "self-contained-package",
+        "maintained-coding-surface"
+      ],
+      "passed": [
+        "native-arm64",
+        "metal-full-offload",
+        "authenticated-loopback",
+        "bounded-inference",
+        "timeout-recovery",
+        "restart",
+        "listener-cleanup"
+      ],
+      "runtimeVersion": "cd644c395",
+      "status": "partial-pass"
+    },
+    "longRunReliability": {
+      "eligibleCandidates": 9,
+      "failed": 0,
+      "minutesPerCandidate": 30,
+      "passed": 9,
+      "status": "completed"
+    },
+    "mlxLifecycle": {
+      "open": [
+        "production-suitable-server",
+        "authenticated-boundary",
+        "self-contained-package",
+        "maintained-coding-surface"
+      ],
+      "passed": [
+        "pinned-offline-runtime",
+        "native-metal-generation",
+        "timeout-recovery",
+        "process-cleanup"
+      ],
+      "runtimeVersion": "0.31.3",
+      "status": "partial-pass"
+    },
+    "modelCoreQualification": {
+      "candidates": 16,
+      "failed": 7,
+      "passed": 9,
+      "status": "partial-pass"
+    },
+    "nativeRepositoryTests": {
+      "checksPassed": 80,
+      "scope": "exact source snapshot full test tier",
+      "sourceSnapshotSha256": "4c50e9f972238bed7def68bb2f36b87b674b5b3ae3c9528ee4011d621c39fe91",
+      "status": "passed"
+    },
+    "noviceSelfContainedPackage": {
+      "open": [
+        "developer-id-signing",
+        "notarization",
+        "gatekeeper-public-admission",
+        "clean-machine-beginner-review",
+        "manual-screen-reader",
+        "manual-keyboard",
+        "manual-zoom",
+        "manual-reduced-motion"
+      ],
+      "passed": [
+        "native-arm64",
+        "embedded-python",
+        "source-package-parity",
+        "relocation",
+        "read-only-startup",
+        "abrupt-exit-recovery",
+        "repeated-lifecycle",
+        "occupied-port-refusal",
+        "shutdown-authority",
+        "hostile-environment",
+        "resource-integrity",
+        "packaged-real-browser-flow"
+      ],
+      "status": "partial-pass"
+    },
+    "ollamaLifecycle": {
+      "boundary": "model qualification, bounded lifecycle, and long-run reliability",
+      "runtimeVersion": "0.32.15",
+      "status": "passed",
+      "transport": "ipv4-loopback-only"
+    },
+    "powerAndThermals": {
+      "open": [
+        "whole-system-wall-power"
+      ],
+      "passed": [
+        "idle-baseline",
+        "representative-small-model",
+        "representative-medium-model",
+        "representative-large-model",
+        "gpu-and-ane-estimates",
+        "thermal-pressure"
+      ],
+      "status": "partial-pass"
+    },
+    "uiAccessibilityAndAttachments": {
+      "open": [
+        "manual-screen-reader",
+        "manual-keyboard",
+        "manual-zoom",
+        "manual-reduced-motion",
+        "physical-clipboard"
+      ],
+      "packagedBrowserChecks": 616,
+      "passed": [
+        "automated-source-package-parity",
+        "packaged-real-browser-flow",
+        "bounded-attachment-flow",
+        "automated-accessibility-flow",
+        "local-privacy-boundary"
+      ],
+      "status": "partial-pass"
+    },
+    "updateRollbackAndUninstall": {
+      "open": [
+        "signed-native-install",
+        "side-by-side-update",
+        "health-gated-activation",
+        "automatic-rollback",
+        "marker-owned-uninstall",
+        "user-data-preservation"
+      ],
+      "passed": [
+        "offline-policy-and-lifecycle-simulation"
+      ],
+      "reason": "The physical artifact is an unsigned development archive; simulations do not prove a native package transition.",
+      "status": "blocked"
+    }
+  },
+  "kind": "haven42-apple-m4-qualification-status",
+  "privacy": {
+    "privateIdentityRetained": false,
+    "privateInfrastructureRetained": false,
+    "rawPromptsOrResponsesRetained": false,
+    "rawTelemetryRetained": false
+  },
+  "profileId": "apple-m4-16gib-macos26-metal",
+  "release": "0.4.0-alpha.2",
+  "schemaVersion": 1,
+  "status": "in-progress"
+}

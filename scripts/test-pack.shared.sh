@@ -149,7 +149,7 @@ test_release_packaging_scripts() {
   printf '%s\n' "$output" | grep -q "Release package plan" || return 1
   printf '%s\n' "$output" | grep -q "haven-42-0.3.0.tar.gz" || return 1
   printf '%s\n' "$output" | grep -q "\.sha256" || return 1
-  printf '%s\n' "$output" | grep -q "Excluded: .git, .vscode, runtime-validation-output, dist, local configs" || return 1
+  printf '%s\n' "$output" | grep -q "Excluded: .git, .vscode, runtime-validation-output, dist, local configs, backups, env/secrets/token files" || return 1
   grep -q "tar -C" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q "sha256sum" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
     grep -q "shasum -a 256" "$REPO_ROOT/scripts/build-release-package.shared.sh" &&
@@ -2652,6 +2652,24 @@ assert portable["security"]["distributionEvidenceEmbeddedInExtractedPackage"] is
 assert portable["security"]["distributionEvidenceRequiresExactHashes"] is True
 assert portable["security"]["distributionEvidenceExcludedFromSigningScope"] is True
 assert "runtime-component-inventory.json" in portable["supplyChainEvidence"]
+assert portable["macosDevelopmentAppWrapper"] == {
+    "status": "unsigned-development-only",
+    "bundleName": "Haven 42.app",
+    "bundleIdentifier": "org.haven42.desktop",
+    "bundleShortVersion": "0.4.0",
+    "alpha2BundleVersion": "0.4.2",
+    "minimumSystemVersion": "13.0",
+    "multipleInstancesProhibited": True,
+    "browserHostedBackgroundApp": True,
+    "embeddedPythonRuntimeRequired": True,
+    "globalPythonRequired": False,
+    "exactFileInventoryRequired": True,
+    "archiveChecksumRequired": True,
+    "developerIdSigned": False,
+    "notarized": False,
+    "gatekeeperAdmissionClaimed": False,
+    "publicDistributionAllowed": False,
+}
 assert "CPYTHON-3.14.6-LICENSE.txt" in portable["supplyChainEvidence"]
 assert "APACHE-2.0.txt" in portable["supplyChainEvidence"]
 assert "LIBFFI-3.4.4-LICENSE.txt" in portable["supplyChainEvidence"]
@@ -2701,6 +2719,7 @@ external_links = sorted(re.findall(r'''(?i)href\s*=\s*["']https?://[^"']+["']'''
 assert external_links == sorted([
     'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
     'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
+    'href="https://github.com/ollama/ollama/releases"',
 ])
 assert 'link.href = state.platformFamily === "linux" ? "https://ollama.com/download/linux" : "https://ollama.com/download/windows"' in assets
 assert "innerHTML" not in assets
@@ -2732,7 +2751,7 @@ PY
   python3 "$REPO_ROOT/scripts/test-local-batch-task-ledger.py" |
     grep -q "374 exact tasks across 18 phases" || return 1
   python3 "$REPO_ROOT/scripts/test-conversation-history-development.py" |
-    grep -q "6 security checks" || return 1
+    grep -q "7 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-folder-selection-foundation.py" |
     grep -q "16 security checks" || return 1
   python3 "$REPO_ROOT/scripts/test-web-research-query-adapter.py" |
@@ -2817,7 +2836,10 @@ test_task_composition_and_repository_privacy() {
   python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "20 effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "13 cases" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "30 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "32 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-build-macos-development-app.py" | grep -q "3 passed" || return 1
+  python3 "$REPO_ROOT/scripts/test-validate-macos-development-app.py" | grep -q "4 passed" || return 1
+  python3 "$REPO_ROOT/scripts/test-summarize-alpha2-macos-development-app.py" | grep -q "4 passed" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" --self-test | grep -q "self-test passed" || return 1
   python3 "$REPO_ROOT/scripts/verify-public-repository-privacy.py" |
     grep -q "tracked or untracked non-ignored working files" || return 1
@@ -3075,8 +3097,28 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-alpha2-hardware-report-preflight.py \
     test-alpha2-model-recommendation-matrix.py \
     test-alpha2-model-recommendation-report.py \
+    test-alpha2-macos-model-qualification.py \
+    test-alpha2-macos-keychain-lifecycle.py \
+    test-alpha2-macos-llamacpp-lifecycle.py \
+    test-alpha2-macos-mlx-lifecycle.py \
+    test-alpha2-macos-opencode-coding-screen.py \
+    test-alpha2-apple-m4-package-result.py \
+    test-alpha2-apple-m4-qualification-status.py \
+    test-alpha2-macos-model-power-cell.py \
+    test-alpha2-macos-idle-power-cell.py \
+    test-alpha2-macos-native-test-result.py \
+    test-alpha2-macos-model-soak.py \
     test-model-coding-agent-history-audit.py \
-    test-model-coding-agent-screen.py
+    test-model-coding-agent-screen.py \
+    test-summarize-alpha2-apple-m4-qualification.py \
+    test-summarize-alpha2-macos-model-qualification.py \
+    test-summarize-macos-powermetrics.py \
+    test-validate-alpha2-macos-model-qualification-result.py \
+    test-validate-alpha2-macos-opencode-coding-result.py \
+    test-validate-alpha2-macos-model-soak-result.py \
+    test-validate-alpha2-macos-power-result.py \
+    test-validate-alpha2-macos-keychain-lifecycle-result.py \
+    test-validate-alpha2-macos-development-app-result.py
   do
     python3 "$REPO_ROOT/scripts/$test_name" || return 1
   done

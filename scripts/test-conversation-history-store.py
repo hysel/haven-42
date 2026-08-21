@@ -9,6 +9,7 @@ import json
 from pathlib import Path
 import sqlite3
 import tempfile
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,29 @@ def seed(store) -> None:
 
 def main() -> None:
     checks = 0
+
+    class ConnectionWithoutExtensionApi:
+        def __init__(self):
+            self.row_factory = None
+            self.statements = []
+            self.closed = False
+
+        def execute(self, statement):
+            self.statements.append(statement)
+            return self
+
+        def close(self):
+            self.closed = True
+
+    connection_without_extensions = ConnectionWithoutExtensionApi()
+    with mock.patch.object(
+        MODULE.sqlite3, "connect", return_value=connection_without_extensions
+    ):
+        assert MODULE._connect(Path("unused.sqlite3")) is connection_without_extensions
+    assert "PRAGMA trusted_schema=OFF" in connection_without_extensions.statements
+    assert connection_without_extensions.closed is False
+    checks += 1
+
     with tempfile.TemporaryDirectory(prefix="haven42-history-store-") as temporary:
         directory = Path(temporary).resolve(); store = MODULE.DevelopmentStore(directory)
         try:

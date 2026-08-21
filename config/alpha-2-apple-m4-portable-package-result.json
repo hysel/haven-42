@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-sanitized-physical-macos-portable-package-result",
+  "release": "0.4.0-alpha.2",
+  "observedAtUtc": "2026-08-21T01:30:42Z",
+  "status": "partial-pass",
+  "hardwareProfile": {
+    "platformFamily": "macos",
+    "architecture": "arm64",
+    "acceleratorFamily": "Apple M4",
+    "systemMemoryGiB": 16
+  },
+  "source": {
+    "baseCommit": "e718801a37965c7000aed8b29af0c9ed9015b7f8",
+    "commitIsExactSource": false,
+    "treeState": "modified-uncommitted",
+    "snapshotSha256": "e266113acc42d53ac888ab3ddfd226e1137261fe34b3934284abfdb9f5788d8e"
+  },
+  "artifact": {
+    "name": "haven42-darwin-arm64-unsigned-development.tar.gz",
+    "sha256": "ae5a1e9982a11298cb6c3507c3bdbe02c130623e4d7a1b7c58a597918e7574bf",
+    "kind": "unsigned-development",
+    "pythonVersion": "3.14.6",
+    "pyinstallerVersion": "6.21.0",
+    "nativeArchitectureVerified": true,
+    "resourceIntegrityManifestEmbedded": true
+  },
+  "tests": {
+    "sourcePackageParity": true,
+    "relocation": true,
+    "readOnlyStartup": true,
+    "abruptExitRecovery": true,
+    "repeatedLifecycle": true,
+    "occupiedPortRefusal": true,
+    "shutdownAuthority": true,
+    "hostileEnvironment": true,
+    "resourceIntegrity": true
+  },
+  "platformTrust": {
+    "codeSignatureStructureValid": true,
+    "developerIdSigned": false,
+    "notarized": false,
+    "gatekeeperAdmitted": false,
+    "gatekeeperExitCode": 3
+  },
+  "privateIdentityRetained": false,
+  "privatePathsRetained": false,
+  "rawUserContentRetained": false,
+  "releasePublicationAuthorized": false,
+  "automaticUpdateAuthorized": false,
+  "productionAdmissionGranted": false
+}

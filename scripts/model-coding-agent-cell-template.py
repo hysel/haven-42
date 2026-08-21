@@ -40,7 +40,6 @@ def build(
         "hardwareProfileId": hardware_profile_id,
         "surface": {"id": surface_id, "version": surface_version},
         "gates": gates,
-        "continueCliPrerequisite": {"read": "not-run", "review": "not-run", "scopedWrite": "not-run"},
         "rawPromptsOrResponsesRetained": False,
         "privateIdentityRetained": False,
     }

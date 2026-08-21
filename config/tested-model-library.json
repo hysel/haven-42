@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 2,
+  "catalogId": "haven42.hardware-aware-tested-model-library",
+  "updatedAt": "2026-08-20",
+  "evidenceBoundary": "Choices are matched to the AI execution computer, not the browser computer. A runtime difference remains visible and is not treated as an exact-profile pass.",
+  "profiles": [
+    {
+      "id": "windows-amd-rx7800xt-16gib-ollama-0.32.9",
+      "platformFamily": "windows",
+      "acceleratorVendor": "AMD",
+      "acceleratorModelPattern": "Radeon RX 7800 XT",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 16,
+      "minimumSystemMemoryGiB": 16,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.9",
+      "hardware": "AMD Radeon RX 7800 XT 16 GB",
+      "operatingSystem": "Windows 11",
+      "evidence": "examples/windows-amd-rx7800xt-ollama0329-recertification.md",
+      "models": [
+        "gemma3:1b-it-q4_K_M", "llama3.2:3b-instruct-q4_K_M", "granite4.1:3b-q4_K_M",
+        "phi4-mini:3.8b-q4_K_M", "nemotron-3-nano:4b", "gemma3:4b-it-q4_K_M",
+        "gemma4:e2b-it-qat", "qwen3.5:4b", "gemma4:e4b-it-qat", "granite4.1:8b-q4_K_M",
+        "qwen3.5:9b", "gemma4:12b-it-qat", "gemma3:12b-it-q4_K_M", "phi4:14b-q4_K_M"
+      ]
+    },
+    {
+      "id": "windows-nvidia-rtx3060-12gib-ollama-0.32.14",
+      "platformFamily": "windows",
+      "acceleratorVendor": "NVIDIA",
+      "acceleratorModelPattern": "GeForce RTX 3060",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 12,
+      "minimumSystemMemoryGiB": 31,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.14",
+      "hardware": "NVIDIA GeForce RTX 3060 12 GB",
+      "operatingSystem": "Windows 11",
+      "evidence": "examples/nvidia-rtx3060-model-qualification.md",
+      "models": [
+        "gemma3:12b-it-q4_K_M", "gemma3:4b-it-q4_K_M", "gemma4:12b-it-qat",
+        "gemma4:e2b-it-qat", "gemma4:e4b-it-qat", "granite4.1:3b-q4_K_M",
+        "granite4.1:8b-q4_K_M", "llama3.2:3b-instruct-q4_K_M", "minicpm-v4.6:1b",
+        "ornith:9b", "phi4-mini:3.8b-q4_K_M", "qwen3.5:2b", "qwen3.5:4b", "qwen3.5:9b"
+      ]
+    },
+    {
+      "id": "linux-nvidia-rtx3060-12gib-ollama-0.32.14",
+      "platformFamily": "linux",
+      "acceleratorVendor": "NVIDIA",
+      "acceleratorModelPattern": "GeForce RTX 3060",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 12,
+      "minimumSystemMemoryGiB": 31,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.14",
+      "hardware": "NVIDIA GeForce RTX 3060 12 GB",
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "evidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+      "models": [
+        "qwen3.5:0.8b", "qwen3.5:2b", "qwen3.5:4b", "qwen3.5:9b",
+        "gemma3:1b-it-q4_K_M", "gemma3:4b-it-q4_K_M", "gemma3:12b-it-q4_K_M",
+        "gemma4:e2b-it-qat", "gemma4:e4b-it-qat", "gemma4:12b-it-qat",
+        "granite4.1:3b-q4_K_M", "granite4.1:8b-q4_K_M", "phi4-mini:3.8b-q4_K_M",
+        "llama3.2:3b-instruct-q4_K_M", "ministral-3:3b-instruct-2512-q4_K_M",
+        "ministral-3:8b-instruct-2512-q4_K_M", "ornith:9b", "lfm2.5:8b", "minicpm-v4.6:1b"
+      ]
+    },
+    {
+      "id": "linux-nvidia-gtx1650-super-4gib-ollama-0.32.14",
+      "platformFamily": "linux",
+      "acceleratorVendor": "NVIDIA",
+      "acceleratorModelPattern": "GeForce GTX 1650 SUPER",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 4,
+      "minimumSystemMemoryGiB": 15,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.14",
+      "hardware": "NVIDIA GeForce GTX 1650 Super 4 GB",
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "evidence": "examples/nvidia-gtx1650-super-linux-model-qualification.md",
+      "models": [
+        "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "granite4.1:3b-q4_K_M",
+        "llama3.2:3b-instruct-q4_K_M", "minicpm-v4.6:1b"
+      ]
+    },
+    {
+      "id": "windows-nvidia-gtx1650-super-4gib-ollama-0.32.14",
+      "platformFamily": "windows",
+      "acceleratorVendor": "NVIDIA",
+      "acceleratorModelPattern": "GeForce GTX 1650 SUPER",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 4,
+      "minimumSystemMemoryGiB": 16,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.14",
+      "hardware": "NVIDIA GeForce GTX 1650 Super 4 GB",
+      "operatingSystem": "Windows 11",
+      "evidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+      "models": [
+        "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "minicpm-v4.6:1b"
+      ]
+    },
+    {
+      "id": "linux-amd-rx5700xt-8gib-ollama-0.32.13",
+      "platformFamily": "linux",
+      "acceleratorVendor": "AMD",
+      "acceleratorModelPattern": "Radeon RX 5700 XT",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 8,
+      "minimumSystemMemoryGiB": 15,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.13",
+      "hardware": "AMD Radeon RX 5700 XT 8 GB",
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "models": [
+        "gemma3:4b-it-q4_K_M", "gemma4:e2b-it-qat", "gemma4:e4b-it-qat",
+        "granite4.1:3b-q4_K_M", "granite4.1:8b-q4_K_M", "llama3.2:3b-instruct-q4_K_M",
+        "ornith:9b", "phi4-mini:3.8b-q4_K_M", "qwen3.5:4b"
+      ]
+    },
+    {
+      "id": "linux-dual-nvidia-v100-32gib-ollama-0.32.13",
+      "platformFamily": "linux",
+      "acceleratorVendor": "NVIDIA",
+      "acceleratorModelPattern": "Tesla V100",
+      "minimumAcceleratorCount": 2,
+      "minimumGpuMemoryGiB": 32,
+      "minimumSystemMemoryGiB": 63,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.13",
+      "hardware": "Dual NVIDIA Tesla V100 32 GB",
+      "operatingSystem": "Linux",
+      "evidence": "examples/august-2026-new-model-qualification.md",
+      "models": [
+        "granite4.1:30b", "ornith:9b", "qwen3.5:4b", "qwen3.6:27b-q4_K_M", "qwen3.6:35b-a3b-q4_K_M"
+      ]
+    }
+  ]
+}
