@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-macos-development-update-lifecycle-plan",
+  "release": "0.4.0-alpha.2",
+  "profileId": "apple-m4-16gib-macos26-metal",
+  "scope": "unsigned-development-package-transition-only",
+  "workspace": {
+    "mustBeAbsentAtStart": true,
+    "qualificationOwnedMarkerRequired": true,
+    "rawPathRetentionAllowed": false,
+    "archiveMaximumMembers": 20000,
+    "archiveMaximumExpandedBytes": 2147483648,
+    "absoluteTraversalDeviceAndHardlinkMembersAllowed": false
+  },
+  "requiredOperations": [
+    "baseline-stage",
+    "baseline-health",
+    "candidate-side-by-side-stage",
+    "candidate-preflight-health",
+    "atomic-candidate-selection",
+    "injected-post-selection-health-failure",
+    "automatic-baseline-rollback",
+    "rollback-health",
+    "healthy-candidate-reactivation",
+    "candidate-post-activation-health",
+    "baseline-final-selection",
+    "candidate-marker-owned-uninstall",
+    "ordinary-managed-uninstall",
+    "user-data-preservation",
+    "qualification-cleanup"
+  ],
+  "privacy": {
+    "privateIdentityAllowed": false,
+    "privatePathsAllowed": false,
+    "rawApplicationOutputAllowed": false,
+    "rawUserContentAllowed": false,
+    "rawTelemetryAllowed": false
+  },
+  "authority": {
+    "developerIdSigningClaimAllowed": false,
+    "notarizationClaimAllowed": false,
+    "productionUpdaterAdmissionAllowed": false,
+    "automaticUpdateAdmissionAllowed": false,
+    "releasePromotionAllowed": false
+  }
+}

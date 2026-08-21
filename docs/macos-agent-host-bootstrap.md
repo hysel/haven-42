@@ -355,6 +355,46 @@ packaged app and its fixed synthetic item. Do not substitute the unattended
 SSH lifecycle result. Whole-system wall power and Apple distribution trust
 remain separate evidence cells.
 
+## Unsigned development-package transition
+
+The physical development-package transition runner exercises actual file and
+process operations only inside a new qualification-owned workspace. It takes
+two different exact app archives and source commits, validates both archive
+digests, rejects unsafe archive members, and then performs side-by-side
+staging, packaged-app preflight health, atomic selection, injected health
+failure, rollback, healthy reactivation, marker-owned removal, ordinary
+managed uninstall, and user-data preservation:
+
+```bash
+python3 scripts/alpha2-macos-development-update-lifecycle.py \
+  --plan config/alpha-2-macos-development-update-lifecycle-plan.json \
+  --baseline-archive /an/isolated/baseline-app.tar.gz \
+  --baseline-sha256 EXACT_BASELINE_ARCHIVE_SHA256 \
+  --baseline-commit EXACT_BASELINE_COMMIT \
+  --candidate-archive /an/isolated/candidate-app.tar.gz \
+  --candidate-sha256 EXACT_CANDIDATE_ARCHIVE_SHA256 \
+  --candidate-commit EXACT_CANDIDATE_COMMIT \
+  --workspace /an/isolated/new-lifecycle-workspace \
+  --output /an/isolated/results/macos-development-update.json
+```
+
+The workspace must not exist before the run. Cleanup is permitted only while
+its exact qualification marker remains intact. Console output from the app is
+bounded and discarded; the retained result contains no path, identity, app
+output, user content, or telemetry. Validate the result independently:
+
+```bash
+python3 scripts/validate-alpha2-macos-development-update-lifecycle-result.py \
+  /an/isolated/results/macos-development-update.json \
+  --plan config/alpha-2-macos-development-update-lifecycle-plan.json
+```
+
+This cell is useful physical evidence for the unsigned development package,
+but it is not the product updater. The injected failure proves a real atomic
+selection rollback, not a naturally occurring package failure. Developer ID
+signing, notarization, Gatekeeper public admission, signed installation, and
+production updater authority remain open regardless of the result.
+
 ## Security and accessibility gates
 
 - Runtime and model listeners stay on `127.0.0.1` unless a separately reviewed
