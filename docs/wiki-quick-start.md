@@ -89,6 +89,12 @@ For same-machine Ollama, use `http://127.0.0.1:11434`. Private-network
 connections must use a private IP address and will show an unencrypted-HTTP
 warning unless you provide a trusted HTTPS endpoint.
 
+On a Mac, connecting to Ollama on another computer also causes macOS to ask
+whether Haven 42 may find devices on local networks. Choose **Allow** only when
+you intend to use the server whose address you entered. Haven 42 does not scan
+for nearby devices. Same-computer setup at `127.0.0.1` does not need this
+private-network access.
+
 For safety, Haven 42 blocks public internet server addresses, passwords placed
 inside an address, and unexpected redirects.
 

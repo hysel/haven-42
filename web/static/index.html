@@ -71,9 +71,10 @@
         <form id="wizard-connection-form">
           <label for="wizard-endpoint">Ollama address</label>
           <div class="field-row compact-control-row">
-            <input id="wizard-endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off" aria-describedby="wizard-endpoint-help wizard-transport-warning wizard-error" aria-errormessage="wizard-error">
+            <input id="wizard-endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off" aria-describedby="wizard-endpoint-help wizard-macos-network-help wizard-transport-warning wizard-error" aria-errormessage="wizard-error">
             <button class="button primary" id="wizard-connect" type="submit">Check connection</button>
           </div>
+          <p class="field-help" id="wizard-macos-network-help"><strong>Using a Mac?</strong> macOS asks for Local Network access when you connect to Ollama on another computer. Choose Allow only for a server you trust. Haven 42 uses the address you enter and does not scan for nearby devices.</p>
           <details>
             <summary>Advanced settings</summary>
             <div class="advanced-grid">
@@ -620,10 +621,11 @@
             <form id="connection-form">
               <label for="endpoint">Ollama address</label>
               <div class="field-row compact-control-row">
-                <input id="endpoint" name="endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off" aria-describedby="endpoint-help connection-transport-warning connection-error" aria-errormessage="connection-error">
+                <input id="endpoint" name="endpoint" value="http://127.0.0.1:11434" spellcheck="false" autocomplete="off" aria-describedby="endpoint-help connection-macos-network-help connection-transport-warning connection-error" aria-errormessage="connection-error">
                 <button class="button primary" id="connect-button" type="submit">Connect</button>
               </div>
               <p class="field-help" id="endpoint-help">A Haven-managed local setup connects automatically. Use this section later only to switch to another same-machine or private-network Ollama server. Applying changes starts a new task.</p>
+              <p class="field-help" id="connection-macos-network-help"><strong>Using a Mac?</strong> macOS asks for Local Network access when you connect to Ollama on another computer. Choose Allow only for a server you trust. If you previously chose Don’t Allow, open System Settings → Privacy &amp; Security → Local Network and enable Haven 42.</p>
               <details>
                 <summary>Advanced connection settings</summary>
                 <div class="advanced-grid">

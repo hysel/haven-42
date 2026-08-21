@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "7551fcfa6b15b31dfe5ce69de6afda0b23c1812d8d4ed7c679c29d1a49e813ba",
-      "sizeBytes": 72680
+      "sha256": "c20283a0b012148d4fa904c73d2673d7c601d9aef166bac82cac45594fc5011f",
+      "sizeBytes": 73390
     },
     {
       "path": "web/static/accessibility.html",

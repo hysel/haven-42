@@ -145,6 +145,10 @@ def info_plist(version: str) -> dict[str, object]:
         "LSUIElement": True,
         "NSHighResolutionCapable": True,
         "NSHumanReadableCopyright": "Copyright Haven 42 contributors",
+        "NSLocalNetworkUsageDescription": (
+            "Haven 42 connects only to an AI server you choose on your private "
+            "network. It does not scan for nearby devices."
+        ),
     }
 
 
