@@ -174,7 +174,7 @@ def walk_regular_files(root: Path, limits: dict) -> tuple[list[Path], list[Path]
         for entry in entries:
             path = Path(entry.path)
             try:
-                info = entry.stat(follow_symlinks=False)
+                info = os.lstat(entry.path)
             except OSError as error:
                 raise AuditError("runtime-read-failed") from error
             if is_link_or_reparse(path, info):
@@ -237,7 +237,7 @@ def license_files(dist_info: Path, files_by_parent: dict[Path, list[Path]], cont
         raise AuditError("maximum-license-file-count-exceeded")
     evidence = []
     for path in sorted(matches, key=lambda item: str(item).casefold()):
-        size = path.stat(follow_symlinks=False).st_size
+        size = path.lstat().st_size
         if size > limits["maxLicenseBytes"]:
             raise AuditError("maximum-license-size-exceeded")
         name = path.name if safe_name(path.name) else "redacted-unsafe-name"
@@ -260,7 +260,7 @@ def distribution_scope(metadata_path: Path) -> str:
 
 
 def distribution_record(metadata_path: Path, evidence: list[dict], max_bytes: int) -> dict:
-    size = metadata_path.stat(follow_symlinks=False).st_size
+    size = metadata_path.lstat().st_size
     if size > max_bytes:
         raise AuditError("maximum-metadata-size-exceeded")
     try:
@@ -332,7 +332,7 @@ def record_native_claims(
     record = dist_info / "RECORD"
     if not record.is_file():
         return {}
-    size = record.stat(follow_symlinks=False).st_size
+    size = record.lstat().st_size
     if size > limits["maxRecordBytes"]:
         raise AuditError("maximum-record-size-exceeded")
     claims: dict[Path, dict] = {}
@@ -386,7 +386,7 @@ def audit(args: argparse.Namespace) -> dict:
         raise AuditError("artifact-digest-not-contracted")
 
     resolved_root = args.runtime.resolve(strict=True)
-    root_info = args.runtime.stat(follow_symlinks=False)
+    root_info = args.runtime.lstat()
     if not resolved_root.is_dir() or is_link_or_reparse(args.runtime, root_info):
         raise AuditError("invalid-runtime-root")
     root = runtime_filesystem_root(resolved_root)
@@ -395,7 +395,7 @@ def audit(args: argparse.Namespace) -> dict:
     output_parent = args.output.parent
     if not output_parent.is_dir():
         raise AuditError("invalid-output-parent")
-    output_parent_info = output_parent.stat(follow_symlinks=False)
+    output_parent_info = output_parent.lstat()
     if is_link_or_reparse(output_parent, output_parent_info):
         raise AuditError("output-parent-link-rejected")
     resolved_output_parent = output_parent.resolve(strict=True)
@@ -412,7 +412,7 @@ def audit(args: argparse.Namespace) -> dict:
     archive_verified = False
     if args.archive is not None:
         archive = args.archive.resolve(strict=True)
-        archive_info = args.archive.stat(follow_symlinks=False)
+        archive_info = args.archive.lstat()
         if not archive.is_file() or is_link_or_reparse(args.archive, archive_info):
             raise AuditError("invalid-archive")
         if digest_file(archive) != artifact_sha:
@@ -474,7 +474,7 @@ def audit(args: argparse.Namespace) -> dict:
         raise AuditError("maximum-global-license-file-count-exceeded")
     global_license_evidence = []
     for path in sorted(global_license_paths, key=lambda item: str(item).casefold()):
-        size = path.stat(follow_symlinks=False).st_size
+        size = path.lstat().st_size
         if size > contract["limits"]["maxGlobalLicenseBytes"]:
             raise AuditError("maximum-license-size-exceeded")
         global_license_evidence.append({
@@ -530,7 +530,7 @@ def audit(args: argparse.Namespace) -> dict:
             missing_owner = True
         native_artifacts.append({
             "relativePath": safe_relative(path, root),
-            "bytes": path.stat(follow_symlinks=False).st_size,
+            "bytes": path.lstat().st_size,
             "sha256": digest,
             "owners": owners,
         })
@@ -581,7 +581,7 @@ def audit(args: argparse.Namespace) -> dict:
             "endpointsRecorded": False,
         },
     }
-    current_parent_info = output_parent.stat(follow_symlinks=False)
+    current_parent_info = output_parent.lstat()
     if (
         is_link_or_reparse(output_parent, current_parent_info)
         or output_parent.resolve(strict=True) != resolved_output_parent

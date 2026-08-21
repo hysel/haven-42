@@ -232,7 +232,8 @@ def configure_tool(
     ensure_safe_destination(temporary, target)
     if temporary.exists():
         raise SetupError(f"Temporary setup file already exists: {temporary.name}")
-    temporary.write_text(content, encoding="utf-8", newline="\n")
+    with temporary.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(content)
     temporary.replace(output)
     return actions
 

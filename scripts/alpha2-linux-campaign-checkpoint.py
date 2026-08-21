@@ -359,7 +359,7 @@ def validate_checkpoint(checkpoint: Any) -> None:
     if not 0 <= index <= len(tasks):
         raise CheckpointError("Checkpoint task index is outside the task set.")
     running = 0
-    for position, (task, expected_task) in enumerate(zip(tasks, expected_tasks, strict=True)):
+    for position, (task, expected_task) in enumerate(zip(tasks, expected_tasks)):
         if not isinstance(task, dict) or set(task) != set(expected_task):
             raise CheckpointError("Checkpoint task fields do not match the reviewed schema.")
         for field in (

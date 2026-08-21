@@ -391,8 +391,10 @@ def main() -> int:
         report = build_report(args.request, args.evidence_root)
         for path in (args.output_json, args.output_markdown):
             path.parent.mkdir(parents=True, exist_ok=True)
-        args.output_json.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
-        args.output_markdown.write_text(markdown(report), encoding="utf-8", newline="\n")
+        with args.output_json.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(json.dumps(report, indent=2, sort_keys=True) + "\n")
+        with args.output_markdown.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(markdown(report))
     except (ComparisonError, OSError) as error:
         parser.error(str(error))
     print(json.dumps({"hardwareProfiles": len(report["hardware"]), "automaticSelectionChanged": False}, sort_keys=True))

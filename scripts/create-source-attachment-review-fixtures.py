@@ -88,12 +88,15 @@ def create_fixtures(output: Path, force: bool = False) -> list[Path]:
             f"review fixtures already exist ({names}); rerun with --force"
         )
 
-    for target, content in zip(targets, FILES.values(), strict=True):
+    if len(targets) != len(FILES):
+        raise ValueError("review fixture target count changed unexpectedly")
+    for target, content in zip(targets, FILES.values()):
         if target.parent.resolve() != output:
             raise ValueError("review fixture escaped the selected output directory")
         if target.exists() and (is_linklike(target) or not target.is_file()):
             raise ValueError(f"review fixture target is not a regular file: {target.name}")
-        target.write_text(content, encoding="utf-8", newline="\n")
+        with target.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(content)
     return targets
 
 

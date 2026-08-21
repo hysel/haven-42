@@ -286,7 +286,7 @@ def _is_reparse_or_link(path: Path) -> bool:
     if path.is_symlink():
         return True
     try:
-        attributes = path.stat(follow_symlinks=False).st_file_attributes
+        attributes = path.lstat().st_file_attributes
     except (AttributeError, OSError):
         return False
     return bool(attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT)

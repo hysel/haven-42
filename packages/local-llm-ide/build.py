@@ -97,15 +97,18 @@ def build(output_value: str) -> tuple[Path, Path, Path]:
             "files": records,
         }
         manifest_text = json.dumps(manifest, indent=2, sort_keys=True) + "\n"
-        (staging / "MANIFEST.json").write_text(manifest_text, encoding="utf-8", newline="\n")
-        outside_manifest.write_text(manifest_text, encoding="utf-8", newline="\n")
+        with (staging / "MANIFEST.json").open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(manifest_text)
+        with outside_manifest.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(manifest_text)
         if archive.exists():
             archive.unlink()
         with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
             for path in sorted(staging.rglob("*")):
                 if path.is_file():
                     add_zip_file(package, path, Path(PACKAGE_NAME) / path.relative_to(staging))
-    checksum.write_text(f"{digest(archive)}  {archive.name}\n", encoding="ascii", newline="\n")
+    with checksum.open("w", encoding="ascii", newline="\n") as stream:
+        stream.write(f"{digest(archive)}  {archive.name}\n")
     return archive, checksum, outside_manifest
 
 

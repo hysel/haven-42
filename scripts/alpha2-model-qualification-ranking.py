@@ -214,7 +214,8 @@ def main() -> int:
     else:
         if args.output.exists() or args.output.is_symlink():
             parser.error("output-already-exists")
-        args.output.write_text(payload, encoding="utf-8", newline="\n")
+        with args.output.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(payload)
     return 0
 
 
