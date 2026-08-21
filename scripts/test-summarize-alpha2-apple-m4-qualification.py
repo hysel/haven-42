@@ -44,6 +44,23 @@ def fixture() -> dict:
         "keychain": {"status": "blocked", "errorCode": "interactive-authorization-required"},
         "mlx": {"runtime": {"packages": {"mlx-lm": "0.31.3"}}},
         "llamacpp": {"runtime": {"commit": "cd644c395"}},
+        "development_update": {
+            "status": "partial-pass",
+            "operations": {
+                operation: True
+                for operation in MODULE.DEVELOPMENT_UPDATE_OPERATIONS
+            },
+            "platformTrust": {
+                "developerIdSigned": False,
+                "notarized": False,
+                "gatekeeperPublicAdmission": False,
+            },
+            "authority": {
+                "productionUpdaterAdmissionGranted": False,
+                "automaticUpdateAdmissionGranted": False,
+                "releasePromotionGranted": False,
+            },
+        },
     }
 
 
@@ -55,8 +72,10 @@ def main() -> int:
     assert status["gates"]["codingAgentQualification"]["eligibleForHumanReview"] == 4
     assert status["gates"]["uiAccessibilityAndAttachments"]["packagedBrowserChecks"] == 61
     assert status["gates"]["keychain"]["status"] == "blocked"
+    assert status["gates"]["updateRollbackAndUninstall"]["status"] == "partial-pass"
+    assert "production-updater-integration" in status["gates"]["updateRollbackAndUninstall"]["open"]
     assert all(value is False for value in status["authority"].values())
-    checks += 6
+    checks += 8
     addendum = fixture()
     addendum["addendum_core"] = {"results": records(1, 0)}
     addendum["addendum_soak"] = {"results": records(1, 0)}
@@ -75,6 +94,8 @@ def main() -> int:
         lambda value: value["small_power"].__setitem__("status", "failed"),
         lambda value: value["medium_power"].__setitem__("status", "failed"),
         lambda value: value["package"]["tests"].__setitem__("packagedBrowserFlow", False),
+        lambda value: value["development_update"]["operations"].__setitem__("automatic-baseline-rollback", False),
+        lambda value: value["development_update"]["authority"].__setitem__("productionUpdaterAdmissionGranted", True),
     ):
         candidate = fixture()
         mutation(candidate)

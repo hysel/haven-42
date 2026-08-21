@@ -15,6 +15,15 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DEVELOPMENT_UPDATE_OPERATIONS = {
+    "baseline-stage", "baseline-health", "candidate-side-by-side-stage",
+    "candidate-preflight-health", "atomic-candidate-selection",
+    "injected-post-selection-health-failure", "automatic-baseline-rollback",
+    "rollback-health", "healthy-candidate-reactivation",
+    "candidate-post-activation-health", "baseline-final-selection",
+    "candidate-marker-owned-uninstall", "ordinary-managed-uninstall",
+    "user-data-preservation", "qualification-cleanup",
+}
 
 
 class SummaryError(ValueError):
@@ -65,6 +74,7 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
     addendum_coding = values.get("addendum_coding")
     addendum_present = all(value is not None for value in (addendum_core, addendum_soak, addendum_coding))
     package, keychain = values["package"], values["keychain"]
+    development_update = values["development_update"]
     native_tests = values["native_tests"]
     power = [
         values[name]
@@ -91,6 +101,28 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
             raise SummaryError("addendum-coding-result-count-invalid")
     if any(value.get("status") != "passed" for value in power):
         raise SummaryError("power-cell-not-passed")
+    development_operations = development_update.get("operations")
+    development_trust = development_update.get("platformTrust")
+    development_authority = development_update.get("authority")
+    if (
+        development_update.get("status") != "partial-pass"
+        or not isinstance(development_operations, dict)
+        or set(development_operations) != DEVELOPMENT_UPDATE_OPERATIONS
+        or not all(value is True for value in development_operations.values())
+        or not isinstance(development_trust, dict)
+        or set(development_trust) != {
+            "developerIdSigned", "notarized", "gatekeeperPublicAdmission",
+        }
+        or any(development_trust.values())
+        or not isinstance(development_authority, dict)
+        or set(development_authority) != {
+            "productionUpdaterAdmissionGranted",
+            "automaticUpdateAdmissionGranted",
+            "releasePromotionGranted",
+        }
+        or any(development_authority.values())
+    ):
+        raise SummaryError("development-update-evidence-invalid")
     tests = package.get("tests", {})
     if (
         tests.get("packagedBrowserFlow") is not True
@@ -137,7 +169,27 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
             "powerAndThermals": {"status": "partial-pass", "passed": ["idle-baseline", "representative-small-model", "representative-medium-model", "representative-large-model", "gpu-and-ane-estimates", "thermal-pressure"], "open": ["whole-system-wall-power"]},
             "uiAccessibilityAndAttachments": {"status": "partial-pass", "passed": ["automated-source-package-parity", "packaged-real-browser-flow", "bounded-attachment-flow", "automated-accessibility-flow", "local-privacy-boundary"], "packagedBrowserChecks": tests["packagedBrowserChecks"], "open": ["manual-screen-reader", "manual-keyboard", "manual-zoom", "manual-reduced-motion", "physical-clipboard"]},
             "keychain": {"status": keychain["status"], "passed": [] if keychain["status"] != "passed" else ["synthetic-item-lifecycle"], "blocked": [keychain["errorCode"]] if keychain["status"] == "blocked" else [], "open": ["interactive-packaged-item-lifecycle", "locked-denied-recovery", "encrypted-history-integration"]},
-            "updateRollbackAndUninstall": {"status": "blocked", "passed": ["offline-policy-and-lifecycle-simulation"], "open": ["signed-native-install", "side-by-side-update", "health-gated-activation", "automatic-rollback", "marker-owned-uninstall", "user-data-preservation"], "reason": "The physical artifact is an unsigned development archive; simulations do not prove a native package transition."},
+            "updateRollbackAndUninstall": {
+                "status": "partial-pass",
+                "passed": [
+                    "offline-policy-and-lifecycle-simulation",
+                    "physical-unsigned-side-by-side-staging",
+                    "health-gated-activation",
+                    "injected-failure-automatic-rollback",
+                    "healthy-candidate-reactivation",
+                    "marker-owned-candidate-uninstall",
+                    "managed-uninstall-user-data-preservation",
+                    "qualification-workspace-cleanup",
+                ],
+                "open": [
+                    "developer-id-signing",
+                    "notarization",
+                    "gatekeeper-public-admission",
+                    "signed-native-install",
+                    "production-updater-integration",
+                ],
+                "reason": "A physical unsigned development-package transition passed. It is not the product updater and grants no signing, notarization, automatic-update, or release authority.",
+            },
         },
         "authority": {"automaticDefaultChangeAllowed": False, "automaticSelectionAllowed": False, "supportLabelChangeAllowed": False, "runtimePromotionAllowed": False, "releasePromotionAllowed": False, "automaticUpdateActivationAllowed": False},
         "privacy": {"privateIdentityRetained": False, "privateInfrastructureRetained": False, "rawPromptsOrResponsesRetained": False, "rawTelemetryRetained": False},
@@ -146,14 +198,14 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp"):
+    for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp", "development-update-plan", "development-update"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     for name in ("addendum-plan", "addendum-core", "addendum-soak", "addendum-coding"):
         parser.add_argument(f"--{name}", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
-    paths = {name.replace("-", "_"): getattr(args, name.replace("-", "_")) for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp")}
+    paths = {name.replace("-", "_"): getattr(args, name.replace("-", "_")) for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp", "development-update-plan", "development-update")}
     addendum_paths = {
         name.replace("-", "_"): getattr(args, name.replace("-", "_"))
         for name in ("addendum-plan", "addendum-core", "addendum-soak", "addendum-coding")
@@ -180,7 +232,8 @@ def main() -> int:
     run_validator(str(validators / "validate-alpha2-macos-keychain-lifecycle-result.py"), str(paths["keychain"]))
     run_validator(str(validators / "validate-alpha2-macos-mlx-lifecycle-result.py"), str(paths["mlx"]))
     run_validator(str(validators / "validate-alpha2-macos-llamacpp-lifecycle-result.py"), str(paths["llamacpp"]))
-    values = {name: load(path) for name, path in paths.items() if name not in {"plan", "addendum_plan", "coding_policy"}}
+    run_validator(str(validators / "validate-alpha2-macos-development-update-lifecycle-result.py"), str(paths["development_update"]), "--plan", str(paths["development_update_plan"]))
+    values = {name: load(path) for name, path in paths.items() if name not in {"plan", "addendum_plan", "coding_policy", "development_update_plan"}}
     bindings = [relative_binding(path) for path in paths.values()]
     status = build_status(values, bindings)
     encoded = json.dumps(status, indent=2, sort_keys=True) + "\n"

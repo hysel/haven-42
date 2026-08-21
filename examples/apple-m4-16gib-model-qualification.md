@@ -105,6 +105,15 @@ Local Network permission without granting device discovery. The app remains
 unsigned, unnotarized, rejected by Gatekeeper, and not admitted for public
 distribution or automatic updates.
 
+Two different exact arm64 development-app archives also passed a physical,
+development-only transition on August 21. The bounded runner performed
+side-by-side staging, package-integrity and loopback-health checks, atomic
+selection, an intentionally injected post-selection failure, automatic
+baseline rollback and health confirmation, healthy-candidate reactivation,
+marker-owned candidate removal, managed uninstall, separate user-data
+preservation, and qualification-workspace cleanup. This proves those mechanics
+for the two exact unsigned archives; it is not the Haven 42 production updater.
+
 ## What remains open
 
 - A maintained coding surface that passes every required gate. OpenCode
@@ -118,8 +127,9 @@ distribution or automatic updates.
   clipboard, and clean-machine beginner review.
 - Interactive Keychain lifecycle. The unattended synthetic create attempt was
   denied and correctly retained as blocked.
-- A signed native installer plus real update, rollback, uninstall, and
-  user-data-preservation evidence.
+- A signed native installer and production updater with immutable release
+  discovery, trusted verification, compatibility preflight, interruption
+  recovery, and the already demonstrated transition mechanics.
 - Signed and notarized public Haven 42 packaging. The current development app
   is intentionally ad-hoc signed and Gatekeeper does not admit it for public
   distribution.

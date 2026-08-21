@@ -310,13 +310,16 @@ python3 scripts/summarize-alpha2-apple-m4-qualification.py \
   --keychain config/alpha-2-apple-m4-keychain-lifecycle-result.json \
   --mlx config/alpha-2-apple-m4-mlx-0.31.3-lifecycle-result.json \
   --llamacpp config/alpha-2-apple-m4-llamacpp-b10520-lifecycle-result.json \
+  --development-update-plan config/alpha-2-macos-development-update-lifecycle-plan.json \
+  --development-update config/alpha-2-apple-m4-development-update-lifecycle-result.json \
   --output config/alpha-2-apple-m4-qualification-status.json \
   --replace
 ```
 
 The ledger remains `in-progress` until its explicitly open signing,
-notarization, interactive accessibility, Keychain, update, rollback, and
-uninstall cells are satisfied. Aggregation never grants product authority.
+notarization, interactive accessibility, Keychain, signed-install, and
+production-updater cells are satisfied. The physical unsigned development
+transition is retained separately and never grants product authority.
 The frozen coding-policy input is required because a later policy revision
 must not be used to reinterpret evidence collected under an earlier contract.
 
