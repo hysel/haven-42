@@ -1,6 +1,6 @@
 # Model release radar
 
-_Reviewed: 2026-08-16_
+_Reviewed: 2026-08-21_
 
 This page answers a narrow question: **which newly released or previously
 missed local models are worth evaluating next?** It is not a list of supported
@@ -43,7 +43,7 @@ still required before a newly prepared soak can start.
 | Ornith 1.0 9B | Small coding/tool-use option already exposed by Ollama | 8 GiB and above | Full immutable Ollama manifest unresolved |
 | North Mini Code 1.0 | 30B-A3B agentic coding model with a 19 GB Q4 | 24/32 GiB | Full manifest, minimum Ollama version, and tool suite |
 | LFM2.5 8B-A1B | Small on-device chat and tool-calling model | 8 GiB and above | Full manifest and LFM license review |
-| LFM2.5 2.6B GGUF | Dense compact assistant/reasoning comparison | CPU/4–8 GiB | Select one exact GGUF and finish LFM license review |
+| LFM2.5 1.2B Instruct and 2.6B GGUF | Compact assistant comparisons | CPU/4–8 GiB | Exact Q4_K_M files ran with full Metal offload on the M4, but both failed bounded core and OpenCode coding gates; LFM license review also remains open |
 
 ## Important releases that do not fit the current lab
 
@@ -94,8 +94,10 @@ execution routes; only Haven 42's local evidence establishes support.
 ## Prepared evaluation order
 
 1. Resolve one official Gemma 4 QAT GGUF per meaningful hardware tier, then
-   resolve exact runtime artifacts for Qwen 3.8 27B, Ornith 9B, North Mini Code,
-   and both LFM2.5 assistant routes.
+   resolve exact runtime artifacts for Qwen 3.8 27B, Ornith 9B, and North Mini
+   Code. The two compact LFM2.5 GGUF routes now have bounded M4 failure evidence
+   and should be revisited only with a specific runtime, prompting, or quality
+   rationale.
 2. Run license review before any LFM or OpenMDW artifact is downloaded.
 3. Start with the compact, differentiated lanes: North Micro Vision, Nemotron
    Parse, Granite Vision, Shieldstral, Nemotron Embed 1B/VL 1B, Tiny Aya, and
@@ -122,4 +124,6 @@ Primary records include the official [Qwen 3.8 27B](https://huggingface.co/Qwen/
 repositories. Ollama
 runtime candidates are recorded from [Ornith](https://ollama.com/library/ornith),
 [North Mini Code](https://ollama.com/library/north-mini-code-1.0), and
-[LFM2.5](https://ollama.com/library/lfm2.5).
+[LFM2.5](https://ollama.com/library/lfm2.5),
+[LFM2.5 1.2B Instruct GGUF](https://huggingface.co/LiquidAI/LFM2.5-1.2B-Instruct-GGUF), and
+[LFM2.5 2.6B GGUF](https://huggingface.co/LiquidAI/LFM2.5-2.6B-GGUF).

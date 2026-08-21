@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import hashlib
 import importlib.util
 import json
@@ -29,6 +30,27 @@ EXPECTED_SURFACE_ARCHIVE_SHA256 = "0026326bd77a3277ab3726be237410b19389f7829e8bb
 
 class CodingScreenError(ValueError):
     pass
+
+
+def valid_add_function(value: Any) -> bool:
+    """Validate the exact requested code shape without executing model output."""
+    if not isinstance(value, dict) or set(value) != {"path", "code"} or value.get("path") != "app/main.py" or not isinstance(value.get("code"), str):
+        return False
+    try:
+        tree = ast.parse(value["code"], filename="app/main.py", mode="exec")
+    except SyntaxError:
+        return False
+    if len(tree.body) != 1 or not isinstance(tree.body[0], ast.FunctionDef):
+        return False
+    function = tree.body[0]
+    if function.name != "add" or [argument.arg for argument in function.args.args] != ["a", "b"]:
+        return False
+    if not all(isinstance(argument.annotation, ast.Name) and argument.annotation.id == "int" for argument in function.args.args):
+        return False
+    if not isinstance(function.returns, ast.Name) or function.returns.id != "int" or len(function.body) != 1 or not isinstance(function.body[0], ast.Return):
+        return False
+    result = function.body[0].value
+    return isinstance(result, ast.BinOp) and isinstance(result.op, ast.Add) and isinstance(result.left, ast.Name) and result.left.id == "a" and isinstance(result.right, ast.Name) and result.right.id == "b"
 
 
 def load_module(name: str, path: Path):
@@ -196,17 +218,7 @@ def deterministic_code_gate(runner: Any, origin: str, model: str) -> dict[str, s
         outputs.append(runner.parse_json_object(runner.response_text(response, "/api/generate")))
         if not runner.unload(origin, model):
             raise CodingScreenError("model-unload-failed")
-    valid = True
-    for value in outputs:
-        if not isinstance(value, dict) or set(value) != {"path", "code"} or value.get("path") != "app/main.py" or not isinstance(value.get("code"), str):
-            valid = False
-            continue
-        try:
-            namespace: dict[str, Any] = {}
-            exec(compile(value["code"], "app/main.py", "exec"), namespace)
-            valid = valid and namespace.get("add") is not None and namespace["add"](2, 3) == 5
-        except Exception:
-            valid = False
+    valid = all(valid_add_function(value) for value in outputs)
     return {
         "valid-code-contract": "passed" if valid else "failed",
         "instruction-fidelity": "passed" if valid else "failed",

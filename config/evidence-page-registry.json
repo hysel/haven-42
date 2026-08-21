@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "2488b3bcb1bdf8e0a186e80cb0825988cb74772a62b706f98b300686b794a7ba",
-  "recordCount": 208,
+  "catalogSha256": "820609753eb72e5502042a99163fbe4540ee06eadff336c066fe7305d817cff2",
+  "recordCount": 210,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -231,6 +231,30 @@
         "repositorySource": "docs/evidence-records/evidence-07f3b51d498ce792.md",
         "wikiPage": "Evidence-Record-07f3b51d498ce792.md",
         "title": "Apple M4 16 GB Gemma 4 12B OpenCode coding screen"
+      }
+    },
+    {
+      "id": "evidence-ea75c15e208b2be2",
+      "claim": {
+        "schema_version": "2",
+        "area": "agent-surface",
+        "subject": "Apple M4 16 GB LFM2.5 OpenCode coding screen",
+        "surface": "OpenCode CLI",
+        "surface_version": "1.18.19",
+        "provider": "llama.cpp b10520 Metal",
+        "os": "macOS 26.6.2",
+        "model": "LFM2.5-1.2B-and-2.6B-Q4_K_M-exact-GGUFs",
+        "operation": "read-plan-review-scoped-write-tool-timeout-recovery-unload-unintended-write",
+        "validation_mode": "disposable-repository-agent",
+        "status": "failed-validation",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Both exact candidates timed out at the bounded 150-second read-only repository gate. No files changed, unload passed, missing gates remain visible, and neither model is eligible for a coding recommendation from this surface."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-ea75c15e208b2be2.md",
+        "wikiPage": "Evidence-Record-ea75c15e208b2be2.md",
+        "title": "Apple M4 16 GB LFM2.5 OpenCode coding screen"
       }
     },
     {
@@ -2991,6 +3015,30 @@
         "repositorySource": "docs/evidence-records/evidence-58b80062769ba4ad.md",
         "wikiPage": "Evidence-Record-58b80062769ba4ad.md",
         "title": "Apple M4 16 GB Gemma 4 12B QAT reliability soak"
+      }
+    },
+    {
+      "id": "evidence-0ef74d64cf30f4b8",
+      "claim": {
+        "schema_version": "2",
+        "area": "model-qualification",
+        "subject": "Apple M4 16 GB LFM2.5 GGUF bounded qualification",
+        "surface": "llama.cpp server",
+        "surface_version": "b10520",
+        "provider": "llama.cpp Metal",
+        "os": "macOS 26.6.2",
+        "model": "LFM2.5-1.2B-and-2.6B-Q4_K_M-exact-GGUFs",
+        "operation": "chat-writing-summary-structured-tool-structured-code-metal-offload-unload",
+        "validation_mode": "local-endpoint",
+        "status": "failed-validation",
+        "evidence": "examples/apple-m4-16gib-model-qualification.md",
+        "notes": "Both exact official GGUF files passed checksum, authenticated loopback, full Metal offload, and unload checks. The 1.2B candidate failed chat, summarization, and the planned structured-code execution gate; its generated code was AST-validated but never executed. The 2.6B candidate failed writing, summarization, and structured code. Neither entered a soak or earned a recommendation, and LFM license review remains open."
+      },
+      "sourceEvidence": "examples/apple-m4-16gib-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-0ef74d64cf30f4b8.md",
+        "wikiPage": "Evidence-Record-0ef74d64cf30f4b8.md",
+        "title": "Apple M4 16 GB LFM2.5 GGUF bounded qualification"
       }
     },
     {

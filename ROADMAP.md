@@ -104,12 +104,14 @@ from the overall application version.
   package parity, and recovery are promotion gates at every stage—not cleanup
   tasks reserved for Beta or RC.
 - Unavailable hardware tracks remain deferred rather than estimated. Physical
-  Apple M4 qualification has completed its base unattended campaign: nine
-  core-pass artifacts from the frozen 16-model corpus completed independent
-  30-minute Metal soaks with no failures; native repository, power, MLX,
-  llama.cpp, OpenCode, and development-app cells are recorded. Signing,
-  notarization, manual accessibility, interactive Keychain, and the
-  late-candidate addendum remain separate gates. A physical unsigned
+  Apple M4 qualification has completed its base unattended campaign: ten
+  core-pass artifacts from the frozen corpus and Gemma 4 addendum completed
+  independent 30-minute Metal soaks with no failures. Two later LFM2.5 GGUF
+  candidates proved native llama.cpp Metal execution but failed the bounded
+  core and OpenCode coding gates, so neither entered a soak. Native repository,
+  power, MLX, llama.cpp, OpenCode, and development-app cells are recorded.
+  Signing, notarization, manual accessibility, and interactive Keychain remain
+  separate gates. A physical unsigned
   side-by-side transition now proves health-gated activation, injected-failure
   rollback, uninstall, and user-data preservation for two exact development
   archives; signed installation and production-updater integration remain open.

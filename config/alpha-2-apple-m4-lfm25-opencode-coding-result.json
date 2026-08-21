@@ -1,0 +1,73 @@
+{
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false,
+  "hardwareProfile": {
+    "acceleratorFamily": "M4",
+    "acceleratorVendor": "Apple",
+    "architecture": "arm64",
+    "backend": "metal",
+    "id": "apple-m4-16gib-macos26-metal",
+    "minimumMemoryReserveGiB": 3,
+    "minimumSystemMemoryGiB": 15,
+    "platformFamily": "macos"
+  },
+  "kind": "haven42-apple-silicon-llamacpp-coding-agent-qualification-result",
+  "observedAtUtc": "2026-08-21T19:04:57Z",
+  "planCanonicalSha256": "fa3ae5936ba262cad6359fde191951d74f1c8ce7b7f77b640a89365e06a4c091",
+  "policyCanonicalSha256": "0b37d73f5a2ddbb38700d03feebbc4696a72575091de87163a943d274405d989",
+  "privateIdentityRetained": false,
+  "qualificationCanonicalSha256": "cbeb0aa8f8f2772f6a1a5773bc1e360f2cad10d86c6f0c9de34cf781575e5b1a",
+  "qualificationReportCorrectionAcknowledged": "structured-code-planned-execution-not-performed-marked-failed",
+  "rawPromptsOrResponsesRetained": false,
+  "release": "0.4.0-alpha.2",
+  "results": [
+    {
+      "codingRecommendationEligible": false,
+      "gates": {
+        "api-structured-code": {"checks": {"deterministic-output": "blocked", "instruction-fidelity": "passed", "valid-code-contract": "passed"}, "status": "failed"},
+        "reliability": {"checks": {"bounded-context": "passed", "model-unload": "passed", "post-failure-recovery": "blocked", "timeout-recovery": "passed"}, "status": "failed"},
+        "repository-read-plan-review": {"checks": {"defect-review": "failed", "exact-filename-fidelity": "failed", "implementation-plan": "failed", "repository-context-use": "failed"}, "status": "failed"},
+        "scoped-edit": {"checks": {"expected-file-only": "blocked", "explicit-write-approval": "passed", "external-git-diff": "blocked", "no-unintended-writes": "blocked"}, "status": "failed"},
+        "tool-contract": {"checks": {"exact-tool-name": "passed", "schema-valid-arguments": "passed", "unknown-tool-refusal": "blocked"}, "status": "failed"}
+      },
+      "modelId": "lfm25-1p2b-instruct-q4km",
+      "modelSha256": "b1b3de114215d9507409a662a501a631095a479a419584e8a2ded6304b19b4f5",
+      "promotionBlock": "license-review",
+      "rawResponseRetained": false,
+      "status": "failed",
+      "surfaceMetrics": {"rawResponseRetained": false, "readDurationSeconds": 150.099, "readErrorCode": "timeout", "readExitCode": 124}
+    },
+    {
+      "codingRecommendationEligible": false,
+      "gates": {
+        "api-structured-code": {"checks": {"deterministic-output": "blocked", "instruction-fidelity": "failed", "valid-code-contract": "failed"}, "status": "failed"},
+        "reliability": {"checks": {"bounded-context": "passed", "model-unload": "passed", "post-failure-recovery": "blocked", "timeout-recovery": "passed"}, "status": "failed"},
+        "repository-read-plan-review": {"checks": {"defect-review": "failed", "exact-filename-fidelity": "failed", "implementation-plan": "failed", "repository-context-use": "failed"}, "status": "failed"},
+        "scoped-edit": {"checks": {"expected-file-only": "blocked", "explicit-write-approval": "passed", "external-git-diff": "blocked", "no-unintended-writes": "blocked"}, "status": "failed"},
+        "tool-contract": {"checks": {"exact-tool-name": "passed", "schema-valid-arguments": "passed", "unknown-tool-refusal": "blocked"}, "status": "failed"}
+      },
+      "modelId": "lfm25-2p6b-q4km",
+      "modelSha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "promotionBlock": "license-review",
+      "rawResponseRetained": false,
+      "status": "failed",
+      "surfaceMetrics": {"rawResponseRetained": false, "readDurationSeconds": 150.125, "readErrorCode": "timeout", "readExitCode": 124}
+    }
+  ],
+  "runtime": {
+    "commit": "cd644c39545aac3dca63261f99a9bfc35956cb25",
+    "provider": "llama.cpp",
+    "releaseTag": "b10520",
+    "serverSha256": "d0878274b8d6bd3c8ea26a78eb66cd1ffd943d007c62b9dff31c8aa99922d713",
+    "transport": "authenticated-ipv4-loopback-only"
+  },
+  "schemaVersion": 1,
+  "status": "completed",
+  "surface": {
+    "archiveSha256": "0026326bd77a3277ab3726be237410b19389f7829e8bb3c82dfaf9044162067c",
+    "binarySha256": "fff10da113acaf6189f1082d64bfe6015a29e4d4c1b2c7ee6f2ac44fa225e099",
+    "id": "opencode-cli",
+    "version": "1.18.19"
+  }
+}

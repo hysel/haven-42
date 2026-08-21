@@ -16,8 +16,8 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 208 |
-| Distinct model-field values | 82 |
+| Evidence records | 210 |
+| Distinct model-field values | 83 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
@@ -25,7 +25,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | Status | Count |
 | --- | ---: |
 | `partial-pass` | 101 |
-| `failed-validation` | 25 |
+| `failed-validation` | 27 |
 | `validated-by-tests` | 22 |
 | `read-only-tool-validated` | 13 |
 | `write-smoke-validated` | 13 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 85 |
+| Local endpoint | 86 |
 | Generated sample | 58 |
 | Editor agent | 14 |
 | Automated tests | 8 |
@@ -50,9 +50,9 @@ See [Evidence Catalog](Evidence-Catalog),
 | physical-source-test | 5 |
 | physical-package-test | 4 |
 | development-network | 3 |
+| disposable-repository-agent | 3 |
 | Static | 3 |
 | browser-and-static | 2 |
-| disposable-repository-agent | 2 |
 | generated-sample-editor-chat | 2 |
 | offline-mocked | 2 |
 | generated-sample-agent | 1 |
@@ -92,6 +92,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | 19-model-passed-soak-corpus |
 | Click 8.2.1 |
 | Express 5.1.0 |
+| LFM2.5-1.2B-and-2.6B-Q4_K_M-exact-GGUFs |
 | OpenVINO/Qwen3-0.6B-int4-ov@f864c6106efb6c7f7b4ef274a78a98e37210dddd |
 | Qwen 3.5 0.8B Q4_0 GGUF@57d1997790d1744fba5b40a7317df71ea5e2acee28c47e78f0cce39c0703f8cf |
 | Qwen3-Coder-Next:latest |

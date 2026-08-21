@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-apple-silicon-llamacpp-model-qualification-plan",
+  "release": "0.4.0-alpha.2",
+  "status": "qualification-only-no-product-promotion",
+  "reviewedAtUtc": "2026-08-21T18:35:00Z",
+  "runtime": {
+    "provider": "llama.cpp",
+    "releaseTag": "b10520",
+    "commit": "cd644c39545aac3dca63261f99a9bfc35956cb25",
+    "serverSha256": "d0878274b8d6bd3c8ea26a78eb66cd1ffd943d007c62b9dff31c8aa99922d713",
+    "transport": "authenticated-ipv4-loopback-only"
+  },
+  "hardwareProfile": {
+    "id": "apple-m4-16gib-macos26-metal",
+    "platformFamily": "macos",
+    "architecture": "arm64",
+    "acceleratorVendor": "Apple",
+    "acceleratorFamily": "M4",
+    "backend": "metal",
+    "minimumSystemMemoryGiB": 15,
+    "minimumMemoryReserveGiB": 3
+  },
+  "testContract": {
+    "version": 2,
+    "generalChat": "exact-token",
+    "contentWrite": "one-sentence-6-to-18-words-required-word",
+    "contentSummarize": "one-sentence-6-to-24-words-exact-fact-labels",
+    "structuredTool": "exact-single-read-file-call",
+    "structuredCode": "exact-path-json-compile-and-execute"
+  },
+  "rules": {
+    "ownerApprovalRecorded": true,
+    "downloadOnlyExactReviewedArtifacts": true,
+    "unloadAfterEveryCell": true,
+    "rawPromptsOrResponsesRetained": false,
+    "privateIdentityRetained": false,
+    "automaticDefaultChangeAllowed": false,
+    "automaticSelectionEvidenceAllowed": false,
+    "automaticSupportChangeAllowed": false,
+    "maintainedCodingSurfaceEvidenceRequiredForCodingRecommendation": true,
+    "continueEvidenceMayBeUsedForNewRecommendation": false
+  },
+  "candidates": [
+    {
+      "modelId": "lfm25-1p2b-instruct-q4km",
+      "displayName": "LFM2.5 1.2B Instruct Q4_K_M",
+      "publisher": "Liquid AI",
+      "repository": "LiquidAI/LFM2.5-1.2B-Instruct-GGUF",
+      "repositoryRevision": "afbd8eaeab5dd94ba0b079ebfb02517d19641e38",
+      "filename": "LFM2.5-1.2B-Instruct-Q4_K_M.gguf",
+      "modelBytes": 730895168,
+      "modelSha256": "b1b3de114215d9507409a662a501a631095a479a419584e8a2ded6304b19b4f5",
+      "license": "LFM-1.0",
+      "promotionBlock": "license-review"
+    },
+    {
+      "modelId": "lfm25-2p6b-q4km",
+      "displayName": "LFM2.5 2.6B Q4_K_M",
+      "publisher": "Liquid AI",
+      "repository": "LiquidAI/LFM2.5-2.6B-GGUF",
+      "repositoryRevision": "f4a289c8a200a5ca71005ba7abc2dad33058a450",
+      "filename": "LFM2.5-2.6B-Q4_K_M.gguf",
+      "modelBytes": 1674455040,
+      "modelSha256": "02a8b7e17487d326e46d68ce0ba24211e1b80a14c4cd0597fa73c1cd697f52ed",
+      "license": "LFM-1.0",
+      "promotionBlock": "license-review"
+    }
+  ]
+}
