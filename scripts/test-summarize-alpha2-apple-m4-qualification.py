@@ -43,7 +43,24 @@ def fixture() -> dict:
         "package": {"tests": tests, "open": ["developer-id-signing", "notarization", "gatekeeper-public-admission", "clean-machine-beginner-review", "manual-screen-reader", "manual-keyboard", "manual-zoom", "manual-reduced-motion"]},
         "keychain": {"status": "blocked", "errorCode": "interactive-authorization-required"},
         "mlx": {"runtime": {"packages": {"mlx-lm": "0.31.3"}}},
-        "llamacpp": {"runtime": {"commit": "cd644c395"}},
+        "llamacpp": {"runtime": {"commit": "cd644c395", "serverSha256": "d" * 64}},
+        "llamacpp_distribution": {
+            "status": "partial-pass",
+            "archive": {"exactOfficialDigest": True},
+            "runtime": {
+                "commit": "cd644c39545aac3dca63261f99a9bfc35956cb25",
+                "serverSha256": "d" * 64,
+                "relocatedLaunchPassed": True,
+                "runtimeLaunchRequiresSystemPython": False,
+                "runtimeLaunchRequiresPackageManager": False,
+            },
+            "platformTrust": {"publicDistributionTrusted": False},
+            "authority": {
+                "runtimeAdmissionGranted": False,
+                "packageAdmissionGranted": False,
+                "releasePromotionAllowed": False,
+            },
+        },
         "development_update": {
             "status": "partial-pass",
             "operations": {
@@ -72,10 +89,12 @@ def main() -> int:
     assert status["gates"]["codingAgentQualification"]["eligibleForHumanReview"] == 4
     assert status["gates"]["uiAccessibilityAndAttachments"]["packagedBrowserChecks"] == 61
     assert status["gates"]["keychain"]["status"] == "blocked"
+    assert "official-release-integrity" in status["gates"]["llamaCppLifecycle"]["passed"]
+    assert "gatekeeper-public-admission" in status["gates"]["llamaCppLifecycle"]["open"]
     assert status["gates"]["updateRollbackAndUninstall"]["status"] == "partial-pass"
     assert "production-updater-integration" in status["gates"]["updateRollbackAndUninstall"]["open"]
     assert all(value is False for value in status["authority"].values())
-    checks += 8
+    checks += 10
     addendum = fixture()
     addendum["addendum_core"] = {"results": records(1, 0)}
     addendum["addendum_soak"] = {"results": records(1, 0)}
@@ -96,6 +115,8 @@ def main() -> int:
         lambda value: value["package"]["tests"].__setitem__("packagedBrowserFlow", False),
         lambda value: value["development_update"]["operations"].__setitem__("automatic-baseline-rollback", False),
         lambda value: value["development_update"]["authority"].__setitem__("productionUpdaterAdmissionGranted", True),
+        lambda value: value["llamacpp_distribution"]["runtime"].__setitem__("runtimeLaunchRequiresSystemPython", True),
+        lambda value: value["llamacpp_distribution"]["platformTrust"].__setitem__("publicDistributionTrusted", True),
     ):
         candidate = fixture()
         mutation(candidate)

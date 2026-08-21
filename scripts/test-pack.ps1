@@ -5232,6 +5232,7 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-alpha2-macos-development-update-lifecycle.py",
         "test-alpha2-macos-keychain-lifecycle.py",
         "test-alpha2-macos-llamacpp-lifecycle.py",
+        "test-alpha2-macos-llamacpp-distribution.py",
         "test-alpha2-macos-mlx-lifecycle.py",
         "test-alpha2-macos-opencode-coding-screen.py",
         "test-alpha2-apple-m4-package-result.py",
@@ -5252,7 +5253,8 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-validate-alpha2-macos-keychain-lifecycle-result.py",
         "test-validate-alpha2-macos-attended-qualification-result.py",
         "test-validate-alpha2-macos-development-update-lifecycle-result.py",
-        "test-validate-alpha2-macos-development-app-result.py"
+        "test-validate-alpha2-macos-development-app-result.py",
+        "test-validate-alpha2-macos-llamacpp-distribution-result.py"
     )
     foreach ($test in $tests) {
         $result = Invoke-NativeCapture -FilePath $python.Source -Arguments @((Join-Path $repoRoot "scripts/$test"))

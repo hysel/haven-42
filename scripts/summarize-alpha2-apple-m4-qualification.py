@@ -74,6 +74,7 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
     addendum_coding = values.get("addendum_coding")
     addendum_present = all(value is not None for value in (addendum_core, addendum_soak, addendum_coding))
     package, keychain = values["package"], values["keychain"]
+    llamacpp_distribution = values["llamacpp_distribution"]
     development_update = values["development_update"]
     native_tests = values["native_tests"]
     power = [
@@ -82,6 +83,21 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
     ]
     if native_tests.get("status") != "passed":
         raise SummaryError("native-tests-not-passed")
+    if (
+        llamacpp_distribution.get("status") != "partial-pass"
+        or not llamacpp_distribution.get("runtime", {}).get("commit", "").startswith(
+            values["llamacpp"].get("runtime", {}).get("commit", "invalid")
+        )
+        or llamacpp_distribution.get("runtime", {}).get("serverSha256")
+        != values["llamacpp"].get("runtime", {}).get("serverSha256")
+        or llamacpp_distribution.get("archive", {}).get("exactOfficialDigest") is not True
+        or llamacpp_distribution.get("runtime", {}).get("relocatedLaunchPassed") is not True
+        or llamacpp_distribution.get("runtime", {}).get("runtimeLaunchRequiresSystemPython") is not False
+        or llamacpp_distribution.get("runtime", {}).get("runtimeLaunchRequiresPackageManager") is not False
+        or llamacpp_distribution.get("platformTrust", {}).get("publicDistributionTrusted") is not False
+        or any(llamacpp_distribution.get("authority", {}).values())
+    ):
+        raise SummaryError("llamacpp-distribution-evidence-invalid")
     native_receipt = native_tests.get("test")
     if not isinstance(native_receipt, dict) or native_receipt.get("tier") != "full" or native_receipt.get("runner") != "native-shell" or not isinstance(native_receipt.get("groupsExecuted"), int) or native_receipt["groupsExecuted"] < 80 or native_receipt.get("groupsSkipped") != 0:
         raise SummaryError("native-test-receipt-invalid")
@@ -161,7 +177,21 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
                 "open": list(package["open"]),
             },
             "ollamaLifecycle": {"status": "passed", "runtimeVersion": core["runtime"]["version"], "transport": core["runtime"]["transport"], "boundary": "model qualification, bounded lifecycle, and long-run reliability"},
-            "llamaCppLifecycle": {"status": "partial-pass", "runtimeVersion": values["llamacpp"]["runtime"]["commit"], "passed": ["native-arm64", "metal-full-offload", "authenticated-loopback", "bounded-inference", "timeout-recovery", "restart", "listener-cleanup"], "open": ["trusted-distribution", "self-contained-package", "maintained-coding-surface"]},
+            "llamaCppLifecycle": {
+                "status": "partial-pass",
+                "runtimeVersion": values["llamacpp"]["runtime"]["commit"],
+                "passed": [
+                    "native-arm64", "metal-full-offload", "authenticated-loopback",
+                    "bounded-inference", "timeout-recovery", "restart", "listener-cleanup",
+                    "official-release-integrity", "safe-archive-extraction",
+                    "one-folder-relocation", "system-python-not-required",
+                    "package-manager-not-required",
+                ],
+                "open": [
+                    "developer-id-signing", "notarization",
+                    "gatekeeper-public-admission", "maintained-coding-surface",
+                ],
+            },
             "mlxLifecycle": {"status": "partial-pass", "runtimeVersion": values["mlx"]["runtime"]["packages"]["mlx-lm"], "passed": ["pinned-offline-runtime", "native-metal-generation", "timeout-recovery", "process-cleanup"], "open": ["production-suitable-server", "authenticated-boundary", "self-contained-package", "maintained-coding-surface"]},
             "modelCoreQualification": {"status": "partial-pass", "candidates": core_candidates, "passed": core_passed, "failed": core_failed},
             "longRunReliability": {"status": "completed", "eligibleCandidates": soak_candidates, "passed": soak_passed, "failed": soak_failed, "minutesPerCandidate": 30},
@@ -198,14 +228,14 @@ def build_status(values: dict[str, dict[str, Any]], bindings: list[dict[str, str
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp", "development-update-plan", "development-update"):
+    for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp", "llamacpp-distribution", "development-update-plan", "development-update"):
         parser.add_argument(f"--{name}", type=Path, required=True)
     for name in ("addendum-plan", "addendum-core", "addendum-soak", "addendum-coding"):
         parser.add_argument(f"--{name}", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--replace", action="store_true")
     args = parser.parse_args()
-    paths = {name.replace("-", "_"): getattr(args, name.replace("-", "_")) for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp", "development-update-plan", "development-update")}
+    paths = {name.replace("-", "_"): getattr(args, name.replace("-", "_")) for name in ("plan", "core", "soak", "coding", "coding-policy", "native-tests", "idle-power", "small-power", "medium-power", "large-power", "package", "keychain", "mlx", "llamacpp", "llamacpp-distribution", "development-update-plan", "development-update")}
     addendum_paths = {
         name.replace("-", "_"): getattr(args, name.replace("-", "_"))
         for name in ("addendum-plan", "addendum-core", "addendum-soak", "addendum-coding")
@@ -232,6 +262,7 @@ def main() -> int:
     run_validator(str(validators / "validate-alpha2-macos-keychain-lifecycle-result.py"), str(paths["keychain"]))
     run_validator(str(validators / "validate-alpha2-macos-mlx-lifecycle-result.py"), str(paths["mlx"]))
     run_validator(str(validators / "validate-alpha2-macos-llamacpp-lifecycle-result.py"), str(paths["llamacpp"]))
+    run_validator(str(validators / "validate-alpha2-macos-llamacpp-distribution-result.py"), str(paths["llamacpp_distribution"]))
     run_validator(str(validators / "validate-alpha2-macos-development-update-lifecycle-result.py"), str(paths["development_update"]), "--plan", str(paths["development_update_plan"]))
     values = {name: load(path) for name, path in paths.items() if name not in {"plan", "addendum_plan", "coding_policy", "development_update_plan"}}
     bindings = [relative_binding(path) for path in paths.values()]

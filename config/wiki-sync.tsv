@@ -264,6 +264,7 @@ docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b
 docs/evidence-records/evidence-27f4eaa91d0b896d.md	Evidence-Record-27f4eaa91d0b896d.md	Radeon RX 5700 XT current-boot host stability
 docs/evidence-records/evidence-e3d838e6e2d03596.md	Evidence-Record-e3d838e6e2d03596.md	Apple M4 16 GB MLX-LM lifecycle
 docs/evidence-records/evidence-6c65da7ee449d0dd.md	Evidence-Record-6c65da7ee449d0dd.md	Apple M4 16 GB llama.cpp lifecycle
+docs/evidence-records/evidence-6f7b8eca3bf0cc89.md	Evidence-Record-6f7b8eca3bf0cc89.md	Apple M4 16 GB official llama.cpp b10520 distribution boundary
 docs/evidence-records/evidence-05d02ca020d00629.md	Evidence-Record-05d02ca020d00629.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-13d3451c24d5c713.md	Evidence-Record-13d3451c24d5c713.md	OpenVINO GenAI on Intel Arc B580
 docs/evidence-records/evidence-d2ac550dc4f53937.md	Evidence-Record-d2ac550dc4f53937.md	llama.cpp 11-model identical-byte AMD/NVIDIA matrix

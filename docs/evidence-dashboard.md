@@ -16,7 +16,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 207 |
+| Evidence records | 208 |
 | Distinct model-field values | 82 |
 | Tracked agent surfaces | 4 |
 
@@ -24,7 +24,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 100 |
+| `partial-pass` | 101 |
 | `failed-validation` | 25 |
 | `validated-by-tests` | 22 |
 | `read-only-tool-validated` | 13 |
@@ -48,8 +48,8 @@ See [Evidence Catalog](Evidence-Catalog),
 | development-native | 7 |
 | offline-fixture | 6 |
 | physical-source-test | 5 |
+| physical-package-test | 4 |
 | development-network | 3 |
-| physical-package-test | 3 |
 | Static | 3 |
 | browser-and-static | 2 |
 | disposable-repository-agent | 2 |

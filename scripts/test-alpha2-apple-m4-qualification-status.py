@@ -24,7 +24,7 @@ class AppleM4QualificationStatusTests(unittest.TestCase):
         self.assertEqual(self.value["status"], "in-progress")
         self.assertFalse(self.value["complete"])
         binding_count = len(self.value["evidenceBindings"])
-        self.assertIn(binding_count, {5, 16, 20})
+        self.assertIn(binding_count, {5, 16, 20, 21})
         self.assertEqual(
             len({binding["path"] for binding in self.value["evidenceBindings"]}),
             len(self.value["evidenceBindings"]),
@@ -55,6 +55,9 @@ class AppleM4QualificationStatusTests(unittest.TestCase):
             gates["uiAccessibilityAndAttachments"]["passed"],
         )
         self.assertEqual(gates["llamaCppLifecycle"]["status"], "partial-pass")
+        self.assertIn("official-release-integrity", gates["llamaCppLifecycle"]["passed"])
+        self.assertIn("gatekeeper-public-admission", gates["llamaCppLifecycle"]["open"])
+        self.assertNotIn("trusted-distribution", gates["llamaCppLifecycle"]["passed"])
         self.assertEqual(gates["mlxLifecycle"]["status"], "partial-pass")
         self.assertIn(gates["modelCoreQualification"]["candidates"], {16, 17})
         self.assertEqual(

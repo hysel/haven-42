@@ -66,6 +66,10 @@
       "sha256": "1e218318e46ae83aee33fbf2dd573e05b1454d94e1e851d11022481083b842e9"
     },
     {
+      "path": "config/alpha-2-apple-m4-llamacpp-b10520-distribution-result.json",
+      "sha256": "9e763bb5143bbee7c5dead72411dbf436286394406124b1394fca562ae7a4f31"
+    },
+    {
       "path": "config/alpha-2-macos-development-update-lifecycle-plan.json",
       "sha256": "d6d145934de863593e2d4a3324d5a7eba371dfc74cbd4c069e9ed2ad55a3222f"
     },
@@ -115,8 +119,9 @@
     },
     "llamaCppLifecycle": {
       "open": [
-        "trusted-distribution",
-        "self-contained-package",
+        "developer-id-signing",
+        "notarization",
+        "gatekeeper-public-admission",
         "maintained-coding-surface"
       ],
       "passed": [
@@ -126,7 +131,12 @@
         "bounded-inference",
         "timeout-recovery",
         "restart",
-        "listener-cleanup"
+        "listener-cleanup",
+        "official-release-integrity",
+        "safe-archive-extraction",
+        "one-folder-relocation",
+        "system-python-not-required",
+        "package-manager-not-required"
       ],
       "runtimeVersion": "cd644c395",
       "status": "partial-pass"
