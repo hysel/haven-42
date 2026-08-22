@@ -9,6 +9,8 @@ import json
 import os
 import platform
 import posixpath
+import shutil
+import stat
 import subprocess
 import tarfile
 import tempfile
@@ -50,6 +52,8 @@ def sha256_file(path: Path) -> str:
 def safe_members(archive: tarfile.TarFile, expected_root: str = ARCHIVE_ROOT) -> list[tarfile.TarInfo]:
     members = archive.getmembers()
     require(0 < len(members) <= 512, "unsafe-archive-member-count")
+    names: set[PurePosixPath] = set()
+    symlinks: set[PurePosixPath] = set()
     for member in members:
         path = PurePosixPath(member.name)
         require(
@@ -59,13 +63,42 @@ def safe_members(archive: tarfile.TarFile, expected_root: str = ARCHIVE_ROOT) ->
             and all(part not in {"", ".", ".."} for part in path.parts),
             "unsafe-archive-path",
         )
+        require(path not in names, "duplicate-archive-member")
+        names.add(path)
         require(member.isdir() or member.isfile() or member.issym(), "unsafe-archive-member-type")
         if member.issym():
             target = PurePosixPath(member.linkname)
             require(not target.is_absolute(), "unsafe-archive-link")
             resolved = posixpath.normpath(posixpath.join(posixpath.dirname(member.name), member.linkname))
             require(resolved.startswith(expected_root + "/"), "unsafe-archive-link")
+            symlinks.add(path)
+    for path in names:
+        require(
+            not any(parent in symlinks for parent in path.parents),
+            "archive-member-beneath-link",
+        )
     return members
+
+
+def extract_members(archive: tarfile.TarFile, root: Path, members: list[tarfile.TarInfo]) -> None:
+    root.mkdir(parents=True, exist_ok=True)
+    directories: list[tuple[Path, int]] = []
+    for member in members:
+        target = root.joinpath(*PurePosixPath(member.name).parts)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if member.isdir():
+            target.mkdir(exist_ok=True)
+            directories.append((target, member.mode))
+        elif member.isfile():
+            source = archive.extractfile(member)
+            require(source is not None, "archive-file-unreadable")
+            with source, target.open("xb") as output:
+                shutil.copyfileobj(source, output, length=1024 * 1024)
+            os.chmod(target, stat.S_IMODE(member.mode))
+        else:
+            os.symlink(member.linkname, target)
+    for directory, mode in reversed(directories):
+        os.chmod(directory, stat.S_IMODE(mode))
 
 
 def run(arguments: list[str], *, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -102,7 +135,7 @@ def inspect_archive(archive_path: Path, output: Path) -> dict[str, Any]:
         root = Path(directory)
         with tarfile.open(archive_path, "r:gz") as archive:
             members = safe_members(archive)
-            archive.extractall(root, filter="data")
+            extract_members(archive, root, members)
         runtime = root / ARCHIVE_ROOT
         server = runtime / "llama-server"
         require(server.is_file() and not server.is_symlink() and os.access(server, os.X_OK), "server-missing")

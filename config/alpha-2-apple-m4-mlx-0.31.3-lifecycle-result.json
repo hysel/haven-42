@@ -18,7 +18,7 @@
     "id": "mlx-community/Qwen3.5-0.8B-OptiQ-4bit@ef605869",
     "totalBytes": 670394767
   },
-  "observedAtUtc": "2026-08-21T08:19:30Z",
+  "observedAtUtc": "2026-08-21T23:35:13Z",
   "privacy": {
     "networkEndpointRetained": false,
     "privateIdentityRetained": false,
@@ -44,11 +44,11 @@
   "status": "passed",
   "tests": {
     "firstGeneration": {
-      "durationSeconds": 1.484,
+      "durationSeconds": 2.311,
       "exitCode": 0,
-      "generationTokensPerSecond": 161.118,
+      "generationTokensPerSecond": 155.648,
       "outputCharacters": 141,
-      "outputSha256": "1e6c25aa30a06e9ef35da74e07f66195472bad158dfcca13aa7286de7f261584",
+      "outputSha256": "751175f4b95e7d29dcd4df3bf8f13705e7d257aff979da1ac32d841b43d1ad9e",
       "peakMetalMemoryGiB": 0.759,
       "processExited": true,
       "requiredTokenObserved": true,
@@ -56,7 +56,7 @@
       "status": "passed"
     },
     "forcedTimeout": {
-      "durationSeconds": 0.013,
+      "durationSeconds": 0.014,
       "processExited": true,
       "responseRetained": false,
       "status": "timed-out"
@@ -65,11 +65,11 @@
     "offlineOnly": true,
     "processResidueRetained": false,
     "recoveryGeneration": {
-      "durationSeconds": 1.479,
+      "durationSeconds": 1.556,
       "exitCode": 0,
-      "generationTokensPerSecond": 163.99,
+      "generationTokensPerSecond": 152.937,
       "outputCharacters": 141,
-      "outputSha256": "3dcb957be1259ade459539ecc716291c125b59b34437d768e045cd62ed311e35",
+      "outputSha256": "45563dc908c11f625aa1103fdbc2ceb4aa0dc2da634b0881de54ec1bbe1db371",
       "peakMetalMemoryGiB": 0.759,
       "processExited": true,
       "requiredTokenObserved": true,

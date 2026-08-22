@@ -106,6 +106,35 @@ def main() -> int:
     assert expanded["gates"]["longRunReliability"]["eligibleCandidates"] == 10
     assert expanded["gates"]["codingAgentQualification"]["candidates"] == 17
     checks += 3
+    lfm_expanded = fixture()
+    lfm_expanded["addendum_core"] = {"results": records(1, 0)}
+    lfm_expanded["addendum_soak"] = {"results": records(1, 0)}
+    lfm_expanded["addendum_coding"] = {"results": records(0, 1, coding=True)}
+    lfm_expanded["lfm_addendum_core"] = {"results": records(0, 2)}
+    lfm_expanded["lfm_addendum_coding"] = {"results": records(0, 2, coding=True)}
+    expanded = MODULE.build_status(lfm_expanded, [])
+    assert expanded["gates"]["modelCoreQualification"] == {
+        "status": "partial-pass", "candidates": 19, "passed": 10, "failed": 9,
+    }
+    assert expanded["gates"]["longRunReliability"] == {
+        "status": "completed", "eligibleCandidates": 10, "passed": 10,
+        "failed": 0, "minutesPerCandidate": 30,
+    }
+    assert expanded["gates"]["codingAgentQualification"]["candidates"] == 19
+    assert expanded["gates"]["codingAgentQualification"]["failed"] == 14
+    assert expanded["gates"]["llamaCppLifecycle"]["failed"] == [
+        "lfm25-maintained-coding-surface",
+    ]
+    checks += 5
+    invalid_lfm = fixture()
+    invalid_lfm["lfm_addendum_core"] = {"results": records(1, 1)}
+    invalid_lfm["lfm_addendum_coding"] = {"results": records(0, 2, coding=True)}
+    try:
+        MODULE.build_status(invalid_lfm, [])
+    except MODULE.SummaryError:
+        checks += 1
+    else:
+        raise AssertionError("An LFM core pass without soak evidence was summarized as usable.")
     for mutation in (
         lambda value: value["soak"].__setitem__("results", records(8, 0)),
         lambda value: value["coding"].__setitem__("results", records(5, 10, coding=True)),

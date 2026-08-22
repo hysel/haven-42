@@ -18,7 +18,7 @@
   },
   "kind": "haven42-alpha2-macos-llamacpp-lifecycle-result",
   "metrics": {
-    "durationSeconds": 1.559,
+    "durationSeconds": 1.87,
     "firstCompletionTokens": 5,
     "recoveryCompletionTokens": 7
   },

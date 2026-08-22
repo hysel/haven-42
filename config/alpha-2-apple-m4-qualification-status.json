@@ -31,7 +31,7 @@
     },
     {
       "path": "config/alpha-2-apple-m4-native-test-result.json",
-      "sha256": "d1c9b4761c8af015cd5de518552cefced300df0ab71693f4244acbbc7eb08ab5"
+      "sha256": "3072205cea6e69340707d24737e9d1f550448af7177af01b096aa5556051e7ff"
     },
     {
       "path": "config/alpha-2-apple-m4-idle-power-result.json",
@@ -59,11 +59,11 @@
     },
     {
       "path": "config/alpha-2-apple-m4-mlx-0.31.3-lifecycle-result.json",
-      "sha256": "76a4bdc008d1d0f307621069f91eb28143b40bb5e8569eff53fb3d951c47ebdd"
+      "sha256": "e820e3b6a19a6ffd938be197c13554f423229185a7d4f4b6e83bc7c24f70331b"
     },
     {
       "path": "config/alpha-2-apple-m4-llamacpp-b10520-lifecycle-result.json",
-      "sha256": "1e218318e46ae83aee33fbf2dd573e05b1454d94e1e851d11022481083b842e9"
+      "sha256": "f78f28f560042f6cd163408e6158528c6373d74152d69a2359da2650b13d0856"
     },
     {
       "path": "config/alpha-2-apple-m4-llamacpp-b10520-distribution-result.json",
@@ -75,7 +75,7 @@
     },
     {
       "path": "config/alpha-2-apple-m4-development-update-lifecycle-result.json",
-      "sha256": "bc31ebcbea0fc79bfe1450a87bb13c8579373267d1647b46d58cd0f80e9e98bb"
+      "sha256": "7289f316e31d8753a22415517813fcbe730ed7023a61e264812b53d6942728a0"
     },
     {
       "path": "config/alpha-2-apple-silicon-16gib-gemma4-12b-addendum-plan.json",
@@ -134,6 +134,9 @@
       "status": "blocked"
     },
     "llamaCppLifecycle": {
+      "failed": [
+        "lfm25-maintained-coding-surface"
+      ],
       "open": [
         "developer-id-signing",
         "notarization",
@@ -153,9 +156,6 @@
         "one-folder-relocation",
         "system-python-not-required",
         "package-manager-not-required"
-      ],
-      "failed": [
-        "lfm25-maintained-coding-surface"
       ],
       "runtimeVersion": "cd644c395",
       "status": "partial-pass"
@@ -192,7 +192,7 @@
     "nativeRepositoryTests": {
       "checksPassed": 81,
       "scope": "exact source snapshot full test tier",
-      "sourceSnapshotSha256": "d0fde8f32f7fa8ce92e44dee100a037bd17c2803fb0203465dd819b7077dd8c5",
+      "sourceSnapshotSha256": "193223f799da8bbccc52908ab6ea18ba9a1416c605ed89cdc77e79cce640c4f4",
       "status": "passed"
     },
     "noviceSelfContainedPackage": {

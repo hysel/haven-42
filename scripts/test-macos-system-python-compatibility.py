@@ -37,6 +37,10 @@ def incompatible_calls(path: Path) -> list[str]:
                 failures.append(
                     f"{path.relative_to(ROOT)}:{node.lineno}: Path.stat(follow_symlinks=) requires Python 3.10"
                 )
+            if node.func.attr == "extractall" and "filter" in keywords:
+                failures.append(
+                    f"{path.relative_to(ROOT)}:{node.lineno}: tarfile.extractall(filter=) requires Python 3.12"
+                )
     return failures
 
 
