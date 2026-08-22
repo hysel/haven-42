@@ -19,8 +19,12 @@ quick reference if you want a little more detail.
 | GPU | A graphics processor that can accelerate a compatible AI model. Available graphics memory limits which model sizes fit. |
 | CUDA | NVIDIA's software path for running supported work on an NVIDIA GPU. A CUDA result does not apply to an Intel or AMD graphics card. |
 | Runtime | The software that loads and runs a model. Ollama is Haven 42's managed text-model runtime in the current Alpha. |
+| Backend or accelerator route | The software path that connects a runtime to hardware, such as CUDA, Vulkan, ROCm/HIP, SYCL, or Metal. A result on one route does not prove another. |
 | Quantization | A way to make a model smaller so it can fit on more computers. Haven 42 selects an already prepared size; the Alpha does not modify models on the tester's computer. |
 | Quantization label | A model-size label such as `Q4_K_M` or `Q8_0`. It identifies how the model was prepared and affects memory use and output quality. Results for one label do not automatically apply to another. |
+| Context window | The amount of prompt, attachment, conversation, and generated text a model can consider in one request. Larger configured context usually needs more memory. |
+| Full GPU residency | A test result showing that the required model data fit on the intended GPU during the measured run. It does not by itself prove output quality or long-run stability. |
+| Evidence cell | One exact combination of model artifact, runtime, version, operating system, hardware, backend, and task. Changing one of those details creates a separate result. |
 | Soak test | A test that runs for a set period to look for failures that may not appear in a short check. |
 | Checksum or artifact digest | A fixed-length value used to identify exact file contents. A changed file has a different value. |
 | Release candidate | A specific package being considered for release. It still must pass its stated checks before publication. |

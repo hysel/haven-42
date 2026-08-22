@@ -31,8 +31,11 @@ shortest recovery steps and shows where to find a sanitized support report.
 - Choose another installed model or search Ollama's public model catalog.
 - Attach bounded text, source-code, structured-text, and PNG screenshot files.
 - Connect to Ollama on this computer or on a private server.
-- In the development source, review and approve a web search before any query
-  leaves your computer. The published Alpha 1 package predates this feature.
+- In the development source, approve every web-research request before it
+  leaves your computer. The bounded route can use Wikipedia or Brave Search;
+  retrieved text is inert and memory-only, and the model cannot receive the
+  search key or approve follow-up requests. Exact package and manual
+  assistive-technology parity remain open.
 - See response speed and local CPU, memory, and graphics use.
 
 Music and video generation are not part of the current app. Conversation

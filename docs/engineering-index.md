@@ -39,6 +39,7 @@ If you are trying to install or use Haven 42, start with the
 - [On-demand runtime version certification](https://github.com/hysel/haven-42/blob/main/docs/runtime-version-certification.md)
 - [Inference engine architecture](https://github.com/hysel/haven-42/blob/main/docs/inference-engine-architecture.md)
 - [Alpha 2 Linux long-term validation](https://github.com/hysel/haven-42/blob/main/docs/alpha-2-linux-long-term-validation.md)
+- [Radeon RX 6800 Ubuntu model qualification](https://github.com/hysel/haven-42/blob/main/examples/amd-rx6800-linux-model-qualification.md)
 - [Evidence catalog](https://github.com/hysel/haven-42/blob/main/docs/evidence-catalog.md)
 - [Remote hardware profiles](https://github.com/hysel/haven-42/blob/main/docs/remote-hardware-profile.md)
 

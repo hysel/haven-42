@@ -11,6 +11,30 @@ wiki. `python scripts/generate-evidence-wiki-pages.py --check` verifies that
 the page set, index, wiki mappings, and future-update evidence registry all
 match the catalog.
 
+## Writing style
+
+Public wiki pages use a practical technical field-guide voice:
+
+- Lead with the problem the page solves and the shortest safe answer.
+- Name the exact operating system, hardware, runtime, version, backend, model
+  artifact, and task whenever a result depends on them.
+- Separate observed results from inference, recommendation, and roadmap work.
+- Keep failures, unsupported routes, and missing gates visible; do not turn a
+  successful startup or one prompt into a compatibility claim.
+- Explain unfamiliar terms where they first appear and link to the Glossary.
+- Prefer compact tables for repeated exact-profile comparisons and numbered
+  steps for procedures. Do not use tables merely to decorate prose.
+- State what a command or setting proves before showing it, and state the
+  expected result afterward.
+- Keep user pages direct and readable. Move raw manifests, hashes, harness
+  internals, and exhaustive logs behind the Engineering and Validation Index.
+- Do not imitate a personality, use promotional filler, or hide uncertainty
+  behind vague terms such as “supported” or “works.”
+
+README remains a concise entry point, the wiki owns the full user journey, and
+repository `docs/` files own engineering detail. A rewrite must preserve those
+canonical boundaries rather than duplicating the same explanation everywhere.
+
 ## Synchronize
 
 Windows PowerShell:
