@@ -16,7 +16,18 @@ examples/nvidia-quadro-rtx5000-power-validation.md	NVIDIA-Quadro-RTX5000-Power-V
 examples/intel-b580-granite41-8b-validation.md	Intel-B580-Granite41-8B-Validation.md	Intel Arc B580 Granite 4.1 Validation
 examples/august-2026-new-model-qualification.md	Eng-August-2026-New-Model-Qualification.md	August 2026 New Model Qualification
 examples/amd-rx5700xt-ollama03213-qualification.md	Eng-AMD-RX5700XT-Ollama-03213-Qualification.md	AMD Radeon RX 5700 XT Ollama 0.32.13 Qualification
+examples/amd-rx6800-linux-model-qualification.md	Eng-AMD-RX6800-Linux-Model-Qualification.md	AMD Radeon RX 6800 Linux Model Qualification
 examples/apple-m4-16gib-model-qualification.md	Eng-Apple-M4-16GiB-Model-Qualification.md	Apple M4 16 GB Model Qualification
+examples/nvidia-gtx1650-super-windows-model-qualification.md	Eng-NVIDIA-GTX1650-Super-Windows-Model-Qualification.md	GeForce GTX 1650 Super Windows Model Qualification
+examples/nvidia-gtx1650-super-linux-model-qualification.md	Eng-NVIDIA-GTX1650-Super-Linux-Model-Qualification.md	GeForce GTX 1650 Super Ubuntu Model Qualification
+examples/nvidia-rtx3060-model-qualification.md	Eng-NVIDIA-RTX3060-Windows-Model-Qualification.md	GeForce RTX 3060 Windows Model Qualification
+examples/nvidia-rtx3060-linux-model-qualification.md	Eng-NVIDIA-RTX3060-Linux-Model-Qualification.md	GeForce RTX 3060 Ubuntu Model Qualification
+examples/nvidia-quadro-rtx5000-power-validation.md	Eng-NVIDIA-Quadro-RTX5000-Power-Validation.md	Quadro RTX 5000 Power Measurement
+examples/nvidia-v100-ollama03213-qualification.md	Eng-NVIDIA-V100-Ollama-03213-Qualification.md	Tesla V100 Ollama 0.32.13 Model Qualification
+examples/nvidia-v100-nemotron-validation.md	Eng-NVIDIA-V100-Nemotron-Validation.md	Tesla V100 Nemotron Model Qualification
+examples/nvidia-tesla-v100-single-power-validation.md	Eng-NVIDIA-Tesla-V100-Single-Power-Validation.md	Tesla V100 Single-Card Power Measurement
+examples/windows-amd-rx7800xt-ollama0329-recertification.md	Eng-AMD-RX7800XT-Windows-Ollama-0329-Recertification.md	Radeon RX 7800 XT Windows Model Qualification
+examples/windows-amd-rx7800xt-power-validation.md	Eng-AMD-RX7800XT-Windows-Power-Validation.md	Radeon RX 7800 XT Windows Power Measurement
 docs/alpha-2-linux-long-term-validation.md	Eng-Alpha-2-Linux-Long-Term-Validation.md	Alpha 2 Linux Long-Term Validation
 docs/wiki-documentation-index.md	Eng-Documentation-Index.md	Documentation Index
 docs/beginner-setup-mode.md	Eng-Beginner-Setup-Mode.md	Beginner Setup Mode

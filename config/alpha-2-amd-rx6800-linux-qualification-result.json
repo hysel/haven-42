@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-amd-rx6800-linux-qualification-result",
+  "release": "0.4.0-alpha.2",
+  "observedThroughUtc": "2026-08-22T20:46:44Z",
+  "status": "exact-profile-engineering-evidence-complete",
+  "environment": {
+    "operatingSystem": "Ubuntu 26.04 LTS",
+    "kernel": "7.0.0-30-generic",
+    "architecture": "x86_64",
+    "accelerator": "AMD Radeon RX 6800 non-XT 16 GB",
+    "pciDeviceId": "1002:73bf",
+    "backend": "vulkan",
+    "vulkanDriver": "RADV",
+    "mesaVersion": "26.0.8-1ubuntu0.3",
+    "systemMemoryBytes": 130406539264,
+    "usableGpuMemoryBytes": 17163091968
+  },
+  "runtime": {
+    "provider": "ollama",
+    "version": "0.32.14",
+    "artifactSha256": "d0758d38ac5882a2c68fd930d0c1220af1952469fa9f30c268746d4021709bf4",
+    "releaseAdmission": "qualification-only"
+  },
+  "qualificationProfiles": [
+    "vulkan-8gib-system-16gib",
+    "vulkan-16gib-system-32gib"
+  ],
+  "sourceBindings": {
+    "inventorySha256": "aff33153e3ec78588e308301582b1212015e6fb8d580b6b8ab5c94150bf7e2a7",
+    "baseMatrixSha256": "7e6a40b1dfb9e53542c722ff8b74ff8cfbecd4170b32522c3b7824fa6fcb4ad5",
+    "expansionMatrixSha256": "53a7485823c5e2117673ec959c225307dff901a59f1bd648402b8de86ebd71f5",
+    "taskValidatorSha256": "abf4db7c8a93f9b6d3d31b663b0b4cfa24040f137600531dfd946e2e28c1b92d",
+    "soakValidatorSha256": "9b3ceef97b49e1e3b5478c026fbf203f5382614ea7a490b7d724c9f0c2c84002",
+    "expansionOrchestratorSha256": "ca11c747a07ceef4a67dbdab9fe298e37b96c971015b24fa910a48f774fbe354"
+  },
+  "counts": {
+    "exactArtifactsChecked": 13,
+    "taskCellsChecked": 39,
+    "taskCellsPassed": 35,
+    "taskCellsFailed": 4,
+    "coreTaskGatePassed": 10,
+    "coreTaskGateFailed": 3,
+    "thirtyMinuteSoaksPassed": 10,
+    "thirtyMinuteSoaksFailed": 0
+  },
+  "models": [
+    {
+      "modelId": "gemma3-1b-q4",
+      "manifestDigest": "8648f39daa8fbf5b18c7b4e6a8fb4990c692751d49917417b8842ca5758e7ffc",
+      "taskGate": "failed",
+      "failedCapabilities": ["content.summarize"],
+      "errorCodes": ["summary-one-sentence-required"],
+      "soak": "not-run"
+    },
+    {
+      "modelId": "gemma3-4b-q4",
+      "manifestDigest": "a2af6cc3eb7fa8be8504abaf9b04e88f17a119ec3f04a3addf55f92841195f5a",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 36,
+      "averageTokensPerSecond": 133.619,
+      "peakGpuMemoryBytes": 2898589122
+    },
+    {
+      "modelId": "gemma3-12b-q4",
+      "manifestDigest": "f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 36,
+      "averageTokensPerSecond": 53.806,
+      "peakGpuMemoryBytes": 8063580896
+    },
+    {
+      "modelId": "gemma4-e2b-qat",
+      "manifestDigest": "07ea59a474013479c8b6b802bef095c40e964a1d776ba02f264c0e30e1aede0c",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 36,
+      "averageTokensPerSecond": 165.463,
+      "peakGpuMemoryBytes": 1665107229
+    },
+    {
+      "modelId": "gemma4-e4b-qat",
+      "manifestDigest": "ee665637121887cf3befff38abbb1be4ee117c7db867d97a67e29049ecd7e15f",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 36,
+      "averageTokensPerSecond": 106.934,
+      "peakGpuMemoryBytes": 3108241407
+    },
+    {
+      "modelId": "gemma4-12b-qat",
+      "manifestDigest": "38044be4f923e5a55264ed7df4eaac2676651a905f735197c504045140c02bd3",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 36,
+      "averageTokensPerSecond": 57.679,
+      "peakGpuMemoryBytes": 7657477896
+    },
+    {
+      "modelId": "granite41-3b-q4",
+      "manifestDigest": "6fd349357287c7ffc9e38189a93b48ea175d24fc566b38f09cfc564fb7f303eb",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 42,
+      "averageTokensPerSecond": 156.402,
+      "peakGpuMemoryBytes": 2496502168
+    },
+    {
+      "modelId": "granite41-8b-q4",
+      "manifestDigest": "444af1c4b2fedd6b54041aca558e7300b0b3d5c0468c44619126240323ba2852",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 39,
+      "averageTokensPerSecond": 83.352,
+      "peakGpuMemoryBytes": 5883853536
+    },
+    {
+      "modelId": "llama32-3b-q4",
+      "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 39,
+      "averageTokensPerSecond": 175.317,
+      "peakGpuMemoryBytes": 2548417166
+    },
+    {
+      "modelId": "ministral3-3b-q4",
+      "manifestDigest": "f04aa1c738f64e13c625b82ae92504fc0260fa6723b509ed1ece0fa188179b1d",
+      "taskGate": "failed",
+      "failedCapabilities": ["content.write"],
+      "errorCodes": ["writing-one-sentence-required"],
+      "soak": "not-run"
+    },
+    {
+      "modelId": "ministral3-8b-q4",
+      "manifestDigest": "1922accd5827ebe6829e536369195db25eaf664528dc66206d646ea3bb386b71",
+      "taskGate": "failed",
+      "failedCapabilities": ["content.write", "content.summarize"],
+      "errorCodes": ["writing-one-sentence-required", "summary-one-sentence-required"],
+      "soak": "not-run"
+    },
+    {
+      "modelId": "phi4-mini-38b-q4",
+      "manifestDigest": "78fad5d182a7c33065e153a5f8ba210754207ba9d91973f57dffa7f487363753",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 39,
+      "averageTokensPerSecond": 150.489,
+      "peakGpuMemoryBytes": 3087615917
+    },
+    {
+      "modelId": "qwen35-9b-q4",
+      "manifestDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+      "taskGate": "passed",
+      "soak": "passed",
+      "soakSamplesPassed": 36,
+      "averageTokensPerSecond": 72.401,
+      "peakGpuMemoryBytes": 5498564770
+    }
+  ],
+  "telemetry": {
+    "source": "amdgpu-sysfs",
+    "scope": "gpu-board-or-package-sensor-only",
+    "samplingIntervalSeconds": 5,
+    "base": {
+      "sampleCount": 2684,
+      "sha256": "22c7b3492274a6afd3f2382584e18e71624077eb0844e8287bdd2d1e50b5675",
+      "observedPeakWatts": 203.0,
+      "observedPeakTemperatureC": 43.0
+    },
+    "expansion": {
+      "sampleCount": 1146,
+      "sha256": "ff021cf1ebab8520da09a85fd914eedb9c8d7c5dc468f6151a5f0e2c4d178418",
+      "observedPeakWatts": 208.0,
+      "observedPeakTemperatureC": 42.0
+    },
+    "powerEvidenceStatus": "telemetry-collected-standard-idle-baseline-not-established",
+    "eligibleForEndUserCostEstimate": false,
+    "includesCpuRamStorageCoolingDisplayOrPsuLosses": false
+  },
+  "evidence": "examples/amd-rx6800-linux-model-qualification.md",
+  "containsPrivateMachineIdentity": false,
+  "containsNetworkIdentity": false,
+  "containsRawPromptsOrResponses": false,
+  "automaticDefaultChangeAllowed": false,
+  "automaticSelectionEvidenceAllowed": false,
+  "automaticSupportChangeAllowed": false
+}

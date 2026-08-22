@@ -61,8 +61,9 @@ keyboard focus there. Search words and retrieved page text are not recorded.
 
 If Wikipedia reports an unexpected response, retry once. Haven 42 rejects
 unrecognized fields or destinations rather than guessing. For broader results,
-choose **Wider web** and approve the exact browser search; Haven 42 does not
-read or import those browser results.
+choose **Wider web with a cited answer** to let Haven 42 retrieve a bounded set
+of approved public pages, or **Private browser search** to open the exact query
+in your browser without importing the results.
 
 ## Setup stops while testing a downloaded model
 

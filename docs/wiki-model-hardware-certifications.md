@@ -1,106 +1,231 @@
-# Model Compatibility
+# Model and Hardware Test Status
 
-_Last reviewed: August 21, 2026._
+_Last reviewed: August 22, 2026._
 
-This page helps you understand which local models Haven 42 can choose safely.
-A result applies only to the listed model, AI engine, operating system, and
-hardware. A model that works on one graphics card may fail, run slowly, or use
-the CPU on another.
+This is the practical compatibility matrix for Haven 42. It answers three
+questions:
 
-You do not need to study this page before using Haven 42. Start with **Choose
-for me · Recommended**. Haven 42 checks your computer and offers only an
-automatic choice backed by matching results. Other installed models remain
-available as clearly labeled manual choices.
+1. Did this exact model complete the required workload?
+2. Did it use the intended accelerator instead of quietly falling back to the CPU?
+3. Did it remain stable long enough to support a recommendation?
 
-## What the labels mean
+The short version: **model support is a complete stack, not just a model name.**
+The operating system, GPU, driver, AI engine, engine version, quantization,
+available memory, and task all matter. A pass on one stack is evidence for that
+stack only.
 
-- **✅ Verified** — the required checks passed on that exact setup.
-- **🧪 Engineering evidence** — useful controlled tests passed, but the complete end-user
-  route has not been verified.
-- **⚠️ Partial** — some checks passed and another required check is incomplete
-  or failed.
-- **❌ Did not pass** — a required check failed.
-- **⬜ Not tested** — no result is available for that combination.
+If you do not want to read the matrix, use **Choose for me · Recommended**.
+Haven 42 only makes an automatic choice when the detected machine matches a
+qualified profile. You can still select other models manually; Haven 42 labels
+what it knows instead of pretending an untested combination is safe.
 
-These labels describe test results, not the size or general quality of a
-model.
+## Read this first
 
-## Automatic choices available today
+### Evidence labels
 
-Automatic selection is intentionally narrow. Haven 42 matches the operating
-system, AI engine, runtime version, available memory, model checksum, and task
-before using one of these choices.
+- **✅ Verified** — the required end-user checks passed on the exact listed stack.
+- **🧪 Engineering evidence** — controlled task and reliability tests passed,
+  but at least one packaged-product or lifecycle gate remains.
+- **⚠️ Partial** — useful checks passed, but another required check failed or is
+  incomplete.
+- **❌ Did not pass** — a required gate failed on the listed stack.
+- **⬜ Not tested** — there is no result for that exact combination.
 
-| Computer | Automatic choice | Intended use |
+These are evidence labels, not model rankings. They do not silently change the
+default model, runtime policy, or support promise.
+
+### What counts as a different result
+
+Any of the following creates a separate evidence cell:
+
+- Windows, Linux, and macOS;
+- NVIDIA CUDA, AMD Vulkan, Intel SYCL, or Apple Metal;
+- Ollama and llama.cpp;
+- a different runtime or driver version;
+- a different model tag, quantization, or artifact digest;
+- Chat, Writing, Summarization, Coding, Vision, or tool use;
+- a different memory tier or GPU architecture.
+
+For example, `Qwen 3.5 9B Q4_K_M` passing through Ollama on a Radeon RX 6800
+does not prove the same model through llama.cpp, and it does not prove support
+on every 16 GB GPU.
+
+## Automatic selection: current qualified profiles
+
+Automatic selection is deliberately conservative. Haven 42 checks the machine,
+runtime, exact model artifact, available memory, and requested task before using
+one of these choices.
+
+| Tested computer and software combination | Automatic model | Why this model |
 | --- | --- | --- |
-| Exact CPU-tested Alpha 2 Linux profiles | Qwen 3.5 0.8B Q8 | Responsive chat, writing, and summarization fallback |
-| Exact Ubuntu 26.04 or Bazzite 44 NVIDIA profile with 16 GB usable graphics memory | Qwen 3.5 4B Q4 | Balanced chat, writing, and summarization |
-| Same 16 GB NVIDIA profiles when the larger choice does not fit | Qwen 3.5 2B Q8 or 0.8B Q8 | Lower-memory fallback |
-| Exact tested Windows NVIDIA baseline | Qwen 3.5 0.8B Q8 | Conservative Windows fallback |
+| Tested Alpha 2 Linux computers running in CPU-only mode | Qwen 3.5 0.8B Q8 | Responsive low-risk fallback for Chat, Writing, and Summarization |
+| Ubuntu 26.04 or Bazzite 44 with a Quadro RTX 5000 and 16 GB of graphics memory | Qwen 3.5 4B Q4_K_M | Balanced quality, speed, and memory headroom |
+| The same Quadro RTX 5000 computers when the 4B model does not fit safely | Qwen 3.5 2B Q8 or 0.8B Q8 | Lower-memory fallback |
+| The tested Windows 11 computer with NVIDIA graphics | Qwen 3.5 0.8B Q8 | Conservative Windows fallback |
 
-A nearby but untested configuration is not treated as equivalent. Other
-successful tests below are candidates, not automatic choices.
+Everything else below is either engineering evidence, partial evidence, or a
+recorded failure. A nearby configuration is not automatically equivalent.
 
-## Useful results by hardware class
+## Model matrix
 
-| Hardware class | What has worked | What the result means |
+The tables are model-first so you can see where a model actually worked. “Passed
+on” means the named profile has recorded task and reliability evidence, not that
+every route on that hardware is supported.
+
+### Small and mid-size models
+
+| Exact model | Passed on | Limits or failures | Status |
+| --- | --- | --- | --- |
+| Qwen 3.5 0.8B Q8 | CPU-only Alpha 2 Linux computers; Quadro RTX 5000 on Ubuntu 26.04 and Bazzite 44; GTX 1650 Super on Windows 11 and Ubuntu 26.04 | Used automatically only on the tested combinations that Haven 42 recognizes | ✅ Qualified fallback |
+| Qwen 3.5 2B Q8 | Quadro RTX 5000 on Ubuntu 26.04 and Bazzite 44, plus the high-memory NVIDIA test servers | Did not fit completely in the GTX 1650 Super's 4 GB of graphics memory | ✅ Qualified on the named Quadro computers |
+| Qwen 3.5 4B Q4_K_M | Quadro RTX 5000 on Ubuntu 26.04 and Bazzite 44; Radeon RX 5700 XT on Ubuntu 26.04; high-memory NVIDIA test servers | Too large to remain completely in the GTX 1650 Super's 4 GB of graphics memory | ✅ Qualified on the named Quadro computers; 🧪 engineering evidence elsewhere |
+| Qwen 3.5 9B Q4_K_M | Radeon RX 6800 on Ubuntu 26.04; Radeon RX 7800 XT on Windows 11; high-memory NVIDIA test servers | Haven 42 does not yet choose it automatically on AMD graphics | 🧪 Candidate for tested 16 GB graphics cards |
+| Gemma 3 1B Q4_K_M | GTX 1650 Super on Windows 11 and Ubuntu 26.04 | Failed the required Summarization check on the RX 6800 Ubuntu computer | 🧪 Useful only on the named tested computers |
+| Gemma 3 4B Q4_K_M | Radeon RX 5700 XT and RX 6800 on Ubuntu 26.04; other separately recorded higher-memory computers | More human comparison of answer quality is still needed | 🧪 Repeated task-and-soak pass |
+| Gemma 3 12B Q4_K_M | Radeon RX 6800 on Ubuntu 26.04 and separately recorded higher-memory computers | Has not qualified on lower-memory graphics cards | 🧪 Candidate for tested 16 GB graphics cards |
+| Gemma 4 E2B QAT | Radeon RX 5700 XT and RX 6800 on Ubuntu 26.04; Apple M4 on macOS 26.6.2 | Installation, update, recovery, and packaged-app checks remain | 🧪 Small-model candidate |
+| Gemma 4 E4B QAT | Radeon RX 5700 XT and RX 6800 on Ubuntu 26.04; Apple M4 on macOS 26.6.2 | Installation, update, recovery, and packaged-app checks remain | 🧪 Mid-size candidate |
+| Gemma 4 12B QAT | Radeon RX 6800 on Ubuntu 26.04; Apple M4 on macOS 26.6.2; separately recorded higher-memory computers | Haven 42 does not yet choose it automatically on AMD or Apple hardware | 🧪 Candidate for tested 16 GB computers |
+| Granite 4.1 3B Q4_K_M | GTX 1650 Super, RX 5700 XT, and RX 6800 on Ubuntu 26.04; Apple M4 on macOS 26.6.2 | The Windows result on a 4 GB graphics card remains a separate, failed memory-fit result | 🧪 Small-model candidate on several tested computers |
+| Granite 4.1 8B Q4_K_M | RX 5700 XT and RX 6800 on Ubuntu 26.04; RTX 3060 on Windows 11 and Ubuntu 26.04; Intel Arc B580 on Ubuntu; Apple M4 on macOS 26.6.2 | The Intel result applies only to the tested llama.cpp SYCL software path | 🧪 Candidate with results on AMD, NVIDIA, Intel, and Apple hardware |
+| Llama 3.2 3B Q4_K_M | GTX 1650 Super, RX 5700 XT, and RX 6800 on Ubuntu 26.04; other separately recorded higher-memory computers | Failed Summarization on the Apple M4 and has no broadly approved default | 🧪 Small-model candidate on the named computers |
+| Phi-4 Mini 3.8B Q4_K_M | RX 5700 XT and RX 6800 on Ubuntu 26.04; separately recorded higher-memory computers | Did not fit completely in the GTX 1650 Super's 4 GB of graphics memory and failed the structured-tool check on Apple M4 | 🧪 Mid-size candidate on the named computers |
+| Ministral 3 3B Q4_K_M | Apple M4 on macOS 26.6.2 and separately recorded Linux/NVIDIA computers | Failed required task checks on RX 6800 Ubuntu, RX 7800 XT Windows, and other recorded combinations | ❌ No broad recommendation |
+| Ministral 3 8B Q4_K_M | Apple M4 on macOS 26.6.2 and separately recorded Linux/NVIDIA computers | Failed required task checks on RX 6800 Ubuntu, RX 7800 XT Windows, and other recorded combinations | ❌ No broad recommendation |
+| MiniCPM V 4.6 1B Q4_K_M | GTX 1650 Super Windows/Ubuntu | Failed tested RX 5700 XT core and Vision contracts | ⚠️ Narrow 4 GB evidence only |
+
+### Large and specialized models
+
+| Exact model | Test profile | Result | Status |
+| --- | --- | --- | --- |
+| Qwen 3.6 27B Q4_K_M | Dual Tesla V100 Ubuntu | Core tasks and 30-minute soak passed | 🧪 High-memory candidate |
+| Qwen 3.6 35B-A3B Q4_K_M | Dual Tesla V100 Ubuntu | Core tasks and 30-minute soak passed | 🧪 High-memory candidate |
+| Qwen 3.8 27B Q4_K_M | Dual Tesla V100 Ubuntu | Core tasks and soak passed; separate Vision gate failed; native VS Code evidence is read-only | ⚠️ Partial; not a Coding recommendation |
+| Granite 4.1 30B Q4_K_M | Dual Tesla V100 Ubuntu | Core, soak, tools, and recovery passed; the separate coding-surface approved-write gate failed | ⚠️ Not a Coding recommendation |
+| Ornith 1.0 9B Q4_K_M | RX 5700 XT Ubuntu | Core, soak, tools, and recovery passed; the separate coding-surface repository-review gate failed | ⚠️ Not a Coding recommendation |
+| North Mini Code 1.0 30B-A3B Q4_K_M | Dual Tesla V100 Ubuntu | Core and soak passed; an earlier Coding JSON contract failed; later Continue evidence does not qualify a maintained surface | ⚠️ Not a Coding recommendation |
+| Nemotron 3.5 Lightning 30B-A3B Q4_K_M and Q8_0 | Dual Tesla V100 Ubuntu | Both passed core tasks and 30-minute soaks | 🧪 Additional capability work remains |
+| Muse Glimmer 30B Q4_K_M | Dual Tesla V100 Ubuntu | Chat passed; Writing and Summarization failed; soak correctly did not run | ❌ Required gates failed |
+| LFM 2.5 8B-A1B Q4_K_M | RX 5700 XT Ubuntu | Required task and Coding gates failed | ❌ No recommendation |
+
+Exact artifact IDs, runtime versions, test records, and failure codes are linked
+from the [[Engineering and Validation Index|Engineering-Index]].
+
+### Apple M4 16 GB model results
+
+The native macOS 26.6.2 campaign used signed and notarized Ollama 0.32.15 with
+Metal. The original frozen campaign checked sixteen exact artifacts; an
+independently approved addendum applied the same contract to Gemma 4 12B QAT.
+
+| Exact model | Core gate | Independent 30-minute soak | Coding surface |
+| --- | --- | --- | --- |
+| Qwen 3.5 2B Q8 | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Qwen 3.5 4B Q4 | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Gemma 4 E2B QAT | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Gemma 4 E4B QAT | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Gemma 4 12B QAT addendum | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Granite 4.1 3B Q4 | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Granite 4.1 8B Q4 | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Ministral 3 3B Q4 | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Ministral 3 8B Q4 | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Ornith 9B | Passed | Passed | OpenCode 1.18.19 did not pass every required gate |
+| Qwen 3.5 0.8B Q8 | Failed Summarization | Not run | No recommendation |
+| Gemma 3 1B Q4 | Failed Summarization, structured tool, and structured code | Not run | No recommendation |
+| Gemma 3 4B Q4 | Failed Summarization and structured tool | Not run | No recommendation |
+| Phi-4 Mini 3.8B Q4 | Failed structured tool | Not run | No recommendation |
+| Llama 3.2 3B Q4 | Failed Summarization | Not run | No recommendation |
+| LFM 2.5 8B | Failed Chat, Writing, and Summarization; license review remains open | Not run | No recommendation |
+| MiniCPM V 4.6 1B | Failed structured code | Not run | No recommendation |
+
+Two separate LFM2.5 GGUF candidates—1.2B Instruct Q4_K_M and 2.6B Q4_K_M—
+proved full Metal offload through pinned llama.cpp `b10520`, but each failed
+required core gates and timed out in the read-only OpenCode screen without
+changing files. Neither entered soak or earned a recommendation.
+
+## Find results for a specific graphics card
+
+This page is organized by model. For card-by-card results, open
+[[Hardware Compatibility|Tested-Hardware-And-AI-Engines]]. Its **Detailed
+card-by-card records** section links to the full NVIDIA, AMD, Intel, and Apple
+test reports. Those engineering records contain the exact versions, speeds,
+failures, test duration, and measurement limits without making this summary
+page favor whichever card was tested most recently.
+
+## Hardware coverage at a glance
+
+| Hardware class | Recorded result | Practical interpretation |
 | --- | --- | --- |
-| NVIDIA, 4 GB | Qwen 3.5 0.8B Q8, Gemma 3 1B Q4, and MiniCPM V 4.6 1B Q4 passed on both tested Windows and Ubuntu GTX 1650 Super setups. Granite 4.1 3B Q4 and Llama 3.2 3B Q4 also passed on the tested Ubuntu setup. | Small-model choices for those exact setups; not blanket 4 GB support. |
-| AMD, 8 GB | Nine profiles passed the Ubuntu RX 5700 XT task and acceleration checks. | Tested Vulkan route; no automatic recommendation yet. |
-| NVIDIA, 12 GB | Fourteen profiles passed on the tested Windows RTX 3060; all 19 tested profiles passed on the tested Ubuntu RTX 3060. | Strong candidate coverage, kept separate by operating system. |
-| Intel, 12 GB | Granite 4.1 8B Q4 passed the tested Ubuntu Arc B580 SYCL route. | Narrow tested candidate; no broad Intel default. |
-| NVIDIA, 16 GB | Qwen 3.5 4B Q4 is the approved balanced choice on the exact Ubuntu 26.04 and Bazzite 44 profiles. Several larger candidates also passed controlled tests. | The broadest completed end-user recommendation among current 16 GB profiles. |
-| AMD, 16 GB | Fourteen profiles passed the tested Windows RX 7800 XT task and soak route. | Broad candidate set; comparative quality and complete lifecycle checks remain separate. |
-| Apple M4, 16 GB unified memory | Ten of seventeen exact Ollama artifacts passed the task gates and their own 30-minute Metal soaks, including the separately approved Gemma 4 12B QAT addendum. Two additional exact LFM2.5 GGUF files ran with full llama.cpp Metal offload, but both failed the core and OpenCode coding gates and did not soak. | Apple Silicon engineering results; no automatic Apple default yet. |
-| NVIDIA, 32 GB or more | Large Qwen and Nemotron candidates passed controlled single- or dual-V100 tests. | High-memory engineering results, not consumer-card equivalence. |
+| NVIDIA 4 GB | Small Qwen, Gemma, Granite, Llama, and MiniCPM candidates passed on specific GTX 1650 Super Windows or Ubuntu routes | Useful small-model tier; not blanket 4 GB support |
+| AMD 8 GB | Nine profiles passed the RX 5700 XT Ubuntu task and acceleration gates | Vulkan engineering route; no automatic AMD default |
+| NVIDIA 12 GB | 14 profiles passed on RTX 3060 Windows; all 19 tested profiles passed on RTX 3060 Ubuntu | Strong coverage, with Windows and Linux kept separate |
+| Intel 12 GB | Granite 4.1 8B Q4 passed the exact Arc B580 Ubuntu SYCL route | Narrow Intel evidence cell |
+| NVIDIA 16 GB | Qwen 3.5 4B Q4_K_M is qualified on exact Ubuntu 26.04 and Bazzite 44 profiles | Most complete current 16 GB end-user route |
+| AMD 16 GB | 10 of 13 candidates passed the RX 6800 Ubuntu route; 14 of 17 passed a separate RX 7800 XT Windows route | Broad RDNA 2/RDNA 3 engineering evidence |
+| Apple M4, 16 GB unified | Ten of seventeen exact Ollama artifacts passed required core gates and independent Metal soaks; two LFM2.5 llama.cpp candidates proved full offload but failed core and coding gates | Broad exact-profile engineering evidence; no automatic Apple default or coding recommendation |
+| NVIDIA 32 GB+ | Large Qwen, Granite, and Nemotron candidates passed controlled V100 campaigns | High-memory results; not consumer-card equivalence |
 
-For the exact operating systems, engines, versions, and limitations, open
-[[Hardware Compatibility|Tested-Hardware-And-AI-Engines]].
+See [[Hardware Compatibility|Tested-Hardware-And-AI-Engines]] for exact OS,
+driver, engine, and accelerator combinations.
 
-## How Haven 42 chooses
+## How qualification works
 
-Haven 42 first removes choices that do not match the installed AI engine,
-runtime version, model checksum, task, or available memory. It also checks that
-the intended accelerator was actually used instead of silently falling back to
-the CPU.
+A model is not eligible for automatic selection merely because it loads or
+answers one prompt. The qualification path checks:
 
-Among the remaining choices, reliability comes before model size. Task quality,
-response speed, memory headroom, and energy use can then distinguish otherwise
-suitable models. The largest model that starts is not automatically the best
-model for everyday use.
+1. **Artifact identity** — exact tag, quantization, and digest.
+2. **Runtime admission** — supported engine and version.
+3. **Memory fit** — enough usable system or graphics memory with headroom.
+4. **Accelerator use** — the intended GPU or Apple accelerator is actually used.
+5. **Task gates** — deterministic requirements for each claimed task.
+6. **Reliability** — repeated runs, timeout recovery, cleanup, and unload.
+7. **Soak** — sustained execution only after the required task gates pass.
+8. **Product lifecycle** — install, update, rollback, reconnect, and packaged UI.
 
-Ollama and llama.cpp are separate routes. A passing Ollama result does not
-prove the same model on llama.cpp, and Haven 42 does not silently switch engines
-or graphics backends.
+Coding qualification is separate. A model must pass repository read, planning,
+review, scoped-write, filename fidelity, tool-call, timeout-recovery, and
+unintended-write checks in a maintained coding surface before Haven 42 calls it
+a Coding recommendation.
 
-## Why some installed models are labeled untested
+## Common interpretation mistakes
 
-Ollama may list models that Haven 42 has not tested for your exact task and
-computer. They remain available for manual selection because the model belongs
-to you. The label is a warning, not a block.
+### “It appears in Ollama, so it is supported”
 
-A model becomes eligible for automatic selection only after its exact files,
-runtime, task behavior, reliability, memory fit, accelerator use, and cleanup
-have passed on a matching setup. A single successful prompt is not enough.
+No. Ollama inventory proves that an artifact is present. It does not prove task
+quality, GPU acceleration, memory safety, or long-run stability.
 
-## Power and electricity
+### “It has the same amount of VRAM, so the result transfers”
 
-Power use changes with the model, task, runtime, driver, and computer. See
+No. GPU architecture, backend, driver, memory behavior, and operating system can
+change the result. Memory size is an admission signal, not certification.
+
+### “The largest model that starts must be the best choice”
+
+No. A smaller model may be faster, more reliable, and better at the requested
+task. Haven 42 prioritizes required-task reliability before model size.
+
+### “An Ollama pass proves llama.cpp”
+
+No. They are separate execution routes with separate versions, model artifacts,
+and backend behavior.
+
+## Power and electricity evidence
+
+Power depends on the model, task, runtime, driver, and complete system. See
 [[Power Use and Electricity Costs|Model-Power-And-Electricity-Evidence]] for
-measured examples and a simple cost formula. Those readings describe graphics
-board or Apple SoC power unless the row explicitly says wall power.
+measured examples and the cost formula. A row reports board or SoC power unless
+it explicitly says wall power.
 
-## More detail
+## Detailed evidence
 
-- [[Hardware Compatibility|Tested-Hardware-And-AI-Engines]] lists exact tested
-  operating-system, graphics, and AI-engine combinations.
-- [[Power Use and Electricity Costs|Model-Power-And-Electricity-Evidence]]
-  explains measured energy use.
-- [[Engineering and Validation Index|Engineering-Index]] links to complete
-  model matrices, failures, test methods, and machine-readable evidence.
+- [[Hardware Compatibility|Tested-Hardware-And-AI-Engines]] — exact tested
+  hardware, operating systems, drivers, and AI engines.
+- [[Power Use and Electricity Costs|Model-Power-And-Electricity-Evidence]] —
+  measured power evidence and its limitations.
+- [[Engineering and Validation Index|Engineering-Index]] — complete matrices,
+  methods, failure records, and machine-readable artifacts.
 
-To request a model test, use the
-[model request form](https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml)
-or email `haven42localai@gmail.com`. Include the model name and intended use if
-you know them. Do not include keys, passwords, private addresses, prompts, or
-files.
+To request another model, use the
+[model test request](https://github.com/hysel/haven-42/issues/new?template=model-test-request.yml)
+or email `haven42localai@gmail.com`. Include the exact model and intended task
+if you know them. Never include API keys, passwords, private addresses, prompts,
+or private files.

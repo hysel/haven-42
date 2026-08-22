@@ -1,16 +1,28 @@
-# Hardware Compatibility
+# Tested Hardware and AI Engines
 
-_Last reviewed: August 21, 2026._
+_Last reviewed: August 22, 2026._
 
-Use this page to find configurations similar to your computer. Each row names
-the operating system, graphics hardware, and AI engine that were tested
-together. A result applies only to that row; it does not prove that every
-computer with the same graphics-card family will behave the same way.
+This is the stack-level test inventory: operating system, accelerator, and AI
+engine in one row. Use it to answer “has this execution route been exercised?”
+Use [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]] to answer
+“which exact models passed?”
+
+A row is not a family-wide compatibility claim. The driver, runtime version,
+model artifact, backend, memory behavior, and task can change the result even
+when the GPU name looks similar.
 
 Haven 42 does not retain private lab addresses, account names, cloud
 identifiers, keys, or local file paths in this public record.
 
-For model choices, see [[Model Compatibility|Model-And-Hardware-Test-Status]].
+## How to use this table
+
+- Match the operating system, GPU, and engine before relying on a row.
+- Treat Windows, native Linux, WSL2, virtual machines, and containers as
+  different environments.
+- Treat CUDA, Vulkan, ROCm/HIP, SYCL, and Metal as different accelerator routes.
+- Follow the linked engineering record when you need exact versions, artifacts,
+  checks, or failure details.
+- Do not use this page as a hardware shopping leaderboard.
 
 ## Status labels
 
@@ -24,7 +36,8 @@ For model choices, see [[Model Compatibility|Model-And-Hardware-Test-Status]].
 - **⬜ Not tested** — no result should be inferred from a different operating
   system, GPU, runtime, or model.
 
-These labels describe only the named test result.
+These are test-result labels. Roadmap labels describe milestone delivery and
+use a different scale.
 
 ## Tested combinations
 
@@ -57,13 +70,32 @@ tables so each result can be read without matching rows by hand.
 | Ubuntu Linux, Proxmox container and server | Two NVIDIA Tesla V100 GPUs, 32 GB each | Ollama with CUDA | ✅ Verified | Passed external-server and model checks. |
 | Ubuntu Linux, controlled server | NVIDIA Tesla V100, 32 GB | llama.cpp with CUDA | ✅ Verified | Passed the 11-model operational matrix. |
 | Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | Ollama 0.32.15 with Metal | 🧪 Engineering evidence | Seventeen exact artifacts completed the bounded five-gate test set; ten passed and then completed independent 30-minute soaks with no failures. All 17 OpenCode 1.18.19 cells failed at least one required coding-agent gate. The separately approved Gemma 4 12B QAT addendum is included; no default or support promotion is granted. |
-| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | llama.cpp `b10520` commit cd644c395 with Metal | ⚠️ Partial | The pinned Qwen 3.5 0.8B GGUF passed full-layer Metal offload, authenticated loopback inference, recovery, restart, unload, and cleanup. Exact LFM2.5 1.2B and 2.6B Q4_K_M files also proved full Metal offload, but both failed bounded core gates and timed out in the OpenCode coding screen without changing files, so neither soaked or earned a recommendation. The official arm64 archive passed integrity and relocation checks but remains ad-hoc signed and rejected by Gatekeeper. |
-| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | MLX-LM 0.31.3 | ⚠️ Partial | The pinned Qwen 3.5 0.8B artifact passed offline native generation, Metal-memory proof, timeout recovery, and cleanup. A production server boundary, self-contained packaging, and a maintained coding surface remain open. |
+| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | llama.cpp `b10520` commit cd644c395 with Metal | ⚠️ Partial | Pinned Qwen 3.5 0.8B passed lifecycle and full-layer Metal checks. Exact LFM2.5 1.2B and 2.6B Q4_K_M files also proved full Metal offload, but failed bounded core and OpenCode coding gates. The official arm64 archive passed integrity and relocation checks but remains ad-hoc signed and rejected by Gatekeeper. |
+| Native macOS 26.6.2, physical Mac | Apple M4, 16 GB unified memory | MLX-LM 0.31.3 | ⚠️ Partial | Pinned Qwen 3.5 0.8B passed offline native generation, Metal-memory proof, timeout recovery, and cleanup. Production server, packaging, and maintained coding-surface gates remain open. |
 | Proxmox VE 9.2, physical host | Two Tesla V100 32 GB GPUs and one Quadro RTX 5000 16 GB GPU | Virtualization and passthrough host | 🧪 Engineering evidence | Used as test infrastructure; this does not establish an end-user runtime route. |
 
-## Detailed records
+## Detailed card-by-card records
 
-The canonical engineering documents are:
+Use these reports when you want the exact models, software versions, test
+duration, failures, speeds, or power measurements for one graphics card. A
+Windows result and an Ubuntu result are listed separately because success on
+one operating system does not prove success on the other.
+
+| Graphics hardware | Operating system | What the detailed record contains |
+| --- | --- | --- |
+| GeForce GTX 1650 Super, 4 GB | Windows 11 | [Models tested and their results](Eng-NVIDIA-GTX1650-Super-Windows-Model-Qualification) |
+| GeForce GTX 1650 Super, 4 GB | Ubuntu 26.04 | [Models tested and their results](Eng-NVIDIA-GTX1650-Super-Linux-Model-Qualification) |
+| GeForce RTX 3060, 12 GB | Windows 11 | [Models tested and their results](Eng-NVIDIA-RTX3060-Windows-Model-Qualification) |
+| GeForce RTX 3060, 12 GB | Ubuntu 26.04 | [Models tested and their results](Eng-NVIDIA-RTX3060-Linux-Model-Qualification) |
+| Quadro RTX 5000, 16 GB | Ubuntu 26.04 | [Measured model power use](Eng-NVIDIA-Quadro-RTX5000-Power-Validation); model and operating-system coverage is summarized in the table above |
+| One or two Tesla V100 cards, 32 GB each | Ubuntu 24.04 | [Ollama 0.32.13 models](Eng-NVIDIA-V100-Ollama-03213-Qualification), [Nemotron models](Eng-NVIDIA-V100-Nemotron-Validation), and [single-card power use](Eng-NVIDIA-Tesla-V100-Single-Power-Validation) |
+| Radeon RX 5700 XT, 8 GB | Ubuntu 26.04 and Windows 11 | [Models, accelerator use, and failures](Eng-AMD-RX5700XT-Ollama-03213-Qualification) |
+| Radeon RX 6800, 16 GB | Ubuntu 26.04 | [Models tested and their results](Eng-AMD-RX6800-Linux-Model-Qualification) |
+| Radeon RX 7800 XT, 16 GB | Windows 11 | [Models tested and their results](Eng-AMD-RX7800XT-Windows-Ollama-0329-Recertification) and [measured model power use](Eng-AMD-RX7800XT-Windows-Power-Validation) |
+| Intel Arc B580, 12 GB | Ubuntu and Windows | [Inference-engine and accelerator results](Eng-Intel-B580-Inference-Engine-Validation) |
+| Apple M4, 16 GB unified memory | macOS 26.6.2 | [Models, Metal acceleration, soaks, and coding checks](Eng-Apple-M4-16GiB-Model-Qualification) |
+
+The broader engineering references are:
 
 - [[Inference Engine Architecture|Eng-Inference-Engine-Architecture]]
 - [[Inference Engine Validation|Eng-Inference-Engine-Validation]]
