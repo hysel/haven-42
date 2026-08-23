@@ -2,20 +2,19 @@
 
 _Last reviewed: August 22, 2026._
 
-This is the practical compatibility matrix for Haven 42. It answers three
-questions:
+Use this page to answer three practical questions:
 
 1. Did this exact model complete the required workload?
 2. Did it use the intended accelerator instead of quietly falling back to the CPU?
 3. Did it remain stable long enough to support a recommendation?
 
-The short version: **model support is a complete stack, not just a model name.**
+The short version: **a model name alone does not prove support.**
 The operating system, GPU, driver, AI engine, engine version, quantization,
 available memory, and task all matter. A pass on one stack is evidence for that
 stack only.
 
 If you do not want to read the matrix, use **Choose for me · Recommended**.
-Haven 42 only makes an automatic choice when the detected machine matches a
+Haven 42 makes an automatic choice only when the detected machine matches a
 qualified profile. You can still select other models manually; Haven 42 labels
 what it knows instead of pretending an untested combination is safe.
 
@@ -36,7 +35,7 @@ default model, runtime policy, or support promise.
 
 ### What counts as a different result
 
-Any of the following creates a separate evidence cell:
+Each of these changes creates a separate result:
 
 - Windows, Linux, and macOS;
 - NVIDIA CUDA, AMD Vulkan, Intel SYCL, or Apple Metal;
@@ -52,7 +51,7 @@ on every 16 GB GPU.
 
 ## Automatic selection: current qualified profiles
 
-Automatic selection is deliberately conservative. Haven 42 checks the machine,
+Automatic selection is deliberately cautious. Haven 42 checks the machine,
 runtime, exact model artifact, available memory, and requested task before using
 one of these choices.
 
@@ -68,9 +67,9 @@ recorded failure. A nearby configuration is not automatically equivalent.
 
 ## Model matrix
 
-The tables are model-first so you can see where a model actually worked. “Passed
-on” means the named profile has recorded task and reliability evidence, not that
-every route on that hardware is supported.
+The tables start with the model so you can see where it actually worked.
+“Passed on” means the named profile has recorded task and reliability evidence;
+it does not mean every route on that hardware is supported.
 
 ### Small and mid-size models
 
@@ -173,7 +172,7 @@ A model is not eligible for automatic selection merely because it loads or
 answers one prompt. The qualification path checks:
 
 1. **Artifact identity** — exact tag, quantization, and digest.
-2. **Runtime admission** — supported engine and version.
+2. **Runtime support** — supported engine and version.
 3. **Memory fit** — enough usable system or graphics memory with headroom.
 4. **Accelerator use** — the intended GPU or Apple accelerator is actually used.
 5. **Task gates** — deterministic requirements for each claimed task.
@@ -196,7 +195,7 @@ quality, GPU acceleration, memory safety, or long-run stability.
 ### “It has the same amount of VRAM, so the result transfers”
 
 No. GPU architecture, backend, driver, memory behavior, and operating system can
-change the result. Memory size is an admission signal, not certification.
+change the result. Memory size is a fit signal, not certification.
 
 ### “The largest model that starts must be the best choice”
 
