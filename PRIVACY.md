@@ -7,8 +7,8 @@ advertising, user account, or background data-collection service. The browser
 interface is served only on IPv4 loopback and cannot be opened to a LAN
 listener through application settings.
 
-Haven 42 transfers information to another networked system only when the user
-specifically requests or configures that operation.
+The program will not transfer information to another networked system unless
+the user specifically requests or configures that operation.
 
 ## Information Kept In Memory
 
