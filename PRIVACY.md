@@ -2,21 +2,19 @@
 
 ## Summary
 
-Haven 42 is a local-first application. It contains no telemetry, analytics,
+Haven 42 is local-first. It contains no telemetry, analytics,
 advertising, user account, or background data-collection service. The browser
 interface is served only on IPv4 loopback and cannot be opened to a LAN
 listener through application settings.
 
-The program will not transfer information to another networked system unless
-the user specifically requests or configures that operation.
+Haven 42 transfers information to another networked system only when the user
+specifically requests or configures that operation.
 
 ## Information Kept In Memory
 
-The current admitted browser runtime keeps provider settings, optional
-provider API keys,
-prompts,
-conversation text, selected attachments, model responses, run metrics, and
-generated image bytes in process or browser memory. Manually approved Wikipedia
+The current browser runtime keeps provider settings, optional provider API
+keys, prompts, conversation text, selected attachments, model responses, run
+metrics, and generated image bytes in process or browser memory. Manually approved Wikipedia
 or wider-web search words, result metadata, bounded selected-page text,
 citations, local-model synthesis, and single-use approval state also remain
 only in process or browser memory. A Brave Search key entered for a cited
@@ -65,7 +63,7 @@ Network access occurs only for an explicit feature the user activates:
   Brave and never to the model;
 - separately reviewing one exact wider-web query before opening the fixed Brave
   Search destination in the user's normal browser;
-- connecting to the admitted loopback ComfyUI image provider;
+- connecting to the supported loopback ComfyUI image provider;
 - opening the fixed Haven 42 GitHub wiki link in the default browser; or
 - developer and maintainer operations such as GitHub Actions, dependency
   acquisition, or repository synchronization outside the end-user runtime.
@@ -100,8 +98,8 @@ request administrator access or add a service, driver, firewall rule, startup
 entry, global Python runtime, or automatic updater. To remove it, close Haven
 42 and delete the extracted application directory.
 
-Provider software, models, exported downloads, and user-created files are
-owned separately and are not removed automatically.
+Provider software, models, exported downloads, and user-created files remain
+separate and are not removed automatically.
 
 ## Security And Public Evidence
 
@@ -120,7 +118,7 @@ Persistent conversation storage, online updates, installers, additional
 research providers, automatic multi-query research, and active citation
 navigation remain separately gated. Before activation, each feature
 requires an updated privacy review, explicit user controls, retention and
-deletion behavior, security testing, and documentation. The currently admitted
+deletion behavior, security testing, and documentation. The currently available
 research slice is limited to separately approved fixed-Wikipedia requests, one
 bounded Brave multi-source cited-answer request, or one browser handoff, with
 memory-only results and no model-tool or automatic-follow-up authority.
