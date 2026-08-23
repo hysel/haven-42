@@ -1,9 +1,9 @@
 # Choose a Model
 
-_For Haven 42 users. Model availability depends on the Ollama server you connect._
+_The available models depend on the Ollama server you connect._
 
-A model is the AI that reads your request and writes the response. Haven 42 can
-recommend one that fits your task and computer.
+A model reads your request and writes the response. Haven 42 can recommend one
+that fits your task and computer.
 
 ## Choose an installed model
 
@@ -19,7 +19,7 @@ labeled when Haven 42 has not tested them for that task.
 
 ## Find a model that is not installed
 
-Use **Search public catalog** when you deliberately want online discovery.
+Use **Search public catalog** when you want to look online.
 Results identify which models are already installed locally. Changing the
 **Configure model for** selection clears the old results and searches for
 choices relevant to the new task.
@@ -32,13 +32,13 @@ you to review and run on that server.
 ## Choosing well
 
 - Start with the recommended installed model.
-- Prefer a smaller model when responsiveness matters more than maximum depth.
+- Prefer a smaller model when response time matters more than maximum depth.
 - Use larger models only when the provider has enough memory and performance.
 - Treat an unverified model as an experiment, especially for long documents,
   structured output, or tool-oriented work.
 - Compare response speed in **Response details · Advanced**.
 
-Haven 42 never hides an installed model merely because it is not recommended.
+Haven 42 does not hide an installed model just because it is not recommended.
 The recommendation is guidance, not a restriction.
 
 ## More detail
