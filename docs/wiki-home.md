@@ -2,27 +2,29 @@
 
 **Private AI that runs on hardware you control.**
 
-Haven 42 gives you a simple interface for local AI chat, writing, and
-summarization. It opens in a browser, while the application and AI model run on
-your computer or on a private Ollama server you choose.
+Haven 42 is a browser interface for local AI chat, writing, and summarization.
+The application runs on your computer; the model can run there too, or on a
+private Ollama server you choose.
 
-There is no Haven 42 account or hosted chat service. Haven 42 does not silently
-download models or send searches: it shows what will happen and asks first.
+There's no Haven 42 account or hosted chat service. If Haven 42 needs to
+download a model or send a search, it tells you what it's about to do and asks
+first.
 
-> **Before you begin:** Haven 42 is development software. Current packages are
-> unsigned, so your operating system may show a security warning. Use only a
-> package from a trusted Haven 42 test source.
+> **Before you begin:** Haven 42 is development software, and current packages
+> are unsigned. Your operating system may warn you about that; only continue if
+> the package came from a trusted Haven 42 test source.
 
 ## Start here
 
 1. Follow [[Quick Start|Quick-Start]] to run Haven 42.
-2. Choose **Set up this computer · Recommended** for guided local setup, or
-   connect an existing private Ollama server.
+2. For the normal local setup, choose **Set up this computer · Recommended**.
+   If you already run a private Ollama server, connect that instead.
 3. Read [[Using Haven 42|Using-Haven-42]] to learn chat, attachments, models,
    and approved web research.
 
-If something does not work, open [[Troubleshooting]]. It begins with the
-shortest recovery steps and shows where to find a sanitized support report.
+If something breaks, start with [[Troubleshooting]]. The shortest recovery
+steps come first, followed by instructions for finding a sanitized support
+report.
 
 ## What you can do
 
@@ -32,15 +34,15 @@ shortest recovery steps and shows where to find a sanitized support report.
 - Attach bounded text, source-code, structured-text, and PNG screenshot files.
 - Connect to Ollama on this computer or on a private server.
 - In the development source, approve every web-research request before it
-  leaves your computer. The bounded route can use Wikipedia or Brave Search;
-  retrieved text is inert and memory-only, and the model cannot receive the
-  search key or approve follow-up requests. Exact package and manual
+  leaves your computer, routed through Wikipedia or Brave Search. Retrieved
+  text stays inert and in memory; the model never receives the search key or
+  permission to approve another request. Exact package and manual
   assistive-technology parity remain open.
 - See response speed and local CPU, memory, and graphics use.
 
-Music and video generation are not part of the current app. Conversation
-history is kept in memory rather than saved. PDF and Office document parsing,
-signed installers, and unattended automatic updates are not shipped.
+The current app doesn't generate music or video. It keeps conversation history
+in memory instead of saving it. PDF and Office document parsing, signed
+installers, and unattended automatic updates aren't shipped either.
 
 ## Find the right guide
 
@@ -60,13 +62,13 @@ signed installers, and unattended automatic updates are not shipped.
 
 ## Privacy in plain language
 
-The Haven 42 page is available only from the computer running the app. Current
-conversation text, selected attachments, settings, and generated image bytes
-are not stored as Haven 42 conversation history.
+You can open the Haven 42 page only from the computer running the app. Haven 42
+doesn't store the current conversation, selected attachments, settings, or
+generated image bytes as conversation history.
 
-If you connect a separately operated AI server, that server has its own privacy
-and retention behavior. Plain HTTP on a private network is not encrypted; use
-HTTPS or a loopback tunnel when traffic must cross another computer.
+Connect a separate AI server and its privacy and retention rules apply too.
+Plain HTTP on a private network isn't encrypted, so use HTTPS or a loopback
+tunnel when traffic crosses another computer.
 
 Read [[Privacy|Privacy-Policy]] and
 [[Connection Security|Provider-Endpoint-Security]] before using sensitive
@@ -75,8 +77,8 @@ material.
 ## About this project
 
 The latest public test build is the unsigned Windows `0.4.0-alpha.1`
-prerelease. The latest stable release line is `0.3.0`. Newer source changes are
-not a published release until they are deliberately packaged and verified.
+prerelease; the latest stable release line is `0.3.0`. Anything newer in the
+source tree isn't a release until it has been packaged and verified.
 
 For project background, limitations, and contact information, see
 [[About Haven 42|Project-Information]]. Contributors can use the
