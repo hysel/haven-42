@@ -3,26 +3,26 @@
 _For first-time Windows Alpha users and developers starting from source on
 Windows, Linux, or macOS. Current packages are unsigned development software._
 
-The current public beginner package supports Windows 11 x64. You do not need to
-know Python, graphics settings, model formats, or server administration for
-that path. Linux and macOS do not yet have a public beginner package; their
-instructions below are for developers running reviewed source with Python 3.
+The public beginner package currently supports Windows 11 x64. You won't need
+Python, graphics tuning, model-format knowledge, or server administration.
+Linux and macOS don't have a beginner package yet; those steps run reviewed
+source with Python 3 and are for developers.
 
 ## Before you begin
 
-Choose one of these forms:
+Pick one route:
 
 - **Windows portable package · Recommended:** download
   [`haven42-0.4.0-alpha.1-windows-x64-unsigned.zip`](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.1/haven42-0.4.0-alpha.1-windows-x64-unsigned.zip)
   and its [published checksum file](https://github.com/hysel/haven-42/releases/download/v0.4.0-alpha.1/haven42-0.4.0-alpha.1-windows-x64-unsigned.zip.sha256)
-  from the official Alpha 1 release. Use only these files from the Haven 42
-  repository.
+  from the official Alpha 1 release. Get both files from the Haven 42
+  repository, not a mirror.
 - **Source · Advanced:** for developers who already have Python 3 and a reviewed
   copy of this repository.
 
-Ollama is the local AI engine that runs a model. Guided Windows setup can place
-the tested portable Ollama files and a suitable model inside your extracted
-Haven 42 folder after showing the downloads and asking your permission.
+Ollama is the local AI engine that runs the model. Windows guided setup can put
+the tested portable Ollama files and a suitable model inside the extracted
+Haven 42 folder, but it lists the downloads and waits for approval first.
 
 ## Start the portable Windows package · Recommended
 
@@ -45,16 +45,16 @@ Haven 42 folder after showing the downloads and asking your permission.
    continue**.
 8. Wait for every item to say **Complete**, then open Chat.
 
-Windows may display a warning because this Alpha package is not digitally
-signed. This is expected for invited testing, but you should stop if the file
-did not come from your trusted Haven 42 test source.
+Windows will warn that this Alpha package isn't digitally signed. That's
+expected for invited testing; stop if the file didn't come from your trusted
+Haven 42 test source.
 
 ## Start from source
 
 Download or clone the reviewed source from the
 [Haven 42 repository](https://github.com/hysel/haven-42), install a working
 Python 3 interpreter, and open a terminal in the repository root. This path is
-for developers; it does not install Ollama or a model.
+for developers and won't install Ollama or a model for you.
 
 Windows PowerShell:
 
@@ -74,29 +74,29 @@ macOS:
 ./scripts/start-haven42-web.macos.sh
 ```
 
-Haven 42 starts on `http://127.0.0.1:4242` and asks the operating system to
-open its default browser. If the browser does not open, copy the exact loopback
-URL printed in the terminal into your browser.
+Haven 42 starts at `http://127.0.0.1:4242` and asks the operating system to open
+your default browser. If nothing opens, copy the exact loopback URL from the
+terminal into the browser yourself.
 
 ## Choose the first-run path
 
 - **Set up this computer · Recommended** checks the computer, recommends a
-  model, explains the downloads, and asks permission.
+  model, lists the downloads, and waits for your approval.
 - **Use another AI server · Advanced** connects to Ollama that you already run.
 - **Look around first** opens Haven 42 without setting up or connecting.
 
-For same-machine Ollama, use `http://127.0.0.1:11434`. Private-network
-connections must use a private IP address and will show an unencrypted-HTTP
-warning unless you provide a trusted HTTPS endpoint.
+For Ollama on the same machine, use `http://127.0.0.1:11434`. A server elsewhere
+on your private network must use a private IP address. Expect an unencrypted
+HTTP warning unless that server has a trusted HTTPS endpoint.
 
-On a Mac, connecting to Ollama on another computer also causes macOS to ask
-whether Haven 42 may find devices on local networks. Choose **Allow** only when
-you intend to use the server whose address you entered. Haven 42 does not scan
-for nearby devices. Same-computer setup at `127.0.0.1` does not need this
-private-network access.
+On a Mac, macOS asks whether Haven 42 may find devices on local networks when
+you connect to Ollama on another computer. Choose **Allow** only if you intend
+to use the address you entered. Haven 42 doesn't scan for nearby devices, and
+same-computer setup at `127.0.0.1` doesn't need private-network access.
 
-For safety, Haven 42 blocks public internet server addresses, passwords placed
-inside an address, and unexpected redirects.
+Try a public internet address, put a password in the URL, or let the server
+redirect somewhere unexpected and Haven 42 will refuse the connection. That's
+intentional.
 
 ## Send a first message
 
@@ -106,22 +106,21 @@ inside an address, and unexpected redirects.
    yourself.
 4. Open **Response details · Advanced** only if you want token and timing data.
 
-Public model search never downloads silently. Selecting a result opens a review
-showing the exact model and destination; the download starts only after you
-choose **Approve and install**. Guided Windows setup likewise downloads only
-the exact components shown on its permission screen.
+Public model search doesn't download a result when you click it. You first get
+a review with the exact model and destination; the download begins only after
+you choose **Approve and install**. Guided Windows setup follows the same rule
+for the components on its approval screen.
 
-After a successful connection, Haven 42 remembers only the last main section
-you viewed and returns there after a browser refresh. It does not store the
-conversation, server address, credentials, research words, or model-install
-approval. If it cannot determine a working connection after restart, setup is
-shown again.
+After connecting, Haven 42 remembers the last main section and returns there
+after a browser refresh. It doesn't store the conversation, server address,
+credentials, research words, or model-install approval. If it can't confirm a
+working connection after restart, it opens setup again.
 
 ## Stop Haven 42
 
-Close Haven 42 using its launcher window or normal close action. The current
-conversation is not saved. A Haven-managed local AI engine stops with Haven 42
-and is checked and restarted automatically the next time you open the same
-extracted copy.
+Close Haven 42 from its launcher window or with the normal close action. The
+current conversation isn't saved. A Haven-managed local AI engine stops with
+Haven 42; the next time you open the same extracted copy, Haven 42 checks and
+restarts it automatically.
 
 **Next:** [[Using Haven 42|Using-Haven-42]]
