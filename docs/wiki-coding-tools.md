@@ -2,9 +2,9 @@
 
 _Last reviewed: August 22, 2026._
 
-The Haven 42 chat app does not require an editor extension or coding agent.
-This page covers the separate, source-only **Haven 42 Local LLM IDE Tools**
-helper for people who deliberately want a local Ollama model in a coding tool.
+The Haven 42 chat app does not need an editor extension or coding agent. This
+page covers the separate, source-only **Haven 42 Local LLM IDE Tools** helper
+for people who want to use a local Ollama model in a coding tool.
 
 ## Current surface status
 
@@ -18,11 +18,11 @@ helper for people who deliberately want a local Ollama model in a coding tool.
 Do not infer coding-agent support from a chat response or a coding benchmark.
 Haven 42 requires repository read, planning, review, scoped write, exact
 filename fidelity, tool use, timeout recovery, and unintended-write checks in
-the exact maintained surface before calling a model suitable for coding.
+the exact maintained surface before describing a model as suitable for coding.
 
-The source package contains one small setup helper for Aider and OpenCode. It does not
-contain Continue project configuration, the Haven 42 app, Ollama, models, IDEs,
-drivers, maintainer scripts, or third-party installers.
+The source package contains one small setup helper for Aider and OpenCode. It
+does not contain Continue project configuration, the Haven 42 app, Ollama,
+models, IDEs, drivers, maintainer scripts, or third-party installers.
 
 Setup shows a preview first. It writes only after you add `--apply`, stops
 before replacing existing settings unless you add `--replace`, and creates a
