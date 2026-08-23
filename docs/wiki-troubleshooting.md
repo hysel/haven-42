@@ -1,10 +1,10 @@
 # Troubleshooting
 
-_For Haven 42 users. Begin here before using the engineering diagnostics._
+_Start here. The engineering diagnostics are for deeper investigation._
 
 ## Haven 42 does not open
 
-- Keep the launcher terminal open while using Haven 42.
+- Leave the launcher terminal open while Haven 42 is running.
 - If the browser does not open automatically, copy the exact
   `http://127.0.0.1:4242` address printed by the launcher into your browser.
 - If the launcher reports that the port is already in use, close the older
@@ -21,12 +21,11 @@ _For Haven 42 users. Begin here before using the engineering diagnostics._
    `http://127.0.0.1:11434`.
 4. For another machine, use its private-network numeric address and the
    port on which Ollama is listening.
-5. Check that the two machines can reach each other under the network policy
-   you manage.
+5. Check that your network policy allows the two machines to reach each other.
 
 Haven 42 blocks public addresses, credentials in URLs, redirects, and unsupported
-hostnames. A private-network HTTP connection also displays an encryption warning;
-that warning is expected until you use trusted HTTPS or a loopback tunnel.
+hostnames. A private-network HTTP connection also shows an encryption warning.
+That warning is expected until you use trusted HTTPS or a loopback tunnel.
 
 ### A Mac says Local Network access is not allowed
 
@@ -47,8 +46,8 @@ uses the server address you enter and does not scan for nearby devices.
 
 ## A model is missing
 
-Open **Models**, search the public catalog, and choose the result. Haven 42
-shows the exact model and connected destination before anything downloads.
+Open **Models**, search the public catalog, and choose a result. Haven 42 shows
+the exact model and connected destination before anything downloads.
 Choose **Approve and install** only if those details are correct. The model is
 not offered for chat until Ollama confirms that the exact model is installed.
 An advanced manual command remains available as a fallback for server owners.
@@ -60,7 +59,7 @@ opens System, expands the log area, refreshes the sanitized events, and moves
 keyboard focus there. Search words and retrieved page text are not recorded.
 
 If Wikipedia reports an unexpected response, retry once. Haven 42 rejects
-unrecognized fields or destinations rather than guessing. For broader results,
+unrecognized fields or destinations instead of guessing. For broader results,
 choose **Wider web with a cited answer** to let Haven 42 retrieve a bounded set
 of approved public pages, or **Private browser search** to open the exact query
 in your browser without importing the results.
@@ -76,13 +75,13 @@ automatic acceleration detection.
 
 ## An attachment is rejected
 
-The current product accepts bounded UTF-8 text, CSV, JSON, admitted source-code
+Haven 42 accepts bounded UTF-8 text, CSV, JSON, supported source-code
 files, and PNG screenshots. It rejects renamed executable content, unsupported
 types, excessive file sizes or counts, malformed structured text, and files
 that fail signature or content checks.
 
-PDF, Office, OpenDocument, archives, and executables are not currently admitted
-chat attachments.
+PDF, Office, OpenDocument, archives, and executables are not currently accepted
+as chat attachments.
 
 ## The response is slow
 
@@ -91,8 +90,8 @@ chat attachments.
 - Reduce attachment size or start a focused new task.
 - Check the Ollama machine for competing model or GPU workloads.
 
-If the Haven 42 page responds quickly but the answer appears slowly, the AI
-model or the computer running it is usually the slow part.
+If the Haven 42 page responds quickly but the answer appears slowly, the delay
+usually comes from the model or the computer running it.
 
 ## Still stuck?
 
