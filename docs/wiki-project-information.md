@@ -1,8 +1,8 @@
 # About Haven 42
 
-Haven 42 is a local-first application for people who want useful AI without
-sending every conversation to a hosted chat service. The interface runs in a
-browser, while the application and AI provider stay on hardware you control.
+Haven 42 runs useful AI locally instead of sending every conversation to a
+hosted chat service. Its interface runs in a browser, while the application
+and AI provider stay on hardware you control.
 
 ## What Haven 42 is designed to do
 
@@ -22,8 +22,8 @@ itself administrator access. Current builds do not save conversation history,
 parse PDF or Office documents, install themselves as a system service, or run
 unattended automatic updates.
 
-Some features shown in engineering documents are experiments rather than
-parts of the current app. A successful test applies only to the named model,
+Some features in the engineering documents are experiments, not parts of the
+current app. A successful test applies only to the named model,
 runtime, operating system, and hardware—not every similar computer.
 
 ## Releases
@@ -33,8 +33,8 @@ prerelease. The latest stable release line is `0.3.0`. Changes in the source
 repository are not a release until they are deliberately packaged and
 verified.
 
-Current development packages are unsigned. Windows or macOS may show a
-security warning, so use only files from a trusted Haven 42 test source.
+Current development packages are unsigned. Windows or macOS may warn before
+opening them, so use only files from a trusted Haven 42 test source.
 
 ## Privacy, security, and accessibility
 
