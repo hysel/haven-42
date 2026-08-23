@@ -2,8 +2,8 @@
 
 _Last reviewed: August 22, 2026._
 
-This is the power-measurement field record for Haven 42 model tests. It is not
-a GPU efficiency leaderboard. Each row belongs to one exact combination of
+This page records power measurements from Haven 42 model tests. It is not a
+GPU efficiency leaderboard. Each row belongs to one exact combination of
 hardware, model artifact, runtime, driver route, workload, and sampling method.
 
 The short version:
@@ -12,13 +12,13 @@ The short version:
 - **Average power without an idle baseline is not an electricity-cost input.**
 - **Different workloads cannot be ranked directly.** Compare exact-profile rows
   or run a controlled cross-hardware test.
-- **A measured card is not a universally measured card.** Changing the model,
-  runtime, driver, operating system, or task creates a new evidence cell.
+- **One measurement does not cover every use of that card.** Changing the model,
+  runtime, driver, operating system, or task creates a separate result.
 
 ## Current measurements
 
-Values below come from the named vendor or operating-system sensor. “Accepted”
-means the record contains the required idle and active windows for that exact
+Values come from the named vendor or operating-system sensor. “Accepted” means
+the record contains the required idle and active windows for that exact
 profile. “Engineering evidence” is useful but has a narrower method or an open
 gate. “Partial” remains excluded from the cost estimator.
 
@@ -40,7 +40,7 @@ gate. “Partial” remains excluded from the cost estimator.
 ## Measurement coverage
 
 Every physical graphics-card model in the Alpha 2 certification inventory
-must receive a reference measurement. Pending cards stay visible here so an
+must receive a reference measurement. Pending cards stay visible so an
 unmeasured card cannot be mistaken for a zero-power result or disappear from
 the campaign. The machine-readable coverage source is
 [`config/alpha-2-gpu-power-coverage.json`](https://github.com/hysel/haven-42/blob/main/config/alpha-2-gpu-power-coverage.json).
@@ -72,7 +72,7 @@ focuses on inference windows.
 
 A fair comparison requires the same model artifact, quantization, runtime,
 task set, context, sampling method, and test duration on each card. Haven 42
-keeps every result tied to its exact profile instead of turning unrelated
+keeps each result tied to its exact profile instead of turning unrelated
 measurements into a leaderboard.
 
 ## What is included
