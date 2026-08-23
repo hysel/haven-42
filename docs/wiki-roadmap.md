@@ -1,8 +1,8 @@
 # Roadmap
 
-[`ROADMAP.md`](https://github.com/hysel/haven-42/blob/main/ROADMAP.md) is the
-single maintained roadmap for Haven 42. It records milestone scope, current
-status, blockers, and exit criteria.
+Haven 42 keeps its full roadmap in
+[`ROADMAP.md`](https://github.com/hysel/haven-42/blob/main/ROADMAP.md). It
+records milestone scope, current status, blockers, and exit criteria.
 
 Roadmap labels such as **Complete**, **In progress**, **Research**, and
 **Proposed** describe delivery work. They are different from the test-result
