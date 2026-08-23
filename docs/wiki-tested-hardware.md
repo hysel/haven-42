@@ -2,12 +2,11 @@
 
 _Last reviewed: August 22, 2026._
 
-This is the stack-level test inventory: operating system, accelerator, and AI
-engine in one row. Use it to answer “has this execution route been exercised?”
-Use [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]] to answer
-“which exact models passed?”
+This page records the operating system, accelerator, and AI engine tested
+together. Use it to check whether that exact route has been exercised. To see
+which models passed, use [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]].
 
-A row is not a family-wide compatibility claim. The driver, runtime version,
+A row does not cover an entire hardware family. The driver, runtime version,
 model artifact, backend, memory behavior, and task can change the result even
 when the GPU name looks similar.
 
@@ -41,8 +40,8 @@ use a different scale.
 
 ## Tested combinations
 
-This table combines the former computer inventory and runtime-combination
-tables so each result can be read without matching rows by hand.
+Each row combines the computer and runtime details needed to read the result
+without cross-referencing another table.
 
 | Operating system and environment | Hardware | AI engine | Status | Notes |
 | --- | --- | --- | --- | --- |
@@ -76,10 +75,10 @@ tables so each result can be read without matching rows by hand.
 
 ## Detailed card-by-card records
 
-Use these reports when you want the exact models, software versions, test
-duration, failures, speeds, or power measurements for one graphics card. A
-Windows result and an Ubuntu result are listed separately because success on
-one operating system does not prove success on the other.
+Use these reports for the exact models, software versions, test duration,
+failures, speeds, or power measurements for one graphics card. Windows and
+Ubuntu results are separate because success on one operating system does not
+prove success on the other.
 
 | Graphics hardware | Operating system | What the detailed record contains |
 | --- | --- | --- |
@@ -95,7 +94,7 @@ one operating system does not prove success on the other.
 | Intel Arc B580, 12 GB | Ubuntu and Windows | [Inference-engine and accelerator results](Eng-Intel-B580-Inference-Engine-Validation) |
 | Apple M4, 16 GB unified memory | macOS 26.6.2 | [Models, Metal acceleration, soaks, and coding checks](Eng-Apple-M4-16GiB-Model-Qualification) |
 
-The broader engineering references are:
+For broader engineering detail, see:
 
 - [[Inference Engine Architecture|Eng-Inference-Engine-Architecture]]
 - [[Inference Engine Validation|Eng-Inference-Engine-Validation]]
