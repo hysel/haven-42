@@ -5,8 +5,8 @@ Windows, Linux, or macOS. Current packages are unsigned development software._
 
 The public beginner package currently supports Windows 11 x64. You won't need
 Python, graphics tuning, model-format knowledge, or server administration.
-Linux and macOS don't have a beginner package yet; those steps run reviewed
-source with Python 3 and are for developers.
+Linux and macOS do not yet have a public beginner package; those steps run
+reviewed source with Python 3 and are for developers.
 
 ## Before you begin
 
