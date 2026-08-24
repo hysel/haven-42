@@ -1899,11 +1899,18 @@ try {
   checks += 1;
   trace("cleanup-policy-verified");
 
-  const keyboardSubmit = await cdp.evaluate(`(() => {
-    document.querySelector('#home-nav').click();
+  await cdp.evaluate("document.querySelector('#home-nav').click()");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#text-panel').classList.contains('hidden')"));
+  await cdp.evaluate(`(() => {
     const messages = document.querySelector('#messages');
     messages.scrollTop = messages.scrollHeight;
     messages.dispatchEvent(new Event('scroll'));
+  })()`);
+  await waitFor(() => cdp.evaluate(`(() => {
+    const messages = document.querySelector('#messages');
+    return messages.scrollHeight - messages.scrollTop - messages.clientHeight <= 8;
+  })()`));
+  const keyboardSubmit = await cdp.evaluate(`(() => {
     document.querySelector('#prompt').value = 'browser flow';
     const shiftNotPrevented = document.querySelector('#prompt').dispatchEvent(
       new KeyboardEvent('keydown', {key: 'Enter', shiftKey: true, bubbles: true, cancelable: true})
