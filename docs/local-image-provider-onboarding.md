@@ -87,7 +87,8 @@ contract is intentionally absent from the shipping resource allowlist.
 
 Remaining native validation prioritizes source/package parity, automatic idle
 shutdown, redistribution review, and consumer onboarding for the exact Windows
-AMD, NVIDIA, and Intel cells. Physical Apple Silicon remains parked until
-suitable hardware is available and does not block continued Windows or Linux
-development. Failed or partial profiles leave evidence only and ship no
-runtime or installer assets.
+AMD, NVIDIA, and Intel cells. Apple M4 hardware is now available, and general
+model and runtime qualification is in progress. The Apple Silicon image-provider
+profile remains candidate-only; no physical image-provider qualification has
+been run yet. Failed or partial profiles leave evidence only and ship no runtime
+or installer assets.

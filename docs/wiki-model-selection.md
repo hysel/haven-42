@@ -24,10 +24,12 @@ Results identify which models are already installed locally. Changing the
 **Configure model for** selection clears the old results and searches for
 choices relevant to the new task.
 
-Catalog search does not install or run anything. Guided Windows setup can
-download only the exact model shown on its permission screen. If you manage
-your own Ollama server, Haven 42 may show an advanced installation command for
-you to review and run on that server.
+Catalog search does not install or run anything. Windows and Linux support
+Haven 42's managed initial Ollama setup; on macOS, install Ollama separately
+before connecting Haven 42. Once connected to Ollama on any platform, the
+Models page uses the same guided download process: you approve the exact model,
+Haven 42 asks Ollama to pull it, shows download progress, and verifies the
+installed model. This works on Windows, Linux, and macOS.
 
 ## Choosing well
 
