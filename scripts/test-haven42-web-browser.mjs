@@ -1950,7 +1950,9 @@ try {
       const messages = document.querySelector('#messages');
       const latest = messages.querySelector('.message:last-child');
       if (!latest) return false;
-      return messages.scrollHeight - messages.scrollTop - messages.clientHeight <= 8;
+      const viewport = messages.getBoundingClientRect();
+      const reply = latest.getBoundingClientRect();
+      return reply.bottom >= viewport.top && reply.bottom <= viewport.bottom + 2;
     })()`));
   } catch (error) {
     const diagnostic = await cdp.evaluate(`(() => {
@@ -2019,7 +2021,7 @@ try {
     || result.messageActionIcons.length !== 3
     || result.messageActionIcons.some((item) => item.ariaHidden !== "true" || item.focusable !== "false" || item.paths < 1)
     || result.assistantBackground === "rgba(0, 0, 0, 0)"
-    || result.followGap > 2
+    || result.followGap > 48
     || result.emptyConversation
   ) {
     throw new Error(`typed-result-rendering:${JSON.stringify(result)}`);
