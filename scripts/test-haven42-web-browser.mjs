@@ -1935,11 +1935,28 @@ try {
     })`);
     throw new Error(`final-response-timeout:${JSON.stringify({ diagnostic, requests })}`, { cause: error });
   }
-  await waitFor(() => cdp.evaluate(`(
-    document.querySelector('#messages').scrollHeight
-      - document.querySelector('#messages').scrollTop
-      - document.querySelector('#messages').clientHeight <= 8
-  )`));
+  try {
+    await waitFor(() => cdp.evaluate(`(() => {
+      const messages = document.querySelector('#messages');
+      const latest = messages.querySelector('.message:last-child');
+      if (!latest) return false;
+      const viewport = messages.getBoundingClientRect();
+      const reply = latest.getBoundingClientRect();
+      return reply.bottom >= viewport.top && reply.bottom <= viewport.bottom + 2;
+    })()`));
+  } catch (error) {
+    const diagnostic = await cdp.evaluate(`(() => {
+      const messages = document.querySelector('#messages');
+      const latest = messages.querySelector('.message:last-child');
+      const viewport = messages.getBoundingClientRect();
+      const reply = latest?.getBoundingClientRect();
+      return {scrollHeight: messages.scrollHeight, scrollTop: messages.scrollTop,
+        clientHeight: messages.clientHeight,
+        viewport: {top: viewport.top, bottom: viewport.bottom},
+        reply: reply ? {top: reply.top, bottom: reply.bottom} : null};
+    })()`);
+    throw new Error(`message-auto-follow:${JSON.stringify(diagnostic)}`, {cause: error});
+  }
   const result = await cdp.evaluate(`(() => {
     const latestMessage = [...document.querySelectorAll('#messages .message')].at(-1);
     return ({
