@@ -100,6 +100,10 @@ from software_update_service import (  # noqa: E402
     SoftwareUpdateError,
     check_for_updates as check_managed_software_updates,
 )
+from managed_runtime_update import (  # noqa: E402
+    ManagedRuntimeUpdateCoordinator,
+    ManagedRuntimeUpdateError,
+)
 import web_research_native_transport as web_research_query  # noqa: E402
 import web_research_native_page_transport as web_research_page  # noqa: E402
 import web_research_general_transport as web_research_general  # noqa: E402
@@ -426,6 +430,7 @@ ATTACHMENT_SAFETY_PROMPT = (
 )
 MODEL_RECOMMENDATIONS_PATH = ROOT / "config" / "text-capability-model-recommendations.json"
 TESTED_MODEL_LIBRARY_PATH = ROOT / "config" / "tested-model-library.json"
+HARDWARE_QUALIFIED_CHAT_MODELS_PATH = ROOT / "config" / "hardware-qualified-chat-models.json"
 EVIDENCE_CATALOG_PATH = ROOT / "config" / "evidence-catalog.tsv"
 SURFACE_MATRIX_PATH = ROOT / "config" / "agent-surface-capabilities.json"
 SURFACE_SOLUTIONS_PATH = ROOT / "config" / "agent-surface-solutions.json"
@@ -826,6 +831,128 @@ def build_tested_model_options(
         "runtimeVersion": runtime_version,
         "options": options,
     }
+def load_hardware_qualified_chat_models(
+    path: Path = HARDWARE_QUALIFIED_CHAT_MODELS_PATH,
+) -> tuple[dict[str, Any], ...]:
+    """Load exact-profile, manual-only chat choices from reviewed evidence."""
+    try:
+        if path.is_symlink() or not path.is_file() or path.stat().st_size > 256 * 1024:
+            return ()
+        value = json.loads(path.read_text(encoding="utf-8"))
+        if (
+            not isinstance(value, dict)
+            or set(value) != {"schemaVersion", "catalogId", "automaticSelectionAllowed", "profiles"}
+            or value.get("schemaVersion") != 1
+            or value.get("catalogId") != "haven42.hardware-qualified-chat-models"
+            or value.get("automaticSelectionAllowed") is not False
+            or not isinstance(value.get("profiles"), list)
+            or len(value["profiles"]) > 32
+        ):
+            return ()
+        profiles: list[dict[str, Any]] = []
+        seen_ids: set[str] = set()
+        for profile in value["profiles"]:
+            if not isinstance(profile, dict) or set(profile) != {
+                "id", "operatingSystem", "acceleratorVendor", "acceleratorModelContains",
+                "minimumAcceleratorMemoryGiB", "minimumSystemMemoryGiB",
+                "minimumOllamaVersion", "evidence", "models",
+            }:
+                return ()
+            models = profile["models"]
+            if (
+                not re.fullmatch(r"[a-z0-9][a-z0-9-]{0,79}", profile["id"])
+                or profile["id"] in seen_ids
+                or profile["operatingSystem"] not in {"windows", "linux", "macos"}
+                or not re.fullmatch(r"[a-z0-9][a-z0-9 .+_-]{0,79}", profile["acceleratorVendor"])
+                or not re.fullmatch(r"[a-z0-9][a-z0-9 .+_-]{0,119}", profile["acceleratorModelContains"])
+                or isinstance(profile["minimumAcceleratorMemoryGiB"], bool)
+                or not isinstance(profile["minimumAcceleratorMemoryGiB"], (int, float))
+                or not 0 <= profile["minimumAcceleratorMemoryGiB"] <= 256
+                or isinstance(profile["minimumSystemMemoryGiB"], bool)
+                or not isinstance(profile["minimumSystemMemoryGiB"], (int, float))
+                or not 4 <= profile["minimumSystemMemoryGiB"] <= 1024
+                or not re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,3}", profile["minimumOllamaVersion"])
+                or not isinstance(profile["evidence"], str)
+                or not profile["evidence"].startswith("examples/")
+                or not profile["evidence"].endswith(".md")
+                or ".." in Path(profile["evidence"]).parts
+                or not (ROOT / profile["evidence"]).is_file()
+                or not isinstance(models, list)
+                or not 1 <= len(models) <= 64
+                or len(set(models)) != len(models)
+                or any(not isinstance(model, str) or not MODEL_NAME.fullmatch(model) for model in models)
+            ):
+                return ()
+            seen_ids.add(profile["id"])
+            profiles.append(profile)
+        return tuple(profiles)
+    except (OSError, UnicodeError, json.JSONDecodeError):
+        return ()
+
+
+def _version_at_least(current: object, minimum: str) -> bool:
+    if not isinstance(current, str) or not re.fullmatch(r"[0-9]+(?:\.[0-9]+){1,3}", current):
+        return False
+    current_parts = tuple(int(part) for part in current.split("."))
+    minimum_parts = tuple(int(part) for part in minimum.split("."))
+    width = max(len(current_parts), len(minimum_parts))
+    return current_parts + (0,) * (width - len(current_parts)) >= minimum_parts + (0,) * (width - len(minimum_parts))
+
+
+def qualified_chat_candidates(
+    snapshot: object,
+    trust_scope: object,
+    ollama_version: object,
+    profiles: tuple[dict[str, Any], ...],
+) -> list[dict[str, Any]]:
+    """Return manual choices only when the local machine matches a tested profile."""
+    if trust_scope != "loopback" or not isinstance(snapshot, dict):
+        return []
+    platform_info = snapshot.get("platform")
+    accelerators = snapshot.get("accelerators")
+    if not isinstance(platform_info, dict) or not isinstance(accelerators, list):
+        return []
+    operating_system = str(platform_info.get("operatingSystem", "")).casefold()
+    system_memory = platform_info.get("systemMemoryGiB")
+    if isinstance(system_memory, bool) or not isinstance(system_memory, (int, float)):
+        return []
+    candidates: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for profile in profiles:
+        if (
+            operating_system != profile["operatingSystem"]
+            or system_memory < profile["minimumSystemMemoryGiB"]
+            or not _version_at_least(ollama_version, profile["minimumOllamaVersion"])
+        ):
+            continue
+        hardware_match = any(
+            isinstance(accelerator, dict)
+            and profile["acceleratorVendor"] in str(accelerator.get("vendor", "")).casefold()
+            and profile["acceleratorModelContains"] in str(accelerator.get("model", "")).casefold()
+            and isinstance(accelerator.get("memoryGiB"), (int, float))
+            and not isinstance(accelerator.get("memoryGiB"), bool)
+            and accelerator["memoryGiB"] >= profile["minimumAcceleratorMemoryGiB"]
+            for accelerator in accelerators
+        )
+        if not hardware_match:
+            continue
+        for model in profile["models"]:
+            if model in seen:
+                continue
+            seen.add(model)
+            candidates.append({
+                "name": model,
+                "capabilityStatus": {
+                    capability_id: "validated-on-matching-hardware"
+                    for capability_id in CAPABILITY_PROMPTS
+                },
+                "hardwareFit": "matched-tested-hardware-profile",
+                "profileId": profile["id"],
+                "minimumOllamaVersion": profile["minimumOllamaVersion"],
+                "automatic": False,
+                "downloadRequiresApproval": True,
+            })
+    return candidates
 
 
 def bind_managed_model_decisions(
@@ -945,15 +1072,25 @@ def install_ollama_model(
     base_url: str,
     model: str,
     authentication: ProviderAuthentication,
+    progress_callback: Callable[[dict[str, Any]], None],
 ) -> dict[str, Any]:
-    """Ask the already-connected Ollama server to pull one reviewed model."""
-    result = _provider_json(
-        base_url,
-        "/api/pull",
-        3600,
-        {"model": model, "stream": False},
-        authentication=authentication,
+    """Pull one reviewed model while consuming Ollama's bounded progress stream."""
+    request = urllib.request.Request(
+        base_url.rstrip("/") + "/api/pull",
+        data=json.dumps({"model": model, "stream": True}, separators=(",", ":")).encode("utf-8"),
+        headers={**authentication.request_headers(), "Content-Type": "application/json"},
+        method="POST",
     )
+    records = read_json_stream(
+        request,
+        3600,
+        MAX_JSON_RESPONSE_BYTES,
+        cancelled=lambda: False,
+        on_open=lambda _response: None,
+        on_close=lambda: None,
+        on_record=progress_callback,
+    )
+    result = records[-1]
     if result.get("status") != "success":
         raise ProviderSecurityError("ollama-model-install-incomplete")
     return result
@@ -1012,7 +1149,7 @@ class HavenState:
         tested_model_library_path: Path = TESTED_MODEL_LIBRARY_PATH,
         readiness_provider: Callable[[], dict[str, Any]] = inspect_system,
         model_catalog_provider: Callable[[str], list[str]] = search_ollama_catalog,
-        model_install_provider: Callable[[str, str, ProviderAuthentication], dict[str, Any]] = install_ollama_model,
+        model_install_provider: Callable[[str, str, ProviderAuthentication, Callable[[dict[str, Any]], None]], dict[str, Any]] = install_ollama_model,
         assurance_provider: Callable[[], dict[str, Any]] | None = None,
         research_query_provider: Callable[[object, object], dict[str, Any]] | None = None,
         research_page_provider: Callable[[object, object, object, object], dict[str, Any]] | None = None,
@@ -1051,12 +1188,14 @@ class HavenState:
         self.model_install_provider = model_install_provider
         self.discovered_model_candidates: set[str] = set()
         self.pending_model_install_approvals: dict[str, dict[str, Any]] = {}
+        self.model_install_progress: dict[str, dict[str, Any]] = {}
         self.research_query_provider = research_query_provider or web_research_query.execute_query
         self.research_page_provider = research_page_provider or web_research_page.execute_selected_page
         self.general_research_search_provider = general_research_search_provider or web_research_general.search
         self.general_research_page_provider = general_research_page_provider or web_research_general.fetch_page
         self.general_research_synthesis_provider = general_research_synthesis_provider or _provider_json
         self.software_update_provider = software_update_provider
+        self.software_update_check: dict[str, Any] | None = None
         self.research_lock = threading.Lock()
         self.pending_research_approvals: dict[str, dict[str, Any]] = {}
         self.research_results: dict[str, dict[str, Any]] = {}
@@ -1071,6 +1210,8 @@ class HavenState:
         self.readiness_created = 0.0
         self.model_recommendations = load_model_recommendations(recommendation_path)
         self.tested_model_library = load_tested_model_library(tested_model_library_path)
+        self.hardware_qualified_chat_profiles = load_hardware_qualified_chat_models()
+        self.qualified_model_candidates: set[str] = set()
         self.read_only_workflows = load_read_only_workflows()
         self.package_integrity = verify_packaged_resources()
         self.diagnostics = DiagnosticLogger(APP_VERSION, diagnostic_root)
@@ -1085,8 +1226,21 @@ class HavenState:
             )
             if MANAGED_SETUP_SUPPORTED else None
         )
+        self.runtime_updates = (
+            ManagedRuntimeUpdateCoordinator(
+                self.csrf_token, self.alpha_setup, self._runtime_update_activated,
+            )
+            if self.alpha_setup is not None else None
+        )
         self.alpha_runtime_binding: dict[str, Any] | None = None
         self.alpha_runtime_plan_id: str | None = None
+
+    def _runtime_update_activated(self, expected_version: str) -> None:
+        """Refresh every renderer-visible provider fact after a runtime switch."""
+        connected = self.connect(MANAGED_OLLAMA_URL, 120, 300, "none", "")
+        version = connected.get("version")
+        if version != expected_version:
+            raise ManagedRuntimeUpdateError("runtime-update-version-refresh-mismatch")
 
     @staticmethod
     def _research_citation(value: object) -> dict[str, Any]:
@@ -1723,6 +1877,41 @@ class HavenState:
         self._validate_alpha2_runtime_binding()
         self.alpha_setup.start(approval_token)
 
+    def check_software_updates(self) -> dict[str, Any]:
+        result = self.software_update_provider()
+        if not isinstance(result, dict):
+            raise SoftwareUpdateError("software-update-response-invalid")
+        with self.lock:
+            self.software_update_check = result
+        if self.runtime_updates is not None:
+            result = {**result, "runtimeStatus": self.runtime_updates.public_status()}
+        return result
+
+    def prepare_runtime_update(self, target: object) -> dict[str, Any]:
+        if self.runtime_updates is None:
+            raise ManagedRuntimeUpdateError(MANAGED_SETUP_UNAVAILABLE)
+        if not isinstance(target, str):
+            raise ManagedRuntimeUpdateError("invalid-runtime-update-target")
+        with self.lock:
+            checked = self.software_update_check
+        if target == "latest-official":
+            if not isinstance(checked, dict) or not isinstance(checked.get("components"), list) or len(checked["components"]) != 1:
+                raise ManagedRuntimeUpdateError("software-update-check-required")
+            component = checked["components"][0]
+        else:
+            component = {}
+        return self.runtime_updates.prepare(component, target)
+
+    def approve_runtime_update(self, plan_id: object, effects: object) -> str:
+        if self.runtime_updates is None:
+            raise ManagedRuntimeUpdateError(MANAGED_SETUP_UNAVAILABLE)
+        return self.runtime_updates.approve(plan_id, effects)
+
+    def start_runtime_update(self, approval_token: object) -> dict[str, Any]:
+        if self.runtime_updates is None:
+            raise ManagedRuntimeUpdateError(MANAGED_SETUP_UNAVAILABLE)
+        return self.runtime_updates.start(approval_token)
+
     def assurance_summary(self) -> dict[str, Any]:
         try:
             result = self.assurance_provider()
@@ -1814,11 +2003,16 @@ class HavenState:
                 for token, approval in self.pending_model_install_approvals.items()
                 if approval["expiresAt"] > now
             }
+            self.model_install_progress = {
+                token: progress
+                for token, progress in self.model_install_progress.items()
+                if progress["_updatedAt"] > now - 900
+            }
             if self.base_url is None:
                 raise WebRequestError("model-install-provider-required", HTTPStatus.CONFLICT)
             if model in self.models:
                 raise WebRequestError("model-already-installed", HTTPStatus.CONFLICT)
-            if model not in self.discovered_model_candidates:
+            if model not in self.discovered_model_candidates and model not in self.qualified_model_candidates:
                 raise WebRequestError("model-install-candidate-expired", HTTPStatus.CONFLICT)
             while len(self.pending_model_install_approvals) >= 8:
                 self.pending_model_install_approvals.pop(next(iter(self.pending_model_install_approvals)))
@@ -1842,6 +2036,23 @@ class HavenState:
             "hardwareFit": "unknown",
         }
 
+    def model_install_status(self, progress_token: object) -> dict[str, Any]:
+        if not isinstance(progress_token, str) or not RESEARCH_APPROVAL_TOKEN.fullmatch(progress_token):
+            raise WebRequestError("model-install-progress-invalid", HTTPStatus.CONFLICT)
+        with self.lock:
+            progress = self.model_install_progress.get(progress_token)
+            if progress is None:
+                raise WebRequestError("model-install-progress-unavailable", HTTPStatus.NOT_FOUND)
+            return {key: value for key, value in progress.items() if not key.startswith("_")}
+
+    def _update_model_install_progress(self, token: str, **changes: Any) -> None:
+        with self.lock:
+            progress = self.model_install_progress.get(token)
+            if progress is None:
+                return
+            progress.update(changes)
+            progress["_updatedAt"] = time.monotonic()
+
     def execute_model_install(self, approval_token: object) -> dict[str, Any]:
         if not isinstance(approval_token, str) or not RESEARCH_APPROVAL_TOKEN.fullmatch(approval_token):
             raise WebRequestError("model-install-approval-invalid", HTTPStatus.CONFLICT)
@@ -1852,18 +2063,80 @@ class HavenState:
             model = approval["model"]
             base_url = self.base_url
             authentication = self.authentication
+            self.model_install_progress[approval_token] = {
+                "schemaVersion": 1,
+                "kind": "model-install-progress",
+                "model": model,
+                "phase": "downloading",
+                "progressPercent": 0,
+                "completedBytes": 0,
+                "totalBytes": None,
+                "status": "Starting model download",
+                "terminal": False,
+                "_updatedAt": time.monotonic(),
+            }
         if base_url is None:
+            self._update_model_install_progress(
+                approval_token, phase="failed", status="AI server connection is unavailable", terminal=True,
+            )
             raise WebRequestError("model-install-provider-required", HTTPStatus.CONFLICT)
+
+        def update_from_provider(record: dict[str, Any]) -> None:
+            raw_status = record.get("status")
+            status = raw_status if isinstance(raw_status, str) else "Downloading model files"
+            status = status.strip().lower()
+            if status.startswith("pulling "):
+                label = "Downloading model files"
+            elif "verifying" in status:
+                label = "Verifying downloaded files"
+            elif "manifest" in status:
+                label = "Preparing model download"
+            elif "writing" in status:
+                label = "Finishing model installation"
+            elif status == "success":
+                label = "Download complete; checking the installed model"
+            else:
+                label = "Downloading model"
+            completed = record.get("completed")
+            total = record.get("total")
+            valid_totals = (
+                type(completed) is int and type(total) is int
+                and completed >= 0 and total > 0 and completed <= total
+            )
+            changes: dict[str, Any] = {"status": label}
+            if valid_totals:
+                with self.lock:
+                    previous = self.model_install_progress.get(approval_token, {}).get("progressPercent", 0)
+                percent = max(previous if type(previous) is int else 0, min(99, completed * 100 // total))
+                changes.update({
+                    "progressPercent": percent,
+                    "completedBytes": completed,
+                    "totalBytes": total,
+                })
+            self._update_model_install_progress(approval_token, **changes)
+
         self.diagnostics.record("models", "MODEL_DOWNLOAD_STARTED", "started")
         try:
             with self.operation_lock:
-                self.model_install_provider(base_url, model, authentication)
+                self.model_install_provider(base_url, model, authentication, update_from_provider)
+                self._update_model_install_progress(
+                    approval_token,
+                    phase="verifying",
+                    progressPercent=100,
+                    status="Download complete; verifying with Ollama",
+                )
                 tags = _provider_json(base_url, "/api/tags", 120, authentication=authentication)
         except (OSError, ProviderSecurityError) as error:
+            self._update_model_install_progress(
+                approval_token, phase="failed", status="Model download stopped", terminal=True,
+            )
             self.diagnostics.record("models", "MODEL_DOWNLOAD_FAILED", "failed")
             raise WebRequestError("ollama-model-install-failed", HTTPStatus.BAD_GATEWAY) from error
         records = tags.get("models", [])
         if not isinstance(records, list) or len(records) > MAX_DISCOVERED_MODELS:
+            self._update_model_install_progress(
+                approval_token, phase="failed", status="Installed model verification failed", terminal=True,
+            )
             self.diagnostics.record("models", "MODEL_DOWNLOAD_VERIFICATION_FAILED", "failed")
             raise WebRequestError("invalid-ollama-model-list", HTTPStatus.BAD_GATEWAY)
         model_digests: dict[str, str] = {}
@@ -1876,6 +2149,9 @@ class HavenState:
                 model_digests[name] = digest if MODEL_DIGEST.fullmatch(digest) else ""
         installed = set(model_digests)
         if model not in installed:
+            self._update_model_install_progress(
+                approval_token, phase="failed", status="Ollama did not report the installed model", terminal=True,
+            )
             self.diagnostics.record("models", "MODEL_DOWNLOAD_VERIFICATION_FAILED", "failed")
             raise WebRequestError("ollama-model-install-verification-failed", HTTPStatus.BAD_GATEWAY)
         with self.lock:
@@ -1884,6 +2160,13 @@ class HavenState:
             self.discovered_model_candidates.discard(model)
         decisions = build_model_decisions(sorted(installed), self.model_recommendations, model_digests)
         option = next(item for item in decisions["modelOptions"] if item["name"] == model)
+        self._update_model_install_progress(
+            approval_token,
+            phase="complete",
+            progressPercent=100,
+            status="Model downloaded and verified",
+            terminal=True,
+        )
         self.diagnostics.record("models", "MODEL_DOWNLOAD_COMPLETED", "completed")
         return {
             "schemaVersion": 1,
@@ -2456,6 +2739,21 @@ class HavenState:
             "idleUnloadSeconds": idle_unload_seconds,
         }
         result.update(build_model_decisions(models, self.model_recommendations, model_digests))
+        try:
+            candidate_snapshot = self.inspect_readiness(False)
+        except WebRequestError:
+            candidate_snapshot = None
+        manual_candidates = qualified_chat_candidates(
+            candidate_snapshot,
+            policy["trustScope"],
+            self.ollama_version,
+            self.hardware_qualified_chat_profiles,
+        )
+        result["manualModelCandidates"] = manual_candidates
+        with self.lock:
+            self.qualified_model_candidates = {
+                item["name"] for item in manual_candidates if item["name"] not in models
+            }
         result["providerHealth"] = {
             "status": "healthy",
             "providerId": "ollama.local-text",
@@ -2539,6 +2837,21 @@ class HavenState:
             "sessionResume": True,
         }
         result.update(build_model_decisions(models, self.model_recommendations, model_digests))
+        try:
+            candidate_snapshot = self.inspect_readiness(False)
+        except WebRequestError:
+            candidate_snapshot = None
+        manual_candidates = qualified_chat_candidates(
+            candidate_snapshot,
+            trust_scope,
+            self.ollama_version,
+            self.hardware_qualified_chat_profiles,
+        )
+        result["manualModelCandidates"] = manual_candidates
+        with self.lock:
+            self.qualified_model_candidates = {
+                item["name"] for item in manual_candidates if item["name"] not in models
+            }
         result["providerHealth"] = {
             "status": "healthy",
             "providerId": "ollama.local-text",
@@ -3405,11 +3718,17 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
 
     def _send_json(self, status: HTTPStatus, value: dict[str, Any]) -> None:
         data = json.dumps(value, separators=(",", ":")).encode("utf-8")
-        self.send_response(status)
-        self._security_headers("application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        try:
+            self.send_response(status)
+            self._security_headers("application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(data)))
+            self.end_headers()
+            self.wfile.write(data)
+        except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError):
+            # Browsers legitimately close an in-flight localhost request during
+            # refresh, navigation, cancellation, or shutdown. The operation has
+            # already completed, and there is no client left to receive an error.
+            return
 
     def _send_error_json(self, error: WebRequestError) -> None:
         value: dict[str, Any] = {"error": error.code}
@@ -3553,7 +3872,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 if set(body) != {"confirmed"} or body["confirmed"] is not True:
                     raise WebRequestError("software-update-check-confirmation-required")
                 try:
-                    result = self.server.state.software_update_provider()
+                    result = self.server.state.check_software_updates()
                 except SoftwareUpdateError as error:
                     self.server.state.diagnostics.record(
                         "software-update", "SOFTWARE_UPDATE_CHECK_FAILED", "failed",
@@ -3563,6 +3882,46 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                     "software-update", "SOFTWARE_UPDATE_CHECK_COMPLETED", "completed",
                 )
                 self._send_json(HTTPStatus.OK, result)
+                return
+            if self.path == "/api/software-updates/prepare":
+                if set(body) != {"target"}:
+                    raise WebRequestError("invalid-runtime-update-preparation-fields")
+                try:
+                    result = self.server.state.prepare_runtime_update(body["target"])
+                except ManagedRuntimeUpdateError as error:
+                    raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
+                self._send_json(HTTPStatus.OK, result)
+                return
+            if self.path == "/api/software-updates/approve":
+                if set(body) != {"planId", "effects", "confirmed"} or body["confirmed"] is not True:
+                    raise WebRequestError("invalid-runtime-update-approval-fields")
+                try:
+                    token = self.server.state.approve_runtime_update(body["planId"], body["effects"])
+                except ManagedRuntimeUpdateError as error:
+                    raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
+                self._send_json(HTTPStatus.OK, {
+                    "schemaVersion": 1, "approvalToken": token,
+                    "singleUse": True, "persisted": False,
+                })
+                return
+            if self.path == "/api/software-updates/execute":
+                if set(body) != {"approvalToken"}:
+                    raise WebRequestError("invalid-runtime-update-execution-fields")
+                try:
+                    result = self.server.state.start_runtime_update(body["approvalToken"])
+                except ManagedRuntimeUpdateError as error:
+                    raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
+                self.server.state.diagnostics.record(
+                    "software-update", "SOFTWARE_UPDATE_INSTALL_STARTED", "started",
+                )
+                self._send_json(HTTPStatus.ACCEPTED, result)
+                return
+            if self.path == "/api/software-updates/status":
+                if body:
+                    raise WebRequestError("invalid-runtime-update-status-fields")
+                if self.server.state.runtime_updates is None:
+                    raise WebRequestError(MANAGED_SETUP_UNAVAILABLE, HTTPStatus.NOT_FOUND)
+                self._send_json(HTTPStatus.OK, self.server.state.runtime_updates.public_status())
                 return
             if self.path == "/api/readiness":
                 if set(body) != {"force"} or not isinstance(body["force"], bool):
@@ -3624,6 +3983,14 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(
                     HTTPStatus.OK,
                     self.server.state.execute_model_install(body["approvalToken"]),
+                )
+                return
+            if self.path == "/api/model-install/status":
+                if set(body) != {"progressToken"} or not isinstance(body["progressToken"], str):
+                    raise WebRequestError("invalid-model-install-progress-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.model_install_status(body["progressToken"]),
                 )
                 return
             if self.path == "/api/research/query/prepare":

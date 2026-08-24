@@ -70,6 +70,13 @@
       "minimumFreeGpuMemoryGiB": 2
     },
     {
+      "id": "vulkan-16gib-system-32gib",
+      "backend": "vulkan",
+      "minimumSystemMemoryGiB": 31,
+      "minimumUsableGpuMemoryGiB": 15,
+      "minimumFreeGpuMemoryGiB": 2
+    },
+    {
       "id": "cuda-32gib-system-64gib",
       "backend": "cuda",
       "minimumSystemMemoryGiB": 63,
@@ -119,7 +126,7 @@
     },
     {
       "modelId": "qwen35-9b-q4",
-      "requiredProfiles": ["cuda-12gib-system-32gib"],
+      "requiredProfiles": ["cuda-12gib-system-32gib", "vulkan-16gib-system-32gib"],
       "state": "ready-for-qualification"
     },
     {
@@ -134,7 +141,7 @@
     },
     {
       "modelId": "gemma3-12b-q4",
-      "requiredProfiles": ["cuda-12gib-system-32gib"],
+      "requiredProfiles": ["cuda-12gib-system-32gib", "vulkan-16gib-system-32gib"],
       "state": "ready-for-qualification"
     },
     {
@@ -149,7 +156,7 @@
     },
     {
       "modelId": "gemma4-12b-qat",
-      "requiredProfiles": ["cuda-16gib", "cuda-12gib-system-32gib"],
+      "requiredProfiles": ["cuda-16gib", "cuda-12gib-system-32gib", "vulkan-16gib-system-32gib"],
       "state": "ready-for-qualification"
     },
     {

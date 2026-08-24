@@ -80,48 +80,48 @@ const LAST_SECTION_STORAGE_KEY = "haven42.last-section.v1";
 const SECTION_TOURS = Object.freeze({
   chat: Object.freeze({
     label: "Chat",
-    revision: 6,
+    revision: 11,
     panelId: "text-panel",
     returnId: "capability-title",
     steps: Object.freeze([
       { target: ".rail", title: "Move around Haven 42", description: "Use this menu to open Chat, Models, System, Technical details, or About. Each section has its own short help tour." },
-      { target: ".task-mode-select", title: "Choose what you want to do", description: "Leave this on Recommended and Haven 42 will choose Chat, Write, or Summarize from your request. You can also choose a task yourself." },
-      { target: ".model-picker", title: "Choose or find an AI model", description: "Haven 42 recommends a compatible installed model for each task. Use Browse models to compare installed choices or review a new model before downloading it." },
+      { target: ".conversation-toolbar", title: "See the model or change settings", description: "The current model and Automatic or Manual choice stay visible here. Open Settings to choose an installed model or a tested download, adjust text size, browse models, or start a new task." },
+      { target: "#messages", title: "Your conversation comes first", description: "Questions and answers use the main area of this page. Haven 42 follows new replies unless you scroll up to review an earlier message." },
       { target: ".composer-surface", title: "Write and attach files", description: "Type your request here, press Enter to send, or use Shift+Enter for a new line. Attachments stay in memory for the current task, and the Keep setting controls prompt recall for this session." },
       { target: "#research-tools", title: "Research with explicit approval", description: "Choose Wikipedia or a wider-web browser search. Haven 42 shows the exact search words before every request, never lets the AI browse on its own, and keeps in-app research only in memory." },
-      { target: ".status-glance", title: "Check connection and resources", description: "This quiet status area shows the active AI server, model, CPU, memory, graphics, and response speed. “This computer” means AI requests stay on this device." },
+      { target: ".status-glance", title: "Check connection and system activity", description: "This status area shows the active AI server, selected model, CPU, memory, graphics use, response speed, and your optional electricity estimate. “This computer” means AI requests stay on this device." },
     ]),
   }),
   models: Object.freeze({
     label: "Models",
-    revision: 3,
+    revision: 5,
     panelId: "models-panel",
     returnId: "models-title",
     steps: Object.freeze([
       { target: "#models-title", title: "Your AI models", description: "This page helps you understand and choose the models available from your connected Ollama server." },
       { target: "#model-search-capability", title: "Choose the task", description: "Select Chat, Writing, or Summarization to see which installed model Haven 42 recommends for that work." },
       { target: "#model-choice-status", title: "Read the recommendation", description: "This message explains the current model choice and whether Haven 42 has test evidence for the selected task." },
-      { target: "#model-discovery", title: "Models matched to this computer", description: "Haven 42 shows installed models and adds evidence-backed choices only when this AI computer's operating system, graphics card, memory, and Ollama runtime match a tested profile." },
-      { target: "#model-search-form", title: "Search, review, then install", description: "Enter a model name or capability. If the model is not installed, select it and Haven 42 will guide you through a one-time download approval." },
+      { target: "#model-discovery", title: "Find another model", description: "Haven 42 lists installed models and tested choices for matching hardware. You can also search Ollama's public catalog. Every download requires your review and approval." },
+      { target: "#model-search-form", title: "Search, review, then install", description: "Enter a model name or capability. If the model is not installed, select it and approve the download once. Haven 42 then shows live download progress and verifies the model before selecting it." },
     ]),
   }),
   system: Object.freeze({
     label: "System",
-    revision: 3,
+    revision: 5,
     panelId: "system-panel",
     returnId: "system-workspace-title",
     steps: Object.freeze([
       { target: "#system-workspace-title", title: "System settings", description: "Use this page to manage your AI connection, local components, resource information, and troubleshooting tools." },
       { target: "#connection-panel", title: "Connect another AI server", description: "A local setup connects automatically. Advanced users can use this area to switch to another trusted Ollama server." },
       { target: "#open-diagnostics", title: "Open troubleshooting logs", description: "Use this clearly labeled button to see recent sanitized technical events or save a support report. Search words, chats, and responses are not recorded." },
-      { target: "#software-updates", title: "Review software updates", description: "Haven 42 checks Ollama's official releases only when you choose Check now. You review every verified update before any download or activation, and no chat or hardware details are sent." },
+      { target: "#software-updates", title: "Choose certified or newest", description: "Certified releases are recommended. You may also review a newer official Ollama release before Haven 42 finishes compatibility testing; every install requires approval, and the certified runtime remains available for rollback." },
       { target: "#evidence-panel", title: "Check connection health", description: "These checks explain whether the AI server, model information, and local files are ready." },
       { target: "#energy-estimator-panel", title: "Estimate graphics-card electricity", description: "Use a measured GPU average and your own electricity rate. Official averages are optional, location is never inferred, and the result is not a whole-computer bill prediction." },
     ]),
   }),
   technical: Object.freeze({
     label: "Technical details",
-    revision: 1,
+    revision: 2,
     panelId: "assurance-panel",
     returnId: "assurance-title",
     steps: Object.freeze([
@@ -133,7 +133,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   about: Object.freeze({
     label: "About",
-    revision: 1,
+    revision: 2,
     panelId: "about-panel",
     returnId: "about-title",
     steps: Object.freeze([
@@ -174,6 +174,7 @@ const state = {
   testedModelOptions: [],
   testedModelCatalog: null,
   testedModelRequestId: 0,
+  qualifiedModelCandidates: [],
   modelSearchResults: [],
   desiredModel: null,
   idleUnloadSeconds: 300,
@@ -196,6 +197,7 @@ const state = {
   lastMetricsAnnouncementAt: 0,
   electricityRateProfile: null,
   energyEstimate: null,
+  chatAutoFollow: true,
   researchResultId: null,
   activePanelId: "text-panel",
   pendingModelInstall: null,
@@ -631,16 +633,55 @@ function renderAssuranceSummary(result) {
   byId("assurance-live-status").textContent = "Not run · read-only summary";
   const statuses = byId("assurance-status-list");
   statuses.replaceChildren();
-  result.evidence.statusCounts.forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "assurance-status-item";
-    const label = document.createElement("span");
-    label.textContent = item.status.replaceAll("-", " ");
-    const count = document.createElement("strong");
-    count.textContent = String(item.count);
-    row.append(label, count);
-    statuses.append(row);
+  const outcomeGroups = [
+    { id: "passed", title: "Passed", matches: (status) => /(?:pass|validated|verified|supported)/u.test(status) && !/(?:partial|fail|block)/u.test(status) },
+    { id: "partial", title: "Partial or candidate", matches: (status) => /(?:partial|candidate|planned|scaffold|not-run|pending)/u.test(status) },
+    { id: "blocked", title: "Failed or blocked", matches: (status) => /(?:fail|block|retired)/u.test(status) },
+  ];
+  const remaining = [...result.evidence.statusCounts];
+  outcomeGroups.forEach((group) => {
+    const items = remaining.filter((item) => group.matches(item.status));
+    items.forEach((item) => remaining.splice(remaining.indexOf(item), 1));
+    if (items.length === 0) return;
+    const cluster = document.createElement("section");
+    cluster.className = `assurance-cluster ${group.id}`;
+    const heading = document.createElement("h4");
+    heading.textContent = group.title;
+    const grid = document.createElement("div");
+    grid.className = "assurance-cluster-grid";
+    items.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = `assurance-status-item ${group.id}`;
+      const label = document.createElement("span");
+      label.textContent = item.status.replaceAll("-", " ");
+      const count = document.createElement("strong");
+      count.textContent = String(item.count);
+      row.append(label, count);
+      grid.append(row);
+    });
+    cluster.append(heading, grid);
+    statuses.append(cluster);
   });
+  if (remaining.length > 0) {
+    const cluster = document.createElement("section");
+    cluster.className = "assurance-cluster informational";
+    const heading = document.createElement("h4");
+    heading.textContent = "Informational";
+    const grid = document.createElement("div");
+    grid.className = "assurance-cluster-grid";
+    remaining.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "assurance-status-item informational";
+      const label = document.createElement("span");
+      label.textContent = item.status.replaceAll("-", " ");
+      const count = document.createElement("strong");
+      count.textContent = String(item.count);
+      row.append(label, count);
+      grid.append(row);
+    });
+    cluster.append(heading, grid);
+    statuses.append(cluster);
+  }
   const container = byId("assurance-surface-list");
   container.replaceChildren();
   result.surfaces.forEach((surface) => {
@@ -679,6 +720,7 @@ async function loadAssurance() {
 
 function showPrimaryPanel(panelId, navigationId, focusId) {
   if (panelId !== "text-panel") byId("research-tools").open = false;
+  if (panelId !== "text-panel") byId("conversation-settings").open = false;
   ["text-panel", "software-panel", "image-panel", "models-panel", "system-panel", "assurance-panel", "about-panel"].forEach((id) => {
     byId(id).classList.toggle("hidden", id !== panelId);
   });
@@ -880,9 +922,6 @@ function calculateElectricityEstimate(event) {
   byId("energy-estimate-source").textContent = `${source} · ${rate} ${currency}/kWh`;
   result.classList.remove("hidden");
   state.energyEstimate = Object.freeze({ formattedCost, formattedKwh, days: Math.trunc(days) });
-  byId("rail-cost-value").textContent = formattedCost;
-  byId("rail-cost-period").textContent = `${Math.trunc(days)} days · GPU only`;
-  byId("rail-cost-estimate").classList.remove("hidden");
   syncEnergyStatusWidget();
 }
 
@@ -925,12 +964,10 @@ function syncStatusSidebar() {
   byId("sidebar-model-name").textContent = model
     ? `Model · ${model}`
     : "No model selected";
-  for (const [source, target] of [
-    ["alpha-cpu", "sidebar-cpu"],
-    ["alpha-ram", "sidebar-ram"],
-    ["alpha-gpu", "sidebar-gpu"],
-    ["alpha-speed", "sidebar-speed"],
-  ]) byId(target).textContent = byId(source).textContent;
+  byId("sidebar-cpu").textContent = byId("alpha-cpu").textContent;
+  byId("sidebar-ram").textContent = byId("alpha-ram").textContent;
+  byId("sidebar-gpu").textContent = byId("alpha-gpu").textContent;
+  byId("sidebar-speed").textContent = byId("alpha-speed").textContent;
 }
 
 function initializeStatusSidebar() {
@@ -1163,21 +1200,40 @@ function providerConfigChanged(config) {
     || config.apiKey.length > 0;
 }
 
+function setPasswordVisibility(inputId, buttonId, visible) {
+  const input = byId(inputId);
+  const button = byId(buttonId);
+  input.type = visible ? "text" : "password";
+  button.setAttribute("aria-pressed", String(visible));
+  button.textContent = visible ? "Hide" : "Show";
+  button.setAttribute("aria-label", `${visible ? "Hide" : "Show"} API key`);
+}
+
+function togglePasswordVisibility(inputId, buttonId) {
+  const button = byId(buttonId);
+  setPasswordVisibility(inputId, buttonId, button.getAttribute("aria-pressed") !== "true");
+}
+
 function updateProviderAuthenticationControl(prefix = "") {
   const mode = byId(`${prefix}auth-mode`).value;
   const key = byId(`${prefix}api-key`);
+  const visibility = byId(`${prefix}api-key-visibility`);
   const endpoint = byId(`${prefix}endpoint`).value.trim();
   const canReuse = state.connected
     && state.providerConfig?.endpoint === endpoint
     && state.providerConfig?.authMode === mode;
   key.disabled = mode === "none";
+  visibility.disabled = key.disabled;
   key.required = mode !== "none" && !canReuse;
   key.placeholder = mode === "none"
     ? "Not used"
     : canReuse
       ? "Current session key retained"
       : "Required";
-  if (mode === "none") key.value = "";
+  if (mode === "none") {
+    key.value = "";
+    setPasswordVisibility(`${prefix}api-key`, `${prefix}api-key-visibility`, false);
+  }
 }
 
 function updateProviderConnectionControl() {
@@ -1262,6 +1318,7 @@ function validateModelSearch(result) {
 }
 
 function chooseDiscoveredModel(item) {
+  resetModelInstallProgress();
   const capabilityId = byId("model-search-capability").value;
   if (item.status === "installed") {
     state.modelSelections[capabilityId] = { mode: "manual", model: item.name };
@@ -1270,9 +1327,16 @@ function chooseDiscoveredModel(item) {
     byId("model-choice-status").textContent = `${item.name} selected for ${CAPABILITIES[capabilityId].modelLabel.toLocaleLowerCase()}.`;
   } else {
     state.desiredModel = item;
-    byId("model-choice-status").textContent = `${item.name} is not on your AI server yet, so it cannot be used.`;
+    byId("model-choice-status").textContent = `${item.name} is not installed yet. Review the download below when you are ready.`;
   }
   renderModelDiscovery();
+  if (item.status !== "installed") {
+    window.setTimeout(() => {
+      const review = byId("desired-model");
+      review.scrollIntoView({ behavior: motionBehavior(), block: "center" });
+      byId("install-model-button").focus({ preventScroll: true });
+    }, 0);
+  }
 }
 
 function closeModelInstallReview() {
@@ -1310,6 +1374,90 @@ function validateModelInstallPreparation(result, expectedModel) {
   return result;
 }
 
+function resetModelInstallProgress() {
+  const region = byId("model-install-progress");
+  const bar = byId("model-install-progress-bar");
+  region.classList.add("hidden");
+  region.removeAttribute("data-state");
+  bar.value = 0;
+  bar.textContent = "0%";
+  byId("model-install-progress-percent").textContent = "0%";
+  byId("model-install-progress-detail").textContent = "Starting download…";
+}
+
+function validateModelInstallProgress(result, expectedModel) {
+  const fields = [
+    "completedBytes", "kind", "model", "phase", "progressPercent",
+    "schemaVersion", "status", "terminal", "totalBytes",
+  ];
+  if (
+    !hasExactObjectKeys(result, fields)
+    || result.schemaVersion !== 1
+    || result.kind !== "model-install-progress"
+    || result.model !== expectedModel
+    || !["downloading", "verifying", "complete", "failed"].includes(result.phase)
+    || typeOfNumber(result.progressPercent) !== "integer"
+    || result.progressPercent < 0
+    || result.progressPercent > 100
+    || ![null, "integer"].includes(typeOfNumber(result.completedBytes))
+    || ![null, "integer"].includes(typeOfNumber(result.totalBytes))
+    || (result.completedBytes === null) !== (result.totalBytes === null)
+    || (result.completedBytes !== null && result.completedBytes < 0)
+    || (result.totalBytes !== null && result.totalBytes <= 0)
+    || (result.totalBytes !== null && result.completedBytes > result.totalBytes)
+    || typeof result.status !== "string"
+    || result.status.length < 1
+    || result.status.length > 160
+    || typeof result.terminal !== "boolean"
+    || result.terminal !== ["complete", "failed"].includes(result.phase)
+  ) throw new Error("invalid-model-install-progress");
+  return result;
+}
+
+function typeOfNumber(value) {
+  if (value === null) return null;
+  return typeof value === "number" && Number.isInteger(value) ? "integer" : typeof value;
+}
+
+function renderModelInstallProgress(progress) {
+  const region = byId("model-install-progress");
+  const bar = byId("model-install-progress-bar");
+  const percent = `${progress.progressPercent}%`;
+  const labels = {
+    downloading: "Downloading model",
+    verifying: "Verifying model",
+    complete: "Model ready",
+    failed: "Download stopped",
+  };
+  region.classList.remove("hidden");
+  region.dataset.state = progress.phase;
+  byId("model-install-progress-label").textContent = labels[progress.phase];
+  byId("model-install-progress-percent").textContent = percent;
+  bar.value = progress.progressPercent;
+  bar.textContent = percent;
+  const transferred = progress.totalBytes === null
+    ? ""
+    : ` · ${formatSetupBytes(progress.completedBytes)} of ${formatSetupBytes(progress.totalBytes)}`;
+  byId("model-install-progress-detail").textContent = `${progress.status}${transferred}`;
+}
+
+async function monitorModelInstallProgress(progressToken, model) {
+  for (let attempt = 0; attempt < 7200; attempt += 1) {
+    await new Promise((resolve) => window.setTimeout(resolve, attempt === 0 ? 100 : 500));
+    try {
+      const progress = validateModelInstallProgress(
+        await api("/api/model-install/status", { progressToken }),
+        model,
+      );
+      renderModelInstallProgress(progress);
+      if (progress.terminal) return progress;
+    } catch (error) {
+      if (attempt >= 9) throw error;
+    }
+  }
+  throw new Error("model-install-progress-timeout");
+}
+
 async function prepareModelInstall() {
   const model = state.desiredModel?.name;
   if (!model) return;
@@ -1345,8 +1493,12 @@ async function executeModelInstall() {
   button.disabled = true;
   button.textContent = "Downloading…";
   byId("model-install-status").textContent = `Downloading ${model}. Large models can take several minutes; keep Haven 42 open.`;
+  byId("model-install-progress").classList.remove("hidden");
   try {
-    const result = await api("/api/model-install/execute", { approvalToken: token, confirmed: true });
+    const installation = api("/api/model-install/execute", { approvalToken: token, confirmed: true });
+    const progressMonitoring = monitorModelInstallProgress(token, model).catch(() => null);
+    const result = await installation;
+    await progressMonitoring;
     if (
       !result
       || result.schemaVersion !== 1
@@ -1480,6 +1632,16 @@ function renderModelDiscovery() {
     const existing = merged.get(item.name);
     merged.set(item.name, existing ? { ...existing, ...item, status: "installed", installCommand: null } : item);
   });
+  state.qualifiedModelCandidates.forEach((item) => {
+    if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) {
+      merged.set(item.name, {
+        ...item,
+        status: "not-installed",
+        validationStatus: "validated-on-matching-hardware",
+        installCommand: `ollama pull ${item.name}`,
+      });
+    }
+  });
   state.modelSearchResults.forEach((item) => {
     if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) merged.set(item.name, item);
   });
@@ -1490,6 +1652,8 @@ function renderModelDiscovery() {
     "tested-hardware-runtime-differs": 3,
     unverified: 4,
     "candidate-only": 5,
+    validated: 0,
+    "validated-on-matching-hardware": 1,
   };
   const configuredModel = selectedModel(capabilityId);
   const results = [...merged.values()].sort((left, right) => {
@@ -1502,6 +1666,7 @@ function renderModelDiscovery() {
     return validationDifference || left.name.localeCompare(right.name);
   });
   const container = byId("model-search-results");
+  const desired = byId("desired-model");
   container.replaceChildren();
   results.forEach((item) => {
     const row = document.createElement("div");
@@ -1520,6 +1685,8 @@ function renderModelDiscovery() {
       ? `Already available on your server${configured ? " · selected" : ""}${evidenceLabel ? ` · ${evidenceLabel}` : ""}`
       : evidenceLabel
         ? `Not installed · ${evidenceLabel}`
+      : item.validationStatus === "validated-on-matching-hardware"
+        ? "Tested on matching hardware · not installed · nothing downloads without approval"
         : "Not on your server yet · searching does not download it";
     detail.append(name, status);
     const choose = document.createElement("button");
@@ -1538,6 +1705,7 @@ function renderModelDiscovery() {
     choose.addEventListener("click", () => chooseDiscoveredModel(item));
     row.append(detail, choose);
     container.append(row);
+    if (state.desiredModel?.name === item.name) container.append(desired);
   });
   const testedCatalog = state.testedModelCatalog;
   const publicMatches = state.modelSearchResults.filter((item) => modelMatchesQuery(item.name, query)).length;
@@ -1555,15 +1723,19 @@ function renderModelDiscovery() {
     byId("model-search-status").textContent = `${count} tested choice${count === 1 ? "" : "s"} match ${testedCatalog.profile.hardware} on ${testedCatalog.profile.operatingSystem}.${runtimeNote}`;
   } else if (results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
     byId("model-search-status").textContent = "No installed or catalog matches yet.";
-  } else if (installed.length > 0 && testedCatalog?.status !== "check-failed") {
+  } else if (
+    installed.length > 0
+    || results.some((item) => item.validationStatus === "validated-on-matching-hardware")
+  ) {
     const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
-    byId("model-search-status").textContent = `${installed.length} installed match${installed.length === 1 ? "" : "es"} shown for ${capabilityLabel}, with the most relevant options first.`;
+    const testedDownloads = results.filter((item) => item.validationStatus === "validated-on-matching-hardware").length;
+    byId("model-search-status").textContent = `${installed.length} installed and ${testedDownloads} tested download${testedDownloads === 1 ? "" : "s"} shown for ${capabilityLabel}.`;
   }
-  const desired = byId("desired-model");
+  if (desired.parentElement !== container) container.append(desired);
   desired.classList.toggle("hidden", !state.desiredModel);
   if (state.desiredModel) {
     byId("desired-model-name").textContent = state.desiredModel.name;
-    byId("desired-model-state").textContent = "Not on your server yet · cannot be used until you install it";
+    byId("desired-model-state").textContent = "Not installed yet · review this model before downloading";
     byId("desired-model-command").textContent = state.desiredModel.installCommand;
   }
 }
@@ -1595,6 +1767,7 @@ function showPostRemovalExperience() {
   state.testedModelRequestId += 1;
   state.testedModelOptions = [];
   state.testedModelCatalog = null;
+  state.qualifiedModelCandidates = [];
   state.modelSearchResults = [];
   state.modelSelections = {};
   state.recommendations = {};
@@ -1615,6 +1788,16 @@ function showPostRemovalExperience() {
   showWizardStep("removed");
 }
 
+function acceleratorDisplayName(vendor, model) {
+  const normalizedVendor = String(vendor || "").trim();
+  const normalizedModel = String(model || "").trim();
+  if (!normalizedVendor) return normalizedModel || "Graphics device";
+  if (!normalizedModel) return normalizedVendor;
+  return normalizedModel.toLocaleLowerCase().startsWith(normalizedVendor.toLocaleLowerCase())
+    ? normalizedModel
+    : `${normalizedVendor} ${normalizedModel}`;
+}
+
 function readinessFacts(snapshot) {
   const platformName = snapshot.platform.productName || snapshot.platform.operatingSystem;
   const platformBuild = Number.isSafeInteger(snapshot.platform.buildNumber)
@@ -1628,7 +1811,7 @@ function readinessFacts(snapshot) {
       const driver = item.driverName
         ? `${item.driverName} · version ${item.driverVersion || "Unavailable"}`
         : item.driverVersion || "Unavailable";
-      return `${item.vendor} ${item.model} · ${item.memoryGiB ? `${item.memoryGiB} GiB` : "graphics memory Unavailable"} · driver ${driver}`;
+      return `${acceleratorDisplayName(item.vendor, item.model)} · ${item.memoryGiB ? `${item.memoryGiB} GiB` : "graphics memory Unavailable"} · driver ${driver}`;
     }).join(", ")
     : "Not detected or permission limited";
   const softwareLabels = {
@@ -1728,7 +1911,7 @@ function problemReportDetails(snapshot) {
     : `${snapshot.platform.systemMemoryGiB} GiB`;
   const graphics = snapshot.accelerators.length
     ? snapshot.accelerators.slice(0, 4).map((item) => (
-      `${safeProblemReportValue(item.vendor, "Unknown", 40)} ${safeProblemReportValue(item.model, "graphics device", 120)}${item.memoryGiB ? ` (${item.memoryGiB} GiB)` : ""}${item.driverVersion ? `, driver ${safeProblemReportValue(item.driverVersion, "", 80)}` : ""}`
+      `${safeProblemReportValue(acceleratorDisplayName(item.vendor, item.model), "Unknown graphics device", 160)}${item.memoryGiB ? ` (${item.memoryGiB} GiB)` : ""}${item.driverVersion ? `, driver ${safeProblemReportValue(item.driverVersion, "", 80)}` : ""}`
     )).join("; ")
     : "Not detected or permission limited";
   return [
@@ -2844,6 +3027,23 @@ function renderModelSelect() {
     select.append(advanced);
   }
 
+  const installedNames = new Set(state.modelOptions.map((item) => item.name));
+  const downloadable = state.qualifiedModelCandidates.filter((item) => (
+    !installedNames.has(item.name)
+    && item.capabilityStatus[capabilityId] === "validated-on-matching-hardware"
+  ));
+  if (downloadable.length > 0) {
+    const tested = document.createElement("optgroup");
+    tested.label = "Tested on matching hardware · download requires approval";
+    for (const item of downloadable) {
+      const option = document.createElement("option");
+      option.value = `candidate:${item.name}`;
+      option.textContent = `${item.name} — not installed`;
+      tested.append(option);
+    }
+    select.append(tested);
+  }
+
   if (selection.mode === "automatic" && recommendation?.automatic) {
     select.value = "automatic";
   } else if (selection.mode === "manual") {
@@ -2852,6 +3052,7 @@ function renderModelSelect() {
     select.selectedIndex = recommendation?.automatic ? 0 : -1;
   }
   const model = selectedModel(capabilityId);
+  byId("current-model-name").textContent = model || "No model selected";
   const status = selection.mode === "manual"
     ? state.modelOptions.find((item) => item.name === model)?.capabilityStatus[capabilityId]
     : recommendation?.status;
@@ -2864,12 +3065,15 @@ function renderModelSelect() {
   byId("model-state").textContent = model
     ? `${selectedStatusLabel} · ${model}`
     : `No suitable installed model found · add ${recommendation?.model || "a recommended model"}, then connect again`;
+  const mode = byId("model-selection-mode");
+  mode.textContent = selection.mode === "manual" ? "Manual" : "Automatic";
+  mode.classList.toggle("manual", selection.mode === "manual");
   byId("reset-model-button").classList.toggle(
     "hidden",
     selection.mode !== "manual" || !recommendation?.automatic,
   );
   const ready = state.connected && Boolean(model);
-  select.disabled = !state.connected || state.modelOptions.length === 0;
+  select.disabled = !state.connected || (state.modelOptions.length === 0 && downloadable.length === 0);
   byId("context-files").disabled = !state.connected;
   byId("browse-context").disabled = !state.connected;
   byId("prompt").disabled = !ready;
@@ -3002,6 +3206,13 @@ function renderRunDetails(details) {
     ["Generation speed", details.tokensPerSecond == null ? null : `${details.tokensPerSecond} tokens/s`],
     ["Elapsed", details.totalDurationMs == null ? null : `${details.totalDurationMs} ms`],
   ];
+  const elapsedSeconds = details.totalDurationMs == null
+    ? "Response time was not reported"
+    : `Response completed in ${(details.totalDurationMs / 1000).toFixed(1)} seconds`;
+  const generated = details.outputTokens == null
+    ? "output length was not reported"
+    : `${details.outputTokens} tokens generated`;
+  byId("run-details-summary").textContent = `${elapsedSeconds}; ${generated}.`;
   rows.forEach(([label, value]) => {
     const row = document.createElement("div");
     const term = document.createElement("dt");
@@ -3262,7 +3473,30 @@ function openAnswerReport(identity, trigger) {
   byId("answer-report-category").focus();
 }
 
+function createMessageAction(label, iconPaths) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "button text-button message-action";
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.classList.add("message-action-icon");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("aria-hidden", "true");
+  icon.setAttribute("focusable", "false");
+  iconPaths.forEach((pathData) => {
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("d", pathData);
+    icon.append(path);
+  });
+  const text = document.createElement("span");
+  text.textContent = label;
+  button.append(icon, text);
+  return {button, text};
+}
+
 function addMessage(role, content, label, answerReportIdentity = null) {
+  const messages = byId("messages");
+  const wasFollowing = state.chatAutoFollow
+    || messages.scrollHeight - messages.scrollTop - messages.clientHeight < 48;
   const article = document.createElement("article");
   article.className = `message ${role}`;
   const avatar = document.createElement("div");
@@ -3284,17 +3518,43 @@ function addMessage(role, content, label, answerReportIdentity = null) {
   if (role === "assistant" && validAnswerReportIdentity(answerReportIdentity)) {
     const actions = document.createElement("div");
     actions.className = "message-actions";
-    const report = document.createElement("button");
-    report.type = "button";
-    report.className = "button secondary message-action";
-    report.textContent = "Report this answer";
-    report.addEventListener("click", () => openAnswerReport(answerReportIdentity, report));
-    actions.append(report);
+    const copyAction = createMessageAction("Copy answer", ["M8 8h11v11H8z", "M5 16V5h11"]);
+    const copy = copyAction.button;
+    copy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(content);
+        copyAction.text.textContent = "Copied";
+      } catch (_error) {
+        copyAction.text.textContent = "Copy unavailable";
+      }
+    });
+    const retry = createMessageAction("Try again", ["M20 7v5h-5", "M19 12a7 7 0 1 0-2.05 4.95"]);
+    const retryButton = retry.button;
+    retryButton.addEventListener("click", () => {
+      const priorPrompt = [...state.messages].reverse().find((item) => item.role === "user")?.content;
+      if (!priorPrompt) return;
+      byId("prompt").value = priorPrompt;
+      byId("prompt").focus();
+      setTaskEvent("Previous request restored for review. Press Send when you are ready.", "result");
+    });
+    const report = createMessageAction("Report this answer", ["M5 21V4", "M5 5h12l-2 4 2 4H5"]);
+    const reportButton = report.button;
+    reportButton.addEventListener("click", () => openAnswerReport(answerReportIdentity, reportButton));
+    actions.append(copy, retryButton, reportButton);
     body.append(actions);
   }
   article.append(avatar, body);
-  byId("messages").append(article);
-  article.scrollIntoView({ behavior: motionBehavior(), block: "end" });
+  messages.append(article);
+  messages.classList.toggle(
+    "empty-conversation",
+    state.messages.length === 0 && messages.childElementCount === 1,
+  );
+  if (wasFollowing) {
+    state.chatAutoFollow = true;
+    const scrollToLatest = () => messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
+    scrollToLatest();
+    window.requestAnimationFrame(scrollToLatest);
+  }
   return article;
 }
 
@@ -4546,6 +4806,7 @@ function resetTask() {
   resetContextImageLimit();
   const capability = CAPABILITIES[state.capabilityId];
   const messages = byId("messages");
+  state.chatAutoFollow = true;
   messages.replaceChildren();
   addMessage("assistant", capability.welcome, "Haven 42");
   byId("prompt").value = "";
@@ -4564,13 +4825,38 @@ async function connectProvider(endpoint, timeoutSeconds, idleUnloadSeconds, auth
   return applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSeconds);
 }
 
-function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSeconds) {
+function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSeconds, resetConversation = true) {
   if (
     !Array.isArray(result.models)
     || !Array.isArray(result.modelOptions)
+    || !Array.isArray(result.manualModelCandidates)
     || result.models.length > MAX_DISCOVERED_MODELS
     || result.modelOptions.length > MAX_DISCOVERED_MODELS
+    || result.manualModelCandidates.length > MAX_DISCOVERED_MODELS
   ) throw new Error("invalid-provider-model-catalog");
+  const candidateNames = new Set();
+  result.manualModelCandidates.forEach((item) => {
+    if (
+      !item
+      || typeof item !== "object"
+      || Array.isArray(item)
+      || Object.keys(item).sort().join(",") !== [
+        "automatic", "capabilityStatus", "downloadRequiresApproval", "hardwareFit",
+        "minimumOllamaVersion", "name", "profileId",
+      ].sort().join(",")
+      || !/^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$/.test(item.name)
+      || candidateNames.has(item.name)
+      || item.automatic !== false
+      || item.downloadRequiresApproval !== true
+      || item.hardwareFit !== "matched-tested-hardware-profile"
+      || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(item.profileId)
+      || !/^[0-9]+(?:\.[0-9]+){1,3}$/.test(item.minimumOllamaVersion)
+      || !item.capabilityStatus
+      || Object.keys(item.capabilityStatus).sort().join(",") !== Object.keys(CAPABILITIES).sort().join(",")
+      || Object.values(item.capabilityStatus).some((status) => status !== "validated-on-matching-hardware")
+    ) throw new Error("invalid-provider-model-catalog");
+    candidateNames.add(item.name);
+  });
   if (
     !result.authentication
     || Object.keys(result.authentication).sort().join(",") !== "configured,mode,persisted"
@@ -4587,6 +4873,7 @@ function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSec
   renderProviderTransportWarning(result.trustScope, result.transportScheme);
   state.recommendations = result.recommendations || {};
   state.modelOptions = result.modelOptions || [];
+  state.qualifiedModelCandidates = result.manualModelCandidates || [];
   if (state.desiredModel && state.modelOptions.some((item) => item.name === state.desiredModel.name)) {
     state.desiredModel = null;
   }
@@ -4635,7 +4922,7 @@ function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSec
   updateProviderConnectionControl();
   updateWizardConnectionControl();
   updateCleanupPolicyControl();
-  resetTask();
+  if (resetConversation) resetTask();
   byId("text-status").textContent = `${result.models.length} installed model${result.models.length === 1 ? "" : "s"} found`;
   byId("cleanup-status").textContent = cleanupPolicyLabel(result.idleUnloadSeconds);
   byId("health-badge").textContent = "Healthy";
@@ -4800,6 +5087,13 @@ byId("connection-form").addEventListener("submit", async (event) => {
     }
     updateWizardConnectionControl();
   });
+});
+
+byId("api-key-visibility").addEventListener("click", () => {
+  togglePasswordVisibility("api-key", "api-key-visibility");
+});
+byId("wizard-api-key-visibility").addEventListener("click", () => {
+  togglePasswordVisibility("wizard-api-key", "wizard-api-key-visibility");
 });
 
 byId("model-search-query").addEventListener("input", () => {
@@ -5202,6 +5496,22 @@ byId("use-recommended-model").addEventListener("click", () => {
 });
 byId("model").addEventListener("change", () => {
   const value = byId("model").value;
+  if (value.startsWith("candidate:")) {
+    const model = value.slice("candidate:".length);
+    const candidate = state.qualifiedModelCandidates.find((item) => item.name === model);
+    renderModelSelect();
+    if (!candidate) return;
+    byId("conversation-settings").open = false;
+    byId("model-search-capability").value = state.capabilityId;
+    openModels();
+    chooseDiscoveredModel({
+      ...candidate,
+      status: "not-installed",
+      validationStatus: "validated-on-matching-hardware",
+      installCommand: `ollama pull ${candidate.name}`,
+    });
+    return;
+  }
   state.modelSelections[state.capabilityId] = value === "automatic"
     ? { mode: "automatic", model: null }
     : { mode: "manual", model: value.slice("manual:".length) };
@@ -5237,6 +5547,7 @@ byId("text-mode-options").addEventListener("keydown", (event) => {
   const current = options.indexOf(document.activeElement);
   if (event.key === "Escape") {
     event.preventDefault();
+    event.stopPropagation();
     closeTaskModePicker({ restoreFocus: true });
     return;
   }
@@ -5267,6 +5578,7 @@ byId("reset-model-button").addEventListener("click", () => {
   renderModelSelect();
 });
 byId("new-task-button").addEventListener("click", async () => {
+  byId("conversation-settings").open = false;
   setTaskControlsDisabled(true);
   let cleanupStatus = "";
   try {
@@ -5295,10 +5607,34 @@ byId("home-nav").addEventListener("click", () => {
   openChat();
   window.scrollTo({ top: 0, behavior: motionBehavior() });
 });
+byId("messages").addEventListener("scroll", () => {
+  const messages = byId("messages");
+  state.chatAutoFollow = messages.scrollHeight - messages.scrollTop - messages.clientHeight < 48;
+}, { passive: true });
+byId("conversation-settings").addEventListener("toggle", () => {
+  const open = byId("conversation-settings").open;
+  const trigger = byId("conversation-settings-trigger");
+  trigger.setAttribute("aria-expanded", String(open));
+  trigger.setAttribute("aria-label", `${open ? "Close" : "Open"} conversation settings`);
+});
+document.addEventListener("pointerdown", (event) => {
+  const settings = byId("conversation-settings");
+  if (settings.open && !settings.contains(event.target)) settings.open = false;
+});
+document.addEventListener("keydown", (event) => {
+  const settings = byId("conversation-settings");
+  if (event.key !== "Escape" || !settings.open) return;
+  event.preventDefault();
+  settings.open = false;
+  byId("conversation-settings-trigger").focus({ preventScroll: true });
+});
 byId("software-nav").addEventListener("click", openSoftware);
 byId("image-nav").addEventListener("click", openImages);
 byId("models-nav").addEventListener("click", openModels);
-byId("open-models-from-chat").addEventListener("click", openModels);
+byId("open-models-from-chat").addEventListener("click", () => {
+  byId("conversation-settings").open = false;
+  openModels();
+});
 byId("assurance-nav").addEventListener("click", openAssurance);
 byId("about-nav").addEventListener("click", openAbout);
 byId("workflow-plan-button").addEventListener("click", async () => {
@@ -5441,11 +5777,6 @@ byId("system-nav").addEventListener("click", () => {
   openSystem();
 });
 byId("view-system-details").addEventListener("click", openSystem);
-byId("rail-cost-estimate").addEventListener("click", () => {
-  openSystem();
-  byId("energy-estimator-panel").scrollIntoView({ behavior: motionBehavior(), block: "start" });
-  byId("energy-estimator-title").focus({ preventScroll: true });
-});
 byId("energy-measurement-profile").addEventListener("change", updateEnergyMeasurement);
 byId("energy-rate-source").addEventListener("change", updateEnergyRateControls);
 byId("energy-pin-status").addEventListener("change", syncEnergyStatusWidget);
@@ -5558,22 +5889,66 @@ function validateSoftwareUpdateCheck(value) {
     || typeof component.newerOfficialVersionAvailable !== "boolean"
     || typeof component.managedVersionIsLatest !== "boolean"
     || typeof component.availableForManagedSetup !== "boolean"
+    || !["certified", "official-unverified"].includes(component.certificationStatus)
     || !Number.isSafeInteger(component.downloadBytes)
     || component.downloadBytes < 1 || component.downloadBytes > 4 * 1024 ** 3
     || !/^[a-f0-9]{64}$/.test(component.sha256)
     || component.releaseUrl !== `https://github.com/ollama/ollama/releases/tag/v${component.latestStableVersion}`
+    || component.downloadUrl !== `https://github.com/ollama/ollama/releases/download/v${component.latestStableVersion}/${component.artifactName}`
   ) throw new Error("invalid-software-update-component");
-  return component;
+  return { component, runtimeStatus: validateRuntimeUpdateStatus(value.runtimeStatus) };
 }
 
-byId("software-update-preference").addEventListener("change", () => {
-  const keep = byId("software-update-preference").value === "keep";
+function validateRuntimeUpdateStatus(value) {
+  if (
+    !value || value.schemaVersion !== 1
+    || value.kind !== "haven42-managed-runtime-update-status"
+    || !/^\d+\.\d+\.\d+$/.test(value.activeVersion)
+    || !/^\d+\.\d+\.\d+$/.test(value.certifiedVersion)
+    || !["certified", "official-unverified"].includes(value.activeCertificationStatus)
+    || typeof value.rollbackAvailable !== "boolean"
+    || typeof value.updateInProgress !== "boolean"
+    || !["idle", "starting", "downloading", "extracting", "validating", "complete", "failed"].includes(value.phase)
+    || !Number.isSafeInteger(value.progressPercent) || value.progressPercent < 0 || value.progressPercent > 100
+    || (value.error !== null && typeof value.error !== "string")
+    || (value.targetVersion !== null && !/^\d+\.\d+\.\d+$/.test(value.targetVersion))
+    || (value.targetCertification !== null && !["certified", "official-unverified"].includes(value.targetCertification))
+    || typeof value.rollbackPerformed !== "boolean"
+  ) throw new Error("invalid-runtime-update-status");
+  return value;
+}
+
+let checkedSoftwareUpdate = null;
+let pendingSoftwareUpdatePlan = null;
+let softwareUpdatePoll = null;
+
+function refreshSoftwareUpdateChoice() {
   const updateButton = byId("use-software-update");
-  updateButton.disabled = keep || updateButton.dataset.available !== "true";
-  if (keep) {
-    byId("software-update-result").textContent = "Your current installed version will be kept. You can change this choice at any time during this session.";
+  if (!checkedSoftwareUpdate) {
+    updateButton.disabled = true;
+    updateButton.textContent = "Check releases first";
+    return;
   }
-});
+  const { component, runtimeStatus } = checkedSoftwareUpdate;
+  const latest = byId("software-update-preference").value === "latest";
+  if (latest) {
+    updateButton.dataset.target = "latest-official";
+    updateButton.textContent = `Review and install Ollama ${component.latestStableVersion}`;
+    updateButton.disabled = (
+      runtimeStatus.activeVersion === component.latestStableVersion
+      || (!component.newerOfficialVersionAvailable && !component.managedVersionIsLatest)
+    );
+  } else {
+    updateButton.dataset.target = "certified";
+    updateButton.textContent = runtimeStatus.rollbackAvailable
+      ? `Review restore to certified Ollama ${runtimeStatus.certifiedVersion}`
+      : `Certified Ollama ${runtimeStatus.certifiedVersion} is active`;
+    updateButton.disabled = !runtimeStatus.rollbackAvailable;
+  }
+  byId("rollback-certified-runtime").classList.toggle("hidden", !runtimeStatus.rollbackAvailable);
+}
+
+byId("software-update-preference").addEventListener("change", refreshSoftwareUpdateChoice);
 
 byId("check-software-updates").addEventListener("click", async () => {
   const button = byId("check-software-updates");
@@ -5583,28 +5958,33 @@ byId("check-software-updates").addEventListener("click", async () => {
   button.disabled = true;
   button.textContent = "Checking official release…";
   updateButton.disabled = true;
+  updateButton.textContent = "Checking official releases…";
   updateButton.dataset.available = "false";
   releaseLink.classList.add("hidden");
   result.textContent = "Contacting Ollama's official GitHub release service…";
   try {
-    const component = validateSoftwareUpdateCheck(
+    checkedSoftwareUpdate = validateSoftwareUpdateCheck(
       await api("/api/software-updates/check", { confirmed: true }),
     );
+    const { component, runtimeStatus } = checkedSoftwareUpdate;
     releaseLink.href = component.releaseUrl;
+    releaseLink.textContent = `View the official Ollama ${component.latestStableVersion} release page`;
     releaseLink.classList.remove("hidden");
     byId("update-status").textContent = `Checked · Ollama ${component.latestStableVersion}`;
-    if (component.managedVersionIsLatest) {
-      result.textContent = `Ollama ${component.managedVersion} is the newest stable version verified for this Haven 42 build. The download is ${formatBytes(component.downloadBytes)} and is used only after setup approval.`;
-      updateButton.textContent = `Review Ollama ${component.managedVersion}`;
-      updateButton.dataset.available = "true";
-      updateButton.disabled = byId("software-update-preference").value === "keep";
-    } else if (component.newerOfficialVersionAvailable) {
-      result.textContent = `Ollama ${component.latestStableVersion} is newer than the verified ${component.managedVersion} runtime in this Haven 42 build. Haven 42 will not install unverified files; you can keep using the current runtime or view the official release.`;
+    if (component.newerOfficialVersionAvailable) {
+      result.textContent = `Ollama ${component.latestStableVersion} is the newest official stable release. Haven 42 has certified ${component.managedVersion}. You may install the newer release after reviewing the compatibility warning; the certified version remains available for rollback.`;
+    } else if (component.managedVersionIsLatest) {
+      result.textContent = `Ollama ${component.managedVersion} is both the newest official stable release and the latest version certified by Haven 42.`;
     } else {
-      result.textContent = `This Haven 42 build verifies Ollama ${component.managedVersion}. The official stable release is ${component.latestStableVersion}; no downgrade will be offered.`;
+      result.textContent = `Haven 42 has certified Ollama ${component.managedVersion}, which is newer than the official stable release currently reported. Haven 42 will not offer an automatic downgrade.`;
     }
+    if (runtimeStatus.activeCertificationStatus === "official-unverified") {
+      result.textContent += ` This computer is currently using unverified Ollama ${runtimeStatus.activeVersion}.`;
+    }
+    refreshSoftwareUpdateChoice();
   } catch (error) {
     result.textContent = `The official release could not be verified. Nothing was downloaded or changed. ${humanError(error)}`;
+    updateButton.textContent = "Release check unavailable";
     byId("update-status").textContent = "Check failed · no changes";
   } finally {
     button.disabled = false;
@@ -5614,10 +5994,150 @@ byId("check-software-updates").addEventListener("click", async () => {
 });
 
 byId("use-software-update").addEventListener("click", () => {
-  if (byId("use-software-update").dataset.available !== "true") return;
-  byId("software-update-result").textContent = "Opening guided local setup. Review the version, download, storage location, and effects before approving.";
-  byId("setup-local-components").click();
+  if (byId("use-software-update").disabled) return;
+  prepareSoftwareRuntimeChange(byId("use-software-update").dataset.target);
 });
+
+async function prepareSoftwareRuntimeChange(target) {
+  const result = byId("software-update-result");
+  try {
+    const plan = await api("/api/software-updates/prepare", { target });
+    if (
+      !plan || plan.schemaVersion !== 1 || plan.kind !== "haven42-managed-runtime-update-plan"
+      || typeof plan.planId !== "string" || !["latest-official", "certified"].includes(plan.target)
+      || !/^\d+\.\d+\.\d+$/.test(plan.version)
+      || !["certified", "official-unverified"].includes(plan.certificationStatus)
+      || !Array.isArray(plan.effects) || plan.effects.length !== 4
+      || plan.approvalRequired !== true || plan.modelsAndUserDataKept !== true
+    ) throw new Error("invalid-runtime-update-plan");
+    pendingSoftwareUpdatePlan = plan;
+    byId("software-update-review-title").textContent = plan.target === "certified"
+      ? `Restore certified Ollama ${plan.version}` : `Install Ollama ${plan.version}`;
+    byId("software-update-review-summary").textContent = plan.target === "certified"
+      ? "Haven 42 will stop its local AI, select the retained certified runtime, verify it, and start local AI again. Models and user data stay in place."
+      : `Haven 42 will download ${formatBytes(plan.downloadBytes)} from Ollama's official release, verify its published digest, install it beside the certified runtime, and test startup before activation.`;
+    const warning = byId("software-update-review-warning");
+    warning.textContent = plan.warning || "";
+    warning.classList.toggle("hidden", !plan.warning);
+    const consentRow = byId("software-update-unverified-consent-row");
+    const consent = byId("software-update-unverified-consent");
+    consent.checked = false;
+    consentRow.classList.toggle("hidden", plan.certificationStatus !== "official-unverified");
+    const effectLabels = {
+      "download-runtime-files": "Download only the selected Ollama runtime into Haven42-Data.",
+      "select-certified-runtime": "Switch back to the retained Haven 42-certified runtime.",
+      "stop-and-restart-owned-local-ai": "Briefly stop and restart only the local AI process owned by Haven 42.",
+      "keep-models-and-user-data": "Keep downloaded models, settings, and user data in place.",
+      "retain-certified-rollback": "Keep the latest certified runtime available as a recovery option.",
+    };
+    byId("software-update-review-effects").replaceChildren(...plan.effects.map((effect) => {
+      const item = document.createElement("li");
+      item.textContent = effectLabels[effect] || effect;
+      return item;
+    }));
+    byId("software-update-review").classList.remove("hidden");
+    byId("software-update-review").focus();
+    result.textContent = "Review the exact change below. Nothing has been downloaded yet.";
+  } catch (error) {
+    result.textContent = `The update review could not be prepared. ${humanError(error)}`;
+  }
+}
+
+byId("rollback-certified-runtime").addEventListener("click", () => prepareSoftwareRuntimeChange("certified"));
+
+byId("cancel-software-update-review").addEventListener("click", () => {
+  pendingSoftwareUpdatePlan = null;
+  byId("software-update-review").classList.add("hidden");
+  byId("use-software-update").focus();
+});
+
+byId("confirm-software-update").addEventListener("click", async () => {
+  const plan = pendingSoftwareUpdatePlan;
+  if (!plan) return;
+  if (plan.certificationStatus === "official-unverified" && !byId("software-update-unverified-consent").checked) {
+    byId("software-update-result").textContent = "Confirm that you understand this official release has not yet been tested by Haven 42.";
+    byId("software-update-unverified-consent").focus();
+    return;
+  }
+  const button = byId("confirm-software-update");
+  button.disabled = true;
+  try {
+    const approved = await api("/api/software-updates/approve", {
+      planId: plan.planId, effects: plan.effects, confirmed: true,
+    });
+    if (!approved || approved.schemaVersion !== 1 || typeof approved.approvalToken !== "string") {
+      throw new Error("invalid-runtime-update-approval");
+    }
+    const status = validateRuntimeUpdateStatus(await api("/api/software-updates/execute", {
+      approvalToken: approved.approvalToken,
+    }));
+    byId("software-update-review").classList.add("hidden");
+    pendingSoftwareUpdatePlan = null;
+    renderRuntimeUpdateProgress(status);
+    clearInterval(softwareUpdatePoll);
+    softwareUpdatePoll = setInterval(pollRuntimeUpdate, 1000);
+  } catch (error) {
+    byId("software-update-result").textContent = `The update did not start. Nothing was changed. ${humanError(error)}`;
+  } finally {
+    button.disabled = false;
+  }
+});
+
+function renderRuntimeUpdateProgress(status) {
+  const shell = byId("software-update-progress-shell");
+  shell.classList.remove("hidden");
+  shell.setAttribute("aria-hidden", "false");
+  byId("software-update-progress-bar").value = status.progressPercent;
+  byId("software-update-progress-bar").textContent = `${status.progressPercent}%`;
+  const labels = {
+    starting: "Preparing the local AI engine change",
+    downloading: "Downloading the official Ollama release",
+    extracting: "Verifying and installing the runtime",
+    validating: "Starting and testing local AI",
+    complete: "Local AI engine change completed",
+    failed: status.rollbackPerformed
+      ? "The change failed; Haven 42 restored the previous working runtime"
+      : "The change failed and local AI needs repair",
+    idle: "Waiting to start",
+  };
+  byId("software-update-progress").textContent = `${labels[status.phase]} · ${status.progressPercent}%`;
+}
+
+async function pollRuntimeUpdate() {
+  try {
+    const status = validateRuntimeUpdateStatus(await api("/api/software-updates/status", {}));
+    renderRuntimeUpdateProgress(status);
+    if (!status.updateInProgress) {
+      clearInterval(softwareUpdatePoll);
+      softwareUpdatePoll = null;
+      if (checkedSoftwareUpdate) checkedSoftwareUpdate.runtimeStatus = status;
+      refreshSoftwareUpdateChoice();
+      if (status.phase === "complete") {
+        try {
+          const refreshed = await api("/api/resume-provider", {});
+          if (
+            refreshed.sessionResume !== true || refreshed.configurationPersisted !== false
+            || typeof refreshed.endpoint !== "string"
+          ) throw new Error("invalid-provider-session-resume");
+          applyProviderConnection(
+            refreshed, refreshed.endpoint, refreshed.timeoutSeconds,
+            refreshed.idleUnloadSeconds, false,
+          );
+        } catch (_error) {
+          byId("software-update-result").textContent = `Ollama ${status.activeVersion} is active, but the page could not refresh its connection details. Reload Haven 42 to update every status view.`;
+          return;
+        }
+        byId("software-update-result").textContent = `Ollama ${status.activeVersion} is active. System status, model compatibility, and connection details now use this version. Your installed models, conversation, and data were kept.`;
+      } else {
+        byId("software-update-result").textContent = `${byId("software-update-progress").textContent}${status.error ? ` (${status.error})` : ""}.`;
+      }
+    }
+  } catch (error) {
+    clearInterval(softwareUpdatePoll);
+    softwareUpdatePoll = null;
+    byId("software-update-result").textContent = `Update status could not be read. ${humanError(error)}`;
+  }
+}
 
 byId("setup-local-components").addEventListener("click", async () => {
   const button = byId("setup-local-components");

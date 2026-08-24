@@ -86,13 +86,14 @@ def main() -> None:
     assert "selected?.dataset.currency" in app
     assert 'byId("energy-currency").value = currency || ""' in app
     assert "filterEnergyCountries(source)" in app
-    assert 'id="rail-cost-estimate"' in html and 'id="rail-cost-value"' in html
+    assert 'id="rail-cost-estimate"' not in html and 'id="rail-cost-value"' not in html
     assert 'id="energy-pin-status" type="checkbox"' in html
     assert 'id="status-energy-widget"' in html
     assert 'id="status-energy-kwh"' in html and 'id="status-energy-cost"' in html
     assert "The widget stays visible while Haven 42 is open" in html
     assert "function syncEnergyStatusWidget()" in app
     assert "state.energyEstimate = Object.freeze" in app
+    assert 'byId("rail-cost-estimate")' not in app
     assert 'byId("status-energy-remove").addEventListener("click"' in app
     assert "/api/electricity-rate" in app
     assert "automatic model" not in html.lower() or "does not detect your location or change your model choice" in html

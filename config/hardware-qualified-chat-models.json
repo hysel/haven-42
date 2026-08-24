@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "haven42.hardware-qualified-chat-models",
+  "automaticSelectionAllowed": false,
+  "profiles": [
+    {
+      "id": "windows-amd-radeon-rx7800xt-16gib",
+      "operatingSystem": "windows",
+      "acceleratorVendor": "amd",
+      "acceleratorModelContains": "rx 7800 xt",
+      "minimumAcceleratorMemoryGiB": 15,
+      "minimumSystemMemoryGiB": 31,
+      "minimumOllamaVersion": "0.32.9",
+      "evidence": "examples/windows-amd-rx7800xt-ollama0329-recertification.md",
+      "models": [
+        "gemma3:1b-it-q4_K_M",
+        "llama3.2:3b-instruct-q4_K_M",
+        "granite4.1:3b-q4_K_M",
+        "phi4-mini:3.8b-q4_K_M",
+        "nemotron-3-nano:4b",
+        "gemma3:4b-it-q4_K_M",
+        "gemma4:e2b-it-qat",
+        "qwen3.5:4b",
+        "gemma4:e4b-it-qat",
+        "granite4.1:8b-q4_K_M",
+        "qwen3.5:9b",
+        "gemma4:12b-it-qat",
+        "gemma3:12b-it-q4_K_M",
+        "phi4:14b-q4_K_M"
+      ]
+    }
+  ]
+}

@@ -100,9 +100,13 @@
                   <option value="x-api-key">X-API-Key · advanced</option>
                 </select>
               </label>
-              <label>API key · session only
-                <input id="wizard-api-key" type="password" maxlength="4096" autocomplete="new-password" autocapitalize="off" spellcheck="false" disabled>
-              </label>
+              <div class="advanced-field">
+                <label for="wizard-api-key">API key · session only</label>
+                <div class="password-control">
+                  <input class="session-secret" id="wizard-api-key" type="password" maxlength="4096" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other" disabled>
+                  <button class="button secondary password-visibility-toggle" id="wizard-api-key-visibility" type="button" aria-controls="wizard-api-key" aria-pressed="false" disabled>Show</button>
+                </div>
+              </div>
             </div>
             <p class="field-help">Keep the recommended automatic option unless your provider or gateway tells you to use an API key. Keys stay in memory, are never returned by the API, and require HTTPS when connecting across a private network. Leave the key blank after connecting to reuse it for this session.</p>
           </details>
@@ -128,18 +132,13 @@
 
   <div class="shell">
     <nav class="rail" aria-label="Primary navigation">
-      <button class="nav-item active" id="home-nav" type="button" aria-current="page"><span aria-hidden="true">✦</span>Chat</button>
+      <button class="nav-item active" id="home-nav" type="button" aria-current="page"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 5h14v10H9l-4 4V5Z"/></svg>Chat</button>
       <button class="nav-item hidden" id="software-nav" type="button" aria-hidden="true" tabindex="-1"><span aria-hidden="true">⌘</span>Software</button>
       <button class="nav-item hidden" id="image-nav" type="button" aria-hidden="true" tabindex="-1"><span aria-hidden="true">◫</span>Images</button>
-      <button class="nav-item" id="models-nav" type="button"><span aria-hidden="true">◉</span>Models</button>
-      <button class="nav-item" id="system-nav" type="button"><span aria-hidden="true">◇</span>System</button>
-      <button class="nav-item" id="assurance-nav" type="button"><span aria-hidden="true">✓</span>Technical details</button>
-      <button class="nav-item" id="about-nav" type="button"><span aria-hidden="true">ⓘ</span>About</button>
-      <button class="rail-cost-estimate hidden" id="rail-cost-estimate" type="button" aria-label="View the current graphics-card electricity estimate in System">
-        <span>GPU electricity estimate</span>
-        <strong id="rail-cost-value">Not calculated</strong>
-        <small id="rail-cost-period">Open System to estimate</small>
-      </button>
+      <button class="nav-item" id="models-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>Models</button>
+      <button class="nav-item" id="system-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>System</button>
+      <button class="nav-item" id="assurance-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg><span class="nav-copy"><span class="nav-label">Technical details</span><small class="nav-tag">Advanced</small></span></button>
+      <button class="nav-item" id="about-nav" type="button"><svg class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></svg>About</button>
       <div class="rail-note">
         <span>AI runs</span>
         <strong>On your computer</strong>
@@ -149,80 +148,90 @@
     </nav>
 
     <main class="workspace" id="main-content" tabindex="-1">
-      <div class="hero">
-        <p class="eyebrow">PRIVATE LOCAL AI</p>
-        <h1>Your AI, ready when you are.</h1>
-        <p>Chat, write, and summarize in one private conversation. Your text is not saved by Haven 42.</p>
-      </div>
-
       <div class="interaction-grid">
         <section class="panel chat-panel" id="text-panel" data-chat-text-size="default">
-          <div class="panel-heading chat-heading">
-            <div>
-              <p class="eyebrow" id="capability-eyebrow">CONVERSATION</p>
-              <h2 id="capability-title" tabindex="-1">Private conversation</h2>
+          <div class="panel-heading chat-heading conversation-toolbar">
+            <div class="conversation-identity">
+              <span class="sr-only" id="capability-eyebrow">CONVERSATION</span>
+              <h1 id="capability-title" tabindex="-1">Private conversation</h1>
+              <div class="conversation-model-summary" aria-label="Current conversation model">
+                <output id="current-model-name">No model selected</output>
+                <span class="badge model-mode-badge" id="model-selection-mode">Automatic</span>
+              </div>
             </div>
             <div class="panel-heading-actions">
-              <button class="button text-button section-tour-help" type="button" data-tour-section="chat" aria-label="Show help for Chat">? Help</button>
-            </div>
-            <div class="text-actions">
-              <div class="task-mode-select">
-                <span id="text-mode-label">Task</span>
-                <div class="task-mode-picker">
-                  <button class="task-mode-button" id="text-mode-button" type="button"
-                    aria-labelledby="text-mode-label text-mode-button-label"
-                    aria-haspopup="listbox" aria-expanded="false" aria-controls="text-mode-options">
-                    <span id="text-mode-button-label">Choose for me</span>
-                    <span class="task-mode-chevron" aria-hidden="true"></span>
-                  </button>
-                  <div class="task-mode-options hidden" id="text-mode-options" role="listbox"
-                    aria-labelledby="text-mode-label" tabindex="-1">
-                    <button class="task-mode-option" type="button" role="option" data-value="automatic" aria-selected="true">
-                      <span>Choose for me</span><small>Recommended · Haven 42 decides from your request</small>
-                    </button>
-                    <button class="task-mode-option" type="button" role="option" data-value="general.chat" aria-selected="false">
-                      <span>Chat</span><small>Ask questions and explore ideas</small>
-                    </button>
-                    <button class="task-mode-option" type="button" role="option" data-value="content.write" aria-selected="false">
-                      <span>Write</span><small>Draft or rewrite content</small>
-                    </button>
-                    <button class="task-mode-option" type="button" role="option" data-value="content.summarize" aria-selected="false">
-                      <span>Summarize</span><small>Shorten text while keeping key points</small>
-                    </button>
+              <details class="chat-settings" id="conversation-settings">
+                <summary class="button secondary chat-settings-trigger" id="conversation-settings-trigger" aria-label="Open conversation settings" aria-expanded="false">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06-2.87 2.87-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21H9.5v-.1A1.7 1.7 0 0 0 8.4 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06-2.87-2.87.06-.06A1.7 1.7 0 0 0 4 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H2V9.5h.3A1.7 1.7 0 0 0 4 8.4a1.7 1.7 0 0 0-.34-1.87l-.06-.06L6.47 3.6l.06.06A1.7 1.7 0 0 0 8.4 4a1.7 1.7 0 0 0 1-.6A1.7 1.7 0 0 0 9.8 2.3V2h4.1v.3A1.7 1.7 0 0 0 15 4a1.7 1.7 0 0 0 1.87-.34l.06-.06 2.87 2.87-.06.06A1.7 1.7 0 0 0 19.4 8.4a1.7 1.7 0 0 0 .6 1 1.7 1.7 0 0 0 1.1.4h.3v4.1h-.3A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+                  <span>Settings</span>
+                </summary>
+                <div class="chat-settings-panel" aria-labelledby="conversation-settings-trigger">
+                  <div class="chat-settings-heading">
+                    <strong>Conversation settings</strong>
+                    <small>Changes apply to this task.</small>
+                  </div>
+                  <div class="task-mode-select">
+                    <span id="text-mode-label">Task</span>
+                    <div class="task-mode-picker">
+                      <button class="task-mode-button" id="text-mode-button" type="button"
+                        aria-labelledby="text-mode-label text-mode-button-label"
+                        aria-haspopup="listbox" aria-expanded="false" aria-controls="text-mode-options">
+                        <span id="text-mode-button-label">Choose for me</span>
+                        <span class="task-mode-chevron" aria-hidden="true"></span>
+                      </button>
+                      <div class="task-mode-options hidden" id="text-mode-options" role="listbox"
+                        aria-labelledby="text-mode-label" tabindex="-1">
+                        <button class="task-mode-option" type="button" role="option" data-value="automatic" aria-selected="true">
+                          <span>Choose for me</span><small>Recommended · Haven 42 decides from your request</small>
+                        </button>
+                        <button class="task-mode-option" type="button" role="option" data-value="general.chat" aria-selected="false">
+                          <span>Chat</span><small>Ask questions and explore ideas</small>
+                        </button>
+                        <button class="task-mode-option" type="button" role="option" data-value="content.write" aria-selected="false">
+                          <span>Write</span><small>Draft or rewrite content</small>
+                        </button>
+                        <button class="task-mode-option" type="button" role="option" data-value="content.summarize" aria-selected="false">
+                          <span>Summarize</span><small>Shorten text while keeping key points</small>
+                        </button>
+                      </div>
+                    </div>
+                    <select id="text-mode" class="hidden" aria-hidden="true" tabindex="-1">
+                      <option value="automatic" selected>Choose for me · Recommended</option>
+                      <option value="general.chat">Chat</option>
+                      <option value="content.write">Write</option>
+                      <option value="content.summarize">Summarize</option>
+                    </select>
+                    <small id="text-mode-status">Haven 42 chooses from your request</small>
+                  </div>
+                  <div class="model-picker">
+                    <div class="model-picker-heading">
+                      <label id="model-label" for="model">Conversation model</label>
+                      <button class="button text-button model-library-link" id="open-models-from-chat" type="button">Browse models <span aria-hidden="true">→</span></button>
+                    </div>
+                    <div class="model-select">
+                      <select id="model" aria-describedby="model-state" disabled>
+                        <option>Connect Ollama first</option>
+                      </select>
+                      <small id="model-state">Automatic selection unavailable</small>
+                    </div>
+                  </div>
+                  <button class="button text-button hidden" id="reset-model-button" type="button">Use automatic</button>
+                  <div class="session-view-controls">
+                    <div class="text-size-controls" role="group" aria-label="Chat text size">
+                      <button class="button text-size-button" id="decrease-chat-text" type="button" aria-label="Make chat text smaller" aria-controls="messages prompt" title="Smaller chat text">A&minus;</button>
+                      <output id="chat-text-size-value" aria-hidden="true">100%</output>
+                      <button class="button text-size-button" id="increase-chat-text" type="button" aria-label="Make chat text larger" aria-controls="messages prompt" title="Larger chat text">A+</button>
+                      <span class="sr-only" id="chat-text-size-status" role="status" aria-live="polite">Default chat text size · session only</span>
+                    </div>
+                    <button class="button secondary" id="new-task-button" type="button">New task</button>
                   </div>
                 </div>
-                <select id="text-mode" class="hidden" aria-hidden="true" tabindex="-1">
-                  <option value="automatic" selected>Choose for me · Recommended</option>
-                  <option value="general.chat">Chat</option>
-                  <option value="content.write">Write</option>
-                  <option value="content.summarize">Summarize</option>
-                </select>
-                <small id="text-mode-status">Haven 42 chooses from your request</small>
-              </div>
-              <div class="text-size-controls" role="group" aria-label="Chat text size">
-                <button class="button text-size-button" id="decrease-chat-text" type="button" aria-label="Make chat text smaller" aria-controls="messages prompt" title="Smaller chat text">A&minus;</button>
-                <output id="chat-text-size-value" aria-hidden="true">100%</output>
-                <button class="button text-size-button" id="increase-chat-text" type="button" aria-label="Make chat text larger" aria-controls="messages prompt" title="Larger chat text">A+</button>
-                <span class="sr-only" id="chat-text-size-status" role="status" aria-live="polite">Default chat text size · session only</span>
-              </div>
-              <button class="button secondary" id="new-task-button" type="button">New task</button>
-              <div class="model-picker">
-                <div class="model-picker-heading">
-                  <label id="model-label" for="model">Conversation model</label>
-                  <button class="button text-button model-library-link" id="open-models-from-chat" type="button">Browse models <span aria-hidden="true">→</span></button>
-                </div>
-                <div class="model-select">
-                  <select id="model" aria-describedby="model-state" disabled>
-                    <option>Connect Ollama first</option>
-                  </select>
-                  <small id="model-state">Automatic selection unavailable</small>
-                </div>
-              </div>
-              <button class="button text-button hidden" id="reset-model-button" type="button">Use automatic</button>
+              </details>
+              <button class="button text-button section-tour-help" type="button" data-tour-section="chat" aria-label="Show help for Chat">? Help</button>
             </div>
           </div>
 
-          <div class="messages" id="messages" aria-live="polite">
+          <div class="messages empty-conversation" id="messages" aria-live="polite">
             <article class="message assistant">
               <div class="avatar" aria-hidden="true">42</div>
               <div>
@@ -240,8 +249,9 @@
             <ol id="research-source-list"></ol>
             <p class="sr-only" id="research-sources-status" role="status" aria-live="polite" aria-atomic="true"></p>
           </section>
+          <div class="chat-utility-row" aria-label="Conversation tools">
           <details class="research-tools" id="research-tools">
-            <summary><span>Research the web</span><small>You approve every search before it leaves this computer</small></summary>
+            <summary><span>Research web</span><small>Approval required</small></summary>
             <div class="research-tools-body">
               <p>Search a reviewed public source without giving the AI permission to browse on its own. Only the exact search words shown in the approval window are sent, and results stay in memory for this task.</p>
               <form class="research-query-form" id="research-query-form">
@@ -286,6 +296,13 @@
               </article>
             </div>
           </details>
+          <details class="run-details hidden" id="run-details">
+            <summary><span>Technical details</span><small>Response timing and tokens</small></summary>
+            <p class="run-details-summary" id="run-details-summary"></p>
+            <dl class="status-list" id="run-details-list"></dl>
+            <p>These numbers come from the AI server. They are not billing information.</p>
+          </details>
+          </div>
           <div class="task-event hidden" id="task-event" role="status" aria-live="polite" aria-atomic="true"></div>
           <section class="alpha-metrics" aria-label="Local session resources" id="alpha-metrics">
             <span><strong>CPU</strong> <output id="alpha-cpu">Checking…</output></span>
@@ -296,12 +313,6 @@
             <small>Live information for this session · token counts come from the AI server</small>
             <span class="sr-only" id="resource-status-announcement" role="status" aria-live="polite" aria-atomic="true"></span>
           </section>
-          <details class="run-details hidden" id="run-details">
-            <summary>Response details · Advanced</summary>
-            <dl class="status-list" id="run-details-list"></dl>
-            <p>These numbers come from the AI server. They are not billing information.</p>
-          </details>
-
           <section class="model-switch-prompt hidden" id="model-switch-prompt" role="dialog" aria-labelledby="model-switch-title" aria-describedby="model-switch-description">
             <div>
               <strong id="model-switch-title">A task-specific model is available</strong>
@@ -483,7 +494,7 @@
               </form>
               <div class="model-search-status" id="model-search-status" role="status" aria-live="polite">Installed models will appear here after connection.</div>
               <div class="model-search-results" id="model-search-results"></div>
-              <article class="desired-model hidden" id="desired-model" aria-live="polite">
+            <article class="desired-model hidden" id="desired-model" aria-live="polite" tabindex="-1">
                 <strong id="desired-model-name"></strong>
                 <span id="desired-model-state"></span>
                 <button class="button primary" id="install-model-button" type="button">Review and install model</button>
@@ -492,6 +503,14 @@
                   <code id="desired-model-command"></code>
                   <button class="button secondary" id="copy-model-command" type="button">Copy installation command</button>
                 </details>
+                <div class="model-install-progress hidden" id="model-install-progress" aria-labelledby="model-install-progress-label model-install-progress-percent">
+                  <div>
+                    <strong id="model-install-progress-label">Downloading model</strong>
+                    <output id="model-install-progress-percent">0%</output>
+                  </div>
+                  <progress id="model-install-progress-bar" max="100" value="0">0%</progress>
+                  <small id="model-install-progress-detail">Starting download…</small>
+                </div>
                 <small id="model-install-status" role="status" aria-live="polite">Nothing will be downloaded until you review and approve the model and destination.</small>
               </article>
             </div>
@@ -518,7 +537,7 @@
               <div><dt>Chat privacy</dt><dd>Kept in memory and cleared when Haven 42 closes</dd></div>
               <div><dt>This version</dt><dd>Unsigned development package for private testing</dd></div>
             </dl>
-            <p class="notice" role="note">This is an early test version and has no publisher signature. Use it only if you received it from a source you trust. Guided setup explains every download and asks permission; it never installs drivers or changes Windows settings.</p>
+            <p class="notice caution" role="note">This is an early test version and has no publisher signature. Use it only if you received it from a source you trust. Guided setup explains every download and asks permission; it never installs drivers or changes Windows settings.</p>
             <section class="about-reference" aria-labelledby="accessibility-reference-title">
               <h3 id="accessibility-reference-title">Accessibility</h3>
               <p>Read what has been tested, the current limitations, and how to report an accessibility barrier.</p>
@@ -590,7 +609,7 @@
               <strong id="sidebar-server-name">AI server not connected</strong>
               <small id="sidebar-model-name">No model selected</small>
             </div>
-            <div class="status-glance-stats" aria-label="Current resource use">
+            <div class="status-glance-stats" aria-label="Current resource use and generation speed">
               <span><strong>CPU</strong><output id="sidebar-cpu">Checking…</output></span>
               <span><strong>RAM</strong><output id="sidebar-ram">Checking…</output></span>
               <span><strong>GPU</strong><output id="sidebar-gpu">Checking…</output></span>
@@ -651,9 +670,13 @@
                       <option value="x-api-key">X-API-Key · advanced</option>
                     </select>
                   </label>
-                  <label>API key · session only
-                    <input id="api-key" type="password" maxlength="4096" autocomplete="new-password" autocapitalize="off" spellcheck="false" disabled>
-                  </label>
+                  <div class="advanced-field">
+                    <label for="api-key">API key · session only</label>
+                    <div class="password-control">
+                      <input class="session-secret" id="api-key" type="password" maxlength="4096" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other" disabled>
+                      <button class="button secondary password-visibility-toggle" id="api-key-visibility" type="button" aria-controls="api-key" aria-pressed="false" disabled>Show</button>
+                    </div>
+                  </div>
                 </div>
                 <p class="field-help">Keep the recommended automatic option unless your provider or gateway tells you to use an API key. Keys stay in memory, are never returned by the API, and require HTTPS when connecting across a private network. Leave the key blank after connecting to reuse it for this session.</p>
               </details>
@@ -683,7 +706,7 @@
               </div>
               <p class="field-help" id="portable-storage-status" role="status">Checking this extracted folder…</p>
               <div class="maintenance-actions">
-                <button class="button secondary full-width maintenance-action" id="setup-local-components" type="button" disabled>Checking local setup…</button>
+                <button class="button primary full-width maintenance-action" id="setup-local-components" type="button" disabled>Checking local setup…</button>
                 <button class="button danger full-width maintenance-action" id="remove-managed-components" type="button" disabled>Checking installed components…</button>
               </div>
               <p class="field-help" id="local-setup-action-status" role="status">You can set up or start local AI here even while another Ollama server is connected.</p>
@@ -695,18 +718,37 @@
                 <p class="eyebrow">SOFTWARE UPDATES</p>
                 <h3 id="software-updates-title">Keep the local AI engine current</h3>
               </div>
-              <p class="field-help">Haven 42 does not check in the background. When you choose Check now, it contacts Ollama's official GitHub release service and sends no chats, files, addresses, credentials, or hardware details.</p>
-              <label for="software-update-preference">When a verified update is available</label>
+              <p class="field-help">Check now compares the newest official Ollama release with the latest version verified by Haven 42. Haven 42 does not check in the background and sends no chats, files, addresses, credentials, or hardware details.</p>
+              <label for="software-update-preference">Which releases should Haven 42 offer?</label>
               <select id="software-update-preference" aria-describedby="software-update-privacy software-update-result">
-                <option value="offer" selected>Let me review and install it · recommended</option>
-                <option value="keep">Keep my current installed version</option>
+                <option value="certified" selected>Haven 42-certified releases only · recommended</option>
+                <option value="latest">Newest official release · may be unverified</option>
               </select>
-              <p class="field-help" id="software-update-privacy">This choice and the check result stay in memory for this session. Downloads and activation always require your approval.</p>
+              <p class="field-help" id="software-update-privacy">This choice and the check result stay in memory for this session. Every download and activation requires your approval. Newer official releases remain clearly marked until Haven 42 tests them.</p>
               <div class="maintenance-actions">
                 <button class="button secondary full-width maintenance-action" id="check-software-updates" type="button">Check official releases now</button>
-                <button class="button primary full-width maintenance-action" id="use-software-update" type="button" disabled>Review newest verified version</button>
+                <button class="button primary full-width maintenance-action" id="use-software-update" type="button" disabled>No update selected</button>
               </div>
               <p class="field-help" id="software-update-result" role="status" aria-live="polite" aria-atomic="true">No release check has been made.</p>
+              <section class="maintenance-control hidden" id="software-update-review" aria-labelledby="software-update-review-title" tabindex="-1">
+                <h4 id="software-update-review-title">Review local AI engine change</h4>
+                <p id="software-update-review-summary"></p>
+                <p class="transport-warning hidden" id="software-update-review-warning"></p>
+                <ul id="software-update-review-effects"></ul>
+                <label class="setup-consent hidden" id="software-update-unverified-consent-row">
+                  <input id="software-update-unverified-consent" type="checkbox">
+                  <span>I understand this official release has not yet been tested by Haven 42.</span>
+                </label>
+                <div class="maintenance-actions">
+                  <button class="button secondary full-width maintenance-action" id="cancel-software-update-review" type="button">Cancel</button>
+                  <button class="button primary full-width maintenance-action" id="confirm-software-update" type="button">Approve and install</button>
+                </div>
+              </section>
+              <div class="model-install-progress hidden" id="software-update-progress-shell" aria-hidden="true">
+                <progress id="software-update-progress-bar" max="100" value="0">0%</progress>
+                <p class="field-help" id="software-update-progress" role="status" aria-live="polite">Waiting to start.</p>
+              </div>
+              <button class="button secondary full-width hidden" id="rollback-certified-runtime" type="button">Restore latest certified version</button>
               <a class="about-reference hidden" id="software-update-release-link" href="https://github.com/ollama/ollama/releases" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">View the official Ollama release page</a>
             </section>
             <form id="cleanup-policy-form">
@@ -724,7 +766,7 @@
             </form>
             <button class="button secondary full-width" id="scan-system-button" type="button">Check this computer</button>
             <div class="readiness-dashboard compact hidden" id="system-readiness" aria-live="polite"></div>
-            <button class="button secondary full-width" id="open-diagnostics" type="button">Open troubleshooting logs</button>
+            <button class="button text-button full-width" id="open-diagnostics" type="button">Open troubleshooting logs</button>
             <details class="portable-storage-control" id="diagnostics-control">
               <summary><strong>Troubleshooting logs</strong></summary>
               <p class="field-help">Haven 42 keeps bounded, sanitized technical events in Haven42-Logs inside this extracted folder. Chats, responses, attachment details, credentials, addresses, identity, personal paths, commands, and raw program output are never recorded or uploaded.</p>

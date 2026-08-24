@@ -17,6 +17,7 @@ PROJECT_FILES = {
     "_internal/web/static/app.js",
     "_internal/web/static/styles.css",
     "_internal/config/text-capability-model-recommendations.json",
+    "_internal/config/hardware-qualified-chat-models.json",
     "_internal/config/evidence-catalog.tsv",
     "_internal/config/agent-surface-capabilities.json",
     "_internal/config/agent-surface-solutions.json",

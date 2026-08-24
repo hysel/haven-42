@@ -180,10 +180,24 @@ class FakeOllama(BaseHTTPRequestHandler):
                     "prompt_eval_duration": 1_000_000_000,
                     "eval_duration": 5_000_000_000,
                 })
-        elif self.path == "/api/pull" and body.get("stream") is False:
+        elif self.path == "/api/pull" and body.get("stream") is True:
             if model not in FakeState.models:
                 FakeState.models.append(model)
-            self._json(200, {"status": "success"})
+            records = [
+                {"status": "pulling manifest"},
+                {"status": "pulling abcdef", "completed": 25, "total": 100},
+                {"status": "pulling abcdef", "completed": 100, "total": 100},
+                {"status": "success"},
+            ]
+            payload = b"".join(
+                json.dumps(record, separators=(",", ":")).encode("utf-8") + b"\n"
+                for record in records
+            )
+            self.send_response(200)
+            self.send_header("Content-Type", "application/x-ndjson")
+            self.send_header("Content-Length", str(len(payload)))
+            self.end_headers()
+            self.wfile.write(payload)
         elif self.path == "/api/generate" and body.get("keep_alive") == 0:
             FakeState.loaded.discard(model)
             self._json(200, {"done": True})
@@ -261,6 +275,35 @@ def contrast_ratio(foreground: str, background: str) -> float:
 
 def main() -> int:
     checks = 0
+
+    class DisconnectingWriter:
+        def __init__(self, error: Exception):
+            self.error = error
+
+        def write(self, _data: bytes) -> None:
+            raise self.error
+
+    handler = object.__new__(WEB.HavenRequestHandler)
+    handler.send_response = lambda _status: None
+    handler._security_headers = lambda _content_type: None
+    handler.send_header = lambda _name, _value: None
+    handler.end_headers = lambda: None
+    for disconnect_error in (
+        BrokenPipeError("client closed"),
+        ConnectionAbortedError("client aborted"),
+        ConnectionResetError("client reset"),
+    ):
+        handler.wfile = DisconnectingWriter(disconnect_error)
+        handler._send_json(HTTPStatus.OK, {"status": "complete"})
+        checks += 1
+    handler.wfile = DisconnectingWriter(OSError("unexpected socket failure"))
+    try:
+        handler._send_json(HTTPStatus.OK, {"status": "complete"})
+    except OSError as error:
+        assert str(error) == "unexpected socket failure"
+    else:
+        raise AssertionError("unexpected socket failures must remain visible")
+    checks += 1
     try:
         WEB._request_process_shutdown(15, None)
     except KeyboardInterrupt:
@@ -530,6 +573,26 @@ def main() -> int:
             "hostIdentityIncluded": False, "privatePathsIncluded": False,
         },
     }
+    qualified_profiles = WEB.load_hardware_qualified_chat_models()
+    assert qualified_profiles
+    matching_snapshot = json.loads(json.dumps(readiness_snapshot))
+    matching_snapshot["accelerators"][0]["model"] = "Radeon RX 7800 XT"
+    matching_candidates = WEB.qualified_chat_candidates(
+        matching_snapshot, "loopback", "0.32.14", qualified_profiles,
+    )
+    assert len(matching_candidates) == 14
+    assert {item["name"] for item in matching_candidates} >= {"qwen3.5:4b", "qwen3.5:9b"}
+    assert all(item["automatic"] is False for item in matching_candidates)
+    assert WEB.qualified_chat_candidates(
+        matching_snapshot, "private-network", "0.32.14", qualified_profiles,
+    ) == []
+    assert WEB.qualified_chat_candidates(
+        matching_snapshot, "loopback", "0.32.8", qualified_profiles,
+    ) == []
+    assert WEB.qualified_chat_candidates(
+        readiness_snapshot, "loopback", "0.32.14", qualified_profiles,
+    ) == []
+    checks += 7
     state = WEB.HavenState(
         readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)),
         model_catalog_provider=lambda query: [
@@ -553,7 +616,9 @@ def main() -> int:
                 "newerOfficialVersionAvailable": False,
                 "managedVersionIsLatest": True,
                 "availableForManagedSetup": True,
+                "certificationStatus": "certified",
                 "releaseUrl": "https://github.com/ollama/ollama/releases/tag/v0.32.14",
+                "downloadUrl": "https://github.com/ollama/ollama/releases/download/v0.32.14/ollama-windows-amd64.zip",
                 "artifactName": "ollama-windows-amd64.zip",
                 "downloadBytes": 1459874325,
                 "sha256": "5ae5bca5f0d297f5e35665e01db399a69a8eac3f8fad89cd9d2531fd495c9457",
@@ -571,6 +636,9 @@ def main() -> int:
             state.csrf_token,
             (DIAGNOSTIC_TEST_PARENT / "Haven42-Data").resolve(),
             state.diagnostics.record,
+        )
+        state.runtime_updates = WEB.ManagedRuntimeUpdateCoordinator(
+            state.csrf_token, state.alpha_setup,
         )
     class ClosingResponse:
         closed = False
@@ -673,7 +741,32 @@ def main() -> int:
         assert software_updates["automaticChecksEnabled"] is False
         assert software_updates["userContentSent"] is False
         assert software_updates["components"][0]["managedVersion"] == "0.32.14"
-        checks += 2
+        assert software_updates["runtimeStatus"]["certifiedVersion"] == "0.32.14"
+        status, error, _ = request_json(
+            origin + "/api/software-updates/prepare", "POST", {"target": "anything"}, token, origin,
+        )
+        assert status == 409 and error["error"] == "invalid-runtime-update-target"
+        status, update_plan, _ = request_json(
+            origin + "/api/software-updates/prepare", "POST", {"target": "latest-official"}, token, origin,
+        )
+        assert status == 200 and update_plan["approvalRequired"] is True
+        assert update_plan["modelsAndUserDataKept"] is True and "downloadUrl" not in update_plan
+        status, error, _ = request_json(
+            origin + "/api/software-updates/approve", "POST", {
+                "planId": update_plan["planId"], "effects": [], "confirmed": True,
+            }, token, origin,
+        )
+        assert status == 409 and error["error"] == "runtime-update-approval-mismatch"
+        status, update_plan, _ = request_json(
+            origin + "/api/software-updates/prepare", "POST", {"target": "certified"}, token, origin,
+        )
+        status, update_approval, _ = request_json(
+            origin + "/api/software-updates/approve", "POST", {
+                "planId": update_plan["planId"], "effects": update_plan["effects"], "confirmed": True,
+            }, token, origin,
+        )
+        assert status == 200 and update_approval["singleUse"] is True
+        checks += 10
 
         with urllib.request.urlopen(origin + "/accessibility", timeout=5) as response:
             accessibility_page = response.read().decode("utf-8")
@@ -684,7 +777,8 @@ def main() -> int:
         assert accessibility_page.count("<h1") == 1
         assert "(WCAG) 2.1 Level AA" in accessibility_page
         assert "self-assessed target" in accessibility_page
-        assert "Last reviewed:</strong> August 16, 2026" in accessibility_page
+        assert "Last reviewed:</strong> August 22, 2026" in accessibility_page
+        assert "Manually scrolling up pauses that behavior" in accessibility_page
         assert "Research uses a labeled modal review" in accessibility_page
         assert "open once for each new section-tour revision" in accessibility_page
         assert "haven42localai@gmail.com" in accessibility_page
@@ -1493,6 +1587,22 @@ def main() -> int:
         assert installed_model["model"] == "community/example-writing:7b"
         assert installed_model["verifiedByProviderCatalog"] is True
         assert installed_model["selectedAutomatically"] is False
+        status, install_progress, _ = request_json(
+            origin + "/api/model-install/status", "POST",
+            {"progressToken": install_review["approvalToken"]}, token, origin,
+        )
+        assert status == 200
+        assert install_progress == {
+            "schemaVersion": 1,
+            "kind": "model-install-progress",
+            "model": "community/example-writing:7b",
+            "phase": "complete",
+            "progressPercent": 100,
+            "completedBytes": 100,
+            "totalBytes": 100,
+            "status": "Model downloaded and verified",
+            "terminal": True,
+        }
         status, replay_error, _ = request_json(
             origin + "/api/model-install/execute", "POST",
             {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
@@ -1502,7 +1612,7 @@ def main() -> int:
         with state.lock:
             state.models = tuple(name for name in state.models if name != "community/example-writing:7b")
             state.model_digests.pop("community/example-writing:7b", None)
-        checks += 11
+        checks += 13
         fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
@@ -2590,6 +2700,7 @@ def main() -> int:
             origin,
         )
         assert status == 200 and no_models["models"] == [] and no_models["modelOptions"] == []
+        assert no_models["manualModelCandidates"] == []
         assert all(
             decision["status"] == "missing" and decision["automatic"] is False
             for decision in no_models["recommendations"].values()
@@ -2829,6 +2940,8 @@ def main() -> int:
         assert "Advanced manual selection" in javascript
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "/api/model-install/execute" in javascript
+        assert "/api/model-install/status" in javascript
+        assert 'id="model-install-progress-bar"' in html
         assert "Review and install model" in html and "Copy installation command" in html
         assert "What Haven 42 needs" in javascript
         assert "Local AI model for chat, writing, and summaries" in javascript
@@ -2844,8 +2957,28 @@ def main() -> int:
         assert 'id="open-models-from-chat"' in html
         assert '<label id="model-label" for="model">Conversation model</label>' in html
         assert "Browse models" in html
-        assert 'byId("open-models-from-chat").addEventListener("click", openModels)' in javascript
-        assert 'revision: 6' in javascript
+        assert 'byId("open-models-from-chat").addEventListener("click", () => {' in javascript
+        assert 'chat: Object.freeze({' in javascript and 'revision: 11' in javascript
+        assert 'models: Object.freeze({' in javascript and 'revision: 5' in javascript
+        assert "Tested on matching hardware · download requires approval" in javascript
+        assert "manualModelCandidates" in javascript
+        assert 'id="model-selection-mode">Automatic</span>' in html
+        assert "Not installed yet · review this model before downloading" in javascript
+        assert 'id="chat-hero"' not in html and 'byId("chat-hero")' not in javascript
+        assert 'class="panel-heading chat-heading conversation-toolbar"' in html
+        assert 'id="conversation-settings-trigger"' in html and 'id="conversation-settings"' in html
+        assert 'id="current-model-name"' in html and 'byId("current-model-name").textContent = model || "No model selected"' in javascript
+        assert 'class="messages empty-conversation"' in html and '"empty-conversation"' in javascript
+        assert '.chat-panel {\n  height: calc(100vh - 108px);' in styles
+        assert 'id="rail-cost-estimate"' not in html and 'byId("rail-cost-estimate")' not in javascript
+        assert "acceleratorDisplayName" in javascript
+        assert "Technical details" in html
+        assert 'class="chat-utility-row"' in html
+        assert 'createMessageAction("Copy answer"' in javascript
+        assert 'createMessageAction("Try again"' in javascript
+        assert 'createMessageAction("Report this answer"' in javascript
+        assert 'icon.setAttribute("aria-hidden", "true")' in javascript
+        assert "state.chatAutoFollow" in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
         assert "Not on your server yet · searching does not download it" in javascript
@@ -2866,7 +2999,16 @@ def main() -> int:
         assert ".advanced-grid select { font-size: var(--select-font-size); }" in styles
         assert ".model-select select { min-width: 190px; height: 36px;" in styles
         assert "providerConfigChanged" in javascript and 'button.textContent = changed ? "Apply changes" : "Connected"' in javascript
-        assert html.count('type="password" maxlength="4096" autocomplete="new-password"') == 2
+        assert html.count('class="session-secret"') == 2
+        assert html.count('type="password" maxlength="4096" autocomplete="off"') == 2
+        assert html.count('data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other"') == 2
+        assert html.count('class="button secondary password-visibility-toggle"') == 2
+        assert html.count('aria-pressed="false" disabled>Show</button>') == 2
+        assert 'class="button danger password-visibility-toggle"' not in html
+        assert "setPasswordVisibility" in javascript
+        assert "togglePasswordVisibility" in javascript
+        assert "[data-lastpass-icon-root]" in styles
+        assert ".password-control [data-lastpass-icon-root]" not in styles
         assert html.count('value="none" selected>Automatic (Recommended)</option>') == 2
         assert html.count('value="bearer">Bearer token · advanced</option>') == 2
         assert html.count('value="x-api-key">X-API-Key · advanced</option>') == 2
@@ -2900,7 +3042,7 @@ def main() -> int:
         assert "A new choice applies to your next message" in html
         assert 'id="about-panel"' in html and 'id="about-nav"' in html
         assert "03 · WRITING" not in javascript and "03 · SUMMARY" not in javascript
-        assert "Chat, write, and summarize in one private conversation" in html
+        assert '<h1 id="capability-title" tabindex="-1">Private conversation</h1>' in html
         assert 'id="text-mode"' in html
         assert 'value="automatic" selected' in html
         assert 'value="general.chat"' in html
@@ -3010,6 +3152,13 @@ def main() -> int:
         assert html.count('id="connection-panel"') == 1 and html.count('id="status-panel"') == 1
         assert 'id="system-panel"' in html and 'id="system-workspace-content"' in html
         assert 'id="sidebar-connection-status"' in html and 'id="view-system-details"' in html
+        assert 'id="sidebar-speed"' in html
+        assert 'id="sidebar-cpu"' in html and 'id="sidebar-ram"' in html and 'id="sidebar-gpu"' in html
+        assert 'aria-label="Current resource use and generation speed"' in html
+        assert 'byId("sidebar-cpu").textContent = byId("alpha-cpu").textContent' in javascript
+        assert 'byId("sidebar-ram").textContent = byId("alpha-ram").textContent' in javascript
+        assert 'byId("sidebar-gpu").textContent = byId("alpha-gpu").textContent' in javascript
+        assert 'byId("sidebar-speed").textContent = byId("alpha-speed").textContent' in javascript
         assert 'for (const id of ["alpha-metrics", "connection-panel", "status-panel", "capability-panel", "evidence-panel", "energy-estimator-panel"])' in javascript
         assert 'id="energy-estimator-panel"' in html and "/api/electricity-rate" in javascript
         assert "Your electricity-bill information stays private" in html
@@ -3017,6 +3166,10 @@ def main() -> int:
         assert 'id="energy-country" autocomplete="country"' in html
         assert "selected?.dataset.currency" in javascript
         assert 'id="status-energy-widget"' in html and 'id="energy-pin-status"' in html
+        assert 'const pinned = byId("energy-pin-status").checked' in javascript
+        assert 'widget.classList.toggle("hidden", !pinned || !estimate)' in javascript
+        assert 'byId("status-energy-kwh").textContent = estimate.formattedKwh' in javascript
+        assert 'byId("status-energy-cost").textContent = estimate.formattedCost' in javascript
         assert "function syncEnergyStatusWidget()" in javascript
         assert "state.energyEstimate = Object.freeze" in javascript
         assert '["Linux kernel", snapshot.platform.kernelVersion || "Unavailable"]' in javascript
@@ -3039,7 +3192,9 @@ def main() -> int:
         assert '<nav class="rail" aria-label="Primary navigation">' in html
         assert '<main class="workspace" id="main-content" tabindex="-1">' in html
         assert html.count("<h1") == 1
-        assert 'aria-hidden="true">✦</span>' in html
+        assert html.count('class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"') == 5
+        assert '.nav-item .nav-icon {' in styles and 'stroke: currentColor;' in styles
+        assert '.nav-item.active::before' in styles
         assert 'id="context-files"' in html and 'tabindex="-1" aria-label="Choose attachment files"' in html
         assert 'id="home-nav" type="button" aria-current="page"' in html
         assert 'byId(buttonId).setAttribute("aria-current", "page")' in javascript

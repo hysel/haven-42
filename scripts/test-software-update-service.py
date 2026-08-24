@@ -5,6 +5,8 @@ from __future__ import annotations
 
 import copy
 import sys
+import tempfile
+import threading
 from pathlib import Path
 
 
@@ -48,10 +50,13 @@ def main() -> int:
     assert component["latestStableVersion"] == "0.32.14"
     assert component["managedVersionIsLatest"] is True
     assert component["availableForManagedSetup"] is True
+    assert component["certificationStatus"] == "certified"
+    assert component["downloadUrl"].endswith("/v0.32.14/" + service._asset_name())
 
     newer = service.check_for_updates(lambda: release("0.32.15"))["components"][0]
     assert newer["newerOfficialVersionAvailable"] is True
     assert newer["availableForManagedSetup"] is False
+    assert newer["certificationStatus"] == "official-unverified"
 
     hostile = []
     for mutation in (
@@ -68,7 +73,18 @@ def main() -> int:
         mutation(candidate)
         hostile.append(candidate)
     assert all(refused(candidate) for candidate in hostile)
-    print(f"Software update service passed {9 + len(hostile)} policy and hostile checks.")
+    hostile_component = dict(newer)
+    hostile_component["downloadUrl"] = "https://example.invalid/ollama.zip"
+    with tempfile.TemporaryDirectory(prefix="haven42-update-download-") as temporary:
+        try:
+            service.download_official_asset(
+                hostile_component, Path(temporary) / "runtime.zip",
+                threading.Event(), lambda _done, _total: None,
+            )
+            raise AssertionError("hostile update download URL was accepted")
+        except service.SoftwareUpdateError:
+            pass
+    print(f"Software update service passed {13 + len(hostile)} policy and hostile checks.")
     return 0
 
 
