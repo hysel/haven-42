@@ -2,23 +2,20 @@
 
 _Reviewed: 2026-08-21_
 
-This page answers a narrow question: **which newly released or previously
-missed local models are worth evaluating next?** It is not a list of supported
-models. Nothing here changes Haven 42's automatic choice, and no model is
-certified until its exact artifact, runtime, hardware profile, task behavior,
-cleanup, and repeatability pass.
+This page tracks newly released or previously missed local models worth
+evaluating next. It is not a supported-model list. Nothing here changes Haven
+42's automatic choice. Certification still requires the exact artifact,
+runtime, hardware profile, task behavior, cleanup, and repeatability to pass.
 
-The machine-readable record is
-`config/model-release-watch.json`. The full unfiltered discovery output stays
-under ignored local review storage because it contains many official publisher
-updates that are unrelated to a local assistant.
+The machine-readable record is `config/model-release-watch.json`. Unfiltered
+discovery output stays in ignored local review storage because it contains many
+official publisher updates unrelated to a local assistant.
 
-The effect-free test design is in
-`config/model-release-evaluation-plan.json`. It assigns every runnable
-candidate below to one task-specific lane and records the evidence gates,
-fixtures, and fail-closed outcomes. That file grants no download, execution,
-hardware-change, support-label, or promotion authority. A fresh owner prompt is
-still required before a newly prepared soak can start.
+The test design is in `config/model-release-evaluation-plan.json`. It assigns
+each runnable candidate below to a task-specific lane and records the required
+checks, fixtures, and failure outcomes. The file does not permit downloads,
+execution, hardware changes, support-label changes, or promotion. A fresh owner
+prompt is still required before a newly prepared soak starts.
 
 ## What the improved sweep found
 
@@ -61,13 +58,13 @@ still required before a newly prepared soak can start.
   Their local weights are real, but not realistic for the current single-node
   test tiers.
 - **MiniMax Music3** is about 53 GiB, has no machine-readable license in the
-  official repository metadata, and targets text-to-music, which Haven has not
-  admitted as an assistant capability.
+  official repository metadata, and targets text-to-music, which Haven 42 does
+  not currently support as an assistant capability.
 - **Granite SWASH 3B-a600M** is a useful Apache-2.0 architecture preview, but it
   is a base model rather than an instruction-tuned novice-facing assistant.
 
-Keeping these entries visible prevents a second mistake: “local weights exist”
-does not mean “practical on the hardware we have.”
+These entries make an important distinction: “local weights exist” does not
+mean “practical on the hardware we have.”
 
 ## Why Qwen 3.8 and Gemma 4 were initially missed
 
@@ -81,15 +78,15 @@ That is useful for community artifacts, but it had four blind spots:
    window. Gemma 4's official repository metadata predates the date on which it
    became relevant to this sweep, so that narrowing hid it.
 
-The updater now polls reviewed publisher namespaces directly, sorted by
+The updater now polls reviewed publisher namespaces directly, sorts by
 `lastModified`, and compares immutable revisions with prior output. Its 45-day
 window is a minimum lookback: a manual timestamp may widen it but cannot narrow
-it. A second source reads Ollama's newest-first registry index, then resolves
-each visible family detail page, so unfamiliar family names no longer depend on
-seed queries. Seeded Ollama and general Hub search remain secondary discovery
-signals. Official publisher
-weights establish release status; runtime registries establish possible
-execution routes; only Haven 42's local evidence establishes support.
+it. A second source reads Ollama's newest-first registry index and resolves each
+visible family detail page, so unfamiliar family names no longer depend on seed
+queries. Seeded Ollama and general Hub search remain secondary discovery
+signals. Official publisher weights establish release status, runtime
+registries establish possible execution routes, and only Haven 42's local tests
+establish support.
 
 ## Prepared evaluation order
 
@@ -106,7 +103,7 @@ execution routes; only Haven 42's local evidence establishes support.
    add lane-specific quality fixtures for vision, safety, embedding, speech,
    and computer use.
 5. Require a separate owner prompt before downloading or executing each newly
-   prepared soak. Candidate research alone grants no test authority.
+   prepared soak. Candidate research alone does not authorize a test.
 
 Primary records include the official [Qwen 3.8 27B](https://huggingface.co/Qwen/Qwen3.8-27B),
 [Gemma 4 documentation](https://ai.google.dev/gemma/docs/core),

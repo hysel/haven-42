@@ -10,9 +10,9 @@ independently for each scenario. The reviewer completed every rank before the
 local answer key was opened. The endpoint, raw model output, local paths, and
 answer key are intentionally excluded from committed evidence.
 
-This is bounded preference evidence, not a statistically stable comparative
-promotion. It does not replace automated constraint checks, broader reviewers,
-accessibility review, license decisions, or exact-platform evidence.
+This is one reviewer's bounded preference result, not a statistically stable
+comparison. It does not replace automated constraint checks, additional
+reviewers, accessibility review, license decisions, or exact-platform results.
 
 ### Exact artifacts
 
@@ -48,17 +48,16 @@ one to fourth.
 
 ### Decision
 
-No comparative writing-quality promotion is justified. Qwen retains the
-existing bounded adapter baseline and narrowly leads this one-reviewer sample,
-but Qwen, Granite, and Gemma each won one scenario. Granite also failed the
-separate repeated automated structured-brief constraint in all three samples,
-so its first-place human preference does not override deterministic fidelity
-evidence.
+No comparative writing-quality promotion is justified. Qwen keeps the existing
+bounded adapter baseline and narrowly leads this one-reviewer sample, but Qwen,
+Granite, and Gemma each won one scenario. Granite also failed the separate
+automated structured-brief constraint in all three repeated samples, so its
+first-place human preference does not override that fidelity failure.
 
-Before changing a default, repeat the blind packet with additional independent
-reviewers and broader scenarios, collect criterion-level scores, reconcile
-preference with automated constraint failures, and repeat exact artifact and
-platform validation. The reusable local-only harness is
+Before changing a default, repeat the blind packet with independent reviewers
+and broader scenarios, collect criterion-level scores, reconcile preferences
+with automated constraint failures, and validate the exact artifact and
+platform again. The reusable local-only harness is
 `scripts/run-blind-writing-review.py`.
 
 ## Second packet
@@ -66,10 +65,9 @@ platform validation. The reusable local-only harness is
 ### Scope
 
 The same reviewer completed a second independently randomized packet on
-2026-07-27. It broadened the synthetic scenarios to long-form continuity,
-distractor-resistant summarization, and constrained fact-preserving editing.
-The reviewer supplied a forced best-to-worst rank for every scenario before
-the local answer key was opened. To keep the review manageable, the reviewer
+2026-07-27. It added long-form continuity, distractor-resistant summarization,
+and constrained fact-preserving editing. The reviewer supplied a forced
+best-to-worst rank for every scenario before opening the local answer key and
 did not assign criterion-level numeric scores.
 
 The packet used the same four exact model artifacts and generation settings as
@@ -95,11 +93,11 @@ excluded from committed evidence.
 
 ### Combined interpretation
 
-Across the six scenarios in both packets, Granite received 17 preference
-points, Qwen 15, and Gemma and Mistral 14 each. Granite and Gemma each won two
-scenarios; Qwen and Mistral each won one. This aggregate is descriptive only:
-both packets used the same reviewer, the provider versions differed, and the
-second packet did not collect criterion-level scores.
+Across the six scenarios, Granite received 17 preference points, Qwen 15, and
+Gemma and Mistral 14 each. Granite and Gemma each won two scenarios; Qwen and
+Mistral each won one. These totals are descriptive only: both packets used the
+same reviewer, the provider versions differed, and the second packet did not
+collect criterion-level scores.
 
 No comparative writing-quality promotion is justified. Granite's preference
 lead does not override its repeatable failure in the separate automated

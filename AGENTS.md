@@ -45,14 +45,23 @@ above — this section adds the specific safety mechanics for this multi-session
   phrases enforced by tests (`scripts/test-*.py`, `scripts/test-pack.ps1`). Never reword
   these, even by one word. If you find a test asserting on wiki text not yet in the
   registry, add it before proceeding and say so explicitly.
-- Validation workflow per page: rewrite the canonical source, run
-  `pwsh -NoProfile -File scripts/test-pack.ps1 -Tier Full -NoReceipt`, and compare the
-  result against the known-failure baseline recorded in `OVERNIGHT-REVIEW.md` — exact
-  test names and exact count, not just the same number of failures. Only stage a page
-  when the result matches that baseline exactly.
-- Staged-not-committed workflow: do not commit past this repository's commit hooks
-  (no `--no-verify`) without a fresh, explicit, per-batch approval from the owner. A
-  prior approval does not carry forward to a new batch or session.
+- Remaining Bucket 2 work uses batches of 8–10 pages. Before editing each page, check
+  the protected-string registry and confirm the page is not among the audited Continue
+  content-policy conflicts. After editing each page, run `git diff --check`, run
+  `pwsh -NoProfile -File scripts/test-pack.ps1 -Tier Fast -NoReceipt`, and run every
+  specifically named test that protects a string on that page, including tests normally
+  classified as Integration. Preserve the per-page diff, word count, and review entry in
+  `OVERNIGHT-REVIEW.md`.
+- After 8–10 pages pass their individual checks, stage the exact batch and run
+  `pwsh -NoProfile -File scripts/test-pack.ps1 -Tier Full` against that staged tree.
+  Compare the result with the active baseline in `OVERNIGHT-REVIEW.md` by exact test
+  count, skip count, and failure identity. If Full fails, isolate the responsible page
+  by splitting and retesting the batch; never commit a failed or partially validated
+  batch.
+- Commit each validated batch once, with a clear message listing every page in that
+  batch. Do not bypass repository hooks (`--no-verify` remains prohibited). The batch
+  commit replaces the earlier one-commit-per-page rule for the remaining Bucket 2
+  volume; review and logging remain page-granular.
 - Hard-stop conditions specific to this project — stop the whole run and wait for
   direction rather than working around them: the known-failure baseline changes; more
   than ~15% of a batch ends up flagged; a repository safety mechanism blocks a
