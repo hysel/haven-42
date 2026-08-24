@@ -2,13 +2,13 @@
 
 _For contributors, maintainers, security reviewers, and evaluators._
 
-You do not need these pages to set up or use Haven 42. Start with
+You do not need this material to set up or use Haven 42. Start with
 [[Quick Start|Quick-Start]], [[Using Haven 42|Using-Haven-42]], or the
 [[Glossary|Glossary]].
 
-This index keeps detailed engineering material available to contributors
-without placing more than one hundred development pages in the main user
-sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
+This index collects detailed engineering material without crowding the main
+user sidebar with more than one hundred development pages. GitHub's wiki page
+list remains the complete alphabetical inventory.
 
 ## Product and architecture
 
@@ -37,8 +37,8 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 
 ## Models, providers, and media
 
-- [[Model Compatibility|Model-And-Hardware-Test-Status]]
-- [[Power Use and Electricity Costs|Model-Power-And-Electricity-Evidence]]
+- [[Model and Hardware Test Status|Model-And-Hardware-Test-Status]]
+- [[Model Power and Electricity Evidence|Model-Power-And-Electricity-Evidence]]
 - [[Engineering Model Selection|Engineering-Model-Selection]]
 - [[Image Provider Admission|Image-Provider-Admission]]
 - [[Local Image Runtime License Review|Local-Image-Runtime-License-Review]]
@@ -100,5 +100,5 @@ sidebar. GitHub's wiki page list remains the complete alphabetical inventory.
 - [[GitHub Repository Policy|GitHub-Repository-Policy]]
 - [[Wiki Maintenance|Wiki-Maintenance]]
 
-Detailed `*-Validation` pages remain exact, scope-limited evidence. They should
-not be interpreted as general availability or production-readiness claims.
+Each detailed `*-Validation` page is exact, scope-limited evidence. It is not a
+general-availability or production-readiness claim.
