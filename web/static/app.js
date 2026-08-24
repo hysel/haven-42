@@ -3551,7 +3551,9 @@ function addMessage(role, content, label, answerReportIdentity = null) {
   );
   if (wasFollowing) {
     state.chatAutoFollow = true;
-    window.requestAnimationFrame(() => messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" }));
+    const scrollToLatest = () => messages.scrollTo({ top: messages.scrollHeight, behavior: "auto" });
+    scrollToLatest();
+    window.requestAnimationFrame(scrollToLatest);
   }
   return article;
 }
