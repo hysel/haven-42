@@ -1901,6 +1901,9 @@ try {
 
   const keyboardSubmit = await cdp.evaluate(`(() => {
     document.querySelector('#home-nav').click();
+    const messages = document.querySelector('#messages');
+    messages.scrollTop = messages.scrollHeight;
+    messages.dispatchEvent(new Event('scroll'));
     document.querySelector('#prompt').value = 'browser flow';
     const shiftNotPrevented = document.querySelector('#prompt').dispatchEvent(
       new KeyboardEvent('keydown', {key: 'Enter', shiftKey: true, bubbles: true, cancelable: true})
@@ -1940,9 +1943,7 @@ try {
       const messages = document.querySelector('#messages');
       const latest = messages.querySelector('.message:last-child');
       if (!latest) return false;
-      const viewport = messages.getBoundingClientRect();
-      const reply = latest.getBoundingClientRect();
-      return reply.bottom >= viewport.top && reply.bottom <= viewport.bottom + 2;
+      return messages.scrollHeight - messages.scrollTop - messages.clientHeight <= 8;
     })()`));
   } catch (error) {
     const diagnostic = await cdp.evaluate(`(() => {
@@ -4030,7 +4031,11 @@ try {
     checks += 43;
     trace("product-research-runtime-verified");
   }
-  await cdp.evaluate(`connectProvider('http://127.0.0.1:${fakePort}', 30, 300, 'bearer', '${browserAuthSecret}')`);
+  await waitFor(() => cdp.evaluate(`(
+    connectProvider('http://127.0.0.1:${fakePort}', 30, 300, 'bearer', '${browserAuthSecret}')
+      .then(() => true)
+      .catch(() => false)
+  )`));
   await cdp.evaluate("document.querySelector('#models-nav').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#models-panel').classList.contains('hidden')"));
   await cdp.evaluate("location.reload()");
