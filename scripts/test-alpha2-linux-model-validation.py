@@ -56,7 +56,7 @@ def main() -> None:
         "qualificationOnly": True,
     }
     assert len(inventory_sha) == 64 and inventory_sha != policy_sha
-    assert qualification_provider == "0.32.13"
+    assert qualification_provider == "0.32.14"
     refused(
         lambda: MODULE.reviewed_model("granite41-3b-q4"),
         "unreviewed-model-cell",
@@ -67,7 +67,7 @@ def main() -> None:
     assert qwen_qualification["name"] == "qwen3.5:0.8b"
     assert qwen_qualification["manifestDigest"] == "f3817196d142eaf72ce79dfebe53dcb20bd21da87ce13e138a8f8e10a866b3a4"
     assert len(qwen_inventory_sha) == 64
-    assert qwen_provider == "0.32.13"
+    assert qwen_provider == "0.32.14"
     refused(
         lambda: MODULE.run_cell(
             origin="http://127.0.0.1:11435",
@@ -118,7 +118,7 @@ def main() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         original = MODULE.QUALIFICATION_INVENTORY_PATH
         inventory = json.loads(original.read_text(encoding="utf-8"))
-        inventory["qualificationProvider"]["exactVersion"] = "0.32.14"
+        inventory["qualificationProvider"]["exactVersion"] = "0.32.13"
         altered = Path(temporary) / "inventory.json"
         altered.write_text(json.dumps(inventory), encoding="utf-8")
         MODULE.QUALIFICATION_INVENTORY_PATH = altered

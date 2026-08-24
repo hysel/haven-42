@@ -30,3 +30,35 @@
 - Preserve the linear Quick Start to Using Haven 42 to Troubleshooting flow, canonical Glossary terminology, and the shared evidence-status taxonomy. Keep roadmap milestone labels explicitly distinct from evidence labels.
 - Use direct, factual, human-friendly language. Remove generic filler and repeated claims, preserve technical meaning and caveats, and flag possibly outdated or inaccurate claims for owner review instead of silently rewriting the claim.
 - For every mapped documentation change, run the wiki synchronization check, review both repositories for drift and private data, commit and push the wiki first when its generated content changes, and then validate and publish the main-repository change. Do not declare documentation complete while the two repositories disagree.
+
+## Wiki voice-pass project (bucket-based rewrite, in progress)
+
+This section covers the operational mechanics for the ongoing bucket-by-bucket wiki
+rewrite. The voice standard itself is set by "README and wiki documentation lifecycle"
+above — this section adds the specific safety mechanics for this multi-session project.
+
+- Source of truth for style and progress: `WIKI-STYLE.md` and `OVERNIGHT-REVIEW.md`,
+  currently in the haven-42.wiki repo. Read both before any wiki edit in this project.
+  If either is missing from a repo you're working in, say so before proceeding — do not
+  reconstruct their rules from memory of a prior session.
+- `WIKI-STYLE.md` maintains a "Protected strings — do not reword" registry: exact
+  phrases enforced by tests (`scripts/test-*.py`, `scripts/test-pack.ps1`). Never reword
+  these, even by one word. If you find a test asserting on wiki text not yet in the
+  registry, add it before proceeding and say so explicitly.
+- Validation workflow per page: rewrite the canonical source, run
+  `pwsh -NoProfile -File scripts/test-pack.ps1 -Tier Full -NoReceipt`, and compare the
+  result against the known-failure baseline recorded in `OVERNIGHT-REVIEW.md` — exact
+  test names and exact count, not just the same number of failures. Only stage a page
+  when the result matches that baseline exactly.
+- Staged-not-committed workflow: do not commit past this repository's commit hooks
+  (no `--no-verify`) without a fresh, explicit, per-batch approval from the owner. A
+  prior approval does not carry forward to a new batch or session.
+- Hard-stop conditions specific to this project — stop the whole run and wait for
+  direction rather than working around them: the known-failure baseline changes; more
+  than ~15% of a batch ends up flagged; a repository safety mechanism blocks a
+  validated change; a page's actual content (not wording) appears stale or conflicts
+  with established policy elsewhere in this file (as with Continue, above) — flag it
+  as a standalone content item, do not resolve it as a voice edit.
+- When reporting progress on this project, always state plainly: pages reviewed,
+  pages rewritten and validated, pages flagged and why, whether any hard-stop condition
+  was hit, and what is staged/uncommitted vs. committed.

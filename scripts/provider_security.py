@@ -37,6 +37,7 @@ def read_json_stream(
     cancelled: Callable[[], bool],
     on_open: Callable[[Any], None],
     on_close: Callable[[], None],
+    on_record: Callable[[dict[str, Any]], None] | None = None,
 ) -> list[dict[str, Any]]:
     """Read bounded newline-delimited JSON without proxies or redirects."""
     if (
@@ -81,6 +82,8 @@ def read_json_stream(
                 if not isinstance(value, dict):
                     raise ProviderSecurityError("provider-json-root-must-be-object")
                 records.append(value)
+                if on_record is not None:
+                    on_record(value)
     except urllib.error.HTTPError as error:
         if cancelled():
             raise ProviderRequestCancelled("provider-request-cancelled") from error

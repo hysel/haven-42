@@ -27,6 +27,7 @@ resources = [
     ("web/static/app.js", "web/static"),
     ("web/static/styles.css", "web/static"),
     ("config/text-capability-model-recommendations.json", "config"),
+    ("config/hardware-qualified-chat-models.json", "config"),
     ("config/evidence-catalog.tsv", "config"),
     ("config/agent-surface-capabilities.json", "config"),
     ("config/agent-surface-solutions.json", "config"),

@@ -991,7 +991,7 @@ try {
   })()`);
   if (
     !tourNavigation.progress.includes("Step 2 of 6")
-    || tourNavigation.title !== "Choose what you want to do"
+    || tourNavigation.title !== "See the model or change settings"
     || !tourNavigation.backEnabled
     || !tourNavigation.back.includes("Step 1 of 6")
     || tourNavigation.trappedFocus !== "section-tour-close"
@@ -1003,7 +1003,7 @@ try {
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
-  if (dismissedTour.state.chat !== 6 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
+  if (dismissedTour.state.chat !== 11 || dismissedTour.focused !== "capability-title" || dismissedTour.backgroundInert) {
     throw new Error(`section-tour-dismissal:${JSON.stringify(dismissedTour)}`);
   }
   const sectionTourCounts = {models: 5, system: 6, technical: 4, about: 4};
@@ -1038,11 +1038,11 @@ try {
   const allTourState = await cdp.evaluate("JSON.parse(localStorage.getItem('haven42.section-tours.v1'))");
   if (
     Object.values(allTourState).length !== 5
-    || allTourState.chat !== 6
-    || allTourState.models !== 3
-    || allTourState.system !== 3
-    || allTourState.technical !== 1
-    || allTourState.about !== 1
+    || allTourState.chat !== 11
+    || allTourState.models !== 5
+    || allTourState.system !== 5
+    || allTourState.technical !== 2
+    || allTourState.about !== 2
   ) {
     throw new Error(`section-tour-state:${JSON.stringify(allTourState)}`);
   }
@@ -1084,7 +1084,7 @@ try {
       stored: JSON.parse(localStorage.getItem('haven42.section-tours.v1')).chat,
     };
   })()`);
-  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 6) {
+  if (!staleBooleanTour.visible || staleBooleanTour.stored !== 11) {
     throw new Error(`stale-boolean-section-tour:${JSON.stringify(staleBooleanTour)}`);
   }
   checks += 41;
@@ -1100,8 +1100,16 @@ try {
     chatNavigationLabel: document.querySelector('#home-nav').textContent,
     legacyTextNavigationCount: document.querySelectorAll('.capability-nav').length,
     modeTabCount: document.querySelectorAll('.mode-tab').length,
-    conversationHeading: document.querySelector('#capability-eyebrow').textContent,
-    conversationModelLabel: document.querySelector('#model-label').textContent
+    conversationHeading: document.querySelector('#capability-title').textContent,
+    conversationModelLabel: document.querySelector('#model-label').textContent,
+    heroCount: document.querySelectorAll('#chat-hero').length,
+    settingsClosed: !document.querySelector('#conversation-settings').open,
+    settingsExpanded: document.querySelector('#conversation-settings-trigger').getAttribute('aria-expanded'),
+    currentModel: document.querySelector('#current-model-name').textContent,
+    toolbarHeight: document.querySelector('.conversation-toolbar').getBoundingClientRect().height,
+    chatHeight: document.querySelector('#text-panel').getBoundingClientRect().height,
+    messagesHeight: document.querySelector('#messages').getBoundingClientRect().height,
+    emptyState: document.querySelector('#messages').classList.contains('empty-conversation')
   })`);
   if (
     !opened.hidden
@@ -1115,8 +1123,16 @@ try {
     || !opened.chatNavigationLabel.includes("Chat")
     || opened.legacyTextNavigationCount !== 0
     || opened.modeTabCount !== 0
-    || opened.conversationHeading !== "CONVERSATION"
+    || opened.conversationHeading !== "Private conversation"
     || opened.conversationModelLabel !== "Conversation model"
+    || opened.heroCount !== 0
+    || !opened.settingsClosed
+    || opened.settingsExpanded !== "false"
+    || opened.currentModel !== "qwen3.5:9b"
+    || opened.toolbarHeight > 84
+    || opened.chatHeight < 560
+    || opened.messagesHeight < opened.toolbarHeight * 2
+    || !opened.emptyState
   ) throw new Error(`chat-handoff:${JSON.stringify(opened)}`);
   const browseActivation = await cdp.evaluate(`(() => {
     const input = document.querySelector('#context-files');
@@ -1132,19 +1148,36 @@ try {
   trace("chat-handoff-verified");
 
   await cdp.evaluate("document.querySelector('#system-nav').click()");
-  const compactControls = await cdp.evaluate(`({
-    endpoint: document.querySelector('#endpoint').getBoundingClientRect().height,
-    cleanup: document.querySelector('#system-idle-unload').getBoundingClientRect().height,
-    model: document.querySelector('#model').getBoundingClientRect().height,
-    authentication: document.querySelector('#auth-mode').getBoundingClientRect().height,
-    endpointFont: getComputedStyle(document.querySelector('#endpoint')).fontSize,
-    cleanupFont: getComputedStyle(document.querySelector('#system-idle-unload')).fontSize,
-    timeoutFont: getComputedStyle(document.querySelector('#timeout')).fontSize,
-    advancedCleanupFont: getComputedStyle(document.querySelector('#idle-unload')).fontSize,
-    authenticationFont: getComputedStyle(document.querySelector('#auth-mode')).fontSize,
-    authenticationText: document.querySelector('#auth-mode').selectedOptions[0].textContent,
-    keyDisabled: document.querySelector('#api-key').disabled
-  })`);
+  const compactControls = await cdp.evaluate(`(() => {
+    const simulatedLastPassControl = document.createElement('div');
+    simulatedLastPassControl.setAttribute('data-lastpass-icon-root', '');
+    document.body.append(simulatedLastPassControl);
+    const result = {
+      endpoint: document.querySelector('#endpoint').getBoundingClientRect().height,
+      cleanup: document.querySelector('#system-idle-unload').getBoundingClientRect().height,
+      model: document.querySelector('#model').getBoundingClientRect().height,
+      authentication: document.querySelector('#auth-mode').getBoundingClientRect().height,
+      endpointFont: getComputedStyle(document.querySelector('#endpoint')).fontSize,
+      cleanupFont: getComputedStyle(document.querySelector('#system-idle-unload')).fontSize,
+      timeoutFont: getComputedStyle(document.querySelector('#timeout')).fontSize,
+      advancedCleanupFont: getComputedStyle(document.querySelector('#idle-unload')).fontSize,
+      authenticationFont: getComputedStyle(document.querySelector('#auth-mode')).fontSize,
+      authenticationText: document.querySelector('#auth-mode').selectedOptions[0].textContent,
+      keyDisabled: document.querySelector('#api-key').disabled,
+      keyToggleDisabled: document.querySelector('#api-key-visibility').disabled,
+      keyToggleNeutral: !document.querySelector('#api-key-visibility').classList.contains('danger'),
+      keyToggleLabel: document.querySelector('#api-key-visibility').textContent.trim(),
+      keyType: document.querySelector('#api-key').type,
+      keyToggleCount: document.querySelectorAll('#connection-form #api-key-visibility').length,
+      keyAutocomplete: document.querySelector('#api-key').autocomplete,
+      keyPasswordManagerIgnored: document.querySelector('#api-key').dataset.lpignore === 'true'
+        && document.querySelector('#api-key').dataset.bwignore === 'true'
+        && document.querySelector('#api-key').hasAttribute('data-1p-ignore'),
+      injectedLastPassControlHidden: getComputedStyle(simulatedLastPassControl).display === 'none'
+    };
+    simulatedLastPassControl.remove();
+    return result;
+  })()`);
   if (
     compactControls.endpoint < 44
     || Math.abs(compactControls.cleanup - compactControls.endpoint) > 1
@@ -1156,8 +1189,16 @@ try {
     || compactControls.authenticationFont !== "14px"
     || compactControls.authenticationText !== "Automatic (Recommended)"
     || !compactControls.keyDisabled
+    || !compactControls.keyToggleDisabled
+    || !compactControls.keyToggleNeutral
+    || compactControls.keyToggleLabel !== "Show"
+    || compactControls.keyType !== "password"
+    || compactControls.keyToggleCount !== 1
+    || compactControls.keyAutocomplete !== "off"
+    || !compactControls.keyPasswordManagerIgnored
+    || !compactControls.injectedLastPassControlHidden
   ) throw new Error(`compact-provider-controls:${JSON.stringify(compactControls)}`);
-  checks += 11;
+  checks += 19;
 
   await cdp.evaluate("document.querySelector('#check-software-updates').click()");
   if (packagedExecutable) {
@@ -1185,8 +1226,7 @@ try {
     checks += 4;
   } else {
     await waitFor(() => cdp.evaluate(`(
-      document.querySelector('#software-update-result').textContent.includes('Ollama 0.32.14')
-      && !document.querySelector('#use-software-update').disabled
+      document.querySelector('#software-update-result').textContent.includes('Ollama 0.32.15')
       && !document.querySelector('#software-update-release-link').classList.contains('hidden')
     )`));
     const softwareUpdateReview = await cdp.evaluate(`(() => {
@@ -1198,22 +1238,52 @@ try {
         release: document.querySelector('#software-update-release-link').href,
         persisted: document.querySelector('#software-update-privacy').textContent,
       };
-      preference.value = 'keep';
+      const certifiedActive = update.disabled;
+      preference.value = 'latest';
       preference.dispatchEvent(new Event('change', {bubbles: true}));
-      const disabledWhenKeeping = update.disabled;
-      preference.value = 'offer';
+      const latestEnabled = !update.disabled;
+      const latestText = update.textContent;
+      preference.value = 'certified';
       preference.dispatchEvent(new Event('change', {bubbles: true}));
-      return {...initial, disabledWhenKeeping, enabledWhenOffering: !update.disabled};
+      return {...initial, certifiedActive, latestEnabled, latestText, certifiedDisabledAgain: update.disabled};
     })()`);
     if (
-      !softwareUpdateReview.status.includes('newest stable version verified')
-      || softwareUpdateReview.updateText !== 'Review Ollama 0.32.14'
-      || softwareUpdateReview.release !== 'https://github.com/ollama/ollama/releases/tag/v0.32.14'
+      !softwareUpdateReview.status.includes('newest official stable release')
+      || softwareUpdateReview.updateText !== 'Certified Ollama 0.32.14 is active'
+      || softwareUpdateReview.release !== 'https://github.com/ollama/ollama/releases/tag/v0.32.15'
       || !softwareUpdateReview.persisted.includes('stay in memory')
-      || !softwareUpdateReview.disabledWhenKeeping
-      || !softwareUpdateReview.enabledWhenOffering
+      || !softwareUpdateReview.certifiedActive
+      || !softwareUpdateReview.latestEnabled
+      || softwareUpdateReview.latestText !== 'Review and install Ollama 0.32.15'
+      || !softwareUpdateReview.certifiedDisabledAgain
     ) throw new Error(`software-update-review:${JSON.stringify(softwareUpdateReview)}`);
-    checks += 6;
+    await cdp.evaluate(`(() => {
+      const preference = document.querySelector('#software-update-preference');
+      preference.value = 'latest';
+      preference.dispatchEvent(new Event('change', {bubbles: true}));
+      document.querySelector('#use-software-update').click();
+    })()`);
+    await waitFor(() => cdp.evaluate(
+      "!document.querySelector('#software-update-review').classList.contains('hidden')",
+    ));
+    const unverifiedReview = await cdp.evaluate(`({
+      title: document.querySelector('#software-update-review-title').textContent,
+      warning: document.querySelector('#software-update-review-warning').textContent,
+      warningVisible: !document.querySelector('#software-update-review-warning').classList.contains('hidden'),
+      consentVisible: !document.querySelector('#software-update-unverified-consent-row').classList.contains('hidden'),
+      consentChecked: document.querySelector('#software-update-unverified-consent').checked,
+      effects: document.querySelectorAll('#software-update-review-effects li').length,
+      focused: document.activeElement === document.querySelector('#software-update-review')
+    })`);
+    if (
+      unverifiedReview.title !== 'Install Ollama 0.32.15'
+      || !unverifiedReview.warning.includes('not yet been compatibility-tested')
+      || !unverifiedReview.warningVisible || !unverifiedReview.consentVisible
+      || unverifiedReview.consentChecked || unverifiedReview.effects !== 4
+      || !unverifiedReview.focused
+    ) throw new Error(`software-update-unverified-review:${JSON.stringify(unverifiedReview)}`);
+    await cdp.evaluate("document.querySelector('#cancel-software-update-review').click()");
+    checks += 15;
   }
 
   const connectedControls = await cdp.evaluate(`({
@@ -1238,6 +1308,15 @@ try {
     const key = document.querySelector('#api-key');
     mode.value = 'bearer';
     mode.dispatchEvent(new Event('change', {bubbles: true}));
+    const visibility = document.querySelector('#api-key-visibility');
+    visibility.click();
+    const reveal = {
+      enabled: !visibility.disabled,
+      type: key.type,
+      pressed: visibility.getAttribute('aria-pressed'),
+      label: visibility.textContent.trim(),
+    };
+    visibility.click();
     key.value = '${browserAuthSecret}';
     key.dispatchEvent(new Event('input', {bubbles: true}));
     const before = {
@@ -1247,13 +1326,18 @@ try {
       buttonEnabled: !document.querySelector('#connect-button').disabled,
     };
     document.querySelector('#connection-form').requestSubmit();
-    return before;
+    return {...before, reveal, hiddenAgain: key.type === 'password' && visibility.getAttribute('aria-pressed') === 'false'};
   })()`);
   if (
     !authenticationDirty.keyEnabled
     || !authenticationDirty.keyRequired
     || authenticationDirty.buttonText !== "Apply changes"
     || !authenticationDirty.buttonEnabled
+    || !authenticationDirty.reveal.enabled
+    || authenticationDirty.reveal.type !== "text"
+    || authenticationDirty.reveal.pressed !== "true"
+    || authenticationDirty.reveal.label !== "Hide"
+    || !authenticationDirty.hiddenAgain
   ) throw new Error(`authentication-dirty-state:${JSON.stringify(authenticationDirty)}`);
   await waitFor(() => cdp.evaluate(`(
     document.querySelector('#connect-button').disabled
@@ -1272,7 +1356,7 @@ try {
     authenticatedRequests.length < 2
     || authenticatedRequests.some(([, , authorization]) => authorization !== `Bearer ${browserAuthSecret}`)
   ) throw new Error(`provider-authentication-headers:${JSON.stringify(authenticatedRequests)}`);
-  checks += 15;
+  checks += 20;
 
   await cdp.evaluate(`(() => {
     const key = document.querySelector('#api-key');
@@ -1376,26 +1460,35 @@ try {
   const testedManualModel = await cdp.evaluate(`(() => ({
     option: document.querySelector('#model option[value="manual:qwen3.5:9b"]')?.textContent || '',
     automatic: document.querySelector('#model option[value="automatic"]')?.textContent || '',
+    mode: document.querySelector('#model-selection-mode').textContent,
   }))()`);
   if (
     !testedManualModel.option.includes('tested for this task')
     || !testedManualModel.automatic.includes('Recommended')
+    || testedManualModel.mode !== 'Manual'
   ) throw new Error(`tested-model-label:${JSON.stringify(testedManualModel)}`);
-  checks += 2;
+  checks += 3;
   const requestsBeforeUnchangedSubmit = requests.length;
   await cdp.evaluate("document.querySelector('#connection-form').requestSubmit()");
   await delay(150);
   if (requests.length !== requestsBeforeUnchangedSubmit) throw new Error("unchanged-provider-reconnected");
   checks += 1;
 
+  await cdp.evaluate("document.querySelector('#conversation-settings-trigger').click()");
+  await waitFor(() => cdp.evaluate("document.querySelector('#conversation-settings-trigger').getAttribute('aria-expanded') === 'true'"));
   const modelLibraryAction = await cdp.evaluate(`(() => {
     const action = document.querySelector('#open-models-from-chat');
     const label = document.querySelector('label[for="model"]');
+    const settings = document.querySelector('#conversation-settings');
+    const trigger = document.querySelector('#conversation-settings-trigger');
     return {
       text: action.textContent.trim(),
       visible: action.getBoundingClientRect().width > 0 && action.getBoundingClientRect().height >= 44,
       label: label?.textContent.trim() || '',
       heading: action.closest('.model-picker-heading') !== null,
+      settingsOpen: settings.open,
+      expanded: trigger.getAttribute('aria-expanded'),
+      triggerHeight: trigger.getBoundingClientRect().height,
     };
   })()`);
   if (
@@ -1403,15 +1496,72 @@ try {
     || !modelLibraryAction.visible
     || modelLibraryAction.label !== "Conversation model"
     || !modelLibraryAction.heading
+    || !modelLibraryAction.settingsOpen
+    || modelLibraryAction.expanded !== "true"
+    || modelLibraryAction.triggerHeight < 44
   ) throw new Error(`model-library-action:${JSON.stringify(modelLibraryAction)}`);
-  checks += 4;
+  await cdp.evaluate("document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))");
+  await waitFor(() => cdp.evaluate("!document.querySelector('#conversation-settings').open && document.querySelector('#conversation-settings-trigger').getAttribute('aria-expanded') === 'false'"));
+  const settingsDismissal = await cdp.evaluate(`({
+    focused: document.activeElement.id,
+    label: document.querySelector('#conversation-settings-trigger').getAttribute('aria-label'),
+  })`);
+  if (settingsDismissal.focused !== "conversation-settings-trigger" || settingsDismissal.label !== "Open conversation settings") {
+    throw new Error(`conversation-settings-dismissal:${JSON.stringify(settingsDismissal)}`);
+  }
+  await cdp.evaluate("document.querySelector('#conversation-settings-trigger').click()");
+  await waitFor(() => cdp.evaluate("document.querySelector('#conversation-settings').open"));
+  checks += 9;
+
+  const remainingDesignFixes = await cdp.evaluate(`(() => {
+    const research = document.querySelector('#research-tools');
+    const technical = document.querySelector('#run-details');
+    technical.classList.remove('hidden');
+    const assistant = document.querySelector('.message.assistant');
+    const navLabel = document.querySelector('#assurance-nav .nav-label').getBoundingClientRect();
+    const navTag = document.querySelector('#assurance-nav .nav-tag');
+    const navTagRect = navTag.getBoundingClientRect();
+    const researchStyle = getComputedStyle(research);
+    const assistantStyle = getComputedStyle(assistant);
+    const researchRect = research.getBoundingClientRect();
+    const technicalRect = technical.getBoundingClientRect();
+    const researchSummaryHeight = research.querySelector('summary').getBoundingClientRect().height;
+    const technicalSummaryHeight = technical.querySelector('summary').getBoundingClientRect().height;
+    technical.classList.add('hidden');
+    return {
+      researchBorder: researchStyle.borderTopWidth,
+      researchRadius: researchStyle.borderRadius,
+      assistantBackground: assistantStyle.backgroundColor,
+      assistantRadius: assistantStyle.borderRadius,
+      navTagText: navTag.textContent.trim(),
+      navTagBorder: getComputedStyle(navTag).borderTopWidth,
+      navTagBelowLabel: navTagRect.top >= navLabel.bottom,
+      utilityControlsShareRow: Math.abs(researchRect.top - technicalRect.top) < 2,
+      researchSummaryHeight,
+      technicalSummaryHeight,
+    };
+  })()`);
+  if (
+    remainingDesignFixes.researchBorder === "0px"
+    || remainingDesignFixes.researchRadius === "0px"
+    || remainingDesignFixes.assistantBackground === "rgba(0, 0, 0, 0)"
+    || remainingDesignFixes.assistantRadius === "0px"
+    || remainingDesignFixes.navTagText !== "Advanced"
+    || remainingDesignFixes.navTagBorder === "0px"
+    || !remainingDesignFixes.navTagBelowLabel
+    || !remainingDesignFixes.utilityControlsShareRow
+    || remainingDesignFixes.researchSummaryHeight < 44
+    || remainingDesignFixes.researchSummaryHeight > 46
+    || remainingDesignFixes.technicalSummaryHeight < 44
+    || remainingDesignFixes.technicalSummaryHeight > 46
+  ) throw new Error(`remaining-design-fixes:${JSON.stringify(remainingDesignFixes)}`);
+  checks += 10;
 
   const dashboardTypography = await cdp.evaluate(`(() => {
     const size = (selector) => getComputedStyle(document.querySelector(selector)).fontSize;
     return {
-      heroCopy: size('.hero > p:last-child'),
-      eyebrow: size('#capability-eyebrow'),
       sectionTitle: size('#capability-title'),
+      currentModel: size('#current-model-name'),
       taskLabel: size('.task-mode-select > span'),
       modelLabel: size('.model-picker-heading label'),
       modelState: size('#model-state'),
@@ -1428,9 +1578,8 @@ try {
     };
   })()`);
   if (JSON.stringify(dashboardTypography) !== JSON.stringify({
-    heroCopy: "15px",
-    eyebrow: "11px",
     sectionTitle: "18px",
+    currentModel: "12px",
     taskLabel: "11px",
     modelLabel: "11px",
     modelState: "12px",
@@ -1454,6 +1603,7 @@ try {
       visible: !document.querySelector('#models-panel').classList.contains('hidden'),
       textHidden: document.querySelector('#text-panel').classList.contains('hidden'),
       imageHidden: document.querySelector('#image-panel').classList.contains('hidden'),
+      settingsClosed: !document.querySelector('#conversation-settings').open,
       focused: document.activeElement.id,
       installed: document.querySelectorAll('#model-search-results .model-search-result').length,
       installedLabel: document.querySelector('#model-search-results small')?.textContent || ''
@@ -1464,14 +1614,16 @@ try {
     || !modelsView.visible
     || !modelsView.textHidden
     || !modelsView.imageHidden
+    || !modelsView.settingsClosed
     || modelsView.focused !== "models-title"
     || modelsView.installed !== 2
     || !modelsView.installedLabel.includes("Already available on your server")
   ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
-  checks += 7;
+  checks += 8;
 
   await cdp.evaluate(`(() => {
     const original = window.fetch;
+    let modelInstallProgressPolls = 0;
     window.__havenOriginalFetch = original;
     window.fetch = (input, init) => {
       if (input === "/api/model-search") return Promise.resolve(new Response(JSON.stringify({
@@ -1523,6 +1675,21 @@ try {
           capabilityStatus: Object.fromEntries(Object.keys(CAPABILITIES).map((id) => [id, "unverified"]))
         }
       }), {status: 200, headers: {"Content-Type": "application/json"}}));
+      if (input === "/api/model-install/status") {
+        modelInstallProgressPolls += 1;
+        const complete = modelInstallProgressPolls > 1;
+        return Promise.resolve(new Response(JSON.stringify({
+          schemaVersion: 1,
+          kind: "model-install-progress",
+          model: "candidate-writing:7b",
+          phase: complete ? "complete" : "downloading",
+          progressPercent: complete ? 100 : 45,
+          completedBytes: complete ? 1000 : 450,
+          totalBytes: 1000,
+          status: complete ? "Model downloaded and verified" : "Downloading model files",
+          terminal: complete
+        }), {status: 200, headers: {"Content-Type": "application/json"}}));
+      }
       return original(input, init);
     };
     const query = document.querySelector('#model-search-query');
@@ -1537,18 +1704,20 @@ try {
     state: document.querySelector('#desired-model-state').textContent,
     command: document.querySelector('#desired-model-command').textContent,
     hidden: document.querySelector('#desired-model').classList.contains('hidden'),
+    inlineAfterCandidate: document.querySelector('#desired-model').previousElementSibling?.classList.contains('model-search-result') === true,
     searchStatus: document.querySelector('#model-search-status').textContent,
     currentModel: document.querySelector('#model').value
   })`);
   if (
     discovery.desired !== "candidate-writing:7b"
-    || !discovery.state.includes("cannot be used until you install it")
+    || !discovery.state.includes("review this model before downloading")
     || discovery.command !== "ollama pull candidate-writing:7b"
     || discovery.hidden
+    || !discovery.inlineAfterCandidate
     || !discovery.searchStatus.includes("Nothing was downloaded")
     || discovery.currentModel !== "manual:unknown-model:latest"
   ) throw new Error(`candidate-only-model-discovery:${JSON.stringify(discovery)}`);
-  checks += 6;
+  checks += 7;
 
   await cdp.evaluate("document.querySelector('#install-model-button').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
@@ -1581,6 +1750,21 @@ try {
   await cdp.evaluate("document.querySelector('#install-model-button').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
   await trustedClick(cdp, "#model-install-review-approve");
+  await waitFor(() => cdp.evaluate("document.querySelector('#model-install-progress-bar').value === 45"));
+  const activeInstallProgress = await cdp.evaluate(`({
+    visible: !document.querySelector('#model-install-progress').classList.contains('hidden'),
+    value: document.querySelector('#model-install-progress-bar').value,
+    percent: document.querySelector('#model-install-progress-percent').textContent,
+    label: document.querySelector('#model-install-progress-label').textContent,
+    detail: document.querySelector('#model-install-progress-detail').textContent,
+  })`);
+  if (
+    !activeInstallProgress.visible
+    || activeInstallProgress.value !== 45
+    || activeInstallProgress.percent !== "45%"
+    || activeInstallProgress.label !== "Downloading model"
+    || !activeInstallProgress.detail.includes("Downloading model files")
+  ) throw new Error(`model-install-progress:${JSON.stringify(activeInstallProgress)}`);
   await waitFor(() => cdp.evaluate("document.querySelector('#desired-model').classList.contains('hidden')"));
   const installedCandidate = await cdp.evaluate(`({
     selected: document.querySelector('#model').value,
@@ -1594,7 +1778,7 @@ try {
     || !installedCandidate.reviewHidden
     || installedCandidate.backgroundInert
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
-  checks += 16;
+  checks += 21;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
@@ -1747,25 +1931,52 @@ try {
     })`);
     throw new Error(`final-response-timeout:${JSON.stringify({ diagnostic, requests })}`, { cause: error });
   }
-  const result = await cdp.evaluate(`({
+  await waitFor(() => cdp.evaluate(`(
+    document.querySelector('#messages').scrollHeight
+      - document.querySelector('#messages').scrollTop
+      - document.querySelector('#messages').clientHeight <= 2
+  )`));
+  const result = await cdp.evaluate(`(() => {
+    const latestMessage = [...document.querySelectorAll('#messages .message')].at(-1);
+    return ({
     output: [...document.querySelectorAll('.message p')].some((item) => item.textContent === 'LOCAL_BROWSER_OK'),
     typed: document.querySelector('#task-event').textContent,
     kind: document.querySelector('#task-event').dataset.kind,
     status: document.querySelector('#text-status').textContent,
     error: document.querySelector('#connection-error').textContent,
+    cpu: document.querySelector('#alpha-cpu').textContent,
+    ram: document.querySelector('#alpha-ram').textContent,
+    gpu: document.querySelector('#alpha-gpu').textContent,
     speed: document.querySelector('#alpha-speed').textContent,
+    sidebarCpu: document.querySelector('#sidebar-cpu').textContent,
+    sidebarRam: document.querySelector('#sidebar-ram').textContent,
+    sidebarGpu: document.querySelector('#sidebar-gpu').textContent,
     sidebarSpeed: document.querySelector('#sidebar-speed').textContent,
     sidebarConnection: document.querySelector('#sidebar-connection-status').textContent,
     sidebarModel: document.querySelector('#sidebar-model-name').textContent,
     sidebarForms: document.querySelectorAll('.configuration-column form').length,
     runDetailsVisible: !document.querySelector('#run-details').classList.contains('hidden'),
-    runDetails: document.querySelector('#run-details-list').textContent
-  })`);
+    runDetails: document.querySelector('#run-details-list').textContent,
+    runDetailsSummary: document.querySelector('#run-details-summary').textContent,
+    messageActions: [...latestMessage.querySelectorAll('.message-action')].map((item) => item.textContent),
+    messageActionIcons: [...latestMessage.querySelectorAll('.message-action-icon')].map((item) => ({
+      ariaHidden: item.getAttribute('aria-hidden'),
+      focusable: item.getAttribute('focusable'),
+      paths: item.querySelectorAll('path').length,
+    })),
+    assistantBackground: getComputedStyle(latestMessage).backgroundColor,
+    followGap: document.querySelector('#messages').scrollHeight - document.querySelector('#messages').scrollTop - document.querySelector('#messages').clientHeight,
+    emptyConversation: document.querySelector('#messages').classList.contains('empty-conversation'),
+    });
+  })()`);
   if (
     !result.output
     || !result.typed.includes("no file saved")
     || !result.typed.includes("has not tested this model")
     || result.kind !== "warning"
+    || result.sidebarCpu !== result.cpu
+    || result.sidebarRam !== result.ram
+    || result.sidebarGpu !== result.gpu
     || result.speed !== "2 tokens/s"
     || result.sidebarSpeed !== "2 tokens/s"
     || result.sidebarConnection !== "Connected"
@@ -1774,10 +1985,17 @@ try {
     || !result.runDetailsVisible
     || !result.runDetails.includes("40")
     || !result.runDetails.includes("2 tokens/s")
+    || !result.runDetailsSummary.includes("Response completed in")
+    || result.messageActions.join('|') !== "Copy answer|Try again|Report this answer"
+    || result.messageActionIcons.length !== 3
+    || result.messageActionIcons.some((item) => item.ariaHidden !== "true" || item.focusable !== "false" || item.paths < 1)
+    || result.assistantBackground === "rgba(0, 0, 0, 0)"
+    || result.followGap > 2
+    || result.emptyConversation
   ) {
     throw new Error(`typed-result-rendering:${JSON.stringify(result)}`);
   }
-  checks += 12;
+  checks += 18;
   trace("typed-result-verified");
 
   const answerReportDisclosure = await cdp.evaluate(`(() => {
@@ -1811,6 +2029,13 @@ try {
   checks += 7;
   trace("answer-report-privacy-flow-verified");
 
+  const manualScroll = await cdp.evaluate(`(() => {
+    const messages = document.querySelector('#messages');
+    messages.scrollTop = 0;
+    messages.dispatchEvent(new Event('scroll'));
+    return messages.scrollHeight - messages.clientHeight;
+  })()`);
+  if (manualScroll <= 48) throw new Error(`manual-scroll-fixture-too-short:${manualScroll}`);
   await cdp.evaluate(`(() => {
     document.querySelector('#prompt').value = 'markdown showcase';
     document.querySelector('#text-form').requestSubmit();
@@ -1831,6 +2056,9 @@ try {
     })`);
     throw new Error(`markdown-response-timeout:${JSON.stringify({ diagnostic, requests })}`, { cause: error });
   }
+  const preservedManualScroll = await cdp.evaluate("document.querySelector('#messages').scrollTop");
+  if (preservedManualScroll !== 0) throw new Error(`manual-scroll-not-preserved:${preservedManualScroll}`);
+  checks += 2;
   const markdown = await cdp.evaluate(`(() => {
     const content = document.querySelector('.message:last-child .message-content');
     return {
@@ -2192,6 +2420,7 @@ try {
     || explicitModes.automaticCapability !== "general.chat"
   ) throw new Error(`explicit-text-modes:${JSON.stringify(explicitModes)}`);
   const taskModePicker = await cdp.evaluate(`(() => {
+    document.querySelector('#conversation-settings').open = true;
     const button = document.querySelector('#text-mode-button');
     const menu = document.querySelector('#text-mode-options');
     button.click();
@@ -2207,6 +2436,7 @@ try {
     document.activeElement.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
     const escapeReturnedFocus = document.activeElement === button && menu.classList.contains('hidden');
     chooseTaskMode('automatic');
+    document.querySelector('#conversation-settings').open = false;
     return {
       opened, initiallyFocused, arrowFocused, selected, buttonLabel,
       closedAfterSelection, escapeReturnedFocus,
@@ -3195,6 +3425,14 @@ try {
           Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated'])
         )
       }],
+      manualModelCandidates: [{
+        name: 'candidate-chat:7b', automatic: false, downloadRequiresApproval: true,
+        hardwareFit: 'matched-tested-hardware-profile',
+        profileId: 'windows-amd-radeon-rx7800xt-16gib', minimumOllamaVersion: '0.32.9',
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+        )
+      }],
       recommendations,
       authentication: {mode: 'none', configured: false, persisted: false},
       trustScope: 'loopback', transportScheme: 'http', version: '0.32.5',
@@ -3209,6 +3447,10 @@ try {
       selections: Object.values(state.modelSelections).map((item) => item.mode),
       selected: document.querySelector('#model').value,
       label: document.querySelector('#model').selectedOptions[0]?.textContent || '',
+      candidateLabel: [...document.querySelector('#model').options]
+        .find((option) => option.value === 'candidate:candidate-chat:7b')?.textContent || '',
+      candidateGroup: [...document.querySelector('#model').querySelectorAll('optgroup')]
+        .find((group) => group.label.includes('download requires approval'))?.label || '',
       status: document.querySelector('#model-state').textContent,
       promptEnabled: !document.querySelector('#prompt').disabled
     };
@@ -3217,11 +3459,18 @@ try {
     managedDefaultHandoff.selections.some((mode) => mode !== "automatic")
     || managedDefaultHandoff.selected !== "automatic"
     || !managedDefaultHandoff.label.includes("qwen3.5:0.8b")
+    || !managedDefaultHandoff.candidateLabel.includes("not installed")
+    || !managedDefaultHandoff.candidateGroup.includes("Tested on matching hardware")
     || !managedDefaultHandoff.status.includes("qwen3.5:0.8b")
     || !managedDefaultHandoff.promptEnabled
   ) throw new Error(`managed-default-handoff:${JSON.stringify(managedDefaultHandoff)}`);
-  checks += 5;
+  checks += 7;
   trace("managed-default-handoff-verified");
+  await cdp.evaluate(`(() => {
+    state.qualifiedModelCandidates = [];
+    renderModelSelect();
+    renderModelDiscovery();
+  })()`);
   const trustedCitationRendering = await cdp.evaluate(`(() => {
     const citation = (suffix, title, page) => ({
       citationId: 'source-' + suffix.repeat(20),
@@ -3802,6 +4051,7 @@ try {
       main: document.querySelectorAll('main').length,
       navigation: document.querySelectorAll('nav').length,
       lastReviewed: document.querySelector('.statement-updated').textContent,
+      implemented: document.querySelector('#completed-work').parentElement.textContent,
       limitation: document.querySelector('#known-limitations').parentElement.textContent,
       targetHeight: action.getBoundingClientRect().height,
       outlineWidth: style.outlineWidth,
@@ -3815,7 +4065,8 @@ try {
     || accessibilityStatement.h1 !== 1
     || accessibilityStatement.main !== 1
     || accessibilityStatement.navigation !== 1
-    || !accessibilityStatement.lastReviewed.includes("August 16, 2026")
+    || !accessibilityStatement.lastReviewed.includes("August 22, 2026")
+    || !accessibilityStatement.implemented.includes("Manually scrolling up pauses that behavior")
     || !accessibilityStatement.limitation.includes("not yet been manually tested")
     || accessibilityStatement.targetHeight < 44
     || Number.parseFloat(accessibilityStatement.outlineWidth) < 3
@@ -3824,7 +4075,7 @@ try {
     || !accessibilityStatement.externalRel.includes("noreferrer")
     || accessibilityStatement.scripts !== 0
   ) throw new Error(`accessibility-statement:${JSON.stringify(accessibilityStatement)}`);
-  checks += 14;
+  checks += 15;
   trace("accessibility-statement-verified");
   console.log("Haven 42 browser evidence gates passed: bounded-attachments, automated-accessibility, local-privacy-boundary.");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);

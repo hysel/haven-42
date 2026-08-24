@@ -75,8 +75,10 @@
       "vendor": "AMD",
       "model": "Radeon RX 6800 non-XT",
       "memoryGiB": 16,
-      "status": "pending",
-      "measurementEvidence": []
+      "status": "partial",
+      "measurementEvidence": [
+        "examples/amd-rx6800-linux-model-qualification.md"
+      ]
     },
     {
       "id": "amd-radeon-rx-7800-xt-16g",

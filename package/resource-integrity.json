@@ -3,28 +3,33 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "c20283a0b012148d4fa904c73d2673d7c601d9aef166bac82cac45594fc5011f",
-      "sizeBytes": 73390
+      "sha256": "d7cd6a60e7364bb194b43a6caab2885c49c5b0470aca8567a2d00b581ae7fb9b",
+      "sizeBytes": 78872
     },
     {
       "path": "web/static/accessibility.html",
-      "sha256": "874319aeb8b0c51cdbf89481915192ee1762bc5bc33dd07e9527725646e1a9fd",
-      "sizeBytes": 7622
+      "sha256": "06b59ff764c9610449e64f4f22491bf4b06e348171d108d00b51e7ad21ccb505",
+      "sizeBytes": 7804
     },
     {
       "path": "web/static/app.js",
-      "sha256": "f02e9b3360accdbb6b3577413d81d376eec56d12ce7f5b404fe9c8be1b18fa1a",
-      "sizeBytes": 264715
+      "sha256": "2af158688fce5a032e5c694f810864c8d77ba3173d73494f844a524d002c68f6",
+      "sizeBytes": 289089
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "337aa6f8a02a7e518c83927e289b2e7f56d84c1d33a0deba43026ed10d18959c",
-      "sizeBytes": 75674
+      "sha256": "9560fcf5dd27d7f7443ceab720b0fa09427104eb5c8f6ff581f154033d98cd47",
+      "sizeBytes": 88048
     },
     {
       "path": "config/text-capability-model-recommendations.json",
       "sha256": "ce0f11fa519f36e3df3fe068a062a30d0bb9e3b44bada64dcf63b36e1729e099",
       "sizeBytes": 1532
+    },
+    {
+      "path": "config/hardware-qualified-chat-models.json",
+      "sha256": "872463570b95b18407fdae94a77d295802493f9b0b62df20300ae690fec3bdbb",
+      "sizeBytes": 961
     },
     {
       "path": "config/evidence-catalog.tsv",

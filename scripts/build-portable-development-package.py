@@ -35,6 +35,7 @@ RESOURCE_PATHS = (
     "web/static/app.js",
     "web/static/styles.css",
     "config/text-capability-model-recommendations.json",
+    "config/hardware-qualified-chat-models.json",
     "config/evidence-catalog.tsv",
     "config/agent-surface-capabilities.json",
     "config/agent-surface-solutions.json",

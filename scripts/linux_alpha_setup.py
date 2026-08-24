@@ -617,7 +617,9 @@ class SetupCoordinator:
         if identity is None or identity["componentIds"] != plan["components"] or identity["modelId"] != plan["modelId"]:
             return set()
         root = _owned_root(self.root, create=False)
-        version = load_registry()["components"][0]["version"]
+        component = load_registry()["components"][0]
+        from managed_runtime_update import read_runtime_selection
+        version = read_runtime_selection(root, component)["version"]
         present = set()
         if (root / "runtime" / version).is_dir() and _integrity_path(root, version).is_file():
             present.update(plan["components"])

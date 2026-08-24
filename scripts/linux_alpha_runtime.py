@@ -37,6 +37,7 @@ MAX_METADATA_BYTES = 2 * 1024 * 1024
 COPY_CHUNK_BYTES = 1024 * 1024
 MAX_PATH_BYTES = 512
 MAX_LINK_DEPTH = 16
+MAX_ARCHIVE_MEMBERS = 4096
 ZSTD_CANDIDATES = (Path("/usr/bin/zstd"), Path("/bin/zstd"))
 
 
@@ -446,6 +447,80 @@ def extract_registered_archive(
         "directories": inventory["directories"],
         "linkFree": True,
     }
+
+
+def extract_official_update_archive(
+    archive: Path, destination: Path, component: dict[str, Any]
+) -> dict[str, Any]:
+    """Safely extract a hash-pinned official update with bounded inventory.
+
+    Compatibility is intentionally not asserted here. The archive is admitted
+    only after the official release digest and size match, and it remains
+    labelled unverified until Haven 42 qualification evidence is published.
+    """
+    if (
+        not isinstance(component, dict)
+        or component.get("id") != "ollama-runtime"
+        or component.get("artifactName") != "ollama-linux-amd64.tar.zst"
+        or not HEX64.fullmatch(str(component.get("sha256", "")))
+        or type(component.get("downloadBytes")) is not int
+        or not 1 <= component["downloadBytes"] <= 4 * 1024**3
+    ):
+        raise LinuxRuntimeError("invalid-official-update-component")
+    bounded = {
+        "id": "ollama-linux-official-update",
+        "byteLength": component["downloadBytes"],
+        "sha256": component["sha256"],
+        "maximumArchiveMembers": MAX_ARCHIVE_MEMBERS,
+        "expandedByteLength": 8 * 1024**3,
+        "expectedRegularFiles": -1,
+        "expectedDirectories": -1,
+        "expectedInternalLinks": -1,
+        "executableRelativePath": "bin/ollama",
+    }
+    records: dict[str, dict[str, Any]] = {}
+    folded: set[str] = set()
+    regular_files = directories = internal_links = expanded = 0
+    verify_registered_archive(archive, bounded)
+    stream, bundle = _open_archive(archive)
+    try:
+        for index, member in enumerate(bundle, start=1):
+            if index > bounded["maximumArchiveMembers"]:
+                raise LinuxRuntimeError("archive-member-limit")
+            name = _member_name(member.name)
+            collision = unicodedata.normalize("NFC", name).casefold()
+            if name in records or collision in folded:
+                raise LinuxRuntimeError("archive-member-collision")
+            folded.add(collision)
+            if member.isdir():
+                directories += 1
+                records[name] = {"kind": "directory"}
+            elif member.isfile():
+                if member.size < 0:
+                    raise LinuxRuntimeError("invalid-archive-member-size")
+                expanded += member.size
+                if expanded > bounded["expandedByteLength"]:
+                    raise LinuxRuntimeError("archive-expansion-limit")
+                regular_files += 1
+                records[name] = {"kind": "file"}
+            elif member.issym():
+                internal_links += 1
+                records[name] = {
+                    "kind": "internal-link",
+                    "target": _resolved_link_name(name, member.linkname),
+                }
+            else:
+                raise LinuxRuntimeError("unsupported-archive-member-type")
+    finally:
+        bundle.close()
+        stream.close()
+    bounded.update({
+        "expandedByteLength": expanded,
+        "expectedRegularFiles": regular_files,
+        "expectedDirectories": directories,
+        "expectedInternalLinks": internal_links,
+    })
+    return extract_registered_archive(archive, destination, bounded)
 
 
 def registered_component(component_id: str, path: Path = REGISTRY_PATH) -> dict[str, Any]:

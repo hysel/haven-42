@@ -12,6 +12,8 @@ import re
 import sys
 import urllib.parse
 import urllib.request
+import hashlib
+import threading
 from pathlib import Path
 from typing import Any, Callable
 
@@ -30,6 +32,29 @@ class SoftwareUpdateError(ValueError):
 class _NoRedirects(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, request, fp, code, msg, headers, new_url):
         raise SoftwareUpdateError("software-update-redirect-refused")
+
+
+class _ReleaseRedirects(urllib.request.HTTPRedirectHandler):
+    """Permit only GitHub's fixed release-asset delivery hosts."""
+
+    def __init__(self) -> None:
+        self.count = 0
+
+    def redirect_request(self, request, fp, code, msg, headers, new_url):
+        self.count += 1
+        parsed = urllib.parse.urlsplit(new_url)
+        if (
+            self.count > 3
+            or parsed.scheme != "https"
+            or parsed.hostname not in {
+                "github.com", "objects.githubusercontent.com",
+                "release-assets.githubusercontent.com",
+            }
+            or parsed.username is not None or parsed.password is not None
+            or parsed.port not in {None, 443}
+        ):
+            raise SoftwareUpdateError("software-update-redirect-refused")
+        return super().redirect_request(request, fp, code, msg, headers, new_url)
 
 
 def _read_official_release() -> dict[str, Any]:
@@ -134,9 +159,76 @@ def check_for_updates(
             "newerOfficialVersionAvailable": latest_tuple > managed_tuple,
             "managedVersionIsLatest": latest_tuple == managed_tuple,
             "availableForManagedSetup": latest_tuple == managed_tuple,
+            "certificationStatus": "certified" if latest_tuple == managed_tuple else "official-unverified",
             "releaseUrl": expected_release_url,
+            "downloadUrl": download,
             "artifactName": _asset_name(),
             "downloadBytes": asset["size"],
             "sha256": digest[7:],
         }],
     }
+
+
+def download_official_asset(
+    component: dict[str, Any],
+    destination: Path,
+    cancel: threading.Event,
+    progress: Callable[[int, int], None],
+) -> None:
+    """Download the exact asset selected from a validated official release."""
+    required = {
+        "id", "displayName", "managedVersion", "latestStableVersion",
+        "newerOfficialVersionAvailable", "managedVersionIsLatest",
+        "availableForManagedSetup", "certificationStatus", "releaseUrl",
+        "downloadUrl", "artifactName", "downloadBytes", "sha256",
+    }
+    if (
+        not isinstance(component, dict) or set(component) != required
+        or component.get("id") != "ollama-runtime"
+        or component.get("certificationStatus") not in {"certified", "official-unverified"}
+        or not VERSION.fullmatch(str(component.get("latestStableVersion", "")))
+        or not HEX64.fullmatch(str(component.get("sha256", "")))
+        or type(component.get("downloadBytes")) is not int
+        or not 1 <= component["downloadBytes"] <= 4 * 1024**3
+    ):
+        raise SoftwareUpdateError("software-update-component-invalid")
+    parsed = urllib.parse.urlsplit(str(component.get("downloadUrl", "")))
+    expected_path = (
+        f"/ollama/ollama/releases/download/v{component['latestStableVersion']}/"
+        f"{component['artifactName']}"
+    )
+    if (
+        parsed.scheme != "https" or parsed.hostname != "github.com"
+        or parsed.path != expected_path or parsed.query or parsed.fragment
+        or parsed.username or parsed.password or parsed.port not in {None, 443}
+    ):
+        raise SoftwareUpdateError("software-update-download-url-invalid")
+    destination = destination.resolve(strict=False)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists() or destination.is_symlink():
+        raise SoftwareUpdateError("software-update-download-destination-exists")
+    digest = hashlib.sha256()
+    written = 0
+    request = urllib.request.Request(
+        component["downloadUrl"], headers={"User-Agent": "Haven42/0.4.0-alpha.2"},
+    )
+    try:
+        with urllib.request.build_opener(_ReleaseRedirects()).open(request, timeout=30) as response, destination.open("xb") as output:
+            while True:
+                if cancel.is_set():
+                    raise SoftwareUpdateError("software-update-cancelled")
+                block = response.read(1024 * 1024)
+                if not block:
+                    break
+                written += len(block)
+                if written > component["downloadBytes"]:
+                    raise SoftwareUpdateError("software-update-size-mismatch")
+                digest.update(block)
+                output.write(block)
+                progress(written, component["downloadBytes"])
+    except Exception:
+        destination.unlink(missing_ok=True)
+        raise
+    if written != component["downloadBytes"] or digest.hexdigest() != component["sha256"]:
+        destination.unlink(missing_ok=True)
+        raise SoftwareUpdateError("software-update-integrity-mismatch")

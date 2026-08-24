@@ -1386,8 +1386,9 @@ class SetupCoordinator:
             raise SetupError("managed-setup-not-complete")
         registry = load_component_registry()
         catalog = load_model_catalog()
-        runtime_version = registry["components"][0]["version"]
         root = _owned_state_root(self.root, create=False)
+        from managed_runtime_update import read_runtime_selection
+        runtime_version = read_runtime_selection(root, registry["components"][0])["version"]
         runtime = root / "runtime" / runtime_version
         models = root / "models"
         verify_runtime_integrity(root, runtime_version, runtime)
