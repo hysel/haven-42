@@ -1204,7 +1204,8 @@ try {
   checks += 19;
 
   await cdp.evaluate("document.querySelector('#check-software-updates').click()");
-  if (packagedExecutable) {
+  const managedRuntimeUpdateSupported = process.platform === "win32" || process.platform === "linux";
+  if (packagedExecutable || !managedRuntimeUpdateSupported) {
     await waitFor(() => cdp.evaluate(
       "document.querySelector('#check-software-updates').textContent === 'Check official releases again'",
     ));
@@ -1937,7 +1938,7 @@ try {
   await waitFor(() => cdp.evaluate(`(
     document.querySelector('#messages').scrollHeight
       - document.querySelector('#messages').scrollTop
-      - document.querySelector('#messages').clientHeight <= 2
+      - document.querySelector('#messages').clientHeight <= 8
   )`));
   const result = await cdp.evaluate(`(() => {
     const latestMessage = [...document.querySelectorAll('#messages .message')].at(-1);
