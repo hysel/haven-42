@@ -1,14 +1,12 @@
 # Advanced and Contributor Topics
 
-_For advanced users, evaluators, and contributors. Each linked page states its
-own evidence boundary._
+_For advanced users, evaluators, and contributors. Each linked page explains
+what has and has not been tested._
 
-The everyday browser workflow is documented in [[Using Haven 42|Using-Haven-42]].
-This page collects advanced setup and engineering paths without placing their
-detailed validation records in the main user navigation.
-
-You do not need anything on this page for normal guided setup, chat, writing,
-or summarization.
+For the everyday browser workflow, use [[Using Haven 42|Using-Haven-42]]. You
+don't need anything here for guided setup, chat, writing, or summarization;
+this page is an index of the advanced setup and engineering material kept out
+of the main user navigation.
 
 ## Editor and agent setup
 
@@ -18,8 +16,9 @@ or summarization.
 - [[Agent Surface Options|Agent-Surface-Options]]
 - [[Agent Surface Solutions|Agent-Surface-Solutions]]
 
-These tools operate outside the browser product and may have separate software,
-repository, or network effects. Read the linked boundaries before running them.
+These tools run outside the browser product and can affect other software,
+repositories, or network services. Check the limits on the linked page before
+running one.
 
 ## Models and inference engines
 
@@ -29,8 +28,8 @@ repository, or network effects. Read the linked boundaries before running them.
 - [[Inference Engine Architecture|Inference-Engine-Architecture]]
 - [[Hardware-Adaptive Quantization|Hardware-Adaptive-Quantization]]
 
-Candidate and validation pages are not automatic installation instructions and
-do not make unevidenced hardware or production claims.
+Candidate and validation pages aren't installation instructions. They also
+don't claim support for hardware or production use that hasn't been tested.
 
 ## Packaging and platform evaluation
 
@@ -42,11 +41,11 @@ do not make unevidenced hardware or production claims.
 - [[macOS Agent Host Bootstrap|macOS-Agent-Host-Bootstrap]]
 
 Current packages are unsigned development artifacts. Signing, notarization,
-public release publication, active online updates, and machine-modifying
-installers remain separate gates.
+public releases, active online updates, and installers that modify the machine
+still require separate approval and testing.
 
 ## Complete engineering documentation
 
-Use the [[Documentation Index|Documentation-Index]] to reach architecture,
-security, evidence, validation, contributor, and research material that is no
-longer displayed directly in the main sidebar.
+The [[Documentation Index|Documentation-Index]] links the architecture,
+security, evidence, validation, contributor, and research material omitted
+from the main sidebar.
