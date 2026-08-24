@@ -1,6 +1,6 @@
 # Capability Registry
 
-`config/capabilities.json` is the provider-neutral intent layer above `config/workflows.json`. It describes what a user wants; provider adapters and engineering workflows describe how an available capability is executed.
+`config/capabilities.json` maps provider-neutral user intent above `config/workflows.json`. It describes what a user wants; provider adapters and engineering workflows describe how to execute an available capability.
 
 The initial registry contains:
 
@@ -21,15 +21,15 @@ The initial registry contains:
 - `blocked`: policy or a required safety boundary prevents execution.
 - `failed`: the configured provider or execution boundary failed validation or execution.
 
-Availability is not permission. A selected capability must still resolve its provider or workflow, disclose effects, validate policy, and obtain any required approval.
+Availability does not grant permission. A selected capability must still resolve its provider or workflow, disclose effects, validate policy, and obtain any required approval.
 
 ## Policy Metadata
 
-Every capability declares repository mode, artifact types, provider kinds, and whether it may read a repository, write files, use a network, download models, call an external provider, or require approval. Provider-dependent and workflow-dependent values must be resolved before execution; they are never treated as permission.
+Every capability declares repository mode, artifact types, provider kinds, and whether it may read a repository, write files, use a network, download models, call an external provider, or require approval. The system must resolve provider-dependent and workflow-dependent values before execution; those values never grant permission.
 
 Engineering requests continue through `config/workflows.json`. General chat success cannot promote a model or agent surface for engineering writes.
 
-Use `discover-capability-availability` to derive runtime availability without persisting provider endpoints. Use `resolve-engineering-route` to turn an engineering capability into a non-invoking workflow plan. See [Capability Availability and Engineering Routing](capability-availability-and-engineering-routing.md).
+Use `discover-capability-availability` to determine runtime availability without persisting provider endpoints. Use `resolve-engineering-route` to turn an engineering capability into a non-invoking workflow plan. See [Capability Availability and Engineering Routing](capability-availability-and-engineering-routing.md).
 
 ## Maintenance
 
