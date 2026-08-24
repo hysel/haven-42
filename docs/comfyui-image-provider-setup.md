@@ -1,6 +1,6 @@
 # ComfyUI Image Provider Setup
 
-This runbook reproduces the promoted local image-generation boundary used by `comfyui.local-image`. It documents the exact Linux configuration that passed live validation. Other operating systems, accelerators, ComfyUI releases, checkpoints, custom nodes, and external API nodes require their own evidence before promotion.
+This runbook reproduces the promoted `comfyui.local-image` boundary. It documents the exact Linux configuration that passed live validation. Other operating systems, accelerators, ComfyUI releases, checkpoints, custom nodes, and external API nodes need separate validation before promotion.
 
 ## Validated Profile
 
@@ -15,7 +15,7 @@ This runbook reproduces the promoted local image-generation boundary used by `co
 | Checkpoint SHA-256 | `31e35c80fc4829d14f90153f4c74cd59c90b779f6afe05a74cd6120b893f7e5b` |
 | Network | ComfyUI listens on `127.0.0.1:8188`; remote access uses SSH tunneling |
 
-CUDA 13 removed Volta library support, so the validated V100 path intentionally uses the CUDA 12.6 PyTorch wheels. Do not replace this with a CUDA 13 wheel on Volta hardware. Current Turing or newer hardware may use a different evidence-gated profile.
+CUDA 13 removed Volta library support, so the validated V100 path intentionally uses the CUDA 12.6 PyTorch wheels. Do not replace this with a CUDA 13 wheel on Volta hardware. Current Turing or newer hardware may use a different validated profile.
 
 ## 1. Inventory The Host
 
@@ -32,7 +32,7 @@ git --version
 systemd-detect-virt || true
 ```
 
-Confirm that the intended GPU is visible to the non-root service account and that the host has sufficient storage for Python packages, the checkpoint, generated outputs, and rollback copies. The validated installation consumed several gigabytes of Python/CUDA packages plus a 6.94 GB checkpoint.
+Confirm that the non-root service account can see the intended GPU and that the host has enough storage for Python packages, the checkpoint, generated outputs, and rollback copies. The validated installation consumed several gigabytes of Python/CUDA packages plus a 6.94 GB checkpoint.
 
 ## 2. Create Dedicated SSH Access
 
@@ -225,7 +225,7 @@ Create a session outside the pack repository, preview the planned writes, and ex
   -Execute -Apply -AsJson
 ```
 
-Confirm that the typed artifact reports `PromptPersisted: false`, `EndpointPersisted: false`, `RepositoryRead: false`, and `ProviderRetainedOutput: true`. ComfyUI keeps its provider-side output even after API history is cleared; include it in retention and cleanup policy.
+Confirm that the typed artifact reports `PromptPersisted: false`, `EndpointPersisted: false`, `RepositoryRead: false`, and `ProviderRetainedOutput: true`. ComfyUI keeps its provider-side output after API history is cleared, so include it in retention and cleanup policy.
 
 ## 10. Upgrade And Rollback Policy
 

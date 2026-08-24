@@ -1,13 +1,13 @@
 # Local Audio Provider Candidates
 
-Recorded 2026-07-22 from official upstream repositories, model cards, and one disposable Linux CUDA feasibility cell, then rechecked against official upstream licensing and releases on 2026-08-04. The live cell is partial evidence only. It does not promote a provider or add `audio.music.create`, scripts, adapters, workflows, configuration, or installer assets.
+This record uses official upstream repositories, model cards, and one disposable Linux CUDA feasibility cell from 2026-07-22, with official licensing and releases rechecked on 2026-08-04. The live cell is partial evidence only. It does not promote a provider or add `audio.music.create`, scripts, adapters, workflows, configuration, or installer assets.
 
 ## ACE-Step 1.5
 
 The current application release is `v0.1.8`, resolving to Git commit `dce621408bee8c31b4fcf4811682eb9359e1bc94`. The separately versioned official `ACE-Step/Ace-Step1.5` model repository was observed at revision `19671f406d603126926c1b7e2adc169acbcade22`, with 10,079,024,720 bytes of LFS-managed blobs.
 
-The 2026-08-04 recheck still identified `v0.1.8` as the latest official
-release and preserved its verified GitHub commit identity. This refresh does
+The 2026-08-04 recheck identified `v0.1.8` as the latest official
+release and preserved its verified GitHub commit identity. The recheck does
 not resolve the unauthenticated catch-all route collision; the regression is
 captured in `examples/fixtures/ace-step-route-collision-cases.json`.
 
@@ -40,4 +40,4 @@ Official sources: [Stable Audio 3 collection](https://huggingface.co/collections
 
 ## Admission Decision
 
-No audio provider is promoted. ACE-Step has broader partial Linux CUDA evidence but has not completed its external gate or resolved the native entry point's route-authentication defect. Stable Audio remains gated by authenticated model acquisition plus exact license review. The shared consent boundary is defined in `docs/generative-media-consent-policy.md`.
+No audio provider is promoted. ACE-Step has broader partial Linux CUDA evidence but has not completed its external gate or resolved the native entry point's route-authentication defect. Stable Audio still requires authenticated model acquisition and exact license review. The shared consent boundary is defined in `docs/generative-media-consent-policy.md`.
