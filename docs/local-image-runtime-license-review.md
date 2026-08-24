@@ -3,13 +3,13 @@
 ## Decision Boundary
 
 Haven 42 does not redistribute, install, or package external image-provider
-software. ComfyUI runtimes and models remain separately acquired, independently
-versioned software. This review inventories exact upstream portable archives
-without executing or importing their code. It supports compatibility and
-security assessment; it is not legal advice, permission to ship those archives,
-or a path for adding them to Haven packages.
+software. Users acquire and version ComfyUI runtimes and models separately.
+This review inventories exact upstream portable archives without executing or
+importing their code. It supports compatibility and security assessment; it is
+not legal advice, permission to ship those archives, or a path for adding them
+to Haven packages.
 
-The governing contract is `config/local-image-runtime-license-contract.json`. The offline auditor is `scripts/audit-local-image-runtime.py`. It requires a contracted profile and archive SHA-256, refuses links and reparse points, bounds traversal and reads, writes only a new caller-selected report, records no absolute path or machine identity, and never turns metadata into automatic license clearance.
+`config/local-image-runtime-license-contract.json` is the governing contract, and `scripts/audit-local-image-runtime.py` is the offline auditor. The auditor requires a contracted profile and archive SHA-256, refuses links and reparse points, bounds traversal and reads, writes only a new caller-selected report, records no absolute path or machine identity, and never treats metadata as automatic license clearance.
 
 ## Exact Profile Status
 
@@ -81,7 +81,7 @@ The NVIDIA review must use the [exact CUDA 13.0 EULA](https://docs.nvidia.com/cu
 
 ## Local Evidence Handling
 
-Raw reports remain beneath ignored `dist/local-review/` storage. They can contain thousands of dependency filenames and hashes and are not committed. A committed summary may record exact public artifact identities, aggregate counts, blockers, and decisions, but must never include a machine path, account, hostname, endpoint, prompt, generated image, or private output.
+Keep raw reports beneath ignored `dist/local-review/` storage. They can contain thousands of dependency filenames and hashes and are not committed. A committed summary may record exact public artifact identities, aggregate counts, blockers, and decisions, but must never include a machine path, account, hostname, endpoint, prompt, generated image, or private output.
 
 ## Prepared Windows Audit Commands
 

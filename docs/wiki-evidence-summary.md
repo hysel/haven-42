@@ -1,9 +1,10 @@
 # Evidence Dashboard
 
-_A user-readable summary of committed, sanitized validation evidence._
+_A readable summary of committed, sanitized test results._
 
-Evidence shows what was tested under a recorded configuration. It is not usage
-analytics, a quality ranking, or proof that every machine will behave the same.
+Each result shows what was tested under a recorded configuration. It is not
+usage analytics, a quality ranking, or proof that every machine will behave the
+same way.
 
 ## Portable application
 
@@ -17,17 +18,17 @@ analytics, a quality ranking, or proof that every machine will behave the same.
 
 ## Providers and hardware
 
-Committed evidence includes exact, scope-limited runs involving Ollama text,
-ComfyUI/SDXL images, and selected inference engines across NVIDIA, AMD, and Intel
-hardware. A hardware result applies only to its recorded operating system,
-driver, runtime, model revision, quantization, and operation.
+Committed results include exact, scope-limited runs involving Ollama text,
+ComfyUI/SDXL images, and selected inference engines across NVIDIA, AMD, and
+Intel hardware. A hardware result applies only to its recorded operating
+system, driver, runtime, model revision, quantization, and operation.
 
-WSL2 AMD/HIP evidence is tracked separately from native Linux AMD evidence.
+WSL2 AMD/HIP results are tracked separately from native Linux AMD results.
 Passing through `/dev/dxg` confirms only the exact Windows-hosted WSL2 profile;
 it does not validate a native Linux driver, desktop, package, or lifecycle.
 
 Unverified hardware and provider combinations remain selectable only where the
-product explicitly labels them as advanced or unavailable. Evidence never
+product explicitly labels them as advanced or unavailable. A test result never
 grants permission to install software or modify a machine.
 
 ## Security and privacy
@@ -37,8 +38,8 @@ grants permission to install software or modify a machine.
 - Provider endpoints are allowlisted by scope and redirects are blocked.
 - Committed evidence excludes private endpoints, user paths, prompts, responses,
   credentials, and local identities.
-- Signing, notarization, installers, production releases, and online updates
-  remain separate inactive gates.
+- These results do not enable signing, notarization, installers, production
+  releases, or online updates.
 
 ## Read the detailed records
 

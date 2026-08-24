@@ -2,9 +2,9 @@
 
 ## Purpose
 
-`config/workflows.json` is the machine-readable catalog of stable workflows that scripts, future dispatchers, and the planned starter-toolkit web UI can use.
+`config/workflows.json` is the machine-readable catalog of stable workflows for scripts, future dispatchers, and the planned starter-toolkit web UI.
 
-The registry keeps workflow metadata in one place so the project can reduce script duplication without losing beginner-friendly entry points.
+The registry keeps workflow metadata in one place, reducing script duplication without removing beginner-friendly entry points.
 
 Use `docs/workflow-chooser.md` for a generated report that compares workflow IDs, safety levels, commands, and reference docs.
 
@@ -12,7 +12,7 @@ Use `docs/script-consolidation-plan.md` for the boundary between shared engines,
 
 ## What It Describes
 
-Each workflow records:
+Each workflow includes:
 
 - `id`: Stable workflow identifier for scripts and UI.
 - `name`: Human-readable label.
@@ -56,7 +56,7 @@ and promotion gates before use.
 
 ## UI Direction
 
-The planned web UI should read this registry rather than hard-code every script. It should show:
+The planned web UI should read this registry instead of hard-coding every script. It should show:
 
 - What the workflow will read or write.
 - Which platform entry point will run.
@@ -68,7 +68,7 @@ The UI should remain a wrapper over tested scripts and shared engines. It should
 
 ## Dispatcher Boundary
 
-`scripts/invoke-workflow.ps1` and the cross-platform `scripts/invoke-workflow.*.sh` wrappers are the stable dispatchers over the registry. They are intentionally small:
+`scripts/invoke-workflow.ps1` and the cross-platform `scripts/invoke-workflow.*.sh` wrappers are the registry's stable dispatchers. They remain intentionally small:
 
 - `-List` prints the available workflow IDs, names, categories, safety levels, and UI readiness.
 - `-WorkflowId <id> -DryRun` resolves the platform-specific entry point without invoking it.
@@ -88,11 +88,11 @@ pwsh -NoProfile -File .\scripts\invoke-workflow.ps1 -WorkflowId validate-pack -W
 ./scripts/invoke-workflow.macos.sh --workflow-id validate-pack --dry-run
 ```
 
-The dispatcher does not reinterpret workflow-specific arguments. Each underlying script remains the source of behavior, validation, and safety checks.
+The dispatcher passes workflow-specific arguments through without reinterpreting them. Each underlying script remains the source of behavior, validation, and safety checks.
 
 ## Versioned Automation Envelope
 
-Future UI and automation callers should use the schema-v1 request envelope in `config/workflow-envelope-contract.json` through `-RequestJson` or `--request-json`. The response standardizes accepted, progress, warning, result, and error records while preserving the workflow process exit code.
+Future UI and automation callers should pass the schema-v1 request envelope in `config/workflow-envelope-contract.json` through `-RequestJson` or `--request-json`. The response standardizes accepted, progress, warning, result, and error records while preserving the workflow process exit code.
 
 Argument values and child output are omitted by default. Use `includeOutput` only for transient local diagnostics, then sanitize before recording evidence. See `docs/workflow-envelope-contract.md` for examples and the privacy boundary.
 

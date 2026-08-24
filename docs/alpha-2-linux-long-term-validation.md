@@ -1,9 +1,9 @@
 # Alpha 2 Linux long-term validation
 
-This document describes the active long-running test campaign for the
-unsigned Haven 42 `0.4.0-alpha.2` Linux package. It does not grant access to a
-test machine, start or stop a virtual machine, assign a graphics card, download
-software, or claim that Alpha 2 passed.
+This page records the long-running test campaign for the unsigned Haven 42
+`0.4.0-alpha.2` Linux package. Reading it does not grant access to a test
+machine, start or stop a virtual machine, assign a graphics card, download
+software, or mean that Alpha 2 passed.
 
 ## Current campaign status
 
@@ -45,10 +45,10 @@ the larger model. This does not extend approval to other NVIDIA distribution
 profiles, lower memory, AMD or Intel acceleration, other runtimes, or other
 model families.
 
-One identical unsigned Linux candidate passed package integrity, relocation,
+The same unsigned Linux candidate passed package integrity, relocation,
 read-only startup, abrupt-exit recovery, repeated lifecycle, occupied-port,
 shutdown-authority, hostile-environment, and protected-resource integrity tests
-on all nine distribution targets. This is package-parity evidence, not yet the
+on all nine distributions. This is package-parity evidence. It is not the
 complete guided-setup, desktop, capability, accessibility, or long-duration
 soak evidence required for a Supported Alpha label.
 
@@ -269,10 +269,10 @@ threshold.
 
 ## Persistence and evidence
 
-A chat session is not a durable scheduler. The eventual controller therefore
-needs a restartable local service with an atomic checkpoint. A reboot or network
-interruption must resume at a safe preflight boundary rather than repeating a
-machine-changing action blindly.
+A chat session is not a durable scheduler. The controller therefore needs a
+restartable local service with an atomic checkpoint. After a reboot or network
+interruption, it must resume at a safe preflight boundary instead of blindly
+repeating a machine-changing action.
 
 The effect-free checkpoint implementation is
 `scripts/alpha2-linux-campaign-checkpoint.py`. It records only the bounded task

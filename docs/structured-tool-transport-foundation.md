@@ -2,16 +2,16 @@
 
 ## Status
 
-Haven 42 has an offline, effect-free parser for future structured model tool
-calls. It is not imported by the application, included in a package, connected
-to a provider, or authorized to execute a tool.
+Haven 42 has an offline parser for future structured model tool calls. The
+application does not import it, packages do not include it, and it cannot
+connect to a provider or execute a tool.
 
-The foundation exists to make malformed or hostile provider output fail closed
-before any future runtime integration is considered.
+Its current job is to reject malformed or hostile provider output before any
+future runtime integration is considered.
 
 ## Supported candidate shapes
 
-The parser recognizes only two exact, review-only response shapes:
+The parser recognizes two exact, review-only response shapes:
 
 - a complete, non-streaming Ollama 0.32.5 response bound to the requested
   model, a normal `stop`, bounded provider metrics, and one indexed function
@@ -19,8 +19,8 @@ The parser recognizes only two exact, review-only response shapes:
 - an OpenAI-compatible assistant choice containing one identified function
   call whose arguments are strict JSON.
 
-This is transport-shape compatibility, not provider admission. No network
-request is made by the parser or its tests.
+This checks transport shape, not provider support. Neither the parser nor its
+tests makes a network request.
 
 ## Security boundary
 
@@ -51,25 +51,25 @@ Run:
 python scripts/test-structured-tool-transport.py
 ```
 
-The deterministic suite covers both candidate shapes and hostile unknown tools,
-parallel calls, mixed content, duplicate keys, invalid JSON values, wrong
-types, unknown or missing arguments, dangerous keys, oversized strings, cyclic
-objects, and unsupported transports. Static checks also keep the module out of
-the product runtime and restrict its imports to JSON and regular-expression
+The deterministic suite covers both candidate shapes plus hostile unknown
+tools, parallel calls, mixed content, duplicate keys, invalid JSON values,
+wrong types, unknown or missing arguments, dangerous keys, oversized strings,
+cyclic objects, and unsupported transports. Static checks keep the module out
+of the product runtime and limit its imports to JSON and regular-expression
 processing.
 
-An explicit manual harness can exercise the exact Ollama profile with a fixed
+An explicit manual harness can test the exact Ollama profile with a fixed
 synthetic prompt and an installed-model list supplied by the operator. It
 requires `--live`, validates the endpoint through the shared IP-literal and
 no-redirect policy, never downloads a model, bounds every response, and
 attempts to unload each tested model in a `finally` path. Its ignored local
-evidence retains model identifiers and outcome categories only; it does not
+record retains model identifiers and outcome categories only; it does not
 retain the endpoint, prompt, response, or tool arguments. Four installed
 tool-capable models passed the exact envelope and argument check against Ollama
 0.32.5; one installed model was correctly classified as not supporting tools.
-This is transport evidence, not application or execution admission.
+This validates transport only, not application integration or execution.
 
-WSL2 may run this effect-free suite as preliminary cross-environment evidence,
+WSL2 may run this offline suite as a preliminary cross-environment check,
 but WSL2 is not native Linux evidence and cannot satisfy a native package or
 operating-system isolation gate.
 

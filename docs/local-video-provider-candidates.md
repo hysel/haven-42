@@ -1,6 +1,6 @@
 # Local Video Provider Candidates
 
-Recorded 2026-07-22 from official upstream repositories and model cards, then rechecked against official upstream requirements and licenses on 2026-08-04. These candidates are documentation-only. No video capability, adapter, harness, workflow, runtime configuration, model, or installer is admitted.
+This record uses official upstream repositories and model cards from 2026-07-22, with upstream requirements and licenses rechecked on 2026-08-04. These candidates are documentation-only. No video capability, adapter, harness, workflow, runtime configuration, model, or installer is admitted.
 
 ## HunyuanVideo 1.5
 
@@ -56,7 +56,7 @@ Official sources: [system requirements](https://docs.ltx.io/open-source-model/ge
 
 ## Evaluation Order And Admission Decision
 
-HunyuanVideo 1.5 and Wan2.2 require separate Linux NVIDIA evaluations for text-to-video and image-to-video. LTX-2.3 remains deferred until suitable 32 GB-class VRAM and storage are available. Every run must verify accelerator use, duration, resolution, frame rate/count, codec/container decoding, non-empty frames, cancellation, timeout, restart, retained state, cleanup, rollback, and uninstall.
+HunyuanVideo 1.5 and Wan2.2 require separate Linux NVIDIA evaluations for text-to-video and image-to-video. LTX-2.3 remains deferred until suitable 32 GB-class VRAM and storage are available. Each run must verify accelerator use, duration, resolution, frame rate/count, codec/container decoding, non-empty frames, cancellation, timeout, restart, retained state, cleanup, rollback, and uninstall.
 
 An exact-profile preflight on 2026-08-03 evaluated an Ubuntu 26.04 host with a
 Quadro RTX 5000 (16,384 MiB VRAM, CUDA capability 7.5), 16 GB system memory,

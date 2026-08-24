@@ -2,10 +2,9 @@
 
 _For contributors preparing an isolated Arch Linux virtual machine for Haven 42 testing._
 
-This page documents the automated Archinstall path used for the Haven 42 test
-lab. It is not required to use Haven 42. The procedure deliberately keeps a
-final human confirmation because starting the installation erases the selected
-virtual disk.
+This is the automated Archinstall path used in the Haven 42 test lab. You do
+not need it to use Haven 42. The final confirmation remains manual because
+starting the installation erases the selected virtual disk.
 
 ## Before loading the configuration
 
@@ -23,9 +22,9 @@ ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub
 - Do not continue if the target disk is ambiguous.
 - Verify the displayed SSH host fingerprint before transferring files.
 
-Keep general settings and credentials in separate files. The credentials file
-should contain a password hash, not a plaintext password. Restrict it to the
-root account while the live installer uses it:
+Keep settings and credentials in separate files. Store a password hash, never
+a plaintext password, in the credentials file. While the live installer uses
+that file, restrict it to the root account:
 
 ```bash
 chmod 600 /root/haven42-arch-credentials.json
@@ -45,8 +44,8 @@ archinstall \
   --creds /root/haven42-arch-credentials.json
 ```
 
-The 4.4 example configuration and runtime parser differ in several important
-places. A working disk definition must account for the runtime behavior:
+The 4.4 example configuration does not exactly match the runtime parser. A
+working disk definition must account for these differences:
 
 - Every partition `start` and `size` needs a `sector_size` object such as
   `{"value": 512, "unit": "B"}`. A `null` value causes the parser to stop.
@@ -58,16 +57,14 @@ places. A working disk definition must account for the runtime behavior:
   display the friendlier label `All open-source (default)`, but that display
   label is not a valid JSON value.
 
-These parsing failures occur before partitioning starts. Read the full error
-and confirm that no installation or disk operation began before retrying with a
-corrected file.
+These parser failures occur before partitioning starts. Read the full error and
+confirm that no installation or disk operation began before retrying.
 
 ## Starting the installation
 
-Loading the two files opens a populated review screen. It does not start
-installation automatically. This is intentional: review the target disk,
-wipe setting, hostname, desktop, filesystem, bootloader, and user before
-selecting **Install**.
+Loading the two files opens a populated review screen; it does not start the
+installation. Review the target disk, wipe setting, hostname, desktop,
+filesystem, bootloader, and user before selecting **Install**.
 
 After selecting **Install**, Archinstall performs the configured installation
 without requiring the same settings to be entered again.
@@ -86,9 +83,9 @@ normally unnecessary when the two JSON files are already present in `/root`.
 
 ## If configuration loading fails
 
-Do not repeatedly change unrelated fields. Work from the first exception in
-the traceback, correct that field, and reload the configuration. Archinstall
-records its diagnostic log at:
+Do not repeatedly change unrelated fields. Start with the first exception in the
+traceback, correct that field, and reload the configuration. Archinstall writes
+its diagnostic log to:
 
 ```text
 /var/log/archinstall/install.log

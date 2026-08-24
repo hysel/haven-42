@@ -2,18 +2,18 @@
 
 ## Purpose
 
-Use this workflow when the editor machine is not the same machine that runs the local LLM server. Common examples are:
+Use this workflow when your editor and local LLM server run on different machines. Common examples are:
 
 - Windows laptop to Linux Ollama server
 - Linux workstation to Linux Ollama server
 - macOS workstation to Linux Ollama server
 - macOS workstation to macOS model host
 
-The remote runner sends the existing local GPU/CPU profile script over SSH and runs it in memory on the remote host. It does not install files on the remote machine. The remote host still needs the normal local prerequisites for useful GPU detection, such as `bash`, optional `nvidia-smi`, optional `rocm-smi`, and optional Ollama.
+The remote runner sends the existing GPU/CPU profile script over SSH and runs it in memory on the remote host. It does not install files on the remote machine. The remote host still needs the usual tools for useful GPU detection: `bash`, optional `nvidia-smi`, optional `rocm-smi`, and optional Ollama.
 
 ## What It Collects
 
-The remote profile output uses the same JSON shape as the local profile scripts:
+The remote profile uses the same JSON shape as the local scripts:
 
 - Platform and operating system summary
 - System RAM
@@ -33,7 +33,7 @@ On the client machine:
 
 - OpenSSH client available as `ssh`
 - This pack repository checked out locally
-- Key-based SSH recommended. The remote profile scripts run SSH in non-interactive mode by default so they fail clearly instead of hanging on password or host-key prompts. If you use interactive/password SSH, the scripts switch to copy-and-run mode with `scp` so the password prompt can use the console.
+- Key-based SSH is recommended. The scripts use non-interactive SSH by default, so they fail instead of hanging on password or host-key prompts. With interactive/password SSH, they switch to copy-and-run mode with `scp` so the password prompt can use the console.
 
 On the remote machine:
 
@@ -50,7 +50,7 @@ Before running the remote profile script, verify SSH works by itself:
 ssh your-user@your-linux-host "echo remote-ok"
 ```
 
-If this prompts to trust the host key, answer it there first. If it asks for a password, configure key-based SSH for automation or use the script's interactive override for a manual one-off test. Interactive mode uploads the profiler to `/tmp`, runs it, and removes it afterward.
+If this asks you to trust the host key, answer it here first. If it asks for a password, configure key-based SSH for automation or use the interactive override for a manual one-off test. Interactive mode uploads the profiler to `/tmp`, runs it, and removes it afterward.
 
 ## Windows Client To Linux Host
 
@@ -128,7 +128,7 @@ If the script stops before `[5/6]`, the problem is usually local SSH tooling, ho
 
 ## Use The Remote Profile For Model Testing
 
-After the remote profile is written, pass it to the model test runner so model pulls are gated by the remote machine's detected VRAM:
+After writing the remote profile, pass it to the model test runner so it can compare model requirements with the remote machine's detected VRAM:
 
 Windows:
 
@@ -160,9 +160,9 @@ Use the Ollama base URL that is reachable from the machine running the test scri
 
 ## VRAM Selection Mode
 
-`TotalDedicated` is the default. It sums visible dedicated or unknown GPU VRAM from the profile. This is useful for machines where Ollama can use the visible GPU capacity you intend to test.
+`TotalDedicated` is the default. It sums visible dedicated or unknown GPU VRAM from the profile. Use it when Ollama can use the visible GPU capacity you intend to test.
 
-`MaxDedicated` uses the largest single detected GPU. Use this when you want a conservative estimate or when the model runtime cannot reliably use multiple GPUs together.
+`MaxDedicated` uses the largest detected GPU. Use it for a conservative estimate or when the runtime cannot reliably combine multiple GPUs.
 
 Manual `AvailableVramGb` or `--available-vram-gb` still overrides the profile value for controlled tests.
 
@@ -173,7 +173,7 @@ If the script appears stuck or reports that the SSH pipe was closed:
 - Stop it with Ctrl+C if it is still running.
 - Run the SSH preflight command above and resolve host-key, password, or key-permission prompts there.
 - Use `-TimeoutSeconds 30` or `--timeout-seconds 30` while testing.
-- Prefer key-based SSH. Non-interactive mode requires a key that works without a password prompt. If you need password SSH for testing, use `-AllowInteractiveSsh` or `--allow-interactive-ssh`; it uses `scp` copy-and-run mode so the password prompt can use the console. This mode requires `scp` and temporarily copies the profiler to the remote host instead of streaming it through SSH stdin.
+- Prefer key-based SSH. Non-interactive mode requires a key that works without a password prompt. For password SSH, use `-AllowInteractiveSsh` or `--allow-interactive-ssh`; it uses `scp` copy-and-run mode so the password prompt can use the console. This mode temporarily copies the profiler to the remote host instead of streaming it through SSH stdin.
 
 If SSH works but the profile has no GPU VRAM:
 

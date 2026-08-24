@@ -2,15 +2,14 @@
 
 ## Scope
 
-This sanitized record covers an initial automated writing-constraint screen on
-Ollama `0.32.1` using a user-controlled Linux NVIDIA host. The exact endpoint,
-host identity, raw prompts, response text, and machine paths are intentionally
-omitted. The committed harness uses only embedded synthetic material and
-persists neither prompts nor raw output.
+This record covers an initial automated writing-constraint screen on Ollama
+`0.32.1` using a user-controlled Linux NVIDIA host. It omits the endpoint, host
+identity, raw prompts, response text, and machine paths. The committed harness
+uses embedded synthetic material and saves neither prompts nor raw output.
 
-This evidence is not a comparative writing-quality promotion. Blind human review,
-broader repeated sampling, long-form coherence, multilingual coverage, license review,
-and exact hardware utilization evidence remain open.
+This is not a comparative writing-quality result. Blind human review, broader
+repeated sampling, long-form coherence, multilingual coverage, license review,
+and exact hardware-utilization measurements remain open.
 
 ## Exact artifacts
 
@@ -25,7 +24,7 @@ The cases covered a concise professional email, a fact- and
 uncertainty-preserving rewrite, and a structured source-grounded brief. Qwen,
 Gemma, and Mistral retained every required marker and avoided every forbidden
 marker. Granite omitted one required uncertainty phrase in the structured
-brief; it remains a candidate and gains no recommendation authority.
+brief; it remains a candidate and is not recommended on this result.
 
 Each request used `think:false`, temperature zero, a 512-token generation
 bound, and `keep_alive: 0`. The harness called the unload API and checked
@@ -40,7 +39,7 @@ all three cases. Granite again passed the email and fact-preserving rewrite but
 omitted the required `no safety conclusion` uncertainty phrase in the
 structured brief. Average generation rates were 75.86, 54.25, 41.20, and
 127.64 tokens per second respectively; these host-specific measurements are
-diagnostic only.
+specific to this host and diagnostic only.
 
 Every per-case unload and every final model unload passed. A separate final
 `/api/ps` request confirmed that the provider had no loaded models. No model
@@ -56,8 +55,8 @@ its content constraints passed. That cell was discarded and rerun alone: Qwen
 passed all 9/9 constraint and unload checks. Average generation rates in the
 valid cells were 76.26, 53.98, 41.18, and 127.12 tokens per second for Qwen,
 Gemma, Mistral, and Granite respectively. Final independent `/api/ps` audits
-were empty. This additional automation still does not replace blind human
-quality review.
+were empty. This additional automation does not replace blind human review of
+writing quality.
 
 ## Limits and promotion boundary
 
@@ -75,8 +74,8 @@ The reusable harness is `scripts/run-writing-model-matrix.py`.
 
 ## Expanded installed-model screen
 
-An additional bounded run on 2026-07-31 screened eight models that were already
-installed on the same private NVIDIA provider. The host reported Ollama
+An additional bounded run on 2026-07-31 screened eight models already installed
+on the same private NVIDIA provider. The host reported Ollama
 `0.32.5` and approximately 250 GB free before the run. No model was downloaded,
 and neither prompts nor response text were retained.
 
@@ -91,8 +90,8 @@ and neither prompts nor response text were retained.
 | `mistral-small3.2:24b-instruct-2506-q4_K_M` | `5a408ab55df5c1b5cf46533c368813b30bf9e4d8fc39263bf2a3338cfa3b895b` | 3/3 passed | 41.20 tokens/s | unloaded |
 | `devstral-small-2:24b` | `24277f07f62db8f9cb68e9dfc679ea1818a7fbac47a50eff0a701d3f645b63c8` | 3/3 passed | 39.64 tokens/s | unloaded |
 
-These exact-output constraint checks are diagnostic, not a quality ranking.
-The two smaller Qwen variants and Granite remain valid user-selectable models,
-but their misses grant no recommendation or promotion authority. Every case
-used bounded generation and immediate unload; a final independent residency
-check reported no loaded models.
+These exact-output constraint checks are diagnostic, not a quality ranking. The
+two smaller Qwen variants and Granite remain user-selectable, but their misses
+do not support a recommendation or promotion. Every case used bounded
+generation and immediate unload; a final independent residency check reported
+no loaded models.

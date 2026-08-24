@@ -1,7 +1,7 @@
 # Local Image Native Validation Packet
 
-This packet prepares later native Windows AMD, NVIDIA, and Intel runs. It does
-not authorize a download, installation, provider launch, or machine change.
+Use this packet for later native Windows AMD, NVIDIA, and Intel runs. It does
+not authorize downloads, installation, provider launch, or machine changes.
 Each run must use the exact candidate profile manifest, a non-administrator
 account, ignored disposable storage, and the existing source and unsigned
 portable package from the same reviewed commit.
@@ -21,8 +21,8 @@ portable package from the same reviewed commit.
 
 ## Source And Package Cells
 
-Run the same fixed workflow against source and the unsigned portable package.
-For each cell verify loopback-only binding, exact provider/process identity,
+Run the same fixed workflow against the source build and unsigned portable package.
+For each cell, verify loopback-only binding, exact provider/process identity,
 accelerator use, typed metadata-free PNG output, bounded cancellation,
 provider-history cleanup, exact-process shutdown, and endpoint closure. The
 package must not read the repository or contain a provider runtime, checkpoint,

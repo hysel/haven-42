@@ -1,7 +1,7 @@
 # Hardware qualification evidence template
 
-Use this page only after the machine-readable result is complete. During a run,
-keep the result in local review and say plainly that it is unfinished.
+Use this template only after completing the machine-readable result. While a
+run is active, keep its result in local review and label it unfinished.
 
 ## What was tested
 
@@ -14,13 +14,13 @@ keep the result in local review and say plainly that it is unfinished.
 
 ## What passed
 
-Summarize the task gates and 30-minute soaks in ordinary language. Link to the
-machine-readable result instead of duplicating every field.
+Summarize the task gates and 30-minute soaks in plain language. Link to the
+machine-readable result rather than duplicating every field.
 
 ## What did not pass
 
-List every failed, blocked, and not-run cell. Include the exact failure cell and
-do not infer support from another operating system, runtime, editor, or GPU.
+List every failed, blocked, and not-run cell. Name the exact failure cell. Do
+not infer support from another operating system, runtime, editor, or GPU.
 
 ## Coding-agent evidence
 
@@ -37,8 +37,8 @@ GPU telemetry as an electricity-bill measurement.
 
 ## Cross-platform comparison
 
-Describe common passes and divergences. Never carry a Windows result over to
-Linux, or a result from one driver/runtime version to another untested cell.
+Describe common passes and differences. Never carry a Windows result over to
+Linux or apply one driver/runtime result to another untested cell.
 
 ## Limits and decision
 
