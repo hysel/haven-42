@@ -5,11 +5,10 @@ not silently follow `latest`, install a runtime, start a soak, or change a
 managed default. Discovery is the first step of certification, not a passing
 result.
 
-The shared contract is
-`config/runtime-certification-sources.json`. It currently covers official
-Ollama and llama.cpp GitHub releases. A future runtime can use the same process
-after its official repository, immutable tag syntax, expected release assets,
-platforms, and backends are added to that reviewed allowlist.
+The source registry is `config/runtime-certification-sources.json`. It currently
+covers official Ollama and llama.cpp GitHub releases. A future runtime can use
+the same process after its official repository, immutable tag syntax, expected
+release assets, platforms, and backends are added to the reviewed list.
 
 ## Run an on-demand check
 
@@ -23,15 +22,14 @@ python scripts/discover-runtime-certification-candidates.py `
 
 Limit the check to one runtime with `--runtime ollama` or
 `--runtime llama-cpp`. The generated files stay under ignored `dist/` until a
-reviewer intentionally turns exact, sanitized results into repository
-evidence.
+reviewer intentionally records exact, sanitized results in the repository.
 
 The command reads only the official GitHub release APIs declared in the
 contract. It accepts a stable release only when the immutable tag, release
 page, publication time, artifact names, byte lengths, SHA-256 digests, and
-download URLs agree with the allowlist. Drafts, prereleases, redirects,
-unexpected hosts, mutable tags, duplicate assets, missing digests, and
-ambiguous profile matches fail closed.
+download URLs match the reviewed source definition. The check rejects drafts,
+prereleases, redirects, unexpected hosts, mutable tags, duplicate assets,
+missing digests, and ambiguous profile matches.
 
 ## What the report means
 
@@ -40,8 +38,8 @@ ambiguous profile matches fail closed.
 backend, model, or product lifecycle is certified.
 
 `new-official-release-candidate` means the stable official release is newer
-than the versions represented by that runtime's tracked collection. It remains
-blocked until all required certification gates have evidence.
+than the versions in that runtime's tracked collection. It remains blocked
+until every required certification check has supporting results.
 
 `blocked-required-artifact-profiles-missing` means the official release does
 not currently contain every platform/backend artifact in Haven 42's reviewed
@@ -49,7 +47,7 @@ matrix. This can happen while a fresh release is still publishing assets or
 when upstream stops producing one. The process reports the gap and does not
 silently narrow the claimed support matrix.
 
-The report deliberately sets these authorities to false:
+The report cannot perform any of these actions:
 
 - downloading a runtime or model;
 - starting native, hardware, regression, or soak tests;
@@ -77,13 +75,13 @@ For each candidate, complete these stages in order:
    recovery, and removal checks.
 6. Update exact evidence, known limitations, runtime/model requirements, and
    human-facing documentation without replacing earlier evidence.
-7. Ask for a separate owner decision before changing the admitted runtime,
+7. Ask for a separate owner decision before changing the certified runtime,
    managed default, support label, package, or release policy.
 
-When a model needs a newer engine, Haven 42 should select the newest *admitted*
-compatible version for that exact model, platform, and backend. Older admitted
-versions remain compatibility fallbacks when newer releases regress. A
-mutable upstream `latest` value is never an installation input.
+When a model needs a newer engine, Haven 42 should select the newest *certified*
+compatible version for that exact model, platform, and backend. Older certified
+versions remain compatibility fallbacks when newer releases regress. A mutable
+upstream `latest` value is never an installation input.
 
 ## Offline and hostile validation
 
@@ -102,6 +100,6 @@ python scripts/discover-runtime-certification-candidates.py `
   --output-path dist/runtime-certification/fixture.json
 ```
 
-Fixture evidence cannot certify a release by itself. Live official metadata,
+Fixture results cannot certify a release by themselves. Live official metadata,
 downloaded artifact verification, native execution, and human review remain
 separate requirements.

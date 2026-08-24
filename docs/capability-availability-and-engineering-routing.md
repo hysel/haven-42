@@ -1,16 +1,16 @@
 # Capability Availability and Engineering Routing
 
-Milestone 21 separates three decisions that must not be collapsed:
+Milestone 21 keeps three decisions separate:
 
 1. `resolve-capability` deterministically identifies what the user wants.
 2. `discover-capability-availability` reports whether a validated provider is configured and reachable.
 3. `resolve-engineering-route` maps engineering intent to existing workflow plans.
 
-None of these commands invokes a provider or workflow. Availability is not permission.
+None of these commands invokes a provider or workflow. Availability does not grant permission.
 
 ## Provider discovery
 
-Discovery is offline by default. It reads `config/capabilities.json` and `config/providers.json`, reports validated candidates, and does not expose or persist an endpoint.
+Discovery runs offline by default. It reads `config/capabilities.json` and `config/providers.json`, reports validated candidates, and neither exposes nor persists an endpoint.
 
 ```powershell
 .\scripts\discover-capability-availability.ps1 -CapabilityId general.chat -AsJson
@@ -36,6 +36,6 @@ Bounded Windows live-probe evidence is recorded in [Capability Availability Vali
 .\scripts\resolve-engineering-route.ps1 -Text "review code" -AsJson
 ```
 
-The result includes ordered workflow steps, safety levels, and OS-specific entry points. `InvocationAllowed` is always false. A caller must collect required repository paths and workflow arguments, disclose effects, and obtain approval where the selected workflow requires it.
+The result includes ordered workflow steps, safety levels, and OS-specific entry points. `InvocationAllowed` is always false. The caller must collect required repository paths and workflow arguments, disclose effects, and obtain approval where the selected workflow requires it.
 
 General-purpose text validation never promotes an engineering workflow or model lane. Image generation remains `configuration-required` until a provider and adapter pass the same evidence gate.

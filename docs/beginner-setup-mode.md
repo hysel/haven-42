@@ -5,11 +5,14 @@
 > the Haven 42 application. New users should follow the wiki
 > [Quick Start](Quick-Start) instead.
 
-Beginner setup mode creates an ordered local setup plan from the workflow registry.
+Beginner setup mode builds an ordered local setup plan from the workflow registry.
 
-It is intentionally a plan generator, not an installer. The first output shows exactly which commands to run, which workflow each command uses, and where the workflow boundary changes from read-only to previewing a write.
+It generates a plan; it does not install anything. The output shows which
+commands to run, which workflow each command uses, and where the workflow moves
+from read-only checks to a write preview.
 
-Use `docs/setup-paths.md` when you need to compare the quick beginner path with team or enterprise review and audit expectations.
+Use `docs/setup-paths.md` to compare this quick path with team or enterprise
+review and audit requirements.
 
 Generate the Windows plan:
 
@@ -24,8 +27,8 @@ Generate a Linux or macOS plan:
 ./scripts/get-beginner-setup-plan.macos.sh --markdown-output-path runtime-validation-output/beginner-setup-plan.md --output-path runtime-validation-output/beginner-setup-plan.json --as-json
 ```
 
-Linux and macOS use the native Python 3 renderer behind these wrappers. They
-do not require PowerShell. Python 3 is the only renderer prerequisite.
+Linux and macOS use the native Python 3 renderer behind these wrappers; they do
+not require PowerShell. Python 3 is the only renderer prerequisite.
 
 The generated plan covers:
 

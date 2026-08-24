@@ -1,10 +1,10 @@
 # Bounded Task Composition
 
-Haven 42 has a plan-only composition foundation for joining trusted read-only workflows into a small dependency graph. It validates intent and produces metadata-only intermediate artifact references. It does not execute a workflow, create a process, read or write a user file, contact a provider, use an approval grant, or modify a machine.
+Haven 42 can plan a small dependency graph of trusted read-only workflows. This foundation validates intent and produces metadata-only intermediate artifact references. It does not execute a workflow, create a process, read or write a user file, contact a provider, use an approval grant, or modify a machine.
 
 `config/task-composition-contract.json` is the default-deny contract. A request is limited to six uniquely named steps, five dependencies per step, exact known fields, and workflows that are both `uiReady` and `read-only` in `config/workflows.json`. Engine-owned lifecycle fields distinguish a fresh plan, one bounded retry, and cancellation; retry identity must point to a different earlier composition and attempts cannot exceed two. Unknown workflows, write-capable workflows, arguments, renderer approvals, additional fields, duplicate steps, missing dependencies, self-dependencies, cycles, replayed retry identity, and inconsistent lifecycle state are rejected.
 
-`scripts/simulate-task-composition.py` performs deterministic topological planning. Each planned edge uses an exact metadata-only intermediate record with source and consumer step IDs, classification, and validation state; no content field is admitted. Each step also reports an engine-owned approval posture that cannot grant execution. Cancellation can stop the plan before any step artifact is emitted. In-process results always set `executionAllowed` to false and explicitly report process creation, filesystem access, network access, and machine modification as false. The command-line entry point deliberately logs no request-derived plan data; it emits only a constant acceptance statement after validation.
+`scripts/simulate-task-composition.py` performs deterministic topological planning. Each planned edge uses a metadata-only intermediate record with source and consumer step IDs, classification, and validation state; no content field is admitted. Each step also reports an engine-owned approval posture that cannot grant execution. Cancellation can stop the plan before any step artifact is emitted. In-process results always set `executionAllowed` to false and explicitly report process creation, filesystem access, network access, and machine modification as false. The command-line entry point logs no request-derived plan data; it emits only a constant acceptance statement after validation.
 
 `scripts/test-task-composition.py` covers 19 ordered-planning, typed metadata-only artifact, fresh/retry/cancel lifecycle, cancellation, unknown-field, size-bound, write-workflow, cycle, missing-dependency, attempt-bound, retry-replay, renderer-approval, and renderer-argument cases.
 
@@ -32,7 +32,7 @@ crossing a non-execution path. Retry requires a completed prior attempt
 with no possible effects. Recovery is visibly blocked whenever prior effects
 may have occurred, and cancellation ends before approval evaluation.
 
-The 49-case hostile suite verifies those boundaries. Even when every structural
+The 49-case hostile suite verifies these boundaries. Even when every structural
 precondition matches, `ApprovalAcceptedForExecution` and `ExecutionAllowed`
 remain false; no approval is issued or consumed and no process, filesystem,
 network, artifact, or machine effect occurs.
@@ -59,7 +59,7 @@ retry or recovery, consume an approval, or permit execution. The 46-case suite
 also confirms that no journal, artifact, file, process, or network effect
 occurs.
 
-This foundation remains intentionally narrower than executable composition.
+This foundation is intentionally narrower than executable composition.
 Future execution still requires a separately admitted native opaque-token
 issuer, workflow dispatcher, typed artifact reader, durable atomic effect
 journal, bounded runtime cancellation/retry/recovery, rollback evidence, and

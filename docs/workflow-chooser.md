@@ -1,6 +1,6 @@
 # Workflow Chooser
 
-The workflow chooser is a complete registry-backed report for users and maintainers who need to compare all stable workflows without reading every script. It is generated from `config/workflows.json`.
+The workflow chooser compares every stable workflow without making users or maintainers read each script. It generates the report from `config/workflows.json`.
 
 Start with `docs/haven-42-menu.md` for the short guided path. Use this chooser when you need the full workflow list with safety levels, commands, and reference docs.
 
@@ -17,7 +17,7 @@ Generate the chooser on Linux or macOS:
 ./scripts/show-workflow-chooser.macos.sh --markdown-output-path runtime-validation-output/workflow-chooser.md --output-path runtime-validation-output/workflow-chooser.json --as-json
 ```
 
-The Linux and macOS wrappers use the native Python 3 renderer and do not
+The Linux and macOS wrappers use the native Python 3 renderer, so they do not
 require PowerShell.
 
 The report includes:
@@ -30,4 +30,4 @@ The report includes:
 - Reference documentation.
 - Link back to `docs/script-reference-appendix.md`.
 
-The generator is read-only except for optional output paths.
+The generator only writes to the optional output paths you provide.

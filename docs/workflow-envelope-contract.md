@@ -2,13 +2,13 @@
 
 ## Purpose
 
-`config/workflow-envelope-contract.json` defines the versioned JSON boundary between the workflow dispatchers and automation such as the planned local web UI.
+`config/workflow-envelope-contract.json` defines the versioned JSON exchanged between workflow dispatchers and automation such as the planned local web UI.
 
-The contract is additive. Existing dispatcher list, dry-run, JSON, and direct argument modes remain supported.
+The contract adds an automation interface without replacing the existing dispatcher list, dry-run, JSON, or direct argument modes.
 
 ## Request
 
-Schema version 1 accepts:
+Schema version 1 accepts these fields:
 
 - `workflowId`: a stable ID from `config/workflows.json`.
 - `platform`: `windows`, `linux`, or `macos`.
@@ -41,7 +41,7 @@ Linux example:
 
 ## Response
 
-Every envelope has:
+Every response envelope includes:
 
 - `schemaVersion`: currently `1`.
 - `kind`: `workflow-execution`.
@@ -54,8 +54,8 @@ Dry runs include a `DRY_RUN` warning. Resolution and execution failures return a
 
 ## Privacy Boundary
 
-Argument values and child output are omitted from responses by default. This avoids casually echoing local paths, endpoints, or secrets into UI logs.
+Responses omit argument values and child output by default so local paths, endpoints, or secrets do not spill into UI logs.
 
 `includeOutput` is an explicit local-only opt-in. Raw child output may contain private machine or repository data. Do not persist or commit it without sanitization.
 
-The envelope does not replace workflow-specific output files. Reports and artifacts remain owned by the invoked workflow.
+The envelope does not replace workflow-specific output files. The invoked workflow still owns its reports and artifacts.

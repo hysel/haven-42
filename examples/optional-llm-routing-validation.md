@@ -2,13 +2,13 @@
 
 ## Scope
 
-This sanitized record covers one bounded `qwen3.5:9b` structured-output routing request on Windows through a user-controlled local-network Ollama endpoint. The endpoint, routing text, raw response, and local paths are intentionally omitted.
+This sanitized record covers one bounded `qwen3.5:9b` structured-output routing request on Windows through a user-controlled local-network Ollama endpoint. It omits the endpoint, routing text, raw response, and local paths.
 
 ## Result
 
-An unambiguous summarization intent produced the registered `content.summarize` capability ID. Deterministic code reloaded the capability from the committed registry, exposed its configuration-required availability and policy, and kept `InvocationAllowed` false. The output stated that neither the prompt nor endpoint was persisted, and serialized output contained neither value.
+An unambiguous summarization intent produced the registered `content.summarize` capability ID. Deterministic code reloaded the capability from the committed registry, reported its configuration-required availability and policy, and kept `InvocationAllowed` false. The output stated that neither the prompt nor endpoint was persisted, and serialized output contained neither value.
 
-Fixture tests also prove dry-run-first behavior and rejection of an invented capability ID. Cross-platform wrappers use native shell/Python command discovery. The model was unloaded after the live request; no model was pulled or deleted.
+Fixture tests also verify dry-run-first behavior and rejection of an invented capability ID. Cross-platform wrappers use native shell/Python command discovery. The model was unloaded after the live request; no model was pulled or deleted.
 
 ## Limits
 

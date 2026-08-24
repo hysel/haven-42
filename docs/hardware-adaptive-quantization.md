@@ -1,6 +1,6 @@
 # Hardware-Adaptive Model Quantization
 
-Haven 42 treats quantization as an evidence-bound model lifecycle, not a bit-count shortcut. The preferred result is a trusted compatible pre-quantized artifact. Local conversion is proposed only when no trustworthy compatible artifact exists and the exact runtime, hardware, license, storage, and quality gates can be satisfied.
+Quantization is not just a bit-count shortcut. Haven 42 prefers a trusted, compatible pre-quantized artifact and proposes local conversion only when none exists and the exact runtime, hardware, license, storage, and quality gates can be satisfied.
 
 ## Contracts
 
@@ -13,7 +13,7 @@ Source weights and derivatives stay outside the application and repository. A co
 
 ## Planning Inputs
 
-The local-only hardware profile must include operating system and architecture, accelerator vendor/model/runtime, usable dedicated or unified memory, system memory, CPU instruction support, driver/runtime versions, available storage, target context, concurrency, and workload lane. Hostnames, IP addresses, usernames, endpoints, serial numbers, local paths, and model files are not committed.
+The local-only hardware profile records the operating system and architecture, accelerator vendor/model/runtime, usable dedicated or unified memory, system memory, CPU instruction support, driver/runtime versions, available storage, target context, concurrency, and workload lane. It does not commit hostnames, IP addresses, usernames, endpoints, serial numbers, local paths, or model files.
 
 ## Consent And Provenance
 
@@ -23,7 +23,7 @@ Before download or conversion, disclose immutable source, license and derivative
 
 Compare the candidate with its source or trusted baseline for cold-load time, first-token latency, token throughput, peak accelerator and system memory, disk use, accelerator confirmation, context stability, and concurrency. Quality checks cover general chat, summarization, tool calls, read-only engineering, and approved-write reliability when that lane is intended. A speed or memory improvement cannot compensate for unacceptable quality loss or malformed tool behavior.
 
-Each model revision, recipe, runtime version, operating system, accelerator, context target, and operation is a separate evidence cell. Failed candidates leave a sanitized decision record only and ship no conversion harness, runtime configuration, artifact, or active catalog entry.
+Test each model revision, recipe, runtime version, operating system, accelerator, context target, and operation separately. Failed candidates leave only a sanitized decision record and ship no conversion harness, runtime configuration, artifact, or active catalog entry.
 
 ## Local Dry Run
 
@@ -49,7 +49,7 @@ Create a local request JSON containing `source`, `target`, `hardwareProfile`, op
 ./scripts/plan-model-quantization.linux.sh --request quantization-request.local.json --output quantization-plan.local.json
 ```
 
-The new output file is created exclusively and is never overwritten; the plan is not printed to the console because it may contain local hardware and model metadata. The result always reports `network`, `downloads`, `writes`, `conversion`, and `activation` as false. A `local-derivative` result is only a proposal for a later approved and independently validated workflow.
+The planner creates a new output file and never overwrites one. It does not print the plan to the console because the plan may contain local hardware and model metadata. The result always reports `network`, `downloads`, `writes`, `conversion`, and `activation` as false. A `local-derivative` result is only a proposal for a later approved and independently validated workflow.
 
 Future Windows Intel and native macOS cells use the [Quantized Artifact Native Validation Packet](quantized-artifact-native-validation-packet.md). Failed SYCL evidence remains a failed cell and cannot grant catalog or activation authority.
 

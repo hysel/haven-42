@@ -1,17 +1,16 @@
 # August 2026 local-model qualification
 
-This report explains what happened when Haven 42 exercised the newly reviewed
-local model candidates on real Linux accelerator hardware. It is an
-engineering record, not a promise that every model is ready for every person or
-computer.
+This report records how newly reviewed local models behaved on real Linux
+accelerator hardware. It applies only to the tested configurations; it does
+not mean that every model is ready for every computer or use case.
 
 ## How to read the result
 
 - **Passed core qualification** means Chat, Writing, Summarization, model
   unload, accelerator residency, and a bounded 30-minute soak all passed.
-- **Passed an additional capability** means that capability also passed its
-  separate deterministic check. A core pass does not imply a vision, coding,
-  reasoning, or tool-use pass.
+- **Passed an additional capability** means that capability passed its own
+  deterministic check. A core pass does not imply a vision, coding, reasoning,
+  or tool-use pass.
 - **Failed validation** means a required check failed. The harness stopped
   before the soak when a task gate failed.
 - **Deferred** means the artifact could not be tested safely on available
@@ -28,11 +27,11 @@ in the evidence. Tool arguments were validated but never executed.
 | Ubuntu Linux with two Tesla V100 32 GiB cards | Ollama 0.32.13, CUDA | Exact high-memory model behavior on this dual-card profile |
 | Ubuntu 26.04 with Radeon RX 5700 XT 8 GiB | Ollama 0.32.13, Vulkan through RADV | Exact RDNA 1 behavior with fail-closed CPU-fallback protection |
 
-The harness required immutable model manifests, the pinned runtime version,
-positive accelerator residency, three repeated samples for each required task,
-an unload after every sample, and at least 30 minutes for every model that
-reached the soak. New cells also preserve Ollama's equality between total model
-bytes and GPU-resident bytes; partial offload cannot satisfy that evidence.
+The harness required immutable model manifests, a pinned runtime, confirmed
+accelerator residency, three samples for each required task, an unload after
+every sample, and at least 30 minutes for every model that reached the soak.
+New cells also require Ollama to report equal total-model and GPU-resident byte
+counts; partial offload does not pass this gate.
 
 ## Results
 
@@ -55,9 +54,9 @@ bytes and GPU-resident bytes; partial offload cannot satisfy that evidence.
 | Nemotron 3.5 Lightning 30B-A3B Q8_0 · dual V100 CUDA | Passed core | Core and soak passed at 58.232 tokens/s; remaining advertised capabilities were not completed in this campaign and license review remains open. |
 
 The MLX variants remain deferred until Apple Silicon is available. Nemotron
-3.5 Lightning BF16 remains deferred because the 65.9 GB artifact cannot retain
-the reviewed safety headroom in the 64 GiB aggregate-GPU lane. A deferred row
-is an admission decision, not a failed model.
+3.5 Lightning BF16 remains deferred because its 65.9 GB artifact does not leave
+the required safety headroom on the 64 GiB aggregate-GPU profile. Deferred is
+an admission decision, not a model failure.
 
 ## Boundaries that remain
 
@@ -74,9 +73,9 @@ is an admission decision, not a failed model.
 
 ## Machine-readable evidence
 
-Each model record binds to an exact canonical inventory and qualification
-matrix generation. The combined campaign summary records task, soak, extended
-capability, and full-residency results without host names, addresses,
-credentials, hardware serials, or raw user content. The public evidence catalog
-is advisory input for a future updater; it cannot install a runtime, download a
-model, or change a default by itself.
+Each model record identifies the exact canonical inventory and qualification
+matrix generation. The combined summary records task, soak, extended-capability,
+and full-residency results without host names, addresses, credentials, hardware
+serials, or raw user content. The public evidence catalog is advisory input for
+a future updater; by itself, it cannot install a runtime, download a model, or
+change a default.

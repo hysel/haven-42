@@ -1,12 +1,11 @@
 # Evidence Catalog
 
-The evidence catalog is the compact index of what has actually been validated.
-Use it to avoid turning one successful test into a broader claim than the
-project can support.
+The evidence catalog indexes what has actually been validated. Use it to keep
+one successful test from becoming a broader claim than the project supports.
 
 The machine-readable catalog lives at `config/evidence-catalog.tsv`.
 
-Its machine-readable definition lives at
+The v2 aggregation rules live at
 `config/capability-evidence-contract.json`.
 
 Every catalog row also has a generated, plain-language wiki page. Browse them
@@ -25,26 +24,26 @@ Check that committed pages are current without changing files:
 python scripts/generate-evidence-wiki-pages.py --check
 ```
 
-The registry is reserved as an evidence input for the automatic-updates work
-on the roadmap. It is advisory only: it cannot start a download, install a
-runtime, promote a model, or change a default. A future updater must still
-require signed update metadata, an exact capability match, user policy,
-compatibility and health checks, and rollback.
+The automatic-updates work on the roadmap may read this registry in the future.
+The registry cannot start a download, install a runtime, promote a model, or
+change a default. Any future updater must still require signed update metadata,
+an exact capability match, user policy, compatibility and health checks, and
+rollback.
 
 ## Capability Evidence Contract v2
 
-Version 2 makes readiness a capability claim instead of a model-wide claim.
-The complete key combines surface, surface version, provider, model, operating
-system, operation, and validation mode.
+Version 2 records readiness for a specific capability rather than an entire
+model. Its complete key combines surface, surface version, provider, model,
+operating system, operation, and validation mode.
 
-Consumers must match every key field. A write result from Continue cannot make
+Consumers must match every key field. A write result from Continue does not make
 the same model write-ready in Aider, OpenCode, or another surface. A read result
-cannot become plan, review, or write evidence. Windows evidence cannot be
-silently inherited on Linux or macOS.
+does not prove plan, review, or write behavior. Windows results do not transfer
+to Linux or macOS.
 
-When duplicate rows have the same complete key, consumers select the most
-conservative status and retain every unique evidence path. They must not pick
-the first or most optimistic row.
+When duplicate rows share a complete key, consumers use the most conservative
+status and retain every unique evidence path rather than selecting the first or
+most optimistic row.
 
 ## Fields
 

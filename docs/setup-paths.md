@@ -1,10 +1,10 @@
 # Setup Paths
 
-This pack supports two setup styles without splitting the project into separate beginner and enterprise editions.
+The same pack supports a quick individual setup and a reviewable team setup.
 
 ## Beginner Path
 
-Use this path when you want a local coding assistant working quickly on one machine or one project.
+Choose this path to get a local coding assistant working on one computer or project.
 
 Start here:
 
@@ -23,7 +23,8 @@ Default posture:
 
 ## Team Or Enterprise Path
 
-Use this path when setup needs reviewability, repeatability, or audit evidence across more than one project.
+Choose this path when setup must be reviewable, repeatable, or auditable across
+multiple projects.
 
 Start here:
 
@@ -53,4 +54,6 @@ Both paths use the same safety model:
 | Trust writes | Tool-use validation before approved writes. | Tool-use validation plus audit evidence and external verification. |
 | Troubleshoot | Troubleshooting docs and local health check. | Health check, runtime validation, evidence dashboard, release readiness. |
 
-Beginner-friendly does not mean weaker safety. Enterprise-safe does not mean harder first-run setup. The difference is how much evidence, review, and repeatability the user needs before applying changes.
+Beginner-friendly does not mean weaker safety. Enterprise-safe does not need to
+make first-run setup harder. The difference is how much evidence, review, and
+repeatability you need before applying changes.
