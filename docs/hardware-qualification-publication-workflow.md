@@ -1,7 +1,7 @@
 # Publishing hardware qualification evidence
 
-This workflow turns a completed lab campaign into a human-readable result
-without exposing the lab or overstating what was tested.
+Use this workflow to turn a completed lab campaign into a readable result
+without exposing the lab or overstating the tests.
 
 ## 1. Export only the evidence boundary
 
@@ -12,7 +12,7 @@ host names, addresses, accounts, keys, machine identifiers, or raw model text.
 
 ## 2. Build the exact environment result
 
-Run `scripts/alpha2-hardware-qualification-evidence.py`. The importer refuses
+Run `scripts/alpha2-hardware-qualification-evidence.py`. The importer rejects
 unexpected models, changed execution order, incomplete results claiming
 completion, malformed telemetry, unknown profile fields, and missing failure
 cells. An unfinished campaign remains `in-progress-local-review-only`.
@@ -27,9 +27,9 @@ systems, drivers, runtimes, or editor surfaces.
 ## 4. Produce the review copy
 
 Run `scripts/alpha2-hardware-qualification-report.py` to create the readable
-comparison and failure-triage bundle. Without `--allow-incomplete`, it refuses
-to render an unfinished comparison. That override is for ignored local review
-only and must not be used to publish final evidence.
+comparison and failure-triage bundle. Without `--allow-incomplete`, it will not
+render an unfinished comparison. That override is only for ignored local
+review and must not be used to publish final evidence.
 
 Older records that did not capture exact validator, orchestrator, and runtime
 artifact bindings may be passed through
@@ -41,9 +41,9 @@ must be complete, freshly bound, and free of not-run comparison cells.
 ## 5. Review before publishing
 
 Confirm the exact environment, artifact and runtime digests, failure cells,
-soak duration, power scope, omissions, and privacy declarations. Decide
-separately whether the evidence justifies a support label, default, runtime, or
-download-policy change; the evidence itself authorizes none of those actions.
+soak duration, power scope, omissions, and privacy declarations. Separately
+decide whether the evidence justifies a support label, default, runtime, or
+download-policy change. The evidence itself authorizes none of those actions.
 
 ## 6. Synchronize the documentation journey
 
