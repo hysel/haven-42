@@ -3,7 +3,7 @@
 ## Exact-profile partial pass
 
 The official ComfyUI `v0.30.0` Intel portable completed a disposable native
-Windows validation on 2026-08-03. This evidence narrows the Milestone 23 gate;
+Windows validation on 2026-08-03. These results narrow the Milestone 23 gate;
 it does not ship or promote a runtime, model, installer, provider profile, or
 product configuration.
 

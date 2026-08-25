@@ -6,7 +6,7 @@ and macOS Keychain candidates have operation-free availability boundaries only.
 Storage dependency, production application-directory binding, application
 persistence, and runtime activation are not admitted.
 
-The checked-in activation-readiness policy converts the remaining work into
+The checked-in activation-readiness policy lists the remaining work as
 eight exact, evidence-linked gates. Its 31-check hostile suite rejects missing,
 reordered, traversing, effect-bearing, or overstated policy states. All gates
 remain open and the evaluator always preserves Private session; it has no

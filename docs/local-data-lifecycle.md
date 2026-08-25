@@ -1,6 +1,6 @@
 # Local Data Lifecycle
 
-Haven 42 separates product-owned engine files from user-owned configuration, models, artifacts, and logs. Uninstall may remove the selected engine version and session temporary files; it does not remove user configuration, models, provider data, or generated artifacts by default.
+Haven 42 keeps product-owned engine files separate from user-owned configuration, models, artifacts, and logs. Uninstall may remove the selected engine version and session temporary files, but it leaves user configuration, models, provider data, and generated artifacts in place by default.
 
 Raw prompts, raw responses, endpoints, and secrets are not persisted by default. Credentials, if a future provider needs them, belong in the operating system credential store rather than repository or configuration files. Alpha logs are local, bounded, sanitized, and stored in the fixed sibling `Haven42-Logs` directory. Removing managed components deletes only `Haven42-Data` and preserves that separate log directory; the Troubleshooting controls ask separately before removing logs.
 The browser stores one fixed-key preference containing five positive integer

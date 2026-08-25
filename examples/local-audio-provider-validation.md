@@ -2,7 +2,7 @@
 
 ## ACE-Step 1.5 Linux CUDA partial pass
 
-A disposable exact-profile feasibility cell ran on 2026-07-22. It validates one instrumental REST operation and runtime lifecycle; it does not promote an audio provider or authorize executable integration files.
+A disposable exact-profile feasibility cell ran on 2026-07-22. It validates one instrumental REST operation and its runtime lifecycle without promoting an audio provider or authorizing executable integration files.
 
 | Field | Value |
 | --- | --- |

@@ -2,7 +2,7 @@
 
 Status: blocked; Private session remains the only effective mode.
 
-The checked-in readiness policy turns the remaining saved-history work into
+The checked-in readiness policy lists the remaining saved-history work as
 eight explicit gates. The evaluator reads only that fixed repository policy,
 verifies every referenced evidence file, and emits a bounded public report. It
 does not accept a caller-selected path and has no database, filesystem-write,
