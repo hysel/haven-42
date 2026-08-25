@@ -1,8 +1,8 @@
 # Local Text Capabilities
 
-One provider-neutral adapter supports repository-free chat, writing, and summarization. `ollama.local-text` uses Ollama's chat API and is live-validated. `llamacpp.local-text` uses the OpenAI-compatible chat-completions API and is live-validated for the exact Linux NVIDIA/CUDA profile admitted by `config/inference-engine-registry.json`. Its direct pinned-server run passed discovery, profile admission, invocation, exact output, sanitization, and cleanup. Windows AMD/HIP retains engine-only evidence until its adapter is run directly, and every other profile fails closed.
+One provider-neutral adapter supports repository-free chat, writing, and summarization. `ollama.local-text` uses Ollama's chat API and has live validation. `llamacpp.local-text` uses the OpenAI-compatible chat-completions API and has live validation for the exact Linux NVIDIA/CUDA profile admitted by `config/inference-engine-registry.json`. Its direct pinned-server run passed discovery, profile admission, invocation, exact output, sanitization, and cleanup. Windows AMD/HIP retains engine-only evidence until its adapter is run directly; every other profile fails closed.
 
-Create a matching session first with `scripts/start-ai-session.*`. Then preview the provider plan without network or file writes:
+First create a matching session with `scripts/start-ai-session.*`. Then preview the provider plan without network or file writes:
 
 ```powershell
 .\scripts\invoke-local-text-capability.ps1 `

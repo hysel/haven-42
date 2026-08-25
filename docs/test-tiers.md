@@ -1,6 +1,6 @@
 # Test Tiers And Exact Content-Tree Receipts
 
-Haven 42 separates routine checks from integration-heavy validation while keeping the full cross-platform GitHub gate authoritative.
+Haven 42 separates routine checks from integration-heavy validation. The full cross-platform GitHub gate remains authoritative.
 
 ## Tiers
 
@@ -34,7 +34,7 @@ Source workflows also retain compatibility with the Python 3.9 interpreter bundl
 
 This compatibility step does not install software, download files, use `eval`, or permanently modify `PATH`. If no valid Python 3 command exists, the suite stops once with a clear prerequisite error instead of producing many misleading script failures. Hosted Linux and macOS jobs continue to use their native `python3` command.
 
-The full suite includes repository validation, so callers should not run `validate-pack` immediately before `test-pack` unless they intentionally want an isolated validation result.
+The Full suite includes repository validation. Do not run `validate-pack` immediately before `test-pack` unless you need a separate validation result.
 
 ## Local Pre-Merge Readiness
 
@@ -62,7 +62,7 @@ security review, Full, hosted CI, or the existing pre-push protection.
 
 ## Timing
 
-Each selected test reports elapsed time. The final summary records the selected tier, executed count, skipped count, and total duration. Use this output to move expensive tests into Integration or remove repeated process and fixture setup; do not weaken assertions merely to reduce time.
+Each selected test reports elapsed time. The final summary records the tier, executed count, skipped count, and total duration. Use this output to move expensive tests into Integration or remove repeated process and fixture setup; do not weaken assertions merely to reduce time.
 
 PowerShell repository-validation fixtures are created in the operating system's temporary directory from the current Git-tracked and non-ignored working files. This includes pending publishable edits while excluding ignored build output, lab evidence, privacy backups, and other local-only data. Fixture assembly rejects rooted paths, paths outside the approved roots, symbolic links, and junctions while allowing ordinary OneDrive cloud-file metadata. Tests that need only generated configuration use a smaller purpose-built fixture instead of copying the repository.
 

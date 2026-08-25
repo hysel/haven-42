@@ -2,11 +2,11 @@
 
 ## Scope
 
-This sanitized record covers the read-only `ollama.local-text` availability probe with `qwen3.5:9b` on Windows through a user-controlled local-network Ollama endpoint. The endpoint and machine-specific paths are intentionally omitted.
+This sanitized record covers the read-only `ollama.local-text` availability probe with `qwen3.5:9b` on Windows through a user-controlled local-network Ollama endpoint. It intentionally omits the endpoint and machine-specific paths.
 
 ## Result
 
-The explicit probe called only Ollama's tags endpoint, found the already-installed model, and returned `available`. The result stated that no capability was invoked and no endpoint was persisted. The serialized output did not contain the runtime hostname, address, or port.
+The explicit probe called only Ollama's tags endpoint, found the already-installed model, and returned `available`. The result confirmed that no capability was invoked and no endpoint was persisted. The serialized output did not contain the runtime hostname, address, or port.
 
 No model was run, loaded, pulled, unloaded, or deleted. Offline fixture tests cover installed and unprobed states, and the engineering route tests verify that every planned workflow exists while `InvocationAllowed` remains false.
 

@@ -1,6 +1,6 @@
 # Deterministic Intent Routing
 
-The capability resolver selects a capability from explicit IDs or conservative registry phrases and keywords. It does not call an LLM, provider, model server, workflow, or repository.
+The capability resolver selects a capability from an explicit ID or from conservative registry phrases and keywords. It does not call an LLM, provider, model server, workflow, or repository.
 
 Windows:
 
@@ -28,6 +28,6 @@ macOS uses `scripts/resolve-capability.macos.sh` with the same native arguments.
 4. A tied highest score returns `needs-clarification` with candidates.
 5. No match returns `unmatched` so the caller can show the deterministic menu or ask a bounded question.
 
-Every routing result returns `InvocationAllowed: false`. A later orchestration layer must independently resolve availability, provider configuration, policy, filesystem scope, network effects, artifact location, and approvals.
+Every routing result returns `InvocationAllowed: false`. A later orchestration layer must separately resolve availability, provider configuration, policy, filesystem scope, network effects, artifact location, and approvals.
 
 An optional future LLM router may suggest capability IDs or clarification questions, but its result must pass this same registry and policy boundary. It cannot create capabilities, promote availability, or authorize execution.
