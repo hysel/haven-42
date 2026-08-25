@@ -3,11 +3,11 @@
 ## Status
 
 OpenCode has a documented non-interactive CLI contract and a local Ollama
-provider format. The pack supplies a local-only configuration generator and a
-disposable test wrapper. Partial generated-sample evidence is recorded in
+provider format. The pack includes a local-only configuration generator and a
+disposable test wrapper. Partial generated-sample evidence appears in
 [OpenCode validation evidence](https://github.com/hysel/haven-42/blob/main/examples/opencode-validation.md). Devstral
 Small 2 24B has passed read-only, write-smoke, and constrained scoped-edit
-validation on the generated sample. Keep the surface at candidate status until
+validation on the generated sample. Keep this surface at candidate status until
 explicitly approved non-generated repository validation passes.
 
 ## Plan And Install

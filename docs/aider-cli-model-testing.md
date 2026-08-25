@@ -2,9 +2,9 @@
 
 ## Purpose
 
-This is the Aider-specific wrapper around the shared CLI-surface harness in docs/agent-cli-surface-model-testing.md.
+This page describes the Aider-specific wrapper around the shared CLI-surface harness in `docs/agent-cli-surface-model-testing.md`.
 
-Use this workflow to test future local models through Aider CLI before asking Aider to touch a real project.
+Use this workflow to test future local models through Aider CLI before allowing Aider to touch a real project.
 
 This is different from `scripts/test-local-agent-models.*`:
 

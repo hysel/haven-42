@@ -1,6 +1,6 @@
 # Agent Surface Solutions
 
-`config/agent-surface-solutions.json` is the user-facing solution catalog for agent surfaces.
+`config/agent-surface-solutions.json` is the user-facing catalog of agent-surface solutions.
 
 It answers the same three questions for every surface:
 
@@ -8,7 +8,7 @@ It answers the same three questions for every surface:
 - How do I configure it?
 - How do I test it?
 
-The catalog does not make documentation-only candidate or blocked surfaces look ready. It records the support tier, default-menu visibility, current solution, status, evidence, and blocked reason for each tracked agent.
+The catalog does not present documentation-only candidates or blocked surfaces as ready. It records the support tier, default-menu visibility, current solution, status, evidence, and blocked reason for each tracked agent.
 
 It also records the config-bundle policy. Aider and OpenCode have supported
 generated local config paths. Continue is retired and retained only as

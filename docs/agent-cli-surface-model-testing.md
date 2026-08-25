@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Use this workflow to screen CLI-capable coding agent surfaces with the same disposable repository tests instead of maintaining separate full scripts for every agent plugin.
+Use this workflow to screen CLI-capable coding agents with the same disposable-repository tests instead of maintaining a separate full script for every surface.
 
 The shared harness supports:
 
@@ -13,7 +13,7 @@ OpenHands is platform-style rather than a simple local CLI harness target, so it
 
 ## Current Boundary
 
-These scripts are automation scaffolding. A dry run proves the harness wiring, not that a surface or model works.
+These scripts are automation scaffolding. A dry run proves the harness wiring; it does not prove that a surface or model works.
 
 OpenCode's documented `run`, provider/model, and local config contracts are reflected in the scaffold, and Devstral Small 2 24B has passed generated-sample read, write-smoke, and constrained scoped-edit checks. OpenCode still needs explicitly approved non-generated repository validation. Use command overrides for experiments, but do not promote wrappers to real-project approved-write readiness from disposable evidence alone.
 
