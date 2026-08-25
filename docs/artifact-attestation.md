@@ -1,12 +1,12 @@
 # Unsigned Development Artifact Attestation
 
-Haven 42 prepares GitHub build-provenance attestations for the native unsigned
+Haven 42 prepares GitHub build-provenance attestations for unsigned native
 development archives produced by the existing Windows, Linux, and macOS
 package matrix. This is supply-chain provenance, not Windows code signing,
 Apple Developer ID signing, notarization, an installer, a GitHub Release, or a
 production-readiness claim.
 
-## Trigger And Authority
+## Trigger and authority
 
 The attestation job runs only for a push to `main` and only after all three
 native package jobs succeed. Pull-request jobs retain the workflow's read-only
@@ -20,10 +20,10 @@ The isolated job receives only:
 - `attestations: write` to store the attestation; and
 - `artifact-metadata: write` for GitHub's attestation metadata.
 
-It receives no contents, packages, releases, security-events, pull-request,
-deployment, or repository-administration write permission.
+It has no write permission for contents, packages, releases, security events,
+pull requests, deployments, or repository administration.
 
-## Subject Boundary
+## Subject boundary
 
 The job downloads only artifact names matching
 `haven42-*-unsigned-development`. It requires exactly three native artifact
@@ -37,13 +37,13 @@ haven42-*-unsigned-development.zip
 haven42-*-unsigned-development.tar.gz
 ```
 
-The action does not attest arbitrary workspace files, upload a Release, push a
+The action does not attest arbitrary workspace files, upload a release, push a
 container, or change artifact contents. The archives remain visibly unsigned
 development packages. The included CycloneDX document remains checksum-bound
 evidence; this first slice does not claim a separate SBOM predicate
 attestation.
 
-## Immutable Actions
+## Immutable actions
 
 Every external action remains GitHub-owned and pinned to a reviewed full commit
 SHA:
@@ -72,7 +72,7 @@ archive digest. Users must still verify Haven 42's `SHA256SUMS` and review the
 unsigned-development warning. A successful attestation does not make an
 artifact production-ready and is not sufficient to activate the updater.
 
-## Remaining Promotion Gates
+## Remaining promotion gates
 
 Production distribution still requires:
 

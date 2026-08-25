@@ -1,10 +1,10 @@
 # Private alpha test plan
 
-This runbook is for the invited, unsigned `0.4.0-alpha.1` Windows candidate.
+This runbook covers the invited, unsigned `0.4.0-alpha.1` Windows candidate.
 It does not activate distribution. Guided setup effects require a separate
 explicit tester choice in the application.
 
-The engineering baseline and its limited hardware scope are recorded in
+The engineering baseline and its limited hardware scope appear in
 `docs/windows-alpha-native-validation.md`. Tester results remain independent
 evidence and must not silently inherit that machine's outcome.
 
@@ -20,7 +20,8 @@ evidence and must not silently inherit that machine's outcome.
 
 ## Core smoke sequence
 
-Record pass, fail, or not applicable without recording private content:
+Record each result as pass, fail, or not applicable. Do not record private
+content.
 
 1. Extract the archive into a new user-owned directory without elevation.
 2. Launch Haven 42 and confirm only an IPv4 loopback URL is shown or opened.
@@ -66,7 +67,7 @@ powershell -NoProfile -ExecutionPolicy Bypass `
   -ExpectedBackendMode <cpu|cuda|rocm|vulkan>
 ```
 
-The harness fails before managed approval when either expectation differs and
+If either expectation differs, the harness fails before managed approval. It
 reports the conservative required free-storage amount without retaining a
 hostname, address, username, local path, prompt, or response.
 

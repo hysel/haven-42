@@ -1,13 +1,12 @@
 # Ollama HTTPS installation foundation
 
 Haven 42 does not currently install Ollama, a TLS gateway, or certificates.
-This foundation records the security requirements for a future installer and
-performs no machine modification.
+This page records the requirements for a future installer. It does not modify
+the machine.
 
-Ollama's official FAQ describes its API as an HTTP server and documents using
-a proxy when exposing it beyond the host. Haven 42 must therefore not claim
-that setting an `https://` `OLLAMA_HOST` value configures a certificate. The
-future private-network topology is:
+Ollama exposes its API over HTTP and documents using a proxy when the service
+must be reachable beyond its host. Setting an `https://` `OLLAMA_HOST` value
+does not configure a certificate. The future private-network topology is:
 
 ```text
 Haven 42 client -- HTTPS + authentication --> TLS gateway
@@ -17,7 +16,7 @@ Haven 42 client -- HTTPS + authentication --> TLS gateway
 
 Ollama remains bound to `127.0.0.1`; only the reviewed gateway may listen on a
 selected private interface. Same-device Haven 42 continues to use HTTP
-loopback and does not need a certificate. Public exposure is not admitted.
+loopback and does not need a certificate. Public exposure is not supported.
 The gateway denies every route except the exact discovery, inference,
 residency, and cleanup paths Haven 42 uses. It requires a generated Bearer or
 X-API-Key credential, rate-limits failures, compares credentials in constant
@@ -30,7 +29,7 @@ minimum.
 The future guided installer must offer a locally generated certificate for
 users who do not have an internal PKI. The preferred structure is a private
 self-signed root with a leaf certificate; a directly trusted self-signed leaf
-may also be supported. Because Haven 42 connects to IP literals, the leaf must
+may also be supported. Haven 42 connects to IP literals, so the leaf must
 contain the exact server IP in its Subject Alternative Name. A Common Name by
 itself is insufficient.
 
@@ -46,7 +45,7 @@ firewall changes, service configuration, and removal are separately disclosed
 machine effects. Uninstall and rollback may remove only keys, certificates,
 trust entries, and gateway files recorded as owned by that exact transaction.
 
-## Admission gates
+## Validation gates
 
 Windows, Linux, and macOS are independent evidence cells. Each must cover
 clean install, preservation of an existing Ollama setup, exact-IP SAN checks,
