@@ -1,6 +1,6 @@
 # Post-quantum cryptography readiness
 
-Reviewed on 2026-08-04. This is a cryptographic inventory and migration
+Reviewed on 2026-08-04. This page records the cryptographic inventory and migration
 foundation. It does not enable encryption, select a production algorithm,
 change TLS behavior, add a dependency, generate or read a key, verify a
 signature, authorize a package, activate an update, or modify a machine.

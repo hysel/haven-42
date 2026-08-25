@@ -6,7 +6,7 @@ Evaluation date: 2026-07-22
 
 Status: **blocked; do not admit desktop runtime manifests or scaffolding**.
 
-The npm and PyInstaller candidate graphs resolved cleanly in a disposable Windows workspace. The released Tauri `2.11.5` graph still contains five Windows-reachable unmaintained Rust crates. Tauri upstream commit `dd725f4b13c30a86b398ccc59eb498f151f461c5` upgrades `urlpattern` to `0.6.0`, removes that chain, and passed a controlled-source audit plus native Windows x64 compile/link probe. The fix is not yet in a published Tauri release, so it is evidence of an available upstream resolution—not a shippable dependency pin.
+The npm and PyInstaller candidate graphs resolved cleanly in a disposable Windows workspace. The released Tauri `2.11.5` graph still contains five Windows-reachable unmaintained Rust crates. Tauri upstream commit `dd725f4b13c30a86b398ccc59eb498f151f461c5` upgrades `urlpattern` to `0.6.0`, removes that chain, and passed a controlled-source audit plus native Windows x64 compile/link probe. The upstream fix exists, but it is not yet in a published Tauri release and cannot be used as a shippable dependency pin.
 
 A third official publication recheck on 2026-08-04 found Tauri release/crate `2.11.5`, `@tauri-apps/cli 2.11.4`, and the released `tauri-utils 2.9.3 -> urlpattern 0.3.0` chain still current for this boundary. The official release log continues to show the five Windows-reachable unmaintained `rust-unic` warnings. No newer published Tauri release carries the reviewed `urlpattern 0.6.0` fix, so the blocker and no-runtime decision remain unchanged.
 

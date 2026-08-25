@@ -1,6 +1,6 @@
 # Core update cryptographic verifier review
 
-Reviewed on 2026-08-04. This is a dependency and security recommendation for a
+Reviewed on 2026-08-04. This review recommends a dependency and security approach for a
 future updater verifier. It does not add a dependency, trusted identity, trust
 root, signing key, online check, download path, staging path, or activation
 authority.

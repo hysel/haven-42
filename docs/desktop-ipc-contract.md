@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`config/desktop-ipc-contract.json` and `config/desktop-capability-policy.json` define the first versioned security boundary for the Milestone 22 Tauri application. They extend the existing workflow envelope and typed artifact contract; they do not create a second workflow engine or grant the UI direct script access.
+`config/desktop-ipc-contract.json` and `config/desktop-capability-policy.json` define the first versioned security boundary for the Milestone 22 Tauri application. They extend the existing workflow envelope and typed artifact contract without creating a second workflow engine or giving the UI direct script access.
 
 The ordinary desktop application loads bundled local assets and launches exactly one packaged, target-matched Haven 42 engine sidecar. Messages use UTF-8 JSON Lines over private stdin/stdout. No desktop HTTP server or listening TCP port is part of this contract.
 
