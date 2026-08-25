@@ -1,6 +1,6 @@
 # General AI Session Workspace
 
-The first-run session command works without a repository, model, or provider. It shows the deterministic capability menu, routes a user goal, discloses availability and material effects, and plans a local artifact workspace. It never invokes the selected capability.
+The first-run session command does not need a repository, model, or provider. It shows the deterministic capability menu, routes a user goal, discloses availability and material effects, and plans a local artifact workspace. It never invokes the selected capability.
 
 Windows:
 
@@ -31,4 +31,4 @@ Use the `.macos.sh` entry point on macOS.
 - `artifacts/` starts empty. A later provider must disclose the exact artifact path and pass policy checks before writing.
 - Ambiguous or unmatched intent does not create a workspace.
 
-Creating a workspace is not permission to execute a provider, read a repository, call a network, or write a result artifact. Those effects remain separately gated.
+Creating a workspace does not permit provider execution, repository reads, network access, or result-artifact writes. Each effect remains separately gated.

@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Local tests prove that a change works on the current machine. They do not prove
+Local tests show that a change works on the current machine. They do not show
 that the pushed commit passes the hosted Windows, Linux, and macOS jobs.
 
-Use the hosted CI verifier after every push. A push is not complete until the
-verifier reports `CI passed` for the exact 40-character commit SHA.
+Run the hosted CI verifier after every push. A push is not complete until it
+reports `CI passed` for the exact 40-character commit SHA.
 
 ## Required States
 
@@ -98,7 +98,7 @@ current directory cannot be resolved by `gh repo view`. Use `-RunId` or
 ## Failure Handling
 
 When verification fails, the script runs `gh run view --log-failed`, exits
-nonzero, and reports `CI failed`. Fix the cause, run local validation again,
+nonzero, and reports `CI failed`. Fix the cause, rerun local validation,
 push the new commit, and verify that new exact SHA. Never reuse a successful run
 from an older commit as evidence for a newer push.
 

@@ -2,7 +2,7 @@
 
 ## Scope
 
-This sanitized record covers the `ollama.local-text` adapter with `qwen3.5:9b` on Windows through a user-controlled local-network Ollama endpoint. The endpoint, prompts, raw responses, and temporary paths are intentionally omitted.
+This sanitized record covers the `ollama.local-text` adapter with `qwen3.5:9b` on Windows through a user-controlled local-network Ollama endpoint. It intentionally omits the endpoint, prompts, raw responses, and temporary paths.
 
 ## Results
 
@@ -12,7 +12,7 @@ This sanitized record covers the `ollama.local-text` adapter with `qwen3.5:9b` o
 | `content.write` | nonempty live response | requested Markdown heading and statement retained | `markdown-document` | no | prompt and endpoint absent | pass |
 | `content.summarize` | nonempty live response | both supplied facts retained | `markdown-document` | no | prompt and endpoint absent | pass |
 
-The adapter wrote only explicitly approved artifacts inside disposable session workspaces. The workspaces were removed and the model was unloaded after validation. No model was pulled or deleted.
+The adapter wrote only explicitly approved artifacts inside disposable session workspaces. After validation, the workspaces were removed and the model was unloaded. No model was pulled or deleted.
 
 A fresh provider-neutral regression run on 2026-07-22 used an already-installed smaller Ollama model. Model discovery returned `available`, chat returned nonempty content, network use was disclosed, no artifact was written, and endpoint persistence remained false. Windows and shared Linux/macOS fixtures also passed the OpenAI-compatible llama.cpp response mapping and rejected non-admitted engine profiles.
 
@@ -29,8 +29,8 @@ running-model list afterward; no endpoint, prompt, raw response, or machine
 path was persisted.
 
 The sanitized run recorded a 9,785.808 ms cold load, 720.059 ms first token,
-272.554 prompt tokens/s, and 76.062 generation tokens/s. These exact-cell
-metrics are diagnostic only and do not change the non-promoting decision.
+272.554 prompt tokens/s, and 76.062 generation tokens/s. These exact-cell metrics
+are diagnostic only and do not change the non-promoting decision.
 
 ## Limits
 
