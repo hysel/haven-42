@@ -2,7 +2,7 @@
 
 ## Exact-profile partial pass
 
-An official ComfyUI NVIDIA portable completed a disposable native Windows validation on 2026-08-01. This evidence narrows the Milestone 23 gate; it does not ship a runtime, model, installer, or provider configuration and does not promote the profile for product use.
+An official ComfyUI NVIDIA portable completed a disposable native Windows validation on 2026-08-01. These results narrow the Milestone 23 gate; they do not ship a runtime, model, installer, or provider configuration or promote the profile for product use.
 
 | Field | Value |
 | --- | --- |

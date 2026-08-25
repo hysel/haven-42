@@ -1,6 +1,6 @@
 # Provider Endpoint Security
 
-Haven 42 treats every model or media endpoint as a network trust boundary, even when the service is privately operated. Provider adapters enforce these rules before live network access.
+Every model or media endpoint is a network trust boundary, even when the service is privately operated. Haven 42's provider adapters enforce these rules before live network access.
 
 ## Trust scopes
 

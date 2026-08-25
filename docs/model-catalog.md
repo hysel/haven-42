@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Haven 42 assembles a read-only model catalog from public discovery metadata,
+Haven 42 builds a read-only model catalog from public discovery metadata,
 local hardware-fit estimates, and committed validation evidence. The catalog is
 an engine-side product contract for future beginner and advanced model views.
 It does not download models, modify runtime configuration, execute model code,
