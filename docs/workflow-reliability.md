@@ -1,6 +1,6 @@
 # Workflow Reliability
 
-Haven 42 workflow execution fails closed when completion is uncertain. The versioned rules are in `config/workflow-reliability-contract.json`; they extend, rather than silently changing, workflow-envelope schema version 1.
+Haven 42 workflow execution fails closed when completion is uncertain. `config/workflow-reliability-contract.json` contains the versioned rules, which extend workflow-envelope schema version 1 without silently changing it.
 
 Every executable request has a bounded timeout and exactly one terminal event. Cancellation is bound to the request and session, starts cooperatively, and may escalate only against a process created and tracked by that request. Haven 42 never terminates unrelated applications to make capacity available.
 

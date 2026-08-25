@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. `config/core-update-manifest-contract.json` defines the future immutable core-engine update boundary, `config/core-update-check-contract.json` defines the narrower offline GitHub Release candidate check, `config/core-update-trust-handoff-contract.json` defines a structural handoff from a future native cryptographic verifier, `config/core-update-verifier-transition-contract.json` defines structural verifier-registry and trust-root transitions, and `config/core-update-lifecycle-contract.json` defines an effect-free lifecycle simulation. The policy scripts can validate and model these inputs offline, but they are not network clients, cryptographic verifiers, trust-store managers, downloaders, installers, activators, cleanup tools, or admitted desktop runtimes.
+`config/desktop-storage-contract.json` defines where each class of Haven 42 data belongs on Windows, Linux, and macOS. The core-update contracts define the future immutable engine-update boundary, offline GitHub Release candidate check, native-verifier handoff, verifier and trust-root transitions, and effect-free lifecycle simulation. The policy scripts validate and model those inputs offline; they are not network clients, cryptographic verifiers, trust-store managers, downloaders, installers, activators, cleanup tools, or admitted desktop runtimes.
 
 The central rule is simple: Haven 42-managed files stay inside the folder the
 user extracted. The fixed mutable root is `Haven42-Data` beside the executable.

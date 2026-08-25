@@ -2,7 +2,7 @@
 
 ## Assets and trust boundaries
 
-Haven 42 protects user repositories, local files, prompts, responses, models, credentials, generated artifacts, approvals, update state, and provider endpoints. The desktop renderer and all model output are untrusted input. Native IPC, the workflow dispatcher, provider adapters, filesystem grants, packaged binaries, and update verification are separate trust boundaries.
+The assets in scope are user repositories, local files, prompts, responses, models, credentials, generated artifacts, approvals, update state, and provider endpoints. Haven 42 treats the desktop renderer and all model output as untrusted input. Native IPC, the workflow dispatcher, provider adapters, filesystem grants, packaged binaries, and update verification are separate trust boundaries.
 
 ## Principal threats
 

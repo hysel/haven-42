@@ -6,7 +6,7 @@ Evaluation date: 2026-07-22
 
 Status: **policy model passed; native runtime remains blocked and unadmitted**.
 
-The released Tauri dependency graph cannot yet enter the repository. The latest
+Haven 42 cannot yet use the released Tauri dependency graph. The latest
 official release and registries were rechecked before this work: Tauri `2.11.5`,
 `tauri-utils 2.9.3`, and `@tauri-apps/cli 2.11.4` remain current. The reviewed
 `urlpattern 0.6` remediation exists at upstream commit
