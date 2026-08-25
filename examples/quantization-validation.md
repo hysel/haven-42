@@ -12,13 +12,13 @@
 - Baseline: Q4_K_M, artifact ID prefix `6488c96fa5fa`
 - Candidate: Q8_0, artifact ID prefix `441ec31e4d2a`
 
-Both artifacts returned the required bounded response, emitted the required structured tool call with valid arguments, and produced a syntactically bounded unified diff containing the requested guard and unchanged nonzero behavior. Ollama reported 100% GPU execution for both.
+Both artifacts returned the required bounded response, emitted the structured tool call with valid arguments, and produced a bounded unified diff containing the requested guard and unchanged nonzero behavior. Ollama reported 100% GPU execution for both.
 
 Q4_K_M used 5.6 GB loaded accelerator memory and generated 79.61 tokens/s in the warm bounded check. Q8_0 used 9.2 GB and generated 66.50 tokens/s. Cold loading and the bounded warm response were effectively similar for this sample. The engineering task was a functional comparison only because the Q4_K_M run included a model reload.
 
-Decision: retain Q4_K_M for this exact profile and do not activate Q8_0. Q4_K_M preserved the tested functional behavior with lower storage and memory use and higher generation throughput. The downloaded Q8_0 candidate was stopped and removed, and the prior Q4_K_M artifact remained installed.
+Decision: keep Q4_K_M for this exact profile and do not activate Q8_0. It preserved the tested behavior with lower storage and memory use and higher generation throughput. The downloaded Q8_0 candidate was stopped and removed; the prior Q4_K_M artifact remained installed.
 
-Boundaries: this Linux evidence does not validate local conversion, other model revisions, other GPUs, Windows, Apple Silicon, larger contexts, concurrency above one, broad conversational quality, long-document summarization, or agent-surface approved writes. Those require separate evidence cells.
+This Linux evidence does not validate local conversion, other model revisions, other GPUs, Windows, Apple Silicon, larger contexts, concurrency above one, broad conversational quality, long-document summarization, or agent-surface approved writes. Those require separate evidence cells.
 
 ## Windows AMD Ollama Trusted-Artifact Comparison
 
@@ -44,10 +44,10 @@ The official standalone Windows and AMD ROCm archives matched the SHA-256 digest
 | Clean engineering patch generation | 66.64 tokens/s | 53.76 tokens/s |
 | Structured tool call and engineering patch | Pass | Pass |
 
-Decision: prefer Q4_K_M for this exact profile. It retained the tested functional behavior while loading faster, using less storage and accelerator memory, and generating about 23.2% more tokens per second in the matched warm check.
+Decision: prefer Q4_K_M for this exact profile. It retained the tested behavior while loading faster, using less storage and accelerator memory, and generating about 23.2% more tokens per second in the matched warm check.
 
 One initial Q4_K_M performance sample was excluded because a game was using the GPU. The measured warm rate was 7.65 tokens per second with that competing workload and 71.99 tokens per second after it closed. This cell demonstrates that background accelerator use must be controlled or disclosed and anomalous results must be repeated.
 
 Cleanup: the loopback-only server was stopped, port closure was verified, and approximately 22.0 GB of temporary archives, runtime libraries, models, logs, and pointers were permanently removed. No Ollama installation, service, startup entry, model, or test directory remains.
 
-Boundaries: this Windows AMD evidence does not validate Vulkan, another AMD GPU or driver, Windows NVIDIA or Intel, local conversion, other models, larger contexts, concurrency above one, long-document quality, or agent-surface approved writes.
+This Windows AMD evidence does not validate Vulkan, another AMD GPU or driver, Windows NVIDIA or Intel, local conversion, other models, larger contexts, concurrency above one, long-document quality, or agent-surface approved writes.

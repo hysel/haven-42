@@ -2,7 +2,7 @@
 
 ## Windows AMD llama.cpp Backends
 
-Validation ran on 2026-07-22 using Windows 11 x64, a Radeon RX 7800 XT 16 GB (`gfx1101`), llama.cpp build `10088` at commit `67b9b0e7f`, a 4,096-token context, and one server slot. HIP and Vulkan ran independently on loopback-only listeners against the identical model artifact.
+Validation ran on 2026-07-22 with Windows 11 x64, a Radeon RX 7800 XT 16 GB (`gfx1101`), llama.cpp build `10088` at commit `67b9b0e7f`, a 4,096-token context, and one server slot. HIP and Vulkan ran independently on loopback-only listeners against the same model artifact.
 
 Inputs were immutable and hash-verified before execution:
 
@@ -27,7 +27,7 @@ The model is an Apache-2.0 quantization of `Qwen/Qwen3.5-9B`. The llama.cpp rele
 
 The HIP patch changed only `False` to `True` in the supplied two-line function and passed `git apply --check`. Vulkan repeatedly produced a malformed hunk or an extraneous separator; the captured candidate failed `git apply --check` with a corrupt-patch result. Faster inference did not override the functional gate.
 
-Decision for the Windows AMD comparison: admit llama.cpp HIP only for this exact backend evidence cell. Do not infer agent-surface approved-write readiness. Keep Vulkan documentation-only and ship no Vulkan installer, adapter, harness, runtime configuration, or active evidence-catalog entry. Later physical Intel Arc B580 candidate results are recorded below and do not alter this AMD decision. Metal remains physical-Mac-last.
+For the Windows AMD comparison, admit llama.cpp HIP only for this exact backend evidence cell. Do not infer agent-surface approved-write readiness. Keep Vulkan documentation-only and ship no Vulkan installer, adapter, harness, runtime configuration, or active evidence-catalog entry. The later physical Intel Arc B580 candidate results below do not alter this AMD decision. Metal remains physical-Mac-last.
 
 A later development-only portable corpus ran 11 revision-pinned GGUF artifacts
 through the same b10088 HIP backend. Every artifact passed hash identity,
@@ -62,7 +62,7 @@ The test reused the same revision-pinned Q4_K_M model and SHA-256 recorded above
 | Required structured tool call and JSON arguments | 0.849 s, Pass |
 | Git-applicable one-word engineering patch | 1.296 s, Pass |
 
-The generated patch changed only `False` to `True` and passed an external `git apply --check`. Decision: admit llama.cpp CUDA for this exact Linux NVIDIA profile as engine-level evidence. This does not establish agent-surface approved-write readiness, multi-GPU behavior, another NVIDIA architecture, a different driver/toolchain/model/context, or a consumer installation path.
+The generated patch changed only `False` to `True` and passed an external `git apply --check`. Admit llama.cpp CUDA for this exact Linux NVIDIA profile as engine-level evidence. This does not establish agent-surface approved-write readiness, multi-GPU behavior, another NVIDIA architecture, a different driver/toolchain/model/context, or a consumer installation path.
 
 The loopback server and SSH tunnel were stopped. The model, pinned source, CUDA environment, compiler caches, build outputs, logs, and patch fixture were removed. The existing Ollama and ComfyUI services remained active and unchanged, and no llama.cpp listener or installation remained.
 

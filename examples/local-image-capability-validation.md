@@ -2,7 +2,7 @@
 
 ## Scope
 
-This sanitized record covers ComfyUI `v0.28.2`, PyTorch `2.11.0+cu126`, SDXL Base 1.0, and the `comfyui.local-image` adapter on Ubuntu Linux with an NVIDIA Tesla V100 32 GB. The server address, SSH identity, prompts, raw API history, local session paths, and generated images are intentionally omitted.
+This sanitized record covers ComfyUI `v0.28.2`, PyTorch `2.11.0+cu126`, SDXL Base 1.0, and the `comfyui.local-image` adapter on Ubuntu Linux with an NVIDIA Tesla V100 32 GB. It intentionally omits the server address, SSH identity, prompts, raw API history, local session paths, and generated images.
 
 ## Results
 
@@ -19,7 +19,7 @@ This sanitized record covers ComfyUI `v0.28.2`, PyTorch `2.11.0+cu126`, SDXL Bas
 | Remote access | temporary SSH-tunneled API health check passed |
 | Pack adapter | typed image artifact, PNG validation, sanitization, cleanup, and retention disclosure passed |
 
-The adapter generated a valid 1024×1024 PNG through a temporary SSH tunnel, wrote only inside an approved disposable session, omitted prompt and endpoint values, and removed the local session and tunnel afterward. ComfyUI retains generated provider output, which the adapter reports explicitly.
+The adapter generated a valid 1024×1024 PNG through a temporary SSH tunnel. It wrote only inside an approved disposable session, omitted prompt and endpoint values, and removed the local session and tunnel afterward. The adapter explicitly reports that ComfyUI retains generated provider output.
 
 On 2026-07-24, the local-web image boundary passed an additional live smoke
 through a temporary pinned SSH tunnel and the existing non-root `haven42-comfyui`
