@@ -16,15 +16,15 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Metric | Count |
 | --- | ---: |
-| Evidence records | 211 |
-| Distinct model-field values | 84 |
+| Evidence records | 212 |
+| Distinct model-field values | 85 |
 | Tracked agent surfaces | 4 |
 
 ## Evidence Outcomes
 
 | Status | Count |
 | --- | ---: |
-| `partial-pass` | 102 |
+| `partial-pass` | 103 |
 | `failed-validation` | 27 |
 | `validated-by-tests` | 22 |
 | `read-only-tool-validated` | 13 |
@@ -41,7 +41,7 @@ See [Evidence Catalog](Evidence-Catalog),
 
 | Mode | Count |
 | --- | ---: |
-| Local endpoint | 87 |
+| Local endpoint | 88 |
 | Generated sample | 58 |
 | Editor agent | 14 |
 | Automated tests | 8 |
@@ -104,6 +104,7 @@ See [Evidence Catalog](Evidence-Catalog),
 | digest-pinned-13-model-corpus |
 | digest-pinned-19-model-corpus |
 | digest-pinned-eight-model-corpus |
+| digest-pinned-nineteen-model-corpus |
 | exact-upstream-candidate-records |
 | five exact manifest-pinned models |
 | five-model-passed-soak-corpus |

@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "05612fb65df5a80bf5ee3cd8c77ff26df698d92538fce77372f413aec56d0c6a",
-  "recordCount": 211,
+  "catalogSha256": "241a193a475cd4e7ef234c18445a09130d5b150a1528ce204cfc667b31f26957",
+  "recordCount": 212,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -1935,6 +1935,30 @@
         "repositorySource": "docs/evidence-records/evidence-8863732197853ce7.md",
         "wikiPage": "Evidence-Record-8863732197853ce7.md",
         "title": "Radeon RX 6800 non-XT exact Ubuntu Vulkan profile"
+      }
+    },
+    {
+      "id": "evidence-5ef05050d8cf0bc1",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Windows AMD Radeon RX 6800 16 GB nineteen-model qualification",
+        "surface": "Ollama ROCm",
+        "surface_version": "0.32.14",
+        "provider": "Ollama",
+        "os": "Windows 11",
+        "model": "digest-pinned-nineteen-model-corpus",
+        "operation": "exact-artifact-core-task-gate-30-minute-soak-and-filtered-power-summary",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx6800-windows-model-qualification.md",
+        "notes": "All 19 exact artifacts passed Chat, Writing, and Summarization and then passed independent 30-minute soaks on this exact RX 6800 Windows profile. Filtered HWiNFO GPU ASIC telemetry is aggregate-only; the raw file is excluded and represented only by SHA-256 and size. Driver version, per-model power, wall power, coding surfaces, automatic defaults, and support changes remain out of scope."
+      },
+      "sourceEvidence": "examples/amd-rx6800-windows-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-5ef05050d8cf0bc1.md",
+        "wikiPage": "Evidence-Record-5ef05050d8cf0bc1.md",
+        "title": "Windows AMD Radeon RX 6800 16 GB nineteen-model qualification"
       }
     },
     {
