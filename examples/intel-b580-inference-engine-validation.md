@@ -8,7 +8,7 @@ The Linux profile used the `xe` kernel driver and a 16 GB Resizable BAR. The
 machine-specific hostnames, addresses, usernames, GPU identities, local paths,
 and raw prompts are intentionally omitted.
 
-This is exact-host development evidence. It does not admit an installer,
+This record is exact-host development evidence. It does not admit an installer,
 driver change, system package, bundled inference runtime, model redistribution,
 automatic download, provider route, or production support. Ubuntu 26.04 is
 newer than OpenVINO's documented Ubuntu 24.04 support baseline, so its
@@ -23,7 +23,7 @@ specialization, embedded and prebuilt web UI assets, CURL, and oneDNN. A first
 build was rejected after it mixed system oneDNN/SYCL libraries and crashed;
 only the isolated no-oneDNN build supplied evidence.
 
-All model files were kept outside the repository and hash-verified before use.
+All model files stayed outside the repository and were hash-verified before use.
 Nine representative text artifacts completed bounded GPU inference with full
 offload:
 
@@ -157,7 +157,7 @@ automatic download, package component, task-quality claim, or runtime choice.
 ## Decision
 
 Representative Intel hardware is no longer a blocker for these two engine
-families. Neither engine is promoted:
+families, but neither engine is promoted:
 
 - llama.cpp SYCL is blocked by upstream test failures and has no consumer
   installation or packaged parity evidence;

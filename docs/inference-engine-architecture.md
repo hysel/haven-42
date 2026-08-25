@@ -1,10 +1,10 @@
 # Inference Engine Architecture
 
-Haven 42 separates what the user wants from how a model runs:
+Haven 42 separates a requested capability from the machinery that runs it:
 
 `capability -> provider contract -> inference engine -> hardware backend -> model artifact`
 
-The capability registry can request text generation without assuming Ollama, llama.cpp, LM Studio, or a hardware vendor. A provider adapter exposes a bounded contract. Engine selection then considers the local operating system, accelerator, verified runtime, model format, and exact evidence cell. No successful result transfers automatically between engines, backends, GPUs, drivers, model revisions, contexts, concurrency levels, or workload lanes.
+The capability registry can request text generation without assuming Ollama, llama.cpp, LM Studio, or a hardware vendor. A provider adapter exposes a bounded contract. Engine selection considers the local operating system, accelerator, verified runtime, model format, and exact evidence cell. A successful result does not transfer automatically between engines, backends, GPUs, drivers, model revisions, contexts, concurrency levels, or workload lanes.
 
 The machine-readable source is `config/inference-engine-registry.json`. Unknown combinations fail closed, silent CPU fallback is prohibited, and failed candidates leave documentation only.
 
@@ -22,15 +22,15 @@ The shared local-text discovery and invocation entry points implement this bound
 | IPEX-LLM | Retired | Upstream was archived on 2026-01-28. Keep a documentation record only. |
 | llama.cpp Metal | Partial physical-Mac evidence | Exact `b10520` lifecycle, full Metal offload, official-archive integrity, safe extraction, relocation, and dependency-free launch passed on an Apple M4 with 16 GB. Two exact LFM2.5 Q4_K_M candidates also executed with full Metal offload, but both failed bounded core gates and timed out in OpenCode without writes. The upstream executable is ad-hoc signed and rejected by Gatekeeper; Developer ID signing, notarization, a passing maintained coding surface, and product admission remain open. |
 
-`Parked` remains the fail-closed status for an engine or backend that has not
-yet earned executable candidate evidence. Moving one exact cell beyond parked
-does not change any other engine, backend, hardware, or package status.
+`Parked` is the fail-closed status for an engine or backend that has not earned
+executable candidate evidence. Moving one exact cell beyond parked does not
+change any other engine, backend, hardware, or package status.
 
 `oneAPI` is a compiler/runtime toolkit rather than a standalone inference engine. It may become a dependency of an admitted Intel backend, but it is not presented as a provider. OpenVINO GenAI remains a separate Intel-focused engine candidate. See `examples/intel-b580-inference-engine-validation.md` for the sanitized exact-host evidence and blockers.
 
 ## Operating-System Decision Matrix
 
-Runtime selection is an exact-profile decision, not a GPU-name lookup. The
+Runtime selection depends on an exact profile, not just a GPU name. The
 selection tuple includes operating system, architecture, CPU features,
 accelerator vendor and model, driver, usable memory, backend, runtime version,
 model artifact, and requested capability.

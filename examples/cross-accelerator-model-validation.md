@@ -2,7 +2,7 @@
 
 ## Scope
 
-This development-only batch compares identical, hash-pinned GGUF bytes through
+This development-only batch compares identical hash-pinned GGUF bytes through
 the same llama.cpp build on Windows AMD/HIP and Linux NVIDIA/CUDA. It does not
 compare an Ollama blob with a llama.cpp artifact, transfer evidence between
 accelerators, admit a provider route, authorize model redistribution, or claim
@@ -67,7 +67,7 @@ is a bounded-task miss, not an engine or offload failure. Four unrelated model
 artifacts returned the exact marker after the llama-cli conversation wrapper
 was removed by a tested parser. SmolLM3 also missed the exact-output gate.
 
-These throughput values are one controlled development run, not a general
+These throughput values come from one controlled development run, not a general
 performance guarantee. Patch, tool-call, context-pressure, repeated lifecycle,
 and vision tests listed in the manifest remain separate follow-on cells and
 must not be inferred from the benchmark.
@@ -113,7 +113,7 @@ memory use afterward. No llama.cpp process or test listener remained.
 ## Cross-Accelerator Comparison
 
 The artifact hash, build number, source commit, full-offload result,
-operational result, and exact-output result agree for every AMD/NVIDIA row.
+operational result, and exact-output result match for every AMD/NVIDIA row.
 The same four artifacts passed the strict exact marker on both accelerators;
 the same seven missed. This consistency supports the conclusion that those
 literal-output misses reflect the fixed task/model behavior rather than an

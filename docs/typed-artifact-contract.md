@@ -1,12 +1,12 @@
 # Typed Artifact Contract
 
-`config/typed-artifact-contract.json` defines result shapes shared by general-purpose capabilities and engineering workflow routing.
+`config/typed-artifact-contract.json` defines the result shapes shared by general-purpose capabilities and engineering workflows.
 
 Every persisted result must identify its schema version, artifact type, status, creation time, source capability, content, and material policy effects. The initial types are chat messages, Markdown documents, images, engineering reports, configuration plans, and repository-change reviews.
 
 ## Write Boundary
 
-Capability routing does not create an artifact and never authorizes a write. Before writing an artifact, the execution layer must:
+Capability routing neither creates an artifact nor authorizes a write. Before writing an artifact, the execution layer must:
 
 1. Resolve an available provider or workflow.
 2. Select a repository-optional session workspace or user-approved destination.
@@ -19,4 +19,4 @@ Raw local paths, endpoints, prompts, credentials, and provider output remain loc
 
 ## Engineering Boundary
 
-An engineering report or repository-change review does not replace the workflow evidence contract. Approved-write readiness remains keyed by agent surface, version, provider, model, operating system, operation, and validation mode.
+An engineering report or repository-change review does not replace the workflow evidence contract. Approved-write readiness remains specific to the agent surface, version, provider, model, operating system, operation, and validation mode.
