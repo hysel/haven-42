@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document tracks possible engineering agent surfaces for Haven 42.
+This page compares the engineering agent surfaces considered for Haven 42.
 
 Continue is a legacy, evidence-only surface. Current VS Code and VSCodium
 evidence includes configuration-loading failures, unavailable edit tools, and
@@ -14,7 +14,7 @@ recommended for real project changes.
 
 ## What Counts As An Agent Surface
 
-An agent surface is the editor, CLI, or runtime that connects the pack assets to a model and to tools.
+An agent surface is an editor, CLI, or runtime that connects pack assets to a model and its tools.
 
 Examples:
 

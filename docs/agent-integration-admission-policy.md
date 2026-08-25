@@ -4,7 +4,7 @@ This policy defines when agent software may add executable or operational assets
 
 ## Decision
 
-The project may evaluate any agent software, but evaluation does not grant repository admission. A new agent must pass the required promotion gates before the repository accepts or ships any agent-specific script, harness, wrapper, adapter, configuration generator, template, example, workflow, active catalog entry, or package asset.
+The project may evaluate any agent software, but evaluation does not grant repository admission. Before the repository accepts or ships any agent-specific script, harness, wrapper, adapter, configuration generator, template, example, workflow, active catalog entry, or package asset, the new agent must pass the required promotion gates.
 
 If an evaluation fails, commit only a concise sanitized decision record. Do not commit the evaluation harness, generated configuration, detailed transcript, raw output, temporary fixture, or partially working integration. Git history and external maintainer records are not product surfaces and must not be used to keep dormant code in the shipped repository.
 

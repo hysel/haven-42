@@ -1,8 +1,8 @@
 # Agent Surface Promotion Gates
 
-All new agent evaluations also follow `docs/agent-integration-admission-policy.md`. Evaluation happens in an external or ignored disposable workspace. No agent-specific implementation artifact enters the repository until the exact tested version passes every required gate.
+Every new agent evaluation follows `docs/agent-integration-admission-policy.md` and runs in an external or ignored disposable workspace. No agent-specific implementation artifact enters the repository until the exact tested version passes every required gate.
 
-This document defines what a maintained agent surface must prove before the pack can promote install, configure, test, or approved-write support.
+This page defines what a maintained agent surface must prove before the pack can promote install, configure, test, or approved-write support.
 
 Continue is legacy and evidence-only. Maintained surfaces can move forward only with sanitized evidence recorded in `config/evidence-catalog.tsv`, `config/agent-surface-solutions.json`, and a surface-specific evidence document.
 

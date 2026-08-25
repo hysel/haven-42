@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Every agent surface should be tracked against the same activities:
+Track every agent surface against the same activities:
 
 - Install
 - Configure
@@ -13,7 +13,7 @@ Every agent surface should be tracked against the same activities:
 - Model selection
 - Evidence
 
-`config/agent-surface-capabilities.json` is the machine-readable source for that parity check.
+`config/agent-surface-capabilities.json` is the machine-readable source for this comparison.
 
 `config/agent-surface-solutions.json` is the companion solution catalog that translates the parity matrix into install, configure, and test answers for users.
 
