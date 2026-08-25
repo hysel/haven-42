@@ -17,6 +17,7 @@ examples/intel-b580-granite41-8b-validation.md	Intel-B580-Granite41-8B-Validatio
 examples/august-2026-new-model-qualification.md	Eng-August-2026-New-Model-Qualification.md	August 2026 New Model Qualification
 examples/amd-rx5700xt-ollama03213-qualification.md	Eng-AMD-RX5700XT-Ollama-03213-Qualification.md	AMD Radeon RX 5700 XT Ollama 0.32.13 Qualification
 examples/amd-rx6800-linux-model-qualification.md	Eng-AMD-RX6800-Linux-Model-Qualification.md	AMD Radeon RX 6800 Linux Model Qualification
+examples/amd-rx6800-windows-model-qualification.md	Eng-AMD-RX6800-Windows-Model-Qualification.md	AMD Radeon RX 6800 Windows Model Qualification
 examples/apple-m4-16gib-model-qualification.md	Eng-Apple-M4-16GiB-Model-Qualification.md	Apple M4 16 GB Model Qualification
 examples/nvidia-gtx1650-super-windows-model-qualification.md	Eng-NVIDIA-GTX1650-Super-Windows-Model-Qualification.md	GeForce GTX 1650 Super Windows Model Qualification
 examples/nvidia-gtx1650-super-linux-model-qualification.md	Eng-NVIDIA-GTX1650-Super-Linux-Model-Qualification.md	GeForce GTX 1650 Super Ubuntu Model Qualification
@@ -273,6 +274,7 @@ docs/evidence-records/evidence-e868714f9f8c5344.md	Evidence-Record-e868714f9f8c5
 docs/evidence-records/evidence-b91e58b8e387a4cc.md	Evidence-Record-b91e58b8e387a4cc.md	Qwen 3.5 9B writing constraint matrix
 docs/evidence-records/evidence-07a5bd4578f3108f.md	Evidence-Record-07a5bd4578f3108f.md	Radeon RX 5700 XT exact Ubuntu Vulkan profile
 docs/evidence-records/evidence-8863732197853ce7.md	Evidence-Record-8863732197853ce7.md	Radeon RX 6800 non-XT exact Ubuntu Vulkan profile
+docs/evidence-records/evidence-5ef05050d8cf0bc1.md	Evidence-Record-5ef05050d8cf0bc1.md	Windows AMD Radeon RX 6800 16 GB nineteen-model qualification
 docs/evidence-records/evidence-7c544083b952b24c.md	Evidence-Record-7c544083b952b24c.md	Script-level recommendation and config generation
 docs/evidence-records/evidence-27f4eaa91d0b896d.md	Evidence-Record-27f4eaa91d0b896d.md	Radeon RX 5700 XT current-boot host stability
 docs/evidence-records/evidence-e3d838e6e2d03596.md	Evidence-Record-e3d838e6e2d03596.md	Apple M4 16 GB MLX-LM lifecycle

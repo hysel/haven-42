@@ -115,6 +115,7 @@ them by hand; update the catalog and run the generator.
 | --- | --- | --- |
 | [Radeon RX 5700 XT exact Ubuntu Vulkan profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-07a5bd4578f3108f) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.13 Vulkan RADV · 16 exact manifest-pinned model profiles |
 | [Radeon RX 6800 non-XT exact Ubuntu Vulkan profile](https://github.com/hysel/haven-42/wiki/Evidence-Record-8863732197853ce7) | `partial-pass` | Ubuntu 26.04 LTS · Ollama 0.32.14 Vulkan RADV · digest-pinned-13-model-corpus |
+| [Windows AMD Radeon RX 6800 16 GB nineteen-model qualification](https://github.com/hysel/haven-42/wiki/Evidence-Record-5ef05050d8cf0bc1) | `partial-pass` | Windows 11 · Ollama · digest-pinned-nineteen-model-corpus |
 ## Hardware Recommendation
 
 | Evidence | Status | Tested environment |

@@ -3095,6 +3095,7 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-alpha2-evidence-freshness.py \
     test-alpha2-hardware-qualification-evidence.py \
     test-alpha2-hardware-report-preflight.py \
+    test-alpha2-amd-rx6800-windows-qualification-result.py \
     test-alpha2-model-recommendation-matrix.py \
     test-alpha2-model-recommendation-report.py \
     test-alpha2-macos-model-qualification.py \
