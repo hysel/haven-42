@@ -1,6 +1,6 @@
 # Local Web MVP
 
-Haven 42 has a runnable local product experience for Windows, Linux, and macOS. It opens a local browser page, reports sanitized host readiness, connects to an explicitly selected Ollama endpoint, discovers installed models, and provides repository-free chat, writing, summarization, and bounded user-selected text context.
+Haven 42 runs locally on Windows, Linux, and macOS. It opens a local browser page, reports sanitized host readiness, connects to an explicitly selected Ollama endpoint, discovers installed models, and provides repository-free chat, writing, summarization, and bounded user-selected text context.
 
 This is a local application, not a hosted website. Source execution does not require Node.js, Rust, Tauri, a cloud account, executable signing, or a public deployment. Unsigned PyInstaller one-folder development packages also remove the global Python requirement; see `docs/portable-development-package.md`.
 

@@ -1,7 +1,7 @@
 # Offline installer lifecycle foundation
 
-Haven 42 does not contain an installer. The offline lifecycle foundation is a
-standard-library simulation that rejects unsafe plans before any future native
+Haven 42 does not contain an installer. The offline lifecycle foundation uses a
+standard-library simulation to reject unsafe plans before any future native
 implementation is considered. It performs no network, filesystem, process,
 service, scheduled-task, registry, driver, elevation, installation, update,
 rollback, cleanup, uninstall, or user-data effect.

@@ -1,6 +1,6 @@
 # GitHub Repository Policy
 
-`config/github-repository-policy.json` is the reviewable source of truth for Haven 42 repository governance. `scripts/verify-github-repository-policy.py` checks committed workflow structure offline; `--live` additionally compares the authoritative GitHub repository settings through GitHub CLI.
+`config/github-repository-policy.json` is the reviewable source of truth for Haven 42 repository governance. `scripts/verify-github-repository-policy.py` checks committed workflow structure offline; `--live` also compares the authoritative GitHub repository settings through GitHub CLI.
 
 The privacy gate scans reachable Git history plus every tracked or untracked
 non-ignored working-tree file. This catches pending evidence before staging or

@@ -1,6 +1,6 @@
 # Portable Development Package
 
-Haven 42 can be built as an unsigned PyInstaller one-folder development package on Windows, Linux, and macOS. It reuses the exact browser UI and Python service from source. The package adds no installer, system service, administrator requirement, global Python requirement, Tauri/Rust runtime, updater activation, or machine-modification capability.
+Haven 42 builds as an unsigned PyInstaller one-folder development package on Windows, Linux, and macOS. It reuses the exact browser UI and Python service from source. The package adds no installer, system service, administrator requirement, global Python requirement, Tauri/Rust runtime, updater activation, or machine-modification capability.
 
 ## Build And Run
 

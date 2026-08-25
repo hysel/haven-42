@@ -12,7 +12,7 @@
 | Repository access | None |
 | Application persistence | None |
 
-The provider address, machine identity, prompt response, and hardware details were not recorded. This cell did not pull, delete, update, or reconfigure a model.
+The cell recorded no provider address, machine identity, prompt response, or hardware details. It did not pull, delete, update, or reconfigure a model.
 
 ## Results
 
