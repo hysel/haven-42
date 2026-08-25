@@ -2,9 +2,9 @@
 
 ## Purpose
 
-Runtime output verification adds a deterministic safety check after model output is generated.
+Runtime output verification adds a deterministic safety check after a model generates output.
 
-Prompt wording is still useful, but local models can ignore instructions. The verifier checks output against the generated runtime context and marks guardrail failures without exposing private repository content.
+Prompt wording still matters, but local models can ignore instructions. The verifier checks output against the generated runtime context and marks guardrail failures without exposing private repository content.
 
 ## What It Checks
 

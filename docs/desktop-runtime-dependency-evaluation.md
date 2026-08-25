@@ -4,7 +4,7 @@
 
 Evaluation date: 2026-07-22
 
-The Milestone 22 desktop stack is **architecture-approved but not admitted for shipment**. This review pins the smallest candidate set so reproducible implementation and platform testing can begin later. It does not add a package manifest, lock file, Rust crate, frontend source tree, installer, or executable runtime. The disposable Windows evidence is recorded in `docs/desktop-dependency-resolution-evidence.md`. A pinned upstream Tauri source commit removes the Windows `rust-unic` chain and passes a native probe, but the fix is not in a published Tauri release, so runtime admission remains blocked.
+The Milestone 22 desktop stack is **architecture-approved but not admitted for shipment**. This review pins the smallest candidate set for later reproducible implementation and platform testing. It does not add a package manifest, lock file, Rust crate, frontend source tree, installer, or executable runtime. The disposable Windows evidence is recorded in `docs/desktop-dependency-resolution-evidence.md`. A pinned upstream Tauri source commit removes the Windows `rust-unic` chain and passes a native probe, but the fix is not in a published Tauri release, so runtime admission remains blocked.
 
 The official GitHub release plus crates.io and npm registries were rechecked again on 2026-07-22 after the first UI slice. Tauri `2.11.5`, `tauri-utils 2.9.3`, and `@tauri-apps/cli 2.11.4` remain current, while the reviewed fix remains only in post-release commit `dd725f4b13c30a86b398ccc59eb498f151f461c5`. No candidate was advanced and no dependency files were added.
 

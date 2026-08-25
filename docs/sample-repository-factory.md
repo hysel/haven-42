@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The sample repository factory creates local, disposable repositories for validating prompts, agent surfaces, language guidance, and approved-write behavior without needing private or customer repositories.
+The sample repository factory creates local, disposable repositories for validating prompts, agent surfaces, language guidance, and approved-write behavior without using private or customer repositories.
 
 The generated repositories are intentionally small. They are not production templates and they do not install dependencies. Their purpose is to provide realistic file names, project markers, source files, tests, documentation, configuration, infrastructure, and database signals that an agent can inspect safely. Python fixtures include a `.gitignore` for the disposable `.venv`, `__pycache__`, and pytest cache created when you run their documented tests.
 

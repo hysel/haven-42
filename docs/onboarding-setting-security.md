@@ -1,6 +1,6 @@
 # Onboarding Setting Security
 
-`config/onboarding-setting-schemas.json` defines the structured advanced controls shared by guided and existing-setup onboarding. `scripts/evaluate-onboarding-configuration.py` evaluates those controls without resolving a provider, opening a connection, reading a granted path, retrieving a secret, installing software, or causing any other machine effect.
+`config/onboarding-setting-schemas.json` defines the structured advanced controls shared by guided and existing-setup onboarding. `scripts/evaluate-onboarding-configuration.py` evaluates them without resolving a provider, opening a connection, reading a granted path, retrieving a secret, installing software, or causing any other machine effect.
 
 ## Authority Boundary
 
