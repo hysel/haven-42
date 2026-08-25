@@ -2,7 +2,7 @@
 
 ## Exact-profile partial pass
 
-The official ComfyUI AMD portable completed disposable native Windows cells on 2026-07-22 and 2026-07-23. This evidence narrows the remaining gate but does not ship or promote a Windows runtime or installer.
+The official ComfyUI AMD portable completed disposable native Windows cells on 2026-07-22 and 2026-07-23. These results narrow the remaining gate but do not ship or promote a Windows runtime or installer.
 
 | Field | Value |
 | --- | --- |

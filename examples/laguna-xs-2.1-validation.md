@@ -2,7 +2,7 @@
 
 ## Result
 
-`laguna-xs-2.1:q4_K_M` passed the bounded 16-check Ollama provider-conformance cell on Linux with Ollama 0.32.1. This is exact provider evidence, not agent-surface approved-write evidence.
+`laguna-xs-2.1:q4_K_M` passed the bounded 16-check Ollama provider-conformance cell on Linux with Ollama 0.32.1. This establishes exact provider behavior, not approved-write behavior on an agent surface.
 
 | Field | Value |
 | --- | --- |

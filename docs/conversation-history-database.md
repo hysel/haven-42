@@ -5,7 +5,7 @@ portable development package keep prompts, responses, prompt recall, selected
 context, and provider details in memory and discard them at a task boundary or
 shutdown according to the existing lifecycle policy.
 
-This document defines the offline foundation for an optional local conversation
+This page defines the offline foundation for an optional local conversation
 database. It is architecture and development-test evidence, not an active
 storage feature.
 
