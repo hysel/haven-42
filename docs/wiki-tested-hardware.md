@@ -50,10 +50,19 @@ without cross-referencing another table.
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | llama.cpp with HIP and ROCm | ✅ Verified | Passed engine and tool-call checks. |
 | Windows 11 x64, physical machine | AMD Radeon RX 7800 XT, 16 GB | llama.cpp with Vulkan | ⚠️ Partial | Runtime checks ran, but the patch-quality gate failed. |
 | Ubuntu 24.04 under WSL2 | AMD Radeon RX 7800 XT, 16 GB through DXG | llama.cpp with HIP and DXG | 🧪 Engineering evidence | Passed the model matrix as candidate evidence; this is not a supported product route. |
+| Ubuntu 26.04 LTS, physical machine | AMD Radeon RX 6800 non-XT, 16 GB | Ollama 0.32.14 with Vulkan and Mesa RADV | 🧪 Engineering evidence | Thirteen exact model artifacts were checked. Ten passed the Chat, Writing, and Summarization gate and independent 30-minute soaks; three failed required Writing or Summarization contracts. No automatic default, managed-runtime choice, or support label changed. |
 | Ubuntu 26.04 LTS, physical machine | AMD Radeon RX 5700 XT, 8 GB | Ollama 0.32.13 with Vulkan and Mesa RADV | 🧪 Engineering evidence | Nine exact profiles passed the core task gate, three oversized candidates were refused before download, full-residency checks passed where requested, and a bounded current-boot stability and board-power profile completed. Seven profiles failed required task contracts; final-profile full-memory and packaged lifecycle testing remain open. |
+| Ubuntu 26.04 LTS, physical machine | AMD Radeon RX 5700 XT, 8 GB | llama.cpp `b10375` with Vulkan and Mesa RADV | ⚠️ Partial | A hash-pinned Qwen 3.5 0.8B GGUF passed device discovery, exact-response generation, full 25-layer GPU offload, VRAM recovery, and process cleanup. This was a bounded one-model engine smoke, not a full model or package qualification. |
+| Windows 11 x64 build 10.0.26200.8973, physical machine | AMD Radeon RX 5700 XT, 8 GB | llama.cpp `b10375` with Vulkan and AMD driver 26.7.1 | ⚠️ Partial | A hash-pinned Qwen 3.5 0.8B GGUF passed nine of nine task samples, 1,602 of 1,602 requests during a 30-minute soak, full 25-layer GPU offload, device proof, and cleanup. Other models, packaged lifecycle, and automatic selection remain open. |
 | Windows 11 x64, physical and Windows-to-Go profiles | Intel Arc B580, 12 GB | Ollama with experimental Vulkan | ✅ Verified | Passed the exact bounded Intel Alpha profile. |
 | Windows 11 x64, physical machine | Intel Arc B580, 12 GB | llama.cpp with SYCL | ❌ Did not pass | Failed the native model-loading gate. |
 | Ubuntu 26.04 Desktop, physical machine | Intel Arc B580, 12 GB | llama.cpp with SYCL | ⚠️ Partial | Functional checks passed, but three upstream tests failed. |
+| Ubuntu 26.04 LTS, physical machine | Intel Arc B580, 12 GB | OpenVINO GenAI 2026.2.1 | ⚠️ Partial | The immutable Qwen3 0.6B INT4 model passed GPU discovery and five fresh load, generate, unload, and cleanup cycles. Strict output behavior failed, the host OS is outside OpenVINO's documented support baseline, and no Haven 42 provider or package is available for this route. |
+| Windows 11 x64, physical machine | Intel Arc B580, 12 GB | OpenVINO GenAI 2026.2.0 | ⚠️ Partial | A hash-verified portable runtime and immutable Qwen3 0.6B INT4 model passed GPU discovery, three direct inference lifecycles, and process cleanup. Strict output behavior failed, and no provider, installer, automatic download, or package support is available for this route. |
+| Windows 11 x64, physical machine | NVIDIA GeForce GTX 1650 Super, 4 GB | Ollama 0.32.14 with CUDA | 🧪 Engineering evidence | Eight exact model artifacts were checked. Three passed the Chat, Writing, and Summarization gate and independent 30-minute soaks; five larger candidates stopped at the full-CUDA-residency gate. No automatic default or support label changed. |
+| Ubuntu 26.04 LTS, physical machine | NVIDIA GeForce GTX 1650 Super, 4 GB | Ollama 0.32.14 with CUDA | 🧪 Engineering evidence | Eight exact model artifacts were checked. Five passed the Chat, Writing, and Summarization gate and independent 30-minute soaks; three larger candidates stopped at the full-CUDA-residency gate. No automatic default or support label changed. |
+| Windows 11 x64, physical machine | NVIDIA GeForce RTX 3060, 12 GB | Ollama 0.32.14 with CUDA | 🧪 Engineering evidence | Fourteen of 19 exact model artifacts passed the core task gate and independent 30-minute soaks. Five stopped at explicit task-contract failures. One OpenCode workflow passed, but the complete coding-policy gate remains incomplete and no coding recommendation is granted. |
+| Ubuntu 26.04 LTS, physical machine | NVIDIA GeForce RTX 3060, 12 GB | Ollama 0.32.14 with CUDA | 🧪 Engineering evidence | All 19 exact model artifacts passed the Chat, Writing, and Summarization gate, unload checks, and independent 30-minute soaks. This exact-profile result does not establish another operating system, automatic default, or general support label. |
 | Windows 11 x64, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | ✅ Verified | Passed the bounded Windows Alpha checks. |
 | Windows 11 x64, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | llama.cpp with CUDA | ✅ Verified | Passed engine, vision, lifecycle, and tool-call checks. |
 | Ubuntu 26.04 Desktop, Proxmox virtual machine | NVIDIA Quadro RTX 5000, 16 GB | Ollama with CUDA | ✅ Verified | Passed Alpha 2 package, task, driver, and GPU-use checks for the exact profile. |
@@ -93,6 +102,17 @@ prove success on the other.
 | Radeon RX 7800 XT, 16 GB | Windows 11 | [Models tested and their results](Eng-AMD-RX7800XT-Windows-Ollama-0329-Recertification) and [measured model power use](Eng-AMD-RX7800XT-Windows-Power-Validation) |
 | Intel Arc B580, 12 GB | Ubuntu and Windows | [Inference-engine and accelerator results](Eng-Intel-B580-Inference-Engine-Validation) |
 | Apple M4, 16 GB unified memory | macOS 26.6.2 | [Models, Metal acceleration, soaks, and coding checks](Eng-Apple-M4-16GiB-Model-Qualification) |
+
+## Other local AI workloads
+
+Image and audio generation use different qualification gates from text
+inference. Their exact hardware and runtime results are kept in separate
+records:
+
+| Workload | Tested configurations | Current result | Detailed records |
+| --- | --- | --- | --- |
+| Local image generation | ComfyUI on Windows 11 with AMD Radeon RX 7800 XT, Intel Arc B580, and NVIDIA Quadro RTX 5000 | ⚠️ Partial | [AMD result](Eng-Windows-AMD-Image-Provider-Validation), [Intel result](Eng-Windows-Intel-Image-Provider-Validation), and [NVIDIA result](Eng-Windows-NVIDIA-Image-Provider-Validation) |
+| Local audio generation | ACE-Step 1.5 on Linux with NVIDIA Tesla V100 and Quadro RTX 5000 | ⚠️ Partial | [Audio-provider results](Eng-Local-Audio-Provider-Validation) |
 
 For broader engineering detail, see:
 

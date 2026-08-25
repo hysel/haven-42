@@ -3,8 +3,8 @@
   "kind": "haven42-evidence-page-registry",
   "sourceCatalog": "config/evidence-catalog.tsv",
   "sourceContract": "config/capability-evidence-contract.json",
-  "catalogSha256": "820609753eb72e5502042a99163fbe4540ee06eadff336c066fe7305d817cff2",
-  "recordCount": 210,
+  "catalogSha256": "05612fb65df5a80bf5ee3cd8c77ff26df698d92538fce77372f413aec56d0c6a",
+  "recordCount": 211,
   "futureAutomaticUpdateUse": {
     "mode": "advisory-evidence-input-only",
     "automaticUpdateActivationAuthorized": false,
@@ -1911,6 +1911,30 @@
         "repositorySource": "docs/evidence-records/evidence-07a5bd4578f3108f.md",
         "wikiPage": "Evidence-Record-07a5bd4578f3108f.md",
         "title": "Radeon RX 5700 XT exact Ubuntu Vulkan profile"
+      }
+    },
+    {
+      "id": "evidence-8863732197853ce7",
+      "claim": {
+        "schema_version": "2",
+        "area": "hardware-qualification",
+        "subject": "Radeon RX 6800 non-XT exact Ubuntu Vulkan profile",
+        "surface": "Haven 42 Alpha 2 qualification harness",
+        "surface_version": "0.4.0-alpha.2",
+        "provider": "Ollama 0.32.14 Vulkan RADV",
+        "os": "Ubuntu 26.04 LTS",
+        "model": "digest-pinned-13-model-corpus",
+        "operation": "exact-artifact-core-task-gate-and-30-minute-soak",
+        "validation_mode": "local-endpoint",
+        "status": "partial-pass",
+        "evidence": "examples/amd-rx6800-linux-model-qualification.md",
+        "notes": "Thirteen exact artifacts were checked; ten passed Chat, Writing, and Summarization and then passed independent 30-minute soaks, while three stopped at explicit task-contract failures. This exact Ubuntu, runtime, driver, and hardware result does not change automatic defaults, managed-runtime choices, support labels, or another platform cell."
+      },
+      "sourceEvidence": "examples/amd-rx6800-linux-model-qualification.md",
+      "page": {
+        "repositorySource": "docs/evidence-records/evidence-8863732197853ce7.md",
+        "wikiPage": "Evidence-Record-8863732197853ce7.md",
+        "title": "Radeon RX 6800 non-XT exact Ubuntu Vulkan profile"
       }
     },
     {
