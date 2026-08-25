@@ -2,9 +2,9 @@
 
 ## Purpose
 
-The future starter-toolkit UI should give new and experienced AI users one guided surface for general chat and content tasks, software work, setup, hardware profiling, model choice, config generation, agent-surface testing, validation, cleanup, and release readiness.
+The future starter-toolkit UI should give new and experienced AI users one guided surface for chat and content tasks, software work, setup, hardware profiling, model choice, configuration generation, agent-surface testing, validation, cleanup, and release readiness.
 
-The UI must be a wrapper over existing workflow registry entries and tested scripts. It should not reimplement hardware profiling, recommendation logic, config generation, evidence parsing, or validation.
+The UI must wrap existing workflow-registry entries and tested scripts. It must not reimplement hardware profiling, recommendation logic, configuration generation, evidence parsing, or validation.
 
 ## Primary Users
 

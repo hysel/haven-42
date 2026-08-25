@@ -4,7 +4,7 @@ OpenHands is a platform-style agent. It is not treated as a simple local editor 
 
 ## Allowed Validation Scope
 
-Initial OpenHands validation may use only a disposable generated repository and a dedicated, isolated workspace. The test must use a read-only task first. A write-smoke task may follow only after the read-only result is recorded and the user approves the write.
+Initial OpenHands validation may use only a disposable generated repository in a dedicated, isolated workspace. The test must begin with a read-only task. A write-smoke task may follow only after that result is recorded and the user approves the write.
 
 The workspace must mount only the generated repository. It must not mount the user profile, SSH keys, cloud credentials, package-manager credentials, private source repositories, or unrelated host directories.
 

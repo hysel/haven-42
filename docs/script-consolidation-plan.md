@@ -8,8 +8,8 @@ package, which exposes one setup helper and keeps its internal file list small.
 Continue is legacy evidence only and has no maintained setup path.
 
 The remaining consolidation work reduces maintenance cost; it is not an
-end-user navigation strategy. The goal is to move repeated behavior into
-shared engines and keep thin platform wrappers only where they remain useful.
+end-user navigation strategy. Move repeated behavior into shared engines and
+keep thin platform wrappers only where they remain useful.
 
 ## Principles
 

@@ -1,6 +1,6 @@
 # Language Rule Pack Validation Evidence
 
-This file records sanitized validation evidence for optional language rule packs.
+This page records sanitized validation evidence for optional language rule packs.
 
 Do not include private repository names, private paths, private endpoints, usernames, hostnames, tokens, raw private source code, or raw transcripts.
 
