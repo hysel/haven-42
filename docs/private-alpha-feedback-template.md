@@ -1,6 +1,6 @@
 # Private alpha feedback template
 
-Use this sanitized structure for a future invited-alpha report. Do not include
+Use this sanitized template for a future invited-alpha report. Do not include
 provider addresses, API keys, prompts, attachments, model responses, local
 paths, usernames, machine identifiers, SSH details, or private repository data.
 
@@ -27,13 +27,13 @@ Confirmation:
 - Candidate archive and application were not modified
 ```
 
-Suspected vulnerabilities, credential exposure, arbitrary execution, listener
-scope errors, update/install effects, or data loss must be reported privately
-and treated as release-blocking until reviewed.
+Report suspected vulnerabilities, credential exposure, arbitrary execution,
+listener scope errors, update/install effects, or data loss privately. Treat
+them as release-blocking until reviewed.
 
 For an ordinary Alpha problem or experience suggestion, use the structured
 [Alpha report chooser](https://github.com/hysel/haven-42/issues/new/choose).
-The forms repeat these privacy limits and disable blank public issues. Review a
-saved sanitized support report before sharing any part of it. Security concerns
-must use
+The forms repeat these privacy limits and disable blank public issues. Review
+any saved, sanitized support report before sharing it. Security concerns must
+use
 [private vulnerability reporting](https://github.com/hysel/haven-42/security/advisories/new).

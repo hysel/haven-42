@@ -1,7 +1,7 @@
 # Private alpha known limitations
 
-These limitations are mandatory disclosures for the published, unsigned Haven
-42 `0.4.0-alpha.1` Windows prerelease.
+These limitations apply to the published, unsigned Haven 42
+`0.4.0-alpha.1` Windows prerelease.
 
 - Artifacts are unsigned and not notarized. Operating-system reputation or
   antivirus warnings may appear.
@@ -13,7 +13,7 @@ These limitations are mandatory disclosures for the published, unsigned Haven
   privileged setup. Its optional guided path writes a pinned standalone Ollama
   runtime and recommended model inside `Haven42-Data` in the extracted package
   folder after explicit approval; neither is bundled.
-- Drivers and TLS gateways are separately acquired. Haven 42 never installs or
+- Drivers and TLS gateways are acquired separately. Haven 42 never installs or
   changes drivers, Windows Update, services, firewall rules, certificate trust,
   firmware, or system runtimes.
 - Same-device Ollama may use HTTP loopback. Authenticated private-network
@@ -36,8 +36,8 @@ These limitations are mandatory disclosures for the published, unsigned Haven
   Other catalog tiers are visible as hardware-fit candidates
   with manual instructions but cannot be downloaded or run automatically by
   Haven.
-- Linux and macOS are outside this Alpha even though development packages have
-  separate evidence.
+- Linux and macOS are outside this Alpha. Development packages have separate
+  evidence.
 - GPU utilization uses NVIDIA telemetry when available and otherwise uses
   Windows vendor-neutral GPU performance counters. The first baseline sample
   or a system without usable counters may briefly or persistently report
@@ -45,6 +45,5 @@ These limitations are mandatory disclosures for the published, unsigned Haven
 - Tauri/Rust, signing, notarization, stable or production promotion, and
   production readiness remain unadmitted.
 
-Any future candidate must freeze this page at its exact revision and add newly
-known issues before distribution. A tester report does not silently widen
-support.
+Any future candidate must freeze the exact revision of this page and add newly
+known issues before distribution. A tester report does not widen support.
