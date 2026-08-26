@@ -24,7 +24,7 @@ record.
 
 ## What this proves
 
-This proves one narrow development capability: an owner-invoked command can
+This result demonstrates one narrow development capability: an owner-invoked command can
 perform one bounded metadata query against one fixed provider while enforcing
 the reviewed transport and response boundaries on this Windows source tree.
 
