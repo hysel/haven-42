@@ -34,6 +34,8 @@ SAMPLE_WEIGHTS = (
     ("custom-helper", 4),
     ("powershell", 3),
     ("shell", 3),
+    ("powershell-inline", 1),
+    ("shell-embedded-python", 1),
 )
 SHELL_RUN_TEST = re.compile(r'^run_test\s+"(?P<name>[^"]+)"\s+(?P<function>test_[A-Za-z0-9_]+)\s*$')
 
@@ -132,9 +134,19 @@ def python_kind(binding: dict[str, object], cache: dict[str, ast.AST]) -> str | 
 
 def candidate_kind(binding: dict[str, object], cache: dict[str, ast.AST]) -> str | None:
     test = str(binding["test"])
+    syntax = str(binding.get("syntax", ""))
+    variable = str(binding.get("variable", ""))
+    if syntax.startswith("powershell-inline-"):
+        return "powershell-inline"
+    if syntax.startswith("shell-embedded-"):
+        return "shell-embedded-python"
     if test.startswith("scripts/test-pack.ps1::"):
+        if variable.startswith("inline:"):
+            return "powershell-inline"
         return "powershell"
     if test.startswith("scripts/test-pack.shared.sh::"):
+        if variable.startswith("embedded-python:"):
+            return "shell-embedded-python"
         return "shell"
     return python_kind(binding, cache)
 
@@ -234,7 +246,7 @@ def shell_test_names(path: Path) -> dict[str, str]:
 
 def test_command(candidate: Candidate, worktree: Path, shell_names: dict[str, str]) -> Command:
     test_path, _separator, test_name = candidate.test.partition("::")
-    if candidate.kind == "powershell":
+    if candidate.kind in {"powershell", "powershell-inline"}:
         return Command(
             (
                 "pwsh",
@@ -249,7 +261,7 @@ def test_command(candidate: Candidate, worktree: Path, shell_names: dict[str, st
             ),
             test_name,
         )
-    if candidate.kind == "shell":
+    if candidate.kind in {"shell", "shell-embedded-python"}:
         display_name = shell_names.get(test_name)
         if display_name is None:
             raise RuntimeError(f"No run_test registration found for shell function {test_name}.")
@@ -272,7 +284,7 @@ def test_command(candidate: Candidate, worktree: Path, shell_names: dict[str, st
 
 
 def verify_selected_test_ran(candidate: Candidate, command: Command, output: str) -> None:
-    if candidate.kind in {"powershell", "shell"}:
+    if candidate.kind in {"powershell", "powershell-inline", "shell", "shell-embedded-python"}:
         if not re.search(r"\b1 tests executed\b", output, re.IGNORECASE):
             raise RuntimeError(
                 f"Selected runner did not report exactly one executed test for {candidate.test}.\n{output}"
@@ -335,7 +347,7 @@ def remove_read_only_tree(path: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sample-size", type=int, default=17, choices=range(15, 19))
+    parser.add_argument("--sample-size", type=int, default=19, choices=range(19, 22))
     parser.add_argument("--timeout-seconds", type=int, default=180)
     args = parser.parse_args()
 

@@ -76,6 +76,41 @@ function Get-Patterns {
     return @()
 }
 
+function Get-ContentSource {
+    param(
+        [System.Management.Automation.Language.Ast]$Node,
+        [hashtable]$PathVariables,
+        [hashtable]$ContentVariables
+    )
+    $name = Get-VariableName -Node $Node
+    if (-not [string]::IsNullOrWhiteSpace($name) -and $ContentVariables.ContainsKey($name)) {
+        return [pscustomobject]@{ Source = $ContentVariables[$name]; Variable = "`$$name" }
+    }
+
+    $text = $Node.Extent.Text
+    $variableMatch = [regex]::Match(
+        $text,
+        'Get-Content\b[\s\S]*?-LiteralPath\s+\$([A-Za-z_][A-Za-z0-9_]*)'
+    )
+    if ($variableMatch.Success -and $PathVariables.ContainsKey($variableMatch.Groups[1].Value)) {
+        return [pscustomobject]@{
+            Source = $PathVariables[$variableMatch.Groups[1].Value]
+            Variable = "inline:$text"
+        }
+    }
+    $inlineMatch = [regex]::Match(
+        $text,
+        'Get-Content\b[\s\S]*?-LiteralPath\s+\(Join-Path\s+\$repoRoot\s+["'']([^"'']+\.md)["'']\)'
+    )
+    if ($inlineMatch.Success) {
+        return [pscustomobject]@{
+            Source = $inlineMatch.Groups[1].Value.Replace('\', '/')
+            Variable = "inline:$text"
+        }
+    }
+    return $null
+}
+
 $results = New-Object System.Collections.Generic.List[object]
 $tests = $ast.FindAll({
     param($node)
@@ -132,13 +167,13 @@ foreach ($test in $tests) {
     }, $true)
 
     foreach ($match in $matches) {
-        $leftName = Get-VariableName -Node $match.Left
-        if ([string]::IsNullOrWhiteSpace($leftName) -or -not $contentVariables.ContainsKey($leftName)) {
+        $contentSource = Get-ContentSource -Node $match.Left -PathVariables $pathVariables -ContentVariables $contentVariables
+        if ($null -eq $contentSource) {
             continue
         }
         $patterns = @(Get-Patterns -Expression $match.Right)
         foreach ($pattern in $patterns) {
-            $sourcePath = Join-Path $repoRoot $contentVariables[$leftName]
+            $sourcePath = Join-Path $repoRoot $contentSource.Source
             $sourceText = if (Test-Path -LiteralPath $sourcePath) {
                 [System.IO.File]::ReadAllText($sourcePath)
             }
@@ -155,11 +190,17 @@ foreach ($test in $tests) {
                 $null -ne $sourceText -and
                 $matchesSource) {
                 $results.Add([pscustomobject]@{
-                    source = $contentVariables[$leftName]
+                    source = $contentSource.Source
                     pattern = $pattern
                     test = "scripts/test-pack.ps1::$testName"
-                    variable = "`$$leftName"
+                    variable = $contentSource.Variable
                     line = $match.Extent.StartLineNumber
+                    syntax = if ($contentSource.Variable.StartsWith('inline:')) {
+                        "powershell-inline-$($match.Operator.ToString().ToLowerInvariant())"
+                    }
+                    else {
+                        "powershell-variable-$($match.Operator.ToString().ToLowerInvariant())"
+                    }
                 })
             }
         }
@@ -190,6 +231,7 @@ foreach ($test in $tests) {
                     test = "scripts/test-pack.ps1::$testName"
                     variable = "`$$leftName"
                     line = $call.Extent.StartLineNumber
+                    syntax = "powershell-variable-contains"
                 })
             }
         }
