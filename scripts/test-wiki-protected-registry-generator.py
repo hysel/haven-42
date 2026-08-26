@@ -249,10 +249,51 @@ def main() -> int:
             for value in values:
                 print(f"{label}: {value}")
         return 1
+    all_bindings = (
+        generator.powershell_bindings()
+        | generator.shell_bindings()
+        | actual
+    )
+    required = {
+        (
+            "docs/product-ui-first-slice.md",
+            "What do you want to do?",
+            "scripts/test-pack.shared.sh::test_product_ui_first_slice",
+            "shell-embedded-python-native-assert-membership",
+        ),
+        (
+            "docs/progressive-onboarding.md",
+            "Advanced mode is control, not a bypass",
+            "scripts/test-pack.ps1::product UI first slice is registry-backed and fail closed",
+            "powershell-inline-imatch",
+        ),
+    }
+    observed = {(item.source, item.pattern, item.test, item.syntax) for item in all_bindings}
+    absent = sorted(required - observed)
+    if absent:
+        for value in absent:
+            print(f"MISSING CROSS-LANGUAGE PATTERN: {value}")
+        return 1
+    syntax_inventory = {item.syntax for item in all_bindings}
+    required_syntax = {
+        "python-native-assert-membership",
+        "python-custom-helper-membership",
+        "shell-grep-positive",
+        "shell-embedded-python-native-assert-membership",
+        "powershell-variable-imatch",
+        "powershell-variable-ilike",
+        "powershell-variable-contains",
+        "powershell-inline-imatch",
+    }
+    missing_syntax = sorted(required_syntax - syntax_inventory)
+    if missing_syntax:
+        print("MISSING ASSERTION SYNTAX: " + ", ".join(missing_syntax))
+        return 1
     print(
         "Protected-string Python reverse audit passed: "
         f"{len(actual)} bindings, {helper_calls} custom assertion-helper calls in "
-        f"{len(helper_files)} files, {helper_memberships} helper membership operands, 0 unresolved"
+        f"{len(helper_files)} files, {helper_memberships} helper membership operands, 0 unresolved; "
+        f"cross-language inventory covers {len(syntax_inventory)} extracted syntax categories"
     )
     return 0
 

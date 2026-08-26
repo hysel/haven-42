@@ -10,7 +10,7 @@ import html
 import json
 import re
 import subprocess
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
@@ -26,6 +26,7 @@ class Binding:
     test: str
     variable: str
     line: int
+    syntax: str = field(default="", compare=False)
 
 
 def wiki_pages() -> dict[str, str]:
@@ -63,6 +64,7 @@ def powershell_bindings() -> set[Binding]:
             test=record["test"],
             variable=record["variable"],
             line=int(record["line"]),
+            syntax=record.get("syntax", "powershell-content-expression"),
         )
         for record in records
         if is_markdown_source(record["source"])
@@ -77,6 +79,10 @@ SHELL_GREP = re.compile(
     r"(?P<neg>!\s*)?grep\s+-(?P<options>[A-Za-z]*q[A-Za-z]*)\s+(?:--\s+)?"
     r"(?P<quote>[\"'])(?P<pattern>.*?)(?P=quote)\s+"
     r"(?P<tquote>[\"'])(?P<target>.*?)(?P=tquote)"
+)
+SHELL_PYTHON_HEREDOC = re.compile(
+    r"(?m)^\s*python(?:3)?(?:\s+[^\n]*?)?\s+<<(?P<quote>['\"]?)(?P<tag>[A-Za-z_][A-Za-z0-9_]*)"
+    r"(?P=quote)[^\n]*$"
 )
 
 
@@ -113,6 +119,30 @@ def shell_bindings() -> set[Binding]:
                     test=f"scripts/test-pack.shared.sh::{start.group(1)}",
                     variable=target,
                     line=line,
+                    syntax="shell-grep-positive",
+                )
+            )
+        for heredoc in SHELL_PYTHON_HEREDOC.finditer(body):
+            body_start = heredoc.end() + (1 if body[heredoc.end() :].startswith("\n") else 0)
+            terminator = re.search(
+                rf"(?m)^\s*{re.escape(heredoc.group('tag'))}\s*$", body[body_start:]
+            )
+            if terminator is None:
+                continue
+            python_text = body[body_start : body_start + terminator.start()]
+            try:
+                tree = ast.parse(python_text, filename=str(path))
+            except SyntaxError:
+                continue
+            line_offset = text.count("\n", 0, start.start() + body_start)
+            results.update(
+                bindings_from_python_tree(
+                    tree,
+                    test_path="scripts/test-pack.shared.sh",
+                    fixed_test_name=start.group(1),
+                    line_offset=line_offset,
+                    variable_prefix="embedded-python:",
+                    initial_paths={"ROOT": "", "root": ""},
                 )
             )
     return results
@@ -239,112 +269,119 @@ def assertion_helper_names(tree: ast.AST) -> set[str]:
     return names
 
 
+def bindings_from_python_tree(
+    tree: ast.AST,
+    *,
+    test_path: str,
+    fixed_test_name: str | None = None,
+    line_offset: int = 0,
+    variable_prefix: str = "",
+    initial_paths: dict[str, str] | None = None,
+) -> set[Binding]:
+    results: set[Binding] = set()
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+    assertion_helpers = assertion_helper_names(tree)
+    paths: dict[str, str] = dict(initial_paths or {"ROOT": ""})
+    contents: dict[str, frozenset[str]] = {}
+
+    assignments = sorted(
+        (node for node in ast.walk(tree) if isinstance(node, (ast.Assign, ast.AnnAssign))),
+        key=lambda node: node.lineno,
+    )
+    iteration_limit = len(assignments) + 1
+    for _ in range(iteration_limit):
+        changed = False
+        for node in assignments:
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            value = node.value
+            for target in targets:
+                if not isinstance(target, ast.Name):
+                    continue
+                possible_path = path_value(value, paths)
+                if possible_path and paths.get(target.id) != possible_path:
+                    paths[target.id] = possible_path
+                    changed = True
+        if not changed:
+            break
+    else:
+        raise RuntimeError(
+            f"Path attribution did not converge for {test_path} after {iteration_limit} iterations."
+        )
+
+    for _ in range(iteration_limit):
+        next_contents: dict[str, frozenset[str]] = {}
+        for node in assignments:
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            value = node.value
+            for target in targets:
+                if not isinstance(target, ast.Name):
+                    continue
+                possible_contents = content_sources(value, paths, contents)
+                if possible_contents:
+                    next_contents[target.id] = possible_contents
+        if next_contents == contents:
+            break
+        contents = next_contents
+    else:
+        raise RuntimeError(
+            f"Content-source attribution did not converge for {test_path} after {iteration_limit} iterations."
+        )
+
+    for node in ast.walk(tree):
+        candidates: list[tuple[str, frozenset[str], str, int]] = []
+        syntax = ""
+        if isinstance(node, ast.Assert):
+            candidates = condition_memberships(node.test, parents, paths, contents)
+            syntax = "python-native-assert-membership"
+        elif (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id in assertion_helpers
+            and node.args
+        ):
+            candidates = condition_memberships(node.args[0], parents, paths, contents)
+            syntax = "python-custom-helper-membership"
+        elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            if node.func.attr in {"assertIn", "assertRegex"} and len(node.args) >= 2:
+                if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                    sources = content_sources(node.args[1], paths, contents)
+                    if sources:
+                        candidates = [(node.args[0].value, sources, ast.unparse(node.args[1]), node.lineno)]
+                        syntax = f"python-unittest-{node.func.attr}"
+        for pattern, sources, variable, line in candidates:
+            for source in sources:
+                if not is_markdown_source(source):
+                    continue
+                source_text = (ROOT / source).read_text(encoding="utf-8")
+                if pattern in source_text or pattern in " ".join(source_text.split()):
+                    test_name = fixed_test_name or enclosing_function(parents, node)
+                    results.add(
+                        Binding(
+                            source=source,
+                            pattern=pattern,
+                            test=f"{test_path}::{test_name}",
+                            variable=f"{variable_prefix}{variable}",
+                            line=line + line_offset,
+                            syntax=(
+                                f"shell-embedded-{syntax}"
+                                if variable_prefix == "embedded-python:"
+                                else syntax
+                            ),
+                        )
+                    )
+    return results
+
+
 def python_bindings() -> set[Binding]:
     results: set[Binding] = set()
     for path in sorted((ROOT / "scripts").glob("test-*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
-        assertion_helpers = assertion_helper_names(tree)
-        paths: dict[str, str] = {"ROOT": ""}
-        contents: dict[str, frozenset[str]] = {}
-
-        assignments = sorted(
-            (
-                node
-                for node in ast.walk(tree)
-                if isinstance(node, (ast.Assign, ast.AnnAssign))
-            ),
-            key=lambda node: node.lineno,
-        )
-        iteration_limit = len(assignments) + 1
-        for _ in range(iteration_limit):
-            changed = False
-            for node in assignments:
-                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-                value = node.value
-                for target in targets:
-                    if not isinstance(target, ast.Name):
-                        continue
-                    possible_path = path_value(value, paths)
-                    if (
-                        possible_path
-                        and possible_path.lower().endswith(".md")
-                        and paths.get(target.id) != possible_path
-                    ):
-                        paths[target.id] = possible_path
-                        changed = True
-            if not changed:
-                break
-        else:
-            raise RuntimeError(
-                f"Path attribution did not converge for {path} after "
-                f"{iteration_limit} iterations."
-            )
-
-        for _ in range(iteration_limit):
-            next_contents: dict[str, frozenset[str]] = {}
-            for node in assignments:
-                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
-                value = node.value
-                for target in targets:
-                    if not isinstance(target, ast.Name):
-                        continue
-                    possible_contents = content_sources(value, paths, contents)
-                    if possible_contents:
-                        next_contents[target.id] = possible_contents
-            if next_contents == contents:
-                break
-            contents = next_contents
-        else:
-            raise RuntimeError(
-                f"Content-source attribution did not converge for {path} after "
-                f"{iteration_limit} iterations."
-            )
-
-        test_path = f"scripts/{path.name}"
-        for node in ast.walk(tree):
-            candidates: list[tuple[str, frozenset[str], str, int]] = []
-            if isinstance(node, ast.Assert):
-                candidates = condition_memberships(node.test, parents, paths, contents)
-            elif (
-                isinstance(node, ast.Call)
-                and isinstance(node.func, ast.Name)
-                and node.func.id in assertion_helpers
-                and node.args
-            ):
-                candidates = condition_memberships(node.args[0], parents, paths, contents)
-            elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-                if node.func.attr in {"assertIn", "assertRegex"} and len(node.args) >= 2:
-                    if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
-                        sources = content_sources(node.args[1], paths, contents)
-                        if sources:
-                            candidates = [
-                                (
-                                    node.args[0].value,
-                                    sources,
-                                    ast.unparse(node.args[1]),
-                                    node.lineno,
-                                )
-                            ]
-            for pattern, sources, variable, line in candidates:
-                for source in sources:
-                    if not is_markdown_source(source):
-                        continue
-                    source_text = (ROOT / source).read_text(encoding="utf-8")
-                    if pattern in source_text or pattern in " ".join(source_text.split()):
-                        results.add(
-                            Binding(
-                                source=source,
-                                pattern=pattern,
-                                test=f"{test_path}::{enclosing_function(parents, node)}",
-                                variable=variable,
-                                line=line,
-                            )
-                        )
+        results.update(bindings_from_python_tree(tree, test_path=f"scripts/{path.name}"))
     return results
 
 
 def render(bindings: Iterable[Binding]) -> str:
+    bindings = set(bindings)
     pages = wiki_pages()
     grouped: dict[tuple[str, str], list[Binding]] = {}
     for binding in bindings:
@@ -361,9 +398,21 @@ def render(bindings: Iterable[Binding]) -> str:
         "so a backslash may be a regular-expression escape rather than visible wiki text.",
         "",
         "> Regenerated with assertion-to-source dataflow attribution from `scripts/test-pack.ps1`,",
-        "> `scripts/test-pack.shared.sh`, and every `scripts/test-*.py` file on 2026-08-25.",
+        "> `scripts/test-pack.shared.sh`, and every `scripts/test-*.py` file on 2026-08-26.",
         f"> The result contains {len(set(bindings))} verified source/test-pattern bindings across",
         f"> {len(grouped)} source groups. Every entry records the assertion variable and source line.",
+        "",
+        "### Covered assertion syntax",
+        "",
+        "The extractor recognizes every positive source-text contract currently used by the test pack:",
+        "PowerShell content-variable and direct-inline `Get-Content` checks with `-match` or `-like`,",
+        "PowerShell `.Contains(...)`, positive shell `grep`, Python assertions embedded in shell",
+        "heredocs, Python native `assert ... in ...`, `unittest.assertIn`, `unittest.assertRegex`,",
+        "and local custom assertion helpers that reject false membership checks. Loop-provided",
+        "literals and `[regex]::Escape(...)` operands are expanded to their concrete patterns.",
+        "Negative/absence assertions (`-notmatch`, `! grep`, `assertNotIn`, and `assertNotRegex`)",
+        "are audited but intentionally excluded because they prohibit text rather than protect it.",
+        "Other equality, numeric, exception, and mock-call assertions do not enforce source prose.",
         "",
     ]
     for (page, source), items in sorted(grouped.items(), key=lambda item: item[0]):
@@ -416,6 +465,7 @@ def main() -> int:
                             "test": item.test,
                             "variable": item.variable,
                             "line": item.line,
+                            "syntax": item.syntax,
                         }
                         for item in sorted(bindings)
                     ],
