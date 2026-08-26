@@ -132,18 +132,23 @@ def path_value(node: ast.AST, paths: dict[str, str]) -> str | None:
     return None
 
 
-def content_source(node: ast.AST, paths: dict[str, str], contents: dict[str, str]) -> str | None:
+def content_sources(
+    node: ast.AST, paths: dict[str, str], contents: dict[str, frozenset[str]]
+) -> frozenset[str]:
     if isinstance(node, ast.Name):
-        return contents.get(node.id)
+        return contents.get(node.id, frozenset())
     if isinstance(node, ast.Call):
         if isinstance(node.func, ast.Name) and node.func.id == "read" and node.args:
             value = path_value(node.args[0], paths)
-            return value if value and is_markdown_source(value) else None
+            return frozenset({value}) if value and is_markdown_source(value) else frozenset()
         if isinstance(node.func, ast.Attribute) and node.func.attr == "read_text":
             value = path_value(node.func.value, paths)
-            return value if value and is_markdown_source(value) else None
-    referenced = {contents[name.id] for name in ast.walk(node) if isinstance(name, ast.Name) and name.id in contents}
-    return next(iter(referenced)) if len(referenced) == 1 else None
+            return frozenset({value}) if value and is_markdown_source(value) else frozenset()
+    referenced: set[str] = set()
+    for name in ast.walk(node):
+        if isinstance(name, ast.Name):
+            referenced.update(contents.get(name.id, frozenset()))
+    return frozenset(referenced)
 
 
 def enclosing_function(parents: dict[ast.AST, ast.AST], node: ast.AST) -> str:
@@ -171,13 +176,77 @@ def enclosing_loop_values(
     return []
 
 
+def condition_memberships(
+    condition: ast.AST,
+    parents: dict[ast.AST, ast.AST],
+    paths: dict[str, str],
+    contents: dict[str, frozenset[str]],
+) -> list[tuple[str, frozenset[str], str, int]]:
+    """Return literal membership checks with their asserted source attribution."""
+
+    results: list[tuple[str, frozenset[str], str, int]] = []
+    for compare in ast.walk(condition):
+        if not isinstance(compare, ast.Compare):
+            continue
+        if len(compare.ops) != 1 or not isinstance(compare.ops[0], ast.In):
+            continue
+        if len(compare.comparators) != 1:
+            continue
+
+        sources = content_sources(compare.comparators[0], paths, contents)
+        if not sources:
+            continue
+        variable = ast.unparse(compare.comparators[0])
+        patterns: list[str] = []
+        if isinstance(compare.left, ast.Constant) and isinstance(compare.left.value, str):
+            patterns = [compare.left.value]
+        elif isinstance(compare.left, ast.Name):
+            patterns = enclosing_loop_values(parents, compare, compare.left.id)
+        for pattern in patterns:
+            results.append((pattern, sources, variable, compare.lineno))
+    return results
+
+
+def assertion_helper_names(tree: ast.AST) -> set[str]:
+    """Find local helpers whose first argument is enforced with AssertionError."""
+
+    names: set[str] = set()
+    for function in ast.walk(tree):
+        if not isinstance(function, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if not function.args.args:
+            continue
+        condition_name = function.args.args[0].arg
+        for branch in ast.walk(function):
+            if not isinstance(branch, ast.If):
+                continue
+            if not (
+                isinstance(branch.test, ast.UnaryOp)
+                and isinstance(branch.test.op, ast.Not)
+                and isinstance(branch.test.operand, ast.Name)
+                and branch.test.operand.id == condition_name
+            ):
+                continue
+            if any(
+                isinstance(item, ast.Raise)
+                and isinstance(item.exc, ast.Call)
+                and isinstance(item.exc.func, ast.Name)
+                and item.exc.func.id == "AssertionError"
+                for item in ast.walk(branch)
+            ):
+                names.add(function.name)
+                break
+    return names
+
+
 def python_bindings() -> set[Binding]:
     results: set[Binding] = set()
     for path in sorted((ROOT / "scripts").glob("test-*.py")):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+        assertion_helpers = assertion_helper_names(tree)
         paths: dict[str, str] = {"ROOT": ""}
-        contents: dict[str, str] = {}
+        contents: dict[str, frozenset[str]] = {}
 
         assignments = sorted(
             (
@@ -187,8 +256,8 @@ def python_bindings() -> set[Binding]:
             ),
             key=lambda node: node.lineno,
         )
-        changed = True
-        while changed:
+        iteration_limit = len(assignments) + 1
+        for _ in range(iteration_limit):
             changed = False
             for node in assignments:
                 targets = node.targets if isinstance(node, ast.Assign) else [node.target]
@@ -204,37 +273,64 @@ def python_bindings() -> set[Binding]:
                     ):
                         paths[target.id] = possible_path
                         changed = True
-                    possible_content = content_source(value, paths, contents)
-                    if possible_content and contents.get(target.id) != possible_content:
-                        contents[target.id] = possible_content
-                        changed = True
+            if not changed:
+                break
+        else:
+            raise RuntimeError(
+                f"Path attribution did not converge for {path} after "
+                f"{iteration_limit} iterations."
+            )
+
+        for _ in range(iteration_limit):
+            next_contents: dict[str, frozenset[str]] = {}
+            for node in assignments:
+                targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+                value = node.value
+                for target in targets:
+                    if not isinstance(target, ast.Name):
+                        continue
+                    possible_contents = content_sources(value, paths, contents)
+                    if possible_contents:
+                        next_contents[target.id] = possible_contents
+            if next_contents == contents:
+                break
+            contents = next_contents
+        else:
+            raise RuntimeError(
+                f"Content-source attribution did not converge for {path} after "
+                f"{iteration_limit} iterations."
+            )
 
         test_path = f"scripts/{path.name}"
         for node in ast.walk(tree):
-            pattern = None
-            source = None
-            variable = ""
-            patterns: list[str] = []
-            if isinstance(node, ast.Assert) and isinstance(node.test, ast.Compare):
-                compare = node.test
-                if len(compare.ops) == 1 and isinstance(compare.ops[0], ast.In) and len(compare.comparators) == 1:
-                    if isinstance(compare.left, ast.Constant) and isinstance(compare.left.value, str):
-                        patterns = [compare.left.value]
-                        source = content_source(compare.comparators[0], paths, contents)
-                        variable = ast.unparse(compare.comparators[0])
-                    elif isinstance(compare.left, ast.Name):
-                        patterns = enclosing_loop_values(parents, node, compare.left.id)
-                        source = content_source(compare.comparators[0], paths, contents)
-                        variable = ast.unparse(compare.comparators[0])
+            candidates: list[tuple[str, frozenset[str], str, int]] = []
+            if isinstance(node, ast.Assert):
+                candidates = condition_memberships(node.test, parents, paths, contents)
+            elif (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id in assertion_helpers
+                and node.args
+            ):
+                candidates = condition_memberships(node.args[0], parents, paths, contents)
             elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
                 if node.func.attr in {"assertIn", "assertRegex"} and len(node.args) >= 2:
                     if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
-                        patterns = [node.args[0].value]
-                        source = content_source(node.args[1], paths, contents)
-                        variable = ast.unparse(node.args[1])
-            if patterns and source and is_markdown_source(source):
-                source_text = (ROOT / source).read_text(encoding="utf-8")
-                for pattern in patterns:
+                        sources = content_sources(node.args[1], paths, contents)
+                        if sources:
+                            candidates = [
+                                (
+                                    node.args[0].value,
+                                    sources,
+                                    ast.unparse(node.args[1]),
+                                    node.lineno,
+                                )
+                            ]
+            for pattern, sources, variable, line in candidates:
+                for source in sources:
+                    if not is_markdown_source(source):
+                        continue
+                    source_text = (ROOT / source).read_text(encoding="utf-8")
                     if pattern in source_text or pattern in " ".join(source_text.split()):
                         results.add(
                             Binding(
@@ -242,7 +338,7 @@ def python_bindings() -> set[Binding]:
                                 pattern=pattern,
                                 test=f"{test_path}::{enclosing_function(parents, node)}",
                                 variable=variable,
-                                line=node.lineno,
+                                line=line,
                             )
                         )
     return results
@@ -288,6 +384,11 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--json-output", type=Path)
+    parser.add_argument(
+        "--style-guide",
+        type=Path,
+        help="Preserve the style guide preamble and replace its protected-string section",
+    )
     args = parser.parse_args()
     extracted = powershell_bindings() | shell_bindings() | python_bindings()
     canonical: dict[tuple[str, str, str], Binding] = {}
@@ -296,8 +397,14 @@ def main() -> int:
         if key not in canonical or item.line < canonical[key].line:
             canonical[key] = item
     bindings = set(canonical.values())
+    rendered = render(bindings)
+    if args.style_guide:
+        style_text = args.style_guide.read_text(encoding="utf-8")
+        marker = "## Protected strings — do not reword"
+        preamble = style_text.split(marker, 1)[0].rstrip()
+        rendered = f"{preamble}\n\n{rendered}" if preamble else rendered
     with args.output.open("w", encoding="utf-8", newline="\n") as handle:
-        handle.write(render(bindings))
+        handle.write(rendered)
     if args.json_output:
         with args.json_output.open("w", encoding="utf-8", newline="\n") as handle:
             handle.write(
