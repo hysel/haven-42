@@ -1,9 +1,9 @@
 # Windows Alpha native validation
 
-This record covers the unsigned Haven 42 `0.4.0-alpha.1` test candidate on
-physical Windows 11 x64 Intel, AMD, and NVIDIA GPU cells. It is sanitized
-evidence, not a public release, a production-readiness claim, or evidence for
-every Windows hardware combination.
+Haven 42 tested the unsigned `0.4.0-alpha.1` candidate on physical Windows 11
+x64 Intel, AMD, and NVIDIA GPU cells. This is sanitized evidence, not a public
+release, a production-readiness claim, or evidence for every Windows hardware
+combination.
 
 ## Exact Intel test cell
 

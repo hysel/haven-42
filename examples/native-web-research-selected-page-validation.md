@@ -42,7 +42,7 @@ response.
 
 ## What this proves
 
-This proves a narrow development capability: an owner-invoked source command
+This result demonstrates a narrow development capability: an owner-invoked source command
 can retrieve one explicitly selected page from one fixed provider while
 binding the request to a fresh engine citation and applying the reviewed
 transport, response, extraction, and cleanup boundaries on Windows and native
