@@ -2,13 +2,13 @@
 
 ## Status
 
-Haven 42 does not currently publish or distribute code-signed binaries. The
-existing portable packages are explicitly unsigned development artifacts. No
+Haven 42 does not currently publish or distribute code-signed binaries.
+Current portable packages are explicitly unsigned development artifacts. No
 certificate, SignPath project, signing secret, signing workflow, installer, or
 public binary Release is active.
 
 If SignPath Foundation accepts Haven 42 and every remaining promotion gate
-passes, this page will carry the provider disclosure required by SignPath:
+passes, this page will include SignPath's required provider disclosure:
 
 > Free code signing provided by SignPath.io, certificate by SignPath Foundation.
 

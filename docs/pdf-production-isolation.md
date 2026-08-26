@@ -2,8 +2,8 @@
 
 Status: assessment complete; production isolation is not satisfied.
 
-The review-only PDF worker proves that bounded parsing can fail closed against
-the synthetic corpus on Windows and Ubuntu Linux. It does not prove that the
+The review-only PDF worker demonstrates that bounded parsing can fail closed
+against the synthetic corpus on Windows and Ubuntu Linux. It does not prove the
 worker is safe to expose to arbitrary user documents. Python API replacement,
 resource limits, timeouts, output ceilings, and process-count limits reduce
 risk but do not replace operating-system capability isolation.

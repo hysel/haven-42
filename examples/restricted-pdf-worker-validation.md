@@ -2,7 +2,7 @@
 
 Date: 2026-07-30
 
-This is sanitized local security-review evidence, not product or runtime
+This sanitized local security-review record is not product or runtime
 admission.
 
 ## Exact review cell
