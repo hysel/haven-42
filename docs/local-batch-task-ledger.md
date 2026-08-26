@@ -1,11 +1,11 @@
 # Recovered local-batch task ledger
 
-The recovered conversation plan contains exactly 374 tasks in 18 phases,
+The recovered conversation plan has exactly 374 tasks in 18 phases,
 numbered 0 through 17. The seven blocker classifications following the Phase 0
 mapping instruction are one multiline task, matching the original count.
 
-The authoritative task list is
-`config/local-batch-task-ledger.tsv`. Every task has a stable phase-local ID,
+The authoritative task list lives in `config/local-batch-task-ledger.tsv`.
+Every task has a stable phase-local ID,
 status, blocker, evidence field, and note. The companion
 `config/local-batch-task-ledger.json` records the source digest, schema,
 allowed states, counts, and denied authority.

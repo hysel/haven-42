@@ -2,9 +2,9 @@
 
 Date: 2026-07-30
 
-This is sanitized source-form review evidence. It does not admit Office or
-OpenDocument uploads, dependencies, workers, routes, provider payloads, package
-components, or release artifacts.
+This sanitized source-form review evidence does not admit Office or OpenDocument
+uploads, dependencies, workers, routes, provider payloads, package components,
+or release artifacts.
 
 ## Review boundary
 

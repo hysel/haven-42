@@ -23,7 +23,7 @@ modified working tree is recorded as modified and cannot become a candidate.
 
 ## Assemble the candidate
 
-After verifying the portable evidence, run:
+After verifying the portable evidence, assemble the candidate:
 
 ```bash
 python3 scripts/verify-portable-development-artifacts.py \
