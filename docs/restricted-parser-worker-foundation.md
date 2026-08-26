@@ -1,6 +1,6 @@
 # Restricted Parser-Worker Foundation
 
-Milestone 27 does not admit PDF or Office parsing yet.
+Milestone 27 does not yet admit PDF or Office parsing.
 `config/restricted-parser-worker-contract.json` and
 `scripts/evaluate-parser-worker-admission.py` define the default-deny boundary
 that a future parser dependency and isolated worker must pass first.

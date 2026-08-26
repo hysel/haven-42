@@ -2,9 +2,9 @@
 
 Date: 2026-07-30
 
-This is offline synthetic security evidence for future Office Open XML and
-OpenDocument work. It is not parser, upload, runtime, UI, provider, or package
-admission.
+This offline synthetic security record supports future Office Open XML and
+OpenDocument work. It does not admit a parser, upload, runtime, UI, provider,
+or package.
 
 The deterministic review corpus contains 16 ignored ZIP/XML containers:
 safe `.docx` and `.odt` controls plus traversal, case-insensitive duplicate

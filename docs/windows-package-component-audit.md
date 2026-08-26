@@ -5,9 +5,9 @@ Audit date: 2026-07-27
 Status updated: 2026-08-06 for the published unsigned Windows
 `0.4.0-alpha.1` prerelease boundary.
 
-This is a sanitized technical and license-readiness inventory for the unsigned
-Windows x64 development package. It is not legal advice, redistribution
-clearance, a signature, or a production-release approval.
+This sanitized inventory covers technical and license readiness for the
+unsigned Windows x64 development package. It is not legal advice,
+redistribution clearance, a signature, or production-release approval.
 
 ## Rejected Local Build And Published Alpha Shape
 

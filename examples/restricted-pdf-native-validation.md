@@ -2,8 +2,8 @@
 
 Date: 2026-07-30
 
-This records sanitized source-form review evidence only. It does not admit a
-parser dependency, packaged worker, user document, runtime route, or release.
+This page records only sanitized source-form review evidence. It does not admit
+a parser dependency, packaged worker, user document, runtime route, or release.
 
 ## Windows source cell
 
