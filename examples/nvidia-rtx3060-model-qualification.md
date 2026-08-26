@@ -2,10 +2,9 @@
 
 ## What this evidence answers
 
-On August 17–18, 2026, Haven 42 tested whether 19 exact local model
-artifacts could run safely on one Windows 11 computer with an NVIDIA GeForce
-RTX 3060 12 GB. The run used NVIDIA driver 610.88 and an isolated,
-loopback-only Ollama 0.32.14 candidate runtime.
+On August 17–18, 2026, Haven 42 tested 19 exact local model artifacts on one
+Windows 11 computer with an NVIDIA GeForce RTX 3060 12 GB. The run used NVIDIA
+driver 610.88 and an isolated, loopback-only Ollama 0.32.14 candidate runtime.
 
 This is engineering evidence for that exact configuration. It does not make
 Ollama 0.32.14 the managed default, certify every RTX 3060 computer, or prove
@@ -58,8 +57,8 @@ human quality score.
 | Ministral 3 8B Q4 | Writing and Summarization returned more than one sentence. |
 | LFM 2.5 8B-A1B Q4 | Chat, Writing, and Summarization missed their exact contracts. |
 
-These are useful negative results. A model can run quickly and still be a poor
-automatic choice when it does not reliably follow the requested task format.
+These negative results matter. A model can run quickly and still be a poor
+automatic choice if it does not reliably follow the requested task format.
 
 ## Coding-agent screen
 
@@ -83,9 +82,8 @@ failure recovery but failed synthetic red/blue vision grounding.
 
 ## Graphics-board power observations
 
-The logger recorded one-second `nvidia-smi` board readings during every soak,
-plus five-minute idle windows before and after the campaign. Idle averaged
-22.116 W.
+The logger recorded one-second `nvidia-smi` board readings during every soak
+and five-minute idle windows before and after the test. Idle averaged 22.116 W.
 
 | Model | Mixed-task average | Observed peak | Board energy over soak |
 | --- | ---: | ---: | ---: |

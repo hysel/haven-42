@@ -1,9 +1,9 @@
 # GeForce GTX 1650 Super 4 GB Linux model qualification
 
-On August 19, 2026, Haven 42 completed an engineering campaign on Ubuntu
-26.04 using a GeForce GTX 1650 Super 4 GB, NVIDIA driver 610.43.02, CUDA,
-and an isolated Ollama 0.32.14 runtime. The campaign checked eight exact
-model artifacts selected for the new `cuda-4gib-system-16gib` profile.
+On August 19, 2026, Haven 42 tested a GeForce GTX 1650 Super 4 GB on Ubuntu
+26.04 with NVIDIA driver 610.43.02, CUDA, and an isolated Ollama 0.32.14
+runtime. The test covered eight exact model artifacts selected for the new
+`cuda-4gib-system-16gib` profile.
 
 This is exact-profile engineering evidence. It is not a blanket claim for
 every GTX 1650 variant, operating system, driver, runtime, or computer, and
@@ -34,7 +34,7 @@ GPU memory.
 
 ## Power scope
 
-The campaign recorded 9,879 one-second `nvidia-smi` samples. Five minutes
+The test recorded 9,879 one-second `nvidia-smi` samples. Five minutes
 before testing averaged 8.360 W and five minutes after testing averaged
 8.203 W. The passing soak windows averaged 12.585–16.208 W and observed
 peaks of 48.88–103.74 W.
@@ -51,6 +51,6 @@ validators, and executed campaign orchestrator by SHA-256. The public record
 contains no host address, hostname, key, machine ID, PCI address, raw prompt,
 or raw model response.
 
-Remaining work includes packaged Haven 42 lifecycle validation, Windows on
-this card, coding-agent surfaces, broader quality comparison, and testing on
-other 4 GB NVIDIA variants.
+Packaged Haven 42 lifecycle validation, Windows on this card, coding-agent
+surfaces, broader quality comparison, and testing on other 4 GB NVIDIA variants
+remain open.
