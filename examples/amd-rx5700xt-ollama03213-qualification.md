@@ -1,14 +1,14 @@
 # Radeon RX 5700 XT qualification evidence
 
-This report covers one Radeon RX 5700 XT 8 GiB on Ubuntu 26.04 and Windows.
+This report tests one Radeon RX 5700 XT 8 GiB on Ubuntu 26.04 and Windows.
 The Ubuntu cells use Ollama 0.32.13 and llama.cpp through Vulkan RADV. The
-Windows cell uses a hash-pinned llama.cpp Vulkan build with the AMD proprietary
-driver. It answers a narrow question: can these exact RDNA 1 configurations run
+Windows cell uses a hash-pinned llama.cpp Vulkan build with AMD's proprietary
+driver. The question is narrow: can these exact RDNA 1 configurations run
 the tested local models without quietly falling back to the CPU?
 
 ## Hardware and runtime proof
 
-The sanitized hardware attestation observed:
+The sanitized hardware record contains:
 
 - AMD PCI vendor `0x1002`, device `0x731f`;
 - the `amdgpu` kernel driver;
@@ -29,9 +29,9 @@ model that passed ran a bounded 30-minute mixed-task soak with repeated unloads.
 Advertised coding, tools, vision, thinking, and recovery behaviors used
 separate checks and did not inherit the core result.
 
-Oversized 12 GiB-class candidates were checked by admission policy and refused
-before download on the automatic 8 GiB path. That refusal is a safety pass, not
-proof that those models are defective.
+The admission policy refused oversized 12 GiB-class candidates before download
+on the automatic 8 GiB path. That refusal is a safety pass, not proof that those
+models are defective.
 
 ## Results
 
@@ -79,7 +79,7 @@ another prompt. The corrected run used explicit single-turn mode and disabled
 reasoning. The initial timeout is retained as harness evidence and is not
 classified as a model or GPU failure.
 
-This Ubuntu result is a bounded engine smoke only. It does not certify the full
+This Ubuntu result is only a bounded engine smoke. It does not certify the full
 llama.cpp model ladder, package lifecycle, server adapter, sustained operation,
 ROCm, or automatic runtime selection.
 
@@ -109,11 +109,11 @@ automatic model selection, or the full packaged Haven 42 lifecycle.
 
 ## Stability boundary
 
-The machine previously had unexplained freezes before its final firmware and
-memory configuration. The owner reports that disabling Global C-state control
-resolved the freezes and has accepted the current exact profile as
-operationally stable. This firmware setting is owner-reported because the
-running operating system cannot independently attest the BIOS value.
+The machine had unexplained freezes before its final firmware and memory
+configuration. The owner reports that disabling Global C-state control resolved
+the freezes and has accepted the current exact profile as operationally stable.
+This setting is owner-reported because the running operating system cannot
+independently attest the BIOS value.
 
 At the evidence review, the current boot reported 78,782 seconds of uptime
 (21 hours 53 minutes), zero failed systemd units, and no matching machine-check,

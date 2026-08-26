@@ -1,17 +1,16 @@
 # Apple M4 16 GB model qualification
 
-On August 20, 2026, Haven 42 ran a bounded engineering qualification on a
-physical Apple M4 Mac with 16 GB of unified memory. The test used the exact
-signed and notarized Ollama 0.32.15 macOS artifact over IPv4 loopback and
-checked 16 exact model manifests with Metal acceleration.
+On August 20, 2026, Haven 42 tested 16 exact model manifests on a physical
+Apple M4 Mac with 16 GB of unified memory and Metal acceleration. The test used
+the exact signed and notarized Ollama 0.32.15 macOS artifact over IPv4 loopback.
 
 On August 21, an independently approved one-model addendum applied the same
 contract to the exact Gemma 4 12B QAT manifest. The addendum is reported
 separately so the original frozen 16-model result remains reproducible.
 
-This is exact-profile engineering evidence. It does not certify every M4 Mac,
-another memory capacity, another macOS or runtime version, a packaged Haven 42
-release, or any coding editor. It does not change an automatic model default,
+These results apply only to the recorded profile. They do not certify every M4
+Mac, another memory capacity, another macOS or runtime version, a packaged Haven
+42 release, or any coding editor. They do not change an automatic model default,
 support label, runtime admission decision, or release policy.
 
 ## What the bounded gate checked
@@ -25,8 +24,8 @@ Every candidate received five deterministic checks:
 - exact-path JSON code that compiled and ran.
 
 Each cell also had to report full Metal residency and unload successfully.
-The public result retains durations and aggregate token rates, but no raw
-prompt or response text and no private machine identity.
+The public result retains durations and aggregate token rates. It excludes raw
+prompt and response text and private machine identity.
 
 ## Results
 
@@ -69,10 +68,9 @@ The Gemma 4 12B QAT addendum also passed its independent reliability cell:
 output tokens, 155 unload proofs, and verified temporary-model removal. Its
 average output rate was 14.304 tokens/s.
 
-This proves bounded reliability only for the exact manifests, runtime,
-operating system, and M4 16 GB profile recorded here. It does not prove every
-prompt, longer contexts, another M4 memory tier, or an automatic product
-recommendation.
+This proves bounded reliability only for the recorded manifests, runtime,
+operating system, and M4 16 GB profile. It does not cover every prompt, longer
+contexts, another M4 memory tier, or an automatic product recommendation.
 
 ## LFM2.5 llama.cpp addendum
 

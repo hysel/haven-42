@@ -40,13 +40,13 @@ Peak reported graphics memory was 3,963 MiB, average GPU utilization was
 These are graphics-board readings, not whole-computer power. They exclude the
 CPU, system memory, storage, cooling, display, and power-supply losses. The
 figures apply only to this exact card, driver, operating system, runtime, model
-artifact, and workload; they are not the card's universal power use.
+artifact, and workload. They do not represent the card's universal power use.
 
-The harness verified the exact runtime and model digest, required the provider
+The harness verified the exact runtime and model digest. It required the provider
 to be idle before the baseline, unloaded the model afterward, stopped only the
 recorded Ollama process, confirmed loopback-port closure, removed the temporary
-campaign files, and verified graceful VM shutdown. This evidence does not
-change Haven 42's automatic model selection.
+campaign files, and verified graceful VM shutdown. This evidence does not change
+Haven 42's automatic model selection.
 
 The complete sanitized record is
 [`examples/fixtures/nvidia-quadro-rtx5000-qwen35-4b-energy.json`](https://github.com/hysel/haven-42/blob/main/examples/fixtures/nvidia-quadro-rtx5000-qwen35-4b-energy.json).

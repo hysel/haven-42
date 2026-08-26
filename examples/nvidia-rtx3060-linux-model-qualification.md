@@ -2,8 +2,8 @@
 
 ## What this record proves
 
-On August 18, 2026, one Ubuntu 26.04 LTS computer with a GeForce RTX 3060
-12 GB completed the Alpha 2 exact-artifact model campaign. The run used Linux
+On August 18, 2026, Haven 42 tested the Alpha 2 exact-artifact model set on one
+Ubuntu 26.04 LTS computer with a GeForce RTX 3060 12 GB. The run used Linux
 kernel 7.0.0-30, NVIDIA driver 610.43.02, CUDA, and an isolated Ollama 0.32.14
 runtime.
 
@@ -55,8 +55,8 @@ maximum-load benchmark.
 
 ## Why the Windows and Linux rows differ
 
-The separate Windows RTX 3060 campaign stopped five artifacts at explicit
-task-contract failures. This Ubuntu campaign passed all 19. The results are
+The separate Windows RTX 3060 test stopped five artifacts at explicit
+task-contract failures. This Ubuntu test passed all 19. The results are
 kept as separate evidence cells because operating system, driver, harness,
 and runtime behavior can change the outcome. Neither result is generalized
 to the other platform.
