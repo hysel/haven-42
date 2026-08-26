@@ -2,11 +2,11 @@
 
 Status: local research and architecture only; inactive and download-free.
 
-The admitted baseline remains bounded, deterministic, memory-only lexical
-retrieval. Exact duplicate UTF-8 content is rejected, source/chunk accounting
-is disclosed, and failure, removal, provider-change, task-boundary, and shutdown
-cleanup remove retained context. Retrieval results remain untrusted data and
-cannot invoke a provider, process, filesystem, or network.
+The current baseline is bounded, deterministic, memory-only lexical retrieval.
+It rejects exact duplicate UTF-8 content, discloses source/chunk accounting, and
+removes retained context after failure, removal, provider changes, task
+boundaries, or shutdown. Retrieval results remain untrusted data and cannot
+invoke a provider, process, filesystem, or network.
 
 Three small embedding candidates are recorded for later comparison. None is
 selected or downloaded. Their licenses, approximate parameter/artifact sizes,

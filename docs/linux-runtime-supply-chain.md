@@ -1,8 +1,8 @@
 # Linux runtime supply-chain review
 
-Haven 42 downloads a local AI engine only after the user reviews and approves
-the exact setup. The download stays inside `Haven42-Data`, beside the extracted
-app. Haven 42 does not install a system package, service, or driver.
+After the user reviews and approves the exact setup, Haven 42 downloads the local
+AI engine. The download stays inside `Haven42-Data`, beside the extracted app.
+Haven 42 does not install a system package, service, or driver.
 
 ## What is currently approved
 

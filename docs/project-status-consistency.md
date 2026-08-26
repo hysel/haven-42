@@ -1,8 +1,8 @@
 # Project Status Consistency
 
-Haven 42 treats public maturity claims as security-relevant evidence. A feature
-must not appear complete in one document while remaining proposed, blocked, or
-unadmitted elsewhere.
+Public maturity claims are security-relevant in Haven 42, so they must agree
+across its documentation. A feature must not appear complete in one document
+while remaining proposed, blocked, or unadmitted elsewhere.
 
 `config/project-status-consistency.json` defines lifecycle classifications for
 the complete Milestone 1 through 28 roadmap. `scripts/verify-project-status-consistency.py`

@@ -8,8 +8,8 @@ ZIP file, and none of these commands can publish a GitHub release.
 
 ## What changed
 
-The ordinary Windows development build remains `0.4.0-alpha.1`. Maintainers
-must explicitly request Alpha 2:
+The ordinary Windows development build remains `0.4.0-alpha.1`. To build Alpha
+2, maintainers must request it explicitly:
 
 ```powershell
 python scripts/build-portable-development-package.py --release-line alpha2 --output dist/portable-windows-alpha2
