@@ -42,7 +42,8 @@ above — this section adds the specific safety mechanics for this multi-session
   If either is missing from a repo you're working in, say so before proceeding — do not
   reconstruct their rules from memory of a prior session.
 - `WIKI-STYLE.md` maintains a "Protected strings — do not reword" registry: exact
-  phrases enforced by tests (`scripts/test-*.py`, `scripts/test-pack.ps1`). Never reword
+  phrases enforced by tests (`scripts/test-*.py`, `scripts/test-pack.ps1`, and
+  `scripts/test-pack.shared.sh`). Never reword
   these, even by one word. If you find a test asserting on wiki text not yet in the
   registry, add it before proceeding and say so explicitly.
 - Remaining Bucket 2 work uses batches of 8–10 pages. Before editing each page, check
@@ -64,10 +65,29 @@ above — this section adds the specific safety mechanics for this multi-session
   volume; review and logging remain page-granular.
 - Hard-stop conditions specific to this project — stop the whole run and wait for
   direction rather than working around them: the known-failure baseline changes; more
-  than ~15% of a batch ends up flagged; a repository safety mechanism blocks a
-  validated change; a page's actual content (not wording) appears stale or conflicts
-  with established policy elsewhere in this file (as with Continue, above) — flag it
-  as a standalone content item, do not resolve it as a voice edit.
+  than ~15% of a batch ends up flagged; or a repository safety mechanism blocks a
+  validated change. If a page's actual content (not wording) appears stale or conflicts
+  with established policy elsewhere in this file (as with Continue, above), leave that
+  page unchanged, log it as a standalone content item, exclude it from the voice-pass
+  flagged-rate calculation, and continue with other eligible pages. Do not resolve the
+  content issue as a voice edit.
 - When reporting progress on this project, always state plainly: pages reviewed,
   pages rewritten and validated, pages flagged and why, whether any hard-stop condition
   was hit, and what is staged/uncommitted vs. committed.
+
+## Merge/CI failure handling
+
+- Treat required checks as evidence for one exact commit SHA. A green result from an
+  earlier head does not carry forward after a branch update, rebase, or merge from the
+  target branch.
+- When one required check fails and the failure is plausibly unrelated infrastructure
+  or a documented flaky test, inspect its complete log first. Retry only that failed
+  check once on the unchanged head. If the same check repeats the same failure, stop on
+  that pull request and report it; do not keep retrying or force the merge.
+- If a pull-request branch is behind its target, update or rebase it only after the
+  targeted retry has established that the original failure was transient. The update
+  creates a new head SHA and GitHub must run the complete required-check set again for
+  that new SHA.
+- Merge only when every required check is green on the pull request's current head.
+  Never rely on stale checks, bypass a required check, or weaken repository settings to
+  complete a merge.
