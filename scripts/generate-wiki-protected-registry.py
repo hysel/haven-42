@@ -256,8 +256,8 @@ def python_bindings() -> set[Binding]:
             ),
             key=lambda node: node.lineno,
         )
-        changed = True
-        while changed:
+        iteration_limit = len(assignments) + 1
+        for _ in range(iteration_limit):
             changed = False
             for node in assignments:
                 targets = node.targets if isinstance(node, ast.Assign) else [node.target]
@@ -273,8 +273,15 @@ def python_bindings() -> set[Binding]:
                     ):
                         paths[target.id] = possible_path
                         changed = True
-        changed = True
-        while changed:
+            if not changed:
+                break
+        else:
+            raise RuntimeError(
+                f"Path attribution did not converge for {path} after "
+                f"{iteration_limit} iterations."
+            )
+
+        for _ in range(iteration_limit):
             next_contents: dict[str, frozenset[str]] = {}
             for node in assignments:
                 targets = node.targets if isinstance(node, ast.Assign) else [node.target]
@@ -285,8 +292,14 @@ def python_bindings() -> set[Binding]:
                     possible_contents = content_sources(value, paths, contents)
                     if possible_contents:
                         next_contents[target.id] = possible_contents
-            changed = next_contents != contents
+            if next_contents == contents:
+                break
             contents = next_contents
+        else:
+            raise RuntimeError(
+                f"Content-source attribution did not converge for {path} after "
+                f"{iteration_limit} iterations."
+            )
 
         test_path = f"scripts/{path.name}"
         for node in ast.walk(tree):

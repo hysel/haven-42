@@ -12,6 +12,7 @@ FAILED=0
 TEST_COUNT=0
 SKIPPED_COUNT=0
 TEST_TIER="full"
+TEST_NAMES=()
 NO_RECEIPT=false
 RUN_STARTED_SECONDS=$SECONDS
 
@@ -24,6 +25,14 @@ while [ "$#" -gt 0 ]; do
     --no-receipt|-NoReceipt)
       NO_RECEIPT=true
       shift
+      ;;
+    --test-name|-TestName)
+      [ "$#" -ge 2 ] || {
+        printf '%s requires a test name.\n' "$1" >&2
+        exit 1
+      }
+      TEST_NAMES+=("$2")
+      shift 2
       ;;
     *)
       printf 'Unknown argument: %s\n' "$1" >&2
@@ -50,6 +59,19 @@ run_test() {
   name="$1"
   shift
   category="fast"
+  if [ "${#TEST_NAMES[@]}" -gt 0 ]; then
+    selected=false
+    for selected_name in "${TEST_NAMES[@]}"; do
+      if [ "$selected_name" = "$name" ]; then
+        selected=true
+        break
+      fi
+    done
+    if [ "$selected" = false ]; then
+      SKIPPED_COUNT=$((SKIPPED_COUNT + 1))
+      return
+    fi
+  fi
   case "$name" in
     "release packaging scripts define archives, checksums, and sanitized dry runs"|\
     "standalone local LLM IDE package is narrow and safe"|\
@@ -104,6 +126,7 @@ run_test() {
 write_test_receipt() {
   [ "$NO_RECEIPT" = false ] || return 0
   [ "$TEST_TIER" = "full" ] || return 0
+  [ "${#TEST_NAMES[@]}" -eq 0 ] || return 0
   git -C "$REPO_ROOT" diff --quiet -- 2>/dev/null &&
     [ -z "$(git -C "$REPO_ROOT" ls-files --others --exclude-standard 2>/dev/null)" ] || {
     printf 'Receipt not written: stage every intended file and remove unstaged or untracked changes.\n'
