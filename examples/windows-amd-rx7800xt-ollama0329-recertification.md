@@ -10,7 +10,7 @@ at least 95% of every loaded model resident on the graphics card.
 
 Fourteen models passed. Three models stopped at the mandatory Summarization
 control, so they did not enter a soak and are not recommendation candidates.
-This repeats the same three task-control failures seen in the earlier targeted
+The same three task-control failures also occurred in the earlier targeted
 Ollama 0.32.9 retry.
 
 The run was requested after a firmware rollback intended to address host
@@ -57,5 +57,5 @@ Writing, and Summarization. Sample count differences reflect the bounded
   policy. The three failed models remain excluded from recommendation review
   for this exact route until a new pinned runtime/artifact test passes.
 
-This page is a human-readable, content-free summary. The evidence catalog is
-the machine-readable pointer for future update tooling.
+This human-readable summary contains no prompts or responses. The evidence
+catalog is the machine-readable pointer for future update tooling.

@@ -1,8 +1,8 @@
 # NVIDIA V100 Nemotron 3.5 Lightning Validation
 
-This record covers two exact Nemotron 3.5 Lightning artifacts on one exact
-high-memory NVIDIA test profile. It is engineering evidence, not an automatic
-Haven 42 model choice.
+Haven 42 tested two exact Nemotron 3.5 Lightning artifacts on one high-memory
+NVIDIA profile. The result is engineering evidence, not an automatic Haven 42
+model choice.
 
 ## Tested profile
 

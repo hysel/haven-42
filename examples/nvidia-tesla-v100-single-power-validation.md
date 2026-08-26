@@ -3,7 +3,7 @@
 ## What was tested
 
 On August 14, 2026, Haven 42 measured one NVIDIA Tesla V100-SXM2 with
-32 GiB of graphics memory on Ubuntu 24.04.4 LTS. The exact profile used:
+32 GiB of graphics memory on Ubuntu 24.04.4 LTS. The test used:
 
 - NVIDIA driver 580.159.04;
 - an isolated, loopback-only Ollama 0.32.9 runtime restricted to one V100;
@@ -43,7 +43,7 @@ CPU, system memory, storage, cooling, display, and power-supply losses. The
 figures apply only to this exact card, driver, operating system, runtime,
 model artifact, and workload.
 
-This result should not be ranked directly against the Quadro or dual-V100
+Do not rank this result directly against the Quadro or dual-V100
 records because their operating systems, drivers, runtimes, model artifacts,
 or workloads differ. It closes the missing single-card V100 reference; it
 does not make the earlier two-card measurements interchangeable with this one.

@@ -5,14 +5,14 @@ change.
 
 On August 15, 2026, three immutable Ollama artifacts completed the current
 Chat, Writing, and Summarization qualification contract and separate
-30-minute reliability soaks on Ubuntu 24.04.4 with CUDA. The review computer
+30-minute reliability soaks on Ubuntu 24.04.4 with CUDA. The test computer
 had 128 GiB of system memory and 64 GiB of aggregate usable GPU memory from two
 Tesla V100 32 GiB cards. Ollama was pinned to `0.32.13` and contacted only over
 IPv4 loopback.
 
-The run retained only bounded aggregate measurements. It retained no prompts,
-responses, endpoints, machine identity, account information, or filesystem
-paths.
+The evidence retains only bounded aggregate measurements. It contains no
+prompts, responses, endpoints, machine identity, account information, or
+filesystem paths.
 
 ## Results
 
