@@ -4,10 +4,10 @@ _Last reviewed: August 16, 2026._
 
 ## What is available
 
-Haven 42 has two narrowly admitted in-app web-research paths. A person can
+Haven 42 has two narrowly admitted in-app web-research paths. Users can
 search the English Wikipedia metadata API, review returned source titles and
 full destinations as inactive text, and separately approve reading one
-selected page as inert plain text. A person can also approve one bounded
+selected page as inert plain text. Users can also approve one bounded
 multi-source search that uses the fixed Brave Search API, retrieves at most
 five returned public HTTPS pages, and asks the selected local Ollama model for
 a strict citation-bound answer.

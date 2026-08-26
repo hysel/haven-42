@@ -13,10 +13,11 @@ the run. The soak and metrics windows were correlated by UTC time. No prompt,
 response, computer name, account name, network address, or local path is in
 this record.
 
-The controlled rerun supplied the required 120-second idle baseline and 1,807
+The controlled rerun included the required 120-second idle baseline and 1,807
 active one-second samples. Haven 42's importer accepted the result as an
-exact-profile GPU energy measurement. It remains engineering evidence: it does
-not approve the model as an automatic default or make a whole-computer claim.
+exact-profile GPU energy measurement. This remains engineering evidence: it
+does not approve the model as an automatic default or make a whole-computer
+claim.
 
 ## Measured result
 

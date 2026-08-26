@@ -2,11 +2,11 @@
 
 ## What this evidence answers
 
-On August 22–23, 2026, Haven 42 tested 19 exact local model artifacts on one
-Windows 11 computer with an AMD Radeon RX 6800 non-XT 16 GB. The run used an
+On August 22–23, 2026, Haven 42 tested 19 exact local model artifacts on a
+Windows 11 computer with an AMD Radeon RX 6800 non-XT 16 GB. The test used an
 isolated Ollama 0.32.14 qualification runtime with its ROCm backend.
 
-This evidence applies only to that exact operating-system, runtime, hardware,
+The results apply only to that exact operating-system, runtime, hardware,
 and model-digest set. The graphics-driver version was not captured in the
 sanitized campaign evidence, so it is reported as unknown rather than inferred.
 No automatic default, support label, managed-runtime choice, or another

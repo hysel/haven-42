@@ -1,9 +1,9 @@
 # Milestone 22 Admission Readiness
 
 `config/milestone22-admission-readiness-contract.json` is the fail-closed source
-of truth for the remaining Milestone 22 promotion gates. It separates work that
-is already admitted for the unsigned browser/PyInstaller development package
-from work that still requires an owner decision, external dependency, trusted
+of truth for the remaining Milestone 22 promotion gates. It separates work
+admitted for the unsigned browser/PyInstaller development package from work
+that still requires an owner decision, external dependency, trusted
 cryptographic identity, native evidence, or machine-effect approval.
 
 Run the offline evaluator with:
