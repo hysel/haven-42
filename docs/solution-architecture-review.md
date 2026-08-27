@@ -1,5 +1,7 @@
 # Solution Architecture Review
 
+> **Historical Continue references:** Milestone statuses and measured evidence below are preserved. Any Continue configuration or workflow named as part of an earlier completed milestone is historical only; Continue is now a legacy, unsupported surface.
+
 This review checks whether each milestone has a complete solution set: user entry point, configuration or workflow path, validation evidence, safety boundary, and remaining enhancement path. Supported-surface completion requires comparable install, configure, and test coverage; documentation-only candidates remain visible without being represented as supported, while failed and retired integrations are removed.
 
 ## Review Standard
@@ -26,7 +28,7 @@ This audit applies the stricter completion standard from the maintainer discussi
 
 | Milestone | Current status | Solution set status | Architect notes |
 | --- | --- | --- | --- |
-| 1: Minimum Usable Pack | Complete | Complete | Core Continue config, rules, prompts, agents, templates, README, and validation are present. |
+| 1: Minimum Usable Pack | Complete | Complete | The original milestone included Continue config, rules, prompts, agents, templates, README, and validation. That Continue material is retained as historical evidence only. |
 | 2: Enterprise Review Depth | Complete | Complete | Review prompts, role agents, SonarQube guidance, examples, and decision records are in place. |
 | 3: Tooling And Integration | Complete | Complete | MCP and SonarQube paths are documented; deeper integrations remain optional evidence expansion. |
 | 4: Runtime Validation And CI | Complete | Complete | CI, runtime context generation, runtime docs, and validation records exist. |

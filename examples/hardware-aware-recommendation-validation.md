@@ -1,5 +1,7 @@
 # Hardware-Aware Recommendation Validation
 
+> **Historical evidence only:** Continue is a legacy surface in Haven 42. This record preserves the script and model-lane evidence collected with Continue; it is not a current Continue setup guide or support recommendation.
+
 ## Scenario
 
 A private application-style repository was used to validate the hardware-aware recommendation flow end to end. Repository name, local paths, endpoint, and raw profile details are intentionally omitted.
@@ -43,13 +45,13 @@ Validated steps:
 
 ## Boundary
 
-This validation proves the script-level flow and Ollama API preflight. It does not replace editor-side Continue validation.
+This validation records the script-level flow and Ollama API preflight that passed. It did not include the historical editor-side Continue validation described below.
 
-Remaining manual checks:
+Historical unrun editor follow-up:
 
-- Open the target repository in Continue.
-- Confirm the generated model lanes appear.
-- Run read-only repository discovery.
+- The target repository was not opened in Continue for this record.
+- The generated model lanes were not confirmed in the editor.
+- Read-only repository discovery was not run through that editor surface.
 - Run the approved-write smoke test.
 - Verify the changed file externally with shell and git status.
 

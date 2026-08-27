@@ -1,5 +1,7 @@
 # Continue CLI Model Validation Evidence
 
+> **Historical evidence only:** Continue is a legacy surface in Haven 42. These results preserve what was measured; they do not make Continue a current, supported, or recommended coding surface.
+
 This file records sanitized Continue CLI model validation results. It intentionally omits private endpoints, local paths, usernames, raw transcripts, and repository-specific details.
 
 ## Summary
@@ -35,7 +37,7 @@ The harness also initializes a standalone Git baseline inside generated sample r
 
 ## Decision
 
-These models can be used as Continue CLI candidates for tool-backed workflows after local setup validation. This evidence does not automatically certify every editor extension surface, real-project edit, or future model build.
+These models qualified as Continue CLI candidates for the historical tool-backed workflow that was tested. The result does not transfer to maintained coding surfaces, editor extensions, real-project edits, or future model builds.
 
 ## Remaining Risks
 

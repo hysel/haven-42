@@ -1,8 +1,10 @@
 # Hardware-Aware Recommendations
 
+> **Current and historical scope:** The surface-neutral `ModelLanes` recommendation contract and maintained adapters remain current. `ContinueProfiles` and the Continue apply examples are retained only as historical evidence because Continue is a legacy, unsupported surface.
+
 The hardware-aware recommendation flow turns an existing model profile into a local model/config recommendation without contacting external services, pulling models, or rewriting editor configuration.
 
-Use `docs/config-generation-strategy.md` to decide whether recommendation output should become project-local config, global Continue config, shared-assets config, or future surface-specific config.
+Use `docs/config-generation-strategy.md` to decide whether recommendation output should become project-local config, shared-assets config, or maintained surface-specific config. Its Continue configuration paths are historical only.
 
 Use it after running one of the local or remote profile scripts:
 
@@ -47,8 +49,8 @@ The script reads:
 
 It does not read repository source code, send hardware profiles online, call Ollama, pull models, or update `.continue/config.yaml`.
 
-Evidence selection follows Capability Evidence Contract v2. The default target
-is Continue Agent, surface version `not-recorded`, provider `Ollama`, and the
+Evidence selection follows Capability Evidence Contract v2. The historical default target
+was Continue Agent, surface version `not-recorded`, provider `Ollama`, and the
 operating system from the hardware profile. PowerShell accepts `-Surface`,
 `-SurfaceVersion`, and `-Provider`; Linux and macOS accept the corresponding
 `--surface`, `--surface-version`, and `--provider` options.
@@ -66,7 +68,7 @@ The output is a sanitized JSON recommendation under `runtime-validation-output/`
 - Candidate models with platform and VRAM fit signals, installed status, parsed model size, and lane-specific scores.
 - WRITE SAFE, PLAN ONLY, and DEEP REVIEW model lanes. A lane can be empty when exact evidence is unavailable.
 - A surface-neutral `ModelLanes` contract that future surfaces can read without inheriting Continue config syntax.
-- Suggested Continue defaults for roles, context length, max tokens, and keep-alive.
+- Historical Continue defaults for roles, context length, max tokens, and keep-alive.
 - Privacy fields showing that paths, endpoints, hostnames, usernames, repository content, and raw hardware reports are not written.
 
 ## Selection Rules
@@ -98,7 +100,9 @@ Unknown tags use a `low`-confidence model-name heuristic and expose that source 
 
 Use `MaxDedicated` for the safest default because most local model servers run a model on one GPU. Use `TotalDedicated` only when your model server and model runner can actually use multiple GPUs effectively.
 
-## Apply The Recommendation To Local Config
+## Historical Continue Local-Config Application
+
+The commands in this section reproduce the legacy Continue evidence path. They are not current setup guidance.
 
 After reviewing the recommendation JSON, generate a local-only Continue config:
 
@@ -139,7 +143,9 @@ Do not commit this file. It may contain private model choices or a private Ollam
 
 Run with `-DryRun` or `--dry-run` first if you want to inspect what would happen without writing the local config.
 
-## Apply The Recommendation To Global Continue Config
+## Historical Continue Global-Config Application
+
+The commands in this section reproduce the legacy Continue evidence path. They are not current setup guidance.
 
 Some editor installations, especially Windows VS Code or VSCodium setups, load the global Continue config instead of the project-local `.continue/config.local.yaml`. Do not copy `config.local.yaml` into the global Continue config by hand. The local config uses project-relative `file://./...` references, and a global copy can make Continue look for prompts under the editor install folder.
 

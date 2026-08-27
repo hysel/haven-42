@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Continue policy:** Continue is a legacy, evidence-only surface. Continue milestones, commands, configurations, and measured results below describe historical work and remain visible for provenance; they are not current setup guidance or a support recommendation. Maintained coding surfaces require their own evidence.
+
 ## Status
 
 > **Current release:** Windows `0.4.0-alpha.1` is available as an unsigned
@@ -658,7 +660,7 @@ Exit criteria:
 
 ## Milestone 11: Editor Surface Compatibility
 
-Goal: Make setup and troubleshooting clearer for users running Continue in VS Code, VSCodium, or the Continue CLI.
+Historical goal: make the then-supported Continue setup and troubleshooting clearer in VS Code, VSCodium, and the Continue CLI. The completed items below are retained as evidence, not current guidance.
 
 Scope:
 
@@ -756,7 +758,7 @@ Scope:
 - Define what each surface must prove before it can be called read-only validated, plan validated, or approved-write ready. Done.
 - Keep beginner-friendly setup paths for simple local hardware while documenting enterprise-safe workflows for larger teams. Done with a shared setup-paths guide.
 - Separate reusable prompts, rules, templates, validation scripts, and evidence formats from Continue-specific configuration details where practical. Done for the current docs, shared assets, validation harnesses, and evidence catalogs.
-- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Continue and Aider now have supported local config generation paths.
+- Decide whether future install scripts should generate surface-specific config bundles instead of only `.continue` assets. Done: surface-specific bundles are allowed only after compatibility evidence exists; Aider and OpenCode have maintained local config paths, while Continue output is historical evidence only.
 - Update README, docs, roadmap, TODO, changelog, and wiki when the project identity or supported surfaces change. Done for the repository docs and roadmap; external wiki updates remain release-process work when publishing.
 
 Exit criteria:
@@ -846,7 +848,7 @@ Scope:
 - Add prompt guidance that keeps recommendations language-neutral when evidence is incomplete.
 - Validate each rule pack against generated samples before promoting it. Static generated-sample validation is recorded for Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code in `examples/language-rule-pack-validation.md`; model-backed workflow validation is recorded for generated Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure samples in `examples/multi-language-workflow-validation.md`. Prompt-level and runner-level filename-fidelity guardrails are now in place, but stricter fallback work remains because deterministic verification still catches model filename drift.
 - Add a machine-readable project-profile classifier that emits detected ecosystems, evidence files, confidence, and selected language-rule-pack IDs. Done with a sanitized, filename-only cross-platform classifier and `config/project-profile-rules.json`.
-- Make installers and config generators activate only the rule packs selected by the project profile. Done for project-local installation by materializing selected packs under `.continue/rules/`; shared-assets mode remains project-neutral pending a per-project overlay design.
+- Make installers and config generators activate only the rule packs selected by the project profile. Historically done for Continue project-local installation by materializing selected packs under `.continue/rules/`; maintained surfaces need their own admitted implementation, while shared-assets mode remains project-neutral pending a per-project overlay design.
 - Add medium-complexity generated samples and a representative language/workflow validation matrix so promotion is not based only on static checks or minimal fixtures. Done with layered Python and TypeScript fixtures plus a component-scoped Java/Go/Rust/SQL/IaC platform fixture and a machine-readable four-operation matrix; editor/model cells remain pending until executed.
 - Execute the representative matrix with deterministic filename and external-write gates. Done for Continue CLI `1.5.47` on Windows: `devstral-small-2:24b` and `qwen3.5:35b` each passed 27 of 28 cells, and their operation-specific combination validates all 28.
 - Generate language-aware agent configuration from exact matrix evidence so a project profile and workflow select the validated model lane. Done for a read-only cross-platform selector that emits Continue-ready model profile metadata; surface-specific runtime auto-switching remains a future adapter capability.
