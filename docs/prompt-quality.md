@@ -1,5 +1,10 @@
 # Prompt Quality
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. The `.continue` paths on this page identify sanitized prompt and template
+> fixtures used in earlier tests; they are not current setup or installation guidance.
+> See `docs/agent-surface-solutions.md` for maintained coding surfaces.
+
 ## Purpose
 
 This document defines prompt-quality expectations for high-risk Haven 42 workflows.

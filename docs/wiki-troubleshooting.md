@@ -103,7 +103,7 @@ You can also open System and choose the full-width **Open troubleshooting
 logs** button. The collapsible technical log region below it remains available
 for repeat checks and saving a sanitized support report.
 
-Developer, Continue, configuration, and repository diagnostics are in
+Developer, configuration, repository, and historical integration diagnostics are in
 [[Engineering Troubleshooting|Eng-Troubleshooting]]. Security issues
 should be reported privately using the repository's
 [security policy](https://github.com/hysel/haven-42/security/policy).

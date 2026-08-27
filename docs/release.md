@@ -37,9 +37,10 @@ Use semantic versioning while the pack matures:
 - Major: breaking config changes or default integration/model posture changes.
 
 The latest stable release line is `0.3.0`. The latest public test build is the
-unsigned Windows `0.4.0-alpha.1` prerelease. The optional coding tools are a
-separate unsigned `0.1.0-development` prerelease for Continue, Aider, and
-OpenCode. Changes after those exact published versions remain under
+unsigned Windows `0.4.0-alpha.1` prerelease. The optional maintained coding
+tools are a separate unsigned `0.1.0-development` prerelease for Aider and
+OpenCode; earlier Continue package records are historical evidence only.
+Changes after those exact published versions remain under
 `Unreleased` until another version is deliberately prepared. Do not create a
 release tag until the release readiness gate and exact-SHA hosted CI pass.
 
@@ -78,7 +79,6 @@ approval for the final candidate.
 
 For each release, update:
 
-- `.continue/config.yaml`
 - `CHANGELOG.md`
 - `README.md`, if setup, status, or workflow docs changed
 - `ROADMAP.md`, if milestone state changed
@@ -99,8 +99,7 @@ Before tagging a release:
 - [ ] Run the Windows Full tier: `.\scripts\test-pack.ps1 -Tier Full`.
 - [ ] Run the Linux Full tier when Bash is available: `./scripts/test-pack.linux.sh --tier full`.
 - [ ] Run the macOS Full tier when available: `./scripts/test-pack.macos.sh --tier full`.
-- [ ] Confirm `.continue/config.yaml` has the intended version.
-- [ ] Confirm Continue can load `.continue/config.yaml` when runtime validation is available.
+- [ ] Confirm every maintained coding-surface configuration has the intended version.
 - [ ] Confirm local Ollama model assumptions are still documented.
 - [ ] Confirm `mcpServers: []` remains the default unless a decision record changes that posture.
 - [ ] Confirm no private IPs, private hostnames, tokens, or project identifiers are committed.
@@ -149,7 +148,7 @@ python packages/local-llm-ide/build.py
 
 That builder uses an explicit file list and writes a ZIP, SHA-256 checksum,
 and JSON manifest under `dist/local-llm-ide`. It includes the small setup
-helper and Continue assets only. It excludes the browser app, maintainer test
+helper and maintained Aider/OpenCode assets only. It excludes the browser app, maintainer test
 scripts, validation records, Ollama, models, IDEs, drivers, and third-party
 installers. Publishing this development ZIP still requires a separate release
 decision and successful hosted checks.

@@ -1,14 +1,21 @@
 # Optional MCP Setup
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue-specific MCP paths and commands below preserve the design input
+> used by earlier testing; they are not current setup guidance, and Continue is not
+> required or recommended. Maintained surfaces need their own separately validated
+> MCP integration before this guidance can be applied to them.
+
 ## Purpose
 
-This document explains how to add optional Model Context Protocol integrations to Haven 42.
+This document preserves the generic MCP safety requirements and the historical
+Continue-specific configuration example that informed them.
 
 MCP is not required for the pack. The default configuration intentionally keeps `mcpServers: []` so the pack remains portable, local-first, and compatible with Ollama-backed systems.
 
 ## Default Position
 
-Do not enable MCP in `.continue/config.yaml` by default.
+The historical Continue fixture kept MCP disabled in `.continue/config.yaml` by default.
 
 Use MCP only when a team explicitly chooses an integration, understands the data boundary, and can provide the required credentials safely.
 
@@ -25,9 +32,10 @@ Why GitHub first:
 
 Keep SonarQube MCP separate until the SonarQube Web API path is validated and the team is comfortable with token handling.
 
-## Setup Pattern
+## Historical Continue Setup Pattern
 
-Prefer a separate local MCP configuration file under `.continue/mcpServers/` instead of editing the default pack config.
+The earlier Continue experiment used a separate local MCP configuration file
+under `.continue/mcpServers/` instead of editing the default pack config.
 
 Example local file:
 
@@ -58,9 +66,9 @@ mcpServers:
 
 Do not commit local MCP server files that contain organization-specific setup unless the values are fully generic and safe for reuse.
 
-## Required Local Setup
+## Historical Continue Test Prerequisites
 
-Before enabling GitHub MCP:
+The recorded test required:
 
 1. Confirm Continue is using agent mode for MCP workflows.
 2. Confirm Docker or another supported container runtime is installed.
@@ -112,7 +120,7 @@ Then validate:
 - The model did not require a cloud LLM.
 - The pack still works after removing or disabling the MCP server file.
 
-## Troubleshooting
+## Historical Continue Troubleshooting
 
 If MCP tools do not appear:
 
