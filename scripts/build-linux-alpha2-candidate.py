@@ -37,6 +37,14 @@ def digest(path: Path) -> str:
     return value.hexdigest()
 
 
+def normalized_known_limitations() -> bytes:
+    try:
+        text = KNOWN_LIMITATIONS_SOURCE.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as error:
+        raise ValueError("candidate-known-limitations-unreadable") from error
+    return text.replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+
+
 def load_provenance(artifacts: Path) -> dict:
     try:
         value = json.loads(
@@ -79,7 +87,7 @@ def build(portable_root: Path, output: Path) -> dict:
     shutil.copy2(source_archive, candidate)
     for name in sorted(REQUIRED_EVIDENCE):
         shutil.copy2(artifacts / name, output / name)
-    shutil.copy2(KNOWN_LIMITATIONS_SOURCE, output / KNOWN_LIMITATIONS_NAME)
+    (output / KNOWN_LIMITATIONS_NAME).write_bytes(normalized_known_limitations())
     archive_digest = digest(candidate)
     limitations_digest = digest(output / KNOWN_LIMITATIONS_NAME)
     source = provenance["source"]

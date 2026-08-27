@@ -51,6 +51,8 @@ def verify_pair(
         not FULL_COMMIT.fullmatch(expected_commit) or expected_commit != source_commit
     ):
         raise ValueError("candidate-unexpected-source-commit")
+    if windows.get("knownLimitations") != linux.get("knownLimitations"):
+        raise ValueError("candidate-known-limitations-mismatch")
     if (
         windows.get("platform") != "windows-x64"
         or linux.get("platform") != "linux-x64"

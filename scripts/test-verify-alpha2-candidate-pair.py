@@ -106,6 +106,26 @@ def main() -> int:
         )
         checks += 1
 
+    with tempfile.TemporaryDirectory(prefix="haven42-alpha2-pair-limitations-") as temporary:
+        root = Path(temporary)
+        windows = root / "windows"
+        linux = root / "linux"
+        candidate(windows, MODULE.WINDOWS, "windows-x64", "a" * 40)
+        candidate(linux, MODULE.LINUX, "linux-x64", "a" * 40)
+        limitations = linux / MODULE.LINUX.KNOWN_LIMITATIONS_NAME
+        limitations.write_text("different limitations\n", encoding="utf-8")
+        manifest_path = linux / "candidate-manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest["knownLimitations"]["sha256"] = hashlib.sha256(
+            limitations.read_bytes()
+        ).hexdigest()
+        manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+        refused(
+            lambda: MODULE.verify_pair(windows, linux),
+            "candidate-known-limitations-mismatch",
+        )
+        checks += 1
+
     with tempfile.TemporaryDirectory(prefix="haven42-alpha2-pair-authority-") as temporary:
         root = Path(temporary)
         windows = root / "windows"
