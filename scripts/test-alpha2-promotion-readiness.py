@@ -46,16 +46,17 @@ def main() -> int:
     assert report["LinuxCpuCompatibilityCellCount"] == 9
     assert report["ManagedRuntimeSelected"] == "0.32.14"
     assert report["StatusCounts"] == {
-        "candidate-required": 10,
+        "candidate-required": 4,
         "owner-required": 1,
-        "satisfied": 6,
+        "satisfied": 12,
     }
     assert report["GateCount"] == 17
-    assert report["ReadyForCandidateBuild"] is True
+    assert report["CandidateBuildComplete"] is True
+    assert report["ReadyForNativeValidation"] is True
     assert report["ReadyForOwnerReview"] is False
     assert report["PublicationAllowed"] is False
     assert report["ProductionReady"] is False
-    checks = 11
+    checks = 12
 
     assert MODULE._admitted_runtime("0.32.14")["admissionState"] == "admitted"
     try:
@@ -85,13 +86,17 @@ def main() -> int:
         (lambda value: value["gates"].pop(), "invalid-gate-registry"),
         (lambda value: value["gates"][1].update(id=value["gates"][0]["id"]), "invalid-gate-registry"),
         (lambda value: value["gates"][0].update(status="complete"), "invalid-gate-registry"),
-        (lambda value: gate(value, "release-contract").update(status="candidate-required"), "foundation-evidence-regressed"),
-        (lambda value: gate(value, "support-matrix-freeze").update(status="owner-required"), "foundation-evidence-regressed"),
+        (lambda value: gate(value, "release-contract").update(status="candidate-required"), "candidate-evidence-regressed"),
+        (lambda value: gate(value, "support-matrix-freeze").update(status="owner-required"), "candidate-evidence-regressed"),
+        (lambda value: gate(value, "hosted-candidate-ci").update(status="candidate-required"), "candidate-evidence-regressed"),
+        (lambda value: gate(value, "native-package-validation").update(status="satisfied"), "native-validation-boundary-mismatch"),
         (lambda value: gate(value, "publication-approval").update(status="satisfied"), "owner-authority-mismatch"),
         (lambda value: value["gates"][0]["evidence"].__setitem__(0, "../private"), "invalid-evidence-reference"),
         (lambda value: value["gates"][0]["evidence"].__setitem__(0, "docs/missing.md"), "missing-evidence-reference"),
         (lambda value: value["gates"][0]["evidence"].append(value["gates"][0]["evidence"][0]), "duplicate-evidence-reference"),
         (lambda value: value["authority"].update(scopeApproved=False), "promotion-authority-must-remain-denied"),
+        (lambda value: value["authority"].update(candidateCommitSelected=False), "promotion-authority-must-remain-denied"),
+        (lambda value: value["authority"].update(releaseCandidatesBuilt=False), "promotion-authority-must-remain-denied"),
         (lambda value: value["authority"].update(readyForOwnerReview=True), "promotion-authority-must-remain-denied"),
         (lambda value: value["authority"].update(publicationAuthorized=True), "promotion-authority-must-remain-denied"),
         (lambda value: value["authority"].update(productionReady=True), "promotion-authority-must-remain-denied"),

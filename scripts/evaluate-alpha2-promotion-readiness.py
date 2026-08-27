@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -14,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONTRACT = ROOT / "config" / "alpha-2-promotion-readiness.json"
 RELEASE_CONTRACT = ROOT / "config" / "alpha-2-release-contract.json"
 RUNTIME_COMPATIBILITY = ROOT / "config" / "alpha-2-runtime-compatibility.json"
+HOSTED_CANDIDATE_RESULT = ROOT / "config" / "alpha-2-hosted-candidate-result.json"
+HOSTED_CANDIDATE_VERIFIER = ROOT / "scripts" / "verify-alpha2-hosted-candidate-result.py"
 SAFE_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ALLOWED_STATUSES = {"satisfied", "candidate-required", "owner-required"}
 EXPECTED_GATES = {
@@ -61,6 +64,20 @@ EXPECTED_NON_BLOCKING = [
     "native-installer-and-updater",
     "code-signing",
 ]
+EXPECTED_SATISFIED_GATES = {
+    "release-contract",
+    "candidate-builders",
+    "existing-regression-ci",
+    "sanitized-model-hardware-evidence",
+    "support-matrix-freeze",
+    "managed-runtime-freeze",
+    "exact-candidate-commit",
+    "windows-candidate-packet",
+    "linux-candidate-packet",
+    "same-source-commit",
+    "supply-chain-evidence",
+    "hosted-candidate-ci",
+}
 
 
 class Alpha2PromotionError(ValueError):
@@ -135,6 +152,22 @@ def _admitted_runtime(version: str) -> dict[str, Any]:
     return runtime
 
 
+def _hosted_candidate_result() -> dict[str, Any]:
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "alpha2_hosted_candidate_result",
+            HOSTED_CANDIDATE_VERIFIER,
+        )
+        if spec is None or spec.loader is None:
+            raise OSError("hosted candidate verifier unavailable")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        value = json.loads(HOSTED_CANDIDATE_RESULT.read_text(encoding="utf-8"))
+        return module.verify(value)
+    except (OSError, UnicodeError, json.JSONDecodeError, ValueError) as error:
+        raise Alpha2PromotionError("hosted-candidate-result-invalid") from error
+
+
 def evaluate(value: Any) -> dict[str, Any]:
     expected = {
         "schemaVersion", "contractId", "releaseContract", "implementationStatus",
@@ -146,7 +179,7 @@ def evaluate(value: Any) -> dict[str, Any]:
         value["schemaVersion"] != 1
         or value["contractId"] != "haven42.alpha2.promotion-readiness"
         or value["releaseContract"] != "config/alpha-2-release-contract.json"
-        or value["implementationStatus"] != "release-scope-frozen-candidates-required"
+        or value["implementationStatus"] != "hosted-candidates-built-native-validation-required"
     ):
         raise Alpha2PromotionError("invalid-contract-identity")
 
@@ -196,6 +229,16 @@ def evaluate(value: Any) -> dict[str, Any]:
     }:
         raise Alpha2PromotionError("runtime-decision-overstated")
     _admitted_runtime(runtime["selectedVersion"])
+    hosted_candidate = _hosted_candidate_result()
+    if (
+        hosted_candidate["Version"] != release["version"]
+        or hosted_candidate["Platforms"] != release["platforms"]
+        or hosted_candidate["CandidatePairReadyForNativeValidation"] is not True
+        or hosted_candidate["NativeValidationComplete"] is not False
+        or hosted_candidate["PublicationAllowed"] is not False
+        or hosted_candidate["ProductionReady"] is not False
+    ):
+        raise Alpha2PromotionError("hosted-candidate-result-mismatch")
 
     gates = value["gates"]
     if not isinstance(gates, list) or len(gates) != len(EXPECTED_GATES):
@@ -230,12 +273,13 @@ def evaluate(value: Any) -> dict[str, Any]:
             blockers.append({"id": gate_id, "status": status})
     if seen != EXPECTED_GATES:
         raise Alpha2PromotionError("invalid-gate-registry")
-    if any(statuses[gate_id] != "satisfied" for gate_id in (
-        "release-contract", "candidate-builders", "existing-regression-ci",
-        "sanitized-model-hardware-evidence", "support-matrix-freeze",
-        "managed-runtime-freeze",
+    if any(statuses[gate_id] != "satisfied" for gate_id in EXPECTED_SATISFIED_GATES):
+        raise Alpha2PromotionError("candidate-evidence-regressed")
+    if any(statuses[gate_id] != "candidate-required" for gate_id in (
+        "native-package-validation", "manual-accessibility-validation",
+        "security-privacy-review", "release-documentation",
     )):
-        raise Alpha2PromotionError("foundation-evidence-regressed")
+        raise Alpha2PromotionError("native-validation-boundary-mismatch")
     if statuses["publication-approval"] != "owner-required":
         raise Alpha2PromotionError("owner-authority-mismatch")
 
@@ -250,8 +294,8 @@ def evaluate(value: Any) -> dict[str, Any]:
     expected_current_authority = {
         "scopeApproved": True,
         "managedRuntimeApproved": True,
-        "candidateCommitSelected": False,
-        "releaseCandidatesBuilt": False,
+        "candidateCommitSelected": True,
+        "releaseCandidatesBuilt": True,
         "nativeValidationComplete": False,
         "readyForOwnerReview": False,
         "publicationAuthorized": False,
@@ -271,7 +315,8 @@ def evaluate(value: Any) -> dict[str, Any]:
         "GateCount": len(gates),
         "StatusCounts": counts,
         "RemainingGates": blockers,
-        "ReadyForCandidateBuild": True,
+        "CandidateBuildComplete": True,
+        "ReadyForNativeValidation": True,
         "ReadyForOwnerReview": False,
         "PublicationAllowed": False,
         "ProductionReady": False,
