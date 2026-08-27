@@ -1,15 +1,22 @@
 # Model Tool-Use Validation
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. This page preserves the exact procedure used for earlier Continue tool-use
+> evidence; its commands and imperative test steps are historical reproduction inputs,
+> not current setup, configuration, recommendation, or qualification guidance. New
+> coding recommendations must pass equivalent gates on a maintained surface.
+
 ## Purpose
 
-Use this guide to prove whether a local model can safely use Continue tools before you trust it for Agent mode or approved write mode.
+This guide records how earlier tests determined whether a local model could safely use
+Continue tools in Agent mode or approved write mode.
 
 Hardware profile scripts recommend candidate models. They do not prove tool safety.
 
-For faster model screening, run the automated Ollama API preflight in
-`docs/local-agent-model-testing.md` before spending time on manual Continue
-Apply testing. The preflight can find obvious tool-call, reasoning-tag, and
-exact-output failures, but it does not replace editor validation.
+The historical workflow ran the automated Ollama API preflight in
+`docs/local-agent-model-testing.md` before manual Continue Apply testing. The preflight
+found obvious tool-call, reasoning-tag, and exact-output failures, but it did not
+replace editor validation.
 
 ## Validation Status Levels
 
@@ -120,7 +127,7 @@ Passing criteria:
 
 ## Step 2: Config Loading Test
 
-Ask Continue to use the intended project-local config.
+The recorded prompt asked Continue to use the intended project-local config.
 
 Confirm:
 
