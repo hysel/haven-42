@@ -77,7 +77,7 @@ def main() -> int:
         assert manifest["publicReleaseAllowed"] is False
         assert manifest["knownLimitations"]["name"] == MODULE.KNOWN_LIMITATIONS_NAME
         assert (output / MODULE.KNOWN_LIMITATIONS_NAME).read_bytes() == (
-            MODULE.KNOWN_LIMITATIONS_SOURCE.read_bytes()
+            MODULE.normalized_known_limitations()
         )
         assert MODULE.verify(output) == manifest
         checks += 8
