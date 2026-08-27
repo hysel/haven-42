@@ -1,5 +1,7 @@
 # Multi-Language Workflow Validation Evidence
 
+> **Historical evidence only:** Continue is a legacy surface in Haven 42. The exact results, failures, and candidate statuses below are preserved as measured evidence; they do not make Continue a current, supported, or recommended coding surface.
+
 This file records sanitized validation evidence for generated multi-language workflow validation.
 
 Do not include private repository names, private paths, private endpoints, usernames, hostnames, tokens, raw private source code, or raw transcripts.
@@ -71,7 +73,7 @@ Do not include private repository names, private paths, private endpoints, usern
 
 - Strengthen documentation, AI framework self-review, and release-readiness prompts to label missing files as recommended additions without implying they exist.
 - Add fixture coverage for filename drift in documentation and release-style outputs.
-- Continue validating additional generated ecosystems before promoting broader language support.
+- At the time of this record, additional generated ecosystems remained unvalidated; any current promotion must use a maintained coding surface and fresh evidence.
 
 
 ## 2026-07-06 Candidate Model Continue CLI Validation
@@ -94,8 +96,8 @@ Do not include private repository names, private paths, private endpoints, usern
 
 ### Interpretation
 
-- Both candidate models are viable for further Continue CLI prompt validation.
-- Both candidates still require manual Continue editor Apply validation before being treated as write-safe.
+- Both candidate models were viable for further historical Continue CLI prompt validation.
+- Neither candidate completed the historical manual Continue editor Apply gate, and neither result transfers write safety to a maintained surface.
 - Both candidates showed the same remaining prompt-quality risk: non-code workflows can reference files that were not present in supplied runtime context.
 
 ### Follow-Up
@@ -128,13 +130,13 @@ Do not include private repository names, private paths, private endpoints, usern
 
 | Model | Result | Failure Signal | Notes |
 | --- | --- | --- | --- |
-| `llama3.1:8b-instruct-q5_K_M` | Candidate | `none` | Passed structured tool-call and exact-content checks. Requires manual Continue editor Apply validation before write-safe use. |
+| `llama3.1:8b-instruct-q5_K_M` | Candidate | `none` | Passed structured tool-call and exact-content checks. Historical Continue editor Apply validation was not completed, so this is not current write-safe evidence. |
 | `sammcj/glm-4-32b-0414:q6_k` | Failed | `TOOL_CALL_FAILED` | Did not produce a valid structured tool call and returned unusable exact-content output. |
 | `deepseek-r1:14b` | Failed | `TOOL_CALL_FAILED` | Did not produce a valid structured tool call or exact-content output. |
 
 ### Interpretation
 
-- `llama3.1:8b-instruct-q5_K_M` is now an API-level candidate, but it still needs manual Continue editor validation.
+- `llama3.1:8b-instruct-q5_K_M` was an API-level candidate in this record, but it did not complete the historical manual Continue editor validation gate.
 - GLM and DeepSeek remain poor fits for this pack's tool-backed Agent workflow in the current local setup.
 - Copied/custom local names should not remain in candidate lists unless they are installed locally or can be pulled by that exact name.
 

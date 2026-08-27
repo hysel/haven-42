@@ -1,13 +1,15 @@
 # Set Up Continue In VS Code And VSCodium
 
+> **Historical evidence only:** Continue is a legacy surface in Haven 42. This guide is retained to explain the exact setup and validation that produced earlier evidence; its installation, configuration, and write-test steps are not current product guidance. Continue is not required or recommended. See the maintained editor-surface guidance in [Editor Compatibility](editor-compatibility.md).
+
 ## Who This Is For
 
-Use this guide when you want to use Continue with this pack in Visual Studio
-Code or VSCodium. It is written for a first setup on one computer and one
-project. The primary instructions cover Windows, followed by a native macOS
+This guide records how Continue was used with this pack in Visual Studio
+Code and VSCodium. It documents a first setup on one computer and one
+project. The historical instructions cover Windows, followed by a native macOS
 VSCodium install path.
 
-The safest first workflow is:
+The historical validation workflow was:
 
 1. Install the pack into the project you want the agent to work on.
 2. Let the installer generate your user-level Continue config.

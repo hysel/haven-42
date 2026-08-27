@@ -1,5 +1,7 @@
 # Scoped Edits From Approved Plans
 
+> **Current and historical scope:** The scoped-edit safety rules on this page apply to maintained coding surfaces. Any Continue-specific failure example is preserved as historical evidence only; Continue is not currently supported or recommended.
+
 ## Purpose
 
 This guide explains how to turn an approved implementation plan into small, reviewable changes in the project being worked on.
@@ -230,7 +232,7 @@ Stop and review manually if:
 - The assistant prints raw JSON tool calls instead of running tools.
 - The assistant cannot read the target files.
 - The assistant proposes changes from typical framework patterns without citing file evidence.
-- Continue reports filepath resolution errors.
+- The selected maintained coding surface reports filepath resolution errors. Historical Continue evidence recorded this failure mode as well.
 - Validation fails in a way the assistant cannot explain.
 - The change touches secrets, auth, deployment, or production data.
 
