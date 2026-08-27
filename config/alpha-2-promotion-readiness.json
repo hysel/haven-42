@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "contractId": "haven42.alpha2.promotion-readiness",
   "releaseContract": "config/alpha-2-release-contract.json",
-  "implementationStatus": "release-scope-frozen-candidates-required",
+  "implementationStatus": "hosted-candidates-built-native-validation-required",
   "release": {
     "version": "0.4.0-alpha.2",
     "audience": "invited-alpha-testers",
@@ -121,34 +121,38 @@
     },
     {
       "id": "exact-candidate-commit",
-      "status": "candidate-required",
+      "status": "satisfied",
       "evidence": [
+        "config/alpha-2-hosted-candidate-result.json",
         "docs/windows-alpha-2-build.md",
         "docs/linux-alpha-2-build.md"
       ]
     },
     {
       "id": "windows-candidate-packet",
-      "status": "candidate-required",
+      "status": "satisfied",
       "evidence": [
+        "config/alpha-2-hosted-candidate-result.json",
         "scripts/build-windows-alpha2-candidate.py",
         "docs/windows-alpha-2-build.md"
       ]
     },
     {
       "id": "linux-candidate-packet",
-      "status": "candidate-required",
+      "status": "satisfied",
       "evidence": [
+        "config/alpha-2-hosted-candidate-result.json",
         "scripts/build-linux-alpha2-candidate.py",
         "docs/linux-alpha-2-build.md"
       ]
     },
     {
       "id": "same-source-commit",
-      "status": "candidate-required",
+      "status": "satisfied",
       "evidence": [
+        "config/alpha-2-hosted-candidate-result.json",
         "config/alpha-2-release-contract.json",
-        "docs/alpha-2-task-list.md"
+        "scripts/verify-alpha2-candidate-pair.py"
       ]
     },
     {
@@ -177,11 +181,11 @@
     },
     {
       "id": "supply-chain-evidence",
-      "status": "candidate-required",
+      "status": "satisfied",
       "evidence": [
+        "config/alpha-2-hosted-candidate-result.json",
         "config/alpha-2-release-contract.json",
-        "docs/windows-alpha-2-build.md",
-        "docs/linux-alpha-2-build.md"
+        "scripts/verify-portable-development-artifacts.py"
       ]
     },
     {
@@ -195,10 +199,11 @@
     },
     {
       "id": "hosted-candidate-ci",
-      "status": "candidate-required",
+      "status": "satisfied",
       "evidence": [
-        ".github/workflows/validate-pack.yml",
-        "docs/hosted-ci-verification.md"
+        ".github/workflows/alpha2-candidate.yml",
+        "config/alpha-2-hosted-candidate-result.json",
+        "scripts/verify-alpha2-candidate-pair.py"
       ]
     },
     {
@@ -213,8 +218,8 @@
   "authority": {
     "scopeApproved": true,
     "managedRuntimeApproved": true,
-    "candidateCommitSelected": false,
-    "releaseCandidatesBuilt": false,
+    "candidateCommitSelected": true,
+    "releaseCandidatesBuilt": true,
     "nativeValidationComplete": false,
     "readyForOwnerReview": false,
     "publicationAuthorized": false,
