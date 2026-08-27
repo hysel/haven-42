@@ -75,12 +75,45 @@ def main() -> int:
         assert manifest["platform"] == "linux-x64"
         assert manifest["alpha1AssetsMayBeModified"] is False
         assert manifest["publicReleaseAllowed"] is False
+        assert manifest["knownLimitations"]["name"] == MODULE.KNOWN_LIMITATIONS_NAME
+        assert (output / MODULE.KNOWN_LIMITATIONS_NAME).read_bytes() == (
+            MODULE.KNOWN_LIMITATIONS_SOURCE.read_bytes()
+        )
         assert MODULE.verify(output) == manifest
-        checks += 6
+        checks += 8
 
         archive = output / MODULE.ARCHIVE_NAME
         archive.write_bytes(b"tampered")
         refused(lambda: MODULE.verify(output), "candidate-archive-integrity-failed")
+        checks += 1
+
+    with tempfile.TemporaryDirectory(prefix="haven42-linux-alpha2-limitations-") as temporary:
+        root = Path(temporary)
+        portable = fixture(root)
+        output = root / "candidate"
+        with (
+            patch.object(MODULE.platform, "system", return_value="Linux"),
+            patch.object(MODULE.platform, "machine", return_value="x86_64"),
+        ):
+            MODULE.build(portable, output)
+        (output / MODULE.KNOWN_LIMITATIONS_NAME).unlink()
+        refused(lambda: MODULE.verify(output), "candidate-file-set-invalid")
+        checks += 1
+
+    with tempfile.TemporaryDirectory(prefix="haven42-linux-alpha2-limitations-tamper-") as temporary:
+        root = Path(temporary)
+        portable = fixture(root)
+        output = root / "candidate"
+        with (
+            patch.object(MODULE.platform, "system", return_value="Linux"),
+            patch.object(MODULE.platform, "machine", return_value="x86_64"),
+        ):
+            MODULE.build(portable, output)
+        (output / MODULE.KNOWN_LIMITATIONS_NAME).write_text("tampered\n", encoding="utf-8")
+        refused(
+            lambda: MODULE.verify(output),
+            "candidate-known-limitations-integrity-failed",
+        )
         checks += 1
 
     with tempfile.TemporaryDirectory(prefix="haven42-linux-alpha2-wrong-version-") as temporary:

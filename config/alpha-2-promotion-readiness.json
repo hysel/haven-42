@@ -82,7 +82,8 @@
         "scripts/build-windows-alpha2-candidate.py",
         "scripts/build-linux-alpha2-candidate.py",
         "scripts/test-windows-alpha2-candidate.py",
-        "scripts/test-linux-alpha2-candidate.py"
+        "scripts/test-linux-alpha2-candidate.py",
+        "scripts/verify-alpha2-candidate-pair.py"
       ]
     },
     {

@@ -36,7 +36,8 @@ def workflow_jobs(text: str, name: str) -> list[tuple[str, str]]:
 
 def verify_workflow_safety(workflows: dict[str, str]) -> None:
     if set(workflows) != {
-        "alpha-usage-report.yml", "codeql.yml", "validate-pack.yml",
+        "alpha-usage-report.yml", "alpha2-candidate.yml", "codeql.yml",
+        "validate-pack.yml",
     }:
         raise PolicyError("unexpected-workflow-inventory")
     combined = "\n".join(workflows[name] for name in sorted(workflows))
@@ -55,10 +56,14 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
             timeout = re.search(r"(?m)^    timeout-minutes:\s*([0-9]+)\s*$", block)
             if not timeout or not 1 <= int(timeout.group(1)) <= 30:
                 raise PolicyError(f"workflow-timeout-invalid:{name}:{job_id}")
-    checkout_blocks = re.findall(
-        r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/checkout@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
-        combined,
-    )
+    checkout_blocks = [
+        block
+        for text in workflows.values()
+        for block in re.findall(
+            r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/checkout@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
+            text,
+        )
+    ]
     if not checkout_blocks or any(
         not re.search(r"(?m)^\s+persist-credentials:\s*false\s*$", block)
         for block in checkout_blocks
@@ -74,21 +79,29 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
         "gh release create", "softprops/action-gh-release", "ncipollo/release-action",
     )):
         raise PolicyError("release-publication-enabled")
-    upload_blocks = re.findall(
-        r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/upload-artifact@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
-        combined,
-    )
-    if len(upload_blocks) != 2:
+    upload_blocks = [
+        block
+        for text in workflows.values()
+        for block in re.findall(
+            r"(?ms)^\s+- name:.*?\n\s+uses:\s+actions/upload-artifact@[0-9a-f]{40}.*?(?=^\s+- name:|\Z)",
+            text,
+        )
+    ]
+    if len(upload_blocks) != 4:
         raise PolicyError("unexpected-artifact-upload-count")
     package_uploads = [block for block in upload_blocks if "unsigned-development" in block]
     report_uploads = [block for block in upload_blocks if "alpha-usage-report" in block]
+    candidate_uploads = [block for block in upload_blocks if "alpha2-" in block]
     if (
         len(package_uploads) != 1
         or len(report_uploads) != 1
+        or len(candidate_uploads) != 2
         or not re.search(r"(?m)^\s+retention-days:\s*7\s*$", package_uploads[0])
         or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", package_uploads[0])
         or not re.search(r"(?m)^\s+retention-days:\s*30\s*$", report_uploads[0])
         or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", report_uploads[0])
+        or any(not re.search(r"(?m)^\s+retention-days:\s*7\s*$", block) for block in candidate_uploads)
+        or any(not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", block) for block in candidate_uploads)
     ):
         raise PolicyError("unsafe-artifact-upload-policy")
     report_workflow = workflows["alpha-usage-report.yml"]
@@ -111,6 +124,40 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
     }
     if any(marker not in report_workflow for marker in required_report_markers):
         raise PolicyError("alpha-usage-report-workflow-incomplete")
+    candidate_workflow = workflows["alpha2-candidate.yml"]
+    required_candidate_markers = {
+        "name: Alpha 2 Candidate",
+        "workflow_dispatch:",
+        "group: alpha2-candidate-${{ github.workflow }}-${{ github.ref }}",
+        "contents: read",
+        "runs-on: ${{ matrix.os }}",
+        "runs-on: ubuntu-24.04",
+        "timeout-minutes: 25",
+        "timeout-minutes: 10",
+        "persist-credentials: false",
+        'python-version: "3.14.6"',
+        "--release-line alpha2",
+        "--expected-version 0.4.0-alpha.2",
+        "--verify-only",
+        "--expected-commit ${{ github.event.pull_request.head.sha || github.sha }}",
+        "name: haven42-alpha2-${{ matrix.platform }}-candidate",
+        "name: haven42-alpha2-candidate-pair-verification",
+        "retention-days: 7",
+    }
+    if any(marker not in candidate_workflow for marker in required_candidate_markers):
+        raise PolicyError("alpha2-candidate-workflow-incomplete")
+    candidate_header = candidate_workflow.split("\njobs:\n", 1)[0]
+    if (
+        "pull_request_target:" in candidate_header
+        or re.search(r"(?m)^\s+push:\s*$", candidate_header)
+        or "contents: write" in candidate_workflow
+        or "id-token: write" in candidate_workflow
+        or "secrets." in candidate_workflow
+        or any(marker in candidate_workflow.lower() for marker in (
+            "gh release create", "softprops/action-gh-release", "ncipollo/release-action",
+        ))
+    ):
+        raise PolicyError("alpha2-candidate-workflow-overprivileged")
     report_header = report_workflow.split("\njobs:\n", 1)[0]
     if (
         "pull_request:" in report_header
@@ -245,12 +292,12 @@ def verify_static(policy: dict) -> None:
     upload_artifact = (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
     )
-    if workflow_text.count(upload_artifact) != 2:
+    if workflow_text.count(upload_artifact) != 4:
         raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
     setup_python = (
         "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97"
     )
-    if workflow_text.count(setup_python) != 1:
+    if workflow_text.count(setup_python) != 3:
         raise PolicyError("reviewed-node24-setup-python-not-pinned")
     package_section = workflow_text.split("  package:", 1)[1].split(
         "  attest-development:", 1
@@ -298,7 +345,7 @@ def verify_static(policy: dict) -> None:
     download_artifact = (
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
     )
-    if workflow_text.count(download_artifact) != 1:
+    if workflow_text.count(download_artifact) != 2:
         raise PolicyError("reviewed-node24-download-artifact-not-pinned")
     codeql_sha = "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28"
     if (
