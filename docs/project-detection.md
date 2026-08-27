@@ -1,5 +1,10 @@
 # Project Detection
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. The `.continue` directories below identify sanitized rule-pack fixtures
+> from earlier tests; they are not current installation or configuration guidance.
+> Project-detection evidence and confidence rules remain surface-neutral.
+
 ## Purpose
 
 Project detection is the evidence step that comes before language-specific advice. Use it to identify the repository's primary ecosystem, framework, build system, test system, and confidence level before recommending architecture, security, testing, performance, or implementation changes.
@@ -68,7 +73,7 @@ Current optional packs:
 - `.continue/rule-packs/sql.md`
 - `.continue/rule-packs/infrastructure-as-code.md`
 
-These packs are supplemental. Their source files are not part of the default `.continue/config.yaml` rule list and must not be treated as globally active. Project-local installation copies only selected packs into `.continue/rules/active-language-<id>.md` after classification finds matching ecosystem evidence.
+These historical fixture packs were supplemental. Their source files were not part of the default `.continue/config.yaml` rule list and must not be treated as globally active. The recorded project-local installer copied only selected packs into `.continue/rules/active-language-<id>.md` after classification found matching ecosystem evidence.
 ## Prompt Integration
 
 Prompts that review, plan, or recommend changes should start with a short project classification pass before making stack-specific recommendations.

@@ -1,5 +1,11 @@
 # Approved Tool-Backed Changes
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue-specific UI labels, fixture filenames, and configuration paths
+> below preserve the earlier validation procedure; they are not current setup or
+> support guidance. The approval and external-verification rules remain current for
+> maintained coding surfaces.
+
 ## Purpose
 
 This guide explains how to let the assistant make changes in a project while keeping the user in control.
@@ -40,7 +46,7 @@ Use tools to list the repository files. Do not modify files.
 
 Expected behavior:
 
-- Continue shows a tool run or approval UI.
+- In the historical Continue cell, Continue showed a tool run or approval UI.
 - The tool runs.
 - The assistant returns a normal text response.
 
@@ -298,4 +304,4 @@ Do not commit:
 - Personal model endpoint overrides.
 - Raw private repository output.
 
-Keep local settings in ignored files such as `.continue/config.local.yaml`.
+The historical Continue cell kept local settings in ignored files such as `.continue/config.local.yaml`.
