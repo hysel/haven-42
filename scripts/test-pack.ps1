@@ -5894,6 +5894,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
         "scripts/test-linux-runtime-supply-chain.py",
         "scripts/test-alpha-release.py",
         "scripts/test-alpha2-release-contract.py",
+        "scripts/test-alpha2-promotion-readiness.py",
         "scripts/test-novice-experience.py",
         "scripts/test-windows-alpha-stage-ledger.py",
         "scripts/test-windows-alpha-candidate.py",

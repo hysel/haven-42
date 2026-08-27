@@ -1,0 +1,222 @@
+{
+  "schemaVersion": 1,
+  "contractId": "haven42.alpha2.promotion-readiness",
+  "releaseContract": "config/alpha-2-release-contract.json",
+  "implementationStatus": "release-scope-frozen-candidates-required",
+  "release": {
+    "version": "0.4.0-alpha.2",
+    "audience": "invited-alpha-testers",
+    "platforms": [
+      "windows-x64",
+      "linux-x64"
+    ],
+    "capabilities": [
+      "general.chat",
+      "content.write",
+      "content.summarize"
+    ],
+    "unsigned": true,
+    "productionReady": false
+  },
+  "scopeProposal": {
+    "status": "approved",
+    "primaryNativeValidationCells": [
+      "windows-11-x64-nvidia",
+      "ubuntu-26.04-x64-nvidia",
+      "bazzite-44-x64-nvidia"
+    ],
+    "compatibilityCoverage": {
+      "mode": "cpu-only-package-and-desktop",
+      "linuxOperatingSystemIds": [
+        "arch-rolling",
+        "bazzite-44",
+        "cachyos-rolling",
+        "debian-13",
+        "fedora-44",
+        "linux-mint-22.3",
+        "pop-os-24.04",
+        "ubuntu-24.04",
+        "ubuntu-26.04"
+      ],
+      "promotionInheritanceAllowed": false
+    },
+    "nonBlockingExpansion": [
+      "macos-packaging",
+      "additional-gpu-and-memory-tiers",
+      "windows-amd-and-intel-promotion",
+      "linux-amd-and-intel-promotion",
+      "coding-agent-surfaces",
+      "image-audio-and-video-engines",
+      "native-installer-and-updater",
+      "code-signing"
+    ],
+    "changesSupportLabels": false,
+    "changesAutomaticModelDefaults": false
+  },
+  "managedRuntimeDecision": {
+    "status": "approved",
+    "selectedProvider": "ollama",
+    "selectedVersion": "0.32.14",
+    "observedEvidenceVersions": [
+      "0.32.5",
+      "0.32.14",
+      "0.32.15"
+    ],
+    "crossVersionEvidenceInheritanceAllowed": false,
+    "newerUnverifiedRuntimeMayBeUserSelectedWithApproval": true,
+    "certifiedRollbackRequired": true
+  },
+  "gates": [
+    {
+      "id": "release-contract",
+      "status": "satisfied",
+      "evidence": [
+        "config/alpha-2-release-contract.json",
+        "scripts/test-alpha2-release-contract.py"
+      ]
+    },
+    {
+      "id": "candidate-builders",
+      "status": "satisfied",
+      "evidence": [
+        "scripts/build-windows-alpha2-candidate.py",
+        "scripts/build-linux-alpha2-candidate.py",
+        "scripts/test-windows-alpha2-candidate.py",
+        "scripts/test-linux-alpha2-candidate.py"
+      ]
+    },
+    {
+      "id": "existing-regression-ci",
+      "status": "satisfied",
+      "evidence": [
+        ".github/workflows/validate-pack.yml",
+        "scripts/test-pack.ps1"
+      ]
+    },
+    {
+      "id": "sanitized-model-hardware-evidence",
+      "status": "satisfied",
+      "evidence": [
+        "config/alpha-2-model-selection-evidence.json",
+        "config/evidence-catalog.tsv",
+        "docs/alpha-2-linux-long-term-validation.md"
+      ]
+    },
+    {
+      "id": "support-matrix-freeze",
+      "status": "satisfied",
+      "evidence": [
+        "docs/alpha-2-task-list.md",
+        "docs/alpha-2-linux-long-term-validation.md"
+      ]
+    },
+    {
+      "id": "managed-runtime-freeze",
+      "status": "satisfied",
+      "evidence": [
+        "config/alpha-2-runtime-compatibility.json",
+        "config/alpha-2-model-selection-evidence.json"
+      ]
+    },
+    {
+      "id": "exact-candidate-commit",
+      "status": "candidate-required",
+      "evidence": [
+        "docs/windows-alpha-2-build.md",
+        "docs/linux-alpha-2-build.md"
+      ]
+    },
+    {
+      "id": "windows-candidate-packet",
+      "status": "candidate-required",
+      "evidence": [
+        "scripts/build-windows-alpha2-candidate.py",
+        "docs/windows-alpha-2-build.md"
+      ]
+    },
+    {
+      "id": "linux-candidate-packet",
+      "status": "candidate-required",
+      "evidence": [
+        "scripts/build-linux-alpha2-candidate.py",
+        "docs/linux-alpha-2-build.md"
+      ]
+    },
+    {
+      "id": "same-source-commit",
+      "status": "candidate-required",
+      "evidence": [
+        "config/alpha-2-release-contract.json",
+        "docs/alpha-2-task-list.md"
+      ]
+    },
+    {
+      "id": "native-package-validation",
+      "status": "candidate-required",
+      "evidence": [
+        "docs/alpha-2-task-list.md",
+        "docs/alpha-2-linux-long-term-validation.md"
+      ]
+    },
+    {
+      "id": "manual-accessibility-validation",
+      "status": "candidate-required",
+      "evidence": [
+        "web/static/accessibility.html",
+        "docs/alpha-2-task-list.md"
+      ]
+    },
+    {
+      "id": "security-privacy-review",
+      "status": "candidate-required",
+      "evidence": [
+        "SECURITY.md",
+        "config/security-review-gate.json"
+      ]
+    },
+    {
+      "id": "supply-chain-evidence",
+      "status": "candidate-required",
+      "evidence": [
+        "config/alpha-2-release-contract.json",
+        "docs/windows-alpha-2-build.md",
+        "docs/linux-alpha-2-build.md"
+      ]
+    },
+    {
+      "id": "release-documentation",
+      "status": "candidate-required",
+      "evidence": [
+        "CHANGELOG.md",
+        "README.md",
+        "docs/release.md"
+      ]
+    },
+    {
+      "id": "hosted-candidate-ci",
+      "status": "candidate-required",
+      "evidence": [
+        ".github/workflows/validate-pack.yml",
+        "docs/hosted-ci-verification.md"
+      ]
+    },
+    {
+      "id": "publication-approval",
+      "status": "owner-required",
+      "evidence": [
+        "config/alpha-2-release-contract.json",
+        "docs/release.md"
+      ]
+    }
+  ],
+  "authority": {
+    "scopeApproved": true,
+    "managedRuntimeApproved": true,
+    "candidateCommitSelected": false,
+    "releaseCandidatesBuilt": false,
+    "nativeValidationComplete": false,
+    "readyForOwnerReview": false,
+    "publicationAuthorized": false,
+    "productionReady": false
+  }
+}
