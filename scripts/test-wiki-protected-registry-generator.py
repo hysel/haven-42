@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import ast
 import importlib.util
+import re
 import sys
 from pathlib import Path
 
@@ -92,7 +93,12 @@ def enclosing_function(parents: dict[ast.AST, ast.AST], node: ast.AST) -> str:
     return "module"
 
 
-def loop_strings(parents: dict[ast.AST, ast.AST], node: ast.AST, name: str) -> list[str]:
+def loop_strings(
+    parents: dict[ast.AST, ast.AST],
+    node: ast.AST,
+    name: str,
+    string_collections: dict[str, tuple[str, ...]],
+) -> list[str]:
     cursor = parents.get(node)
     while cursor is not None:
         if (
@@ -101,19 +107,78 @@ def loop_strings(parents: dict[ast.AST, ast.AST], node: ast.AST, name: str) -> l
             and cursor.target.id == name
             and isinstance(cursor.iter, (ast.Tuple, ast.List, ast.Set))
         ):
-            return [
-                item.value
-                for item in cursor.iter.elts
-                if isinstance(item, ast.Constant) and isinstance(item.value, str)
-            ]
+            return [item.value for item in cursor.iter.elts if isinstance(item, ast.Constant) and isinstance(item.value, str)]
+        if (
+            isinstance(cursor, (ast.For, ast.AsyncFor))
+            and isinstance(cursor.target, ast.Name)
+            and cursor.target.id == name
+            and isinstance(cursor.iter, ast.Name)
+        ):
+            return list(string_collections.get(cursor.iter.id, ()))
         cursor = parents.get(cursor)
     return []
 
 
+def generator_strings(parents: dict[ast.AST, ast.AST], node: ast.AST, name: str) -> list[str]:
+    cursor = parents.get(node)
+    while cursor is not None:
+        if isinstance(cursor, ast.GeneratorExp):
+            for comprehension in cursor.generators:
+                if (
+                    isinstance(comprehension.target, ast.Name)
+                    and comprehension.target.id == name
+                    and isinstance(comprehension.iter, (ast.Tuple, ast.List, ast.Set))
+                ):
+                    return [
+                        item.value
+                        for item in comprehension.iter.elts
+                        if isinstance(item, ast.Constant) and isinstance(item.value, str)
+                    ]
+        cursor = parents.get(cursor)
+    return []
+
+
+def match_mode(node: ast.AST) -> str:
+    return (
+        "case-insensitive"
+        if any(
+            isinstance(child, ast.Call)
+            and isinstance(child.func, ast.Attribute)
+            and child.func.attr in {"lower", "casefold"}
+            and not child.args
+            for child in ast.walk(node)
+        )
+        else "case-sensitive"
+    )
+
+
+def normalized_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr in {"lower", "casefold"}
+        and not node.args
+        and isinstance(node.func.value, ast.Name)
+    ):
+        return node.func.value.id
+    return None
+
+
+def source_matches(root: Path, source: str, pattern: str, mode: str) -> bool:
+    text = (root / source).read_text(encoding="utf-8")
+    normalized = " ".join(text.split())
+    if mode == "case-insensitive":
+        return pattern.casefold() in text.casefold() or pattern.casefold() in normalized.casefold()
+    return pattern in text or pattern in normalized
+
+
 def expected_python_bindings(
     generator,
-) -> tuple[set[object], list[str], int, int, set[str]]:
+) -> tuple[set[object], set[object], list[str], int, int, set[str]]:
     expected: set[object] = set()
+    expected_multi: set[object] = set()
     unresolved: list[str] = []
     helper_calls = 0
     helper_memberships = 0
@@ -128,6 +193,20 @@ def expected_python_bindings(
             (node for node in ast.walk(tree) if isinstance(node, (ast.Assign, ast.AnnAssign))),
             key=lambda node: node.lineno,
         )
+        string_collections: dict[str, tuple[str, ...]] = {}
+        for assignment in assignments:
+            targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
+            if not isinstance(assignment.value, (ast.Tuple, ast.List, ast.Set)):
+                continue
+            values = tuple(
+                item.value
+                for item in assignment.value.elts
+                if isinstance(item, ast.Constant) and isinstance(item.value, str)
+            )
+            if len(values) == len(assignment.value.elts):
+                for target in targets:
+                    if isinstance(target, ast.Name):
+                        string_collections[target.id] = values
         for _ in range(len(assignments) + 1):
             changed = False
             for assignment in assignments:
@@ -191,17 +270,41 @@ def expected_python_bindings(
                 patterns: list[str] = []
                 if isinstance(compare.left, ast.Constant) and isinstance(compare.left.value, str):
                     patterns = [compare.left.value]
-                elif isinstance(compare.left, ast.Name):
-                    patterns = loop_strings(parents, compare, compare.left.id)
+                else:
+                    left_name = normalized_name(compare.left)
+                    if left_name is None:
+                        continue
+                    patterns = loop_strings(
+                        parents, compare, left_name, string_collections
+                    )
+                    if not patterns:
+                        patterns = generator_strings(parents, compare, left_name)
                 if not sources:
                     continue
-                for source in sources:
-                    if not generator.is_markdown_source(source):
+                markdown_sources = tuple(sorted(source for source in sources if generator.is_markdown_source(source)))
+                mode = (
+                    "case-insensitive"
+                    if "case-insensitive"
+                    in {match_mode(compare.left), match_mode(compare.comparators[0])}
+                    else "case-sensitive"
+                )
+                for pattern in patterns:
+                    matching_sources = tuple(
+                        source for source in markdown_sources if source_matches(ROOT, source, pattern, mode)
+                    )
+                    if len(markdown_sources) > 1 and matching_sources:
+                        expected_multi.add(
+                            generator.MultiSourceContract(
+                                sources=markdown_sources,
+                                pattern=pattern,
+                                test=f"{test_path}::{enclosing_function(parents, assertion)}",
+                                variable=ast.unparse(compare.comparators[0]),
+                                line=compare.lineno,
+                                match_mode=mode,
+                            )
+                        )
                         continue
-                    source_text = (ROOT / source).read_text(encoding="utf-8")
-                    for pattern in patterns:
-                        if pattern not in source_text and pattern not in " ".join(source_text.split()):
-                            continue
+                    for source in matching_sources:
                         expected.add(
                             generator.Binding(
                                 source=source,
@@ -209,6 +312,7 @@ def expected_python_bindings(
                                 test=f"{test_path}::{enclosing_function(parents, assertion)}",
                                 variable=ast.unparse(compare.comparators[0]),
                                 line=compare.lineno,
+                                match_mode=mode,
                             )
                         )
             if (
@@ -223,8 +327,8 @@ def expected_python_bindings(
                     if not generator.is_markdown_source(source):
                         continue
                     pattern = assertion.args[0].value
-                    source_text = (ROOT / source).read_text(encoding="utf-8")
-                    if pattern not in source_text and pattern not in " ".join(source_text.split()):
+                    mode = match_mode(assertion.args[1])
+                    if not source_matches(ROOT, source, pattern, mode):
                         continue
                     expected.add(
                         generator.Binding(
@@ -233,19 +337,44 @@ def expected_python_bindings(
                             test=f"{test_path}::{enclosing_function(parents, assertion)}",
                             variable=ast.unparse(assertion.args[1]),
                             line=assertion.lineno,
+                            match_mode=mode,
                         )
                     )
-    return expected, unresolved, helper_calls, helper_memberships, helper_files
+    return expected, expected_multi, unresolved, helper_calls, helper_memberships, helper_files
 
 
 def main() -> int:
     generator = load_generator()
-    actual = generator.python_bindings()
-    expected, unresolved, helper_calls, helper_memberships, helper_files = expected_python_bindings(generator)
+    shell_text = (ROOT / "scripts" / "test-pack.shared.sh").read_text(encoding="utf-8")
+    heredoc_starts = [
+        line
+        for line in shell_text.splitlines()
+        if re.match(r"^\s*python(?:3)?\b.*<<", line)
+    ]
+    heredoc_matches = list(generator.SHELL_PYTHON_HEREDOC.finditer(shell_text))
+    if len(heredoc_matches) != len(heredoc_starts) or not any(
+        match.group("delimiter") == "''PY''" for match in heredoc_matches
+    ):
+        print(
+            "HEREDOC INVENTORY MISMATCH: "
+            f"{len(heredoc_matches)} extracted vs {len(heredoc_starts)} present; "
+            "shell quote-concatenation coverage missing"
+        )
+        return 1
+    actual, actual_multi = generator.python_contracts()
+    expected, expected_multi, unresolved, helper_calls, helper_memberships, helper_files = expected_python_bindings(generator)
     missing = sorted(expected - actual)
     unexpected = sorted(actual - expected)
-    if missing or unexpected or unresolved:
-        for label, values in (("MISSING", missing), ("UNEXPECTED", unexpected), ("UNRESOLVED", unresolved)):
+    missing_multi = sorted(expected_multi - actual_multi)
+    unexpected_multi = sorted(actual_multi - expected_multi)
+    if missing or unexpected or missing_multi or unexpected_multi or unresolved:
+        for label, values in (
+            ("MISSING", missing),
+            ("UNEXPECTED", unexpected),
+            ("MISSING MULTI-SOURCE", missing_multi),
+            ("UNEXPECTED MULTI-SOURCE", unexpected_multi),
+            ("UNRESOLVED", unresolved),
+        ):
             for value in values:
                 print(f"{label}: {value}")
         return 1
@@ -267,12 +396,56 @@ def main() -> int:
             "scripts/test-pack.ps1::product UI first slice is registry-backed and fail closed",
             "powershell-inline-imatch",
         ),
+        (
+            "README.md",
+            "[code signing policy](code-signing-policy.md)",
+            "scripts/test-code-signing-readiness.py::main",
+            "python-custom-helper-membership",
+        ),
+        (
+            "docs/writing-model-evaluation.md",
+            "No candidate under comparative evaluation in this document is a product default",
+            "scripts/test-pack.shared.sh::test_local_web_mvp",
+            "shell-embedded-python-native-assert-membership",
+        ),
     }
     observed = {(item.source, item.pattern, item.test, item.syntax) for item in all_bindings}
     absent = sorted(required - observed)
     if absent:
         for value in absent:
             print(f"MISSING CROSS-LANGUAGE PATTERN: {value}")
+        return 1
+    required_multi = {
+        (
+            ("AI.md", "CONTRIBUTING.md", "STYLEGUIDE.md"),
+            "novice-first",
+            "scripts/test-novice-experience.py::main",
+            "case-insensitive",
+        ),
+        (
+            ("AI.md", "CONTRIBUTING.md", "STYLEGUIDE.md"),
+            "clearly labelled **Advanced**",
+            "scripts/test-novice-experience.py::main",
+            "case-insensitive",
+        ),
+        (
+            ("AI.md", "CONTRIBUTING.md", "STYLEGUIDE.md"),
+            "plain language",
+            "scripts/test-novice-experience.py::main",
+            "case-insensitive",
+        ),
+    }
+    observed_multi = {
+        (item.sources, item.pattern, item.test, item.match_mode) for item in actual_multi
+    }
+    absent_multi = sorted(required_multi - observed_multi)
+    if absent_multi:
+        for value in absent_multi:
+            print(f"MISSING MULTI-SOURCE CONTRACT: {value}")
+        return 1
+    generated = generator.generated_content_contracts()
+    if len(generated) != 7:
+        print(f"GENERATED-CONTENT CONTRACT COUNT MISMATCH: expected 7, got {len(generated)}")
         return 1
     syntax_inventory = {item.syntax for item in all_bindings}
     required_syntax = {
@@ -291,7 +464,8 @@ def main() -> int:
         return 1
     print(
         "Protected-string Python reverse audit passed: "
-        f"{len(actual)} bindings, {helper_calls} custom assertion-helper calls in "
+        f"{len(actual)} bindings, {len(actual_multi)} multi-source contracts, "
+        f"{len(generated)} generated-content contracts, {helper_calls} custom assertion-helper calls in "
         f"{len(helper_files)} files, {helper_memberships} helper membership operands, 0 unresolved; "
         f"cross-language inventory covers {len(syntax_inventory)} extracted syntax categories"
     )

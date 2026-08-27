@@ -26,7 +26,27 @@ class Binding:
     test: str
     variable: str
     line: int
+    match_mode: str = "case-sensitive"
     syntax: str = field(default="", compare=False)
+
+
+@dataclass(frozen=True, order=True)
+class MultiSourceContract:
+    sources: tuple[str, ...]
+    pattern: str
+    test: str
+    variable: str
+    line: int
+    match_mode: str = "case-sensitive"
+    syntax: str = field(default="", compare=False)
+
+
+@dataclass(frozen=True, order=True)
+class GeneratedContentContract:
+    source: str
+    format_description: str
+    test: str
+    line: int
 
 
 def wiki_pages() -> dict[str, str]:
@@ -57,18 +77,26 @@ def powershell_bindings() -> set[Binding]:
     records = json.loads(completed.stdout or "[]")
     if isinstance(records, dict):
         records = [records]
-    return {
-        Binding(
-            source=record["source"],
-            pattern=record["pattern"],
-            test=record["test"],
-            variable=record["variable"],
-            line=int(record["line"]),
-            syntax=record.get("syntax", "powershell-content-expression"),
+    results: set[Binding] = set()
+    for record in records:
+        if not is_markdown_source(record["source"]):
+            continue
+        syntax = record.get("syntax", "powershell-content-expression")
+        results.add(
+            Binding(
+                source=record["source"],
+                pattern=record["pattern"],
+                test=record["test"],
+                variable=record["variable"],
+                line=int(record["line"]),
+                match_mode=record.get(
+                    "matchMode",
+                    "case-insensitive" if syntax.endswith(("imatch", "ilike")) else "case-sensitive",
+                ),
+                syntax=syntax,
+            )
         )
-        for record in records
-        if is_markdown_source(record["source"])
-    }
+    return results
 
 
 SHELL_FUNCTION = re.compile(r"(?m)^(test_[A-Za-z0-9_]+)\(\)\s*\{")
@@ -81,16 +109,17 @@ SHELL_GREP = re.compile(
     r"(?P<tquote>[\"'])(?P<target>.*?)(?P=tquote)"
 )
 SHELL_PYTHON_HEREDOC = re.compile(
-    r"(?m)^\s*python(?:3)?(?:\s+[^\n]*?)?\s+<<(?P<quote>['\"]?)(?P<tag>[A-Za-z_][A-Za-z0-9_]*)"
-    r"(?P=quote)[^\n]*$"
+    r"(?m)^\s*python(?:3)?(?:\s+[^\n]*?)?\s+<<"
+    r"(?P<delimiter>['\"]*(?P<tag>[A-Za-z_][A-Za-z0-9_]*)['\"]*)[^\n]*$"
 )
 
 
-def shell_bindings() -> set[Binding]:
+def shell_contracts() -> tuple[set[Binding], set[MultiSourceContract]]:
     path = ROOT / "scripts" / "test-pack.shared.sh"
     text = path.read_text(encoding="utf-8")
     starts = list(SHELL_FUNCTION.finditer(text))
     results: set[Binding] = set()
+    multi_source_results: set[MultiSourceContract] = set()
     for index, start in enumerate(starts):
         end = starts[index + 1].start() if index + 1 < len(starts) else len(text)
         body = re.sub(
@@ -135,17 +164,21 @@ def shell_bindings() -> set[Binding]:
             except SyntaxError:
                 continue
             line_offset = text.count("\n", 0, start.start() + body_start)
-            results.update(
-                bindings_from_python_tree(
-                    tree,
-                    test_path="scripts/test-pack.shared.sh",
-                    fixed_test_name=start.group(1),
-                    line_offset=line_offset,
-                    variable_prefix="embedded-python:",
-                    initial_paths={"ROOT": "", "root": ""},
-                )
+            bindings, multi_source = bindings_from_python_tree(
+                tree,
+                test_path="scripts/test-pack.shared.sh",
+                fixed_test_name=start.group(1),
+                line_offset=line_offset,
+                variable_prefix="embedded-python:",
+                initial_paths={"ROOT": "", "root": ""},
             )
-    return results
+            results.update(bindings)
+            multi_source_results.update(multi_source)
+    return results, multi_source_results
+
+
+def shell_bindings() -> set[Binding]:
+    return shell_contracts()[0]
 
 
 def path_value(node: ast.AST, paths: dict[str, str]) -> str | None:
@@ -191,19 +224,85 @@ def enclosing_function(parents: dict[ast.AST, ast.AST], node: ast.AST) -> str:
 
 
 def enclosing_loop_values(
-    parents: dict[ast.AST, ast.AST], node: ast.AST, variable_name: str
+    parents: dict[ast.AST, ast.AST],
+    node: ast.AST,
+    variable_name: str,
+    string_collections: dict[str, tuple[str, ...]],
 ) -> list[str]:
     cursor = parents.get(node)
     while cursor is not None:
         if isinstance(cursor, (ast.For, ast.AsyncFor)) and isinstance(cursor.target, ast.Name):
-            if cursor.target.id == variable_name and isinstance(cursor.iter, (ast.Tuple, ast.List, ast.Set)):
-                values = []
-                for item in cursor.iter.elts:
-                    if isinstance(item, ast.Constant) and isinstance(item.value, str):
-                        values.append(item.value)
-                return values
+            if cursor.target.id == variable_name:
+                if isinstance(cursor.iter, (ast.Tuple, ast.List, ast.Set)):
+                    return [
+                        item.value
+                        for item in cursor.iter.elts
+                        if isinstance(item, ast.Constant) and isinstance(item.value, str)
+                    ]
+                if isinstance(cursor.iter, ast.Name):
+                    return list(string_collections.get(cursor.iter.id, ()))
         cursor = parents.get(cursor)
     return []
+
+
+def enclosing_generator_values(
+    parents: dict[ast.AST, ast.AST], node: ast.AST, variable_name: str
+) -> list[str]:
+    """Resolve a generator target backed by an inline literal collection."""
+
+    cursor = parents.get(node)
+    while cursor is not None:
+        if isinstance(cursor, ast.GeneratorExp):
+            for comprehension in cursor.generators:
+                if (
+                    isinstance(comprehension.target, ast.Name)
+                    and comprehension.target.id == variable_name
+                    and isinstance(comprehension.iter, (ast.Tuple, ast.List, ast.Set))
+                ):
+                    return [
+                        item.value
+                        for item in comprehension.iter.elts
+                        if isinstance(item, ast.Constant) and isinstance(item.value, str)
+                    ]
+        cursor = parents.get(cursor)
+    return []
+
+
+def expression_match_mode(node: ast.AST) -> str:
+    """Identify source normalization that makes a membership check case-insensitive."""
+
+    for child in ast.walk(node):
+        if (
+            isinstance(child, ast.Call)
+            and isinstance(child.func, ast.Attribute)
+            and child.func.attr in {"lower", "casefold"}
+            and not child.args
+        ):
+            return "case-insensitive"
+    return "case-sensitive"
+
+
+def normalized_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Name):
+        return node.id
+    if (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr in {"lower", "casefold"}
+        and not node.args
+        and isinstance(node.func.value, ast.Name)
+    ):
+        return node.func.value.id
+    return None
+
+
+def source_contains_pattern(source: str, pattern: str, match_mode: str) -> bool:
+    source_text = (ROOT / source).read_text(encoding="utf-8")
+    normalized_text = " ".join(source_text.split())
+    if match_mode == "case-insensitive":
+        pattern = pattern.casefold()
+        return pattern in source_text.casefold() or pattern in normalized_text.casefold()
+    return pattern in source_text or pattern in normalized_text
 
 
 def condition_memberships(
@@ -211,10 +310,11 @@ def condition_memberships(
     parents: dict[ast.AST, ast.AST],
     paths: dict[str, str],
     contents: dict[str, frozenset[str]],
-) -> list[tuple[str, frozenset[str], str, int]]:
+    string_collections: dict[str, tuple[str, ...]],
+) -> list[tuple[str, frozenset[str], str, int, str]]:
     """Return literal membership checks with their asserted source attribution."""
 
-    results: list[tuple[str, frozenset[str], str, int]] = []
+    results: list[tuple[str, frozenset[str], str, int, str]] = []
     for compare in ast.walk(condition):
         if not isinstance(compare, ast.Compare):
             continue
@@ -230,10 +330,23 @@ def condition_memberships(
         patterns: list[str] = []
         if isinstance(compare.left, ast.Constant) and isinstance(compare.left.value, str):
             patterns = [compare.left.value]
-        elif isinstance(compare.left, ast.Name):
-            patterns = enclosing_loop_values(parents, compare, compare.left.id)
+        else:
+            left_name = normalized_name(compare.left)
+            if left_name is None:
+                continue
+            patterns = enclosing_loop_values(
+                parents, compare, left_name, string_collections
+            )
+            if not patterns:
+                patterns = enclosing_generator_values(parents, compare, left_name)
+        match_mode = (
+            "case-insensitive"
+            if "case-insensitive"
+            in {expression_match_mode(compare.left), expression_match_mode(compare.comparators[0])}
+            else "case-sensitive"
+        )
         for pattern in patterns:
-            results.append((pattern, sources, variable, compare.lineno))
+            results.append((pattern, sources, variable, compare.lineno, match_mode))
     return results
 
 
@@ -277,8 +390,9 @@ def bindings_from_python_tree(
     line_offset: int = 0,
     variable_prefix: str = "",
     initial_paths: dict[str, str] | None = None,
-) -> set[Binding]:
+) -> tuple[set[Binding], set[MultiSourceContract]]:
     results: set[Binding] = set()
+    multi_source_results: set[MultiSourceContract] = set()
     parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
     assertion_helpers = assertion_helper_names(tree)
     paths: dict[str, str] = dict(initial_paths or {"ROOT": ""})
@@ -288,6 +402,21 @@ def bindings_from_python_tree(
         (node for node in ast.walk(tree) if isinstance(node, (ast.Assign, ast.AnnAssign))),
         key=lambda node: node.lineno,
     )
+    string_collections: dict[str, tuple[str, ...]] = {}
+    for assignment in assignments:
+        targets = assignment.targets if isinstance(assignment, ast.Assign) else [assignment.target]
+        if not isinstance(assignment.value, (ast.Tuple, ast.List, ast.Set)):
+            continue
+        values = tuple(
+            item.value
+            for item in assignment.value.elts
+            if isinstance(item, ast.Constant) and isinstance(item.value, str)
+        )
+        if len(values) != len(assignment.value.elts):
+            continue
+        for target in targets:
+            if isinstance(target, ast.Name):
+                string_collections[target.id] = values
     iteration_limit = len(assignments) + 1
     for _ in range(iteration_limit):
         changed = False
@@ -328,10 +457,12 @@ def bindings_from_python_tree(
         )
 
     for node in ast.walk(tree):
-        candidates: list[tuple[str, frozenset[str], str, int]] = []
+        candidates: list[tuple[str, frozenset[str], str, int, str]] = []
         syntax = ""
         if isinstance(node, ast.Assert):
-            candidates = condition_memberships(node.test, parents, paths, contents)
+            candidates = condition_memberships(
+                node.test, parents, paths, contents, string_collections
+            )
             syntax = "python-native-assert-membership"
         elif (
             isinstance(node, ast.Call)
@@ -339,49 +470,144 @@ def bindings_from_python_tree(
             and node.func.id in assertion_helpers
             and node.args
         ):
-            candidates = condition_memberships(node.args[0], parents, paths, contents)
+            candidates = condition_memberships(
+                node.args[0], parents, paths, contents, string_collections
+            )
             syntax = "python-custom-helper-membership"
         elif isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr in {"assertIn", "assertRegex"} and len(node.args) >= 2:
                 if isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
                     sources = content_sources(node.args[1], paths, contents)
                     if sources:
-                        candidates = [(node.args[0].value, sources, ast.unparse(node.args[1]), node.lineno)]
+                        candidates = [
+                            (
+                                node.args[0].value,
+                                sources,
+                                ast.unparse(node.args[1]),
+                                node.lineno,
+                                expression_match_mode(node.args[1]),
+                            )
+                        ]
                         syntax = f"python-unittest-{node.func.attr}"
-        for pattern, sources, variable, line in candidates:
-            for source in sources:
-                if not is_markdown_source(source):
-                    continue
-                source_text = (ROOT / source).read_text(encoding="utf-8")
-                if pattern in source_text or pattern in " ".join(source_text.split()):
-                    test_name = fixed_test_name or enclosing_function(parents, node)
-                    results.add(
-                        Binding(
-                            source=source,
-                            pattern=pattern,
-                            test=f"{test_path}::{test_name}",
-                            variable=f"{variable_prefix}{variable}",
-                            line=line + line_offset,
-                            syntax=(
-                                f"shell-embedded-{syntax}"
-                                if variable_prefix == "embedded-python:"
-                                else syntax
-                            ),
-                        )
+        for pattern, sources, variable, line, match_mode in candidates:
+            markdown_sources = tuple(sorted(source for source in sources if is_markdown_source(source)))
+            matching_sources = tuple(
+                source
+                for source in markdown_sources
+                if source_contains_pattern(source, pattern, match_mode)
+            )
+            if len(markdown_sources) > 1 and matching_sources:
+                test_name = fixed_test_name or enclosing_function(parents, node)
+                multi_source_results.add(
+                    MultiSourceContract(
+                        sources=markdown_sources,
+                        pattern=pattern,
+                        test=f"{test_path}::{test_name}",
+                        variable=f"{variable_prefix}{variable}",
+                        line=line + line_offset,
+                        match_mode=match_mode,
+                        syntax=(
+                            f"shell-embedded-{syntax}"
+                            if variable_prefix == "embedded-python:"
+                            else syntax
+                        ),
                     )
-    return results
+                )
+                continue
+            for source in matching_sources:
+                test_name = fixed_test_name or enclosing_function(parents, node)
+                results.add(
+                    Binding(
+                        source=source,
+                        pattern=pattern,
+                        test=f"{test_path}::{test_name}",
+                        variable=f"{variable_prefix}{variable}",
+                        line=line + line_offset,
+                        match_mode=match_mode,
+                        syntax=(
+                            f"shell-embedded-{syntax}"
+                            if variable_prefix == "embedded-python:"
+                            else syntax
+                        ),
+                    )
+                )
+    return results, multi_source_results
+
+
+def python_contracts() -> tuple[set[Binding], set[MultiSourceContract]]:
+    results: set[Binding] = set()
+    multi_source_results: set[MultiSourceContract] = set()
+    for path in sorted((ROOT / "scripts").glob("test-*.py")):
+        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+        bindings, multi_source = bindings_from_python_tree(
+            tree, test_path=f"scripts/{path.name}"
+        )
+        results.update(bindings)
+        multi_source_results.update(multi_source)
+    return results, multi_source_results
 
 
 def python_bindings() -> set[Binding]:
-    results: set[Binding] = set()
-    for path in sorted((ROOT / "scripts").glob("test-*.py")):
-        tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        results.update(bindings_from_python_tree(tree, test_path=f"scripts/{path.name}"))
-    return results
+    return python_contracts()[0]
 
 
-def render(bindings: Iterable[Binding]) -> str:
+def generated_content_contracts() -> tuple[GeneratedContentContract, ...]:
+    """Document dynamic source contracts that cannot be represented as fixed prose."""
+
+    return (
+        GeneratedContentContract(
+            "examples/amd-rx6800-windows-model-qualification.md",
+            "The report must contain the SHA-256 recorded for the raw telemetry provenance object.",
+            "scripts/test-alpha2-amd-rx6800-windows-qualification-result.py::main",
+            101,
+        ),
+        GeneratedContentContract(
+            "docs/wiki-model-power-evidence.md",
+            "For every hardware record, the page must contain `{model} {memoryGiB} GiB`.",
+            "scripts/test-novice-experience.py::main",
+            108,
+        ),
+        GeneratedContentContract(
+            "docs/windows-alpha-release.md",
+            "The page must contain the release tag and the candidate source commit, artifact name, byte length, and SHA-256 from the release record.",
+            "scripts/test-windows-alpha-release-record.py::main",
+            149,
+        ),
+        GeneratedContentContract(
+            "docs/evidence-dashboard.md",
+            "The summary table must contain `| Evidence records | {EvidenceCount} |` from the generated assurance report.",
+            "scripts/test-pack.shared.sh::test_local_web_mvp",
+            2620,
+        ),
+        GeneratedContentContract(
+            "docs/evidence-dashboard.md",
+            "The summary table must contain `| Distinct model-field values | {ModelCount} |` from the generated assurance report.",
+            "scripts/test-pack.shared.sh::test_local_web_mvp",
+            2621,
+        ),
+        GeneratedContentContract(
+            "docs/evidence-dashboard.md",
+            "The status table must contain one `| {Status} | {Count} |` row for every generated status-count record.",
+            "scripts/test-pack.shared.sh::test_local_web_mvp",
+            2623,
+        ),
+        GeneratedContentContract(
+            "docs/evidence-dashboard.md",
+            "The surface-readiness table must contain one `| {Name} |` row for every generated surface record.",
+            "scripts/test-pack.shared.sh::test_local_web_mvp",
+            2625,
+        ),
+    )
+
+
+def render(
+    bindings: Iterable[Binding],
+    multi_source_contracts: Iterable[MultiSourceContract],
+    generated_contracts: Iterable[GeneratedContentContract],
+) -> str:
     bindings = set(bindings)
+    multi_source_contracts = set(multi_source_contracts)
+    generated_contracts = set(generated_contracts)
     pages = wiki_pages()
     grouped: dict[tuple[str, str], list[Binding]] = {}
     for binding in bindings:
@@ -409,7 +635,8 @@ def render(bindings: Iterable[Binding]) -> str:
         "PowerShell `.Contains(...)`, positive shell `grep`, Python assertions embedded in shell",
         "heredocs, Python native `assert ... in ...`, `unittest.assertIn`, `unittest.assertRegex`,",
         "and local custom assertion helpers that reject false membership checks. Loop-provided",
-        "literals and `[regex]::Escape(...)` operands are expanded to their concrete patterns.",
+        "and generator-provided literals and `[regex]::Escape(...)` operands are expanded to",
+        "their concrete patterns. Case-normalized comparisons are recorded as case-insensitive.",
         "Negative/absence assertions (`-notmatch`, `! grep`, `assertNotIn`, and `assertNotRegex`)",
         "are audited but intentionally excluded because they prohibit text rather than protect it.",
         "Other equality, numeric, exception, and mock-call assertions do not enforce source prose.",
@@ -421,11 +648,48 @@ def render(bindings: Iterable[Binding]) -> str:
             phrase = html.escape(item.pattern, quote=False)
             test = html.escape(item.test, quote=False)
             variable = html.escape(item.variable, quote=False)
+            mode = "; case-insensitive" if item.match_mode == "case-insensitive" else ""
             lines.append(
                 f"- <code>{phrase}</code> — <code>{test}</code>, "
-                f"asserted against <code>{variable}</code> at line {item.line}"
+                f"asserted against <code>{variable}</code> at line {item.line}{mode}"
             )
         lines.append("")
+    lines.extend(
+        [
+            "### Multi-source protected strings — satisfy in any listed source",
+            "",
+            "These tests combine several Markdown sources before checking a phrase. The phrase must",
+            "remain present in at least one listed source, but the test does not assign ownership to",
+            "one specific file. Do not treat these as ordinary single-source bindings.",
+            "",
+        ]
+    )
+    for item in sorted(multi_source_contracts):
+        phrase = html.escape(item.pattern, quote=False)
+        sources = ", ".join(f"<code>{html.escape(source, quote=False)}</code>" for source in item.sources)
+        test = html.escape(item.test, quote=False)
+        mode = "case-insensitive; " if item.match_mode == "case-insensitive" else ""
+        lines.append(
+            f"- <code>{phrase}</code> — any of {sources}; {mode}<code>{test}</code>, line {item.line}"
+        )
+    lines.extend(
+        [
+            "",
+            "## Generated-content contracts",
+            "",
+            "These checks protect generated values or document structure, not fixed prose. Editors may",
+            "reword surrounding explanations, but must preserve the described output format and regenerate",
+            "the page from its authoritative data when those values change.",
+            "",
+        ]
+    )
+    for item in sorted(generated_contracts):
+        lines.append(
+            f"- <code>{html.escape(item.source, quote=False)}</code> — "
+            f"{html.escape(item.format_description, quote=False)} "
+            f"(<code>{html.escape(item.test, quote=False)}</code>, line {item.line})"
+        )
+    lines.append("")
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -439,14 +703,18 @@ def main() -> int:
         help="Preserve the style guide preamble and replace its protected-string section",
     )
     args = parser.parse_args()
-    extracted = powershell_bindings() | shell_bindings() | python_bindings()
-    canonical: dict[tuple[str, str, str], Binding] = {}
+    shell_single, shell_multi = shell_contracts()
+    python_single, python_multi = python_contracts()
+    extracted = powershell_bindings() | shell_single | python_single
+    multi_source = shell_multi | python_multi
+    canonical: dict[tuple[str, str, str, str], Binding] = {}
     for item in extracted:
-        key = (item.source, item.pattern, item.test)
+        key = (item.source, item.pattern, item.test, item.match_mode)
         if key not in canonical or item.line < canonical[key].line:
             canonical[key] = item
     bindings = set(canonical.values())
-    rendered = render(bindings)
+    generated = generated_content_contracts()
+    rendered = render(bindings, multi_source, generated)
     if args.style_guide:
         style_text = args.style_guide.read_text(encoding="utf-8")
         marker = "## Protected strings — do not reword"
@@ -458,22 +726,58 @@ def main() -> int:
         with args.json_output.open("w", encoding="utf-8", newline="\n") as handle:
             handle.write(
                 json.dumps(
-                    [
+                    {
+                        "bindings": [
                         {
+                            "recordType": "single-source",
                             "source": item.source,
                             "pattern": item.pattern,
                             "test": item.test,
                             "variable": item.variable,
                             "line": item.line,
+                            "matchMode": item.match_mode,
                             "syntax": item.syntax,
                         }
                         for item in sorted(bindings)
-                    ],
+                        ],
+                        "multiSourceContracts": [
+                            {
+                                "recordType": "multi-source",
+                                "sources": list(item.sources),
+                                "pattern": item.pattern,
+                                "test": item.test,
+                                "variable": item.variable,
+                                "line": item.line,
+                                "matchMode": item.match_mode,
+                                "syntax": item.syntax,
+                            }
+                            for item in sorted(multi_source)
+                        ],
+                        "generatedContentContracts": [
+                            {
+                                "recordType": "generated-content",
+                                "source": item.source,
+                                "format": item.format_description,
+                                "test": item.test,
+                                "line": item.line,
+                            }
+                            for item in sorted(generated)
+                        ],
+                    },
                     indent=2,
                 )
                 + "\n"
             )
-    print(json.dumps({"bindings": len(bindings), "output": str(args.output)}))
+    print(
+        json.dumps(
+            {
+                "bindings": len(bindings),
+                "multiSourceContracts": len(multi_source),
+                "generatedContentContracts": len(generated),
+                "output": str(args.output),
+            }
+        )
+    )
     return 0
 
 

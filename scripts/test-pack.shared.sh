@@ -2631,7 +2631,7 @@ PY
   grep -q "python3 -c" "$REPO_ROOT/scripts/start-haven42-web.shared.sh" || return 1
   grep -q "python -c" "$REPO_ROOT/scripts/start-haven42-web.shared.sh" || return 1
   grep -q "py -3 -c" "$REPO_ROOT/scripts/start-haven42-web.shared.sh" || return 1
-  python3 - "$REPO_ROOT" <<'PY'
+  python3 - "$REPO_ROOT" <<'PY' || return 1
 import json, pathlib, re, sys
 root = pathlib.Path(sys.argv[1])
 policy = json.loads((root / "config/local-web-runtime-policy.json").read_text(encoding="utf-8"))

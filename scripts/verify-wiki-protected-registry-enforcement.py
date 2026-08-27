@@ -36,16 +36,19 @@ SAMPLE_WEIGHTS = (
     ("shell", 3),
     ("powershell-inline", 1),
     ("shell-embedded-python", 1),
+    ("case-insensitive", 1),
+    ("multi-source", 1),
 )
 SHELL_RUN_TEST = re.compile(r'^run_test\s+"(?P<name>[^"]+)"\s+(?P<function>test_[A-Za-z0-9_]+)\s*$')
 
 
 @dataclass(frozen=True)
 class Candidate:
-    source: str
+    sources: tuple[str, ...]
     pattern: str
     test: str
     kind: str
+    match_mode: str
 
 
 @dataclass(frozen=True)
@@ -133,6 +136,10 @@ def python_kind(binding: dict[str, object], cache: dict[str, ast.AST]) -> str | 
 
 
 def candidate_kind(binding: dict[str, object], cache: dict[str, ast.AST]) -> str | None:
+    if binding.get("recordType") == "multi-source":
+        return "multi-source"
+    if binding.get("matchMode") == "case-insensitive":
+        return "case-insensitive"
     test = str(binding["test"])
     syntax = str(binding.get("syntax", ""))
     variable = str(binding.get("variable", ""))
@@ -163,10 +170,15 @@ def mutation(pattern: str) -> str | None:
     return None
 
 
+def pattern_occurrences(text: str, pattern: str, match_mode: str) -> list[tuple[int, int]]:
+    flags = re.IGNORECASE if match_mode == "case-insensitive" else 0
+    return [match.span() for match in re.finditer(re.escape(pattern), text, flags)]
+
+
 def stable_order(candidate: Candidate) -> tuple[str, str, str]:
     digest = hashlib.sha256(
         f"haven42-protected-registry-enforcement-v1\0{candidate.kind}\0"
-        f"{candidate.test}\0{candidate.source}\0{candidate.pattern}".encode("utf-8")
+        f"{candidate.test}\0{','.join(candidate.sources)}\0{candidate.pattern}".encode("utf-8")
     ).hexdigest()
     return digest, candidate.test, candidate.pattern
 
@@ -178,12 +190,23 @@ def select_candidates(bindings: list[dict[str, object]], sample_size: int) -> li
         kind = candidate_kind(binding, cache)
         if kind not in pools:
             continue
-        source = str(binding["source"])
+        sources = tuple(
+            str(source)
+            for source in (
+                binding.get("sources", [])
+                if binding.get("recordType") == "multi-source"
+                else [binding["source"]]
+            )
+        )
         pattern = str(binding["pattern"])
-        source_text = repository_file(ROOT, source).read_text(encoding="utf-8")
-        if source_text.count(pattern) != 1 or mutation(pattern) is None:
+        mode = str(binding.get("matchMode", "case-sensitive"))
+        occurrence_count = sum(
+            len(pattern_occurrences(repository_file(ROOT, source).read_text(encoding="utf-8"), pattern, mode))
+            for source in sources
+        )
+        if occurrence_count < 1 or mutation(pattern) is None:
             continue
-        pools[kind].append(Candidate(source, pattern, str(binding["test"]), kind))
+        pools[kind].append(Candidate(sources, pattern, str(binding["test"]), kind, mode))
     for pool in pools.values():
         pool.sort(key=stable_order)
 
@@ -195,7 +218,7 @@ def select_candidates(bindings: list[dict[str, object]], sample_size: int) -> li
         preferred = [item for item in pool if item.test not in used_tests]
         fallback = [item for item in pool if item.test in used_tests]
         for item in [*preferred, *fallback]:
-            key = (item.source, item.pattern)
+            key = ("\0".join(item.sources), item.pattern)
             if key in used_pairs:
                 continue
             selected.append(item)
@@ -209,7 +232,7 @@ def select_candidates(bindings: list[dict[str, object]], sample_size: int) -> li
             item
             for pool in pools.values()
             for item in pool
-            if (item.source, item.pattern) not in used_pairs
+            if ("\0".join(item.sources), item.pattern) not in used_pairs
         ),
         key=stable_order,
     )
@@ -217,7 +240,7 @@ def select_candidates(bindings: list[dict[str, object]], sample_size: int) -> li
         if len(selected) >= sample_size:
             break
         selected.append(item)
-        used_pairs.add((item.source, item.pattern))
+        used_pairs.add(("\0".join(item.sources), item.pattern))
 
     selected = selected[:sample_size]
     missing = [
@@ -246,7 +269,7 @@ def shell_test_names(path: Path) -> dict[str, str]:
 
 def test_command(candidate: Candidate, worktree: Path, shell_names: dict[str, str]) -> Command:
     test_path, _separator, test_name = candidate.test.partition("::")
-    if candidate.kind in {"powershell", "powershell-inline"}:
+    if test_path == "scripts/test-pack.ps1":
         return Command(
             (
                 "pwsh",
@@ -261,7 +284,7 @@ def test_command(candidate: Candidate, worktree: Path, shell_names: dict[str, st
             ),
             test_name,
         )
-    if candidate.kind in {"shell", "shell-embedded-python"}:
+    if test_path == "scripts/test-pack.shared.sh":
         display_name = shell_names.get(test_name)
         if display_name is None:
             raise RuntimeError(f"No run_test registration found for shell function {test_name}.")
@@ -284,7 +307,7 @@ def test_command(candidate: Candidate, worktree: Path, shell_names: dict[str, st
 
 
 def verify_selected_test_ran(candidate: Candidate, command: Command, output: str) -> None:
-    if candidate.kind in {"powershell", "powershell-inline", "shell", "shell-embedded-python"}:
+    if candidate.test.startswith(("scripts/test-pack.ps1::", "scripts/test-pack.shared.sh::")):
         if not re.search(r"\b1 tests executed\b", output, re.IGNORECASE):
             raise RuntimeError(
                 f"Selected runner did not report exactly one executed test for {candidate.test}.\n{output}"
@@ -292,7 +315,7 @@ def verify_selected_test_ran(candidate: Candidate, command: Command, output: str
 
 
 def overlay_current_files(worktree: Path, selected: list[Candidate]) -> None:
-    paths = {candidate.source for candidate in selected}
+    paths = {source for candidate in selected for source in candidate.sources}
     paths.update(candidate.test.partition("::")[0] for candidate in selected)
     paths.update(
         {
@@ -347,7 +370,7 @@ def remove_read_only_tree(path: Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--sample-size", type=int, default=19, choices=range(19, 22))
+    parser.add_argument("--sample-size", type=int, default=21, choices=range(21, 24))
     parser.add_argument("--timeout-seconds", type=int, default=180)
     args = parser.parse_args()
 
@@ -388,10 +411,13 @@ def main() -> int:
             cwd=ROOT,
             check=True,
         )
-        bindings = json.loads(registry_json.read_text(encoding="utf-8"))
+        registry = json.loads(registry_json.read_text(encoding="utf-8"))
+        bindings = [*registry["bindings"], *registry["multiSourceContracts"]]
         selected = select_candidates(bindings, args.sample_size)
         source_hashes = {
-            candidate.source: sha256(repository_file(ROOT, candidate.source)) for candidate in selected
+            source: sha256(repository_file(ROOT, source))
+            for candidate in selected
+            for source in candidate.sources
         }
 
         run(["git", "worktree", "add", "--detach", str(worktree), "HEAD"], cwd=ROOT, check=True)
@@ -402,13 +428,23 @@ def main() -> int:
 
         for index, candidate in enumerate(selected, start=1):
             command = test_command(candidate, worktree, shell_names)
-            source_path = repository_file(worktree, candidate.source)
-            original = source_path.read_bytes()
-            pattern = candidate.pattern.encode("utf-8")
             changed = mutation(candidate.pattern)
-            if changed is None or original.count(pattern) != 1:
+            if changed is None:
                 raise RuntimeError(f"Selected binding is not safely mutable: {candidate}")
-            mutated = original.replace(pattern, changed.encode("utf-8"), 1)
+            originals: dict[Path, bytes] = {}
+            mutations: dict[Path, bytes] = {}
+            for source in candidate.sources:
+                source_path = repository_file(worktree, source)
+                original_text = source_path.read_text(encoding="utf-8")
+                spans = pattern_occurrences(original_text, candidate.pattern, candidate.match_mode)
+                if not spans:
+                    continue
+                originals[source_path] = source_path.read_bytes()
+                for start, end in reversed(spans):
+                    original_text = original_text[:start] + changed + original_text[end:]
+                mutations[source_path] = original_text.encode("utf-8")
+            if not mutations:
+                raise RuntimeError(f"Selected binding has no mutable source occurrence: {candidate}")
 
             baseline = run(command.arguments, cwd=worktree, timeout=args.timeout_seconds)
             baseline_output = baseline.stdout + baseline.stderr
@@ -417,17 +453,19 @@ def main() -> int:
                 raise RuntimeError(f"Baseline failed for {candidate.test}.\n{baseline_output}")
 
             try:
-                source_path.write_bytes(mutated)
+                for source_path, mutated in mutations.items():
+                    source_path.write_bytes(mutated)
                 failed = run(command.arguments, cwd=worktree, timeout=args.timeout_seconds)
                 failed_output = failed.stdout + failed.stderr
                 verify_selected_test_ran(candidate, command, failed_output)
                 if failed.returncode == 0:
                     raise RuntimeError(
                         f"Mutation did not fail its registered test: {candidate.test} -> "
-                        f"{candidate.source} / {candidate.pattern!r}"
+                        f"{', '.join(candidate.sources)} / {candidate.pattern!r}"
                     )
             finally:
-                source_path.write_bytes(original)
+                for source_path, original in originals.items():
+                    source_path.write_bytes(original)
 
             restored = run(command.arguments, cwd=worktree, timeout=args.timeout_seconds)
             restored_output = restored.stdout + restored.stderr
@@ -436,7 +474,7 @@ def main() -> int:
                 raise RuntimeError(f"Restored source did not pass for {candidate.test}.\n{restored_output}")
             passed += 1
             print(
-                f"PASS {index}/{len(selected)} [{candidate.kind}] {candidate.source} :: "
+                f"PASS {index}/{len(selected)} [{candidate.kind}] {', '.join(candidate.sources)} :: "
                 f"{candidate.pattern!r} :: {candidate.test}"
             )
     finally:
