@@ -1,14 +1,20 @@
 # Shared Asset Installation
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. This page preserves the exact shared-assets experiment and its commands;
+> every Continue installation or configuration step below is historical reproduction
+> input, not current setup guidance. Maintained surfaces require their own admitted
+> shared-asset design and validation.
+
 ## Purpose
 
-Shared asset installation is an opt-in mode for people who use this pack across more than one target repository. Project-local install remains the safest default for beginners and single-project users. Shared-assets mode puts reusable pack assets in one local machine folder and generates the global Continue config so prompts, docs, templates, and optional rules resolve from that shared folder instead of from one project copy.
+This page records an opt-in Continue experiment for using the pack across more than one target repository. The project-local and shared-assets commands below describe that historical fixture only.
 
-Use this mode when your editor reliably loads the global Continue config, or when you maintain several repositories and do not want each one to carry a duplicate copy of the same pack assets.
+The experiment targeted editors that loaded the global Continue config and maintainers who did not want each repository to carry a duplicate copy of the same pack assets.
 
-Use `docs/config-generation-strategy.md` to compare project-local, global Continue, shared-assets, and future surface-specific config choices.
+`docs/config-generation-strategy.md` preserves the comparison among project-local, global Continue, shared-assets, and future surface-specific config choices.
 
-## Current Modes
+## Historical Modes
 
 ### Project-Local Mode
 
@@ -137,7 +143,7 @@ Shared-assets mode currently supports reusable assets and global config generati
 
 ## Validation
 
-After installing, restart the editor and run this read-only test in Continue Agent mode:
+The historical campaign restarted the editor and ran this read-only test in Continue Agent mode:
 
 ```text
 Use tools to inspect the repository root.
@@ -195,9 +201,9 @@ Rollback is straightforward:
 
 ## Known Limitations
 
-- Shared-assets mode is currently implemented for Continue global config generation.
+- Shared-assets mode was implemented for historical Continue global config generation.
 - Project-local model profile generation remains separate.
-- Future non-Continue surfaces may reuse this folder layout, but they still need surface-specific validation evidence first. See `docs/surface-specific-config-bundles.md`.
+- Maintained non-Continue surfaces may reuse this folder layout only after surface-specific validation. See `docs/surface-specific-config-bundles.md`.
 - The target repository can still have its own `.continue` folder for project-specific rules, evidence, or local overrides.
 - Automatic language-rule activation requires project-local installation today. A future per-project overlay for centralized assets remains planned.
 - Automatic language-rule activation requires project-local installation today. A future per-project overlay for centralized assets remains planned.

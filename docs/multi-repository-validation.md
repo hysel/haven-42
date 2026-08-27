@@ -1,5 +1,10 @@
 # Multi-Repository Validation
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue-specific configuration and version fields below identify earlier
+> evidence cells only. New multi-repository qualification must use a maintained surface
+> and record that surface independently.
+
 ## Purpose
 
 Use this guide to validate the pack against more than one repository shape.
@@ -31,7 +36,7 @@ For each repository category:
 
 1. Start from a clean git working tree.
 2. Install or update the pack with the documented installer.
-3. Confirm Continue is using the intended config.
+3. Record whether the exact historical Continue cell used its intended config.
 4. Run repository discovery in read-only mode.
 5. Run implementation planning in plan-only mode.
 6. Run one review workflow that matches the repository type.
@@ -74,7 +79,7 @@ Record only reusable, sanitized evidence:
 - Repository category.
 - Repository size bucket, such as small, medium, or large.
 - Primary language or framework family.
-- Editor surface, Continue version, model, and provider.
+- Editor surface, exact surface version, model, and provider; historical cells record the Continue version.
 - Operating system.
 - Whether MCP was enabled.
 - Prompts tested.

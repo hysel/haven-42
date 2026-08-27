@@ -1,8 +1,13 @@
 # Project Profile Classification
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. The `.continue` output paths and installer steps below describe an earlier
+> validation fixture, not a current Continue setup path. Filename-only classification,
+> privacy limits, and evidence confidence remain surface-neutral.
+
 ## Purpose
 
-Project profile classification gives installers and future user interfaces a deterministic way to identify repository ecosystems before enabling language-specific guidance. It inspects filenames and relative paths only. It does not read source-file contents or record the target repository path.
+Project profile classification gives maintained installers and user interfaces a deterministic way to identify repository ecosystems before enabling language-specific guidance. It inspects filenames and relative paths only. It does not read source-file contents or record the target repository path. The output path below belongs to the historical Continue fixture.
 
 The signal catalog is `config/project-profile-rules.json`. The output contract is a sanitized `.continue/project-profile.json` file with:
 
@@ -14,7 +19,7 @@ The signal catalog is `config/project-profile-rules.json`. The output contract i
 - source and active rule-pack paths
 - explicit privacy metadata
 
-## Run It Directly
+## Historical Fixture Commands
 
 Windows PowerShell:
 
@@ -55,7 +60,7 @@ Project-local installation runs classification before changing the target:
 
 Mixed repositories can activate more than one pack. For example, a Node service with a `package.json` and `Dockerfile` can select both TypeScript and Infrastructure as Code guidance.
 
-The committed `.continue/config.yaml` still does not reference optional source packs globally. This prevents every language pack from loading for every repository and avoids adding duplicate global rule references.
+The historical `.continue/config.yaml` fixture did not reference optional source packs globally. This prevented every language pack from loading for every repository and avoided duplicate global rule references.
 
 ## Confidence And Safety
 

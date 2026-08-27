@@ -1,10 +1,16 @@
 # Runtime Validation
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue CLI and editor cells below preserve sanitized historical results
+> for their exact versions, models, and repositories. They are not current setup,
+> qualification, or support guidance, and their status does not transfer to a
+> maintained coding surface.
+
 ## Purpose
 
-This document tracks runtime validation of Haven 42 against real repositories and realistic review inputs.
+This document preserves runtime-validation evidence from real repositories and realistic review inputs.
 
-Runtime validation is different from static validation. Static validation checks repository invariants. Runtime validation checks whether the pack is useful, accurate, and ergonomic when used in Continue with real code.
+Runtime validation is different from static validation. Static validation checks repository invariants. The historical runtime campaign checked whether the pack was useful, accurate, and ergonomic on the recorded Continue surfaces with real code.
 
 Runtime validation also supports deterministic output verification. See `docs/runtime-output-verification.md` for filename-fidelity, unsafe migration-pattern, and lifecycle/support-claim checks.
 

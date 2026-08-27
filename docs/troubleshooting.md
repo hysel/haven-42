@@ -1,10 +1,17 @@
 # Troubleshooting
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. This engineering page preserves the exact Continue failure modes, commands,
+> and recovery inputs used in earlier testing; they are not current installation,
+> repair, or support guidance. Use the public Troubleshooting page and maintained
+> coding-surface documentation for current help.
+
 ## Purpose
 
-Use this guide when Haven 42 does not load, prompts do not appear, or local model execution fails.
+This guide records how the historical Continue test surface was diagnosed when its
+config, prompts, tools, or local-model execution failed.
 
-## Quick Checks
+## Historical Quick Checks
 
 Run these checks from the repository root:
 

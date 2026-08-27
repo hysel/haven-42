@@ -1,5 +1,10 @@
 # Tool Use Modes
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue-specific tool names, settings, and smoke-test prompts below are
+> retained as historical test inputs. The read-only, plan-only, approval, scope, and
+> external-verification rules remain current for maintained coding surfaces.
+
 ## Purpose
 
 This guide explains how the pack should behave when reviewing or changing another project.
@@ -100,7 +105,7 @@ Expected behavior:
 - If workspace discovery fails, the assistant says `WORKSPACE_UNAVAILABLE` and stops.
 - If the correct target path cannot be proven, the assistant says `PATH_AMBIGUOUS` and stops before editing.
 - The assistant successfully reads the exact files it plans to change before editing.
-- The assistant uses Continue edit/apply tools to change the approved files.
+- In the historical Continue cell, the assistant used edit/apply tools to change the approved files.
 - The assistant confirms the apply target matches the requested, discovered, and read target file before applying. If the apply target differs, the assistant says `APPLY_TARGET_MISMATCH` and stops.
 - The assistant verifies the edit with changed file content, `git diff`, or another available diff/status tool before claiming success.
 - Approved-write readiness requires an external shell or git check after the assistant reports success. Assistant-only readback is not enough evidence that the file exists on disk.
@@ -179,7 +184,7 @@ For existing-file write validation, pre-create the test file and make the
 assistant edit it. This better matches real project work and avoids double
 approval paths.
 
-Recommended temporary Continue built-in tool settings:
+Historical temporary Continue built-in tool settings:
 
 | Tool | Setting |
 | --- | --- |
