@@ -70,7 +70,13 @@ def main() -> int:
     assert 'VERSION = "0.4.0-alpha.1"' in builder
     assert 'VERSION = "0.4.0-alpha.2"' in alpha2_builder
     assert "alpha1AssetsMayBeModified" in alpha2_builder
-    print("Alpha 2 release contract passed 12 fail-closed checks.")
+    linux_alpha2_builder = (
+        ROOT / "scripts/build-linux-alpha2-candidate.py"
+    ).read_text(encoding="utf-8")
+    assert "KNOWN_LIMITATIONS_NAME" in alpha2_builder
+    assert "KNOWN_LIMITATIONS_NAME" in linux_alpha2_builder
+    assert (ROOT / "docs/alpha-2-known-limitations.md").is_file()
+    print("Alpha 2 release contract passed 15 fail-closed checks.")
     return 0
 
 

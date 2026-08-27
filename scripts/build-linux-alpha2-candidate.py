@@ -12,6 +12,7 @@ import shutil
 from pathlib import Path
 
 
+ROOT = Path(__file__).resolve().parents[1]
 VERSION = "0.4.0-alpha.2"
 PORTABLE_ARCHIVE = "haven42-linux-x86_64-unsigned-development.tar.gz"
 ARCHIVE_NAME = f"haven42-{VERSION}-linux-x64-unsigned.tar.gz"
@@ -23,6 +24,9 @@ REQUIRED_EVIDENCE = {
     "THIRD-PARTY-NOTICES.txt", "build-provenance.json", "dependency-inventory.json",
     "haven42.cdx.json", "package-file-inventory.json", "runtime-component-inventory.json",
 }
+KNOWN_LIMITATIONS_NAME = "KNOWN-LIMITATIONS.md"
+KNOWN_LIMITATIONS_SOURCE = ROOT / "docs" / "alpha-2-known-limitations.md"
+CANDIDATE_EVIDENCE = REQUIRED_EVIDENCE | {KNOWN_LIMITATIONS_NAME}
 
 
 def digest(path: Path) -> str:
@@ -65,6 +69,8 @@ def build(portable_root: Path, output: Path) -> dict:
     missing = sorted(name for name in REQUIRED_EVIDENCE if not (artifacts / name).is_file())
     if missing:
         raise ValueError("candidate-evidence-incomplete")
+    if not KNOWN_LIMITATIONS_SOURCE.is_file() or KNOWN_LIMITATIONS_SOURCE.is_symlink():
+        raise ValueError("candidate-known-limitations-required")
     provenance = load_provenance(artifacts)
     output.mkdir(parents=True, exist_ok=True)
     candidate = output / ARCHIVE_NAME
@@ -73,7 +79,9 @@ def build(portable_root: Path, output: Path) -> dict:
     shutil.copy2(source_archive, candidate)
     for name in sorted(REQUIRED_EVIDENCE):
         shutil.copy2(artifacts / name, output / name)
+    shutil.copy2(KNOWN_LIMITATIONS_SOURCE, output / KNOWN_LIMITATIONS_NAME)
     archive_digest = digest(candidate)
+    limitations_digest = digest(output / KNOWN_LIMITATIONS_NAME)
     source = provenance["source"]
     manifest = {
         "schemaVersion": 1,
@@ -84,6 +92,10 @@ def build(portable_root: Path, output: Path) -> dict:
             "name": ARCHIVE_NAME,
             "sizeBytes": candidate.stat().st_size,
             "sha256": archive_digest,
+        },
+        "knownLimitations": {
+            "name": KNOWN_LIMITATIONS_NAME,
+            "sha256": limitations_digest,
         },
         "sourceCommit": source["commit"],
         "exactSourceCommit": source["commitIsExactSource"],
@@ -112,12 +124,13 @@ def verify(output: Path) -> dict:
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise ValueError("invalid-candidate-manifest") from error
     required = {
-        "schemaVersion", "kind", "version", "platform", "archive", "sourceCommit",
+        "schemaVersion", "kind", "version", "platform", "archive", "knownLimitations",
+        "sourceCommit",
         "exactSourceCommit", "treeState", "signed", "publicReleaseAllowed",
         "distributionAuthorized", "productionReady", "nativeValidationRequired",
         "alpha1AssetsMayBeModified",
     }
-    expected_files = REQUIRED_EVIDENCE | {
+    expected_files = CANDIDATE_EVIDENCE | {
         ARCHIVE_NAME,
         f"{ARCHIVE_NAME}.sha256",
         "candidate-manifest.json",
@@ -129,6 +142,7 @@ def verify(output: Path) -> dict:
     ):
         raise ValueError("candidate-file-set-invalid")
     archive = manifest.get("archive", {})
+    known_limitations = manifest.get("knownLimitations", {})
     if (
         set(manifest) != required
         or manifest.get("schemaVersion") != 1
@@ -136,6 +150,8 @@ def verify(output: Path) -> dict:
         or manifest.get("version") != VERSION
         or manifest.get("platform") != "linux-x64"
         or archive.get("name") != ARCHIVE_NAME
+        or known_limitations.get("name") != KNOWN_LIMITATIONS_NAME
+        or not SHA256.fullmatch(str(known_limitations.get("sha256", "")))
         or not FULL_COMMIT.fullmatch(str(manifest.get("sourceCommit", "")))
         or manifest.get("exactSourceCommit") is not True
         or manifest.get("treeState") != "exact-commit"
@@ -159,7 +175,10 @@ def verify(output: Path) -> dict:
         f"{archive['sha256']}  {ARCHIVE_NAME}\n"
     ):
         raise ValueError("candidate-checksum-mismatch")
-    if any(not (output / name).is_file() for name in REQUIRED_EVIDENCE):
+    limitations = output / KNOWN_LIMITATIONS_NAME
+    if digest(limitations) != known_limitations["sha256"]:
+        raise ValueError("candidate-known-limitations-integrity-failed")
+    if any(not (output / name).is_file() for name in CANDIDATE_EVIDENCE):
         raise ValueError("candidate-evidence-incomplete")
     return manifest
 

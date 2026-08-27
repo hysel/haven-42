@@ -1,0 +1,138 @@
+name: Alpha 2 Candidate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/alpha2-candidate.yml"
+      - "config/alpha-2-promotion-readiness.json"
+      - "config/alpha-2-release-contract.json"
+      - "docs/alpha-2-known-limitations.md"
+      - "package/**"
+      - "scripts/build-portable-development-package.py"
+      - "scripts/build-windows-alpha2-candidate.py"
+      - "scripts/build-linux-alpha2-candidate.py"
+      - "scripts/verify-alpha2-candidate-pair.py"
+      - "web/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alpha2-candidate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-candidate:
+    name: ${{ matrix.label }} Alpha 2 candidate
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2025
+            label: Windows
+            platform: windows-x64
+            executable: dist/portable-alpha2/bundle/haven42/haven42.exe
+            builder: scripts/build-windows-alpha2-candidate.py
+            python_asset: python-3.14.6-win32-x64.zip
+            python_sha256: dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9
+          - os: ubuntu-24.04
+            label: Linux
+            platform: linux-x64
+            executable: dist/portable-alpha2/bundle/haven42/haven42
+            builder: scripts/build-linux-alpha2-candidate.py
+            python_asset: python-3.14.6-linux-24.04-x64.tar.gz
+            python_sha256: 29dc7f3887a430fe7a0005fee4732b00be1bbed5bf21aa1e43f8d947eb1b9f61
+
+    steps:
+      - name: Checkout exact source without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Select exact package Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14.6"
+
+      - name: Install hash-locked build dependencies
+        run: python -m pip install --disable-pip-version-check --require-hashes -r package/requirements-build.txt
+
+      - name: Verify protected-resource manifest policy
+        run: python scripts/test-portable-build-provenance.py
+
+      - name: Build unsigned Alpha 2 package and evidence
+        env:
+          HAVEN42_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          HAVEN42_PYTHON_SOURCE_ASSET: ${{ matrix.python_asset }}
+          HAVEN42_PYTHON_SOURCE_SHA256: ${{ matrix.python_sha256 }}
+        run: python scripts/build-portable-development-package.py --release-line alpha2 --output dist/portable-alpha2
+
+      - name: Run source/package parity and native hostile tests
+        run: >-
+          python scripts/test-portable-package.py
+          --executable "${{ matrix.executable }}"
+          --expected-version 0.4.0-alpha.2
+
+      - name: Run packaged browser attachment and UI smoke test
+        env:
+          HAVEN42_TEST_EXECUTABLE: ${{ matrix.executable }}
+        run: node scripts/test-haven42-web-browser.mjs
+
+      - name: Verify portable Alpha 2 evidence
+        run: python scripts/verify-portable-development-artifacts.py --artifact-directory dist/portable-alpha2/artifacts --expected-version 0.4.0-alpha.2 --self-test
+
+      - name: Assemble exact Alpha 2 candidate packet
+        run: python ${{ matrix.builder }} --portable-root dist/portable-alpha2 --output dist/alpha2-candidate
+
+      - name: Reverify exact Alpha 2 candidate packet
+        run: python ${{ matrix.builder }} --portable-root dist/portable-alpha2 --output dist/alpha2-candidate --verify-only
+
+      - name: Upload candidate packet for cross-platform pairing
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: haven42-alpha2-${{ matrix.platform }}-candidate
+          path: dist/alpha2-candidate/
+          if-no-files-found: error
+          retention-days: 7
+
+  verify-pair:
+    name: Verify Alpha 2 candidate pair
+    needs: build-candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout exact source without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Select verification Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14.6"
+
+      - name: Download same-run candidate packets
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: haven42-alpha2-*-candidate
+          path: dist/alpha2-pair
+
+      - name: Verify identical source commit and denied publication authority
+        run: >-
+          python scripts/verify-alpha2-candidate-pair.py
+          --windows dist/alpha2-pair/haven42-alpha2-windows-x64-candidate
+          --linux dist/alpha2-pair/haven42-alpha2-linux-x64-candidate
+          --expected-commit ${{ github.event.pull_request.head.sha || github.sha }}
+          --output dist/alpha2-pair-verification.json
+
+      - name: Upload cross-platform verification report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: haven42-alpha2-candidate-pair-verification
+          path: dist/alpha2-pair-verification.json
+          if-no-files-found: error
+          retention-days: 7
