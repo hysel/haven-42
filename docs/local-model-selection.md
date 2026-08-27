@@ -1,8 +1,16 @@
 # Local Model Selection
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. This page preserves sanitized results from earlier testing; it is not
+> current setup guidance, and Continue is not required or recommended. See
+> [Coding Tools for Local Models](https://github.com/hysel/haven-42/wiki/Coding-Tools-For-Local-Models)
+> for maintained options.
+
 ## Purpose
 
-This guide helps users choose a candidate local Ollama model for Continue based on machine capacity and workflow risk.
+This guide records the surface-neutral inputs used to choose candidate local
+Ollama models based on machine capacity and workflow risk. Continue-specific
+configuration examples below are historical test inputs only.
 
 The goal is not to chase the largest model. The goal is to choose the smallest reliable model that can complete the task safely.
 
@@ -109,9 +117,11 @@ The helpers report:
 
 It does not collect hostnames, IP addresses, usernames, local filesystem paths, secrets, or custom Ollama endpoint values.
 
-## Automatic Local Config Selection
+## Historical Automatic Continue Config Selection
 
-The install scripts can create a local-only Continue config that uses the model recommended by the hardware profile helper.
+Earlier Continue testing used install scripts to create a local-only config from
+the hardware-profile recommendation. These commands are retained to identify
+the historical test input; they are not a supported setup path.
 
 Windows PowerShell:
 
@@ -146,7 +156,7 @@ macOS:
 
 This writes `.continue/config.local.yaml` in the target repository after installation. That file is local-only and should not be committed. It uses the profile script's recommended installed model when available, while the shared `.continue/config.yaml` remains a portable starter sample.
 
-## Model Lanes
+## Historical Continue Model Lanes
 
 For real work, it is safer to use different models for different risk levels
 instead of giving every model permission to edit files.
@@ -167,8 +177,8 @@ is not an Agent profile and does not receive `chat`, `edit`, or `apply` roles.
 
 ## Why These Profiles
 
-These profiles are based on observed Continue Agent behavior, not only model
-size or benchmark reputation.
+These profiles preserve observed Continue Agent behavior from the recorded
+campaign; they are not current surface recommendations.
 
 | Profile | Model | Why it is used |
 | --- | --- | --- |
@@ -187,12 +197,12 @@ Suggested high-resource upgrades after validation:
 | `2 - PLAN ONLY` | `devstral-small-2:24b` | The machine can run it with acceptable latency and the model stays chat-only. |
 | `3 - DEEP REVIEW` | `qwen3-coder:30b` | The machine can run it with acceptable latency and read-only tool validation passes. |
 
-After a model passes validation, use `scripts/install-validated-model.ps1` on
-Windows or the Linux/macOS `install-validated-model.*.sh` wrappers to pull the
-model and update only `.continue/config.local.yaml` for the selected profile.
+The historical harness used `scripts/install-validated-model.ps1` on Windows
+or the Linux/macOS `install-validated-model.*.sh` wrappers to pull the model
+and update only `.continue/config.local.yaml` for the selected profile.
 
-Treat these models as validated defaults for this pack, not permanent
-requirements. If a newer local model performs better, add it only after
+Treat these models as historical tested selections, not current defaults or
+permanent requirements. If a newer local model performs better, add it only after
 recording sanitized read, plan, and approved-write evidence.
 
 Windows PowerShell:
@@ -213,9 +223,10 @@ macOS:
 ./scripts/install-continue-pack.macos.sh --target-repo /path/to/your-project --model-lanes
 ```
 
-## Install Profiles
+## Historical Continue Install Profiles
 
-Use installer profiles when you know the intended workflow and do not want to hand-edit model roles:
+The recorded campaign used these installer profiles to avoid hand-editing model
+roles. They are retained as evidence inputs, not current installation commands:
 
 ```powershell
 .\scripts\install-continue-pack.ps1 -TargetRepo "C:\path\to\your-project" -InstallProfile read-only
@@ -443,7 +454,7 @@ Examples:
 
 Model guidance:
 
-- Use only a model that has been validated with the exact Continue workflow.
+- Historical Continue results apply only to the exact tested model and workflow.
 - For tool-backed edits, verify that the model executes tools instead of printing raw JSON tool calls.
 - Prefer plan-only first, then one scoped edit at a time.
 - Stop if the model ignores boundaries or invents details.
@@ -526,13 +537,13 @@ Apple Silicon:
 - Apple Silicon Macs use unified memory, so system RAM and model memory share the same pool.
 - A 16 GB Mac should be treated conservatively for coding-agent workflows, even if smaller models run well.
 - A 32 GB or larger Mac is a better starting point for medium and larger coding models.
-- Ollama with GGUF models remains the default beginner path because it is easy to install and works with this pack's default Continue setup.
+- Ollama with GGUF models remains the default beginner runtime path; maintained surfaces require their own admitted configuration.
 - MLX models can perform well on Apple Silicon, but they are a separate serving path and should be treated as advanced setup.
 
 Windows ARM:
 
 - Windows ARM local LLM acceleration varies by device, driver, runtime, and model provider.
-- Treat Windows ARM as conservative until the exact model, Continue setup, and tool execution path are validated.
+- Treat Windows ARM as conservative until the exact model, maintained surface, and tool execution path are validated.
 - CPU-only operation may work for review and planning, but tool-backed edits should wait for a successful read-only tool test.
 
 Linux ARM:
@@ -575,10 +586,10 @@ The current profile chooses MLX `High` at 32 GB or more, `Medium` at 24-31 GB,
 and `Low` below 24 GB. A 16 GB Apple Silicon host therefore receives the
 validated 4B MLX candidate rather than the 9B recommendation.
 
-If you want to use MLX with Continue:
+The historical Continue/MLX experiment used this boundary:
 
 - Run an MLX-compatible local server that exposes an OpenAI-compatible API.
-- Configure Continue locally to use that endpoint.
+- Configure the historical Continue fixture locally to use that endpoint.
 - Keep the endpoint, model names, and machine-specific settings out of committed config.
 - Run the same read-only tool validation before using Agent mode or approved write mode.
 
@@ -681,7 +692,10 @@ The helper scripts use `config/model-recommendations.tsv` when selecting an inst
 | Medium | `qwen3.5:9b` by default; heavier profile upgrades only when local hardware can run them acceptably | Keep write access limited to the validated WRITE SAFE profile |
 | Low | `qwen3.5:9b` after latency and write validation are acceptable; otherwise use read-only or plan-only workflows | Focused context, one scoped edit at a time, and no approved writes until validation passes |
 
-These recommendations are intentionally conservative. A model is not approved for tool-backed edits until it successfully runs a read-only tool test in Continue and the result is recorded using the validation evidence template.
+These recommendations are intentionally conservative. A model is not approved
+for tool-backed edits until it passes the maintained surface's read-only and
+scoped-write gates and the result is recorded using the validation evidence
+template. Historical Continue results do not transfer to another surface.
 
 ## Context Length Guidance
 

@@ -10,7 +10,8 @@ of the main user navigation.
 
 ## Editor and agent setup
 
-- [[VS Code and Continue|VS-Code-Continue-Setup]]
+- [[Coding Tools for Local Models|Coding-Tools-For-Local-Models]]
+- [[Historical Continue evidence|Eng-VS-Code-Continue-Setup]]
 - [[Setup Paths|Setup-Paths]]
 - [[Beginner Setup Mode|Beginner-Setup-Mode]]
 - [[Agent Surface Options|Agent-Surface-Options]]

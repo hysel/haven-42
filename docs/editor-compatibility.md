@@ -14,27 +14,26 @@
 
 ## Purpose
 
-Use this guide to test whether Continue is using this pack correctly in VS Code, VSCodium, or the Continue CLI.
-
-For a beginner-friendly Windows VS Code installation sequence, use
-`docs/vscode-continue-setup.md` first. This document remains the reference for
-cross-editor compatibility and diagnostics.
+This page preserves the historical VS Code, VSCodium, and Continue CLI test
+procedure so its sanitized results remain understandable. It is not a current
+installation, configuration, repair, or qualification guide. For maintained
+coding options, see `docs/agent-surface-solutions.md`.
 
 The committed `.continue/config.yaml` is an internal validation fixture. It is
 not shipped into end-user projects. Editor-specific paths, private endpoints,
 and local model experiments stay in ignored test configuration.
 
-## Supported Surfaces
+## Historically Tested Surfaces
 
 | Surface | What to expect | What to verify |
 | --- | --- | --- |
-| VS Code | Experimental contributor surface. | Record whether Continue loads the isolated config, uses the exact selected model, and keeps every approved edit in scope. |
-| VSCodium | Experimental contributor surface; extension versions and command names may differ. | Record config loading, exact model identity, tool availability, and external diff results independently from VS Code. |
-| Continue CLI | Useful fallback when editor behavior is unclear. | `npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml` uses the exact validated CLI identity. |
+| VS Code | Historical experimental contributor surface. | Earlier tests recorded whether Continue loaded the isolated config, used the exact selected model, and kept every approved edit in scope. |
+| VSCodium | Historical experimental contributor surface; extension versions and command names differed. | Earlier tests recorded config loading, exact model identity, tool availability, and external diff results independently from VS Code. |
+| Continue CLI | Historical fallback used to isolate editor behavior. | `npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml` identifies the exact tested CLI. |
 
-## Isolated Project-Local Test Config
+## Historical Isolated Test Config
 
-For a disposable contributor test only, use the fixture repository's config:
+The disposable contributor tests used this fixture layout:
 
 ```text
 target-repository/
@@ -42,7 +41,7 @@ target-repository/
     config.yaml
 ```
 
-Do not keep pointing Continue at the original pack repository after copying the pack into the project you want to review.
+The historical procedure avoided pointing Continue at the original pack repository after copying the fixture into a disposable target.
 
 Keep local machine settings in ignored files such as:
 
@@ -58,9 +57,9 @@ Do not commit:
 - tokens or API keys
 - editor-specific absolute config paths
 
-## Setup Checks
+## Historical Setup Checks
 
-Run these checks before testing prompts:
+The recorded preflight checked:
 
 1. Open the target repository in the editor.
 2. Confirm the editor file explorer shows the target repository files.
@@ -71,12 +70,12 @@ Run these checks before testing prompts:
 
 If the model or prompts are missing, Continue may be using a global/default config instead of the project-local config.
 
-## Global Config Install
+## Historical Global Config Input
 
-Some editor setups load the global Continue config instead of the repository's
-project-local `.continue/config.yaml`. If that happens, use the installer's
-explicit global-config mode. It writes the global Continue config with absolute
-references to the target repository's installed prompts and docs.
+Some tested editor setups loaded the global Continue config instead of the
+project-local `.continue/config.yaml`. The historical harness used the commands
+below to create an isolated test input with absolute references. Do not use
+them as current setup guidance.
 
 Windows PowerShell:
 
@@ -130,7 +129,7 @@ On Windows, the PowerShell installer writes absolute Continue file references in
 the `file://C:/path/...` form because some VSCodium setups do not resolve
 `file:///C:/path/...` correctly.
 
-## Terminal Preflight Checks
+## Historical Terminal Preflight Checks
 
 These commands do not prove that the editor UI loaded the project-local config. They only confirm that the editor command and Continue extension are visible from the current shell.
 
@@ -161,7 +160,7 @@ If `code` or `codium` is not on `PATH`, use the editor UI to confirm the install
 
 Record sanitized terminal preflight results in `examples/editor-surface-validation.md` only when they change shared guidance.
 
-## Duplicate Rule Warnings
+## Historical Duplicate Rule Findings
 
 Duplicate rule warnings usually mean the same rule files are loaded from two places:
 
@@ -176,7 +175,7 @@ Duplicate rules named "Clean Architecture" detected.
 Duplicate rules named "Security" detected.
 ```
 
-Fix:
+The recorded recovery procedure was:
 
 1. Choose one active source of rules.
 2. Prefer the project-local `.continue/config.yaml` for repositories using this pack.
@@ -185,7 +184,7 @@ Fix:
 5. Reload the editor window.
 6. Reopen Continue and confirm the warnings are gone.
 
-## Read-Only Editor Test
+## Historical Read-Only Editor Test
 
 ### Project-language prerequisites
 
@@ -221,9 +220,9 @@ Expected result:
 - The response does not print raw JSON tool calls as the final answer.
 - No files are modified.
 
-## Agent Tool Test
+## Historical Agent Tool Test
 
-Only run this after the read-only editor test works.
+This cell was run only after the read-only editor test worked.
 
 Use Agent mode and ask:
 
@@ -244,9 +243,10 @@ If Agent mode prints raw JSON or tool-call markup instead of executing tools, tr
 
 Use `docs/model-tool-use-validation.md` for the full validation checklist and `examples/model-tool-use-validation.md` for sanitized evidence.
 
-## CLI Fallback
+## Historical CLI Fallback
 
-Use the CLI fallback when the editor does not clearly show which config is active.
+The test campaign used this CLI fallback when the editor did not clearly show
+which config was active:
 
 Windows PowerShell:
 
@@ -262,7 +262,7 @@ npx -y @continuedev/cli@1.5.47 --config .continue/config.yaml --readonly -p "Rep
 
 If the CLI loads the config but the editor does not, the issue is likely editor config selection, extension version, or global config precedence.
 
-## Test Record
+## Historical Test Record
 
 When testing an editor surface, record:
 

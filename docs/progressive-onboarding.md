@@ -21,7 +21,7 @@ Examples include:
 | Capability | Guided path | Existing path |
 | --- | --- | --- |
 | Chat | Select a validated local text profile and recommended model | Connect an existing local or explicitly trusted remote API |
-| Software | Configure a maintained agent surface with safe defaults | Discover an existing Continue, Aider, or OpenCode setup |
+| Software | Configure a maintained agent surface with safe defaults | Discover an existing Aider or OpenCode setup; legacy Continue evidence is not an onboarding path |
 | Images | Install a promoted native provider profile | Validate an existing ComfyUI endpoint and model mapping |
 | Audio or video | Offer a profile only after its exact promotion gates pass | Inspect a user-managed provider without inheriting validation |
 | Models | Recommend a fitting trusted artifact | Register an existing local model and verify identity and runtime fit |
