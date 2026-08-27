@@ -1,5 +1,10 @@
 # Local Model Reliability
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue-specific tool and configuration observations below are retained
+> as sanitized historical evidence and do not establish current Continue support.
+> Apply the general reliability rules through a maintained coding surface.
+
 ## Purpose
 
 This guide explains how to use the pack safely with local models such as Ollama-backed coding models.
@@ -29,7 +34,8 @@ Local models may still:
 
 ## Tool-Capable Model Guidance
 
-Agent mode tool execution needs a model that produces tool calls in the format Continue can execute.
+Agent-mode tool execution needs a model that produces tool calls in the exact format
+its maintained surface can execute. The observations below came from Continue testing.
 
 Validated behavior:
 
@@ -145,7 +151,9 @@ Keep committed configuration portable:
 - Do not commit `apiBase` values that point to a private network.
 - Do not commit raw runtime output that contains local paths, endpoint values, repository names, or secrets.
 
-For machine-specific setup, copy the committed config to an ignored local file such as `.continue/config.local.yaml`, then add the local endpoint there.
+The historical Continue fixture kept machine-specific endpoints in an ignored local
+file such as `.continue/config.local.yaml`; this path is retained only to identify the
+recorded test boundary.
 
 ## When To Retry
 

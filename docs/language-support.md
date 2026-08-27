@@ -1,5 +1,10 @@
 # Language Support
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue CLI and editor results on this page remain valid only for their
+> exact recorded surfaces and versions; they are not current setup guidance or support
+> for Continue. Maintained coding surfaces require their own evidence cells.
+
 ## Purpose
 
 This document tracks how Haven 42 should grow beyond its current .NET-centered engineering guidance.
@@ -25,7 +30,7 @@ Use `docs/project-detection.md` as the source of truth for ecosystem signals, ev
 
 ## Milestone 15 Completion Basis
 
-Milestone 15 is complete for the current scope because the pack now treats multi-language support as staged, evidence-gated guidance rather than .NET-only advice. .NET remains the most mature path, while Python, JavaScript/TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code have optional guidance that stays outside the default `.continue/config.yaml`.
+Milestone 15 is complete for its recorded scope because the pack treats multi-language support as staged, evidence-gated guidance rather than .NET-only advice. .NET remains the most mature path, while Python, JavaScript/TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code have optional guidance that stayed outside the historical `.continue/config.yaml` fixture.
 
 The required Python and JavaScript/TypeScript generated-sample validation is recorded in `examples/multi-language-workflow-validation.md`: repository discovery, implementation planning, and code review passed verification for both samples. `docs/project-detection.md` and `docs/language-rule-packs.md` keep language-specific recommendations gated by detected repository evidence, and broader real-repository/editor validation remains future evidence expansion.
 
@@ -44,7 +49,7 @@ These standards should remain cross-language:
 
 ## Language-Specific Guidance
 
-Language-specific rules should be added only when they are useful and validated. Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule packs now live in `.continue/rule-packs/` and are documented in `docs/language-rule-packs.md`. Static generated-sample validation evidence is recorded in `examples/language-rule-pack-validation.md`. They are not loaded by default from `.continue/config.yaml`.
+Language-specific rules should be added only when they are useful and validated. Optional Python, TypeScript, Java, Go, Rust, SQL, and Infrastructure as Code rule-pack fixtures live in `.continue/rule-packs/` and are documented in `docs/language-rule-packs.md`. Static generated-sample validation evidence is recorded in `examples/language-rule-pack-validation.md`. The historical Continue fixture did not load them by default from `.continue/config.yaml`.
 
 Each language pack should define:
 

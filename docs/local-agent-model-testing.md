@@ -1,9 +1,15 @@
 # Local Agent Model Testing
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. The API screening scripts remain useful for candidate research, but every
+> Continue editor, Apply, configuration, and CLI reference below describes historical
+> test evidence only. Use a maintained coding surface for new qualification work.
+
 ## Purpose
 
-Use these scripts to automate the repetitive part of local model validation before
-testing Continue Agent mode in the editor.
+Use these scripts to automate the repetitive API-level part of local model screening.
+The recorded campaign followed that screen with Continue Agent tests; those editor
+steps are retained only to explain the historical evidence.
 
 These scripts test selected local model names. They do not discover newer
 models online. If an online discovery helper is added later, it should only
@@ -20,8 +26,10 @@ The scripts can:
 - write a sanitized JSON report
 - optionally remove failed models when explicitly requested
 
-The scripts cannot click Continue's Apply button or prove that the editor
-extension applied a patch. Automated preflight does not replace Continue UI Apply validation; that still requires a manual check in the editor and an external shell verification.
+The scripts cannot prove that any maintained editor surface applied a patch. In the
+historical campaign, automated preflight does not replace Continue UI Apply validation;
+that evidence required a manual editor check and external shell verification. New
+coding recommendations require the equivalent gates on a maintained surface.
 
 ## Pull Candidate Models
 
@@ -97,12 +105,12 @@ until they pass local validation.
 
 The current simple-hardware default remains `qwen3.5:9b` for WRITE SAFE, PLAN ONLY, and DEEP REVIEW profiles.
 
-Recent automated API-level screening and Continue CLI prompt validation found two additional candidates worth manual editor testing:
+Historical automated API-level screening and Continue CLI prompt validation found two additional candidates that were worth manual editor testing at the time:
 
 | Model | Automated Result | Next Step |
 | --- | --- | --- |
-| `Qwen3-Coder-Next:latest` | Passed API-level tool/exact-content screening and completed all generated Python sample CLI workflows; 10 of 12 workflow outputs passed verification. | Try manual Continue editor Apply validation before granting write-safe status. |
-| `devstral-small-2:latest` | Passed API-level tool/exact-content screening and completed all generated Python sample CLI workflows; 10 of 12 workflow outputs passed verification. | Try manual Continue editor Apply validation before granting write-safe status. |
+| `Qwen3-Coder-Next:latest` | Passed API-level tool/exact-content screening and completed all generated Python sample CLI workflows; 10 of 12 workflow outputs passed verification. | The historical campaign required manual Continue editor Apply validation before granting write-safe status. |
+| `devstral-small-2:latest` | Passed API-level tool/exact-content screening and completed all generated Python sample CLI workflows; 10 of 12 workflow outputs passed verification. | The historical campaign required manual Continue editor Apply validation before granting write-safe status. |
 
 Both candidates failed verification only on filename-drift guardrails in non-code workflows. That is a prompt-quality follow-up, not proof that either model is write-safe.
 
@@ -110,7 +118,7 @@ Additional missing-model screening found:
 
 | Model | Automated Result | Next Step |
 | --- | --- | --- |
-| `llama3.1:8b-instruct-q5_K_M` | Passed API-level structured tool-call and exact-content screening. | Treat as an API-level candidate only; run manual Continue editor Apply validation before write-safe use. |
+| `llama3.1:8b-instruct-q5_K_M` | Passed API-level structured tool-call and exact-content screening. | Historical status: API-level candidate only; Continue editor Apply validation was not recorded for write-safe use. |
 | `sammcj/glm-4-32b-0414:q6_k` | Failed structured tool-call validation. | Do not use for tool-backed Agent workflows unless settings or model variant changes. |
 | `deepseek-r1:14b` | Failed structured tool-call validation. | Do not use for tool-backed Agent workflows unless settings or model variant changes. |
 | `qwen3-coder-localpilot:latest` | Not installed and not pullable by that exact name. | Remove from active candidate lists unless a valid local tag is created. |
@@ -294,10 +302,9 @@ chosen only from models that passed the API-level structured tool-call and
 exact-content checks. It prefers the smallest passing model first, with a small
 preference for coding-oriented local-agent model families.
 
-Treat this as the model to validate next in the editor, not as automatic
-approval for write-safe use. Continue read-only validation and approved-write
-smoke testing are still required before installing the model into a write-safe
-profile.
+This identified the next historical editor-validation candidate; it did not grant
+write-safe approval. A current recommendation still requires read-only and scoped-write
+gates on a maintained surface before installation into a write-capable profile.
 ## Install A Validated Model Into Local Config
 
 After a model passes validation, install it into one local-only profile. This
@@ -345,8 +352,8 @@ The model is marked as an API-level candidate only when:
 - The model can return the exact requested file content without reasoning tags,
   markdown fences, raw tool-call text, or extra lines.
 
-This is not the same as approved-write readiness in Continue. A model that passes
-these API checks must still pass the editor Apply smoke test in
+This was not the same as approved-write readiness in Continue. A model that passed
+these API checks still had to pass the historical editor Apply smoke test in
 `docs/model-tool-use-validation.md`.
 
 ## Failure Signals
@@ -361,8 +368,8 @@ Common failure signals:
 - `THINK_TAG_LEAK`
 - `INCORRECT_EXACT_CONTENT`
 
-If a model fails here, do not spend time testing approved writes in Continue
-until you intentionally change model, prompt, or provider settings.
+If a model fails here, do not proceed to approved-write testing on any surface until
+you intentionally change the model, prompt, or provider settings.
 
 ## Output
 

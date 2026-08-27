@@ -1,5 +1,10 @@
 # Optional Online Model Discovery
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue-specific validation and configuration references below identify
+> earlier test gates only. New coding recommendations use the same safety principles
+> through a maintained surface with its own evidence.
+
 ## Purpose
 
 This guide defines how the pack discovers newer candidates from multiple public
@@ -45,7 +50,7 @@ The default workflow stays offline:
 2. Run the local hardware profile helper.
 3. Check models already installed on the local Ollama server.
 4. Use `config/model-recommendations.tsv` for curated local recommendations.
-5. Validate the selected model in Continue before tool-backed work.
+5. Validate the selected model on the intended maintained surface before tool-backed work; historical Continue results do not transfer.
 
 No setup, validation, or install script should require internet access for the
 normal path.
@@ -248,10 +253,10 @@ Use this sequence if online discovery is added later:
 3. Review the candidate list.
 4. Pull one chosen model locally.
 5. Run API-level model preflight.
-6. Run Continue read-only tool validation.
+6. Run read-only tool validation on the intended maintained surface.
 7. Run approved-write smoke testing only when the model needs write access.
-8. Install the validated model into `.continue/config.local.yaml` with the
-   post-validation installer.
+8. For the historical Continue campaign, install the validated model into
+   `.continue/config.local.yaml` with the recorded post-validation installer.
 9. Record sanitized validation evidence before updating shared guidance.
 
 ## Candidate Status
@@ -265,7 +270,7 @@ A discovered model can move through these states:
 | Online candidate | The model appears in a public catalog or public source. |
 | Local candidate | The model is installed on the local Ollama server. |
 | API preflight candidate | The model passed local Ollama API checks. |
-| Read-only validated | The model used Continue tools to inspect files. |
+| Read-only validated | The model used tools on the exact recorded surface to inspect files. |
 | Approved-write ready | The model passed scoped edit/apply validation and external file checks. |
 
 Only the last two statuses should influence Agent tool-use guidance.

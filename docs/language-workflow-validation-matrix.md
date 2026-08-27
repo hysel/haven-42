@@ -1,5 +1,10 @@
 # Language Workflow Validation Matrix
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. Continue CLI commands and results below preserve sanitized qualification
+> evidence for the exact recorded versions; they are not current installation,
+> configuration, or support guidance. Maintained surfaces need separate validation.
+
 ## Purpose
 
 `config/language-workflow-validation-matrix.json` defines the representative
@@ -63,7 +68,7 @@ Then inspect the matrix and choose one ecosystem/operation pair at a time. Use
 `examples/language-rule-pack-validation.md` for sanitized evidence and
 `docs/runtime-output-verification.md` for deterministic output checks.
 
-## Automated Continue CLI Run
+## Historical Automated Continue CLI Run
 
 Windows PowerShell can execute selected matrix rows with separate read and
 write configurations:
@@ -76,21 +81,21 @@ write configurations:
   -UnloadAfterRun
 ```
 
-The runner generates clean fixtures, invokes Continue CLI in read-only or auto
-mode, checks operation-specific filenames, verifies scoped writes with Git,
-restores the fixture, stores raw output only under ignored runtime output, and
-writes a sanitized JSON report. When `-UnloadAfterRun` is used, it retries the
-model release and verifies that the model is no longer resident before reporting
-success. Use `-Operations` to run a smaller slice and `-DryRun` to validate
-orchestration without contacting a model.
+The historical runner generated clean fixtures, invoked Continue CLI in read-only or auto
+mode, checked operation-specific filenames, verified scoped writes with Git,
+restored the fixture, stored raw output only under ignored runtime output, and
+wrote a sanitized JSON report. With `-UnloadAfterRun`, it retried the model
+release and verified that the model was no longer resident before reporting
+success. The campaign used `-Operations` for smaller slices and `-DryRun` to
+validate orchestration without contacting a model.
 
-The native Bash runner also supports a local OpenAI-compatible endpoint such
-as an Apple Silicon MLX server. Set `provider: openai` and an `apiBase` ending
-in `/v1` in both Continue configs. It probes `/v1/models` instead of Ollama's
-API and records `MLX`/OpenAI-compatible runs with their declared provider.
-`--unload-after-run` continues to unload Ollama models, but intentionally does
-not terminate an externally managed MLX server; stop or restart that server
-through its own service manager after the matrix if memory must be released.
+The historical native Bash runner also supported a local OpenAI-compatible endpoint
+such as an Apple Silicon MLX server. The recorded input set `provider: openai` and
+an `apiBase` ending in `/v1` in both Continue configs. It probed `/v1/models`
+instead of Ollama's API and recorded `MLX`/OpenAI-compatible runs with their
+declared provider. `--unload-after-run` unloaded Ollama models but intentionally
+did not terminate an externally managed MLX server; that server remained under
+its own service manager.
 
 On macOS, the runner also resolves Homebrew's standard `npx` locations when a
 non-interactive SSH shell does not inherit the Homebrew `PATH`. Node.js is
@@ -129,7 +134,7 @@ loads. Unload the existing model first; use `-AllowLoadedModels` on Windows
 or `--allow-loaded-models` on Linux/macOS only when concurrent use is
 intentional and the available memory has been checked.
 
-## Latest Continue CLI Evidence
+## Historical Continue CLI Evidence
 
 Two full Windows runs on 2026-07-15 used Continue CLI `1.5.47` with Ollama.
 Each model independently passed 27 of 28 cells; their evidence-backed

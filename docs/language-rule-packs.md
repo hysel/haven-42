@@ -1,10 +1,16 @@
 # Language Rule Packs
 
+> **Historical Continue evidence:** Continue is a legacy, evidence-only surface in
+> Haven 42. The `.continue` paths on this page identify sanitized rule-pack fixtures
+> used in earlier validation; they are not current setup or installation guidance.
+> The evidence-gating rules remain applicable to maintained coding surfaces.
+
 ## Purpose
 
-Language rule packs provide ecosystem-specific guidance without making the default pack noisy or wrong for every repository.
+Language rule packs provide ecosystem-specific guidance without making a default
+agent configuration noisy or wrong for every repository.
 
-The default `.continue/config.yaml` loads shared engineering rules plus evidence-gated .NET, ASP.NET Core, and API rules. Optional language rule-pack sources live under `.continue/rule-packs/`. Project-local installation classifies the target and copies only matching packs into `.continue/rules/active-language-<id>.md`.
+The historical Continue fixture loaded shared engineering rules plus evidence-gated .NET, ASP.NET Core, and API rules. Its optional language rule-pack sources lived under `.continue/rule-packs/`, and its project-local test installer copied only matching packs into `.continue/rules/active-language-<id>.md` after classification.
 
 ## Current Optional Packs
 
@@ -18,7 +24,7 @@ The default `.continue/config.yaml` loads shared engineering rules plus evidence
 | `.continue/rule-packs/sql.md` | Static generated-sample validation recorded | SQL/database evidence such as migration folders, schema folders, `*.sql`, seed files, database changelog files, or inspected database ownership docs. |
 | `.continue/rule-packs/infrastructure-as-code.md` | Static generated-sample validation recorded | IaC evidence such as Terraform/OpenTofu files, Kubernetes manifests, Helm charts, Dockerfiles, Compose files, workflow files, cloud deployment templates, or inspected infrastructure docs. |
 
-## How Agents Should Use Them
+## Surface-Neutral Use
 
 1. Run project classification using `docs/project-detection.md` or the scripts in `docs/project-profile-classification.md`.
 2. Cite the files that prove the ecosystem.
@@ -28,9 +34,9 @@ The default `.continue/config.yaml` loads shared engineering rules plus evidence
 
 ## Default Config Behavior
 
-Optional source rule packs are intentionally not referenced from `.continue/config.yaml`. The default config includes the shared rules and the evidence-gated .NET, ASP.NET Core, and API rules. Their file globs reduce irrelevant activation, while their evidence gates remain authoritative when repository classification is uncertain.
+Optional source rule packs are intentionally not referenced from the historical `.continue/config.yaml`. That fixture includes the shared rules and the evidence-gated .NET, ASP.NET Core, and API rules. Their file globs reduce irrelevant activation, while their evidence gates remain authoritative when repository classification is uncertain.
 
-Keeping the optional source packs out of the default config prevents Python, JavaScript/TypeScript, Java, Go, Rust, SQL, or infrastructure advice from being applied to unrelated repositories. Project-local installers now create a sanitized profile and materialize only selected packs under `.continue/rules/`. Shared-assets mode remains project-neutral and does not activate language packs.
+Keeping optional source packs out of a default configuration prevents Python, JavaScript/TypeScript, Java, Go, Rust, SQL, or infrastructure advice from being applied to unrelated repositories. The historical project-local installer created a sanitized profile and materialized only selected packs under `.continue/rules/`. Shared-assets evidence remained project-neutral and did not activate language packs.
 
 ## Validation Expectations
 
