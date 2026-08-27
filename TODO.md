@@ -405,6 +405,41 @@ evidence-only; no new Continue development or qualification is planned.
 
 ## Milestone 21: General-Purpose AI Assistant And Intent Routing
 
+- [ ] Define and validate one provider-neutral, connect-only
+  OpenAI-compatible endpoint profile for user-managed Jan, LM Studio,
+  LocalAI, vLLM, SGLang, and Text Generation Inference servers. Keep endpoint
+  discovery bounded and memory-only; distinguish loopback from private-LAN
+  disclosure; require explicit credentials, capability checks, cancellation,
+  unload/cleanup behavior, hostile-response handling, accessibility, and
+  source/package parity without installing or administering those products.
+- [ ] Evaluate LocalAI as the closest open second managed-runtime candidate.
+  Pin its exact release and backend graph; review its OpenAI-, Anthropic-, and
+  Ollama-compatible surfaces, model lifecycle, authentication, container and
+  native packaging, update/rollback, dependency provenance, network boundary,
+  resource limits, cleanup, and uninstall behavior before granting any
+  installer or runtime authority.
+- [ ] Evaluate a current MLX-LM local-server profile for the Haven 42 macOS
+  application independently from historical agent-surface evidence. Require
+  Apple Silicon model/runtime binding, loopback-only service controls,
+  sequential and concurrent request isolation, tool-call behavior,
+  cancellation, recovery, cleanup, accessibility, and packaged parity; keep
+  Ollama as the beginner path unless a later owner-approved comparison changes
+  that policy.
+- [ ] Evaluate llamafile as a portable GGUF execution candidate with pinned
+  executable and model digests, operating-system size constraints, process and
+  network isolation, GPU-backend evidence, update/replacement, cleanup, and
+  uninstall gates. Do not infer llama.cpp admission from a llamafile result or
+  vice versa.
+- [ ] Evaluate vLLM, SGLang, and Text Generation Inference only as
+  server-class profiles on appropriate hardware. Pin exact containers or
+  binaries and model revisions; test authentication coverage, unauthenticated
+  routes, loopback/private-LAN exposure, concurrency, multi-GPU behavior,
+  tool-call protocol, cancellation, resource exhaustion, telemetry, recovery,
+  and teardown before exposing a supported connection profile.
+- [ ] Keep Ollama as the novice managed default and llama.cpp as the controlled
+  GGUF fallback while the alternative-runtime cells remain pending. Any
+  default, support-label, installer, or release-policy change requires a
+  separate owner decision based on exact comparative evidence.
 - [x] Define a provider-neutral capability registry above the engineering workflow registry for chat, writing, summarization, image creation, software work, and local-AI setup.
 - [x] Define typed result artifacts, capability availability states, privacy disclosures, and safety metadata for local and external providers.
 - [x] Add deterministic registry routing with explicit-ID selection, phrase and keyword matching, ambiguity handling, unmatched fallback, and no automatic invocation.
@@ -705,6 +740,18 @@ evidence-only; no new Continue development or qualification is planned.
 
 ## Milestone 26: Hardware-Adaptive Model Quantization
 
+- [ ] Qualify the current official Hermes 3 local candidates without relying
+  on mutable aliases: pin the exact Ollama manifests and digests for the 3B
+  Llama 3.2 Q4_K_M and 8B Llama 3.1 Q4_K_M artifacts, then run the complete
+  Chat, Writing, Summarization, tool-call, coding-agent, unload/recovery, GPU
+  residency, power, and bounded-soak gates on hardware tiers where each
+  artifact fits. Keep every result candidate-only until the exact
+  model/runtime/hardware cells pass; do not change an automatic default.
+- [ ] Compare Hermes 3 8B Q8_0 against its Q4_K_M artifact on appropriate
+  12-16 GiB hardware, and reserve the 70B Q4 research cell for a separately
+  approved high-memory or RAM-assisted configuration. Do not download or run
+  either comparison until the owner starts the hardware-dependent test; do
+  not treat the older 4K-context Nous Hermes releases as current defaults.
 - [x] Define versioned quantization-plan and artifact-manifest contracts with immutable source identity, license, hashes, pinned tools, recipe parameters, runtime compatibility, local storage, and cleanup state.
 - [x] Extend sanitized hardware profiling with accelerator capabilities, usable memory, runtime and driver versions, instruction support, storage headroom, context target, concurrency, and workload lane.
 - [x] Implement dry-run selection that prefers a trusted compatible pre-quantized artifact and explains when local conversion is unnecessary or unsafe.
@@ -830,6 +877,27 @@ evidence-only; no new Continue development or qualification is planned.
     every native package lane remain open.
 - [ ] Evaluate self-hosted search and bounded multi-query research only as later independent gates.
   - [x] Define separate self-hosted and four-query-maximum evaluation contracts that preserve SSRF/citation controls, require visible per-query approval and aggregate budgets, forbid autonomous or page-injected follow-ups, and grant no provider, network, runtime, UI, model-tool, or package authority.
+
+## Milestone 29: Internationalization And Community Translation
+
+- [ ] Inventory user-facing strings and define stable message IDs, translator
+  context, a versioned data-only catalog schema, and deterministic English
+  fallback.
+- [ ] Add locale-aware formatting, pseudo-locales, bidirectional layout and
+  isolation, logical CSS properties, and local locale persistence without
+  changing model-language claims.
+- [ ] Build the cross-platform community translation kit: locale template,
+  manifest, skeleton generator, validator, local preview, contributor guide,
+  and translation pull-request checklist.
+- [ ] Reject unsafe markup, executable content, unexpected bidirectional
+  controls, invalid placeholders, malformed plurals, and incompatible catalog
+  revisions before preview or packaging.
+- [ ] Pilot one left-to-right and one right-to-left locale through native
+  language review, accessibility, expansion, package-parity, update, and
+  rollback gates before publishing either as supported.
+- [ ] Keep runtime third-party locale loading unadmitted until signed-catalog,
+  compatibility, revocation, safe-update, and rollback architecture is
+  separately approved and tested.
 
 ## Security architecture remediation
 

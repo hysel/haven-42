@@ -55,6 +55,7 @@ def main() -> int:
         ),
         ("ROADMAP.md", "Milestone 27:", "Milestone 127:"),
         ("ROADMAP.md", "Milestone 28:", "Milestone 128:"),
+        ("ROADMAP.md", "Milestone 29:", "Milestone 129:"),
         (
             "docs/solution-architecture-review.md",
             "| 22: Unified Product UI And Task Composition | In progress;",
@@ -140,7 +141,7 @@ def main() -> int:
     del incomplete_inventory["milestones"]["1"]
     malformed_contracts.append(incomplete_inventory)
     invalid_document_range = json.loads(json.dumps(contract))
-    invalid_document_range["documents"]["ROADMAP.md"]["firstMilestone"] = 29
+    invalid_document_range["documents"]["ROADMAP.md"]["firstMilestone"] = 30
     malformed_contracts.append(invalid_document_range)
     for index, malformed_contract in enumerate(malformed_contracts):
         with tempfile.TemporaryDirectory(

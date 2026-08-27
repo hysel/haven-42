@@ -77,9 +77,9 @@ def load_contract(path: Path = CONTRACT) -> dict:
             or classification not in patterns
         ):
             raise StatusError("milestone classifications must reference known patterns")
-    expected_milestones = {str(number) for number in range(1, 29)}
+    expected_milestones = {str(number) for number in range(1, 30)}
     if set(milestones) != expected_milestones:
-        raise StatusError("milestone classifications must cover exactly 1 through 28")
+        raise StatusError("milestone classifications must cover exactly 1 through 29")
     for settings in documents.values():
         document_milestones = {
             str(number)
@@ -95,7 +95,7 @@ def load_contract(path: Path = CONTRACT) -> dict:
         or set(inventory)
         != {"firstMilestone", "lastMilestone", "summaryDocument", "detailDocuments"}
         or inventory["firstMilestone"] != 1
-        or inventory["lastMilestone"] != 28
+        or inventory["lastMilestone"] != 29
         or inventory["summaryDocument"] != authority
         or not isinstance(inventory["detailDocuments"], list)
         or len(inventory["detailDocuments"]) != 2
@@ -105,7 +105,7 @@ def load_contract(path: Path = CONTRACT) -> dict:
         )
         or len(set(inventory["detailDocuments"])) != 2
     ):
-        raise StatusError("roadmap inventory must cover 1 through 28 in two detail documents")
+        raise StatusError("roadmap inventory must cover 1 through 29 in two detail documents")
     for classification, pattern in patterns.items():
         if not isinstance(classification, str) or not isinstance(pattern, str):
             raise StatusError("classification patterns must be strings")

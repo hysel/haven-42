@@ -17,6 +17,7 @@
 | Milestone 22 | Active. The Windows Alpha is published; dependency, signing, broader lifecycle, and production gates remain open. |
 | Milestones 23–27 | Work continues on images, audio, video, model sizing, and local files. Each feature must pass its own tests before it appears in the app. |
 | Milestone 28 | Active. Reviewed Wikipedia lookup, one bounded multi-source cited-answer request, and an exact browser-search fallback are admitted in source; package parity, assistive-technology review, self-hosted providers, automatic multi-query work, and active navigation remain gated. |
+| Milestone 29 | Proposed. Internationalization, right-to-left layout support, and a reviewed community-translation kit are planned; no non-English locale is currently claimed as supported. |
 
 Status terms are intentionally strict:
 
@@ -54,11 +55,12 @@ later release stage.
 | Roadmap work | Alpha 2 | Alpha 3 | Beta through Stable |
 | --- | --- | --- | --- |
 | Milestone 22 — Product UI and lifecycle | Stabilize the current core journey and produce separate Windows/Linux candidates. | Finish the admitted core feature set and freeze its data, provider, and recovery contracts. | Sign, install, update, migrate, roll back, support, and repeatedly validate the frozen core. |
-| Milestone 26 — Model and hardware adaptation | Gather exact-profile evidence and correct misleading compatibility or default claims. | Bind every admitted recommendation to compatible model, runtime, driver, quantization, and hardware evidence. | Freeze the supported matrix, retest affected cells after changes, and publish bounded performance, energy, and cost guidance. |
+| Milestone 26 — Model and hardware adaptation | Gather exact-profile evidence, define safe RAM-assisted inference, and correct misleading compatibility or default claims. | Bind every admitted recommendation—including CPU/RAM offload—to compatible model, runtime, driver, quantization, context, and hardware evidence. | Freeze the supported matrix, retest affected cells after changes, and publish bounded performance, memory, energy, and cost guidance. |
 | Milestone 27 — Local knowledge and files | Preserve the currently admitted bounded attachments and reject unsupported inputs safely. | Admit only the attachment, history, or retrieval features that meet the Alpha 3 core gate; leave the rest unavailable or Preview. | Prove migration, privacy, retention, cleanup, accessibility, and package parity for anything included in the stable core. |
 | Milestone 23 — Images | Continue independent exact-profile validation; inclusion is optional. | May ship as a clearly labeled Preview only after its own admission gates pass. | Does not block core Stable unless the release explicitly promotes it as supported. |
 | Milestones 24–25 — Audio and video | Research and evidence only. | Remain Research, Candidate, or independently admitted Preview capabilities. | Do not block the core train and do not inherit Stable status from the app. |
 | Milestone 28 — Web research | Validate the owner-approved Wikipedia and bounded multi-source cited-answer paths without expanding model or navigation authority. | May ship only after exact package parity and accessibility gates pass. | Self-hosted providers, automatic multi-query work, and active navigation require independent owner-approved capability gates. |
+| Milestone 29 — Internationalization and community translation | Design stable message catalogs, safe English fallback, and bidirectional-layout foundations without delaying the Alpha 2 core. | Pilot at least one left-to-right and one right-to-left locale through the reviewed contributor workflow. | Publish only locales that pass native-language review, accessibility, package-parity, update, and rollback gates. |
 
 Before work begins on a release stage, its actionable items must be mapped in
 `TODO.md` or a machine-readable release ledger to exactly one outcome: required
@@ -153,6 +155,10 @@ from the overall application version.
 7. Keep Milestone 28 limited to the owner-approved manual fixed-Wikipedia
    query/page slice until exact package, accessibility, citation-synthesis, and
    any broader-provider gates are independently admitted.
+8. Prepare Milestone 29 as a data-only localization system and community
+   contribution workflow. Do not claim a translated locale as supported until
+   its language, layout, accessibility, packaging, update, and rollback
+   evidence is complete.
 
 ### Product and IDE package split
 
@@ -177,6 +183,7 @@ every open parent task has one explicit blocker or work classification.
 - <a href="#milestone-26-hardware-adaptive-model-quantization">Milestone 26 — Hardware-adaptive model quantization</a>
 - <a href="#milestone-27-local-knowledge-context-and-retrieval">Milestone 27 — Local knowledge context and retrieval</a>
 - <a href="#milestone-28-controlled-web-research">Milestone 28 — Controlled web research</a>
+- <a href="#milestone-29-internationalization-and-community-translation">Milestone 29 — Internationalization and community translation</a>
 - <a href="#security-hardening-baseline-implemented">Implemented security baseline</a>
 
 <details>
@@ -371,6 +378,7 @@ admission.
 | Milestone 26: Hardware-Adaptive Model Quantization | Engine evidence expanded | Exact Ollama comparisons passed on Linux NVIDIA and Windows AMD; llama.cpp CUDA and HIP passed their exact profiles. The exact Gemma 3 1B, Phi 4 Mini 3.8B, and Qwen 3.6 27B Q4 artifacts now also pass the current three-task contract and separate 30-minute soaks on Ubuntu 24.04.4 CUDA with Ollama 0.32.13; this exact high-memory review evidence grants no automatic selection or physical 16 GiB claim. The same hash-pinned 11-model portable GGUF corpus passes b10088 execution, full-offload, bounded-exit, and cleanup gates on Windows AMD/HIP and Linux NVIDIA/CUDA, with matching exact-output outcomes. Separate Windows NVIDIA and Windows AMD follow-ons record patch, context, repeated-lifecycle, vision, and direct structured tool-call outcomes without promoting failed quality cells. A 62-check structured tool-transport parser validates exact final Ollama 0.32.5 and normalized OpenAI-compatible candidate shapes while granting no execution, approval, provider, or runtime authority. A bounded manual live run passed four tool-capable installed models and correctly classified one unsupported model; it retained no content and unloaded every tested model. Physical Intel Arc B580 candidate evidence covers Linux llama.cpp SYCL plus Linux and Windows OpenVINO GenAI. A native Windows llama.cpp SYCL cell passed exact artifact preflight but was rejected after zero-free-memory reporting, tensor-load failure, and an OpenCL fallback fast-fail; no engine is promoted. Vulkan failed the patch gate. |
 | Milestone 27: Local Knowledge Context And Retrieval | Bounded attachment slice and offline history/retrieval/parser foundations in progress | Explicit bounded text, structured-text, source-code, and PNG attachments are admitted and pass source/native-package browser smoke on Windows, Linux, and macOS. Retrieval, history, PDF, Office, OpenDocument, folder scanning, embeddings, OCR, persistence, physical macOS clipboard evidence, and complex-document UI remain independently gated. |
 | Milestone 28: Controlled Web Research | In progress; reviewed source runtime admitted | Chat can separately approve exact Wikipedia lookup, one bounded Brave multi-source request with a session-only key and citation-bound local-model answer, or a browser-search fallback. Fixed endpoints, public-address validation, pinned TLS, byte/text budgets, inert citations, memory cleanup, and hostile runtime/API checks pass in source. Model initiation or approval, model tools, credentials in model context, arbitrary URLs, autonomous follow-up, persistence, downloads, signed release status, and full native package/accessibility parity remain unadmitted. |
+| Milestone 29: Internationalization And Community Translation | Proposed | The product needs a locale-independent UI foundation, right-to-left support, and a reviewed data-only translation contribution path. No translated locale, community catalog, runtime loader, or support claim is currently admitted. |
 
 </details>
 
@@ -1319,6 +1327,8 @@ Scope:
 - Prefer an official or otherwise independently trusted pre-quantized artifact when an exact compatible option exists. Local quantization is a fallback, not an automatic first step.
 - Evaluate runtime-specific formats and methods independently, including GGUF quantizations for llama.cpp/Ollama, MLX quantizations for Apple Silicon, and compatible weight-only or reduced-precision formats such as AWQ, GPTQ, FP8, or INT4 only where the selected backend and accelerator explicitly support them.
 - Never infer compatibility from a bit count alone. Quantization method, kernel support, model architecture, expert layout, KV-cache precision, context target, batch size, and CPU/GPU offload can materially change fit and performance.
+- Add an evidence-gated RAM-assisted inference path for models that do not fit entirely in discrete GPU VRAM. Treat this as CPU/RAM offload, not as equivalent pooled VRAM: preserve a tested operating-system memory reserve, avoid paging as a supported steady state, select a bounded GPU-layer split where the runtime permits it, and verify the actual placement rather than inferring it. Evaluate Ollama automatic placement and llama.cpp explicit layer offload independently. Treat Apple Silicon unified memory as a separate profile because its CPU and GPU share one physical memory pool.
+- Present the capability to non-technical users as **Fastest**, **Balanced**, and **Largest available** choices. Disclose when a selection uses system memory, that it may respond substantially more slowly, and the measured context and responsiveness limits. Keep exact layer counts, memory budgets, and runtime controls in an advanced view.
 - Resolve every source model and input artifact to an immutable revision, verify checksums where published, inspect model and dataset licenses, and record whether derivative creation and redistribution are permitted.
 - Keep source weights and generated derivatives outside the replaceable application and repository trees. Never overwrite the source artifact; retain a manifest that records source revision, input hashes, tool versions, parameters, output hashes, format, license, and intended runtime.
 - Require explicit consent before downloading source weights or beginning a potentially long conversion. Disclose expected download size, temporary and final storage, estimated memory, compute time, network use, and cleanup options.
@@ -1334,6 +1344,7 @@ Exit criteria:
 - A dry-run can explain whether the best choice is an existing trusted artifact, a local derivative, or no safe recommendation, without downloading or changing model state.
 - A local quantization plan is reproducible from immutable source identifiers, verified inputs, pinned tools, explicit parameters, and a machine-readable manifest.
 - The workflow refuses unsupported accelerator/runtime/format combinations and detects unexpected CPU fallback or excessive memory pressure.
+- A RAM-assisted recommendation must pass cold load, sustained generation, context growth, cancellation, unload, retry, power, and memory-pressure gates without relying on swap or making the desktop unresponsive. Its evidence records the measured CPU/GPU placement, peak system RAM and VRAM, time to first token, tokens per second, context target, and safe operating-system reserve.
 - The candidate passes resource, functional, quality, tool-use, cleanup, and rollback gates on the exact target profile before it becomes selectable as validated.
 - Machine-specific paths, hardware identifiers, endpoints, calibration content, and model files remain local and are excluded from commits and release packages.
 - The unified UI can disclose the tradeoffs, request approval, show progress and storage use, compare measured results, activate the selected artifact, and restore the previous known-good configuration.
@@ -1387,7 +1398,8 @@ Exit criteria:
    IPEX-LLM is retired;
    LM Studio is optional user-installed API-only software. No source-built or
    portable candidate engine is yet a consumer installation path.
-8. Add conversion, activation, rollback, cleanup, and UI integration only for exact profiles that pass all promotion gates.
+8. Define and validate RAM-assisted profiles separately for Ollama automatic placement, llama.cpp explicit layer offload, and Apple Silicon unified memory. Begin with dry-run capacity planning and a bounded benchmark; do not promote a larger model merely because it loads. Require exact hardware/runtime/OS evidence and retain full-GPU recommendations when hybrid performance or stability is unsuitable.
+9. Add conversion, activation, rollback, cleanup, and UI integration only for exact profiles that pass all promotion gates.
 
 ## Milestone 27: Local Knowledge Context And Retrieval
 
@@ -1646,6 +1658,112 @@ Exit criteria:
 5. Add explicit user-selected page retrieval with SSRF revalidation, strict content limits, inert text extraction, and no page execution. Done in source behind a separate page approval. The engine binds a fresh exact query result, citation, and destination to two-pass public DNS validation, pinned TLS, strict bounded JSON/plain-text extraction, and no redirects, credentials, cookies, proxy inheritance, execution, files, or follow-up. Source/package parity on exact native candidates remains open.
 6. Add cited model synthesis from only the approved result/page set, with exact source accounting and no autonomous follow-up. The offline caller-fixture foundation now validates URL-free source envelopes and claim-level engine-derived citations in 26 hostile/static checks, and the same sanitized source bundle passes on native Windows and Ubuntu Linux. It invokes no model and remains absent from the runtime and package; macOS and native package evidence remain open.
 7. Evaluate a self-hosted adapter and bounded multi-query research independently after the single-query path passes native evidence. Default-deny evaluation contracts now cap the latter at four visible, separately approved queries and prohibit autonomous or page-derived follow-up; no provider is selected or active.
+
+## Milestone 29: Internationalization And Community Translation
+
+Goal: Let people use and help translate Haven 42 in their own language,
+including right-to-left languages, without placing executable code or product
+policy inside translation files.
+
+Current status: Proposed. Haven 42 is currently an English-language product.
+This milestone records the intended architecture and contribution process; it
+does not claim that any translated locale is implemented, reviewed, packaged,
+or supported.
+
+Scope:
+
+- Separate user-interface language, model response language, document
+  language, and model-language qualification. Changing the interface locale
+  must not imply that the selected model is good at that language.
+- Replace user-facing strings embedded in HTML, JavaScript, and server
+  responses with stable message IDs and versioned locale catalogs. English is
+  the complete source catalog and the safe fallback for every missing or
+  invalid message.
+- Use locale-aware formatting for plurals, numbers, dates, times, units,
+  electricity prices, and currencies. Do not build sentences by concatenating
+  translated fragments whose order may differ between languages.
+- Add document-level `lang` and `dir` handling, logical CSS properties,
+  bidirectional isolation for model names, paths, commands, versions, and
+  technical identifiers, and `dir="auto"` only where user or model text may
+  legitimately mix directions. Visual mirroring must not reverse playback,
+  download, code, brand, or other direction-independent symbols.
+- Preserve logical DOM order, keyboard order, focus behavior, screen-reader
+  announcements, zoom, reflow, reduced motion, forced colors, and non-color
+  status cues in both left-to-right and right-to-left layouts.
+- Keep privacy, safety, consent, error, troubleshooting, update, and
+  accessibility language complete. A locale cannot ship with critical notices
+  silently omitted or replaced by a less specific translation.
+
+### Community translation kit
+
+Build a contributor guide and validation kit that lets a translator add a
+locale without editing application logic:
+
+- Provide a copyable locale template and a small manifest containing the BCP
+  47 locale tag, native display name, text direction, catalog schema version,
+  English source revision, and optional contributor attribution. Contributors
+  must not need to disclose personal information publicly.
+- Provide one documented command that creates a locale skeleton, compares it
+  with the current English catalog, validates it, and produces a local preview.
+  The workflow should be usable on Windows, Linux, and macOS.
+- Validate missing, unknown, duplicate, blank, oversized, and malformed
+  messages; placeholder names and plural branches; invalid Unicode; unexpected
+  bidirectional controls; unsafe markup; and any attempt to include scripts,
+  styles, URLs, commands, filesystem paths, or executable content.
+- Include pseudo-locales for text expansion and right-to-left stress testing,
+  screenshot guidance, keyboard and screen-reader review checklists, and a
+  translation-specific pull-request template.
+- Accept community translations as reviewed data-only repository changes at
+  first. Do not add a runtime marketplace or load arbitrary third-party locale
+  files until signed catalogs, compatibility rules, revocation, rollback, and
+  safe-update behavior have their own design and tests.
+- Require a language reviewer for meaning and tone plus a product reviewer for
+  privacy, safety, terminology, placeholders, and UI fit. Machine translation
+  may help produce a draft but cannot be the only review for a supported
+  locale.
+- Keep translation attribution and licensing compatible with the repository's
+  contribution terms, and document how contributors can update or withdraw
+  attribution without removing the translation history.
+
+Exit criteria:
+
+- Every user-facing source string has a stable catalog key, context for
+  translators, and a deterministic English fallback; tests fail when new
+  source strings bypass the catalog.
+- The validator and preview workflow reject malformed or authority-bearing
+  catalogs and report missing work in plain language without executing catalog
+  content.
+- At least one left-to-right pilot locale and one right-to-left pilot locale
+  pass native-language review, truncation and expansion checks, keyboard-only
+  use, screen-reader review, 200% and 400% zoom/reflow, forced colors, and
+  source-versus-package parity on every platform claimed for that locale.
+- Setup, recovery, consent, privacy, diagnostics, accessibility, model
+  selection, downloads, updates, and uninstall remain understandable in each
+  promoted locale.
+- Locale selection persists locally, survives updates, rolls back safely with
+  the application, and never sends language choice or translated content to a
+  network service unless a separately disclosed feature requires it.
+- Contributor documentation explains how to create, preview, validate,
+  submit, review, maintain, and retire a locale without requiring application
+  code changes.
+
+### Recommended Implementation Order
+
+1. Inventory every user-facing string and define the message-catalog schema,
+   stable key policy, context notes, English fallback, and locale persistence.
+2. Add locale-aware formatting and pseudo-localization before translating real
+   languages so layout and string-construction defects appear early.
+3. Convert layout styling to direction-safe logical properties and validate
+   the complete keyboard, focus, announcement, zoom, and forced-colors path in
+   synthetic left-to-right and right-to-left modes.
+4. Build the cross-platform community translation kit, schema validator,
+   preview command, contributor guide, and pull-request checklist.
+5. Pilot one left-to-right and one right-to-left locale with native-language
+   reviewers; treat both as experimental until their exact package matrices
+   pass.
+6. Add locale-aware update and rollback handling, then publish the supported
+   locale matrix and known limitations without extending claims to model
+   language quality.
 
 ## Security hardening baseline (implemented)
 

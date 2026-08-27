@@ -29,23 +29,24 @@
     "25": "research",
     "26": "evidence-expanded",
     "27": "in-progress",
-    "28": "in-progress"
+    "28": "in-progress",
+    "29": "proposed"
   },
   "documents": {
     "ROADMAP.md": {
       "rowPrefix": "Milestone ",
       "firstMilestone": 1,
-      "lastMilestone": 28
+      "lastMilestone": 29
     },
     "docs/solution-architecture-review.md": {
       "rowPrefix": "",
       "firstMilestone": 1,
-      "lastMilestone": 28
+      "lastMilestone": 29
     }
   },
   "roadmapInventory": {
     "firstMilestone": 1,
-    "lastMilestone": 28,
+    "lastMilestone": 29,
     "summaryDocument": "ROADMAP.md",
     "detailDocuments": [
       "ROADMAP.md",
@@ -68,7 +69,8 @@
       "## Milestone 25: Local Video Generation",
       "## Milestone 26: Hardware-Adaptive Model Quantization",
       "## Milestone 27: Local Knowledge Context And Retrieval",
-      "## Milestone 28: Controlled Web Research"
+      "## Milestone 28: Controlled Web Research",
+      "## Milestone 29: Internationalization And Community Translation"
     ],
     "PROJECT.md": [
       "Milestones 1 through 10 and 12 through 21 are complete for their defined scopes.",
