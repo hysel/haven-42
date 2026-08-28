@@ -114,14 +114,18 @@ if os.name == "nt":
         SetupError,
         build_plan,
     )
+    build_resume_plan = build_plan
+    resume_setup_admitted = automatic_setup_admitted
 elif sys.platform.startswith("linux"):
     MANAGED_SETUP_SUPPORTED = True
     from linux_alpha import (  # noqa: F401
         LinuxAlphaError as AlphaPlatformError,
         driver_guidance,
         evaluate_hardware,
+        build_resume_plan,
         load_catalog as load_model_catalog,
         load_registry as load_component_registry,
+        resume_setup_admitted,
         select_model,
     )
     from linux_alpha import build_plan
@@ -165,3 +169,5 @@ else:
         SetupError,
         build_plan,
     )
+    build_resume_plan = build_plan
+    resume_setup_admitted = automatic_setup_admitted

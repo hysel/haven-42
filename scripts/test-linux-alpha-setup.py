@@ -198,6 +198,30 @@ def main() -> None:
         )
         checks += 1
 
+        receipt_coordinator.register_plan(value)
+        with (
+            mock.patch.object(MODULE, "_verify_integrity"),
+            mock.patch.object(MODULE, "_model_record", return_value=True),
+            mock.patch.object(receipt_coordinator.process, "is_running", return_value=True),
+            mock.patch.object(receipt_coordinator, "_start_runtime") as start_runtime,
+            mock.patch.object(MODULE, "_wait_provider") as wait_provider,
+        ):
+            resumed = receipt_coordinator.resume_completed()
+        assert resumed == {
+            "resumed": True,
+            "modelId": value["modelId"],
+            "backendMode": value["backendMode"],
+            "downloadPerformed": False,
+            "installationPerformed": False,
+            "integrityVerified": True,
+            "registeredDigestVerified": True,
+            "publisherVerified": False,
+            "receiptVerified": True,
+        }
+        start_runtime.assert_not_called()
+        wait_provider.assert_not_called()
+        checks += 3
+
         empty = MODULE.SetupCoordinator("c" * 32, state_root=base / "empty")
         assert empty.remove_managed_components()["removed"] is False
         owned = MODULE._owned_root(base / "owned", create=True)

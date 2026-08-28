@@ -91,7 +91,21 @@ def main() -> None:
     committed_cuda = MODULE.select_model(cuda)
     assert committed_cuda["automaticExecutionAllowed"] is True
     assert committed_cuda["selected"]["id"] == "qwen35-4b-q4"
-    checks += 9
+    installed_model = next(
+        item for item in MODULE.load_catalog()["models"]
+        if item["id"] == committed_cuda["selected"]["id"]
+    )
+    low_storage = copy.deepcopy(cuda)
+    low_storage["platform"]["availableStorageGiB"] = 1
+    assert "storage-threshold" in MODULE.evaluate_hardware(low_storage)["blockers"]
+    assert MODULE.select_model(low_storage)["automaticExecutionAllowed"] is False
+    assert MODULE.resume_setup_admitted(installed_model, low_storage) is True
+    resume_plan = MODULE.build_resume_plan(low_storage, installed_model)
+    assert resume_plan["modelId"] == installed_model["id"]
+    assert resume_plan["backendMode"] == "cuda"
+    low_storage["platform"]["systemMemoryGiB"] = 4
+    assert MODULE.resume_setup_admitted(installed_model, low_storage) is False
+    checks += 15
 
     cpu = snapshot(None)
     cpu_evidence = evidence("qwen35-08b-q8", backend="cpu")

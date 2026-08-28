@@ -2589,10 +2589,14 @@ async function retryManagedAlphaSetup(button, progress) {
 }
 
 function validateManagedProviderResume(managed) {
+  const platformTrustVerified = state.platformFamily === "linux"
+    ? managed.managedResume?.registeredDigestVerified === true
+      && managed.managedResume?.publisherVerified === false
+    : managed.managedResume?.publisherVerified === true;
   if (
     managed.managedResume?.receiptVerified !== true
     || managed.managedResume?.integrityVerified !== true
-    || managed.managedResume?.publisherVerified !== true
+    || !platformTrustVerified
     || managed.managedResume?.downloadPerformed !== false
     || managed.managedResume?.installationPerformed !== false
     || managed.trustScope !== "loopback"

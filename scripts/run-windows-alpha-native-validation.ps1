@@ -231,6 +231,8 @@ try {
 
     $managedSetupCompleted = $false
     $managedChatCompleted = $false
+    $managedCapabilitiesCompleted = $false
+    $capabilityResults = @()
     $modelUnloadVerified = $false
     $acceleratorUseVerified = $false
     if ($Mode -eq "NoEffect") {
@@ -286,31 +288,48 @@ try {
         $connected = Invoke-HavenPost `
             -Origin $origin `
             -Token $token `
-            -Path "/api/connect" `
-            -Body @{
-                endpoint = "http://127.0.0.1:11435"
-                timeoutSeconds = 300
-                idleUnloadSeconds = 300
-                authentication = @{ mode = "none"; apiKey = "" }
-            }
+            -Path "/api/alpha/connect-managed-provider" `
+            -Body @{}
         Assert-Condition ($connected.connected -eq $true) "managed-provider-connect-failed"
+        Assert-Condition ($connected.managedResume.receiptVerified -eq $true) "managed-receipt-unverified"
+        Assert-Condition ($connected.managedResume.integrityVerified -eq $true) "managed-integrity-unverified"
+        Assert-Condition ($connected.managedResume.publisherVerified -eq $true) "managed-publisher-unverified"
+        Assert-Condition ($connected.managedResume.downloadPerformed -eq $false) "managed-resume-downloaded"
+        Assert-Condition ($connected.managedResume.installationPerformed -eq $false) "managed-resume-installed"
+        Assert-Condition ($connected.trustScope -eq "loopback") "managed-provider-not-loopback"
 
         $selectedModel = [string]$plan.alphaCandidate.modelSelection.selected.name
-        $chat = Invoke-HavenPost `
-            -Origin $origin `
-            -Token $token `
-            -Path "/api/text" `
-            -Body @{
-                capabilityId = "general.chat"
-                model = $selectedModel
-                messages = @(@{ role = "user"; content = "Reply with only NATIVE_ALPHA_OK." })
-                attachments = @()
-                images = @()
-                contextConsent = $false
+        $capabilities = @(
+            @{ id = "general.chat"; kind = "chat-message"; prompt = "Reply with only NATIVE_ALPHA_OK." },
+            @{ id = "content.write"; kind = "markdown-document"; prompt = "Write exactly one sentence explaining that local AI runs on this computer." },
+            @{ id = "content.summarize"; kind = "markdown-document"; prompt = "Summarize in one sentence: Haven 42 is local-first, keeps its web interface on loopback, and requires approval before managed downloads." }
+        )
+        foreach ($capability in $capabilities) {
+            $reply = Invoke-HavenPost `
+                -Origin $origin `
+                -Token $token `
+                -Path "/api/text" `
+                -Body @{
+                    capabilityId = $capability.id
+                    model = $selectedModel
+                    messages = @(@{ role = "user"; content = $capability.prompt })
+                    attachments = @()
+                    images = @()
+                    contextConsent = $false
+                }
+            Assert-Condition ($reply.kind -eq $capability.kind) ("managed-" + $capability.id + "-kind-invalid")
+            Assert-Condition (-not [string]::IsNullOrWhiteSpace([string]$reply.content)) ("managed-" + $capability.id + "-empty")
+            Assert-Condition ($reply.modelDigestVerified -eq $true) ("managed-" + $capability.id + "-model-digest-unverified")
+            $capabilityResults += [ordered]@{
+                capabilityId = $capability.id
+                status = "passed-nonempty-native-response"
+                modelDigestVerified = $true
             }
-        Assert-Condition ($chat.kind -eq "chat-message") "managed-chat-kind-invalid"
-        Assert-Condition (-not [string]::IsNullOrWhiteSpace([string]$chat.content)) "managed-chat-empty"
-        $managedChatCompleted = $true
+            if ($capability.id -eq "general.chat") {
+                $managedChatCompleted = $true
+            }
+        }
+        $managedCapabilitiesCompleted = $capabilityResults.Count -eq 3
 
         $resourceAfterChat = Invoke-HavenGet -Origin $origin -Path "/api/alpha/resources"
         Assert-Condition ($resourceAfterChat.sessionTokens.requestCount -ge 1) "managed-token-count-missing"
@@ -394,6 +413,8 @@ try {
         stateWritten = $Mode -eq "Managed"
         managedSetupCompleted = $managedSetupCompleted
         managedChatCompleted = $managedChatCompleted
+        managedCapabilitiesCompleted = $managedCapabilitiesCompleted
+        capabilityResults = $capabilityResults
         acceleratorUseVerified = $acceleratorUseVerified
         modelUnloadVerified = $modelUnloadVerified
         managedPortClosed = $managedPortClosed

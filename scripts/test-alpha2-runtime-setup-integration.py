@@ -90,6 +90,7 @@ def main() -> None:
         WEB.driver_guidance = lambda _snapshot: []
         WEB.load_model_catalog = lambda: {"models": [{
             "id": "qwen35-4b-q4", "name": "qwen3.5:4b",
+            "manifestDigest": "a" * 64,
             "minimumSystemMemoryGiB": 8,
             "minimumUsableGpuMemoryGiB": 4,
         }]}
@@ -101,6 +102,7 @@ def main() -> None:
             "effects": ["network-download"],
             "backendMode": "cuda",
         }
+        WEB.build_resume_plan = WEB.build_windows_alpha_plan
 
         plan = state.setup_plan("snapshot-1", "guided-setup")
         candidate = plan["alphaCandidate"]
@@ -162,20 +164,25 @@ def main() -> None:
             "componentIds": [component_id],
             "modelId": "qwen35-4b-q4",
         }
-        original_automatic = WEB.automatic_setup_admitted
+        original_resume_admitted = WEB.resume_setup_admitted
         original_binding = WEB.bind_managed_model_decisions
-        WEB.automatic_setup_admitted = lambda _selected, _snapshot: True
+        WEB.resume_setup_admitted = lambda _selected, _snapshot: True
         WEB.bind_managed_model_decisions = lambda *_args: None
         state.connect = lambda *_args: {"models": ["qwen3.5:4b"]}
         try:
             resumed = state.resume_managed_provider()
         finally:
-            WEB.automatic_setup_admitted = original_automatic
+            WEB.resume_setup_admitted = original_resume_admitted
             WEB.bind_managed_model_decisions = original_binding
         assert resumed["managedResume"]["resumed"] is True
         assert setup.resumed == 1
         assert state.alpha_runtime_binding["selectedRuntimeVersion"] == "0.32.14"
         assert state.alpha_runtime_plan_id == "alpha2-plan-1"
+        assert state.managed_model_selection == {
+            "id": "qwen35-4b-q4",
+            "name": "qwen3.5:4b",
+            "manifestDigest": "a" * 64,
+        }
 
     print("Alpha 2 runtime/setup integration passed 26 fail-closed checks.")
 
