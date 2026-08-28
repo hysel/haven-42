@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-native-package-validation-result",
+  "release": "0.4.0-alpha.2",
+  "candidateSourceCommit": "9cd1c7dad92040429493576a7c882388ed6fc4f3",
+  "validationDate": "2026-08-28",
+  "artifacts": {
+    "linuxArchive": {
+      "name": "haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz",
+      "sha256": "e5d078ddd32418c98c7b0b9e958ca4a4fc6ed78708e3468ac94dcdf15dbdc5b6",
+      "sizeBytes": 25366223,
+      "packagedExecutableSha256": "4d4295c2665a5428ed5281217c260c6e2d39b62fa1dc6523fa9f66fc152a897f"
+    },
+    "windowsArchive": {
+      "name": "haven42-0.4.0-alpha.2-windows-x64-unsigned.zip",
+      "sha256": "89b9098c309abd1237f494ffe192bd99adc8e126bc9d1b9dddbd71150ff028a3",
+      "sizeBytes": 9968189
+    }
+  },
+  "primaryCells": [
+    {
+      "id": "windows-11-x64-nvidia",
+      "operatingSystem": "Windows 11 build 26200.8973",
+      "accelerator": "NVIDIA Quadro RTX 5000 16 GiB",
+      "driverVersion": "582.70",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "passed",
+      "selectedModel": "qwen35-9b-q4",
+      "backendMode": "cuda",
+      "managedSetupExecution": "not-run",
+      "capabilityValidation": "not-run",
+      "unloadValidation": "not-run",
+      "sanitizedResultSha256": "21d5f9cc6ea566ec07ce0b32a0b833d427e58c68211033ff53f0f5240479040f"
+    },
+    {
+      "id": "ubuntu-26.04-x64-nvidia",
+      "operatingSystem": "Ubuntu 26.04",
+      "accelerator": "NVIDIA Quadro RTX 5000 16 GiB",
+      "driverVersion": "595.84",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "passed",
+      "selectedModel": "qwen3.5:2b",
+      "selectedModelDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+      "backendMode": "cuda",
+      "managedSetupExecution": "not-run",
+      "capabilityValidation": "not-run",
+      "unloadValidation": "not-run",
+      "sanitizedResultSha256": "3101db4ba141e1beb007ce5b907173d78b3d1af663366a0cf1f60d051f3a3b88"
+    },
+    {
+      "id": "bazzite-44-x64-nvidia",
+      "operatingSystem": "Bazzite 44.20260801.0",
+      "accelerator": "NVIDIA Quadro RTX 5000 16 GiB",
+      "driverVersion": "610.43.03",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "passed",
+      "selectedModel": "qwen3.5:2b",
+      "selectedModelDigest": "324d162be6ca5629ae4517c8710434d0bd2d665bc94dbad46e9af8fbf8a2f0df",
+      "backendMode": "cuda",
+      "managedSetupExecution": "not-run",
+      "capabilityValidation": "not-run",
+      "unloadValidation": "not-run",
+      "sanitizedResultSha256": "3101db4ba141e1beb007ce5b907173d78b3d1af663366a0cf1f60d051f3a3b88"
+    }
+  ],
+  "compatibilityCells": [
+    {
+      "id": "ubuntu-24.04-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    },
+    {
+      "id": "debian-13-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    },
+    {
+      "id": "linux-mint-22.3-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    },
+    {
+      "id": "pop-os-24.04-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    },
+    {
+      "id": "fedora-44-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    },
+    {
+      "id": "cachyos-rolling-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    },
+    {
+      "id": "arch-rolling-x64",
+      "packageLifecycle": "passed",
+      "noEffectReadiness": "passed",
+      "managedSetupPlan": "unavailable-for-profile",
+      "sanitizedResultSha256": "b6191d66d5abf9628883da18fc803699e4e0add30d2f4b450e3344ce17618c0d"
+    }
+  ],
+  "summary": {
+    "nativeCellsCollected": 10,
+    "packageLifecyclePassed": 10,
+    "noEffectReadinessPassed": 10,
+    "primaryManagedPlansPassed": 3,
+    "managedSetupExecutionsPassed": 0,
+    "nativeCapabilityCellsPassed": 0,
+    "nativePackageValidationComplete": false,
+    "readyForOwnerReview": false,
+    "publicationAuthorized": false,
+    "productionReady": false
+  },
+  "openGates": [
+    "managed setup, native Chat, Writing, and Summarization on each primary cell",
+    "accelerator residency and model unload on each primary cell",
+    "manual accessibility validation",
+    "exact-candidate security and privacy review",
+    "release documentation and owner publication approval"
+  ],
+  "privacy": {
+    "containsPrivateAddresses": false,
+    "containsHostNames": false,
+    "containsUserNames": false,
+    "containsLocalPaths": false,
+    "containsPromptsOrResponses": false,
+    "containsCredentialsOrTokens": false
+  }
+}
