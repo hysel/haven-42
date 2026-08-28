@@ -120,7 +120,9 @@ def main() -> int:
         "planId": "plan-1", "components": ["ollama-windows-core"],
         "backendMode": "cpu",
     }
+    WEB.build_resume_plan = WEB.build_windows_alpha_plan
     WEB.automatic_setup_admitted = lambda _selected, _snapshot: True
+    WEB.resume_setup_admitted = lambda _selected, _snapshot: True
     WEB.resolve_alpha2_runtime = lambda *_args, **_kwargs: {"decision": "install"}
     WEB.validate_managed_setup_binding = lambda *_args, **_kwargs: None
     WEB.load_alpha_component_registry = lambda: {}
@@ -206,6 +208,9 @@ def main() -> int:
     assert 'showWizardStep(state.readinessSnapshot ? "readiness" : "welcome")' in app
     assert 'byId("wizard-readiness-next").disabled = true' in app
     assert "receiptVerified !== true" in app
+    assert 'state.platformFamily === "linux"' in app
+    assert "registeredDigestVerified === true" in app
+    assert "publisherVerified === false" in app
     setup_progress_renderer = app[app.index("function validAlphaSetupProgress"):app.index("async function runManagedAlphaSetup")]
     assert ".innerHTML" not in setup_progress_renderer
     assert ".innerHTML" not in setup_renderer

@@ -724,13 +724,24 @@ class SetupCoordinator:
         runtime = root / "runtime" / version
         _verify_integrity(root, version, runtime)
         self.cancel_event.clear()
-        self._start_runtime(root, runtime, plan["backendMode"])
-        _wait_provider(version, self.process, self.cancel_event)
+        if not self.process.is_running():
+            self._start_runtime(root, runtime, plan["backendMode"])
+            _wait_provider(version, self.process, self.cancel_event)
         model = next(item for item in load_catalog()["models"] if item["id"] == plan["modelId"])
         if not _model_record(model):
             self.process.stop()
             raise SetupError("managed-model-not-present")
-        return {"resumed": True, "modelId": model["id"], "backendMode": plan["backendMode"]}
+        return {
+            "resumed": True,
+            "modelId": model["id"],
+            "backendMode": plan["backendMode"],
+            "downloadPerformed": False,
+            "installationPerformed": False,
+            "integrityVerified": True,
+            "registeredDigestVerified": True,
+            "publisherVerified": False,
+            "receiptVerified": True,
+        }
 
     def _start_runtime(self, root: Path, runtime: Path, backend: str) -> None:
         for directory in (root / "home", root / "models", root / "temp"):

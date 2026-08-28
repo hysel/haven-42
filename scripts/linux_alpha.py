@@ -352,6 +352,64 @@ def select_model(
     }
 
 
+def resume_setup_admitted(selected_model: dict[str, Any], snapshot: dict[str, Any]) -> bool:
+    """Revalidate an installed exact model without requiring install headroom again."""
+    hardware = evaluate_hardware(snapshot)
+    if set(hardware["blockers"]) - {"storage-threshold"}:
+        return False
+    catalog = load_catalog()
+    registered = next((item for item in catalog["models"] if item == selected_model), None)
+    if registered is None:
+        return False
+    profile = {
+        "platformFamily": "linux",
+        "operatingSystemId": hardware["operatingSystemId"],
+        "architecture": "x64",
+        "backendMode": hardware["managedBackendCandidate"],
+        "systemMemoryGiB": hardware["systemMemoryGiB"],
+        "usableGpuMemoryGiB": hardware["maximumUsableGpuMemoryGiB"],
+        "storageAdmittedModelIds": [registered["id"]],
+        "requestedCapabilities": ["general.chat", "content.write", "content.summarize"],
+        "provider": "ollama",
+        "providerVersion": "0.32.5",
+    }
+    try:
+        decision = SELECTOR.select_model(profile, load_evidence())
+    except SELECTOR.SelectionError:
+        return False
+    return (
+        decision.get("automaticExecutionAllowed") is True
+        and decision.get("selectedModelId") == registered["id"]
+    )
+
+
+def build_resume_plan(snapshot: dict[str, Any], selected_model: dict[str, Any]) -> dict[str, Any]:
+    """Reconstruct the exact receipt-bound plan without download storage admission."""
+    if not resume_setup_admitted(selected_model, snapshot):
+        raise LinuxAlphaError("linux-model-not-automatically-admitted")
+    backend = setup_backend(snapshot)
+    core = load_registry()["components"][0]
+    return {
+        "schemaVersion": 1,
+        "kind": "linux-alpha-setup-plan",
+        "planId": secrets.token_urlsafe(24),
+        "version": "0.4.0-alpha.2",
+        "components": backend["components"],
+        "modelId": selected_model["id"],
+        "backendMode": backend["backendMode"],
+        "gpuAccelerationRequired": backend["backendMode"] != "cpu",
+        "requiredStorageBytes": _required_storage_bytes(selected_model, core),
+        "effects": [
+            "network-download", "portable-folder-files", "owned-process",
+            "local-model-validation",
+        ],
+        "forbiddenEffects": load_contract()["forbiddenEffects"],
+        "approvalRequired": True,
+        "rememberApprovalAllowed": False,
+        "driverAutomationAllowed": False,
+    }
+
+
 def build_plan(snapshot: dict[str, Any], selected_model: dict[str, Any]) -> dict[str, Any]:
     decision = select_model(snapshot)
     catalog = load_catalog()

@@ -108,6 +108,15 @@ def main() -> int:
     assert 'if result["managedSetupApplied"]:' in linux_source
     assert 'request_json(origin, "/api/unload"' in linux_source
     assert 'origin, "/api/shutdown", token=token' in linux_source
+    assert '"/api/alpha/connect-managed-provider"' in linux_source
+    assert 'managed_resume.get("receiptVerified") is True' in linux_source
+    assert 'managed_resume.get("integrityVerified") is True' in linux_source
+    assert 'managed_resume.get("registeredDigestVerified") is True' in linux_source
+    assert 'managed_resume.get("publisherVerified") is False' in linux_source
+    assert 'reply.get("modelDigestVerified") is True' in linux_source
+    assert '"general.chat": "chat-message"' in linux_source
+    assert '"content.write": "markdown-document"' in linux_source
+    assert '"content.summarize": "markdown-document"' in linux_source
     assert all(token not in linux_source for token in (
         "shell=True", "sudo ", "systemctl", "firewall-cmd", "ufw ",
     ))
@@ -117,7 +126,16 @@ def main() -> int:
     assert '[string]$ExpectedVersion = "0.4.0-alpha.1"' in windows_source
     assert '$bootstrap.version -eq $ExpectedVersion' in windows_source
     assert '$bootstrap.version -eq "0.4.0-alpha.1"' not in windows_source
-    print("Alpha 2 native package evidence passed 63 fail-closed checks.")
+    assert 'Path "/api/alpha/connect-managed-provider"' in windows_source
+    assert '$connected.managedResume.receiptVerified -eq $true' in windows_source
+    assert '$connected.managedResume.integrityVerified -eq $true' in windows_source
+    assert '$connected.managedResume.publisherVerified -eq $true' in windows_source
+    assert '$reply.modelDigestVerified -eq $true' in windows_source
+    assert 'id = "general.chat"; kind = "chat-message"' in windows_source
+    assert 'id = "content.write"; kind = "markdown-document"' in windows_source
+    assert 'id = "content.summarize"; kind = "markdown-document"' in windows_source
+    assert 'managedCapabilitiesCompleted = $managedCapabilitiesCompleted' in windows_source
+    print("Alpha 2 native package evidence passed 80 fail-closed checks.")
     return 0
 
 

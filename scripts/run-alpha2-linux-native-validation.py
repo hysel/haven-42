@@ -236,23 +236,31 @@ def main() -> int:
 
             connected = request_json(
                 origin,
-                "/api/connect",
+                "/api/alpha/connect-managed-provider",
                 token=token,
-                body={
-                    "endpoint": "http://127.0.0.1:11435",
-                    "timeoutSeconds": 300,
-                    "idleUnloadSeconds": 300,
-                    "authentication": {"mode": "none", "apiKey": ""},
-                },
+                body={},
                 timeout=330,
             )
             require(connected.get("connected") is True, "managed-provider-connect-failed")
+            managed_resume = connected.get("managedResume", {})
+            require(managed_resume.get("receiptVerified") is True, "managed-receipt-unverified")
+            require(managed_resume.get("integrityVerified") is True, "managed-integrity-unverified")
+            require(managed_resume.get("registeredDigestVerified") is True, "managed-registered-digest-unverified")
+            require(managed_resume.get("publisherVerified") is False, "managed-linux-publisher-overclaimed")
+            require(managed_resume.get("downloadPerformed") is False, "managed-resume-downloaded")
+            require(managed_resume.get("installationPerformed") is False, "managed-resume-installed")
+            require(connected.get("trustScope") == "loopback", "managed-provider-not-loopback")
             result["managedProviderConnected"] = True
 
             prompts = {
                 "general.chat": "Reply with only NATIVE_ALPHA_OK.",
                 "content.write": "Write exactly one sentence explaining that local AI runs on this computer.",
                 "content.summarize": "Summarize in one sentence: Haven 42 is local-first, keeps its web interface on loopback, and requires approval before managed downloads.",
+            }
+            expected_kinds = {
+                "general.chat": "chat-message",
+                "content.write": "markdown-document",
+                "content.summarize": "markdown-document",
             }
             for capability_id, prompt in prompts.items():
                 reply = request_json(
@@ -269,8 +277,9 @@ def main() -> int:
                     },
                     timeout=600,
                 )
-                require(reply.get("kind") == "chat-message", f"{capability_id}-kind-invalid")
+                require(reply.get("kind") == expected_kinds[capability_id], f"{capability_id}-kind-invalid")
                 require(isinstance(reply.get("content"), str) and reply["content"].strip(), f"{capability_id}-empty")
+                require(reply.get("modelDigestVerified") is True, f"{capability_id}-model-digest-unverified")
                 result["capabilityResults"].append({
                     "capabilityId": capability_id,
                     "status": "passed-nonempty-native-response",

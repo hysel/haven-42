@@ -83,11 +83,13 @@ from alpha_platform import (  # noqa: E402
     SetupError,
     automatic_setup_admitted,
     build_plan as build_alpha_plan,
+    build_resume_plan,
     driver_guidance,
     evaluate_hardware,
     load_component_registry as load_alpha_component_registry,
     load_model_catalog,
     require_platform_operation,
+    resume_setup_admitted,
     select_model,
     validate_provider_metrics,
 )
@@ -986,6 +988,7 @@ def bind_managed_model_decisions(
         recommendations[capability_id] = {
             "status": "validated",
             "model": model,
+            "digest": expected_digest,
             "evidenceId": evidence_id,
             "digestVerified": True,
             "hardwareFit": "validated-on-this-device",
@@ -999,6 +1002,24 @@ def bind_managed_model_decisions(
         "hardwareFitMeasured": True,
     })
     return connected
+
+
+def managed_model_is_evidenced(
+    base_url: str | None,
+    selection: dict[str, Any] | None,
+    model: str,
+    digest: str,
+) -> bool:
+    """Bind managed authority only to the active managed endpoint and exact digest."""
+    return bool(
+        base_url == MANAGED_OLLAMA_URL
+        and isinstance(selection, dict)
+        and selection.get("name") == model
+        and MODEL_DIGEST.fullmatch(digest)
+        and isinstance(selection.get("manifestDigest"), str)
+        and MODEL_DIGEST.fullmatch(selection["manifestDigest"])
+        and secrets.compare_digest(selection["manifestDigest"], digest)
+    )
 
 
 def load_read_only_workflows(path: Path = WORKFLOW_REGISTRY_PATH) -> dict[str, dict[str, Any]]:
@@ -1169,6 +1190,7 @@ class HavenState:
         self.idle_unload_seconds = 300
         self.models: tuple[str, ...] = ()
         self.model_digests: dict[str, str] = {}
+        self.managed_model_selection: dict[str, Any] | None = None
         self.ollama_version: str | None = None
         self.used_models: set[tuple[str, str, int, ProviderAuthentication]] = set()
         self.active_model: tuple[str, str, int, ProviderAuthentication] | None = None
@@ -2721,6 +2743,7 @@ class HavenState:
                 self.idle_unload_seconds = idle_unload_seconds
                 self.models = tuple(models)
                 self.model_digests = model_digests
+                self.managed_model_selection = None
                 self.ollama_version = str(version.get("version", "unknown"))[:64]
                 self.discovered_model_candidates.clear()
                 self.pending_model_install_approvals.clear()
@@ -2872,6 +2895,14 @@ class HavenState:
             "hardwareFitMeasured": False,
             "unknownModelsGainAuthority": False,
         }
+        with self.lock:
+            managed_selection = (
+                dict(self.managed_model_selection)
+                if self.managed_model_selection is not None
+                else None
+            )
+        if base_url == MANAGED_OLLAMA_URL and managed_selection is not None:
+            bind_managed_model_decisions(result, managed_selection, model_digests)
         self.diagnostics.record("provider", "PROVIDER_SESSION_RESUMED", "completed")
         return result
 
@@ -3033,6 +3064,11 @@ class HavenState:
             authentication = self.authentication
             allowed_models = self.models
             model_digests = dict(self.model_digests)
+            managed_model_selection = (
+                dict(self.managed_model_selection)
+                if self.managed_model_selection is not None
+                else None
+            )
             runtime_version = self.ollama_version
         if base_url is None:
             raise WebRequestError("ollama-not-connected", HTTPStatus.CONFLICT)
@@ -3281,12 +3317,14 @@ class HavenState:
         finally:
             self._finish_text_request(effective_request_id)
         artifact_kind = "chat-message" if capability_id == "general.chat" else "markdown-document"
-        model_is_evidenced = any(
+        model_is_evidenced = managed_model_is_evidenced(
+            base_url,
+            managed_model_selection,
+            model,
+            model_digests.get(model, ""),
+        ) or any(
             record["model"] == model
-            and secrets.compare_digest(
-                record.get("digest", ""),
-                model_digests.get(model, ""),
-            )
+            and secrets.compare_digest(record.get("digest", ""), model_digests.get(model, ""))
             for record in self.model_recommendations.get(capability_id, ())
         )
         def bounded_provider_integer(name: str) -> int | None:
@@ -3493,7 +3531,7 @@ class HavenState:
             non_storage_blockers = set(assessment["blockers"]) - {"storage-threshold"}
             if (
                 non_storage_blockers
-                or not automatic_setup_admitted(selected, snapshot)
+                or not resume_setup_admitted(selected, snapshot)
                 or assessment["systemMemoryGiB"] is None
                 or assessment["systemMemoryGiB"] < selected["minimumSystemMemoryGiB"]
                 or (
@@ -3506,7 +3544,7 @@ class HavenState:
                 )
             ):
                 raise SetupError("managed-setup-not-admitted-for-device")
-            plan = build_windows_alpha_plan(snapshot, selected)
+            plan = build_resume_plan(snapshot, selected)
             if plan["components"] != identity["componentIds"]:
                 raise SetupError("managed-backend-changed")
             if APP_VERSION == ALPHA_2_VERSION:
@@ -3544,6 +3582,12 @@ class HavenState:
             with self.lock:
                 installed_digests = dict(self.model_digests)
             bind_managed_model_decisions(connected, selected, installed_digests)
+            with self.lock:
+                self.managed_model_selection = {
+                    "id": selected["id"],
+                    "name": selected["name"],
+                    "manifestDigest": selected["manifestDigest"],
+                }
         except WebRequestError:
             self.alpha_setup.close()
             with self.lock:
@@ -3553,6 +3597,7 @@ class HavenState:
                     self.authentication = NO_PROVIDER_AUTHENTICATION
                     self.models = ()
                     self.model_digests = {}
+                    self.managed_model_selection = None
                     self.ollama_version = None
                     self.active_model = None
                     self.used_models.clear()
@@ -3583,6 +3628,7 @@ class HavenState:
                     self.authentication = NO_PROVIDER_AUTHENTICATION
                     self.models = ()
                     self.model_digests = {}
+                    self.managed_model_selection = None
                     self.ollama_version = None
                     self.active_model = None
                     self.used_models.clear()

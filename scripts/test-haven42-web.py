@@ -1684,6 +1684,7 @@ def main() -> int:
             decision == {
                 "status": "validated",
                 "model": "qwen3.5:0.8b",
+                "digest": "a" * 64,
                 "evidenceId": "windows-alpha-qwen35-08b-q8-managed-self-test",
                 "digestVerified": True,
                 "hardwareFit": "validated-on-this-device",
@@ -1693,6 +1694,24 @@ def main() -> int:
         )
         assert set(managed_connection["modelOptions"][0]["capabilityStatus"].values()) == {"validated"}
         assert managed_connection["evidenceBoundary"]["hardwareFitMeasured"] is True
+        assert WEB.managed_model_is_evidenced(
+            WEB.MANAGED_OLLAMA_URL,
+            {"name": "qwen3.5:0.8b", "manifestDigest": "a" * 64},
+            "qwen3.5:0.8b",
+            "a" * 64,
+        ) is True
+        assert WEB.managed_model_is_evidenced(
+            "http://127.0.0.1:11434",
+            {"name": "qwen3.5:0.8b", "manifestDigest": "a" * 64},
+            "qwen3.5:0.8b",
+            "a" * 64,
+        ) is False
+        assert WEB.managed_model_is_evidenced(
+            WEB.MANAGED_OLLAMA_URL,
+            {"name": "qwen3.5:0.8b", "manifestDigest": 1},
+            "qwen3.5:0.8b",
+            "a" * 64,
+        ) is False
         try:
             WEB.bind_managed_model_decisions(
                 managed_connection,
