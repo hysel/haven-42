@@ -2558,6 +2558,7 @@ test_local_web_mvp() {
   python3 "$REPO_ROOT/scripts/test-linux-runtime-supply-chain.py" || return 1
   python3 "$REPO_ROOT/scripts/test-alpha-release.py" || return 1
   python3 "$REPO_ROOT/scripts/test-alpha2-release-contract.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-alpha2-native-package-validation.py" || return 1
   python3 "$REPO_ROOT/scripts/test-novice-experience.py" || return 1
   python3 "$REPO_ROOT/scripts/test-windows-alpha-stage-ledger.py" || return 1
   python3 "$REPO_ROOT/scripts/test-windows-alpha-candidate.py" || return 1

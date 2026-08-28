@@ -14,7 +14,10 @@ param(
     [string]$ExpectedModelId = "",
 
     [ValidateSet("", "cpu", "cuda", "rocm", "vulkan")]
-    [string]$ExpectedBackendMode = ""
+    [string]$ExpectedBackendMode = "",
+
+    [ValidateSet("0.4.0-alpha.1", "0.4.0-alpha.2")]
+    [string]$ExpectedVersion = "0.4.0-alpha.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -159,7 +162,7 @@ try {
 
     $bootstrap = Invoke-HavenGet -Origin $origin -Path "/api/bootstrap"
     $token = [string]$bootstrap.sessionToken
-    Assert-Condition ($bootstrap.version -eq "0.4.0-alpha.1") "wrong-alpha-version"
+    Assert-Condition ($bootstrap.version -eq $ExpectedVersion) "wrong-alpha-version"
     Assert-Condition ($bootstrap.runtime.bindScope -eq "loopback-only") "non-loopback-bind"
     Assert-Condition ($bootstrap.alpha.chatOnly -eq $false) "chat-only-policy-still-enabled"
     Assert-Condition ($bootstrap.alpha.textOnly -eq $true) "text-only-policy-missing"

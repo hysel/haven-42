@@ -159,6 +159,8 @@
       "id": "native-package-validation",
       "status": "candidate-required",
       "evidence": [
+        "config/alpha-2-native-package-validation-result.json",
+        "scripts/run-alpha2-linux-native-validation.py",
         "docs/alpha-2-task-list.md",
         "docs/alpha-2-linux-long-term-validation.md"
       ]
