@@ -16,6 +16,7 @@ import re
 import secrets
 import shutil
 import signal
+import ssl
 import stat
 import subprocess
 import sys
@@ -44,6 +45,13 @@ APPROVAL_TTL_SECONDS = 15 * 60
 DOWNLOAD_CHUNK_BYTES = 1024 * 1024
 MAX_REDIRECTS = 3
 MAX_PROVIDER_RESPONSE_BYTES = 4 * 1024 * 1024
+MAX_SYSTEM_CA_BUNDLE_BYTES = 16 * 1024 * 1024
+SYSTEM_CA_BUNDLE_CANDIDATES = (
+    Path("/etc/ssl/certs/ca-certificates.crt"),
+    Path("/etc/pki/tls/certs/ca-bundle.crt"),
+    Path("/etc/pki/ca-trust/extracted/pem/tls-ca-bundle.pem"),
+    Path("/etc/ssl/cert.pem"),
+)
 MAX_RUNTIME_FILES = 8192
 MAX_MANAGED_TREE_ENTRIES = 32768
 MODEL_PULL_SOCKET_TIMEOUT_SECONDS = 120
@@ -305,6 +313,35 @@ class _Redirects(urllib.request.HTTPRedirectHandler):
         return super().redirect_request(request, fp, code, msg, headers, new_url)
 
 
+def _validated_system_ca_bundle() -> Path:
+    """Return one trusted, distribution-provided CA bundle or fail closed."""
+    for candidate in SYSTEM_CA_BUNDLE_CANDIDATES:
+        try:
+            resolved = candidate.resolve(strict=True)
+            details = resolved.stat()
+        except OSError:
+            continue
+        if (
+            not resolved.is_absolute()
+            or not resolved.is_file()
+            or resolved.is_symlink()
+            or not 1024 <= details.st_size <= MAX_SYSTEM_CA_BUNDLE_BYTES
+            or details.st_mode & 0o022
+            or (hasattr(details, "st_uid") and details.st_uid != 0)
+        ):
+            continue
+        return resolved
+    raise SetupError("system-ca-bundle-unavailable")
+
+
+def _download_ssl_context() -> ssl.SSLContext:
+    """Use populated platform trust, with a verified Linux bundle fallback."""
+    context = ssl.create_default_context()
+    if context.cert_store_stats().get("x509_ca", 0) > 0:
+        return context
+    return ssl.create_default_context(cafile=str(_validated_system_ca_bundle()))
+
+
 def _download(component: dict[str, Any], destination: Path, cancel: threading.Event, progress: Callable[[int, int], None]) -> None:
     if component not in load_registry()["components"] or component.get("managedInstallationAllowed") is not True:
         raise SetupError("unregistered-component")
@@ -318,7 +355,10 @@ def _download(component: dict[str, Any], destination: Path, cancel: threading.Ev
     digest = hashlib.sha256()
     written = 0
     try:
-        with urllib.request.build_opener(_Redirects()).open(request, timeout=30) as response, destination.open("xb") as output:
+        opener = urllib.request.build_opener(
+            _Redirects(), urllib.request.HTTPSHandler(context=_download_ssl_context()),
+        )
+        with opener.open(request, timeout=30) as response, destination.open("xb") as output:
             while True:
                 if cancel.is_set():
                     raise SetupError("setup-cancelled")
@@ -331,9 +371,12 @@ def _download(component: dict[str, Any], destination: Path, cancel: threading.Ev
                 digest.update(block)
                 output.write(block)
                 progress(written, component["byteLength"])
-    except Exception:
+    except SetupError:
         destination.unlink(missing_ok=True)
         raise
+    except (OSError, ssl.SSLError, urllib.error.URLError) as error:
+        destination.unlink(missing_ok=True)
+        raise SetupError("managed-runtime-download-failed") from error
     if written != component["byteLength"] or digest.hexdigest() != component["sha256"]:
         destination.unlink(missing_ok=True)
         raise SetupError("component-integrity-mismatch")
