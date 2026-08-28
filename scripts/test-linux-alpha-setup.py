@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 from pathlib import Path
+import ssl
 import tempfile
 import urllib.request
 from unittest import mock
@@ -101,6 +102,34 @@ def main() -> None:
         "unsafe-download-redirect",
     )
     checks += 3
+
+    populated_context = mock.Mock(spec=ssl.SSLContext)
+    populated_context.cert_store_stats.return_value = {"x509_ca": 120}
+    with mock.patch.object(
+        MODULE.ssl, "create_default_context", return_value=populated_context,
+    ) as create_context:
+        assert MODULE._download_ssl_context() is populated_context
+    create_context.assert_called_once_with()
+    checks += 1
+
+    empty_context = mock.Mock(spec=ssl.SSLContext)
+    empty_context.cert_store_stats.return_value = {"x509_ca": 0}
+    fallback_context = mock.Mock(spec=ssl.SSLContext)
+    trusted_bundle = Path("/trusted/system-ca-bundle.pem")
+    with (
+        mock.patch.object(
+            MODULE.ssl, "create_default_context",
+            side_effect=(empty_context, fallback_context),
+        ) as create_context,
+        mock.patch.object(
+            MODULE, "_validated_system_ca_bundle", return_value=trusted_bundle,
+        ),
+    ):
+        assert MODULE._download_ssl_context() is fallback_context
+    assert create_context.call_args_list == [
+        mock.call(), mock.call(cafile=str(trusted_bundle)),
+    ]
+    checks += 1
 
     with tempfile.TemporaryDirectory() as directory:
         # macOS exposes /var through /private/var. Resolve the temporary root
