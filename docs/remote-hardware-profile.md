@@ -175,6 +175,25 @@ If the script appears stuck or reports that the SSH pipe was closed:
 - Use `-TimeoutSeconds 30` or `--timeout-seconds 30` while testing.
 - Prefer key-based SSH. Non-interactive mode requires a key that works without a password prompt. For password SSH, use `-AllowInteractiveSsh` or `--allow-interactive-ssh`; it uses `scp` copy-and-run mode so the password prompt can use the console. This mode temporarily copies the profiler to the remote host instead of streaming it through SSH stdin.
 
+If the server records repeated pre-authentication resets even though the same key
+worked previously, check the client-side SSH agent before changing the server:
+
+1. Run `ssh-add -l` on the client and confirm the intended key is available.
+2. Retry with the intended identity and `IdentitiesOnly=yes` so unrelated keys are
+   not offered.
+3. Do **not** set `IdentityAgent=none` when the usable private key is held by the SSH
+   agent. That option can leave the client able to offer the public key but unable to
+   complete the signature, which looks like a server-side pre-authentication reset.
+4. If needed, compare `ssh -G your-user@your-linux-host` between the working manual
+   command and the automation command. Check identity-agent, identity-file,
+   identities-only, host-key, and key-exchange settings before editing `sshd_config`.
+
+An SSH client/version mismatch was not the cause of this observed failure. Restore a
+known-working client identity path first; do not reinstall the server, replace host
+keys, weaken authentication, or enable password login merely to work around a missing
+client signature. Keep host addresses, account names, key names, fingerprints, and
+server log excerpts out of committed qualification evidence.
+
 If SSH works but the profile has no GPU VRAM:
 
 - Confirm the remote host can run `nvidia-smi` or `rocm-smi` directly.

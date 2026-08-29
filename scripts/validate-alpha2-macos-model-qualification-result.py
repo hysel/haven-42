@@ -65,8 +65,20 @@ def validate_no_private_content(result: dict[str, Any]) -> None:
                 raise ResultError("private-address-present")
 
 
-def validate_result(result: dict[str, Any], plan: dict[str, Any], runner: Any) -> None:
+def validate_result(
+    result: dict[str, Any],
+    plan: dict[str, Any],
+    runner: Any,
+    model_ids: list[str] | None = None,
+) -> None:
     candidates = runner.validate_plan(plan, ROOT)
+    if model_ids is not None:
+        if not model_ids or len(model_ids) != len(set(model_ids)):
+            raise ResultError("invalid-candidate-selection")
+        unknown = set(model_ids) - set(candidates)
+        if unknown:
+            raise ResultError("unknown-candidate-selection")
+        candidates = {model_id: candidates[model_id] for model_id in model_ids}
     if result.get("schemaVersion") != 1 or result.get("kind") != "haven42-apple-silicon-model-qualification-result":
         raise ResultError("invalid-result-identity")
     if result.get("release") != plan.get("release") or result.get("status") != "completed":
@@ -132,12 +144,18 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("result", type=Path)
     parser.add_argument("--plan", type=Path, default=PLAN_PATH)
+    parser.add_argument(
+        "--model-id",
+        action="append",
+        dest="model_ids",
+        help="Validate only an explicitly selected plan candidate; repeat as needed.",
+    )
     args = parser.parse_args()
     runner = load_runner()
     try:
         result = runner.load_json(args.result)
         plan = runner.load_json(args.plan)
-        validate_result(result, plan, runner)
+        validate_result(result, plan, runner, args.model_ids)
     except (ResultError, runner.QualificationError) as error:
         parser.error(str(error))
     print("Apple-Silicon qualification result is structurally valid and sanitized.")

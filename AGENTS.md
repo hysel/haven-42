@@ -91,3 +91,23 @@ above — this section adds the specific safety mechanics for this multi-session
 - Merge only when every required check is green on the pull request's current head.
   Never rely on stale checks, bypass a required check, or weaken repository settings to
   complete a merge.
+
+## Remote hardware SSH interoperability
+
+- On Windows, when the intended private key is backed by the native Windows OpenSSH
+  agent, use the native Windows OpenSSH client with the explicit identity and
+  `IdentitiesOnly=yes`. Do not set `IdentityAgent=none`; that disables the agent needed
+  to complete signing even when the server recognizes the corresponding public key.
+- Keep SSH probes fail-closed: use batch mode, disable password and keyboard-interactive
+  fallback, require strict host-key checking, and set a bounded connection timeout.
+- A dual-boot or multi-OS machine may present different SSH host keys at the same network
+  address. Do not delete or overwrite a trusted global host-key entry merely because the
+  operating system changed. Verify the presented fingerprint against the previously
+  trusted key for that operating system, then use a separate OS-specific or temporary
+  known-hosts file for the connection.
+- If verbose SSH output shows that the server accepts the offered public key but rejects
+  the signed authentication, first confirm that the selected client can reach the agent
+  holding the usable private key. On Windows, retry with the native OpenSSH client and
+  the agent enabled before changing server policy, authorized keys, or file permissions.
+- Never record private lab addresses, host identities, usernames, key names, key data,
+  or credentials in repository instructions or evidence.

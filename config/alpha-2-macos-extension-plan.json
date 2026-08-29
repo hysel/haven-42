@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-macos-extension-plan",
+  "release": "0.4.0-alpha.2",
+  "status": "owner-approved-implementation-and-native-validation-required",
+  "target": {
+    "platformId": "macos-arm64",
+    "operatingSystem": "macOS 26.6.2",
+    "architecture": "arm64",
+    "hardwareProfileId": "apple-m4-16gib-macos26-metal",
+    "accelerator": "Apple M4 Metal",
+    "systemMemoryGiB": 16.0,
+    "plannedArchive": "haven42-0.4.0-alpha.2-macos-arm64-unsigned.zip"
+  },
+  "existingExactProfileEvidence": {
+    "modelCandidatesChecked": 19,
+    "modelCandidatesPassed": 10,
+    "thirtyMinuteSoaksPassed": 10,
+    "ollamaVersion": "0.32.15",
+    "codingSurface": "opencode-cli",
+    "codingSurfaceVersion": "1.18.19",
+    "codingCandidatesRecommended": 0,
+    "powerCellsAvailable": true,
+    "unsignedDevelopmentAppLifecycleAvailable": true,
+    "crossSnapshotInheritanceAllowed": false
+  },
+  "currentCandidateGates": [
+    {
+      "id": "physical-hardware-and-access-preflight",
+      "status": "passed"
+    },
+    {
+      "id": "existing-evidence-inventory-and-privacy-review",
+      "status": "passed"
+    },
+    {
+      "id": "current-source-full-suite",
+      "status": "required"
+    },
+    {
+      "id": "current-source-macos-real-browser-flow",
+      "status": "required"
+    },
+    {
+      "id": "current-unsigned-arm64-package-build",
+      "status": "required"
+    },
+    {
+      "id": "source-package-parity-and-lifecycle",
+      "status": "required"
+    },
+    {
+      "id": "separate-ollama-install-and-guided-model-download",
+      "status": "required"
+    },
+    {
+      "id": "clean-machine-beginner-review",
+      "status": "attended-required"
+    },
+    {
+      "id": "manual-keyboard-voiceover-zoom-and-reduced-motion",
+      "status": "attended-required"
+    },
+    {
+      "id": "physical-clipboard-image-flow",
+      "status": "attended-required"
+    },
+    {
+      "id": "exact-candidate-security-privacy-and-supply-chain-review",
+      "status": "required"
+    }
+  ],
+  "platformBehavior": {
+    "managedInitialOllamaInstallation": false,
+    "userInstallsOllamaBeforeConnecting": true,
+    "guidedModelDownloadsAfterConnection": true,
+    "terminalRequiredForOrdinaryModelDownload": false
+  },
+  "authority": {
+    "changesAutomaticModelDefaults": false,
+    "changesSupportLabels": false,
+    "changesManagedRuntimeAdmission": false,
+    "publicationAuthorized": false,
+    "productionReady": false,
+    "signedOrNotarized": false
+  }
+}

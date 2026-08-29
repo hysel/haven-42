@@ -66,7 +66,7 @@ def main() -> None:
     MODULE.load_catalog()
     MODULE.load_registry()
     reviewed = MODULE.load_evidence()
-    assert len(reviewed) == 15
+    assert len(reviewed) == 22
     checks += 4
 
     cuda = snapshot()
@@ -115,6 +115,25 @@ def main() -> None:
     committed_cpu = MODULE.select_model(cpu)
     assert committed_cpu["selected"]["id"] == "qwen35-08b-q8"
     checks += 3
+
+    exact_profiles = {
+        "ubuntu": ("26.04", "ubuntu-26.04"),
+        "debian": ("13", "debian-13"),
+        "linuxmint": ("22.3", "linux-mint-22.3"),
+        "pop": ("24.04", "pop-os-24.04"),
+        "fedora": ("44", "fedora-44"),
+        "bazzite": ("44", "bazzite-44"),
+        "cachyos": ("rolling", "cachyos-rolling"),
+        "arch": ("rolling", "arch-rolling"),
+    }
+    for distribution_id, (version, expected_id) in exact_profiles.items():
+        profile = snapshot(None)
+        profile["platform"].update(
+            distributionId=distribution_id, distributionVersion=version,
+        )
+        assert MODULE.operating_system_id(profile) == expected_id
+        assert MODULE.evaluate_hardware(profile)["decision"] == "candidate"
+        checks += 2
 
     rolling = snapshot(None)
     rolling["platform"].update(
