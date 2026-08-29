@@ -44,7 +44,7 @@ later release stage.
 | Stage | Intended audience | Product goal | Required exit gate |
 | --- | --- | --- | --- |
 | Alpha 1 — `0.4.0-alpha.1` | Invited Windows testers | Prove that the local-first product shell, private text workflows, readiness checks, and managed setup can work as one bounded application. | Published historical stage. The exact unsigned Windows archive and its limitations remain recorded; it is not retroactively changed. |
-| Alpha 2 — `0.4.0-alpha.2` | Invited Windows and Linux testers | Make the core text experience repeatable across supported hardware and explicitly named Linux distributions, while improving setup recovery, model/runtime compatibility, accessibility, onboarding, diagnostics, and uninstall behavior. | Separate Windows x64 and Linux x64 candidates pass their release contracts, dependency/license review, source-versus-package parity, supported-platform accessibility checks, clean install/update/recovery/uninstall tests, and evidence-backed model selection. Packages may remain unsigned and must say so clearly. |
+| Alpha 2 — `0.4.0-alpha.2` | Invited Windows, Linux, and macOS testers | Make the core text experience repeatable across supported hardware, explicitly named Linux distributions, and the exact Apple Silicon profile admitted for testing, while improving setup recovery, model/runtime compatibility, accessibility, onboarding, diagnostics, and uninstall behavior. | Separate Windows x64, Linux x64, and macOS ARM64 candidates pass their release contracts, dependency/license review, source-versus-package parity, supported-platform accessibility checks, clean install/update/recovery/uninstall tests, and evidence-backed model selection. Packages may remain unsigned and must say so clearly; the macOS candidate remains blocked until its dedicated current-source and attended native gates pass. |
 | Alpha 3 — `0.4.0-alpha.3` | Broader technical testers | Reach core feature completeness before public Beta: dependable Chat, Writing, Summarization, attachments admitted for this release, local/external provider management, hardware-aware recommendations, runtime/model version binding, privacy-safe diagnostics, and stable user-data boundaries. | No unresolved blocker in the core user journey; schemas and migrations are defined; interrupted operations recover safely; defaults are justified by exact evidence; supported OS/GPU cells meet their stated coverage; keyboard, screen-reader, zoom, contrast, reduced-motion, forced-colors, and novice-flow reviews pass on the claimed configurations. Optional capabilities remain visibly Preview or unavailable. |
 | Beta 1 — `0.4.0-beta.1` | Public early adopters | Deliver a signed, installable, supportable public preview with stable configuration and data contracts. | Signed Windows and supported Linux packages, trustworthy installer/uninstaller behavior, cryptographically verified update staging with rollback, reproducible release records, SBOM/notices, vulnerability and dependency review, support and accessibility statements, backup/migration tests, and no known release-blocking privacy, security, accessibility, or supported-platform regressions. Automatic update installation remains separately owner-approved. |
 | Beta 2 — `0.4.0-beta.2` | Wider public testing | Stabilize rather than expand: resolve Beta feedback, validate upgrades from earlier supported builds, and prove sustained reliability on the published compatibility matrix. | Core feature freeze; upgrade/rollback and repeated-lifecycle soaks pass; crash and network-loss recovery pass; telemetry remains opt-in and content-free; documentation and in-product guidance match the package; performance and energy guidance is evidence-backed; all release-blocking defects are closed or the affected configuration is removed from support. |
@@ -102,6 +102,20 @@ from the overall application version.
 - Stable support applies only to the published operating-system, browser or
   desktop shell, runtime, model, driver, and hardware combinations. Evidence
   from one configuration cannot promote another.
+- After an accelerator family establishes a complete exact-profile baseline,
+  routine releases use a risk-based hardware matrix instead of repeating the
+  full model and soak campaign on every available graphics card. Every release
+  still runs package startup, real inference, accelerator residency, unload,
+  and shutdown smoke tests on one representative admitted profile for each
+  claimed backend and operating-system family. Driver, runtime, selector,
+  memory-management, packaging, model, quantization, or backend-specific
+  changes trigger focused recertification of every affected evidence cell.
+  New accelerator architectures and newly claimed hardware receive the full
+  qualification and soak sequence once; major releases and scheduled
+  regression audits repeat the broader available-hardware matrix. Power tests
+  repeat only when a change can plausibly affect power behavior. Representative
+  smoke evidence validates shared release behavior but never promotes the
+  performance or compatibility of an untested card.
 - Security, privacy, accessibility, compatibility, licensing, documentation,
   package parity, and recovery are promotion gates at every stage—not cleanup
   tasks reserved for Beta or RC.

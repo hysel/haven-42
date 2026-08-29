@@ -20,8 +20,10 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_CONTRACT = ROOT / "config/alpha-2-linux-long-term-validation.json"
 MODEL_POLICY_PATH = ROOT / "config/alpha-2-model-selection-policy.json"
 SAFE_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,63}$")
+SAFE_OS_ID = re.compile(r"^[a-z0-9][a-z0-9.-]{0,79}$")
 ALLOWED_CPU_LANES = {"required"}
 ALLOWED_NVIDIA_LANES = {"promotion-candidate", "experimental"}
+ALLOWED_CA_TRUST_FAMILIES = {"arch", "debian", "fedora"}
 EXPECTED_CAPABILITIES = ["chat", "writing", "summarization"]
 EXPECTED_STAGES = [
     "preflight",
@@ -127,13 +129,36 @@ def validate_contract(contract: Any) -> None:
         raise ContractError("The Linux campaign requires exactly nine target profiles.")
     promotion_targets: set[str] = set()
     for target in targets:
-        if set(target) != {"id", "distribution", "desktop", "cpuLane", "nvidiaLane"}:
+        if set(target) != {
+            "id", "distribution", "distributionId", "distributionVersion",
+            "operatingSystemId", "caTrustFamily", "desktop", "cpuLane",
+            "nvidiaLane",
+        }:
             raise ContractError(f"Target {target['id']} has unexpected fields.")
         if not all(
             isinstance(target[field], str) and 1 <= len(target[field]) <= 80
             for field in ("distribution", "desktop")
         ):
             raise ContractError(f"Target {target['id']} has invalid display text.")
+        distribution_id = target["distributionId"]
+        distribution_version = target["distributionVersion"]
+        normalized_id = {
+            "linuxmint": "linux-mint", "pop": "pop-os",
+        }.get(distribution_id, distribution_id)
+        expected_os_id = f"{normalized_id}-{distribution_version}"
+        if (
+            distribution_id not in {
+                "arch", "bazzite", "cachyos", "debian", "fedora",
+                "linuxmint", "pop", "ubuntu",
+            }
+            or not SAFE_OS_ID.fullmatch(expected_os_id)
+            or target["operatingSystemId"] != expected_os_id
+        ):
+            raise ContractError(
+                f"Target {target['id']} has an inconsistent exact OS identity."
+            )
+        if target["caTrustFamily"] not in ALLOWED_CA_TRUST_FAMILIES:
+            raise ContractError(f"Target {target['id']} has an unknown CA trust family.")
         if target["cpuLane"] not in ALLOWED_CPU_LANES:
             raise ContractError(f"Target {target['id']} must retain its CPU lane.")
         if target["nvidiaLane"] not in ALLOWED_NVIDIA_LANES:

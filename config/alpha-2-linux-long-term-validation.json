@@ -12,6 +12,10 @@
     {
       "id": "ubuntu-26-04-gnome",
       "distribution": "Ubuntu 26.04 LTS",
+      "distributionId": "ubuntu",
+      "distributionVersion": "26.04",
+      "operatingSystemId": "ubuntu-26.04",
+      "caTrustFamily": "debian",
       "desktop": "GNOME",
       "cpuLane": "required",
       "nvidiaLane": "promotion-candidate"
@@ -19,6 +23,10 @@
     {
       "id": "ubuntu-24-04-gnome",
       "distribution": "Ubuntu 24.04 LTS",
+      "distributionId": "ubuntu",
+      "distributionVersion": "24.04",
+      "operatingSystemId": "ubuntu-24.04",
+      "caTrustFamily": "debian",
       "desktop": "GNOME",
       "cpuLane": "required",
       "nvidiaLane": "experimental"
@@ -26,13 +34,21 @@
     {
       "id": "debian-13-gnome",
       "distribution": "Debian 13",
+      "distributionId": "debian",
+      "distributionVersion": "13",
+      "operatingSystemId": "debian-13",
+      "caTrustFamily": "debian",
       "desktop": "GNOME",
       "cpuLane": "required",
       "nvidiaLane": "experimental"
     },
     {
       "id": "linux-mint-22-cinnamon",
-      "distribution": "Linux Mint 22",
+      "distribution": "Linux Mint 22.3",
+      "distributionId": "linuxmint",
+      "distributionVersion": "22.3",
+      "operatingSystemId": "linux-mint-22.3",
+      "caTrustFamily": "debian",
       "desktop": "Cinnamon",
       "cpuLane": "required",
       "nvidiaLane": "experimental"
@@ -40,6 +56,10 @@
     {
       "id": "pop-os-24-04-cosmic",
       "distribution": "Pop!_OS 24.04 LTS",
+      "distributionId": "pop",
+      "distributionVersion": "24.04",
+      "operatingSystemId": "pop-os-24.04",
+      "caTrustFamily": "debian",
       "desktop": "COSMIC",
       "cpuLane": "required",
       "nvidiaLane": "experimental"
@@ -47,6 +67,10 @@
     {
       "id": "fedora-44-gnome",
       "distribution": "Fedora Workstation 44",
+      "distributionId": "fedora",
+      "distributionVersion": "44",
+      "operatingSystemId": "fedora-44",
+      "caTrustFamily": "fedora",
       "desktop": "GNOME",
       "cpuLane": "required",
       "nvidiaLane": "experimental"
@@ -54,6 +78,10 @@
     {
       "id": "bazzite-kde",
       "distribution": "Bazzite",
+      "distributionId": "bazzite",
+      "distributionVersion": "44",
+      "operatingSystemId": "bazzite-44",
+      "caTrustFamily": "fedora",
       "desktop": "KDE Plasma",
       "cpuLane": "required",
       "nvidiaLane": "promotion-candidate"
@@ -61,6 +89,10 @@
     {
       "id": "cachyos-kde",
       "distribution": "CachyOS",
+      "distributionId": "cachyos",
+      "distributionVersion": "rolling",
+      "operatingSystemId": "cachyos-rolling",
+      "caTrustFamily": "arch",
       "desktop": "KDE Plasma",
       "cpuLane": "required",
       "nvidiaLane": "experimental"
@@ -68,6 +100,10 @@
     {
       "id": "arch-linux-kde",
       "distribution": "Arch Linux",
+      "distributionId": "arch",
+      "distributionVersion": "rolling",
+      "operatingSystemId": "arch-rolling",
+      "caTrustFamily": "arch",
       "desktop": "KDE Plasma",
       "cpuLane": "required",
       "nvidiaLane": "experimental"

@@ -59,6 +59,24 @@ class ResultValidatorTests(unittest.TestCase):
         with self.assertRaisesRegex(MODULE.ResultError, "candidate-binding-mismatch"):
             MODULE.validate_result(report, PLAN, RUNNER)
 
+    def test_explicit_candidate_subset_passes_and_unknown_selection_fails(self) -> None:
+        report = valid_report()
+        selected = report["results"][0]
+        report["results"] = [selected]
+        report["modelsRequested"] = 1
+        MODULE.validate_result(report, PLAN, RUNNER, [selected["modelId"]])
+
+        with self.assertRaisesRegex(MODULE.ResultError, "unknown-candidate-selection"):
+            MODULE.validate_result(report, PLAN, RUNNER, ["not-in-plan"])
+
+        with self.assertRaisesRegex(MODULE.ResultError, "invalid-candidate-selection"):
+            MODULE.validate_result(
+                report,
+                PLAN,
+                RUNNER,
+                [selected["modelId"], selected["modelId"]],
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -2553,6 +2553,7 @@ test_local_web_mvp() {
   python3 "$REPO_ROOT/scripts/test-alpha-platform.py" || return 1
   python3 "$REPO_ROOT/scripts/test-system-readiness.py" || return 1
   python3 "$REPO_ROOT/scripts/test-linux-alpha.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-alpha2-linux-native-profile-gates.py" || return 1
   python3 "$REPO_ROOT/scripts/test-linux-alpha-runtime.py" || return 1
   python3 "$REPO_ROOT/scripts/test-linux-alpha-setup.py" || return 1
   python3 "$REPO_ROOT/scripts/test-linux-runtime-supply-chain.py" || return 1
@@ -3123,6 +3124,7 @@ test_qualification_evidence_recommendation_and_coding_screens() {
     test-alpha2-model-recommendation-matrix.py \
     test-alpha2-model-recommendation-report.py \
     test-alpha2-macos-model-qualification.py \
+    test-alpha2-macos-extension-plan.py \
     test-alpha2-macos-attended-qualification.py \
     test-alpha2-macos-development-update-lifecycle.py \
     test-alpha2-macos-keychain-lifecycle.py \

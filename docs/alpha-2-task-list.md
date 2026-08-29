@@ -2,8 +2,11 @@
 
 This checklist controls preparation of the unsigned Haven 42
 `0.4.0-alpha.2` prerelease. Alpha 2 is intended to provide separate Windows
-x64 and Linux x64 portable packages for invited testing. It is not an
-installer, signed product, stable release, or production-readiness claim.
+x64, Linux x64, and macOS ARM64 portable packages for invited testing. It is
+not an installer, signed product, stable release, or production-readiness
+claim. The macOS expansion is approved for implementation and native
+validation, but it cannot enter the release contract until its current-source
+package, lifecycle, accessibility, privacy, and supply-chain gates pass.
 
 Completing a task records only that task's stated evidence. It does not promote
 another operating system, distribution, accelerator, model, or package.
@@ -13,7 +16,9 @@ another operating system, distribution, accelerator, model, or package.
 - Keep the shared browser UI and minimum trusted PyInstaller launcher/service.
 - Keep Tauri and Rust unadmitted.
 - Expose only Chat, Writing, and Summarization.
-- Distribute separate unsigned Windows x64 and Linux x64 portable archives.
+- Distribute separate unsigned Windows x64, Linux x64, and macOS ARM64
+  portable archives only after each platform's exact candidate passes its own
+  native gates.
 - Bundle no Ollama runtime, model, driver, package manager, or other external
   software inside the Haven 42 application archive.
 - Download only exact registered artifacts after the tester reviews the plan
@@ -78,8 +83,9 @@ the current release-candidate blockers, in execution order:
 6. Finish the novice Linux quick start, compatibility table, known
    limitations, issue-reporting fields, release notes, README, security
    documentation, and mapped wiki review.
-7. Present the two exact packages, user flows, compatibility labels, model
-   evidence, and release-page wording for owner review. A new automatic model
+7. Present every admitted package, user flow, compatibility label, model
+   evidence, and release-page wording for owner review. Add the macOS package
+   to that review only after its separate extension gates pass. A new automatic model
    default and Alpha 2 publication each require separate explicit approval.
 
 No package build, test result, or documentation update may overwrite the Alpha
@@ -96,6 +102,9 @@ does not automatically check a native or release-candidate task.
 - [x] Define these candidate assets:
   - `haven42-0.4.0-alpha.2-windows-x64-unsigned.zip`
   - `haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz`
+- [ ] Admit the planned macOS expansion asset only after its builder and
+  native gates pass:
+  - `haven42-0.4.0-alpha.2-macos-arm64-unsigned.zip`
 - [x] Define separate checksums, inventories, notices, SBOMs, provenance, and
   known-limitations evidence for each archive.
 - [x] Update the release gate so one platform cannot inherit another
@@ -384,6 +393,17 @@ hostname, username, address, personal path, prompt, response, or API key.
 
 ## Phase 10: Native accelerator matrix
 
+Alpha 2 establishes the broad baseline. Later routine releases do not repeat
+every full model ladder and soak on every card. They run one exact package,
+inference, residency, unload, and shutdown smoke cell for each claimed
+operating-system/backend family, then expand only when a relevant driver,
+runtime, model, quantization, selector, memory, packaging, or backend change
+affects additional cells. New accelerator architectures and newly claimed
+hardware still require full qualification and soak evidence. Major releases
+and scheduled regression audits repeat the broader available-hardware matrix.
+Power measurement repeats only for changes that can affect power behavior.
+Representative results never certify an untested card or operating system.
+
 - [x] Windows 11 x64 NVIDIA: repeat the complete current-candidate CUDA cell.
 - [ ] Windows 11 x64 AMD: repeat the complete current-candidate ROCm cell.
 - [ ] Windows 11 x64 Intel: repeat the exact admitted Arc/Vulkan cell.
@@ -461,7 +481,7 @@ hostname, username, address, personal path, prompt, response, or API key.
   for the model, intended uses, optional official source, and optional broad
   hardware profile; require privacy and no-guarantee acknowledgements, and
   link it from the README and model-certification page.
-- [ ] Provide separate Windows and Linux download links, checksum commands,
+- [ ] Provide separate Windows, Linux, and macOS download links, checksum commands,
   known limitations, and report-a-problem links.
 - [ ] Review all novice-facing language and remove unexplained engineering
   terms, internal status language, stale versions, and obsolete package names.
@@ -470,19 +490,19 @@ hostname, username, address, personal path, prompt, response, or API key.
 
 ## Phase 14: Release-candidate closure
 
-- [ ] Complete the exact Windows and Linux dependency/license audit, including
+- [ ] Complete the exact Windows, Linux, and macOS dependency/license audit, including
   all redistributed native libraries.
-- [ ] Build both candidates from one clean, exact commit using pinned isolated
+- [ ] Build all admitted candidates from one clean, exact commit using pinned isolated
   toolchains; do not install build tools globally.
 - [ ] Run the full local gate once against the exact candidate tree.
 - [ ] Push one coherent branch and require every hosted Windows, Linux, macOS
   regression, package, CodeQL, privacy, and wiki check to pass.
 - [ ] Re-run only genuinely failed or affected checks after a correction; do
   not weaken a gate to obtain a pass.
-- [ ] Obtain owner review of the Windows and Linux user flows and release-page
+- [ ] Obtain owner review of the Windows, Linux, and macOS user flows and release-page
   wording.
 - [ ] Obtain explicit owner approval before tagging or publishing Alpha 2.
-- [ ] Publish both unsigned archives as one GitHub prerelease with checksums,
+- [ ] Publish the validated unsigned archives as one GitHub prerelease with checksums,
   inventories, notices, SBOMs, provenance, limitations, and feedback links.
 - [ ] Verify the immutable tag, asset names, sizes, digests, download links,
   issue forms, and public documentation after publication.
@@ -721,8 +741,11 @@ promotion:
   promotion remain open. The main remaining capacity gap is a 24 GB
   consumer or workstation card; it is not required for Alpha 2. Broader
   CPU-only systems, Linux AMD and Intel, and Windows release-candidate routes
-  remain open. Keep Apple silicon owner-deferred until its hardware is
-  available. Use `docs/alpha-2-gpu-rotation-test-plan.md` for the planned
+  remain open. Apple M4 16 GB hardware is now available and has prior exact-profile
+  model, soak, power, coding-screen, and unsigned development-app evidence.
+  Current-candidate macOS package and attended accessibility revalidation remain
+  open under `config/alpha-2-macos-extension-plan.json`. Use
+  `docs/alpha-2-gpu-rotation-test-plan.md` for the planned
   phase order, slot maps, RX 7800 XT local lane, RX 5700 XT dual-boot lane, safety
   gates, and restoration sequence.
 - [ ] Obtain owner approval before enabling any new automatic default in the
