@@ -1,0 +1,35 @@
+{
+  "artifact": {
+    "name": "haven42-darwin-arm64-developer-id-notarized.zip",
+    "sha256": "3b8c857eed234be810bf10d30706d10bed0709d54dd61fc12b8c9587900d2bab",
+    "sizeBytes": 10490259
+  },
+  "authority": {
+    "automaticUpdateActivationGranted": false,
+    "releasePublicationGranted": false
+  },
+  "kind": "haven42-sanitized-macos-developer-id-notarization-result",
+  "observedAtUtc": "2026-08-30T14:14:09Z",
+  "platformTrust": {
+    "developerIdSigned": true,
+    "gatekeeperAdmittedOnTestHost": true,
+    "hardenedRuntime": true,
+    "notarized": true,
+    "ticketStapled": true
+  },
+  "privacy": {
+    "certificateIdentityRetained": false,
+    "notaryCredentialRetained": false,
+    "notaryProfileRetained": false,
+    "rawToolOutputRetained": false,
+    "teamIdentifierRetained": false
+  },
+  "release": "0.4.0-alpha.2",
+  "schemaVersion": 1,
+  "source": {
+    "appInventoryCanonicalSha256": "5e7b2f421f331f6de39ec4f8589265a8018c146eb8717893e9687e3e24f45dfc",
+    "buildEvidenceSha256": "73b0616c6cbddf6eb94f6417d1f8f77c0c3a9d56d3f8771b304eb4170563f0a9",
+    "unsignedArtifactSha256": "eee374d82cbe0fd8320cbf01ff7bd126a5dc026e21e9d871662731e15a9e8fb1"
+  },
+  "status": "passed"
+}

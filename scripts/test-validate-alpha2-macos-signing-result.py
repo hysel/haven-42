@@ -14,6 +14,7 @@ import unittest
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "validate-alpha2-macos-signing-result.py"
+RECORDED_RESULT = ROOT / "config" / "alpha-2-apple-m4-signing-notarization-result.json"
 SPEC = importlib.util.spec_from_file_location("validate_alpha2_macos_signing_result", SCRIPT)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
@@ -78,6 +79,33 @@ def write(root: Path, value: dict[str, object]) -> None:
 
 
 class ValidatorTests(unittest.TestCase):
+    def test_recorded_physical_result_is_sanitized_and_non_authorizing(self) -> None:
+        encoded = RECORDED_RESULT.read_text(encoding="utf-8")
+        value = json.loads(encoded)
+        self.assertEqual(value["kind"], "haven42-sanitized-macos-developer-id-notarization-result")
+        self.assertEqual(value["release"], "0.4.0-alpha.2")
+        self.assertEqual(value["status"], "passed")
+        self.assertEqual(value["platformTrust"], {
+            "developerIdSigned": True,
+            "gatekeeperAdmittedOnTestHost": True,
+            "hardenedRuntime": True,
+            "notarized": True,
+            "ticketStapled": True,
+        })
+        self.assertEqual(value["privacy"], {
+            "certificateIdentityRetained": False,
+            "notaryCredentialRetained": False,
+            "notaryProfileRetained": False,
+            "rawToolOutputRetained": False,
+            "teamIdentifierRetained": False,
+        })
+        self.assertEqual(value["authority"], {
+            "automaticUpdateActivationGranted": False,
+            "releasePublicationGranted": False,
+        })
+        for forbidden in ("/Users/", "Developer ID Application:", "haven42-alpha2-notary", "192.168."):
+            self.assertNotIn(forbidden, encoded)
+
     def test_exact_sanitized_result_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root, value = result_directory(Path(temporary) / "result")
