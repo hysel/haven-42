@@ -49,8 +49,9 @@ def source_binding() -> dict[str, str]:
 
 
 class FakeRunner:
-    def __init__(self, *, accepted: bool = True) -> None:
+    def __init__(self, *, accepted: bool = True, submit_error: bool = False) -> None:
         self.accepted = accepted
+        self.submit_error = submit_error
         self.commands: list[list[str]] = []
 
     def __call__(self, command: list[str], **_: object) -> subprocess.CompletedProcess:
@@ -73,6 +74,8 @@ class FakeRunner:
             Path(command[-1]).write_bytes(b"synthetic-notarization-archive")
             return completed(command)
         if executable == "xcrun" and "notarytool" in command:
+            if self.submit_error:
+                return completed(command, 69, b"not-json", b"credential profile unavailable")
             status = "Accepted" if self.accepted else "Invalid"
             return completed(command, 0 if self.accepted else 1, json.dumps({"status": status}).encode())
         return completed(command)
@@ -126,6 +129,30 @@ class SigningTests(unittest.TestCase):
             self.assertEqual(len(ditto_commands), 2)
             self.assertTrue((output / "haven42-darwin-arm64-developer-id-notarized.zip").is_file())
             self.assertTrue((output / "SHA256SUMS").is_file())
+            self.assertEqual(
+                {path.name for path in output.iterdir()},
+                {
+                    "haven42-darwin-arm64-developer-id-notarized.zip",
+                    "macos-signing-notarization-result.json",
+                    "SHA256SUMS",
+                },
+            )
+
+    def test_notarytool_command_failure_is_not_reported_as_invalid_json(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            app = source_app(root / "source")
+            runner = FakeRunner(submit_error=True)
+            with mock.patch.object(MODULE, "require_tool", return_value=None), mock.patch.object(
+                MODULE, "validate_source_directory",
+                return_value=(app, "0.4.0-alpha.2", source_binding()),
+            ):
+                with self.assertRaisesRegex(MODULE.SigningError, "notarization-submit-failed"):
+                    MODULE.execute(
+                        app.parent, root / "result", IDENTITY, "haven42-notary",
+                        runner=runner, platform_name="darwin",
+                    )
+            self.assertFalse((root / "result").exists())
 
     def test_rejected_notarization_cleans_temporary_workspace(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:

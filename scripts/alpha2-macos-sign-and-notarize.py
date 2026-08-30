@@ -240,6 +240,8 @@ def notarize(
     try:
         response = json.loads(submitted.stdout.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
+        if submitted.returncode != 0:
+            raise SigningError("notarization-submit-failed") from error
         raise SigningError("notarization-response-invalid") from error
     if submitted.returncode != 0 or response.get("status") != "Accepted":
         raise SigningError("notarization-not-accepted")
@@ -341,6 +343,7 @@ def execute(
         notarize(app, archive, notary_profile, runner=runner)
         verify_signed_app(app, runner=runner)
         write_result(temporary, version, archive, source)
+        shutil.rmtree(app)
         os.replace(temporary, output)
         temporary = None
         return json.loads((output / "macos-signing-notarization-result.json").read_text(encoding="utf-8"))
