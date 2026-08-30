@@ -19,7 +19,21 @@ class WindowsUserPathError(ValueError):
 
 def portable_install_root() -> Path:
     """Return the directory containing the portable app, never an env override."""
-    candidate = Path(sys.executable).parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parents[1]
+    if getattr(sys, "frozen", False):
+        executable = Path(sys.executable)
+        candidate = executable.parent
+        if (
+            sys.platform == "darwin"
+            and executable.parent.name == "MacOS"
+            and executable.parent.parent.name == "Contents"
+            and executable.parent.parent.parent.name == "Haven 42.app"
+        ):
+            # A macOS .app executable lives below Contents/MacOS.  Portable
+            # mutable state belongs beside the bundle, never inside its signed
+            # seal where a normal launch would invalidate package integrity.
+            candidate = executable.parents[3]
+    else:
+        candidate = Path(__file__).resolve().parents[1]
     try:
         root = candidate.resolve(strict=True)
     except OSError as error:

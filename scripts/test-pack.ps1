@@ -5232,6 +5232,7 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-alpha2-macos-extension-plan.py",
         "test-alpha2-macos-attended-qualification.py",
         "test-alpha2-macos-development-update-lifecycle.py",
+        "test-alpha2-macos-sign-and-notarize.py",
         "test-alpha2-macos-keychain-lifecycle.py",
         "test-alpha2-macos-llamacpp-lifecycle.py",
         "test-alpha2-macos-llamacpp-distribution.py",
@@ -5256,6 +5257,7 @@ Invoke-PackTest "qualification evidence recommendation and coding screens fail c
         "test-validate-alpha2-macos-attended-qualification-result.py",
         "test-validate-alpha2-macos-development-update-lifecycle-result.py",
         "test-validate-alpha2-macos-development-app-result.py",
+        "test-validate-alpha2-macos-signing-result.py",
         "test-validate-alpha2-macos-llamacpp-distribution-result.py"
     )
     foreach ($test in $tests) {
@@ -5889,6 +5891,7 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
         "scripts/test-windows-alpha-setup.py",
         "scripts/test-windows-alpha-job-lifecycle.py",
         "scripts/test-diagnostic-logging.py",
+        "scripts/test-windows-user-paths.py",
         "scripts/test-windows-alpha-web-policy.py",
         "scripts/test-alpha-platform.py",
         "scripts/test-linux-alpha.py",
