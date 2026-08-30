@@ -277,6 +277,32 @@ def contrast_ratio(foreground: str, background: str) -> float:
 def main() -> int:
     checks = 0
 
+    with tempfile.TemporaryDirectory(prefix="haven42-macos-resource-root-") as temporary:
+        contents = Path(temporary) / "Haven 42.app" / "Contents"
+        frameworks = contents / "Frameworks"
+        resources = contents / "Resources" / "Runtime"
+        frameworks.mkdir(parents=True)
+        resources.mkdir(parents=True)
+        assert WEB.select_application_root(
+            frameworks, frozen=True, platform_name="darwin",
+        ) == resources
+        assert WEB.select_application_root(
+            frameworks, frozen=False, platform_name="darwin",
+        ) == frameworks
+        assert WEB.select_application_root(
+            frameworks, frozen=True, platform_name="linux",
+        ) == frameworks
+        resources.rmdir()
+        try:
+            WEB.select_application_root(
+                frameworks, frozen=True, platform_name="darwin",
+            )
+        except RuntimeError as error:
+            assert str(error) == "Packaged macOS resource root is invalid."
+        else:
+            raise AssertionError("Missing macOS physical resource root was accepted")
+        checks += 4
+
     class DisconnectingWriter:
         def __init__(self, error: Exception):
             self.error = error

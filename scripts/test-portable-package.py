@@ -34,7 +34,7 @@ def packaged_layout(executable: Path) -> tuple[Path, Path, Path]:
         return (
             root,
             Path("Contents") / "MacOS" / executable.name,
-            Path("Contents") / "Frameworks",
+            Path("Contents") / "Resources" / "Runtime",
         )
     return executable.parent, Path(executable.name), Path("_internal")
 
@@ -412,7 +412,7 @@ def assert_integrity_failure(executable: Path, mutate) -> None:
     package_dir, executable_relative, internal_relative = packaged_layout(executable)
     with tempfile.TemporaryDirectory(prefix="haven42-hostile-package-") as temporary:
         copied = Path(temporary) / package_dir.name
-        shutil.copytree(package_dir, copied)
+        shutil.copytree(package_dir, copied, symlinks=True)
         copied_executable = copied / executable_relative
         internal = copied / internal_relative
         mutate(internal)
