@@ -32,6 +32,29 @@ ALLOWED_SOURCE_LINKS = {
     "_internal/Python.framework/Resources": "Versions/Current/Resources",
     "_internal/Python.framework/Versions/Current": "3.14",
 }
+RESOURCE_RUNTIME_ENTRIES = {
+    "base_library.zip", "config", "package", "scripts", "web",
+}
+FRAMEWORK_FILE_ENTRIES = {
+    "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
+}
+EXPECTED_INTERNAL_ENTRIES = (
+    RESOURCE_RUNTIME_ENTRIES
+    | FRAMEWORK_FILE_ENTRIES
+    | {"Python", "Python.framework", "python3.14"}
+)
+APP_LINKS = {
+    "Contents/Frameworks/Python": "Python.framework/Versions/3.14/Python",
+    "Contents/Frameworks/Python.framework/Python": "Versions/Current/Python",
+    "Contents/Frameworks/Python.framework/Resources": "Versions/Current/Resources",
+    "Contents/Frameworks/Python.framework/Versions/Current": "3.14",
+    **{
+        f"Contents/Frameworks/{name}": f"../Resources/Runtime/{name}"
+        for name in RESOURCE_RUNTIME_ENTRIES
+    },
+    "Contents/Frameworks/python3.14": "python3__dot__14",
+    "Contents/Resources/python3.14": "../Frameworks/python3__dot__14",
+}
 
 
 class AppBuildError(RuntimeError):
@@ -85,6 +108,26 @@ def safe_files(
     return sorted(records, key=lambda item: str(item["path"]))
 
 
+def safe_links(root: Path, allowed_links: dict[str, str]) -> list[dict[str, str]]:
+    resolved_root = root.resolve()
+    records: list[dict[str, str]] = []
+    for path in sorted(root.rglob("*")):
+        if not path.is_symlink():
+            continue
+        relative = path.relative_to(root).as_posix()
+        try:
+            target = path.readlink().as_posix()
+            path.resolve(strict=True).relative_to(resolved_root)
+        except (OSError, ValueError) as error:
+            raise AppBuildError("bundle-link-escaped-root") from error
+        if allowed_links.get(relative) != target:
+            raise AppBuildError("unexpected-bundle-link")
+        records.append({"path": relative, "target": target})
+    if {item["path"] for item in records} != set(allowed_links):
+        raise AppBuildError("required-bundle-link-missing")
+    return records
+
+
 def validate_source_package(source: Path) -> None:
     if not source.is_dir() or source.is_symlink():
         raise AppBuildError("source-package-not-found")
@@ -103,10 +146,16 @@ def validate_source_package(source: Path) -> None:
         os.name != "nt" and not (executable.stat().st_mode & stat.S_IXUSR)
     ):
         raise AppBuildError("source-executable-is-not-executable")
+    internal_entries = {path.name for path in (source / "_internal").iterdir()}
+    if internal_entries != EXPECTED_INTERNAL_ENTRIES:
+        raise AppBuildError(
+            f"unexpected-internal-entry:{sorted(internal_entries ^ EXPECTED_INTERNAL_ENTRIES)}"
+        )
     # PyInstaller's pinned macOS framework layout contains four conventional
-    # internal links.  Admit only those exact link names and targets, prove
-    # they resolve inside the package, then dereference them into the app.
+    # internal links. Admit only those names and targets and prove that every
+    # link resolves inside the package before preserving it in the app bundle.
     safe_files(source, ALLOWED_SOURCE_LINKS)
+    safe_links(source, ALLOWED_SOURCE_LINKS)
 
 
 def resolve_output(value: str) -> Path:
@@ -169,12 +218,34 @@ def build_bundle(source: Path, output: Path, version: str) -> dict[str, object]:
     portable_resources.mkdir()
 
     shutil.copy2(source / "haven42", macos / "haven42")
-    for path in sorted((source / "_internal").iterdir()):
-        destination = frameworks / path.name
-        if path.is_dir():
-            shutil.copytree(path, destination, symlinks=False)
+    runtime_resources = resources / "Runtime"
+    runtime_resources.mkdir()
+    internal = source / "_internal"
+    for name in sorted(RESOURCE_RUNTIME_ENTRIES):
+        source_path = internal / name
+        destination = runtime_resources / name
+        if source_path.is_dir():
+            shutil.copytree(source_path, destination, symlinks=True)
         else:
-            shutil.copy2(path, destination, follow_symlinks=True)
+            shutil.copy2(source_path, destination, follow_symlinks=False)
+        (frameworks / name).symlink_to(Path("../Resources/Runtime") / name)
+    for name in sorted(FRAMEWORK_FILE_ENTRIES):
+        shutil.copy2(internal / name, frameworks / name, follow_symlinks=False)
+    shutil.copytree(
+        internal / "Python.framework",
+        frameworks / "Python.framework",
+        symlinks=True,
+    )
+    (frameworks / "Python").symlink_to(
+        "Python.framework/Versions/3.14/Python"
+    )
+    shutil.copytree(
+        internal / "python3.14",
+        frameworks / "python3__dot__14",
+        symlinks=True,
+    )
+    (frameworks / "python3.14").symlink_to("python3__dot__14")
+    (resources / "python3.14").symlink_to("../Frameworks/python3__dot__14")
     for name in (
         "DEVELOPMENT-BUILD.txt", "LICENSE.txt", "THIRD-PARTY-NOTICES.txt",
     ):
@@ -193,7 +264,8 @@ def build_bundle(source: Path, output: Path, version: str) -> dict[str, object]:
         encoding="utf-8",
     )
 
-    records = safe_files(app)
+    records = safe_files(app, APP_LINKS)
+    links = safe_links(app, APP_LINKS)
     result: dict[str, object] = {
         "schemaVersion": 1,
         "kind": "haven42-unsigned-macos-development-app-build",
@@ -217,8 +289,9 @@ def build_bundle(source: Path, output: Path, version: str) -> dict[str, object]:
         },
         "inventory": {
             "algorithm": "sha256",
-            "canonicalSha256": canonical_sha256(records),
-            "fileCount": len(records), "files": records,
+            "canonicalSha256": canonical_sha256({"files": records, "links": links}),
+            "fileCount": len(records), "linkCount": len(links),
+            "files": records, "links": links,
         },
     }
     evidence = output / "macos-app-build-result.json"
@@ -226,7 +299,7 @@ def build_bundle(source: Path, output: Path, version: str) -> dict[str, object]:
         json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8",
     )
     archive = output / "haven42-darwin-arm64-unsigned-development-app.tar.gz"
-    with tarfile.open(archive, "w:gz", dereference=True) as stream:
+    with tarfile.open(archive, "w:gz", dereference=False) as stream:
         stream.add(app, arcname=BUNDLE_NAME, recursive=True)
     (output / "SHA256SUMS").write_text(
         f"{sha256(archive)}  {archive.name}\n"

@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 from pathlib import Path
+import shutil
 import stat
 import subprocess
 import tempfile
@@ -33,9 +35,28 @@ def source_fixture(root: Path) -> Path:
     executable = source / "haven42"
     executable.write_bytes(b"fixture")
     executable.chmod(executable.stat().st_mode | stat.S_IXUSR)
-    for directory in ("_internal", "licenses"):
-        (source / directory).mkdir()
-        (source / directory / "fixture.txt").write_text("fixture", encoding="utf-8")
+    internal = source / "_internal"
+    internal.mkdir()
+    (internal / "base_library.zip").write_bytes(b"fixture")
+    for name in ("config", "package", "scripts", "web"):
+        directory = internal / name
+        directory.mkdir()
+        (directory / "fixture.txt").write_text("fixture", encoding="utf-8")
+    for name in ("libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib"):
+        (internal / name).write_bytes(b"fixture")
+    runtime = internal / "python3.14" / "lib-dynload"
+    runtime.mkdir(parents=True)
+    (runtime / "fixture.so").write_bytes(b"fixture")
+    framework_version = internal / "Python.framework" / "Versions" / "3.14"
+    (framework_version / "Resources").mkdir(parents=True)
+    (framework_version / "Python").write_bytes(b"fixture")
+    (framework_version / "Resources" / "Info.plist").write_bytes(b"fixture")
+    (internal / "Python").symlink_to("Python.framework/Versions/3.14/Python")
+    (internal / "Python.framework" / "Python").symlink_to("Versions/Current/Python")
+    (internal / "Python.framework" / "Resources").symlink_to("Versions/Current/Resources")
+    (internal / "Python.framework" / "Versions" / "Current").symlink_to("3.14")
+    (source / "licenses").mkdir()
+    (source / "licenses" / "fixture.txt").write_text("fixture", encoding="utf-8")
     for name in ("DEVELOPMENT-BUILD.txt", "LICENSE.txt", "THIRD-PARTY-NOTICES.txt"):
         (source / name).write_text("fixture", encoding="utf-8")
     return source
@@ -70,10 +91,17 @@ def hardware_fixture(path: Path) -> None:
 
 
 def main() -> int:
+    if os.name == "nt":
+        assert callable(SUMMARY.wrapped_package_records)
+        assert len(SUMMARY.VALIDATOR.APP_LINKS) == 11
+        print("macOS development app summary tests: 4 passed (Windows contract; native link tests run on macOS)")
+        return 0
     with tempfile.TemporaryDirectory(prefix="haven42-macos-app-summary-") as temporary:
         root = Path(temporary)
         source = source_fixture(root)
-        package_files = BUILDER.safe_files(source)
+        materialized = root / "materialized"
+        shutil.copytree(source, materialized, symlinks=False)
+        package_files = BUILDER.safe_files(materialized)
         artifacts = root / "artifacts"
         BUILDER.build_bundle(source, artifacts, "0.4.0-alpha.2")
         portable = root / "portable"

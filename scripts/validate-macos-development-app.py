@@ -16,6 +16,31 @@ import tarfile
 APP_NAME = "Haven 42.app"
 ARCHIVE_NAME = "haven42-darwin-arm64-unsigned-development-app.tar.gz"
 EXPECTED_FILES = {APP_NAME, ARCHIVE_NAME, "macos-app-build-result.json", "SHA256SUMS"}
+RESOURCE_RUNTIME_ENTRIES = {
+    "base_library.zip", "config", "package", "scripts", "web",
+}
+APP_LINKS = {
+    "Contents/Frameworks/Python": "Python.framework/Versions/3.14/Python",
+    "Contents/Frameworks/Python.framework/Python": "Versions/Current/Python",
+    "Contents/Frameworks/Python.framework/Resources": "Versions/Current/Resources",
+    "Contents/Frameworks/Python.framework/Versions/Current": "3.14",
+    **{
+        f"Contents/Frameworks/{name}": f"../Resources/Runtime/{name}"
+        for name in RESOURCE_RUNTIME_ENTRIES
+    },
+    "Contents/Frameworks/python3.14": "python3__dot__14",
+    "Contents/Resources/python3.14": "../Frameworks/python3__dot__14",
+}
+EXPECTED_FRAMEWORK_ENTRIES = (
+    RESOURCE_RUNTIME_ENTRIES
+    | {
+        "Python", "Python.framework", "libcrypto.3.dylib", "libssl.3.dylib",
+        "libzstd.1.dylib", "python3.14", "python3__dot__14",
+    }
+)
+EXPECTED_RESOURCE_ENTRIES = {
+    "PortablePackage", "README.txt", "Runtime", "python3.14",
+}
 
 
 class ValidationError(RuntimeError):
@@ -40,20 +65,38 @@ def canonical_sha256(value: object) -> str:
     ).encode("utf-8"))
 
 
-def app_records(app: Path) -> list[dict[str, object]]:
+def app_inventory(
+    app: Path,
+) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
     if not app.is_dir() or app.is_symlink():
         raise ValidationError("app-bundle-missing")
     records: list[dict[str, object]] = []
+    links: list[dict[str, str]] = []
+    resolved_app = app.resolve()
     for path in sorted(app.rglob("*")):
         if path.is_symlink():
-            raise ValidationError("app-bundle-link-rejected")
+            relative = path.relative_to(app).as_posix()
+            try:
+                target = path.readlink().as_posix()
+                path.resolve(strict=True).relative_to(resolved_app)
+            except (OSError, ValueError) as error:
+                raise ValidationError("app-bundle-link-escaped-root") from error
+            if APP_LINKS.get(relative) != target:
+                raise ValidationError("unexpected-app-bundle-link")
+            links.append({"path": relative, "target": target})
+            continue
         if path.is_file():
             records.append({
                 "path": path.relative_to(app).as_posix(),
                 "sha256": sha256(path),
                 "sizeBytes": path.stat().st_size,
             })
-    return sorted(records, key=lambda item: str(item["path"]))
+    if {item["path"] for item in links} != set(APP_LINKS):
+        raise ValidationError("required-app-bundle-link-missing")
+    return (
+        sorted(records, key=lambda item: str(item["path"])),
+        sorted(links, key=lambda item: item["path"]),
+    )
 
 
 def safe_member(name: str) -> str:
@@ -65,8 +108,11 @@ def safe_member(name: str) -> str:
     return path.as_posix()
 
 
-def archive_records(archive: Path) -> list[dict[str, object]]:
+def archive_inventory(
+    archive: Path,
+) -> tuple[list[dict[str, object]], list[dict[str, str]]]:
     records: list[dict[str, object]] = []
+    links: list[dict[str, str]] = []
     names: set[str] = set()
     folded: set[str] = set()
     try:
@@ -83,6 +129,12 @@ def archive_records(archive: Path) -> list[dict[str, object]]:
             folded.add(folded_name)
             if member.isdir():
                 continue
+            relative = PurePosixPath(name).relative_to(APP_NAME).as_posix()
+            if member.issym():
+                if APP_LINKS.get(relative) != member.linkname or member.size != 0:
+                    raise ValidationError("unexpected-archive-link")
+                links.append({"path": relative, "target": member.linkname})
+                continue
             if not member.isfile() or member.size > 134_217_728:
                 raise ValidationError("non-regular-archive-member")
             extracted = stream.extractfile(member)
@@ -92,11 +144,16 @@ def archive_records(archive: Path) -> list[dict[str, object]]:
             if len(data) != member.size:
                 raise ValidationError("invalid-app-archive")
             records.append({
-                "path": PurePosixPath(name).relative_to(APP_NAME).as_posix(),
+                "path": relative,
                 "sha256": sha256_bytes(data),
                 "sizeBytes": len(data),
             })
-    return sorted(records, key=lambda item: str(item["path"]))
+    if {item["path"] for item in links} != set(APP_LINKS):
+        raise ValidationError("required-archive-link-missing")
+    return (
+        sorted(records, key=lambda item: str(item["path"])),
+        sorted(links, key=lambda item: item["path"]),
+    )
 
 
 def checksums(directory: Path) -> dict[str, str]:
@@ -115,6 +172,18 @@ def validate(directory: Path) -> dict[str, object]:
         raise ValidationError("app-output-not-found")
     if {path.name for path in directory.iterdir()} != EXPECTED_FILES:
         raise ValidationError("unexpected-app-output-entry")
+    app = directory / APP_NAME
+    contents = app / "Contents"
+    if (
+        {path.name for path in contents.iterdir()}
+        != {"Frameworks", "Info.plist", "MacOS", "PkgInfo", "Resources"}
+        or {path.name for path in (contents / "MacOS").iterdir()} != {"haven42"}
+        or {path.name for path in (contents / "Frameworks").iterdir()}
+        != EXPECTED_FRAMEWORK_ENTRIES
+        or {path.name for path in (contents / "Resources").iterdir()}
+        != EXPECTED_RESOURCE_ENTRIES
+    ):
+        raise ValidationError("unexpected-app-bundle-layout")
     archive = directory / ARCHIVE_NAME
     evidence_path = directory / "macos-app-build-result.json"
     expected_checksums = {
@@ -146,19 +215,21 @@ def validate(directory: Path) -> dict[str, object]:
         }
     ):
         raise ValidationError("invalid-app-build-result")
-    records = app_records(directory / APP_NAME)
+    records, links = app_inventory(app)
     inventory = evidence.get("inventory")
     if inventory != {
         "algorithm": "sha256",
-        "canonicalSha256": canonical_sha256(records),
+        "canonicalSha256": canonical_sha256({"files": records, "links": links}),
         "fileCount": len(records),
+        "linkCount": len(links),
         "files": records,
+        "links": links,
     }:
         raise ValidationError("app-inventory-mismatch")
-    if archive_records(archive) != records:
+    if archive_inventory(archive) != (records, links):
         raise ValidationError("app-archive-inventory-mismatch")
     try:
-        with (directory / APP_NAME / "Contents" / "Info.plist").open("rb") as stream:
+        with (app / "Contents" / "Info.plist").open("rb") as stream:
             plist = plistlib.load(stream)
     except (OSError, plistlib.InvalidFileException) as error:
         raise ValidationError("invalid-app-info-plist") from error

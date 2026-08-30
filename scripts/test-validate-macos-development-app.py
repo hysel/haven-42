@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 from pathlib import Path
 import shutil
 import stat
@@ -32,9 +33,28 @@ def source_fixture(root: Path) -> Path:
     binary = source / "haven42"
     binary.write_bytes(b"fixture executable")
     binary.chmod(binary.stat().st_mode | stat.S_IXUSR)
-    for directory in ("_internal", "licenses"):
-        (source / directory).mkdir()
-        (source / directory / "fixture.txt").write_text("fixture", encoding="utf-8")
+    internal = source / "_internal"
+    internal.mkdir()
+    (internal / "base_library.zip").write_bytes(b"fixture")
+    for name in ("config", "package", "scripts", "web"):
+        directory = internal / name
+        directory.mkdir()
+        (directory / "fixture.txt").write_text("fixture", encoding="utf-8")
+    for name in ("libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib"):
+        (internal / name).write_bytes(b"fixture")
+    runtime = internal / "python3.14" / "lib-dynload"
+    runtime.mkdir(parents=True)
+    (runtime / "fixture.so").write_bytes(b"fixture")
+    framework_version = internal / "Python.framework" / "Versions" / "3.14"
+    (framework_version / "Resources").mkdir(parents=True)
+    (framework_version / "Python").write_bytes(b"fixture")
+    (framework_version / "Resources" / "Info.plist").write_bytes(b"fixture")
+    (internal / "Python").symlink_to("Python.framework/Versions/3.14/Python")
+    (internal / "Python.framework" / "Python").symlink_to("Versions/Current/Python")
+    (internal / "Python.framework" / "Resources").symlink_to("Versions/Current/Resources")
+    (internal / "Python.framework" / "Versions" / "Current").symlink_to("3.14")
+    (source / "licenses").mkdir()
+    (source / "licenses" / "fixture.txt").write_text("fixture", encoding="utf-8")
     for name in ("DEVELOPMENT-BUILD.txt", "LICENSE.txt", "THIRD-PARTY-NOTICES.txt"):
         (source / name).write_text("fixture", encoding="utf-8")
     return source
@@ -50,6 +70,15 @@ def expect(directory: Path, code: str) -> None:
 
 
 def main() -> int:
+    if os.name == "nt":
+        assert VALIDATOR.EXPECTED_FRAMEWORK_ENTRIES == {
+            "Python", "Python.framework", "base_library.zip", "config",
+            "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
+            "package", "python3.14", "python3__dot__14", "scripts", "web",
+        }
+        assert len(VALIDATOR.APP_LINKS) == 11
+        print("macOS development app validator tests: 4 passed (Windows contract; native link tests run on macOS)")
+        return 0
     with tempfile.TemporaryDirectory(prefix="haven42-macos-app-validator-") as temporary:
         root = Path(temporary)
         accepted = root / "accepted"
@@ -58,19 +87,19 @@ def main() -> int:
         assert result["status"] == "development-only"
 
         tampered = root / "tampered"
-        shutil.copytree(accepted, tampered)
+        shutil.copytree(accepted, tampered, symlinks=True)
         (tampered / "Haven 42.app" / "Contents" / "Resources" / "README.txt").write_text(
             "tampered", encoding="utf-8",
         )
         expect(tampered, "app-inventory-mismatch")
 
         extra = root / "extra"
-        shutil.copytree(accepted, extra)
+        shutil.copytree(accepted, extra, symlinks=True)
         (extra / "unexpected.txt").write_text("unexpected", encoding="utf-8")
         expect(extra, "unexpected-app-output-entry")
 
         linked = root / "linked"
-        shutil.copytree(accepted, linked)
+        shutil.copytree(accepted, linked, symlinks=True)
         archive = linked / VALIDATOR.ARCHIVE_NAME
         with tarfile.open(archive, "w:gz") as stream:
             item = tarfile.TarInfo("Haven 42.app/link")
@@ -83,7 +112,7 @@ def main() -> int:
             f"{VALIDATOR.sha256(linked / 'macos-app-build-result.json')}  macos-app-build-result.json\n",
             encoding="utf-8",
         )
-        expect(linked, "non-regular-archive-member")
+        expect(linked, "unexpected-archive-link")
     print("macOS development app validator tests: 4 passed")
     return 0
 

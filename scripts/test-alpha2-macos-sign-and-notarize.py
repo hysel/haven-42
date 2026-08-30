@@ -95,7 +95,7 @@ class SigningTests(unittest.TestCase):
 
             files, frameworks = MODULE.code_targets(app, runner=macho)
             self.assertIn(standalone, files)
-            self.assertIn(app / "Contents" / "MacOS" / "haven42", files)
+            self.assertNotIn(app / "Contents" / "MacOS" / "haven42", files)
             self.assertNotIn(framework_binary, files)
             self.assertEqual(frameworks, [framework])
 
