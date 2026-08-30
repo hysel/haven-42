@@ -79,6 +79,26 @@ class FakeRunner:
 
 
 class SigningTests(unittest.TestCase):
+    def test_framework_macho_files_are_signed_as_one_framework_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            app = source_app(Path(temporary))
+            standalone = app / "Contents" / "Frameworks" / "libssl.3.dylib"
+            framework = app / "Contents" / "Frameworks" / "Python.framework"
+            framework_binary = framework / "Versions" / "3.14" / "Python"
+            standalone.parent.mkdir(parents=True, exist_ok=True)
+            standalone.write_bytes(b"synthetic-mach-o")
+            framework_binary.parent.mkdir(parents=True)
+            framework_binary.write_bytes(b"synthetic-mach-o")
+
+            def macho(command: list[str], **_: object) -> subprocess.CompletedProcess:
+                return completed(command, stdout=b"Mach-O 64-bit executable arm64\n")
+
+            files, frameworks = MODULE.code_targets(app, runner=macho)
+            self.assertIn(standalone, files)
+            self.assertIn(app / "Contents" / "MacOS" / "haven42", files)
+            self.assertNotIn(framework_binary, files)
+            self.assertEqual(frameworks, [framework])
+
     def test_signed_notarized_result_is_sanitized_and_stapled_archive_is_repacked(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
