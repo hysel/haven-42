@@ -39,6 +39,38 @@ from typing import Any, Callable
 
 SOURCE_ROOT = Path(__file__).resolve().parent.parent
 ROOT = Path(getattr(sys, "_MEIPASS", SOURCE_ROOT))
+
+
+def select_application_root(
+    runtime_root: Path,
+    *,
+    frozen: bool,
+    platform_name: str,
+) -> Path:
+    """Use the physical Resources tree for a frozen, conventional macOS app."""
+    if (
+        not frozen
+        or platform_name != "darwin"
+        or runtime_root.name != "Frameworks"
+        or runtime_root.parent.name != "Contents"
+    ):
+        return runtime_root
+    contents = runtime_root.parent
+    resources = contents / "Resources" / "Runtime"
+    try:
+        if resources.is_symlink() or not resources.is_dir():
+            raise ValueError("macos-resource-root-missing")
+        resources.resolve(strict=True).relative_to(contents.resolve(strict=True))
+    except (OSError, ValueError) as error:
+        raise RuntimeError("Packaged macOS resource root is invalid.") from error
+    return resources
+
+
+ROOT = select_application_root(
+    ROOT,
+    frozen=bool(getattr(sys, "frozen", False)),
+    platform_name=sys.platform,
+)
 STATIC_ROOT = ROOT / "web" / "static"
 sys.path.insert(0, str(ROOT / "scripts"))
 
