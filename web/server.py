@@ -2170,7 +2170,9 @@ class HavenState:
             if MODEL_NAME.fullmatch(name):
                 model_digests[name] = digest if MODEL_DIGEST.fullmatch(digest) else ""
         installed = set(model_digests)
-        if model not in installed:
+        requested_leaf = model.rsplit("/", 1)[-1]
+        verified_model = model if ":" in requested_leaf else f"{model}:latest"
+        if verified_model not in installed:
             self._update_model_install_progress(
                 approval_token, phase="failed", status="Ollama did not report the installed model", terminal=True,
             )
@@ -2181,7 +2183,7 @@ class HavenState:
             self.model_digests = model_digests
             self.discovered_model_candidates.discard(model)
         decisions = build_model_decisions(sorted(installed), self.model_recommendations, model_digests)
-        option = next(item for item in decisions["modelOptions"] if item["name"] == model)
+        option = next(item for item in decisions["modelOptions"] if item["name"] == verified_model)
         self._update_model_install_progress(
             approval_token,
             phase="complete",
@@ -2194,7 +2196,7 @@ class HavenState:
             "schemaVersion": 1,
             "kind": "model-install-result",
             "status": "installed",
-            "model": model,
+            "model": verified_model,
             "verifiedByProviderCatalog": True,
             "selectedAutomatically": False,
             "modelOption": option,

@@ -181,8 +181,9 @@ class FakeOllama(BaseHTTPRequestHandler):
                     "eval_duration": 5_000_000_000,
                 })
         elif self.path == "/api/pull" and body.get("stream") is True:
-            if model not in FakeState.models:
-                FakeState.models.append(model)
+            reported_model = model if ":" in model.rsplit("/", 1)[-1] else f"{model}:latest"
+            if reported_model not in FakeState.models:
+                FakeState.models.append(reported_model)
             records = [
                 {"status": "pulling manifest"},
                 {"status": "pulling abcdef", "completed": 25, "total": 100},
@@ -1612,7 +1613,23 @@ def main() -> int:
         with state.lock:
             state.models = tuple(name for name in state.models if name != "community/example-writing:7b")
             state.model_digests.pop("community/example-writing:7b", None)
-        checks += 13
+        status, alias_review, _ = request_json(
+            origin + "/api/model-install/prepare", "POST",
+            {"model": "qwen3.5"}, token, origin,
+        )
+        assert status == 200
+        status, alias_result, _ = request_json(
+            origin + "/api/model-install/execute", "POST",
+            {"approvalToken": alias_review["approvalToken"], "confirmed": True}, token, origin,
+        )
+        assert status == 200
+        assert alias_result["model"] == "qwen3.5:latest"
+        assert alias_result["modelOption"]["name"] == "qwen3.5:latest"
+        FakeState.models.remove("qwen3.5:latest")
+        with state.lock:
+            state.models = tuple(name for name in state.models if name != "qwen3.5:latest")
+            state.model_digests.pop("qwen3.5:latest", None)
+        checks += 17
         fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
@@ -1631,13 +1648,37 @@ def main() -> int:
         ) + '<a href="/library/model:cloud">cloud</a><a href="/library/bad%20model">bad</a>'
         assert len(search_globals["parse_ollama_search_html"](hostile_html)) == 20
         assert search_globals["_NoRedirect"]().redirect_request(None, None, 302, "", {}, "") is None
+        macos_ca = DIAGNOSTIC_TEST_PARENT / "macos-system-ca.pem"
+        macos_ca.write_text("fixed-system-ca-fixture", encoding="utf-8")
+
+        class FakeContext:
+            def __init__(self, populated):
+                self.populated = populated
+
+            def get_ca_certs(self):
+                return [object()] if self.populated else []
+
+        context_calls = []
+
+        def fake_context(*, cafile=None):
+            context_calls.append(cafile)
+            return FakeContext(cafile is not None)
+
+        with (
+            patch.object(search_globals["sys"], "platform", "darwin"),
+            patch.dict(search_globals, {"MACOS_SYSTEM_CA_BUNDLES": (macos_ca,)}),
+            patch.object(search_globals["ssl"], "create_default_context", side_effect=fake_context),
+        ):
+            selected_context = search_globals["_catalog_ssl_context"]()
+        assert selected_context.get_ca_certs()
+        assert context_calls == [None, str(macos_ca.resolve())]
         try:
             WEB.search_ollama_catalog("safe", timeout_seconds=16)
         except search_globals["ModelCatalogSearchError"] as error:
             assert str(error) == "invalid-model-search-timeout"
         else:
             raise AssertionError("unsafe model search timeout must be rejected")
-        checks += 14
+        checks += 16
 
         cross_capability = WEB.build_model_decisions(
             ["chat-only:1b"],

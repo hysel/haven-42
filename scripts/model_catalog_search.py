@@ -4,7 +4,10 @@
 from __future__ import annotations
 
 from html.parser import HTMLParser
+from pathlib import Path
 import re
+import ssl
+import sys
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -16,6 +19,7 @@ MAX_QUERY_CHARACTERS = 64
 MAX_RESULTS = 20
 MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$")
 QUERY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9 ._/:+-]{0,63}$")
+MACOS_SYSTEM_CA_BUNDLES = (Path("/etc/ssl/cert.pem"),)
 
 
 class ModelCatalogSearchError(ValueError):
@@ -77,6 +81,21 @@ def parse_ollama_search_html(content: str) -> list[str]:
     return parser.models[:MAX_RESULTS]
 
 
+def _catalog_ssl_context() -> ssl.SSLContext:
+    """Use interpreter trust, or the fixed macOS system bundle when it is empty."""
+    context = ssl.create_default_context()
+    if context.get_ca_certs() or sys.platform != "darwin":
+        return context
+    for candidate in MACOS_SYSTEM_CA_BUNDLES:
+        try:
+            resolved = candidate.resolve(strict=True)
+        except OSError:
+            continue
+        if resolved.is_file() and resolved.stat().st_size > 0:
+            return ssl.create_default_context(cafile=str(resolved))
+    raise ModelCatalogSearchError("model-catalog-system-trust-unavailable")
+
+
 def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
     """Send only a bounded query to the fixed public catalog and return model names."""
     query = validate_query(query)
@@ -92,8 +111,12 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
         method="GET",
     )
     # Search consent covers the fixed catalog origin, not an inherited proxy.
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
     try:
+        opener = urllib.request.build_opener(
+            urllib.request.ProxyHandler({}),
+            urllib.request.HTTPSHandler(context=_catalog_ssl_context()),
+            _NoRedirect(),
+        )
         with opener.open(request, timeout=timeout_seconds) as response:
             final = urllib.parse.urlsplit(response.geturl())
             if (
