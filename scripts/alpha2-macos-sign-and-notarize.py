@@ -146,7 +146,12 @@ def is_macho(path: Path, *, runner: Callable) -> bool:
 def code_targets(app: Path, *, runner: Callable) -> tuple[list[Path], list[Path]]:
     files = [
         path for path in app.rglob("*")
-        if path.is_file() and not path.is_symlink() and is_macho(path, runner=runner)
+        if (
+            path.is_file()
+            and not path.is_symlink()
+            and not any(parent.name.endswith(".framework") for parent in path.parents)
+            and is_macho(path, runner=runner)
+        )
     ]
     frameworks = [
         path for path in app.rglob("*.framework")
