@@ -27,8 +27,26 @@ def fixture(root: Path) -> Path:
     executable = source / "haven42"
     executable.write_bytes(b"fixture executable")
     executable.chmod(executable.stat().st_mode | stat.S_IXUSR)
-    (source / "_internal").mkdir()
-    (source / "_internal" / "app.js").write_text("fixture", encoding="utf-8")
+    internal = source / "_internal"
+    internal.mkdir()
+    (internal / "base_library.zip").write_bytes(b"fixture")
+    for name in ("config", "package", "scripts", "web"):
+        directory = internal / name
+        directory.mkdir()
+        (directory / "fixture.txt").write_text("fixture", encoding="utf-8")
+    for name in ("libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib"):
+        (internal / name).write_bytes(b"fixture")
+    runtime = internal / "python3.14" / "lib-dynload"
+    runtime.mkdir(parents=True)
+    (runtime / "fixture.so").write_bytes(b"fixture")
+    framework_version = internal / "Python.framework" / "Versions" / "3.14"
+    (framework_version / "Resources").mkdir(parents=True)
+    (framework_version / "Python").write_bytes(b"fixture")
+    (framework_version / "Resources" / "Info.plist").write_bytes(b"fixture")
+    (internal / "Python").symlink_to("Python.framework/Versions/3.14/Python")
+    (internal / "Python.framework" / "Python").symlink_to("Versions/Current/Python")
+    (internal / "Python.framework" / "Resources").symlink_to("Versions/Current/Resources")
+    (internal / "Python.framework" / "Versions" / "Current").symlink_to("3.14")
     (source / "licenses").mkdir()
     (source / "licenses" / "MIT.txt").write_text("fixture", encoding="utf-8")
     for name in ("DEVELOPMENT-BUILD.txt", "LICENSE.txt", "THIRD-PARTY-NOTICES.txt"):
@@ -37,6 +55,18 @@ def fixture(root: Path) -> Path:
 
 
 def main() -> int:
+    if os.name == "nt":
+        # Windows cannot create symlinks without an optional host privilege.
+        # The same test runs the real link-preserving build on macOS/Linux CI;
+        # keep Windows deterministic while still checking the pinned contract.
+        assert MODULE.EXPECTED_INTERNAL_ENTRIES == {
+            "Python", "Python.framework", "base_library.zip", "config",
+            "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
+            "package", "python3.14", "scripts", "web",
+        }
+        assert len(MODULE.APP_LINKS) == 11
+        print("macOS development app builder tests: 3 passed (Windows contract; native link build runs on macOS)")
+        return 0
     with tempfile.TemporaryDirectory(prefix="haven42-macos-app-test-") as temporary:
         root = Path(temporary)
         source = fixture(root)
@@ -58,7 +88,11 @@ def main() -> int:
         )
         if os.name != "nt":
             assert (app / "Contents" / "MacOS" / "haven42").stat().st_mode & stat.S_IXUSR
-        assert (app / "Contents" / "Frameworks" / "app.js").is_file()
+        assert (app / "Contents" / "Resources" / "Runtime" / "config" / "fixture.txt").is_file()
+        assert (app / "Contents" / "Frameworks" / "config").is_symlink()
+        assert (app / "Contents" / "Frameworks" / "python3.14").is_symlink()
+        assert (app / "Contents" / "Frameworks" / "python3__dot__14").is_dir()
+        assert (app / "Contents" / "Resources" / "python3.14").is_symlink()
         assert (
             app / "Contents" / "Resources" / "PortablePackage" / "licenses" / "MIT.txt"
         ).is_file()
@@ -74,6 +108,7 @@ def main() -> int:
         )
         assert evidence == result
         assert evidence["inventory"]["fileCount"] >= 9
+        assert evidence["inventory"]["linkCount"] == len(MODULE.APP_LINKS)
         assert (output / "haven42-darwin-arm64-unsigned-development-app.tar.gz").is_file()
         assert len((output / "SHA256SUMS").read_text(encoding="utf-8").splitlines()) == 2
         try:

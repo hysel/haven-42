@@ -7,6 +7,7 @@ import argparse
 from datetime import datetime, timezone
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -53,6 +54,49 @@ PORTABLE_VALIDATOR = load_portable_validator()
 
 class SummaryError(RuntimeError):
     """Raised when the physical app evidence cannot be proven."""
+
+
+def logical_file_records(root: Path, prefix: str) -> list[dict[str, object]]:
+    records: list[dict[str, object]] = []
+    if root.is_file():
+        return [{
+            "path": prefix,
+            "sha256": VALIDATOR.sha256(root),
+            "sizeBytes": root.stat().st_size,
+        }]
+    for current, directories, files in os.walk(root, followlinks=True):
+        directories.sort()
+        files.sort()
+        current_path = Path(current)
+        for name in files:
+            path = current_path / name
+            relative = path.relative_to(root).as_posix()
+            records.append({
+                "path": f"{prefix}/{relative}",
+                "sha256": VALIDATOR.sha256(path),
+                "sizeBytes": path.stat().st_size,
+            })
+    return records
+
+
+def wrapped_package_records(app: Path) -> list[dict[str, object]]:
+    records = logical_file_records(app / "Contents" / "MacOS" / "haven42", "haven42")
+    frameworks = app / "Contents" / "Frameworks"
+    for name in sorted(
+        {
+            "Python", "Python.framework", "base_library.zip", "config",
+            "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
+            "package", "python3.14", "scripts", "web",
+        }
+    ):
+        records.extend(logical_file_records(frameworks / name, f"_internal/{name}"))
+    portable = app / "Contents" / "Resources" / "PortablePackage"
+    for name in (
+        "DEVELOPMENT-BUILD.txt", "LICENSE.txt", "THIRD-PARTY-NOTICES.txt",
+        "licenses",
+    ):
+        records.extend(logical_file_records(portable / name, name))
+    return sorted(records, key=lambda item: str(item["path"]))
 
 
 def load_json(path: Path) -> dict:
@@ -114,31 +158,8 @@ def summarize(
     package_files = package_inventory.get("files")
     if not isinstance(package_files, list):
         raise SummaryError("invalid-portable-package-inventory")
-    app_files = app_result["inventory"]["files"]
-    wrapped_files = []
-    extra_paths = set()
-    for record in app_files:
-        path = record.get("path") if isinstance(record, dict) else None
-        if not isinstance(path, str):
-            raise SummaryError("invalid-app-inventory")
-        if path == "Contents/MacOS/haven42":
-            wrapped_files.append({**record, "path": "haven42"})
-        elif path.startswith("Contents/Frameworks/"):
-            wrapped_files.append({
-                **record,
-                "path": "_internal/" + path[len("Contents/Frameworks/"):],
-            })
-        elif path.startswith("Contents/Resources/PortablePackage/"):
-            wrapped_files.append({
-                **record,
-                "path": path[len("Contents/Resources/PortablePackage/"):],
-            })
-        else:
-            extra_paths.add(path)
-    wrapped_files.sort(key=lambda item: str(item["path"]))
-    if wrapped_files != package_files or extra_paths != {
-        "Contents/Info.plist", "Contents/PkgInfo", "Contents/Resources/README.txt",
-    }:
+    app = artifact_directory / "Haven 42.app"
+    if wrapped_package_records(app) != package_files:
         raise SummaryError("app-portable-package-parity-mismatch")
     try:
         package_log = package_test_log.read_text(encoding="utf-8")
@@ -160,7 +181,6 @@ def summarize(
             raise SummaryError("browser-test-marker-missing-or-ambiguous")
         browser_checks = int(browser_match.group(1))
 
-    app = artifact_directory / "Haven 42.app"
     executable = app / "Contents" / "MacOS" / "haven42"
     file_probe = tool(["/usr/bin/file", "-b", str(executable)])
     if file_probe.returncode != 0 or not re.search(

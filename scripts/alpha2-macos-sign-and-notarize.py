@@ -32,6 +32,21 @@ BUNDLE_ID = "org.haven42.desktop"
 ALLOWED_VERSIONS = {"0.4.0-alpha.2"}
 IDENTITY_SHA1 = re.compile(r"[0-9A-Fa-f]{40}")
 PROFILE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
+RESOURCE_RUNTIME_ENTRIES = {
+    "base_library.zip", "config", "package", "scripts", "web",
+}
+SOURCE_APP_LINKS = {
+    "Contents/Frameworks/Python": "Python.framework/Versions/3.14/Python",
+    "Contents/Frameworks/Python.framework/Python": "Versions/Current/Python",
+    "Contents/Frameworks/Python.framework/Resources": "Versions/Current/Resources",
+    "Contents/Frameworks/Python.framework/Versions/Current": "3.14",
+    **{
+        f"Contents/Frameworks/{name}": f"../Resources/Runtime/{name}"
+        for name in RESOURCE_RUNTIME_ENTRIES
+    },
+    "Contents/Frameworks/python3.14": "python3__dot__14",
+    "Contents/Resources/python3.14": "../Frameworks/python3__dot__14",
+}
 
 
 class SigningError(RuntimeError):
@@ -94,8 +109,22 @@ def validate_source_app(app: Path) -> str:
     executable = app / "Contents" / "MacOS" / "haven42"
     if not plist_path.is_file() or not executable.is_file():
         raise SigningError("source-app-incomplete")
-    if any(path.is_symlink() for path in app.rglob("*")):
-        raise SigningError("source-app-link-rejected")
+    resolved_app = app.resolve()
+    observed_links: dict[str, str] = {}
+    for path in app.rglob("*"):
+        if not path.is_symlink():
+            continue
+        relative = path.relative_to(app).as_posix()
+        try:
+            target = path.readlink().as_posix()
+            path.resolve(strict=True).relative_to(resolved_app)
+        except (OSError, ValueError) as error:
+            raise SigningError("source-app-link-escaped-root") from error
+        if SOURCE_APP_LINKS.get(relative) != target:
+            raise SigningError("source-app-link-rejected")
+        observed_links[relative] = target
+    if observed_links != SOURCE_APP_LINKS:
+        raise SigningError("source-app-link-set-incomplete")
     try:
         with plist_path.open("rb") as stream:
             plist = plistlib.load(stream)
@@ -144,11 +173,13 @@ def is_macho(path: Path, *, runner: Callable) -> bool:
 
 
 def code_targets(app: Path, *, runner: Callable) -> tuple[list[Path], list[Path]]:
+    main_executable = app / "Contents" / "MacOS" / "haven42"
     files = [
         path for path in app.rglob("*")
         if (
             path.is_file()
             and not path.is_symlink()
+            and path != main_executable
             and not any(parent.name.endswith(".framework") for parent in path.parents)
             and is_macho(path, runner=runner)
         )
@@ -298,10 +329,8 @@ def execute(
     ))
     try:
         app = temporary / APP_NAME
-        shutil.copytree(source_app, app, symlinks=False)
+        shutil.copytree(source_app, app, symlinks=True)
         files, frameworks = code_targets(app, runner=runner)
-        if not files:
-            raise SigningError("no-mach-o-code-found")
         for target in files:
             sign_target(target, identity, runner=runner)
         for target in frameworks:
