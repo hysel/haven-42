@@ -672,7 +672,9 @@ try {
   const showsAmdTools = guided.factsText.includes("AMD graphics tools");
   const showsNvidiaTools = guided.factsText.includes("NVIDIA tools");
   const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
-  const storageBoundaryText = process.platform === "win32"
+  const guidedIsWindows = /^Operating systemWindows\b/i.test(guided.factsText);
+  const guidedIsMacos = /^Operating systemmacOS\b/i.test(guided.factsText);
+  const storageBoundaryText = guidedIsWindows
     ? "Does not use Program Files or AppData"
     : "Does not use system application folders";
   if (
@@ -713,7 +715,7 @@ try {
     )
   ) throw new Error(`guided-installation-progress:${JSON.stringify(guided)}`);
   if (
-    process.platform === "darwin"
+    guidedIsMacos
     && guided.macosInstallLink
     && (
       guided.nextDisabled
@@ -723,7 +725,7 @@ try {
     throw new Error(`guided-macos-external-setup:${JSON.stringify(guided)}`);
   }
   if (
-    process.platform === "darwin"
+    guidedIsMacos
     && !guided.macosInstallLink
     && (
       !guided.nextDisabled
@@ -734,7 +736,7 @@ try {
     throw new Error(`guided-macos-no-fitting-model:${JSON.stringify(guided)}`);
   }
   if (
-    process.platform !== "darwin"
+    !guidedIsMacos
     && !guided.installationPanel
     && (!guided.nextDisabled || guided.nextText !== "Local setup unavailable")
   ) {
