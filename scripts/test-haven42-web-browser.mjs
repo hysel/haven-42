@@ -714,13 +714,24 @@ try {
   ) throw new Error(`guided-installation-progress:${JSON.stringify(guided)}`);
   if (
     process.platform === "darwin"
+    && guided.macosInstallLink
     && (
-      !guided.macosInstallLink
-      || guided.nextDisabled
+      guided.nextDisabled
       || guided.nextText !== "I've installed Ollama — check again"
     )
   ) {
     throw new Error(`guided-macos-external-setup:${JSON.stringify(guided)}`);
+  }
+  if (
+    process.platform === "darwin"
+    && !guided.macosInstallLink
+    && (
+      !guided.nextDisabled
+      || guided.nextText !== "Local setup unavailable"
+      || !guided.planText.includes("could not safely choose a local AI model")
+    )
+  ) {
+    throw new Error(`guided-macos-no-fitting-model:${JSON.stringify(guided)}`);
   }
   if (
     process.platform !== "darwin"
