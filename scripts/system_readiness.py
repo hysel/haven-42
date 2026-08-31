@@ -177,6 +177,27 @@ def _windows_platform_facts() -> dict[str, Any]:
     return facts
 
 
+def _macos_platform_facts(runner: ProbeRunner) -> dict[str, Any]:
+    """Return a bounded, non-identifying Mac model description."""
+    facts: dict[str, Any] = {"productName": None}
+    profiler = runner.run("system_profiler", ("SPHardwareDataType", "-json"))
+    if profiler["state"] != "detected":
+        return facts
+    try:
+        records = json.loads(profiler["output"]).get("SPHardwareDataType", [])
+    except (json.JSONDecodeError, AttributeError):
+        return facts
+    if not isinstance(records, list) or not records or not isinstance(records[0], dict):
+        return facts
+    machine_name = _sanitize_text(str(records[0].get("machine_name", "")), 80)
+    chip_type = _sanitize_text(str(records[0].get("chip_type", "")), 80)
+    if machine_name and re.fullmatch(r"[A-Za-z0-9 .()+_-]{1,80}", machine_name):
+        facts["productName"] = machine_name
+        if chip_type and re.fullmatch(r"[A-Za-z0-9 .()+_-]{1,80}", chip_type):
+            facts["productName"] = f"{machine_name} · {chip_type}"
+    return facts
+
+
 LINUX_OS_RELEASE_PATHS = {
     Path("/etc/os-release"),
     Path("/usr/lib/os-release"),
@@ -540,6 +561,9 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
     if system == "darwin":
         system = "macos"
     windows_facts = _windows_platform_facts()
+    macos_facts = _macos_platform_facts(runner) if system == "macos" else {
+        "productName": None,
+    }
     linux_facts = _linux_platform_facts() if system == "linux" else {
         "distributionId": None,
         "distributionVersion": None,
@@ -578,7 +602,10 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
             "availableStorageGiB": storage,
             "productName": (
                 windows_facts["productName"]
-                if system == "windows" else linux_facts["productName"]
+                if system == "windows"
+                else macos_facts["productName"]
+                if system == "macos"
+                else linux_facts["productName"]
             ),
             "buildNumber": windows_facts["buildNumber"],
             "cpuFeatures": windows_facts["cpuFeatures"],

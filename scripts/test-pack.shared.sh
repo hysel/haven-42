@@ -2649,6 +2649,7 @@ assert policy["browser"]["fixedExternalNavigationUrls"] == [
     "https://github.com/ollama/ollama/releases",
     "https://ollama.com/download/windows",
     "https://ollama.com/download/linux",
+    "https://ollama.com/download/mac",
 ]
 assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
 assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
@@ -2747,7 +2748,9 @@ assert external_links == sorted([
     'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
     'href="https://github.com/ollama/ollama/releases"',
 ])
-assert 'link.href = state.platformFamily === "linux" ? "https://ollama.com/download/linux" : "https://ollama.com/download/windows"' in assets
+assert '"https://ollama.com/download/mac"' in assets
+assert '"https://ollama.com/download/linux"' in assets
+assert '"https://ollama.com/download/windows"' in assets
 assert "innerHTML" not in assets
 assert html.index('id="text-panel"') < html.index('id="connection-panel"')
 assert 'class="interaction-grid"' in html and 'class="configuration-column"' in html

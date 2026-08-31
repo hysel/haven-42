@@ -18,7 +18,8 @@
         "https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml",
         "https://github.com/ollama/ollama/releases",
         "https://ollama.com/download/windows",
-        "https://ollama.com/download/linux"
+        "https://ollama.com/download/linux",
+        "https://ollama.com/download/mac"
       ],
     "fixedExternalNavigationRequiresExplicitClick": true,
     "approvedParameterizedNavigationOrigins": ["https://search.brave.com/search"],

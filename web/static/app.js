@@ -1799,7 +1799,9 @@ function acceleratorDisplayName(vendor, model) {
 }
 
 function readinessFacts(snapshot) {
-  const platformName = snapshot.platform.productName || snapshot.platform.operatingSystem;
+  const platformName = snapshot.platform.operatingSystem === "macos"
+    ? "macOS"
+    : snapshot.platform.productName || snapshot.platform.operatingSystem;
   const platformBuild = Number.isSafeInteger(snapshot.platform.buildNumber)
     ? ` · build ${snapshot.platform.buildNumber}`
     : "";
@@ -1863,8 +1865,12 @@ function readinessFacts(snapshot) {
         : "Unavailable"],
     ]
     : [];
+  const macDetails = snapshot.platform.operatingSystem === "macos"
+    ? [["Mac model", snapshot.platform.productName || "Unavailable"]]
+    : [];
   return [
     ["Operating system", `${platformName}${platformBuild} · ${snapshot.platform.architecture}`],
+    ...macDetails,
     ["Processor", processor],
     ["Memory", memory],
     ["Available space", storage],
@@ -2520,19 +2526,33 @@ function renderSetupPlan(plan) {
       progress.textContent = "Component details are temporarily unavailable. Setup has not started.";
     });
   } else if (alphaModel) {
+    const macosExternalSetup = state.platformFamily === "macos";
     const disclosure = document.createElement("p");
     disclosure.className = "notice";
-    disclosure.textContent = runtimeCompatibility?.decision === "deny"
+    disclosure.textContent = macosExternalSetup
+      ? "Haven 42 found a suitable model, but it does not install the Ollama app on macOS. Install Ollama from its official macOS download, open it, then return here and check the connection. Haven 42 will not use Terminal or change system settings."
+      : runtimeCompatibility?.decision === "deny"
       ? `This model fits the computer, but Haven 42 does not have an approved ${runtimeCompatibility.engine || "local AI engine"} version for it on this operating system. Setup stopped before downloading anything. Technical reason: ${runtimeCompatibility.reason || "no-compatible-runtime"}.`
       : "This model may fit your computer, but automatic setup has not passed all required tests. You can view manual instructions instead; Haven 42 will not make changes for you.";
     const controls = document.createElement("div");
     controls.className = "wizard-actions";
-    const instructions = document.createElement("button");
-    instructions.type = "button";
-    instructions.className = "button secondary";
-    instructions.textContent = "Show manual steps";
-    instructions.addEventListener("click", () => renderManualAlphaSteps(plan, container));
-    controls.append(instructions);
+    if (macosExternalSetup) {
+      const installLink = document.createElement("a");
+      installLink.className = "button secondary";
+      installLink.href = "https://ollama.com/download/mac";
+      installLink.target = "_blank";
+      installLink.rel = "noopener noreferrer";
+      installLink.referrerPolicy = "no-referrer";
+      installLink.textContent = "Install Ollama for macOS";
+      controls.append(installLink);
+    } else {
+      const instructions = document.createElement("button");
+      instructions.type = "button";
+      instructions.className = "button secondary";
+      instructions.textContent = "Show manual steps";
+      instructions.addEventListener("click", () => renderManualAlphaSteps(plan, container));
+      controls.append(instructions);
+    }
     container.append(disclosure, controls);
   }
 }
@@ -2550,12 +2570,20 @@ function renderManualAlphaSteps(plan, container) {
   title.textContent = "Manual setup";
   const text = document.createElement("p");
   const technicalModelName = plan.alphaCandidate?.modelSelection?.selected?.name;
-  const platformLabel = state.platformFamily === "linux" ? "Linux" : "Windows";
+  const platformLabel = state.platformFamily === "linux"
+    ? "Linux"
+    : state.platformFamily === "macos"
+      ? "macOS"
+      : "Windows";
   text.textContent = technicalModelName
     ? `Install the Ollama local AI engine from its official ${platformLabel} download, then add the recommended model for chat, writing, and summaries. Its technical name is ${technicalModelName}. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`
     : `Install the Ollama local AI engine from its official ${platformLabel} download, then add a compatible text model. Return here and choose Use another AI server. Haven 42 will not make changes in manual mode.`;
   const link = document.createElement("a");
-  link.href = state.platformFamily === "linux" ? "https://ollama.com/download/linux" : "https://ollama.com/download/windows";
+  link.href = state.platformFamily === "linux"
+    ? "https://ollama.com/download/linux"
+    : state.platformFamily === "macos"
+      ? "https://ollama.com/download/mac"
+      : "https://ollama.com/download/windows";
   link.target = "_blank";
   link.rel = "noopener noreferrer";
   link.referrerPolicy = "no-referrer";
@@ -2673,9 +2701,24 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
   }
 }
 
+function updateReadinessNextControl(managedSetupAvailable) {
+  const macosExternalSetup = state.platformFamily === "macos" && !managedSetupAvailable;
+  byId("wizard-readiness-next").disabled = !macosExternalSetup;
+  byId("wizard-readiness-next").textContent = managedSetupAvailable
+    ? "Complete setup above"
+    : macosExternalSetup
+      ? "I've installed Ollama — check again"
+      : "Local setup unavailable";
+}
+
 async function runReadiness() {
   showWizardStep("readiness");
-  byId("wizard-scan-status").textContent = `Checking ${state.platformFamily === "linux" ? "Linux" : "Windows"}, memory, storage, and graphics hardware…`;
+  const platformLabel = state.platformFamily === "linux"
+    ? "Linux"
+    : state.platformFamily === "macos"
+      ? "macOS"
+      : "Windows";
+  byId("wizard-scan-status").textContent = `Checking ${platformLabel}, memory, storage, and graphics hardware…`;
   byId("wizard-readiness-next").disabled = true;
   try {
     const snapshot = await api("/api/readiness", { force: true });
@@ -2693,10 +2736,7 @@ async function runReadiness() {
       plan.alphaCandidate?.managedSetupCandidateAvailable === true
       && Boolean(plan.alphaCandidate?.managedPlan)
     );
-    byId("wizard-readiness-next").disabled = true;
-    byId("wizard-readiness-next").textContent = managedSetupAvailable
-      ? "Complete setup above"
-      : "Local setup unavailable";
+    updateReadinessNextControl(managedSetupAvailable);
   } catch (error) {
     byId("wizard-scan-status").textContent = humanError(error);
   } finally {
@@ -5840,7 +5880,7 @@ byId("wizard-readiness-back").addEventListener("click", () => {
   }
   showWizardStep("welcome");
 });
-byId("wizard-readiness-next").addEventListener("click", () => {
+byId("wizard-readiness-next").addEventListener("click", async () => {
   if (state.connected) {
     byId("setup-wizard").classList.add("hidden");
     openChat();
@@ -5852,6 +5892,22 @@ byId("wizard-readiness-next").addEventListener("click", () => {
   ) {
     byId("wizard-scan-status").textContent = "Finish the local setup above. Haven 42 will open chat automatically after it checks and starts the local AI.";
     byId("alpha-setup-review")?.focus();
+    return;
+  }
+  if (state.platformFamily === "macos") {
+    const button = byId("wizard-readiness-next");
+    button.disabled = true;
+    button.textContent = "Checking Ollama…";
+    byId("wizard-scan-status").textContent = "Checking for Ollama on this Mac. No files or settings are changed.";
+    try {
+      await connectProvider("http://127.0.0.1:11434", 120, 300, "none", "");
+      renderWizardReadiness();
+      showWizardStep("ready");
+    } catch (_error) {
+      byId("wizard-scan-status").textContent = "Ollama is not running yet. Install and open Ollama, then check again. Haven 42 made no changes.";
+      button.disabled = false;
+      button.textContent = "I've installed Ollama — check again";
+    }
     return;
   }
   byId("wizard-scan-status").textContent = "Local setup is not ready, so Haven 42 will not continue. Review the explanation above, or go Back and choose the advanced external-server option.";
