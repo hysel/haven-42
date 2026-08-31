@@ -2627,6 +2627,7 @@ class HavenState:
             runtime_admitted = APP_VERSION != ALPHA_2_VERSION
             if (
                 APP_VERSION == ALPHA_2_VERSION
+                and MANAGED_SETUP_SUPPORTED
                 and selection.get("automaticExecutionAllowed") is True
                 and isinstance(selection.get("selected"), dict)
             ):

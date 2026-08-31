@@ -19,6 +19,14 @@ SHARED_PLATFORM_OPERATIONS: FrozenSet[str] = frozenset({
     "readiness.inspect",
     "provider.metrics.validate",
 })
+PLANNING_PLATFORM_OPERATIONS: FrozenSet[str] = frozenset({
+    "component-registry.load",
+    "driver.guidance",
+    "hardware.evaluate",
+    "model-catalog.load",
+    "model.select",
+    "setup.plan",
+})
 MANAGED_PLATFORM_OPERATIONS: FrozenSet[str] = frozenset({
     "component-registry.load",
     "driver.guidance",
@@ -65,6 +73,12 @@ SUPPORTED_PLATFORM_ADAPTERS = {
     )
     for platform_id, family in (("windows-x64", "windows"), ("linux-x64", "linux"))
 }
+SUPPORTED_PLATFORM_ADAPTERS["macos-arm64"] = PlatformAdapter(
+    platform_id="macos-arm64",
+    platform_family="macos",
+    managed_setup_supported=False,
+    supported_operations=SHARED_PLATFORM_OPERATIONS | PLANNING_PLATFORM_OPERATIONS,
+)
 
 
 def resolve_platform_adapter(platform_id: str) -> PlatformAdapter:
@@ -79,6 +93,8 @@ def _active_adapter() -> PlatformAdapter:
         return resolve_platform_adapter("windows-x64")
     if sys.platform.startswith("linux"):
         return resolve_platform_adapter("linux-x64")
+    if sys.platform == "darwin":
+        return resolve_platform_adapter("macos-arm64")
     return PlatformAdapter(
         platform_id="shared-ui-only",
         platform_family="unsupported",

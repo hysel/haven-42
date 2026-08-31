@@ -2525,7 +2525,7 @@ function renderSetupPlan(plan) {
     refreshAlphaSetupProgress().catch(() => {
       progress.textContent = "Component details are temporarily unavailable. Setup has not started.";
     });
-  } else if (alphaModel) {
+  } else if (alphaModel || state.platformFamily === "macos") {
     const macosExternalSetup = state.platformFamily === "macos";
     const disclosure = document.createElement("p");
     disclosure.className = "notice";

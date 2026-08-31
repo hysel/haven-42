@@ -37,6 +37,10 @@ def main() -> int:
         "model-catalog.load", "model.select", "setup.approve", "setup.execute",
         "setup.plan", "setup.remove", "setup.resume",
     }
+    required_planning = {
+        "component-registry.load", "driver.guidance", "hardware.evaluate",
+        "model-catalog.load", "model.select", "setup.plan",
+    }
     for case in fixture["supported"]:
         adapter = ADAPTER.resolve_platform_adapter(case["platformId"])
         summary = adapter.public_summary()
@@ -44,7 +48,10 @@ def main() -> int:
         assert summary["platformId"] == case["platformId"]
         assert summary["platformFamily"] == case["platformFamily"]
         assert summary["managedSetupSupported"] is case["managedSetupSupported"]
-        assert set(summary["supportedOperations"]) == required_shared | required_managed
+        expected_operations = required_shared | (
+            required_managed if case["managedSetupSupported"] else required_planning
+        )
+        assert set(summary["supportedOperations"]) == expected_operations
         for operation_id in summary["supportedOperations"]:
             assert adapter.require(operation_id) is None
 
@@ -57,9 +64,14 @@ def main() -> int:
     linux = ADAPTER.resolve_platform_adapter("linux-x64")
     for operation_id in fixture["rejectedOperationIds"]:
         rejected(linux.require, operation_id, "unsupported-platform-operation")
+    macos = ADAPTER.resolve_platform_adapter("macos-arm64")
+    for operation_id in required_shared | required_planning:
+        assert macos.require(operation_id) is None
+    for operation_id in {"setup.approve", "setup.execute", "setup.remove", "setup.resume"}:
+        rejected(macos.require, operation_id, "unsupported-platform-operation")
 
     summary = ADAPTER.ACTIVE_PLATFORM_ADAPTER.public_summary()
-    assert summary["platformId"] in {"windows-x64", "linux-x64", "shared-ui-only"}
+    assert summary["platformId"] in {"windows-x64", "linux-x64", "macos-arm64", "shared-ui-only"}
     assert "command" not in json.dumps(summary).casefold()
     assert "path" not in json.dumps(summary).casefold()
     assert "environment" not in json.dumps(summary).casefold()

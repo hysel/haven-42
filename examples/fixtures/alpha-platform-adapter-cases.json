@@ -10,6 +10,11 @@
       "platformId": "linux-x64",
       "platformFamily": "linux",
       "managedSetupSupported": true
+    },
+    {
+      "platformId": "macos-arm64",
+      "platformFamily": "macos",
+      "managedSetupSupported": false
     }
   ],
   "rejectedPlatformIds": [
