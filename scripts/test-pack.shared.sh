@@ -2553,6 +2553,7 @@ test_local_web_mvp() {
   python3 "$REPO_ROOT/scripts/test-windows-alpha-web-policy.py" || return 1
   python3 "$REPO_ROOT/scripts/test-alpha-platform.py" || return 1
   python3 "$REPO_ROOT/scripts/test-system-readiness.py" || return 1
+  python3 "$REPO_ROOT/scripts/test-macos-installed-ollama.py" || return 1
   python3 "$REPO_ROOT/scripts/test-linux-alpha.py" || return 1
   python3 "$REPO_ROOT/scripts/test-alpha2-linux-native-profile-gates.py" || return 1
   python3 "$REPO_ROOT/scripts/test-linux-alpha-runtime.py" || return 1

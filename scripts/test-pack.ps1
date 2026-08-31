@@ -5851,6 +5851,8 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     $paths = @(
         "scripts/system_readiness.py",
         "scripts/test-system-readiness.py",
+        "scripts/macos_installed_ollama.py",
+        "scripts/test-macos-installed-ollama.py",
         "scripts/alpha_platform.py",
         "scripts/test-alpha-platform.py",
         "scripts/linux_alpha.py",
@@ -5887,6 +5889,10 @@ Invoke-PackTest "system readiness and setup planning remain effect free" {
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Readiness security tests should pass. Output: $($output -join ' ')"
     $readinessCoverage = [regex]::Match(($output -join "`n"), "passed: (?<count>\d+)")
     Assert-True -Condition ($readinessCoverage.Success -and [int]$readinessCoverage.Groups["count"].Value -ge 85) -Message "Readiness test coverage should remain complete."
+    $macOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-macos-installed-ollama.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "macOS installed-Ollama lifecycle tests should pass. Output: $($macOutput -join ' ')"
+    $macCoverage = [regex]::Match(($macOutput -join "`n"), "passed: (?<count>\d+)")
+    Assert-True -Condition ($macCoverage.Success -and [int]$macCoverage.Groups["count"].Value -ge 29) -Message "macOS installed-Ollama test coverage should remain complete."
     foreach ($alphaTest in @(
         "scripts/test-windows-alpha.py",
         "scripts/test-windows-alpha-setup.py",

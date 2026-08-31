@@ -27,6 +27,10 @@ PLANNING_PLATFORM_OPERATIONS: FrozenSet[str] = frozenset({
     "model.select",
     "setup.plan",
 })
+MACOS_INSTALLED_RUNTIME_OPERATIONS: FrozenSet[str] = frozenset({
+    "setup.approve-installed-runtime",
+    "setup.start-installed-runtime",
+})
 MANAGED_PLATFORM_OPERATIONS: FrozenSet[str] = frozenset({
     "component-registry.load",
     "driver.guidance",
@@ -77,7 +81,11 @@ SUPPORTED_PLATFORM_ADAPTERS["macos-arm64"] = PlatformAdapter(
     platform_id="macos-arm64",
     platform_family="macos",
     managed_setup_supported=False,
-    supported_operations=SHARED_PLATFORM_OPERATIONS | PLANNING_PLATFORM_OPERATIONS,
+    supported_operations=(
+        SHARED_PLATFORM_OPERATIONS
+        | PLANNING_PLATFORM_OPERATIONS
+        | MACOS_INSTALLED_RUNTIME_OPERATIONS
+    ),
 )
 
 

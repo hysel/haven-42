@@ -41,6 +41,9 @@ def main() -> int:
         "component-registry.load", "driver.guidance", "hardware.evaluate",
         "model-catalog.load", "model.select", "setup.plan",
     }
+    required_macos_runtime = {
+        "setup.approve-installed-runtime", "setup.start-installed-runtime",
+    }
     for case in fixture["supported"]:
         adapter = ADAPTER.resolve_platform_adapter(case["platformId"])
         summary = adapter.public_summary()
@@ -51,6 +54,8 @@ def main() -> int:
         expected_operations = required_shared | (
             required_managed if case["managedSetupSupported"] else required_planning
         )
+        if case["platformId"] == "macos-arm64":
+            expected_operations |= required_macos_runtime
         assert set(summary["supportedOperations"]) == expected_operations
         for operation_id in summary["supportedOperations"]:
             assert adapter.require(operation_id) is None
@@ -65,7 +70,7 @@ def main() -> int:
     for operation_id in fixture["rejectedOperationIds"]:
         rejected(linux.require, operation_id, "unsupported-platform-operation")
     macos = ADAPTER.resolve_platform_adapter("macos-arm64")
-    for operation_id in required_shared | required_planning:
+    for operation_id in required_shared | required_planning | required_macos_runtime:
         assert macos.require(operation_id) is None
     for operation_id in {"setup.approve", "setup.execute", "setup.remove", "setup.resume"}:
         rejected(macos.require, operation_id, "unsupported-platform-operation")

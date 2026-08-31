@@ -153,10 +153,22 @@ from alpha_release import (  # noqa: E402
     display_version,
 )
 
+if sys.platform == "darwin":
+    from macos_installed_ollama import (  # noqa: E402
+        MacOSInstalledOllamaCoordinator,
+        MacOSInstalledOllamaError,
+    )
+else:
+    MacOSInstalledOllamaCoordinator = None  # type: ignore[assignment,misc]
+    MacOSInstalledOllamaError = ValueError  # type: ignore[assignment,misc]
+
 
 LINUX_ALPHA = sys.platform.startswith("linux")
+MACOS_ALPHA = sys.platform == "darwin"
 APP_VERSION = application_version()
-ALPHA_PLATFORM_PREFIX = "linux-alpha" if LINUX_ALPHA else "windows-alpha"
+ALPHA_PLATFORM_PREFIX = (
+    "linux-alpha" if LINUX_ALPHA else "macos-alpha" if MACOS_ALPHA else "windows-alpha"
+)
 MANAGED_SETUP_UNAVAILABLE = (
     "windows-alpha-setup-unavailable" if os.name == "nt"
     else "linux-alpha-setup-unavailable"
@@ -1334,6 +1346,12 @@ class HavenState:
                 event_sink=self.diagnostics.record,
             )
             if MANAGED_SETUP_SUPPORTED else None
+        )
+        self.macos_installed_ollama = (
+            MacOSInstalledOllamaCoordinator(
+                self.csrf_token,
+            )
+            if MACOS_ALPHA and MacOSInstalledOllamaCoordinator is not None else None
         )
         self.runtime_updates = (
             ManagedRuntimeUpdateCoordinator(
@@ -2726,6 +2744,32 @@ class HavenState:
                 "runtimeCompatibility": runtime_compatibility,
                 "quantizationDecision": "use-pinned-prequantized-model",
             }
+            if self.macos_installed_ollama is not None:
+                software = {
+                    item.get("componentId"): item
+                    for item in snapshot.get("software", [])
+                    if isinstance(item, dict)
+                }
+                ollama = software.get("ollama", {})
+                if (
+                    ollama.get("source") == "registered-app-bundle-probe"
+                    and ollama.get("state") == "installed-unverified"
+                ):
+                    try:
+                        plan["alphaCandidate"]["macosInstalledRuntime"] = {
+                            "available": True,
+                            "plan": self.macos_installed_ollama.register_plan(),
+                        }
+                    except MacOSInstalledOllamaError as error:
+                        plan["alphaCandidate"]["macosInstalledRuntime"] = {
+                            "available": False,
+                            "reason": str(error),
+                        }
+                else:
+                    plan["alphaCandidate"]["macosInstalledRuntime"] = {
+                        "available": False,
+                        "reason": "macos-ollama-app-not-detected",
+                    }
             if (
                 self.alpha_setup is not None
                 and selection.get("selected") is not None
@@ -2759,6 +2803,36 @@ class HavenState:
             SetupError,
         ) as error:
             raise WebRequestError(str(error)) from error
+
+    def approve_macos_installed_ollama(self, plan_id: str, effects: list[str]) -> str:
+        if self.macos_installed_ollama is None:
+            raise WebRequestError("macos-installed-ollama-unavailable", HTTPStatus.NOT_FOUND)
+        try:
+            require_platform_operation("setup.approve-installed-runtime")
+            return self.macos_installed_ollama.approve(plan_id, effects)
+        except (PlatformAdapterError, MacOSInstalledOllamaError) as error:
+            raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
+
+    def start_macos_installed_ollama(self, approval_token: str) -> dict[str, Any]:
+        if self.macos_installed_ollama is None:
+            raise WebRequestError("macos-installed-ollama-unavailable", HTTPStatus.NOT_FOUND)
+        try:
+            require_platform_operation("setup.start-installed-runtime")
+            started = self.macos_installed_ollama.start(approval_token)
+        except (PlatformAdapterError, MacOSInstalledOllamaError) as error:
+            raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
+        try:
+            connected = self.connect(started["endpoint"], 120, 300, "none", "")
+        except WebRequestError:
+            self.macos_installed_ollama.close()
+            raise
+        self.diagnostics.record("setup", "MACOS_INSTALLED_OLLAMA_STARTED", "completed")
+        return {
+            "schemaVersion": 1,
+            "kind": "macos-installed-ollama-connection",
+            "localSetup": started,
+            "connection": connected,
+        }
 
     def connect(
         self,
@@ -3841,6 +3915,8 @@ class HavenWebServer(ThreadingHTTPServer):
         self.state.clear_research()
         if self.state.alpha_setup is not None:
             self.state.alpha_setup.close()
+        if self.state.macos_installed_ollama is not None:
+            self.state.macos_installed_ollama.close()
         self.state.diagnostics.close()
         super().server_close()
 
@@ -4448,6 +4524,32 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                     "schemaVersion": 1, "approvalToken": approval,
                     "singleUse": True, "persisted": False,
                 })
+                return
+            if self.path == "/api/macos/installed-ollama-approve":
+                if (
+                    set(body) != {"planId", "effects", "confirmed"}
+                    or not isinstance(body["planId"], str)
+                    or not isinstance(body["effects"], list)
+                    or body["confirmed"] is not True
+                ):
+                    raise WebRequestError("invalid-macos-ollama-approval-fields")
+                approval = self.server.state.approve_macos_installed_ollama(
+                    body["planId"], body["effects"],
+                )
+                self._send_json(HTTPStatus.OK, {
+                    "schemaVersion": 1,
+                    "approvalToken": approval,
+                    "singleUse": True,
+                    "persisted": False,
+                })
+                return
+            if self.path == "/api/macos/installed-ollama-start":
+                if set(body) != {"approvalToken"} or not isinstance(body["approvalToken"], str):
+                    raise WebRequestError("invalid-macos-ollama-start-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.start_macos_installed_ollama(body["approvalToken"]),
+                )
                 return
             if self.path == "/api/alpha/setup-execute":
                 if self.server.state.alpha_setup is None:
