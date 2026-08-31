@@ -154,6 +154,7 @@ const PANEL_TOUR_SECTIONS = Object.freeze({
 
 const state = {
   token: "",
+  browserSessionId: crypto.randomUUID(),
   connected: false,
   capabilityId: "general.chat",
   messages: [],
@@ -1041,6 +1042,30 @@ async function api(path, body) {
     throw error;
   }
   return result;
+}
+
+async function maintainBrowserLifecycle() {
+  while (state.token) {
+    try {
+      const response = await fetch("/api/browser-lifecycle", {
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+          "X-Haven-Token": state.token,
+          "X-Haven-Browser-Session": state.browserSessionId,
+        },
+      });
+      if (!response.ok || !response.body) return;
+      const reader = response.body.getReader();
+      while (state.token) {
+        const chunk = await reader.read();
+        if (chunk.done) break;
+      }
+    } catch (_error) {
+      // A short loopback interruption is retried within the server's close grace period.
+    }
+    if (state.token) await new Promise((resolve) => window.setTimeout(resolve, 500));
+  }
 }
 
 function humanError(error) {
@@ -4989,6 +5014,7 @@ async function bootstrap() {
     if (!response.ok) throw new Error("bootstrap-failed");
     const result = await response.json();
     state.token = result.sessionToken;
+    maintainBrowserLifecycle();
     state.alphaTextOnly = result.alpha?.textOnly === true;
     state.appVersion = result.version;
     state.platformFamily = result.runtime.platform;
@@ -6356,11 +6382,42 @@ byId("removed-close").addEventListener("click", async () => {
   status.classList.remove("hidden");
   try {
     await api("/api/shutdown", {});
+    state.token = "";
     actions.classList.add("hidden");
     status.textContent = "Haven 42 is closed. You can close this browser tab.";
   } catch (error) {
     actions.querySelectorAll("button").forEach((button) => { button.disabled = false; });
     status.textContent = humanError(error);
+  }
+});
+byId("close-app-nav").addEventListener("click", async () => {
+  if (!window.confirm("Close Haven 42? The local service will stop and this session will end.")) return;
+  const button = byId("close-app-nav");
+  button.disabled = true;
+  button.textContent = "Closing Haven 42…";
+  try {
+    await api("/api/shutdown", {});
+    state.token = "";
+    document.querySelector(".shell").classList.add("hidden");
+    const wizard = byId("setup-wizard");
+    wizard.classList.remove("hidden");
+    wizard.setAttribute("aria-labelledby", "shutdown-title");
+    wizard.setAttribute("aria-describedby", "shutdown-description");
+    wizard.replaceChildren();
+    const panel = document.createElement("section");
+    panel.className = "wizard-card";
+    const title = document.createElement("h1");
+    title.id = "shutdown-title";
+    title.textContent = "Haven 42 is closed";
+    const description = document.createElement("p");
+    description.id = "shutdown-description";
+    description.textContent = "The local service and any models used in this session have stopped. You can close this browser window.";
+    panel.append(title, description);
+    wizard.append(panel);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Close Haven 42";
+    window.alert(humanError(error));
   }
 });
 byId("wizard-connection-form").addEventListener("submit", async (event) => {

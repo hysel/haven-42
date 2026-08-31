@@ -194,7 +194,7 @@ def _macos_platform_facts(runner: ProbeRunner) -> dict[str, Any]:
     if machine_name and re.fullmatch(r"[A-Za-z0-9 .()+_-]{1,80}", machine_name):
         facts["productName"] = machine_name
         if chip_type and re.fullmatch(r"[A-Za-z0-9 .()+_-]{1,80}", chip_type):
-            facts["productName"] = f"{machine_name} · {chip_type}"
+            facts["productName"] = f"{machine_name} ({chip_type})"
     return facts
 
 
