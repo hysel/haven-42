@@ -539,12 +539,22 @@ def inspect_system(runner: ProbeRunner | None = None) -> dict[str, Any]:
         storage = round(shutil.disk_usage(storage_root).free / (1024 ** 3), 1)
     except (OSError, WindowsUserPathError):
         storage = None
+    ollama_item = _software_item(runner, "ollama", "ollama", ("--version",))
+    if system == "darwin" and ollama_item["state"] == "not-detected":
+        try:
+            from macos_installed_ollama import readiness_item
+
+            ollama_item = readiness_item()
+        except (ImportError, OSError, ValueError):
+            # Readiness remains fail-closed when the fixed app-bundle probe is
+            # unavailable or cannot verify its bounded, non-identifying fields.
+            pass
     software = [
         {
             "componentId": "python", "state": "validated",
             "version": platform.python_version(), "source": "running-interpreter", "confidence": "high",
         },
-        _software_item(runner, "ollama", "ollama", ("--version",)),
+        ollama_item,
         _software_item(runner, "continue", "cn", ("--version",)),
         _software_item(runner, "aider", "aider", ("--version",)),
         _software_item(runner, "opencode", "opencode", ("--version",)),

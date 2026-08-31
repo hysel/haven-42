@@ -556,7 +556,7 @@ try {
     };
     renderSystemReadiness('wizard-system-readiness', snapshot);
     renderSetupPlan(plan);
-    updateReadinessNextControl(false);
+    updateReadinessNextControl(false, false);
     const link = document.querySelector('#wizard-setup-plan a[href="https://ollama.com/download/mac"]');
     const result = {
       facts: document.querySelector('#wizard-system-readiness').textContent,
@@ -575,7 +575,7 @@ try {
     !macosGuidedPresentation.facts.includes('Operating systemmacOS · arm64')
     || !macosGuidedPresentation.facts.includes('Mac modelMac mini · Apple M4')
     || !macosGuidedPresentation.facts.includes('System Ollamanot-detected')
-    || !macosGuidedPresentation.explanation.includes('does not install the Ollama app on macOS')
+    || !macosGuidedPresentation.explanation.includes('did not find an official Ollama app it could verify')
     || macosGuidedPresentation.linkText !== 'Install Ollama for macOS'
     || macosGuidedPresentation.linkTarget !== '_blank'
     || !macosGuidedPresentation.linkRel.includes('noopener')
@@ -586,6 +586,63 @@ try {
   ) throw new Error(`macos-guided-setup:${JSON.stringify(macosGuidedPresentation)}`);
   checks += 10;
   trace("macos-guided-setup-verified");
+
+  const macosInstalledPresentation = await cdp.evaluate(`(() => {
+    const originalPlatform = state.platformFamily;
+    state.platformFamily = 'macos';
+    const effects = [
+      "Verify the installed Ollama app's code signature and Gatekeeper approval.",
+      "Start its local AI engine on this computer for this Haven 42 session only.",
+      "Use the current macOS user's existing Ollama model storage; do not download a model yet.",
+    ];
+    renderSetupPlan({
+      hardwareAssessment: {candidateModel: 'qwen3.5:9b'},
+      actions: [],
+      alphaCandidate: {
+        modelSelection: {selected: {name: 'qwen3.5:9b'}, automaticExecutionAllowed: false},
+        managedSetupCandidateAvailable: false,
+        runtimeCompatibility: null,
+        driverGuidance: [],
+        macosInstalledRuntime: {
+          available: true,
+          plan: {planId: 'fixed-test-plan', version: '0.33.2', effects},
+        },
+      },
+    });
+    updateReadinessNextControl(false, true);
+    const review = [...document.querySelectorAll('#wizard-setup-plan button')]
+      .find((item) => item.textContent === 'Review and start local AI');
+    review.click();
+    const approval = document.querySelector('#wizard-setup-plan .setup-approval');
+    const result = {
+      explanation: document.querySelector('#wizard-setup-plan').textContent,
+      reviewText: review.textContent,
+      approvalVisible: !approval.classList.contains('hidden'),
+      effectCount: approval.querySelectorAll('li').length,
+      consentText: approval.querySelector('.setup-consent').textContent,
+      approveDisabled: [...approval.querySelectorAll('button')]
+        .find((item) => item.textContent === 'Approve and start').disabled,
+      installLinkPresent: Boolean(document.querySelector('#wizard-setup-plan a[href="https://ollama.com/download/mac"]')),
+      nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
+      nextText: document.querySelector('#wizard-readiness-next').textContent,
+    };
+    state.platformFamily = originalPlatform;
+    return result;
+  })()`);
+  if (
+    !macosInstalledPresentation.explanation.includes('found Ollama 0.33.2 in Applications')
+    || !macosInstalledPresentation.explanation.includes('No app or model will be downloaded')
+    || macosInstalledPresentation.reviewText !== 'Review and start local AI'
+    || !macosInstalledPresentation.approvalVisible
+    || macosInstalledPresentation.effectCount !== 3
+    || !macosInstalledPresentation.consentText.includes('allow Haven 42 to start')
+    || !macosInstalledPresentation.approveDisabled
+    || macosInstalledPresentation.installLinkPresent
+    || !macosInstalledPresentation.nextDisabled
+    || macosInstalledPresentation.nextText !== 'Start local AI above'
+  ) throw new Error(`macos-installed-setup:${JSON.stringify(macosInstalledPresentation)}`);
+  checks += 10;
+  trace("macos-installed-setup-verified");
 
   const managedSetupHost = process.platform === "win32" || process.platform === "linux";
   if (managedSetupHost) {

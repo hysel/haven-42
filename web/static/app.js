@@ -2552,16 +2552,72 @@ function renderSetupPlan(plan) {
     });
   } else if (alphaModel || state.platformFamily === "macos") {
     const macosExternalSetup = state.platformFamily === "macos";
+    const macosRuntime = plan.alphaCandidate?.macosInstalledRuntime;
+    const macosRuntimePlan = macosRuntime?.available === true ? macosRuntime.plan : null;
     const disclosure = document.createElement("p");
     disclosure.className = "notice";
     disclosure.textContent = macosExternalSetup
-      ? "Haven 42 found a suitable model, but it does not install the Ollama app on macOS. Install Ollama from its official macOS download, open it, then return here and check the connection. Haven 42 will not use Terminal or change system settings."
+      ? macosRuntimePlan
+        ? `Haven 42 found Ollama ${macosRuntimePlan.version} in Applications and verified its publisher with macOS. It can start the local engine after you review and approve the exact effects below. No app or model will be downloaded.`
+        : "Haven 42 did not find an official Ollama app it could verify in Applications. Install Ollama from its official macOS download, then return here and check this computer again. Haven 42 will not use Terminal or change system settings."
       : runtimeCompatibility?.decision === "deny"
       ? `This model fits the computer, but Haven 42 does not have an approved ${runtimeCompatibility.engine || "local AI engine"} version for it on this operating system. Setup stopped before downloading anything. Technical reason: ${runtimeCompatibility.reason || "no-compatible-runtime"}.`
       : "This model may fit your computer, but automatic setup has not passed all required tests. You can view manual instructions instead; Haven 42 will not make changes for you.";
     const controls = document.createElement("div");
     controls.className = "wizard-actions";
-    if (macosExternalSetup) {
+    if (macosRuntimePlan) {
+      const review = document.createElement("button");
+      review.type = "button";
+      review.className = "button primary";
+      review.textContent = "Review and start local AI";
+      const approvalPanel = document.createElement("div");
+      approvalPanel.className = "setup-approval hidden";
+      const approvalTitle = document.createElement("strong");
+      approvalTitle.textContent = "Your permission is required";
+      const approvalEffects = document.createElement("ul");
+      for (const effect of macosRuntimePlan.effects) {
+        const item = document.createElement("li");
+        item.textContent = effect;
+        approvalEffects.append(item);
+      }
+      const consentRow = document.createElement("label");
+      consentRow.className = "setup-consent";
+      const consent = document.createElement("input");
+      consent.type = "checkbox";
+      consent.autocomplete = "off";
+      const consentText = document.createElement("span");
+      consentText.textContent = "I understand and allow Haven 42 to start this verified local AI now.";
+      consentRow.append(consent, consentText);
+      const approvalActions = document.createElement("div");
+      approvalActions.className = "wizard-actions";
+      const approve = document.createElement("button");
+      approve.type = "button";
+      approve.className = "button primary";
+      approve.textContent = "Approve and start";
+      approve.disabled = true;
+      const cancel = document.createElement("button");
+      cancel.type = "button";
+      cancel.className = "button secondary";
+      cancel.textContent = "Cancel";
+      consent.addEventListener("change", () => { approve.disabled = !consent.checked; });
+      review.addEventListener("click", () => {
+        approvalPanel.classList.remove("hidden");
+        consent.focus();
+      });
+      cancel.addEventListener("click", () => {
+        approvalPanel.classList.add("hidden");
+        consent.checked = false;
+        approve.disabled = true;
+        review.focus();
+      });
+      approve.addEventListener("click", () => {
+        void runMacOSInstalledOllamaSetup(macosRuntimePlan, approve, review, consent, approvalPanel);
+      });
+      approvalActions.append(approve, cancel);
+      approvalPanel.append(approvalTitle, approvalEffects, consentRow, approvalActions);
+      controls.append(review);
+      container.append(disclosure, controls, approvalPanel);
+    } else if (macosExternalSetup) {
       const installLink = document.createElement("a");
       installLink.className = "button secondary";
       installLink.href = "https://ollama.com/download/mac";
@@ -2570,6 +2626,7 @@ function renderSetupPlan(plan) {
       installLink.referrerPolicy = "no-referrer";
       installLink.textContent = "Install Ollama for macOS";
       controls.append(installLink);
+      container.append(disclosure, controls);
     } else {
       const instructions = document.createElement("button");
       instructions.type = "button";
@@ -2577,8 +2634,46 @@ function renderSetupPlan(plan) {
       instructions.textContent = "Show manual steps";
       instructions.addEventListener("click", () => renderManualAlphaSteps(plan, container));
       controls.append(instructions);
+      container.append(disclosure, controls);
     }
-    container.append(disclosure, controls);
+  }
+}
+
+async function runMacOSInstalledOllamaSetup(plan, approve, review, consent, approvalPanel) {
+  if (!plan || approve.disabled || !consent.checked) return;
+  approve.disabled = true;
+  review.disabled = true;
+  byId("wizard-scan-status").textContent = "Verifying and starting the installed Ollama app…";
+  try {
+    const approval = await api("/api/macos/installed-ollama-approve", {
+      planId: plan.planId,
+      effects: plan.effects,
+      confirmed: true,
+    });
+    const result = await api("/api/macos/installed-ollama-start", {
+      approvalToken: approval.approvalToken,
+    });
+    const local = result.localSetup;
+    if (
+      result.kind !== "macos-installed-ollama-connection"
+      || !local || local.status !== "started"
+      || local.signatureVerified !== true || local.gatekeeperAccepted !== true
+      || local.ownedProcess !== true || local.approvalConsumed !== true
+      || local.downloadPerformed !== false || local.installationPerformed !== false
+      || local.appBundleChanged !== false || local.modelDownloadPerformed !== false
+      || local.persisted !== false || local.endpoint !== "http://127.0.0.1:11435"
+    ) throw new Error("invalid-macos-installed-ollama-result");
+    applyProviderConnection(result.connection, local.endpoint, 120, 300);
+    approvalPanel.classList.add("hidden");
+    renderWizardReadiness();
+    showWizardStep("ready");
+    byId("wizard-scan-status").textContent = "The verified local AI is connected. No app or model was downloaded.";
+  } catch (error) {
+    byId("wizard-scan-status").textContent = `Local AI startup stopped safely. ${humanError(error)}`;
+    review.disabled = false;
+    approve.disabled = !consent.checked;
+  } finally {
+    await refreshDiagnosticsQuietly();
   }
 }
 
@@ -2726,11 +2821,13 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
   }
 }
 
-function updateReadinessNextControl(managedSetupAvailable) {
-  const macosExternalSetup = state.platformFamily === "macos" && !managedSetupAvailable;
-  byId("wizard-readiness-next").disabled = !macosExternalSetup;
+function updateReadinessNextControl(managedSetupAvailable, macosRuntimeAvailable) {
+  const macosExternalSetup = state.platformFamily === "macos" && !macosRuntimeAvailable;
+  byId("wizard-readiness-next").disabled = managedSetupAvailable || macosRuntimeAvailable || !macosExternalSetup;
   byId("wizard-readiness-next").textContent = managedSetupAvailable
     ? "Complete setup above"
+    : macosRuntimeAvailable
+      ? "Start local AI above"
     : macosExternalSetup
       ? "I've installed Ollama — check again"
       : "Local setup unavailable";
@@ -2761,7 +2858,11 @@ async function runReadiness() {
       plan.alphaCandidate?.managedSetupCandidateAvailable === true
       && Boolean(plan.alphaCandidate?.managedPlan)
     );
-    updateReadinessNextControl(managedSetupAvailable);
+    const macosRuntimeAvailable = (
+      plan.alphaCandidate?.macosInstalledRuntime?.available === true
+      && Boolean(plan.alphaCandidate?.macosInstalledRuntime?.plan)
+    );
+    updateReadinessNextControl(managedSetupAvailable, macosRuntimeAvailable);
   } catch (error) {
     byId("wizard-scan-status").textContent = humanError(error);
   } finally {
@@ -3181,8 +3282,9 @@ function renderWizardReadiness() {
   byId("wizard-ready-title").textContent = usable ? "Your local AI is ready" : "A model is still needed";
   byId("wizard-ready-summary").textContent = usable
     ? `Haven 42 found ${automaticCount} ready model choice${automaticCount === 1 ? "" : "s"}. You can change these later under Models.`
-    : "Haven 42 did not find a tested model it can choose automatically. Nothing was downloaded. Add the recommended model in Ollama, then check again.";
-  byId("wizard-finish").disabled = !usable;
+    : "The local AI engine is connected, but it still needs a model. Choose one under Models; Haven 42 will show the download and ask before starting it.";
+  byId("wizard-finish").textContent = usable ? "Open chat" : "Choose a model";
+  byId("wizard-finish").disabled = !state.connected;
 }
 
 function validateExecutionEvents(events, expectedTerminal) {
@@ -6466,7 +6568,9 @@ byId("wizard-back").addEventListener("click", () => {
 });
 byId("wizard-finish").addEventListener("click", () => {
   byId("setup-wizard").classList.add("hidden");
-  openChat();
+  const usable = Object.values(state.recommendations).some((item) => item?.automatic === true);
+  if (usable) openChat();
+  else openModels();
 });
 byId("setup-wizard").addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
