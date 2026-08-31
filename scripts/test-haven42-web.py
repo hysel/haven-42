@@ -740,6 +740,21 @@ def main() -> int:
         assert error.code == "assurance-evidence-unavailable"
         assert error.status == HTTPStatus.SERVICE_UNAVAILABLE
     checks += 2
+    occupied = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    occupied.bind(("127.0.0.1", 0))
+    occupied.listen(1)
+    try:
+        try:
+            WEB.HavenWebServer(("127.0.0.1", occupied.getsockname()[1]), state)
+            raise AssertionError("occupied port was accepted")
+        except OSError:
+            pass
+        state.diagnostics.record(
+            "application", "FAILED_BIND_PRESERVES_STATE", "completed",
+        )
+    finally:
+        occupied.close()
+    checks += 2
     app = WEB.HavenWebServer(("127.0.0.1", 0), state)
     app_thread = threading.Thread(target=app.serve_forever, daemon=True)
     app_thread.start()

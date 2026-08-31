@@ -3865,13 +3865,15 @@ class HavenWebServer(ThreadingHTTPServer):
             raise ValueError("Haven 42 web MVP must bind to 127.0.0.1.")
         self.state = state
         self._request_slots = threading.BoundedSemaphore(MAX_HTTP_WORKERS)
-        super().__init__(address, HavenRequestHandler)
-        self.expected_origin = f"http://127.0.0.1:{self.server_port}"
-        self.expected_host = f"127.0.0.1:{self.server_port}"
+        self._initialization_complete = False
         self.browser_lifecycle = BrowserLifecycle(
             BROWSER_CLOSE_GRACE_SECONDS,
             self._shutdown_after_last_browser,
         )
+        super().__init__(address, HavenRequestHandler)
+        self.expected_origin = f"http://127.0.0.1:{self.server_port}"
+        self.expected_host = f"127.0.0.1:{self.server_port}"
+        self._initialization_complete = True
 
     def _shutdown_after_last_browser(self) -> None:
         if not self.state.unload_used_models():
@@ -3911,6 +3913,9 @@ class HavenWebServer(ThreadingHTTPServer):
 
     def server_close(self) -> None:
         self.browser_lifecycle.close()
+        if not self._initialization_complete:
+            super().server_close()
+            return
         self.state.unload_used_models()
         self.state.clear_research()
         if self.state.alpha_setup is not None:
