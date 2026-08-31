@@ -644,8 +644,8 @@ try {
   checks += 10;
   trace("macos-installed-setup-verified");
 
-  const managedSetupHost = process.platform === "win32" || process.platform === "linux";
-  if (managedSetupHost) {
+  const setupPlanningHost = ["win32", "linux", "darwin"].includes(process.platform);
+  if (setupPlanningHost) {
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");
   await waitFor(() => cdp.evaluate("document.querySelectorAll('#wizard-setup-plan .plan-action').length >= 2"));
   await waitFor(() => cdp.evaluate(`
@@ -661,6 +661,7 @@ try {
     installationPanel: Boolean(document.querySelector('#alpha-installation-panel')),
     installationRows: document.querySelectorAll('#alpha-installation-components .installation-component').length,
     installationProgressBars: document.querySelectorAll('#alpha-installation-panel progress').length,
+    macosInstallLink: Boolean(document.querySelector('#wizard-setup-plan a[href="https://ollama.com/download/mac"]')),
     nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
     nextText: document.querySelector('#wizard-readiness-next').textContent,
     status: document.querySelector('#wizard-scan-status').textContent
@@ -711,7 +712,21 @@ try {
       || (detectedAmd && !guided.planText.includes("Ollama 0.32.14 AMD support package"))
     )
   ) throw new Error(`guided-installation-progress:${JSON.stringify(guided)}`);
-  if (!guided.installationPanel && (!guided.nextDisabled || guided.nextText !== "Local setup unavailable")) {
+  if (
+    process.platform === "darwin"
+    && (
+      !guided.macosInstallLink
+      || guided.nextDisabled
+      || guided.nextText !== "I've installed Ollama — check again"
+    )
+  ) {
+    throw new Error(`guided-macos-external-setup:${JSON.stringify(guided)}`);
+  }
+  if (
+    process.platform !== "darwin"
+    && !guided.installationPanel
+    && (!guided.nextDisabled || guided.nextText !== "Local setup unavailable")
+  ) {
     throw new Error(`guided-manual-connection:${JSON.stringify(guided)}`);
   }
   if (guided.installationPanel) {

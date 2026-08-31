@@ -1218,7 +1218,8 @@ def main() -> int:
             origin + "/api/setup-plan", "POST",
             {"snapshotId": "wrong-snapshot-id", "intent": "guided-setup"}, token, origin,
         )
-        if WEB.MANAGED_SETUP_SUPPORTED:
+        setup_planning_supported = WEB.MANAGED_SETUP_SUPPORTED or WEB.MACOS_ALPHA
+        if setup_planning_supported:
             assert status == 409 and error["error"] == "readiness-snapshot-mismatch"
             status, plan, _ = request_json(
                 origin + "/api/setup-plan", "POST",
