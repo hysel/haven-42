@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import subprocess
 import tempfile
+from contextlib import contextmanager
 from pathlib import Path
 
 
@@ -17,11 +19,39 @@ MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
 
+GIT_LOCAL_ENVIRONMENT_NAMES = (
+    "GIT_ALTERNATE_OBJECT_DIRECTORIES",
+    "GIT_COMMON_DIR",
+    "GIT_DIR",
+    "GIT_INDEX_FILE",
+    "GIT_OBJECT_DIRECTORY",
+    "GIT_PREFIX",
+    "GIT_WORK_TREE",
+)
+
+
+@contextmanager
+def isolated_git_environment():
+    saved = {name: os.environ[name] for name in GIT_LOCAL_ENVIRONMENT_NAMES if name in os.environ}
+    try:
+        for name in GIT_LOCAL_ENVIRONMENT_NAMES:
+            os.environ.pop(name, None)
+        yield
+    finally:
+        for name in GIT_LOCAL_ENVIRONMENT_NAMES:
+            os.environ.pop(name, None)
+        os.environ.update(saved)
+
+
 def run(root: Path, *arguments: str) -> bytes:
+    environment = os.environ.copy()
+    for name in GIT_LOCAL_ENVIRONMENT_NAMES:
+        environment.pop(name, None)
     return subprocess.run(
         ["git", "-C", str(root), *arguments],
         check=True,
         capture_output=True,
+        env=environment,
     ).stdout
 
 
@@ -58,7 +88,7 @@ def write_receipt(root: Path, tree: str) -> None:
 
 def main() -> int:
     checks = 0
-    with tempfile.TemporaryDirectory(prefix="haven42-precommit-") as raw:
+    with isolated_git_environment(), tempfile.TemporaryDirectory(prefix="haven42-precommit-") as raw:
         root = Path(raw)
         run(root, "init", "--initial-branch=main")
         run(root, "config", "user.name", "Haven 42 Test")

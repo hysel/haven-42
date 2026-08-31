@@ -279,9 +279,10 @@ def probe(
                 assert managed is None
         with request(origin + "/api/alpha/resources") as response:
             resources = json.load(response)
-            assert resources["kind"] == (
-                "linux-alpha-local-metrics" if linux_alpha else "windows-alpha-local-metrics"
-            )
+            runtime_platform = bootstrap["runtime"]["platform"]
+            assert runtime_platform in {"windows", "linux", "darwin"}
+            expected_metrics_platform = "macos" if runtime_platform == "darwin" else runtime_platform
+            assert resources["kind"] == f"{expected_metrics_platform}-alpha-local-metrics"
             assert resources["persisted"] is False
             assert resources["externalTelemetryUsed"] is False
             assert resources["sample"]["persisted"] is False

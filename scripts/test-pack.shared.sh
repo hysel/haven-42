@@ -2748,6 +2748,7 @@ assert external_links == sorted([
     'href="https://github.com/hysel/haven-42/wiki/Model-And-Hardware-Test-Status"',
     'href="https://github.com/hysel/haven-42/issues/new?template=alpha-bug-report.yml"',
     'href="https://github.com/ollama/ollama/releases"',
+    'href = "https://ollama.com/download/mac"',
 ])
 assert '"https://ollama.com/download/mac"' in assets
 assert '"https://ollama.com/download/linux"' in assets
