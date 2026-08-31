@@ -115,9 +115,14 @@ def main() -> int:
             }
 
     macos_facts = READINESS._macos_platform_facts(MacHardwareRunner())
-    assert macos_facts == {"productName": "Mac mini · Apple M4"}
+    assert macos_facts == {"productName": "Mac mini (Apple M4)"}
+    macos_snapshot = copy.deepcopy(snapshot)
+    macos_snapshot["platform"]["operatingSystem"] = "macos"
+    macos_snapshot["platform"]["architecture"] = "arm64"
+    macos_snapshot["platform"]["productName"] = macos_facts["productName"]
+    READINESS.validate_snapshot(macos_snapshot)
     assert "serial" not in json.dumps(macos_facts).lower()
-    checks += 2
+    checks += 3
 
     with tempfile.TemporaryDirectory() as directory:
         release = Path(directory) / "os-release"

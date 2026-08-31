@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "d7cd6a60e7364bb194b43a6caab2885c49c5b0470aca8567a2d00b581ae7fb9b",
-      "sizeBytes": 78872
+      "sha256": "9c676de0a492ead2bff8be9c5929e64d222d8f220e27042f53f952f1132b3bb3",
+      "sizeBytes": 79072
     },
     {
       "path": "web/static/accessibility.html",
@@ -13,8 +13,8 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "76e89fb33c99233c9938e84b3f51bfde08be591a614be4a0d08daaa9220a2100",
-      "sizeBytes": 291716
+      "sha256": "846ef8f7b22b00a11f2af6a3f6630804063505fd56aeb68077af1044d5f71bbe",
+      "sizeBytes": 293876
     },
     {
       "path": "web/static/styles.css",

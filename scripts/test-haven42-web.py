@@ -620,6 +620,25 @@ def main() -> int:
         readiness_snapshot, "loopback", "0.32.14", qualified_profiles,
     ) == []
     checks += 7
+    last_browser_closed = threading.Event()
+    browser_lifecycle = WEB.BrowserLifecycle(0.05, last_browser_closed.set)
+    first_connection = browser_lifecycle.open("11111111-1111-4111-8111-111111111111")
+    replacement_connection = browser_lifecycle.open("11111111-1111-4111-8111-111111111111")
+    browser_lifecycle.disconnected(
+        "11111111-1111-4111-8111-111111111111", first_connection,
+    )
+    assert not last_browser_closed.wait(0.1)
+    second_session = browser_lifecycle.open("22222222-2222-4222-8222-222222222222")
+    browser_lifecycle.disconnected(
+        "11111111-1111-4111-8111-111111111111", replacement_connection,
+    )
+    assert not last_browser_closed.wait(0.1)
+    browser_lifecycle.disconnected(
+        "22222222-2222-4222-8222-222222222222", second_session,
+    )
+    assert last_browser_closed.wait(1)
+    browser_lifecycle.close()
+    checks += 4
     state = WEB.HavenState(
         readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)),
         model_catalog_provider=lambda query: [
@@ -3009,6 +3028,7 @@ def main() -> int:
         assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
         javascript = (ROOT / "web/static/app.js").read_text(encoding="utf-8")
         html = (ROOT / "web/static/index.html").read_text(encoding="utf-8")
+        server_source = (ROOT / "web/server.py").read_text(encoding="utf-8")
         styles = (ROOT / "web/static/styles.css").read_text(encoding="utf-8")
         accessibility_html = (ROOT / "web/static/accessibility.html").read_text(encoding="utf-8")
         assert '<main class="statement-content" id="statement-content" tabindex="-1">' in accessibility_html
@@ -3284,7 +3304,14 @@ def main() -> int:
         assert '<nav class="rail" aria-label="Primary navigation">' in html
         assert '<main class="workspace" id="main-content" tabindex="-1">' in html
         assert html.count("<h1") == 1
-        assert html.count('class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"') == 5
+        assert html.count('class="nav-icon" aria-hidden="true" viewBox="0 0 24 24"') == 6
+        assert 'id="close-app-nav" type="button"' in html
+        assert 'byId("close-app-nav").addEventListener("click"' in javascript
+        assert 'await api("/api/shutdown", {})' in javascript
+        assert 'wizard.setAttribute("aria-labelledby", "shutdown-title")' in javascript
+        assert 'fetch("/api/browser-lifecycle"' in javascript
+        assert '"X-Haven-Browser-Session": state.browserSessionId' in javascript
+        assert 'LAST_BROWSER_WINDOW_CLOSED' in server_source
         assert '.nav-item .nav-icon {' in styles and 'stroke: currentColor;' in styles
         assert '.nav-item.active::before' in styles
         assert 'id="context-files"' in html and 'tabindex="-1" aria-label="Choose attachment files"' in html

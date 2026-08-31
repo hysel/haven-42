@@ -257,6 +257,9 @@ MAX_CONTEXT_CSV_COLUMNS = 256
 MAX_CONTEXT_CSV_CELL_CHARACTERS = 8_192
 MAX_DISCOVERED_MODELS = 512
 MAX_HTTP_WORKERS = 32
+BROWSER_CLOSE_GRACE_SECONDS = 8
+BROWSER_LIFECYCLE_HEARTBEAT_SECONDS = 2
+BROWSER_SESSION_ID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
 HTTP_SOCKET_TIMEOUT_SECONDS = 15
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
 ALLOWED_IDLE_UNLOAD_SECONDS = {0, 300, 900, 1800}
@@ -1193,6 +1196,58 @@ def png_dimensions(data: bytes) -> tuple[int, int]:
     if width < 64 or height < 64 or width > 2048 or height > 2048:
         raise WebRequestError("invalid-image-dimensions", HTTPStatus.BAD_GATEWAY)
     return width, height
+
+
+class BrowserLifecycle:
+    """Track live browser pages and close after the final page disconnects."""
+
+    def __init__(self, grace_seconds: float, on_last_disconnect: Callable[[], None]) -> None:
+        if not isinstance(grace_seconds, (int, float)) or not 0 < grace_seconds <= 60:
+            raise ValueError("invalid-browser-close-grace")
+        self.grace_seconds = float(grace_seconds)
+        self.on_last_disconnect = on_last_disconnect
+        self.lock = threading.Lock()
+        self.connections: dict[str, str] = {}
+        self.timer: threading.Timer | None = None
+        self.closed = False
+
+    def open(self, session_id: str) -> str:
+        connection_id = secrets.token_hex(16)
+        with self.lock:
+            if self.closed:
+                raise RuntimeError("browser-lifecycle-closed")
+            if self.timer is not None:
+                self.timer.cancel()
+                self.timer = None
+            self.connections[session_id] = connection_id
+        return connection_id
+
+    def disconnected(self, session_id: str, connection_id: str) -> None:
+        with self.lock:
+            if self.closed or self.connections.get(session_id) != connection_id:
+                return
+            del self.connections[session_id]
+            if self.connections or self.timer is not None:
+                return
+            timer = threading.Timer(self.grace_seconds, self._finish_if_empty)
+            timer.daemon = True
+            self.timer = timer
+            timer.start()
+
+    def _finish_if_empty(self) -> None:
+        with self.lock:
+            self.timer = None
+            if self.closed or self.connections:
+                return
+        self.on_last_disconnect()
+
+    def close(self) -> None:
+        with self.lock:
+            self.closed = True
+            self.connections.clear()
+            if self.timer is not None:
+                self.timer.cancel()
+                self.timer = None
 
 
 class HavenState:
@@ -3739,6 +3794,21 @@ class HavenWebServer(ThreadingHTTPServer):
         super().__init__(address, HavenRequestHandler)
         self.expected_origin = f"http://127.0.0.1:{self.server_port}"
         self.expected_host = f"127.0.0.1:{self.server_port}"
+        self.browser_lifecycle = BrowserLifecycle(
+            BROWSER_CLOSE_GRACE_SECONDS,
+            self._shutdown_after_last_browser,
+        )
+
+    def _shutdown_after_last_browser(self) -> None:
+        if not self.state.unload_used_models():
+            self.state.diagnostics.record(
+                "application", "BROWSER_CLOSE_MODEL_CLEANUP_FAILED", "failed",
+            )
+            return
+        self.state.diagnostics.record(
+            "application", "LAST_BROWSER_WINDOW_CLOSED", "completed",
+        )
+        self.shutdown()
 
     def get_request(self) -> tuple[socket.socket, Any]:
         request, client_address = super().get_request()
@@ -3766,6 +3836,7 @@ class HavenWebServer(ThreadingHTTPServer):
             self._request_slots.release()
 
     def server_close(self) -> None:
+        self.browser_lifecycle.close()
         self.state.unload_used_models()
         self.state.clear_research()
         if self.state.alpha_setup is not None:
@@ -3880,6 +3951,20 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
         if self.headers.get_content_type() != "application/json":
             raise WebRequestError("json-content-type-required", HTTPStatus.UNSUPPORTED_MEDIA_TYPE)
 
+    def _require_browser_lifecycle_authority(self) -> str:
+        self._require_local_request()
+        if self.headers.get("Sec-Fetch-Site") not in {None, "same-origin"}:
+            raise WebRequestError("cross-site-request-rejected", HTTPStatus.FORBIDDEN)
+        if not secrets.compare_digest(
+            self.headers.get("X-Haven-Token", ""),
+            self.server.state.csrf_token,
+        ):
+            raise WebRequestError("invalid-session-token", HTTPStatus.FORBIDDEN)
+        session_id = self.headers.get("X-Haven-Browser-Session", "")
+        if not BROWSER_SESSION_ID.fullmatch(session_id):
+            raise WebRequestError("invalid-browser-session", HTTPStatus.FORBIDDEN)
+        return session_id
+
     def _read_body(self) -> dict[str, Any]:
         try:
             length = int(self.headers.get("Content-Length", ""))
@@ -3908,6 +3993,23 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 status = self.server.state.public_status()
                 status["sessionToken"] = self.server.state.csrf_token
                 self._send_json(HTTPStatus.OK, status)
+                return
+            if self.path == "/api/browser-lifecycle":
+                session_id = self._require_browser_lifecycle_authority()
+                connection_id = self.server.browser_lifecycle.open(session_id)
+                try:
+                    self.send_response(HTTPStatus.OK)
+                    self._security_headers("text/event-stream; charset=utf-8")
+                    self.send_header("Connection", "keep-alive")
+                    self.end_headers()
+                    while True:
+                        self.wfile.write(b": haven42-browser-open\n\n")
+                        self.wfile.flush()
+                        time.sleep(BROWSER_LIFECYCLE_HEARTBEAT_SECONDS)
+                except (BrokenPipeError, ConnectionAbortedError, ConnectionResetError, OSError):
+                    pass
+                finally:
+                    self.server.browser_lifecycle.disconnected(session_id, connection_id)
                 return
             if self.path == "/api/alpha/resources":
                 sample = self.server.state.alpha_resources.take()
