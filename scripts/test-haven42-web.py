@@ -3003,6 +3003,7 @@ def main() -> int:
             "https://github.com/ollama/ollama/releases",
             "https://ollama.com/download/windows",
             "https://ollama.com/download/linux",
+            "https://ollama.com/download/mac",
         ]
         assert policy["browser"]["fixedExternalNavigationRequiresExplicitClick"] is True
         assert policy["browser"]["rendererSuppliedExternalNavigationAllowed"] is False
@@ -3039,6 +3040,11 @@ def main() -> int:
         assert "document.createElement(\"progress\")" in javascript
         assert 'setTaskEvent("Local AI setup complete · ready to chat", "result")' in javascript
         assert 'byId("wizard-readiness-next").textContent = "Open chat"' not in javascript
+        assert '"Mac model"' in javascript
+        assert "Install Ollama for macOS" in javascript
+        assert "I've installed Ollama — check again" in javascript
+        assert 'connectProvider("http://127.0.0.1:11434", 120, 300, "none", "")' in javascript
+        assert "Ollama is not running yet. Install and open Ollama" in javascript
         assert 'id="models-panel"' in html and 'id="model-search-capability"' in html
         assert 'id="open-models-from-chat"' in html
         assert '<label id="model-label" for="model">Conversation model</label>' in html

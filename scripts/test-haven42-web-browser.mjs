@@ -529,6 +529,64 @@ try {
   checks += 17;
   trace("assurance-view-verified");
 
+  const macosGuidedPresentation = await cdp.evaluate(`(() => {
+    const originalPlatform = state.platformFamily;
+    state.platformFamily = 'macos';
+    const snapshot = {
+      platform: {
+        operatingSystem: 'macos', architecture: 'arm64', logicalProcessors: 10,
+        systemMemoryGiB: 16, availableStorageGiB: 160,
+        productName: 'Mac mini · Apple M4', buildNumber: null,
+      },
+      accelerators: [{vendor: 'Apple', model: 'Apple M4', memoryGiB: null, driverName: null, driverVersion: null}],
+      software: [
+        {componentId: 'python', state: 'validated', version: '3.14.6'},
+        {componentId: 'ollama', state: 'not-detected', version: null},
+      ],
+    };
+    const plan = {
+      hardwareAssessment: {candidateModel: 'qwen3.5:9b'},
+      actions: [],
+      alphaCandidate: {
+        modelSelection: {selected: {name: 'qwen3.5:9b'}, automaticExecutionAllowed: false},
+        managedSetupCandidateAvailable: false,
+        runtimeCompatibility: null,
+        driverGuidance: [],
+      },
+    };
+    renderSystemReadiness('wizard-system-readiness', snapshot);
+    renderSetupPlan(plan);
+    updateReadinessNextControl(false);
+    const link = document.querySelector('#wizard-setup-plan a[href="https://ollama.com/download/mac"]');
+    const result = {
+      facts: document.querySelector('#wizard-system-readiness').textContent,
+      explanation: document.querySelector('#wizard-setup-plan').textContent,
+      linkText: link?.textContent,
+      linkTarget: link?.target,
+      linkRel: link?.rel,
+      linkReferrer: link?.referrerPolicy,
+      nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
+      nextText: document.querySelector('#wizard-readiness-next').textContent,
+    };
+    state.platformFamily = originalPlatform;
+    return result;
+  })()`);
+  if (
+    !macosGuidedPresentation.facts.includes('Operating systemmacOS · arm64')
+    || !macosGuidedPresentation.facts.includes('Mac modelMac mini · Apple M4')
+    || !macosGuidedPresentation.facts.includes('System Ollamanot-detected')
+    || !macosGuidedPresentation.explanation.includes('does not install the Ollama app on macOS')
+    || macosGuidedPresentation.linkText !== 'Install Ollama for macOS'
+    || macosGuidedPresentation.linkTarget !== '_blank'
+    || !macosGuidedPresentation.linkRel.includes('noopener')
+    || !macosGuidedPresentation.linkRel.includes('noreferrer')
+    || macosGuidedPresentation.linkReferrer !== 'no-referrer'
+    || macosGuidedPresentation.nextDisabled
+    || macosGuidedPresentation.nextText !== "I've installed Ollama — check again"
+  ) throw new Error(`macos-guided-setup:${JSON.stringify(macosGuidedPresentation)}`);
+  checks += 10;
+  trace("macos-guided-setup-verified");
+
   const managedSetupHost = process.platform === "win32" || process.platform === "linux";
   if (managedSetupHost) {
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");

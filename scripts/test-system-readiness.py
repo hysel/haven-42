@@ -98,6 +98,27 @@ def main() -> int:
     )
     checks += 14
 
+    class MacHardwareRunner:
+        def run(self, executable: str, arguments: tuple[str, ...], timeout: int = 3):
+            assert executable == "system_profiler"
+            assert arguments == ("SPHardwareDataType", "-json")
+            return {
+                "state": "detected",
+                "output": json.dumps({
+                    "SPHardwareDataType": [{
+                        "machine_name": "Mac mini",
+                        "chip_type": "Apple M4",
+                        "serial_number": "must-not-be-returned",
+                    }]
+                }),
+                "code": 0,
+            }
+
+    macos_facts = READINESS._macos_platform_facts(MacHardwareRunner())
+    assert macos_facts == {"productName": "Mac mini · Apple M4"}
+    assert "serial" not in json.dumps(macos_facts).lower()
+    checks += 2
+
     with tempfile.TemporaryDirectory() as directory:
         release = Path(directory) / "os-release"
         release.write_text(
