@@ -85,7 +85,11 @@ def main() -> int:
         assert calls[2][0][:5] == (
             "/usr/sbin/spctl", "--assess", "--type", "execute", "--verbose=4",
         )
-        checks += 8
+        assert MODULE.version_status("0.33.2") == "newer-unverified"
+        assert MODULE.version_status("0.32.15") == "certified"
+        assert MODULE.version_status("0.31.0") == "older-unverified"
+        assert MODULE.version_status("preview") == "unverified-version-order"
+        checks += 12
 
         readiness = MODULE.readiness_item(app)
         assert readiness == {
@@ -151,6 +155,10 @@ def main() -> int:
         coordinator._wait_ready = ready
         plan = coordinator.register_plan()
         assert plan["approvalRequired"] is True
+        assert plan["certifiedVersion"] == "0.32.15"
+        assert plan["versionStatus"] == "newer-unverified"
+        assert plan["newerVersionAllowedAfterApproval"] is True
+        assert "has not completed Haven 42 compatibility testing" in plan["effects"][1]
         assert plan["downloadPerformed"] is False
         assert plan["installationPerformed"] is False
         assert plan["modelDownloadPerformed"] is False
@@ -164,6 +172,8 @@ def main() -> int:
         result = coordinator.start(token)
         assert result["status"] == "started"
         assert result["endpoint"] == MODULE.OLLAMA_URL
+        assert result["certifiedVersion"] == "0.32.15"
+        assert result["versionStatus"] == "newer-unverified"
         assert result["ownedProcess"] is True and result["approvalConsumed"] is True
         assert result["downloadPerformed"] is False
         assert result["installationPerformed"] is False
@@ -177,7 +187,7 @@ def main() -> int:
         assert factory_calls[0]["keywords"]["start_new_session"] is True
         assert coordinator.close() is True
         expect_error("invalid-macos-ollama-approval", coordinator.start, token)
-        checks += 17
+        checks += 23
 
     print(f"macOS installed Ollama checks passed: {checks}")
     return 0

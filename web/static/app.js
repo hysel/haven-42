@@ -2558,7 +2558,9 @@ function renderSetupPlan(plan) {
     disclosure.className = "notice";
     disclosure.textContent = macosExternalSetup
       ? macosRuntimePlan
-        ? `Haven 42 found Ollama ${macosRuntimePlan.version} in Applications and verified its publisher with macOS. It can start the local engine after you review and approve the exact effects below. No app or model will be downloaded.`
+        ? macosRuntimePlan.versionStatus === "newer-unverified"
+          ? `Haven 42 verified official Ollama ${macosRuntimePlan.version} in Applications. This is newer than the certified macOS version ${macosRuntimePlan.certifiedVersion}, so Haven 42 has not completed compatibility testing for it. You can continue after reviewing and approving the warning below. No app or model will be downloaded.`
+          : `Haven 42 found Ollama ${macosRuntimePlan.version} in Applications and verified its publisher with macOS. It can start the local engine after you review and approve the exact effects below. No app or model will be downloaded.`
         : "Haven 42 did not find an official Ollama app it could verify in Applications. Install Ollama from its official macOS download, then return here and check this computer again. Haven 42 will not use Terminal or change system settings."
       : runtimeCompatibility?.decision === "deny"
       ? `This model fits the computer, but Haven 42 does not have an approved ${runtimeCompatibility.engine || "local AI engine"} version for it on this operating system. Setup stopped before downloading anything. Technical reason: ${runtimeCompatibility.reason || "no-compatible-runtime"}.`
@@ -2569,6 +2571,7 @@ function renderSetupPlan(plan) {
       const review = document.createElement("button");
       review.type = "button";
       review.className = "button primary";
+      review.id = "macos-installed-ollama-review";
       review.textContent = "Review and start local AI";
       const approvalPanel = document.createElement("div");
       approvalPanel.className = "setup-approval hidden";
@@ -2823,11 +2826,11 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
 
 function updateReadinessNextControl(managedSetupAvailable, macosRuntimeAvailable) {
   const macosExternalSetup = state.platformFamily === "macos" && !macosRuntimeAvailable;
-  byId("wizard-readiness-next").disabled = managedSetupAvailable || macosRuntimeAvailable || !macosExternalSetup;
+  byId("wizard-readiness-next").disabled = managedSetupAvailable || (!macosRuntimeAvailable && !macosExternalSetup);
   byId("wizard-readiness-next").textContent = managedSetupAvailable
     ? "Complete setup above"
     : macosRuntimeAvailable
-      ? "Start local AI above"
+      ? "Review and start local AI"
     : macosExternalSetup
       ? "I've installed Ollama — check again"
       : "Local setup unavailable";
@@ -6020,6 +6023,12 @@ byId("wizard-readiness-next").addEventListener("click", async () => {
   ) {
     byId("wizard-scan-status").textContent = "Finish the local setup above. Haven 42 will open chat automatically after it checks and starts the local AI.";
     byId("alpha-setup-review")?.focus();
+    return;
+  }
+  const macosReview = byId("macos-installed-ollama-review");
+  if (state.platformFamily === "macos" && macosReview) {
+    macosReview.click();
+    macosReview.scrollIntoView({ behavior: motionBehavior(), block: "center" });
     return;
   }
   if (state.platformFamily === "macos") {

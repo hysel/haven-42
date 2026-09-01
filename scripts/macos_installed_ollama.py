@@ -24,15 +24,30 @@ OLLAMA_BINARY_RELATIVE = Path("Contents/Resources/ollama")
 OLLAMA_INFO_RELATIVE = Path("Contents/Info.plist")
 OLLAMA_BUNDLE_ID = "com.electron.ollama"
 OLLAMA_TEAM_ID = "3MU9H2V9Y9"
+CERTIFIED_OLLAMA_VERSION = "0.32.15"
 OLLAMA_HOST = "127.0.0.1:11435"
 OLLAMA_URL = f"http://{OLLAMA_HOST}"
 MAX_COMMAND_OUTPUT = 64 * 1024
 SAFE_VERSION = re.compile(r"^[0-9][0-9A-Za-z._+-]{0,63}$")
 SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_-]{16,160}$")
+NUMERIC_VERSION = re.compile(r"^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$")
 
 
 class MacOSInstalledOllamaError(ValueError):
     """The installed app or requested lifecycle action failed closed."""
+
+
+def version_status(version: str) -> str:
+    """Compare an official installed version with the exact macOS-certified version."""
+    installed_match = NUMERIC_VERSION.fullmatch(version)
+    certified_match = NUMERIC_VERSION.fullmatch(CERTIFIED_OLLAMA_VERSION)
+    if installed_match is None or certified_match is None:
+        return "unverified-version-order"
+    installed = tuple(int(part) for part in installed_match.groups())
+    certified = tuple(int(part) for part in certified_match.groups())
+    if installed == certified:
+        return "certified"
+    return "newer-unverified" if installed > certified else "older-unverified"
 
 
 def _registered_child(root: Path, relative: Path) -> Path:
@@ -198,12 +213,25 @@ class MacOSInstalledOllamaCoordinator:
 
     def register_plan(self) -> dict[str, Any]:
         verified = self.inspector(self.app_path)
+        installed_version = verified["version"]
+        installed_version_status = version_status(installed_version)
+        effects = list(self.EFFECTS)
+        if installed_version_status == "newer-unverified":
+            effects.insert(
+                1,
+                f"Use installed Ollama {installed_version}. Haven 42 certified "
+                f"{CERTIFIED_OLLAMA_VERSION}; this newer version has not completed "
+                "Haven 42 compatibility testing.",
+            )
         plan = {
             "schemaVersion": 1,
             "kind": "macos-installed-ollama-start-plan",
             "planId": secrets.token_urlsafe(18),
-            "version": verified["version"],
-            "effects": list(self.EFFECTS),
+            "version": installed_version,
+            "certifiedVersion": CERTIFIED_OLLAMA_VERSION,
+            "versionStatus": installed_version_status,
+            "newerVersionAllowedAfterApproval": installed_version_status == "newer-unverified",
+            "effects": effects,
             "approvalRequired": True,
             "endpoint": OLLAMA_URL,
             "downloadPerformed": False,
@@ -320,6 +348,8 @@ class MacOSInstalledOllamaCoordinator:
             "endpoint": OLLAMA_URL,
             "appVersion": verified["version"],
             "runtimeVersion": runtime_version,
+            "certifiedVersion": CERTIFIED_OLLAMA_VERSION,
+            "versionStatus": version_status(runtime_version),
             "signatureVerified": True,
             "gatekeeperAccepted": True,
             "ownedProcess": True,

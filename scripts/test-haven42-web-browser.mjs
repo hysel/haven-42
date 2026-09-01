@@ -605,14 +605,18 @@ try {
         driverGuidance: [],
         macosInstalledRuntime: {
           available: true,
-          plan: {planId: 'fixed-test-plan', version: '0.33.2', effects},
+          plan: {
+            planId: 'fixed-test-plan', version: '0.33.2', certifiedVersion: '0.32.15',
+            versionStatus: 'newer-unverified', newerVersionAllowedAfterApproval: true,
+            effects: [effects[0], 'Use the newer unverified version after approval.', ...effects.slice(1)],
+          },
         },
       },
     });
     updateReadinessNextControl(false, true);
     const review = [...document.querySelectorAll('#wizard-setup-plan button')]
       .find((item) => item.textContent === 'Review and start local AI');
-    review.click();
+    document.querySelector('#wizard-readiness-next').click();
     const approval = document.querySelector('#wizard-setup-plan .setup-approval');
     const result = {
       explanation: document.querySelector('#wizard-setup-plan').textContent,
@@ -630,18 +634,20 @@ try {
     return result;
   })()`);
   if (
-    !macosInstalledPresentation.explanation.includes('found Ollama 0.33.2 in Applications')
+    !macosInstalledPresentation.explanation.includes('verified official Ollama 0.33.2 in Applications')
+    || !macosInstalledPresentation.explanation.includes('newer than the certified macOS version 0.32.15')
+    || !macosInstalledPresentation.explanation.includes('You can continue after reviewing and approving')
     || !macosInstalledPresentation.explanation.includes('No app or model will be downloaded')
     || macosInstalledPresentation.reviewText !== 'Review and start local AI'
     || !macosInstalledPresentation.approvalVisible
-    || macosInstalledPresentation.effectCount !== 3
+    || macosInstalledPresentation.effectCount !== 4
     || !macosInstalledPresentation.consentText.includes('allow Haven 42 to start')
     || !macosInstalledPresentation.approveDisabled
     || macosInstalledPresentation.installLinkPresent
-    || !macosInstalledPresentation.nextDisabled
-    || macosInstalledPresentation.nextText !== 'Start local AI above'
+    || macosInstalledPresentation.nextDisabled
+    || macosInstalledPresentation.nextText !== 'Review and start local AI'
   ) throw new Error(`macos-installed-setup:${JSON.stringify(macosInstalledPresentation)}`);
-  checks += 10;
+  checks += 12;
   trace("macos-installed-setup-verified");
 
   const setupPlanningHost = ["win32", "linux", "darwin"].includes(process.platform);
