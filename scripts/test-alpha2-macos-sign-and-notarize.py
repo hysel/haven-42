@@ -126,7 +126,8 @@ class SigningTests(unittest.TestCase):
             self.assertNotIn(IDENTITY, encoded)
             self.assertNotIn("haven42-notary", encoded)
             ditto_commands = [command for command in runner.commands if Path(command[0]).name == "ditto"]
-            self.assertEqual(len(ditto_commands), 2)
+            self.assertEqual(len(ditto_commands), 3)
+            self.assertEqual(Path(ditto_commands[-1][-2]).name, "Haven42")
             self.assertTrue((output / "haven42-darwin-arm64-developer-id-notarized.zip").is_file())
             self.assertTrue((output / "SHA256SUMS").is_file())
             self.assertEqual(

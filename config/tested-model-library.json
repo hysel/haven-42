@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "catalogId": "haven42.hardware-aware-tested-model-library",
   "updatedAt": "2026-08-20",
   "evidenceBoundary": "Choices are matched to the AI execution computer, not the browser computer. A runtime difference remains visible and is not treated as an exact-profile pass.",
@@ -17,6 +17,7 @@
       "hardware": "AMD Radeon RX 7800 XT 16 GB",
       "operatingSystem": "Windows 11",
       "evidence": "examples/windows-amd-rx7800xt-ollama0329-recertification.md",
+      "recommendedModel": "qwen3.5:9b",
       "models": [
         "gemma3:1b-it-q4_K_M", "llama3.2:3b-instruct-q4_K_M", "granite4.1:3b-q4_K_M",
         "phi4-mini:3.8b-q4_K_M", "nemotron-3-nano:4b", "gemma3:4b-it-q4_K_M",
@@ -37,6 +38,7 @@
       "hardware": "NVIDIA GeForce RTX 3060 12 GB",
       "operatingSystem": "Windows 11",
       "evidence": "examples/nvidia-rtx3060-model-qualification.md",
+      "recommendedModel": "qwen3.5:9b",
       "models": [
         "gemma3:12b-it-q4_K_M", "gemma3:4b-it-q4_K_M", "gemma4:12b-it-qat",
         "gemma4:e2b-it-qat", "gemma4:e4b-it-qat", "granite4.1:3b-q4_K_M",
@@ -57,6 +59,7 @@
       "hardware": "NVIDIA GeForce RTX 3060 12 GB",
       "operatingSystem": "Ubuntu 26.04 LTS",
       "evidence": "examples/nvidia-rtx3060-linux-model-qualification.md",
+      "recommendedModel": "qwen3.5:9b",
       "models": [
         "qwen3.5:0.8b", "qwen3.5:2b", "qwen3.5:4b", "qwen3.5:9b",
         "gemma3:1b-it-q4_K_M", "gemma3:4b-it-q4_K_M", "gemma3:12b-it-q4_K_M",
@@ -79,6 +82,7 @@
       "hardware": "NVIDIA GeForce GTX 1650 Super 4 GB",
       "operatingSystem": "Ubuntu 26.04 LTS",
       "evidence": "examples/nvidia-gtx1650-super-linux-model-qualification.md",
+      "recommendedModel": "qwen3.5:0.8b",
       "models": [
         "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "granite4.1:3b-q4_K_M",
         "llama3.2:3b-instruct-q4_K_M", "minicpm-v4.6:1b"
@@ -97,6 +101,7 @@
       "hardware": "NVIDIA GeForce GTX 1650 Super 4 GB",
       "operatingSystem": "Windows 11",
       "evidence": "examples/nvidia-gtx1650-super-windows-model-qualification.md",
+      "recommendedModel": "gemma3:1b-it-q4_K_M",
       "models": [
         "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "minicpm-v4.6:1b"
       ]
@@ -114,6 +119,7 @@
       "hardware": "AMD Radeon RX 5700 XT 8 GB",
       "operatingSystem": "Ubuntu 26.04 LTS",
       "evidence": "examples/amd-rx5700xt-ollama03213-qualification.md",
+      "recommendedModel": "qwen3.5:4b",
       "models": [
         "gemma3:4b-it-q4_K_M", "gemma4:e2b-it-qat", "gemma4:e4b-it-qat",
         "granite4.1:3b-q4_K_M", "granite4.1:8b-q4_K_M", "llama3.2:3b-instruct-q4_K_M",
@@ -133,8 +139,73 @@
       "hardware": "Dual NVIDIA Tesla V100 32 GB",
       "operatingSystem": "Linux",
       "evidence": "examples/august-2026-new-model-qualification.md",
+      "recommendedModel": "qwen3.6:35b-a3b-q4_K_M",
       "models": [
         "granite4.1:30b", "ornith:9b", "qwen3.5:4b", "qwen3.6:27b-q4_K_M", "qwen3.6:35b-a3b-q4_K_M"
+      ]
+    },
+    {
+      "id": "linux-amd-rx6800-16gib-ollama-0.32.14",
+      "platformFamily": "linux",
+      "acceleratorVendor": "AMD",
+      "acceleratorModelPattern": "Radeon RX 6800",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 16,
+      "minimumSystemMemoryGiB": 31,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.14",
+      "hardware": "AMD Radeon RX 6800 16 GB",
+      "operatingSystem": "Ubuntu 26.04 LTS",
+      "evidence": "examples/amd-rx6800-linux-model-qualification.md",
+      "recommendedModel": "qwen3.5:9b",
+      "models": [
+        "qwen3.5:0.8b", "qwen3.5:2b", "qwen3.5:4b", "qwen3.5:9b",
+        "gemma3:1b-it-q4_K_M", "gemma3:4b-it-q4_K_M", "gemma3:12b-it-q4_K_M",
+        "gemma4:e2b-it-qat", "gemma4:e4b-it-qat", "gemma4:12b-it-qat"
+      ]
+    },
+    {
+      "id": "windows-amd-rx6800-16gib-ollama-0.32.14",
+      "platformFamily": "windows",
+      "acceleratorVendor": "AMD",
+      "acceleratorModelPattern": "Radeon RX 6800",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 16,
+      "minimumSystemMemoryGiB": 31,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.14",
+      "hardware": "AMD Radeon RX 6800 16 GB",
+      "operatingSystem": "Windows 11",
+      "evidence": "examples/amd-rx6800-windows-model-qualification.md",
+      "recommendedModel": "qwen3.5:9b",
+      "models": [
+        "qwen3.5:0.8b", "qwen3.5:2b", "qwen3.5:4b", "qwen3.5:9b",
+        "gemma3:1b-it-q4_K_M", "gemma3:4b-it-q4_K_M", "gemma3:12b-it-q4_K_M",
+        "gemma4:e2b-it-qat", "gemma4:e4b-it-qat", "gemma4:12b-it-qat",
+        "granite4.1:3b-q4_K_M", "granite4.1:8b-q4_K_M", "phi4-mini:3.8b-q4_K_M",
+        "llama3.2:3b-instruct-q4_K_M", "ministral-3:3b-instruct-2512-q4_K_M",
+        "ministral-3:8b-instruct-2512-q4_K_M", "ornith:9b", "lfm2.5:8b", "minicpm-v4.6:1b"
+      ]
+    },
+    {
+      "id": "macos-apple-m4-16gib-ollama-0.32.15",
+      "platformFamily": "macos",
+      "acceleratorVendor": "Apple",
+      "acceleratorModelPattern": "Apple M4",
+      "minimumAcceleratorCount": 1,
+      "minimumGpuMemoryGiB": 0,
+      "minimumSystemMemoryGiB": 15,
+      "runtimeProvider": "ollama",
+      "runtimeVersion": "0.32.15",
+      "hardware": "Apple M4 with 16 GB unified memory",
+      "operatingSystem": "macOS 26",
+      "evidence": "examples/apple-m4-16gib-model-qualification.md",
+      "recommendedModel": "qwen3.5:4b",
+      "models": [
+        "qwen3.5:2b", "qwen3.5:4b", "gemma4:e2b-it-qat", "gemma4:e4b-it-qat",
+        "granite4.1:3b-q4_K_M", "granite4.1:8b-q4_K_M",
+        "ministral-3:3b-instruct-2512-q4_K_M", "ministral-3:8b-instruct-2512-q4_K_M",
+        "ornith:9b"
       ]
     }
   ]

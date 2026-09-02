@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import io
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -20,6 +21,11 @@ from portable_runtime_components import (
 
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
+ARCHIVE_ROOT = "Haven42"
+VISIBLE_STATE_DIRECTORIES = {
+    f"{ARCHIVE_ROOT}/Haven42-Data",
+    f"{ARCHIVE_ROOT}/Haven42-Logs",
+}
 EXPECTED_APP_VERSIONS = {
     "windows": "0.4.0-alpha.1",
     "darwin": "0.4.0-alpha.1",
@@ -134,7 +140,7 @@ def safe_member_name(value: str) -> str:
     if "\\" in value or "\x00" in value:
         raise ArtifactVerificationError("unsafe-archive-member")
     path = PurePosixPath(value)
-    if path.is_absolute() or not path.parts or path.parts[0] != "haven42":
+    if path.is_absolute() or not path.parts or path.parts[0] != ARCHIVE_ROOT:
         raise ArtifactVerificationError("unsafe-archive-member")
     if any(part in {"", ".", ".."} for part in path.parts):
         raise ArtifactVerificationError("unsafe-archive-member")
@@ -143,6 +149,7 @@ def safe_member_name(value: str) -> str:
 
 def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
     files: dict[str, tuple[int, str]] = {}
+    directories: set[str] = set()
     total_bytes = 0
 
     def add(name: str, data: bytes) -> None:
@@ -155,7 +162,7 @@ def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
         if total_bytes > MAX_ARCHIVE_TOTAL_BYTES:
             raise ArtifactVerificationError("archive-total-size-exceeded")
         safe = safe_member_name(name)
-        relative = PurePosixPath(safe).relative_to("haven42").as_posix()
+        relative = PurePosixPath(safe).relative_to(ARCHIVE_ROOT).as_posix()
         if not relative or relative.casefold() in {item.casefold() for item in files}:
             raise ArtifactVerificationError("duplicate-archive-member")
         files[relative] = (len(data), sha256_bytes(data))
@@ -170,7 +177,7 @@ def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
                     if unix_mode == 0o120000:
                         raise ArtifactVerificationError("non-regular-archive-member")
                     if member.is_dir():
-                        safe_member_name(member.filename.rstrip("/"))
+                        directories.add(safe_member_name(member.filename.rstrip("/")))
                         continue
                     add(member.filename, archive.read(member))
         except (OSError, zipfile.BadZipFile, RuntimeError) as error:
@@ -179,8 +186,9 @@ def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
         try:
             with tarfile.open(path, "r:gz") as archive:
                 for member in archive.getmembers():
-                    safe_member_name(member.name)
+                    safe = safe_member_name(member.name)
                     if member.isdir():
+                        directories.add(safe)
                         continue
                     if not member.isfile():
                         raise ArtifactVerificationError("non-regular-archive-member")
@@ -194,6 +202,8 @@ def read_archive_files(path: Path) -> dict[str, tuple[int, str]]:
         raise ArtifactVerificationError("unsupported-archive-format")
     if not files:
         raise ArtifactVerificationError("empty-archive")
+    if not VISIBLE_STATE_DIRECTORIES.issubset(directories):
+        raise ArtifactVerificationError("visible-state-directories-missing")
     return files
 
 
@@ -223,7 +233,7 @@ def expected_package_files(path: Path) -> dict[str, tuple[int, str]]:
         if not isinstance(record, dict) or set(record) != {"path", "sha256", "sizeBytes"}:
             raise ArtifactVerificationError("invalid-package-file-record")
         name = str(record["path"])
-        safe_member_name(f"haven42/{name}")
+        safe_member_name(f"{ARCHIVE_ROOT}/{name}")
         digest = str(record["sha256"])
         size = record["sizeBytes"]
         if (
@@ -559,16 +569,16 @@ def verify(directory: Path, expected_version: str | None = None) -> None:
 
 
 def run_self_tests() -> None:
-    accepted = safe_member_name("haven42/_internal/web/static/app.js")
-    assert accepted == "haven42/_internal/web/static/app.js"
+    accepted = safe_member_name("Haven42/_internal/web/static/app.js")
+    assert accepted == "Haven42/_internal/web/static/app.js"
     denied = 0
     for value in (
         "../escape",
-        "/haven42/file",
+        "/Haven42/file",
         "other/file",
-        "haven42/../escape",
-        "haven42\\file",
-        "haven42/\x00file",
+        "Haven42/../escape",
+        "Haven42\\file",
+        "Haven42/\x00file",
     ):
         try:
             safe_member_name(value)
@@ -579,24 +589,48 @@ def run_self_tests() -> None:
     hostile_cases = 0
     with tempfile.TemporaryDirectory(prefix="haven42-artifact-verifier-") as temporary:
         root = Path(temporary)
+        valid_zip = root / "valid.zip"
+        with zipfile.ZipFile(valid_zip, "w") as archive:
+            archive.writestr("Haven42/app.bin", b"application")
+            archive.writestr("Haven42/Haven42-Data/", b"")
+            archive.writestr("Haven42/Haven42-Logs/", b"")
+        valid_tar = root / "valid.tar.gz"
+        with tarfile.open(valid_tar, "w:gz") as archive:
+            for name in ("Haven42", *sorted(VISIBLE_STATE_DIRECTORIES)):
+                directory = tarfile.TarInfo(name)
+                directory.type = tarfile.DIRTYPE
+                archive.addfile(directory)
+            payload = b"application"
+            member = tarfile.TarInfo("Haven42/app.bin")
+            member.size = len(payload)
+            archive.addfile(member, io.BytesIO(payload))
+        expected_valid = {"app.bin": (len(b"application"), sha256_bytes(b"application"))}
+        if read_archive_files(valid_zip) != expected_valid:
+            raise AssertionError("valid visible ZIP layout self-test failed")
+        if read_archive_files(valid_tar) != expected_valid:
+            raise AssertionError("valid visible TAR layout self-test failed")
         traversal = root / "traversal.zip"
         with zipfile.ZipFile(traversal, "w") as archive:
-            archive.writestr("haven42/../escape", b"unsafe")
+            archive.writestr("Haven42/../escape", b"unsafe")
+        missing_visible_directories = root / "missing-visible-directories.zip"
+        with zipfile.ZipFile(missing_visible_directories, "w") as archive:
+            archive.writestr("Haven42/app.bin", b"application")
         duplicate = root / "duplicate.zip"
         with zipfile.ZipFile(duplicate, "w") as archive:
-            archive.writestr("haven42/File.txt", b"one")
-            archive.writestr("haven42/file.txt", b"two")
+            archive.writestr("Haven42/File.txt", b"one")
+            archive.writestr("Haven42/file.txt", b"two")
         linked = root / "linked.tar.gz"
         with tarfile.open(linked, "w:gz") as archive:
-            directory = tarfile.TarInfo("haven42")
+            directory = tarfile.TarInfo("Haven42")
             directory.type = tarfile.DIRTYPE
             archive.addfile(directory)
-            link = tarfile.TarInfo("haven42/link")
+            link = tarfile.TarInfo("Haven42/link")
             link.type = tarfile.SYMTYPE
             link.linkname = "../../escape"
             archive.addfile(link)
         for path, expected in (
             (traversal, "unsafe-archive-member"),
+            (missing_visible_directories, "visible-state-directories-missing"),
             (duplicate, "duplicate-archive-member"),
             (linked, "non-regular-archive-member"),
         ):
@@ -755,7 +789,7 @@ def run_self_tests() -> None:
             hostile_cases += 1
         else:
             raise AssertionError("expected license-evidence-notice-missing")
-    if hostile_cases != 9:
+    if hostile_cases != 10:
         raise AssertionError("hostile archive self-test failed")
 
 
@@ -778,7 +812,7 @@ def main() -> int:
         if args.self_test or args.self_test_only:
             run_self_tests()
         if args.self_test_only:
-            print("Portable verifier hostile self-tests passed 9 cases.")
+            print("Portable verifier hostile self-tests passed 10 cases.")
             return 0
         verify(Path(args.artifact_directory).resolve(), args.expected_version)
     except ArtifactVerificationError as error:

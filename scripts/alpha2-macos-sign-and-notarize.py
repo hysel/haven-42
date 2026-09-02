@@ -26,6 +26,9 @@ SECURITY = Path("/usr/bin/security")
 SPCTL = Path("/usr/sbin/spctl")
 XCRUN = Path("/usr/bin/xcrun")
 APP_NAME = "Haven 42.app"
+PACKAGE_ROOT_NAME = "Haven42"
+DATA_DIRECTORY_NAME = "Haven42-Data"
+LOG_DIRECTORY_NAME = "Haven42-Logs"
 UNSIGNED_ARCHIVE_NAME = "haven42-darwin-arm64-unsigned-development-app.tar.gz"
 UNSIGNED_EVIDENCE_NAME = "macos-app-build-result.json"
 BUNDLE_ID = "org.haven42.desktop"
@@ -259,6 +262,31 @@ def notarize(
         raise SigningError("stapled-archive-repack-failed")
 
 
+def package_visible_distribution(app: Path, archive: Path, *, runner: Callable) -> Path:
+    """Wrap the notarized app and its user-visible state directories in one folder."""
+    archive.unlink(missing_ok=True)
+    package_root = app.parent / PACKAGE_ROOT_NAME
+    if package_root.exists() or package_root.is_symlink():
+        raise SigningError("distribution-root-already-exists")
+    package_root.mkdir(mode=0o755)
+    packaged_app = package_root / APP_NAME
+    app.rename(packaged_app)
+    for directory_name in (DATA_DIRECTORY_NAME, LOG_DIRECTORY_NAME):
+        directory = package_root / directory_name
+        directory.mkdir(mode=0o700)
+        (directory / "README.txt").write_text(
+            "Haven 42 keeps its own files in this visible folder.\n",
+            encoding="utf-8",
+        )
+    packed = invoke([
+        str(DITTO), "-c", "-k", "--keepParent", "--sequesterRsrc",
+        str(package_root), str(archive),
+    ], runner=runner)
+    if packed.returncode != 0 or not archive.is_file():
+        raise SigningError("visible-distribution-archive-failed")
+    return packaged_app
+
+
 def write_result(
     output: Path,
     version: str,
@@ -342,8 +370,10 @@ def execute(
         archive = temporary / "haven42-darwin-arm64-developer-id-notarized.zip"
         notarize(app, archive, notary_profile, runner=runner)
         verify_signed_app(app, runner=runner)
+        app = package_visible_distribution(app, archive, runner=runner)
+        verify_signed_app(app, runner=runner)
         write_result(temporary, version, archive, source)
-        shutil.rmtree(app)
+        shutil.rmtree(app.parent)
         os.replace(temporary, output)
         temporary = None
         return json.loads((output / "macos-signing-notarization-result.json").read_text(encoding="utf-8"))

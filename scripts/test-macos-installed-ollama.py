@@ -179,6 +179,8 @@ def main() -> int:
         assert result["installationPerformed"] is False
         assert result["appBundleChanged"] is False
         assert result["modelDownloadPerformed"] is False
+        assert result["modelStorageDirectoryName"] == "Haven42-Data"
+        assert result["unrelatedUserModelsChanged"] is False
         assert result["persisted"] is False
         assert factory_calls[0]["arguments"][0] == [
             str((app / MODULE.OLLAMA_BINARY_RELATIVE).resolve()), "serve",

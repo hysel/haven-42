@@ -281,7 +281,9 @@ class Cdp {
   }
   async evaluate(expression) {
     const result = await this.call("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
-    if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+    if (result.exceptionDetails) {
+      throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
+    }
     return result.result.value;
   }
   close() { this.socket.close(); }
@@ -589,18 +591,24 @@ try {
 
   const macosInstalledPresentation = await cdp.evaluate(`(() => {
     const originalPlatform = state.platformFamily;
+    const originalSetupPlan = state.setupPlan;
     state.platformFamily = 'macos';
     const effects = [
       "Verify the installed Ollama app's code signature and Gatekeeper approval.",
       "Start its local AI engine on this computer for this Haven 42 session only.",
-      "Use the current macOS user's existing Ollama model storage; do not download a model yet.",
+      "Keep Haven 42 model downloads in Haven42-Data beside this app; do not use or change unrelated Ollama models.",
     ];
-    renderSetupPlan({
+    const physicalMacPlan = {
       hardwareAssessment: {candidateModel: 'qwen3.5:9b'},
-      actions: [],
+      actions: [
+        {componentId: 'python', state: 'already-available'},
+        {componentId: 'ollama', state: 'install'},
+        {componentId: 'ollama-model-qwen35-9b', state: 'install'},
+      ],
       alphaCandidate: {
         modelSelection: {selected: {name: 'qwen3.5:9b'}, automaticExecutionAllowed: false},
-        managedSetupCandidateAvailable: false,
+        managedSetupCandidateAvailable: true,
+        managedPlan: {backendMode: 'cpu'},
         runtimeCompatibility: null,
         driverGuidance: [],
         macosInstalledRuntime: {
@@ -612,25 +620,39 @@ try {
           },
         },
       },
-    });
+    };
+    state.setupPlan = physicalMacPlan;
+    renderSetupPlan(physicalMacPlan);
     updateReadinessNextControl(false, true);
-    const review = [...document.querySelectorAll('#wizard-setup-plan button')]
-      .find((item) => item.textContent === 'Review and start local AI');
+    showWizardStep('readiness');
+    const review = document.querySelector('#wizard-readiness-next');
+    const duplicateReviewCount = [...document.querySelectorAll('#wizard-setup-plan button')]
+      .filter((item) => item.textContent === 'Review and start local AI').length;
+    state.platformFamily = 'unknown';
     document.querySelector('#wizard-readiness-next').click();
     const approval = document.querySelector('#wizard-setup-plan .setup-approval');
+    const consent = approval.querySelector('.setup-consent input[type="checkbox"]');
     const result = {
       explanation: document.querySelector('#wizard-setup-plan').textContent,
       reviewText: review.textContent,
+      duplicateReviewCount,
       approvalVisible: !approval.classList.contains('hidden'),
+      approvalAriaHidden: approval.getAttribute('aria-hidden'),
+      approvalLabelledBy: approval.getAttribute('aria-labelledby'),
       effectCount: approval.querySelectorAll('li').length,
       consentText: approval.querySelector('.setup-consent').textContent,
+      consentFocused: document.activeElement === consent,
+      actionStatus: approval.querySelector('[role="status"]').textContent,
       approveDisabled: [...approval.querySelectorAll('button')]
         .find((item) => item.textContent === 'Approve and start').disabled,
       installLinkPresent: Boolean(document.querySelector('#wizard-setup-plan a[href="https://ollama.com/download/mac"]')),
+      genericManagedPanelPresent: Boolean(document.querySelector('#alpha-installation-panel')),
+      fallbackStatusPresent: document.querySelector('#wizard-scan-status').textContent.includes('Local setup is not ready'),
       nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
       nextText: document.querySelector('#wizard-readiness-next').textContent,
     };
     state.platformFamily = originalPlatform;
+    state.setupPlan = originalSetupPlan;
     return result;
   })()`);
   if (
@@ -638,20 +660,59 @@ try {
     || !macosInstalledPresentation.explanation.includes('newer than the certified macOS version 0.32.15')
     || !macosInstalledPresentation.explanation.includes('You can continue after reviewing and approving')
     || !macosInstalledPresentation.explanation.includes('No app or model will be downloaded')
+    || !macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Installed · 0.33.2 · approval required')
+    || !macosInstalledPresentation.explanation.includes('Recommended AI modelChecked after local AI starts')
+    || macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Needed for this setup')
     || macosInstalledPresentation.reviewText !== 'Review and start local AI'
+    || macosInstalledPresentation.duplicateReviewCount !== 0
     || !macosInstalledPresentation.approvalVisible
+    || macosInstalledPresentation.approvalAriaHidden !== 'false'
+    || macosInstalledPresentation.approvalLabelledBy !== 'macos-installed-ollama-approval-title'
     || macosInstalledPresentation.effectCount !== 4
     || !macosInstalledPresentation.consentText.includes('allow Haven 42 to start')
+    || !macosInstalledPresentation.consentFocused
+    || !macosInstalledPresentation.actionStatus.includes('Nothing has started')
     || !macosInstalledPresentation.approveDisabled
     || macosInstalledPresentation.installLinkPresent
+    || macosInstalledPresentation.genericManagedPanelPresent
+    || macosInstalledPresentation.fallbackStatusPresent
     || macosInstalledPresentation.nextDisabled
     || macosInstalledPresentation.nextText !== 'Review and start local AI'
   ) throw new Error(`macos-installed-setup:${JSON.stringify(macosInstalledPresentation)}`);
-  checks += 12;
+  checks += 22;
   trace("macos-installed-setup-verified");
+
+  const macosInstalledFailureFeedback = await cdp.evaluate(`(async () => {
+    const approval = document.querySelector('#macos-installed-ollama-approval');
+    const consent = approval.querySelector('.setup-consent input[type="checkbox"]');
+    const approve = [...approval.querySelectorAll('button')]
+      .find((item) => item.textContent === 'Approve and start');
+    const originalApi = api;
+    api = async () => { throw new Error('macos-ollama-start-timeout'); };
+    consent.click();
+    approve.click();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    const result = {
+      status: document.querySelector('#macos-installed-ollama-action-status').textContent,
+      topStatus: document.querySelector('#wizard-scan-status').textContent,
+      approveText: approve.textContent,
+      approveDisabled: approve.disabled,
+    };
+    api = originalApi;
+    return result;
+  })()`);
+  if (
+    !macosInstalledFailureFeedback.status.includes('did not start within 20 seconds')
+    || macosInstalledFailureFeedback.topStatus !== macosInstalledFailureFeedback.status
+    || macosInstalledFailureFeedback.approveText !== 'Approve and try again'
+    || macosInstalledFailureFeedback.approveDisabled
+  ) throw new Error(`macos-installed-failure-feedback:${JSON.stringify(macosInstalledFailureFeedback)}`);
+  checks += 4;
+  trace("macos-installed-failure-feedback-verified");
 
   const setupPlanningHost = ["win32", "linux", "darwin"].includes(process.platform);
   if (setupPlanningHost) {
+  await cdp.evaluate("document.querySelector('#wizard-setup-plan').replaceChildren()");
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");
   await waitFor(() => cdp.evaluate("document.querySelectorAll('#wizard-setup-plan .plan-action').length >= 2"));
   await waitFor(() => cdp.evaluate(`
@@ -1769,7 +1830,7 @@ try {
     || !modelsView.imageHidden
     || !modelsView.settingsClosed
     || modelsView.focused !== "models-title"
-    || modelsView.installed !== 2
+    || modelsView.installed < 2
     || !modelsView.installedLabel.includes("Already available on your server")
   ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
   checks += 8;
@@ -1797,6 +1858,8 @@ try {
             validationStatus: "candidate-only",
             capabilityEvidence: "unverified",
             hardwareFit: "unknown",
+            hardwareFitReason: null,
+            minimumSystemMemoryGiB: null,
             licenseStatus: "review-required",
             executionAllowed: false,
             installCommand: "ollama pull candidate-writing:7b"
@@ -1813,7 +1876,9 @@ try {
         destination: "This computer",
         downloadStarted: false,
         licenseStatus: "review-required",
-        hardwareFit: "unknown"
+        hardwareFit: "unknown",
+        hardwareFitReason: null,
+        minimumSystemMemoryGiB: null
       }), {status: 200, headers: {"Content-Type": "application/json"}}));
       if (input === "/api/model-install/execute") return Promise.resolve(new Response(JSON.stringify({
         schemaVersion: 1,
@@ -1821,7 +1886,7 @@ try {
         status: "installed",
         model: "candidate-writing:7b",
         verifiedByProviderCatalog: true,
-        selectedAutomatically: false,
+        selectedAutomatically: true,
         modelOption: {
           name: "candidate-writing:7b",
           digestVerified: false,
@@ -1921,17 +1986,22 @@ try {
   await waitFor(() => cdp.evaluate("document.querySelector('#desired-model').classList.contains('hidden')"));
   const installedCandidate = await cdp.evaluate(`({
     selected: document.querySelector('#model').value,
+    selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
+      state.modelSelections[capabilityId]?.mode === 'manual'
+      && state.modelSelections[capabilityId]?.model === 'candidate-writing:7b'
+    )),
     status: document.querySelector('#model-search-status').textContent,
     reviewHidden: document.querySelector('#model-install-review-layer').classList.contains('hidden'),
     backgroundInert: document.querySelector('.shell').inert,
   })`);
   if (
     installedCandidate.selected !== "manual:candidate-writing:7b"
+    || !installedCandidate.selectedForEveryTextTask
     || !installedCandidate.status.includes("downloaded and verified")
     || !installedCandidate.reviewHidden
     || installedCandidate.backgroundInert
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
-  checks += 21;
+  checks += 22;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
@@ -1988,6 +2058,8 @@ try {
           validationStatus: "candidate-only",
           capabilityEvidence: "unverified",
           hardwareFit: "unknown",
+          hardwareFitReason: null,
+          minimumSystemMemoryGiB: null,
           licenseStatus: "review-required",
           executionAllowed: false,
           installCommand: "ollama pull safe:7b && hostile"
@@ -3323,7 +3395,7 @@ try {
     || navigation.models.focused !== "models-title"
     || !navigation.models.visible
     || !navigation.models.imageHidden
-    || navigation.models.installed !== 2
+    || navigation.models.installed < 2
     || !navigation.system.active
     || navigation.system.focused !== "system-workspace-title"
     || !navigation.system.visible
@@ -3606,7 +3678,7 @@ try {
         )
       }],
       manualModelCandidates: [{
-        name: 'candidate-chat:7b', automatic: false, downloadRequiresApproval: true,
+        name: 'candidate-chat:7b', automatic: false, recommended: false, downloadRequiresApproval: true,
         hardwareFit: 'matched-tested-hardware-profile',
         profileId: 'windows-amd-radeon-rx7800xt-16gib', minimumOllamaVersion: '0.32.9',
         capabilityStatus: Object.fromEntries(

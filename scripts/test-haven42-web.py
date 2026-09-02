@@ -609,7 +609,8 @@ def main() -> int:
     )
     assert len(matching_candidates) == 14
     assert {item["name"] for item in matching_candidates} >= {"qwen3.5:4b", "qwen3.5:9b"}
-    assert all(item["automatic"] is False for item in matching_candidates)
+    assert [item["name"] for item in matching_candidates if item["automatic"]] == ["qwen3.5:9b"]
+    assert [item["name"] for item in matching_candidates if item["recommended"]] == ["qwen3.5:9b"]
     assert WEB.qualified_chat_candidates(
         matching_snapshot, "private-network", "0.32.14", qualified_profiles,
     ) == []
@@ -646,7 +647,7 @@ def main() -> int:
             "community/example-writing:7b",
             "unsafe model<script>",
             "qwen3.5",
-        ] if query == "writing" else [],
+        ] if query == "writing" else ["qwen3.8-flash-next"] if query == "oversized" else [],
         software_update_provider=lambda: {
             "schemaVersion": 1,
             "kind": "haven42-managed-software-update-check",
@@ -1615,6 +1616,8 @@ def main() -> int:
                 "validationStatus": "candidate-only",
                 "capabilityEvidence": "unverified",
                 "hardwareFit": "unknown",
+                "hardwareFitReason": None,
+                "minimumSystemMemoryGiB": None,
                 "licenseStatus": "review-required",
                 "executionAllowed": False,
                 "installCommand": "ollama pull qwen3.5",
@@ -1626,6 +1629,8 @@ def main() -> int:
                 "validationStatus": "candidate-only",
                 "capabilityEvidence": "unverified",
                 "hardwareFit": "unknown",
+                "hardwareFitReason": None,
+                "minimumSystemMemoryGiB": None,
                 "licenseStatus": "review-required",
                 "executionAllowed": False,
                 "installCommand": "ollama pull community/example-writing:7b",
@@ -1640,6 +1645,9 @@ def main() -> int:
         assert install_review["singleUse"] is True
         assert install_review["persisted"] is False
         assert install_review["destination"] == "This computer"
+        assert install_review["hardwareFit"] == "unknown"
+        assert install_review["hardwareFitReason"] is None
+        assert install_review["minimumSystemMemoryGiB"] is None
         status, installed_model, _ = request_json(
             origin + "/api/model-install/execute", "POST",
             {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
@@ -1648,7 +1656,7 @@ def main() -> int:
         assert installed_model["status"] == "installed"
         assert installed_model["model"] == "community/example-writing:7b"
         assert installed_model["verifiedByProviderCatalog"] is True
-        assert installed_model["selectedAutomatically"] is False
+        assert installed_model["selectedAutomatically"] is True
         status, install_progress, _ = request_json(
             origin + "/api/model-install/status", "POST",
             {"progressToken": install_review["approvalToken"]}, token, origin,
@@ -1690,7 +1698,20 @@ def main() -> int:
         with state.lock:
             state.models = tuple(name for name in state.models if name != "qwen3.5:latest")
             state.model_digests.pop("qwen3.5:latest", None)
-        checks += 17
+        status, oversized, _ = request_json(
+            origin + "/api/model-search", "POST",
+            {"query": "oversized", "online": True}, token, origin,
+        )
+        assert status == 200
+        assert oversized["results"][0]["hardwareFit"] == "incompatible"
+        assert oversized["results"][0]["hardwareFitReason"] == "insufficient-system-memory"
+        assert oversized["results"][0]["minimumSystemMemoryGiB"] == 108
+        status, error, _ = request_json(
+            origin + "/api/model-install/prepare", "POST",
+            {"model": "qwen3.8-flash-next"}, token, origin,
+        )
+        assert status == 409 and error["error"] == "model-incompatible-with-hardware"
+        checks += 22
         fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
@@ -1850,7 +1871,7 @@ def main() -> int:
             ROOT / "config/does-not-exist.tsv",
         ) == {}
         tested_library = WEB.load_tested_model_library()
-        assert len(tested_library) == 7
+        assert len(tested_library) == 10
         exact_hardware = WEB.build_tested_model_options(
             tested_library,
             ["qwen3.5:9b"],
@@ -1865,9 +1886,11 @@ def main() -> int:
         )
         assert exact_hardware["status"] == "exact-profile"
         assert exact_hardware["profile"]["hardware"] == "AMD Radeon RX 7800 XT 16 GB"
+        assert exact_hardware["profile"]["recommendedModel"] == "qwen3.5:9b"
         assert len(exact_hardware["options"]) == 14
         exact_qwen = next(item for item in exact_hardware["options"] if item["name"] == "qwen3.5:9b")
         assert exact_qwen["status"] == "installed" and exact_qwen["installCommand"] is None
+        assert exact_qwen["recommended"] is True
         runtime_difference = WEB.build_tested_model_options(
             tested_library,
             [],
@@ -1903,6 +1926,20 @@ def main() -> int:
             "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "minicpm-v4.6:1b",
         ]
         assert windows_gtx1650["options"][0]["status"] == "installed"
+        mac_m4 = WEB.build_tested_model_options(
+            tested_library,
+            [],
+            {
+                "platform": {"operatingSystem": "macos", "systemMemoryGiB": 16},
+                "accelerators": [{
+                    "vendor": "Apple", "model": "Apple M4", "memoryGiB": None,
+                }],
+            },
+            "0.32.15",
+        )
+        assert mac_m4["status"] == "exact-profile"
+        assert mac_m4["profile"]["recommendedModel"] == "qwen3.5:4b"
+        assert next(item for item in mac_m4["options"] if item["name"] == "qwen3.5:4b")["recommended"] is True
         no_profile = WEB.build_tested_model_options(
             tested_library,
             [],
@@ -2865,7 +2902,12 @@ def main() -> int:
             "general.chat", "content.write", "content.summarize"
         ]
         assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
-        assert policy["text"]["missingModelDownloadsAllowed"] is False
+        assert policy["text"]["modelDownloads"] == "explicit-user-approval-only"
+        assert policy["text"]["missingModelDownloadsAllowed"] is True
+        assert policy["modelDiscovery"]["automaticSelectionAfterInstallAllowed"] is True
+        assert policy["modelDiscovery"]["evidenceUse"] == "recommendation-and-labeling-only"
+        assert policy["modelDiscovery"]["unknownHardwareFit"] == "allow-after-user-approval"
+        assert policy["modelDiscovery"]["knownIncompatibleHardwareFit"] == "block-before-download"
         assert policy["text"]["maximumRequestBytes"] == 12582912
         assert policy["text"]["maximumConversationBytes"] == 65536
         assert policy["text"]["chatTextSizeControl"] == {
@@ -3109,7 +3151,8 @@ def main() -> int:
         assert "state.chatAutoFollow" in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
-        assert "Not on your server yet · searching does not download it" in javascript
+        assert "Not tested on this computer · you can still review and install it · nothing downloads without approval" in javascript
+        assert "Cannot run on this computer" in javascript and "download blocked" in javascript
         assert "Downloads only after you approve" in html
         assert 'id="cleanup-policy-form"' in html and 'id="system-idle-unload"' in html
         assert 'byId("system-idle-unload").value = String(idleUnloadSeconds)' in javascript

@@ -620,13 +620,22 @@ def create_archive(package_dir: Path, artifact_dir: Path, target: str) -> Path:
         with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as output:
             for path in sorted(package_dir.rglob("*")):
                 if path.is_file():
-                    output.write(path, Path("haven42") / path.relative_to(package_dir))
+                    output.write(path, Path("Haven42") / path.relative_to(package_dir))
+            for directory in ("Haven42-Data", "Haven42-Logs"):
+                entry = zipfile.ZipInfo(f"Haven42/{directory}/")
+                entry.external_attr = (0o40700 << 16) | 0x10
+                output.writestr(entry, b"")
         return archive
     archive = artifact_dir / f"haven42-{target}-unsigned-development.tar.gz"
     # PyInstaller uses platform-native symlinks on macOS. Portable archives
     # materialize their targets so extraction never creates archive-owned links.
     with tarfile.open(archive, "w:gz", dereference=True) as output:
-        output.add(package_dir, arcname="haven42", recursive=True)
+        output.add(package_dir, arcname="Haven42", recursive=True)
+        for directory in ("Haven42-Data", "Haven42-Logs"):
+            info = tarfile.TarInfo(f"Haven42/{directory}")
+            info.type = tarfile.DIRTYPE
+            info.mode = 0o700
+            output.addfile(info)
     return archive
 
 

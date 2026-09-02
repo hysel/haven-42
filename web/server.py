@@ -486,6 +486,53 @@ SURFACE_SOLUTIONS_PATH = ROOT / "config" / "agent-surface-solutions.json"
 WORKFLOW_REGISTRY_PATH = ROOT / "config" / "workflows.json"
 PROMOTED_IMAGE_MODEL = "sd_xl_base_1.0.safetensors"
 MODEL_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$")
+
+# These are hard download limits, not performance recommendations. Unknown models
+# remain user-selectable; only models whose reviewed artifact size cannot fit in the
+# detected system memory are stopped before Ollama starts a pull.
+MODEL_DOWNLOAD_MEMORY_LIMITS = (
+    (re.compile(r"^qwen3\.5:(?:27b|27b-[A-Za-z0-9._+-]+)$", re.IGNORECASE), 20),
+    (re.compile(r"^qwen3\.5:(?:35b|35b-[A-Za-z0-9._+-]+)$", re.IGNORECASE), 27),
+    (re.compile(r"^qwen3\.8(?::(?:latest|27b|27b-[A-Za-z0-9._+-]+))?$", re.IGNORECASE), 20),
+    (re.compile(r"^qwen3\.8-flash-next(?::[A-Za-z0-9._+-]+)?$", re.IGNORECASE), 108),
+)
+
+
+def assess_model_download_fit(
+    model: str,
+    snapshot: object,
+    trust_scope: object,
+) -> dict[str, Any]:
+    """Allow unknown models; reject only a reviewed, certain memory mismatch."""
+    minimum = next((
+        required
+        for pattern, required in MODEL_DOWNLOAD_MEMORY_LIMITS
+        if pattern.fullmatch(model)
+    ), None)
+    system_memory = None
+    if trust_scope == "loopback" and isinstance(snapshot, dict):
+        platform_info = snapshot.get("platform")
+        if isinstance(platform_info, dict):
+            candidate = platform_info.get("systemMemoryGiB")
+            if isinstance(candidate, (int, float)) and not isinstance(candidate, bool):
+                system_memory = float(candidate)
+    if minimum is None or system_memory is None:
+        return {
+            "hardwareFit": "unknown",
+            "hardwareFitReason": None,
+            "minimumSystemMemoryGiB": minimum,
+        }
+    if system_memory < minimum:
+        return {
+            "hardwareFit": "incompatible",
+            "hardwareFitReason": "insufficient-system-memory",
+            "minimumSystemMemoryGiB": minimum,
+        }
+    return {
+        "hardwareFit": "compatible",
+        "hardwareFitReason": "reviewed-memory-limit-satisfied",
+        "minimumSystemMemoryGiB": minimum,
+    }
 MODEL_DIGEST = re.compile(r"^[0-9a-f]{64}$")
 CAPABILITY_OPERATION = {
     "general.chat": "general-chat",
@@ -597,9 +644,9 @@ def load_model_recommendations(
             or set(value["capabilities"]) != set(CAPABILITY_PROMPTS)
             or value.get("selectionPolicy") != {
                 "automaticRequiresExactCapabilityEvidence": True,
-                "unknownInstalledModelsAre": "unverified",
-                "downloadsAllowed": False,
-                "hardwareFitSource": "execution-host-profile-required",
+                "unknownInstalledModelsAre": "unverified-selectable",
+                "downloadsAllowed": "explicit-user-approval-only",
+                "hardwareFitSource": "execution-host-profile-or-firm-incompatibility-rule",
             }
         ):
             return {}
@@ -756,7 +803,7 @@ def load_tested_model_library(path: Path = TESTED_MODEL_LIBRARY_PATH) -> tuple[d
         if (
             not isinstance(value, dict)
             or set(value) != {"schemaVersion", "catalogId", "updatedAt", "evidenceBoundary", "profiles"}
-            or value.get("schemaVersion") != 2
+            or value.get("schemaVersion") != 3
             or value.get("catalogId") != "haven42.hardware-aware-tested-model-library"
             or not isinstance(value.get("profiles"), list)
             or len(value["profiles"]) > 32
@@ -768,7 +815,7 @@ def load_tested_model_library(path: Path = TESTED_MODEL_LIBRARY_PATH) -> tuple[d
             "id", "platformFamily", "acceleratorVendor", "acceleratorModelPattern",
             "minimumAcceleratorCount", "minimumGpuMemoryGiB", "minimumSystemMemoryGiB",
             "runtimeProvider", "runtimeVersion", "hardware", "operatingSystem", "evidence",
-            "models",
+            "recommendedModel", "models",
         }
         for profile in value["profiles"]:
             if (
@@ -784,7 +831,7 @@ def load_tested_model_library(path: Path = TESTED_MODEL_LIBRARY_PATH) -> tuple[d
                 or any(
                     isinstance(profile.get(field), bool)
                     or not isinstance(profile.get(field), (int, float))
-                    or profile[field] <= 0
+                    or profile[field] < (0 if field == "minimumGpuMemoryGiB" else 1)
                     or profile[field] > maximum
                     for field, maximum in (
                         ("minimumAcceleratorCount", 16),
@@ -803,6 +850,8 @@ def load_tested_model_library(path: Path = TESTED_MODEL_LIBRARY_PATH) -> tuple[d
             if any(not isinstance(model, str) or not MODEL_NAME.fullmatch(model) for model in profile["models"]):
                 return ()
             if len(set(profile["models"])) != len(profile["models"]):
+                return ()
+            if profile["recommendedModel"] not in profile["models"]:
                 return ()
             profile_ids.add(profile["id"])
             profiles.append({**profile, "models": tuple(profile["models"])})
@@ -826,9 +875,14 @@ def build_tested_model_options(
             accelerator for accelerator in accelerators
             if profile["acceleratorVendor"].casefold() in str(accelerator.get("vendor", "")).casefold()
             and profile["acceleratorModelPattern"].casefold() in str(accelerator.get("model", "")).casefold()
-            and isinstance(accelerator.get("memoryGiB"), (int, float))
-            and not isinstance(accelerator.get("memoryGiB"), bool)
-            and accelerator["memoryGiB"] >= profile["minimumGpuMemoryGiB"]
+            and (
+                profile["minimumGpuMemoryGiB"] == 0
+                or (
+                    isinstance(accelerator.get("memoryGiB"), (int, float))
+                    and not isinstance(accelerator.get("memoryGiB"), bool)
+                    and accelerator["memoryGiB"] >= profile["minimumGpuMemoryGiB"]
+                )
+            )
         ]
         if (
             operating_system == profile["platformFamily"]
@@ -865,6 +919,7 @@ def build_tested_model_options(
         "testedRuntimeVersion": profile["runtimeVersion"],
         "currentRuntimeVersion": runtime_version,
         "evidence": profile["evidence"],
+        "recommended": model == profile["recommendedModel"],
         "installCommand": None if model in installed else f"ollama pull {model}",
     } for model in profile["models"]]
     return {
@@ -876,6 +931,7 @@ def build_tested_model_options(
             "hardware": profile["hardware"],
             "operatingSystem": profile["operatingSystem"],
             "testedRuntimeVersion": profile["runtimeVersion"],
+            "recommendedModel": profile["recommendedModel"],
         },
         "runtimeVersion": runtime_version,
         "options": options,
@@ -891,9 +947,9 @@ def load_hardware_qualified_chat_models(
         if (
             not isinstance(value, dict)
             or set(value) != {"schemaVersion", "catalogId", "automaticSelectionAllowed", "profiles"}
-            or value.get("schemaVersion") != 1
+            or value.get("schemaVersion") != 2
             or value.get("catalogId") != "haven42.hardware-qualified-chat-models"
-            or value.get("automaticSelectionAllowed") is not False
+            or value.get("automaticSelectionAllowed") is not True
             or not isinstance(value.get("profiles"), list)
             or len(value["profiles"]) > 32
         ):
@@ -904,7 +960,7 @@ def load_hardware_qualified_chat_models(
             if not isinstance(profile, dict) or set(profile) != {
                 "id", "operatingSystem", "acceleratorVendor", "acceleratorModelContains",
                 "minimumAcceleratorMemoryGiB", "minimumSystemMemoryGiB",
-                "minimumOllamaVersion", "evidence", "models",
+                "minimumOllamaVersion", "evidence", "recommendedModel", "models",
             }:
                 return ()
             models = profile["models"]
@@ -930,6 +986,7 @@ def load_hardware_qualified_chat_models(
                 or not 1 <= len(models) <= 64
                 or len(set(models)) != len(models)
                 or any(not isinstance(model, str) or not MODEL_NAME.fullmatch(model) for model in models)
+                or profile["recommendedModel"] not in models
             ):
                 return ()
             seen_ids.add(profile["id"])
@@ -978,9 +1035,14 @@ def qualified_chat_candidates(
             isinstance(accelerator, dict)
             and profile["acceleratorVendor"] in str(accelerator.get("vendor", "")).casefold()
             and profile["acceleratorModelContains"] in str(accelerator.get("model", "")).casefold()
-            and isinstance(accelerator.get("memoryGiB"), (int, float))
-            and not isinstance(accelerator.get("memoryGiB"), bool)
-            and accelerator["memoryGiB"] >= profile["minimumAcceleratorMemoryGiB"]
+            and (
+                profile["minimumAcceleratorMemoryGiB"] == 0
+                or (
+                    isinstance(accelerator.get("memoryGiB"), (int, float))
+                    and not isinstance(accelerator.get("memoryGiB"), bool)
+                    and accelerator["memoryGiB"] >= profile["minimumAcceleratorMemoryGiB"]
+                )
+            )
             for accelerator in accelerators
         )
         if not hardware_match:
@@ -998,7 +1060,8 @@ def qualified_chat_candidates(
                 "hardwareFit": "matched-tested-hardware-profile",
                 "profileId": profile["id"],
                 "minimumOllamaVersion": profile["minimumOllamaVersion"],
-                "automatic": False,
+                "automatic": model == profile["recommendedModel"],
+                "recommended": model == profile["recommendedModel"],
                 "downloadRequiresApproval": True,
             })
     return candidates
@@ -1307,7 +1370,7 @@ class HavenState:
         self.readiness_provider = readiness_provider
         self.model_catalog_provider = model_catalog_provider
         self.model_install_provider = model_install_provider
-        self.discovered_model_candidates: set[str] = set()
+        self.discovered_model_candidates: dict[str, dict[str, Any]] = {}
         self.pending_model_install_approvals: dict[str, dict[str, Any]] = {}
         self.model_install_progress: dict[str, dict[str, Any]] = {}
         self.research_query_provider = research_query_provider or web_research_query.execute_query
@@ -2075,6 +2138,11 @@ class HavenState:
             raise WebRequestError("invalid-model-catalog-response", HTTPStatus.BAD_GATEWAY)
         with self.lock:
             installed = set(self.models)
+            trust_scope = self.trust_scope
+        try:
+            snapshot = self.inspect_readiness(False) if trust_scope == "loopback" else None
+        except WebRequestError:
+            snapshot = None
         results = []
         seen: set[str] = set()
         for value in discovered:
@@ -2087,13 +2155,14 @@ class HavenState:
                 continue
             seen.add(value)
             is_installed = value in installed
+            fit = assess_model_download_fit(value, snapshot, trust_scope)
             results.append({
                 "name": value,
                 "source": "ollama-public-catalog",
                 "status": "installed" if is_installed else "not-installed",
                 "validationStatus": "candidate-only",
                 "capabilityEvidence": "unverified",
-                "hardwareFit": "unknown",
+                **fit,
                 "licenseStatus": "review-required",
                 "executionAllowed": is_installed,
                 "installCommand": None if is_installed else f"ollama pull {value}",
@@ -2103,7 +2172,12 @@ class HavenState:
             # This prevents a candidate discovered against an earlier catalog
             # or provider connection from remaining eligible indefinitely.
             self.discovered_model_candidates = {
-                item["name"] for item in results if item["status"] == "not-installed"
+                item["name"]: {
+                    "hardwareFit": item["hardwareFit"],
+                    "hardwareFitReason": item["hardwareFitReason"],
+                    "minimumSystemMemoryGiB": item["minimumSystemMemoryGiB"],
+                }
+                for item in results if item["status"] == "not-installed"
             }
             self.pending_model_install_approvals.clear()
         return {
@@ -2141,6 +2215,13 @@ class HavenState:
                 raise WebRequestError("model-already-installed", HTTPStatus.CONFLICT)
             if model not in self.discovered_model_candidates and model not in self.qualified_model_candidates:
                 raise WebRequestError("model-install-candidate-expired", HTTPStatus.CONFLICT)
+            fit = self.discovered_model_candidates.get(model, {
+                "hardwareFit": "compatible",
+                "hardwareFitReason": "matched-tested-hardware-profile",
+                "minimumSystemMemoryGiB": None,
+            })
+            if fit["hardwareFit"] == "incompatible":
+                raise WebRequestError("model-incompatible-with-hardware", HTTPStatus.CONFLICT)
             while len(self.pending_model_install_approvals) >= 8:
                 self.pending_model_install_approvals.pop(next(iter(self.pending_model_install_approvals)))
             token = secrets.token_hex(16)
@@ -2160,7 +2241,7 @@ class HavenState:
             "destination": destination,
             "downloadStarted": False,
             "licenseStatus": "review-required",
-            "hardwareFit": "unknown",
+            **fit,
         }
 
     def model_install_status(self, progress_token: object) -> dict[str, Any]:
@@ -2286,7 +2367,7 @@ class HavenState:
         with self.lock:
             self.models = tuple(sorted(installed))
             self.model_digests = model_digests
-            self.discovered_model_candidates.discard(model)
+            self.discovered_model_candidates.pop(model, None)
         decisions = build_model_decisions(sorted(installed), self.model_recommendations, model_digests)
         option = next(item for item in decisions["modelOptions"] if item["name"] == verified_model)
         self._update_model_install_progress(
@@ -2303,7 +2384,7 @@ class HavenState:
             "status": "installed",
             "model": verified_model,
             "verifiedByProviderCatalog": True,
-            "selectedAutomatically": False,
+            "selectedAutomatically": True,
             "modelOption": option,
         }
 

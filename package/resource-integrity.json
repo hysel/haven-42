@@ -13,8 +13,8 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "cf0c659ed1d348325383a036e8cfbd6753881a6361f3af3420f99135378c3474",
-      "sizeBytes": 299788
+      "sha256": "28946abd925ea98dc13073fd590d577ce95f9e29fc81a523fa7bf7a2ff6a4c9c",
+      "sizeBytes": 307032
     },
     {
       "path": "web/static/styles.css",
@@ -23,13 +23,13 @@
     },
     {
       "path": "config/text-capability-model-recommendations.json",
-      "sha256": "ce0f11fa519f36e3df3fe068a062a30d0bb9e3b44bada64dcf63b36e1729e099",
-      "sizeBytes": 1532
+      "sha256": "555c13690b157541b4283923f1c9fefbe1cc25dbbf5ca55103fcba7aa8bd6492",
+      "sizeBytes": 1587
     },
     {
       "path": "config/hardware-qualified-chat-models.json",
-      "sha256": "872463570b95b18407fdae94a77d295802493f9b0b62df20300ae690fec3bdbb",
-      "sizeBytes": 961
+      "sha256": "fb7ef3ae327b93af911274f7bee4a30aff8cb64a2425c7b40b6fcc29e46321dc",
+      "sizeBytes": 3049
     },
     {
       "path": "config/evidence-catalog.tsv",
