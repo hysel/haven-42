@@ -4470,7 +4470,7 @@ Invoke-PackTest "solution architecture review tracks milestone gaps" {
     Assert-True -Condition ($uiDoc -match "Tauri 2.*unadmitted") -Message "Unified UI design should keep Tauri/Rust unadmitted."
     Assert-True -Condition ($uiDoc -match "must not expose arbitrary shell execution") -Message "Unified UI design should reject an arbitrary shell bridge."
     Assert-True -Condition ($uiDoc -match "headless Linux") -Message "Unified UI design should keep headless loopback mode separately scoped."
-    Assert-True -Condition ($uiDoc -match "Microsoft Store MSIX signing or the SignPath Foundation") -Message "Unified UI design should prefer the agreed low-cost Windows signing paths."
+    Assert-True -Condition ($uiDoc -match "Use Microsoft Artifact Signing for an exact, owner-approved Windows candidate") -Message "Unified UI design should preserve the admitted, approval-gated Windows signing path."
     Assert-True -Condition ($uiDoc -match "Defer Apple Developer Program enrollment") -Message "Unified UI design should defer Apple enrollment until the public beta gate."
     Assert-True -Condition ($roadmap -match "Milestone 22 \| Active") -Message "Roadmap should mark Milestone 22 active."
     Assert-True -Condition ($todo -match "\[x\] Select and document the shared browser UI") -Message "TODO should mark the browser/PyInstaller runtime selection complete."
@@ -5720,7 +5720,10 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($milestone22Output -join "`n") -match "20 cases") -Message "Milestone 22 admission readiness should keep deferred and blocked gates explicit without granting authority."
     $signingOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-code-signing-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Code-signing readiness checks should pass."
-    Assert-True -Condition (($signingOutput -join "`n") -match "20 effect-free checks") -Message "Code-signing readiness must remain inactive and fail closed."
+    Assert-True -Condition (($signingOutput -join "`n") -match "22 effect-free checks") -Message "Code-signing readiness must remain manual, narrowly scoped, unpublished, and fail closed."
+    $artifactSigningOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-windows-artifact-signing-workflow.py") 2>&1)
+    Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows Artifact Signing workflow checks should pass."
+    Assert-True -Condition (($artifactSigningOutput -join "`n") -match "28 fail-closed checks") -Message "Windows signing must remain manual, exact-source, digest-bound, OIDC-only, launcher-only, and unable to publish a release."
     $runtimeComponentOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-runtime-components.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable runtime component hostile tests should pass."
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."

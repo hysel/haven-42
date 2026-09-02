@@ -43,7 +43,12 @@ The repository currently has one eligible CODEOWNER. GitHub does not allow an au
 
 ## Actions Rules
 
-Actions receive read-only default workflow permission and cannot approve pull requests. Only GitHub-owned actions are admitted, and GitHub enforces full-length commit-SHA pinning. Workflows independently declare minimum permissions and disable persisted checkout credentials.
+Actions receive read-only default workflow permission and cannot approve pull
+requests. GitHub-owned actions are admitted. The allowlist additionally names
+only Azure's official login and Artifact Signing action repositories; every
+use remains pinned to a reviewed full-length commit SHA. Workflows
+independently declare minimum permissions and disable persisted checkout
+credentials.
 
 Dependabot checks GitHub Actions weekly. The CodeQL `init` and `analyze`
 sub-actions are grouped so they cannot propose incompatible scanner versions
@@ -66,6 +71,14 @@ traffic API's required repository `Administration: read` permission. The
 workflow never requests a broader credential. The
 report contains no downloader identity, IP address, prompt, device, or Haven 42
 telemetry. See `docs/alpha-usage-report.md`.
+
+The Windows Artifact Signing workflow is manual and restricted to an exact
+commit reachable from `main`. Its first job builds and hashes the unsigned
+launcher without OIDC access. The second job receives OIDC authority only
+after the owner approves the protected `windows-signing` environment. It signs
+the exact Haven 42-owned `haven42.exe`, requires a SHA-256 timestamped
+Authenticode result, retains the native-validation candidate for three days,
+and has no Release or repository-write authority.
 
 ## Efficient Local-to-Hosted Flow
 

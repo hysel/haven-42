@@ -131,7 +131,7 @@ Application files are immutable and versioned separately from configuration, sta
 
 - Use standard GitHub-hosted Windows, Linux, and macOS runners for the public repository; do not rent an AWS Mac for routine builds or signing.
 - Build unsigned packages during development and sign only approved release candidates.
-- Pursue free Windows signing through Microsoft Store MSIX signing or the SignPath Foundation before paid Microsoft Artifact Signing.
+- Use Microsoft Artifact Signing for an exact, owner-approved Windows candidate only after the repository's signing and promotion gates pass.
 - Defer Apple Developer Program enrollment until the first public macOS beta is otherwise ready.
 - Store signing credentials only in protected GitHub environments or equivalent secret storage, require release approval, and never commit private keys.
 - Keep macOS physical-hardware testing as the last release gate rather than a routine CI dependency.

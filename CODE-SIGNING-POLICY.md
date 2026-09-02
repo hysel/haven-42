@@ -3,17 +3,16 @@
 ## Status
 
 Haven 42 does not currently publish or distribute code-signed binaries.
-Current portable packages are explicitly unsigned development artifacts. No
-certificate, SignPath project, signing secret, signing workflow, installer, or
-public binary Release is active.
+Current public portable packages are unsigned development artifacts. A
+Microsoft Artifact Signing account, Public Trust certificate profile, and
+keyless GitHub OIDC identity are configured for Windows candidate validation.
+That configuration does not authorize a signature, distribution, or Release.
 
-If SignPath Foundation accepts Haven 42 and every remaining promotion gate
-passes, this page will include SignPath's required provider disclosure:
-
-> Free code signing provided by SignPath.io, certificate by SignPath Foundation.
-
-That sentence describes a planned disclosure only. It must not be interpreted
-as a current signature, enrollment, endorsement, or acceptance claim.
+The repository's manual signing workflow may sign one exact `haven42.exe` from
+an immutable commit on `main` only after the owner reviews its unsigned SHA-256
+and approves the protected `windows-signing` environment. Its short-lived
+output is a native-validation candidate, not a public release. Publication
+remains a separate owner decision after every promotion gate passes.
 
 ## Project And Repository
 
@@ -32,7 +31,7 @@ material.
 
 ## Eligible Artifact Scope
 
-The initial proposed Windows signing scope is only the Haven 42-owned
+The initial Windows signing scope is only the Haven 42-owned
 `haven42.exe` launcher built from the authoritative repository at one immutable
 commit. Product name, product version, file version, original filename, and
 description metadata must match the release manifest and be enforced by the
@@ -148,5 +147,6 @@ be filed with secrets or private user data in a public issue.
 
 Every material policy change requires repository review and the complete
 required CI gate. A policy change cannot retroactively authorize an existing
-artifact. SignPath Foundation's current conditions and technical constraints
-take precedence for any artifact signed through its certificate.
+artifact. The admitted managed signing provider's current conditions and
+technical constraints take precedence for any artifact signed through its
+certificate.

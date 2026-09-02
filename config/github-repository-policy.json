@@ -35,7 +35,10 @@
     "allowedActions": "selected",
     "githubOwnedAllowed": true,
     "verifiedAllowed": false,
-    "patternsAllowed": [],
+    "patternsAllowed": [
+      "Azure/artifact-signing-action@*",
+      "Azure/login@*"
+    ],
     "shaPinningRequired": true,
     "defaultWorkflowPermissions": "read",
     "canApprovePullRequestReviews": false
@@ -59,6 +62,18 @@
     "platformCodeSigningClaimAllowed": false,
     "notarizationClaimAllowed": false,
     "productionReadinessClaimAllowed": false
+  },
+  "artifactSigning": {
+    "enabled": true,
+    "provider": "microsoft-artifact-signing",
+    "workflow": "windows-artifact-signing.yml",
+    "trigger": "manual",
+    "environment": "windows-signing",
+    "allowedSourceBranch": "main",
+    "signingScope": "haven42.exe-only",
+    "authentication": "github-oidc",
+    "candidateRetentionDays": 3,
+    "releasePublicationAllowed": false
   },
   "usageReports": {
     "enabled": true,

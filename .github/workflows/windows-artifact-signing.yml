@@ -1,0 +1,213 @@
+name: Windows Artifact Signing Candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_commit:
+        description: Exact 40-character commit SHA from main to build and sign
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-artifact-signing
+  cancel-in-progress: false
+
+jobs:
+  prepare-unsigned-candidate:
+    name: Prepare exact unsigned Windows candidate
+    runs-on: windows-2025
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout the explicitly selected source without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require an exact commit reachable from main
+        shell: pwsh
+        env:
+          HAVEN42_SELECTED_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          if ($env:HAVEN42_SELECTED_COMMIT -notmatch '^[0-9a-f]{40}$') {
+            throw 'source_commit must be a lowercase 40-character Git commit SHA.'
+          }
+          $actual = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $actual -ne $env:HAVEN42_SELECTED_COMMIT) {
+            throw 'The checked-out source does not match the selected commit.'
+          }
+          git fetch --no-tags origin main
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Unable to fetch the protected main branch.'
+          }
+          git merge-base --is-ancestor $actual origin/main
+          if ($LASTEXITCODE -ne 0) {
+            throw 'The selected commit is not reachable from main.'
+          }
+
+      - name: Select exact package Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14.6"
+
+      - name: Install hash-locked build dependencies
+        run: python -m pip install --disable-pip-version-check --require-hashes -r package/requirements-build.txt
+
+      - name: Build and validate the unsigned Alpha 2 package
+        shell: pwsh
+        env:
+          HAVEN42_SOURCE_COMMIT: ${{ inputs.source_commit }}
+          HAVEN42_PYTHON_SOURCE_ASSET: python-3.14.6-win32-x64.zip
+          HAVEN42_PYTHON_SOURCE_SHA256: dc722964ab28f81f6a0c753ee960871f045d363568f4fb7626cc02c1e0caa1e9
+        run: |
+          python scripts/test-portable-build-provenance.py
+          python scripts/build-portable-development-package.py --release-line alpha2 --output dist/portable-alpha2
+          python scripts/test-portable-package.py --executable dist/portable-alpha2/bundle/haven42/haven42.exe --expected-version 0.4.0-alpha.2
+          node scripts/test-haven42-web-browser.mjs
+          python scripts/verify-portable-development-artifacts.py --artifact-directory dist/portable-alpha2/artifacts --expected-version 0.4.0-alpha.2 --self-test
+
+      - name: Record the exact executable awaiting approval
+        shell: pwsh
+        env:
+          HAVEN42_SELECTED_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          $exe = Resolve-Path -LiteralPath 'dist/portable-alpha2/bundle/haven42/haven42.exe'
+          $digest = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $request = [ordered]@{
+            schemaVersion = 1
+            kind = 'haven42-windows-artifact-signing-request'
+            sourceCommit = $env:HAVEN42_SELECTED_COMMIT
+            relativePath = 'haven42/haven42.exe'
+            unsignedSha256 = $digest
+            signingScope = 'project-owned-launcher-only'
+            publicationAuthorized = $false
+          }
+          $request | ConvertTo-Json | Set-Content -LiteralPath 'dist/portable-alpha2/signing-request.json' -Encoding utf8NoBOM
+          "## Windows signing approval request" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "- Source commit: ``$($env:HAVEN42_SELECTED_COMMIT)``" >> $env:GITHUB_STEP_SUMMARY
+          "- File: ``haven42/haven42.exe``" >> $env:GITHUB_STEP_SUMMARY
+          "- Unsigned SHA-256: ``$digest``" >> $env:GITHUB_STEP_SUMMARY
+          "- Publication: not authorized" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload the exact unsigned approval packet
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: haven42-windows-unsigned-signing-request
+          path: |
+            dist/portable-alpha2/bundle/haven42/
+            dist/portable-alpha2/artifacts/
+            dist/portable-alpha2/signing-request.json
+          if-no-files-found: error
+          retention-days: 3
+
+  sign-approved-candidate:
+    name: Sign approved Haven 42 launcher
+    needs: prepare-unsigned-candidate
+    runs-on: windows-2025
+    timeout-minutes: 20
+    environment: windows-signing
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout the exact source without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source_commit }}
+          persist-credentials: false
+
+      - name: Download the owner-approved packet from this run
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: haven42-windows-unsigned-signing-request
+          path: dist/approved-input
+
+      - name: Reverify the approval-bound executable
+        shell: pwsh
+        env:
+          HAVEN42_SELECTED_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          $request = Get-Content -LiteralPath 'dist/approved-input/signing-request.json' -Raw | ConvertFrom-Json
+          $exe = Resolve-Path -LiteralPath 'dist/approved-input/bundle/haven42/haven42.exe'
+          $digest = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($request.kind -ne 'haven42-windows-artifact-signing-request' -or
+              $request.sourceCommit -ne $env:HAVEN42_SELECTED_COMMIT -or
+              $request.relativePath -ne 'haven42/haven42.exe' -or
+              $request.unsignedSha256 -ne $digest -or
+              $request.signingScope -ne 'project-owned-launcher-only' -or
+              $request.publicationAuthorized -ne $false) {
+            throw 'The downloaded signing request does not match the approved source and executable.'
+          }
+
+      - name: Authenticate to Azure with GitHub OIDC
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign only the Haven 42-owned launcher
+        uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
+        with:
+          endpoint: https://eus.codesigning.azure.net/
+          signing-account-name: haven42-public-release
+          certificate-profile-name: haven42-public-release
+          files: ${{ github.workspace }}\dist\approved-input\bundle\haven42\haven42.exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+          description: Haven 42
+          description-url: https://github.com/hysel/haven-42
+
+      - name: Verify and retain a non-release signed candidate
+        shell: pwsh
+        env:
+          HAVEN42_SELECTED_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          $root = Resolve-Path -LiteralPath 'dist/approved-input/bundle/haven42'
+          $exe = Join-Path $root 'haven42.exe'
+          $signature = Get-AuthenticodeSignature -LiteralPath $exe
+          if ($signature.Status -ne 'Valid' -or $null -eq $signature.SignerCertificate -or $null -eq $signature.TimeStamperCertificate) {
+            throw "Authenticode verification failed: $($signature.Status) $($signature.StatusMessage)"
+          }
+          $signedDigest = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
+          $resultDirectory = New-Item -ItemType Directory -Force -Path 'dist/windows-signed-candidate'
+          $result = [ordered]@{
+            schemaVersion = 1
+            kind = 'haven42-windows-artifact-signing-result'
+            sourceCommit = $env:HAVEN42_SELECTED_COMMIT
+            relativePath = 'haven42/haven42.exe'
+            signedSha256 = $signedDigest
+            signatureStatus = [string]$signature.Status
+            signerSubject = $signature.SignerCertificate.Subject
+            signerIssuer = $signature.SignerCertificate.Issuer
+            timestampSubject = $signature.TimeStamperCertificate.Subject
+            timestampIssuer = $signature.TimeStamperCertificate.Issuer
+            releasePublished = $false
+            distributionAuthorized = $false
+            productionReady = $false
+          }
+          $result | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $resultDirectory 'windows-signing-result.json') -Encoding utf8NoBOM
+          Compress-Archive -LiteralPath $root -DestinationPath (Join-Path $resultDirectory 'haven42-0.4.0-alpha.2-windows-x64-signed-candidate.zip') -CompressionLevel Optimal
+          "## Verified signed candidate" >> $env:GITHUB_STEP_SUMMARY
+          "" >> $env:GITHUB_STEP_SUMMARY
+          "- Signed SHA-256: ``$signedDigest``" >> $env:GITHUB_STEP_SUMMARY
+          "- Authenticode status: ``$($signature.Status)``" >> $env:GITHUB_STEP_SUMMARY
+          "- Signer: ``$($signature.SignerCertificate.Subject)``" >> $env:GITHUB_STEP_SUMMARY
+          "- Timestamp: present" >> $env:GITHUB_STEP_SUMMARY
+          "- Release publication: not authorized" >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload signed candidate for native validation only
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: haven42-windows-signed-native-validation-candidate
+          path: dist/windows-signed-candidate/
+          if-no-files-found: error
+          retention-days: 3
