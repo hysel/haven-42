@@ -347,7 +347,7 @@ def verify_static(policy: dict) -> None:
     )
     if workflow_text.count(download_artifact) != 2:
         raise PolicyError("reviewed-node24-download-artifact-not-pinned")
-    codeql_sha = "db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28"
+    codeql_sha = "cdf488f595d80d6e07e03d4674febd5ab45fa938"
     if (
         workflow_text.count(f"github/codeql-action/init@{codeql_sha}") != 1
         or workflow_text.count(f"github/codeql-action/analyze@{codeql_sha}") != 1
