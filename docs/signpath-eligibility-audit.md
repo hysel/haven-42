@@ -5,12 +5,19 @@ Audit date: 2026-07-27
 Status updated: 2026-08-06 after publication of the unsigned Windows
 `0.4.0-alpha.1` prerelease.
 
+Historical record: this audit preserves the sanitized readiness assessment
+made for one earlier provider path. It does not describe Haven 42's current
+signing integration. See `CODE-SIGNING-POLICY.md` for current status and
+authority boundaries. No provider correspondence or application outcome is
+recorded here.
+
 This sanitized audit records repository readiness. It is not a SignPath
 Foundation application, acceptance, certificate, signature, or legal
 conclusion. SignPath publishes the authoritative conditions at
 <https://signpath.org/terms.html>.
 
-No certificate, signing service, or signing workflow is active.
+At the time of this audit, no certificate, signing service, or signing workflow
+was active.
 
 ## Result
 

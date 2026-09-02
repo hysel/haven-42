@@ -31,6 +31,7 @@ def main() -> int:
     version_info = read("package/haven42-version-info.txt")
     spec = read("package/haven42.spec")
     workflow = read(".github/workflows/validate-pack.yml")
+    signing_workflow = read(".github/workflows/windows-artifact-signing.yml")
     codeowners = read(".github/CODEOWNERS")
     wiki_map = read("config/wiki-sync.tsv")
     readme = read("README.md")
@@ -40,16 +41,16 @@ def main() -> int:
 
     require(
         "does not currently publish or distribute code-signed binaries" in policy,
-        "Policy must not claim that code signing is active.",
+        "Policy must not claim that signed binaries are published.",
     )
     require(
-        "planned disclosure only" in policy
-        and "Free code signing provided by SignPath.io, certificate by SignPath Foundation."
-        in policy,
-        "Provider disclosure must be present but explicitly inactive.",
+        "Microsoft Artifact Signing account" in policy
+        and "does not authorize a signature, distribution, or Release" in policy
+        and "native-validation candidate, not a public release" in policy,
+        "Configured signing infrastructure must not grant signing or release authority.",
     )
     require(
-        "initial proposed Windows signing scope is only" in policy
+        "initial Windows signing scope is only" in policy
         and "`haven42.exe`" in policy,
         "Signing scope must be restricted to the project-owned launcher.",
     )
@@ -63,9 +64,11 @@ def main() -> int:
         "Privacy policy must preserve the local-first transfer boundary.",
     )
     require(
-        "**Not currently eligible to request production signing.**" in audit
-        and "No certificate, signing service, or signing workflow is active" in audit,
-        "Eligibility audit must fail closed.",
+        "Historical record:" in audit
+        and "does not describe Haven 42's current" in audit
+        and "signing integration" in audit
+        and "No provider correspondence or application outcome" in audit,
+        "The earlier provider audit must remain sanitized and clearly historical.",
     )
     require(
         "exact unsigned Windows" in audit
@@ -118,6 +121,19 @@ def main() -> int:
         "The development workflow must not activate a signing service or platform signer.",
     )
     require(
+        "workflow_dispatch:" in signing_workflow
+        and "environment: windows-signing" in signing_workflow
+        and "id-token: write" in signing_workflow
+        and "AZURE_CLIENT_SECRET" not in signing_workflow,
+        "The signing workflow must be manual, approval protected, and OIDC only.",
+    )
+    require(
+        "\\bundle\\haven42\\haven42.exe" in signing_workflow
+        and "files-folder:" not in signing_workflow
+        and "releasePublished = $false" in signing_workflow,
+        "The signing workflow must sign only the launcher and deny release publication.",
+    )
+    require(
         "/CODE-SIGNING-POLICY.md @hysel" in codeowners
         and "/package/haven42-version-info.txt @hysel" in codeowners,
         "Signing policy and executable identity must remain code-owner protected.",
@@ -136,12 +152,13 @@ def main() -> int:
     )
     require(
         "[Code signing policy](https://github.com/hysel/haven-42/blob/main/CODE-SIGNING-POLICY.md)" in release
-        and "unsigned development artifacts" in release,
-        "Release guidance must link the policy without claiming signed output.",
+        and "public downloads remain unsigned development artifacts" in release
+        and "candidate is not a Release" in release,
+        "Release guidance must distinguish native signing validation from publication.",
     )
-    if checks != 20:
-        raise AssertionError(f"Expected 20 checks, executed {checks}.")
-    print("Code-signing readiness self-test passed: 20 effect-free checks.")
+    if checks != 22:
+        raise AssertionError(f"Expected 22 checks, executed {checks}.")
+    print("Code-signing readiness self-test passed: 22 effect-free checks.")
     return 0
 
 

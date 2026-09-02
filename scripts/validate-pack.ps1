@@ -172,6 +172,7 @@ $requiredFiles = @(
     "config/installation-broker-contract.json",
     ".github/workflows/codeql.yml",
     ".github/workflows/alpha-usage-report.yml",
+    ".github/workflows/windows-artifact-signing.yml",
     "docs/provider-endpoint-security.md",
     "scripts/provider_security.py",
     "scripts/validate-post-quantum-readiness.py",

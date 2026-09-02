@@ -194,6 +194,7 @@ REQUIRED_FILES=(
   "scripts/model_catalog_search.py"
   ".github/workflows/codeql.yml"
   ".github/workflows/alpha-usage-report.yml"
+  ".github/workflows/windows-artifact-signing.yml"
   "docs/provider-endpoint-security.md"
   "scripts/provider_security.py"
   "scripts/validate-post-quantum-readiness.py"

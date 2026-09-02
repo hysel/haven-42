@@ -37,14 +37,15 @@ def workflow_jobs(text: str, name: str) -> list[tuple[str, str]]:
 def verify_workflow_safety(workflows: dict[str, str]) -> None:
     if set(workflows) != {
         "alpha-usage-report.yml", "alpha2-candidate.yml", "codeql.yml",
-        "validate-pack.yml",
+        "validate-pack.yml", "windows-artifact-signing.yml",
     }:
         raise PolicyError("unexpected-workflow-inventory")
     combined = "\n".join(workflows[name] for name in sorted(workflows))
     for name, text in workflows.items():
         header = text.split("\njobs:\n", 1)[0]
+        expected_cancel = "false" if name == "windows-artifact-signing.yml" else "true"
         if not re.search(
-            r"(?ms)^concurrency:\s*\n\s+group:\s*\S.+\n\s+cancel-in-progress:\s*true\s*$",
+            rf"(?ms)^concurrency:\s*\n\s+group:\s*\S.+\n\s+cancel-in-progress:\s*{expected_cancel}\s*$",
             header,
         ):
             raise PolicyError(f"workflow-concurrency-unbounded:{name}")
@@ -87,21 +88,25 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
             text,
         )
     ]
-    if len(upload_blocks) != 4:
+    if len(upload_blocks) != 6:
         raise PolicyError("unexpected-artifact-upload-count")
     package_uploads = [block for block in upload_blocks if "unsigned-development" in block]
     report_uploads = [block for block in upload_blocks if "alpha-usage-report" in block]
     candidate_uploads = [block for block in upload_blocks if "alpha2-" in block]
+    signing_uploads = [block for block in upload_blocks if "signing-request" in block or "signed-native-validation-candidate" in block]
     if (
         len(package_uploads) != 1
         or len(report_uploads) != 1
         or len(candidate_uploads) != 2
+        or len(signing_uploads) != 2
         or not re.search(r"(?m)^\s+retention-days:\s*7\s*$", package_uploads[0])
         or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", package_uploads[0])
         or not re.search(r"(?m)^\s+retention-days:\s*30\s*$", report_uploads[0])
         or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", report_uploads[0])
         or any(not re.search(r"(?m)^\s+retention-days:\s*7\s*$", block) for block in candidate_uploads)
         or any(not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", block) for block in candidate_uploads)
+        or any(not re.search(r"(?m)^\s+retention-days:\s*3\s*$", block) for block in signing_uploads)
+        or any(not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", block) for block in signing_uploads)
     ):
         raise PolicyError("unsafe-artifact-upload-policy")
     report_workflow = workflows["alpha-usage-report.yml"]
@@ -178,7 +183,8 @@ def load_policy() -> dict:
         raise PolicyError("invalid-policy-json") from error
     required = {
         "schemaVersion", "repository", "defaultBranch", "mergePolicy",
-        "branchProtection", "actions", "artifactAttestations", "usageReports",
+        "branchProtection", "actions", "artifactAttestations", "artifactSigning",
+        "usageReports",
     }
     if not isinstance(value, dict) or set(value) != required or value["schemaVersion"] != 1:
         raise PolicyError("invalid-policy-shape")
@@ -230,7 +236,10 @@ def verify_static(policy: dict) -> None:
         "allowedActions": "selected",
         "githubOwnedAllowed": True,
         "verifiedAllowed": False,
-        "patternsAllowed": [],
+        "patternsAllowed": [
+            "Azure/artifact-signing-action@*",
+            "Azure/login@*",
+        ],
         "shaPinningRequired": True,
         "defaultWorkflowPermissions": "read",
         "canApprovePullRequestReviews": False,
@@ -257,6 +266,19 @@ def verify_static(policy: dict) -> None:
         "productionReadinessClaimAllowed": False,
     }:
         raise PolicyError("unsafe-artifact-attestation-policy")
+    if policy["artifactSigning"] != {
+        "enabled": True,
+        "provider": "microsoft-artifact-signing",
+        "workflow": "windows-artifact-signing.yml",
+        "trigger": "manual",
+        "environment": "windows-signing",
+        "allowedSourceBranch": "main",
+        "signingScope": "haven42.exe-only",
+        "authentication": "github-oidc",
+        "candidateRetentionDays": 3,
+        "releasePublicationAllowed": False,
+    }:
+        raise PolicyError("unsafe-artifact-signing-policy")
     if policy["usageReports"] != {
         "enabled": True,
         "workflow": "alpha-usage-report.yml",
@@ -292,12 +314,12 @@ def verify_static(policy: dict) -> None:
     upload_artifact = (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
     )
-    if workflow_text.count(upload_artifact) != 4:
+    if workflow_text.count(upload_artifact) != 6:
         raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
     setup_python = (
         "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97"
     )
-    if workflow_text.count(setup_python) != 3:
+    if workflow_text.count(setup_python) != 4:
         raise PolicyError("reviewed-node24-setup-python-not-pinned")
     package_section = workflow_text.split("  package:", 1)[1].split(
         "  attest-development:", 1
@@ -345,7 +367,7 @@ def verify_static(policy: dict) -> None:
     download_artifact = (
         "actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c"
     )
-    if workflow_text.count(download_artifact) != 2:
+    if workflow_text.count(download_artifact) != 3:
         raise PolicyError("reviewed-node24-download-artifact-not-pinned")
     codeql_sha = "cdf488f595d80d6e07e03d4674febd5ab45fa938"
     if (
