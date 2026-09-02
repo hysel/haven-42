@@ -10,7 +10,9 @@ That configuration does not authorize a signature, distribution, or Release.
 
 The repository's manual signing workflow may sign one exact `haven42.exe` from
 an immutable commit on `main` only after the owner reviews its unsigned SHA-256
-and approves the protected `windows-signing` environment. Its short-lived
+and approves the protected `windows-signing` environment. The environment must
+also define the exact reviewed certificate subject; any different signer fails
+closed after signing and cannot become a retained candidate. Its short-lived
 output is a native-validation candidate, not a public release. Publication
 remains a separate owner decision after every promotion gate passes.
 

@@ -5720,10 +5720,10 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($milestone22Output -join "`n") -match "20 cases") -Message "Milestone 22 admission readiness should keep deferred and blocked gates explicit without granting authority."
     $signingOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-code-signing-readiness.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Code-signing readiness checks should pass."
-    Assert-True -Condition (($signingOutput -join "`n") -match "22 effect-free checks") -Message "Code-signing readiness must remain manual, narrowly scoped, unpublished, and fail closed."
+    Assert-True -Condition (($signingOutput -join "`n") -match "23 effect-free checks") -Message "Code-signing readiness must remain manual, narrowly scoped, unpublished, and fail closed."
     $artifactSigningOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-windows-artifact-signing-workflow.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Windows Artifact Signing workflow checks should pass."
-    Assert-True -Condition (($artifactSigningOutput -join "`n") -match "28 fail-closed checks") -Message "Windows signing must remain manual, exact-source, digest-bound, OIDC-only, launcher-only, and unable to publish a release."
+    Assert-True -Condition (($artifactSigningOutput -join "`n") -match "31 fail-closed checks") -Message "Windows signing must remain manual, exact-source, digest-bound, OIDC-only, launcher-only, and unable to publish a release."
     $runtimeComponentOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-runtime-components.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable runtime component hostile tests should pass."
     Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."

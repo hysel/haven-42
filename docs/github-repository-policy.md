@@ -77,8 +77,12 @@ commit reachable from `main`. Its first job builds and hashes the unsigned
 launcher without OIDC access. The second job receives OIDC authority only
 after the owner approves the protected `windows-signing` environment. It signs
 the exact Haven 42-owned `haven42.exe`, requires a SHA-256 timestamped
-Authenticode result, retains the native-validation candidate for three days,
-and has no Release or repository-write authority.
+Authenticode result, and rejects any signer subject that does not exactly match
+the environment's reviewed `WINDOWS_EXPECTED_SIGNER_SUBJECT` value. The signed
+ZIP replaces the unsigned-development marker with candidate-only signing scope
+and records the archive SHA-256 beside it. The workflow retains the
+native-validation candidate for three days and has no Release or
+repository-write authority.
 
 ## Efficient Local-to-Hosted Flow
 

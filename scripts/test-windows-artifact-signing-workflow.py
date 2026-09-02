@@ -102,6 +102,14 @@ def main() -> int:
         "Authentication must use OIDC without a reusable client secret.",
     )
     require(
+        "HAVEN42_EXPECTED_SIGNER_SUBJECT: ${{ vars.WINDOWS_EXPECTED_SIGNER_SUBJECT }}"
+        in sign_job
+        and "Require the approved publisher identity before signing" in sign_job
+        and sign_job.index("Require the approved publisher identity before signing")
+        < sign_job.index("Sign only the Haven 42-owned launcher"),
+        "An exact approved publisher identity must be configured before paid signing.",
+    )
+    require(
         "endpoint: https://eus.codesigning.azure.net/" in sign_job
         and "signing-account-name: haven42-public-release" in sign_job
         and "certificate-profile-name: haven42-public-release" in sign_job,
@@ -130,6 +138,18 @@ def main() -> int:
         "Post-sign verification must require a valid timestamped Authenticode signature.",
     )
     require(
+        "[System.StringComparison]::Ordinal" in sign_job
+        and "SignerCertificate.Subject, $expectedSubject" in sign_job
+        and "expectedSignerSubjectMatched = $true" in sign_job,
+        "Post-sign verification must match the exact approved publisher identity.",
+    )
+    require(
+        "Haven 42 signed native-validation candidate." in sign_job
+        and "Only the project-owned haven42.exe launcher is signed" in sign_job
+        and "candidateArchiveSha256 = $candidateArchiveDigest" in sign_job,
+        "The signed ZIP must carry accurate candidate metadata and an external digest record.",
+    )
+    require(
         "releasePublished = $false" in sign_job
         and "distributionAuthorized = $false" in sign_job
         and "productionReady = $false" in sign_job,
@@ -144,10 +164,10 @@ def main() -> int:
         "The signing workflow must not create or modify a GitHub Release.",
     )
     require(
-        checks == 28,
-        f"Expected 28 signing-workflow checks, executed {checks}.",
+        checks == 31,
+        f"Expected 31 signing-workflow checks, executed {checks}.",
     )
-    print("Windows Artifact Signing workflow self-test passed: 28 fail-closed checks.")
+    print("Windows Artifact Signing workflow self-test passed: 31 fail-closed checks.")
     return 0
 
 

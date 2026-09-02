@@ -128,6 +128,12 @@ def main() -> int:
         "The signing workflow must be manual, approval protected, and OIDC only.",
     )
     require(
+        "vars.WINDOWS_EXPECTED_SIGNER_SUBJECT" in signing_workflow
+        and "[System.StringComparison]::Ordinal" in signing_workflow
+        and "expectedSignerSubjectMatched = $true" in signing_workflow,
+        "The signing workflow must fail closed around the approved publisher identity.",
+    )
+    require(
         "\\bundle\\haven42\\haven42.exe" in signing_workflow
         and "files-folder:" not in signing_workflow
         and "releasePublished = $false" in signing_workflow,
@@ -156,9 +162,9 @@ def main() -> int:
         and "candidate is not a Release" in release,
         "Release guidance must distinguish native signing validation from publication.",
     )
-    if checks != 22:
-        raise AssertionError(f"Expected 22 checks, executed {checks}.")
-    print("Code-signing readiness self-test passed: 22 effect-free checks.")
+    if checks != 23:
+        raise AssertionError(f"Expected 23 checks, executed {checks}.")
+    print("Code-signing readiness self-test passed: 23 effect-free checks.")
     return 0
 
 
