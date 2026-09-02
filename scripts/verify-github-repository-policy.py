@@ -275,6 +275,8 @@ def verify_static(policy: dict) -> None:
         "allowedSourceBranch": "main",
         "signingScope": "haven42.exe-only",
         "authentication": "github-oidc",
+        "expectedSignerSubjectSource": "windows-signing-environment-variable",
+        "expectedSignerSubjectMatch": "exact-ordinal",
         "candidateRetentionDays": 3,
         "releasePublicationAllowed": False,
     }:

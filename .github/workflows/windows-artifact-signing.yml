@@ -146,6 +146,16 @@ jobs:
             throw 'The downloaded signing request does not match the approved source and executable.'
           }
 
+      - name: Require the approved publisher identity before signing
+        shell: pwsh
+        env:
+          HAVEN42_EXPECTED_SIGNER_SUBJECT: ${{ vars.WINDOWS_EXPECTED_SIGNER_SUBJECT }}
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:HAVEN42_EXPECTED_SIGNER_SUBJECT) -or
+              $env:HAVEN42_EXPECTED_SIGNER_SUBJECT -match "[`r`n]") {
+            throw 'The windows-signing environment must define one exact WINDOWS_EXPECTED_SIGNER_SUBJECT value.'
+          }
+
       - name: Authenticate to Azure with GitHub OIDC
         uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3
         with:
@@ -170,6 +180,7 @@ jobs:
         shell: pwsh
         env:
           HAVEN42_SELECTED_COMMIT: ${{ inputs.source_commit }}
+          HAVEN42_EXPECTED_SIGNER_SUBJECT: ${{ vars.WINDOWS_EXPECTED_SIGNER_SUBJECT }}
         run: |
           $root = Resolve-Path -LiteralPath 'dist/approved-input/bundle/haven42'
           $exe = Join-Path $root 'haven42.exe'
@@ -177,8 +188,21 @@ jobs:
           if ($signature.Status -ne 'Valid' -or $null -eq $signature.SignerCertificate -or $null -eq $signature.TimeStamperCertificate) {
             throw "Authenticode verification failed: $($signature.Status) $($signature.StatusMessage)"
           }
+          $expectedSubject = $env:HAVEN42_EXPECTED_SIGNER_SUBJECT.Trim()
+          if (-not [string]::Equals($signature.SignerCertificate.Subject, $expectedSubject, [System.StringComparison]::Ordinal)) {
+            throw 'The Authenticode signer subject does not match the approved publisher identity.'
+          }
           $signedDigest = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToLowerInvariant()
           $resultDirectory = New-Item -ItemType Directory -Force -Path 'dist/windows-signed-candidate'
+          $candidateMarker = Join-Path $root 'DEVELOPMENT-BUILD.txt'
+          @(
+            'Haven 42 signed native-validation candidate.'
+            'Only the project-owned haven42.exe launcher is signed; embedded third-party runtime components remain outside Haven 42 signing scope.'
+            'No installer, updater activation, distribution authorization, production-readiness claim, or release publication.'
+          ) | Set-Content -LiteralPath $candidateMarker -Encoding utf8NoBOM
+          $candidateArchive = Join-Path $resultDirectory 'haven42-0.4.0-alpha.2-windows-x64-signed-candidate.zip'
+          Compress-Archive -LiteralPath $root -DestinationPath $candidateArchive -CompressionLevel Optimal
+          $candidateArchiveDigest = (Get-FileHash -LiteralPath $candidateArchive -Algorithm SHA256).Hash.ToLowerInvariant()
           $result = [ordered]@{
             schemaVersion = 1
             kind = 'haven42-windows-artifact-signing-result'
@@ -190,17 +214,19 @@ jobs:
             signerIssuer = $signature.SignerCertificate.Issuer
             timestampSubject = $signature.TimeStamperCertificate.Subject
             timestampIssuer = $signature.TimeStamperCertificate.Issuer
+            expectedSignerSubjectMatched = $true
+            candidateArchiveSha256 = $candidateArchiveDigest
             releasePublished = $false
             distributionAuthorized = $false
             productionReady = $false
           }
           $result | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $resultDirectory 'windows-signing-result.json') -Encoding utf8NoBOM
-          Compress-Archive -LiteralPath $root -DestinationPath (Join-Path $resultDirectory 'haven42-0.4.0-alpha.2-windows-x64-signed-candidate.zip') -CompressionLevel Optimal
           "## Verified signed candidate" >> $env:GITHUB_STEP_SUMMARY
           "" >> $env:GITHUB_STEP_SUMMARY
           "- Signed SHA-256: ``$signedDigest``" >> $env:GITHUB_STEP_SUMMARY
           "- Authenticode status: ``$($signature.Status)``" >> $env:GITHUB_STEP_SUMMARY
           "- Signer: ``$($signature.SignerCertificate.Subject)``" >> $env:GITHUB_STEP_SUMMARY
+          "- Candidate archive SHA-256: ``$candidateArchiveDigest``" >> $env:GITHUB_STEP_SUMMARY
           "- Timestamp: present" >> $env:GITHUB_STEP_SUMMARY
           "- Release publication: not authorized" >> $env:GITHUB_STEP_SUMMARY
 
