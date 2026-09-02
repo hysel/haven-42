@@ -659,7 +659,8 @@ try {
     !macosInstalledPresentation.explanation.includes('verified official Ollama 0.33.2 in Applications')
     || !macosInstalledPresentation.explanation.includes('newer than the certified macOS version 0.32.15')
     || !macosInstalledPresentation.explanation.includes('You can continue after reviewing and approving')
-    || !macosInstalledPresentation.explanation.includes('No app or model will be downloaded')
+    || !macosInstalledPresentation.explanation.includes('This step starts Ollama without downloading an app or model')
+    || !macosInstalledPresentation.explanation.includes('choose the best tested fit for this Mac and ask separately before downloading it')
     || !macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Installed · 0.33.2 · approval required')
     || !macosInstalledPresentation.explanation.includes('Recommended AI modelChecked after local AI starts')
     || macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Needed for this setup')
@@ -679,7 +680,7 @@ try {
     || macosInstalledPresentation.nextDisabled
     || macosInstalledPresentation.nextText !== 'Review and start local AI'
   ) throw new Error(`macos-installed-setup:${JSON.stringify(macosInstalledPresentation)}`);
-  checks += 22;
+  checks += 23;
   trace("macos-installed-setup-verified");
 
   const macosInstalledFailureFeedback = await cdp.evaluate(`(async () => {
@@ -1955,14 +1956,21 @@ try {
     || installReview.focused !== "model-install-review-dialog"
     || !installReview.backgroundInert
   ) throw new Error(`model-install-review:${JSON.stringify(installReview)}`);
+  await cdp.evaluate("state.modelInstallReturnToChat = true");
   await cdp.evaluate("document.querySelector('#model-install-review-dialog').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))");
   await waitFor(() => cdp.evaluate("document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
   const installCancel = await cdp.evaluate(`({
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
     status: document.querySelector('#model-install-status').textContent,
+    returnFlagCleared: state.modelInstallReturnToChat === false,
   })`);
-  if (installCancel.focused !== "install-model-button" || installCancel.backgroundInert || !installCancel.status.includes("Nothing was downloaded")) {
+  if (
+    installCancel.focused !== "install-model-button"
+    || installCancel.backgroundInert
+    || !installCancel.status.includes("Nothing was downloaded")
+    || !installCancel.returnFlagCleared
+  ) {
     throw new Error(`model-install-cancel:${JSON.stringify(installCancel)}`);
   }
   await cdp.evaluate("document.querySelector('#install-model-button').click()");
@@ -2001,7 +2009,7 @@ try {
     || !installedCandidate.reviewHidden
     || installedCandidate.backgroundInert
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
-  checks += 22;
+  checks += 23;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
@@ -3718,6 +3726,95 @@ try {
   ) throw new Error(`managed-default-handoff:${JSON.stringify(managedDefaultHandoff)}`);
   checks += 7;
   trace("managed-default-handoff-verified");
+
+  const guidedDefaultInstall = await cdp.evaluate(`(async () => {
+    const originalApi = api;
+    const model = 'qwen3.5:4b';
+    let result;
+    try {
+      state.modelOptions = [];
+      state.modelSelections = Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+      );
+      state.qualifiedModelCandidates = [{
+        name: model, automatic: true, recommended: true, downloadRequiresApproval: true,
+        hardwareFit: 'matched-tested-hardware-profile', profileId: 'macos-apple-m4-16gib',
+        minimumOllamaVersion: '0.32.15',
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+        )
+      }];
+      document.querySelector('#setup-wizard').classList.remove('hidden');
+      api = async (path) => {
+        if (path === '/api/model-install/prepare') return {
+          schemaVersion: 1, kind: 'model-install-approval', approvalToken: 'b'.repeat(32),
+          expiresInSeconds: 300, singleUse: true, persisted: false, model,
+          destination: 'This computer', downloadStarted: false, licenseStatus: 'review-required',
+          hardwareFit: 'compatible', hardwareFitReason: 'matched-tested-hardware-profile',
+          minimumSystemMemoryGiB: 8
+        };
+        if (path === '/api/model-install/status') return {
+          schemaVersion: 1, kind: 'model-install-progress', model, phase: 'complete',
+          progressPercent: 100, completedBytes: 1000, totalBytes: 1000,
+          status: 'Model downloaded and verified', terminal: true
+        };
+        if (path === '/api/model-install/execute') return {
+          schemaVersion: 1, kind: 'model-install-result', status: 'installed', model,
+          verifiedByProviderCatalog: true, selectedAutomatically: true,
+          modelOption: {
+            name: model, digestVerified: true,
+            capabilityStatus: Object.fromEntries(
+              Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated'])
+            )
+          }
+        };
+        throw new Error('unexpected-guided-default-api:' + path);
+      };
+      const offered = await offerRecommendedModelDuringSetup();
+      const review = {
+        offered,
+        wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+        modelsVisible: !document.querySelector('#models-panel').classList.contains('hidden'),
+        desired: document.querySelector('#desired-model-name').textContent,
+        approvalVisible: !document.querySelector('#model-install-review-layer').classList.contains('hidden'),
+        approvalModel: document.querySelector('#model-install-review-name').textContent,
+        destination: document.querySelector('#model-install-review-destination').textContent,
+      };
+      await executeModelInstall();
+      result = {
+        review,
+        chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+        selected: document.querySelector('#model').value,
+        selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
+          state.modelSelections[capabilityId]?.mode === 'manual'
+          && state.modelSelections[capabilityId]?.model === model
+        )),
+        desiredHidden: document.querySelector('#desired-model').classList.contains('hidden'),
+        status: document.querySelector('#text-status').textContent,
+        returnFlagCleared: state.modelInstallReturnToChat === false,
+      };
+    } finally {
+      api = originalApi;
+    }
+    return result;
+  })()`);
+  if (
+    !guidedDefaultInstall.review.offered
+    || !guidedDefaultInstall.review.wizardHidden
+    || !guidedDefaultInstall.review.modelsVisible
+    || guidedDefaultInstall.review.desired !== 'qwen3.5:4b'
+    || !guidedDefaultInstall.review.approvalVisible
+    || guidedDefaultInstall.review.approvalModel !== 'qwen3.5:4b'
+    || guidedDefaultInstall.review.destination !== 'This computer'
+    || !guidedDefaultInstall.chatVisible
+    || guidedDefaultInstall.selected !== 'manual:qwen3.5:4b'
+    || !guidedDefaultInstall.selectedForEveryTextTask
+    || !guidedDefaultInstall.desiredHidden
+    || !guidedDefaultInstall.status.includes('installed, selected, and ready')
+    || !guidedDefaultInstall.returnFlagCleared
+  ) throw new Error(`guided-default-model-install:${JSON.stringify(guidedDefaultInstall)}`);
+  checks += 13;
+  trace("guided-default-model-install-verified");
   await cdp.evaluate(`(() => {
     state.qualifiedModelCandidates = [];
     renderModelSelect();
