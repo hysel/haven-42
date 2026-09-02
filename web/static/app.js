@@ -202,6 +202,7 @@ const state = {
   researchResultId: null,
   activePanelId: "text-panel",
   pendingModelInstall: null,
+  activeModelInstall: null,
   modelInstallReturnToChat: false,
 };
 
@@ -1360,6 +1361,10 @@ function validateModelSearch(result) {
 }
 
 function chooseDiscoveredModel(item) {
+  if (state.activeModelInstall && state.activeModelInstall.model !== item.name) {
+    byId("model-choice-status").textContent = `${state.activeModelInstall.model} is still downloading. Wait for it to finish before choosing another model.`;
+    return;
+  }
   resetModelInstallProgress();
   const capabilityId = byId("model-search-capability").value;
   if (item.status === "installed") {
@@ -1446,6 +1451,12 @@ function resetModelInstallProgress() {
   byId("model-install-progress-detail").textContent = "Starting download…";
 }
 
+function setModelInstallActivity(active) {
+  byId("model-search-query").disabled = active;
+  byId("model-search-button").disabled = active;
+  byId("model-search-capability").disabled = active;
+}
+
 function validateModelInstallProgress(result, expectedModel) {
   const fields = [
     "completedBytes", "kind", "model", "phase", "progressPercent",
@@ -1504,7 +1515,9 @@ function renderModelInstallProgress(progress) {
 
 async function monitorModelInstallProgress(progressToken, model) {
   for (let attempt = 0; attempt < 7200; attempt += 1) {
+    if (state.activeModelInstall?.token !== progressToken) return null;
     await new Promise((resolve) => window.setTimeout(resolve, attempt === 0 ? 100 : 500));
+    if (state.activeModelInstall?.token !== progressToken) return null;
     try {
       const progress = validateModelInstallProgress(
         await api("/api/model-install/status", { progressToken }),
@@ -1551,7 +1564,10 @@ async function executeModelInstall() {
   if (!pending) return;
   const model = pending.model;
   const token = pending.approvalToken;
+  state.activeModelInstall = { model, token };
   closeModelInstallReview(true);
+  setModelInstallActivity(true);
+  renderModelDiscovery();
   const button = byId("install-model-button");
   button.disabled = true;
   button.textContent = "Downloading…";
@@ -1559,45 +1575,62 @@ async function executeModelInstall() {
   byId("model-install-progress").classList.remove("hidden");
   try {
     const installation = api("/api/model-install/execute", { approvalToken: token, confirmed: true });
-    const progressMonitoring = monitorModelInstallProgress(token, model).catch(() => null);
+    const progressMonitoring = monitorModelInstallProgress(token, model);
     const result = await installation;
-    await progressMonitoring;
+    try {
+      await progressMonitoring;
+    } catch {
+      // The completed install response is authoritative. Replace a failed
+      // progress poll with an explicit terminal state instead of leaving the
+      // page looking busy forever.
+      renderModelInstallProgress({
+        phase: "complete", progressPercent: 100, completedBytes: null,
+        totalBytes: null, status: "Model downloaded and verified",
+      });
+    }
+    const installedName = result?.model;
     if (
       !result
       || result.schemaVersion !== 1
       || result.kind !== "model-install-result"
       || result.status !== "installed"
-      || result.model !== model
+      || ![model, `${model}:latest`].includes(installedName)
       || result.verifiedByProviderCatalog !== true
       || result.selectedAutomatically !== true
       || !result.modelOption
-      || result.modelOption.name !== model
+      || result.modelOption.name !== installedName
       || typeof result.modelOption.digestVerified !== "boolean"
       || !result.modelOption.capabilityStatus
     ) throw new Error("invalid-model-install-result");
-    state.modelOptions = [...state.modelOptions.filter((item) => item.name !== model), result.modelOption];
-    state.modelSearchResults = state.modelSearchResults.map((item) => (
-      item.name === model ? { ...item, status: "installed", executionAllowed: true, installCommand: null } : item
-    ));
+    state.modelOptions = [...state.modelOptions.filter((item) => ![model, installedName].includes(item.name)), result.modelOption];
+    state.modelSearchResults = state.modelSearchResults
+      .filter((item) => item.name !== model)
+      .concat({
+        name: installedName, source: "ollama-public-catalog", status: "installed",
+        validationStatus: "candidate-only", capabilityEvidence: "unverified",
+        hardwareFit: "unknown", hardwareFitReason: null, minimumSystemMemoryGiB: null,
+        licenseStatus: "review-required", executionAllowed: true, installCommand: null,
+      });
     const capabilityId = byId("model-search-capability").value;
     assignModelToSupportedCapabilities(result.modelOption, capabilityId);
     state.desiredModel = null;
     renderModelSelect();
     renderModelDiscovery();
-    byId("model-choice-status").textContent = `${model} is installed and selected for every supported text task.`;
-    byId("model-search-status").textContent = `${model} was downloaded and verified by your Ollama server.`;
+    byId("model-choice-status").textContent = `${installedName} is installed and selected for every supported text task.`;
+    byId("model-search-status").textContent = `${installedName} was downloaded and verified by your Ollama server.`;
     if (state.modelInstallReturnToChat) {
       state.modelInstallReturnToChat = false;
       openChat();
-      byId("text-status").textContent = `${model} is installed, selected, and ready.`;
+      byId("text-status").textContent = `${installedName} is installed, selected, and ready.`;
     }
   } catch (error) {
     byId("model-install-status").textContent = humanError(error);
   } finally {
-    if (state.desiredModel?.name === model) {
-      button.disabled = false;
-      button.textContent = "Review and install model";
-    }
+    state.activeModelInstall = null;
+    setModelInstallActivity(false);
+    button.disabled = false;
+    button.textContent = "Review and install model";
+    renderModelDiscovery();
   }
 }
 
@@ -1772,13 +1805,16 @@ function renderModelDiscovery() {
     const status = document.createElement("small");
     const configured = item.status === "installed" && selectedModel(capabilityId) === item.name;
     const knownIncompatible = item.status !== "installed" && item.hardwareFit === "incompatible";
+    const thisInstallActive = state.activeModelInstall?.model === item.name;
     const evidenceLabel = item.validationStatus === "tested-exact-profile"
       ? "tested on this hardware, operating system, and Ollama version"
       : item.validationStatus === "tested-hardware-runtime-differs"
         ? `tested on this hardware with Ollama ${item.testedRuntimeVersion}; connected server uses ${item.currentRuntimeVersion}`
         : null;
     const recommendationLabel = item.recommended ? "Recommended for this computer · " : "";
-    status.textContent = knownIncompatible
+    status.textContent = thisInstallActive
+      ? "Downloading this model · other model choices will be available when it finishes"
+      : knownIncompatible
       ? `Cannot run on this computer · needs at least ${item.minimumSystemMemoryGiB} GiB total memory · download blocked`
       : item.status === "installed"
       ? `${recommendationLabel}Already available on your server${configured ? " · selected" : ""}${evidenceLabel ? ` · ${evidenceLabel}` : ""}`
@@ -1792,13 +1828,15 @@ function renderModelDiscovery() {
     choose.className = "button secondary";
     choose.type = "button";
     const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
-    choose.textContent = configured
+    choose.textContent = thisInstallActive
+      ? "Downloading…"
+      : configured
       ? "Selected"
       : item.status === "installed"
         ? `Use for ${capabilityLabel}`
         : "Review and install";
     choose.setAttribute("aria-label", `${choose.textContent} ${item.name}`);
-    choose.disabled = configured || knownIncompatible;
+    choose.disabled = configured || knownIncompatible || Boolean(state.activeModelInstall);
     choose.addEventListener("click", () => chooseDiscoveredModel(item));
     row.append(detail, choose);
     container.append(row);

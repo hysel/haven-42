@@ -1864,6 +1864,18 @@ try {
             licenseStatus: "review-required",
             executionAllowed: false,
             installCommand: "ollama pull candidate-writing:7b"
+          }, {
+            name: "candidate-writing:3b",
+            source: "ollama-public-catalog",
+            status: "not-installed",
+            validationStatus: "candidate-only",
+            capabilityEvidence: "unverified",
+            hardwareFit: "unknown",
+            hardwareFitReason: null,
+            minimumSystemMemoryGiB: null,
+            licenseStatus: "review-required",
+            executionAllowed: false,
+            installCommand: "ollama pull candidate-writing:3b"
           }]
         }), {status: 200, headers: {"Content-Type": "application/json"}}));
       if (input === "/api/model-install/prepare") return Promise.resolve(new Response(JSON.stringify({
@@ -1916,8 +1928,12 @@ try {
     query.dispatchEvent(new Event('input', {bubbles: true}));
     document.querySelector('#model-search-form').requestSubmit();
   })()`);
-  await waitFor(() => cdp.evaluate("document.querySelectorAll('#model-search-results .model-search-result').length === 1"));
-  await cdp.evaluate("document.querySelector('#model-search-results button').click()");
+  await waitFor(() => cdp.evaluate("document.querySelectorAll('#model-search-results .model-search-result').length === 2"));
+  await cdp.evaluate(`(() => {
+    const row = [...document.querySelectorAll('#model-search-results .model-search-result')]
+      .find((item) => item.querySelector('strong').textContent === 'candidate-writing:7b');
+    row.querySelector('button').click();
+  })()`);
   const discovery = await cdp.evaluate(`({
     desired: document.querySelector('#desired-model-name').textContent,
     state: document.querySelector('#desired-model-state').textContent,
@@ -1983,6 +1999,13 @@ try {
     percent: document.querySelector('#model-install-progress-percent').textContent,
     label: document.querySelector('#model-install-progress-label').textContent,
     detail: document.querySelector('#model-install-progress-detail').textContent,
+    activeModel: state.activeModelInstall?.model || null,
+    desiredModel: document.querySelector('#desired-model-name').textContent,
+    allCandidateButtonsDisabled: [...document.querySelectorAll('#model-search-results .model-search-result button')]
+      .every((button) => button.disabled),
+    searchDisabled: document.querySelector('#model-search-button').disabled,
+    queryDisabled: document.querySelector('#model-search-query').disabled,
+    capabilityDisabled: document.querySelector('#model-search-capability').disabled,
   })`);
   if (
     !activeInstallProgress.visible
@@ -1990,6 +2013,12 @@ try {
     || activeInstallProgress.percent !== "45%"
     || activeInstallProgress.label !== "Downloading model"
     || !activeInstallProgress.detail.includes("Downloading model files")
+    || activeInstallProgress.activeModel !== "candidate-writing:7b"
+    || activeInstallProgress.desiredModel !== "candidate-writing:7b"
+    || !activeInstallProgress.allCandidateButtonsDisabled
+    || !activeInstallProgress.searchDisabled
+    || !activeInstallProgress.queryDisabled
+    || !activeInstallProgress.capabilityDisabled
   ) throw new Error(`model-install-progress:${JSON.stringify(activeInstallProgress)}`);
   await waitFor(() => cdp.evaluate("document.querySelector('#desired-model').classList.contains('hidden')"));
   const installedCandidate = await cdp.evaluate(`({
@@ -2001,6 +2030,9 @@ try {
     status: document.querySelector('#model-search-status').textContent,
     reviewHidden: document.querySelector('#model-install-review-layer').classList.contains('hidden'),
     backgroundInert: document.querySelector('.shell').inert,
+    searchEnabled: !document.querySelector('#model-search-button').disabled,
+    queryEnabled: !document.querySelector('#model-search-query').disabled,
+    capabilityEnabled: !document.querySelector('#model-search-capability').disabled,
   })`);
   if (
     installedCandidate.selected !== "manual:candidate-writing:7b"
@@ -2008,8 +2040,11 @@ try {
     || !installedCandidate.status.includes("downloaded and verified")
     || !installedCandidate.reviewHidden
     || installedCandidate.backgroundInert
+    || !installedCandidate.searchEnabled
+    || !installedCandidate.queryEnabled
+    || !installedCandidate.capabilityEnabled
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
-  checks += 23;
+  checks += 32;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};

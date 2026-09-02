@@ -13,8 +13,8 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "4f6b6285c4d9a17f326d5431624797d9e737676c09a33e5db81f17e00038ef59",
-      "sizeBytes": 309032
+      "sha256": "9ff3d83a88b9c80627afe951e9767314b8e50c7b5c78cca4d18efeecd7261659",
+      "sizeBytes": 310870
     },
     {
       "path": "web/static/styles.css",

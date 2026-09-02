@@ -1717,6 +1717,36 @@ def main() -> int:
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
         assert parsed == ["qwen3.5:9b", "qwen3.5:35b", "qwen3.5:9b-mlx"]
         assert search_globals["validate_query"]("  agent   writing ") == "agent writing"
+        catalog_pages = {
+            "/search": (
+                '<a href="/library/qwen3.8">Qwen 3.8</a>'
+                '<a href="/library/qwen3.5">Qwen 3.5</a>'
+                '<a href="/library/qwen2.5-coder">Qwen coder</a>'
+            ),
+            "/library/qwen3.8/tags": (
+                '<a href="/library/qwen3.8:27b">27B</a>'
+                '<a href="/library/qwen3.8:27b-mlx">27B MLX</a>'
+            ),
+            "/library/qwen3.5/tags": (
+                '<a href="/library/qwen3.5:0.8b">0.8B</a>'
+                '<a href="/library/qwen3.5:2b-mlx">2B MLX</a>'
+            ),
+            "/library/qwen2.5-coder/tags": (
+                '<a href="/library/qwen2.5-coder:7b">7B</a>'
+            ),
+        }
+        with patch.object(
+            search_globals["sys"].modules[search_globals["__name__"]],
+            "_fetch_catalog_html",
+            side_effect=lambda path, _timeout, _query=None: catalog_pages[path],
+        ):
+            broad_qwen = search_globals["search_ollama_catalog"]("qwen")
+            valid_exact_tag = search_globals["search_ollama_catalog"]("qwen3.5:2b-mlx")
+            invalid_exact_tag = search_globals["search_ollama_catalog"]("qwen3.5:0.8b-mlx")
+        assert broad_qwen[:3] == ["qwen3.8", "qwen3.8:27b", "qwen3.8:27b-mlx"]
+        assert "qwen3.5:0.8b" in broad_qwen and "qwen2.5-coder:7b" in broad_qwen
+        assert valid_exact_tag == ["qwen3.5:2b-mlx"]
+        assert invalid_exact_tag == []
         for hostile_query in ("", "x" * 65, "model?token=secret", "<script>"):
             try:
                 search_globals["validate_query"](hostile_query)
@@ -1760,7 +1790,7 @@ def main() -> int:
             assert str(error) == "invalid-model-search-timeout"
         else:
             raise AssertionError("unsafe model search timeout must be rejected")
-        checks += 16
+        checks += 20
 
         cross_capability = WEB.build_model_decisions(
             ["chat-only:1b"],
