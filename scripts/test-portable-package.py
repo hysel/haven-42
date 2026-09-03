@@ -256,8 +256,18 @@ def probe(
             assert isinstance(alpha_plan["managedSetupRuntimeAdmitted"], bool)
             if expected_version == "0.4.0-alpha.2" and automatic_allowed:
                 compatibility = alpha_plan["runtimeCompatibility"]
-                assert isinstance(compatibility, dict)
-                assert runtime_admitted is (compatibility.get("decision") == "install")
+                if bootstrap["runtime"]["platform"] in {"windows", "linux"}:
+                    assert isinstance(compatibility, dict)
+                    assert runtime_admitted is (
+                        compatibility.get("decision") == "install"
+                    )
+                else:
+                    # macOS recommends a model for the detected hardware, but
+                    # deliberately uses the separately installed Ollama app
+                    # instead of Haven 42's managed runtime-install path.
+                    assert bootstrap["runtime"]["platform"] == "darwin"
+                    assert compatibility is None
+                    assert runtime_admitted is False
             managed = alpha_plan.get("managedPlan")
             expected_managed = (
                 bootstrap["runtime"]["platform"] in {"windows", "linux"}
