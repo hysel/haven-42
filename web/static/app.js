@@ -1098,6 +1098,7 @@ function humanError(error) {
     "invalid-model-install-preparation": "Haven 42 could not verify the model-download review, so nothing was downloaded.",
     "invalid-model-install-result": "Haven 42 could not verify the completed model download, so it was not selected.",
     "guided-default-model-install-failed": "The recommended model could not be downloaded and verified. No different model was selected.",
+    "guided-default-model-unavailable": "Haven 42 could not identify a tested default model for this computer, so setup did not finish without a usable model.",
     "research-query-size": "Enter between 1 and 256 characters to research.",
     "research-query-active-content": "Remove markup or control characters from the research words.",
     "research-query-credential-like": "Remove passwords, tokens, or API-key-like text before researching.",
@@ -1621,11 +1622,9 @@ async function executeModelInstall() {
     renderModelDiscovery();
     byId("model-choice-status").textContent = `${installedName} is installed and selected for every supported text task.`;
     byId("model-search-status").textContent = `${installedName} was downloaded and verified by your Ollama server.`;
-    if (state.modelInstallReturnToChat) {
-      state.modelInstallReturnToChat = false;
-      openChat();
-      byId("text-status").textContent = `${installedName} is installed, selected, and ready.`;
-    }
+    state.modelInstallReturnToChat = false;
+    openChat();
+    byId("text-status").textContent = `${installedName} is installed, selected, and ready.`;
     return true;
   } catch (error) {
     byId("model-install-status").textContent = humanError(error);
@@ -1640,13 +1639,21 @@ async function executeModelInstall() {
 }
 
 async function offerRecommendedModelDuringSetup(setupApprovalIncludesModel = false) {
-  const candidate = state.qualifiedModelCandidates.find((item) => (
-    item.recommended === true
-    && !state.modelOptions.some((installed) => installed.name === item.name)
-  ));
+  const candidate = state.qualifiedModelCandidates.find((item) => item.recommended === true);
   if (!candidate) return false;
   state.modelInstallReturnToChat = true;
   byId("setup-wizard").classList.add("hidden");
+  const installed = state.modelOptions.find((item) => item.name === candidate.name);
+  if (installed) {
+    assignModelToSupportedCapabilities(installed, "general.chat");
+    state.desiredModel = null;
+    state.modelInstallReturnToChat = false;
+    renderModelSelect();
+    renderModelDiscovery();
+    openChat();
+    byId("text-status").textContent = `${installed.name} is selected and ready.`;
+    return true;
+  }
   openModels();
   chooseDiscoveredModel({
     ...candidate,
@@ -2827,9 +2834,7 @@ async function runMacOSInstalledOllamaSetup(
       byId("wizard-scan-status").textContent = "The best tested model for this Mac was downloaded if needed, verified, selected, and is ready for chat.";
       return;
     }
-    renderWizardReadiness();
-    showWizardStep("ready");
-    byId("wizard-scan-status").textContent = "The verified local AI is connected. No app or model was downloaded.";
+    throw new Error("guided-default-model-unavailable");
   } catch (error) {
     const message = `Local AI startup stopped safely. ${humanError(error)}`;
     actionStatus.textContent = message;
@@ -6205,6 +6210,12 @@ byId("wizard-readiness-back").addEventListener("click", () => {
 });
 byId("wizard-readiness-next").addEventListener("click", async () => {
   if (state.connected) {
+    if (await offerRecommendedModelDuringSetup()) return;
+    const usable = Object.keys(CAPABILITIES).some((capabilityId) => Boolean(selectedModel(capabilityId)));
+    if (!usable) {
+      byId("wizard-scan-status").textContent = humanError(new Error("guided-default-model-unavailable"));
+      return;
+    }
     byId("setup-wizard").classList.add("hidden");
     openChat();
     return;

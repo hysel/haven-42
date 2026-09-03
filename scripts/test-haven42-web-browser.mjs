@@ -2022,6 +2022,9 @@ try {
   await waitFor(() => cdp.evaluate("document.querySelector('#desired-model').classList.contains('hidden')"));
   const installedCandidate = await cdp.evaluate(`({
     selected: document.querySelector('#model').value,
+    chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+    chatStatus: document.querySelector('#text-status').textContent,
+    returnFlagCleared: state.modelInstallReturnToChat === false,
     selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
       state.modelSelections[capabilityId]?.mode === 'manual'
       && state.modelSelections[capabilityId]?.model === 'candidate-writing:7b'
@@ -2035,6 +2038,9 @@ try {
   })`);
   if (
     installedCandidate.selected !== "manual:candidate-writing:7b"
+    || !installedCandidate.chatVisible
+    || !installedCandidate.chatStatus.includes("installed, selected, and ready")
+    || !installedCandidate.returnFlagCleared
     || !installedCandidate.selectedForEveryTextTask
     || !installedCandidate.status.includes("downloaded and verified")
     || !installedCandidate.reviewHidden
@@ -2043,7 +2049,7 @@ try {
     || !installedCandidate.queryEnabled
     || !installedCandidate.capabilityEnabled
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
-  checks += 32;
+  checks += 35;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
@@ -3844,6 +3850,48 @@ try {
   ) throw new Error(`guided-default-model-install:${JSON.stringify(guidedDefaultInstall)}`);
   checks += 13;
   trace("guided-default-model-install-verified");
+  const guidedInstalledDefault = await cdp.evaluate(`(() => {
+    const model = 'qwen3.5:4b';
+    state.modelOptions = [{
+      name: model, digestVerified: true,
+      capabilityStatus: Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated'])
+      )
+    }];
+    state.modelSelections = Object.fromEntries(
+      Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+    );
+    state.qualifiedModelCandidates = [{
+      name: model, automatic: true, recommended: true, downloadRequiresApproval: true,
+      hardwareFit: 'matched-tested-hardware-profile', profileId: 'macos-apple-m4-16gib',
+      minimumOllamaVersion: '0.32.15',
+      capabilityStatus: Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+      )
+    }];
+    document.querySelector('#setup-wizard').classList.remove('hidden');
+    return offerRecommendedModelDuringSetup(true).then((offered) => ({
+      offered,
+      wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+      chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+      selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
+        state.modelSelections[capabilityId]?.mode === 'manual'
+        && state.modelSelections[capabilityId]?.model === model
+      )),
+      status: document.querySelector('#text-status').textContent,
+      returnFlagCleared: state.modelInstallReturnToChat === false,
+    }));
+  })()`);
+  if (
+    !guidedInstalledDefault.offered
+    || !guidedInstalledDefault.wizardHidden
+    || !guidedInstalledDefault.chatVisible
+    || !guidedInstalledDefault.selectedForEveryTextTask
+    || !guidedInstalledDefault.status.includes('selected and ready')
+    || !guidedInstalledDefault.returnFlagCleared
+  ) throw new Error(`guided-installed-default:${JSON.stringify(guidedInstalledDefault)}`);
+  checks += 6;
+  trace("guided-installed-default-verified");
   await cdp.evaluate(`(() => {
     state.qualifiedModelCandidates = [];
     renderModelSelect();
