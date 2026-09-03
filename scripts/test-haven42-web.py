@@ -640,6 +640,8 @@ def main() -> int:
     assert last_browser_closed.wait(1)
     browser_lifecycle.close()
     checks += 4
+    assert WEB.HavenWebServer.allow_reuse_address is True
+    checks += 1
     state = WEB.HavenState(
         readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)),
         model_catalog_provider=lambda query: [

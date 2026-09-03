@@ -1097,6 +1097,7 @@ function humanError(error) {
     "ollama-model-install-verification-failed": "Ollama finished the request but did not list the model afterward, so Haven 42 did not select it.",
     "invalid-model-install-preparation": "Haven 42 could not verify the model-download review, so nothing was downloaded.",
     "invalid-model-install-result": "Haven 42 could not verify the completed model download, so it was not selected.",
+    "guided-default-model-install-failed": "The recommended model could not be downloaded and verified. No different model was selected.",
     "research-query-size": "Enter between 1 and 256 characters to research.",
     "research-query-active-content": "Remove markup or control characters from the research words.",
     "research-query-credential-like": "Remove passwords, tokens, or API-key-like text before researching.",
@@ -1532,7 +1533,7 @@ async function monitorModelInstallProgress(progressToken, model) {
   throw new Error("model-install-progress-timeout");
 }
 
-async function prepareModelInstall() {
+async function prepareModelInstall(reviewRequired = true) {
   const model = state.desiredModel?.name;
   if (!model) return false;
   const button = byId("install-model-button");
@@ -1544,13 +1545,15 @@ async function prepareModelInstall() {
       model,
     );
     state.pendingModelInstall = { ...preparation, returnFocus: button };
-    byId("model-install-review-name").textContent = preparation.model;
-    byId("model-install-review-destination").textContent = preparation.destination;
-    byId("model-install-review-status").textContent = "Nothing has been downloaded.";
-    document.querySelector(".shell").inert = true;
-    byId("model-install-review-layer").classList.remove("hidden");
-    byId("model-install-review-layer").setAttribute("aria-hidden", "false");
-    byId("model-install-review-dialog").focus({ preventScroll: true });
+    if (reviewRequired) {
+      byId("model-install-review-name").textContent = preparation.model;
+      byId("model-install-review-destination").textContent = preparation.destination;
+      byId("model-install-review-status").textContent = "Nothing has been downloaded.";
+      document.querySelector(".shell").inert = true;
+      byId("model-install-review-layer").classList.remove("hidden");
+      byId("model-install-review-layer").setAttribute("aria-hidden", "false");
+      byId("model-install-review-dialog").focus({ preventScroll: true });
+    }
     return true;
   } catch (error) {
     byId("model-install-status").textContent = humanError(error);
@@ -1561,7 +1564,7 @@ async function prepareModelInstall() {
 
 async function executeModelInstall() {
   const pending = state.pendingModelInstall;
-  if (!pending) return;
+  if (!pending) return false;
   const model = pending.model;
   const token = pending.approvalToken;
   state.activeModelInstall = { model, token };
@@ -1623,8 +1626,10 @@ async function executeModelInstall() {
       openChat();
       byId("text-status").textContent = `${installedName} is installed, selected, and ready.`;
     }
+    return true;
   } catch (error) {
     byId("model-install-status").textContent = humanError(error);
+    return false;
   } finally {
     state.activeModelInstall = null;
     setModelInstallActivity(false);
@@ -1634,7 +1639,7 @@ async function executeModelInstall() {
   }
 }
 
-async function offerRecommendedModelDuringSetup() {
+async function offerRecommendedModelDuringSetup(setupApprovalIncludesModel = false) {
   const candidate = state.qualifiedModelCandidates.find((item) => (
     item.recommended === true
     && !state.modelOptions.some((installed) => installed.name === item.name)
@@ -1649,9 +1654,11 @@ async function offerRecommendedModelDuringSetup() {
     validationStatus: "validated-on-matching-hardware",
     installCommand: `ollama pull ${candidate.name}`,
   });
-  const prepared = await prepareModelInstall();
+  const prepared = await prepareModelInstall(!setupApprovalIncludesModel);
   if (!prepared) state.modelInstallReturnToChat = false;
-  return prepared;
+  if (!prepared || !setupApprovalIncludesModel) return prepared;
+  if (!await executeModelInstall()) throw new Error("guided-default-model-install-failed");
+  return true;
 }
 
 function updateModelChoiceStatus() {
@@ -2414,7 +2421,9 @@ function renderSetupPlan(plan) {
   const macosRuntimePlan = macosRuntime?.available === true ? macosRuntime.plan : null;
   const cpuCompatibilityMode = managed?.backendMode === "cpu";
   fit.textContent = macosRuntimePlan
-    ? `Haven 42 verified official Ollama ${macosRuntimePlan.version} on this Mac. Review the version warning and startup effects below. Haven 42 will check the available models after the local AI engine connects.`
+    ? alphaModel
+      ? `Haven 42 verified official Ollama ${macosRuntimePlan.version} on this Mac and selected ${alphaModel} as the best tested model for this hardware. One approval starts the engine, downloads that model if needed, verifies it, and selects it for chat.`
+      : `Haven 42 verified official Ollama ${macosRuntimePlan.version} on this Mac. Review the version warning and startup effects below. Haven 42 will check the available models after the local AI engine connects.`
     : alphaModel
     ? automaticAllowed
       ? cpuCompatibilityMode
@@ -2448,7 +2457,9 @@ function renderSetupPlan(plan) {
     if (macosRuntimePlan && action.componentId === "ollama") {
       stateLabel.textContent = `Installed · ${macosRuntimePlan.version} · approval required`;
     } else if (macosRuntimePlan && action.componentId === "ollama-model-qwen35-9b") {
-      stateLabel.textContent = "Checked after local AI starts";
+      stateLabel.textContent = alphaModel
+        ? `${alphaModel} · downloaded under this setup approval if missing`
+        : "Checked after local AI starts";
     } else {
       stateLabel.textContent = action.state === "already-available" ? "Already available" : "Needed for this setup";
     }
@@ -2677,8 +2688,8 @@ function renderSetupPlan(plan) {
     disclosure.textContent = macosExternalSetup
       ? macosRuntimePlan
         ? macosRuntimePlan.versionStatus === "newer-unverified"
-          ? `Haven 42 verified official Ollama ${macosRuntimePlan.version} in Applications. This is newer than the certified macOS version ${macosRuntimePlan.certifiedVersion}, so Haven 42 has not completed compatibility testing for it. You can continue after reviewing and approving the warning below. This step starts Ollama without downloading an app or model; if a model is needed, Haven 42 will choose the best tested fit for this Mac and ask separately before downloading it.`
-          : `Haven 42 found Ollama ${macosRuntimePlan.version} in Applications and verified its publisher with macOS. It can start the local engine after you review and approve the exact effects below. This step does not download an app or model; if a model is needed, Haven 42 will choose the best tested fit for this Mac and ask separately before downloading it.`
+          ? `Haven 42 verified official Ollama ${macosRuntimePlan.version} in Applications. This is newer than the certified macOS version ${macosRuntimePlan.certifiedVersion}, so Haven 42 has not completed compatibility testing for it. You can continue after reviewing and approving the warning below. Haven 42 will start Ollama and, when ${alphaModel || "a tested model"} is not already installed, download and verify that hardware-matched default under the same approval.`
+          : `Haven 42 found Ollama ${macosRuntimePlan.version} in Applications and verified its publisher with macOS. After you approve the exact effects below, Haven 42 will start Ollama and, when ${alphaModel || "a tested model"} is not already installed, download and verify that hardware-matched default under the same approval.`
         : "Haven 42 did not find an official Ollama app it could verify in Applications. Install Ollama from its official macOS download, then return here and check this computer again. Haven 42 will not use Terminal or change system settings."
       : runtimeCompatibility?.decision === "deny"
       ? `This model fits the computer, but Haven 42 does not have an approved ${runtimeCompatibility.engine || "local AI engine"} version for it on this operating system. Setup stopped before downloading anything. Technical reason: ${runtimeCompatibility.reason || "no-compatible-runtime"}.`
@@ -2701,13 +2712,20 @@ function renderSetupPlan(plan) {
         item.textContent = effect;
         approvalEffects.append(item);
       }
+      if (alphaModel) {
+        const modelEffect = document.createElement("li");
+        modelEffect.textContent = `Download ${alphaModel} from the connected Ollama catalog if it is missing, verify it, and select it for chat, writing, and summaries.`;
+        approvalEffects.append(modelEffect);
+      }
       const consentRow = document.createElement("label");
       consentRow.className = "setup-consent";
       const consent = document.createElement("input");
       consent.type = "checkbox";
       consent.autocomplete = "off";
       const consentText = document.createElement("span");
-      consentText.textContent = "I understand and allow Haven 42 to start this verified local AI now.";
+      consentText.textContent = alphaModel
+        ? `I understand and allow Haven 42 to start this verified local AI and prepare ${alphaModel} for chat now.`
+        : "I understand and allow Haven 42 to start this verified local AI now.";
       consentRow.append(consent, consentText);
       const approvalActions = document.createElement("div");
       approvalActions.className = "wizard-actions";
@@ -2805,8 +2823,8 @@ async function runMacOSInstalledOllamaSetup(
     actionStatus.textContent = "Local AI started and connected.";
     approvalPanel.classList.add("hidden");
     approvalPanel.setAttribute("aria-hidden", "true");
-    if (await offerRecommendedModelDuringSetup()) {
-      byId("wizard-scan-status").textContent = "Haven 42 selected the best tested model for this Mac. Review and approve its download; it will be selected automatically when verification finishes.";
+    if (await offerRecommendedModelDuringSetup(true)) {
+      byId("wizard-scan-status").textContent = "The best tested model for this Mac was downloaded if needed, verified, selected, and is ready for chat.";
       return;
     }
     renderWizardReadiness();

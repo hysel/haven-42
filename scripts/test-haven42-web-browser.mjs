@@ -659,18 +659,17 @@ try {
     !macosInstalledPresentation.explanation.includes('verified official Ollama 0.33.2 in Applications')
     || !macosInstalledPresentation.explanation.includes('newer than the certified macOS version 0.32.15')
     || !macosInstalledPresentation.explanation.includes('You can continue after reviewing and approving')
-    || !macosInstalledPresentation.explanation.includes('This step starts Ollama without downloading an app or model')
-    || !macosInstalledPresentation.explanation.includes('choose the best tested fit for this Mac and ask separately before downloading it')
+    || !macosInstalledPresentation.explanation.includes('download and verify that hardware-matched default under the same approval')
     || !macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Installed · 0.33.2 · approval required')
-    || !macosInstalledPresentation.explanation.includes('Recommended AI modelChecked after local AI starts')
+    || !macosInstalledPresentation.explanation.includes('Recommended AI modelqwen3.5:9b · downloaded under this setup approval if missing')
     || macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Needed for this setup')
     || macosInstalledPresentation.reviewText !== 'Review and start local AI'
     || macosInstalledPresentation.duplicateReviewCount !== 0
     || !macosInstalledPresentation.approvalVisible
     || macosInstalledPresentation.approvalAriaHidden !== 'false'
     || macosInstalledPresentation.approvalLabelledBy !== 'macos-installed-ollama-approval-title'
-    || macosInstalledPresentation.effectCount !== 4
-    || !macosInstalledPresentation.consentText.includes('allow Haven 42 to start')
+    || macosInstalledPresentation.effectCount !== 5
+    || !macosInstalledPresentation.consentText.includes('prepare qwen3.5:9b for chat now')
     || !macosInstalledPresentation.consentFocused
     || !macosInstalledPresentation.actionStatus.includes('Nothing has started')
     || !macosInstalledPresentation.approveDisabled
@@ -3805,17 +3804,14 @@ try {
         };
         throw new Error('unexpected-guided-default-api:' + path);
       };
-      const offered = await offerRecommendedModelDuringSetup();
+      const offered = await offerRecommendedModelDuringSetup(true);
       const review = {
         offered,
         wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
         modelsVisible: !document.querySelector('#models-panel').classList.contains('hidden'),
         desired: document.querySelector('#desired-model-name').textContent,
         approvalVisible: !document.querySelector('#model-install-review-layer').classList.contains('hidden'),
-        approvalModel: document.querySelector('#model-install-review-name').textContent,
-        destination: document.querySelector('#model-install-review-destination').textContent,
       };
-      await executeModelInstall();
       result = {
         review,
         chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
@@ -3836,11 +3832,9 @@ try {
   if (
     !guidedDefaultInstall.review.offered
     || !guidedDefaultInstall.review.wizardHidden
-    || !guidedDefaultInstall.review.modelsVisible
+    || guidedDefaultInstall.review.modelsVisible
     || guidedDefaultInstall.review.desired !== 'qwen3.5:4b'
-    || !guidedDefaultInstall.review.approvalVisible
-    || guidedDefaultInstall.review.approvalModel !== 'qwen3.5:4b'
-    || guidedDefaultInstall.review.destination !== 'This computer'
+    || guidedDefaultInstall.review.approvalVisible
     || !guidedDefaultInstall.chatVisible
     || guidedDefaultInstall.selected !== 'manual:qwen3.5:4b'
     || !guidedDefaultInstall.selectedForEveryTextTask

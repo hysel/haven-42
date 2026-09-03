@@ -3938,7 +3938,9 @@ class HavenState:
 
 class HavenWebServer(ThreadingHTTPServer):
     daemon_threads = True
-    allow_reuse_address = False
+    # A cleanly closed desktop session must be able to bind the same loopback
+    # address immediately instead of waiting for retired TCP connections.
+    allow_reuse_address = True
     request_queue_size = 32
 
     def __init__(self, address: tuple[str, int], state: HavenState):
@@ -4862,6 +4864,26 @@ def _request_process_shutdown(_signum: int, _frame: Any) -> None:
     raise KeyboardInterrupt
 
 
+def existing_haven42_instance(url: str) -> bool:
+    """Return true only when the requested loopback URL is this Haven 42 build."""
+    try:
+        request = urllib.request.Request(
+            f"{url}/api/bootstrap",
+            headers={"Accept": "application/json"},
+            method="GET",
+        )
+        value = json.loads(read_bounded(request, 1, MAX_JSON_RESPONSE_BYTES).decode("utf-8"))
+    except (OSError, ValueError, json.JSONDecodeError, ProviderSecurityError):
+        return False
+    return (
+        isinstance(value, dict)
+        and value.get("schemaVersion") == 1
+        and value.get("kind") == "haven42-web-status"
+        and value.get("product") == "Haven 42"
+        and value.get("version") == APP_VERSION
+    )
+
+
 def main() -> int:
     args = build_parser().parse_args()
     if args.host != "127.0.0.1":
@@ -4870,11 +4892,22 @@ def main() -> int:
     if args.port < 0 or args.port > 65535:
         print("Port must be from 0 through 65535.", file=sys.stderr)
         return 2
+    requested_url = f"http://127.0.0.1:{args.port}"
+    if args.port and existing_haven42_instance(requested_url):
+        print(f"Haven 42 is already running at {requested_url}", flush=True)
+        if not args.no_open:
+            open_browser_or_report(requested_url)
+        return 0
     state = HavenState()
     try:
         server = HavenWebServer((args.host, args.port), state)
     except OSError as error:
         state.diagnostics.close()
+        if args.port and existing_haven42_instance(requested_url):
+            print(f"Haven 42 is already running at {requested_url}", flush=True)
+            if not args.no_open:
+                open_browser_or_report(requested_url)
+            return 0
         print(f"Could not start Haven 42 local web server: {error}", file=sys.stderr)
         return 1
     for signal_name in ("SIGTERM", "SIGHUP"):

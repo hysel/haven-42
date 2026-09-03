@@ -579,6 +579,26 @@ def test_port_collision(command: list[str]) -> None:
         listener.close()
 
 
+def test_existing_instance_reopen(executable: Path) -> None:
+    process, origin = launch([str(executable)], executable.parent)
+    port = urllib.parse.urlsplit(origin).port
+    assert port is not None
+    try:
+        result = subprocess.run(
+            [str(executable), "--port", str(port), "--no-open"],
+            cwd=executable.parent,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        assert result.returncode == 0
+        assert f"Haven 42 is already running at {origin}" in (result.stdout + result.stderr)
+        with urllib.request.urlopen(origin + "/api/bootstrap", timeout=5) as response:
+            assert json.load(response)["kind"] == "haven42-web-status"
+    finally:
+        terminate(process)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", required=True)
@@ -611,6 +631,7 @@ def main() -> int:
     )
     test_read_only_package(executable, packaged, args.expected_version)
     test_abrupt_exit_recovery(executable, packaged, args.expected_version)
+    test_existing_instance_reopen(executable)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
     remove_test_diagnostics(executable.parent)
