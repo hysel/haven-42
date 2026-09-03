@@ -13,13 +13,13 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "716c2f664a10ead7ad61d85f8a386d6c995382b47f823e50aa5c0966969e4bc5",
-      "sizeBytes": 312699
+      "sha256": "05e2e7d0a543a10e9ec335c9ac1bd33210be90dae86a5c3ae9102410e8dfdf47",
+      "sizeBytes": 321126
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "9560fcf5dd27d7f7443ceab720b0fa09427104eb5c8f6ff581f154033d98cd47",
-      "sizeBytes": 88048
+      "sha256": "df103f82c22d944336d32fcd4b6b2070406a0ccfd133bfb429717188743397a4",
+      "sizeBytes": 88184
     },
     {
       "path": "config/text-capability-model-recommendations.json",

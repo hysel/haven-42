@@ -182,7 +182,9 @@ const state = {
   providerConfig: null,
   capabilities: [],
   readinessSnapshot: null,
+  readinessRequestId: 0,
   setupPlan: null,
+  setupOperationActive: false,
   workflows: [],
   assurance: null,
   imageConnected: false,
@@ -204,6 +206,7 @@ const state = {
   pendingModelInstall: null,
   activeModelInstall: null,
   modelInstallReturnToChat: false,
+  defaultModelOfferPending: false,
 };
 
 const byId = (id) => document.getElementById(id);
@@ -1385,7 +1388,9 @@ function chooseDiscoveredModel(item) {
   if (item.status !== "installed") {
     window.setTimeout(() => {
       const review = byId("desired-model");
-      review.scrollIntoView({ behavior: motionBehavior(), block: "center" });
+      // The next action must be stationary before it becomes clickable. A
+      // smooth scroll can leave the button moving under a real pointer.
+      review.scrollIntoView({ behavior: "auto", block: "center" });
       byId("install-model-button").focus({ preventScroll: true });
     }, 0);
   }
@@ -1534,6 +1539,102 @@ async function monitorModelInstallProgress(progressToken, model) {
   throw new Error("model-install-progress-timeout");
 }
 
+function validateActiveModelInstall(result) {
+  if (
+    !result || result.schemaVersion !== 1
+    || result.kind !== "model-install-activity"
+    || !["active", "inactive"].includes(result.activityStatus)
+  ) throw new Error("invalid-model-install-activity");
+  if (result.activityStatus === "inactive") {
+    if (!hasExactObjectKeys(result, ["activityStatus", "kind", "schemaVersion"])) {
+      throw new Error("invalid-model-install-activity");
+    }
+    return result;
+  }
+  if (
+    !/^[0-9a-f]{32}$/u.test(result.progressToken)
+    || !hasExactObjectKeys(result, [
+      "completedBytes", "kind", "model", "phase", "progressPercent", "progressToken",
+      "schemaVersion", "status", "terminal", "totalBytes", "activityStatus",
+    ])
+  ) throw new Error("invalid-model-install-activity");
+  const progress = validateModelInstallProgress({
+    schemaVersion: result.schemaVersion,
+    kind: "model-install-progress",
+    model: result.model,
+    phase: result.phase,
+    progressPercent: result.progressPercent,
+    completedBytes: result.completedBytes,
+    totalBytes: result.totalBytes,
+    status: result.status,
+    terminal: result.terminal,
+  }, result.model);
+  return { ...progress, activityStatus: "active", progressToken: result.progressToken };
+}
+
+function installedModelOptionForRequest(requestedModel) {
+  const leaf = requestedModel.split("/").at(-1) || "";
+  const acceptedNames = leaf.includes(":")
+    ? [requestedModel]
+    : [requestedModel, `${requestedModel}:latest`];
+  return state.modelOptions.find((option) => acceptedNames.includes(option.name)) || null;
+}
+
+async function finishRecoveredModelInstall(activity) {
+  const button = byId("install-model-button");
+  try {
+    const progress = await monitorModelInstallProgress(activity.progressToken, activity.model);
+    if (!progress || progress.phase !== "complete") {
+      throw new Error("ollama-model-install-failed");
+    }
+    const refreshed = await api("/api/resume-provider", {});
+    if (
+      refreshed.sessionResume !== true
+      || refreshed.configurationPersisted !== false
+      || typeof refreshed.endpoint !== "string"
+    ) throw new Error("invalid-provider-session-resume");
+    applyProviderConnection(
+      refreshed, refreshed.endpoint, refreshed.timeoutSeconds,
+      refreshed.idleUnloadSeconds, false,
+    );
+    const installed = installedModelOptionForRequest(activity.model);
+    if (!installed) throw new Error("ollama-model-install-verification-failed");
+    assignModelToSupportedCapabilities(installed, "general.chat");
+    state.desiredModel = null;
+    renderModelSelect();
+    renderModelDiscovery();
+    byId("model-choice-status").textContent = `${installed.name} finished downloading and is selected for every supported text task.`;
+    byId("model-search-status").textContent = `${installed.name} was downloaded and verified by your Ollama server.`;
+    openChat();
+    byId("text-status").textContent = `${installed.name} is installed, selected, and ready.`;
+  } catch (error) {
+    byId("model-install-status").textContent = `The interrupted download could not be resumed. ${humanError(error)}`;
+  } finally {
+    state.activeModelInstall = null;
+    setModelInstallActivity(false);
+    button.disabled = false;
+    button.textContent = "Review and install model";
+    renderModelDiscovery();
+  }
+}
+
+async function resumeActiveModelInstall() {
+  const activity = validateActiveModelInstall(await api("/api/model-install/active", {}));
+  if (activity.activityStatus !== "active") return false;
+  state.activeModelInstall = { model: activity.model, token: activity.progressToken };
+  byId("setup-wizard").classList.add("hidden");
+  openModels();
+  setModelInstallActivity(true);
+  const button = byId("install-model-button");
+  button.disabled = true;
+  button.textContent = "Downloading…";
+  byId("model-install-status").textContent = `${activity.model} is still downloading. Haven 42 reconnected to its progress after the page was refreshed.`;
+  renderModelInstallProgress(activity);
+  renderModelDiscovery();
+  void finishRecoveredModelInstall(activity);
+  return true;
+}
+
 async function prepareModelInstall(reviewRequired = true) {
   const model = state.desiredModel?.name;
   if (!model) return false;
@@ -1639,33 +1740,45 @@ async function executeModelInstall() {
 }
 
 async function offerRecommendedModelDuringSetup(setupApprovalIncludesModel = false) {
+  if (state.defaultModelOfferPending) return true;
   const candidate = state.qualifiedModelCandidates.find((item) => item.recommended === true);
   if (!candidate) return false;
+  state.defaultModelOfferPending = true;
   state.modelInstallReturnToChat = true;
-  byId("setup-wizard").classList.add("hidden");
-  const installed = state.modelOptions.find((item) => item.name === candidate.name);
-  if (installed) {
-    assignModelToSupportedCapabilities(installed, "general.chat");
-    state.desiredModel = null;
-    state.modelInstallReturnToChat = false;
-    renderModelSelect();
-    renderModelDiscovery();
-    openChat();
-    byId("text-status").textContent = `${installed.name} is selected and ready.`;
+  try {
+    byId("setup-wizard").classList.add("hidden");
+    const installed = state.modelOptions.find((item) => item.name === candidate.name);
+    if (installed) {
+      assignModelToSupportedCapabilities(installed, "general.chat");
+      state.desiredModel = null;
+      state.modelInstallReturnToChat = false;
+      renderModelSelect();
+      renderModelDiscovery();
+      openChat();
+      byId("text-status").textContent = `${installed.name} is selected and ready.`;
+      return true;
+    }
+    openModels();
+    chooseDiscoveredModel({
+      ...candidate,
+      status: "not-installed",
+      validationStatus: "validated-on-matching-hardware",
+      installCommand: `ollama pull ${candidate.name}`,
+    });
+    const prepared = await prepareModelInstall(!setupApprovalIncludesModel);
+    if (!prepared) {
+      state.modelInstallReturnToChat = false;
+      byId("setup-wizard").classList.remove("hidden");
+      showWizardStep("readiness");
+      byId("wizard-scan-status").textContent = "The recommended model review could not be prepared. Nothing was downloaded. Check this computer again, then retry.";
+      return false;
+    }
+    if (!setupApprovalIncludesModel) return true;
+    if (!await executeModelInstall()) throw new Error("guided-default-model-install-failed");
     return true;
+  } finally {
+    state.defaultModelOfferPending = false;
   }
-  openModels();
-  chooseDiscoveredModel({
-    ...candidate,
-    status: "not-installed",
-    validationStatus: "validated-on-matching-hardware",
-    installCommand: `ollama pull ${candidate.name}`,
-  });
-  const prepared = await prepareModelInstall(!setupApprovalIncludesModel);
-  if (!prepared) state.modelInstallReturnToChat = false;
-  if (!prepared || !setupApprovalIncludesModel) return prepared;
-  if (!await executeModelInstall()) throw new Error("guided-default-model-install-failed");
-  return true;
 }
 
 function updateModelChoiceStatus() {
@@ -1774,14 +1887,19 @@ function renderModelDiscovery() {
     merged.set(item.name, existing ? { ...existing, ...item, status: "installed", installCommand: null } : item);
   });
   state.qualifiedModelCandidates.forEach((item) => {
-    if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) {
-      merged.set(item.name, {
-        ...item,
-        status: "not-installed",
-        validationStatus: "validated-on-matching-hardware",
-        installCommand: `ollama pull ${item.name}`,
-      });
-    }
+    if (!modelMatchesQuery(item.name, query)) return;
+    const existing = merged.get(item.name);
+    merged.set(item.name, existing ? {
+      ...existing,
+      recommended: item.recommended,
+      hardwareFit: item.hardwareFit,
+      profileId: item.profileId,
+    } : {
+      ...item,
+      status: "not-installed",
+      validationStatus: "validated-on-matching-hardware",
+      installCommand: `ollama pull ${item.name}`,
+    });
   });
   state.modelSearchResults.forEach((item) => {
     if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) merged.set(item.name, item);
@@ -2623,6 +2741,7 @@ function renderSetupPlan(plan) {
     const approvalPanel = document.createElement("section");
     approvalPanel.id = "alpha-setup-approval";
     approvalPanel.className = "setup-approval hidden";
+    approvalPanel.setAttribute("aria-hidden", "true");
     approvalPanel.setAttribute("aria-labelledby", "alpha-setup-approval-title");
     const approvalTitle = document.createElement("strong");
     approvalTitle.id = "alpha-setup-approval-title";
@@ -2669,13 +2788,13 @@ function renderSetupPlan(plan) {
         await retryManagedAlphaSetup(automatic, progress);
         return;
       }
-      approvalPanel.classList.remove("hidden");
-      consent.focus();
+      revealInlineApproval(approvalPanel, consent);
     });
     cancelApproval.addEventListener("click", () => {
       consent.checked = false;
       approve.disabled = true;
       approvalPanel.classList.add("hidden");
+      approvalPanel.setAttribute("aria-hidden", "true");
       automatic.focus();
     });
     approve.addEventListener("click", () => (
@@ -2727,6 +2846,7 @@ function renderSetupPlan(plan) {
       const consentRow = document.createElement("label");
       consentRow.className = "setup-consent";
       const consent = document.createElement("input");
+      consent.id = "macos-installed-ollama-consent";
       consent.type = "checkbox";
       consent.autocomplete = "off";
       const consentText = document.createElement("span");
@@ -2790,12 +2910,20 @@ function renderSetupPlan(plan) {
   }
 }
 
-function revealMacOSInstalledOllamaApproval(approvalPanel, consent, actionStatus) {
+function revealInlineApproval(approvalPanel, consent) {
   approvalPanel.classList.remove("hidden");
   approvalPanel.setAttribute("aria-hidden", "false");
+  // Keep the approval target stationary before returning control to the user.
+  // A browser can otherwise continue scrolling after focus moves, causing the
+  // first pointer click to land on whatever moved under the cursor. This is
+  // shared by Windows, Linux, and macOS setup approval surfaces.
+  approvalPanel.scrollIntoView({ behavior: "auto", block: "center" });
+  consent.focus({ preventScroll: true });
+}
+
+function revealMacOSInstalledOllamaApproval(approvalPanel, consent, actionStatus) {
   actionStatus.textContent = "Nothing has started. Review the effects and confirm below.";
-  approvalPanel.scrollIntoView({ behavior: motionBehavior(), block: "center" });
-  consent.focus();
+  revealInlineApproval(approvalPanel, consent);
 }
 
 async function runMacOSInstalledOllamaSetup(
@@ -2805,6 +2933,7 @@ async function runMacOSInstalledOllamaSetup(
   approve.disabled = true;
   approve.textContent = "Starting local AI…";
   review.disabled = true;
+  state.setupOperationActive = true;
   actionStatus.textContent = "Verifying the installed Ollama app and starting local AI…";
   byId("wizard-scan-status").textContent = "Verifying and starting the installed Ollama app…";
   try {
@@ -2843,6 +2972,7 @@ async function runMacOSInstalledOllamaSetup(
     approve.disabled = !consent.checked;
     approve.textContent = "Approve and try again";
   } finally {
+    state.setupOperationActive = false;
     await refreshDiagnosticsQuietly();
   }
 }
@@ -2942,7 +3072,9 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
   if (!managed || button.disabled || !consent.checked) return;
   button.disabled = true;
   reviewButton.disabled = true;
+  state.setupOperationActive = true;
   approvalPanel.classList.add("hidden");
+  approvalPanel.setAttribute("aria-hidden", "true");
   const progress = byId("alpha-setup-progress");
   progress.textContent = "Recording your one-time approval…";
   try {
@@ -2984,6 +3116,7 @@ async function runManagedAlphaSetup(plan, button, consent, approvalPanel, review
   } catch (error) {
     progress.textContent = `Setup stopped safely · ${humanError(error)}`;
   } finally {
+    state.setupOperationActive = false;
     consent.checked = false;
     button.disabled = true;
     reviewButton.disabled = false;
@@ -3004,6 +3137,7 @@ function updateReadinessNextControl(managedSetupAvailable, macosRuntimeAvailable
 }
 
 async function runReadiness() {
+  const requestId = ++state.readinessRequestId;
   showWizardStep("readiness");
   const platformLabel = state.platformFamily === "linux"
     ? "Linux"
@@ -3014,6 +3148,7 @@ async function runReadiness() {
   byId("wizard-readiness-next").disabled = true;
   try {
     const snapshot = await api("/api/readiness", { force: true });
+    if (requestId !== state.readinessRequestId) return;
     state.readinessSnapshot = snapshot;
     renderSystemReadiness("wizard-system-readiness", snapshot);
     renderSystemReadiness("system-readiness", snapshot);
@@ -3021,6 +3156,7 @@ async function runReadiness() {
       snapshotId: snapshot.snapshotId,
       intent: "guided-setup",
     });
+    if (requestId !== state.readinessRequestId) return;
     state.setupPlan = plan;
     renderSetupPlan(plan);
     byId("wizard-scan-status").textContent = "Check complete. Nothing was installed, downloaded, or saved.";
@@ -3034,9 +3170,11 @@ async function runReadiness() {
     );
     updateReadinessNextControl(managedSetupAvailable, macosRuntimeAvailable);
   } catch (error) {
-    byId("wizard-scan-status").textContent = humanError(error);
+    if (requestId === state.readinessRequestId) {
+      byId("wizard-scan-status").textContent = humanError(error);
+    }
   } finally {
-    await refreshDiagnosticsQuietly();
+    if (requestId === state.readinessRequestId) await refreshDiagnosticsQuietly();
   }
 }
 
@@ -3050,6 +3188,12 @@ function selectedModel(capabilityId) {
   return state.modelOptions.some((item) => item.name === selection.model)
     ? selection.model
     : "";
+}
+
+function hasUsableTextModel() {
+  // Chat is the novice landing surface. A model assigned only to Writing or
+  // Summarization must not make setup look complete while Chat is unusable.
+  return Boolean(selectedModel("general.chat"));
 }
 
 function suggestedCapability(content) {
@@ -3344,7 +3488,7 @@ function renderModelSelect() {
   const automatic = document.createElement("option");
   automatic.value = "automatic";
   automatic.textContent = recommendation?.automatic
-    ? `Automatic — ${recommendation.model} (Recommended)`
+    ? `Automatic — ${recommendation.model} (Recommended${recommendation.status === "hardware-recommended" ? " for this computer" : ""})`
     : "Automatic — no validated model installed";
   automatic.disabled = !recommendation?.automatic;
   select.append(automatic);
@@ -3411,7 +3555,9 @@ function renderModelSelect() {
     ? state.modelOptions.find((item) => item.name === model)?.capabilityStatus[capabilityId]
     : recommendation?.status;
   const testedForTask = ["recommended", "validated"].includes(status);
-  const selectedStatusLabel = testedForTask
+  const selectedStatusLabel = status === "hardware-recommended"
+    ? "Recommended for this computer · current model files differ from the tested digest"
+    : testedForTask
     ? "Tested choice"
     : status === "compatible"
       ? "Available · tested for a different task"
@@ -3440,32 +3586,33 @@ function renderModelSelect() {
 function renderWizardReadiness() {
   const container = byId("wizard-readiness");
   container.replaceChildren();
-  let automaticCount = 0;
+  let readyCount = 0;
   for (const [capabilityId, capability] of Object.entries(CAPABILITIES)) {
     const recommendation = state.recommendations[capabilityId] || {
       status: "missing",
       model: null,
       automatic: false,
     };
-    if (recommendation.automatic) automaticCount += 1;
+    const readyModel = selectedModel(capabilityId);
+    if (readyModel) readyCount += 1;
     const row = document.createElement("div");
     row.className = "readiness-row";
     const detail = document.createElement("div");
     const title = document.createElement("strong");
     title.textContent = capability.modelLabel;
     const model = document.createElement("span");
-    model.textContent = recommendation.model || "No recommended model found";
+    model.textContent = readyModel || recommendation.model || "No recommended model found";
     detail.append(title, model);
     const status = document.createElement("span");
     status.className = `readiness-state ${recommendation.status}`;
-    status.textContent = recommendation.automatic ? "Recommended" : "Not ready";
+    status.textContent = readyModel ? "Ready" : "Not ready";
     row.append(detail, status);
     container.append(row);
   }
-  const usable = automaticCount > 0;
+  const usable = hasUsableTextModel();
   byId("wizard-ready-title").textContent = usable ? "Your local AI is ready" : "A model is still needed";
   byId("wizard-ready-summary").textContent = usable
-    ? `Haven 42 found ${automaticCount} ready model choice${automaticCount === 1 ? "" : "s"}. You can change these later under Models.`
+    ? `Haven 42 found ${readyCount} ready model choice${readyCount === 1 ? "" : "s"}. You can change these later under Models.`
     : "The local AI engine is connected, but it still needs a model. Choose one under Models; Haven 42 will show the download and ask before starting it.";
   byId("wizard-finish").textContent = usable ? "Open chat" : "Choose a model";
   byId("wizard-finish").disabled = !state.connected;
@@ -5231,6 +5378,30 @@ function applyProviderConnection(result, endpoint, timeoutSeconds, idleUnloadSec
   state.modelOptions = result.modelOptions || [];
   state.qualifiedModelCandidates = result.manualModelCandidates || [];
   const hardwareDefault = state.qualifiedModelCandidates.find((item) => item.recommended);
+  const installedHardwareDefault = hardwareDefault
+    ? state.modelOptions.find((item) => item.name === hardwareDefault.name)
+    : null;
+  if (installedHardwareDefault) {
+    // A tested hardware match remains the automatic default after refresh even
+    // when Ollama now reports a newer digest than the recorded qualification.
+    // The evidence is a recommendation; only a known hardware incompatibility
+    // blocks use or download.
+    Object.keys(CAPABILITIES).forEach((capabilityId) => {
+      if (
+        hardwareDefault.capabilityStatus?.[capabilityId] === "validated-on-matching-hardware"
+        && state.recommendations[capabilityId]?.automatic !== true
+      ) {
+        state.recommendations[capabilityId] = {
+          status: "hardware-recommended",
+          model: installedHardwareDefault.name,
+          evidenceId: `hardware-profile:${hardwareDefault.profileId}`,
+          digestVerified: installedHardwareDefault.digestVerified === true,
+          hardwareFit: "matched-tested-hardware-profile",
+          automatic: true,
+        };
+      }
+    });
+  }
   if (
     hardwareDefault
     && !state.modelOptions.some((item) => item.name === hardwareDefault.name)
@@ -5366,6 +5537,15 @@ async function bootstrap() {
         byId("wizard-description").textContent = `Haven 42 remembered an AI connection for this running session but could not verify that it still works. Setup is shown so you can reconnect safely. ${humanError(error)}`;
       }
     }
+    let activeModelInstallRecovered = false;
+    if (providerConnected) {
+      try {
+        activeModelInstallRecovered = await resumeActiveModelInstall();
+      } catch (_error) {
+        // No active model download is a normal startup state. Setup/model
+        // readiness below remains authoritative if the recovery check fails.
+      }
+    }
     if (!state.alphaTextOnly) await loadWorkflows();
     try {
       await loadAssurance();
@@ -5375,9 +5555,17 @@ async function bootstrap() {
     byId("update-status").textContent = result.updates?.mode === "user-initiated-only"
       ? "Only when you choose Check now"
       : "Unavailable";
-    if (!providerConnected) {
+    if (activeModelInstallRecovered) {
+      // The Models page is already showing the live, previously approved
+      // download. Its completion handler selects the model and opens Chat.
+    } else if (!providerConnected) {
       state.lastFocusBeforeWizard = document.activeElement;
       byId("setup-wizard").querySelector(".wizard-card").focus();
+    } else if (!hasUsableTextModel()) {
+      // A working Ollama endpoint is not a completed novice setup. Keep setup
+      // visible and rebuild its hardware-matched model review after refresh.
+      byId("setup-wizard").classList.remove("hidden");
+      await runReadiness();
     } else {
       restoreLastSection();
     }
@@ -6211,8 +6399,7 @@ byId("wizard-readiness-back").addEventListener("click", () => {
 byId("wizard-readiness-next").addEventListener("click", async () => {
   if (state.connected) {
     if (await offerRecommendedModelDuringSetup()) return;
-    const usable = Object.keys(CAPABILITIES).some((capabilityId) => Boolean(selectedModel(capabilityId)));
-    if (!usable) {
+    if (!hasUsableTextModel()) {
       byId("wizard-scan-status").textContent = humanError(new Error("guided-default-model-unavailable"));
       return;
     }
@@ -6792,13 +6979,16 @@ byId("wizard-back").addEventListener("click", () => {
 });
 byId("wizard-finish").addEventListener("click", () => {
   byId("setup-wizard").classList.add("hidden");
-  const usable = Object.values(state.recommendations).some((item) => item?.automatic === true);
-  if (usable) openChat();
+  if (hasUsableTextModel()) openChat();
   else openModels();
 });
 byId("setup-wizard").addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     event.preventDefault();
+    if (state.setupOperationActive) {
+      byId("wizard-scan-status").textContent = "Setup is still running. Use its Cancel control when available, or wait for the current verification step to finish.";
+      return;
+    }
     byId("setup-wizard").classList.add("hidden");
     const previous = state.lastFocusBeforeWizard;
     const returnTarget = previous instanceof HTMLElement

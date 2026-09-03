@@ -331,12 +331,24 @@ body::before {
   display: flex;
   gap: 9px;
   align-items: flex-start;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 6px 0;
   color: var(--text);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
-.setup-consent input { width: auto; margin: 2px 0 0; accent-color: var(--accent); }
+.setup-consent input {
+  flex: 0 0 20px;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
 .installation-component.state-complete,
 .installation-component.state-ready { border-color: rgba(95, 224, 194, 0.42); }
 .installation-component.state-failed { border-color: rgba(255, 132, 119, 0.55); }

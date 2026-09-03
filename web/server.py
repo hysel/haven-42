@@ -2253,6 +2253,31 @@ class HavenState:
                 raise WebRequestError("model-install-progress-unavailable", HTTPStatus.NOT_FOUND)
             return {key: value for key, value in progress.items() if not key.startswith("_")}
 
+    def active_model_install(self) -> dict[str, Any]:
+        """Return a still-running approved install so a refreshed UI can reattach."""
+        with self.lock:
+            now = time.monotonic()
+            active = [
+                (token, progress)
+                for token, progress in self.model_install_progress.items()
+                if progress.get("_updatedAt", 0) > now - 900
+                and progress.get("terminal") is False
+            ]
+            if not active:
+                return {
+                    "schemaVersion": 1,
+                    "kind": "model-install-activity",
+                    "activityStatus": "inactive",
+                }
+            token, progress = max(active, key=lambda item: item[1].get("_updatedAt", 0))
+            return {
+                "schemaVersion": 1,
+                "kind": "model-install-activity",
+                "activityStatus": "active",
+                "progressToken": token,
+                **{key: value for key, value in progress.items() if not key.startswith("_")},
+            }
+
     def _update_model_install_progress(self, token: str, **changes: Any) -> None:
         with self.lock:
             progress = self.model_install_progress.get(token)
@@ -4338,6 +4363,14 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(
                     HTTPStatus.OK,
                     self.server.state.model_install_status(body["progressToken"]),
+                )
+                return
+            if self.path == "/api/model-install/active":
+                if body:
+                    raise WebRequestError("invalid-model-install-activity-fields")
+                self._send_json(
+                    HTTPStatus.OK,
+                    self.server.state.active_model_install(),
                 )
                 return
             if self.path == "/api/research/query/prepare":

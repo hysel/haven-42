@@ -1675,6 +1675,37 @@ def main() -> int:
             "status": "Model downloaded and verified",
             "terminal": True,
         }
+        status, inactive_install, _ = request_json(
+            origin + "/api/model-install/active", "POST", {}, token, origin,
+        )
+        assert status == 200 and inactive_install == {
+            "schemaVersion": 1,
+            "kind": "model-install-activity",
+            "activityStatus": "inactive",
+        }
+        with state.lock:
+            state.model_install_progress["a" * 32] = {
+                "schemaVersion": 1,
+                "kind": "model-install-progress",
+                "model": "qwen3.5:9b",
+                "phase": "downloading",
+                "progressPercent": 42,
+                "completedBytes": 42,
+                "totalBytes": 100,
+                "status": "Downloading model files",
+                "terminal": False,
+                "_updatedAt": time.monotonic(),
+            }
+        status, active_install, _ = request_json(
+            origin + "/api/model-install/active", "POST", {}, token, origin,
+        )
+        assert status == 200
+        assert active_install["activityStatus"] == "active"
+        assert active_install["progressToken"] == "a" * 32
+        assert active_install["model"] == "qwen3.5:9b"
+        assert active_install["progressPercent"] == 42
+        with state.lock:
+            state.model_install_progress.pop("a" * 32)
         status, replay_error, _ = request_json(
             origin + "/api/model-install/execute", "POST",
             {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
@@ -1713,7 +1744,7 @@ def main() -> int:
             {"model": "qwen3.8-flash-next"}, token, origin,
         )
         assert status == 409 and error["error"] == "model-incompatible-with-hardware"
-        checks += 22
+        checks += 28
         fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
@@ -3138,6 +3169,7 @@ def main() -> int:
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "/api/model-install/execute" in javascript
         assert "/api/model-install/status" in javascript
+        assert "/api/model-install/active" in javascript
         assert 'id="model-install-progress-bar"' in html
         assert "Review and install model" in html and "Copy installation command" in html
         assert "What Haven 42 needs" in javascript
