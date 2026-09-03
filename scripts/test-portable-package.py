@@ -95,6 +95,18 @@ def launch(
     raise AssertionError("runtime did not announce its loopback URL")
 
 
+def terminate(process: subprocess.Popen[str]) -> None:
+    """Stop a test runtime without leaving it behind after an assertion failure."""
+    if process.poll() is not None:
+        return
+    process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=10)
+
+
 def expect_http_error(
     url: str,
     headers: dict[str, str],
