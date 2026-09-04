@@ -3,6 +3,14 @@ set -eu
 
 repo_root="$(git rev-parse --show-toplevel)"
 
+# Git exports repository-local variables to hooks. Clear them before running
+# tests so fixture commands such as `git -C <temporary-directory>` operate on
+# their intended disposable repositories instead of the repository being
+# pushed.
+for variable in $(git rev-parse --local-env-vars); do
+  unset "$variable"
+done
+
 printf '%s\n' "Running pre-push pack validation..."
 
 # Do not trust command presence alone: Windows Store app-execution aliases can
