@@ -95,6 +95,18 @@ def launch(
     raise AssertionError("runtime did not announce its loopback URL")
 
 
+def terminate(process: subprocess.Popen[str]) -> None:
+    """Stop a test runtime without leaving it behind after an assertion failure."""
+    if process.poll() is not None:
+        return
+    process.terminate()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        process.kill()
+        process.wait(timeout=10)
+
+
 def expect_http_error(
     url: str,
     headers: dict[str, str],
@@ -244,8 +256,18 @@ def probe(
             assert isinstance(alpha_plan["managedSetupRuntimeAdmitted"], bool)
             if expected_version == "0.4.0-alpha.2" and automatic_allowed:
                 compatibility = alpha_plan["runtimeCompatibility"]
-                assert isinstance(compatibility, dict)
-                assert runtime_admitted is (compatibility.get("decision") == "install")
+                if bootstrap["runtime"]["platform"] in {"windows", "linux"}:
+                    assert isinstance(compatibility, dict)
+                    assert runtime_admitted is (
+                        compatibility.get("decision") == "install"
+                    )
+                else:
+                    # macOS recommends a model for the detected hardware, but
+                    # deliberately uses the separately installed Ollama app
+                    # instead of Haven 42's managed runtime-install path.
+                    assert bootstrap["runtime"]["platform"] == "darwin"
+                    assert compatibility is None
+                    assert runtime_admitted is False
             managed = alpha_plan.get("managedPlan")
             expected_managed = (
                 bootstrap["runtime"]["platform"] in {"windows", "linux"}
@@ -579,6 +601,26 @@ def test_port_collision(command: list[str]) -> None:
         listener.close()
 
 
+def test_existing_instance_reopen(executable: Path) -> None:
+    process, origin = launch([str(executable)], executable.parent)
+    port = urllib.parse.urlsplit(origin).port
+    assert port is not None
+    try:
+        result = subprocess.run(
+            [str(executable), "--port", str(port), "--no-open"],
+            cwd=executable.parent,
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        assert result.returncode == 0
+        assert f"Haven 42 is already running at {origin}" in (result.stdout + result.stderr)
+        with urllib.request.urlopen(origin + "/api/bootstrap", timeout=5) as response:
+            assert json.load(response)["kind"] == "haven42-web-status"
+    finally:
+        terminate(process)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", required=True)
@@ -611,6 +653,7 @@ def main() -> int:
     )
     test_read_only_package(executable, packaged, args.expected_version)
     test_abrupt_exit_recovery(executable, packaged, args.expected_version)
+    test_existing_instance_reopen(executable)
     test_port_collision([str(executable)])
     test_hostile_packages(executable)
     remove_test_diagnostics(executable.parent)

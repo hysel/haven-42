@@ -18,6 +18,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Callable
 
+from windows_user_paths import portable_data_root
+
 
 OLLAMA_APP = Path("/Applications/Ollama.app")
 OLLAMA_BINARY_RELATIVE = Path("Contents/Resources/ollama")
@@ -193,7 +195,7 @@ class MacOSInstalledOllamaCoordinator:
     EFFECTS = [
         "Verify the installed Ollama app's code signature and Gatekeeper approval.",
         "Start its local AI engine on this computer for this Haven 42 session only.",
-        "Use the current macOS user's existing Ollama model storage; do not download a model yet.",
+        "Keep Haven 42 model downloads in Haven42-Data beside this app; do not use or change unrelated Ollama models.",
     ]
 
     def __init__(
@@ -264,7 +266,25 @@ class MacOSInstalledOllamaCoordinator:
             probe.close()
 
     @staticmethod
-    def _trusted_user_environment() -> dict[str, str]:
+    def _haven42_model_root() -> Path:
+        data_root = portable_data_root()
+        try:
+            install_root = data_root.parent.resolve(strict=True)
+            if data_root.exists() and data_root.is_symlink():
+                raise MacOSInstalledOllamaError("macos-managed-model-root-unverified")
+            data_root.mkdir(mode=0o700, exist_ok=True)
+            models = data_root / "models" / "ollama"
+            models.mkdir(mode=0o700, parents=True, exist_ok=True)
+            resolved = models.resolve(strict=True)
+            resolved.relative_to(install_root)
+        except (OSError, ValueError) as error:
+            if isinstance(error, MacOSInstalledOllamaError):
+                raise
+            raise MacOSInstalledOllamaError("macos-managed-model-root-unverified") from error
+        return resolved
+
+    @classmethod
+    def _trusted_user_environment(cls) -> dict[str, str]:
         try:
             import pwd
 
@@ -288,6 +308,7 @@ class MacOSInstalledOllamaCoordinator:
             "OLLAMA_ORIGINS": "http://127.0.0.1",
             "OLLAMA_NO_CLOUD": "1",
             "OLLAMA_NOHISTORY": "1",
+            "OLLAMA_MODELS": str(cls._haven42_model_root()),
         }
 
     @staticmethod
@@ -357,6 +378,8 @@ class MacOSInstalledOllamaCoordinator:
             "installationPerformed": False,
             "appBundleChanged": False,
             "modelDownloadPerformed": False,
+            "modelStorageDirectoryName": "Haven42-Data",
+            "unrelatedUserModelsChanged": False,
             "approvalConsumed": True,
             "persisted": False,
         }

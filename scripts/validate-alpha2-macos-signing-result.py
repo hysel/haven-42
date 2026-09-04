@@ -8,6 +8,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import zipfile
 
 
 ARCHIVE_NAME = "haven42-darwin-arm64-developer-id-notarized.zip"
@@ -15,6 +16,10 @@ EVIDENCE_NAME = "macos-signing-notarization-result.json"
 EXPECTED_FILES = {ARCHIVE_NAME, EVIDENCE_NAME, "SHA256SUMS"}
 SHA256 = re.compile(r"[0-9a-f]{64}")
 UTC_TIMESTAMP = re.compile(r"20\d{2}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z")
+PACKAGE_ARCHIVE_ROOT = "Haven42/"
+APP_ARCHIVE_ROOT = f"{PACKAGE_ARCHIVE_ROOT}Haven 42.app/"
+DATA_ARCHIVE_ROOT = f"{PACKAGE_ARCHIVE_ROOT}Haven42-Data/"
+LOG_ARCHIVE_ROOT = f"{PACKAGE_ARCHIVE_ROOT}Haven42-Logs/"
 
 
 class ValidationError(RuntimeError):
@@ -46,6 +51,34 @@ def checksum_manifest(path: Path) -> dict[str, str]:
             raise ValidationError("checksum-manifest-invalid")
         parsed[match.group(2)] = match.group(1)
     return parsed
+
+
+def validate_archive_layout(path: Path) -> None:
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = [entry.filename for entry in archive.infolist()]
+    except (OSError, zipfile.BadZipFile) as error:
+        raise ValidationError("artifact-zip-invalid") from error
+    require(bool(names), "artifact-zip-empty")
+    require(
+        all(
+            name
+            and "\\" not in name
+            and not name.startswith("/")
+            and ".." not in Path(name).parts
+            for name in names
+        ),
+        "artifact-zip-path-invalid",
+    )
+    visible_names = [name for name in names if not name.startswith("__MACOSX/")]
+    require(
+        PACKAGE_ARCHIVE_ROOT in visible_names
+        and APP_ARCHIVE_ROOT in visible_names
+        and DATA_ARCHIVE_ROOT in visible_names
+        and LOG_ARCHIVE_ROOT in visible_names
+        and all(name.startswith(PACKAGE_ARCHIVE_ROOT) for name in visible_names),
+        "artifact-visible-layout-invalid",
+    )
 
 
 def validate(directory: Path) -> dict[str, object]:
@@ -109,6 +142,7 @@ def validate(directory: Path) -> dict[str, object]:
         and artifact["sizeBytes"] == archive.stat().st_size,
         "artifact-record-mismatch",
     )
+    validate_archive_layout(archive)
     require(
         value["platformTrust"] == {
             "developerIdSigned": True,

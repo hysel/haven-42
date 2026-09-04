@@ -30,7 +30,7 @@ def fixture(root: Path) -> Path:
     internal = source / "_internal"
     internal.mkdir()
     (internal / "base_library.zip").write_bytes(b"fixture")
-    for name in ("config", "package", "scripts", "web"):
+    for name in ("config", "examples", "package", "scripts", "web"):
         directory = internal / name
         directory.mkdir()
         (directory / "fixture.txt").write_text("fixture", encoding="utf-8")
@@ -60,11 +60,11 @@ def main() -> int:
         # The same test runs the real link-preserving build on macOS/Linux CI;
         # keep Windows deterministic while still checking the pinned contract.
         assert MODULE.EXPECTED_INTERNAL_ENTRIES == {
-            "Python", "Python.framework", "base_library.zip", "config",
+            "Python", "Python.framework", "base_library.zip", "config", "examples",
             "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
             "package", "python3.14", "scripts", "web",
         }
-        assert len(MODULE.APP_LINKS) == 11
+        assert len(MODULE.APP_LINKS) == 12
         print("macOS development app builder tests: 3 passed (Windows contract; native link build runs on macOS)")
         return 0
     with tempfile.TemporaryDirectory(prefix="haven42-macos-app-test-") as temporary:

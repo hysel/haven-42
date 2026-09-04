@@ -38,7 +38,7 @@ def source_fixture(root: Path) -> Path:
     internal = source / "_internal"
     internal.mkdir()
     (internal / "base_library.zip").write_bytes(b"fixture")
-    for name in ("config", "package", "scripts", "web"):
+    for name in ("config", "examples", "package", "scripts", "web"):
         directory = internal / name
         directory.mkdir()
         (directory / "fixture.txt").write_text("fixture", encoding="utf-8")
@@ -93,7 +93,7 @@ def hardware_fixture(path: Path) -> None:
 def main() -> int:
     if os.name == "nt":
         assert callable(SUMMARY.wrapped_package_records)
-        assert len(SUMMARY.VALIDATOR.APP_LINKS) == 11
+        assert len(SUMMARY.VALIDATOR.APP_LINKS) == 12
         print("macOS development app summary tests: 4 passed (Windows contract; native link tests run on macOS)")
         return 0
     with tempfile.TemporaryDirectory(prefix="haven42-macos-app-summary-") as temporary:

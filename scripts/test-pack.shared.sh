@@ -2716,7 +2716,8 @@ assert policy["text"]["defaultIdleUnloadSeconds"] == 300
 assert policy["text"]["unloadOnFailure"] is True and policy["text"]["unloadOnShutdown"] is True and policy["text"]["unloadOnNewTask"] is True
 assert policy["text"]["recommendationAuthority"] == "server-owned-static-catalog"
 assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
-assert policy["text"]["missingModelDownloadsAllowed"] is False
+assert policy["text"]["modelDownloads"] == "explicit-user-approval-only"
+assert policy["text"]["missingModelDownloadsAllowed"] is True
 assert policy["modelDiscovery"]["explicitOnlineConsentRequired"] is True
 assert policy["modelDiscovery"]["redirectsAllowed"] is False
 assert policy["modelDiscovery"]["automaticDownloadsAllowed"] is False
@@ -2724,7 +2725,10 @@ assert policy["modelDiscovery"]["pullApiAllowed"] is True
 assert policy["modelDiscovery"]["explicitInstallApprovalRequired"] is True
 assert policy["modelDiscovery"]["installCandidateMustComeFromCurrentSessionSearch"] is True
 assert policy["modelDiscovery"]["providerCatalogVerificationRequiredAfterPull"] is True
-assert policy["modelDiscovery"]["automaticSelectionAfterInstallAllowed"] is False
+assert policy["modelDiscovery"]["automaticSelectionAfterInstallAllowed"] is True
+assert policy["modelDiscovery"]["evidenceUse"] == "recommendation-and-labeling-only"
+assert policy["modelDiscovery"]["unknownHardwareFit"] == "allow-after-user-approval"
+assert policy["modelDiscovery"]["knownIncompatibleHardwareFit"] == "block-before-download"
 assert policy["modelDiscovery"]["commandExecutionAllowed"] is False
 assert policy["softwareWorkflows"]["executionMode"] == "plan-only"
 assert policy["softwareWorkflows"]["rendererArgumentsAllowed"] is False

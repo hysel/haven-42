@@ -3,9 +3,9 @@
   "catalogId": "haven42.text-capability-model-recommendations",
   "selectionPolicy": {
     "automaticRequiresExactCapabilityEvidence": true,
-    "unknownInstalledModelsAre": "unverified",
-    "downloadsAllowed": false,
-    "hardwareFitSource": "execution-host-profile-required"
+    "unknownInstalledModelsAre": "unverified-selectable",
+    "downloadsAllowed": "explicit-user-approval-only",
+    "hardwareFitSource": "execution-host-profile-or-firm-incompatibility-rule"
   },
   "capabilities": {
     "general.chat": [

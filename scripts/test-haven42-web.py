@@ -331,6 +331,17 @@ def main() -> int:
     else:
         raise AssertionError("unexpected socket failures must remain visible")
     checks += 1
+    server = object.__new__(WEB.HavenWebServer)
+    for disconnect_error in (
+        BrokenPipeError("client closed before request handling"),
+        ConnectionAbortedError("client aborted before request handling"),
+        ConnectionResetError("client reset before request handling"),
+    ):
+        try:
+            raise disconnect_error
+        except type(disconnect_error):
+            server.handle_error(None, ("127.0.0.1", 1))
+        checks += 1
     try:
         WEB._request_process_shutdown(15, None)
     except KeyboardInterrupt:
@@ -609,7 +620,8 @@ def main() -> int:
     )
     assert len(matching_candidates) == 14
     assert {item["name"] for item in matching_candidates} >= {"qwen3.5:4b", "qwen3.5:9b"}
-    assert all(item["automatic"] is False for item in matching_candidates)
+    assert [item["name"] for item in matching_candidates if item["automatic"]] == ["qwen3.5:9b"]
+    assert [item["name"] for item in matching_candidates if item["recommended"]] == ["qwen3.5:9b"]
     assert WEB.qualified_chat_candidates(
         matching_snapshot, "private-network", "0.32.14", qualified_profiles,
     ) == []
@@ -639,6 +651,8 @@ def main() -> int:
     assert last_browser_closed.wait(1)
     browser_lifecycle.close()
     checks += 4
+    assert WEB.HavenWebServer.allow_reuse_address is True
+    checks += 1
     state = WEB.HavenState(
         readiness_provider=lambda: json.loads(json.dumps(readiness_snapshot)),
         model_catalog_provider=lambda query: [
@@ -646,7 +660,7 @@ def main() -> int:
             "community/example-writing:7b",
             "unsafe model<script>",
             "qwen3.5",
-        ] if query == "writing" else [],
+        ] if query == "writing" else ["qwen3.8-flash-next"] if query == "oversized" else [],
         software_update_provider=lambda: {
             "schemaVersion": 1,
             "kind": "haven42-managed-software-update-check",
@@ -1615,6 +1629,8 @@ def main() -> int:
                 "validationStatus": "candidate-only",
                 "capabilityEvidence": "unverified",
                 "hardwareFit": "unknown",
+                "hardwareFitReason": None,
+                "minimumSystemMemoryGiB": None,
                 "licenseStatus": "review-required",
                 "executionAllowed": False,
                 "installCommand": "ollama pull qwen3.5",
@@ -1626,6 +1642,8 @@ def main() -> int:
                 "validationStatus": "candidate-only",
                 "capabilityEvidence": "unverified",
                 "hardwareFit": "unknown",
+                "hardwareFitReason": None,
+                "minimumSystemMemoryGiB": None,
                 "licenseStatus": "review-required",
                 "executionAllowed": False,
                 "installCommand": "ollama pull community/example-writing:7b",
@@ -1640,6 +1658,9 @@ def main() -> int:
         assert install_review["singleUse"] is True
         assert install_review["persisted"] is False
         assert install_review["destination"] == "This computer"
+        assert install_review["hardwareFit"] == "unknown"
+        assert install_review["hardwareFitReason"] is None
+        assert install_review["minimumSystemMemoryGiB"] is None
         status, installed_model, _ = request_json(
             origin + "/api/model-install/execute", "POST",
             {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
@@ -1648,7 +1669,7 @@ def main() -> int:
         assert installed_model["status"] == "installed"
         assert installed_model["model"] == "community/example-writing:7b"
         assert installed_model["verifiedByProviderCatalog"] is True
-        assert installed_model["selectedAutomatically"] is False
+        assert installed_model["selectedAutomatically"] is True
         status, install_progress, _ = request_json(
             origin + "/api/model-install/status", "POST",
             {"progressToken": install_review["approvalToken"]}, token, origin,
@@ -1665,6 +1686,37 @@ def main() -> int:
             "status": "Model downloaded and verified",
             "terminal": True,
         }
+        status, inactive_install, _ = request_json(
+            origin + "/api/model-install/active", "POST", {}, token, origin,
+        )
+        assert status == 200 and inactive_install == {
+            "schemaVersion": 1,
+            "kind": "model-install-activity",
+            "activityStatus": "inactive",
+        }
+        with state.lock:
+            state.model_install_progress["a" * 32] = {
+                "schemaVersion": 1,
+                "kind": "model-install-progress",
+                "model": "qwen3.5:9b",
+                "phase": "downloading",
+                "progressPercent": 42,
+                "completedBytes": 42,
+                "totalBytes": 100,
+                "status": "Downloading model files",
+                "terminal": False,
+                "_updatedAt": time.monotonic(),
+            }
+        status, active_install, _ = request_json(
+            origin + "/api/model-install/active", "POST", {}, token, origin,
+        )
+        assert status == 200
+        assert active_install["activityStatus"] == "active"
+        assert active_install["progressToken"] == "a" * 32
+        assert active_install["model"] == "qwen3.5:9b"
+        assert active_install["progressPercent"] == 42
+        with state.lock:
+            state.model_install_progress.pop("a" * 32)
         status, replay_error, _ = request_json(
             origin + "/api/model-install/execute", "POST",
             {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
@@ -1690,12 +1742,55 @@ def main() -> int:
         with state.lock:
             state.models = tuple(name for name in state.models if name != "qwen3.5:latest")
             state.model_digests.pop("qwen3.5:latest", None)
-        checks += 17
+        status, oversized, _ = request_json(
+            origin + "/api/model-search", "POST",
+            {"query": "oversized", "online": True}, token, origin,
+        )
+        assert status == 200
+        assert oversized["results"][0]["hardwareFit"] == "incompatible"
+        assert oversized["results"][0]["hardwareFitReason"] == "insufficient-system-memory"
+        assert oversized["results"][0]["minimumSystemMemoryGiB"] == 108
+        status, error, _ = request_json(
+            origin + "/api/model-install/prepare", "POST",
+            {"model": "qwen3.8-flash-next"}, token, origin,
+        )
+        assert status == 409 and error["error"] == "model-incompatible-with-hardware"
+        checks += 28
         fixture_html = (ROOT / "examples/fixtures/ollama-model-library.html").read_text(encoding="utf-8")
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
         assert parsed == ["qwen3.5:9b", "qwen3.5:35b", "qwen3.5:9b-mlx"]
         assert search_globals["validate_query"]("  agent   writing ") == "agent writing"
+        catalog_pages = {
+            "/search": (
+                '<a href="/library/qwen3.8">Qwen 3.8</a>'
+                '<a href="/library/qwen3.5">Qwen 3.5</a>'
+                '<a href="/library/qwen2.5-coder">Qwen coder</a>'
+            ),
+            "/library/qwen3.8/tags": (
+                '<a href="/library/qwen3.8:27b">27B</a>'
+                '<a href="/library/qwen3.8:27b-mlx">27B MLX</a>'
+            ),
+            "/library/qwen3.5/tags": (
+                '<a href="/library/qwen3.5:0.8b">0.8B</a>'
+                '<a href="/library/qwen3.5:2b-mlx">2B MLX</a>'
+            ),
+            "/library/qwen2.5-coder/tags": (
+                '<a href="/library/qwen2.5-coder:7b">7B</a>'
+            ),
+        }
+        with patch.object(
+            search_globals["sys"].modules[search_globals["__name__"]],
+            "_fetch_catalog_html",
+            side_effect=lambda path, _timeout, _query=None: catalog_pages[path],
+        ):
+            broad_qwen = search_globals["search_ollama_catalog"]("qwen")
+            valid_exact_tag = search_globals["search_ollama_catalog"]("qwen3.5:2b-mlx")
+            invalid_exact_tag = search_globals["search_ollama_catalog"]("qwen3.5:0.8b-mlx")
+        assert broad_qwen[:3] == ["qwen3.8", "qwen3.8:27b", "qwen3.8:27b-mlx"]
+        assert "qwen3.5:0.8b" in broad_qwen and "qwen2.5-coder:7b" in broad_qwen
+        assert valid_exact_tag == ["qwen3.5:2b-mlx"]
+        assert invalid_exact_tag == []
         for hostile_query in ("", "x" * 65, "model?token=secret", "<script>"):
             try:
                 search_globals["validate_query"](hostile_query)
@@ -1739,7 +1834,7 @@ def main() -> int:
             assert str(error) == "invalid-model-search-timeout"
         else:
             raise AssertionError("unsafe model search timeout must be rejected")
-        checks += 16
+        checks += 20
 
         cross_capability = WEB.build_model_decisions(
             ["chat-only:1b"],
@@ -1850,7 +1945,7 @@ def main() -> int:
             ROOT / "config/does-not-exist.tsv",
         ) == {}
         tested_library = WEB.load_tested_model_library()
-        assert len(tested_library) == 7
+        assert len(tested_library) == 10
         exact_hardware = WEB.build_tested_model_options(
             tested_library,
             ["qwen3.5:9b"],
@@ -1865,9 +1960,11 @@ def main() -> int:
         )
         assert exact_hardware["status"] == "exact-profile"
         assert exact_hardware["profile"]["hardware"] == "AMD Radeon RX 7800 XT 16 GB"
+        assert exact_hardware["profile"]["recommendedModel"] == "qwen3.5:9b"
         assert len(exact_hardware["options"]) == 14
         exact_qwen = next(item for item in exact_hardware["options"] if item["name"] == "qwen3.5:9b")
         assert exact_qwen["status"] == "installed" and exact_qwen["installCommand"] is None
+        assert exact_qwen["recommended"] is True
         runtime_difference = WEB.build_tested_model_options(
             tested_library,
             [],
@@ -1903,6 +2000,20 @@ def main() -> int:
             "qwen3.5:0.8b", "gemma3:1b-it-q4_K_M", "minicpm-v4.6:1b",
         ]
         assert windows_gtx1650["options"][0]["status"] == "installed"
+        mac_m4 = WEB.build_tested_model_options(
+            tested_library,
+            [],
+            {
+                "platform": {"operatingSystem": "macos", "systemMemoryGiB": 16},
+                "accelerators": [{
+                    "vendor": "Apple", "model": "Apple M4", "memoryGiB": None,
+                }],
+            },
+            "0.32.15",
+        )
+        assert mac_m4["status"] == "exact-profile"
+        assert mac_m4["profile"]["recommendedModel"] == "qwen3.5:4b"
+        assert next(item for item in mac_m4["options"] if item["name"] == "qwen3.5:4b")["recommended"] is True
         no_profile = WEB.build_tested_model_options(
             tested_library,
             [],
@@ -2865,7 +2976,12 @@ def main() -> int:
             "general.chat", "content.write", "content.summarize"
         ]
         assert policy["text"]["automaticUnknownModelSelectionAllowed"] is False
-        assert policy["text"]["missingModelDownloadsAllowed"] is False
+        assert policy["text"]["modelDownloads"] == "explicit-user-approval-only"
+        assert policy["text"]["missingModelDownloadsAllowed"] is True
+        assert policy["modelDiscovery"]["automaticSelectionAfterInstallAllowed"] is True
+        assert policy["modelDiscovery"]["evidenceUse"] == "recommendation-and-labeling-only"
+        assert policy["modelDiscovery"]["unknownHardwareFit"] == "allow-after-user-approval"
+        assert policy["modelDiscovery"]["knownIncompatibleHardwareFit"] == "block-before-download"
         assert policy["text"]["maximumRequestBytes"] == 12582912
         assert policy["text"]["maximumConversationBytes"] == 65536
         assert policy["text"]["chatTextSizeControl"] == {
@@ -3064,6 +3180,7 @@ def main() -> int:
         assert "result.downloadsPerformed !== false" in javascript
         assert "/api/model-search" in javascript and "/api/model-install/execute" in javascript
         assert "/api/model-install/status" in javascript
+        assert "/api/model-install/active" in javascript
         assert 'id="model-install-progress-bar"' in html
         assert "Review and install model" in html and "Copy installation command" in html
         assert "What Haven 42 needs" in javascript
@@ -3109,7 +3226,8 @@ def main() -> int:
         assert "state.chatAutoFollow" in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
-        assert "Not on your server yet · searching does not download it" in javascript
+        assert "Not tested on this computer · you can still review and install it · nothing downloads without approval" in javascript
+        assert "Cannot run on this computer" in javascript and "download blocked" in javascript
         assert "Downloads only after you approve" in html
         assert 'id="cleanup-policy-form"' in html and 'id="system-idle-unload"' in html
         assert 'byId("system-idle-unload").value = String(idleUnloadSeconds)' in javascript

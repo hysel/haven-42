@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+import zipfile
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -28,7 +29,12 @@ def sha256(path: Path) -> str:
 def result_directory(root: Path) -> tuple[Path, dict[str, object]]:
     root.mkdir()
     archive = root / MODULE.ARCHIVE_NAME
-    archive.write_bytes(b"signed-notarized-stapled-archive")
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as output:
+        output.writestr("Haven42/", b"")
+        output.writestr("Haven42/Haven 42.app/", b"")
+        output.writestr("Haven42/Haven 42.app/Contents/Info.plist", b"signed-notarized-stapled-app")
+        output.writestr("Haven42/Haven42-Data/", b"")
+        output.writestr("Haven42/Haven42-Logs/", b"")
     value: dict[str, object] = {
         "schemaVersion": 1,
         "kind": "haven42-sanitized-macos-developer-id-notarization-result",
@@ -116,6 +122,24 @@ class ValidatorTests(unittest.TestCase):
             root, _ = result_directory(Path(temporary) / "result")
             (root / MODULE.ARCHIVE_NAME).write_bytes(b"changed")
             with self.assertRaisesRegex(MODULE.ValidationError, "artifact-record-mismatch"):
+                MODULE.validate(root)
+
+    def test_archive_requires_one_visible_haven42_root(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root, value = result_directory(Path(temporary) / "result")
+            archive = root / MODULE.ARCHIVE_NAME
+            with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as output:
+                output.writestr("Haven42-0.4.0-alpha.2/Haven 42.app/", b"")
+                output.writestr(
+                    "Haven42-0.4.0-alpha.2/Haven 42.app/Contents/Info.plist",
+                    b"wrapped-app",
+                )
+            value["artifact"]["sha256"] = sha256(archive)
+            value["artifact"]["sizeBytes"] = archive.stat().st_size
+            write(root, value)
+            with self.assertRaisesRegex(
+                MODULE.ValidationError, "artifact-visible-layout-invalid",
+            ):
                 MODULE.validate(root)
 
     def test_privacy_or_authority_overstatement_fails(self) -> None:

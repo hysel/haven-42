@@ -53,6 +53,9 @@ class FakeRunner:
         self.accepted = accepted
         self.submit_error = submit_error
         self.commands: list[list[str]] = []
+        self.visible_package_entries: set[str] | None = None
+        self.visible_data_readme = False
+        self.visible_logs_readme = False
 
     def __call__(self, command: list[str], **_: object) -> subprocess.CompletedProcess:
         self.commands.append(command)
@@ -71,6 +74,11 @@ class FakeRunner:
                 b"TeamIdentifier=ABCDE12345\nflags=0x10000(runtime)\n"
             ))
         if executable == "ditto":
+            source = Path(command[-2])
+            if source.name == "Haven42" and source.is_dir():
+                self.visible_package_entries = {path.name for path in source.iterdir()}
+                self.visible_data_readme = (source / "Haven42-Data" / "README.txt").is_file()
+                self.visible_logs_readme = (source / "Haven42-Logs" / "README.txt").is_file()
             Path(command[-1]).write_bytes(b"synthetic-notarization-archive")
             return completed(command)
         if executable == "xcrun" and "notarytool" in command:
@@ -126,7 +134,14 @@ class SigningTests(unittest.TestCase):
             self.assertNotIn(IDENTITY, encoded)
             self.assertNotIn("haven42-notary", encoded)
             ditto_commands = [command for command in runner.commands if Path(command[0]).name == "ditto"]
-            self.assertEqual(len(ditto_commands), 2)
+            self.assertEqual(len(ditto_commands), 3)
+            self.assertEqual(Path(ditto_commands[-1][-2]).name, "Haven42")
+            self.assertEqual(
+                runner.visible_package_entries,
+                {"Haven 42.app", "Haven42-Data", "Haven42-Logs"},
+            )
+            self.assertTrue(runner.visible_data_readme)
+            self.assertTrue(runner.visible_logs_readme)
             self.assertTrue((output / "haven42-darwin-arm64-developer-id-notarized.zip").is_file())
             self.assertTrue((output / "SHA256SUMS").is_file())
             self.assertEqual(

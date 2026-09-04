@@ -180,6 +180,14 @@ async function terminate(child) {
   ]);
 }
 
+async function waitForExit(child, timeoutMs) {
+  if (!child || child.exitCode !== null) return child?.exitCode;
+  return Promise.race([
+    new Promise((accept) => child.once("close", accept)),
+    delay(timeoutMs).then(() => null),
+  ]);
+}
+
 function resolvePython() {
   for (const [command, prefix] of [["python3", []], ["python", []], ["py", ["-3"]]]) {
     const probe = spawnSync(command, [...prefix, "-c", "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)"]);
@@ -281,7 +289,9 @@ class Cdp {
   }
   async evaluate(expression) {
     const result = await this.call("Runtime.evaluate", { expression, awaitPromise: true, returnByValue: true });
-    if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+    if (result.exceptionDetails) {
+      throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
+    }
     return result.result.value;
   }
   close() { this.socket.close(); }
@@ -589,18 +599,25 @@ try {
 
   const macosInstalledPresentation = await cdp.evaluate(`(() => {
     const originalPlatform = state.platformFamily;
+    const originalSetupPlan = state.setupPlan;
+    window.__haven42MacosInstalledOriginal = {originalPlatform, originalSetupPlan};
     state.platformFamily = 'macos';
     const effects = [
       "Verify the installed Ollama app's code signature and Gatekeeper approval.",
       "Start its local AI engine on this computer for this Haven 42 session only.",
-      "Use the current macOS user's existing Ollama model storage; do not download a model yet.",
+      "Keep Haven 42 model downloads in Haven42-Data beside this app; do not use or change unrelated Ollama models.",
     ];
-    renderSetupPlan({
+    const physicalMacPlan = {
       hardwareAssessment: {candidateModel: 'qwen3.5:9b'},
-      actions: [],
+      actions: [
+        {componentId: 'python', state: 'already-available'},
+        {componentId: 'ollama', state: 'install'},
+        {componentId: 'ollama-model-qwen35-9b', state: 'install'},
+      ],
       alphaCandidate: {
         modelSelection: {selected: {name: 'qwen3.5:9b'}, automaticExecutionAllowed: false},
-        managedSetupCandidateAvailable: false,
+        managedSetupCandidateAvailable: true,
+        managedPlan: {backendMode: 'cpu'},
         runtimeCompatibility: null,
         driverGuidance: [],
         macosInstalledRuntime: {
@@ -612,46 +629,179 @@ try {
           },
         },
       },
-    });
+    };
+    state.setupPlan = physicalMacPlan;
+    renderSetupPlan(physicalMacPlan);
     updateReadinessNextControl(false, true);
-    const review = [...document.querySelectorAll('#wizard-setup-plan button')]
-      .find((item) => item.textContent === 'Review and start local AI');
+    showWizardStep('readiness');
+    const review = document.querySelector('#wizard-readiness-next');
+    const duplicateReviewCount = [...document.querySelectorAll('#wizard-setup-plan button')]
+      .filter((item) => item.textContent === 'Review and start local AI').length;
+    state.platformFamily = 'unknown';
     document.querySelector('#wizard-readiness-next').click();
     const approval = document.querySelector('#wizard-setup-plan .setup-approval');
+    const consent = approval.querySelector('.setup-consent input[type="checkbox"]');
     const result = {
       explanation: document.querySelector('#wizard-setup-plan').textContent,
       reviewText: review.textContent,
+      duplicateReviewCount,
       approvalVisible: !approval.classList.contains('hidden'),
+      approvalAriaHidden: approval.getAttribute('aria-hidden'),
+      approvalLabelledBy: approval.getAttribute('aria-labelledby'),
       effectCount: approval.querySelectorAll('li').length,
       consentText: approval.querySelector('.setup-consent').textContent,
+      consentFocused: document.activeElement === consent,
+      actionStatus: approval.querySelector('[role="status"]').textContent,
       approveDisabled: [...approval.querySelectorAll('button')]
         .find((item) => item.textContent === 'Approve and start').disabled,
       installLinkPresent: Boolean(document.querySelector('#wizard-setup-plan a[href="https://ollama.com/download/mac"]')),
+      genericManagedPanelPresent: Boolean(document.querySelector('#alpha-installation-panel')),
+      fallbackStatusPresent: document.querySelector('#wizard-scan-status').textContent.includes('Local setup is not ready'),
       nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
       nextText: document.querySelector('#wizard-readiness-next').textContent,
+      reviewTarget: (() => {
+        const rect = review.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        return {
+          width: rect.width,
+          height: rect.height,
+          topElement: document.elementFromPoint(x, y)?.id || null,
+        };
+      })(),
     };
-    state.platformFamily = originalPlatform;
+    approval.classList.add('hidden');
+    approval.setAttribute('aria-hidden', 'true');
     return result;
   })()`);
   if (
     !macosInstalledPresentation.explanation.includes('verified official Ollama 0.33.2 in Applications')
     || !macosInstalledPresentation.explanation.includes('newer than the certified macOS version 0.32.15')
     || !macosInstalledPresentation.explanation.includes('You can continue after reviewing and approving')
-    || !macosInstalledPresentation.explanation.includes('No app or model will be downloaded')
+    || !macosInstalledPresentation.explanation.includes('download and verify that hardware-matched default under the same approval')
+    || !macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Installed · 0.33.2 · approval required')
+    || !macosInstalledPresentation.explanation.includes('Recommended AI modelqwen3.5:9b · downloaded under this setup approval if missing')
+    || macosInstalledPresentation.explanation.includes('Local AI engine (Ollama)Needed for this setup')
     || macosInstalledPresentation.reviewText !== 'Review and start local AI'
+    || macosInstalledPresentation.duplicateReviewCount !== 0
     || !macosInstalledPresentation.approvalVisible
-    || macosInstalledPresentation.effectCount !== 4
-    || !macosInstalledPresentation.consentText.includes('allow Haven 42 to start')
+    || macosInstalledPresentation.approvalAriaHidden !== 'false'
+    || macosInstalledPresentation.approvalLabelledBy !== 'macos-installed-ollama-approval-title'
+    || macosInstalledPresentation.effectCount !== 5
+    || !macosInstalledPresentation.consentText.includes('prepare qwen3.5:9b for chat now')
+    || !macosInstalledPresentation.consentFocused
+    || !macosInstalledPresentation.actionStatus.includes('Nothing has started')
     || !macosInstalledPresentation.approveDisabled
     || macosInstalledPresentation.installLinkPresent
+    || macosInstalledPresentation.genericManagedPanelPresent
+    || macosInstalledPresentation.fallbackStatusPresent
     || macosInstalledPresentation.nextDisabled
     || macosInstalledPresentation.nextText !== 'Review and start local AI'
+    || macosInstalledPresentation.reviewTarget.width < 44
+    || macosInstalledPresentation.reviewTarget.height < 44
+    || macosInstalledPresentation.reviewTarget.topElement !== 'wizard-readiness-next'
   ) throw new Error(`macos-installed-setup:${JSON.stringify(macosInstalledPresentation)}`);
-  checks += 12;
+  await trustedClick(cdp, '#wizard-readiness-next');
+  const macosReviewActivated = await cdp.evaluate(`(() => {
+    const approval = document.querySelector('#macos-installed-ollama-approval');
+    const consent = document.querySelector('#macos-installed-ollama-consent');
+    const result = {
+      visible: !approval.classList.contains('hidden'),
+      ariaHidden: approval.getAttribute('aria-hidden'),
+      consentFocused: document.activeElement === consent,
+    };
+    state.platformFamily = window.__haven42MacosInstalledOriginal.originalPlatform;
+    state.setupPlan = window.__haven42MacosInstalledOriginal.originalSetupPlan;
+    delete window.__haven42MacosInstalledOriginal;
+    return result;
+  })()`);
+  if (
+    !macosReviewActivated.visible
+    || macosReviewActivated.ariaHidden !== 'false'
+    || !macosReviewActivated.consentFocused
+  ) throw new Error(`macos-installed-review-activation:${JSON.stringify(macosReviewActivated)}`);
+  checks += 29;
   trace("macos-installed-setup-verified");
+
+  const macosConsentTarget = await cdp.evaluate(`(() => {
+    const consent = document.querySelector('#macos-installed-ollama-consent');
+    const rect = consent.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
+    return {
+      width: rect.width,
+      height: rect.height,
+      topElement: document.elementFromPoint(x, y)?.id || null,
+      checked: consent.checked,
+    };
+  })()`);
+  if (
+    macosConsentTarget.width < 20
+    || macosConsentTarget.height < 20
+    || macosConsentTarget.topElement !== 'macos-installed-ollama-consent'
+    || macosConsentTarget.checked
+  ) throw new Error(`macos-installed-consent-target:${JSON.stringify(macosConsentTarget)}`);
+  await trustedClick(cdp, '#macos-installed-ollama-consent');
+  const macosConsentActivated = await cdp.evaluate(`({
+    checked: document.querySelector('#macos-installed-ollama-consent').checked,
+    approveDisabled: [...document.querySelector('#macos-installed-ollama-approval').querySelectorAll('button')]
+      .find((item) => item.textContent === 'Approve and start').disabled,
+  })`);
+  if (!macosConsentActivated.checked || macosConsentActivated.approveDisabled) {
+    throw new Error(`macos-installed-consent-activation:${JSON.stringify(macosConsentActivated)}`);
+  }
+  checks += 6;
+  trace("macos-installed-consent-pointer-target-verified");
+
+  const activeSetupEscape = await cdp.evaluate(`(() => {
+    state.setupOperationActive = true;
+    document.querySelector('#setup-wizard').dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Escape', bubbles: true, cancelable: true,
+    }));
+    const result = {
+      wizardVisible: !document.querySelector('#setup-wizard').classList.contains('hidden'),
+      status: document.querySelector('#wizard-scan-status').textContent,
+    };
+    state.setupOperationActive = false;
+    return result;
+  })()`);
+  if (
+    !activeSetupEscape.wizardVisible
+    || !activeSetupEscape.status.includes('Setup is still running')
+  ) throw new Error(`active-setup-escape:${JSON.stringify(activeSetupEscape)}`);
+  checks += 2;
+  trace("active-setup-escape-guard-verified");
+
+  const macosInstalledFailureFeedback = await cdp.evaluate(`(async () => {
+    const approval = document.querySelector('#macos-installed-ollama-approval');
+    const consent = approval.querySelector('.setup-consent input[type="checkbox"]');
+    const approve = [...approval.querySelectorAll('button')]
+      .find((item) => item.textContent === 'Approve and start');
+    const originalApi = api;
+    api = async () => { throw new Error('macos-ollama-start-timeout'); };
+    approve.click();
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+    const result = {
+      status: document.querySelector('#macos-installed-ollama-action-status').textContent,
+      topStatus: document.querySelector('#wizard-scan-status').textContent,
+      approveText: approve.textContent,
+      approveDisabled: approve.disabled,
+    };
+    api = originalApi;
+    return result;
+  })()`);
+  if (
+    !macosInstalledFailureFeedback.status.includes('did not start within 20 seconds')
+    || macosInstalledFailureFeedback.topStatus !== macosInstalledFailureFeedback.status
+    || macosInstalledFailureFeedback.approveText !== 'Approve and try again'
+    || macosInstalledFailureFeedback.approveDisabled
+  ) throw new Error(`macos-installed-failure-feedback:${JSON.stringify(macosInstalledFailureFeedback)}`);
+  checks += 4;
+  trace("macos-installed-failure-feedback-verified");
 
   const setupPlanningHost = ["win32", "linux", "darwin"].includes(process.platform);
   if (setupPlanningHost) {
+  await cdp.evaluate("document.querySelector('#wizard-setup-plan').replaceChildren()");
   await cdp.evaluate("document.querySelector('#wizard-guided').click()");
   await waitFor(() => cdp.evaluate("document.querySelectorAll('#wizard-setup-plan .plan-action').length >= 2"));
   await waitFor(() => cdp.evaluate(`
@@ -680,6 +830,8 @@ try {
   const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
   const guidedIsWindows = /^Operating systemWindows\b/i.test(guided.factsText);
   const guidedIsMacos = /^Operating systemmacOS\b/i.test(guided.factsText);
+  const guidedHasInstalledMacosOllama = guidedIsMacos
+    && guided.planText.includes("Haven 42 verified official Ollama");
   const storageBoundaryText = guidedIsWindows
     ? "Does not use Program Files or AppData"
     : "Does not use system application folders";
@@ -733,6 +885,7 @@ try {
   if (
     guidedIsMacos
     && !guided.macosInstallLink
+    && !guidedHasInstalledMacosOllama
     && (
       !guided.nextDisabled
       || guided.nextText !== "Local setup unavailable"
@@ -740,6 +893,17 @@ try {
     )
   ) {
     throw new Error(`guided-macos-no-fitting-model:${JSON.stringify(guided)}`);
+  }
+  if (
+    guidedHasInstalledMacosOllama
+    && (
+      guided.nextDisabled
+      || guided.nextText !== "Review and start local AI"
+      || !guided.planText.includes("approval required")
+      || !guided.planText.includes("newer than the certified macOS version")
+    )
+  ) {
+    throw new Error(`guided-macos-installed-ollama:${JSON.stringify(guided)}`);
   }
   if (
     !guidedIsMacos
@@ -906,37 +1070,46 @@ try {
     }
     const approvalInitial = await cdp.evaluate(`(() => {
       document.querySelector('#alpha-setup-review').click();
+      const consent = document.querySelector('#alpha-setup-consent');
+      const rect = consent.getBoundingClientRect();
       return {
         visible: !document.querySelector('#alpha-setup-approval').classList.contains('hidden'),
-        checked: document.querySelector('#alpha-setup-consent').checked,
+        ariaHidden: document.querySelector('#alpha-setup-approval').getAttribute('aria-hidden'),
+        checked: consent.checked,
         approveDisabled: document.querySelector('#alpha-setup-approval .button.primary').disabled,
         focused: document.activeElement.id,
+        targetWidth: rect.width,
+        targetHeight: rect.height,
+        topElement: document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)?.id,
         text: document.querySelector('#alpha-setup-approval').textContent
       };
     })()`);
     if (
       !approvalInitial.visible || approvalInitial.checked || !approvalInitial.approveDisabled
+      || approvalInitial.ariaHidden !== 'false'
       || approvalInitial.focused !== "alpha-setup-consent"
+      || approvalInitial.targetWidth < 20 || approvalInitial.targetHeight < 20
+      || approvalInitial.topElement !== 'alpha-setup-consent'
       || !approvalInitial.text.includes("Your permission is required")
       || !approvalInitial.text.includes("allow Haven 42")
     ) throw new Error(`setup-approval-initial:${JSON.stringify(approvalInitial)}`);
-    const approvalEnabled = await cdp.evaluate(`(() => {
-      const consent = document.querySelector('#alpha-setup-consent');
-      consent.checked = true;
-      consent.dispatchEvent(new Event('change', {bubbles: true}));
-      return !document.querySelector('#alpha-setup-approval .button.primary').disabled;
-    })()`);
+    await trustedClick(cdp, '#alpha-setup-consent');
+    const approvalEnabled = await cdp.evaluate(`(
+      document.querySelector('#alpha-setup-consent').checked
+      && !document.querySelector('#alpha-setup-approval .button.primary').disabled
+    )`);
     if (!approvalEnabled) throw new Error("setup-approval-not-enabled");
     await cdp.evaluate("document.querySelector('#alpha-setup-approval .button.secondary').click()");
     const approvalCancelled = await cdp.evaluate(`({
       hidden: document.querySelector('#alpha-setup-approval').classList.contains('hidden'),
+      ariaHidden: document.querySelector('#alpha-setup-approval').getAttribute('aria-hidden'),
       checked: document.querySelector('#alpha-setup-consent').checked,
       focused: document.activeElement.id
     })`);
-    if (!approvalCancelled.hidden || approvalCancelled.checked || approvalCancelled.focused !== "alpha-setup-review") {
+    if (!approvalCancelled.hidden || approvalCancelled.ariaHidden !== 'true' || approvalCancelled.checked || approvalCancelled.focused !== "alpha-setup-review") {
       throw new Error(`setup-approval-cancel:${JSON.stringify(approvalCancelled)}`);
     }
-    checks += 22;
+    checks += 28;
   }
   checks += 4;
   } else {
@@ -1435,8 +1608,26 @@ try {
       || unverifiedReview.consentChecked || unverifiedReview.effects !== 4
       || !unverifiedReview.focused
     ) throw new Error(`software-update-unverified-review:${JSON.stringify(unverifiedReview)}`);
+    const softwareConsentTarget = await cdp.evaluate(`(() => {
+      const consent = document.querySelector('#software-update-unverified-consent');
+      const rect = consent.getBoundingClientRect();
+      return {
+        width: rect.width,
+        height: rect.height,
+        topElement: document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)?.id,
+      };
+    })()`);
+    if (
+      softwareConsentTarget.width < 20
+      || softwareConsentTarget.height < 20
+      || softwareConsentTarget.topElement !== 'software-update-unverified-consent'
+    ) throw new Error(`software-update-consent-target:${JSON.stringify(softwareConsentTarget)}`);
+    await trustedClick(cdp, '#software-update-unverified-consent');
+    if (!await cdp.evaluate("document.querySelector('#software-update-unverified-consent').checked")) {
+      throw new Error('software-update-consent-not-activated');
+    }
     await cdp.evaluate("document.querySelector('#cancel-software-update-review').click()");
-    checks += 15;
+    checks += 19;
   }
 
   const connectedControls = await cdp.evaluate(`({
@@ -1769,7 +1960,7 @@ try {
     || !modelsView.imageHidden
     || !modelsView.settingsClosed
     || modelsView.focused !== "models-title"
-    || modelsView.installed !== 2
+    || modelsView.installed < 2
     || !modelsView.installedLabel.includes("Already available on your server")
   ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
   checks += 8;
@@ -1797,9 +1988,23 @@ try {
             validationStatus: "candidate-only",
             capabilityEvidence: "unverified",
             hardwareFit: "unknown",
+            hardwareFitReason: null,
+            minimumSystemMemoryGiB: null,
             licenseStatus: "review-required",
             executionAllowed: false,
             installCommand: "ollama pull candidate-writing:7b"
+          }, {
+            name: "candidate-writing:3b",
+            source: "ollama-public-catalog",
+            status: "not-installed",
+            validationStatus: "candidate-only",
+            capabilityEvidence: "unverified",
+            hardwareFit: "unknown",
+            hardwareFitReason: null,
+            minimumSystemMemoryGiB: null,
+            licenseStatus: "review-required",
+            executionAllowed: false,
+            installCommand: "ollama pull candidate-writing:3b"
           }]
         }), {status: 200, headers: {"Content-Type": "application/json"}}));
       if (input === "/api/model-install/prepare") return Promise.resolve(new Response(JSON.stringify({
@@ -1813,7 +2018,9 @@ try {
         destination: "This computer",
         downloadStarted: false,
         licenseStatus: "review-required",
-        hardwareFit: "unknown"
+        hardwareFit: "unknown",
+        hardwareFitReason: null,
+        minimumSystemMemoryGiB: null
       }), {status: 200, headers: {"Content-Type": "application/json"}}));
       if (input === "/api/model-install/execute") return Promise.resolve(new Response(JSON.stringify({
         schemaVersion: 1,
@@ -1821,7 +2028,7 @@ try {
         status: "installed",
         model: "candidate-writing:7b",
         verifiedByProviderCatalog: true,
-        selectedAutomatically: false,
+        selectedAutomatically: true,
         modelOption: {
           name: "candidate-writing:7b",
           digestVerified: false,
@@ -1850,8 +2057,12 @@ try {
     query.dispatchEvent(new Event('input', {bubbles: true}));
     document.querySelector('#model-search-form').requestSubmit();
   })()`);
-  await waitFor(() => cdp.evaluate("document.querySelectorAll('#model-search-results .model-search-result').length === 1"));
-  await cdp.evaluate("document.querySelector('#model-search-results button').click()");
+  await waitFor(() => cdp.evaluate("document.querySelectorAll('#model-search-results .model-search-result').length === 2"));
+  await cdp.evaluate(`(() => {
+    const row = [...document.querySelectorAll('#model-search-results .model-search-result')]
+      .find((item) => item.querySelector('strong').textContent === 'candidate-writing:7b');
+    row.querySelector('button').click();
+  })()`);
   const discovery = await cdp.evaluate(`({
     desired: document.querySelector('#desired-model-name').textContent,
     state: document.querySelector('#desired-model-state').textContent,
@@ -1890,14 +2101,21 @@ try {
     || installReview.focused !== "model-install-review-dialog"
     || !installReview.backgroundInert
   ) throw new Error(`model-install-review:${JSON.stringify(installReview)}`);
+  await cdp.evaluate("state.modelInstallReturnToChat = true");
   await cdp.evaluate("document.querySelector('#model-install-review-dialog').dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true, cancelable: true}))");
   await waitFor(() => cdp.evaluate("document.querySelector('#model-install-review-layer').classList.contains('hidden')"));
   const installCancel = await cdp.evaluate(`({
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
     status: document.querySelector('#model-install-status').textContent,
+    returnFlagCleared: state.modelInstallReturnToChat === false,
   })`);
-  if (installCancel.focused !== "install-model-button" || installCancel.backgroundInert || !installCancel.status.includes("Nothing was downloaded")) {
+  if (
+    installCancel.focused !== "install-model-button"
+    || installCancel.backgroundInert
+    || !installCancel.status.includes("Nothing was downloaded")
+    || !installCancel.returnFlagCleared
+  ) {
     throw new Error(`model-install-cancel:${JSON.stringify(installCancel)}`);
   }
   await cdp.evaluate("document.querySelector('#install-model-button').click()");
@@ -1910,6 +2128,13 @@ try {
     percent: document.querySelector('#model-install-progress-percent').textContent,
     label: document.querySelector('#model-install-progress-label').textContent,
     detail: document.querySelector('#model-install-progress-detail').textContent,
+    activeModel: state.activeModelInstall?.model || null,
+    desiredModel: document.querySelector('#desired-model-name').textContent,
+    allCandidateButtonsDisabled: [...document.querySelectorAll('#model-search-results .model-search-result button')]
+      .every((button) => button.disabled),
+    searchDisabled: document.querySelector('#model-search-button').disabled,
+    queryDisabled: document.querySelector('#model-search-query').disabled,
+    capabilityDisabled: document.querySelector('#model-search-capability').disabled,
   })`);
   if (
     !activeInstallProgress.visible
@@ -1917,21 +2142,59 @@ try {
     || activeInstallProgress.percent !== "45%"
     || activeInstallProgress.label !== "Downloading model"
     || !activeInstallProgress.detail.includes("Downloading model files")
+    || activeInstallProgress.activeModel !== "candidate-writing:7b"
+    || activeInstallProgress.desiredModel !== "candidate-writing:7b"
+    || !activeInstallProgress.allCandidateButtonsDisabled
+    || !activeInstallProgress.searchDisabled
+    || !activeInstallProgress.queryDisabled
+    || !activeInstallProgress.capabilityDisabled
   ) throw new Error(`model-install-progress:${JSON.stringify(activeInstallProgress)}`);
   await waitFor(() => cdp.evaluate("document.querySelector('#desired-model').classList.contains('hidden')"));
   const installedCandidate = await cdp.evaluate(`({
     selected: document.querySelector('#model').value,
+    chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+    chatStatus: document.querySelector('#text-status').textContent,
+    returnFlagCleared: state.modelInstallReturnToChat === false,
+    selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
+      state.modelSelections[capabilityId]?.mode === 'manual'
+      && state.modelSelections[capabilityId]?.model === 'candidate-writing:7b'
+    )),
     status: document.querySelector('#model-search-status').textContent,
     reviewHidden: document.querySelector('#model-install-review-layer').classList.contains('hidden'),
     backgroundInert: document.querySelector('.shell').inert,
+    searchEnabled: !document.querySelector('#model-search-button').disabled,
+    queryEnabled: !document.querySelector('#model-search-query').disabled,
+    capabilityEnabled: !document.querySelector('#model-search-capability').disabled,
   })`);
   if (
     installedCandidate.selected !== "manual:candidate-writing:7b"
+    || !installedCandidate.chatVisible
+    || !installedCandidate.chatStatus.includes("installed, selected, and ready")
+    || !installedCandidate.returnFlagCleared
+    || !installedCandidate.selectedForEveryTextTask
     || !installedCandidate.status.includes("downloaded and verified")
     || !installedCandidate.reviewHidden
     || installedCandidate.backgroundInert
+    || !installedCandidate.searchEnabled
+    || !installedCandidate.queryEnabled
+    || !installedCandidate.capabilityEnabled
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
-  checks += 21;
+  checks += 35;
+
+  await cdp.evaluate("openModels()");
+  await delay(2000);
+  const installedModelReopen = await cdp.evaluate(`({
+    status: document.querySelector('#model-search-status').textContent,
+    installedRows: [...document.querySelectorAll('#model-search-results .model-search-result strong')]
+      .filter((item) => item.textContent === 'candidate-writing:7b').length,
+    requestId: state.testedModelRequestId,
+    catalogStatus: state.testedModelCatalog?.status || null,
+    publicResults: state.modelSearchResults.map((item) => item.name),
+  })`);
+  if (installedModelReopen.installedRows !== 1 || installedModelReopen.status.includes("Checking")) {
+    throw new Error(`installed-model-reopen:${JSON.stringify(installedModelReopen)}`);
+  }
+  checks += 2;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
@@ -1958,7 +2221,7 @@ try {
   const expectedUnpromotedPhysicalProfile = (
     Boolean(packagedExecutable)
     && capabilityReset.resultCount >= 1
-    && capabilityReset.status.includes("No matching qualification profile exists")
+    && capabilityReset.status.includes("tested download")
   );
   if (
     capabilityReset.query !== ""
@@ -1988,6 +2251,8 @@ try {
           validationStatus: "candidate-only",
           capabilityEvidence: "unverified",
           hardwareFit: "unknown",
+          hardwareFitReason: null,
+          minimumSystemMemoryGiB: null,
           licenseStatus: "review-required",
           executionAllowed: false,
           installCommand: "ollama pull safe:7b && hostile"
@@ -3323,7 +3588,7 @@ try {
     || navigation.models.focused !== "models-title"
     || !navigation.models.visible
     || !navigation.models.imageHidden
-    || navigation.models.installed !== 2
+    || navigation.models.installed < 2
     || !navigation.system.active
     || navigation.system.focused !== "system-workspace-title"
     || !navigation.system.visible
@@ -3606,7 +3871,7 @@ try {
         )
       }],
       manualModelCandidates: [{
-        name: 'candidate-chat:7b', automatic: false, downloadRequiresApproval: true,
+        name: 'candidate-chat:7b', automatic: false, recommended: false, downloadRequiresApproval: true,
         hardwareFit: 'matched-tested-hardware-profile',
         profileId: 'windows-amd-radeon-rx7800xt-16gib', minimumOllamaVersion: '0.32.9',
         capabilityStatus: Object.fromEntries(
@@ -3646,6 +3911,342 @@ try {
   ) throw new Error(`managed-default-handoff:${JSON.stringify(managedDefaultHandoff)}`);
   checks += 7;
   trace("managed-default-handoff-verified");
+
+  const hardwareDefaultRefresh = await cdp.evaluate(`(() => {
+    const model = 'qwen3.5:9b';
+    state.modelSelections = Object.fromEntries(
+      Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+    );
+    const missingRecommendations = Object.fromEntries(
+      Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {
+        status: 'missing', model, automatic: false, digestVerified: false,
+        hardwareFit: 'unknown', evidenceId: 'recorded-digest-differs'
+      }])
+    );
+    applyProviderConnection({
+      models: [model],
+      modelOptions: [{
+        name: model, digestVerified: false,
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'compatible'])
+        )
+      }],
+      manualModelCandidates: [{
+        name: model, automatic: true, recommended: true, downloadRequiresApproval: true,
+        hardwareFit: 'matched-tested-hardware-profile', profileId: 'macos-apple-m4-16gib',
+        minimumOllamaVersion: '0.32.15',
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+        )
+      }],
+      recommendations: missingRecommendations,
+      authentication: {mode: 'none', configured: false, persisted: false},
+      trustScope: 'loopback', transportScheme: 'http', version: '0.33.2',
+      idleUnloadSeconds: 300, providerHealth: {status: 'healthy'},
+      evidenceBoundary: {
+        catalogStatus: 'ready', immutableDigestBound: false,
+        hardwareFitMeasured: true, unknownModelsGainAuthority: false
+      }
+    }, 'http://127.0.0.1:11434', 120, 300);
+    renderWizardReadiness();
+    return {
+      allAutomatic: Object.values(state.modelSelections).every((item) => item.mode === 'automatic'),
+      allRecommended: Object.values(state.recommendations).every((item) => (
+        item.automatic && item.model === model && item.hardwareFit === 'matched-tested-hardware-profile'
+      )),
+      selected: document.querySelector('#model').value,
+      current: document.querySelector('#current-model-name').textContent,
+      modelState: document.querySelector('#model-state').textContent,
+      discoveryStatus: [...document.querySelectorAll('#model-search-results .model-search-result')]
+        .find((row) => row.querySelector('strong')?.textContent === model)?.querySelector('small')?.textContent || '',
+      readyTitle: document.querySelector('#wizard-ready-title').textContent,
+      readySummary: document.querySelector('#wizard-ready-summary').textContent,
+      finishText: document.querySelector('#wizard-finish').textContent,
+      finishDisabled: document.querySelector('#wizard-finish').disabled,
+      promptEnabled: !document.querySelector('#prompt').disabled,
+    };
+  })()`);
+  if (
+    !hardwareDefaultRefresh.allAutomatic
+    || !hardwareDefaultRefresh.allRecommended
+    || hardwareDefaultRefresh.selected !== 'automatic'
+    || hardwareDefaultRefresh.current !== 'qwen3.5:9b'
+    || !hardwareDefaultRefresh.modelState.includes('Recommended for this computer')
+    || !hardwareDefaultRefresh.modelState.includes('differ from the tested digest')
+    || !hardwareDefaultRefresh.discoveryStatus.includes('Recommended for this computer')
+    || hardwareDefaultRefresh.readyTitle !== 'Your local AI is ready'
+    || !hardwareDefaultRefresh.readySummary.includes('ready model choice')
+    || hardwareDefaultRefresh.finishText !== 'Open chat'
+    || hardwareDefaultRefresh.finishDisabled
+    || !hardwareDefaultRefresh.promptEnabled
+  ) throw new Error(`hardware-default-refresh:${JSON.stringify(hardwareDefaultRefresh)}`);
+  checks += 12;
+  trace("hardware-default-refresh-verified");
+
+  const refreshedDownloadRecovery = await cdp.evaluate(`(async () => {
+    const originalApi = api;
+    const model = 'qwen3.5:0.8b';
+    try {
+      api = async (path, body) => {
+        if (path === '/api/model-install/active') return {
+          schemaVersion: 1, kind: 'model-install-activity', activityStatus: 'active',
+          progressToken: 'c'.repeat(32), model, phase: 'downloading', progressPercent: 64,
+          completedBytes: 64, totalBytes: 100, status: 'Downloading model files', terminal: false,
+        };
+        if (path === '/api/model-install/status') return {
+          schemaVersion: 1, kind: 'model-install-progress', model, phase: 'complete',
+          progressPercent: 100, completedBytes: 100, totalBytes: 100,
+          status: 'Model downloaded and verified', terminal: true,
+        };
+        if (path === '/api/resume-provider') {
+          const resumed = await originalApi(path, body);
+          const installed = {
+            name: model, digestVerified: false,
+            capabilityStatus: Object.fromEntries(
+              Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'unverified'])
+            ),
+          };
+          return {
+            ...resumed,
+            models: [...new Set([...resumed.models, model])],
+            modelOptions: [...resumed.modelOptions.filter((option) => option.name !== model), installed],
+          };
+        }
+        return originalApi(path, body);
+      };
+      const recovered = await resumeActiveModelInstall();
+      const activePresentation = {
+        recovered,
+        modelsVisible: !document.querySelector('#models-panel').classList.contains('hidden'),
+        wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+        progress: document.querySelector('#model-install-progress-bar').value,
+        installText: document.querySelector('#install-model-button').textContent,
+      };
+      for (let attempt = 0; attempt < 30 && state.activeModelInstall; attempt += 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
+      }
+      return {
+        activePresentation,
+        completed: state.activeModelInstall === null,
+        chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+        selected: selectedModel('general.chat'),
+        installText: document.querySelector('#install-model-button').textContent,
+      };
+    } finally {
+      api = originalApi;
+    }
+  })()`);
+  if (
+    !refreshedDownloadRecovery.activePresentation.recovered
+    || !refreshedDownloadRecovery.activePresentation.modelsVisible
+    || !refreshedDownloadRecovery.activePresentation.wizardHidden
+    || refreshedDownloadRecovery.activePresentation.progress !== 64
+    || refreshedDownloadRecovery.activePresentation.installText !== 'Downloading…'
+    || !refreshedDownloadRecovery.completed
+    || !refreshedDownloadRecovery.chatVisible
+    || refreshedDownloadRecovery.selected !== 'qwen3.5:0.8b'
+    || refreshedDownloadRecovery.installText !== 'Review and install model'
+  ) throw new Error(`refreshed-download-recovery:${JSON.stringify(refreshedDownloadRecovery)}`);
+  checks += 9;
+  trace("refreshed-download-recovery-verified");
+
+  const guidedPreparationFailure = await cdp.evaluate(`(async () => {
+    const originalApi = api;
+    const model = 'qwen3.5:4b';
+    try {
+      state.modelOptions = [];
+      state.modelSelections = Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+      );
+      state.qualifiedModelCandidates = [{
+        name: model, automatic: true, recommended: true, downloadRequiresApproval: true,
+        hardwareFit: 'matched-tested-hardware-profile', profileId: 'macos-apple-m4-16gib',
+        minimumOllamaVersion: '0.32.15',
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+        )
+      }];
+      document.querySelector('#setup-wizard').classList.remove('hidden');
+      api = async (path) => {
+        if (path === '/api/model-install/prepare') throw new Error('model-install-provider-required');
+        throw new Error('unexpected-guided-failure-api:' + path);
+      };
+      const offered = await offerRecommendedModelDuringSetup(true);
+      return {
+        offered,
+        wizardVisible: !document.querySelector('#setup-wizard').classList.contains('hidden'),
+        readinessVisible: !document.querySelector('[data-wizard-step="readiness"]').classList.contains('hidden'),
+        status: document.querySelector('#wizard-scan-status').textContent,
+        pendingGuardCleared: state.defaultModelOfferPending === false,
+        returnFlagCleared: state.modelInstallReturnToChat === false,
+      };
+    } finally {
+      api = originalApi;
+    }
+  })()`);
+  if (
+    guidedPreparationFailure.offered
+    || !guidedPreparationFailure.wizardVisible
+    || !guidedPreparationFailure.readinessVisible
+    || !guidedPreparationFailure.status.includes('Nothing was downloaded')
+    || !guidedPreparationFailure.pendingGuardCleared
+    || !guidedPreparationFailure.returnFlagCleared
+  ) throw new Error(`guided-preparation-failure:${JSON.stringify(guidedPreparationFailure)}`);
+  checks += 6;
+  trace("guided-preparation-failure-recovery-verified");
+
+  const guidedDefaultInstall = await cdp.evaluate(`(async () => {
+    const originalApi = api;
+    const model = 'qwen3.5:4b';
+    let result;
+    try {
+      state.modelOptions = [];
+      state.modelSelections = Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+      );
+      state.qualifiedModelCandidates = [{
+        name: model, automatic: true, recommended: true, downloadRequiresApproval: true,
+        hardwareFit: 'matched-tested-hardware-profile', profileId: 'macos-apple-m4-16gib',
+        minimumOllamaVersion: '0.32.15',
+        capabilityStatus: Object.fromEntries(
+          Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+        )
+      }];
+      document.querySelector('#setup-wizard').classList.remove('hidden');
+      api = async (path) => {
+        if (path === '/api/model-install/prepare') return {
+          schemaVersion: 1, kind: 'model-install-approval', approvalToken: 'b'.repeat(32),
+          expiresInSeconds: 300, singleUse: true, persisted: false, model,
+          destination: 'This computer', downloadStarted: false, licenseStatus: 'review-required',
+          hardwareFit: 'compatible', hardwareFitReason: 'matched-tested-hardware-profile',
+          minimumSystemMemoryGiB: 8
+        };
+        if (path === '/api/model-install/status') return {
+          schemaVersion: 1, kind: 'model-install-progress', model, phase: 'complete',
+          progressPercent: 100, completedBytes: 1000, totalBytes: 1000,
+          status: 'Model downloaded and verified', terminal: true
+        };
+        if (path === '/api/model-install/execute') return {
+          schemaVersion: 1, kind: 'model-install-result', status: 'installed', model,
+          verifiedByProviderCatalog: true, selectedAutomatically: true,
+          modelOption: {
+            name: model, digestVerified: true,
+            capabilityStatus: Object.fromEntries(
+              Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated'])
+            )
+          }
+        };
+        throw new Error('unexpected-guided-default-api:' + path);
+      };
+      const offered = await offerRecommendedModelDuringSetup(true);
+      const review = {
+        offered,
+        wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+        modelsVisible: !document.querySelector('#models-panel').classList.contains('hidden'),
+        desired: document.querySelector('#desired-model-name').textContent,
+        approvalVisible: !document.querySelector('#model-install-review-layer').classList.contains('hidden'),
+      };
+      result = {
+        review,
+        chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+        selected: document.querySelector('#model').value,
+        selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
+          state.modelSelections[capabilityId]?.mode === 'manual'
+          && state.modelSelections[capabilityId]?.model === model
+        )),
+        desiredHidden: document.querySelector('#desired-model').classList.contains('hidden'),
+        status: document.querySelector('#text-status').textContent,
+        returnFlagCleared: state.modelInstallReturnToChat === false,
+      };
+    } finally {
+      api = originalApi;
+    }
+    return result;
+  })()`);
+  if (
+    !guidedDefaultInstall.review.offered
+    || !guidedDefaultInstall.review.wizardHidden
+    || guidedDefaultInstall.review.modelsVisible
+    || guidedDefaultInstall.review.desired !== 'qwen3.5:4b'
+    || guidedDefaultInstall.review.approvalVisible
+    || !guidedDefaultInstall.chatVisible
+    || guidedDefaultInstall.selected !== 'manual:qwen3.5:4b'
+    || !guidedDefaultInstall.selectedForEveryTextTask
+    || !guidedDefaultInstall.desiredHidden
+    || !guidedDefaultInstall.status.includes('installed, selected, and ready')
+    || !guidedDefaultInstall.returnFlagCleared
+  ) throw new Error(`guided-default-model-install:${JSON.stringify(guidedDefaultInstall)}`);
+  checks += 13;
+  trace("guided-default-model-install-verified");
+  const conversationModelGate = await cdp.evaluate(`(() => {
+    const previousSelections = structuredClone(state.modelSelections);
+    try {
+      const model = state.modelOptions[0].name;
+      state.modelSelections = {
+        'general.chat': {mode: 'none', model: null},
+        'content.write': {mode: 'manual', model},
+        'content.summarize': {mode: 'none', model: null},
+      };
+      renderWizardReadiness();
+      return {
+        usable: hasUsableTextModel(),
+        title: document.querySelector('#wizard-ready-title').textContent,
+        finish: document.querySelector('#wizard-finish').textContent,
+      };
+    } finally {
+      state.modelSelections = previousSelections;
+      renderWizardReadiness();
+    }
+  })()`);
+  if (
+    conversationModelGate.usable
+    || conversationModelGate.title !== 'A model is still needed'
+    || conversationModelGate.finish !== 'Choose a model'
+  ) throw new Error(`conversation-model-setup-gate:${JSON.stringify(conversationModelGate)}`);
+  checks += 3;
+  trace("conversation-model-setup-gate-verified");
+  const guidedInstalledDefault = await cdp.evaluate(`(() => {
+    const model = 'qwen3.5:4b';
+    state.modelOptions = [{
+      name: model, digestVerified: true,
+      capabilityStatus: Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated'])
+      )
+    }];
+    state.modelSelections = Object.fromEntries(
+      Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, {mode: 'none', model: null}])
+    );
+    state.qualifiedModelCandidates = [{
+      name: model, automatic: true, recommended: true, downloadRequiresApproval: true,
+      hardwareFit: 'matched-tested-hardware-profile', profileId: 'macos-apple-m4-16gib',
+      minimumOllamaVersion: '0.32.15',
+      capabilityStatus: Object.fromEntries(
+        Object.keys(CAPABILITIES).map((capabilityId) => [capabilityId, 'validated-on-matching-hardware'])
+      )
+    }];
+    document.querySelector('#setup-wizard').classList.remove('hidden');
+    return offerRecommendedModelDuringSetup(true).then((offered) => ({
+      offered,
+      wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+      chatVisible: !document.querySelector('#text-panel').classList.contains('hidden'),
+      selectedForEveryTextTask: Object.keys(CAPABILITIES).every((capabilityId) => (
+        state.modelSelections[capabilityId]?.mode === 'manual'
+        && state.modelSelections[capabilityId]?.model === model
+      )),
+      status: document.querySelector('#text-status').textContent,
+      returnFlagCleared: state.modelInstallReturnToChat === false,
+    }));
+  })()`);
+  if (
+    !guidedInstalledDefault.offered
+    || !guidedInstalledDefault.wizardHidden
+    || !guidedInstalledDefault.chatVisible
+    || !guidedInstalledDefault.selectedForEveryTextTask
+    || !guidedInstalledDefault.status.includes('selected and ready')
+    || !guidedInstalledDefault.returnFlagCleared
+  ) throw new Error(`guided-installed-default:${JSON.stringify(guidedInstalledDefault)}`);
+  checks += 6;
+  trace("guided-installed-default-verified");
   await cdp.evaluate(`(() => {
     state.qualifiedModelCandidates = [];
     renderModelSelect();
@@ -4189,11 +4790,40 @@ try {
     checks += 43;
     trace("product-research-runtime-verified");
   }
+  models = [];
   await waitFor(() => cdp.evaluate(`(
     connectProvider('http://127.0.0.1:${fakePort}', 30, 300, 'bearer', '${browserAuthSecret}')
       .then(() => true)
       .catch(() => false)
   )`));
+  await cdp.evaluate("location.reload()");
+  await waitFor(() => cdp.evaluate("document.readyState === 'complete' && Boolean(document.querySelector('#setup-wizard'))"));
+  await waitFor(() => cdp.evaluate("state.connected && !document.querySelector('#setup-wizard').classList.contains('hidden')"));
+  await waitFor(() => cdp.evaluate("!document.querySelector('[data-wizard-step=\"readiness\"]').classList.contains('hidden')"));
+  const connectedWithoutModel = await cdp.evaluate(`({
+    connected: state.connected,
+    setupVisible: !document.querySelector('#setup-wizard').classList.contains('hidden'),
+    readinessVisible: !document.querySelector('[data-wizard-step="readiness"]').classList.contains('hidden'),
+    promptDisabled: document.querySelector('#prompt').disabled,
+    selectedModel: document.querySelector('#current-model-name').textContent,
+  })`);
+  if (
+    !connectedWithoutModel.connected
+    || !connectedWithoutModel.setupVisible
+    || !connectedWithoutModel.readinessVisible
+    || !connectedWithoutModel.promptDisabled
+    || connectedWithoutModel.selectedModel !== 'No model selected'
+  ) throw new Error(`connected-without-model-refresh:${JSON.stringify(connectedWithoutModel)}`);
+  checks += 5;
+  trace("connected-without-model-refresh-recovery-verified");
+
+  models = ["qwen3.5:9b", "unknown-model:latest"];
+  await waitFor(() => cdp.evaluate(`(
+    connectProvider('http://127.0.0.1:${fakePort}', 30, 300, 'bearer', '${browserAuthSecret}')
+      .then(() => true)
+      .catch(() => false)
+  )`));
+  await cdp.evaluate("document.querySelector('#setup-wizard').classList.add('hidden')");
   await cdp.evaluate("document.querySelector('#models-nav').click()");
   await waitFor(() => cdp.evaluate("!document.querySelector('#models-panel').classList.contains('hidden')"));
   await cdp.evaluate("location.reload()");
@@ -4261,6 +4891,22 @@ try {
   ) throw new Error(`accessibility-statement:${JSON.stringify(accessibilityStatement)}`);
   checks += 15;
   trace("accessibility-statement-verified");
+  await cdp.call("Page.close");
+  cdp.close();
+  cdp = undefined;
+  await waitForExit(haven, 20000);
+  if (haven.exitCode !== 0) {
+    throw new Error(`browser-close-runtime-exit:${haven.exitCode}`);
+  }
+  let portReleased = false;
+  try {
+    await fetch(`${origin}/api/bootstrap`, { signal: AbortSignal.timeout(1000) });
+  } catch {
+    portReleased = true;
+  }
+  if (!portReleased) throw new Error("browser-close-port-still-open");
+  checks += 2;
+  trace("browser-close-runtime-cleanup-verified");
   console.log("Haven 42 browser evidence gates passed: bounded-attachments, automated-accessibility, local-privacy-boundary.");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
 } finally {

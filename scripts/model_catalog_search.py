@@ -96,12 +96,12 @@ def _catalog_ssl_context() -> ssl.SSLContext:
     raise ModelCatalogSearchError("model-catalog-system-trust-unavailable")
 
 
-def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
-    """Send only a bounded query to the fixed public catalog and return model names."""
-    query = validate_query(query)
-    if timeout_seconds < 1 or timeout_seconds > 15:
-        raise ModelCatalogSearchError("invalid-model-search-timeout")
-    url = CATALOG_ORIGIN + "/search?" + urllib.parse.urlencode({"q": query})
+def _fetch_catalog_html(path: str, timeout_seconds: int, query: str | None = None) -> str:
+    if not path.startswith("/") or ".." in path or not re.fullmatch(r"/[A-Za-z0-9._/:+-]+", path):
+        raise ModelCatalogSearchError("invalid-model-catalog-path")
+    url = CATALOG_ORIGIN + path
+    if query is not None:
+        url += "?" + urllib.parse.urlencode({"q": query})
     request = urllib.request.Request(
         url,
         headers={
@@ -122,7 +122,7 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
             if (
                 final.scheme != "https"
                 or final.netloc != "ollama.com"
-                or final.path != "/search"
+                or final.path != path
                 or response.status != 200
             ):
                 raise ModelCatalogSearchError("invalid-model-catalog-response")
@@ -139,4 +139,50 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
         if isinstance(error, ModelCatalogSearchError):
             raise
         raise ModelCatalogSearchError("model-catalog-search-failed") from error
-    return parse_ollama_search_html(data.decode("utf-8", errors="strict"))
+    return data.decode("utf-8", errors="strict")
+
+
+def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
+    """Return matching families and their bounded official Ollama tag variants."""
+    query = validate_query(query)
+    if timeout_seconds < 1 or timeout_seconds > 15:
+        raise ModelCatalogSearchError("invalid-model-search-timeout")
+    normalized_query = query.casefold().replace(" ", "")
+
+    # A tag-like query must be admitted by the official family tag page. The
+    # general search page may echo an unknown tag in navigation markup, which
+    # is not evidence that Ollama can actually pull it.
+    requested_leaf = normalized_query.rsplit("/", 1)[-1]
+    if ":" in requested_leaf:
+        family = normalized_query.rsplit(":", 1)[0]
+        encoded = urllib.parse.quote(family, safe="._+-/")
+        variants = parse_ollama_search_html(
+            _fetch_catalog_html(f"/library/{encoded}/tags", timeout_seconds)
+        )
+        return [model for model in variants if model.casefold() == normalized_query][:1]
+
+    models = parse_ollama_search_html(_fetch_catalog_html("/search", timeout_seconds, query))
+    families = [
+        model for model in models
+        if ":" not in model.rsplit("/", 1)[-1]
+        and normalized_query in model.casefold()
+    ][:3]
+    expanded: list[str] = []
+    exact_family = next(
+        (family for family in families if family.casefold() == normalized_query),
+        None,
+    )
+    selected_families = [exact_family] if exact_family else families
+    for family in selected_families:
+        if family is None:
+            continue
+        if family not in expanded:
+            expanded.append(family)
+        encoded = urllib.parse.quote(family, safe="._+-")
+        variants = parse_ollama_search_html(
+            _fetch_catalog_html(f"/library/{encoded}/tags", timeout_seconds)
+        )
+        limit = MAX_RESULTS - 1 if exact_family else 5
+        expanded.extend(model for model in variants[:limit] if model not in expanded)
+    expanded.extend(model for model in models if model not in expanded)
+    return expanded[:MAX_RESULTS]

@@ -84,7 +84,7 @@ def wrapped_package_records(app: Path) -> list[dict[str, object]]:
     frameworks = app / "Contents" / "Frameworks"
     for name in sorted(
         {
-            "Python", "Python.framework", "base_library.zip", "config",
+            "Python", "Python.framework", "base_library.zip", "config", "examples",
             "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
             "package", "python3.14", "scripts", "web",
         }
