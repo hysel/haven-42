@@ -347,6 +347,7 @@ test_test_tier_contract() {
     grep -q 'haven-42-test-receipt-v1' "$REPO_ROOT/scripts/test-pack.shared.sh" &&
     grep -q 'Exact content-tree full-test receipt found' "$REPO_ROOT/.githooks/pre-push" &&
     grep -q 'schema=3' "$REPO_ROOT/.githooks/pre-push" &&
+    grep -q 'git rev-parse --local-env-vars' "$REPO_ROOT/.githooks/pre-push" &&
     grep -q 'ensure-test-python3.shared.sh' "$REPO_ROOT/.githooks/pre-commit" &&
     grep -q 'security-review-gate.py' "$REPO_ROOT/.githooks/pre-commit" &&
     grep -q 'verify-pre-commit-readiness.py' "$REPO_ROOT/.githooks/pre-commit" &&
