@@ -8,6 +8,7 @@ LICENSE text eol=lf
 .githooks/* text eol=lf
 scripts/test-shims/* text eol=lf
 package/licenses/* text eol=lf
+examples/*.md text eol=lf
 web/static/index.html text eol=lf
 web/static/accessibility.html text eol=lf
 web/static/app.js text eol=lf

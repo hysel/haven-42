@@ -360,6 +360,7 @@ def main() -> int:
     assert "VCRUNTIME" in spec_text
     attributes_text = (ROOT / ".gitattributes").read_text(encoding="utf-8")
     assert "LICENSE text eol=lf" in attributes_text.splitlines()
+    assert "examples/*.md text eol=lf" in attributes_text.splitlines()
     for relative in MODULE.RESOURCE_PATHS:
         assert f'("{relative}",' in spec_text, (
             f"protected resource is missing from the PyInstaller data list: {relative}"
