@@ -15,10 +15,24 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 SCRIPT = ROOT / "scripts" / "alpha2-macos-sign-and-notarize.py"
+BUILDER_SCRIPT = ROOT / "scripts" / "build-macos-development-app.py"
+VALIDATOR_SCRIPT = ROOT / "scripts" / "validate-macos-development-app.py"
 SPEC = importlib.util.spec_from_file_location("alpha2_macos_sign_and_notarize", SCRIPT)
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC and SPEC.loader
 SPEC.loader.exec_module(MODULE)
+BUILDER_SPEC = importlib.util.spec_from_file_location(
+    "macos_development_app_builder_for_signing_contract", BUILDER_SCRIPT,
+)
+BUILDER = importlib.util.module_from_spec(BUILDER_SPEC)
+assert BUILDER_SPEC and BUILDER_SPEC.loader
+BUILDER_SPEC.loader.exec_module(BUILDER)
+VALIDATOR_SPEC = importlib.util.spec_from_file_location(
+    "macos_development_app_validator_for_signing_contract", VALIDATOR_SCRIPT,
+)
+VALIDATOR = importlib.util.module_from_spec(VALIDATOR_SPEC)
+assert VALIDATOR_SPEC and VALIDATOR_SPEC.loader
+VALIDATOR_SPEC.loader.exec_module(VALIDATOR)
 IDENTITY = "A" * 40
 
 
@@ -90,6 +104,12 @@ class FakeRunner:
 
 
 class SigningTests(unittest.TestCase):
+    def test_source_link_contract_matches_builder_and_validator(self) -> None:
+        self.assertEqual(MODULE.SOURCE_APP_LINKS, BUILDER.APP_LINKS)
+        self.assertEqual(MODULE.SOURCE_APP_LINKS, VALIDATOR.APP_LINKS)
+        self.assertIn("Contents/Frameworks/examples", MODULE.SOURCE_APP_LINKS)
+        self.assertEqual(len(MODULE.SOURCE_APP_LINKS), 12)
+
     def test_framework_macho_files_are_signed_as_one_framework_bundle(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             app = source_app(Path(temporary))
