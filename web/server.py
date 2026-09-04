@@ -4021,7 +4021,7 @@ class HavenWebServer(ThreadingHTTPServer):
             self._request_slots.release()
 
     def handle_error(self, request: socket.socket, client_address: Any) -> None:
-        error = sys.exception()
+        error = sys.exc_info()[1]
         if isinstance(error, (BrokenPipeError, ConnectionAbortedError, ConnectionResetError)):
             # A browser can retire a keep-alive connection while the desktop
             # session is closing. This is expected client lifecycle behavior,
