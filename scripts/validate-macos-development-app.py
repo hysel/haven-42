@@ -17,7 +17,7 @@ APP_NAME = "Haven 42.app"
 ARCHIVE_NAME = "haven42-darwin-arm64-unsigned-development-app.tar.gz"
 EXPECTED_FILES = {APP_NAME, ARCHIVE_NAME, "macos-app-build-result.json", "SHA256SUMS"}
 RESOURCE_RUNTIME_ENTRIES = {
-    "base_library.zip", "config", "package", "scripts", "web",
+    "base_library.zip", "config", "examples", "package", "scripts", "web",
 }
 APP_LINKS = {
     "Contents/Frameworks/Python": "Python.framework/Versions/3.14/Python",

@@ -613,7 +613,8 @@ def verify_packaged_resources(path: Path = INTEGRITY_MANIFEST_PATH) -> dict[str,
         actual = {
             target.relative_to(ROOT).as_posix()
             for parent in (
-                ROOT / "web" / "static", ROOT / "config", ROOT / "scripts",
+                ROOT / "web" / "static", ROOT / "config", ROOT / "examples",
+                ROOT / "scripts",
             )
             if parent.is_dir()
             for target in parent.rglob("*")
@@ -4018,6 +4019,15 @@ class HavenWebServer(ThreadingHTTPServer):
             super().process_request_thread(request, client_address)
         finally:
             self._request_slots.release()
+
+    def handle_error(self, request: socket.socket, client_address: Any) -> None:
+        error = sys.exception()
+        if isinstance(error, (BrokenPipeError, ConnectionAbortedError, ConnectionResetError)):
+            # A browser can retire a keep-alive connection while the desktop
+            # session is closing. This is expected client lifecycle behavior,
+            # not an application failure worth printing as a traceback.
+            return
+        super().handle_error(request, client_address)
 
     def server_close(self) -> None:
         self.browser_lifecycle.close()

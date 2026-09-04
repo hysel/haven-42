@@ -3,8 +3,8 @@
   "resources": [
     {
       "path": "web/static/index.html",
-      "sha256": "9c676de0a492ead2bff8be9c5929e64d222d8f220e27042f53f952f1132b3bb3",
-      "sizeBytes": 79072
+      "sha256": "0f1f5d4db07245d541b3cb55201cd59f56bc8486add742d2016fd9a881b77e61",
+      "sizeBytes": 79085
     },
     {
       "path": "web/static/accessibility.html",
@@ -13,13 +13,13 @@
     },
     {
       "path": "web/static/app.js",
-      "sha256": "05e2e7d0a543a10e9ec335c9ac1bd33210be90dae86a5c3ae9102410e8dfdf47",
-      "sizeBytes": 321126
+      "sha256": "2cc6f2a166144bc58d5746634ad67a90fdfd8782d7f9a360a7dbdc63cb435b9b",
+      "sizeBytes": 323543
     },
     {
       "path": "web/static/styles.css",
-      "sha256": "df103f82c22d944336d32fcd4b6b2070406a0ccfd133bfb429717188743397a4",
-      "sizeBytes": 88184
+      "sha256": "222795e294c18e9554fffd1b734fc88d2f14e3f5726f33345eee172d73dfae36",
+      "sizeBytes": 88414
     },
     {
       "path": "config/text-capability-model-recommendations.json",
@@ -30,6 +30,26 @@
       "path": "config/hardware-qualified-chat-models.json",
       "sha256": "fb7ef3ae327b93af911274f7bee4a30aff8cb64a2425c7b40b6fcc29e46321dc",
       "sizeBytes": 3049
+    },
+    {
+      "path": "examples/apple-m4-16gib-model-qualification.md",
+      "sha256": "36dbf5170763f8dac5771b069ac7ed3d83fb8a63760fcb6c27a007c92126d383",
+      "sizeBytes": 9889
+    },
+    {
+      "path": "examples/amd-rx6800-linux-model-qualification.md",
+      "sha256": "d06ba79572951227bdbe4e089b83cfda650fb23c84187446a0b2188b461ded08",
+      "sizeBytes": 2978
+    },
+    {
+      "path": "examples/amd-rx6800-windows-model-qualification.md",
+      "sha256": "564e5d4921ff86f8a5e2772f3ee83a1eb36227d4a961d27bb52a1ef3baab4c8b",
+      "sizeBytes": 6232
+    },
+    {
+      "path": "examples/windows-amd-rx7800xt-ollama0329-recertification.md",
+      "sha256": "4e77a01f238b844cfdf5be2aacfd9c5f2bb34bb2915eaab51cfc5466e051db1f",
+      "sizeBytes": 3804
     },
     {
       "path": "config/evidence-catalog.tsv",

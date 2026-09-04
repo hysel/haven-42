@@ -628,6 +628,10 @@ summary { cursor: pointer; font-size: 12px; }
 .model-library-link { flex: 0 0 auto; min-height: 44px; text-align: right; white-space: nowrap; }
 .button.text-button { padding: 7px 0; color: var(--accent); background: transparent; font-size: 11px; }
 .messages { flex: 1 1 auto; padding: 10px 24px 24px; min-height: 0; overflow: auto; }
+/* Haven 42 owns chat follow behavior. Browser scroll anchoring can otherwise
+   move a reader who intentionally scrolled to an older message when a
+   streamed response adds content below. */
+.messages { overflow-anchor: none; }
 .model-switch-prompt { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 24px 10px; padding: 12px 14px; border: 1px solid rgba(98, 230, 198, 0.35); border-radius: 12px; background: rgba(98, 230, 198, 0.08); }
 .model-switch-prompt strong { display: block; font-size: 12px; }
 .model-switch-prompt p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }

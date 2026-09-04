@@ -36,7 +36,7 @@ def source_fixture(root: Path) -> Path:
     internal = source / "_internal"
     internal.mkdir()
     (internal / "base_library.zip").write_bytes(b"fixture")
-    for name in ("config", "package", "scripts", "web"):
+    for name in ("config", "examples", "package", "scripts", "web"):
         directory = internal / name
         directory.mkdir()
         (directory / "fixture.txt").write_text("fixture", encoding="utf-8")
@@ -72,11 +72,11 @@ def expect(directory: Path, code: str) -> None:
 def main() -> int:
     if os.name == "nt":
         assert VALIDATOR.EXPECTED_FRAMEWORK_ENTRIES == {
-            "Python", "Python.framework", "base_library.zip", "config",
+            "Python", "Python.framework", "base_library.zip", "config", "examples",
             "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
             "package", "python3.14", "python3__dot__14", "scripts", "web",
         }
-        assert len(VALIDATOR.APP_LINKS) == 11
+        assert len(VALIDATOR.APP_LINKS) == 12
         print("macOS development app validator tests: 4 passed (Windows contract; native link tests run on macOS)")
         return 0
     with tempfile.TemporaryDirectory(prefix="haven42-macos-app-validator-") as temporary:

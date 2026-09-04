@@ -368,6 +368,17 @@ def main() -> int:
             assert f"{relative} text eol=lf" in attributes_text.splitlines(), (
                 f"protected static resource lacks an LF checkout rule: {relative}"
             )
+    qualified_catalog = json.loads(
+        (ROOT / "config" / "hardware-qualified-chat-models.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    qualified_evidence = {
+        profile["evidence"] for profile in qualified_catalog["profiles"]
+    }
+    assert qualified_evidence <= set(MODULE.RESOURCE_PATHS), (
+        "every packaged hardware-qualified profile must include its reviewed evidence"
+    )
     build_text = (ROOT / "scripts/build-portable-development-package.py").read_text(
         encoding="utf-8"
     )

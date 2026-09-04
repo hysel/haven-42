@@ -600,6 +600,7 @@ try {
   const macosInstalledPresentation = await cdp.evaluate(`(() => {
     const originalPlatform = state.platformFamily;
     const originalSetupPlan = state.setupPlan;
+    window.__haven42MacosInstalledOriginal = {originalPlatform, originalSetupPlan};
     state.platformFamily = 'macos';
     const effects = [
       "Verify the installed Ollama app's code signature and Gatekeeper approval.",
@@ -658,9 +659,19 @@ try {
       fallbackStatusPresent: document.querySelector('#wizard-scan-status').textContent.includes('Local setup is not ready'),
       nextDisabled: document.querySelector('#wizard-readiness-next').disabled,
       nextText: document.querySelector('#wizard-readiness-next').textContent,
+      reviewTarget: (() => {
+        const rect = review.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        return {
+          width: rect.width,
+          height: rect.height,
+          topElement: document.elementFromPoint(x, y)?.id || null,
+        };
+      })(),
     };
-    state.platformFamily = originalPlatform;
-    state.setupPlan = originalSetupPlan;
+    approval.classList.add('hidden');
+    approval.setAttribute('aria-hidden', 'true');
     return result;
   })()`);
   if (
@@ -686,8 +697,30 @@ try {
     || macosInstalledPresentation.fallbackStatusPresent
     || macosInstalledPresentation.nextDisabled
     || macosInstalledPresentation.nextText !== 'Review and start local AI'
+    || macosInstalledPresentation.reviewTarget.width < 44
+    || macosInstalledPresentation.reviewTarget.height < 44
+    || macosInstalledPresentation.reviewTarget.topElement !== 'wizard-readiness-next'
   ) throw new Error(`macos-installed-setup:${JSON.stringify(macosInstalledPresentation)}`);
-  checks += 23;
+  await trustedClick(cdp, '#wizard-readiness-next');
+  const macosReviewActivated = await cdp.evaluate(`(() => {
+    const approval = document.querySelector('#macos-installed-ollama-approval');
+    const consent = document.querySelector('#macos-installed-ollama-consent');
+    const result = {
+      visible: !approval.classList.contains('hidden'),
+      ariaHidden: approval.getAttribute('aria-hidden'),
+      consentFocused: document.activeElement === consent,
+    };
+    state.platformFamily = window.__haven42MacosInstalledOriginal.originalPlatform;
+    state.setupPlan = window.__haven42MacosInstalledOriginal.originalSetupPlan;
+    delete window.__haven42MacosInstalledOriginal;
+    return result;
+  })()`);
+  if (
+    !macosReviewActivated.visible
+    || macosReviewActivated.ariaHidden !== 'false'
+    || !macosReviewActivated.consentFocused
+  ) throw new Error(`macos-installed-review-activation:${JSON.stringify(macosReviewActivated)}`);
+  checks += 29;
   trace("macos-installed-setup-verified");
 
   const macosConsentTarget = await cdp.evaluate(`(() => {
@@ -2147,6 +2180,21 @@ try {
     || !installedCandidate.capabilityEnabled
   ) throw new Error(`model-install-complete:${JSON.stringify(installedCandidate)}`);
   checks += 35;
+
+  await cdp.evaluate("openModels()");
+  await delay(2000);
+  const installedModelReopen = await cdp.evaluate(`({
+    status: document.querySelector('#model-search-status').textContent,
+    installedRows: [...document.querySelectorAll('#model-search-results .model-search-result strong')]
+      .filter((item) => item.textContent === 'candidate-writing:7b').length,
+    requestId: state.testedModelRequestId,
+    catalogStatus: state.testedModelCatalog?.status || null,
+    publicResults: state.modelSearchResults.map((item) => item.name),
+  })`);
+  if (installedModelReopen.installedRows !== 1 || installedModelReopen.status.includes("Checking")) {
+    throw new Error(`installed-model-reopen:${JSON.stringify(installedModelReopen)}`);
+  }
+  checks += 2;
   await cdp.evaluate(`(() => {
     state.modelOptions = state.modelOptions.filter((item) => item.name !== "candidate-writing:7b");
     state.modelSelections[document.querySelector('#model-search-capability').value] = {mode: 'manual', model: 'unknown-model:latest'};
@@ -2173,7 +2221,7 @@ try {
   const expectedUnpromotedPhysicalProfile = (
     Boolean(packagedExecutable)
     && capabilityReset.resultCount >= 1
-    && capabilityReset.status.includes("No matching qualification profile exists")
+    && capabilityReset.status.includes("tested download")
   );
   if (
     capabilityReset.query !== ""

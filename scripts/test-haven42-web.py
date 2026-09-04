@@ -331,6 +331,17 @@ def main() -> int:
     else:
         raise AssertionError("unexpected socket failures must remain visible")
     checks += 1
+    server = object.__new__(WEB.HavenWebServer)
+    for disconnect_error in (
+        BrokenPipeError("client closed before request handling"),
+        ConnectionAbortedError("client aborted before request handling"),
+        ConnectionResetError("client reset before request handling"),
+    ):
+        try:
+            raise disconnect_error
+        except type(disconnect_error):
+            server.handle_error(None, ("127.0.0.1", 1))
+        checks += 1
     try:
         WEB._request_process_shutdown(15, None)
     except KeyboardInterrupt:

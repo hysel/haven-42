@@ -1708,14 +1708,15 @@ async function executeModelInstall() {
       || !result.modelOption.capabilityStatus
     ) throw new Error("invalid-model-install-result");
     state.modelOptions = [...state.modelOptions.filter((item) => ![model, installedName].includes(item.name)), result.modelOption];
+    // A completed download now belongs to the installed-model catalog. Remove
+    // its transient public-search entry so later hardware checks do not mistake
+    // it for an active public-search result and leave the status stuck on
+    // "Checking qualification evidence…".
     state.modelSearchResults = state.modelSearchResults
-      .filter((item) => item.name !== model)
-      .concat({
-        name: installedName, source: "ollama-public-catalog", status: "installed",
-        validationStatus: "candidate-only", capabilityEvidence: "unverified",
-        hardwareFit: "unknown", hardwareFitReason: null, minimumSystemMemoryGiB: null,
-        licenseStatus: "review-required", executionAllowed: true, installCommand: null,
-      });
+      .filter((item) => ![model, installedName].includes(item.name));
+    // Ignore any hardware-catalog request that began before the provider
+    // confirmed this install. A fresh request is issued when Models opens.
+    state.testedModelRequestId += 1;
     const capabilityId = byId("model-search-capability").value;
     assignModelToSupportedCapabilities(result.modelOption, capabilityId);
     state.desiredModel = null;
@@ -1850,7 +1851,12 @@ async function loadHardwareMatchedModels() {
     renderModelDiscovery();
     return;
   }
-  byId("model-search-status").textContent = "Checking qualification evidence for this AI computer…";
+  const searchStatus = byId("model-search-status");
+  const preservingCompletedPublicSearch = state.modelSearchResults.length > 0
+    && searchStatus.textContent.includes("Nothing was downloaded.");
+  if (!preservingCompletedPublicSearch) {
+    searchStatus.textContent = "Checking qualification evidence for this AI computer…";
+  }
   try {
     const result = validateTestedModelCatalog(await api("/api/models/tested", {}));
     if (requestId !== state.testedModelRequestId) return;
@@ -1976,10 +1982,24 @@ function renderModelDiscovery() {
   });
   const testedCatalog = state.testedModelCatalog;
   const publicMatches = state.modelSearchResults.filter((item) => modelMatchesQuery(item.name, query)).length;
-  if (publicMatches > 0) {
+  const testedDownloads = results.filter(
+    (item) => item.validationStatus === "validated-on-matching-hardware",
+  ).length;
+  const preservingCompletedPublicSearch = publicMatches > 0
+    && (
+      byId("model-search-status").textContent.includes("Nothing was downloaded.")
+      || byId("model-search-status").textContent.includes("downloaded and verified")
+    );
+  if (preservingCompletedPublicSearch) {
     // Preserve the explicit public-search result message, including its no-download disclosure.
   } else if (testedCatalog?.status === "remote-hardware-not-verifiable") {
     byId("model-search-status").textContent = "This connected AI server does not report enough hardware information for Haven 42 to match a tested profile. Installed models remain available, and you can search the public catalog.";
+  } else if (
+    testedCatalog?.status === "no-matching-evidence"
+    && (installed.length > 0 || testedDownloads > 0)
+  ) {
+    const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
+    byId("model-search-status").textContent = `${installed.length} installed and ${testedDownloads} tested download${testedDownloads === 1 ? "" : "s"} shown for ${capabilityLabel}.`;
   } else if (testedCatalog?.status === "no-matching-evidence") {
     byId("model-search-status").textContent = "No matching qualification profile exists for this AI computer yet. Installed models remain available without a hardware-tested label.";
   } else if (["exact-profile", "runtime-differs"].includes(testedCatalog?.status)) {
@@ -1990,12 +2010,8 @@ function renderModelDiscovery() {
     byId("model-search-status").textContent = `${count} tested choice${count === 1 ? "" : "s"} match ${testedCatalog.profile.hardware} on ${testedCatalog.profile.operatingSystem}.${runtimeNote}`;
   } else if (results.length === 0 && !byId("model-search-status").textContent.includes("Searching")) {
     byId("model-search-status").textContent = "No installed or catalog matches yet.";
-  } else if (
-    installed.length > 0
-    || results.some((item) => item.validationStatus === "validated-on-matching-hardware")
-  ) {
+  } else if (installed.length > 0 || testedDownloads > 0) {
     const capabilityLabel = CAPABILITIES[capabilityId].modelLabel.replace(" model", "");
-    const testedDownloads = results.filter((item) => item.validationStatus === "validated-on-matching-hardware").length;
     byId("model-search-status").textContent = `${installed.length} installed and ${testedDownloads} tested download${testedDownloads === 1 ? "" : "s"} shown for ${capabilityLabel}.`;
   }
   if (desired.parentElement !== container) container.append(desired);
@@ -2937,6 +2953,36 @@ async function runMacOSInstalledOllamaSetup(
   actionStatus.textContent = "Verifying the installed Ollama app and starting local AI…";
   byId("wizard-scan-status").textContent = "Verifying and starting the installed Ollama app…";
   try {
+    // Another browser window may have completed this same app session after
+    // this page loaded. Reuse only the exact managed loopback endpoint; never
+    // treat an unrelated or remote provider as completion of this approval.
+    try {
+      const resumed = await api("/api/resume-provider", {});
+      if (
+        resumed.sessionResume === true
+        && resumed.configurationPersisted === false
+        && resumed.trustScope === "loopback"
+        && resumed.endpoint === "http://127.0.0.1:11435"
+        && Number.isSafeInteger(resumed.timeoutSeconds)
+      ) {
+        applyProviderConnection(
+          resumed, resumed.endpoint, resumed.timeoutSeconds,
+          resumed.idleUnloadSeconds,
+        );
+        actionStatus.textContent = "Local AI was already running and is connected.";
+        approvalPanel.classList.add("hidden");
+        approvalPanel.setAttribute("aria-hidden", "true");
+        if (await offerRecommendedModelDuringSetup(true)) {
+          byId("wizard-scan-status").textContent = "The running local AI and its best tested model are selected and ready for chat.";
+          return;
+        }
+        throw new Error("guided-default-model-unavailable");
+      }
+    } catch (resumeError) {
+      if (resumeError.message === "guided-default-model-unavailable") throw resumeError;
+      // No matching running session is the normal first-start path. The
+      // reviewed approval below remains required before anything starts.
+    }
     const approval = await api("/api/macos/installed-ollama-approve", {
       planId: plan.planId,
       effects: plan.effects,

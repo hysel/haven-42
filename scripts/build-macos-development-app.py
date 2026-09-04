@@ -33,7 +33,7 @@ ALLOWED_SOURCE_LINKS = {
     "_internal/Python.framework/Versions/Current": "3.14",
 }
 RESOURCE_RUNTIME_ENTRIES = {
-    "base_library.zip", "config", "package", "scripts", "web",
+    "base_library.zip", "config", "examples", "package", "scripts", "web",
 }
 FRAMEWORK_FILE_ENTRIES = {
     "libcrypto.3.dylib", "libssl.3.dylib", "libzstd.1.dylib",
