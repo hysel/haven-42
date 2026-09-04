@@ -36,7 +36,7 @@ ALLOWED_VERSIONS = {"0.4.0-alpha.2"}
 IDENTITY_SHA1 = re.compile(r"[0-9A-Fa-f]{40}")
 PROFILE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}")
 RESOURCE_RUNTIME_ENTRIES = {
-    "base_library.zip", "config", "package", "scripts", "web",
+    "base_library.zip", "config", "examples", "package", "scripts", "web",
 }
 SOURCE_APP_LINKS = {
     "Contents/Frameworks/Python": "Python.framework/Versions/3.14/Python",
