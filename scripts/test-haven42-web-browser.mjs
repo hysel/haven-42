@@ -180,6 +180,14 @@ async function terminate(child) {
   ]);
 }
 
+async function waitForExit(child, timeoutMs) {
+  if (!child || child.exitCode !== null) return child?.exitCode;
+  return Promise.race([
+    new Promise((accept) => child.once("close", accept)),
+    delay(timeoutMs).then(() => null),
+  ]);
+}
+
 function resolvePython() {
   for (const [command, prefix] of [["python3", []], ["python", []], ["py", ["-3"]]]) {
     const probe = spawnSync(command, [...prefix, "-c", "import sys; raise SystemExit(0 if sys.version_info.major == 3 else 1)"]);
@@ -789,6 +797,8 @@ try {
   const showsIntelTools = guided.factsText.includes("Intel oneAPI tools");
   const guidedIsWindows = /^Operating systemWindows\b/i.test(guided.factsText);
   const guidedIsMacos = /^Operating systemmacOS\b/i.test(guided.factsText);
+  const guidedHasInstalledMacosOllama = guidedIsMacos
+    && guided.planText.includes("Haven 42 verified official Ollama");
   const storageBoundaryText = guidedIsWindows
     ? "Does not use Program Files or AppData"
     : "Does not use system application folders";
@@ -842,6 +852,7 @@ try {
   if (
     guidedIsMacos
     && !guided.macosInstallLink
+    && !guidedHasInstalledMacosOllama
     && (
       !guided.nextDisabled
       || guided.nextText !== "Local setup unavailable"
@@ -849,6 +860,17 @@ try {
     )
   ) {
     throw new Error(`guided-macos-no-fitting-model:${JSON.stringify(guided)}`);
+  }
+  if (
+    guidedHasInstalledMacosOllama
+    && (
+      guided.nextDisabled
+      || guided.nextText !== "Review and start local AI"
+      || !guided.planText.includes("approval required")
+      || !guided.planText.includes("newer than the certified macOS version")
+    )
+  ) {
+    throw new Error(`guided-macos-installed-ollama:${JSON.stringify(guided)}`);
   }
   if (
     !guidedIsMacos
@@ -4821,6 +4843,22 @@ try {
   ) throw new Error(`accessibility-statement:${JSON.stringify(accessibilityStatement)}`);
   checks += 15;
   trace("accessibility-statement-verified");
+  await cdp.call("Page.close");
+  cdp.close();
+  cdp = undefined;
+  await waitForExit(haven, 20000);
+  if (haven.exitCode !== 0) {
+    throw new Error(`browser-close-runtime-exit:${haven.exitCode}`);
+  }
+  let portReleased = false;
+  try {
+    await fetch(`${origin}/api/bootstrap`, { signal: AbortSignal.timeout(1000) });
+  } catch {
+    portReleased = true;
+  }
+  if (!portReleased) throw new Error("browser-close-port-still-open");
+  checks += 2;
+  trace("browser-close-runtime-cleanup-verified");
   console.log("Haven 42 browser evidence gates passed: bounded-attachments, automated-accessibility, local-privacy-boundary.");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
 } finally {

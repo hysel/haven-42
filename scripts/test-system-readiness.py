@@ -8,6 +8,7 @@ import importlib.util
 import json
 import tempfile
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -69,7 +70,8 @@ def main() -> int:
     checks += 2
 
     runner = FakeRunner()
-    snapshot = READINESS.inspect_system(runner)
+    with mock.patch.object(READINESS.platform, "system", return_value="Linux"):
+        snapshot = READINESS.inspect_system(runner)
     READINESS.validate_snapshot(snapshot)
     assert snapshot["kind"] == "system-readiness"
     assert snapshot["installedModels"] == []
@@ -123,6 +125,32 @@ def main() -> int:
     READINESS.validate_snapshot(macos_snapshot)
     assert "serial" not in json.dumps(macos_facts).lower()
     checks += 3
+
+    class MacSystemRunner(FakeRunner):
+        def run(self, executable: str, arguments: tuple[str, ...], timeout: int = 3):
+            if executable == "ollama":
+                raise AssertionError("PATH Ollama must not override the fixed macOS app probe")
+            if executable == "system_profiler":
+                return MacHardwareRunner().run(executable, arguments, timeout)
+            return super().run(executable, arguments, timeout)
+
+    fixed_app_item = {
+        "componentId": "ollama", "state": "installed-unverified",
+        "version": "0.33.2", "source": "registered-app-bundle-probe",
+        "confidence": "medium",
+    }
+    with (
+        mock.patch.object(READINESS.platform, "system", return_value="Darwin"),
+        mock.patch.object(READINESS.platform, "machine", return_value="arm64"),
+        mock.patch("macos_installed_ollama.readiness_item", return_value=fixed_app_item),
+    ):
+        fixed_app_snapshot = READINESS.inspect_system(MacSystemRunner())
+    assert next(
+        item for item in fixed_app_snapshot["software"]
+        if item["componentId"] == "ollama"
+    ) == fixed_app_item
+    READINESS.validate_snapshot(fixed_app_snapshot)
+    checks += 2
 
     with tempfile.TemporaryDirectory() as directory:
         release = Path(directory) / "os-release"
