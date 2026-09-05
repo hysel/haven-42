@@ -167,7 +167,7 @@ jobs:
         uses: azure/artifact-signing-action@c7ab2a863ab5f9a846ddb8265964877ef296ee82 # v2
         with:
           endpoint: https://eus.codesigning.azure.net/
-          signing-account-name: haven42-public-release
+          signing-account-name: haven42-artifact-signing
           certificate-profile-name: haven42-public-release
           files: ${{ github.workspace }}\dist\approved-input\bundle\haven42\haven42.exe
           file-digest: SHA256
