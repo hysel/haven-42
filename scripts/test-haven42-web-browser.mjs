@@ -3,7 +3,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { deflateSync } from "node:zlib";
@@ -408,6 +408,11 @@ try {
     // isolated profile resolves every non-loopback host to 0.0.0.0 and serves
     // synthetic content only; Haven 42 never adds this flag to a user's browser.
     browserArguments.splice(2, 0, "--no-sandbox");
+  }
+  if (process.platform === "win32" && basename(browserPath).toLowerCase() === "msedge.exe") {
+    // Edge's compatibility launcher otherwise exits and starts an unowned
+    // replacement process, leaving this disposable profile locked after cleanup.
+    browserArguments.push("--edge-skip-compat-layer-relaunch");
   }
   browser = spawn(browserPath, browserArguments, {
     windowsHide: true,
@@ -5064,6 +5069,10 @@ try {
   trace("browser-close-runtime-cleanup-verified");
   console.log("Haven 42 browser evidence gates passed: bounded-attachments, automated-accessibility, local-privacy-boundary.");
   console.log(`Haven 42 headless browser flow passed: ${checks} checks.`);
+} catch (error) {
+  // Preserve the actual test failure even if profile cleanup also fails below.
+  console.error("Browser test failed before cleanup:", error);
+  throw error;
 } finally {
   trace("cleanup-started");
   cdp?.close();
