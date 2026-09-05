@@ -38,8 +38,8 @@
     },
     {
       "path": "examples/amd-rx6800-linux-model-qualification.md",
-      "sha256": "d06ba79572951227bdbe4e089b83cfda650fb23c84187446a0b2188b461ded08",
-      "sizeBytes": 2978
+      "sha256": "35648d6859dd2c32b65ef6c08b5aca4a8886915d8eef97a7b6edcf478d7dcea6",
+      "sizeBytes": 4619
     },
     {
       "path": "examples/amd-rx6800-windows-model-qualification.md",

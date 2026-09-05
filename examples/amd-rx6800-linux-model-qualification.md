@@ -47,6 +47,38 @@ engineering telemetry and are not fed into the cost estimator. They are GPU
 board or package sensor readings, not wall power, and exclude the CPU, RAM,
 storage, cooling, displays, and power-supply losses.
 
+## August 29 idle/load follow-up
+
+A later, separate measurement of `llama3.2:3b-instruct-q4_K_M` on the same
+recorded Ubuntu 26.04, Mesa 26.0.8 RADV, RX 6800 and Ollama 0.32.14 profile
+retained 104 idle and 255 active sensor samples. The configured idle window
+was 120 seconds and the measured active window was 300.237 seconds, with a
+one-second sampling interval. The saved aggregate reports:
+
+| Measurement | Result |
+| --- | ---: |
+| Idle average | 11.471 W |
+| Active average | 78.745 W |
+| Active peak | 172 W |
+| Idle-adjusted active average | 67.274 W |
+| Active GPU energy | 6.567265 Wh |
+| Output tokens | 19,650 |
+| Overall output rate | 65.448 tokens/s |
+
+The [saved aggregate](amd-rx6800-ubuntu-llama32-power.json) records the exact
+model manifest and identifies the sensor source as `amd-smi`. These are GPU
+board/package readings, not whole-system wall power. The earlier campaign's
+speed and this mixed-task measurement use different workloads and must not be
+treated as a regression comparison. Raw sensor samples are not included in
+this publication; the aggregate cannot independently reconstruct their timing.
+No electricity-estimator admission or automatic selection change is made here.
+
+The accompanying package probe verified integrity, no-effect readiness and
+shutdown, but managed setup did **not** run: it stopped at
+`linux-amd-native-evidence-required`. This is evidence of the package's safe
+blocking behavior at that time, not a successful packaged setup or inference
+test. The power measurement does not close that package-validation gap.
+
 ## Privacy and reproducibility
 
 The machine-readable result binds the exact runtime, model manifests,
@@ -55,5 +87,6 @@ SHA-256. It contains no address, hostname, account name, key, machine ID, raw
 prompt, or raw model response.
 
 Windows qualification, comparative human quality review, coding-agent surfaces,
-packaged setup and recovery, and a controlled power rerun with the standard idle
-baseline remain open. No automatic default or support label changed.
+packaged setup and recovery remain separate evidence scopes. The later power
+follow-up above closes the previously unreported idle/load measurement, not
+these other scopes. No automatic default or support label changed.
