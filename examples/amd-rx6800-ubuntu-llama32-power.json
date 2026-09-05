@@ -1,0 +1,80 @@
+{
+  "billEstimate": null,
+  "environment": {
+    "acceleratorModel": "Radeon-RX-6800-16GiB",
+    "acceleratorVendor": "amd",
+    "driverVersion": "Mesa-26.0.8-RADV",
+    "operatingSystem": "Ubuntu-26.04"
+  },
+  "evidence": {
+    "automaticPromotionAllowed": false,
+    "containsPrivateMachineIdentity": false,
+    "containsProviderEndpoint": false,
+    "containsRawPromptsOrResponses": false
+  },
+  "identity": {
+    "manifestDigest": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+    "model": "llama3.2:3b-instruct-q4_K_M",
+    "provider": "ollama",
+    "runtimeVersion": "0.32.14"
+  },
+  "kind": "haven42-model-energy-measurement",
+  "measuredAtUtc": "2026-08-29T12:46:41Z",
+  "metrics": {
+    "averageGpuUtilizationPercent": 34.655,
+    "byTask": {
+      "content.summarize": {
+        "averageWatts": 92.673,
+        "outputTokens": 9170,
+        "outputTokensPerWh": 3073.258,
+        "peakWatts": 172.0,
+        "requestSeconds": 115.909,
+        "sampleCount": 98
+      },
+      "content.write": {
+        "averageWatts": 86.323,
+        "outputTokens": 9170,
+        "outputTokensPerWh": 3307.135,
+        "peakWatts": 170.0,
+        "requestSeconds": 115.636,
+        "sampleCount": 99
+      },
+      "general.chat": {
+        "averageWatts": 42.421,
+        "outputTokens": 1310,
+        "outputTokensPerWh": 1619.295,
+        "peakWatts": 60.0,
+        "requestSeconds": 68.654,
+        "sampleCount": 57
+      }
+    },
+    "idleAdjustedAverageWatts": 67.274,
+    "idleAdjustedGpuEnergyWh": 5.610582,
+    "idleAverageWatts": 11.471,
+    "loadAverageWatts": 78.745,
+    "loadPeakWatts": 172.0,
+    "measuredGpuEnergyWh": 6.567265,
+    "outputTokens": 19650,
+    "outputTokensPerSecond": 65.448,
+    "outputTokensPerWh": 2992.113
+  },
+  "outcome": "passed",
+  "schemaVersion": 1,
+  "telemetry": {
+    "activeSampleCount": 255,
+    "idleSampleCount": 104,
+    "includesCpuRamStorageOrPsuLosses": false,
+    "scope": "gpu-board-or-package-only",
+    "source": "amd-smi"
+  },
+  "workload": {
+    "activeMeasurementSeconds": 300.237,
+    "idleBaselineSeconds": 120.0,
+    "samplingIntervalSeconds": 1.0,
+    "taskSampleCounts": {
+      "content.summarize": 262,
+      "content.write": 262,
+      "general.chat": 262
+    }
+  }
+}
