@@ -11,6 +11,51 @@ This project follows a simple changelog format:
 
 ## Unreleased
 
+### Alpha 2 release preparation (not published)
+
+This summary covers the application changes since `v0.4.0-alpha.1`; the release
+date and final artifact set remain pending. See the
+[Alpha 2 release notes](docs/alpha-2-release-notes.md) and
+[known limitations](docs/alpha-2-known-limitations.md).
+
+#### Added
+
+- Linux x64 and Apple Silicon macOS ARM64 candidate packaging alongside Windows
+  x64, with source/package checks, inventories, checksums and build provenance.
+- Approval-gated Windows launcher signing and macOS Developer ID signing,
+  notarization, stapling and trust verification, separate from publication.
+- Approved web-research flows, engine release discovery, section-specific help
+  tours, and additional hardware/model qualification records.
+
+#### Changed
+
+- Hardware-aware first-run model selection and download stay in setup across
+  platforms, then prepare the selected model for chat.
+- Broader model search distinguishes tested recommendations from other relevant
+  results while retaining hardware warnings.
+- Conversation-first layout and compact settings, research and technical details;
+  improved keyboard, focus, contrast, reduced-motion and high-contrast behavior.
+- Clearer user documentation; Continue is historical evidence only, not a current
+  setup recommendation. Optional coding tools remain a separate package.
+
+#### Fixed
+
+- macOS clean setup, existing Ollama startup, approved newer-version handling,
+  model installation/selection, embedded resources and system-Python errors.
+- macOS framework signing boundaries and application layout; closing the final
+  app window shuts down the local service, with startup/port errors preserved.
+- Interrupted managed setup/model recovery, Fedora-family certificate-bundle
+  handling, Git-hook environment isolation and headless Edge process cleanup.
+- Model scorecard publication and protected-documentation assertion tracking.
+
+These changes do not claim production readiness, universal GPU compatibility,
+automatic updates, or promotion of coding/image/audio/video capabilities.
+
+### Earlier development entries (historical)
+
+The entries below preserve the development sequence, including intermediate
+states later superseded by the Alpha 2 summary above.
+
 - Removed Continue project configuration from the end-user Local LLM IDE Tools
   package and retired the earlier development ZIP after controlled VS Code and
   VSCodium tests found unreliable workspace-config loading, unavailable edit
