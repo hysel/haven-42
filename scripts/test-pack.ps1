@@ -537,7 +537,7 @@ Invoke-PackTest "GitHub Actions dependencies are current and monitored" {
     Assert-True -Condition ($null -ne $python) -Message "Python 3 should be available for repository policy verification."
     $policyOutput = @(& $python.Source (Join-Path $repoRoot "scripts/verify-github-repository-policy.py") --self-test 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Committed workflow and GitHub repository policy should remain aligned: $($policyOutput -join [Environment]::NewLine)"
-    Assert-True -Condition (($policyOutput -join "`n") -match "with 10 hostile checks") -Message "Workflow policy must reject excessive permissions, unbounded execution, persisted credentials, unsafe artifacts, report drift, and release publication."
+    Assert-True -Condition (($policyOutput -join "`n") -match "with 15 hostile checks") -Message "Workflow policy must reject excessive permissions, unbounded execution, persisted credentials, unsafe artifacts, report drift, and release publication."
     $reportOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-github-alpha-usage-report.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Aggregate Alpha usage reporting should pass offline hostile tests: $($reportOutput -join [Environment]::NewLine)"
     Assert-True -Condition (($reportOutput -join "`n") -match "26 checks") -Message "Alpha reporting must reject hostile identities, counts, traffic, API responses, redirects, timestamps, and escaped output paths without collecting individuals."

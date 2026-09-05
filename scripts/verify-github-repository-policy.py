@@ -37,7 +37,7 @@ def workflow_jobs(text: str, name: str) -> list[tuple[str, str]]:
 def verify_workflow_safety(workflows: dict[str, str]) -> None:
     if set(workflows) != {
         "alpha-usage-report.yml", "alpha2-candidate.yml", "codeql.yml",
-        "validate-pack.yml", "windows-artifact-signing.yml",
+        "validate-pack.yml", "windows-artifact-signing.yml", "macos-alpha2-candidate.yml",
     }:
         raise PolicyError("unexpected-workflow-inventory")
     combined = "\n".join(workflows[name] for name in sorted(workflows))
@@ -88,17 +88,21 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
             text,
         )
     ]
-    if len(upload_blocks) != 6:
+    if len(upload_blocks) != 7:
         raise PolicyError("unexpected-artifact-upload-count")
-    package_uploads = [block for block in upload_blocks if "unsigned-development" in block]
+    macos_uploads = [block for block in upload_blocks if "name: haven42-macos-arm64-alpha2-unsigned-app" in block]
+    package_uploads = [block for block in upload_blocks if "unsigned-development" in block and block not in macos_uploads]
     report_uploads = [block for block in upload_blocks if "alpha-usage-report" in block]
-    candidate_uploads = [block for block in upload_blocks if "alpha2-" in block]
+    candidate_uploads = [block for block in upload_blocks if "alpha2-" in block and block not in macos_uploads]
     signing_uploads = [block for block in upload_blocks if "signing-request" in block or "signed-native-validation-candidate" in block]
     if (
         len(package_uploads) != 1
         or len(report_uploads) != 1
         or len(candidate_uploads) != 2
         or len(signing_uploads) != 2
+        or len(macos_uploads) != 1
+        or any(not re.search(r"(?m)^\s+retention-days:\s*7\s*$", block) for block in macos_uploads)
+        or any(not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", block) for block in macos_uploads)
         or not re.search(r"(?m)^\s+retention-days:\s*7\s*$", package_uploads[0])
         or not re.search(r"(?m)^\s+if-no-files-found:\s*error\s*$", package_uploads[0])
         or not re.search(r"(?m)^\s+retention-days:\s*30\s*$", report_uploads[0])
@@ -110,6 +114,32 @@ def verify_workflow_safety(workflows: dict[str, str]) -> None:
     ):
         raise PolicyError("unsafe-artifact-upload-policy")
     report_workflow = workflows["alpha-usage-report.yml"]
+    macos_workflow = workflows["macos-alpha2-candidate.yml"]
+    macos_markers = {
+        "workflow_dispatch:", "runs-on: macos-15", 'python-version: "3.14.6"',
+        "--release-line alpha2", "--expected-version 0.4.0-alpha.2",
+        "--version 0.4.0-alpha.2", "--require-hashes",
+        'test "$(uname -m)" = arm64',
+        'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"',
+        "ref: ${{ github.event.pull_request.head.sha || github.sha }}",
+        "HAVEN42_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}",
+        "python-3.14.6-darwin-arm64.tar.gz",
+        "7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c",
+        "python scripts/build-macos-development-app.py",
+        "python scripts/validate-macos-development-app.py dist/macos-alpha2-app",
+        "dist/portable-alpha2/artifacts/",
+        "dist/macos-alpha2-app/haven42-darwin-arm64-unsigned-development-app.tar.gz",
+    }
+    if any(marker not in macos_workflow for marker in macos_markers):
+        raise PolicyError("macos-alpha2-candidate-workflow-incomplete")
+    if (
+        re.search(r"(?m)^\s+[a-z-]+:\s*write\s*$", macos_workflow)
+        or any(marker in macos_workflow for marker in (
+            "secrets.", "pull_request_target:", "environment:",
+            "alpha2-macos-sign-and-notarize.py", "notarytool", "codesign --sign",
+        ))
+    ):
+        raise PolicyError("macos-alpha2-candidate-workflow-overprivileged")
     required_report_markers = {
         "name: Alpha Usage Report",
         "workflow_dispatch:",
@@ -316,12 +346,12 @@ def verify_static(policy: dict) -> None:
     upload_artifact = (
         "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a"
     )
-    if workflow_text.count(upload_artifact) != 6:
+    if workflow_text.count(upload_artifact) != 7:
         raise PolicyError("reviewed-node24-upload-artifact-not-pinned")
     setup_python = (
         "actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97"
     )
-    if workflow_text.count(setup_python) != 4:
+    if workflow_text.count(setup_python) != 5:
         raise PolicyError("reviewed-node24-setup-python-not-pinned")
     package_section = workflow_text.split("  package:", 1)[1].split(
         "  attest-development:", 1
@@ -455,6 +485,23 @@ def run_self_tests() -> int:
         checks += 1
     else:
         raise AssertionError("release publication marker was accepted")
+    for old, new, expected in (
+        ("--release-line alpha2", "--release-line platform-default", "macos-alpha2-candidate-workflow-incomplete"),
+        ('test "$(uname -m)" = arm64', 'test "$(uname -m)" = x86_64', "macos-alpha2-candidate-workflow-incomplete"),
+        ("contents: read", "contents: read\n  id-token: write", "macos-alpha2-candidate-workflow-overprivileged"),
+        ("contents: read", "contents: read\n# ${{ secrets.NOTARY_KEY }}", "macos-alpha2-candidate-workflow-overprivileged"),
+        ("workflow_dispatch:", "workflow_dispatch:\n  pull_request_target:", "macos-alpha2-candidate-workflow-overprivileged"),
+    ):
+        hostile = dict(workflows)
+        assert old in hostile["macos-alpha2-candidate.yml"]
+        hostile["macos-alpha2-candidate.yml"] = hostile["macos-alpha2-candidate.yml"].replace(old, new, 1)
+        try:
+            verify_workflow_safety(hostile)
+        except PolicyError as error:
+            assert str(error) == expected, (expected, str(error))
+            checks += 1
+        else:
+            raise AssertionError(f"unsafe macOS workflow accepted: {expected}")
     return checks
 
 

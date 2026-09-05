@@ -55,6 +55,21 @@ def fixture(root: Path) -> Path:
 
 
 def main() -> int:
+    workflow = (ROOT / ".github/workflows/macos-alpha2-candidate.yml").read_text(encoding="utf-8")
+    assert "--release-line alpha2" in workflow
+    assert "--expected-version 0.4.0-alpha.2" in workflow
+    assert "--version 0.4.0-alpha.2" in workflow
+    assert 'test "$(uname -m)" = arm64' in workflow
+    assert 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"' in workflow
+    assert "ref: ${{ github.event.pull_request.head.sha || github.sha }}" in workflow
+    assert "contents: read" in workflow and "persist-credentials: false" in workflow
+    assert "--require-hashes" in workflow
+    assert "python scripts/validate-macos-development-app.py dist/macos-alpha2-app" in workflow
+    assert "dist/portable-alpha2/artifacts/" in workflow
+    assert "dist/macos-alpha2-app/haven42-darwin-arm64-unsigned-development-app.tar.gz" in workflow
+    assert "secrets." not in workflow and "id-token: write" not in workflow
+    assert "contents: write" not in workflow and "pull_request_target:" not in workflow
+    assert "alpha2-macos-sign-and-notarize.py" not in workflow
     if os.name == "nt":
         # Windows cannot create symlinks without an optional host privilege.
         # The same test runs the real link-preserving build on macOS/Linux CI;

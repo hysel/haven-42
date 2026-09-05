@@ -335,7 +335,7 @@ test_github_actions_dependencies() {
     grep -Eq '^[[:space:]]+codeql-action:' "$REPO_ROOT/.github/dependabot.yml" &&
     grep -Fq '"github/codeql-action/*"' "$REPO_ROOT/.github/dependabot.yml" &&
     python3 "$REPO_ROOT/scripts/verify-github-repository-policy.py" --self-test |
-      grep -q 'with 10 hostile checks' &&
+      grep -q 'with 15 hostile checks' &&
     python3 "$REPO_ROOT/scripts/test-github-alpha-usage-report.py" |
       grep -q '26 checks'
 }
