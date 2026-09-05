@@ -88,6 +88,7 @@ from provider_security import (  # noqa: E402
     validate_provider_authentication,
 )
 from model_catalog_search import (  # noqa: E402
+    MAX_RESULTS as MAX_MODEL_SEARCH_RESULTS,
     ModelCatalogSearchError,
     search_ollama_catalog,
     validate_query,
@@ -1372,6 +1373,7 @@ class HavenState:
         self.model_catalog_provider = model_catalog_provider
         self.model_install_provider = model_install_provider
         self.discovered_model_candidates: dict[str, dict[str, Any]] = {}
+        self.model_search_request_id = 0
         self.pending_model_install_approvals: dict[str, dict[str, Any]] = {}
         self.model_install_progress: dict[str, dict[str, Any]] = {}
         self.research_query_provider = research_query_provider or web_research_query.execute_query
@@ -2131,6 +2133,9 @@ class HavenState:
             raise WebRequestError(str(error)) from error
         if online is not True:
             raise WebRequestError("explicit-online-search-consent-required")
+        with self.lock:
+            self.model_search_request_id += 1
+            request_id = self.model_search_request_id
         try:
             discovered = self.model_catalog_provider(normalized_query)
         except ModelCatalogSearchError as error:
@@ -2151,7 +2156,7 @@ class HavenState:
                 not isinstance(value, str)
                 or not MODEL_NAME.fullmatch(value)
                 or value in seen
-                or len(results) >= 20
+                or len(results) >= MAX_MODEL_SEARCH_RESULTS
             ):
                 continue
             seen.add(value)
@@ -2172,7 +2177,7 @@ class HavenState:
             # Only the most recent reviewed search may authorize an install.
             # This prevents a candidate discovered against an earlier catalog
             # or provider connection from remaining eligible indefinitely.
-            self.discovered_model_candidates = {
+            candidates = {
                 item["name"]: {
                     "hardwareFit": item["hardwareFit"],
                     "hardwareFitReason": item["hardwareFitReason"],
@@ -2180,10 +2185,13 @@ class HavenState:
                 }
                 for item in results if item["status"] == "not-installed"
             }
-            self.pending_model_install_approvals.clear()
+            if request_id == self.model_search_request_id:
+                self.discovered_model_candidates = candidates
+                self.pending_model_install_approvals.clear()
         return {
             "schemaVersion": 1,
             "kind": "model-catalog-search",
+            **({"variantsIncomplete": True} if getattr(discovered, "incomplete", False) else {}),
             "query": normalized_query,
             "source": "ollama-public-catalog",
             "networkUsed": True,
@@ -3017,6 +3025,7 @@ class HavenState:
                 self.managed_model_selection = None
                 self.ollama_version = str(version.get("version", "unknown"))[:64]
                 self.discovered_model_candidates.clear()
+                self.model_search_request_id += 1
                 self.pending_model_install_approvals.clear()
         result = {
             "connected": True,

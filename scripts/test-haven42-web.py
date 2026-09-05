@@ -1760,6 +1760,13 @@ def main() -> int:
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
         assert parsed == ["qwen3.5:9b", "qwen3.5:35b", "qwen3.5:9b-mlx"]
+        community = search_globals["parse_ollama_search_html"](
+            '<a class="group w-full" href="/Author/Writer">Writing</a>'
+            '<a href="/Author/Writer:q4_K_M">Q4</a>'
+            '<a href="https://untrusted.invalid/library/fake:1b">external</a>'
+            '<a href="/docs/install">docs</a>'
+        )
+        assert community == ["Author/Writer", "Author/Writer:q4_K_M"]
         assert search_globals["validate_query"]("  agent   writing ") == "agent writing"
         catalog_pages = {
             "/search": (
@@ -1791,6 +1798,82 @@ def main() -> int:
         assert "qwen3.5:0.8b" in broad_qwen and "qwen2.5-coder:7b" in broad_qwen
         assert valid_exact_tag == ["qwen3.5:2b-mlx"]
         assert invalid_exact_tag == []
+        # A format search must inspect tag variants, including those after the
+        # old 20-link cutoff. Exact lookup must inspect that same complete page.
+        catalog_pages["/library"] = catalog_pages["/search"]
+        catalog_pages["/library/qwen3.5/tags"] = "".join(
+            f'<a href="/library/qwen3.5:{index}b">variant</a>' for index in range(40)
+        ) + '<a href="/library/qwen3.5:4b-mlx">MLX</a><a href="/library/qwen3.5:4b-q4_k_m">Q4</a>'
+        with patch.object(
+            search_globals["sys"].modules[search_globals["__name__"]],
+            "_fetch_catalog_html",
+            side_effect=lambda path, _timeout, _query=None: catalog_pages[path],
+        ):
+            mlx_results = search_globals["search_ollama_catalog"]("mlx")
+            combined_results = search_globals["search_ollama_catalog"]("qwen3.5 mlx")
+            late_exact = search_globals["search_ollama_catalog"]("qwen3.5:4b-mlx")
+            complete_family = search_globals["search_ollama_catalog"]("qwen3.5")
+            semantic = search_globals["search_ollama_catalog"]("writing")
+            quantized = search_globals["search_ollama_catalog"]("qwen3.5 q4_k_m")
+        assert mlx_results == ["qwen3.8:27b-mlx", "qwen3.5:4b-mlx"]
+        assert combined_results == ["qwen3.5:4b-mlx"]
+        assert late_exact == ["qwen3.5:4b-mlx"]
+        assert len(complete_family) == 43 and "qwen3.5:4b-mlx" in complete_family
+        assert "qwen3.5" in semantic  # Catalog relevance need not be in its name.
+        assert quantized == ["qwen3.5:4b-q4_k_m"]
+        community_pages = {
+            "/search": '<a class="group w-full" href="/Author/Writer">Writing</a>',
+            "/Author/Writer/tags": '<a href="/Author/Writer:q4_K_M">Q4</a>',
+        }
+        with patch.object(
+            search_globals["sys"].modules[search_globals["__name__"]], "_fetch_catalog_html",
+            side_effect=lambda path, _timeout, _query=None: community_pages[path],
+        ):
+            assert search_globals["search_ollama_catalog"]("writing") == ["Author/Writer", "Author/Writer:q4_K_M"]
+            assert search_globals["search_ollama_catalog"]("Author/Writer:q4_K_M") == ["Author/Writer:q4_K_M"]
+        checks += 3
+        def partially_available_catalog(path, _timeout, _query=None):
+            if path == "/search":
+                return community_pages[path]
+            raise search_globals["ModelCatalogSearchError"]("model-catalog-search-failed")
+
+        with patch.object(
+            search_globals["sys"].modules[search_globals["__name__"]], "_fetch_catalog_html",
+            side_effect=partially_available_catalog,
+        ):
+            partial = search_globals["search_ollama_catalog"]("writing")
+            assert partial == ["Author/Writer"] and partial.incomplete
+        with patch.object(state, "model_catalog_provider", return_value=partial):
+            partial_response = state.search_models("writing", True)
+            assert partial_response["variantsIncomplete"] is True
+            assert partial_response["results"][0]["name"] == "Author/Writer"
+        checks += 3
+        for platform in ("windows", "linux", "macos"):
+            snapshot = {"platform": {"operatingSystem": platform, "systemMemoryGiB": 16}}
+            assert WEB.assess_model_download_fit("qwen3.8-flash-next", snapshot, "loopback")["hardwareFit"] == "incompatible"
+            assert WEB.assess_model_download_fit("new-uncertified:2b", snapshot, "loopback")["hardwareFit"] == "unknown"
+        checks += 12
+        old_search_started = threading.Event()
+        release_old_search = threading.Event()
+
+        def delayed_catalog(query):
+            if query == "old":
+                old_search_started.set()
+                assert release_old_search.wait(5)
+            return [f"{query}:2b"]
+
+        with patch.object(state, "model_catalog_provider", side_effect=delayed_catalog):
+            old_search = threading.Thread(target=state.search_models, args=("old", True))
+            old_search.start()
+            try:
+                assert old_search_started.wait(5)
+                state.search_models("new", True)
+            finally:
+                release_old_search.set()
+                old_search.join(5)
+            assert not old_search.is_alive()
+            assert set(state.discovered_model_candidates) == {"new:2b"}
+        checks += 2
         for hostile_query in ("", "x" * 65, "model?token=secret", "<script>"):
             try:
                 search_globals["validate_query"](hostile_query)
@@ -3226,7 +3309,7 @@ def main() -> int:
         assert "state.chatAutoFollow" in javascript
         assert 'id="model-search-consent"' not in html and "Search public catalog" in html
         assert "Already available on your server" in javascript
-        assert "Not tested on this computer · you can still review and install it · nothing downloads without approval" in javascript
+        assert "Not certified for this computer · you can still review and install it · nothing downloads without approval" in javascript
         assert "Cannot run on this computer" in javascript and "download blocked" in javascript
         assert "Downloads only after you approve" in html
         assert 'id="cleanup-policy-form"' in html and 'id="system-idle-unload"' in html
