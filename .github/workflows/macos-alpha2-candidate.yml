@@ -1,0 +1,81 @@
+name: macOS Alpha 2 Unsigned Candidate
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/macos-alpha2-candidate.yml"
+      - "scripts/build-macos-development-app.py"
+      - "scripts/validate-macos-development-app.py"
+      - "scripts/test-build-macos-development-app.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: macos-alpha2-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: macOS ARM64 unsigned Alpha 2 app
+    runs-on: macos-15
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact source without credentials
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Select exact package Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14.6"
+
+      - name: Verify native architecture and exact checkout
+        env:
+          EXPECTED_SOURCE: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(uname -m)" = arm64
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE"
+
+      - name: Install hash-locked build dependencies
+        run: python -m pip install --disable-pip-version-check --require-hashes -r package/requirements-build.txt
+
+      - name: Build unsigned Alpha 2 portable input
+        env:
+          HAVEN42_SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+          HAVEN42_PYTHON_SOURCE_ASSET: python-3.14.6-darwin-arm64.tar.gz
+          HAVEN42_PYTHON_SOURCE_SHA256: 7ed5b5c399a38b9b5b1bbb70a454c2ac8b0548cd0610871ea443c4747468e97c
+        run: |
+          python scripts/test-portable-build-provenance.py
+          python scripts/build-portable-development-package.py --release-line alpha2 --output dist/portable-alpha2
+
+      - name: Verify packaged runtime and browser parity
+        env:
+          HAVEN42_TEST_EXECUTABLE: dist/portable-alpha2/bundle/haven42/haven42
+        run: |
+          python scripts/test-portable-package.py --executable dist/portable-alpha2/bundle/haven42/haven42 --expected-version 0.4.0-alpha.2
+          node scripts/test-haven42-web-browser.mjs
+          python scripts/verify-portable-development-artifacts.py --artifact-directory dist/portable-alpha2/artifacts --expected-version 0.4.0-alpha.2 --self-test
+
+      - name: Build and verify unsigned application layout
+        run: |
+          python scripts/build-macos-development-app.py --source-package dist/portable-alpha2/bundle/haven42 --output dist/macos-alpha2-app --version 0.4.0-alpha.2
+          python scripts/validate-macos-development-app.py dist/macos-alpha2-app
+
+      - name: Upload app archive and source provenance for review only
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: haven42-macos-arm64-alpha2-unsigned-app
+          path: |
+            dist/macos-alpha2-app/haven42-darwin-arm64-unsigned-development-app.tar.gz
+            dist/macos-alpha2-app/macos-app-build-result.json
+            dist/macos-alpha2-app/SHA256SUMS
+            dist/portable-alpha2/artifacts/
+          if-no-files-found: error
+          retention-days: 7
+
+      # No signing credentials, OIDC, notary request, release upload, or promotion.
+      # App archive preserves symlinks; do not upload an expanded .app directory.
