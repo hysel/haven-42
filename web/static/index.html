@@ -64,6 +64,16 @@
           <button class="button primary" id="wizard-readiness-next" type="button" disabled>Continue</button>
         </div>
       </section>
+      <section class="wizard-step hidden" data-wizard-step="model-download">
+        <p class="eyebrow">STEP 2 · SET UP LOCAL AI</p>
+        <h2 id="wizard-model-title" tabindex="-1">Preparing your recommended model</h2>
+        <p id="wizard-model-description">The local AI engine is connected. Haven 42 will download the approved model, verify it, select it, and open Chat when it is ready.</p>
+        <div id="wizard-model-feedback"></div>
+        <div class="wizard-actions">
+          <button class="button primary" id="wizard-model-retry" type="button" hidden>Review and retry download</button>
+          <button class="button secondary" id="wizard-model-back" type="button" hidden>Back to setup</button>
+        </div>
+      </section>
       <section class="wizard-step hidden" data-wizard-step="provider">
         <p class="eyebrow">STEP 2 · ADVANCED CONNECTION</p>
         <h2>Connect to another Ollama server</h2>
@@ -509,7 +519,7 @@
                     <strong id="model-install-progress-label">Downloading model</strong>
                     <output id="model-install-progress-percent">0%</output>
                   </div>
-                  <progress id="model-install-progress-bar" max="100" value="0">0%</progress>
+                  <progress id="model-install-progress-bar" aria-labelledby="model-install-progress-label model-install-progress-percent" max="100" value="0">0%</progress>
                   <small id="model-install-progress-detail">Starting download…</small>
                 </div>
                 <small id="model-install-status" role="status" aria-live="polite">Nothing will be downloaded until you review and approve the model and destination.</small>

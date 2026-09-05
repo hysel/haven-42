@@ -2203,7 +2203,10 @@ class HavenState:
             "results": results,
         }
 
-    def prepare_model_install(self, model: object) -> dict[str, Any]:
+    def prepare_model_install(self, model: object, presentation: object = "models") -> dict[str, Any]:
+        # Presentation is session-only routing metadata, never download authority.
+        if not isinstance(presentation, str) or presentation not in {"setup", "models"}:
+            raise WebRequestError("invalid-model-install-presentation")
         if not isinstance(model, str) or not MODEL_NAME.fullmatch(model):
             raise WebRequestError("invalid-model-install-candidate")
         with self.lock:
@@ -2236,6 +2239,7 @@ class HavenState:
             token = secrets.token_hex(16)
             self.pending_model_install_approvals[token] = {
                 "model": model,
+                "presentation": presentation,
                 "expiresAt": time.monotonic() + 300,
             }
             destination = "This computer" if self.trust_scope == "loopback" else "Your connected private AI server"
@@ -2280,11 +2284,12 @@ class HavenState:
                 }
             token, progress = max(active, key=lambda item: item[1].get("_updatedAt", 0))
             return {
+                **{key: value for key, value in progress.items() if not key.startswith("_")},
                 "schemaVersion": 1,
                 "kind": "model-install-activity",
                 "activityStatus": "active",
                 "progressToken": token,
-                **{key: value for key, value in progress.items() if not key.startswith("_")},
+                "presentation": progress.get("_presentation", "models"),
             }
 
     def _update_model_install_progress(self, token: str, **changes: Any) -> None:
@@ -2311,11 +2316,12 @@ class HavenState:
                 "model": model,
                 "phase": "downloading",
                 "progressPercent": 0,
-                "completedBytes": 0,
+                "completedBytes": None,
                 "totalBytes": None,
                 "status": "Starting model download",
                 "terminal": False,
                 "_updatedAt": time.monotonic(),
+                "_presentation": approval.get("presentation", "models"),
             }
         if base_url is None:
             self._update_model_install_progress(
@@ -4357,11 +4363,11 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 )
                 return
             if self.path == "/api/model-install/prepare":
-                if set(body) != {"model"} or not isinstance(body["model"], str):
+                if set(body) not in ({"model"}, {"model", "presentation"}) or not isinstance(body["model"], str):
                     raise WebRequestError("invalid-model-install-preparation-fields")
                 self._send_json(
                     HTTPStatus.OK,
-                    self.server.state.prepare_model_install(body["model"]),
+                    self.server.state.prepare_model_install(body["model"], body.get("presentation", "models")),
                 )
                 return
             if self.path == "/api/model-install/execute":

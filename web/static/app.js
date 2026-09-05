@@ -188,6 +188,7 @@ const state = {
   readinessRequestId: 0,
   setupPlan: null,
   setupOperationActive: false,
+  setupModelDownload: false,
   workflows: [],
   assurance: null,
   imageConnected: false,
@@ -1417,7 +1418,11 @@ function assignModelToSupportedCapabilities(modelOption, fallbackCapabilityId = 
 function closeModelInstallReview(preserveSetupReturn = false) {
   byId("model-install-review-layer").classList.add("hidden");
   byId("model-install-review-layer").setAttribute("aria-hidden", "true");
-  document.querySelector(".shell").inert = false;
+  document.querySelector(".shell").inert = state.setupModelDownload === true;
+  byId("setup-wizard").inert = false;
+  if (state.setupModelDownload && !preserveSetupReturn) {
+    showSetupModelRetry();
+  }
   if (!preserveSetupReturn) state.modelInstallReturnToChat = false;
   const target = state.pendingModelInstall?.returnFocus;
   state.pendingModelInstall = null;
@@ -1426,6 +1431,46 @@ function closeModelInstallReview(preserveSetupReturn = false) {
     byId("model-install-status").textContent = "Nothing was downloaded. You can review this model again when you are ready.";
   }
   if (target instanceof HTMLElement && target.isConnected) target.focus({ preventScroll: true });
+}
+
+// One model-download surface and one progress renderer for every platform.
+// Refresh routing comes from the live server session, never browser storage.
+function rememberSetupModelDownload(active) {
+  state.setupModelDownload = active;
+}
+
+function showSetupModelDownload() {
+  rememberSetupModelDownload(true);
+  document.querySelector(".shell").inert = true;
+  byId("setup-wizard").classList.remove("hidden");
+  byId("wizard-model-feedback").append(byId("model-install-progress"), byId("model-install-status"));
+  byId("wizard-model-retry").hidden = true;
+  byId("wizard-model-back").hidden = true;
+  showWizardStep("model-download");
+}
+
+function showSetupModelRetry() {
+  if (!state.setupModelDownload) return;
+  byId("wizard-model-retry").hidden = false;
+  byId("wizard-model-back").hidden = false;
+  byId("wizard-model-retry").focus({ preventScroll: true });
+}
+
+function showModelInstallFailure(message) {
+  renderModelInstallProgress({
+    phase: "failed", progressPercent: byId("model-install-progress-bar").value,
+    completedBytes: null, totalBytes: null, status: "The model is not ready for chat.",
+  });
+  byId("model-install-status").textContent = message;
+  showSetupModelRetry();
+}
+
+function finishSetupModelDownload() {
+  if (!state.setupModelDownload) return;
+  rememberSetupModelDownload(false);
+  document.querySelector(".shell").inert = false;
+  byId("desired-model").append(byId("model-install-progress"), byId("model-install-status"));
+  byId("setup-wizard").classList.add("hidden");
 }
 
 function validateModelInstallPreparation(result, expectedModel) {
@@ -1560,9 +1605,10 @@ function validateActiveModelInstall(result) {
   }
   if (
     !/^[0-9a-f]{32}$/u.test(result.progressToken)
+    || !["setup", "models"].includes(result.presentation)
     || !hasExactObjectKeys(result, [
       "completedBytes", "kind", "model", "phase", "progressPercent", "progressToken",
-      "schemaVersion", "status", "terminal", "totalBytes", "activityStatus",
+      "schemaVersion", "status", "terminal", "totalBytes", "activityStatus", "presentation",
     ])
   ) throw new Error("invalid-model-install-activity");
   const progress = validateModelInstallProgress({
@@ -1576,7 +1622,7 @@ function validateActiveModelInstall(result) {
     status: result.status,
     terminal: result.terminal,
   }, result.model);
-  return { ...progress, activityStatus: "active", progressToken: result.progressToken };
+  return { ...progress, activityStatus: "active", progressToken: result.progressToken, presentation: result.presentation };
 }
 
 function installedModelOptionForRequest(requestedModel) {
@@ -1613,10 +1659,11 @@ async function finishRecoveredModelInstall(activity) {
     byId("model-choice-status").textContent = `${installed.name} finished downloading and is selected for every supported text task.`;
     byId("model-search-status").textContent = `${installed.name} was downloaded and verified by your Ollama server.`;
     state.modelSearchMessage = byId("model-search-status").textContent;
+    finishSetupModelDownload();
     openChat();
     byId("text-status").textContent = `${installed.name} is installed, selected, and ready.`;
   } catch (error) {
-    byId("model-install-status").textContent = `The interrupted download could not be resumed. ${humanError(error)}`;
+    showModelInstallFailure(`The interrupted download could not be resumed. ${humanError(error)}`);
   } finally {
     state.activeModelInstall = null;
     setModelInstallActivity(false);
@@ -1628,10 +1675,21 @@ async function finishRecoveredModelInstall(activity) {
 
 async function resumeActiveModelInstall() {
   const activity = validateActiveModelInstall(await api("/api/model-install/active", {}));
-  if (activity.activityStatus !== "active") return false;
+  if (activity.activityStatus !== "active") {
+    rememberSetupModelDownload(false);
+    return false;
+  }
   state.activeModelInstall = { model: activity.model, token: activity.progressToken };
-  byId("setup-wizard").classList.add("hidden");
-  openModels();
+  if (activity.presentation === "setup") {
+    // Recovered progress is read-only authority. A retry still needs a new
+    // server preparation and an explicit approval, never a stored token.
+    state.desiredModel = { name: activity.model, status: "not-installed" };
+    showSetupModelDownload();
+  }
+  else {
+    byId("setup-wizard").classList.add("hidden");
+    openModels();
+  }
   setModelInstallActivity(true);
   const button = byId("install-model-button");
   button.disabled = true;
@@ -1651,15 +1709,16 @@ async function prepareModelInstall(reviewRequired = true) {
   byId("model-install-status").textContent = "Preparing the model and destination for review…";
   try {
     const preparation = validateModelInstallPreparation(
-      await api("/api/model-install/prepare", { model }),
+      await api("/api/model-install/prepare", { model, presentation: state.setupModelDownload ? "setup" : "models" }),
       model,
     );
-    state.pendingModelInstall = { ...preparation, returnFocus: button };
+    state.pendingModelInstall = { ...preparation, returnFocus: state.setupModelDownload ? byId("wizard-model-title") : button };
     if (reviewRequired) {
       byId("model-install-review-name").textContent = preparation.model;
       byId("model-install-review-destination").textContent = preparation.destination;
       byId("model-install-review-status").textContent = "Nothing has been downloaded.";
       document.querySelector(".shell").inert = true;
+      byId("setup-wizard").inert = state.setupModelDownload === true;
       byId("model-install-review-layer").classList.remove("hidden");
       byId("model-install-review-layer").setAttribute("aria-hidden", "false");
       byId("model-install-review-dialog").focus({ preventScroll: true });
@@ -1679,6 +1738,7 @@ async function executeModelInstall() {
   const token = pending.approvalToken;
   state.activeModelInstall = { model, token };
   closeModelInstallReview(true);
+  if (state.setupModelDownload) showSetupModelDownload();
   setModelInstallActivity(true);
   renderModelDiscovery();
   const button = byId("install-model-button");
@@ -1688,10 +1748,10 @@ async function executeModelInstall() {
   byId("model-install-progress").classList.remove("hidden");
   try {
     const installation = api("/api/model-install/execute", { approvalToken: token, confirmed: true });
-    const progressMonitoring = monitorModelInstallProgress(token, model);
+    const progressMonitoring = monitorModelInstallProgress(token, model).catch(() => null);
     const result = await installation;
     try {
-      await progressMonitoring;
+      if (!await progressMonitoring) throw new Error("model-progress-unavailable");
     } catch {
       // The completed install response is authoritative. Replace a failed
       // progress poll with an explicit terminal state instead of leaving the
@@ -1734,11 +1794,12 @@ async function executeModelInstall() {
     byId("model-search-status").textContent = `${installedName} was downloaded and verified by your Ollama server.`;
     state.modelSearchMessage = byId("model-search-status").textContent;
     state.modelInstallReturnToChat = false;
+    finishSetupModelDownload();
     openChat();
     byId("text-status").textContent = `${installedName} is installed, selected, and ready.`;
     return true;
   } catch (error) {
-    byId("model-install-status").textContent = humanError(error);
+    showModelInstallFailure(humanError(error));
     return false;
   } finally {
     state.activeModelInstall = null;
@@ -1756,7 +1817,7 @@ async function offerRecommendedModelDuringSetup(setupApprovalIncludesModel = fal
   state.defaultModelOfferPending = true;
   state.modelInstallReturnToChat = true;
   try {
-    byId("setup-wizard").classList.add("hidden");
+    showSetupModelDownload();
     const installed = state.modelOptions.find((item) => item.name === candidate.name);
     if (installed) {
       assignModelToSupportedCapabilities(installed, "general.chat");
@@ -1764,20 +1825,24 @@ async function offerRecommendedModelDuringSetup(setupApprovalIncludesModel = fal
       state.modelInstallReturnToChat = false;
       renderModelSelect();
       renderModelDiscovery();
+      finishSetupModelDownload();
       openChat();
       byId("text-status").textContent = `${installed.name} is selected and ready.`;
       return true;
     }
-    openModels();
-    chooseDiscoveredModel({
+    byId("model-search-capability").value = "general.chat";
+    state.desiredModel = {
       ...candidate,
       status: "not-installed",
       validationStatus: "validated-on-matching-hardware",
       installCommand: `ollama pull ${candidate.name}`,
-    });
+    };
+    resetModelInstallProgress();
+    renderModelDiscovery();
     const prepared = await prepareModelInstall(!setupApprovalIncludesModel);
     if (!prepared) {
       state.modelInstallReturnToChat = false;
+      finishSetupModelDownload();
       byId("setup-wizard").classList.remove("hidden");
       showWizardStep("readiness");
       byId("wizard-scan-status").textContent = "The recommended model review could not be prepared. Nothing was downloaded. Check this computer again, then retry.";
@@ -2036,7 +2101,9 @@ function renderModelDiscovery() {
 }
 
 function showWizardStep(step) {
-  const progressStep = ["readiness", "provider"].includes(step) ? "middle" : step;
+  byId("setup-wizard").setAttribute("aria-labelledby", step === "model-download" ? "wizard-model-title" : "wizard-title");
+  byId("setup-wizard").setAttribute("aria-describedby", step === "model-download" ? "wizard-model-description" : "wizard-description");
+  const progressStep = ["readiness", "provider", "model-download"].includes(step) ? "middle" : step;
   byId("setup-wizard").querySelector(".wizard-progress").classList.toggle("hidden", step === "removed");
   document.querySelectorAll("[data-wizard-step]").forEach((panel) => {
     panel.classList.toggle("hidden", panel.dataset.wizardStep !== step);
@@ -2048,7 +2115,7 @@ function showWizardStep(step) {
   });
   const middleMarker = document.querySelector('[data-wizard-progress="middle"]');
   if (middleMarker && progressStep === "middle") {
-    middleMarker.setAttribute("aria-label", step === "readiness" ? "Check and set up this computer" : "Connect another AI server");
+    middleMarker.setAttribute("aria-label", step !== "provider" ? "Check and set up this computer" : "Connect another AI server");
   }
   const panel = document.querySelector(`[data-wizard-step="${step}"]`);
   const focusTarget = panel.querySelector("input, button, select, summary, [tabindex]");
@@ -5902,8 +5969,8 @@ byId("copy-model-command").addEventListener("click", async () => {
   }
 });
 byId("install-model-button").addEventListener("click", () => { void prepareModelInstall(); });
-byId("model-install-review-close").addEventListener("click", closeModelInstallReview);
-byId("model-install-review-cancel").addEventListener("click", closeModelInstallReview);
+byId("model-install-review-close").addEventListener("click", () => closeModelInstallReview());
+byId("model-install-review-cancel").addEventListener("click", () => closeModelInstallReview());
 byId("model-install-review-approve").addEventListener("click", (event) => {
   if (!event.isTrusted) {
     byId("model-install-review-status").textContent = "Approval requires a direct user action.";
@@ -6456,6 +6523,17 @@ document.querySelectorAll(".availability-nav").forEach((button) => {
 });
 
 byId("wizard-guided").addEventListener("click", runReadiness);
+byId("wizard-model-retry").addEventListener("click", async () => {
+  if (state.activeModelInstall) return;
+  const prepared = await prepareModelInstall();
+  if (!prepared) showSetupModelRetry();
+});
+byId("wizard-model-back").addEventListener("click", () => {
+  if (state.activeModelInstall) return;
+  finishSetupModelDownload();
+  byId("setup-wizard").classList.remove("hidden");
+  showWizardStep("readiness");
+});
 byId("wizard-existing").addEventListener("click", () => {
   showWizardStep("provider");
   byId("wizard-endpoint").focus();
@@ -7067,7 +7145,11 @@ byId("wizard-finish").addEventListener("click", () => {
 byId("setup-wizard").addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     event.preventDefault();
-    if (state.setupOperationActive) {
+    if (state.setupOperationActive || state.setupModelDownload) {
+      if (state.setupModelDownload) {
+        byId("model-install-status").textContent = "Finish the approved download, or use Back to setup after a stopped download. Chat opens when the model is verified and selected.";
+        return;
+      }
       byId("wizard-scan-status").textContent = "Setup is still running. Use its Cancel control when available, or wait for the current verification step to finish.";
       return;
     }
@@ -7086,8 +7168,12 @@ byId("setup-wizard").addEventListener("keydown", (event) => {
   if (event.key !== "Tab") return;
   const focusable = [...byId("setup-wizard").querySelectorAll(
     'button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
-  )].filter((item) => !item.closest(".hidden"));
-  if (focusable.length === 0) return;
+  )].filter((item) => !item.closest(".hidden, [hidden], [inert]") && item.getClientRects().length > 0);
+  if (focusable.length === 0) {
+    event.preventDefault();
+    (state.setupModelDownload ? byId("wizard-model-title") : byId("setup-wizard").querySelector(".wizard-card")).focus();
+    return;
+  }
   const first = focusable[0];
   const last = focusable[focusable.length - 1];
   if (event.shiftKey && document.activeElement === first) {
