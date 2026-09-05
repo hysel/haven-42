@@ -111,7 +111,7 @@ def main() -> int:
     )
     require(
         "endpoint: https://eus.codesigning.azure.net/" in sign_job
-        and "signing-account-name: haven42-public-release" in sign_job
+        and "signing-account-name: haven42-artifact-signing" in sign_job
         and "certificate-profile-name: haven42-public-release" in sign_job,
         "The action must target the admitted East US account and profile.",
     )
