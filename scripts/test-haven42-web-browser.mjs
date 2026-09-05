@@ -1361,7 +1361,7 @@ try {
   if (
     Object.values(allTourState).length !== 5
     || allTourState.chat !== 11
-    || allTourState.models !== 5
+    || allTourState.models !== 6
     || allTourState.system !== 5
     || allTourState.technical !== 2
     || allTourState.about !== 2
@@ -1965,6 +1965,48 @@ try {
   ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
   checks += 8;
 
+  // Search results must survive lack of certification, non-name relevance,
+  // and a hardware mismatch. Empty results remain explicit after rerendering.
+  const discoveryRegression = await cdp.evaluate(`(() => {
+    const saved = {
+      modelSearchResults: state.modelSearchResults,
+      modelSearchQuery: state.modelSearchQuery,
+      modelSearchMessage: state.modelSearchMessage,
+      testedModelCatalog: state.testedModelCatalog,
+    };
+    const input = document.querySelector('#model-search-query');
+    const originalQuery = input.value;
+    try {
+      input.value = 'writing mlx';
+      state.modelSearchQuery = input.value;
+      state.modelSearchMessage = '2 catalog results. Nothing was downloaded.';
+      state.testedModelCatalog = {status: 'no-matching-evidence'};
+      state.modelSearchResults = [
+        {name: 'qwen3.5:4b-mlx', status: 'not-installed', validationStatus: 'candidate-only', hardwareFit: 'unknown'},
+        {name: 'qwen3.8:large-mlx', status: 'not-installed', validationStatus: 'candidate-only', hardwareFit: 'incompatible', minimumSystemMemoryGiB: 108},
+      ];
+      renderModelDiscovery();
+      const rows = [...document.querySelectorAll('#model-search-results .model-search-result')];
+      const visible = rows.length === 2;
+      const uncertifiedSelectable = rows.some(row => row.textContent.includes('Not certified') && !row.querySelector('button').disabled);
+      const warningVisible = rows.some(row => row.textContent.includes('Hardware warning: Cannot run') && row.querySelector('button').disabled);
+      state.modelSearchResults = [];
+      state.modelSearchMessage = 'No public catalog matches found. Nothing was downloaded.';
+      renderModelDiscovery();
+      renderModelDiscovery();
+      const emptyPreserved = document.querySelector('#model-search-status').textContent === state.modelSearchMessage;
+      return {visible, uncertifiedSelectable, warningVisible, emptyPreserved};
+    } finally {
+      Object.assign(state, saved);
+      input.value = originalQuery;
+      renderModelDiscovery();
+    }
+  })()`);
+  if (Object.values(discoveryRegression).some(value => value !== true)) {
+    throw new Error('model-discovery-regression:' + JSON.stringify(discoveryRegression));
+  }
+  checks += 4;
+
   await cdp.evaluate(`(() => {
     const original = window.fetch;
     let modelInstallProgressPolls = 0;
@@ -1974,6 +2016,7 @@ try {
           schemaVersion: 1,
           kind: "model-catalog-search",
           query: "writing",
+          variantsIncomplete: true,
           source: "ollama-public-catalog",
           networkUsed: true,
           queryPersisted: false,

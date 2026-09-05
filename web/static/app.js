@@ -94,7 +94,7 @@ const SECTION_TOURS = Object.freeze({
   }),
   models: Object.freeze({
     label: "Models",
-    revision: 5,
+    revision: 6,
     panelId: "models-panel",
     returnId: "models-title",
     steps: Object.freeze([
@@ -102,7 +102,7 @@ const SECTION_TOURS = Object.freeze({
       { target: "#model-search-capability", title: "Choose the task", description: "Select Chat, Writing, or Summarization to see which installed model Haven 42 recommends for that work." },
       { target: "#model-choice-status", title: "Read the recommendation", description: "This message explains the current model choice and whether Haven 42 has test evidence for the selected task." },
       { target: "#model-discovery", title: "Find another model", description: "Haven 42 lists installed models and tested choices for matching hardware. You can also search Ollama's public catalog. Every download requires your review and approval." },
-      { target: "#model-search-form", title: "Search, review, then install", description: "Enter a model name or capability. If the model is not installed, select it and approve the download once. Haven 42 then shows live download progress and verifies the model before selecting it." },
+      { target: "#model-search-form", title: "Search, review, then install", description: "Search by model family, capability, or format. Results include uncertified models and show hardware warnings separately. Review a model before approving its download. Haven 42 then shows progress and verifies the model before selecting it." },
     ]),
   }),
   system: Object.freeze({
@@ -177,6 +177,9 @@ const state = {
   testedModelRequestId: 0,
   qualifiedModelCandidates: [],
   modelSearchResults: [],
+  modelSearchQuery: null,
+  modelSearchMessage: null,
+  modelSearchRequest: 0,
   desiredModel: null,
   idleUnloadSeconds: 300,
   providerConfig: null,
@@ -1191,7 +1194,7 @@ function humanError(error) {
 }
 
 function modelMatchesQuery(name, query) {
-  return !query || name.toLocaleLowerCase().includes(query.toLocaleLowerCase());
+  return query.trim().toLowerCase().split(/\s+/).every((term) => name.toLowerCase().includes(term));
 }
 
 function cleanupPolicyLabel(seconds) {
@@ -1316,6 +1319,10 @@ function validateModelSearch(result) {
     "networkUsed", "query", "queryPersisted", "repositoryContentSent", "results",
     "schemaVersion", "source",
   ];
+  if (result && Object.hasOwn(result, "variantsIncomplete")) {
+    if (result.variantsIncomplete !== true) throw new Error("invalid-model-catalog-response");
+    expected.push("variantsIncomplete");
+  }
   if (
     !result
     || typeof result !== "object"
@@ -1331,7 +1338,7 @@ function validateModelSearch(result) {
     || result.repositoryContentSent !== false
     || result.hardwareProfileSent !== false
     || !Array.isArray(result.results)
-    || result.results.length > 20
+    || result.results.length > 200
   ) throw new Error("invalid-model-catalog-response");
   const names = new Set();
   result.results.forEach((item) => {
@@ -1605,6 +1612,7 @@ async function finishRecoveredModelInstall(activity) {
     renderModelDiscovery();
     byId("model-choice-status").textContent = `${installed.name} finished downloading and is selected for every supported text task.`;
     byId("model-search-status").textContent = `${installed.name} was downloaded and verified by your Ollama server.`;
+    state.modelSearchMessage = byId("model-search-status").textContent;
     openChat();
     byId("text-status").textContent = `${installed.name} is installed, selected, and ready.`;
   } catch (error) {
@@ -1724,6 +1732,7 @@ async function executeModelInstall() {
     renderModelDiscovery();
     byId("model-choice-status").textContent = `${installedName} is installed and selected for every supported text task.`;
     byId("model-search-status").textContent = `${installedName} was downloaded and verified by your Ollama server.`;
+    state.modelSearchMessage = byId("model-search-status").textContent;
     state.modelInstallReturnToChat = false;
     openChat();
     byId("text-status").textContent = `${installedName} is installed, selected, and ready.`;
@@ -1852,8 +1861,8 @@ async function loadHardwareMatchedModels() {
     return;
   }
   const searchStatus = byId("model-search-status");
-  const preservingCompletedPublicSearch = state.modelSearchResults.length > 0
-    && searchStatus.textContent.includes("Nothing was downloaded.");
+  const preservingCompletedPublicSearch = state.modelSearchQuery === byId("model-search-query").value.trim()
+    && state.modelSearchMessage !== null;
   if (!preservingCompletedPublicSearch) {
     searchStatus.textContent = "Checking qualification evidence for this AI computer…";
   }
@@ -1908,7 +1917,9 @@ function renderModelDiscovery() {
     });
   });
   state.modelSearchResults.forEach((item) => {
-    if (modelMatchesQuery(item.name, query) && !merged.has(item.name)) merged.set(item.name, item);
+    // Public catalog relevance can come from a description or capability. Do
+    // not discard those results merely because the name lacks the search term.
+    if (state.modelSearchQuery === query && !merged.has(item.name)) merged.set(item.name, item);
   });
   const validationPriority = {
     recommended: 0,
@@ -1953,14 +1964,17 @@ function renderModelDiscovery() {
     status.textContent = thisInstallActive
       ? "Downloading this model · other model choices will be available when it finishes"
       : knownIncompatible
-      ? `Cannot run on this computer · needs at least ${item.minimumSystemMemoryGiB} GiB total memory · download blocked`
+      ? `Hardware warning: Cannot run on this computer · needs at least ${item.minimumSystemMemoryGiB} GiB total memory · not certified for this computer · download blocked`
       : item.status === "installed"
       ? `${recommendationLabel}Already available on your server${configured ? " · selected" : ""}${evidenceLabel ? ` · ${evidenceLabel}` : ""}`
       : evidenceLabel
         ? `${recommendationLabel}Not installed · ${evidenceLabel}`
       : item.validationStatus === "validated-on-matching-hardware"
         ? `${recommendationLabel}Tested on matching hardware · not installed · nothing downloads without approval`
-        : "Not tested on this computer · you can still review and install it · nothing downloads without approval";
+        : "Not certified for this computer · you can still review and install it · nothing downloads without approval";
+    if (!thisInstallActive && item.hardwareFit === "unknown") {
+      status.textContent += " · Hardware fit has not been verified";
+    }
     detail.append(name, status);
     const choose = document.createElement("button");
     choose.className = "button secondary";
@@ -1981,17 +1995,15 @@ function renderModelDiscovery() {
     if (state.desiredModel?.name === item.name) container.append(desired);
   });
   const testedCatalog = state.testedModelCatalog;
-  const publicMatches = state.modelSearchResults.filter((item) => modelMatchesQuery(item.name, query)).length;
   const testedDownloads = results.filter(
     (item) => item.validationStatus === "validated-on-matching-hardware",
   ).length;
-  const preservingCompletedPublicSearch = publicMatches > 0
-    && (
-      byId("model-search-status").textContent.includes("Nothing was downloaded.")
-      || byId("model-search-status").textContent.includes("downloaded and verified")
-    );
+  const preservingCompletedPublicSearch = state.modelSearchQuery === query
+    && state.modelSearchMessage !== null;
   if (preservingCompletedPublicSearch) {
-    // Preserve the explicit public-search result message, including its no-download disclosure.
+    byId("model-search-status").textContent = state.modelSearchMessage;
+  } else if (query) {
+    byId("model-search-status").textContent = `${results.length} local match${results.length === 1 ? "" : "es"}. Choose Search public catalog to find more models.`;
   } else if (testedCatalog?.status === "remote-hardware-not-verifiable") {
     byId("model-search-status").textContent = "This connected AI server does not report enough hardware information for Haven 42 to match a tested profile. Installed models remain available, and you can search the public catalog.";
   } else if (
@@ -5703,12 +5715,22 @@ byId("wizard-api-key-visibility").addEventListener("click", () => {
 
 byId("model-search-query").addEventListener("input", () => {
   state.modelSearchResults = [];
+  state.modelSearchQuery = null;
+  state.modelSearchMessage = null;
+  state.modelSearchRequest += 1;
+  byId("model-search-button").disabled = false;
+  byId("model-search-button").textContent = "Search public catalog";
   byId("model-search-status").textContent = "Filtering installed models locally.";
   renderModelDiscovery();
 });
 
 byId("model-search-capability").addEventListener("change", () => {
   state.modelSearchResults = [];
+  state.modelSearchQuery = null;
+  state.modelSearchMessage = null;
+  state.modelSearchRequest += 1;
+  byId("model-search-button").disabled = false;
+  byId("model-search-button").textContent = "Search public catalog";
   state.desiredModel = null;
   byId("model-search-query").value = "";
   updateModelChoiceStatus();
@@ -5722,21 +5744,35 @@ byId("model-search-form").addEventListener("submit", async (event) => {
   clearError();
   const button = byId("model-search-button");
   const query = byId("model-search-query").value.trim();
+  const requestId = ++state.modelSearchRequest;
+  state.modelSearchQuery = query;
+  state.modelSearchResults = [];
+  state.modelSearchMessage = "Searching the public Ollama catalog…";
   button.disabled = true;
   button.textContent = "Searching…";
   byId("model-search-status").textContent = "Searching the public Ollama catalog…";
   try {
     const result = validateModelSearch(await api("/api/model-search", { query, online: true }));
+    if (requestId !== state.modelSearchRequest) return;
     state.modelSearchResults = result.results;
-    byId("model-search-status").textContent = `${result.results.length} candidate${result.results.length === 1 ? "" : "s"} found. Nothing was downloaded.`;
+    state.modelSearchMessage = result.results.length
+      ? `${result.results.length} catalog result${result.results.length === 1 ? "" : "s"}. Certification and hardware fit are shown per model. Nothing was downloaded.${result.results.length === 200 ? " Showing the first 200 results; narrow your search for more specific matches." : ""}`
+      : "No public catalog matches found. Try a model family or a family plus format, such as qwen mlx. Nothing was downloaded.";
+    if (result.variantsIncomplete) {
+      state.modelSearchMessage += " Some model variants could not be checked. Try again for additional matches.";
+    }
     renderModelDiscovery();
   } catch (error) {
+    if (requestId !== state.modelSearchRequest) return;
     state.modelSearchResults = [];
-    byId("model-search-status").textContent = "Search stopped safely.";
+    state.modelSearchMessage = `Public catalog search failed. ${humanError(error)}`;
+    renderModelDiscovery();
     showError(humanError(error));
   } finally {
-    button.disabled = false;
-    button.textContent = "Search public catalog";
+    if (requestId === state.modelSearchRequest) {
+      button.disabled = false;
+      button.textContent = "Search public catalog";
+    }
   }
 });
 
