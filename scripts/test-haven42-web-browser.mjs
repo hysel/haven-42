@@ -4026,6 +4026,7 @@ try {
   checks += 12;
   trace("hardware-default-refresh-verified");
 
+  for (const setupRecovery of [false, true]) {
   const refreshedDownloadRecovery = await cdp.evaluate(`(async () => {
     const originalApi = api;
     const model = 'qwen3.5:0.8b';
@@ -4033,6 +4034,7 @@ try {
       api = async (path, body) => {
         if (path === '/api/model-install/active') return {
           schemaVersion: 1, kind: 'model-install-activity', activityStatus: 'active',
+          presentation: '${setupRecovery ? 'setup' : 'models'}',
           progressToken: 'c'.repeat(32), model, phase: 'downloading', progressPercent: 64,
           completedBytes: 64, totalBytes: 100, status: 'Downloading model files', terminal: false,
         };
@@ -4062,6 +4064,7 @@ try {
         recovered,
         modelsVisible: !document.querySelector('#models-panel').classList.contains('hidden'),
         wizardHidden: document.querySelector('#setup-wizard').classList.contains('hidden'),
+        setupProgressVisible: Boolean(document.querySelector('#wizard-model-feedback #model-install-progress')),
         progress: document.querySelector('#model-install-progress-bar').value,
         installText: document.querySelector('#install-model-button').textContent,
       };
@@ -4081,8 +4084,9 @@ try {
   })()`);
   if (
     !refreshedDownloadRecovery.activePresentation.recovered
-    || !refreshedDownloadRecovery.activePresentation.modelsVisible
-    || !refreshedDownloadRecovery.activePresentation.wizardHidden
+    || (!setupRecovery && !refreshedDownloadRecovery.activePresentation.modelsVisible)
+    || refreshedDownloadRecovery.activePresentation.wizardHidden === setupRecovery
+    || refreshedDownloadRecovery.activePresentation.setupProgressVisible !== setupRecovery
     || refreshedDownloadRecovery.activePresentation.progress !== 64
     || refreshedDownloadRecovery.activePresentation.installText !== 'Downloading…'
     || !refreshedDownloadRecovery.completed
@@ -4092,6 +4096,114 @@ try {
   ) throw new Error(`refreshed-download-recovery:${JSON.stringify(refreshedDownloadRecovery)}`);
   checks += 9;
   trace("refreshed-download-recovery-verified");
+  }
+
+  // Cross-platform UX contract: setup owns the default-model download until
+  // provider verification and selection complete. Platform adapters may differ,
+  // but none may route a novice through Models or expose Chat prematurely.
+  for (const platform of ['windows', 'linux', 'macos']) {
+    for (const verificationFails of [false, true]) {
+    const alignment = await cdp.evaluate(`(async () => {
+      const originalApi = api;
+      const originalPlatform = state.platformFamily;
+      const originalOpenModels = openModels;
+      let modelNavigation = 0;
+      const model = 'qwen3.5:4b';
+      let resolveInstall;
+      let progressPhase = 'downloading';
+      let executions = 0;
+      const visible = (id) => !document.querySelector('#' + id).closest('.hidden, [hidden], [inert]');
+      const capture = () => ({
+        wizard: visible('setup-wizard'),
+        progressInSetup: Boolean(document.querySelector('#wizard-model-feedback #model-install-progress')),
+        shellInert: document.querySelector('.shell').inert,
+        phase: document.querySelector('#model-install-progress').dataset.state,
+        selected: selectedModel('general.chat'),
+        focus: document.activeElement.id,
+      });
+      try {
+        state.platformFamily = '${platform}';
+        openModels = () => { modelNavigation++; originalOpenModels(); };
+        state.modelOptions = [];
+        state.modelSelections = Object.fromEntries(Object.keys(CAPABILITIES).map(id => [id, {mode:'none', model:null}]));
+        state.qualifiedModelCandidates = [{name:model, recommended:true, automatic:true, capabilityStatus:{'general.chat':'validated'}}];
+        api = async (path) => {
+          if (path === '/api/model-install/prepare') return {
+            schemaVersion:1, kind:'model-install-approval', approvalToken:'d'.repeat(32),
+            expiresInSeconds:300, singleUse:true, persisted:false, model,
+            destination:'This computer', downloadStarted:false, licenseStatus:'review-required',
+            hardwareFit:'compatible', hardwareFitReason:'matched-tested-hardware-profile', minimumSystemMemoryGiB:8
+          };
+          if (path === '/api/model-install/status') return {
+            schemaVersion:1, kind:'model-install-progress', model, phase:progressPhase,
+            progressPercent:progressPhase === 'downloading' ? 45 : 100,
+            completedBytes:progressPhase === 'downloading' ? 45 : 100, totalBytes:100,
+            status:progressPhase, terminal:progressPhase === 'complete'
+          };
+          if (path === '/api/model-install/execute') {
+            executions++;
+            return new Promise(resolve => { resolveInstall = resolve; });
+          }
+          throw new Error('unexpected-alignment-api:' + path);
+        };
+        // Preparing or cancelling a review grants no download authority.
+        await offerRecommendedModelDuringSetup(false);
+        const review = {executions, wizardInert:document.querySelector('#setup-wizard').inert, focus:document.activeElement.id};
+        document.querySelector('#model-install-review-cancel').click();
+        const cancelled = {executions, retry:visible('wizard-model-retry'), wizard:visible('setup-wizard')};
+        const operation = offerRecommendedModelDuringSetup(true);
+        for (let i=0; i<40 && document.querySelector('#model-install-progress').dataset.state !== 'downloading'; i++) await new Promise(r=>setTimeout(r,25));
+        const downloading = capture();
+        document.querySelector('#wizard-model-title').focus();
+        const tabEvent = new KeyboardEvent('keydown',{key:'Tab',bubbles:true,cancelable:true});
+        document.querySelector('#setup-wizard').dispatchEvent(tabEvent);
+        const focusContained = tabEvent.defaultPrevented && document.activeElement.id === 'wizard-model-title';
+        document.querySelector('#setup-wizard').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));
+        const escapeKeptSetup = visible('setup-wizard');
+        progressPhase = 'verifying';
+        for (let i=0; i<40 && document.querySelector('#model-install-progress').dataset.state !== 'verifying'; i++) await new Promise(r=>setTimeout(r,25));
+        const verifying = capture();
+        progressPhase = 'complete';
+        resolveInstall({schemaVersion:1,kind:'model-install-result',status:'installed',model,
+          verifiedByProviderCatalog:${!verificationFails},selectedAutomatically:true,
+          modelOption:{name:model,digestVerified:true,capabilityStatus:{'general.chat':'validated'}}});
+        let failure = null;
+        try { await operation; } catch (error) { failure = error.message; }
+        const complete = {
+          wizardHidden:document.querySelector('#setup-wizard').classList.contains('hidden'),
+          chat:visible('text-panel'), selected:selectedModel('general.chat'),
+          shellInert:document.querySelector('.shell').inert,
+          focus:document.activeElement.id,
+          flag:state.setupModelDownload,
+          progressRestored:Boolean(document.querySelector('#desired-model #model-install-progress')),
+          retry:visible('wizard-model-retry'), back:visible('wizard-model-back'),
+          failure, status:document.querySelector('#model-install-status').textContent,
+          progressLabel:document.querySelector('#model-install-progress-label').textContent,
+        };
+        if (${verificationFails}) { finishSetupModelDownload(); openChat(); }
+        return {review,cancelled,downloading,verifying,escapeKeptSetup,complete,executions,modelNavigation,focusContained};
+      } finally { api=originalApi; state.platformFamily=originalPlatform; openModels=originalOpenModels; }
+    })()`);
+    if (alignment.review.executions !== 0 || !alignment.review.wizardInert
+      || alignment.review.focus !== 'model-install-review-dialog'
+      || alignment.cancelled.executions !== 0 || !alignment.cancelled.retry || !alignment.cancelled.wizard
+      || !alignment.escapeKeptSetup || alignment.executions !== 1
+      || alignment.modelNavigation !== 0 || !alignment.focusContained
+      || [alignment.downloading, alignment.verifying].some(value => !value.wizard || !value.progressInSetup || !value.shellInert || value.selected)
+      || alignment.downloading.phase !== 'downloading' || alignment.verifying.phase !== 'verifying'
+      || (!verificationFails && (!alignment.complete.wizardHidden || !alignment.complete.chat || alignment.complete.selected !== 'qwen3.5:4b'
+        || alignment.complete.shellInert || alignment.complete.focus !== 'prompt'
+        || alignment.complete.flag !== false || !alignment.complete.progressRestored || alignment.complete.failure))
+      || (verificationFails && (alignment.complete.wizardHidden || alignment.complete.chat || alignment.complete.selected
+        || !alignment.complete.shellInert || !alignment.complete.retry || !alignment.complete.back
+        || alignment.complete.failure !== 'guided-default-model-install-failed' || !alignment.complete.status
+        || alignment.complete.progressLabel !== 'Download stopped'))) {
+      throw new Error('cross-platform-setup-alignment:' + platform + ':' + JSON.stringify(alignment));
+    }
+    checks += 24;
+    trace('cross-platform-setup-alignment-' + platform + '-verified');
+    }
+  }
 
   const guidedPreparationFailure = await cdp.evaluate(`(async () => {
     const originalApi = api;

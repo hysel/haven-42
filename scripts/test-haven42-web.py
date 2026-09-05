@@ -1651,7 +1651,7 @@ def main() -> int:
         ]
         status, install_review, _ = request_json(
             origin + "/api/model-install/prepare", "POST",
-            {"model": "community/example-writing:7b"}, token, origin,
+            {"model": "community/example-writing:7b", "presentation": "setup"}, token, origin,
         )
         assert status == 200
         assert install_review["downloadStarted"] is False
@@ -1661,6 +1661,14 @@ def main() -> int:
         assert install_review["hardwareFit"] == "unknown"
         assert install_review["hardwareFitReason"] is None
         assert install_review["minimumSystemMemoryGiB"] is None
+        assert state.pending_model_install_approvals[install_review["approvalToken"]]["presentation"] == "setup"
+        for invalid_presentation in ("auto-approve", True, None, [], {"setup": True}):
+            status, invalid_presentation_result, _ = request_json(
+                origin + "/api/model-install/prepare", "POST",
+                {"model": "community/example-writing:7b", "presentation": invalid_presentation}, token, origin,
+            )
+            assert status == 400
+            assert invalid_presentation_result["error"] == "invalid-model-install-presentation"
         status, installed_model, _ = request_json(
             origin + "/api/model-install/execute", "POST",
             {"approvalToken": install_review["approvalToken"], "confirmed": True}, token, origin,
@@ -1670,6 +1678,7 @@ def main() -> int:
         assert installed_model["model"] == "community/example-writing:7b"
         assert installed_model["verifiedByProviderCatalog"] is True
         assert installed_model["selectedAutomatically"] is True
+        assert state.model_install_progress[install_review["approvalToken"]]["_presentation"] == "setup"
         status, install_progress, _ = request_json(
             origin + "/api/model-install/status", "POST",
             {"progressToken": install_review["approvalToken"]}, token, origin,
@@ -1715,6 +1724,22 @@ def main() -> int:
         assert active_install["progressToken"] == "a" * 32
         assert active_install["model"] == "qwen3.5:9b"
         assert active_install["progressPercent"] == 42
+        assert active_install["kind"] == "model-install-activity"
+        assert active_install["presentation"] == "models"
+        with state.lock:
+            state.model_install_progress["a" * 32]["_presentation"] = "setup"
+        status, setup_activity, _ = request_json(
+            origin + "/api/model-install/active", "POST", {}, token, origin,
+        )
+        assert status == 200 and setup_activity["presentation"] == "setup"
+        assert setup_activity["kind"] == "model-install-activity"
+        assert not any(key.startswith("_") for key in setup_activity)
+        status, denied_execute, _ = request_json(
+            origin + "/api/model-install/execute", "POST",
+            {"approvalToken": "a" * 32, "confirmed": True}, token, origin,
+        )
+        assert status == 409 and denied_execute["error"] == "model-install-approval-invalid"
+        checks += 18
         with state.lock:
             state.model_install_progress.pop("a" * 32)
         status, replay_error, _ = request_json(
