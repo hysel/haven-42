@@ -1,12 +1,12 @@
 # Haven 42 0.4 Alpha 2 task list
 
-This checklist controls preparation of the unsigned Haven 42
+This checklist controls preparation of the Haven 42
 `0.4.0-alpha.2` prerelease. Alpha 2 is intended to provide separate Windows
 x64, Linux x64, and macOS ARM64 portable packages for invited testing. It is
-not an installer, signed product, stable release, or production-readiness
-claim. The macOS expansion is approved for implementation and native
-validation, but it cannot enter the release contract until its current-source
-package, lifecycle, accessibility, privacy, and supply-chain gates pass.
+not an installer, stable release, or production-readiness claim. The owner-approved
+release scope is signed Windows x64, unsigned Linux x64, and Developer ID signed
+and notarized macOS ARM64. This scope approval does not approve publication or
+prove that any final release artifact has passed its native gates.
 
 Completing a task records only that task's stated evidence. It does not promote
 another operating system, distribution, accelerator, model, or package.
@@ -16,9 +16,12 @@ another operating system, distribution, accelerator, model, or package.
 - Keep the shared browser UI and minimum trusted PyInstaller launcher/service.
 - Keep Tauri and Rust unadmitted.
 - Expose only Chat, Writing, and Summarization.
-- Distribute separate unsigned Windows x64, Linux x64, and macOS ARM64
+- Distribute separate Windows x64, Linux x64, and macOS ARM64
   portable archives only after each platform's exact candidate passes its own
   native gates.
+- Require Authenticode and a trusted timestamp for Windows; Developer ID,
+  hardened runtime, notarization, stapling and Gatekeeper verification for macOS.
+  Linux remains unsigned. Validate signatures against the exact final artifacts.
 - Bundle no Ollama runtime, model, driver, package manager, or other external
   software inside the Haven 42 application archive.
 - Download only exact registered artifacts after the tester reviews the plan
@@ -30,7 +33,7 @@ another operating system, distribution, accelerator, model, or package.
   package-manager state, operating-system updates, services, firewall rules,
   certificate stores, login items, shell profiles, or global environment.
 - Bind the Haven service and Haven-managed Ollama only to IPv4 loopback.
-- Keep signing, installers, automatic updates, machine-wide modification,
+- Keep installers, automatic updates, machine-wide modification,
   stable promotion, and production claims outside Alpha 2.
 - Stop release preparation on any unresolved security or privacy finding.
 
@@ -46,7 +49,16 @@ another operating system, distribution, accelerator, model, or package.
 
 ## Release-candidate gap audit
 
-_Last reconciled: August 11, 2026._
+_Release scope reconciled: September 5, 2026. The campaign audit below is the
+historical August 11 assessment; its dated results do not validate new artifacts._
+
+The release and promotion contracts now include all three platforms and separate
+signing requirements. The old unsigned Windows/Linux hosted pair remains historical
+evidence, not a completed signed three-platform candidate set. The new final-set,
+Windows signature and macOS trust gates remain open. All final candidates must
+come from one clean source commit, and publication still needs separate owner
+approval. Earlier candidate-specific signing and attended tests retain their
+original scope; they do not transfer to a new build.
 
 The merged Alpha 2 foundation now includes the Linux platform adapter,
 distribution and hardware admission, exact component registry, link-free
@@ -99,12 +111,14 @@ does not automatically check a native or release-candidate task.
 - [x] Freeze `0.4.0-alpha.1`; never replace its tag or published assets.
 - [ ] Use `0.4.0-alpha.2` consistently in code, package metadata, evidence,
   documentation, issue forms, and release notes.
-- [x] Define these candidate assets:
-  - `haven42-0.4.0-alpha.2-windows-x64-unsigned.zip`
+- [x] Define these intended release assets (names are not build/pass claims):
+  - `haven42-0.4.0-alpha.2-windows-x64-signed.zip`
   - `haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz`
-- [ ] Admit the planned macOS expansion asset only after its builder and
-  native gates pass:
-  - `haven42-0.4.0-alpha.2-macos-arm64-unsigned.zip`
+  - `haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip`
+- [ ] Complete the final three-platform candidate set and its native gates.
+- [ ] Verify the final Windows signature and trusted timestamp.
+- [ ] Verify the final macOS Developer ID signature, hardened runtime,
+  notarization, stapling and Gatekeeper result.
 - [x] Define separate checksums, inventories, notices, SBOMs, provenance, and
   known-limitations evidence for each archive.
 - [x] Update the release gate so one platform cannot inherit another
@@ -434,7 +448,7 @@ Representative results never certify an untested card or operating system.
   read-only startup behavior, repeated lifecycle, occupied ports, hostile
   environment variables, and abrupt exit on both platforms.
 - [ ] Generate exact package file inventories, dependency inventories,
-  third-party notices, CycloneDX SBOMs, checksums, and unsigned provenance.
+  third-party notices, CycloneDX SBOMs, checksums, and build/signing provenance.
 - [ ] Verify that each archive contains the Haven 42 license and every required
   redistributed dependency license.
 - [ ] Confirm no model, Ollama binary, driver, secret, local evidence, machine
@@ -502,12 +516,13 @@ Representative results never certify an untested card or operating system.
 - [ ] Obtain owner review of the Windows, Linux, and macOS user flows and release-page
   wording.
 - [ ] Obtain explicit owner approval before tagging or publishing Alpha 2.
-- [ ] Publish the validated unsigned archives as one GitHub prerelease with checksums,
+- [ ] Publish the validated platform archives as one GitHub prerelease with checksums,
   inventories, notices, SBOMs, provenance, limitations, and feedback links.
 - [ ] Verify the immutable tag, asset names, sizes, digests, download links,
   issue forms, and public documentation after publication.
-- [ ] Keep the prerelease flag and unsigned warnings visible; make no stable,
-  signed, installer, universal-Linux, or production-readiness claim.
+- [ ] Keep the prerelease flag and Linux unsigned warning visible. Describe Windows
+  and macOS signing only after verifying the published artifacts; make no stable,
+  installer, universal-Linux, or production-readiness claim.
 
 ## External-machine schedule
 
