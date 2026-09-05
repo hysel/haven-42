@@ -20,28 +20,32 @@ HOSTED_CANDIDATE_VERIFIER = ROOT / "scripts" / "verify-alpha2-hosted-candidate-r
 SAFE_ID = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 ALLOWED_STATUSES = {"satisfied", "candidate-required", "owner-required"}
 EXPECTED_GATES = {
+    "final-three-platform-candidate-set",
+    "windows-release-signature",
+    "macos-release-trust",
     "release-contract",
     "candidate-builders",
     "existing-regression-ci",
     "sanitized-model-hardware-evidence",
     "support-matrix-freeze",
     "managed-runtime-freeze",
-    "exact-candidate-commit",
-    "windows-candidate-packet",
-    "linux-candidate-packet",
-    "same-source-commit",
+    "historical-exact-candidate-commit",
+    "historical-windows-candidate-packet",
+    "historical-linux-candidate-packet",
+    "historical-same-source-commit",
     "native-package-validation",
     "manual-accessibility-validation",
     "security-privacy-review",
-    "supply-chain-evidence",
+    "historical-supply-chain-evidence",
     "release-documentation",
-    "hosted-candidate-ci",
+    "historical-hosted-candidate-ci",
     "publication-approval",
 }
 EXPECTED_PRIMARY_CELLS = [
     "windows-11-x64-nvidia",
     "ubuntu-26.04-x64-nvidia",
     "bazzite-44-x64-nvidia",
+    "macos-arm64",
 ]
 EXPECTED_LINUX_CPU_CELLS = [
     "arch-rolling",
@@ -55,14 +59,12 @@ EXPECTED_LINUX_CPU_CELLS = [
     "ubuntu-26.04",
 ]
 EXPECTED_NON_BLOCKING = [
-    "macos-packaging",
     "additional-gpu-and-memory-tiers",
     "windows-amd-and-intel-promotion",
     "linux-amd-and-intel-promotion",
     "coding-agent-surfaces",
     "image-audio-and-video-engines",
     "native-installer-and-updater",
-    "code-signing",
 ]
 EXPECTED_SATISFIED_GATES = {
     "release-contract",
@@ -71,12 +73,12 @@ EXPECTED_SATISFIED_GATES = {
     "sanitized-model-hardware-evidence",
     "support-matrix-freeze",
     "managed-runtime-freeze",
-    "exact-candidate-commit",
-    "windows-candidate-packet",
-    "linux-candidate-packet",
-    "same-source-commit",
-    "supply-chain-evidence",
-    "hosted-candidate-ci",
+    "historical-exact-candidate-commit",
+    "historical-windows-candidate-packet",
+    "historical-linux-candidate-packet",
+    "historical-same-source-commit",
+    "historical-supply-chain-evidence",
+    "historical-hosted-candidate-ci",
 }
 
 
@@ -106,13 +108,24 @@ def _release_contract() -> dict[str, Any]:
     except (OSError, UnicodeError, json.JSONDecodeError) as error:
         raise Alpha2PromotionError("release-contract-unreadable") from error
     if (
-        value.get("contractId") != "haven42.alpha2.release"
+        value.get("schemaVersion") != 2
+        or value.get("contractId") != "haven42.alpha2.release"
         or value.get("version") != "0.4.0-alpha.2"
         or value.get("capabilities") != [
             "general.chat", "content.write", "content.summarize",
         ]
-        or [item.get("id") for item in value.get("platforms", [])]
-        != ["windows-x64", "linux-x64"]
+        or value.get("platforms") != [
+            {"id": "windows-x64", "archive": "haven42-0.4.0-alpha.2-windows-x64-signed.zip", "nativeValidationRequired": True},
+            {"id": "linux-x64", "archive": "haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz", "nativeValidationRequired": True},
+            {"id": "macos-arm64", "archive": "haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip", "nativeValidationRequired": True},
+        ]
+        or value.get("releaseControls", {}).get("signingRequirements") != {
+            "windows-x64": ["authenticode", "trusted-timestamp"],
+            "linux-x64": [],
+            "macos-arm64": ["developer-id", "hardened-runtime", "notarization", "stapling", "gatekeeper"],
+        }
+        or "unsigned" in value.get("releaseControls", {})
+        or value.get("releaseControls", {}).get("ownerApprovalRequiredForPublication") is not True
         or value.get("releaseControls", {}).get("productionReady") is not False
         or value.get("releaseControls", {}).get("automaticPublicationAllowed") is not False
     ):
@@ -176,10 +189,10 @@ def evaluate(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict) or set(value) != expected:
         raise Alpha2PromotionError("invalid-contract-shape")
     if (
-        value["schemaVersion"] != 1
+        value["schemaVersion"] != 2
         or value["contractId"] != "haven42.alpha2.promotion-readiness"
         or value["releaseContract"] != "config/alpha-2-release-contract.json"
-        or value["implementationStatus"] != "hosted-candidates-built-native-validation-required"
+        or value["implementationStatus"] != "release-scope-approved-final-candidates-required"
     ):
         raise Alpha2PromotionError("invalid-contract-identity")
 
@@ -190,7 +203,7 @@ def evaluate(value: Any) -> dict[str, Any]:
         "audience": release_contract["audience"],
         "platforms": [item["id"] for item in release_contract["platforms"]],
         "capabilities": release_contract["capabilities"],
-        "unsigned": release_contract["releaseControls"]["unsigned"],
+        "signingRequirements": release_contract["releaseControls"]["signingRequirements"],
         "productionReady": False,
     }:
         raise Alpha2PromotionError("release-scope-mismatch")
@@ -232,7 +245,9 @@ def evaluate(value: Any) -> dict[str, Any]:
     hosted_candidate = _hosted_candidate_result()
     if (
         hosted_candidate["Version"] != release["version"]
-        or hosted_candidate["Platforms"] != release["platforms"]
+        # This verified record is the historical unsigned pair, not evidence
+        # for the newly approved signed three-platform release set.
+        or hosted_candidate["Platforms"] != ["windows-x64", "linux-x64"]
         or hosted_candidate["CandidatePairReadyForNativeValidation"] is not True
         or hosted_candidate["NativeValidationComplete"] is not False
         or hosted_candidate["PublicationAllowed"] is not False
@@ -278,6 +293,8 @@ def evaluate(value: Any) -> dict[str, Any]:
     if any(statuses[gate_id] != "candidate-required" for gate_id in (
         "native-package-validation", "manual-accessibility-validation",
         "security-privacy-review", "release-documentation",
+        "final-three-platform-candidate-set", "windows-release-signature",
+        "macos-release-trust",
     )):
         raise Alpha2PromotionError("native-validation-boundary-mismatch")
     if statuses["publication-approval"] != "owner-required":
@@ -294,8 +311,8 @@ def evaluate(value: Any) -> dict[str, Any]:
     expected_current_authority = {
         "scopeApproved": True,
         "managedRuntimeApproved": True,
-        "candidateCommitSelected": True,
-        "releaseCandidatesBuilt": True,
+        "candidateCommitSelected": False,
+        "releaseCandidatesBuilt": False,
         "nativeValidationComplete": False,
         "readyForOwnerReview": False,
         "publicationAuthorized": False,
@@ -305,18 +322,21 @@ def evaluate(value: Any) -> dict[str, Any]:
         raise Alpha2PromotionError("promotion-authority-must-remain-denied")
 
     return {
-        "SchemaVersion": 1,
+        "SchemaVersion": 2,
         "Mode": value["implementationStatus"],
         "Version": release["version"],
         "PublicationPlatforms": release["platforms"],
+        "SigningRequirements": release["signingRequirements"],
+        "HistoricalUnsignedCandidatePlatforms": hosted_candidate["Platforms"],
+        "HistoricalUnsignedCandidateBuildComplete": True,
         "PrimaryNativeValidationCells": scope["primaryNativeValidationCells"],
         "LinuxCpuCompatibilityCellCount": len(coverage["linuxOperatingSystemIds"]),
         "ManagedRuntimeSelected": runtime["selectedVersion"],
         "GateCount": len(gates),
         "StatusCounts": counts,
         "RemainingGates": blockers,
-        "CandidateBuildComplete": True,
-        "ReadyForNativeValidation": True,
+        "CandidateBuildComplete": False,
+        "ReadyForNativeValidation": False,
         "ReadyForOwnerReview": False,
         "PublicationAllowed": False,
         "ProductionReady": False,

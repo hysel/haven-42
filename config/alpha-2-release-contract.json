@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "contractId": "haven42.alpha2.release",
   "version": "0.4.0-alpha.2",
   "status": "candidate-preparation-native-validation-required",
@@ -12,12 +12,17 @@
   "platforms": [
     {
       "id": "windows-x64",
-      "archive": "haven42-0.4.0-alpha.2-windows-x64-unsigned.zip",
+      "archive": "haven42-0.4.0-alpha.2-windows-x64-signed.zip",
       "nativeValidationRequired": true
     },
     {
       "id": "linux-x64",
       "archive": "haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz",
+      "nativeValidationRequired": true
+    },
+    {
+      "id": "macos-arm64",
+      "archive": "haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip",
       "nativeValidationRequired": true
     }
   ],
@@ -30,7 +35,11 @@
     "republicationAllowed": false
   },
   "releaseControls": {
-    "unsigned": true,
+    "signingRequirements": {
+      "windows-x64": ["authenticode", "trusted-timestamp"],
+      "linux-x64": [],
+      "macos-arm64": ["developer-id", "hardened-runtime", "notarization", "stapling", "gatekeeper"]
+    },
     "prereleaseRequired": true,
     "automaticPublicationAllowed": false,
     "ownerApprovalRequiredForPublication": true,

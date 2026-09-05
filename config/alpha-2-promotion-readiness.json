@@ -1,21 +1,26 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "contractId": "haven42.alpha2.promotion-readiness",
   "releaseContract": "config/alpha-2-release-contract.json",
-  "implementationStatus": "hosted-candidates-built-native-validation-required",
+  "implementationStatus": "release-scope-approved-final-candidates-required",
   "release": {
     "version": "0.4.0-alpha.2",
     "audience": "invited-alpha-testers",
     "platforms": [
       "windows-x64",
-      "linux-x64"
+      "linux-x64",
+      "macos-arm64"
     ],
     "capabilities": [
       "general.chat",
       "content.write",
       "content.summarize"
     ],
-    "unsigned": true,
+    "signingRequirements": {
+      "windows-x64": ["authenticode", "trusted-timestamp"],
+      "linux-x64": [],
+      "macos-arm64": ["developer-id", "hardened-runtime", "notarization", "stapling", "gatekeeper"]
+    },
     "productionReady": false
   },
   "scopeProposal": {
@@ -23,7 +28,8 @@
     "primaryNativeValidationCells": [
       "windows-11-x64-nvidia",
       "ubuntu-26.04-x64-nvidia",
-      "bazzite-44-x64-nvidia"
+      "bazzite-44-x64-nvidia",
+      "macos-arm64"
     ],
     "compatibilityCoverage": {
       "mode": "cpu-only-package-and-desktop",
@@ -41,14 +47,12 @@
       "promotionInheritanceAllowed": false
     },
     "nonBlockingExpansion": [
-      "macos-packaging",
       "additional-gpu-and-memory-tiers",
       "windows-amd-and-intel-promotion",
       "linux-amd-and-intel-promotion",
       "coding-agent-surfaces",
       "image-audio-and-video-engines",
-      "native-installer-and-updater",
-      "code-signing"
+      "native-installer-and-updater"
     ],
     "changesSupportLabels": false,
     "changesAutomaticModelDefaults": false
@@ -67,6 +71,21 @@
     "certifiedRollbackRequired": true
   },
   "gates": [
+    {
+      "id": "final-three-platform-candidate-set",
+      "status": "candidate-required",
+      "evidence": ["config/alpha-2-release-contract.json"]
+    },
+    {
+      "id": "windows-release-signature",
+      "status": "candidate-required",
+      "evidence": ["config/alpha-2-release-contract.json"]
+    },
+    {
+      "id": "macos-release-trust",
+      "status": "candidate-required",
+      "evidence": ["config/alpha-2-release-contract.json"]
+    },
     {
       "id": "release-contract",
       "status": "satisfied",
@@ -120,7 +139,7 @@
       ]
     },
     {
-      "id": "exact-candidate-commit",
+      "id": "historical-exact-candidate-commit",
       "status": "satisfied",
       "evidence": [
         "config/alpha-2-hosted-candidate-result.json",
@@ -129,7 +148,7 @@
       ]
     },
     {
-      "id": "windows-candidate-packet",
+      "id": "historical-windows-candidate-packet",
       "status": "satisfied",
       "evidence": [
         "config/alpha-2-hosted-candidate-result.json",
@@ -138,7 +157,7 @@
       ]
     },
     {
-      "id": "linux-candidate-packet",
+      "id": "historical-linux-candidate-packet",
       "status": "satisfied",
       "evidence": [
         "config/alpha-2-hosted-candidate-result.json",
@@ -147,7 +166,7 @@
       ]
     },
     {
-      "id": "same-source-commit",
+      "id": "historical-same-source-commit",
       "status": "satisfied",
       "evidence": [
         "config/alpha-2-hosted-candidate-result.json",
@@ -182,7 +201,7 @@
       ]
     },
     {
-      "id": "supply-chain-evidence",
+      "id": "historical-supply-chain-evidence",
       "status": "satisfied",
       "evidence": [
         "config/alpha-2-hosted-candidate-result.json",
@@ -200,7 +219,7 @@
       ]
     },
     {
-      "id": "hosted-candidate-ci",
+      "id": "historical-hosted-candidate-ci",
       "status": "satisfied",
       "evidence": [
         ".github/workflows/alpha2-candidate.yml",
@@ -220,8 +239,8 @@
   "authority": {
     "scopeApproved": true,
     "managedRuntimeApproved": true,
-    "candidateCommitSelected": true,
-    "releaseCandidatesBuilt": true,
+    "candidateCommitSelected": false,
+    "releaseCandidatesBuilt": false,
     "nativeValidationComplete": false,
     "readyForOwnerReview": false,
     "publicationAuthorized": false,

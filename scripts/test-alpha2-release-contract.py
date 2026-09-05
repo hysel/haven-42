@@ -18,7 +18,7 @@ def main() -> int:
         "capabilities", "platforms", "alpha1", "releaseControls",
         "requiredPerArchiveEvidence", "stopConditions",
     }
-    assert value["schemaVersion"] == 1
+    assert value["schemaVersion"] == 2
     assert value["contractId"] == "haven42.alpha2.release"
     assert value["version"] == "0.4.0-alpha.2"
     assert value["status"] == "candidate-preparation-native-validation-required"
@@ -28,12 +28,17 @@ def main() -> int:
     assert value["platforms"] == [
         {
             "id": "windows-x64",
-            "archive": "haven42-0.4.0-alpha.2-windows-x64-unsigned.zip",
+            "archive": "haven42-0.4.0-alpha.2-windows-x64-signed.zip",
             "nativeValidationRequired": True,
         },
         {
             "id": "linux-x64",
             "archive": "haven42-0.4.0-alpha.2-linux-x64-unsigned.tar.gz",
+            "nativeValidationRequired": True,
+        },
+        {
+            "id": "macos-arm64",
+            "archive": "haven42-0.4.0-alpha.2-macos-arm64-signed-notarized.zip",
             "nativeValidationRequired": True,
         },
     ]
@@ -47,7 +52,11 @@ def main() -> int:
     }
     controls = value["releaseControls"]
     assert controls == {
-        "unsigned": True,
+        "signingRequirements": {
+            "windows-x64": ["authenticode", "trusted-timestamp"],
+            "linux-x64": [],
+            "macos-arm64": ["developer-id", "hardened-runtime", "notarization", "stapling", "gatekeeper"],
+        },
         "prereleaseRequired": True,
         "automaticPublicationAllowed": False,
         "ownerApprovalRequiredForPublication": True,
