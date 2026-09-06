@@ -5,12 +5,18 @@ from __future__ import annotations
 
 import hashlib
 import argparse
+import faulthandler
+import os
 import sys
 import tempfile
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+# Opt-in, source-fixture-only diagnostics for a bounded startup smoke test.
+# Cancel before serving requests; never dump application/session content.
+if os.environ.get("HAVEN42_TEST_STARTUP_TRACE") == "1":
+    faulthandler.dump_traceback_later(10, repeat=False)
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "web"))
 
@@ -196,6 +202,7 @@ def main() -> int:
             state.diagnostics.close()
             print(f"Could not start Haven 42 local web test server: {error}", file=sys.stderr)
             return 1
+        faulthandler.cancel_dump_traceback_later()
         print(f"Haven 42 is available at {app.expected_origin}", flush=True)
         try:
             app.serve_forever(poll_interval=0.2)

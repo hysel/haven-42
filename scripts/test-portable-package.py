@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from collections import deque
 import json
 from pathlib import Path
 import re
@@ -101,18 +102,34 @@ def launch(
 
     reader = threading.Thread(target=read_output, daemon=True)
     reader.start()
+    startup_frames: deque[str] = deque(maxlen=20)
+
+    def startup_failure(reason: str) -> AssertionError:
+        # Report stack locations only, never arbitrary child output, absolute
+        # paths, environment values, credentials, or source-code lines.
+        return AssertionError(reason + (
+            "; startup frames: " + " -> ".join(startup_frames)
+            if startup_frames else ""
+        ))
+
     deadline = time.monotonic() + startup_timeout
     try:
         while True:
             remaining = deadline - time.monotonic()
             if remaining <= 0:
-                raise AssertionError("runtime did not announce its loopback URL")
+                raise startup_failure("runtime did not announce its loopback URL")
             try:
                 line = lines.get(timeout=remaining)
             except queue.Empty:
-                raise AssertionError("runtime did not announce its loopback URL") from None
+                raise startup_failure("runtime did not announce its loopback URL") from None
             if line is None:
-                raise AssertionError("runtime exited before announcing its loopback URL")
+                raise startup_failure("runtime exited before announcing its loopback URL")
+            frame = re.fullmatch(
+                r'\s*File "[^"\r\n]*[/\\]([A-Za-z0-9_.-]+\.py)", line ([0-9]+) in ([A-Za-z0-9_<>]+)\s*',
+                line,
+            )
+            if frame:
+                startup_frames.append(f"{frame[1]}:{frame[2]} in {frame[3]}")
             match = re.search(r"http://127\.0\.0\.1:\d+", line)
             if match:
                 return process, match.group(0)
@@ -700,6 +717,21 @@ def test_harness() -> None:
                 raise AssertionError("unannounced child was accepted")
             assert time.monotonic() - started < 5, "startup deadline was not bounded"
             assert children[-1].poll() is not None, "failed child was not reaped"
+        try:
+            launch([
+                sys.executable, "-c",
+                "import time; "
+                "print('private credential must not be echoed', flush=True); "
+                "print('  File \"/private/test-user/socket.py\", line 123 in getfqdn', flush=True); "
+                "time.sleep(30)",
+            ], startup_timeout=0.5)
+        except AssertionError as error:
+            assert "socket.py:123 in getfqdn" in str(error)
+            assert "private" not in str(error) and "test-user" not in str(error)
+            assert "credential" not in str(error)
+        else:
+            raise AssertionError("stalled child with a traceback was accepted")
+        assert children[-1].poll() is not None
         child, origin = launch([
             sys.executable, "-c",
             "import time; print('http://127.0.0.1:12345', flush=True); time.sleep(30)",
@@ -760,7 +792,10 @@ def main() -> int:
             "--source-version-for-package-parity",
             args.expected_version,
         ])
-    source = probe(source_command, False, expected_version=args.expected_version)
+    source = probe(
+        source_command, False, expected_version=args.expected_version,
+        environment={"HAVEN42_TEST_STARTUP_TRACE": "1"},
+    )
     executable = Path(args.executable).resolve()
     packaged = probe(
         [str(executable)], True, expected_version=args.expected_version,
