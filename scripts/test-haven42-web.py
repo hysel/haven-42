@@ -116,6 +116,7 @@ class FakeOllama(BaseHTTPRequestHandler):
             self._json(200, {"models": [
                 {
                     "name": name,
+                    **({"size": 6600000000} if name == "qwen3.5:9b" else {}),
                     "digest": (
                         QWEN_DIGEST
                         if name == "qwen3.5:9b"
@@ -1453,6 +1454,9 @@ def main() -> int:
         )
         assert status == 200
         assert connected["models"] == ["qwen3.5:9b", "writer-model:latest"]
+        assert next(item for item in connected["modelOptions"] if item["name"] == "qwen3.5:9b")["modelSize"] == {"bytes": 6600000000, "source": "ollama-installed"}
+        resumed_sizes = state.resume_provider_session()
+        assert next(item for item in resumed_sizes["modelOptions"] if item["name"] == "qwen3.5:9b")["modelSize"] == {"bytes": 6600000000, "source": "ollama-installed"}
         assert connected["trustScope"] == "loopback" and connected["idleUnloadSeconds"] == 300
         assert connected["transportScheme"] == "http"
         assert connected["transportEncrypted"] is False
@@ -1815,6 +1819,29 @@ def main() -> int:
         search_globals = WEB.search_ollama_catalog.__globals__
         parsed = search_globals["parse_ollama_search_html"](fixture_html)
         assert parsed == ["qwen3.5:9b", "qwen3.5:35b", "qwen3.5:9b-mlx"]
+        sized = search_globals["parse_ollama_search_html"](
+            '<a href="/library/example:small"><span>86 MB</span></a>'
+            '<a href="/library/example:mlx"><span>1.2GB</span></a>'
+            '<a href="/library/example:unknown">135M parameters</a><span>99GB</span>'
+            '<a href="/library/example:bad">-3GB</a>'
+            '<a href="/library/example:huge">9999TB</a>'
+            '<a href="https://untrusted.invalid/library/example:external">4GB</a>'
+        )
+        assert sized.sizes == {"example:small": 86000000, "example:mlx": 1200000000}
+        assert WEB.reported_model_sizes([
+            {"name": "example:good", "size": 123456},
+            *({"name": "example:bad", "size": value} for value in (True, -1, 0, "123", 10**30, None)),
+        ]) == {"example:good": 123456}
+        decisions_with_sizes = WEB.build_model_decisions(["example:good"], {}, {}, {"example:good": 123456})
+        assert decisions_with_sizes["modelOptions"][0]["modelSize"] == {"bytes": 123456, "source": "ollama-installed"}
+        saved_catalog_provider = state.model_catalog_provider
+        state.model_catalog_provider = lambda query: sized
+        sized_search = state.search_models("example", True)
+        assert sized_search["results"][0]["modelSize"] == {"bytes": 86000000, "source": "ollama-catalog"}
+        assert "modelSize" not in sized_search["results"][2]
+        assert state.prepare_model_install("example:mlx")["modelSize"] == {"bytes": 1200000000, "source": "ollama-catalog"}
+        state.model_catalog_provider = saved_catalog_provider
+        checks += 6
         community = search_globals["parse_ollama_search_html"](
             '<a class="group w-full" href="/Author/Writer">Writing</a>'
             '<a href="/Author/Writer:q4_K_M">Q4</a>'
@@ -1835,7 +1862,7 @@ def main() -> int:
             ),
             "/library/qwen3.5/tags": (
                 '<a href="/library/qwen3.5:0.8b">0.8B</a>'
-                '<a href="/library/qwen3.5:2b-mlx">2B MLX</a>'
+                '<a href="/library/qwen3.5:2b-mlx">2B MLX <span>3.1GB</span></a>'
             ),
             "/library/qwen2.5-coder/tags": (
                 '<a href="/library/qwen2.5-coder:7b">7B</a>'
@@ -1852,6 +1879,8 @@ def main() -> int:
         assert broad_qwen[:3] == ["qwen3.8", "qwen3.8:27b", "qwen3.8:27b-mlx"]
         assert "qwen3.5:0.8b" in broad_qwen and "qwen2.5-coder:7b" in broad_qwen
         assert valid_exact_tag == ["qwen3.5:2b-mlx"]
+        assert valid_exact_tag.sizes == {"qwen3.5:2b-mlx": 3100000000}
+        assert broad_qwen.sizes == {"qwen3.5:2b-mlx": 3100000000}
         assert invalid_exact_tag == []
         # A format search must inspect tag variants, including those after the
         # old 20-link cutoff. Exact lookup must inspect that same complete page.

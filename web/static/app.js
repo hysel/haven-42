@@ -1314,6 +1314,24 @@ function updateCleanupPolicyControl() {
   button.textContent = changed ? "Apply changes" : (state.connected ? "Applied" : "Selected");
 }
 
+function validModelSize(value) {
+  return hasExactObjectKeys(value, ["bytes", "source"])
+    && Number.isSafeInteger(value.bytes) && value.bytes > 0 && value.bytes <= 16 * 1024 ** 4
+    && ["ollama-installed", "ollama-catalog"].includes(value.source);
+}
+
+function modelSizeLabel(item) {
+  const size = item?.modelSize;
+  if (!validModelSize(size)) return "Size unavailable";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const index = Math.min(4, Math.floor(Math.log10(size.bytes) / 3));
+  const amount = size.bytes / 1000 ** index;
+  const label = `${Number(amount.toFixed(2))} ${units[index]}`;
+  return size.source === "ollama-installed"
+    ? `Model size: ${label} · reported by Ollama`
+    : `Approx. model download: ${label} · catalog estimate`;
+}
+
 function validateModelSearch(result) {
   const expected = [
     "configurationChanged", "downloadsPerformed", "hardwareProfileSent", "kind",
@@ -1352,7 +1370,9 @@ function validateModelSearch(result) {
         "capabilityEvidence", "executionAllowed", "hardwareFit", "installCommand",
         "hardwareFitReason", "licenseStatus", "minimumSystemMemoryGiB", "name",
         "source", "status", "validationStatus",
+        ...(Object.hasOwn(item, "modelSize") ? ["modelSize"] : []),
       ].sort().join(",")
+      || (Object.hasOwn(item, "modelSize") && !validModelSize(item.modelSize))
       || !/^[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}$/.test(item.name)
       || names.has(item.name)
       || item.source !== "ollama-public-catalog"
@@ -1478,9 +1498,11 @@ function validateModelInstallPreparation(result, expectedModel) {
     "approvalToken", "destination", "downloadStarted", "expiresInSeconds", "hardwareFit",
     "hardwareFitReason", "kind", "licenseStatus", "minimumSystemMemoryGiB", "model",
     "persisted", "schemaVersion", "singleUse",
+    ...(result && Object.hasOwn(result, "modelSize") ? ["modelSize"] : []),
   ];
   if (
     !hasExactObjectKeys(result, fields)
+    || (Object.hasOwn(result, "modelSize") && !validModelSize(result.modelSize))
     || result.schemaVersion !== 1
     || result.kind !== "model-install-approval"
     || result.model !== expectedModel
@@ -1716,7 +1738,7 @@ async function prepareModelInstall(reviewRequired = true) {
     if (reviewRequired) {
       byId("model-install-review-name").textContent = preparation.model;
       byId("model-install-review-destination").textContent = preparation.destination;
-      byId("model-install-review-status").textContent = "Nothing has been downloaded.";
+      byId("model-install-review-status").textContent = `${modelSizeLabel(preparation)}. Download transfer may be smaller if files are already cached. Disk size is not RAM or graphics-memory usage. Nothing has been downloaded.`;
       document.querySelector(".shell").inert = true;
       byId("setup-wizard").inert = state.setupModelDownload === true;
       byId("model-install-review-layer").classList.remove("hidden");
@@ -1959,12 +1981,15 @@ function renderModelDiscovery() {
       status: "installed",
       validationStatus: item.capabilityStatus[capabilityId] || "unverified",
       installCommand: null,
+      ...(item.modelSize ? { modelSize: item.modelSize } : {}),
     }));
   const merged = new Map(installed.map((item) => [item.name, item]));
   state.testedModelOptions.forEach((item) => {
     if (!modelMatchesQuery(item.name, query)) return;
     const existing = merged.get(item.name);
-    merged.set(item.name, existing ? { ...existing, ...item, status: "installed", installCommand: null } : item);
+    merged.set(item.name, existing ? { ...existing, ...item, status: "installed", installCommand: null,
+      ...(existing.modelSize ? { modelSize: existing.modelSize } : {}),
+    } : item);
   });
   state.qualifiedModelCandidates.forEach((item) => {
     if (!modelMatchesQuery(item.name, query)) return;
@@ -1984,7 +2009,11 @@ function renderModelDiscovery() {
   state.modelSearchResults.forEach((item) => {
     // Public catalog relevance can come from a description or capability. Do
     // not discard those results merely because the name lacks the search term.
-    if (state.modelSearchQuery === query && !merged.has(item.name)) merged.set(item.name, item);
+    if (state.modelSearchQuery === query) {
+      const existing = merged.get(item.name);
+      if (!existing) merged.set(item.name, item);
+      else if (!existing.modelSize && item.modelSize) merged.set(item.name, { ...existing, modelSize: item.modelSize });
+    }
   });
   const validationPriority = {
     recommended: 0,
@@ -2040,7 +2069,10 @@ function renderModelDiscovery() {
     if (!thisInstallActive && item.hardwareFit === "unknown") {
       status.textContent += " · Hardware fit has not been verified";
     }
-    detail.append(name, status);
+    const size = document.createElement("small");
+    size.className = "model-size";
+    size.textContent = modelSizeLabel(item);
+    detail.append(name, status, size);
     const choose = document.createElement("button");
     choose.className = "button secondary";
     choose.type = "button";
@@ -2095,7 +2127,7 @@ function renderModelDiscovery() {
   desired.classList.toggle("hidden", !state.desiredModel);
   if (state.desiredModel) {
     byId("desired-model-name").textContent = state.desiredModel.name;
-    byId("desired-model-state").textContent = "Not installed yet · review this model before downloading";
+    byId("desired-model-state").textContent = `Not installed yet · review this model before downloading · ${modelSizeLabel(state.desiredModel)}`;
     byId("desired-model-command").textContent = state.desiredModel.installCommand;
   }
 }

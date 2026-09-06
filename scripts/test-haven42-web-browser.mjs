@@ -76,6 +76,7 @@ const fake = createServer((request, response) => {
   if (request.method === "GET" && request.url === "/api/tags") return json(response, 200, {
     models: models.map((name) => ({
       name,
+      ...(name === "qwen3.5:9b" ? { size: 6600000000 } : {}),
       digest: name === "qwen3.5:9b" ? QWEN_DIGEST : "1".repeat(64),
     })),
   });
@@ -1970,6 +1971,22 @@ try {
   ) throw new Error(`dedicated-models-view:${JSON.stringify(modelsView)}`);
   checks += 8;
 
+  const modelSizes = await cdp.evaluate(`(() => {
+    const rows = [...document.querySelectorAll('#model-search-results .model-search-result')];
+    return {
+      installed: rows.find(row => row.querySelector('strong').textContent === 'qwen3.5:9b')?.querySelector('.model-size')?.textContent,
+      unknown: rows.find(row => row.querySelector('strong').textContent === 'unknown-model:latest')?.querySelector('.model-size')?.textContent,
+      approximate: modelSizeLabel({modelSize: {bytes: 86000000, source: 'ollama-catalog'}}),
+      invalid: [null, {bytes: -1, source: 'ollama-installed'}, {bytes: true, source: 'ollama-installed'}, {bytes: 1, source: '<script>'}]
+        .every(value => modelSizeLabel({modelSize: value}) === 'Size unavailable'),
+    };
+  })()`);
+  if (modelSizes.installed !== 'Model size: 6.6 GB · reported by Ollama'
+      || modelSizes.unknown !== 'Size unavailable'
+      || modelSizes.approximate !== 'Approx. model download: 86 MB · catalog estimate'
+      || !modelSizes.invalid) throw new Error('model-size-display:' + JSON.stringify(modelSizes));
+  checks += 4;
+
   // Search results must survive lack of certification, non-name relevance,
   // and a hardware mismatch. Empty results remain explicit after rerendering.
   const discoveryRegression = await cdp.evaluate(`(() => {
@@ -2058,6 +2075,7 @@ try {
       if (input === "/api/model-install/prepare") return Promise.resolve(new Response(JSON.stringify({
         schemaVersion: 1,
         kind: "model-install-approval",
+        modelSize: { bytes: 4200000000, source: "ollama-catalog" },
         approvalToken: "a".repeat(32),
         expiresInSeconds: 300,
         singleUse: true,
@@ -2138,6 +2156,7 @@ try {
     modal: document.querySelector('#model-install-review-dialog').getAttribute('aria-modal'),
     model: document.querySelector('#model-install-review-name').textContent,
     destination: document.querySelector('#model-install-review-destination').textContent,
+    size: document.querySelector('#model-install-review-status').textContent,
     focused: document.activeElement.id,
     backgroundInert: document.querySelector('.shell').inert,
   })`);
@@ -2146,6 +2165,8 @@ try {
     || installReview.modal !== "true"
     || installReview.model !== "candidate-writing:7b"
     || installReview.destination !== "This computer"
+    || !installReview.size.includes("Approx. model download: 4.2 GB")
+    || !installReview.size.includes("Disk size is not RAM")
     || installReview.focused !== "model-install-review-dialog"
     || !installReview.backgroundInert
   ) throw new Error(`model-install-review:${JSON.stringify(installReview)}`);

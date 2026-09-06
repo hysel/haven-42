@@ -714,10 +714,25 @@ def load_model_recommendations(
         return {}
 
 
+def reported_model_sizes(records: list[Any]) -> dict[str, int]:
+    """Keep only bounded byte counts explicitly reported for an installed tag."""
+    sizes = {}
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        name = record.get("name") or record.get("model")
+        size = record.get("size")
+        if (isinstance(name, str) and MODEL_NAME.fullmatch(name)
+                and type(size) is int and 0 < size <= 16 * 1024 ** 4):
+            sizes[name] = size
+    return sizes
+
+
 def build_model_decisions(
     installed_models: list[str],
     catalog: dict[str, tuple[dict[str, Any], ...]],
     installed_digests: dict[str, str] | None = None,
+    installed_sizes: dict[str, int] | None = None,
 ) -> dict[str, Any]:
     installed = set(installed_models)
     digests = installed_digests or {}
@@ -783,6 +798,8 @@ def build_model_decisions(
             )
         options.append({
             "name": model,
+            **({"modelSize": {"bytes": installed_sizes[model], "source": "ollama-installed"}}
+               if installed_sizes and model in installed_sizes else {}),
             "digestVerified": any(
                 record["model"] == model
                 and secrets.compare_digest(record.get("digest", ""), digests.get(model, ""))
@@ -1379,6 +1396,7 @@ class HavenState:
         self.idle_unload_seconds = 300
         self.models: tuple[str, ...] = ()
         self.model_digests: dict[str, str] = {}
+        self.model_sizes: dict[str, int] = {}
         self.managed_model_selection: dict[str, Any] | None = None
         self.ollama_version: str | None = None
         self.used_models: set[tuple[str, str, int, ProviderAuthentication]] = set()
@@ -2169,6 +2187,7 @@ class HavenState:
             raise WebRequestError("invalid-model-catalog-response", HTTPStatus.BAD_GATEWAY)
         with self.lock:
             installed = set(self.models)
+            installed_sizes = dict(self.model_sizes)
             trust_scope = self.trust_scope
         try:
             snapshot = self.inspect_readiness(False) if trust_scope == "loopback" else None
@@ -2187,8 +2206,12 @@ class HavenState:
             seen.add(value)
             is_installed = value in installed
             fit = assess_model_download_fit(value, snapshot, trust_scope)
+            size = installed_sizes.get(value) if is_installed else getattr(discovered, "sizes", {}).get(value)
+            size_metadata = ({"modelSize": {"bytes": size, "source": "ollama-installed" if is_installed else "ollama-catalog"}}
+                             if type(size) is int and 0 < size <= 16 * 1024 ** 4 else {})
             results.append({
                 "name": value,
+                **size_metadata,
                 "source": "ollama-public-catalog",
                 "status": "installed" if is_installed else "not-installed",
                 "validationStatus": "candidate-only",
@@ -2207,6 +2230,7 @@ class HavenState:
                     "hardwareFit": item["hardwareFit"],
                     "hardwareFitReason": item["hardwareFitReason"],
                     "minimumSystemMemoryGiB": item["minimumSystemMemoryGiB"],
+                    **({"modelSize": item["modelSize"]} if "modelSize" in item else {}),
                 }
                 for item in results if item["status"] == "not-installed"
             }
@@ -2433,8 +2457,9 @@ class HavenState:
         with self.lock:
             self.models = tuple(sorted(installed))
             self.model_digests = model_digests
+            self.model_sizes = reported_model_sizes(records)
             self.discovered_model_candidates.pop(model, None)
-        decisions = build_model_decisions(sorted(installed), self.model_recommendations, model_digests)
+        decisions = build_model_decisions(sorted(installed), self.model_recommendations, model_digests, reported_model_sizes(records))
         option = next(item for item in decisions["modelOptions"] if item["name"] == verified_model)
         self._update_model_install_progress(
             approval_token,
@@ -3054,6 +3079,7 @@ class HavenState:
                 self.idle_unload_seconds = idle_unload_seconds
                 self.models = tuple(models)
                 self.model_digests = model_digests
+                self.model_sizes = reported_model_sizes(records)
                 self.managed_model_selection = None
                 self.ollama_version = str(version.get("version", "unknown"))[:64]
                 self.discovered_model_candidates.clear()
@@ -3073,7 +3099,7 @@ class HavenState:
             "timeoutSeconds": timeout_seconds,
             "idleUnloadSeconds": idle_unload_seconds,
         }
-        result.update(build_model_decisions(models, self.model_recommendations, model_digests))
+        result.update(build_model_decisions(models, self.model_recommendations, model_digests, reported_model_sizes(records)))
         try:
             candidate_snapshot = self.inspect_readiness(False)
         except WebRequestError:
@@ -3154,6 +3180,7 @@ class HavenState:
                 raise WebRequestError("provider-session-changed", HTTPStatus.CONFLICT)
             self.models = tuple(models)
             self.model_digests = model_digests
+            self.model_sizes = reported_model_sizes(records)
             self.ollama_version = str(version.get("version", "unknown"))[:64]
         result = {
             "connected": True,
@@ -3171,7 +3198,7 @@ class HavenState:
             "endpoint": base_url,
             "sessionResume": True,
         }
-        result.update(build_model_decisions(models, self.model_recommendations, model_digests))
+        result.update(build_model_decisions(models, self.model_recommendations, model_digests, reported_model_sizes(records)))
         try:
             candidate_snapshot = self.inspect_readiness(False)
         except WebRequestError:
