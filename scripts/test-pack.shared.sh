@@ -2872,7 +2872,7 @@ test_task_composition_and_repository_privacy() {
   python3 "$REPO_ROOT/scripts/test-milestone22-admission-readiness.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-code-signing-readiness.py" | grep -q "23 effect-free checks" || return 1
   python3 "$REPO_ROOT/scripts/test-windows-artifact-signing-workflow.py" | grep -q "31 fail-closed checks" || return 1
-  python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "13 cases" || return 1
+  python3 "$REPO_ROOT/scripts/test-portable-runtime-components.py" | grep -q "20 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-portable-build-provenance.py" | grep -q "33 cases" || return 1
   python3 "$REPO_ROOT/scripts/test-build-macos-development-app.py" | grep -q "3 passed" || return 1
   python3 "$REPO_ROOT/scripts/test-validate-macos-development-app.py" | grep -q "4 passed" || return 1

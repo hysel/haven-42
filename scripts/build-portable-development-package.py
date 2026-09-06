@@ -20,7 +20,7 @@ import tarfile
 import tempfile
 import zipfile
 
-from portable_runtime_components import classify
+from portable_runtime_components import classify, embedded_sbom_components
 from alpha_release import ALPHA_1_VERSION, ALPHA_2_VERSION
 
 
@@ -92,10 +92,12 @@ PLATFORM_BUILD_DISTRIBUTIONS = {
     "Linux": {},
 }
 LICENSE_EVIDENCE = {
+    "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt": "b2d5a7874aa5a93400f347bd283fb2ce43d03c2e27d38e69e007d8eba9072cd0",
     "APACHE-2.0.txt": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
     "CPYTHON-3.14.6-LICENSE.txt": "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
     "LIBFFI-3.4.4-LICENSE.txt": "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
     "OLLAMA-MIT-LICENSE.txt": "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226",
+    "PYINSTALLER-6.21.0-COPYING.txt": "571f650c741ae1f6d8b689ef639b02c93297b84cef32db7c5211674d7b6fc094",
 }
 PYTHON_DISTRIBUTIONS = {
     "windows-amd64": {
@@ -403,10 +405,16 @@ def third_party_notice(
     runtime_inventory: dict[str, object],
 ) -> str:
     notices = [
-        "THIRD-PARTY NOTICES — unsigned development package",
+        "THIRD-PARTY NOTICES — Haven 42 portable package",
         "",
         "Build-tool versions and license expressions are an explicit reviewed allowlist.",
-        "These tools influence the generated package but are not imported application dependencies.",
+        "PyInstaller embeds its bootloader, loader modules and selected runtime hooks in the executable.",
+        "Bootloader and loader terms: GPL-2.0-or-later WITH Bootloader-exception.",
+        "PyInstaller runtime hook terms: Apache-2.0.",
+        "See licenses/PYINSTALLER-6.21.0-COPYING.txt for the complete upstream terms.",
+        "Ubuntu native-library copyright evidence is in licenses/UBUNTU-24.04-NATIVE-COPYRIGHTS.txt.",
+        "That source-package evidence also describes tools and tests not shipped here.",
+        "Other listed build tools are not necessarily embedded application dependencies.",
         "",
     ]
     notices.extend(
@@ -417,7 +425,9 @@ def third_party_notice(
         "",
         "Embedded runtime component inventory",
         "RUNTIME REDISTRIBUTION IS NOT CLEARED FOR PRODUCTION PROMOTION.",
-        "Every runtime component below is excluded from Haven 42 signing scope.",
+        "This inventory describes the unsigned build stage, before any separately approved signing.",
+        "For final signing status and scope, consult the platform-specific signing evidence.",
+        "A project signature does not change third-party ownership or license terms.",
         "CPYTHON-3.14.6-LICENSE.txt, APACHE-2.0.txt, "
         "LIBFFI-3.4.4-LICENSE.txt, and OLLAMA-MIT-LICENSE.txt are included "
         "in the extracted package and "
@@ -721,6 +731,7 @@ def main() -> int:
         target,
         platform.python_version(),
         openssl_runtime_version(),
+        app_version=APP_VERSION,
     )
     notices = third_party_notice(dependencies, preliminary_inventory)
     write_package_text(package_dir / "THIRD-PARTY-NOTICES.txt", notices)
@@ -731,6 +742,7 @@ def main() -> int:
         target,
         platform.python_version(),
         openssl_runtime_version(),
+        app_version=APP_VERSION,
     )
     write_json(evidence / "package-file-inventory.json", {
         "schemaVersion": 1,
@@ -740,8 +752,9 @@ def main() -> int:
     })
     write_json(evidence / "runtime-component-inventory.json", runtime_inventory)
     write_json(evidence / "dependency-inventory.json", {
-        "schemaVersion": 3,
+        "schemaVersion": 4,
         "target": target,
+        "embeddedRuntimeComponents": runtime_inventory["projectOwned"]["embeddedRuntimeComponents"],
         "runtimeComponents": [
             {
                 key: item[key]
@@ -818,7 +831,7 @@ def main() -> int:
                 ],
             }
             for item in runtime_inventory["runtimeComponents"]
-        ],
+        ] + embedded_sbom_components(runtime_inventory),
     })
     (evidence / "THIRD-PARTY-NOTICES.txt").write_text(notices, encoding="utf-8")
     copy_license_evidence(evidence)

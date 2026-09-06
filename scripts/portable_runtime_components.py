@@ -50,6 +50,12 @@ PROJECT_FILES = {
     "_internal/scripts/validate-web-research-query-adapter.py",
 }
 DISTRIBUTION_EVIDENCE_HASHES = {
+    "licenses/UBUNTU-24.04-NATIVE-COPYRIGHTS.txt": (
+        "b2d5a7874aa5a93400f347bd283fb2ce43d03c2e27d38e69e007d8eba9072cd0"
+    ),
+    "licenses/PYINSTALLER-6.21.0-COPYING.txt": (
+        "571f650c741ae1f6d8b689ef639b02c93297b84cef32db7c5211674d7b6fc094"
+    ),
     "LICENSE.txt": (
         "da343e362fb1cc2b46c07e179936040dcfe8e92de4aa6d61f2bd4a43486f3ccc"
     ),
@@ -189,6 +195,20 @@ class ComponentClassificationError(ValueError):
     """Raised when a packaged file cannot be classified safely."""
 
 
+def embedded_sbom_components(runtime_inventory: dict[str, Any]) -> list[dict[str, Any]]:
+    return [
+        {
+            "type": "library", "name": item["name"], "version": item["version"],
+            "scope": "required", "licenses": [{"expression": item["license"]}],
+            "properties": [
+                {"name": "haven42:component-id", "value": item["id"]},
+                {"name": "haven42:embedded-in", "value": ",".join(item["containerFiles"])},
+            ],
+        }
+        for item in runtime_inventory.get("projectOwned", {}).get("embeddedRuntimeComponents", [])
+    ]
+
+
 def _classify(path: str) -> str:
     name = PurePosixPath(path).name
     folded = name.casefold()
@@ -222,7 +242,11 @@ def classify(
     target: str,
     python_version: str,
     openssl_version: str,
+    *,
+    app_version: str = "0.4.0-alpha.1",
 ) -> dict[str, Any]:
+    if app_version not in {"0.4.0-alpha.1", "0.4.0-alpha.2"}:
+        raise ComponentClassificationError("invalid-component-app-version")
     if not re.fullmatch(r"(?:windows|linux|darwin)-[a-z0-9_]+", target):
         raise ComponentClassificationError("invalid-component-target")
     project_files: list[dict[str, Any]] = []
@@ -327,8 +351,21 @@ def classify(
         "target": target,
         "projectOwned": {
             "name": "Haven 42",
-            "version": "0.4.0-alpha.1",
+            "version": app_version,
             "license": "MIT",
+            "licenseScope": "Haven 42-authored code; embedded third-party code retains its own terms",
+            "embeddedRuntimeComponents": [
+                {
+                    "id": component_id, "name": name, "version": "6.21.0",
+                    "license": license_expression,
+                    "licenseEvidence": "licenses/PYINSTALLER-6.21.0-COPYING.txt",
+                    "containerFiles": [path for path in ("haven42", "haven42.exe") if path in seen],
+                }
+                for component_id, name, license_expression in (
+                    ("pyinstaller-bootloader", "PyInstaller bootloader and loader modules", "GPL-2.0-or-later WITH Bootloader-exception"),
+                    ("pyinstaller-runtime-hooks", "PyInstaller runtime hooks", "Apache-2.0"),
+                )
+            ],
             "signingEligibleFiles": [
                 path for path in ("haven42", "haven42.exe") if path in seen
             ],

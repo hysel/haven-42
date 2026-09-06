@@ -1,0 +1,598 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-09-06",
+  "scope": "Unsigned portable runtime bytes from candidate source 6e22bc1; recheck every final release artifact, not a blanket clearance of later builds.",
+  "linux": {
+    "method": "Each official Ubuntu archive SHA-256 checked against its HTTPS Packages index; shared-library bytes compared with the candidate archive.",
+    "libraries": [
+      {
+        "package": "libbz2-1.0",
+        "version": "1.0.8-5.1ubuntu0.1",
+        "url": "https://security.ubuntu.com/ubuntu/pool/main/b/bzip2/libbz2-1.0_1.0.8-5.1ubuntu0.1_amd64.deb",
+        "archiveSha256": "36ee08b00b1ee5018b2fce02881b7d2d73c9b4e32990bde3388400d86c48126a",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/libbz2.so.1.0",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4",
+            "sha256": "cc08c9f50a8009ffd6391e0116a100369b11ca9238fa52392c019e6645b122a1"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      },
+      {
+        "package": "libffi8",
+        "version": "3.4.6-1build1",
+        "url": "https://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi8_3.4.6-1build1_amd64.deb",
+        "archiveSha256": "637e6a7744de08cd331a41f4efd0d24e6ea9064843dea9d1c6ca87bdb5f038a2",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/libffi.so.8",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libffi.so.8.1.4",
+            "sha256": "00f593fe192f2851b8ce23b25cec2488d769beb5a8f63e8c9e563071e1075153"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      },
+      {
+        "package": "liblzma5",
+        "version": "5.6.1+really5.4.5-1ubuntu0.3",
+        "url": "https://security.ubuntu.com/ubuntu/pool/main/x/xz-utils/liblzma5_5.6.1+really5.4.5-1ubuntu0.3_amd64.deb",
+        "archiveSha256": "d2eabd41ca77d2c2dd9d5d4ef478cccb64ffde6279c47cf4699a857d46785a52",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/liblzma.so.5",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5",
+            "sha256": "696e868dd0700a19a6d65fc01608ec2d70d3cb91f65710e89180cd2e688f30cb"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      },
+      {
+        "package": "libssl3t64",
+        "version": "3.0.13-0ubuntu3.15",
+        "url": "https://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl3t64_3.0.13-0ubuntu3.15_amd64.deb",
+        "archiveSha256": "3d0955bc049bbcca0f4c3e78a3a8b994593d96db7d84f4320217224433844534",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/libcrypto.so.3",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libcrypto.so.3",
+            "sha256": "6a66c3ba6b3749aacc9497973fff00f6ba61c703ba7015d0d7ab3fd9510974b6"
+          },
+          {
+            "candidatePath": "Haven42/_internal/libssl.so.3",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libssl.so.3",
+            "sha256": "8e49cebd373d90b55f3626da71dd97fe8e95c68dc4c064d8962b27907690736e"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      },
+      {
+        "package": "libuuid1",
+        "version": "2.39.3-9ubuntu6.6",
+        "url": "https://security.ubuntu.com/ubuntu/pool/main/u/util-linux/libuuid1_2.39.3-9ubuntu6.6_amd64.deb",
+        "archiveSha256": "7e2992d3a79fc05514dc5966558ee9c66a7214a47edf2a36017b9e2777528665",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/libuuid.so.1",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libuuid.so.1.3.0",
+            "sha256": "78d7f4d6f27b7dffc1c84dfe2f83e84aefa6f6ceeffc6ac4bc41f9fbc61cb84e"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      },
+      {
+        "package": "libzstd1",
+        "version": "1.5.5+dfsg2-2build1.1",
+        "url": "https://archive.ubuntu.com/ubuntu/pool/main/libz/libzstd/libzstd1_1.5.5+dfsg2-2build1.1_amd64.deb",
+        "archiveSha256": "dfcf25061e07aad7efd3f4f880ba5ad4d4d09ebe7fc8cc77ab6b8a161d6d4727",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/libzstd.so.1",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libzstd.so.1.5.5",
+            "sha256": "0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      },
+      {
+        "package": "zlib1g",
+        "version": "1:1.3.dfsg-3.1ubuntu2.2",
+        "url": "https://security.ubuntu.com/ubuntu/pool/main/z/zlib/zlib1g_1.3.dfsg-3.1ubuntu2.2_amd64.deb",
+        "archiveSha256": "84b9cf5752b29c9f92c27cd4c4ba9bbcc70b5ccf9b1b515421a28ae23212e273",
+        "files": [
+          {
+            "candidatePath": "Haven42/_internal/libz.so.1",
+            "packagePath": "./usr/lib/x86_64-linux-gnu/libz.so.1.3",
+            "sha256": "86200da370f20476a2507e9097a789b5ef97269b4ca8d5e164ad82dab9d99892"
+          }
+        ],
+        "copyrightEvidence": "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt"
+      }
+    ]
+  },
+  "macos": {
+    "installer": {
+      "url": "https://www.python.org/ftp/python/3.14.6/python-3.14.6-macos11.pkg",
+      "sha256": "d3c9fff52214847e4fab03e9eaf53dd2a8e51e3534aa0b61f201b749f86bef28",
+      "signature": "Developer ID Installer: Python Software Foundation (BMM5U3QVKW)",
+      "notarization": "trusted",
+      "timestamp": "2026-06-10T12:23:56Z"
+    },
+    "method": "official installer files processed with PyInstaller 6.21.0, arm64, fresh cache, ad-hoc signature",
+    "records": [
+      {
+        "path": "Python.framework/Versions/3.14/Python",
+        "upstreamPath": "Python",
+        "upstreamSha256": "9fab929b9e1e4ebb1f991ed5b65e88acaf9053df7e76cfd8b35d0513b1f43f6e",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "f8cd0273dd9c5bc9f1785de4db942c26e078386b99b50d6be94764cf9d6d18b3",
+        "packagedSha256": "f8cd0273dd9c5bc9f1785de4db942c26e078386b99b50d6be94764cf9d6d18b3",
+        "status": "matched"
+      },
+      {
+        "path": "libcrypto.3.dylib",
+        "upstreamPath": "lib/libcrypto.3.dylib",
+        "upstreamSha256": "77e7e1f13cd767fdb56de1d6c386316fac6624773e1b791c7cf1b3788660b8b8",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "01d69381bdb6cea3dd43c3d6376b6ddfa7798eacc294a4a1801773658641c210",
+        "packagedSha256": "01d69381bdb6cea3dd43c3d6376b6ddfa7798eacc294a4a1801773658641c210",
+        "status": "matched"
+      },
+      {
+        "path": "libssl.3.dylib",
+        "upstreamPath": "lib/libssl.3.dylib",
+        "upstreamSha256": "3532dce53c731aaf2b77bcf2f9ef1afe630ce3151db3ec61c7cad7ea11778f9d",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "e353f5df2627b4e498e6402ecd3b76a9b92a7be28e32ebf91779eca25e9be8e4",
+        "packagedSha256": "e353f5df2627b4e498e6402ecd3b76a9b92a7be28e32ebf91779eca25e9be8e4",
+        "status": "matched"
+      },
+      {
+        "path": "libzstd.1.dylib",
+        "upstreamPath": "lib/libzstd.1.dylib",
+        "upstreamSha256": "567c3c3e80b379971bc870180e776ea0994f5bca8f56e1869f354ac6268ec776",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "b76e2ea2f1589777fa2740e003e942bc84735143bf22d1da99f83750040d29c7",
+        "packagedSha256": "b76e2ea2f1589777fa2740e003e942bc84735143bf22d1da99f83750040d29c7",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_bisect.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_bisect.cpython-314-darwin.so",
+        "upstreamSha256": "20a47cb3207cae621db58179c72942c8e16a8abfe19981b97dcd82682fbb2a54",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "f5bfed28de787862f497a8eb5556ff8ae57810b8f8e80eba62ff1ae12a1170d1",
+        "packagedSha256": "f5bfed28de787862f497a8eb5556ff8ae57810b8f8e80eba62ff1ae12a1170d1",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_blake2.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_blake2.cpython-314-darwin.so",
+        "upstreamSha256": "5dd83581ef5a62d4e5733205fca3bcf023a11d8258f30c5e596efffa0d0d99c4",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "6d6c91bd283f561bebe3f3ba671a1108043b37925ecd8111d1476e106e2a0b76",
+        "packagedSha256": "6d6c91bd283f561bebe3f3ba671a1108043b37925ecd8111d1476e106e2a0b76",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_bz2.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_bz2.cpython-314-darwin.so",
+        "upstreamSha256": "e906835c6a14ebe9a2d2fa645a20536af479f05084ca2cae79e713e3357ca6a8",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "71cd4d59d4dc4553d728f267e116553c1cdf8dab01bf5ab99ae67898f13c4ff2",
+        "packagedSha256": "71cd4d59d4dc4553d728f267e116553c1cdf8dab01bf5ab99ae67898f13c4ff2",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_codecs_cn.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_codecs_cn.cpython-314-darwin.so",
+        "upstreamSha256": "ba14c22eadcf7c677a4fb4d7dd2d2f703a0d964ddba398cd216be1d221ae10ee",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "2741a38f76f45088372ab0a9bc522cc4415316f97b7d9b2dab7e84d4278b4da7",
+        "packagedSha256": "2741a38f76f45088372ab0a9bc522cc4415316f97b7d9b2dab7e84d4278b4da7",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_codecs_hk.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_codecs_hk.cpython-314-darwin.so",
+        "upstreamSha256": "d866b3982dedfa3bdbf2c388b765e7985132fa3a8c469598afe7e50cb9b816bd",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "e4d2f87c428608b89483701550a13c71330732a1301fa9429c7d8a5fd3c4fc99",
+        "packagedSha256": "e4d2f87c428608b89483701550a13c71330732a1301fa9429c7d8a5fd3c4fc99",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_codecs_iso2022.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_codecs_iso2022.cpython-314-darwin.so",
+        "upstreamSha256": "7f07e7aa6bfc69b583d8aac3ab359935dc1bf22f0db52bef65960efc7b888cbc",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "c9ba904a1ed44bcdcd5db8034c4697178b2a3724a65110144bd86e5744bb7505",
+        "packagedSha256": "c9ba904a1ed44bcdcd5db8034c4697178b2a3724a65110144bd86e5744bb7505",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_codecs_jp.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_codecs_jp.cpython-314-darwin.so",
+        "upstreamSha256": "997a6f2da50b6ed68450712680357dcb7b002ed38cdff6b3fea1699326aea687",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "d74b786f7202443e50a771d8a5121fc7176b326587bb15e9dfccd86d6f297dc1",
+        "packagedSha256": "d74b786f7202443e50a771d8a5121fc7176b326587bb15e9dfccd86d6f297dc1",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_codecs_kr.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_codecs_kr.cpython-314-darwin.so",
+        "upstreamSha256": "763c4f2f505a70fff402a330c9166f35ce9ef489d7aa29e8c2a7b1fe2d313557",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "4161b72e3a036474f7f6752674f49ae0455ebb6aec0dc68b891df89ee5483cc9",
+        "packagedSha256": "4161b72e3a036474f7f6752674f49ae0455ebb6aec0dc68b891df89ee5483cc9",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_codecs_tw.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_codecs_tw.cpython-314-darwin.so",
+        "upstreamSha256": "46836110e33ec36997ce59247d18c0f486ed965f43dd1447fe465fa1d3afe138",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "91153faf55cfc879f9b8d353d4e318ff95436536f198f6e7089a66ee80303eb0",
+        "packagedSha256": "91153faf55cfc879f9b8d353d4e318ff95436536f198f6e7089a66ee80303eb0",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_csv.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_csv.cpython-314-darwin.so",
+        "upstreamSha256": "e3eda70b3b0b688a0d065950da10eb6566fc9012a0405fbdc7b8d7e77fe86218",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "696636fbab1d15deefdf6d66d066c4f90ddd64d3488fe92761514bf0db2ebe19",
+        "packagedSha256": "696636fbab1d15deefdf6d66d066c4f90ddd64d3488fe92761514bf0db2ebe19",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_ctypes.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_ctypes.cpython-314-darwin.so",
+        "upstreamSha256": "437a7ce2cc0c796826899ed344fd52310fae0548f3fb2e66d4c80581f7789ce4",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "b87e9b79d0128180c33efa46cb29195be318b989c77f3050b9663755cbaea77f",
+        "packagedSha256": "b87e9b79d0128180c33efa46cb29195be318b989c77f3050b9663755cbaea77f",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_decimal.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_decimal.cpython-314-darwin.so",
+        "upstreamSha256": "9cbaf62c476411f6eb2a153de973d204ce944ba8affbaef1074e3b1d7f8edc9f",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "fa6c88e4ca4a5e4e2ffc41c1ad19e4e8bfc2f376014f235b6dab94896a93d993",
+        "packagedSha256": "fa6c88e4ca4a5e4e2ffc41c1ad19e4e8bfc2f376014f235b6dab94896a93d993",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_hashlib.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_hashlib.cpython-314-darwin.so",
+        "upstreamSha256": "a4749598b60028e831a6988fb27480c6ced6d67246db12ade2988491f900eaa2",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "9bd6b903a92eb94560918ed188bafa2de0be8ffc3f44e915afa5029dee37097f",
+        "packagedSha256": "9bd6b903a92eb94560918ed188bafa2de0be8ffc3f44e915afa5029dee37097f",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_heapq.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_heapq.cpython-314-darwin.so",
+        "upstreamSha256": "c6aa0e77d024775b9d2a2d09ef30ed42ee5d782ea1560961590f0efe96390a72",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "7d6c4fec2c6dbabf8fab0213127f932db6cf96d90d071a0fa4ff119917e9fdfe",
+        "packagedSha256": "7d6c4fec2c6dbabf8fab0213127f932db6cf96d90d071a0fa4ff119917e9fdfe",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_hmac.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_hmac.cpython-314-darwin.so",
+        "upstreamSha256": "846bdc13a7f0023a0ff87c94996f1b1db94eb60f57a2d8901edcb899ffed6e50",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "a4ae684d6ba5f7d739589c51b15f1de86ce7140f9db996a11eee0956a465e96a",
+        "packagedSha256": "a4ae684d6ba5f7d739589c51b15f1de86ce7140f9db996a11eee0956a465e96a",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_interpqueues.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_interpqueues.cpython-314-darwin.so",
+        "upstreamSha256": "701686ad3edc4168db947d05060f2422b9a9487ea9e519b8c8f669ed11906823",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "6df765ae43c4190f26420931a2e5ca469bfa5aad5b39f51d43b527643783d5e3",
+        "packagedSha256": "6df765ae43c4190f26420931a2e5ca469bfa5aad5b39f51d43b527643783d5e3",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_interpreters.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_interpreters.cpython-314-darwin.so",
+        "upstreamSha256": "6dbfe3ff4fff8b6772eb21fd8b10197b29162c39ee60b1ac9ac9f4d274ae0855",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "5595ca37a7e2baa1e492b20e1f7150ceca4212543045f57b5ef4da066da93954",
+        "packagedSha256": "5595ca37a7e2baa1e492b20e1f7150ceca4212543045f57b5ef4da066da93954",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_json.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_json.cpython-314-darwin.so",
+        "upstreamSha256": "9a1d2fbf1d6de06a3caa56401f9d1b02551e8e3966742c3fcf22ed68b60eda5a",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "11bbfe32b3ebd5d52c3a86b589c0435627e1aaf68611a8e5af9f886326a9035c",
+        "packagedSha256": "11bbfe32b3ebd5d52c3a86b589c0435627e1aaf68611a8e5af9f886326a9035c",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_lzma.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_lzma.cpython-314-darwin.so",
+        "upstreamSha256": "f11b3aec8ceb0a2ee4523d75b5a1ed1cc2b49b57112b727b0a63415d2dfa0c15",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "c21b31797389934a9e636e011d1b5e7e0513eed0b659720430722d815fedccfd",
+        "packagedSha256": "c21b31797389934a9e636e011d1b5e7e0513eed0b659720430722d815fedccfd",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_md5.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_md5.cpython-314-darwin.so",
+        "upstreamSha256": "2d62fb259ea515588a9136700c769a9d87fe8c835ca90632257a08d645ef461a",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "948950d4c0eb00cb87a9f333fc063ad1a4d0a3c7de5a9f879c0a8be248485872",
+        "packagedSha256": "948950d4c0eb00cb87a9f333fc063ad1a4d0a3c7de5a9f879c0a8be248485872",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_multibytecodec.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_multibytecodec.cpython-314-darwin.so",
+        "upstreamSha256": "77d9d520baa72e1a1f63b026fa9f05c2f679baab8c1830a8347c352e4cc58e75",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "f07320fc6c4b1a5705c7992b94707db886381fc6995a59981972a9e649537692",
+        "packagedSha256": "f07320fc6c4b1a5705c7992b94707db886381fc6995a59981972a9e649537692",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_multiprocessing.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_multiprocessing.cpython-314-darwin.so",
+        "upstreamSha256": "3f113f7559db446c0b145942de99314bdcfe005c62c6e6b83d6141c5341b61ef",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "4ca68925c82f5ccd8041827790c4204b10cdbc2dbeabc7443fae97eb9f025017",
+        "packagedSha256": "4ca68925c82f5ccd8041827790c4204b10cdbc2dbeabc7443fae97eb9f025017",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_pickle.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_pickle.cpython-314-darwin.so",
+        "upstreamSha256": "5376adbc7d235abeba28495e4d95c3d679584bf13f602d19e62786c673f091fc",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "5b249e7f7c46027bb28ae22af7fba9114b5d24e0682353598cfdc3322304a871",
+        "packagedSha256": "5b249e7f7c46027bb28ae22af7fba9114b5d24e0682353598cfdc3322304a871",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_posixshmem.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_posixshmem.cpython-314-darwin.so",
+        "upstreamSha256": "5958b3e18a8490f901658fcc61025ecaa7476a1544f7bbdbcc9d33d64c4cb630",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "bde24f6b296c71c05b763eb6b3f8f92b9bd5ed7b2b98639374e7363d6bf292f1",
+        "packagedSha256": "bde24f6b296c71c05b763eb6b3f8f92b9bd5ed7b2b98639374e7363d6bf292f1",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_posixsubprocess.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_posixsubprocess.cpython-314-darwin.so",
+        "upstreamSha256": "5551d2cb605900b009658a5edcae535a238b6d1c4a1867122cfbbcbd074e7524",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "b3bf4e15d5e250700edaf0cc61f960f1901c2702bf2c7b8bc1f28ca9f2a29f54",
+        "packagedSha256": "b3bf4e15d5e250700edaf0cc61f960f1901c2702bf2c7b8bc1f28ca9f2a29f54",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_queue.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_queue.cpython-314-darwin.so",
+        "upstreamSha256": "daf198d91b48af354a6870613e812ed13cffec85b0f321e07fbe44e573c69fb8",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "76901ae9e14c4503f794e46e3df509d0e9ce11fcd2776903ea523c9a049cbd37",
+        "packagedSha256": "76901ae9e14c4503f794e46e3df509d0e9ce11fcd2776903ea523c9a049cbd37",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_random.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_random.cpython-314-darwin.so",
+        "upstreamSha256": "9e1ca5c292497c48c4a84a6206b0ec6b8b941d17925c801daae2ddd1ddaf1571",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "93771f2467f3cbd5ebe826532101a3511f5eeca847583277a4ec324c3b87c406",
+        "packagedSha256": "93771f2467f3cbd5ebe826532101a3511f5eeca847583277a4ec324c3b87c406",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_scproxy.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_scproxy.cpython-314-darwin.so",
+        "upstreamSha256": "1fdaf363c822f1d0222256fa0ad169c960a72b5fd745536b9305957a7a169b31",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "29161012e752b90f63751de981aacaab0cdbca2d45b4dbbb0ff94b112d167fb4",
+        "packagedSha256": "29161012e752b90f63751de981aacaab0cdbca2d45b4dbbb0ff94b112d167fb4",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_sha1.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_sha1.cpython-314-darwin.so",
+        "upstreamSha256": "4c4545d9a7803c22322b8f82a8add12da77fb53fea31b9bf1bf63e4a2ba1cf71",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "ca0d85d866bf01cd1ea7b9e971a65ceda5f35e312e8039c6ece0532efa66c430",
+        "packagedSha256": "ca0d85d866bf01cd1ea7b9e971a65ceda5f35e312e8039c6ece0532efa66c430",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_sha2.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_sha2.cpython-314-darwin.so",
+        "upstreamSha256": "b2f9c376d08343db64d4fd387d0d30eea7f7b5e5c373bd373a306beaa346f221",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "3b29399e16583fceee99fefc27db0ad218a90da05e55314b5f4016f2f34ed2ad",
+        "packagedSha256": "3b29399e16583fceee99fefc27db0ad218a90da05e55314b5f4016f2f34ed2ad",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_sha3.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_sha3.cpython-314-darwin.so",
+        "upstreamSha256": "d1eb8a1681c52cd8f3ff42c0686a2a3a09583c312a2294a1cee7f7859556ba43",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "dbd5e13c66a513d2a7f04f6fd495f7c55f413e6dd59f0026ea7362f862b19740",
+        "packagedSha256": "dbd5e13c66a513d2a7f04f6fd495f7c55f413e6dd59f0026ea7362f862b19740",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_socket.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_socket.cpython-314-darwin.so",
+        "upstreamSha256": "a06311c1473acebf7702c57ff0c6c9afebf78a6bf46a9f4a2f8bf0eb1f54e000",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "f11d561771da2bf6652c38fa30d66861f1f20a9c807dca9fa9594d576d9071ef",
+        "packagedSha256": "f11d561771da2bf6652c38fa30d66861f1f20a9c807dca9fa9594d576d9071ef",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_ssl.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_ssl.cpython-314-darwin.so",
+        "upstreamSha256": "71b4f8a7bd3115fb8b13a36390d41ed8849c44087db3fb7d3d1a0811eaa3b368",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "845c568fa22d43b0082d7bcb95d5c3fae8edf8ff7aec1cdd4f8849c17a6fbcee",
+        "packagedSha256": "845c568fa22d43b0082d7bcb95d5c3fae8edf8ff7aec1cdd4f8849c17a6fbcee",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_statistics.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_statistics.cpython-314-darwin.so",
+        "upstreamSha256": "3e6fcdd5f3d187b2baed521e013fea72350db3321662c2d5d0570bd51215a044",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "9595be9c63a6fc33948c30f3965a2c8084e8d61f8be1d47c2511ca4e570758e4",
+        "packagedSha256": "9595be9c63a6fc33948c30f3965a2c8084e8d61f8be1d47c2511ca4e570758e4",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_struct.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_struct.cpython-314-darwin.so",
+        "upstreamSha256": "effc9898bb8b4ed1d5a089b1fadefff6d275791767131cf63268d77ca9a7d16f",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "d675507576e24d323d8044c473e3e57d58a8089ee1a097a748fa8d32f08ba763",
+        "packagedSha256": "d675507576e24d323d8044c473e3e57d58a8089ee1a097a748fa8d32f08ba763",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_uuid.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_uuid.cpython-314-darwin.so",
+        "upstreamSha256": "8109345fad1769fe1812f5ee48bbd14a5fbd6b783f1ad180bbd0249007ff813f",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "f61b37d9e2b4bd63165ab1a45540f7d5397433da8a11fcf87914b78d1d3fe6aa",
+        "packagedSha256": "f61b37d9e2b4bd63165ab1a45540f7d5397433da8a11fcf87914b78d1d3fe6aa",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/_zstd.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/_zstd.cpython-314-darwin.so",
+        "upstreamSha256": "8dff8c483f3996eb8a468d9c99b4726fa162179619410c12083c94e365145a5e",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "1f17f81360f99b92359d6c02ce911d5fb2953dfd9e4784e1c5772804ffb1e56b",
+        "packagedSha256": "1f17f81360f99b92359d6c02ce911d5fb2953dfd9e4784e1c5772804ffb1e56b",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/array.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/array.cpython-314-darwin.so",
+        "upstreamSha256": "e48caad8d917b92515f6665a0d7604c97a46a08a66465009b520d5e170e08c0a",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "7a04bdf0a6b294cbc25c631c706d43f9ca6bf9789c5d00353f58b94f3dff1dbd",
+        "packagedSha256": "7a04bdf0a6b294cbc25c631c706d43f9ca6bf9789c5d00353f58b94f3dff1dbd",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/binascii.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/binascii.cpython-314-darwin.so",
+        "upstreamSha256": "12a7e17cd508355679c6311eaa4065c5b7ea3c99a95ff965574cf24adf5e0398",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "259782e7e0241b34c4df2b7ee4cc5f41bb8042f5697e0a3de1d97f7aacd76266",
+        "packagedSha256": "259782e7e0241b34c4df2b7ee4cc5f41bb8042f5697e0a3de1d97f7aacd76266",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/fcntl.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/fcntl.cpython-314-darwin.so",
+        "upstreamSha256": "e3d61fcb871b83a353e1941044d9a4fe4344f09ec93138be08920c0bc801fcb9",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "1ff930695614267b96f8606d629b6d8ee183d42f99c1f27457e1efba74bf11a8",
+        "packagedSha256": "1ff930695614267b96f8606d629b6d8ee183d42f99c1f27457e1efba74bf11a8",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/grp.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/grp.cpython-314-darwin.so",
+        "upstreamSha256": "7a7c222b25850b5e21169fa878a38d5bf3bf16bd5ca990b76c687d65a4a4b0bd",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "a1cf94679e3ff9927b96d40eae62fcca17cb1a7b2803ad5cef91c7e477214cf2",
+        "packagedSha256": "a1cf94679e3ff9927b96d40eae62fcca17cb1a7b2803ad5cef91c7e477214cf2",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/math.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/math.cpython-314-darwin.so",
+        "upstreamSha256": "7c9f3b3a7f67939c2c28cba1438b409fb9a2d6d1e2863f435c0de450e6da46ce",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "a32dab252a522e594997a37c462240c7bdcf15f6aa0105d1cbb1446c5053e8aa",
+        "packagedSha256": "a32dab252a522e594997a37c462240c7bdcf15f6aa0105d1cbb1446c5053e8aa",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/mmap.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/mmap.cpython-314-darwin.so",
+        "upstreamSha256": "4d8555b2639332e288f96d93fff4cd659158a6c97b07a7ffa1772332628c33df",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "8d7c3429115e6a1c9fc23348f93e3afddd56075b8fe0a66592ee1ce9e9b400aa",
+        "packagedSha256": "8d7c3429115e6a1c9fc23348f93e3afddd56075b8fe0a66592ee1ce9e9b400aa",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/pyexpat.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/pyexpat.cpython-314-darwin.so",
+        "upstreamSha256": "12146c63f7e071ee17c52d084a9f88396bf92d6a72f409842024e3e9ada90da3",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "31fdf2126226d828a92b6947b06d5df215d7868171e95794640a7e6abd4fa373",
+        "packagedSha256": "31fdf2126226d828a92b6947b06d5df215d7868171e95794640a7e6abd4fa373",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/resource.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/resource.cpython-314-darwin.so",
+        "upstreamSha256": "0c91fae6d4a0c75b910a9192df57c11a31530819f4c2970d5920a3e8295f0849",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "0a2c05eca1c052269f9f5e04bfca56e6a08a1eaada8e7c2f7e46b2205a113dd7",
+        "packagedSha256": "0a2c05eca1c052269f9f5e04bfca56e6a08a1eaada8e7c2f7e46b2205a113dd7",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/select.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/select.cpython-314-darwin.so",
+        "upstreamSha256": "d9aea86bb2ec423ac714ae3b57be222b56c870c7b76eb74dc3aa75a6e33c07a9",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "0cd1b9b0250fd2eddbf951e388744e243298222aa2fcc515e32439c7a0052ed4",
+        "packagedSha256": "0cd1b9b0250fd2eddbf951e388744e243298222aa2fcc515e32439c7a0052ed4",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/unicodedata.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/unicodedata.cpython-314-darwin.so",
+        "upstreamSha256": "b6a3b18158be34d2d551e04c60c2bbc56644bc27b3eb034e7a5470b42e69e6b7",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "0dfc25cfc720e07f57d0d451b4c5953108c2e2f906e1bd66a43b2fe87ed5ca62",
+        "packagedSha256": "0dfc25cfc720e07f57d0d451b4c5953108c2e2f906e1bd66a43b2fe87ed5ca62",
+        "status": "matched"
+      },
+      {
+        "path": "python3.14/lib-dynload/zlib.cpython-314-darwin.so",
+        "upstreamPath": "lib/python3.14/lib-dynload/zlib.cpython-314-darwin.so",
+        "upstreamSha256": "1e1d688848718dac63ab128b2085ae277c2f9125c1982fc9b11da2fffd6846df",
+        "installedMatchesUpstream": true,
+        "transformedSha256": "b3abc7bd1729946e6f2c6cca4a375835b387350b2f07a96bb5f928a3d422631d",
+        "packagedSha256": "b3abc7bd1729946e6f2c6cca4a375835b387350b2f07a96bb5f928a3d422631d",
+        "status": "matched"
+      }
+    ]
+  },
+  "limitations": [
+    "Linux CPython runtime and Windows runtime provenance have separate existing records; this file supplements rather than replaces them.",
+    "Developer ID re-signing changes Mach-O bytes; these hashes bind the unsigned build before approved signing.",
+    "No private keys, machine identities, or lab addresses are recorded."
+  ]
+}
