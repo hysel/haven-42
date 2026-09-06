@@ -406,10 +406,43 @@ class DiagnosticLogger:
                             raise DiagnosticLogError("unsafe-diagnostic-report-entry")
             if _is_link_or_reparse(self.root):
                 raise DiagnosticLogError("diagnostic-root-link-rejected")
-            shutil.rmtree(self.root)
+            shutil.rmtree(self.root, onexc=self._retry_readonly_root_removal)
             self._available = False
             self._removed_for_session = True
             return {"removed": True, "directoryName": LOG_DIRECTORY_NAME}
+
+    def _retry_readonly_root_removal(self, function, path, error) -> None:
+        """Handle only Windows' read-only flag on the validated, now-empty root.
+
+        Never change ACLs, child permissions, links, or unrelated paths. Real
+        access restrictions and sharing violations must still fail closed.
+        """
+        target = Path(path).absolute()
+        if (
+            os.name != "nt"
+            or function is not os.rmdir
+            or target != self.root
+            or not isinstance(error, PermissionError)
+            or getattr(error, "winerror", None) != 5
+            or _is_link_or_reparse(target)
+        ):
+            raise error
+        metadata = target.lstat()
+        if (
+            not stat.S_ISDIR(metadata.st_mode)
+            or not metadata.st_file_attributes & stat.FILE_ATTRIBUTE_READONLY
+            or any(target.iterdir())
+        ):
+            raise error
+        target.chmod(metadata.st_mode | stat.S_IWRITE)
+        try:
+            os.rmdir(target)
+        except OSError:
+            # Restore the original attribute if a genuine lock/ACL still blocks
+            # removal; there is no retry loop or broader permission repair.
+            if target.exists() and not _is_link_or_reparse(target):
+                target.chmod(metadata.st_mode)
+            raise
 
     def close(self) -> None:
         with self._lock:

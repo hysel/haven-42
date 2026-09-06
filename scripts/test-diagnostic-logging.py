@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import os
+import stat
 from pathlib import Path
 import tempfile
 from unittest.mock import patch
@@ -32,6 +33,54 @@ def assert_private(summary: dict) -> None:
 
 
 def main() -> int:
+    if os.name == "nt":
+        with tempfile.TemporaryDirectory(prefix="haven42-readonly-log-regression-") as raw:
+            root = log_root(Path(raw))
+            logger = LOGS.DiagnosticLogger("0.4-alpha-1", root)
+            root.chmod(root.stat().st_mode & ~stat.S_IWRITE)
+            try:
+                assert root.stat().st_file_attributes & stat.FILE_ATTRIBUTE_READONLY
+                assert logger.remove_all()["removed"] is True
+                assert not root.exists()
+            finally:
+                if root.exists():
+                    root.chmod(root.stat().st_mode | stat.S_IWRITE)
+        with tempfile.TemporaryDirectory(prefix="haven42-readonly-log-unowned-") as raw:
+            root = log_root(Path(raw))
+            logger = LOGS.DiagnosticLogger("0.4-alpha-1", root)
+            unrelated = root / "unrelated.txt"
+            unrelated.write_text("keep", encoding="utf-8")
+            root.chmod(root.stat().st_mode & ~stat.S_IWRITE)
+            try:
+                try:
+                    logger.remove_all()
+                    raise AssertionError("unrelated log content was removed")
+                except LOGS.DiagnosticLogError:
+                    pass
+                assert unrelated.read_text(encoding="utf-8") == "keep"
+                assert root.stat().st_file_attributes & stat.FILE_ATTRIBUTE_READONLY
+            finally:
+                root.chmod(root.stat().st_mode | stat.S_IWRITE)
+        print("Windows read-only diagnostic root regression checks passed.")
+    with tempfile.TemporaryDirectory(prefix="haven42-log-denied-") as raw:
+        root = log_root(Path(raw))
+        logger = LOGS.DiagnosticLogger("0.4-alpha-1", root)
+        denied = PermissionError("access denied must remain an error")
+        with patch.object(LOGS.shutil, "rmtree", side_effect=denied):
+            try:
+                logger.remove_all()
+                raise AssertionError("access restriction was ignored")
+            except PermissionError as error:
+                assert error is denied
+        assert root.exists() and not logger.summary()["removedForSession"]
+        with patch.object(Path, "chmod") as chmod:
+            try:
+                logger._retry_readonly_root_removal(os.unlink, root, denied)
+                raise AssertionError("file deletion failure was repaired")
+            except PermissionError as error:
+                assert error is denied
+            chmod.assert_not_called()
+        logger.close()
     checks = 0
     secret = "PROMPT_SECRET_ENDPOINT_PATH_TOKEN"
     with tempfile.TemporaryDirectory(prefix="haven42-diagnostics-") as raw:
