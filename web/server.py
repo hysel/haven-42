@@ -1259,11 +1259,12 @@ def install_ollama_model(
     records = read_json_stream(
         request,
         3600,
-        MAX_JSON_RESPONSE_BYTES,
+        64 * 1024,  # Bound each progress record, not the entire download history.
         cancelled=lambda: False,
         on_open=lambda _response: None,
         on_close=lambda: None,
         on_record=progress_callback,
+        last_record_only=True,
     )
     result = records[-1]
     if result.get("status") != "success":
