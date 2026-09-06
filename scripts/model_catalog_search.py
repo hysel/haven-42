@@ -31,9 +31,10 @@ class ModelCatalogSearchError(ValueError):
 class CatalogResults(list):
     """Catalog matches with an explicit notice when tag expansion was partial."""
 
-    def __init__(self, values: list[str], incomplete: bool = False):
+    def __init__(self, values: list[str], incomplete: bool = False, sizes: dict[str, int] | None = None):
         super().__init__(values)
         self.incomplete = incomplete
+        self.sizes = {name: size for name, size in (sizes or {}).items() if name in values}
 
 
 class _NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -46,10 +47,15 @@ class _LibraryLinkParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.models: list[str] = []
+        self.sizes: dict[str, int] = {}
+        self._size_model: str | None = None
+        self._size_text: list[str] = []
 
     def handle_starttag(self, tag: str, attributes: list[tuple[str, str | None]]) -> None:
         if tag.lower() != "a":
             return
+        self._size_model = None
+        self._size_text = []
         href = next((value for name, value in attributes if name.lower() == "href"), None)
         if not href:
             return
@@ -75,10 +81,29 @@ class _LibraryLinkParser(HTMLParser):
             not candidate
             or candidate.endswith(":cloud")
             or not MODEL_NAME.fullmatch(candidate)
-            or candidate in self.models
         ):
             return
-        self.models.append(candidate)
+        self._size_model = candidate
+        if candidate not in self.models:
+            self.models.append(candidate)
+
+    def handle_data(self, data: str) -> None:
+        if self._size_model and sum(map(len, self._size_text)) < 8192:
+            self._size_text.append(data[:8192])
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() != "a" or not self._size_model:
+            return
+        # Only size text inside this exact model's link is attributable to it.
+        # Never take a sibling/next row's size or infer bytes from parameter count.
+        matches = re.findall(r"(?<![\w.-])([0-9]{1,4}(?:\.[0-9]{1,3})?)\s*(KB|MB|GB|TB)\b", " ".join(self._size_text))
+        if len(matches) == 1:
+            amount, unit = matches[0]
+            size = round(float(amount) * 1000 ** ({"KB": 1, "MB": 2, "GB": 3, "TB": 4}[unit]))
+            if 0 < size <= 16 * 1024 ** 4:
+                self.sizes[self._size_model] = size
+        self._size_model = None
+        self._size_text = []
 
 
 def validate_query(value: object) -> str:
@@ -102,7 +127,7 @@ def parse_ollama_search_html(content: str, limit: int | None = 20) -> list[str]:
         parser.close()
     except (UnicodeError, ValueError) as error:
         raise ModelCatalogSearchError("invalid-model-catalog-response") from error
-    return parser.models if limit is None else parser.models[:limit]
+    return CatalogResults(parser.models if limit is None else parser.models[:limit], sizes=parser.sizes)
 
 
 def _catalog_ssl_context() -> ssl.SSLContext:
@@ -184,7 +209,7 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
         variants = parse_ollama_search_html(
             _fetch_catalog_html(tag_path, timeout_seconds), None,
         )
-        return [model for model in variants if model.casefold() == normalized_query][:1]
+        return CatalogResults([model for model in variants if model.casefold() == normalized_query][:1], sizes=variants.sizes)
 
     # Format terms describe tags, not family names. Search families first and
     # inspect their tags before applying the output bound or the format filter.
@@ -209,7 +234,8 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
         None,
     )
     selected_families = [exact_family] if exact_family else families
-    def family_variants(family: str) -> tuple[list[str], bool]:
+    sizes = dict(models.sizes)
+    def family_variants(family: str) -> tuple[list[str], bool, dict[str, int]]:
         encoded = urllib.parse.quote(family, safe="._+-/")
         tag_path = f"/{encoded}/tags" if "/" in family else f"/library/{encoded}/tags"
         try:
@@ -219,14 +245,18 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
         except ModelCatalogSearchError:
             # The search page already established this family's existence.
             # A failed tag request must not erase every other search result.
-            return [family], True
-        return [family, *(model for model in variants if model.startswith(family + ":"))], False
+            return [family], True, {}
+        family_sizes = dict(variants.sizes)
+        if family + ":latest" in family_sizes:
+            family_sizes[family] = family_sizes[family + ":latest"]
+        return [family, *(model for model in variants if model.startswith(family + ":"))], False, family_sizes
 
     # Keep requests bounded and preserve catalog order regardless of completion order.
     incomplete = False
     with ThreadPoolExecutor(max_workers=4) as pool:
-        for variants, failed in pool.map(family_variants, selected_families):
+        for variants, failed, variant_sizes in pool.map(family_variants, selected_families):
             incomplete = incomplete or failed
+            sizes.update(variant_sizes)
             expanded.extend(model for model in variants if model not in expanded)
     expanded.extend(
         model for model in models if model not in expanded
@@ -234,4 +264,4 @@ def search_ollama_catalog(query: str, timeout_seconds: int = 10) -> list[str]:
     )
     if formats:
         expanded = [model for model in expanded if all(term in model.casefold() for term in formats)]
-    return CatalogResults(expanded[:MAX_RESULTS], incomplete)
+    return CatalogResults(expanded[:MAX_RESULTS], incomplete, sizes)
