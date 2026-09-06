@@ -5729,7 +5729,7 @@ Invoke-PackTest "task composition and repository privacy foundations fail closed
     Assert-True -Condition (($artifactSigningOutput -join "`n") -match "31 fail-closed checks") -Message "Windows signing must remain manual, exact-source, digest-bound, OIDC-only, launcher-only, and unable to publish a release."
     $runtimeComponentOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-runtime-components.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable runtime component hostile tests should pass."
-    Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "13 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files."
+    Assert-True -Condition (($runtimeComponentOutput -join "`n") -match "20 cases") -Message "Runtime component evidence must reject unclassified, unsafe, duplicate, and malformed files and enforce the selected application version."
     $buildProvenanceOutput = @(& $python.Source (Join-Path $repoRoot "scripts/test-portable-build-provenance.py") 2>&1)
     Assert-Equal -Actual $LASTEXITCODE -Expected 0 -Message "Portable build provenance hostile tests should pass."
     Assert-True -Condition (($buildProvenanceOutput -join "`n") -match "33 cases") -Message "Hosted Python distribution provenance, current protected-resource integrity, modified-source snapshot identity, protected-resource trust updates, repository-local build-tool selection, build caches, and output confinement must remain explicit and fail closed."

@@ -17,6 +17,7 @@ from portable_runtime_components import (
     ComponentClassificationError,
     DISTRIBUTION_EVIDENCE_HASHES,
     classify,
+    embedded_sbom_components,
 )
 
 
@@ -36,6 +37,8 @@ REQUIRED_EVIDENCE = {
     "CPYTHON-3.14.6-LICENSE.txt",
     "LIBFFI-3.4.4-LICENSE.txt",
     "OLLAMA-MIT-LICENSE.txt",
+    "PYINSTALLER-6.21.0-COPYING.txt",
+    "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt",
     "THIRD-PARTY-NOTICES.txt",
     "build-provenance.json",
     "dependency-inventory.json",
@@ -44,10 +47,12 @@ REQUIRED_EVIDENCE = {
     "runtime-component-inventory.json",
 }
 EXPECTED_LICENSE_EVIDENCE = {
+    "UBUNTU-24.04-NATIVE-COPYRIGHTS.txt": "b2d5a7874aa5a93400f347bd283fb2ce43d03c2e27d38e69e007d8eba9072cd0",
     "APACHE-2.0.txt": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
     "CPYTHON-3.14.6-LICENSE.txt": "214919267ac05a769eed6c9e442432ab7cacf108774e4597b2d676c5dd12d020",
     "LIBFFI-3.4.4-LICENSE.txt": "2c9c2acb9743e6b007b91350475308aee44691d96aa20eacef8e199988c8c388",
     "OLLAMA-MIT-LICENSE.txt": "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226",
+    "PYINSTALLER-6.21.0-COPYING.txt": "571f650c741ae1f6d8b689ef639b02c93297b84cef32db7c5211674d7b6fc094",
 }
 EXPECTED_COMMON_BUILD_DEPENDENCIES = {
     "altgraph": ("0.17.5", "MIT"),
@@ -317,7 +322,7 @@ def verify_sbom_document(
                 ],
             }
             for item in runtime_inventory["runtimeComponents"]
-        ]
+        ] + embedded_sbom_components(runtime_inventory)
     ):
         raise ArtifactVerificationError("invalid-sbom")
 
@@ -336,6 +341,15 @@ def verify_notice_text(notices: str, inventory: dict, runtime_inventory: dict) -
         not in notices
     ):
         raise ArtifactVerificationError("license-evidence-notice-missing")
+    for marker in (
+        "PyInstaller embeds its bootloader",
+        "PyInstaller runtime hook terms: Apache-2.0.",
+        "licenses/PYINSTALLER-6.21.0-COPYING.txt",
+    ):
+        if marker not in notices:
+            raise ArtifactVerificationError("embedded-runtime-notice-missing")
+    if "Every runtime component below is excluded from Haven 42 signing scope." in notices:
+        raise ArtifactVerificationError("stale-platform-signing-notice")
     for record in runtime_inventory["runtimeComponents"]:
         marker = (
             f"{record['name']} {record['version']} — {record['license']} — "
@@ -366,9 +380,10 @@ def verify_evidence(directory: Path, expected_version: str | None = None) -> Non
     except ArtifactVerificationError:
         required_app_version = None
     if (
-        inventory.get("schemaVersion") != 3
+        inventory.get("schemaVersion") != 4
         or set(inventory) != {
             "schemaVersion", "target", "runtimeComponents", "buildDependencies",
+            "embeddedRuntimeComponents",
         }
         or not isinstance(inventory.get("runtimeComponents"), list)
         or not isinstance(inventory.get("buildDependencies"), list)
@@ -506,11 +521,14 @@ def verify_evidence(directory: Path, expected_version: str | None = None) -> Non
             str(target),
             str(environment.get("pythonVersion")),
             openssl_version,
+            app_version=required_app_version,
         )
     except (ComponentClassificationError, TypeError) as error:
         raise ArtifactVerificationError("invalid-runtime-component-inventory") from error
     if runtime_inventory != expected_runtime_inventory:
         raise ArtifactVerificationError("runtime-component-inventory-mismatch")
+    if inventory["embeddedRuntimeComponents"] != runtime_inventory["projectOwned"]["embeddedRuntimeComponents"]:
+        raise ArtifactVerificationError("dependency-embedded-component-mismatch")
     expected_runtime_summaries = [
         {
             key: item[key]
@@ -738,6 +756,24 @@ def run_self_tests() -> None:
             "windows-amd64",
             EXPECTED_APP_VERSIONS["windows"],
         )
+        runtime_inventory["projectOwned"] = {"embeddedRuntimeComponents": [{
+            "id": "pyinstaller-runtime-hooks", "name": "PyInstaller runtime hooks",
+            "version": "6.21.0", "license": "Apache-2.0", "containerFiles": ["haven42.exe"],
+        }]}
+        for supplied_components in ([], [{
+            "type": "library", "name": "PyInstaller runtime hooks", "version": "6.21.0",
+            "scope": "required", "licenses": [{"expression": "MIT"}], "properties": [],
+        }]):
+            candidate_sbom = {**valid_sbom, "components": valid_sbom["components"] + supplied_components}
+            try:
+                verify_sbom_document(candidate_sbom, inventory, runtime_inventory, "windows-amd64", EXPECTED_APP_VERSIONS["windows"])
+            except ArtifactVerificationError as error:
+                assert str(error) == "invalid-sbom"
+                hostile_cases += 1
+            else:
+                raise AssertionError("missing or incorrect embedded-code license accepted")
+        valid_sbom["components"] += embedded_sbom_components(runtime_inventory)
+        verify_sbom_document(valid_sbom, inventory, runtime_inventory, "windows-amd64", EXPECTED_APP_VERSIONS["windows"])
         valid_sbom["metadata"]["component"]["version"] = EXPECTED_APP_VERSIONS["linux"]
         try:
             verify_sbom_document(
@@ -789,7 +825,7 @@ def run_self_tests() -> None:
             hostile_cases += 1
         else:
             raise AssertionError("expected license-evidence-notice-missing")
-    if hostile_cases != 10:
+    if hostile_cases != 12:
         raise AssertionError("hostile archive self-test failed")
 
 
@@ -812,7 +848,7 @@ def main() -> int:
         if args.self_test or args.self_test_only:
             run_self_tests()
         if args.self_test_only:
-            print("Portable verifier hostile self-tests passed 10 cases.")
+            print("Portable verifier hostile self-tests passed 12 cases.")
             return 0
         verify(Path(args.artifact_directory).resolve(), args.expected_version)
     except ArtifactVerificationError as error:

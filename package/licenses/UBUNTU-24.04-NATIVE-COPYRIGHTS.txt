@@ -1,0 +1,1531 @@
+Ubuntu 24.04 native runtime copyright evidence
+
+These are the unabridged source-package copyright files accompanying the
+byte-matched shared libraries. They also describe tools, tests and packaging
+not shipped in Haven 42; do not treat every listed license as applying to
+every binary. Package origins and exact library hashes are recorded in
+ALPHA2-NATIVE-RUNTIME-SOURCES.json in the source repository.
+
+libbz2-1.0 1.0.8-5.1ubuntu0.1
+Archive: https://security.ubuntu.com/ubuntu/pool/main/b/bzip2/libbz2-1.0_1.0.8-5.1ubuntu0.1_amd64.deb
+Archive SHA-256: 36ee08b00b1ee5018b2fce02881b7d2d73c9b4e32990bde3388400d86c48126a
+./usr/share/doc/libbz2-1.0/copyright
+
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: bzip2
+Source: http://www.bzip.org/
+
+Files: *
+Copyright: 1996-2010 Julian R Seward <jseward@bzip.org>
+License: BSD-variant
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ .
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ .
+ 2. The origin of this software must not be misrepresented; you must
+    not claim that you wrote the original software.  If you use this
+    software in a product, an acknowledgment in the product
+    documentation would be appreciated but is not required.
+ .
+ 3. Altered source versions must be plainly marked as such, and must
+    not be misrepresented as being the original software.
+ .
+ 4. The name of the author may not be used to endorse or promote
+    products derived from this software without specific prior written
+    permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
+ OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+ GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Files: debian/*
+Copyright: 2018 Nicolas Boulenguez <nicolas.boulenguez@free.fr>
+	   2012-2015 Santiago Ruano Rincón <santiago@debian.org>
+           2014      Canonical Ltd.
+           2004-2011 Anibal Monsalve Salazar <anibal@debian.org>
+           1999-2002 Philippe Troin <phil@fifi.org>
+           1997-1999 Anthony Fok <foka@debian.org>
+License: GPL-2
+ The full text of the GNU General Public License version 2
+ can be found in /usr/share/common-licenses/GPL-2.
+
+
+libffi8 3.4.6-1build1
+Archive: https://archive.ubuntu.com/ubuntu/pool/main/libf/libffi/libffi8_3.4.6-1build1_amd64.deb
+Archive SHA-256: 637e6a7744de08cd331a41f4efd0d24e6ea9064843dea9d1c6ca87bdb5f038a2
+./usr/share/doc/libffi8/copyright
+
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Comment: This package was debianized by Matthias Klose <doko@debian.org>
+Source: https://github.com/libffi/libffi/releases
+Upstream-Contact:
+    Anthony Green <green@redhat.com>
+    GCC developers
+    See the README and below in the list of copyright holders for a more
+    complete list.
+
+Files: *
+Copyright:
+    Copyright (c) 1996-2024 Red Hat, Inc.
+    Copyright (C) 1996-2024 Anthony Green
+    Copyright (C) 1996-2010 Free Software Foundation, Inc
+    Copyright (c) 2003, 2004, 2006, 2007, 2008 Kaz Kojima
+    Copyright (c) 2010, 2011, Plausible Labs Cooperative , Inc.
+    Copyright (c) 2010 CodeSourcery
+    Copyright (c) 2012 Alan Hourihane
+    Copyright (c) 1998 Andreas Schwab
+    Copyright (c) 2012, 2016 Thorsten Glaser
+    Copyright (c) 2000 Hewlett Packard Company
+    Copyright (c) 2009 Bradley Smith
+    Copyright (c) 2008 David Daney
+    Copyright (c) 2004 Simon Posnjak
+    Copyright (c) 2005 Axis Communications AB
+    Copyright (c) 1998 Cygnus Solutions
+    Copyright (c) 2004 Renesas Technology
+    Copyright (c) 2002, 2007  Bo Thorsen <bo@suse.de>
+    Copyright (c) 2002 Ranjit Mathew
+    Copyright (c) 2002 Roger Sayle
+    Copyright (c) 2000, 2007 Software AG
+    Copyright (c) 2003 Jakub Jelinek
+    Copyright (c) 2000, 2001 John Hornkvist
+    Copyright (c) 1998 Geoffrey Keating
+    Copyright (c) 2008 Björn König
+    Copyright (c) 2021 Microsoft, Inc.
+    Copyright (c) 2019 Microsoft Corporation.
+    Copyright (c) 2012 Alexandre K. I. de Mendonca <alexandre.keunecke@gmail.com>
+    Copyright (c) 2012 Paulo Pizarro <paulo.pizarro@gmail.com>
+    Copyright (c) 2015 Michael Knyszek <mknyszek@berkeley.edu>
+    Copyright (c) 2011 Timothy Wall
+    Copyright (c) 2020 Kalray
+    Copyright (c) 2013 Tensilica, Inc.
+    Copyright (c) 2011-2012 Tilera Corp.
+    Copyright (c) 2009-2012 ARM Ltd.
+    Copyright (c) 2013 IBM
+    Copyright (C) 2011 Kyle Moffett
+    Copyright (c) 1998 Geoffrey Keating
+    Copyright (c) 2013 The Written Word, Inc.
+    Copyright (c) 2013 Imagination Technologies
+    Copyright (c) 2013 Synopsys, Inc. (www.synopsys.com)
+    Copyright (c) 2014 Sebastian Macke <sebastian@macke.de>
+    Copyright (c) 2012, 2013 Xilinx, Inc
+    Copyright (c) 2013 Miodrag Vallat.  <miod@openbsd.org>
+    Copyright (c) 2013 Mentor Graphics.
+    Copyright (c) 2020 Madhavan T. Venkataraman
+License: Expat
+Comment: See source files for details.
+ The libffi source distribution contains certain code that is not part
+ of libffi, and is only used as tooling to assist with the building and
+ testing of libffi.  This includes the msvcc.sh script used to wrap the
+ Microsoft compiler with GNU compatible command-line options,
+ make_sunver.pl, and the libffi test code distributed in the
+ testsuite/libffi.bhaible directory.  This code is distributed with
+ libffi for the purpose of convenience only, and libffi is in no way
+ derived from this code.
+
+Files: doc/libffi.*
+Copyright: (C) 2008-2019, 2021 Anthony Green and Red Hat, Inc.
+License: Expat
+
+Files: install-sh
+Copyright: (C) 1994 X Consortium
+License: X11
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to
+ deal in the Software without restriction, including without limitation the
+ rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ sell copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included in
+ all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+ X CONSORTIUM BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
+ AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNEC-
+ TION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ .
+ Except as contained in this notice, the name of the X Consortium shall not
+ be used in advertising or otherwise to promote the sale, use or other deal-
+ ings in this Software without prior written authorization from the X Consor-
+ tium.
+Comment: FSF changes to this file are in the public domain.
+
+Files: libtool-ldflags
+Copyright: (C) 2005 Free Software Foundation, Inc.
+License: GPL-2+
+Comment: Contributed by CodeSourcery, LLC.
+
+Files: make_sunver.pl
+Copyright: (C) 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
+License: GPL-3+
+Comment: Upstream does not have the license details.
+ ffmpeg includes this software as GPL-3+.
+
+Files: msvcc.sh
+Copyright:
+ The Initial Developer of the Original Code is
+ Timothy Wall <twalljava@dev.java.net>.
+ Portions created by the Initial Developer are Copyright (C) 2009
+ the Initial Developer. All Rights Reserved.
+Comment: Contributor(s): Daniel Witte <dwitte@mozilla.com>
+License: MPL-1.1 or GPL-2+ or LGPL-2.1+
+ The contents of this file are subject to the Mozilla Public License Version
+ 1.1 (the "License"); you may not use this file except in compliance with
+ the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+ .
+ Software distributed under the License is distributed on an "AS IS" basis,
+ WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ for the specific language governing rights and limitations under the
+ License.
+ .
+ Alternatively, the contents of this file may be used under the terms of
+ either the GNU General Public License Version 2 or later (the "GPL"), or
+ the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+ .
+ On Debian GNU/Linux systems, the complete texts of these licenses are in
+ `/usr/share/common-licenses/{MPL-1.1,GPL-2,LGPL-2.1}'.
+
+Files: src/dlmalloc.c
+Copyright: None (author: Doug Lea)
+License: public-domain
+  This is a version (aka dlmalloc) of malloc/free/realloc written by
+  Doug Lea and released to the public domain, as explained at
+  http://creativecommons.org/licenses/publicdomain.  Send questions,
+  comments, complaints, performance data, etc to dl@cs.oswego.edu
+
+Files: testsuite/*
+Copyright: (C) 2003-2019 Free Software Foundation, Inc.
+License: GPL-3+
+
+Files: testsuite/libffi.closures/*
+Copyright: (C) 2003, 2006, 2009, 2010, 2014, 2019 Free Software Foundation, Inc.
+           (C) 2019 Anthony Green
+License: GPL-3+
+
+Files: testsuite/libffi.bhaible/*
+Copyright:
+ Copyright 1993 Bill Triggs <Bill.Triggs@inrialpes.fr>
+ Copyright 1995-2017 Bruno Haible <bruno@clisp.org>
+ Copyright (C) 2003, 2006, 2009, 2010, 2014, 2018 Free Software Foundation, Inc.
+License: GPL-3+
+
+Files: testsuite/libffi.bhaible/alignof.h
+Copyright: (C) 2003-2004, 2006, 2009-2017 Free Software Foundation, Inc.
+License: GPL-2+
+
+Files: debian/*
+Copyright: (C) 2008, 2011 Matthias Klose <doko@debian.org>
+License: GPL
+ The Debian packaging is licensed under the GPL,
+ see `/usr/share/common-licenses/GPL'.
+
+License: Expat
+    Permission is hereby granted, free of charge, to any person obtaining
+    a copy of this software and associated documentation files (the
+    ``Software''), to deal in the Software without restriction, including
+    without limitation the rights to use, copy, modify, merge, publish,
+    distribute, sublicense, and/or sell copies of the Software, and to
+    permit persons to whom the Software is furnished to do so, subject to
+    the following conditions:
+ .
+    The above copyright notice and this permission notice shall be included
+    in all copies or substantial portions of the Software.
+ .
+    THE SOFTWARE IS PROVIDED ``AS IS'', WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+    IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+    TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+    SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+License: GPL-2+
+ This file is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ MA 02110-1301, USA.
+
+License: GPL-3+
+ This file is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program; see the file COPYING.GPLv3.  If not see
+ <http://www.gnu.org/licenses/>.
+
+
+liblzma5 5.6.1+really5.4.5-1ubuntu0.3
+Archive: https://security.ubuntu.com/ubuntu/pool/main/x/xz-utils/liblzma5_5.6.1+really5.4.5-1ubuntu0.3_amd64.deb
+Archive SHA-256: d2eabd41ca77d2c2dd9d5d4ef478cccb64ffde6279c47cf4699a857d46785a52
+./usr/share/doc/liblzma5/copyright
+
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: XZ Utils
+Upstream-Contact:
+ Lasse Collin <lasse.collin@tukaani.org>
+ https://tukaani.org/xz/lists.html
+Source:
+ https://tukaani.org/xz
+ https://git.tukaani.org/xz.git
+Comment:
+ XZ Utils is developed and maintained upstream by Lasse Collin.  Major
+ portions are based on code by other authors; see AUTHORS for details.
+ Most of the source has been put into the public domain, but some files
+ have not (details below).
+ .
+ This file describes the source package.  The binary packages contain
+ some files derived from other works: for example, images in the API
+ documentation come from Doxygen.
+License:
+ Different licenses apply to different files in this package. Here
+ is a rough summary of which licenses apply to which parts of this
+ package (but check the individual files to be sure!):
+ .
+   - liblzma is in the public domain.
+ .
+   - xz, xzdec, and lzmadec command line tools are in the public
+     domain unless GNU getopt_long had to be compiled and linked
+     in from the lib directory. The getopt_long code is under
+     GNU LGPLv2.1+.
+ .
+   - The scripts to grep, diff, and view compressed files have been
+     adapted from gzip. These scripts and their documentation are
+     under GNU GPLv2+.
+ .
+   - All the documentation in the doc directory and most of the
+     XZ Utils specific documentation files in other directories
+     are in the public domain.
+ .
+   - Translated messages are in the public domain.
+ .
+   - The build system contains public domain files, and files that
+     are under GNU GPLv2+ or GNU GPLv3+. None of these files end up
+     in the binaries being built.
+ .
+   - Test files and test code in the tests directory, and debugging
+     utilities in the debug directory are in the public domain.
+ .
+   - The extra directory may contain public domain files, and files
+     that are under various free software licenses.
+ .
+ You can do whatever you want with the files that have been put into
+ the public domain. If you find public domain legally problematic,
+ take the previous sentence as a license grant. If you still find
+ the lack of copyright legally problematic, you have too many
+ lawyers.
+ .
+ As usual, this software is provided "as is", without any warranty.
+ .
+ If you copy significant amounts of public domain code from XZ Utils
+ into your project, acknowledging this somewhere in your software is
+ polite (especially if it is proprietary, non-free software), but
+ naturally it is not legally required. Here is an example of a good
+ notice to put into "about box" or into documentation:
+ .
+     This software includes code from XZ Utils <http://tukaani.org/xz/>.
+ .
+ The following license texts are included in the following files:
+   - COPYING.LGPLv2.1: GNU Lesser General Public License version 2.1
+   - COPYING.GPLv2: GNU General Public License version 2
+   - COPYING.GPLv3: GNU General Public License version 3
+ .
+ Note that the toolchain (compiler, linker etc.) may add some code
+ pieces that are copyrighted. Thus, it is possible that e.g. liblzma
+ binary wouldn't actually be in the public domain in its entirety
+ even though it contains no copyrighted code from the XZ Utils source
+ package.
+ .
+ If you have questions, don't hesitate to ask the author(s) for more
+ information.
+
+Files: *
+Copyright: 2006-2018, Lasse Collin
+           1999-2008, Igor Pavlov
+           2006, Ville Koskinen
+           1998, Steve Reid
+           2000, Wei Dai
+           2003, Kevin Springle
+           2009, Jonathan Nieder
+           2010, Anders F Björklund
+License: PD
+ This file has been put in the public domain.
+ You can do whatever you want with this file.
+Comment:
+  From: Lasse Collin <lasse.collin@tukaani.org>
+  To: Jonathan Nieder <jrnieder@gmail.com>
+  Subject: Re: XZ utils for Debian
+  Date: Sun, 19 Jul 2009 13:28:23 +0300
+  Message-Id: <200907191328.23816.lasse.collin@tukaani.org>
+ .
+ [...]
+ .
+  > AUTHORS, ChangeLog, COPYING, README, THANKS, TODO,
+  > dos/README, windows/README
+ .
+  COPYING says that most docs are in the public domain. Maybe that's not
+  clear enough, but on the other hand it looks a bit stupid to put
+  copyright information in tiny and relatively small docs like README.
+ .
+  I don't dare to say that _all_ XZ Utils specific docs are in the public
+  domain unless otherwise mentioned in the file. I'm including PDF files
+  generated by groff + ps2pdf, and some day I might include Doxygen-
+  generated HTML docs too. Those don't include any copyright notices, but
+  it seems likely that groff + ps2pdf or at least Doxygen put some
+  copyrighted content into the generated files.
+
+Files: INSTALL NEWS PACKAGERS
+ windows/README-Windows.txt
+ windows/INSTALL-MinGW.txt
+Copyright: 2009-2010, Lasse Collin
+License: probably-PD
+ See the note on AUTHORS, README, and so on above.
+
+Files: src/scripts/* lib/* extra/scanlzma/scanlzma.c
+Copyright: © 1993, Jean-loup Gailly
+           © 1989-1994, 1996-1999, 2001-2007, Free Software Foundation, Inc.
+           © 2006 Timo Lindfors
+           2005, Charles Levert
+           2005, 2009, Lasse Collin
+           2009, Andrew Dudman
+Other-Authors: Paul Eggert, Ulrich Drepper
+License: GPL-2+
+
+Files: src/scripts/Makefile.am src/scripts/xzless.1
+Copyright: 2009, Andrew Dudman
+           2009, Lasse Collin
+License: PD
+ This file has been put in the public domain.
+ You can do whatever you want with this file.
+
+Files: doc/examples/xz_pipe_comp.c doc/examples/xz_pipe_decomp.c
+Copyright: 2010, Daniel Mealha Cabrita
+License: PD
+ Not copyrighted -- provided to the public domain.
+
+Files: lib/getopt.c lib/getopt1.c lib/getopt.in.h
+Copyright: © 1987-2007 Free Software Foundation, Inc.
+Other-Authors: Ulrich Drepper
+License: LGPL-2.1+
+
+Files: m4/getopt.m4 m4/posix-shell.m4
+Copyright: © 2002-2006, 2008 Free Software Foundation, Inc.
+           © 2007-2008 Free Software Foundation, Inc.
+Other-Authors: Bruno Haible, Paul Eggert
+License: permissive-fsf
+
+Files: m4/acx_pthread.m4
+Copyright: © 2008, Steven G. Johnson <stevenj@alum.mit.edu>
+License: Autoconf
+
+files: m4/ax_check_capsicum.m4
+Copyright: © 2014, Google Inc.
+           © 2015, Lasse Collin <lasse.collin@tukaani.org>
+License: permissive-nowarranty
+
+Files: Doxyfile.in
+Copyright: © 1997-2007 by Dimitri van Heesch
+Origin: Doxygen 1.4.7
+License: GPL-2
+
+Files: src/liblzma/check/crc32_table_?e.h
+ src/liblzma/check/crc64_table_?e.h
+ src/liblzma/lzma/fastpos_table.c
+ src/liblzma/rangecoder/price_table.c
+Copyright: none, automatically generated data
+Generated-With:
+ src/liblzma/check/crc32_tablegen.c
+ src/liblzma/check/crc64_tablegen.c
+ src/liblzma/lzma/fastpos_tablegen.c
+ src/liblzma/rangecoder/price_tablegen.c
+License: none
+ No copyright to license.
+
+Files: .gitignore m4/.gitignore po/.gitignore po/LINGUAS po/POTFILES.in
+Copyright: none; these are just short lists.
+License: none
+ No copyright to license.
+
+Files: tests/compress_prepared_bcj_*
+Copyright: 2008-2009, Lasse Collin
+Source-Code: tests/bcj_test.c
+License: PD
+ This file has been put into the public domain.
+ You can do whatever you want with this file.
+Comment:
+ changelog.gz (commit 975d8fd) explains:
+ .
+ Recreated the BCJ test files for x86 and SPARC. The old files
+ were linked with crt*.o, which are copyrighted, and thus the
+ old test files were not in the public domain as a whole. They
+ are freely distributable though, but it is better to be careful
+ and avoid including any copyrighted pieces in the test files.
+ The new files are just compiled and assembled object files,
+ and thus don't contain any copyrighted code.
+
+Files: po/cs.po po/de.po po/fr.po
+Copyright: 2010, Marek Černocký
+           2010, Andre Noll
+           2011, Adrien Nader
+License: PD
+ This file is put in the public domain.
+
+Files: po/it.po po/pl.po
+Copyright: 2009, 2010, Gruppo traduzione italiano di Ubuntu-it
+           2010, Lorenzo De Liso
+           2009, 2010, 2011, Milo Casagrande
+           2011, Jakub Bogusz
+License: PD
+ This file is in the public domain
+
+Files: INSTALL.generic
+Copyright: © 1994, 1995, 1996, 1999, 2000, 2001, 2002, 2004, 2005,
+             2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+License: permissive-nowarranty
+
+Files: dos/config.h
+Copyright: © 1992, 1993, 1994, 1999, 2000, 2001, 2002, 2005
+             Free Software Foundation, Inc.
+           2007-2010, Lasse Collin
+Other-Authors: Roland McGrath, Akim Demaille, Paul Eggert,
+               David Mackenzie, Bruno Haible, and many others.
+Origin: configure.ac from XZ Utils,
+        visibility.m4 serial 1 (gettext-0.15),
+        Autoconf 2.52g
+License: config-h
+ configure.ac:
+ .
+  # Author: Lasse Collin
+  #
+  # This file has been put into the public domain.
+  # You can do whatever you want with this file.
+ .
+ visibility.m4:
+ .
+  dnl Copyright (C) 2005 Free Software Foundation, Inc.
+  dnl This file is free software; the Free Software Foundation
+  dnl gives unlimited permission to copy and/or distribute it,
+  dnl with or without modifications, as long as this notice is preserved.
+ .
+ dnl From Bruno Haible.
+ .
+ comments from Autoconf 2.52g:
+ .
+  # Copyright 1992, 1993, 1994, 1999, 2000, 2001, 2002
+  # Free Software Foundation, Inc.
+ .
+ [...]
+ .
+  # As a special exception, the Free Software Foundation gives unlimited
+  # permission to copy, distribute and modify the configure scripts that
+  # are the output of Autoconf.  You need not follow the terms of the GNU
+  # General Public License when using or distributing such scripts, even
+  # though portions of the text of Autoconf appear in them.  The GNU
+  # General Public License (GPL) does govern all other use of the material
+  # that constitutes the Autoconf program.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License version 2 can be found in ‘/usr/share/common-licenses/GPL-2’.
+ dos/config.h was generated with autoheader, which tells Autoconf to
+ output a script to generate a config.h file and then runs it.
+
+Files: po/Makevars
+Origin: gettext-runtime/po/Makevars (gettext-0.12)
+Copyright: © 2003 Free Software Foundation, Inc.
+Authors: Bruno Haible
+License: LGPL-2.1+
+ The gettext-runtime package is under the LGPL, see files intl/COPYING.LIB-2.0
+ and intl/COPYING.LIB-2.1.
+ .
+ On Debian systems, the complete text of intl/COPYING.LIB-2.0 from
+ gettext-runtime 0.12 can be found in ‘/usr/share/common-licenses/LGPL-2’
+ and the text of intl/COPYING.LIB-2.1 can be found in
+ ‘/usr/share/common-licenses/LGPL-2.1’.
+ .
+ po/Makevars consists mostly of helpful comments and does not contain a
+ copyright and license notice.
+
+Files: COPYING.GPLv2 COPYING.GPLv3 COPYING.LGPLv2.1
+Copyright: © 1989, 1991, 1999, 2007 Free Software Foundation, Inc.
+License: noderivs
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+Files: debian/*
+Copyright: 2009-2012, Jonathan Nieder
+License: PD-debian
+ The Debian packaging files are in the public domain.
+ You may freely use, modify, distribute, and relicense them.
+
+License: LGPL-2.1+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1, or (at your option)
+ any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License along
+ with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ .
+ On Debian systems, the complete text of the GNU Lesser General Public
+ License version 2.1 can be found in ‘/usr/share/common-licenses/LGPL-2.1’.
+
+License: GPL-2
+ Permission to use, copy, modify, and distribute this software and its
+ documentation under the terms of the GNU General Public License is
+ hereby granted. No representations are made about the suitability of
+ this software for any purpose. It is provided "as is" without express
+ or implied warranty. See the GNU General Public License for more
+ details.
+ .
+ Documents produced by doxygen are derivative works derived from the
+ input used in their production; they are not affected by this license.
+ .
+ On Debian systems, the complete text of the version of the GNU General
+ Public License distributed with Doxygen can be found in
+ ‘/usr/share/common-licenses/GPL-2’.
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2, or (at your option)
+ any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in ‘/usr/share/common-licenses/GPL-2’.
+
+License: Autoconf
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or (at your
+ option) any later version.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ As a special exception, the respective Autoconf Macro's copyright owner
+ gives unlimited permission to copy, distribute and modify the configure
+ scripts that are the output of Autoconf when processing the Macro. You
+ need not follow the terms of the GNU General Public License when using
+ or distributing such scripts, even though portions of the text of the
+ Macro appear in them. The GNU General Public License (GPL) does govern
+ all other use of the material that constitutes the Autoconf Macro.
+ .
+ This special exception to the GPL applies to versions of the Autoconf
+ Macro released by the Autoconf Archive. When you make and distribute a
+ modified version of the Autoconf Macro, you may extend this special
+ exception to the GPL to apply to your modified version as well.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License version 3 can be found in ‘/usr/share/common-licenses/GPL-3’.
+
+License: permissive-fsf
+ This file is free software; the Free Software Foundation
+ gives unlimited permission to copy and/or distribute it,
+ with or without modifications, as long as this notice is preserved.
+
+License: permissive-nowarranty
+ Copying and distribution of this file, with or without modification,
+ are permitted in any medium without royalty provided the copyright
+ notice and this notice are preserved.  This file is offered as-is,
+ without warranty of any kind.
+
+
+libssl3t64 3.0.13-0ubuntu3.15
+Archive: https://security.ubuntu.com/ubuntu/pool/main/o/openssl/libssl3t64_3.0.13-0ubuntu3.15_amd64.deb
+Archive SHA-256: 3d0955bc049bbcca0f4c3e78a3a8b994593d96db7d84f4320217224433844534
+./usr/share/doc/libssl3t64/copyright
+
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: OpenSSL
+Source: https://www.openssl.org
+
+Files: *
+Copyright: 1995-2020, The OpenSSL Project Authors
+	   1995-1998, Eric A. Young, Tim J. Hudson
+	   2004-2014 Akamai Technologies.
+	   2008 Andy Polyakov <appro@openssl.org>
+	   2017 BaishanCloud.
+	   2015 CloudFlare Inc.
+	   2014-2016 Cryptography Research Inc.
+	   2012-2014 Daniel J. Bernstein
+	   2004 EdelKey Project.
+	   2011 Google Inc.
+	   2018-2019 IBM Corp.
+	   2012,2014 Intel Corporation.
+	   2012-2016 Jean-Philippe Aumasson
+	   2007 KISA(Korea Information Security Agency).
+	   2004 Kungliga Tekniska Högskolan
+	   2017 National Security Research Institute.
+	   2006 Network Resonance Inc.
+	   2005,2007-2020 Nokia
+	   2006 NTT (Nippon Telegraph and Telephone Corporation)
+	   2002,2017-2020 Oracle and/or its affiliates.
+	   1995 Patrick Powell
+	   2019 Red Hat Inc.
+	   2017 Ribose Inc.
+	   2004,2018 Richard Levitte <richard@levitte.org>
+	   2011 RTFM Inc.
+	   2012 Samuel Neves <sneves@dei.uc.pt>
+	   2015-2020 Siemens AG
+	   2002 The OpenTSA Project.
+	   2013-2014 Timo Teräs <timo.teras@gmail.com>
+	   2016 Viktor Dukhovni <openssl-users@dukhovni.org>.
+	   2016 VMS Software Inc.
+License: Apache-2.0
+
+License: Apache-2.0
+ Licensed under the Apache License 2.0 (the "License").  You may not use
+ this file except in compliance with the License.  You can obtain a copy
+ in the file LICENSE in the source distribution or at
+ https://www.openssl.org/source/license.html
+ .
+ On Debian systems, the complete text of the Apache 2.0 License
+ can be found in `/usr/share/common-licenses/Apache-2.0'
+
+Files: debian/*
+Copyright: Christoph Martin, Kurt Roeckx, Sebastian Andrzej Siewior
+License: Apache-2.0
+
+Files: external/perl/Text-Template-1.56/*
+Copyright: 2013, Mark Jason Dominus <mjd@cpan.org>.
+License: Artistic or GPL-1+
+
+License: Artistic
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the Artistic License, which comes with Perl.
+ .
+ On Debian systems, the complete text of the Artistic License can be
+ found in `/usr/share/common-licenses/Artistic'.
+
+License: GPL-1+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 1, or (at your option)
+ any later version.
+ .
+ On Debian systems, the complete text of version 1 of the GNU General
+ Public License can be found in `/usr/share/common-licenses/GPL-1'.
+
+
+libuuid1 2.39.3-9ubuntu6.6
+Archive: https://security.ubuntu.com/ubuntu/pool/main/u/util-linux/libuuid1_2.39.3-9ubuntu6.6_amd64.deb
+Archive SHA-256: 7e2992d3a79fc05514dc5966558ee9c66a7214a47edf2a36017b9e2777528665
+./usr/share/doc/libuuid1/copyright
+
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: util-linux
+Upstream-Contact: util-linux@vger.kernel.org
+Source: https://www.kernel.org/pub/linux/utils/util-linux/
+
+Files: *
+Copyright:      Michal Luscon <mluscon@redhat.com>
+           1986 Gary S. Brown
+           1990 Gordon Irlam (gordoni@cs.ua.oz.au)
+           1991, 1992 Linus Torvalds
+           1991-2004 Miquel van Smoorenburg
+           1992  A. V. Le Blanc (LeBlanc@mcc.ac.uk)
+           1992-1997 Michael K. Johnson, johnsonm@redhat.com
+           1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+                 2003, 2004, 2005, 2008 Theodore Ts'o <tytso@mit.edu>
+           1994 Kevin E. Martin (martin@cs.unc.edu)
+           1994 Salvatore Valente <svalente@mit.edu>
+           1994,1996 Alessandro Rubini (rubini@ipvvis.unipv.it)
+           1994-2005 Jeff Tranter (tranter@pobox.com)
+           1995, 1999, 2000 Andries E. Brouwer <aeb@cwi.nl>
+           1997-2005 Frodo Looijaard <frodo@frodo.looijaard.name>
+           1998 Danek Duvall <duvall@alumni.princeton.edu>
+           1999 Andreas Dilger
+           1999-2002 Transmeta Corporation
+           1999, 2000, 2002-2009, 2010, 2011, 2012, 2014 Red Hat, Inc.
+           2000 Werner Almesberger
+           2004-2006 Michael Holzt, kju -at- fqdn.org
+           2005 Adrian Bunk
+           2007-2020 Karel Zak <kzak@redhat.com>
+           2007, 2011, 2012, 2016 SuSE LINUX Products GmbH
+           2008 Cai Qian <qcai@redhat.com>
+           2008 Hayden A. James (hayden.james@gmail.com)
+           2008 James Youngman <jay@gnu.org>
+           2008 Roy Peled, the.roy.peled  -at-  gmail.com
+           2009 Mikhail Gusarov <dottedmag@dottedmag.net>
+           2010, 2011, 2012 Davidlohr Bueso <dave@gnu.org>
+           2010 Jason Borden <jborden@bluehost.com>A
+           2010 Hajime Taira <htaira@redhat.com>
+           2010 Masatake Yamato <yamato@redhat.com>
+           2011 IBM Corp.
+           2012 Andy Lutomirski <luto@amacapital.net>
+           2012 Lennart Poettering
+           2012 Sami Kerola <kerolasa@iki.fi>
+           2012 Cody Maloney <cmaloney@theoreticalchaos.com>
+           2012 Werner Fink <werner@suse.de>
+           2013,2014 Ondrej Oprala <ooprala@redhat.com>
+License: GPL-2+
+
+Files: schedutils/ionice.c
+Copyright: 2005 Jens Axboe <jens@axboe.dk>
+License: GPL-2
+
+Files: schedutils/chrt.c
+       schedutils/taskset.c
+Copyright: 2004 Robert Love <rml@tech9.net>
+           2010 Karel Zak <kzak@redhat.com>
+License: GPL-2
+
+Files: disk-utils/raw.c
+Copyright: 1999, 2000, Red Hat Software
+License: GPL-2
+
+Files: sys-utils/hwclock-parse-date.y
+Copyright: Steven M. Bellovin <smb@research.att.com>
+           Unknown Authors on Usenet
+           1990 Rich $alz <rsalz@bbn.com>
+           1990 Jim Berets <jberets@bbn.com>
+           1999, 2004 Paul Eggert <eggert@twinsun.com>
+License: GPL-3+
+
+Files: sys-utils/nsenter.c
+Copyright: 2012-2013 Eric Biederman <ebiederm@xmission.com>
+License: GPL-2
+
+Files: disk-utils/mkfs.minix.c
+       disk-utils/mkswap.c
+Copyright: 1991, 1992 Linus Torvalds
+License: GPL-2
+
+Files: lib/blkdev.c
+       lib/loopdev.c
+       lib/sysfs.c
+       lib/ttyutils.c
+       misc-utils/mcookie.c
+       sys-utils/setsid.c
+       text-utils/line.c
+Copyright: n/a
+License: public-domain
+
+Files: login-utils/vipw.c
+       misc-utils/cal.c
+       misc-utils/kill.c
+       misc-utils/logger.c
+       misc-utils/look.c
+       misc-utils/whereis.c
+       sys-utils/renice.c
+       term-utils/mesg.c
+       term-utils/script.c
+       term-utils/ttymsg.c
+       term-utils/wall.c
+       term-utils/write.c
+       text-utils/col.c
+       text-utils/colcrt.c
+       text-utils/colrm.c
+       text-utils/column.c
+       text-utils/hexdump.c
+       text-utils/hexdump.h
+       text-utils/hexdump-conv.c
+       text-utils/hexdump-display.c
+       text-utils/hexdump-parse.c
+       text-utils/rev.c
+       text-utils/ul.c
+Copyright: 1980, 1983, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994
+                The Regents of the University of California
+           2014 Sami Kerola <kerolasa@iki.fi>
+           2014 Karel Zak <kzak@redhat.com>
+License: BSD-4-clause
+
+Files: sys-utils/flock.c
+Copyright: 2003-2005 H. Peter Anvin
+License: MIT
+
+Files: text-utils/pg.c
+Copyright: 2000-2001 Gunnar Ritter
+License: BSD-3-clause
+
+Files: login-utils/login.c
+Copyright: 1980, 1987, 1988 The Regents of the University of California.
+           2011 Karel Zak <kzak@redhat.com>
+License: BSLA
+
+Files: libuuid/*
+       libuuid/src/*
+       libuuid/man/*
+Copyright: 1996, 1997, 1998, 1999, 2007 Theodore Ts'o.
+           1999 Andreas Dilger (adilger@enel.ucalgary.ca)
+License: BSD-3-clause
+
+Files: include/xalloc.h
+Copyright: 2010 Davidlohr Bueso <dave@gnu.org>
+           2010-2022 Karel Zak <kzak@redhat.com>
+License: LGPL-2+
+
+Files: */colors.*
+Copyright: 2012 Ondrej Oprala <ooprala@redhat.com>
+           2012-2014 Karel Zak <kzak@redhat.com>
+License: LGPL-2+
+
+Files: login-utils/setpwnam.h
+       login-utils/setpwnam.c
+Copyright: 1994 Martin Schulze <joey@infodrom.north.de>
+           1994 Salvatore Valente <svalente@mit.edu>
+License: LGPL-2+
+
+Files: libfdisk/*
+       libfdisk/src/*
+Copyright: 2007-2013 Karel Zak <kzak@redhat.com>
+           2012 Davidlohr Bueso <dave@gnu.org>
+License: LGPL-2.1+
+
+Files: lib/cpuset.c
+       */match.*
+       lib/canonicalize.c
+Copyright: 2008-2009, 2010, 2011, 2012 Karel Zak <kzak@redhat.com>
+License: LGPL-2.1+
+
+Files: */mbsalign.*
+Copyright: 2009-2010 Free Software Foundation, Inc.
+           2010-2013 Karel Zak <kzak@redhat.com>
+License: LGPL-2.1+
+
+Files: */timeutils.*
+Copyright: 2010 Lennart Poettering
+License: LGPL-2.1+
+
+Files: include/list.h
+Copyright: 2008 Karel Zak <kzak@redhat.com>
+           1999-2008 by Theodore Ts'o
+License: LGPL
+
+Files: libblkid/*
+       libblkid/src/*
+       libblkid/samples/*
+       libblkid/src/partitions/*
+       libblkid/src/superblocks/*
+       libblkid/src/topology/*
+Copyright: 1999, 2001 Andries Brouwer
+           1995, 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003, 2004
+               Theodore Ts'o.
+           2001 Andreas Dilger (adilger@turbolinux.com)
+           2004-2008 Kay Sievers <kay.sievers@vrfy.org>
+           2008-2013 Karel Zak <kzak@redhat.com>
+           2009 Bastian Friedrich <bastian.friedrich@collax.com>
+           2009 Corentin Chary <corentincj@iksaif.net>
+           2009 Mike Hommey <mh@glandium.org>
+           2009 Red Hat, Inc.
+           2009-2010 Andreas Dilger <adilger@sun.com>
+           2010 Andrew Nayenko <resver@gmail.com>
+           2010 Jeroen Oortwijn <oortwijn@gmail.com>
+           2010 Jiro SEKIBA <jir@unicus.jp>
+           2011 Philipp Marek <philipp.marek@linbit.com>
+           2012 Milan Broz <mbroz@redhat.com>
+           2013 Alejandro Martinez Ruiz <alex@nowcomputing.com>
+           2013 Eric Sandeen <sandeen@redhat.com>
+           2013 Rolf Fokkens <rolf@fokkens.nl>
+           2013 Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+License: LGPL-2.1+
+
+Files: include/cpuset.h
+       lib/randutils.c
+Copyright: *unknown*
+License: LGPL
+
+Files: misc-utils/blkid.c
+Copyright: 2001 Andreas Dilger
+License: LGPL
+
+Files: libmount/*
+       libmount/src/*
+Copyright: 2008-2012 Karel Zak <kzak@redhat.com>
+License: LGPL-2.1+
+
+Files: libmount/python/*
+Copyright: 2013, Red Hat, Inc.
+License: LGPL-3+
+
+Files: libsmartcols/*
+Copyright:  2009-2014 Karel Zak <kzak@redhat.com>
+            2014 Ondrej Oprala <ooprala@redhat.com>
+License: LGPL-2.1+
+
+Files: debian/*
+Copyright:           Guy Maor <maor@debian.org>
+                     Sean 'Shaleh' Perry <shaleh@debian.org>
+                     Adrian Bunk <bunk@stusta.de>
+                     LaMont Jones <lamont@debian.org>
+           1996-2003 Martin Mitchell (martin@debian.org)
+           2008-2012 Frank Lichtenheld (djpig@debian.org)
+           2014      Andreas Henriksson <andreas@fatal.se>
+           2017-2020 Michael Biebl <biebl@debian.org>
+           2019      Petter Reinholdtsen <pere@debian.org>
+           2017-2020 Chris Hofstaedtler <zeha@debian.org>
+License: GPL-2+
+
+Files: debian/po/*
+Copyright:           Aiet Kolkhi <aietkolkhi@gmail.com>
+                     Anton Gladky <gladky.anton@gmail.com>
+                     Arief S F (arief@gurame.fisika.ui.ac.id>
+                     Armin Beširović <armin@linux.org.ba>
+                     astur <malditoastur@gmail.com>
+                     Axel Bojer <axelb@skolelinux.no>
+                     Bart Cornelis <cobaco@skolelinux.no>
+                     Bartosz Fe�ski <fenio@o2.pl>
+                     Basil Shubin <bashu@surgut.ru>
+                     Baurzhan Muftakhidinov <baurthefirst@gmail.com>
+                     Bjorn Steensrud <bjornst@powertech.no>
+                     Claus Hindsgaul <claus_h@image.dk>
+                     Clytie Siddall <clytie@riverland.net.au>
+                     Dafydd Tomos <l10n@da.fydd.org>
+                     Damyan Ivanov <dam@modsoftsys.com>
+                     Daniel Franganillo <dfranganillo@gmail.com>
+                     Daniel Nylander <po@danielnylander.se>
+                     Danishka Navin <danishka@gmail.com>
+                     Dauren Sarsenov <daur88@inbox.ru>
+                     Dominik Zablotny <dominz@wp.pl>
+                     Dr.T.Vasudevan <agnihot3@gmail.com>
+                     Eddy Petrisor <eddy.petrisor@gmail.com>
+                     Eder L. Marques <frolic@debian-ce.org>
+                     Elian Myftiu <elian.myftiu@gmail.com>
+                     Emmanuel Galatoulas <galas@tee.gr>
+                     Esko Arajärvi <edu@iki.fi>
+                     Frank Lichtenheld <djpig@debian.org>
+                     Frédéric Bothamy <frederic.bothamy@free.fr>
+                     Gabor Burjan <buga@buvoshetes.hu>
+                     George Papamichelakis <george@step.gr>
+                     Hans Fredrik Nordhaug <hans@nordhaug.priv.no>
+                     Håvard Korsvoll <korsvoll@gmail.com>
+                     Hideki Yamane <henrich@samba.gr.jp>
+                     Hleb Rubanau <g.rubanau@gmail.com>
+                     I Gede Wijaya S <gwijayas@yahoo.com>
+                     Ivan Masár <helix84@centrum.sk>
+                     Jacobo Tarrio <jtarrio@debian.org>
+                     Jamil Ahmed <jamil@ankur.org.bd>
+                     Janos Guljas <janos@resenje.org>
+                     Jordi Mallach <jordi@debian.org>
+                     Josip Rodin <joy+ditrans@linux.hr>
+                     Karolina Kalic <karolina@resenje.org>
+                     Kartik Mistry <kartik.mistry@gmail.com>
+                     Kęstutis Biliūnas <kebil@kaunas.init.lt>
+                     Kevin Scannell <kscanne@gmail.com>
+                     Khoem Sokhem <khoemsokhem@khmeros.info>
+                     Klaus Ade Johnstad <klaus@skolelinux.no>
+                     Knut Yrvin <knuty@skolelinux.no>
+                     Konstantinos Margaritis <markos@debian.org>
+                     Kostas Papadimas <pkst@gnome.org>
+                     Kumar Appaiah <a.kumar@alumni.iitm.ac.in>
+                     Lior Kaplan <kaplan@debian.org>
+                     Luiz Portella <lfpor@lujz.org>
+                     Mallikarjuna <Mallikarjunasj@gmail.com>
+                     Mert Dirik <mertdirik@gmail.com>
+                     Milo Casagrande <milo@ubuntu.com>
+                     Ming Hua <minghua@ubuntu.com>
+                     Miroslav Kure <kurem@debian.cz>
+                     Mouhamadou Mamoune Mbacke <mouhamadoumamoune@gmail.com>
+                     Nabin Gautam <nabin@mpp.org.np>
+                     Ossama M. Khayat <okhayat@yahoo.com>
+                     Ovidiu Damian <deelerious@gmail.com>
+                     Parlin Imanuel Toh <parlin_i@yahoo.com>
+                     Pavel Piatruk <berserker@neolocation.com>
+                     Piarres Beobide <pi@beobide.net>
+                     Praveen|പ്രവീണ്‍ A|എ <pravi.a@gmail.com>
+                     Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>
+                     Sahran <Sahran.ug@gmail.com>
+                     Sampada Nakhare <sampadanakhare@gmail.com>
+                     Setyo Nugroho <setyo@gmx.net>
+                     Simão Pedro Cardoso <pthell@gmail.com>
+                     Stefano Melchior <stefano.melchior@openlabs.it>
+                     Sunjae Park <darehanl@gmail.com>
+                     Sveinn í Felli <sveinki@nett.is>
+                     Tetralet <tetralet@gmail.com>
+                     Theppitak Karoonboonyanan <thep@linux.thai.net>
+                     Tshewang Norbu <bumthap2006@hotmail.com>
+                     Vahid Ghaderi <vahid_male1384@yahoo.com>
+                     Vanja Cvelbar <cvelbar@gmail.com>
+                     Veeven <veeven@gmail.com>
+                     Vikram Vincent <vincentvikram@gmail.com>
+                     Yoppy Hidayanto <yoppy.hidayanto@gmail.com>
+License: GPL-2+
+
+
+License: public-domain
+ The files tagged with this license contains the following paragraphs:
+ .
+ No copyright is claimed.  This code is in the public domain; do with
+ it what you wish.
+ .
+ Written by Karel Zak <kzak@redhat.com>
+
+License: GPL-2
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License, v2, as
+ published by the Free Software Foundation
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License version 3 can be found in `/usr/share/common-licenses/GPL-3'.
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+ .
+ 1) Redistributions of source code must retain the above copyright notice,
+ this list of conditions and the following disclaimer.
+ .
+ 2) Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following disclaimer in the documentation
+ and/or other materials provided with the distribution.
+ .
+ 3) Neither the name of the ORGANIZATION nor the names of its contributors
+ may be used to endorse or promote products derived from this software
+ without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+
+License: BSD-4-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. All advertising materials mentioning features or use of this software
+    must display the following acknowledgement:
+    This product includes software developed by the University of
+    California, Berkeley and its contributors.
+ 4. Neither the name of the University nor the names of its contributors
+    may be used to endorse or promote products derived from this software
+    without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+ FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ SUCH DAMAGE.
+
+License: BSLA
+ Redistribution and use in source and binary forms are permitted
+ provided that the above copyright notice and this paragraph are
+ duplicated in all such forms and that any documentation,
+ advertising materials, and other materials related to such
+ distribution and use acknowledge that the software was developed
+ by the University of California, Berkeley.  The name of the
+ University may not be used to endorse or promote products derived
+ from this software without specific prior written permission.
+ THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+License: LGPL
+ This file may be redistributed under the terms of the
+ GNU Lesser General Public License.
+ .
+ On Debian systems, the complete text of the GNU Lesser General Public
+ License can be found in ‘/usr/share/common-licenses/LGPL’.
+
+License: LGPL-2+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation, either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ GNU Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ The complete text of the GNU Lesser General Public License
+ can be found in /usr/share/common-licenses/LGPL-2 file.
+
+License: LGPL-2.1+
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1, or (at your option)
+ any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License along
+ with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ .
+ On Debian systems, the complete text of the GNU Lesser General Public
+ License version 2.1 can be found in ‘/usr/share/common-licenses/LGPL-2.1’.
+
+License: LGPL-3+
+ This package is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in "/usr/share/common-licenses/LGPL-3".
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated documentation files
+ (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge,
+ publish, distribute, sublicense, and/or sell copies of the Software,
+ and to permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+
+libzstd1 1.5.5+dfsg2-2build1.1
+Archive: https://archive.ubuntu.com/ubuntu/pool/main/libz/libzstd/libzstd1_1.5.5+dfsg2-2build1.1_amd64.deb
+Archive SHA-256: dfcf25061e07aad7efd3f4f880ba5ad4d4d09ebe7fc8cc77ab6b8a161d6d4727
+./usr/share/doc/libzstd1/copyright
+
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Zstd
+Source: https://github.com/facebook/zstd
+Files-Excluded: appveyor.yml
+                build/VS2008
+                build/VS2010
+                build/VS_scripts
+                programs/windres/*
+                .travis.yml
+                .buckversion
+                .buckconfig
+                .circleci/*
+                .cirrus.yml
+
+Files: *
+Copyright: Yann Collet
+	   Przemyslaw Skibinski
+	   Martin Liska
+	   SUSE
+	   Meta Platforms, Inc. and affiliates
+License: BSD-3-clause or GPL-2
+Comment: Starting from 1.3.1 zstd's patent claim is removed
+ see: https://github.com/facebook/zstd/pull/801
+
+Files: zlibWrapper/examples/*.c
+Copyright: 1995-2006, 2011 Jean-loup Gailly
+License: zlib
+
+Files: zlibWrapper/gz*.c
+Copyright: (C) 2004, 2005, 2010, 2011, 2012, 2013 Mark Adler
+License: zlib
+
+License: zlib
+ This software is provided 'as-is', without any express or implied
+ warranty. In no event will the authors be held liable for any damages
+ arising from the use of this software.
+ .
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it
+ freely, subject to the following restrictions:
+ .
+ 1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgement in the product documentation would be
+    appreciated but is not required.
+ 2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+
+Files: lib/dictBuilder/divsufsort.*
+Copyright: 2003-2008, Yuta Mori
+License: Expat
+
+Files: examples/*
+Copyright: 2016-present, Yann Collet, Facebook, Inc.
+License: BSD-3-clause or GPL-2
+
+Files: debian/*
+Copyright:
+ 2015-2016 Kevin Murray <spam@kdmurray.id.au>
+ 2022-2023 Peter Pentchev <roam@debian.org>
+License: Expat
+
+License: Expat
+ Permission is hereby granted, free of charge, to any person obtaining
+ a copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+ BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+License: GPL-2
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License, v2, as
+ published by the Free Software Foundation
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program; if not, write to the Free Software Foundation, Inc.,
+ 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ .
+ On Debian systems, the complete text of the GNU General Public
+ License version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+License: BSD-3-clause
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+     * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+     * Neither the name of cereal nor the
+       names of its contributors may be used to endorse or promote products
+       derived from this software without specific prior written permission.
+ .
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL RANDOLPH VOORHIES OR SHANE GRANT BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
+zlib1g 1:1.3.dfsg-3.1ubuntu2.2
+Archive: https://security.ubuntu.com/ubuntu/pool/main/z/zlib/zlib1g_1.3.dfsg-3.1ubuntu2.2_amd64.deb
+Archive SHA-256: 84b9cf5752b29c9f92c27cd4c4ba9bbcc70b5ccf9b1b515421a28ae23212e273
+./usr/share/doc/zlib1g/copyright
+
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: zlib
+Upstream-Contact: zlib@gzip.org
+Source: http://zlib.net/
+Comment: This is the pre-packaged Debian Linux version of the zlib compression
+ library.  It was packaged by Michael Alan Dorman <mdorman@debian.org>
+ from sources originally retrieved from ftp.uu.net in the directory
+ /pub/archiving/zip/zlib as the file zlib-1.0.4.tar.gz.
+ .
+ The deflate format used by zlib was defined by Phil Katz. The deflate
+ and zlib specifications were written by Peter Deutsch. Thanks to all the
+ people who reported problems and suggested various improvements in zlib;
+ they are too numerous to cite here.
+Files-Excluded:
+ contrib/ada
+ contrib/amd64
+ contrib/asm686
+ contrib/blast
+ contrib/delphi
+ contrib/dotzlib
+ contrib/gcc_gvmat64
+ contrib/infback9
+ contrib/inflate86
+ contrib/iostream
+ contrib/iostream2
+ contrib/iostream3
+ contrib/masmx64
+ contrib/masmx86
+ contrib/pascal
+ contrib/puff
+ contrib/testzlib
+ contrib/untgz
+ contrib/vstudio
+ doc/rfc1950.txt
+ doc/rfc1951.txt
+ doc/rfc1952.txt
+ win32
+
+Files: *
+Copyright: 1995-2013 Jean-loup Gailly and Mark Adler
+License: Zlib
+
+Files: amiga/Makefile.pup
+Copyright: 1998 by Andreas R. Kleinert
+License: Zlib
+
+Files: contrib/minizip/*
+Copyright: 1998-2010 Gilles Vollant
+           2007-2008 Even Rouault
+           2009-2010 Mathias Svensson
+License: Zlib
+
+Files: debian/*
+Copyright: 2000-2017 Mark Brown
+License: Zlib
+
+License: Zlib
+ This software is provided 'as-is', without any express or implied
+ warranty.  In no event will the authors be held liable for any damages
+ arising from the use of this software.
+ .
+ Permission is granted to anyone to use this software for any purpose,
+ including commercial applications, and to alter it and redistribute it
+ freely, subject to the following restrictions:
+ .
+ 1. The origin of this software must not be misrepresented; you must not
+    claim that you wrote the original software. If you use this software
+    in a product, an acknowledgment in the product documentation would be
+    appreciated but is not required.
+ 2. Altered source versions must be plainly marked as such, and must not be
+    misrepresented as being the original software.
+ 3. This notice may not be removed or altered from any source distribution.
+ .
+ Jean-loup Gailly        Mark Adler
+ jloup@gzip.org          madler@alumni.caltech.edu
+ .
+ If you use the zlib library in a product, we would appreciate *not* receiving
+ lengthy legal documents to sign.  The sources are provided for free but without
+ warranty of any kind.  The library has been entirely written by Jean-loup
+ Gailly and Mark Adler; it does not include third-party code.
+ .
+ If you redistribute modified sources, we would appreciate that you include in
+ the file ChangeLog history information documenting your changes.  Please read
+ the FAQ for more information on the distribution of modified source versions.

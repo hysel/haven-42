@@ -13,6 +13,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from portable_runtime_components import (  # noqa: E402
     ComponentClassificationError,
     classify,
+    embedded_sbom_components,
 )
 
 
@@ -26,6 +27,14 @@ def hashed_record(path: str, digest: str) -> dict:
 
 def distribution_records() -> list[dict]:
     return [
+        hashed_record(
+            "licenses/PYINSTALLER-6.21.0-COPYING.txt",
+            "571f650c741ae1f6d8b689ef639b02c93297b84cef32db7c5211674d7b6fc094",
+        ),
+        hashed_record(
+            "licenses/UBUNTU-24.04-NATIVE-COPYRIGHTS.txt",
+            "b2d5a7874aa5a93400f347bd283fb2ce43d03c2e27d38e69e007d8eba9072cd0",
+        ),
         hashed_record(
             "LICENSE.txt",
             "da343e362fb1cc2b46c07e179936040dcfe8e92de4aa6d61f2bd4a43486f3ccc",
@@ -89,7 +98,12 @@ def main() -> int:
         "productionPromotionAllowed": False,
     }
     assert result["projectOwned"]["signingEligibleFiles"] == ["haven42.exe"]
-    assert result["distributionEvidence"]["fileCount"] == 6
+    embedded = result["projectOwned"]["embeddedRuntimeComponents"]
+    assert [item["id"] for item in embedded] == ["pyinstaller-bootloader", "pyinstaller-runtime-hooks"]
+    assert [item["license"] for item in embedded] == ["GPL-2.0-or-later WITH Bootloader-exception", "Apache-2.0"]
+    assert all(item["containerFiles"] == ["haven42.exe"] and item["version"] == "6.21.0" for item in embedded)
+    assert [item["licenses"][0]["expression"] for item in embedded_sbom_components(result)] == [item["license"] for item in embedded]
+    assert result["distributionEvidence"]["fileCount"] == 8
     assert result["distributionEvidence"]["signingEligible"] is False
     assert result["unclassifiedFiles"] == []
     groups = {item["id"]: item for item in result["runtimeComponents"]}
@@ -228,6 +242,20 @@ def main() -> int:
     assert {item["id"] for item in macos_result["runtimeComponents"]} == {
         "cpython", "openssl",
     }
+    passed += 1
+
+    for files, target in ((fixture, "windows-amd64"), (linux, "linux-x86_64"), (macos, "darwin-arm64")):
+        for version in ("0.4.0-alpha.1", "0.4.0-alpha.2"):
+            versioned = classify(files, target, "3.14.6", "3.5.7", app_version=version)
+            assert versioned["projectOwned"]["version"] == version
+            assert versioned["review"]["productionPromotionAllowed"] is False
+            passed += 1
+    try:
+        classify(fixture, "windows-amd64", "3.14.6", "3.5.7", app_version="unknown")
+    except ComponentClassificationError as error:
+        assert str(error) == "invalid-component-app-version"
+    else:
+        raise AssertionError("unknown application version accepted")
     passed += 1
 
     print(f"Portable runtime component self-test passed: {passed} cases.")

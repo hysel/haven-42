@@ -1,0 +1,10 @@
+{
+  "component": "PyInstaller",
+  "version": "6.21.0",
+  "upstreamFile": "https://github.com/pyinstaller/pyinstaller/blob/v6.21.0/COPYING.txt",
+  "extractedFrom": "hash-locked PyInstaller 6.21.0 wheel license metadata",
+  "originalSha256": "dcf75fdb959db1e3b41c0f8505069d2ece781b5ec6b3d0a4d30975cfc6580245",
+  "packagedFile": "PYINSTALLER-6.21.0-COPYING.txt",
+  "packagedSha256": "571f650c741ae1f6d8b689ef639b02c93297b84cef32db7c5211674d7b6fc094",
+  "normalization": "LF line endings, trailing line whitespace removed, one final newline; license wording unchanged"
+}

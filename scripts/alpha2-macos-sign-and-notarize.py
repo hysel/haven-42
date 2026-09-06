@@ -56,6 +56,25 @@ class SigningError(RuntimeError):
     """Raised when a release-signing boundary cannot be proved."""
 
 
+def prepare_signing_stage_marker(app: Path) -> None:
+    """Update only the validated staging copy, before its signature is created."""
+    evidence = app / "Contents" / "Resources" / "PortablePackage"
+    marker = evidence / "DEVELOPMENT-BUILD.txt"
+    notice = evidence / "THIRD-PARTY-NOTICES.txt"
+    if any(path.is_symlink() or not path.is_file() for path in (marker, notice)):
+        raise SigningError("signing-package-notices-missing")
+    text = notice.read_text(encoding="utf-8")
+    if "PyInstaller embeds its bootloader" not in text or "Every runtime component below is excluded" in text:
+        raise SigningError("signing-package-notices-stale")
+    marker.write_text(
+        "Haven 42 macOS signing-stage candidate.\n"
+        "Prepared for Developer ID signing and Apple notarization.\n"
+        "Verify the final archive against its platform-trust record and SHA-256.\n"
+        "This build-stage marker does not grant release publication authority.\n",
+        encoding="utf-8",
+    )
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as stream:
@@ -363,6 +382,7 @@ def execute(
     try:
         app = temporary / APP_NAME
         shutil.copytree(source_app, app, symlinks=True)
+        prepare_signing_stage_marker(app)
         files, frameworks = code_targets(app, runner=runner)
         for target in files:
             sign_target(target, identity, runner=runner)

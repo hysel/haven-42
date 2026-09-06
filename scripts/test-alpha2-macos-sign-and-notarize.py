@@ -48,6 +48,10 @@ def source_app(root: Path) -> Path:
     executable = app / "Contents" / "MacOS" / "haven42"
     executable.parent.mkdir(parents=True)
     executable.write_bytes(b"synthetic-mach-o")
+    evidence = app / "Contents" / "Resources" / "PortablePackage"
+    evidence.mkdir(parents=True)
+    (evidence / "DEVELOPMENT-BUILD.txt").write_text("unsigned development build\n", encoding="utf-8")
+    (evidence / "THIRD-PARTY-NOTICES.txt").write_text("PyInstaller embeds its bootloader\n", encoding="utf-8")
     with (app / "Contents" / "Info.plist").open("wb") as stream:
         plistlib.dump({
             "CFBundleIdentifier": "org.haven42.desktop",
@@ -73,6 +77,7 @@ class FakeRunner:
         self.visible_package_entries: set[str] | None = None
         self.visible_data_readme = False
         self.visible_logs_readme = False
+        self.signed_app_marker: str | None = None
 
     def __call__(self, command: list[str], **_: object) -> subprocess.CompletedProcess:
         self.commands.append(command)
@@ -85,6 +90,10 @@ class FakeRunner:
         if executable == "file":
             output = b"Mach-O 64-bit executable arm64\n" if command[-1].endswith("haven42") else b"XML document text\n"
             return completed(command, stdout=output)
+        if executable == "codesign" and "--force" in command and Path(command[-1]).name == MODULE.APP_NAME:
+            self.signed_app_marker = (
+                Path(command[-1]) / "Contents/Resources/PortablePackage/DEVELOPMENT-BUILD.txt"
+            ).read_text(encoding="utf-8")
         if executable == "codesign" and "-dv" in command:
             return completed(command, stderr=(
                 b"Authority=Developer ID Application: Haven 42 Test (ABCDE12345)\n"
@@ -107,6 +116,22 @@ class FakeRunner:
 
 
 class SigningTests(unittest.TestCase):
+    def test_signing_stage_marker_is_accurate_and_stale_notices_fail_closed(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            app = source_app(Path(temporary))
+            evidence = app / "Contents/Resources/PortablePackage"
+            MODULE.prepare_signing_stage_marker(app)
+            marker = (evidence / "DEVELOPMENT-BUILD.txt").read_text(encoding="utf-8")
+            self.assertIn("signing-stage candidate", marker)
+            self.assertNotIn("unsigned development build", marker)
+            self.assertIn("does not grant release publication authority", marker)
+            (evidence / "THIRD-PARTY-NOTICES.txt").write_text("old notice", encoding="utf-8")
+            with self.assertRaisesRegex(MODULE.SigningError, "signing-package-notices-stale"):
+                MODULE.prepare_signing_stage_marker(app)
+            (evidence / "THIRD-PARTY-NOTICES.txt").unlink()
+            with self.assertRaisesRegex(MODULE.SigningError, "signing-package-notices-missing"):
+                MODULE.prepare_signing_stage_marker(app)
+
     def test_visible_distribution_allows_logging_and_support_report(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -169,6 +194,11 @@ class SigningTests(unittest.TestCase):
                     runner=runner, platform_name="darwin",
                 )
             self.assertEqual(result["status"], "passed")
+            self.assertIn("signing-stage candidate", runner.signed_app_marker)
+            self.assertEqual(
+                (app / "Contents/Resources/PortablePackage/DEVELOPMENT-BUILD.txt").read_text(encoding="utf-8"),
+                "unsigned development build\n",
+            )
             self.assertTrue(result["platformTrust"]["developerIdSigned"])
             self.assertTrue(result["platformTrust"]["hardenedRuntime"])
             self.assertTrue(result["platformTrust"]["notarized"])

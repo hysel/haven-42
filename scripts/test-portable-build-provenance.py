@@ -395,6 +395,47 @@ def main() -> int:
     assert MODULE.LICENSE_EVIDENCE["OLLAMA-MIT-LICENSE.txt"] == (
         "5934ed2ce0d15154bcdb9c85203210abac0da4314af34081e36df4599f90b226"
     )
+    assert MODULE.LICENSE_EVIDENCE["PYINSTALLER-6.21.0-COPYING.txt"] == (
+        "571f650c741ae1f6d8b689ef639b02c93297b84cef32db7c5211674d7b6fc094"
+    )
+    notice = MODULE.third_party_notice([], {"runtimeComponents": []})
+    assert "PyInstaller embeds its bootloader" in notice
+    assert "PyInstaller runtime hook terms: Apache-2.0." in notice
+    assert "licenses/PYINSTALLER-6.21.0-COPYING.txt" in notice
+    assert "Every runtime component below is excluded" not in notice
+    verifier_spec = importlib.util.spec_from_file_location(
+        "portable_notice_verifier", ROOT / "scripts/verify-portable-development-artifacts.py",
+    )
+    verifier = importlib.util.module_from_spec(verifier_spec)
+    assert verifier_spec.loader is not None
+    verifier_spec.loader.exec_module(verifier)
+    verifier.verify_notice_text(notice, {"buildDependencies": []}, {"runtimeComponents": []})
+    for marker in (
+        "PyInstaller embeds its bootloader",
+        "PyInstaller runtime hook terms: Apache-2.0.",
+        "licenses/PYINSTALLER-6.21.0-COPYING.txt",
+    ):
+        try:
+            verifier.verify_notice_text(notice.replace(marker, "removed"), {"buildDependencies": []}, {"runtimeComponents": []})
+        except verifier.ArtifactVerificationError as error:
+            assert str(error) == "embedded-runtime-notice-missing"
+        else:
+            raise AssertionError("missing embedded runtime notice accepted")
+    try:
+        verifier.verify_notice_text(
+            notice + "Every runtime component below is excluded from Haven 42 signing scope.",
+            {"buildDependencies": []}, {"runtimeComponents": []},
+        )
+    except verifier.ArtifactVerificationError as error:
+        assert str(error) == "stale-platform-signing-notice"
+    else:
+        raise AssertionError("stale signing-scope notice accepted")
+    with tempfile.TemporaryDirectory() as temporary:
+        destination = Path(temporary)
+        MODULE.copy_package_license_evidence(destination)
+        assert MODULE.sha256(destination / "licenses/PYINSTALLER-6.21.0-COPYING.txt") == (
+            MODULE.LICENSE_EVIDENCE["PYINSTALLER-6.21.0-COPYING.txt"]
+        )
     passed += 1
 
     # Exercise the checked-out manifest, not only synthetic fixtures. This is
