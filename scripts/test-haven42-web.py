@@ -769,7 +769,10 @@ def main() -> int:
     finally:
         occupied.close()
     checks += 2
-    app = WEB.HavenWebServer(("127.0.0.1", 0), state)
+    with patch.object(socket, "getfqdn", side_effect=AssertionError("loopback startup must not resolve a hostname")) as reverse_lookup:
+        app = WEB.HavenWebServer(("127.0.0.1", 0), state)
+        reverse_lookup.assert_not_called()
+    assert app.server_name == "127.0.0.1" and app.server_port > 0
     app_thread = threading.Thread(target=app.serve_forever, daemon=True)
     app_thread.start()
     origin = app.expected_origin
