@@ -8,6 +8,7 @@ import json
 import os
 import stat
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -38,10 +39,17 @@ def read_json_stream(
     on_open: Callable[[Any], None],
     on_close: Callable[[], None],
     on_record: Callable[[dict[str, Any]], None] | None = None,
+    *,
+    last_record_only: bool = False,
 ) -> list[dict[str, Any]]:
-    """Read bounded newline-delimited JSON without proxies or redirects."""
+    """Read NDJSON with an aggregate bound, or a per-record bound for progress.
+
+    Progress mode retains only the latest record and enforces an elapsed deadline.
+    Ordinary response streams keep their existing aggregate limit.
+    """
     if (
-        isinstance(timeout, bool)
+        not isinstance(last_record_only, bool)
+        or isinstance(timeout, bool)
         or not isinstance(timeout, int)
         or timeout < 1
         or timeout > 3600
@@ -54,23 +62,32 @@ def read_json_stream(
     opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), _NoRedirect())
     records: list[dict[str, Any]] = []
     total_bytes = 0
+    deadline = time.monotonic() + timeout
     try:
         with opener.open(request, timeout=timeout) as response:
             on_open(response)
             content_length = response.headers.get("Content-Length")
             if content_length is not None:
                 try:
-                    if int(content_length) > maximum_bytes:
-                        raise ProviderSecurityError("provider-response-too-large")
+                    declared_bytes = int(content_length)
                 except ValueError as error:
                     raise ProviderSecurityError("invalid-provider-content-length") from error
+                if declared_bytes < 0:
+                    raise ProviderSecurityError("invalid-provider-content-length")
+                if not last_record_only and declared_bytes > maximum_bytes:
+                    raise ProviderSecurityError("provider-response-too-large")
             while True:
                 if cancelled():
                     raise ProviderRequestCancelled("provider-request-cancelled")
-                line = response.readline(maximum_bytes - total_bytes + 1)
+                if last_record_only and time.monotonic() >= deadline:
+                    raise TimeoutError("provider-stream-deadline-exceeded")
+                remaining = maximum_bytes if last_record_only else maximum_bytes - total_bytes
+                line = response.readline(remaining + 1)
+                if last_record_only and time.monotonic() >= deadline:
+                    raise TimeoutError("provider-stream-deadline-exceeded")
                 if not line:
                     break
-                total_bytes += len(line)
+                total_bytes = len(line) if last_record_only else total_bytes + len(line)
                 if total_bytes > maximum_bytes:
                     raise ProviderSecurityError("provider-response-too-large")
                 if not line.strip():
@@ -81,7 +98,10 @@ def read_json_stream(
                     raise ProviderSecurityError("invalid-provider-json") from error
                 if not isinstance(value, dict):
                     raise ProviderSecurityError("provider-json-root-must-be-object")
-                records.append(value)
+                if last_record_only:
+                    records[:] = [value]
+                else:
+                    records.append(value)
                 if on_record is not None:
                     on_record(value)
     except urllib.error.HTTPError as error:

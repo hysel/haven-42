@@ -6,6 +6,7 @@ from __future__ import annotations
 import atexit
 import base64
 import importlib.util
+import io
 import json
 import os
 import re
@@ -277,6 +278,67 @@ def contrast_ratio(foreground: str, background: str) -> float:
 
 def main() -> int:
     checks = 0
+
+    # Real download consumer: progress may exceed 8 MiB without retaining history.
+    import provider_security as security
+    request = urllib.request.Request("http://127.0.0.1:11434/api/pull")
+    class ProgressResponse(io.BytesIO):
+        def __init__(self, data, headers=None):
+            super().__init__(data)
+            self.headers = headers or {}
+
+    line = json.dumps({"status": "pulling", "padding": "x" * 1000}).encode() + b"\n"
+    data = line * 9000 + b'{"status":"success"}\n'
+    assert len(data) > 8 * 1024 * 1024
+    seen = [0]
+    def progress(record):
+        seen[0] += 1
+    response = ProgressResponse(data, {"Content-Length": str(len(data))})
+    with patch.object(security.urllib.request, "build_opener") as opener:
+        opener.return_value.open.return_value = response
+        result = WEB.install_ollama_model(
+            "http://127.0.0.1:11434", "test:tiny",
+            WEB.ProviderAuthentication("none", None, None), progress,
+        )
+    assert result == {"status": "success"} and seen[0] == 9001
+    assert response.closed
+    checks += 1
+
+    def read_progress(data, **kwargs):
+        response = ProgressResponse(data)
+        closed = []
+        with patch.object(security.urllib.request, "build_opener") as opener:
+            opener.return_value.open.return_value = response
+            try:
+                return security.read_json_stream(
+                    request, 60, 64 * 1024, lambda: False,
+                    lambda _: None, lambda: closed.append(True), **kwargs,
+                )
+            finally:
+                assert response.closed and closed == [True]
+    assert read_progress(data, last_record_only=True) == [{"status": "success"}]
+    for payload, options, expected in [
+        (data, {}, "provider-response-too-large"),
+        (b"x" * (64 * 1024 + 1), {"last_record_only": True}, "provider-response-too-large"),
+        (b"not json\n", {"last_record_only": True}, "invalid-provider-json"),
+        (b"[]\n", {"last_record_only": True}, "provider-json-root-must-be-object"),
+        (b"", {"last_record_only": True}, "invalid-provider-json"),
+    ]:
+        try:
+            read_progress(payload, **options)
+        except security.ProviderSecurityError as error:
+            assert str(error) == expected
+        else:
+            raise AssertionError(expected)
+        checks += 1
+    with patch.object(security.time, "monotonic", side_effect=[0, 61]):
+        try:
+            read_progress(b'{"status":"success"}\n', last_record_only=True)
+        except TimeoutError:
+            pass
+        else:
+            raise AssertionError("Progress deadline not enforced")
+    checks += 1
 
     private_error = "synthetic private provider text /private/test-path token=not-a-real-secret"
     cases = [
