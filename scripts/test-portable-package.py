@@ -8,12 +8,14 @@ import json
 from pathlib import Path
 import re
 import os
+import queue
 import shutil
 import socket
 import stat
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -69,6 +71,7 @@ def launch(
     command: list[str],
     cwd: Path = ROOT,
     environment: dict[str, str] | None = None,
+    startup_timeout: float = 15,
 ) -> tuple[subprocess.Popen[str], str]:
     process = subprocess.Popen(
         command + ["--port", "0", "--no-open"],
@@ -83,16 +86,41 @@ def launch(
             **(environment or {}),
         },
     )
-    deadline = time.monotonic() + 15
-    while time.monotonic() < deadline:
-        line = process.stdout.readline() if process.stdout else ""
-        match = re.search(r"http://127\.0\.0\.1:\d+", line)
-        if match:
-            return process, match.group(0)
-        if process.poll() is not None:
-            raise AssertionError(f"runtime exited early: {line}")
-    process.kill()
-    raise AssertionError("runtime did not announce its loopback URL")
+    # Pipe readline can block forever (including on a partial line). Read on a
+    # daemon thread so the deadline works on Windows pipes as well as POSIX.
+    lines: queue.Queue[str | None] = queue.Queue()
+
+    def read_output() -> None:
+        assert process.stdout is not None
+        try:
+            for line in process.stdout:
+                lines.put(line)
+        finally:
+            lines.put(None)
+            process.stdout.close()
+
+    reader = threading.Thread(target=read_output, daemon=True)
+    reader.start()
+    deadline = time.monotonic() + startup_timeout
+    try:
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise AssertionError("runtime did not announce its loopback URL")
+            try:
+                line = lines.get(timeout=remaining)
+            except queue.Empty:
+                raise AssertionError("runtime did not announce its loopback URL") from None
+            if line is None:
+                raise AssertionError("runtime exited before announcing its loopback URL")
+            match = re.search(r"http://127\.0\.0\.1:\d+", line)
+            if match:
+                return process, match.group(0)
+    except BaseException:
+        # Reap our child even on assertion failure or Ctrl-C.
+        terminate(process)
+        reader.join(timeout=2)
+        raise
 
 
 def terminate(process: subprocess.Popen[str]) -> None:
@@ -433,12 +461,36 @@ def probe(
 
 def assert_integrity_failure(executable: Path, mutate) -> None:
     package_dir, executable_relative, internal_relative = packaged_layout(executable)
+    signed_app = sys.platform == "darwin" and package_dir.suffix == ".app"
+    if signed_app:
+        # Verify the original before testing rejection: a pre-existing broken
+        # signature must never make the negative test pass.
+        subprocess.run(
+            ["/usr/bin/codesign", "--verify", "--deep", "--strict", str(package_dir)],
+            check=True, capture_output=True, text=True, timeout=15,
+        )
     with tempfile.TemporaryDirectory(prefix="haven42-hostile-package-") as temporary:
         copied = Path(temporary) / package_dir.name
         shutil.copytree(package_dir, copied, symlinks=True)
         copied_executable = copied / executable_relative
         internal = copied / internal_relative
+        if signed_app:
+            subprocess.run(
+                ["/usr/bin/codesign", "--verify", "--deep", "--strict", str(copied)],
+                check=True, capture_output=True, text=True, timeout=15,
+            )
         mutate(internal)
+        if signed_app:
+            # macOS can stop modified signed code in dyld before our resource
+            # verifier executes. Require explicit sealed-resource rejection;
+            # never interpret a launch timeout as successful enforcement.
+            rejected = subprocess.run(
+                ["/usr/bin/codesign", "--verify", "--deep", "--strict", str(copied)],
+                capture_output=True, text=True, timeout=15,
+            )
+            assert rejected.returncode != 0, "tampered signed app was accepted"
+            assert "a sealed resource is missing or invalid" in rejected.stderr, rejected.stderr
+            return
         result = subprocess.run(
             [str(copied_executable), "--port", "0", "--no-open"],
             cwd=copied,
@@ -513,7 +565,7 @@ def test_relocation_and_hostile_environment(
     package_dir, executable_relative, _ = packaged_layout(executable)
     with tempfile.TemporaryDirectory(prefix="haven42-relocated-package-") as temporary:
         relocated = Path(temporary) / "directory with spaces" / package_dir.name
-        shutil.copytree(package_dir, relocated)
+        shutil.copytree(package_dir, relocated, symlinks=True)
         relocated_executable = relocated / executable_relative
         actual = probe(
             [str(relocated_executable)],
@@ -545,7 +597,7 @@ def test_read_only_package(
     package_dir, executable_relative, _ = packaged_layout(executable)
     with tempfile.TemporaryDirectory(prefix="haven42-read-only-package-") as temporary:
         copied = Path(temporary) / package_dir.name
-        shutil.copytree(package_dir, copied)
+        shutil.copytree(package_dir, copied, symlinks=True)
         copied_executable = copied / executable_relative
         try:
             for path in copied.rglob("*"):
@@ -621,15 +673,84 @@ def test_existing_instance_reopen(executable: Path) -> None:
         terminate(process)
 
 
+def test_harness() -> None:
+    """Exercise deadline/cleanup and framework copying independently of an app."""
+    from unittest.mock import patch
+
+    original_popen = subprocess.Popen
+    children = []
+
+    def record_child(*args, **kwargs):
+        child = original_popen(*args, **kwargs)
+        children.append(child)
+        return child
+
+    with patch.object(subprocess, "Popen", side_effect=record_child):
+        for code in (
+            "import time; time.sleep(30)",
+            "import sys,time; sys.stdout.write('partial'); sys.stdout.flush(); time.sleep(30)",
+            "raise SystemExit(1)",
+        ):
+            started = time.monotonic()
+            try:
+                launch([sys.executable, "-c", code], startup_timeout=0.5)
+            except AssertionError as error:
+                assert "loopback URL" in str(error)
+            else:
+                raise AssertionError("unannounced child was accepted")
+            assert time.monotonic() - started < 5, "startup deadline was not bounded"
+            assert children[-1].poll() is not None, "failed child was not reaped"
+        child, origin = launch([
+            sys.executable, "-c",
+            "import time; print('http://127.0.0.1:12345', flush=True); time.sleep(30)",
+        ])
+        try:
+            assert origin == "http://127.0.0.1:12345"
+        finally:
+            terminate(child)
+
+    if sys.platform != "win32":
+        with tempfile.TemporaryDirectory(prefix="haven42-framework-copy-test-") as temporary:
+            app = Path(temporary) / "Haven 42.app"
+            executable = app / "Contents/MacOS/haven42"
+            executable.parent.mkdir(parents=True)
+            executable.write_text("test fixture", encoding="utf-8")
+            framework = app / "Contents/Frameworks/Python.framework"
+            version = framework / "Versions/3.14"
+            version.mkdir(parents=True)
+            (version / "Python").write_text("framework fixture", encoding="utf-8")
+            (framework / "Versions/Current").symlink_to("3.14", target_is_directory=True)
+            (framework / "Python").symlink_to("Versions/Current/Python")
+
+            def verify_copy(command, *args, **kwargs):
+                copied_app, _, _ = packaged_layout(Path(command[0]))
+                copied_framework = copied_app / "Contents/Frameworks/Python.framework"
+                assert (copied_framework / "Versions/Current").is_symlink()
+                assert (copied_framework / "Python").is_symlink()
+                assert os.readlink(copied_framework / "Python") == "Versions/Current/Python"
+                return {}
+
+            with patch.dict(globals(), probe=verify_copy):
+                test_relocation_and_hostile_environment(executable, {}, None)
+                test_read_only_package(executable, {}, None)
+    print("Portable test harness deadline, child cleanup and framework-copy checks passed.")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--executable", required=True)
+    parser.add_argument("--executable")
+    parser.add_argument("--self-test", action="store_true")
     parser.add_argument(
         "--expected-version",
         choices=("0.4.0-alpha.1", "0.4.0-alpha.2"),
         help="Require this embedded packaged release identity.",
     )
     args = parser.parse_args()
+    if not args.executable and not args.self_test:
+        parser.error("--executable is required unless --self-test is selected")
+    test_harness()
+    if args.self_test:
+        return 0
     source_command = [
         sys.executable,
         str(ROOT / "scripts/run-haven42-web-browser-test.py"),
