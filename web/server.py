@@ -1202,6 +1202,30 @@ def _provider_json(
     return read_json(request, timeout, maximum_bytes)
 
 
+def model_download_failure_code(error: BaseException) -> str:
+    """Classify failures without persisting provider text, paths or credentials."""
+    if isinstance(error, urllib.error.URLError) and isinstance(error.reason, BaseException):
+        error = error.reason
+    if isinstance(error, TimeoutError):
+        return "MODEL_DOWNLOAD_TIMEOUT"
+    if isinstance(error, ConnectionError):
+        return "MODEL_DOWNLOAD_CONNECTION_LOST"
+    if isinstance(error, ProviderSecurityError):
+        message = str(error)
+        known = {
+            "provider-response-too-large": "MODEL_DOWNLOAD_PROGRESS_LIMIT",
+            "invalid-provider-json": "MODEL_DOWNLOAD_INVALID_PROGRESS",
+            "provider-json-root-must-be-object": "MODEL_DOWNLOAD_INVALID_PROGRESS",
+            "ollama-model-install-incomplete": "MODEL_DOWNLOAD_INCOMPLETE",
+        }
+        if message in known:
+            return known[message]
+        if re.fullmatch(r"provider-http-error-[1-5][0-9]{2}", message):
+            return "MODEL_DOWNLOAD_PROVIDER_HTTP_ERROR"
+        return "MODEL_DOWNLOAD_PROVIDER_REJECTED"
+    return "MODEL_DOWNLOAD_IO_FAILED"
+
+
 def install_ollama_model(
     base_url: str,
     model: str,
@@ -1575,7 +1599,7 @@ class HavenState:
 
     def execute_external_web_search(self, approval_token: object) -> dict[str, Any]:
         approval = self._consume_research_approval(approval_token, "web")
-        self.diagnostics.record("research", "EXTERNAL_WEB_SEARCH_APPROVED", "completed")
+        self.diagnostics.record("provider", "EXTERNAL_WEB_SEARCH_APPROVED", "completed")
         return {
             "schemaVersion": 1,
             "kind": "external-web-search-navigation",
@@ -1677,7 +1701,7 @@ class HavenState:
                 approval["query"], approval["apiKey"], 5,
             )
         except web_research_general.GeneralResearchError as error:
-            self.diagnostics.record("research", "GENERAL_WEB_SEARCH_FAILED", "failed")
+            self.diagnostics.record("provider", "GENERAL_WEB_SEARCH_FAILED", "failed")
             raise WebRequestError(f"research-{error}", HTTPStatus.BAD_GATEWAY) from error
         finally:
             approval["apiKey"] = ""
@@ -1781,14 +1805,14 @@ class HavenState:
                 authentication=authentication,
             )
         except (OSError, ProviderSecurityError) as error:
-            self.diagnostics.record("research", "GENERAL_WEB_SYNTHESIS_FAILED", "failed")
+            self.diagnostics.record("provider", "GENERAL_WEB_SYNTHESIS_FAILED", "failed")
             raise WebRequestError("research-synthesis-failed", HTTPStatus.BAD_GATEWAY) from error
         message = response.get("message") if isinstance(response, dict) else None
         claims = self._validate_general_research_claims(
             message.get("content") if isinstance(message, dict) else None,
             citations,
         )
-        self.diagnostics.record("research", "GENERAL_WEB_RESEARCH_COMPLETED", "completed")
+        self.diagnostics.record("provider", "GENERAL_WEB_RESEARCH_COMPLETED", "completed")
         return {
             "schemaVersion": 1,
             "kind": "general-web-research-answer",
@@ -1827,7 +1851,7 @@ class HavenState:
             web_research_query.NativeQueryError,
             web_research_query.ADAPTER.QueryAdapterError,
         ) as error:
-            self.diagnostics.record("research", "WEB_RESEARCH_QUERY_FAILED", "failed")
+            self.diagnostics.record("provider", "WEB_RESEARCH_QUERY_FAILED", "failed")
             raise WebRequestError(f"research-{error}", HTTPStatus.BAD_GATEWAY) from error
         expected_transport = {
             "providerId": "wikipedia-query",
@@ -1859,7 +1883,7 @@ class HavenState:
             or raw.get("pageRetrievalAllowed") is not False
             or raw.get("transport") != expected_transport
         ):
-            self.diagnostics.record("research", "WEB_RESEARCH_QUERY_RESPONSE_REJECTED", "failed")
+            self.diagnostics.record("provider", "WEB_RESEARCH_QUERY_RESPONSE_REJECTED", "failed")
             raise WebRequestError("research-provider-response-invalid", HTTPStatus.BAD_GATEWAY)
         citations = [self._research_citation(item) for item in raw["results"]]
         if len({item["citationId"] for item in citations}) != len(citations):
@@ -1938,7 +1962,7 @@ class HavenState:
             web_research_query.NativeQueryError,
             web_research_query.ADAPTER.QueryAdapterError,
         ) as error:
-            self.diagnostics.record("research", "WEB_RESEARCH_PAGE_FAILED", "failed")
+            self.diagnostics.record("provider", "WEB_RESEARCH_PAGE_FAILED", "failed")
             raise WebRequestError(f"research-{error}", HTTPStatus.BAD_GATEWAY) from error
         segments = raw.get("segments") if isinstance(raw, dict) else None
         if (
@@ -1988,7 +2012,7 @@ class HavenState:
             or raw.get("runtimeAdmissionGranted") is not False
             or raw.get("packageAdmissionGranted") is not False
         ):
-            self.diagnostics.record("research", "WEB_RESEARCH_PAGE_RESPONSE_REJECTED", "failed")
+            self.diagnostics.record("provider", "WEB_RESEARCH_PAGE_RESPONSE_REJECTED", "failed")
             raise WebRequestError("research-provider-response-invalid", HTTPStatus.BAD_GATEWAY)
         return {
             "schemaVersion": 1,
@@ -2364,7 +2388,7 @@ class HavenState:
                 })
             self._update_model_install_progress(approval_token, **changes)
 
-        self.diagnostics.record("models", "MODEL_DOWNLOAD_STARTED", "started")
+        self.diagnostics.record("provider", "MODEL_DOWNLOAD_STARTED", "started")
         try:
             with self.operation_lock:
                 self.model_install_provider(base_url, model, authentication, update_from_provider)
@@ -2379,14 +2403,15 @@ class HavenState:
             self._update_model_install_progress(
                 approval_token, phase="failed", status="Model download stopped", terminal=True,
             )
-            self.diagnostics.record("models", "MODEL_DOWNLOAD_FAILED", "failed")
+            self.diagnostics.record("provider", "MODEL_DOWNLOAD_FAILED", "failed")
+            self.diagnostics.record("provider", model_download_failure_code(error), "failed")
             raise WebRequestError("ollama-model-install-failed", HTTPStatus.BAD_GATEWAY) from error
         records = tags.get("models", [])
         if not isinstance(records, list) or len(records) > MAX_DISCOVERED_MODELS:
             self._update_model_install_progress(
                 approval_token, phase="failed", status="Installed model verification failed", terminal=True,
             )
-            self.diagnostics.record("models", "MODEL_DOWNLOAD_VERIFICATION_FAILED", "failed")
+            self.diagnostics.record("provider", "MODEL_DOWNLOAD_VERIFICATION_FAILED", "failed")
             raise WebRequestError("invalid-ollama-model-list", HTTPStatus.BAD_GATEWAY)
         model_digests: dict[str, str] = {}
         for item in records:
@@ -2403,7 +2428,7 @@ class HavenState:
             self._update_model_install_progress(
                 approval_token, phase="failed", status="Ollama did not report the installed model", terminal=True,
             )
-            self.diagnostics.record("models", "MODEL_DOWNLOAD_VERIFICATION_FAILED", "failed")
+            self.diagnostics.record("provider", "MODEL_DOWNLOAD_VERIFICATION_FAILED", "failed")
             raise WebRequestError("ollama-model-install-verification-failed", HTTPStatus.BAD_GATEWAY)
         with self.lock:
             self.models = tuple(sorted(installed))
@@ -2418,7 +2443,7 @@ class HavenState:
             status="Model downloaded and verified",
             terminal=True,
         )
-        self.diagnostics.record("models", "MODEL_DOWNLOAD_COMPLETED", "completed")
+        self.diagnostics.record("provider", "MODEL_DOWNLOAD_COMPLETED", "completed")
         return {
             "schemaVersion": 1,
             "kind": "model-install-result",
@@ -4280,11 +4305,11 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                     result = self.server.state.check_software_updates()
                 except SoftwareUpdateError as error:
                     self.server.state.diagnostics.record(
-                        "software-update", "SOFTWARE_UPDATE_CHECK_FAILED", "failed",
+                        "provider", "SOFTWARE_UPDATE_CHECK_FAILED", "failed",
                     )
                     raise WebRequestError(str(error), HTTPStatus.BAD_GATEWAY) from error
                 self.server.state.diagnostics.record(
-                    "software-update", "SOFTWARE_UPDATE_CHECK_COMPLETED", "completed",
+                    "provider", "SOFTWARE_UPDATE_CHECK_COMPLETED", "completed",
                 )
                 self._send_json(HTTPStatus.OK, result)
                 return
@@ -4317,7 +4342,7 @@ class HavenRequestHandler(BaseHTTPRequestHandler):
                 except ManagedRuntimeUpdateError as error:
                     raise WebRequestError(str(error), HTTPStatus.CONFLICT) from error
                 self.server.state.diagnostics.record(
-                    "software-update", "SOFTWARE_UPDATE_INSTALL_STARTED", "started",
+                    "provider", "SOFTWARE_UPDATE_INSTALL_STARTED", "started",
                 )
                 self._send_json(HTTPStatus.ACCEPTED, result)
                 return

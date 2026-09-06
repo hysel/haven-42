@@ -274,10 +274,13 @@ def package_visible_distribution(app: Path, archive: Path, *, runner: Callable) 
     for directory_name in (DATA_DIRECTORY_NAME, LOG_DIRECTORY_NAME):
         directory = package_root / directory_name
         directory.mkdir(mode=0o700)
-        (directory / "README.txt").write_text(
-            "Haven 42 keeps its own files in this visible folder.\n",
-            encoding="utf-8",
-        )
+        # The logger adopts only an empty directory or a marked diagnostic root.
+        # A packaged README would make this look like an unowned user directory.
+        if directory_name == DATA_DIRECTORY_NAME:
+            (directory / "README.txt").write_text(
+                "Haven 42 keeps its own files in this visible folder.\n",
+                encoding="utf-8",
+            )
     packed = invoke([
         str(DITTO), "-c", "-k", "--keepParent", "--sequesterRsrc",
         str(package_root), str(archive),
