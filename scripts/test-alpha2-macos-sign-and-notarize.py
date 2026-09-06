@@ -8,12 +8,15 @@ import json
 from pathlib import Path
 import plistlib
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT / "scripts"))
+from diagnostic_logging import DiagnosticLogger
 SCRIPT = ROOT / "scripts" / "alpha2-macos-sign-and-notarize.py"
 BUILDER_SCRIPT = ROOT / "scripts" / "build-macos-development-app.py"
 VALIDATOR_SCRIPT = ROOT / "scripts" / "validate-macos-development-app.py"
@@ -104,6 +107,27 @@ class FakeRunner:
 
 
 class SigningTests(unittest.TestCase):
+    def test_visible_distribution_allows_logging_and_support_report(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            app = source_app(root / "source")
+            packaged = MODULE.package_visible_distribution(
+                app, root / "candidate.zip", runner=FakeRunner(),
+            )
+            logs = packaged.parent / "Haven42-Logs"
+            self.assertEqual(list(logs.iterdir()), [])
+            logger = DiagnosticLogger("0.4.0-alpha.2", logs)
+            try:
+                self.assertTrue(logger.summary()["available"])
+                self.assertGreater(logger.summary()["eventCount"], 0)
+                report = logger.save_support_report()
+                self.assertTrue(report["saved"])
+                saved = json.loads((logs / "Reports" / report["fileName"]).read_text())
+                self.assertFalse(saved["automaticUpload"])
+                self.assertFalse(saved["containsUserContent"])
+            finally:
+                logger.close()
+
     def test_source_link_contract_matches_builder_and_validator(self) -> None:
         self.assertEqual(MODULE.SOURCE_APP_LINKS, BUILDER.APP_LINKS)
         self.assertEqual(MODULE.SOURCE_APP_LINKS, VALIDATOR.APP_LINKS)
@@ -161,7 +185,7 @@ class SigningTests(unittest.TestCase):
                 {"Haven 42.app", "Haven42-Data", "Haven42-Logs"},
             )
             self.assertTrue(runner.visible_data_readme)
-            self.assertTrue(runner.visible_logs_readme)
+            self.assertFalse(runner.visible_logs_readme)
             self.assertTrue((output / "haven42-darwin-arm64-developer-id-notarized.zip").is_file())
             self.assertTrue((output / "SHA256SUMS").is_file())
             self.assertEqual(

@@ -277,6 +277,33 @@ def contrast_ratio(foreground: str, background: str) -> float:
 def main() -> int:
     checks = 0
 
+    private_error = "synthetic private provider text /private/test-path token=not-a-real-secret"
+    cases = [
+        (TimeoutError(private_error), "MODEL_DOWNLOAD_TIMEOUT"),
+        (urllib.error.URLError(TimeoutError(private_error)), "MODEL_DOWNLOAD_TIMEOUT"),
+        (ConnectionResetError(private_error), "MODEL_DOWNLOAD_CONNECTION_LOST"),
+        (WEB.ProviderSecurityError("provider-response-too-large"), "MODEL_DOWNLOAD_PROGRESS_LIMIT"),
+        (WEB.ProviderSecurityError("invalid-provider-json"), "MODEL_DOWNLOAD_INVALID_PROGRESS"),
+        (WEB.ProviderSecurityError("provider-json-root-must-be-object"), "MODEL_DOWNLOAD_INVALID_PROGRESS"),
+        (WEB.ProviderSecurityError("ollama-model-install-incomplete"), "MODEL_DOWNLOAD_INCOMPLETE"),
+        (WEB.ProviderSecurityError("provider-http-error-503"), "MODEL_DOWNLOAD_PROVIDER_HTTP_ERROR"),
+        (WEB.ProviderSecurityError(private_error), "MODEL_DOWNLOAD_PROVIDER_REJECTED"),
+        (OSError(private_error), "MODEL_DOWNLOAD_IO_FAILED"),
+    ]
+    with tempfile.TemporaryDirectory(prefix="haven42-download-diagnostics-") as temporary:
+        logger = WEB.DiagnosticLogger("0.4.0-alpha.2", Path(temporary) / "Haven42-Logs")
+        try:
+            for error, expected in cases:
+                code = WEB.model_download_failure_code(error)
+                assert code == expected
+                assert logger.record("provider", code, "failed")
+            report = logger.save_support_report()
+            text = (logger.root / "Reports" / report["fileName"]).read_text()
+            assert private_error not in text and "not-a-real-secret" not in text
+            assert "MODEL_DOWNLOAD_PROGRESS_LIMIT" in text
+        finally:
+            logger.close()
+
     with tempfile.TemporaryDirectory(prefix="haven42-macos-resource-root-") as temporary:
         contents = Path(temporary) / "Haven 42.app" / "Contents"
         frameworks = contents / "Frameworks"

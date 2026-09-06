@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import importlib.util
+import ast
 import json
 import os
 import stat
@@ -216,4 +217,30 @@ def main() -> int:
 
 
 if __name__ == "__main__":
+    # Exercise the server's literal event contracts through the real logger.
+    # Unknown categories are intentionally rejected rather than persisted.
+    tree = ast.parse((ROOT / "web/server.py").read_text(encoding="utf-8"))
+    with tempfile.TemporaryDirectory(prefix="haven42-diagnostic-call-contract-") as raw:
+        logger = LOGS.DiagnosticLogger("0.4.0-alpha.2", log_root(Path(raw)))
+        count = 0
+        try:
+            for node in ast.walk(tree):
+                if (
+                    isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "record"
+                    and isinstance(node.func.value, ast.Attribute)
+                    and node.func.value.attr == "diagnostics"
+                    and len(node.args) == 3
+                    and all(isinstance(arg, ast.Constant) for arg in node.args)
+                ):
+                    values = [arg.value for arg in node.args]
+                    assert logger.record(*values), f"Rejected server diagnostic at line {node.lineno}: {values}"
+                    count += 1
+            assert count > 0
+            report = logger.save_support_report()
+            events = json.loads((logger.root / "Reports" / report["fileName"]).read_text())["events"]
+            assert any(event["code"] == "MODEL_DOWNLOAD_FAILED" for event in events)
+        finally:
+            logger.close()
+    print(f"Server diagnostic call contracts passed: {count} calls.")
     raise SystemExit(main())
