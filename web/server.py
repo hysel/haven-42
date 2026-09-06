@@ -33,6 +33,7 @@ import uuid
 import zlib
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from socketserver import TCPServer
 from pathlib import Path
 from typing import Any, Callable
 
@@ -3983,6 +3984,13 @@ class HavenWebServer(ThreadingHTTPServer):
     # address immediately instead of waiting for retired TCP connections.
     allow_reuse_address = True
     request_queue_size = 32
+
+    def server_bind(self) -> None:
+        # HTTPServer.server_bind performs getfqdn, which can block on the host
+        # resolver even for loopback. This server only accepts a fixed numeric
+        # loopback address; no hostname lookup is needed or authoritative.
+        TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address[:2]
 
     def __init__(self, address: tuple[str, int], state: HavenState):
         if address[0] != "127.0.0.1":
