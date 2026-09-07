@@ -18,6 +18,7 @@ PROJECT_FILES = {
     "_internal/web/static/styles.css",
     "_internal/config/text-capability-model-recommendations.json",
     "_internal/config/hardware-qualified-chat-models.json",
+    "_internal/config/model-size-catalog.json",
     "_internal/examples/apple-m4-16gib-model-qualification.md",
     "_internal/examples/amd-rx6800-linux-model-qualification.md",
     "_internal/examples/amd-rx6800-windows-model-qualification.md",

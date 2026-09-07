@@ -361,7 +361,11 @@ def main() -> int:
     attributes_text = (ROOT / ".gitattributes").read_text(encoding="utf-8")
     assert "LICENSE text eol=lf" in attributes_text.splitlines()
     assert "examples/*.md text eol=lf" in attributes_text.splitlines()
+    from portable_runtime_components import PROJECT_FILES
     for relative in MODULE.RESOURCE_PATHS:
+        assert f"_internal/{relative}" in PROJECT_FILES, (
+            f"protected resource is missing from first-party classification: {relative}"
+        )
         assert f'("{relative}",' in spec_text, (
             f"protected resource is missing from the PyInstaller data list: {relative}"
         )
