@@ -346,7 +346,25 @@ def evaluate(value: Any) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--contract", default=str(DEFAULT_CONTRACT))
+    parser.add_argument("--final-record", help="Reviewed final evidence; does not mutate the historical contract")
+    parser.add_argument("--artifact-directory", type=Path, help="Exact final archives, required to permit publication")
     args = parser.parse_args()
+    if args.final_record:
+        from alpha2_final_release import evaluate_final
+        # Still validate the historical scope/runtime boundary before evaluating
+        # a final record. A final record cannot silently redefine release scope.
+        evaluate(json.loads(DEFAULT_CONTRACT.read_text(encoding="utf-8")))
+        final = Path(args.final_record).resolve()
+        if not final.is_relative_to(ROOT.resolve()):
+            parser.error("final record must remain inside the repository")
+        try:
+            report = evaluate_final(json.loads(final.read_text(encoding="utf-8")), ROOT, args.artifact_directory)
+        except (OSError, ValueError) as error:
+            parser.error(str(error))
+        print(json.dumps(report, indent=2, sort_keys=True))
+        return 0 if report["PublicationAllowed"] else 1
+    if args.artifact_directory:
+        parser.error("--artifact-directory requires --final-record")
     path = Path(args.contract).resolve()
     try:
         path.relative_to(ROOT.resolve())

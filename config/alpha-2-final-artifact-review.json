@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "haven42-alpha2-final-artifact-review",
+  "sourceCommit": "44aa95e193bf9f021230304124747683c570d704",
+  "reviewDate": "2026-09-07",
+  "artifactSha256": {
+    "windows-x64": "4764662ddee3ed7d3ae9348f8202482f6257abb7044f01624a6ae3752ff3a516",
+    "linux-x64": "9c596ca438ea6c212aee7dac84e6a18ea48d1f7be9d47d9a8a5985dc2d995248",
+    "macos-arm64": "5892ea6285c00ebfd4a4c4a467542cd949512cf5c2a02025dd645685ac3c295a"
+  },
+  "hostedRuns": {
+    "validation": "https://github.com/hysel/haven-42/actions/runs/34068395617",
+    "codeql": "https://github.com/hysel/haven-42/actions/runs/34068395551",
+    "unsignedPair": "https://github.com/hysel/haven-42/actions/runs/34068423033",
+    "unsignedMac": "https://github.com/hysel/haven-42/actions/runs/34068424441",
+    "windowsSigning": "https://github.com/hysel/haven-42/actions/runs/34069553351"
+  },
+  "observations": [
+    "All listed hosted runs completed successfully on the selected source commit.",
+    "Windows signed archive and launcher hashes matched the signing result after download; local Authenticode status Valid, expected publisher matched, trusted timestamp present.",
+    "The signed Windows executable passed the portable parity, relocation, startup, recovery, shutdown and hostile integrity test harness.",
+    "Linux candidate verifier passed; all eight reviewed Ubuntu native library hashes matched the upstream comparison record.",
+    "Physical Mac unsigned package parity and lifecycle tests passed. Final signing result reported Developer ID signing, hardened runtime, notarization, stapling and Gatekeeper admission. Final archive and evidence checksums matched after transfer.",
+    "These observations do not establish final-candidate managed model setup, Chat, Write, Summarize and unload on every primary hardware/OS cell. Historical qualification is not inherited."
+  ],
+  "ownerDecisions": {
+    "publicationRequested": true,
+    "releaseControlReviewApproved": true,
+    "remainingManualAccessibility": "deferred-not-run",
+    "knownRegressionsWaived": false
+  },
+  "releasePublished": false,
+  "productionReady": false
+}
