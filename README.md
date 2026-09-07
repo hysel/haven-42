@@ -28,7 +28,7 @@ before downloading anything.
 > Incomplete validation coverage and deferred manual accessibility testing are
 > disclosed in the release notes; this is not a production-ready release.
 
-Version `0.3.0` is the current stable release line. See the
+See the
 [code signing policy](CODE-SIGNING-POLICY.md) for signing scope and the distinction
 between historical development packages and the published Alpha 2 artifacts.
 

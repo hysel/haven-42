@@ -1211,7 +1211,7 @@ test_agent_prompt_rule_template_contracts() {
     grep -q "Execution And Evidence Contract" "$REPO_ROOT/docs/prompt-quality.md" &&
     grep -q "pseudo function calls" "$REPO_ROOT/docs/banned-output-patterns.md" &&
     grep -q "evidence-gated .NET, ASP.NET Core, and API rules" "$REPO_ROOT/docs/language-rule-packs.md" &&
-    grep -q 'Version `0.3.0`' "$REPO_ROOT/README.md"
+    grep -Fq 'https://github.com/hysel/haven-42/releases/tag/' "$REPO_ROOT/README.md"
 }
 test_sample_repository_factory() {
   temp_root="$(mktemp -d)"
