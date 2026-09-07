@@ -2,6 +2,10 @@
 
 **Private AI that runs on hardware you control.**
 
+**[Download Alpha 2 for Windows, Linux or Apple Silicon](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.2)**
+
+The release includes portable packages, checksums, changes since Alpha 1 and known limitations.
+
 Haven 42 is a browser interface for local AI chat, writing, and summarization.
 The application runs on your computer; the model can run there too, or on a
 private Ollama server you choose.
@@ -10,9 +14,9 @@ There's no Haven 42 account or hosted chat service. If Haven 42 needs to
 download a model or send a search, it tells you what it's about to do and asks
 first.
 
-> **Before you begin:** Haven 42 is development software, and current packages
-> are unsigned. Your operating system may warn you about that; only continue if
-> the package came from a trusted Haven 42 test source.
+> **Before you begin:** Alpha 2 is experimental software. Its Windows launcher
+> is signed, its Apple Silicon app is signed and notarized, and its Linux archive
+> is unsigned. Verify the checksums and read the release's testing limitations.
 
 ## Start here
 
@@ -33,7 +37,7 @@ report.
 - Choose another installed model or search Ollama's public model catalog.
 - Attach bounded text, source-code, structured-text, and PNG screenshot files.
 - Connect to Ollama on this computer or on a private server.
-- In the development source, approve every web-research request before it
+- In Alpha 2, approve every web-research request before it
   leaves your computer, routed through Wikipedia or Brave Search. Retrieved
   text stays inert and in memory; the model never receives the search key or
   permission to approve another request. Exact package and manual
@@ -76,9 +80,9 @@ material.
 
 ## About this project
 
-The latest public test build is the unsigned Windows `0.4.0-alpha.1`
-prerelease; the latest stable release line is `0.3.0`. Anything newer in the
-source tree isn't a release until it has been packaged and verified.
+The latest public test build is [Alpha 2 (`0.4.0-alpha.2`)](https://github.com/hysel/haven-42/releases/tag/v0.4.0-alpha.2),
+published for Windows x64, Linux x64 and Apple Silicon. It is a prerelease, not
+production certification. The stable release line remains `0.3.0`.
 
 For project background, limitations, and contact information, see
 [[About Haven 42|Project-Information]]. Contributors can use the
